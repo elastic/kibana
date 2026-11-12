@@ -99,15 +99,6 @@ describe('GraphQLConnector', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // validateUrls
-  // ---------------------------------------------------------------------------
-  describe('validateUrls', () => {
-    it('validates the url field', () => {
-      expect(GraphQLConnector.validateUrls?.fields).toContain('url');
-    });
-  });
-
-  // ---------------------------------------------------------------------------
   // Helper: successful GraphQL response
   // ---------------------------------------------------------------------------
   const makeGraphQLResponse = (data: unknown) => ({

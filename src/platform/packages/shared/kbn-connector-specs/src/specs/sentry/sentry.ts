@@ -165,10 +165,6 @@ export const Sentry: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['baseUrl'],
-  },
-
   actions: {
     listIssues: {
       isTool: true,

@@ -28,16 +28,6 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-/**
- * Common output schema for Microsoft Graph API responses that return a collection.
- * Uses z.any() for the array items to avoid over-specifying the response structure.
- */
-const GraphCollectionOutputSchema = lazySchema(() =>
-  z.object({
-    value: z.array(z.any()).describe('Array of items returned from the API'),
-    '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
-  })
-);
 
 // Graph site IDs are "hostname,siteCollectionId,webId", so they can exceed the
 // usual ID bound when the hostname is long. SharePoint caps KQL query text at
@@ -226,7 +216,6 @@ export const SharepointOnline: ConnectorSpec = {
           })
           .optional()
       ),
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { search?: string } | undefined;
 
@@ -272,7 +261,6 @@ export const SharepointOnline: ConnectorSpec = {
             ),
         })
       ),
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
@@ -316,7 +304,6 @@ export const SharepointOnline: ConnectorSpec = {
             ),
         })
       ),
-      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
@@ -417,7 +404,6 @@ export const SharepointOnline: ConnectorSpec = {
             ),
         })
       ),
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
@@ -459,7 +445,6 @@ export const SharepointOnline: ConnectorSpec = {
           })
           .strict()
       ),
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
@@ -505,7 +490,6 @@ export const SharepointOnline: ConnectorSpec = {
             ),
         })
       ),
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
@@ -603,13 +587,6 @@ export const SharepointOnline: ConnectorSpec = {
             ),
         })
       ),
-      output: lazySchema(() =>
-        z.object({
-          contentType: z.string().optional().describe('Content-Type header'),
-          contentLength: z.string().optional().describe('Content-Length header'),
-          text: z.string().describe('File content as UTF-8 text'),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           driveId: string;
@@ -653,13 +630,6 @@ export const SharepointOnline: ConnectorSpec = {
             .describe(
               'The pre-authenticated download URL for the file. This is the @microsoft.graph.downloadUrl property returned by getDriveItems, and must be an https URL on a *.sharepoint.com host. Note: these URLs are time-limited and should be used promptly.'
             ),
-        })
-      ),
-      output: lazySchema(() =>
-        z.object({
-          contentType: z.string().optional().describe('Content-Type header'),
-          contentLength: z.string().optional().describe('Content-Length header'),
-          base64: z.string().describe('File content as base64-encoded string'),
         })
       ),
       handler: async (ctx, input) => {
@@ -721,7 +691,6 @@ export const SharepointOnline: ConnectorSpec = {
           body: z.any().optional().describe('Request body (for POST)'),
         })
       ),
-      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const typedInput = input as {
           method: 'GET' | 'POST';
@@ -792,7 +761,6 @@ export const SharepointOnline: ConnectorSpec = {
             ),
         })
       ),
-      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const typedInput = input as {
           query: string;

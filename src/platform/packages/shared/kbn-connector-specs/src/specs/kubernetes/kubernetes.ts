@@ -505,12 +505,6 @@ export const KubernetesConnector: ConnectorSpec = {
         'Retrieve logs for a pod (optionally a specific container). Output is capped to the last ' +
         `${MAX_LOG_CHARS} characters to stay within context limits.`,
       input: GetPodLogsInputSchema,
-      output: lazySchema(() =>
-        z.object({
-          logs: z.string().describe('The (possibly truncated) log output.'),
-          truncated: z.boolean().describe('Whether the output was truncated to fit the size cap.'),
-        })
-      ),
       handler: async (ctx, input: GetPodLogsInput) => {
         const data = await k8sRequest(ctx, {
           method: 'GET',

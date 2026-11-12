@@ -67,10 +67,6 @@ export const TavilyConnector: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['serverUrl'],
-  },
-
   actions: {
     tavilySearch: {
       isTool: true,

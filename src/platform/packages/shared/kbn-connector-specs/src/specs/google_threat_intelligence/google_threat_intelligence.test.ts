@@ -69,7 +69,6 @@ describe('GoogleThreatIntelligenceConnector', () => {
 
       expect(Object.keys(shape)).toEqual(['baseUrl']);
       expect(shape.baseUrl.meta()?.validate).toEqual({ allowedHosts: true });
-      expect(GoogleThreatIntelligenceConnector.validateUrls?.fields).toEqual(['baseUrl']);
     });
 
     it('configures API key authentication with the x-apikey header', () => {

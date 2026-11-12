@@ -608,12 +608,6 @@ export const ArgocdConnector: ConnectorSpec = {
         `${MAX_LOG_CHARS} characters. Prefer finite query params (tailLines, sinceSeconds); ` +
         'streaming/watch log APIs are not exposed.',
       input: GetPodLogsInputSchema,
-      output: lazySchema(() =>
-        z.object({
-          logs: z.string().describe('The (possibly truncated) log output.'),
-          truncated: z.boolean().describe('Whether the output was truncated to fit the size cap.'),
-        })
-      ),
       handler: async (ctx, input: GetPodLogsInput) => {
         const data = await argoRequest(ctx, {
           method: 'GET',

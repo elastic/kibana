@@ -37,7 +37,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type {
   AnyRecord,
@@ -52,12 +51,6 @@ import type {
 } from './types';
 import {
   ZOOM_DEFAULT_MAX_RECORDING_CONTENT_CHARS,
-  ZoomPaginationOutputSchema,
-  ZoomMeetingSummarySchema,
-  ZoomRecordingFileSchema,
-  ZoomParticipantSchema,
-  ZoomRegistrantSchema,
-  ZoomUserProfileSchema,
   ZoomWhoAmIInputSchema,
   ZoomListMeetingsInputSchema,
   ZoomGetMeetingDetailsInputSchema,
@@ -129,7 +122,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'Get the profile of the currently authenticated Zoom user, including name, email, role, timezone, and personal meeting URL. Use this first to confirm which account is connected and to obtain the userId for other actions.',
       input: ZoomWhoAmIInputSchema,
-      output: ZoomUserProfileSchema,
       handler: async (ctx) => {
         ctx.log.debug('Zoom whoAmI — fetching /users/me');
         const { data } = await ctx.client.get(`${ZOOM_API_BASE}/users/me`);
@@ -143,11 +135,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'List meetings for a user. Use type=upcoming (default) for future meetings, type=live for in-progress meetings, type=scheduled for all scheduled meetings, or type=previous_meetings for past meetings. Returns meeting topics, start times, durations, and join URLs.',
       input: ZoomListMeetingsInputSchema,
-      output: lazySchema(() =>
-        ZoomPaginationOutputSchema.extend({
-          meetings: z.array(ZoomMeetingSummarySchema).describe('Array of meeting summaries'),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomListMeetingsInput = ZoomListMeetingsInputSchema.parse(input);
         ctx.log.debug(
@@ -180,27 +167,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, and settings. Use this for upcoming/recurring meetings to understand what a meeting is about before looking at recordings or participants.',
       input: ZoomGetMeetingDetailsInputSchema,
-      output: lazySchema(() =>
-        z.object({
-          uuid: z.string().optional(),
-          id: z.number().optional(),
-          host_email: z.string().optional(),
-          topic: z.string().optional(),
-          type: z
-            .number()
-            .optional()
-            .describe(
-              'Meeting type: 1=instant, 2=scheduled, 3=recurring no fixed time, 8=recurring fixed time'
-            ),
-          status: z.string().optional().describe('Meeting status: waiting or started'),
-          start_time: z.string().optional(),
-          duration: z.number().optional().describe('Scheduled duration in minutes'),
-          timezone: z.string().optional(),
-          agenda: z.string().optional().describe('Meeting agenda/description'),
-          join_url: z.string().optional(),
-          password: z.string().optional().describe('Meeting passcode required to join'),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetMeetingDetailsInput =
           ZoomGetMeetingDetailsInputSchema.parse(input);
@@ -231,18 +197,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'Get summary information for a meeting that has already ended. Returns total minutes, participant count, start/end times. Only works for past meetings — use getMeetingDetails for upcoming/scheduled meetings.',
       input: ZoomGetPastMeetingDetailsInputSchema,
-      output: lazySchema(() =>
-        z.object({
-          uuid: z.string().optional(),
-          id: z.number().optional(),
-          topic: z.string().optional(),
-          start_time: z.string().optional(),
-          end_time: z.string().optional(),
-          duration: z.number().optional().describe('Actual meeting duration in minutes'),
-          total_minutes: z.number().optional().describe('Sum of all participant minutes'),
-          participants_count: z.number().optional(),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetPastMeetingDetailsInput =
           ZoomGetPastMeetingDetailsInputSchema.parse(input);
@@ -269,16 +223,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'Get cloud recording files for a specific meeting. Returns recording_files entries with recording_type (e.g. audio_transcript for VTT transcripts, chat_file for TXT chat logs, shared_screen_with_speaker_view for MP4 video), file_type, file_size, download_url, and status. Use the download_url values with downloadRecordingFile to fetch the actual content.',
       input: ZoomGetMeetingRecordingsInputSchema,
-      output: lazySchema(() =>
-        z.object({
-          topic: z.string().optional(),
-          start_time: z.string().optional(),
-          duration: z.number().optional(),
-          recording_count: z.number().optional(),
-          password: z.string().optional().describe('Passcode to access the recording files'),
-          recording_files: z.array(ZoomRecordingFileSchema),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetMeetingRecordingsInput =
           ZoomGetMeetingRecordingsInputSchema.parse(input);
@@ -303,18 +247,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'List cloud recordings for a user within a date range (max 1 month). Returns meetings with their recording_files entries (including audio_transcript for VTT transcripts and chat_file for TXT chat logs). Use the download_url values from recording_files with downloadRecordingFile to fetch the actual content. Use this when you need recordings across multiple meetings; use getMeetingRecordings when you already know the specific meeting ID.',
       input: ZoomListUserRecordingsInputSchema,
-      output: lazySchema(() =>
-        ZoomPaginationOutputSchema.extend({
-          from: z.string().optional(),
-          to: z.string().optional(),
-          meetings: z.array(
-            ZoomMeetingSummarySchema.extend({
-              recording_count: z.number().optional(),
-              recording_files: z.array(ZoomRecordingFileSchema),
-            })
-          ),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomListUserRecordingsInput =
           ZoomListUserRecordingsInputSchema.parse(input);
@@ -352,13 +284,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'Download a Zoom recording file by its download_url. Works for transcripts (recording_type=audio_transcript, VTT format), chat logs (recording_type=chat_file, TXT format), and other recording file types. Obtain the download_url from getMeetingRecordings or listUserRecordings — look for recording_files entries with the desired recording_type. Returns the file content as UTF-8 text, truncated to maxChars if needed. Check the truncated flag in the response.',
       input: ZoomDownloadRecordingFileInputSchema,
-      output: lazySchema(() =>
-        z.object({
-          contentType: z.string().optional().describe('Content-Type header from the response'),
-          text: z.string().describe('File content as UTF-8 text (may be truncated)'),
-          truncated: z.boolean().describe('Whether the content was truncated to maxChars'),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomDownloadRecordingFileInput =
           ZoomDownloadRecordingFileInputSchema.parse(input);
@@ -392,11 +317,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'List participants of a past meeting. Returns participant name, email, join/leave times, and duration. Only works for meetings that have ended.',
       input: ZoomGetMeetingParticipantsInputSchema,
-      output: lazySchema(() =>
-        ZoomPaginationOutputSchema.extend({
-          participants: z.array(ZoomParticipantSchema),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetMeetingParticipantsInput =
           ZoomGetMeetingParticipantsInputSchema.parse(input);
@@ -427,11 +347,6 @@ export const Zoom: ConnectorSpec = {
       description:
         'List registrants of a meeting. Works for future and past meetings that have registration enabled. Returns registrant name, email, and registration status.',
       input: ZoomGetMeetingRegistrantsInputSchema,
-      output: lazySchema(() =>
-        ZoomPaginationOutputSchema.extend({
-          registrants: z.array(ZoomRegistrantSchema),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetMeetingRegistrantsInput =
           ZoomGetMeetingRegistrantsInputSchema.parse(input);

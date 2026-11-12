@@ -125,10 +125,6 @@ export const SolarWindsPlatform: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['url'],
-  },
-
   actions: {
     query: {
       isTool: true,

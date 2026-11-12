@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   SearchMessagesInputSchema,
@@ -17,8 +16,6 @@ import {
   GetAttachmentInputSchema,
   ListAttachmentsInputSchema,
   ListFoldersInputSchema,
-  SearchMessagesOutputSchema,
-  GetMessageOutputSchema,
 } from './types';
 import type {
   SearchMessagesInput,
@@ -30,14 +27,6 @@ import type {
 } from './types';
 
 const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
-
-const GraphCollectionOutputSchema = lazySchema(() =>
-  z.object({
-    value: z.array(z.any()).describe('Array of items returned from the API'),
-    '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
-    '@odata.count': z.number().optional().describe('Total count of items (if requested)'),
-  })
-);
 
 export const Outlook: ConnectorSpec = {
   metadata: {
@@ -94,7 +83,6 @@ export const Outlook: ConnectorSpec = {
       description:
         "Search Outlook emails using the Microsoft Graph Search API with KQL syntax. Supports filtering by sender, subject, body content, attachment presence, and date ranges. Searches the signed-in user's mailbox. Returns hits with message ID, subject, sender, received date, and a short summary.",
       input: SearchMessagesInputSchema,
-      output: SearchMessagesOutputSchema,
       handler: async (ctx, input: SearchMessagesInput) => {
         const searchRequest = {
           requests: [
@@ -122,7 +110,6 @@ export const Outlook: ConnectorSpec = {
       description:
         'List Outlook email messages from the inbox or a specific folder. Returns message metadata including id, subject, sender, receivedDateTime, isRead, and hasAttachments. Use searchMessages when you have a keyword query; use listMessages when you want to browse a folder or apply OData filters.',
       input: ListMessagesInputSchema,
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListMessagesInput) => {
         const folderSegment = input.folderId ? `/mailFolders/${input.folderId}` : '';
         const url = `${GRAPH_BASE}/me${folderSegment}/messages`;
@@ -150,7 +137,6 @@ export const Outlook: ConnectorSpec = {
       description:
         'Retrieve the full details of a single Outlook email message by ID, including the HTML or text body. Use listMessages or searchMessages to discover message IDs.',
       input: GetMessageInputSchema,
-      output: GetMessageOutputSchema,
       handler: async (ctx, input: GetMessageInput) => {
         const url = `${GRAPH_BASE}/me/messages/${input.messageId}`;
 
@@ -172,7 +158,6 @@ export const Outlook: ConnectorSpec = {
       description:
         'List the attachments on an Outlook email message. Returns attachment metadata including id, name, contentType, size, and isInline. Use this before calling getAttachment to discover attachment IDs.',
       input: ListAttachmentsInputSchema,
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListAttachmentsInput) => {
         const url = `${GRAPH_BASE}/me/messages/${input.messageId}/attachments`;
 
@@ -193,16 +178,6 @@ export const Outlook: ConnectorSpec = {
       description:
         'Download an attachment from an Outlook email message. Returns the attachment content as a base64-encoded string (contentBytes). WARNING: Attachment content can be large; only call this when you have a plan to process the binary data (for example, via an Elasticsearch ingest pipeline attachment processor). Use listAttachments first to get the attachment ID and verify the content type and size before downloading.',
       input: GetAttachmentInputSchema,
-      output: lazySchema(() =>
-        z.object({
-          id: z.string().describe('Attachment ID'),
-          name: z.string().describe('File name of the attachment'),
-          contentType: z.string().describe('MIME type of the attachment'),
-          size: z.number().describe('Size of the attachment in bytes'),
-          contentBytes: z.string().describe('Base64-encoded content of the attachment'),
-          isInline: z.boolean().optional().describe('Whether the attachment is inline'),
-        })
-      ),
       handler: async (ctx, input: GetAttachmentInput) => {
         const url = `${GRAPH_BASE}/me/messages/${input.messageId}/attachments/${input.attachmentId}`;
 
@@ -221,7 +196,6 @@ export const Outlook: ConnectorSpec = {
       description:
         'List the mail folders in an Outlook mailbox, including well-known folders (inbox, sentitems, drafts, deleteditems, junkemail) and custom folders. Returns folder id, displayName, totalItemCount, and unreadItemCount. Use folder IDs with listMessages to browse a specific folder.',
       input: ListFoldersInputSchema,
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListFoldersInput) => {
         const url = `${GRAPH_BASE}/me/mailFolders`;
 

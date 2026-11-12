@@ -116,10 +116,6 @@ export const Box: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['serverUrl'],
-  },
-
   actions: {
     whoAmI: {
       isTool: true,

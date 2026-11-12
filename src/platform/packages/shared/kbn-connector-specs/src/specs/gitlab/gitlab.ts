@@ -177,10 +177,6 @@ export const Gitlab: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['apiUrl'],
-  },
-
   actions: {
     // =========================================================================
     // Read actions

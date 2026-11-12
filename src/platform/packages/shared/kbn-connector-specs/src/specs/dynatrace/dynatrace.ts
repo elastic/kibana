@@ -221,10 +221,6 @@ export const Dynatrace: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['environmentUrl'],
-  },
-
   actions: {
     listProblems: {
       isTool: true,

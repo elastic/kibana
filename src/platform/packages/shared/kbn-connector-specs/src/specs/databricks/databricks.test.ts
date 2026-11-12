@@ -143,12 +143,6 @@ describe('Databricks', () => {
     });
   });
 
-  describe('validateUrls', () => {
-    it('validates the serverUrl field', () => {
-      expect(Databricks.validateUrls?.fields).toContain('serverUrl');
-    });
-  });
-
   describe('runQuery action', () => {
     it('is exposed as a tool', () => {
       expect(Databricks.actions.runQuery.isTool).toBe(true);

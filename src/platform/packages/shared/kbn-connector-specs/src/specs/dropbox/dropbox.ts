@@ -95,10 +95,6 @@ export const Dropbox: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['serverUrl'],
-  },
-
   actions: {
     whoAmI: {
       isTool: true,

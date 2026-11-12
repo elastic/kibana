@@ -135,10 +135,6 @@ export const MondayCom: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['serverUrl'],
-  },
-
   actions: {
     // ── Discovery ─────────────────────────────────────────────────────────────
     whoAmI: {

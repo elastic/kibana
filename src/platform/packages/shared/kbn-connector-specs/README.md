@@ -13,7 +13,6 @@ The `@kbn/connector-specs` package provides a simplified, declarative way to def
 - **Type-Safe**: Built on Zod schemas for validation and type safety
 - **UI Derivation**: UI forms are automatically generated from schemas using metadata extensions
 - **Standard Auth Patterns**: Reusable authentication schemas (Basic, Bearer, Headers)
-- **Policy-Based Configuration**: Built-in support for rate limiting, retry policies, pagination, and more
 
 ## Quick Start (Recommended): Build a Connector with AI
 
@@ -173,7 +172,6 @@ export * from './specs/my_connector/my_connector';
 The main specification file that defines:
 - `SingleFileConnectorDefinition` - The main interface for connector definitions
 - Standard authentication schemas (Basic, Bearer, Headers)
-- Policy interfaces (RateLimit, Pagination, Retry, Error, Streaming)
 - Action definitions and context types
 - Helper utilities
 
@@ -279,14 +277,11 @@ actions: {
   actionName: {
     isTool?: boolean,              // Whether this action is a tool (for AI workflows)
     input: z.ZodSchema,            // Input validation schema
-    output?: z.ZodSchema,          // Output validation schema (optional)
     handler: async (ctx, input) => {
       // Action implementation
       return result;
     },
     description?: string,
-    actionGroup?: string,
-    supportsStreaming?: boolean,
   },
 }
 ```
@@ -309,20 +304,6 @@ test: {
 Test handler contract: **throw on failure**; do not return an `{ ok }` flag. A resolved
 return value (including `{}` or optional data) is treated as success. Set `enabled: true` only
 after migrating the handler to this contract.
-
-### Policies (Optional)
-
-Configure connector behavior:
-
-```typescript
-policies: {
-  rateLimit?: RateLimitPolicy,
-  pagination?: PaginationPolicy,
-  retry?: RetryPolicy,
-  error?: ErrorPolicy,
-  streaming?: StreamingPolicy,
-}
-```
 
 ## Authentication Patterns
 
@@ -420,34 +401,6 @@ customHost: z.string().meta({
     then: 'show',
   },
 }).describe('Custom Host')
-```
-
-### Streaming Support
-
-Enable streaming responses:
-
-```typescript
-policies: {
-  streaming: {
-    enabled: true,
-    mechanism: 'sse',  // or 'chunked', 'websocket'
-    parser: 'ndjson',  // or 'json', 'text', 'custom'
-  },
-}
-```
-
-### Rate Limiting
-
-Configure rate limit handling:
-
-```typescript
-policies: {
-  rateLimit: {
-    strategy: 'header',
-    remainingHeader: 'X-RateLimit-Remaining',
-    resetHeader: 'X-RateLimit-Reset',
-  },
-}
 ```
 
 ## Icons

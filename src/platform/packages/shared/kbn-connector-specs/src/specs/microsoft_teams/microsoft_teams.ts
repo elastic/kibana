@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { MICROSOFT_TEAMS_CONNECTOR_TYPE_ID } from './constants';
 import { microsoftTeamsEvents } from './events';
@@ -45,13 +44,6 @@ type AppOnlyAuthType = 'oauth_client_credentials' | 'oauth_client_credentials_pr
 const isAppOnlyAuth = (authType?: unknown): authType is AppOnlyAuthType =>
   authType === 'oauth_client_credentials' ||
   authType === 'oauth_client_credentials_private_key_jwt';
-
-const GraphCollectionOutputSchema = lazySchema(() =>
-  z.object({
-    value: z.array(z.any()).describe('Array of items returned from the API'),
-    '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
-  })
-);
 
 export const MicrosoftTeams: ConnectorSpec = {
   metadata: {
@@ -186,7 +178,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         "List the Microsoft Teams that the authenticated user (or a specified user) has joined. Use this to discover available teams before drilling into channels or messages. With delegated auth (bearer token or OAuth authorization code), omit userId to list the signed-in user's teams. With app-only auth (client credentials), userId is required.",
       input: ListJoinedTeamsInputSchema,
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListJoinedTeamsInput) => {
         if (isAppOnlyAuth(ctx.secrets?.authType) && !input?.userId) {
           throw new Error(
@@ -215,7 +206,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'List all channels in a Microsoft Teams team. Use this to discover channel IDs before fetching messages with listChannelMessages. Requires the team ID (obtainable via listJoinedTeams).',
       input: ListChannelsInputSchema,
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChannelsInput) => {
         ctx.log.debug(`Microsoft Teams listing channels for team ${input.teamId}`);
         const response = await ctx.client.get(
@@ -237,7 +227,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'Retrieve recent messages from a Microsoft Teams channel. Returns message content, sender, timestamp, and web URL for each message. Use listJoinedTeams and listChannels first to obtain teamId and channelId. Use the top parameter to control how many messages are returned (max 50).',
       input: ListChannelMessagesInputSchema,
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChannelMessagesInput) => {
         ctx.log.debug(
           `Microsoft Teams listing messages for channel ${input.channelId} in team ${input.teamId}`
@@ -263,7 +252,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'List Microsoft Teams chats (direct messages and group chats) for the authenticated user or a specified user. Use this to discover chat IDs before fetching messages with listChatMessages. With delegated auth (bearer token or OAuth authorization code), omit userId. With app-only auth (client credentials), userId is required.',
       input: ListChatsInputSchema,
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatsInput) => {
         if (isAppOnlyAuth(ctx.secrets?.authType) && !input.userId) {
           throw new Error(
@@ -290,7 +278,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'Retrieve recent messages from a Microsoft Teams direct message or group chat. Returns message content, sender, timestamp, and web URL. Use listChats first to obtain the chatId. Use the top parameter to control how many messages are returned (max 50).',
       input: ListChatMessagesInputSchema,
-      output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatMessagesInput) => {
         ctx.log.debug(`Microsoft Teams listing messages for chat ${input.chatId}`);
         const response = await ctx.client.get(
@@ -312,21 +299,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
       input: SearchMessagesInputSchema,
-      output: lazySchema(() =>
-        z
-          .object({
-            value: z
-              .array(
-                z.object({
-                  hitsContainers: z
-                    .array(z.any())
-                    .describe('Containers with search hits and associated metadata'),
-                })
-              )
-              .describe('Search response containers'),
-          })
-          .describe('Microsoft Graph Search API response')
-      ),
       handler: async (ctx, input: SearchMessagesInput) => {
         if (isAppOnlyAuth(ctx.secrets?.authType)) {
           throw new Error(
@@ -368,20 +340,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'Post a new message to a Microsoft Teams channel. Returns the created message object including its id and webUrl. Use listJoinedTeams → listChannels to obtain teamId and channelId. Requires ChannelMessage.Send delegated permission or ChannelMessage.ReadWrite.All application permission (for app-only auth, grant via Azure AD app registration).',
       input: SendChannelMessageInputSchema,
-      output: lazySchema(() =>
-        z
-          .object({
-            id: z.string().describe('ID of the created message'),
-            createdDateTime: z
-              .string()
-              .optional()
-              .describe('ISO 8601 timestamp when the message was created'),
-            webUrl: z.string().optional().describe('URL to open the message in Microsoft Teams'),
-            from: z.any().optional().describe('Sender information'),
-            body: z.any().optional().describe('Message body'),
-          })
-          .describe('Created Teams channel message')
-      ),
       handler: async (ctx, input: SendChannelMessageInput) => {
         ctx.log.debug(
           `Microsoft Teams sending message to channel ${input.channelId} in team ${input.teamId}`
@@ -412,20 +370,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'Send a message to a Microsoft Teams 1:1 or group chat. Returns the created message object. Use listChats to obtain an existing chatId, or createChat to open a new chat first. With delegated auth (bearer/OAuth authorization code/ears) the sender is the signed-in user. With app-only (client credentials) the tenant admin must grant Chat.ReadWrite.All application permission to the Azure AD app registration.',
       input: SendChatMessageInputSchema,
-      output: lazySchema(() =>
-        z
-          .object({
-            id: z.string().describe('ID of the created message'),
-            createdDateTime: z
-              .string()
-              .optional()
-              .describe('ISO 8601 timestamp when the message was created'),
-            webUrl: z.string().optional().describe('URL to open the message in Microsoft Teams'),
-            from: z.any().optional().describe('Sender information'),
-            body: z.any().optional().describe('Message body'),
-          })
-          .describe('Created Teams chat message')
-      ),
       handler: async (ctx, input: SendChatMessageInput) => {
         ctx.log.debug(`Microsoft Teams sending message to chat ${input.chatId}`);
         const requestBody = {
@@ -449,13 +393,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'Update the body of an existing Teams message. Works for both channel messages (provide teamId + channelId + messageId) and chat messages (provide chatId + messageId). Only the message body content can be changed — sender, timestamp, and other fields are immutable. The API returns no content on success.',
       input: UpdateMessageInputSchema,
-      output: lazySchema(() =>
-        z
-          .object({
-            success: z.boolean().describe('true when the message was updated successfully'),
-          })
-          .describe('Update result')
-      ),
       handler: async (ctx, input: UpdateMessageInput) => {
         const requestBody = {
           body: {
@@ -492,18 +429,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         "Retrieve a Microsoft Teams / Azure AD user by their user ID (GUID) or user principal name (UPN, e.g. alice@contoso.com). Returns the user's id, displayName, mail, and userPrincipalName. Use the returned id with createChat or listChats (userId parameter). Works with all auth types.",
       input: GetUserInputSchema,
-      output: lazySchema(() =>
-        z
-          .object({
-            id: z.string().describe('Azure AD object ID (GUID) of the user'),
-            displayName: z.string().optional().describe('Full display name of the user'),
-            mail: z.string().optional().describe('Primary email address'),
-            userPrincipalName: z.string().optional().describe('User principal name (UPN)'),
-            jobTitle: z.string().optional().describe('Job title'),
-            department: z.string().optional().describe('Department'),
-          })
-          .describe('Azure AD user object')
-      ),
       handler: async (ctx, input: GetUserInput) => {
         ctx.log.debug(`Microsoft Teams getting user ${input.userId}`);
         const response = await ctx.client.get(
@@ -525,20 +450,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         "Create a new Microsoft Teams chat (1:1 or group). Returns the created chat object with its id, which can be passed to sendChatMessage. For a 1:1 chat, provide both your own user ID and the other person's user ID in memberIds (two total). For a group chat, include your own ID plus two or more other user IDs. Use getUser to resolve an email or UPN to a user ID before calling this action. Note: guest accounts cannot create chats; all members must belong to the tenant.",
       input: CreateChatInputSchema,
-      output: lazySchema(() =>
-        z
-          .object({
-            id: z
-              .string()
-              .describe(
-                'ID of the created chat, for use with sendChatMessage and listChatMessages'
-              ),
-            chatType: z.string().optional().describe('Type of the chat: "oneOnOne" or "group"'),
-            webUrl: z.string().optional().describe('URL to open the chat in Microsoft Teams'),
-            topic: z.string().optional().describe('Display topic of the chat'),
-          })
-          .describe('Created Teams chat object')
-      ),
       handler: async (ctx, input: CreateChatInput) => {
         ctx.log.debug(`Microsoft Teams creating ${input.chatType} chat`);
         const members = input.memberIds.map((userId) => ({

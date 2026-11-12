@@ -178,68 +178,6 @@ export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
 // - Custom (connector-specific auth flows)
 
 // ============================================================================
-// POLICIES
-// ============================================================================
-
-export const RETRY_RATE_LIMIT = [429, 503] as const;
-export const RETRY_SERVER_ERRORS = [500, 502, 503, 504] as const;
-export const RETRY_GATEWAY_ERRORS = [502, 503, 504] as const;
-export const RETRY_TIMEOUT_AND_RATE_LIMIT = [408, 429, 503] as const;
-
-export interface RateLimitPolicy {
-  strategy: 'header' | 'status_code' | 'response_body';
-  codes?: number[];
-  remainingHeader?: string;
-  resetHeader?: string;
-  bodyPath?: string;
-}
-
-export interface PaginationPolicy {
-  strategy: 'cursor' | 'offset' | 'link_header' | 'none';
-  parameterLocation?: 'query_params' | 'headers' | 'body';
-  resultPath?: string;
-  cursorParam?: string;
-  cursorPath?: string;
-  offsetParam?: string;
-  limitParam?: string;
-  linkHeaderName?: string;
-  pageSizeParam?: string;
-  defaultPageSize?: number;
-}
-
-export interface RetryPolicy {
-  retryOnStatusCodes?: number[];
-  customRetryCondition?: (error: {
-    status?: number;
-    message?: string;
-    response?: unknown;
-  }) => boolean;
-  maxRetries?: number;
-  backoffStrategy?: 'exponential' | 'linear' | 'fixed';
-  initialDelay?: number;
-}
-
-export interface ErrorPolicy {
-  classifyError?: (error: { status?: number; message?: string }) => 'user' | 'system' | 'unknown';
-  userErrorCodes?: number[];
-  systemErrorCodes?: number[];
-}
-
-export interface StreamingPolicy {
-  enabled: boolean;
-  mechanism?: 'sse' | 'chunked' | 'websocket';
-  parser?: 'ndjson' | 'json' | 'text' | 'custom';
-}
-
-export interface ConnectorPolicies {
-  rateLimit?: RateLimitPolicy;
-  pagination?: PaginationPolicy;
-  retry?: RetryPolicy;
-  error?: ErrorPolicy;
-  streaming?: StreamingPolicy;
-}
-
-// ============================================================================
 // ACTIONS
 // ============================================================================
 
@@ -255,15 +193,11 @@ export interface ConnectorPolicies {
  */
 export type ActionScope = 'read' | 'write' | 'destroy';
 
-export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
+export interface ActionDefinition<TInput = unknown, TOutput = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
-  output?: z.ZodSchema<TOutput>;
-  error?: z.ZodSchema<TError>;
   handler: (ctx: ActionContext, input: TInput) => Promise<TOutput>;
   description?: string;
-  actionGroup?: string;
-  supportsStreaming?: boolean;
   /**
    * HTTP response header that advertises response size for this action.
    * The generated executor reads this header from Axios errors when the Actions
@@ -308,26 +242,6 @@ export interface ActionContext {
    * calls; those go through `client`.
    */
   fetchTestOnly?: typeof fetch;
-}
-
-// ============================================================================
-// TRANSFORMATIONS
-// ============================================================================
-
-export interface TemplateRendering {
-  enabled: boolean;
-  format?: 'mustache' | 'handlebars' | 'custom';
-  escaping?: 'html' | 'json' | 'markdown' | 'none';
-}
-
-export interface Transformations {
-  templates?: TemplateRendering;
-  serializeRequest?: (data: unknown) => unknown;
-  deserializeResponse?: (data: unknown) => unknown;
-  interceptors?: {
-    request?: (config: unknown) => unknown | Promise<unknown>;
-    response?: (response: unknown) => unknown | Promise<unknown>;
-  };
 }
 
 // ============================================================================
@@ -402,19 +316,13 @@ export interface ConnectorSpec {
   // Mark sensitive fields with withUIMeta({ sensitive: true })
   schema?: z.ZodObject;
 
-  validateUrls?: {
-    fields?: string[];
-  };
-
   // Hosts a sandbox command may send this connector's auth headers to. Required when an
   // auth type sets supportsSandbox; a connector that resolves to no hosts cannot be used
   // from the sandbox.
   sandbox?: ConnectorSandbox;
 
-  policies?: ConnectorPolicies;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
-  actions: Record<string, ActionDefinition<any, any, any>>;
+  actions: Record<string, ActionDefinition<any, any>>;
 
   test: ConnectorTest;
 
@@ -426,8 +334,6 @@ export interface ConnectorSpec {
   // Optional Kibana-managed signing key. When present, creating a connector generates
   // a key pair, Kibana publishes the public key, and actions get `signJwt`.
   signingKey?: ConnectorSigningKey;
-
-  transformations?: Transformations;
 
   // Optional skill content for Agent Builder. When present, this string is
   // included in the connector's agent attachment representation so the LLM
@@ -441,10 +347,6 @@ export interface ConnectorSpec {
 
 export function requiresCredentials(auth: { method: string }): boolean {
   return auth.method !== 'none' && auth.method !== 'webhook';
-}
-
-export function supportsStreaming(connector: ConnectorSpec): boolean {
-  return connector.policies?.streaming?.enabled ?? false;
 }
 
 export function getActionNames(connector: ConnectorSpec): string[] {

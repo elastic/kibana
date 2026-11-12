@@ -125,10 +125,6 @@ export const PostHog: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['instanceHost'],
-  },
-
   actions: {
     listIssues: {
       isTool: true,

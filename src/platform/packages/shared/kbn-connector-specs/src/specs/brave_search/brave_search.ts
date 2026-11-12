@@ -70,13 +70,6 @@ export const BraveSearchConnector: ConnectorSpec = {
             .describe('Zero-based page of results to return, in pages of count results (max 9)'),
         })
       ),
-      output: lazySchema(() =>
-        z.object({
-          query: z.any().describe('Original query information'),
-          results: z.array(z.any()).describe('Array of search results'),
-          type: z.string().describe('Search type'),
-        })
-      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           q: string;

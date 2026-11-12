@@ -131,10 +131,6 @@ export const Grafana: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['baseUrl'],
-  },
-
   actions: {
     getAlerts: {
       isTool: true,

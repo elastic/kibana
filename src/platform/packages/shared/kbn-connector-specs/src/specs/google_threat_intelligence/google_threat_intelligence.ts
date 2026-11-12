@@ -224,10 +224,6 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
     })
   ),
 
-  validateUrls: {
-    fields: ['baseUrl'],
-  },
-
   actions: {
     searchCollections: {
       isTool: true,

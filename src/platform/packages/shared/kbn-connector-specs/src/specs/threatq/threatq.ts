@@ -222,7 +222,6 @@ export const ThreatQ: ConnectorSpec = {
     ],
   },
   schema: configSchema,
-  validateUrls: { fields: ['url'] },
   actions: {
     searchIndicators: {
       isTool: true,

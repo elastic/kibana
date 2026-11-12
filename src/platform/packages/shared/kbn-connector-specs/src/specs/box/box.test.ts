@@ -120,12 +120,6 @@ describe('Box', () => {
     });
   });
 
-  describe('validateUrls', () => {
-    it('validates the serverUrl field', () => {
-      expect(Box.validateUrls?.fields).toContain('serverUrl');
-    });
-  });
-
   describe('whoAmI action', () => {
     it('is exposed as a tool', () => {
       expect(Box.actions.whoAmI.isTool).toBe(true);
