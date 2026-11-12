@@ -9,7 +9,10 @@ import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import {
+  ConversationAccessControlMode,
+  type ConversationAccessControlEntry,
+} from '@kbn/agent-builder-common';
 import type { ListConversationsResponseItem } from '../../../../common/http_api/conversations';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { ConversationSearchModal } from './conversation_search_modal';
@@ -172,15 +175,23 @@ describe('ConversationSearchModal', () => {
 });
 
 describe('ConversationSearchModal access tooltip', () => {
+  const member = {
+    type: 'user',
+    id: 'member-1',
+    role: 'viewer',
+    added_at: '2026-01-01T00:00:00.000Z',
+  } as unknown as ConversationAccessControlEntry;
+
   it.each([
-    [ConversationAccessControlMode.Public, 'Public'],
-    [ConversationAccessControlMode.Private, 'Private'],
-  ])('names the %s access mode in a tooltip on hover', async (accessMode, label) => {
+    ['public', ConversationAccessControlMode.Public, [], 'Public'],
+    ['author-only', ConversationAccessControlMode.Private, [], 'Private'],
+    ['member-shared', ConversationAccessControlMode.Private, [member], 'Restricted'],
+  ])('names a %s chat in a tooltip on hover', async (_, accessMode, entries, label) => {
     mockLists({
       cached: [
         buildConversation({
           id: 'c1',
-          access_control: { access_mode: accessMode, entries: [] },
+          access_control: { access_mode: accessMode, entries },
         }),
       ],
     });

@@ -17,11 +17,12 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT, ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, isPublicConversation } from '@kbn/agent-builder-common';
 import type { ListConversationsResponseItem } from '../../../../common/http_api/conversations';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { formatConversationDate } from '../../utils/format_conversation_date';
 import { getTemplateDisplayName } from './activity_log/to_activity_items';
+import { getConversationVisibilityLabel } from './conversation_header/conversation_visibility';
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
@@ -30,12 +31,6 @@ import {
 const labels = {
   defaultType: i18n.translate('xpack.agentBuilder.conversationSearchModal.defaultType', {
     defaultMessage: 'Chat',
-  }),
-  public: i18n.translate('xpack.agentBuilder.conversationSearchModal.public', {
-    defaultMessage: 'Public',
-  }),
-  private: i18n.translate('xpack.agentBuilder.conversationSearchModal.private', {
-    defaultMessage: 'Private',
   }),
 };
 
@@ -61,9 +56,9 @@ export const ConversationSearchResult: React.FC<ConversationSearchResultProps> =
   const { conversationTemplatesService } = useAgentBuilderServices();
 
   const { id, title, template_id: templateId, updated_at: updatedAt } = conversation;
-  const isPublic =
-    conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
-  const accessLabel = isPublic ? labels.public : labels.private;
+  const { access_control: accessControl } = conversation;
+  const isPublic = isPublicConversation(accessControl);
+  const accessLabel = getConversationVisibilityLabel(accessControl);
   const typeLabel = templateId
     ? getTemplateDisplayName(
         templateId,
