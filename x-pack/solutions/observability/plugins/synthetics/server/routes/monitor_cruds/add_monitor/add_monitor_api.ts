@@ -18,6 +18,7 @@ import {
   syntheticsMonitorSavedObjectType,
 } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
+import { InvalidNamespaceError } from './invalid_namespace_error';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
@@ -407,7 +408,9 @@ export class AddEditMonitorAPI {
         : configuredNamespace;
     const { error } = isValidNamespace(namespace);
     if (error) {
-      throw new Error(`Cannot save monitor. Monitor namespace is invalid: ${error}`);
+      throw new InvalidNamespaceError(
+        `Cannot save monitor. Monitor namespace is invalid: ${error}`
+      );
     }
     return namespace;
   }

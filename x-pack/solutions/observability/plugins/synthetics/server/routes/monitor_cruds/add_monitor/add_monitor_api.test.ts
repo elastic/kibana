@@ -7,6 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from './add_monitor_api';
+import { InvalidNamespaceError } from './invalid_namespace_error';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { ServiceManagedLocations } from '../../../synthetics_service/service_managed_locations';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
@@ -430,6 +431,7 @@ describe('AddNewMonitorsPublicAPI', () => {
 
     it('throws when the resolved namespace is invalid', () => {
       const api = buildApi('test-space');
+      expect(() => api.getMonitorNamespace('UPPER_CASE', true)).toThrow(InvalidNamespaceError);
       expect(() => api.getMonitorNamespace('UPPER_CASE', true)).toThrow(/namespace is invalid/);
     });
   });

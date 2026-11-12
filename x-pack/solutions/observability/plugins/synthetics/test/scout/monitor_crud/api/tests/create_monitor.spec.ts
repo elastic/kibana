@@ -156,5 +156,37 @@ apiTest.describe(
         }
       }
     );
+
+    apiTest(
+      'rejects an invalid namespace with a 400, also when preserve_namespace is set',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const SPACE_ID = `test-space-${uuidv4()}`;
+
+        await kbnClient.spaces.create({ id: SPACE_ID, name: `test-space-name ${uuidv4()}` });
+        try {
+          const spacePrivateLocation =
+            await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(SPACE_ID);
+
+          // An empty namespace passes the request schema, so the handler's validation rejects it.
+          const res = await apiClient.post(
+            `s/${SPACE_ID}/api/synthetics/monitors?preserve_namespace=true`,
+            {
+              headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+              body: {
+                ...httpMonitorFixture,
+                namespace: '',
+                locations: [spacePrivateLocation],
+                spaces: [],
+              },
+              responseType: 'json',
+            }
+          );
+          expect(res).toHaveStatusCode(400);
+          expect((res.body as { message: string }).message).toContain('namespace is invalid');
+        } finally {
+          await kbnClient.spaces.delete(SPACE_ID);
+        }
+      }
+    );
   }
 );

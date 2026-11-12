@@ -22,6 +22,7 @@ import {
 import { InvalidMaintenanceWindowError } from '../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { InvalidNamespaceError } from './add_monitor/invalid_namespace_error';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey } from '../../../common/runtime_types';
 import type { MonitorFields } from '../../../common/runtime_types';
@@ -201,7 +202,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (
         error instanceof InvalidLocationError ||
         error instanceof InvalidScheduleError ||
-        error instanceof InvalidMaintenanceWindowError
+        error instanceof InvalidMaintenanceWindowError ||
+        error instanceof InvalidNamespaceError
       ) {
         return response.badRequest({ body: { message: error.message } });
       }
