@@ -245,6 +245,26 @@ describe('ReassignActionRunner', () => {
     );
   });
 
+  it('does not hedge about a batch no earlier attempt could have handled', async () => {
+    // a retry reaches batches it has never seen, so an uncovered batch is not always one an
+    // earlier attempt got to. These agents are hosted: nothing ever reassigned them, and saying
+    // an earlier attempt may have handled them would point away from the reason that matters
+    (isHostedAgent as jest.Mock).mockReturnValue(true);
+    mockedGetAgentsByKuery.mockResolvedValue({
+      agents: AGENTS.slice(2, 4),
+      total: 2,
+      page: 1,
+      perPage: 2,
+    } as Awaited<ReturnType<typeof getAgentsByKuery>>);
+    mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-2', 'agent-3']);
+
+    await createRunner().runActionAsyncWithRetry();
+
+    const [, , recordedErrors] = (createErrorActionResults as jest.Mock).mock.calls[0];
+    expect(recordedErrors['agent-2'].message).not.toContain('an earlier attempt');
+    expect(recordedErrors['agent-2'].message).toContain('managed agents');
+  });
+
   it('fails the batch when a recovered error result could not be written', async () => {
     // moving the checkpoint past an agent whose result never landed leaves the action one short
     // of its total forever, so this is the one path where a refused result has to fail the batch

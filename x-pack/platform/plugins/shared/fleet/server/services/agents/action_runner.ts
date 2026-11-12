@@ -563,17 +563,23 @@ export abstract class ActionRunner {
       .info(
         `Writing the missing error results of ${agentIdsWithoutResults.length} agents excluded by an earlier run of action ${actionId}`
       );
-    // With a document naming the rest of the batch, the replay's error describes agents an earlier
-    // run deliberately left out, and stands on its own. Without one, the same error may instead be
-    // this action's own change reported back at it — an earlier run's agent writes landing without
-    // their action document — and reading "already assigned" as a plain failure would send someone
-    // after agents that are exactly where they asked for them to be. Which of the two it is cannot
-    // be told from here, so the result says so rather than picking one.
-    const recordedError = hasEarlierRecord
-      ? error
-      : new Error(
-          `Not actioned by this attempt, an earlier attempt of this action may have handled this batch: ${error.message}`
-        );
+    // Only one case is worth hedging about: the agents are already in the state the action asks
+    // for, and no document records who put them there. That may be this action's own change
+    // reported back at it — an earlier run's agent writes landing without their action document —
+    // and reading "already assigned" as a plain failure would send someone after agents that are
+    // exactly where they asked for them to be.
+    //
+    // Everywhere else the error stands on its own and the hedge would mislead. With a document
+    // naming the rest of the batch, an earlier run demonstrably left these agents out on purpose.
+    // And an agent this action can never act on — hosted, agentless — was not handled by any
+    // earlier attempt whatever the read found, so saying one may have handled it points away from
+    // the reason that actually matters.
+    const recordedError =
+      !hasEarlierRecord && this.isAlreadyInRequestedState(error)
+        ? new Error(
+            `Not actioned by this attempt, an earlier attempt of this action may have handled this batch: ${error.message}`
+          )
+        : error;
     const refusedAgentIds = await createErrorActionResults(
       this.esClient,
       actionId,
@@ -609,6 +615,19 @@ export abstract class ActionRunner {
    * silently: each is given the error as its result before the run moves on.
    */
   protected isBatchWithoutActionableAgents(error: Error): boolean {
+    return false;
+  }
+
+  /**
+   * Of the errors above, whether this one means the agents are already in the state the action
+   * asks for, as opposed to ones it can never act on.
+   *
+   * Only the first can have been caused by an earlier attempt of this same action, so it is the
+   * only one whose result is worth hedging about when nothing records who got there first. A
+   * hosted or agentless agent was refused, not handled, and saying otherwise would hide the
+   * reason someone needs to see.
+   */
+  protected isAlreadyInRequestedState(error: Error): boolean {
     return false;
   }
 

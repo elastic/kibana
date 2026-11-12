@@ -42,6 +42,15 @@ export class ReassignActionRunner extends ActionRunner {
     return error instanceof AgentReassignmentError;
   }
 
+  /**
+   * `AgentAlreadyAssignedError` is the one `reassignBatch` raises when every agent in the batch is
+   * on the target policy already, which is where this action's own change can come back at it.
+   * The wider `AgentReassignmentError` covers managed agents too, which it can never reassign.
+   */
+  protected isAlreadyInRequestedState(error: Error): boolean {
+    return error instanceof AgentAlreadyAssignedError;
+  }
+
   protected getTaskType() {
     return BulkActionTaskType.REASSIGN_RETRY;
   }
