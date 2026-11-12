@@ -18,13 +18,16 @@ import {
   UNIT_STATS_DEFAULT_WINDOW_MS,
   UNIT_STATS_REQUEST_TIMEOUT_MS,
 } from './constants';
+import { getDestinationAuthFailures } from './destination_auth_failures';
 import { toSearchError } from './errors/search_errors';
 import { mostActionableFailure, STATS_ERROR_CODE, UnitStatsError } from './errors/unit_stats_error';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
 import {
   joinDestinationRows,
   mapDestinationStatsRows,
+  noAuthFailures,
   noDestinationStats,
+  withAuthFailures,
 } from './mappers/map_destination_stats_result';
 import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_result';
 import { mapSourceStatsRows, noSourceStats } from './mappers/map_source_stats_result';
@@ -245,9 +248,22 @@ export class UnitStatsClient {
     const ids = destinations.map(({ id }) => id);
 
     try {
-      const [rateRows, sumsRows] = await Promise.all([
+      const [rateRows, sumsRows, authFailures] = await Promise.all([
         this.runQuery(buildDestinationRateQuery({ ...baseParams, ids })),
         this.runQuery(buildDestinationSumsQuery({ ...baseParams, ids, bucketMs })),
+        // Never throws: a failure is logged here, and the destinations keep their other stats.
+        getDestinationAuthFailures({
+          runQuery: (query) => this.runQuery(query),
+          baseParams,
+          destinations,
+          onFailure: (error, part) => {
+            const failedPart = `destination ${part}`;
+            this.logFailure(toSearchError(error, failedPart), {
+              unitId: baseParams.unitId,
+              what: failedPart,
+            });
+          },
+        }),
       ]);
       const mapped = mapDestinationStatsRows({
         rows: joinDestinationRows({ rateRows, sumsRows }),
@@ -258,7 +274,10 @@ export class UnitStatsClient {
         results: Object.fromEntries(
           ids.map((id) => [
             id,
-            Object.hasOwn(mapped, id) ? mapped[id] : noDestinationStats(bucketMs),
+            withAuthFailures(
+              Object.hasOwn(mapped, id) ? mapped[id] : noDestinationStats(bucketMs),
+              Object.hasOwn(authFailures, id) ? authFailures[id] : noAuthFailures()
+            ),
           ])
         ),
       };

@@ -8,7 +8,7 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { ITEM_UNIT, SECONDS_UNIT, STATS_COLUMN } from '../constants';
 import { groupById, indexById, numberOrNull, type EsqlRow, type EsqlValue } from './esql_rows';
-import { toFailureRate, toItemRate, toSeries, toValue } from './stats_values';
+import { toItemRate, toSeries, toValue } from './stats_values';
 
 type AuthFailureStats = Pick<
   StreamsUnit.StatsDestinationResult['events']['failed'],
@@ -36,58 +36,48 @@ export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinati
   },
 });
 
-/**
- * What the destination queries return for one destination. `failureCollections` has one row per
- * collection with 401 or 403 failures, and is missing when that query did not run for the
- * destination.
- */
+/** The result of a destination, with its authentication and authorization failures. */
+export const withAuthFailures = (
+  result: StreamsUnit.StatsDestinationResult,
+  authFailures: AuthFailureStats
+): StreamsUnit.StatsDestinationResult => ({
+  ...result,
+  events: { ...result.events, failed: { ...result.events.failed, ...authFailures } },
+});
+
+/** What the two destination queries return for one destination. */
 export interface DestinationRow {
   [STATS_COLUMN.incomingRate]?: EsqlValue;
   [STATS_COLUMN.failedRate]?: EsqlValue;
-  [STATS_COLUMN.authenticationRate]?: EsqlValue;
-  [STATS_COLUMN.authorizationRate]?: EsqlValue;
   [STATS_COLUMN.avgLatency]?: EsqlValue;
   series: EsqlRow[];
-  failureCollections?: EsqlRow[];
 }
 
 /**
- * Joins the rows of the rate query, of the sums query and of the failure collections query on the
- * destination id, into one object per destination. A destination is there when the sums query has
- * rows for it (it has items in the window). The series keeps the order of the rows, which the query
- * sorts by bucket. The failure collections rows are only for the destinations that have failures,
- * so a destination without them has no `failureCollections`.
+ * Joins the rows of the rate query and of the sums query on the destination id, into one object
+ * per destination. A destination is there when the sums query has rows for it (it has items in
+ * the window). The series keeps the order of the rows, which the query sorts by bucket.
  */
 export const joinDestinationRows = ({
   rateRows,
   sumsRows,
-  failureCollectionsRows = [],
 }: {
   rateRows: EsqlRow[];
   sumsRows: EsqlRow[];
-  failureCollectionsRows?: EsqlRow[];
 }): Record<string, DestinationRow> => {
   const ratesById = indexById(rateRows, STATS_COLUMN.id);
   const seriesById = groupById(sumsRows, STATS_COLUMN.id);
-  const failureCollectionsById = groupById(failureCollectionsRows, STATS_COLUMN.id);
 
   return Object.fromEntries(
-    Object.entries(seriesById).map(([id, series]) => [
-      id,
-      {
-        ...ratesById[id],
-        series,
-        ...(Object.hasOwn(failureCollectionsById, id)
-          ? { failureCollections: failureCollectionsById[id] }
-          : {}),
-      },
-    ])
+    Object.entries(seriesById).map(([id, series]) => [id, { ...ratesById[id], series }])
   );
 };
 
 /**
  * Places the joined rows of each destination into its result. A column that ES|QL returned as
- * null stays no data. `total` is the sum of the points, so it always agrees with the bars.
+ * null stays no data. `total` is the sum of the points, so it always agrees with the bars. The
+ * authentication and authorization failures are not read here: the queries of the destination's
+ * type give them, see `withAuthFailures`.
  */
 export const mapDestinationStatsRows = ({
   rows,
@@ -114,16 +104,7 @@ export const mapDestinationStatsRows = ({
             },
             failed: {
               rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])),
-              authentication: toFailureRate({
-                rate: numberOrNull(row[STATS_COLUMN.authenticationRate]),
-                collectionRows: row.failureCollections ?? [],
-                column: STATS_COLUMN.authenticationRate,
-              }),
-              authorization: toFailureRate({
-                rate: numberOrNull(row[STATS_COLUMN.authorizationRate]),
-                collectionRows: row.failureCollections ?? [],
-                column: STATS_COLUMN.authorizationRate,
-              }),
+              ...noAuthFailures(),
             },
           },
         },

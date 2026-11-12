@@ -39,15 +39,33 @@ const responses = {
     columns: [
       { name: 'incoming_rate', type: 'double' },
       { name: 'failed_rate', type: 'double' },
-      { name: 'authentication_rate', type: 'double' },
-      { name: 'authorization_rate', type: 'double' },
       { name: 'avg_latency', type: 'double' },
       { name: 'id', type: 'keyword' },
     ],
     values: [
-      [4.6, 0, 0, 0, 0.18, 'es-prod'],
-      [4.2, 2.4, 0.5, 1.9, 0.17, 'es-dev'],
+      [4.6, 0, 0.18, 'es-prod'],
+      [4.2, 2.4, 0.17, 'es-dev'],
     ],
+  },
+  destinationAuthRates: {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'authentication_rate', type: 'double' },
+      { name: 'authorization_rate', type: 'double' },
+    ],
+    values: [
+      ['es-prod', 0, 0],
+      ['es-dev', 0.5, 1.9],
+    ],
+  },
+  destinationAuthCollections: {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'collection', type: 'keyword' },
+      { name: 'authentication_rate', type: 'double' },
+      { name: 'authorization_rate', type: 'double' },
+    ],
+    values: [['es-dev', 'logs-generic.otel-default', null, 1.9]],
   },
   destinationSums: {
     columns: [
@@ -86,14 +104,23 @@ const responses = {
 type QueryName = keyof typeof responses;
 
 const isProbe = (query: string) => query.endsWith('| LIMIT 0');
-/** Only the per-destination aggregate divides by the window, the series query does not. */
-const isDestinationRateQuery = (query: string) => query.includes('window_seconds');
+/** The per-destination totals are the only destination query with the incoming rate. */
+const isDestinationRateQuery = (query: string) =>
+  query.includes('incoming_rate') && query.includes('scope.attributes.streams.destination.id');
+
+/** The series query is the only one that buckets by time. */
+const isDestinationSumsQuery = (query: string) =>
+  query.includes('BUCKET(') && query.includes('scope.attributes.streams.destination.id');
 
 const queryName = (query: string): QueryName => {
   if (query.includes('metrics.streams.source.items')) return 'sourceRate';
   if (!query.includes('scope.attributes.streams.destination.id')) return 'processor';
+  // The collections query is the only one with `INLINE STATS`.
+  if (query.includes('INLINE STATS')) return 'destinationAuthCollections';
+  if (isDestinationRateQuery(query)) return 'destinationRate';
+  if (query.includes('authentication_rate')) return 'destinationAuthRates';
 
-  return isDestinationRateQuery(query) ? 'destinationRate' : 'destinationSums';
+  return 'destinationSums';
 };
 
 /**
@@ -331,7 +358,9 @@ describe('UnitStatsClient.getStats', () => {
       const unpinnedQueries = statsQueries(unpinned);
       const pinnedQueries = statsQueries(pinned);
       const isSourceQuery = (query: string) => query.includes('metrics.streams.source.items');
-      expect(unpinnedQueries).toHaveLength(4);
+      // Rates, sums, the auth failure rates and the collections of the destinations that have
+      // failures, then processors and sources.
+      expect(unpinnedQueries).toHaveLength(6);
       unpinnedQueries.forEach((query) => {
         expect(query).toContain('resource.attributes.unit.id == "default"');
         expect(query).toContain(`@timestamp >= "${timeRange.start}"`);
@@ -361,10 +390,7 @@ describe('UnitStatsClient.getStats', () => {
         })),
       });
       const maxDestinations = destinationsOf(MAX_STREAMS_UNIT_STATS_COMPONENTS);
-      const sumsQueries = (esql: jest.Mock) =>
-        statsQueries(esql).filter(
-          (query) => !isDestinationRateQuery(query) && query.includes('destination')
-        );
+      const sumsQueries = (esql: jest.Mock) => statsQueries(esql).filter(isDestinationSumsQuery);
 
       it('asks for the sums once and the rates once', async () => {
         const esql = makeEsql();
@@ -457,6 +483,132 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.processors['uppercase-message'].instances).toEqual([]);
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.meta.config_hash).toBe('nope');
+    });
+  });
+
+  describe('authentication and authorization failures', () => {
+    const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+    const collectionsQueries = (esql: jest.Mock) =>
+      statsQueries(esql).filter((query) => query.includes('INLINE STATS'));
+    const authRatesQueries = (esql: jest.Mock) =>
+      statsQueries(esql).filter(
+        (query) =>
+          query.includes('authentication_rate') &&
+          !query.includes('INLINE STATS') &&
+          !isDestinationRateQuery(query)
+      );
+
+    it('puts the failures of each destination in its result, with the collections of one that has failures', async () => {
+      const response = await run(makeEsql());
+
+      expect(response.components.destinations['es-dev'].events.failed).toEqual({
+        rate: rate(2.4),
+        authentication: { rate: rate(0.5) },
+        authorization: {
+          rate: rate(1.9),
+          collections: { 'logs-generic.otel-default': { rate: rate(1.9) } },
+        },
+      });
+      expect(response.components.destinations['es-prod'].events.failed.authentication).toEqual({
+        rate: rate(0),
+      });
+      expect(response.components.destinations['es-prod'].events.failed.authorization).toEqual({
+        rate: rate(0),
+      });
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
+    });
+
+    it('asks for the collections of the destinations that have failures only', async () => {
+      const esql = makeEsql();
+
+      await run(esql);
+
+      const [collectionsQuery] = collectionsQueries(esql);
+      expect(collectionsQueries(esql)).toHaveLength(1);
+      expect(collectionsQuery).toContain('destination.id IN ("es-dev")');
+      expect(collectionsQuery).not.toContain('"es-prod"');
+    });
+
+    it('asks for no collections when no destination has failures', async () => {
+      const esql = makeEsql({
+        destinationAuthRates: () => ({
+          columns: responses.destinationAuthRates.columns,
+          values: [
+            ['es-prod', 0, 0],
+            ['es-dev', 0, 0],
+          ],
+        }),
+      });
+
+      await run(esql);
+
+      expect(collectionsQueries(esql)).toHaveLength(0);
+    });
+
+    it('leaves a destination of a type with no failure queries without failure rates', async () => {
+      const esql = makeEsql();
+
+      const response = await run(esql);
+
+      const { failed } = response.components.destinations.dbg.events;
+      expect(failed.authentication).toEqual({ rate: rate(null) });
+      expect(failed.authorization).toEqual({ rate: rate(null) });
+      [...authRatesQueries(esql), ...collectionsQueries(esql)].forEach((query) =>
+        expect(query).not.toContain('"dbg"')
+      );
+    });
+
+    it('asks the Elasticsearch failure queries for a remote Elasticsearch destination', async () => {
+      const esql = makeEsql();
+      const remoteUnit: StreamsUnit.Configuration = {
+        ...unit,
+        destinations: [
+          { id: 'remote', type: 'remote_elasticsearch', supported_telemetry: ['logs'] },
+        ],
+      };
+
+      await run(esql, {}, remoteUnit);
+
+      expect(authRatesQueries(esql)).toHaveLength(1);
+      expect(authRatesQueries(esql)[0]).toContain('destination.id IN ("remote")');
+    });
+
+    it('keeps the failure rates and logs a warn when the collections query fails', async () => {
+      const logger = loggingSystemMock.createLogger();
+
+      const response = await run(
+        makeEsql({ destinationAuthCollections: failWith(responseError(500)) }),
+        {},
+        unit,
+        logger
+      );
+
+      const esDev = response.components.destinations['es-dev'];
+      expect(esDev.error).toBeUndefined();
+      expect(esDev.events.failed.authorization).toEqual({ rate: rate(1.9) });
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('destination authentication and authorization collections')
+      );
+    });
+
+    it('keeps the other stats, and logs a warn, when the failure rates query fails', async () => {
+      const logger = loggingSystemMock.createLogger();
+      const esql = makeEsql({ destinationAuthRates: failWith(responseError(500)) });
+
+      const response = await run(esql, {}, unit, logger);
+
+      const esDev = response.components.destinations['es-dev'];
+      expect(esDev.error).toBeUndefined();
+      expect(esDev.events.incoming.rate.value).toBe(4.2);
+      expect(esDev.events.failed.rate).toEqual(rate(2.4));
+      expect(esDev.events.failed.authentication).toEqual({ rate: rate(null) });
+      expect(esDev.events.failed.authorization).toEqual({ rate: rate(null) });
+      expect(collectionsQueries(esql)).toHaveLength(0);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('destination authentication and authorization rates')
+      );
     });
   });
 

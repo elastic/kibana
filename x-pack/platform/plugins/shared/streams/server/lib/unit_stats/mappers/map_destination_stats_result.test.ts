@@ -6,11 +6,10 @@
  */
 
 import { streamsUnitStatsDestinationResultSchema } from '@kbn/streams-schema';
-import { MAX_FAILURE_COLLECTIONS } from '../constants';
 import {
   joinDestinationRows,
   mapDestinationStatsRows,
-  type DestinationRow,
+  withAuthFailures,
 } from './map_destination_stats_result';
 
 const bucketMs = 60_000;
@@ -82,119 +81,55 @@ describe('mapDestinationStatsRows', () => {
   });
 });
 
-describe('mapDestinationStatsRows failure rates', () => {
-  const series = [{ bucket: '2026-10-20T10:00:00.000Z', sum_items: 270 }];
+describe('withAuthFailures', () => {
   const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
-
-  /** Maps one destination, and checks that the result still parses with the response schema. */
-  const mapFailed = (row: Partial<DestinationRow>) => {
-    const result = mapDestinationStatsRows({
-      rows: { 'es-prod': { incoming_rate: 4.6, failed_rate: 0, series, ...row } },
-      bucketMs,
-    })['es-prod'];
-    expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
-
-    return result.events.failed;
+  const base = mapDestinationStatsRows({
+    rows: {
+      'es-prod': {
+        incoming_rate: 4.6,
+        failed_rate: 2.4,
+        avg_latency: 0.18,
+        series: [{ bucket: '2026-10-20T10:00:00.000Z', sum_items: 270 }],
+      },
+    },
+    bucketMs,
+  })['es-prod'];
+  const authFailures = {
+    authentication: { rate: rate(0.5) },
+    authorization: {
+      rate: rate(1.9),
+      collections: { 'logs-a-default': { rate: rate(1.9) } },
+    },
   };
 
-  it('has no data for a destination whose rates are null', () => {
-    const failed = mapFailed({ authentication_rate: null, authorization_rate: null });
+  it('replaces the authentication and authorization failures', () => {
+    const result = withAuthFailures(base, authFailures);
 
-    expect(failed.authentication).toEqual({ rate: rate(null) });
-    expect(failed.authorization).toEqual({ rate: rate(null) });
+    expect(result.events.failed.authentication).toEqual(authFailures.authentication);
+    expect(result.events.failed.authorization).toEqual(authFailures.authorization);
+    expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
   });
 
-  it('has a rate of 0 and no collections for a destination with items and no rejection', () => {
-    const failed = mapFailed({ authentication_rate: 0, authorization_rate: 0 });
+  it('keeps everything else of the result', () => {
+    const result = withAuthFailures(base, authFailures);
 
-    expect(failed.authentication).toEqual({ rate: rate(0) });
-    expect(failed.authorization).toEqual({ rate: rate(0) });
+    expect(result.latency).toEqual(base.latency);
+    expect(result.events.incoming).toEqual(base.events.incoming);
+    expect(result.events.failed.rate).toEqual(base.events.failed.rate);
   });
 
-  it('reports a 401 rate with no collections, because a whole request has none', () => {
-    const failed = mapFailed({ authentication_rate: 2, authorization_rate: 0 });
+  it('keeps the error of the result', () => {
+    const error = { code: 'unavailable', reason: 'Try again.' };
 
-    expect(failed.authentication).toEqual({ rate: rate(2) });
-    expect(failed.authorization).toEqual({ rate: rate(0) });
+    expect(withAuthFailures({ ...base, error }, authFailures).error).toEqual(error);
   });
 
-  it('reports 403 failures with their collections', () => {
-    const failed = mapFailed({
-      authentication_rate: 0,
-      authorization_rate: 1.9,
-      failureCollections: [
-        {
-          collection: 'logs-generic.otel-default',
-          authentication_rate: null,
-          authorization_rate: 1.9,
-        },
-      ],
-    });
+  it('does not change the result it was given', () => {
+    const before = JSON.parse(JSON.stringify(base));
 
-    expect(failed.authentication).toEqual({ rate: rate(0) });
-    expect(failed.authorization).toEqual({
-      rate: rate(1.9),
-      collections: { 'logs-generic.otel-default': { rate: rate(1.9) } },
-    });
-  });
+    withAuthFailures(base, authFailures);
 
-  it('leaves out a collection with no failures of a type, and lists no more than the destination rate', () => {
-    const failed = mapFailed({
-      authentication_rate: 2.5,
-      authorization_rate: 1,
-      failureCollections: [
-        { collection: 'logs-a-default', authentication_rate: 1.5, authorization_rate: 1 },
-        { collection: 'logs-b-default', authentication_rate: 0.5, authorization_rate: null },
-      ],
-    });
-
-    expect(Object.keys(failed.authentication.collections ?? {})).toEqual([
-      'logs-a-default',
-      'logs-b-default',
-    ]);
-    expect(Object.keys(failed.authorization.collections ?? {})).toEqual(['logs-a-default']);
-    const collectionRates = Object.values(failed.authentication.collections ?? {}).map(
-      ({ rate: { value } }) => value ?? 0
-    );
-    expect(collectionRates.reduce((sum, value) => sum + value, 0)).toBeLessThanOrEqual(
-      failed.authentication.rate.value ?? NaN
-    );
-  });
-
-  it('skips a row with no collection name', () => {
-    const failed = mapFailed({
-      authentication_rate: 2,
-      authorization_rate: 0,
-      failureCollections: [
-        { collection: 'logs-a-default', authentication_rate: 1, authorization_rate: null },
-        { collection: null, authentication_rate: 1, authorization_rate: null },
-      ],
-    });
-
-    expect(failed.authentication).toEqual({
-      rate: rate(2),
-      collections: { 'logs-a-default': { rate: rate(1) } },
-    });
-  });
-
-  it('keeps the collections with the highest rates, highest first, up to the cap', () => {
-    const total = MAX_FAILURE_COLLECTIONS + 5;
-    const failureCollections = Array.from({ length: total }, (_, index) => ({
-      collection: `logs-c${index + 1}-default`,
-      authentication_rate: index + 1,
-      authorization_rate: null,
-    }));
-
-    const failed = mapFailed({
-      authentication_rate: 1000,
-      authorization_rate: 0,
-      failureCollections,
-    });
-    const names = Object.keys(failed.authentication.collections ?? {});
-
-    expect(names).toHaveLength(MAX_FAILURE_COLLECTIONS);
-    expect(names[0]).toBe(`logs-c${total}-default`);
-    expect(names[names.length - 1]).toBe(`logs-c${total - MAX_FAILURE_COLLECTIONS + 1}-default`);
+    expect(base).toEqual(before);
   });
 });
 
@@ -245,24 +180,6 @@ describe('joinDestinationRows', () => {
     expect(shaped['es-dev']).toEqual({
       series: [{ bucket: '2026-10-20T10:00:00.000Z', sum_items: 90 }],
     });
-  });
-
-  it('attaches the failure collection rows only to the destination that has them', () => {
-    const failureCollectionsRows = [
-      {
-        id: 'es-dev',
-        collection: 'logs-a-default',
-        authentication_rate: 0.5,
-        authorization_rate: null,
-      },
-    ];
-
-    const shaped = joinDestinationRows({ rateRows, sumsRows, failureCollectionsRows });
-
-    expect(shaped['es-dev'].failureCollections).toEqual([
-      { collection: 'logs-a-default', authentication_rate: 0.5, authorization_rate: null },
-    ]);
-    expect(shaped['es-prod']).not.toHaveProperty('failureCollections');
   });
 
   it('has no destinations for no rows', () => {
