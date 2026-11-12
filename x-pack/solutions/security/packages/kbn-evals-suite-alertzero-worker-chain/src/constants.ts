@@ -131,7 +131,7 @@ export const GENERATION_FAILED_HOP_STATUS = 'generation_failed';
 export const WORKER_CHAIN_EXPERIMENT_CONCURRENCY = 1;
 
 /** Examples the spec runs when no subset is selected (non-`failed` FP/TP worlds). */
-export const WORKER_CHAIN_EXAMPLE_COUNT = 21;
+export const WORKER_CHAIN_EXAMPLE_COUNT = 22;
 
 /**
  * The Buildkite eval step is killed at 120 min (run_suite.sh sets

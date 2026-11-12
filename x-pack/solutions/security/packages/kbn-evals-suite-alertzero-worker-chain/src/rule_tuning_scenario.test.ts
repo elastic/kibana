@@ -47,6 +47,8 @@ interface FixtureOptions {
   transientListFailures?: number;
   /** Connector the review's diagnose_rule step reports; `null` reports none. */
   connectorId?: string | null;
+  /** The review is reachable only through `/children` (sync fallback), not the dispatch steps. */
+  syncChildrenOnly?: boolean;
 }
 
 const fixture = (autonomy: 'manual' | 'assisted', options: FixtureOptions = {}) => {
@@ -59,7 +61,9 @@ const fixture = (autonomy: 'manual' | 'assisted', options: FixtureOptions = {}) 
     approveFailure,
     transientListFailures = 0,
     connectorId = CANDIDATE,
+    syncChildrenOnly = false,
   } = options;
+  const reviewIds = [...(siblingReview ? ['review-other'] : []), 'review-1'];
   let conflicts = approveConflicts;
   let listFailures = transientListFailures;
   let stage = autonomy === 'manual' ? 0 : 1;
@@ -78,22 +82,39 @@ const fixture = (autonomy: 'manual' | 'assisted', options: FixtureOptions = {}) 
         status: 'completed',
         stepExecutions: [{ stepId: 'run_rule_tuning', output: { executionId: 'sweep-1' } }],
       };
+    // The sweep fans reviews out with `workflow.executeAsync`, so their ids live on
+    // the dispatch steps; `/children` lists only sync children and stays empty.
     if (path.endsWith('/executions/sweep-1/children'))
-      return [
-        ...(siblingReview
-          ? [{ workflowId: RULE_TUNING_REVIEW_ID, executionId: 'review-other' }]
-          : []),
-        { workflowId: RULE_TUNING_REVIEW_ID, executionId: 'review-1' },
-        { workflowId: 'something-else', executionId: 'other-child' },
-      ];
+      return syncChildrenOnly
+        ? [
+            ...reviewIds.map((executionId) => ({ workflowId: RULE_TUNING_REVIEW_ID, executionId })),
+            { workflowId: 'something-else', executionId: 'other-child' },
+          ]
+        : [];
+    if (path.endsWith('/executions/sweep-1'))
+      return {
+        status: 'running',
+        stepExecutions: syncChildrenOnly
+          ? []
+          : [
+              ...reviewIds.map((executionId) => ({
+                stepId: 'run_review',
+                stepType: 'workflow.executeAsync',
+                output: { executionId, workflowId: RULE_TUNING_REVIEW_ID, status: 'pending' },
+              })),
+              { stepId: 'list_rules', output: { executionId: 'not-a-dispatch' } },
+            ],
+      };
     if (path.endsWith('/executions/review-other'))
       return {
+        workflowId: RULE_TUNING_REVIEW_ID,
         status: 'waiting_for_child',
         concurrencyGroupKey: 'rule-tuning-review-another-rule',
         stepExecutions: [],
       };
     if (path.endsWith('/executions/review-1'))
       return {
+        workflowId: RULE_TUNING_REVIEW_ID,
         status: stage >= 2 ? 'completed' : 'waiting_for_child',
         concurrencyGroupKey: `rule-tuning-review-${input.ruleId}`,
         ...(reviewIdentity ? { effectiveIdentity: reviewIdentity } : {}),
@@ -199,6 +220,19 @@ describe('Rule Tuning proposal scenario', () => {
 
   it('picks the review of the seeded rule, not a sibling review in the same sweep', async () => {
     const { operator } = fixture('assisted', { siblingReview: true });
+    const record = await runRuleTuningScenario(operator, input);
+    expect(record.runId).toBe('review-1');
+  });
+
+  it('finds the async review on the sweep dispatch steps when /children lists none', async () => {
+    const { operator, fetch } = fixture('assisted');
+    const record = await runRuleTuningScenario(operator, input);
+    expect(record.runId).toBe('review-1');
+    expect(calls(fetch, '/executions/not-a-dispatch')).toHaveLength(0);
+  });
+
+  it('falls back to sync /children when no dispatch step carries the review', async () => {
+    const { operator } = fixture('assisted', { syncChildrenOnly: true, siblingReview: true });
     const record = await runRuleTuningScenario(operator, input);
     expect(record.runId).toBe('review-1');
   });
