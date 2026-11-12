@@ -23,6 +23,7 @@ import {
   sendFleetActionResponse,
 } from '../../../../scripts/endpoint/common/response_actions';
 import { createSystemIndicesEsClient } from '../ui/fixtures/system_indices_es_client';
+import { runCleanups } from './run_cleanups';
 
 interface AgentStatusResponse {
   data: Record<string, { isolated: boolean }>;
@@ -109,29 +110,17 @@ export const deleteSubmittedHostActions = async ({
   };
 
   try {
-    const failures: unknown[] = [];
-
-    try {
-      // .fleet-actions-results is a system data stream and rejects this call without the fleet origin.
-      await deleteMatching(FLEET_ACTION_INDICES, {
-        headers: { 'X-elastic-product-origin': 'fleet' },
-      });
-    } catch (error) {
-      failures.push(error);
-    }
-
-    try {
-      await deleteMatching(ENDPOINT_ACTION_INDICES);
-    } catch (error) {
-      failures.push(error);
-    }
-
-    if (failures.length === 1) {
-      throw failures[0];
-    }
-    if (failures.length > 1) {
-      throw new AggregateError(failures, 'Failed to delete submitted host actions');
-    }
+    await runCleanups(
+      [
+        // .fleet-actions-results is a system data stream and rejects this call without the fleet origin.
+        () =>
+          deleteMatching(FLEET_ACTION_INDICES, {
+            headers: { 'X-elastic-product-origin': 'fleet' },
+          }),
+        () => deleteMatching(ENDPOINT_ACTION_INDICES),
+      ],
+      'Failed to delete submitted host actions'
+    );
   } finally {
     await systemEsClient.close();
   }
@@ -172,38 +161,31 @@ export const deleteGetFileUploads = async ({
   }
 
   const systemEsClient = await createSystemIndicesEsClient(esClient, config);
-  try {
-    const failures: unknown[] = [];
-    for (const [index, ids] of [
-      [FILE_STORAGE_METADATA_INDEX, metadataIds],
-      [FILE_STORAGE_DATA_INDEX, dataIds],
-    ] as const) {
-      try {
-        // Fleet file storage indices are data streams, so delete by query (delete by id
-        // needs the backing index). They are Fleet-owned, so send the fleet product origin.
-        await systemEsClient.deleteByQuery(
-          {
-            index,
-            query: { ids: { values: ids } },
-            conflicts: 'proceed',
-            ignore_unavailable: true,
-            allow_no_indices: true,
-            refresh: true,
-            wait_for_completion: true,
-          },
-          { headers: { 'X-elastic-product-origin': 'fleet' } }
-        );
-      } catch (error) {
-        failures.push(error);
-      }
-    }
+  // Fleet file storage indices are data streams, so delete by query (delete by id
+  // needs the backing index). They are Fleet-owned, so send the fleet product origin.
+  const deleteByIds = async (index: string, ids: string[]): Promise<void> => {
+    await systemEsClient.deleteByQuery(
+      {
+        index,
+        query: { ids: { values: ids } },
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        refresh: true,
+        wait_for_completion: true,
+      },
+      { headers: { 'X-elastic-product-origin': 'fleet' } }
+    );
+  };
 
-    if (failures.length === 1) {
-      throw failures[0];
-    }
-    if (failures.length > 1) {
-      throw new AggregateError(failures, 'Failed to delete get-file uploads');
-    }
+  try {
+    await runCleanups(
+      [
+        () => deleteByIds(FILE_STORAGE_METADATA_INDEX, metadataIds),
+        () => deleteByIds(FILE_STORAGE_DATA_INDEX, dataIds),
+      ],
+      'Failed to delete get-file uploads'
+    );
   } finally {
     await systemEsClient.close();
   }
