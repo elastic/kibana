@@ -70,7 +70,7 @@
   "sources": {
     "v2": {
       "apiVersion": "2.0.0",
-      "fetchedAt": "2026-10-07T20:48:47.792Z",
+      "fetchedAt": "2026-11-12T23:15:02.703Z",
       "format": "openapi",
       "url": "https://developer.zendesk.com/zendesk/oas.yaml"
     }

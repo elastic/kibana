@@ -21,3 +21,14 @@ actions:
           type: integer
           minimum: 1
           maximum: 100
+  - target: $.paths['/api/v2/users/me'].get
+    description: >-
+      The spec gives Show Self no security of its own, so it inherits the root `basicAuth`, while
+      every other GET operation lists `oauth2` scopes. The `read` scope of the spec's own `oauth2`
+      scheme is described as "Read all data. Gives access to GET endpoints", and Zendesk's docs
+      (https://developer.zendesk.com/api-reference/introduction/security-and-auth/) deprecate
+      basic authentication in favor of OAuth access tokens, so the endpoint accepts a `read` token.
+    update:
+      security:
+        - oauth2:
+            - read
