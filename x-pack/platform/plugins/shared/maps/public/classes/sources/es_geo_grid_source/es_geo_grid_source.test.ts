@@ -14,13 +14,8 @@ import {
   getSearchService,
 } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
-import {
-  APP_ID,
-  ES_GEO_FIELD_TYPE,
-  GRID_RESOLUTION,
-  RENDER_AS,
-  SOURCE_TYPES,
-} from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
+import { APP_ID, ES_GEO_FIELD_TYPE, RENDER_AS, SOURCE_TYPES } from '../../../../common/constants';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
@@ -302,6 +297,20 @@ describe('ESGeoGridSource', () => {
         requestType: RENDER_AS.HEATMAP,
       });
       expect(superFineSource.getGeoGridPrecision(10)).toBe(0);
+    });
+
+    // Hex is always MVT, so precision is determined server side and the client value is a constant 0.
+    it('Should return constant precision for hex', () => {
+      const hexSource = new ESGeoGridSource({
+        id: 'foobar',
+        indexPatternId: 'fooIp',
+        geoField: geoFieldName,
+        metrics: [],
+        resolution: GRID_RESOLUTION.COARSE,
+        type: SOURCE_TYPES.ES_GEO_GRID,
+        requestType: RENDER_AS.HEX,
+      });
+      expect(hexSource.getGeoGridPrecision(10)).toBe(0);
     });
   });
 
