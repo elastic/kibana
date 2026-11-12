@@ -22,7 +22,6 @@ import { createFixtureEntityInventoryApiClient } from '../__fixtures__/inventory
 import { createAppServicesMock, createCoreStartMock, createStartDependenciesMock } from '../mocks';
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
-import { ENTITY_LIST_PLACEHOLDER } from './translations';
 import { EntityInventoryShell, renderApp } from '.';
 
 const PageTemplate = (({ children }: { children: React.ReactNode }) => (
@@ -73,12 +72,57 @@ describe('EntityInventoryShell', () => {
     }
   );
 
-  it('keeps the placeholder on the all resources page until grouping lands', () => {
-    renderShellAt('/all-resources');
+  it('lists one section per type on the all resources page, in the order of the types response', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const { types } = await fixtureClient.getTypes({});
+    const reversedTypes = [...types].reverse();
+    renderShellAt('/all-resources', {
+      ...fixtureClient,
+      getTypes: async () => ({ types: reversedTypes }),
+    });
 
-    expect(screen.getByTestId('entityInventoryPlaceholder')).toHaveTextContent(
-      ENTITY_LIST_PLACEHOLDER
-    );
+    await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+    expect(
+      screen
+        .getAllByTestId('entityInventoryTypeSection')
+        .map((section) => section.getAttribute('data-entity-type'))
+    ).toEqual(reversedTypes.map(({ type }) => type));
+    expect(screen.queryByTestId('entityInventoryTypeNotAvailable')).not.toBeInTheDocument();
+  });
+
+  it.each(['/hosts', '/kubernetes', '/all-resources'])(
+    'shows one error with a retry and no sections on %s when the types request fails',
+    async (path) => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getEntities = jest.fn(fixtureClient.getEntities);
+      renderShellAt(path, {
+        getTypes: () => Promise.reject(new Error('Types failed')),
+        getEntities,
+      });
+
+      expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
+        'Types failed'
+      );
+      expect(screen.getAllByTestId('entityInventoryTableError')).toHaveLength(1);
+      expect(screen.getByTestId('entityInventoryTableRetry')).toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventoryTypeSection')).not.toBeInTheDocument();
+      expect(getEntities).not.toHaveBeenCalled();
+    }
+  );
+
+  it('says a page type missing from the types response is not available, without listing it', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const { types } = await fixtureClient.getTypes({});
+    const getEntities = jest.fn(() => Promise.reject(new Error('Request failed')));
+    renderShellAt('/kubernetes', {
+      getTypes: async () => ({ types: types.filter(({ type }) => type === 'host') }),
+      getEntities,
+    });
+
+    expect(await screen.findByTestId('entityInventoryTypeNotAvailable')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTypeSection')).not.toBeInTheDocument();
+    expect(getEntities).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -91,7 +135,6 @@ describe('EntityInventoryShell', () => {
       'data-entity-type',
       entityType
     );
-    expect(screen.queryByTestId('entityInventoryPlaceholder')).not.toBeInTheDocument();
   });
 
   it('keeps the column choices of a type while another page is open', async () => {
@@ -109,9 +152,11 @@ describe('EntityInventoryShell', () => {
       expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
     );
 
-    act(() => history.push('/all-resources'));
-    expect(await screen.findByTestId('entityInventoryPlaceholder')).toBeInTheDocument();
-    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+    act(() => history.push('/kubernetes'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'k8s.deployment'
+    );
     act(() => history.push('/hosts'));
 
     expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
