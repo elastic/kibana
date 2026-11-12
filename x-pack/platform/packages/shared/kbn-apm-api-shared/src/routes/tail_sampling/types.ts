@@ -9,10 +9,17 @@ import { z } from '@kbn/zod/v4';
 export const MAX_TAIL_SAMPLING_POLICIES = 100;
 export const MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH = 256;
 export const MAX_TAIL_SAMPLING_POLICY_TYPE_LENGTH = 64;
-// sha256, hex encoded
-export const TAIL_SAMPLING_HASH_LENGTH = 64;
+// Whether the hash comes from Kibana or the control API is still open, so only bound it.
+export const MAX_TAIL_SAMPLING_HASH_LENGTH = 128;
 // Saved object versions are short opaque strings, such as 'WzEsMV0='.
 export const MAX_TAIL_SAMPLING_VERSION_LENGTH = 128;
+
+/**
+ * The tail-sampling processors Kibana accepts. A project uses exactly one at a time.
+ * Uses the collector's own names. 'adaptive_tail_sampling' may follow later.
+ */
+export const TAIL_SAMPLING_PROCESSOR = 'tail_sampling';
+export type TailSamplingProcessor = typeof TAIL_SAMPLING_PROCESSOR;
 
 /**
  * One policy of the upstream OpenTelemetry `tail_sampling` processor, for example
@@ -36,6 +43,20 @@ export const tailSamplingPoliciesSchema = z
   .array(tailSamplingPolicySchema)
   .max(MAX_TAIL_SAMPLING_POLICIES);
 
+/** The config of the `tail_sampling` processor. */
+export interface TailSamplingConfig {
+  policies: TailSamplingPolicy[];
+}
+
+/**
+ * The processor and its config, as sent to `_validate` and `PUT`. A second processor
+ * would turn this into a union keyed on `processor`.
+ */
+export const tailSamplingSettingsSchema = z.object({
+  processor: z.literal(TAIL_SAMPLING_PROCESSOR),
+  config: z.object({ policies: tailSamplingPoliciesSchema }),
+});
+
 export interface TailSamplingDiagnostic {
   code: string;
   message: string;
@@ -46,11 +67,12 @@ export interface TailSamplingDiagnostic {
   path?: Array<string | number>;
 }
 
-export interface ManagedTailSamplingResponse {
-  // False until a policy set has been saved once. The page shows its empty state.
+export interface TailSamplingResponse {
+  // False until a config has been saved once. The page shows its empty state.
   saved: boolean;
   enabled: boolean;
-  policies: TailSamplingPolicy[];
+  processor: TailSamplingProcessor;
+  config: TailSamplingConfig;
   hash: string | null;
   // Version of the stored document. Send it back on save to detect concurrent edits.
   version?: string;
@@ -58,9 +80,9 @@ export interface ManagedTailSamplingResponse {
   updatedAt?: string;
 }
 
-export interface ValidateManagedTailSamplingResponse {
+export interface ValidateTailSamplingResponse {
   valid: boolean;
   diagnostics: TailSamplingDiagnostic[];
-  // Hash of the policies as validated. Send it back as `validatedHash` on save.
+  // Hash of the config as validated. Send it back as `validatedHash` on save.
   hash: string;
 }

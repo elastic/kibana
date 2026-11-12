@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { defineRoute } from '../types';
-import type { ManagedTailSamplingResponse } from './types';
+import type { TailSamplingResponse } from './types';
 
 /**
- * Turns sampling back on with the policies already stored. The server validates them
- * again before applying: 400 with diagnostics when they no longer pass, 409 when
+ * Turns sampling back on with the config already stored. The server validates it
+ * again before applying: 400 with diagnostics when it no longer passes, 409 when
  * nothing has been saved yet. Calling it while enabled returns the current state.
  */
-export const enableManagedTailSamplingRoute = defineRoute<ManagedTailSamplingResponse>()({
-  endpoint: 'POST /internal/managed_tail_sampling/_enable',
+export const enableTailSamplingRoute = defineRoute<TailSamplingResponse>()({
+  endpoint: 'POST /internal/tail_sampling/_enable',
 });

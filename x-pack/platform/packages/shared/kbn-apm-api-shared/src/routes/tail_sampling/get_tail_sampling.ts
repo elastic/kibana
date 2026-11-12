@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { defineRoute } from '../types';
-import type { ManagedTailSamplingResponse } from './types';
+import type { TailSamplingResponse } from './types';
 
-export const getManagedTailSamplingRoute = defineRoute<ManagedTailSamplingResponse>()({
-  endpoint: 'GET /internal/managed_tail_sampling',
+export const getTailSamplingRoute = defineRoute<TailSamplingResponse>()({
+  endpoint: 'GET /internal/tail_sampling',
 });
