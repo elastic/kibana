@@ -95,25 +95,23 @@ export const runEvaluate = async (context: StageContext): Promise<void> => {
     const dir = runDirOf(config, runId, aiIndex.id);
     const sets = kiSetsOf(dir, targetsOfRun(context, aiIndex, dir));
 
-    let useReranker = true;
+    let fallbacks = 0;
     const rank = async (target: EvalTarget, kis: DumpedKi[]): Promise<DumpedKi[]> => {
       if (kis.length <= config.evaluate.candidates) {
         return kis;
       }
       const query = targetQuery(target);
-      if (useReranker) {
-        try {
-          return await rankWithReranker(esClient, config.evaluate.rerank_inference_id, query, kis);
-        } catch (error) {
-          log.warning(
-            `Reranking with ${config.evaluate.rerank_inference_id} failed (${
-              error instanceof Error ? error.message : String(error)
-            }); ranking by shared words instead`
-          );
-          useReranker = false;
-        }
+      try {
+        return await rankWithReranker(esClient, config.evaluate.rerank_inference_id, query, kis);
+      } catch (error) {
+        fallbacks++;
+        log.warning(
+          `Reranking ${target.id} with ${config.evaluate.rerank_inference_id} failed (${
+            error instanceof Error ? error.message : String(error)
+          }); ranking its KIs by shared words instead`
+        );
+        return rankByOverlap(query, kis);
       }
-      return rankByOverlap(query, kis);
     };
 
     const total = sets.reduce((sum, { targets }) => sum + targets.length, 0);
@@ -156,7 +154,9 @@ export const runEvaluate = async (context: StageContext): Promise<void> => {
       runId,
       aiIndexId: aiIndex.id,
       connectorId,
-      ranker: useReranker ? `the ${config.evaluate.rerank_inference_id} reranker` : 'shared words',
+      ranker: `the ${config.evaluate.rerank_inference_id} reranker${
+        fallbacks > 0 ? ` (shared words for ${fallbacks} of ${total} targets it failed on)` : ''
+      }`,
       evaluatedAt: new Date().toISOString(),
       kis: kiCount,
       ...scoresOf(results, SCORES),

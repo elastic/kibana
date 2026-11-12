@@ -112,11 +112,15 @@ describe('judge', () => {
     await expect(
       rankWithReranker({ transport } as unknown as Client, 'rerank-id', 'degree', kis)
     ).resolves.toEqual([kis[1], kis[0]]);
-    expect(transport.request).toHaveBeenCalledWith({
-      method: 'POST',
-      path: '/_inference/rerank/rerank-id',
-      body: { query: 'degree', input: kis.map(kiText) },
-    });
+    expect(transport.request).toHaveBeenCalledWith(
+      {
+        method: 'POST',
+        path: '/_inference/rerank/rerank-id',
+        querystring: { timeout: '120s' },
+        body: { query: 'degree', input: kis.map(kiText) },
+      },
+      { requestTimeout: 150_000 }
+    );
     expect(rankByOverlap('Business Administration degree', kis).map(({ id }) => id)).toEqual([
       'b',
       'a',

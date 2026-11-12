@@ -22,6 +22,8 @@ export interface Judgement {
 const KI_TEXT_CHARS = 1500;
 /** KIs ranked per rerank request. */
 const RERANK_BATCH = 100;
+/** How long a rerank request may take: a local model ranks a batch of a large AI index slowly. */
+const RERANK_TIMEOUT = '120s';
 
 export const SYSTEM_PROMPT =
   'You grade a long-term memory store that a memory system built from past conversations. You decide whether the store holds a given piece of knowledge, and answer with JSON only.';
@@ -63,11 +65,15 @@ export const rankWithReranker = async (
     const batch = kis.slice(start, start + RERANK_BATCH);
     const response = await esClient.transport.request<{
       rerank: Array<{ index: number; relevance_score: number }>;
-    }>({
-      method: 'POST',
-      path: `/_inference/rerank/${encodeURIComponent(inferenceId)}`,
-      body: { query, input: batch.map(kiText) },
-    });
+    }>(
+      {
+        method: 'POST',
+        path: `/_inference/rerank/${encodeURIComponent(inferenceId)}`,
+        querystring: { timeout: RERANK_TIMEOUT },
+        body: { query, input: batch.map(kiText) },
+      },
+      { requestTimeout: 150_000 }
+    );
     for (const { index, relevance_score: score } of response.rerank) {
       scored.push({ ki: batch[index], score });
     }
