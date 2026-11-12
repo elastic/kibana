@@ -6,45 +6,46 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { chatSystemIndex } from '@kbn/agent-builder-server';
-import type { IndexStorageSettings } from '@kbn/storage-adapter';
-import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import { NIGHTSHIFT_BLIND_SPOTS_INDEX } from '@kbn/nightshift-shared';
 import type { HypothesisStatus } from '@kbn/agentic-investigations-plugin/common';
 import type { MissingDataItem } from '../../common/missing_data';
 
 /**
- * Where the findings recorder keeps what an investigation could not settle. A chat system index, as
- * Elasticsearch lets Kibana's internal user create those, and read-only for now: nothing in the product reads it, so the data can be checked across clusters first.
+ * Where the findings recorder keeps what an investigation could not settle. Written as the user of
+ * the request, which for an investigation is the Nightshift service account: its role grants this
+ * one index. Nothing in the product reads it yet, so the data can be checked across clusters first.
  */
-export const BLIND_SPOTS_INDEX = chatSystemIndex('nightshift-blind-spots');
+export const BLIND_SPOTS_INDEX = NIGHTSHIFT_BLIND_SPOTS_INDEX;
 
-const storageSettings = {
-  name: BLIND_SPOTS_INDEX,
-  schema: {
-    properties: {
-      conversation_id: types.keyword({}),
-      space_id: types.keyword({}),
-      '@timestamp': types.date({}),
-      /** `cause_not_confirmed` when the verdict says so, `cause_found` otherwise. */
-      outcome: types.keyword({}),
-      missing_data: types.object({
-        properties: {
-          what: types.text({}),
-          source: types.text({}),
-          why: types.keyword({}),
-          would_decide: types.text({}),
-        },
-      }),
-      hypotheses: types.object({
-        properties: {
-          candidate: types.text({}),
-          status: types.keyword({}),
-          settled_by: types.text({}),
-        },
-      }),
+/** Bump when the mapping changes: an index created with an older one is not updated. */
+const MAPPING_VERSION = 1;
+
+const MAPPINGS = {
+  dynamic: 'strict',
+  _meta: { version: MAPPING_VERSION },
+  properties: {
+    conversation_id: { type: 'keyword' },
+    space_id: { type: 'keyword' },
+    '@timestamp': { type: 'date' },
+    /** `cause_not_confirmed` when the verdict says so, `cause_found` otherwise. */
+    outcome: { type: 'keyword' },
+    missing_data: {
+      properties: {
+        what: { type: 'text' },
+        source: { type: 'text' },
+        why: { type: 'keyword' },
+        would_decide: { type: 'text' },
+      },
+    },
+    hypotheses: {
+      properties: {
+        candidate: { type: 'text' },
+        status: { type: 'keyword' },
+        settled_by: { type: 'text' },
+      },
     },
   },
-} satisfies IndexStorageSettings;
+} as const;
 
 export type BlindSpotsOutcome = 'cause_not_confirmed' | 'cause_found';
 
@@ -57,12 +58,17 @@ export interface BlindSpotsDocument {
   hypotheses: Array<{ candidate: string; status: HypothesisStatus; settled_by?: string }>;
 }
 
-type BlindSpotsStorageSettings = typeof storageSettings;
-
 /** Saves the blind spots of one investigation, replacing what an earlier pass stored for it. */
 export interface BlindSpotsStore {
   save: (document: Omit<BlindSpotsDocument, 'space_id'>) => Promise<void>;
 }
+
+const isAlreadyExists = (error: unknown): boolean =>
+  (error as { body?: { error?: { type?: string } } })?.body?.error?.type ===
+  'resource_already_exists_exception';
+
+// One check per process: the index is created once and only ever by its first writer.
+let indexReady = false;
 
 export const createBlindSpotsStore = ({
   esClient,
@@ -73,17 +79,34 @@ export const createBlindSpotsStore = ({
   logger: Logger;
   spaceId: string;
 }): BlindSpotsStore => {
-  const client = new StorageIndexAdapter<BlindSpotsStorageSettings, BlindSpotsDocument>(
-    esClient,
-    logger,
-    storageSettings
-  ).getClient();
+  const ensureIndex = async (): Promise<void> => {
+    if (indexReady) return;
+    try {
+      await esClient.indices.create({
+        index: BLIND_SPOTS_INDEX,
+        settings: { hidden: true, number_of_shards: 1, auto_expand_replicas: '0-1' },
+        mappings: MAPPINGS,
+      });
+      logger.debug(`Created the ${BLIND_SPOTS_INDEX} index`);
+    } catch (error) {
+      if (!isAlreadyExists(error)) throw error;
+    }
+    indexReady = true;
+  };
+
   return {
     save: async (document) => {
-      await client.index({
+      await ensureIndex();
+      await esClient.index({
+        index: BLIND_SPOTS_INDEX,
         id: document.conversation_id,
         document: { ...document, space_id: spaceId },
       });
     },
   };
+};
+
+/** Lets a test start from an index that has not been checked yet. */
+export const resetBlindSpotsIndexCheck = (): void => {
+  indexReady = false;
 };

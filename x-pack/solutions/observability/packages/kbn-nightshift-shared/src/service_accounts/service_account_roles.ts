@@ -16,6 +16,12 @@ type RoleDescriptor = Omit<estypes.SecurityPutRoleRequest, 'name'>;
  * runtime: tests, evals and local development create them with
  * `ensureNightshiftServiceAccountRoles`.
  */
+/**
+ * Where the findings recorder keeps what each investigation could not settle. The agent's service
+ * account creates and writes it, so its role grants exactly this index.
+ */
+export const NIGHTSHIFT_BLIND_SPOTS_INDEX = '.nightshift-blind-spots';
+
 export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, RoleDescriptor>> = {
   nightshift_agent: {
     description:
@@ -29,6 +35,11 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
           'ai-index-idx-nightshift-decision-trees',
         ],
         privileges: ['read', 'view_index_metadata', 'write', 'auto_configure'],
+        allow_restricted_indices: false,
+      },
+      {
+        names: [NIGHTSHIFT_BLIND_SPOTS_INDEX],
+        privileges: ['read', 'view_index_metadata', 'write', 'create_index'],
         allow_restricted_indices: false,
       },
     ],

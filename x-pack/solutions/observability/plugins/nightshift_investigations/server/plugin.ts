@@ -377,7 +377,8 @@ export class NightshiftInvestigationsPlugin
             getBlindSpots: (request) =>
               this.coreStart
                 ? createBlindSpotsStore({
-                    esClient: this.coreStart.elasticsearch.client.asInternalUser,
+                    // As the request's user, like wiki and memory: for an investigation the service account.
+                    esClient: this.coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
                     logger: this.logger.get('blind-spots'),
                     spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
                   })

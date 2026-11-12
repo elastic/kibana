@@ -6,43 +6,72 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { BLIND_SPOTS_INDEX, createBlindSpotsStore } from './blind_spots_store';
+import {
+  BLIND_SPOTS_INDEX,
+  createBlindSpotsStore,
+  resetBlindSpotsIndexCheck,
+} from './blind_spots_store';
 
-const mockIndex = jest.fn();
-
-jest.mock('@kbn/storage-adapter', () => ({
-  ...jest.requireActual('@kbn/storage-adapter'),
-  StorageIndexAdapter: jest.fn().mockImplementation(() => ({
-    getClient: () => ({ index: mockIndex }),
-  })),
-}));
+const document = {
+  conversation_id: 'c1',
+  '@timestamp': '2026-11-12T10:00:00.000Z',
+  outcome: 'cause_not_confirmed' as const,
+  missing_data: [{ what: 'SLO definition', why: 'no_access' as const }],
+  hypotheses: [
+    { candidate: 'bad deploy', status: 'investigating' as const, settled_by: 'Refuted if x' },
+  ],
+};
 
 describe('createBlindSpotsStore', () => {
-  it('indexes one document per investigation, tagged with the space', async () => {
+  const setup = () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const store = createBlindSpotsStore({
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      esClient,
       logger: loggingSystemMock.createLogger(),
       spaceId: 'ops',
     });
+    return { esClient, store };
+  };
 
-    await store.save({
-      conversation_id: 'c1',
-      '@timestamp': '2026-11-12T10:00:00.000Z',
-      outcome: 'cause_not_confirmed',
-      missing_data: [{ what: 'SLO definition', why: 'no_access' }],
-      hypotheses: [
-        { candidate: 'bad deploy', status: 'investigating', settled_by: 'Refuted if x' },
-      ],
-    });
+  beforeEach(() => resetBlindSpotsIndexCheck());
 
-    expect(mockIndex).toHaveBeenCalledWith({
+  it('creates the index with a strict mapping, then indexes one document per investigation', async () => {
+    const { esClient, store } = setup();
+
+    await store.save(document);
+
+    expect(esClient.indices.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: BLIND_SPOTS_INDEX,
+        settings: expect.objectContaining({ hidden: true }),
+        mappings: expect.objectContaining({ dynamic: 'strict' }),
+      })
+    );
+    expect(esClient.index).toHaveBeenCalledWith({
+      index: BLIND_SPOTS_INDEX,
       id: 'c1',
-      document: expect.objectContaining({
-        conversation_id: 'c1',
-        space_id: 'ops',
-        outcome: 'cause_not_confirmed',
-      }),
+      document: { ...document, space_id: 'ops' },
     });
-    expect(BLIND_SPOTS_INDEX).toBe('.chat-nightshift-blind-spots');
+  });
+
+  it('creates the index once, and treats one that already exists as ready', async () => {
+    const { esClient, store } = setup();
+    esClient.indices.create.mockRejectedValueOnce({
+      body: { error: { type: 'resource_already_exists_exception' } },
+    });
+
+    await store.save(document);
+    await store.save({ ...document, conversation_id: 'c2' });
+
+    expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+    expect(esClient.index).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not write when the index cannot be created', async () => {
+    const { esClient, store } = setup();
+    esClient.indices.create.mockRejectedValueOnce(new Error('security_exception'));
+
+    await expect(store.save(document)).rejects.toThrow('security_exception');
+    expect(esClient.index).not.toHaveBeenCalled();
   });
 });
