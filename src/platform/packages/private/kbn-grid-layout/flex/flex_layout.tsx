@@ -88,23 +88,8 @@ export const FlexLayout = ({
       setElementsInOrder(getLayoutInOrder(panels));
     });
 
-    /**
-     * This subscription adds and/or removes the necessary class names related to styling for
-     * mobile view and a static (non-interactable) layout
-     */
-    const gridLayoutClassSubscription = gridLayoutStateManager.accessMode$.subscribe(
-      (currentAccessMode) => {
-        if (currentAccessMode === 'VIEW') {
-          layoutRef.current?.classList.add('kbnFlex--static');
-        } else {
-          layoutRef.current?.classList.remove('kbnFlex--static');
-        }
-      }
-    );
-
     return () => {
       renderSubscription.unsubscribe();
-      gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -128,7 +113,7 @@ export const FlexLayout = ({
           layoutRef.current = divElement;
           setDimensionsRef(divElement);
         }}
-        className={classNames('kbnFlex', className)}
+        className={classNames('kbnFlex', { 'kbnFlex--static': accessMode === 'VIEW' }, className)}
         css={[styles.layout, styles.hasActivePanel]}
       >
         {elementsInOrder.map((element) => {
