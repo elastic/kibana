@@ -27,9 +27,6 @@ describe('toCloneRequestBody', () => {
   it('copies an existing automation with a copy suffix', () => {
     const automation = buildAutomation({
       name: 'Triage',
-      workflowId: 'current',
-      previousWorkflowIds: ['old'],
-      backingWorkflow: { state: 'missing' },
       tags: ['oncall'],
       description: 'Triage alerts',
       trigger: {

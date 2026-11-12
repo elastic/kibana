@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { isRunQuotaReached, type RunQuotasResponse } from '@kbn/significant-events-plugin/common';
 import { isScheduleOnlyAutomation } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../../data/automations/use_automations';
-import { getWorkflowRepairDisabledReason } from '../workflow_recovery';
 
 export const RUN_AUTOMATION_LABEL = i18n.translate('xpack.nightshift.automations.runButtonLabel', {
   defaultMessage: 'Run',
@@ -19,8 +18,6 @@ export const getRunAutomationDisabledReason = (
   automation: Automation,
   activity: { data?: { isRunning: boolean }; isInitialLoading?: boolean; isError?: boolean } = {}
 ): string | undefined => {
-  const workflowDisabledReason = getWorkflowRepairDisabledReason(automation);
-  if (workflowDisabledReason) return workflowDisabledReason;
   if (!automation.isEnabled) {
     return i18n.translate('xpack.nightshift.automations.runDisabledAutomationTooltip', {
       defaultMessage: 'This automation is disabled. Enable it to run on a schedule or manually.',

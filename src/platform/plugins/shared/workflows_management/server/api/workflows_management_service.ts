@@ -136,7 +136,7 @@ export interface SearchExecutionsViewParams {
 export interface SearchWorkflowExecutionsParams {
   request?: KibanaRequest;
   accessControlFilter?: estypes.QueryDslQueryContainer;
-  workflowId?: string | string[];
+  workflowId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -376,18 +376,10 @@ export class WorkflowsService {
   public async getWorkflowsByIds(
     ids: string[],
     spaceId: string,
-    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
+    options?: { includeDeleted?: boolean }
   ): Promise<WorkflowDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsByIds(ids, spaceId, options);
-  }
-
-  public async getWorkflowStates(
-    ids: string[],
-    spaceId: string
-  ): Promise<Array<{ id: string; enabled: boolean }>> {
-    await this.ensureInitialized();
-    return this.crudService.getWorkflowStates(ids, spaceId);
   }
 
   public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {

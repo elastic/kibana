@@ -97,50 +97,6 @@ describe('WorkflowExecutionQueryService', () => {
       expect(must[1].bool.should[0]).toEqual({ term: { spaceId: 'my-space' } });
     });
 
-    it('queries historical workflow ids together without changing pagination, date range or space', async () => {
-      mockEsClient.search.mockResolvedValue(emptyResponse as never);
-      await service.getWorkflowExecutions(
-        {
-          workflowId: ['old', 'current', 'old'],
-          page: 2,
-          size: 10,
-          startedAfter: '2026-11-01T00:00:00Z',
-        },
-        'my-space'
-      );
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          from: 10,
-          size: 10,
-          query: {
-            bool: {
-              must: expect.arrayContaining([
-                { terms: { workflowId: ['old', 'current'] } },
-                { range: { startedAt: { gte: '2026-11-01T00:00:00.000Z' } } },
-              ]),
-            },
-          },
-        })
-      );
-    });
-
-    it('matches no executions when the workflow ID array is empty', async () => {
-      mockEsClient.search.mockResolvedValue(emptyResponse as never);
-
-      await service.getWorkflowExecutions({ workflowId: [] }, 'my-space');
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              must: expect.arrayContaining([{ terms: { workflowId: [] } }]),
-            },
-          },
-        })
-      );
-      expect(mockEsClient.search.mock.calls[0][0]).not.toHaveProperty('aggs');
-    });
-
     it('adds status filter when statuses provided', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 

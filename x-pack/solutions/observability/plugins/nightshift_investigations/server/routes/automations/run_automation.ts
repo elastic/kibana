@@ -45,7 +45,6 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
     getAutomationsSoClient,
     getWorkflowsManagement,
     getInvestigatorServiceAccountService,
-    getAutomationWorkflowService,
     context,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
@@ -57,10 +56,6 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
       request,
       spaceId
     ).get<NightshiftAutomationAttributes>(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
-    await getAutomationWorkflowService().assertAvailable(
-      { id: params.path.id, ...automation },
-      spaceId
-    );
     if (!automation.isEnabled) {
       throw badRequest('Enable the automation before running it manually.');
     }
@@ -76,28 +71,21 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
     );
     const { workflowId } = automation;
     if (!workflowId)
-      throw badRequest(
-        'The backing workflow is missing. Use Repair to regenerate the backing workflow.'
-      );
+      throw badRequest('The backing workflow is missing. Open the automation and use Repair.');
     const workflow = await management.getWorkflow(workflowId, spaceId, request);
-    if (!workflow) {
+    if (!workflow?.definition || !workflow.valid) {
       throw badRequest(
-        'The backing workflow could not be found or read. If it was deleted, use Repair; otherwise check workflow permissions.'
-      );
-    }
-    if (!workflow.definition || !workflow.valid) {
-      throw badRequest(
-        'The backing workflow is invalid. Save the automation to regenerate it before running it.'
+        'The backing workflow is missing, unreadable, or invalid. If it was deleted, open the automation and use Repair; otherwise check workflow permissions or save the automation.'
       );
     }
     if (!serviceAccountId || workflow.definition.settings?.run_as !== serviceAccountId) {
       throw badRequest(
-        'The backing workflow is not bound to the Nightshift automations service account. Set up Nightshift service accounts and save the automation.'
+        'The backing workflow is not bound to the Nightshift automations service account. Set up Nightshift service accounts and save the automation again.'
       );
     }
     if (!workflow.enabled) {
       throw badRequest(
-        'The backing workflow is disabled. Use Repair and enable before running it.'
+        'The backing workflow is disabled. Save the automation again before running it.'
       );
     }
     const workflowExecutionId = await management.runWorkflow(

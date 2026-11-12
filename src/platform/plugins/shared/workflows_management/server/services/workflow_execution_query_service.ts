@@ -197,11 +197,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     const must: estypes.QueryDslQueryContainer[] = [
-      ...(Array.isArray(params.workflowId)
-        ? [{ terms: { workflowId: [...new Set(params.workflowId)] } }]
-        : params.workflowId
-        ? [{ term: { workflowId: params.workflowId } }]
-        : []),
+      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
       buildWorkflowExecutionsSpaceFilter(spaceId),
       ...(params.accessControlFilter ? [params.accessControlFilter] : []),
     ];
@@ -287,7 +283,7 @@ export class WorkflowExecutionQueryService {
       collapse: params.collapse ? { field: params.collapse } : undefined,
       // First page only. Later pages reuse this flag. List filters stay off this query.
       namedExecutionQuery:
-        typeof params.workflowId === 'string' && params.workflowId && !params.searchAfter?.length
+        params.workflowId && !params.searchAfter?.length
           ? {
               bool: {
                 must: [

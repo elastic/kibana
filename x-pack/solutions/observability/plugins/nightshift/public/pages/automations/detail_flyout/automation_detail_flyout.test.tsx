@@ -14,6 +14,7 @@ import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_ru
 import { AutomationDetailFlyout } from './automation_detail_flyout';
 import {
   useAutomationRunsInRange,
+  useAutomationDetail,
   useAutomationRunActivity,
   useToggleAutomation,
   useUpdateAutomation,
@@ -23,6 +24,7 @@ import type { Automation } from '../../../data/automations/use_automations';
 
 jest.mock('../../../data/automations/use_automations', () => ({
   useAutomationRunsInRange: jest.fn(),
+  useAutomationDetail: jest.fn(),
   useAutomationRunActivity: jest.fn(),
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
@@ -71,6 +73,12 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const navigateToUrl = jest.fn();
 
   beforeEach(() => {
+    (useAutomationDetail as jest.Mock).mockReturnValue({
+      data: { isWorkflowMissing: false },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
     (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: false } });
     (useRunQuotas as jest.Mock).mockReturnValue({ data: undefined });
     onRun.mockClear();
@@ -133,18 +141,31 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
 
-  it.each(['missing', 'out_of_sync'] as const)(
+  it.each(['missing', 'loading', 'error'] as const)(
     'keeps Pause and Delete available while blocking editing for a %s workflow',
     (state) => {
-      renderFlyout({ selectedAutomation: { ...automation, backingWorkflow: { state } } });
+      (useAutomationDetail as jest.Mock).mockReturnValue({
+        data: { isWorkflowMissing: state === 'missing' },
+        isLoading: state === 'loading',
+        isError: state === 'error',
+        refetch: jest.fn(),
+      });
+      renderFlyout({
+        selectedAutomation: {
+          ...automation,
+          trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+          execution: { promptTemplate: 'Review health.' },
+        },
+      });
       expect(screen.getByTestId('automationEditButton')).toBeDisabled();
       expect(screen.getByRole('switch', { name: 'Enabled' })).toBeEnabled();
       expect(screen.getByTestId('automationActionsButton')).toBeEnabled();
       fireEvent.click(screen.getByTestId('automationActionsButton'));
       expect(screen.getByTestId('automationDeleteButton')).toBeEnabled();
       expect(screen.getByTestId('automationCloneButton')).toBeDisabled();
+      expect(screen.getByTestId('automationRunButton')).toBeDisabled();
       fireEvent.click(screen.getByTestId('automationActionsButton'));
-      expect(screen.getByRole('button', { name: 'Repair and enable' })).toBeEnabled();
+      if (state === 'missing') expect(screen.getByRole('button', { name: 'Repair' })).toBeEnabled();
       fireEvent.click(screen.getByTestId('automationEditButton'));
       expect(screen.queryByTestId('automationSaveButton')).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('tab', { name: 'Run history' }));
@@ -159,13 +180,25 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     const { rerenderAutomation } = renderFlyout();
     startEditing();
     renameTo('Updated triage');
-    rerenderAutomation({ ...automation, backingWorkflow: { state: 'missing' } });
+    (useAutomationDetail as jest.Mock).mockReturnValue({
+      data: { isWorkflowMissing: true },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+    rerenderAutomation(automation);
     expect(screen.getByTestId('automationName')).toBeDisabled();
     expect(screen.getByTestId('automationSaveButton')).toBeDisabled();
     expect(screen.getByTestId('automationWorkflowWarning')).toHaveTextContent('was deleted');
     fireEvent.click(screen.getByTestId('automationSaveButton'));
     expect(mutate).not.toHaveBeenCalled();
-    rerenderAutomation({ ...automation, backingWorkflow: { state: 'available' } });
+    (useAutomationDetail as jest.Mock).mockReturnValue({
+      data: { isWorkflowMissing: false },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+    rerenderAutomation({ ...automation, isEnabled: false });
     expect(screen.getByTestId('automationName')).toBeEnabled();
     expect(screen.queryByTestId('automationWorkflowWarning')).not.toBeInTheDocument();
   });
@@ -191,6 +224,12 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   it.each([undefined, 'drop', 'queue', 'cancel_in_progress'] as const)(
     'handles an active execution with overlap policy %s in Actions',
     async (overlapPolicy) => {
+      (useAutomationDetail as jest.Mock).mockReturnValue({
+        data: { isWorkflowMissing: false },
+        isLoading: false,
+        isError: false,
+        refetch: jest.fn(),
+      });
       (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: true } });
       renderFlyout({
         selectedAutomation: {

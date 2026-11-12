@@ -6,21 +6,15 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { conflict } from '@hapi/boom';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { deleteAutomationRoute } from './delete_automation';
-import {
-  createWorkflowService,
-  createRouteContext,
-  createServiceAccountService,
-} from './test_helpers';
+import { createRouteContext, createServiceAccountService } from './test_helpers';
 
 const { handler } = deleteAutomationRoute['DELETE /internal/nightshift/automations/{id}'];
 const soClient = savedObjectsClientMock.create();
 const deleteWorkflows = jest.fn();
 const getWorkflow = jest.fn();
 const serviceAccountService = createServiceAccountService();
-const workflowService = createWorkflowService();
 const call = () =>
   handler({
     request: httpServerMock.createKibanaRequest(),
@@ -28,7 +22,6 @@ const call = () =>
     getAutomationsSoClient: () => soClient,
     getWorkflowsManagement: () => ({ management: { deleteWorkflows, getWorkflow } }),
     getInvestigatorServiceAccountService: () => serviceAccountService,
-    getAutomationWorkflowService: () => workflowService,
     context: createRouteContext(),
   } as never);
 
@@ -57,24 +50,6 @@ it('also deletes automations which have never dispatched', async () => {
   soClient.delete.mockRejectedValueOnce(
     SavedObjectsErrorHelpers.createGenericNotFoundError('nightshift-automation-budget', 'auto-1')
   );
-  await expect(call()).resolves.toEqual({});
-  expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'auto-1');
-});
-
-it('deletes an invalid legacy automation with a missing workflow without requiring repair', async () => {
-  soClient.get.mockResolvedValue({
-    id: 'auto-1',
-    type: 'nightshift-automation',
-    references: [],
-    attributes: {
-      workflowId: 'wf-1',
-      execution: {},
-      trigger: { rows: [{ kind: 'schedule', schedulePreset: 'custom' }] },
-    },
-  });
-  getWorkflow.mockResolvedValue(null);
-  deleteWorkflows.mockResolvedValue({ total: 1, deleted: 0, failures: [] });
-  workflowService.assertAvailable.mockRejectedValueOnce(conflict('Repair the backing workflow.'));
   await expect(call()).resolves.toEqual({});
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'auto-1');
 });

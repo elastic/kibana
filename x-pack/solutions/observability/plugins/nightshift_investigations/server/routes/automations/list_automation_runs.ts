@@ -77,19 +77,13 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       params.path.id
     );
     const usedToday = await readAutomationUsage(soClient, params.path.id);
-    const workflowIds = [
-      ...new Set([
-        ...(so.attributes.previousWorkflowIds ?? []),
-        ...(so.attributes.workflowId ? [so.attributes.workflowId] : []),
-      ]),
-    ];
-    if (workflowIds.length === 0) {
+    if (!so.attributes.workflowId) {
       return { runs: [], total: 0, usedToday, page: params.query.page, size: params.query.size };
     }
 
     const executions = await workflowsManagement.management.getWorkflowExecutions(
       {
-        workflowId: workflowIds,
+        workflowId: so.attributes.workflowId,
         omitStepRuns: true,
         page: params.query.page,
         size: params.query.size,
@@ -100,15 +94,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       spaceId
     );
 
-    const executionsByWorkflow = new Map<string, string[]>();
-    for (const execution of executions.results) {
-      const workflowId = execution.workflowId ?? so.attributes.workflowId;
-      if (!workflowId) continue;
-      executionsByWorkflow.set(workflowId, [
-        ...(executionsByWorkflow.get(workflowId) ?? []),
-        execution.id,
-      ]);
-    }
+    const { workflowId } = so.attributes;
     const stepExecutions = await Promise.all(
       [
         'trigger_investigation',
@@ -118,29 +104,23 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         'follow_up_recovered_alert',
         'trigger_investigation_alert_v2',
         'follow_up_recovered_alert_v2',
-      ].map(async (stepId) => {
-        const groups = await Promise.all(
-          [...executionsByWorkflow].map(([workflowId, workflowExecutionIds]) =>
-            workflowsManagement.management.searchStepExecutions(
-              {
-                workflowId,
-                stepId,
-                workflowExecutionIds,
-                includeInput: true,
-                includeOutput: true,
-                page: 1,
-                size: workflowExecutionIds.length,
-                sourceIncludes: ['workflowRunId', 'input', 'output'],
-                request,
-              },
-              spaceId
-            )
-          )
-        );
-        return { results: groups.flatMap(({ results }) => results) };
-      })
+      ].map((stepId) =>
+        workflowsManagement.management.searchStepExecutions(
+          {
+            workflowId,
+            stepId,
+            workflowExecutionIds: executions.results.map(({ id }) => id),
+            includeInput: true,
+            includeOutput: true,
+            page: 1,
+            size: Math.max(executions.results.length, 1),
+            sourceIncludes: ['workflowRunId', 'input', 'output'],
+            request,
+          },
+          spaceId
+        )
+      )
     );
-
     const [
       defaultSteps,
       legacyAlertSteps,

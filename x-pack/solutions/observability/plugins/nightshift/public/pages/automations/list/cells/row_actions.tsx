@@ -19,7 +19,6 @@ import { cloneActionIcon, deleteActionIcon } from '../../action_menu_icons';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import {
   useAutomationRunActivity,
-  useRepairAutomation,
   type Automation,
 } from '../../../../data/automations/use_automations';
 import { useRunQuotas } from '../../../../data/run_quotas/use_significant_events_run_quotas';
@@ -28,11 +27,6 @@ import {
   getRunAutomationDisabledReason,
   getManualRunQuotaDisabledReason,
 } from '../../utils/run_automation';
-import {
-  getRepairLabel,
-  getWorkflowRepairDisabledReason,
-  needsWorkflowRepair,
-} from '../../workflow_recovery';
 import { listLabels } from '../translations';
 
 export const AutomationActions = ({
@@ -48,11 +42,9 @@ export const AutomationActions = ({
   onClone: () => void;
   onDelete: () => void;
 }) => {
-  const repair = useRepairAutomation();
   const [isOpen, setIsOpen] = useState(false);
   const activity = useAutomationRunActivity(automation, { enabled: isOpen });
   const quotas = useRunQuotas({ enabled: isOpen, poll: isOpen });
-  const repairDisabledReason = getWorkflowRepairDisabledReason(automation);
   const runDisabledReason =
     getRunAutomationDisabledReason(automation, activity) ?? getManualRunQuotaDisabledReason(quotas);
   const allActionsLabel = useEuiI18n('euiCollapsedItemActions.allActionsTooltip', 'All actions');
@@ -81,26 +73,6 @@ export const AutomationActions = ({
     >
       <EuiContextMenuPanel
         items={[
-          ...(needsWorkflowRepair(automation)
-            ? [
-                <EuiContextMenuItem
-                  key="repair"
-                  icon="wrench"
-                  {...getEbtProps({
-                    action: NIGHTSHIFT_EBT_ACTIONS.REPAIR_AUTOMATION,
-                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
-                  })}
-                  disabled={repair.isLoading}
-                  onClick={() => {
-                    setIsOpen(false);
-                    repair.mutate(automation);
-                  }}
-                  data-test-subj="repairAutomation"
-                >
-                  {getRepairLabel(automation)}
-                </EuiContextMenuItem>,
-              ]
-            : []),
           <EuiContextMenuItem
             key="run"
             icon="play"
@@ -121,8 +93,6 @@ export const AutomationActions = ({
           <EuiContextMenuItem
             key="clone"
             icon={cloneActionIcon}
-            disabled={Boolean(repairDisabledReason)}
-            toolTipContent={repairDisabledReason}
             onClick={(event: React.MouseEvent) => {
               setIsOpen(false);
               onClone();

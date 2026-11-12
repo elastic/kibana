@@ -19,6 +19,7 @@ import {
   AUTOMATIONS_QUERY_KEY,
   RUN_QUOTAS_QUERY_KEY,
   automationRunActivityQueryKey,
+  automationDetailQueryKey,
 } from '../query_keys';
 
 type AutomationsResponse =
@@ -71,8 +72,6 @@ export const useFetchAutomations = ({ enabled = true }: { enabled?: boolean } = 
 
   return useQuery({
     queryKey: AUTOMATIONS_QUERY_KEY,
-    refetchInterval: 30_000,
-    refetchOnWindowFocus: 'always',
     enabled: enabled && investigationsClient != null,
     queryFn: async ({ signal }): Promise<AutomationsResponse> => {
       if (!investigationsClient) {
@@ -85,6 +84,24 @@ export const useFetchAutomations = ({ enabled = true }: { enabled?: boolean } = 
     retry: (failureCount, error) => !isHttpClientError(error) && failureCount < 3,
     onError: (error: unknown) =>
       notifications.toasts.addError(toError(error), { title: errorToastTitles.load }),
+  });
+};
+
+export const useAutomationDetail = (id: string) => {
+  const { nightshiftInvestigations } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+  return useQuery({
+    queryKey: automationDetailQueryKey(id),
+    enabled: investigationsClient != null,
+    queryFn: async ({ signal }) => {
+      if (!investigationsClient) throw new Error('Nightshift investigations plugin is unavailable');
+      return investigationsClient.fetch('GET /internal/nightshift/automations/{id}', {
+        params: { path: { id } },
+        signal: signal ?? null,
+      });
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -209,10 +226,8 @@ const useAutomationMutation = <TVariables, TData = unknown>(
       await onSuccess?.(variables, _data);
       await queryClient.invalidateQueries({ queryKey: AUTOMATIONS_QUERY_KEY });
     },
-    onError: async (error: unknown) => {
-      notifications.toasts.addError(toError(error), { title: errorTitle });
-      await queryClient.invalidateQueries({ queryKey: AUTOMATIONS_QUERY_KEY });
-    },
+    onError: (error: unknown) =>
+      notifications.toasts.addError(toError(error), { title: errorTitle }),
   });
 };
 

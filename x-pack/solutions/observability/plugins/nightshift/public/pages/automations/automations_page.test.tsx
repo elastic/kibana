@@ -30,13 +30,19 @@ import type { Automation } from '../../data/automations/use_automations';
 jest.mock('../../data/automations/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
   useAutomationRunsInRange: jest.fn(),
+  useAutomationDetail: () => ({
+    data: { isWorkflowMissing: false },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+  useRepairAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
   useAutomationRunActivity: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
   useCreateAutomation: jest.fn(),
   useCurrentUsername: jest.fn(),
   useDeleteAutomation: jest.fn(),
   useRunAutomation: jest.fn(),
-  useRepairAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
   useFetchAutomations: jest.fn(),
   useRefreshAutomations: jest.fn(() => jest.fn()),
   useToggleAutomation: jest.fn(),
@@ -161,31 +167,6 @@ describe('AutomationsPage', () => {
     expect(mutate).toHaveBeenCalledWith(automation, expect.anything());
     await waitFor(() => expect(screen.queryByTestId('runAutomation')).not.toBeInTheDocument());
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  });
-
-  it('keeps Pause available when the backing workflow needs repair', () => {
-    const automation = {
-      id: 'broken-1',
-      name: 'Health review',
-      isEnabled: true,
-      trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
-      execution: { promptTemplate: 'Review health.' },
-      completions: [],
-      runtime: {},
-      author: 'alice',
-      backingWorkflow: { state: 'missing' },
-    };
-    mockUseFetchAutomations.mockReturnValue({ data: { automations: [automation] } });
-    const mutate = jest.fn();
-    mockUseToggleAutomation.mockReturnValue({ mutate, isLoading: false });
-    renderPage();
-    expect(screen.getByTestId('automationToggle-broken-1')).toBeEnabled();
-    fireEvent.click(screen.getByTestId('automationToggle-broken-1'));
-    expect(mutate).toHaveBeenCalledWith({
-      id: 'broken-1',
-      name: 'Health review',
-      isEnabled: false,
-    });
   });
 
   it.each([undefined, 'drop', 'queue', 'cancel_in_progress'] as const)(

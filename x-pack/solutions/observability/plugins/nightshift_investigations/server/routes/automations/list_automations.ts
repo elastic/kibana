@@ -9,10 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
-import type {
-  NightshiftAutomationAttributes,
-  NightshiftAutomationRecord,
-} from '../../lib/automations/types';
+import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 
 export const listAutomationsRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/automations',
@@ -25,7 +22,7 @@ export const listAutomationsRoute = createNightshiftInvestigationsServerRoute({
     authz: { requiredPrivileges: ['read_nightshift'] },
   },
   params: z.object({}),
-  handler: async ({ request, getAutomationsSoClient, getAutomationWorkflowService, context }) => {
+  handler: async ({ request, getAutomationsSoClient, context }) => {
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
@@ -38,19 +35,12 @@ export const listAutomationsRoute = createNightshiftInvestigationsServerRoute({
       sortOrder: 'desc',
     });
 
-    const automations = result.saved_objects.map((so) => ({
-      id: so.id,
-      ...so.attributes,
-      author: so.attributes.author ?? 'System',
-    }));
-    const states = await getAutomationWorkflowService().getStates(automations, spaceId);
     return {
-      automations: automations.map(
-        (automation): NightshiftAutomationRecord & { author: string } => ({
-          ...automation,
-          backingWorkflow: states.get(automation.id),
-        })
-      ),
+      automations: result.saved_objects.map((so) => ({
+        id: so.id,
+        ...so.attributes,
+        author: so.attributes.author ?? 'System',
+      })),
       total: result.total,
     };
   },

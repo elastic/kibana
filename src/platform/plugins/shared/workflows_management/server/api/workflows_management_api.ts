@@ -540,14 +540,6 @@ export class WorkflowsManagementApi {
     );
   }
 
-  /** Availability only, for ids obtained from a trusted consumer's already-authorized records. */
-  public async getWorkflowStates(
-    ids: string[],
-    spaceId: string
-  ): Promise<Array<{ id: string; enabled: boolean }>> {
-    return this.workflowsService.getWorkflowStates(ids, spaceId);
-  }
-
   public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
     return this.workflowsService.findExistingWorkflowIds(ids);
   }
@@ -1243,20 +1235,7 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowExecutionListDto> {
     const access = await this.workflowsService.getAccessControl();
     let accessControlFilter: estypes.QueryDslQueryContainer | undefined;
-    if (Array.isArray(params.workflowId)) {
-      const workflows = await this.workflowsService.getWorkflowsByIds(params.workflowId, spaceId, {
-        includeDeleted: true,
-        includeGlobal: false,
-      });
-      const readable = await Promise.all(
-        workflows.map(async (workflow) =>
-          (await access.checkAccess(workflow, 'read', params.request)) ? workflow.id : undefined
-        )
-      );
-      accessControlFilter = {
-        terms: { workflowId: readable.filter((id): id is string => id !== undefined) },
-      };
-    } else if (params.workflowId) {
+    if (params.workflowId) {
       const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
         includeDeleted: true,
       });
