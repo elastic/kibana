@@ -45,15 +45,9 @@ export const assertActionBelongsToSpace = async (
     query: {
       bool: {
         filter: [
-          {
-            bool: {
-              should: [
-                { term: { action_id: queryActionId } },
-                { term: { 'queries.action_id': queryActionId } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
+          // Child id only: result and response docs never carry the parent
+          // `action_id`, so accepting it would poll the wrong id until timeout.
+          { term: { 'queries.action_id': queryActionId } },
           buildSpaceIdFilter(spaceId, { matchMissingSpaceId: false }),
         ],
       },

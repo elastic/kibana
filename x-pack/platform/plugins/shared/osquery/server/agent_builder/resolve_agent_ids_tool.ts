@@ -247,7 +247,11 @@ export const resolveAgentIdsTool = (
             ...matches,
             ...candidates.agents.filter((agent) => isExactHost(agent) && !known.has(agent.id)),
           ];
-          inconclusive = matches.length === 0 && candidates.truncated;
+          // A capped fallback may have dropped the live host even when a stale
+          // offline enrollment matched, so that case is uncertain too.
+          inconclusive =
+            candidates.truncated &&
+            !matches.some((agent) => agent.status === 'online' || agent.status === 'degraded');
         }
 
         const best = [...matches].sort((a, b) => {

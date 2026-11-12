@@ -209,14 +209,12 @@ export const runLiveQueryTool = (
               query,
               timeout_seconds: timeout ?? 60,
               guidance:
-                'Query dispatched to Fleet. Results will be collected from osquerybeat. The action_id can be used to poll for results.',
+                status === 'completed'
+                  ? 'Every agent responded; the rows are included in this result.'
+                  : 'Not every agent has responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
               responded_agents: responded,
               row_count: rows.length,
               rows: rows.slice(0, MAX_RESULT_ROWS),
-              ...(status !== 'completed' && {
-                guidance:
-                  'Not every agent has responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
-              }),
             },
           },
         ],
@@ -228,12 +226,12 @@ export const runLiveQueryTool = (
         results: [
           {
             tool_result_id: getToolResultId(),
-            type: ToolResultType.other,
+            type: ToolResultType.error,
             data: {
+              message: `Failed to dispatch query: ${e instanceof Error ? e.message : String(e)}`,
               action_id: null,
               status: 'failed',
               query,
-              error: `Failed to dispatch query: ${e instanceof Error ? e.message : String(e)}`,
             },
           },
         ],

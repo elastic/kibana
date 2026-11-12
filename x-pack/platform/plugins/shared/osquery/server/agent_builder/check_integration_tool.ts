@@ -200,7 +200,7 @@ export const checkIntegrationTool = (
         const { agents, total } = await scopedAgentClient.listAgents({
           kuery: `agent.id:"${escapedAgentId}" and (${policyKuery})`,
           perPage: 1,
-          showInactive: true,
+          showInactive: false,
         });
 
         const capable = (agents?.length ?? 0) > 0 || (total ?? 0) > 0;

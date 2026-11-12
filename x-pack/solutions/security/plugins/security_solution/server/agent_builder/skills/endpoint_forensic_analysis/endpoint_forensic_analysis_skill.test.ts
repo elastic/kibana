@@ -28,7 +28,7 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(isAllowedBuiltinSkill(ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID)).toBe(true);
   });
 
-  it('exposes ES|QL and index discovery platform registry tools only (read-only scope)', () => {
+  it('exposes the Osquery tools plus the ES|QL platform registry tools', () => {
     const registryTools = endpointForensicAnalysisSkill.getRegistryTools?.() ?? [];
     expect(registryTools).toEqual([
       ...ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,

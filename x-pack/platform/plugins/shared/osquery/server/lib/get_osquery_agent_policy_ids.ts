@@ -57,12 +57,23 @@ export const getOsqueryAgentPolicyIds = async (
 
     return { agentPolicyIds, lookupFailed: false };
   } catch (e) {
+    osqueryContext.logFactory
+      .get('getOsqueryAgentPolicyIds')
+      .warn(`Osquery agent policy lookup failed: ${e instanceof Error ? e.message : String(e)}`);
+
     return { agentPolicyIds: [], lookupFailed: true };
   }
 };
 
-/** KQL clause matching agents enrolled into any osquery-capable agent policy. */
+/**
+ * KQL clause matching agents enrolled into any osquery-capable agent policy.
+ * An empty id list yields a clause that matches nothing, never every agent.
+ */
 export const buildOsqueryPolicyKuery = (agentPolicyIds: string[]): string =>
-  agentPolicyIds.map((id) => `policy_id:"${id}"`).join(' or ');
+  agentPolicyIds.length === 0
+    ? 'policy_id:"__no_osquery_policy__"'
+    : agentPolicyIds
+        .map((id) => `policy_id:"${id.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
+        .join(' or ');
 
 export const OSQUERY_PACKAGE_POLICY_SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;

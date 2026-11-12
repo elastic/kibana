@@ -93,10 +93,10 @@ const sanitizeSql = (sql: string): string => {
  * - `carves` — `carve=1` turns the SELECT into a new carve request (file exfil)
  * - `yara`   — triggers a one-off YARA scan on the host
  */
+const NON_READ_ONLY_TABLES = new Set(['curl', 'carves', 'yara']);
+
 /** Upper bound on query size; validation is linear, this keeps the work bounded. */
 const MAX_QUERY_LENGTH = 20000;
-
-const NON_READ_ONLY_TABLES = new Set(['curl', 'carves', 'yara']);
 
 interface TableRefs {
   refs: string[];

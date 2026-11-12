@@ -38,8 +38,9 @@ const buildContext = (agentsOrPages: MockAgent[] | MockAgent[][]) => {
 
   const savedObjectsClient = { find: jest.fn().mockResolvedValue({ saved_objects: [] }) };
 
-  // The tool asserts the same `osquery-read` privilege its route counterpart
-  // declares, and only resolves agents enrolled in an Osquery-capable policy.
+  // RBAC is mocked off here, so privilege enforcement is not exercised in this
+  // suite; it is covered by tool_privilege_parity.test.ts. This suite covers
+  // resolution against Osquery-capable policies only.
   const security = {
     authz: {
       mode: { useRbacForRequest: () => false },
@@ -332,6 +333,57 @@ describe('resolveAgentIdsTool', () => {
       });
       expect(data.guidance).toContain('Could not determine an agent for: SRV-1');
       expect(data.guidance).not.toContain('No enrolled Osquery-capable agent found');
+    });
+
+    it('flags a stale offline match as inconclusive when the capped fallback may hide a live host', async () => {
+      const { context, listAgents } = buildContext([]);
+      listAgents.mockImplementation(async ({ kuery }) => ({
+        agents: kuery.includes('.keyword:"SRV-1"')
+          ? [
+              buildAgent({
+                id: 'stale-srv-1',
+                status: 'offline',
+                local_metadata: { host: { hostname: 'SRV-1' } },
+              }),
+            ]
+          : noisyPage,
+      }));
+
+      const tool = resolveAgentIdsTool(context, loggerMock.create());
+      const result = await tool.handler({ hostnames: ['SRV-1'] }, {
+        request: {},
+        spaceId: 'default',
+      } as any);
+
+      expect(getResultData(result).resolved[0]).toMatchObject({
+        agent_id: 'stale-srv-1',
+        inconclusive: true,
+      });
+    });
+
+    it('stays conclusive when an online exact match exists (negative control)', async () => {
+      const { context, listAgents } = buildContext([]);
+      listAgents.mockImplementation(async ({ kuery }) => ({
+        agents: kuery.includes('.keyword:"SRV-1"')
+          ? [
+              buildAgent({
+                id: 'live-srv-1',
+                status: 'online',
+                local_metadata: { host: { hostname: 'SRV-1' } },
+              }),
+            ]
+          : noisyPage,
+      }));
+
+      const tool = resolveAgentIdsTool(context, loggerMock.create());
+      const result = await tool.handler({ hostnames: ['SRV-1'] }, {
+        request: {},
+        spaceId: 'default',
+      } as any);
+
+      const [entry] = getResultData(result).resolved;
+      expect(entry.agent_id).toBe('live-srv-1');
+      expect(entry).not.toHaveProperty('inconclusive');
     });
   });
 });
