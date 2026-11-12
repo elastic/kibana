@@ -113,6 +113,86 @@ export async function bulkIndexEntities({
   await esClient.bulk({ refresh: true, operations });
 }
 
+/**
+ * Runs risk-score maintainer setup before history documents are indexed.
+ * Install waits for the entity store, and the data stream is created in maintainer setup.
+ * Indexing first lets Elasticsearch create `risk-score.risk-score-<space>` as a plain index.
+ */
+export async function ensureRiskScoreDataStream({
+  supertest,
+}: {
+  supertest: SuperTest.Agent;
+}): Promise<void> {
+  const path = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', 'risk-score');
+  const res = await supertest
+    .post(path)
+    .query({ sync: 'true' })
+    .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2')
+    .set('x-elastic-internal-origin', 'Kibana')
+    .timeout(10 * 60 * 1000)
+    .send();
+  if (res.status !== 200) {
+    throw new Error(
+      `Risk score maintainer run failed (${res.status}): ${JSON.stringify(res.body)}`
+    );
+  }
+}
+
+/** Removes the risk-score data stream, or a plain index left behind when setup did not run. */
+export async function deleteRiskScoreHistoryIndex({
+  esClient,
+  namespace = 'default',
+}: {
+  esClient: ElasticsearchClient;
+  namespace?: string;
+}): Promise<void> {
+  const name = `risk-score.risk-score-${namespace}`;
+  await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+  await esClient.indices.delete({ index: name }, { ignore: [404] });
+}
+
+export async function indexRiskScoreHistory({
+  esClient,
+  entityType,
+  entityId,
+  points,
+  namespace = 'default',
+}: {
+  esClient: ElasticsearchClient;
+  entityType: 'user' | 'host';
+  entityId: string;
+  points: ReadonlyArray<{ timestamp: string; scoreNorm: number; level: EntityRiskLevels }>;
+  namespace?: string;
+}): Promise<void> {
+  if (points.length === 0) return;
+
+  const operations = points.flatMap((point) => [
+    { create: { _index: `risk-score.risk-score-${namespace}` } },
+    {
+      '@timestamp': point.timestamp,
+      [entityType]: {
+        risk: {
+          '@timestamp': point.timestamp,
+          id_field: 'entity.id',
+          id_value: entityId,
+          calculated_score_norm: point.scoreNorm,
+          calculated_level: point.level,
+        },
+      },
+    },
+  ]);
+
+  const response = await esClient.bulk({ refresh: true, operations });
+  if (response.errors) {
+    const failures = response.items.flatMap((item) => {
+      const error = item.create?.error;
+      return error ? [error.reason ?? error.type] : [];
+    });
+    throw new Error(`Failed to seed risk score history: ${failures.join('; ')}`);
+  }
+}
+
 export async function deleteWatchlistsByName({
   supertest,
   names,
@@ -264,13 +344,14 @@ export async function deleteEntityEngines({
   supertest: SuperTest.Agent;
   log: ScoutLogger;
 }): Promise<void> {
-  try {
-    await supertest
-      .post('/api/security/entity_store/uninstall')
-      .set(MUTATING_HEADERS)
-      .send({ delete_data: true });
-  } catch (err) {
-    log.warning(`deleteEntityEngines failed during teardown: ${(err as Error).message}`);
+  const res = await supertest
+    .post('/api/security/entity_store/uninstall')
+    .set(MUTATING_HEADERS)
+    .send({});
+  if (res.status !== 200) {
+    log.warning(
+      `deleteEntityEngines failed during teardown: ${res.status} ${JSON.stringify(res.body)}`
+    );
   }
 }
 
