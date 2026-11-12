@@ -350,7 +350,19 @@ describe('DataGrid', () => {
     act(() => commitLatestScroll());
     expect(screen.getByRole('gridcell', { name: 'Name 10' })).not.toBeNull();
     act(() => commitStaleFocus());
-    expect(document.activeElement).not.toBe(screen.getByRole('gridcell', { name: 'Name 50' }));
+    const staleCell = screen.getByRole('gridcell', { name: 'Name 50' });
+    const grid = screen.getByRole('grid');
+    expect(document.activeElement).not.toBe(staleCell);
+    expect(staleCell.getAttribute('tabindex')).toBe('-1');
+    expect(grid.getAttribute('tabindex')).toBe('0');
+
+    focusElement(grid);
+    const commitRestoredFocus = mockPendingVirtualScrolls[2];
+    if (!commitRestoredFocus) {
+      throw new Error('Expected re-entry to restore the previously active cell.');
+    }
+    act(() => commitRestoredFocus());
+    await expectFocus('Name 0');
   });
 
   it('re-resolves a delayed pending focus after row reordering', async () => {
@@ -658,6 +670,26 @@ describe('DataGrid', () => {
     expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
     focusElement(grid);
     expect(document.activeElement).toBe(grid);
+  });
+
+  it('moves focus from a focused empty grid to the first cell when rows return', async () => {
+    const { container, rerender } = renderGrid({ gridRows: [] });
+    const grid = screen.getByRole('grid');
+    focusElement(grid);
+
+    rerender(
+      <DataGrid
+        ariaLabel="Example data"
+        columns={columns}
+        rows={rows}
+        getRowId={getRowId}
+        height={160}
+      />
+    );
+
+    await expectFocus('Name 0');
+    expect(grid.getAttribute('tabindex')).toBe('-1');
+    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
   });
 
   it('copies the accessible cell value with the platform shortcut', async () => {

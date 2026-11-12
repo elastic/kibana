@@ -161,6 +161,18 @@ export const useDataGridFocus = ({
     []
   );
 
+  const commitFocusedCell = useCallback(
+    (address: DataGridCellAddress, element: HTMLDivElement): void => {
+      activeCellRef.current = address;
+      setActiveCell(address);
+      lostOwnedFocusRef.current = null;
+      focusOwnershipRef.current = null;
+      scrollElementIntoView(element);
+      element.focus({ preventScroll: true });
+    },
+    []
+  );
+
   const focusCell = useCallback<DataGridApi['focusCell']>(
     (address) => {
       cancelPendingFocus('superseded');
@@ -172,30 +184,26 @@ export const useDataGridFocus = ({
 
       const generation = focusRequestGenerationRef.current;
       focusOwnershipRef.current = generation;
-      if (!scrollToRowRef.current(resolution.rowIndex)) {
-        focusOwnershipRef.current = null;
-        onCommandFailureRef.current('scroll_failed');
-        return Promise.resolve({ status: 'failed', reason: 'scroll_failed' });
-      }
-
-      activeCellRef.current = address;
-      setActiveCell(address);
-
       const cellElement = getAddressedElement(cellElementsRef.current, address);
       if (cellElement) {
-        scrollElementIntoView(cellElement);
-        lostOwnedFocusRef.current = null;
-        focusOwnershipRef.current = null;
-        cellElement.focus({ preventScroll: true });
+        if (!scrollToRowRef.current(resolution.rowIndex)) {
+          focusOwnershipRef.current = null;
+          onCommandFailureRef.current('scroll_failed');
+          return Promise.resolve({ status: 'failed', reason: 'scroll_failed' });
+        }
+        commitFocusedCell(address, cellElement);
         return Promise.resolve(completedResult);
       }
 
       const result = new Promise<DataGridCommandResult>((resolve) => {
         pendingFocusRef.current = { address, generation, resolve };
       });
+      if (!scrollToRowRef.current(resolution.rowIndex)) {
+        failPendingFocus('scroll_failed');
+      }
       return result;
     },
-    [cancelPendingFocus, resolveAddress]
+    [cancelPendingFocus, commitFocusedCell, failPendingFocus, resolveAddress]
   );
 
   const scrollToCell = useCallback<DataGridApi['scrollToCell']>(
@@ -243,10 +251,7 @@ export const useDataGridFocus = ({
           return;
         }
         pendingFocusRef.current = null;
-        focusOwnershipRef.current = null;
-        lostOwnedFocusRef.current = null;
-        scrollElementIntoView(element);
-        element.focus({ preventScroll: true });
+        commitFocusedCell(address, element);
         pendingFocus.resolve(completedResult);
         return;
       }
@@ -260,7 +265,7 @@ export const useDataGridFocus = ({
         element.focus({ preventScroll: true });
       }
     },
-    [failPendingFocus, gridRef, resolveAddress]
+    [commitFocusedCell, failPendingFocus, gridRef, resolveAddress]
   );
 
   const enterNavigationMode = useCallback(
@@ -323,7 +328,7 @@ export const useDataGridFocus = ({
       return;
     }
 
-    if (lostOwnedFocusRef.current) {
+    if (lostOwnedFocusRef.current || document.activeElement === gridRef.current) {
       lostOwnedFocusRef.current = null;
       void focusCell(reconciledActiveCell);
     }
