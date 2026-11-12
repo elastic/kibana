@@ -374,6 +374,24 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.error?.message).toBe(createRequestAbortedError().message);
     });
 
+    it('reports the abort when the step is aborted during a call that returns busy', async () => {
+      const controller = new AbortController();
+      const execution = {
+        executeAgent: jest.fn().mockImplementation(async () => {
+          controller.abort();
+          throw busyError;
+        }),
+      };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(
+        createContext({ input: { message: 'hello' }, abortSignal: controller.signal })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+      expect(res.error?.message).toBe(createRequestAbortedError().message);
+    });
+
     it('fails with the busy error once the retry budget is spent', async () => {
       const execution = { executeAgent: jest.fn().mockRejectedValue(busyError) };
       const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
@@ -382,6 +400,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       await jest.advanceTimersByTimeAsync(CONVERSATION_BUSY_RETRY_OPTIONS.maxRetryTime * 2);
       const res = await resPromise;
 
+      expect(execution.executeAgent.mock.calls.length).toBeGreaterThan(1);
       expect(res.error).toBe(busyError);
     });
   });

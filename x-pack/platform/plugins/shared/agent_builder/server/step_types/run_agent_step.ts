@@ -494,7 +494,10 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           {
             ...CONVERSATION_BUSY_RETRY_OPTIONS,
             onFailedAttempt: (error) => {
-              if (!isConversationBusyError(error) || context.abortSignal.aborted) {
+              if (context.abortSignal.aborted) {
+                throw createRequestAbortedError();
+              }
+              if (!isConversationBusyError(error)) {
                 throw error;
               }
             },
