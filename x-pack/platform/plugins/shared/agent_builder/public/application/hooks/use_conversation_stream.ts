@@ -33,7 +33,7 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const { attachments, resetAttachments, browserApiTools, onSubmit } = useConversationContext();
+  const { attachments, removeAttachments, browserApiTools, onSubmit } = useConversationContext();
   const { selectedConnector } = useConnectorSelection();
   const { isLocked: isModelSetByAgent } = useAgentModel(agentId);
 
@@ -70,7 +70,7 @@ export const useConversationStream = () => {
         connectorId,
         attachments,
         conversationAttachments: conversation?.attachments,
-        resetAttachments,
+        removeAttachments,
         browserApiTools,
       });
     },
@@ -80,7 +80,7 @@ export const useConversationStream = () => {
       connectorId,
       attachments,
       conversation?.attachments,
-      resetAttachments,
+      removeAttachments,
       browserApiTools,
       onSubmit,
     ]

@@ -25,6 +25,7 @@ import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
 import { propagateEvents } from './propagate_events';
 import { streamWithReattach } from './reattach_on_disconnect';
+import { withErrorBody } from './with_error_body';
 
 interface BaseConverseParams {
   signal?: AbortSignal;
@@ -165,12 +166,14 @@ export class ChatService {
   private converse(signal: AbortSignal | undefined, payload: ConversePayload) {
     return streamWithReattach({
       connect: () =>
-        this.http.post(`${chatApiPath}/converse/async`, {
-          signal,
-          asResponse: true,
-          rawResponse: true,
-          body: JSON.stringify(payload),
-        }),
+        withErrorBody(
+          this.http.post(`${chatApiPath}/converse/async`, {
+            signal,
+            asResponse: true,
+            rawResponse: true,
+            body: JSON.stringify(payload),
+          })
+        ),
       reattach: (offset) => this.reattach(payload.execution_id, offset, signal),
       parse: parseChatEvents(),
       signal,

@@ -16,10 +16,12 @@ import {
 } from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
-  createImagePlaceholderElement,
+  createAttachmentPlaceholderElement,
   getPlaceholderNamesFromElement,
   removePlaceholderByName as removePlaceholderByNameFromDom,
-} from './image_placeholder';
+  setPlaceholderAttachmentIdByName,
+  type PlaceholderKind,
+} from './attachment_placeholder';
 import { getTextBeforeCursor } from './command_menu/utils/get_text_before_cursor';
 import { isAtWordBoundary } from './command_menu/command_matcher';
 import {
@@ -55,11 +57,14 @@ export interface MessageEditorController {
   clear: () => void;
   insertText: (text: string) => void;
   isEmpty: boolean;
-  getPlaceholderNames: () => string[];
-  removePlaceholderByName: (name: string) => void;
+  /** Names of the chips of `kind` (images by default). */
+  getPlaceholderNames: (kind?: PlaceholderKind) => string[];
+  removePlaceholderByName: (name: string, kind?: PlaceholderKind) => void;
+  /** Links the chip named `name` to its attachment, so the sent message points to it. */
+  setPlaceholderAttachmentId: (name: string, kind: PlaceholderKind, attachmentId: string) => void;
 }
 
-// The limit applies to what is sent, and image placeholders and command badges serialize to
+// The limit applies to what is sent, and attachment placeholders and command badges serialize to
 // markdown links longer than the text they display. Falls back to the displayed length for a
 // badge that cannot be serialized, which submit reports on its own.
 const getSerializedLength = (element: HTMLElement, displayedLength: number): number => {
@@ -238,8 +243,10 @@ const useMessageEditorController = ({
             ref.current.appendChild(createTextFragment(segment.value));
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
-          } else if (segment.type === 'image') {
-            ref.current.appendChild(createImagePlaceholderElement(segment.name));
+          } else if (segment.type === 'attachment') {
+            ref.current.appendChild(
+              createAttachmentPlaceholderElement(segment.name, segment.kind, segment.attachmentId)
+            );
           }
         }
 
@@ -269,11 +276,17 @@ const useMessageEditorController = ({
         insertNodeAtCursor(document.createTextNode(`${needsSpace ? ' ' : ''}${text}`));
         notifyInput();
       },
-      getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
-      removePlaceholderByName: (name: string) => {
+      getPlaceholderNames: (kind?: PlaceholderKind) =>
+        ref.current ? getPlaceholderNamesFromElement(ref.current, kind) : [],
+      removePlaceholderByName: (name: string, kind?: PlaceholderKind) => {
         if (ref.current) {
-          removePlaceholderByNameFromDom(ref.current, name);
+          removePlaceholderByNameFromDom(ref.current, name, kind);
           syncIsEmpty();
+        }
+      },
+      setPlaceholderAttachmentId: (name: string, kind: PlaceholderKind, attachmentId: string) => {
+        if (ref.current) {
+          setPlaceholderAttachmentIdByName(ref.current, name, kind, attachmentId);
         }
       },
       isEmpty,

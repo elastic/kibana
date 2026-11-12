@@ -125,3 +125,32 @@ describe('ChatService.attachToExecution', () => {
     expect(http.get).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('ChatService.chat', () => {
+  it('fails with the server message when the request is refused', async () => {
+    const { http, service } = setup();
+    const serverMessage = 'Attachment validation failed: The text of the file is too long.';
+    // Core http does not read the body of a failed `rawResponse` request.
+    const refused = Object.assign(new Error('Bad Request'), {
+      request: {},
+      response: new Response(JSON.stringify({ statusCode: 400, message: serverMessage }), {
+        status: 400,
+      }),
+      body: null,
+    });
+    http.post.mockRejectedValueOnce(refused);
+
+    const error = await lastValueFrom(
+      service.chat({
+        agentId: 'agent-1',
+        conversationId: 'conv-1',
+        executionId: 'exec-1',
+        input: 'hello',
+      })
+    ).catch((e) => e);
+
+    expect(error.body).toEqual({ statusCode: 400, message: serverMessage });
+    expect(error.response.status).toBe(400);
+    expect(http.post).toHaveBeenCalledTimes(1);
+  });
+});

@@ -53,6 +53,21 @@ describe('AttachmentsService HTTP methods', () => {
     expect(res).toEqual({ id: 'a1' });
   });
 
+  it('getSupportedBinaryMimeTypes GETs the supported types route and unwraps `mime_types`', async () => {
+    const { http, service } = setup();
+    http.get.mockResolvedValue({ mime_types: ['application/pdf', 'text/plain'] });
+    expect(await service.getSupportedBinaryMimeTypes()).toEqual(['application/pdf']);
+    expect(http.get).toHaveBeenCalledWith(
+      '/internal/agent_builder/attachments/binary/_supported_types'
+    );
+  });
+
+  it('getSupportedBinaryMimeTypes drops types the client does not know', async () => {
+    const { http, service } = setup();
+    http.get.mockResolvedValue({ mime_types: ['application/pdf', 'application/msword'] });
+    expect(await service.getSupportedBinaryMimeTypes()).toEqual(['application/pdf']);
+  });
+
   it('update PUTs the body and unwraps `attachment`', async () => {
     const { http, service } = setup();
     http.put.mockResolvedValue({ attachment: { id: 'a1' }, new_version: 2 });

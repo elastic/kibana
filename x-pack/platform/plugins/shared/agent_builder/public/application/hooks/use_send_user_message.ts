@@ -20,12 +20,14 @@ import { ChatTriggerMode } from '../../../common/http_api/chat';
  */
 export const useSendUserMessage = () => {
   const conversationId = useConversationId();
-  const { attachments, resetAttachments } = useConversationContext();
+  const { attachments, removeAttachments } = useConversationContext();
   const { chatService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: mutationKeys.sendUserMessage(conversationId),
+    // Remembers what was sent, so attachments added while the post runs stay in the composer.
+    onMutate: () => ({ sentAttachments: attachments ?? [] }),
     mutationFn: (message: string) => {
       if (!conversationId) {
         return Promise.reject(new Error('Cannot send a user message without a conversation id'));
@@ -37,10 +39,10 @@ export const useSendUserMessage = () => {
         triggerMode: ChatTriggerMode.Never,
       });
     },
-    onSuccess: (conversation) => {
+    onSuccess: (conversation, _message, context) => {
       queryClient.setQueryData(queryKeys.conversations.byId(conversation.id), conversation);
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list });
-      resetAttachments?.();
+      removeAttachments?.(context?.sentAttachments ?? []);
     },
   });
 };

@@ -12,32 +12,32 @@ import { euiCanAnimate, type EuiThemeComputed } from '@elastic/eui';
 export const ATTACHMENT_PILL_WIDTH = 72;
 export const ATTACHMENT_PILL_HEIGHT = 32;
 
-const IMAGE_UPLOAD_PROGRESS_DURATION = '1.4s';
-const IMAGE_UPLOAD_PROGRESS_FILL_WIDTH = '40%';
-const IMAGE_UPLOAD_PROGRESS_RADIUS = '999px';
+const ATTACHMENT_UPLOAD_PROGRESS_DURATION = '1.4s';
+const ATTACHMENT_UPLOAD_PROGRESS_FILL_WIDTH = '40%';
+const ATTACHMENT_UPLOAD_PROGRESS_RADIUS = '999px';
 
-export const imageUploadProgressSweepKeyframes = keyframes`
+export const attachmentUploadProgressSweepKeyframes = keyframes`
   0% { transform: translateX(-100%); }
   100% { transform: translateX(250%); }
 `;
 
 /** Fill bar for an indeterminate upload-progress sweep, absolutely positioned within its track. */
-export const imageUploadProgressFillStyles = (euiTheme: EuiThemeComputed) => css`
+export const attachmentUploadProgressFillStyles = (euiTheme: EuiThemeComputed) => css`
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
-  width: ${IMAGE_UPLOAD_PROGRESS_FILL_WIDTH};
-  border-radius: ${IMAGE_UPLOAD_PROGRESS_RADIUS};
+  width: ${ATTACHMENT_UPLOAD_PROGRESS_FILL_WIDTH};
+  border-radius: ${ATTACHMENT_UPLOAD_PROGRESS_RADIUS};
   background: ${euiTheme.colors.backgroundFilledText};
   ${euiCanAnimate} {
-    animation: ${imageUploadProgressSweepKeyframes} ${IMAGE_UPLOAD_PROGRESS_DURATION} ease-in-out
-      infinite;
+    animation: ${attachmentUploadProgressSweepKeyframes} ${ATTACHMENT_UPLOAD_PROGRESS_DURATION}
+      ease-in-out infinite;
   }
 `;
 
-export const imageUploadProgressTrackColorStyles = (euiTheme: EuiThemeComputed) => css`
-  border-radius: ${IMAGE_UPLOAD_PROGRESS_RADIUS};
+export const attachmentUploadProgressTrackColorStyles = (euiTheme: EuiThemeComputed) => css`
+  border-radius: ${ATTACHMENT_UPLOAD_PROGRESS_RADIUS};
   background: ${euiTheme.colors.backgroundLightText};
   overflow: hidden;
 `;

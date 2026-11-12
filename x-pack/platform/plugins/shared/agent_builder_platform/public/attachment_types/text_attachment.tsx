@@ -33,7 +33,8 @@ const TextInlineContent: React.FC<AttachmentRenderProps<TextAttachment>> = ({ at
  * UI definition for text attachments
  */
 export const textAttachmentDefinition: AttachmentUIDefinition<TextAttachment> = {
-  getLabel: () =>
+  getLabel: ({ data }) =>
+    data?.name ??
     i18n.translate('xpack.agentBuilderPlatform.attachments.text.label', {
       defaultMessage: 'Text',
     }),

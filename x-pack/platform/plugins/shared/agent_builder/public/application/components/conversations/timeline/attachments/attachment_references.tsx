@@ -14,10 +14,12 @@ import type {
   AttachmentRefActor,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { css } from '@emotion/react';
 import { AttachmentPill } from './attachment_pill';
-import { useResolvedAttachmentReferences } from './use_resolved_attachment_references';
+import {
+  useResolvedAttachmentReferences,
+  type ResolvedReference,
+} from './use_resolved_attachment_references';
 
 export interface AttachmentReferencesProps {
   attachmentRefs?: AttachmentVersionRef[];
@@ -25,8 +27,8 @@ export interface AttachmentReferencesProps {
   fallbackAttachments?: Attachment[];
   actorFilter?: AttachmentRefActor[];
   justifyContent?: EuiFlexGroupProps['justifyContent'];
-  /** Attachment types to exclude from rendering. Hidden when all remaining refs are excluded. */
-  excludeTypes?: AttachmentType[];
+  /** Refs to leave out of the list. Hidden when all refs are excluded. */
+  isExcluded?: (ref: ResolvedReference) => boolean;
 }
 
 const labels = {
@@ -44,7 +46,7 @@ export const AttachmentReferences: React.FC<AttachmentReferencesProps> = ({
   fallbackAttachments,
   actorFilter,
   justifyContent = 'flexStart',
-  excludeTypes,
+  isExcluded,
 }) => {
   const allResolved = useResolvedAttachmentReferences({
     attachmentRefs,
@@ -53,8 +55,8 @@ export const AttachmentReferences: React.FC<AttachmentReferencesProps> = ({
     actorFilter,
   });
 
-  const resolvedReferences = excludeTypes?.length
-    ? allResolved.filter((ref) => !excludeTypes.includes(ref.attachment.type as AttachmentType))
+  const resolvedReferences = isExcluded
+    ? allResolved.filter((ref) => !isExcluded(ref))
     : allResolved;
 
   if (resolvedReferences.length === 0) {

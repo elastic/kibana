@@ -6,21 +6,26 @@
  */
 
 import { isElementCommandBadge, serializeCommandBadge } from './command_badge';
-import { IMAGE_ATTACHMENT_SCHEME, isElementImagePlaceholder } from './image_placeholder';
+import {
+  ATTACHMENT_ID_PARAM,
+  getPlaceholderKind,
+  isElementAttachmentPlaceholder,
+} from './attachment_placeholder';
 import { stripZeroWidthSpaces } from './utils';
 
 /**
- * Encodes an image filename for use as the path in a serialized image link.
+ * Encodes an attachment file name for use as the path in a serialized attachment link.
  * Uses encodeURIComponent and additionally escapes parentheses to avoid
  * breaking the badge regex parser.
  */
-export const encodeImageName = (name: string): string =>
+export const encodeAttachmentName = (name: string): string =>
   encodeURIComponent(name).replace(/\(/g, '%28').replace(/\)/g, '%29');
 
 /**
  * Walks child nodes of the editor element and serializes to text.
  * Badge spans are converted to `[/label](scheme://metadataValue)`.
- * Image placeholders are converted to `[name](image://encodedName)`.
+ * Image, binary and text file placeholders are converted to `[name](image://encodedName)`, `[name](binary://encodedName)` and `[name](text://encodedName)`.
+ * A placeholder that knows its attachment id adds it as `?id=<encodedId>`, so the sent message links to the attachment.
  * Text nodes are appended as-is, with caret-target ZWS characters stripped.
  * A trailing <br> is skipped: the browser adds it to keep the last line visible, it is not content.
  */
@@ -48,10 +53,15 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
       continue;
     }
     const element = node as HTMLElement;
-    if (isElementImagePlaceholder(element)) {
+    if (isElementAttachmentPlaceholder(element)) {
       const name = element.getAttribute('aria-label') ?? '';
       const displayName = name.replace(/[\[\]]/g, '');
-      result += `[${displayName}](${IMAGE_ATTACHMENT_SCHEME}://${encodeImageName(name)})`;
+      const scheme = getPlaceholderKind(element);
+      const { attachmentId } = element.dataset;
+      const query = attachmentId
+        ? `?${ATTACHMENT_ID_PARAM}=${encodeAttachmentName(attachmentId)}`
+        : '';
+      result += `[${displayName}](${scheme}://${encodeAttachmentName(name)}${query})`;
     } else if (isElementCommandBadge(element)) {
       result += serializeCommandBadge(element);
     } else if (element.tagName === 'BR') {
