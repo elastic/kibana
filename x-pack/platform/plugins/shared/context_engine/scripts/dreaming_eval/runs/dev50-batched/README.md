@@ -37,6 +37,22 @@ Dreaming's tokens come from the workflow step executions, and the answer agent's
 
 Per question: about 159k input and 17k output tokens of dreaming ($0.18), $0.12 for the answer agent and half a cent of judging. The reranker runs in the local Elasticsearch.
 
+### Estimated cost of full runs
+
+LongMemEval S scales with the question count, as each question dreams on its own haystack. The other datasets are sized from their extracted transcripts, at the 0.33 input tokens per transcript character and the 10.7% output-to-input ratio this run measured. Ask and judging stay at the measured $0.12 a question, at today's prices.
+
+| Run | Questions | Dreaming | Ask and judging | Total |
+| --- | --- | --- | --- | --- |
+| LongMemEval S | 470 (500 with abstention) | $85 | $58 | about $145 (about $150) |
+| LongMemEval M (about 9.4× the haystack) | 470 | about $810 | about $60 | about $870 |
+| LongMemEval oracle (answer sessions only) | 470 | about $5 | $58 | about $65 |
+| LME-V2 enterprise, small (one 100-trajectory haystack, dreamed once) | 141 (211 all) | about $1 | $17 | about $20 (about $28) |
+| LME-V2 web, small | 153 (240 all) | about $0.50 | $19 | about $20 (about $30) |
+| LME-V2 enterprise, medium (500 trajectories a question) | 141 (211) | about $790 | $17 | about $810 (about $1,200) |
+| LME-V2 web, medium | 153 (240) | about $340 | $19 | about $360 (about $570) |
+
+The smaller LME-V2 counts leave out the abstention questions and those with a screenshot, which the eval skips by default. Dreaming doubles from January 1, 2027. The answer agent can use a cheaper model (`ask.connector_id`), and the judges are about 2% of the cost.
+
 ## How it ran
 
 On a local stack with Gemini 3.8 Flash dreaming (Kibana's default for Context Engine prompts), with trace dreaming batching rounds by conversation, up to 500k tokens a batch, run in parallel ([#304972](https://github.com/elastic/kibana/pull/304972) at `3936a6ff3bbd`). The eval script is the one of [#304953](https://github.com/elastic/kibana/pull/304953).
