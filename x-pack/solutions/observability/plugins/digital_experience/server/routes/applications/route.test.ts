@@ -18,7 +18,6 @@ const mockedClassic = jest.mocked(getClassicApplications);
 
 const START = '2021-01-18T12:00:00.000Z';
 const END = '2021-01-18T13:00:00.000Z';
-const SESSIONS_SETTINGS = { frequency: '1m', partitions: 1 };
 const mockedOtel = jest.mocked(getOtelApplicationsFromBestSource);
 
 const runHandler = ({
@@ -53,7 +52,6 @@ const runHandler = ({
     plugins: { apmDataAccess: withApmDataAccess ? { getApmIndices } : undefined },
     isServerless,
     isUxEnabled,
-    sessionsSettings: SESSIONS_SETTINGS,
     logger: loggingSystemMock.createLogger(),
   });
   return { result, getApmIndices };
@@ -111,15 +109,11 @@ describe('GET /internal/digital_experience/applications', () => {
     );
   });
 
-  it('lets the OTel source check the sessions with the internal user and the configured settings', async () => {
+  it('lets the OTel source check the sessions with the internal user', async () => {
     await runHandler({ isServerless: false }).result;
 
     expect(mockedOtel).toHaveBeenCalledWith(
-      expect.objectContaining({
-        esClient: {},
-        internalEsClient: {},
-        sessionsSettings: SESSIONS_SETTINGS,
-      })
+      expect.objectContaining({ esClient: {}, internalEsClient: {} })
     );
   });
 

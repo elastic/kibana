@@ -15,20 +15,45 @@ import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-grou
 import type { KibanaPackageManifest } from '@kbn/repo-packages';
 
 interface ModuleInfo {
+  dir?: string;
   group: ModuleGroup;
   visibility: ModuleVisibility;
   type?: KibanaPackageManifest['type'];
   devOnly?: boolean;
 }
 
+const toPath = ({
+  dir = '',
+  group,
+  visibility,
+  type = 'shared-common',
+  devOnly = false,
+}: ModuleInfo) => `${dir}${group}.${visibility}.${type}.${devOnly}`;
+
 const make = (from: ModuleInfo, to: ModuleInfo, imp = 'import') => ({
-  filename: `${from.group}.${from.visibility}.${from.type ?? 'shared-common'}.${
-    from.devOnly ?? 'false'
-  }.ts`,
+  filename: `${toPath(from)}.ts`,
   code: dedent`
-    ${imp} '${to.group}.${to.visibility}.${to.type ?? 'shared-common'}.${to.devOnly ?? 'false'}'
+    ${imp} '${toPath(to)}'
   `,
 });
+
+const CORE_PRIVATE: ModuleInfo = {
+  dir: 'src/core/packages/foo/server-internal/',
+  group: 'platform',
+  visibility: 'private',
+};
+
+const CORE_PRIVATE_SUGGESTION = formatSuggestions([
+  `Import the public Core package instead (@kbn/core-<domain>-server, @kbn/core-<domain>-browser, or @kbn/core-<domain>-common).`,
+  `If the public package does not expose what you need, ask @elastic/kibana-core for a public API.`,
+]);
+
+jest.mock('../helpers/core_private_importers', () => ({
+  CORE_PRIVATE_IMPORTERS: new Set([
+    'x-pack/platform/plugins/shared/allowlisted/platform.shared.shared-common.false.ts',
+    'x-pack/solutions/security/plugins/allowlisted/security.private.shared-common.false.ts',
+  ]),
+}));
 
 jest.mock('../get_import_resolver', () => {
   return {
@@ -37,7 +62,7 @@ jest.mock('../get_import_resolver', () => {
         resolve(req: string) {
           return {
             type: 'file',
-            absolute: req.split('.'),
+            absolute: req,
           };
         },
       };
@@ -49,9 +74,11 @@ jest.mock('../helpers/repo_source_classifier', () => {
   return {
     getRepoSourceClassifier() {
       return {
-        classify(r: string | [string, string]) {
-          const [group, visibility, type, devOnly] =
-            typeof r === 'string' ? (r.endsWith('.ts') ? r.slice(0, -3) : r).split('.') : r;
+        classify(path: string) {
+          const [group, visibility, type, devOnly] = path
+            .slice(path.lastIndexOf('/') + 1)
+            .replace(/\.ts$/, '')
+            .split('.');
           return {
             pkgInfo: {
               pkgId: 'aPackage',
@@ -62,6 +89,7 @@ jest.mock('../helpers/repo_source_classifier', () => {
             },
             group,
             visibility,
+            repoRel: path,
           };
         },
       };
@@ -147,6 +175,30 @@ for (const [name, tester] of [tsTester, babelTester]) {
           { group: 'platform', visibility: 'private' }
         ),
         make({ group: 'common', visibility: 'shared' }, { group: 'common', visibility: 'shared' }),
+        make(
+          {
+            dir: 'src/core/packages/bar/server-internal/',
+            group: 'platform',
+            visibility: 'private',
+          },
+          CORE_PRIVATE
+        ),
+        make(
+          {
+            dir: 'x-pack/platform/plugins/shared/allowlisted/',
+            group: 'platform',
+            visibility: 'shared',
+          },
+          CORE_PRIVATE
+        ),
+        make(
+          { dir: 'x-pack/platform/plugins/shared/foo/', group: 'platform', visibility: 'shared' },
+          { dir: 'src/core/packages/foo/server/', group: 'platform', visibility: 'shared' }
+        ),
+        make(
+          { dir: 'x-pack/platform/plugins/shared/foo/', group: 'platform', visibility: 'shared' },
+          { dir: 'src/platform/packages/private/bar/', group: 'platform', visibility: 'private' }
+        ),
       ],
 
       invalid: [
@@ -199,6 +251,52 @@ for (const [name, tester] of [tsTester, babelTester]) {
               },
             },
           ],
+        },
+        {
+          ...make(
+            { dir: 'src/platform/plugins/shared/foo/', group: 'platform', visibility: 'shared' },
+            CORE_PRIVATE
+          ),
+          errors: [
+            {
+              line: 1,
+              messageId: 'CORE_PRIVATE_IMPORT',
+              data: {
+                importedPackage: 'aPackage',
+                sourcePath:
+                  'src/platform/plugins/shared/foo/platform.shared.shared-common.false.ts',
+                suggestion: CORE_PRIVATE_SUGGESTION,
+              },
+            },
+          ],
+        },
+        {
+          ...make(
+            { dir: 'packages/kbn-foo/', group: 'common', visibility: 'shared', devOnly: true },
+            CORE_PRIVATE
+          ),
+          errors: [
+            {
+              line: 1,
+              messageId: 'CORE_PRIVATE_IMPORT',
+              data: {
+                importedPackage: 'aPackage',
+                sourcePath: 'packages/kbn-foo/common.shared.shared-common.true.ts',
+                suggestion: CORE_PRIVATE_SUGGESTION,
+              },
+            },
+          ],
+        },
+        {
+          ...make(
+            {
+              dir: 'x-pack/solutions/security/plugins/allowlisted/',
+              group: 'security',
+              visibility: 'private',
+            },
+            CORE_PRIVATE
+          ),
+          errors: [{ line: 1, messageId: 'ILLEGAL_IMPORT' }],
         },
       ],
     });
