@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const accessControlSchema = z
-  .object({
-    access_mode: z
-      .union([z.literal('write_restricted'), z.literal('default')])
-      .optional()
-      .meta({
-        description:
-          "Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit). Requests authenticated with an API key can't set `write_restricted`, because an API key doesn't map to a user. To set it, authenticate as a user.",
-      }),
-  })
-  .strict()
-  .optional()
-  .meta({
-    description: 'Access control settings for the dashboard.',
-    id: 'kbn-dashboard-access-control',
-    title: 'Access control',
-  });
+export const accessControlSchema = lazySchema(() =>
+  z
+    .object({
+      access_mode: z
+        .union([z.literal('write_restricted'), z.literal('default')])
+        .optional()
+        .meta({
+          description:
+            "Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit). Requests authenticated with an API key can't set `write_restricted`, because an API key doesn't map to a user. To set it, authenticate as a user.",
+        }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      description: 'Access control settings for the dashboard.',
+      id: 'kbn-dashboard-access-control',
+      title: 'Access control',
+    })
+);
