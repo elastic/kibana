@@ -54,7 +54,7 @@ describe('confirmedEvidencesEvaluator', () => {
     const events = [
       {
         status: 'active',
-        severity: 'high',
+        severity: 'medium',
         signals: [{ type: 'detection', description: 'No rows.', verdict: 'inconclusive' }],
       },
     ];

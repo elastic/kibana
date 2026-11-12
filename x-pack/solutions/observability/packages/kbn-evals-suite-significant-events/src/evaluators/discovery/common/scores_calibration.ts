@@ -36,11 +36,11 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: `Apply the \`severity\` field contract in order — do not invent tier rules beyond it and its discovery application rule. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary. A tier needs the evidence these rules name: an error line is evidence of a failure mode, not of impact.`,
+    text: `Apply the \`severity\` field contract in order — do not invent tier rules beyond it and its discovery application rule. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary. A tier needs the evidence these rules name: a count or share of log lines is volume, not impact.`,
   },
   {
     id: 'weak_signals_low_severity',
-    text: 'Unconfirmed signals — no confirmed failure evidence — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a high volume of log lines is not impact by itself. A rule that fired few times is not lowered for that alone, and a failure confirmed on a user-critical path is rated on its evidenced outcome and reach, not on how many detections fired.',
+    text: 'Unconfirmed signals — no confirmed failure evidence — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a high volume of log lines is not impact by itself. A rule that fired few times is not lowered for that alone, and a failure confirmed on a user-critical path is rated on the evidence the severity rules name for its tier, not on how many detections fired.',
     score: 1,
   },
   {
@@ -55,7 +55,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'over_escalation_is_fail',
-    text: 'Over-escalation is a FAIL: the event is rated higher than the severity rules above support, and scores 0 on this criterion. The assessment note names the missing outcome or reach.',
+    text: 'Over-escalation is a FAIL: the event is rated higher than the severity rules above support.',
     score: 2,
   },
 ];
@@ -67,7 +67,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'confidence_basis_stated',
-    text: 'When the agent’s one-line statement of what its confidence follows from is visible, it names evidence the descriptions actually carry (the failure, its timing and scope, contradictions between signals) and the number fits that basis. A limiter is named only for a check the descriptions do not show.',
+    text: 'Sentence 3 of the assessment_note names evidence the descriptions actually carry (the failure, its timing and scope, contradictions between signals) and any support they do not show, and the confidence fits that basis.',
   },
   {
     id: 'detection_metadata_not_confidence',

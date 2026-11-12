@@ -522,9 +522,9 @@ search. When a fetched result is returned as a file, read the whole file before 
 write anything that uses it: never conclude an absence (no edge, no entity) from a summary of it.
 
 1. **Activate paths.** Only `confirms` signals activate paths. If no signal is `confirms`, emit empty
-   `causal_features` and `blast_radius` and skip the remaining sub-steps. A feature that is not a
-   service (a feature of the types `dataset_analysis`, `log_samples`, `log_patterns` or `error_logs`
-   describes data) is not a service: it is never the failed entity and never enters
+   `causal_features` and `blast_radius` and skip the remaining sub-steps. A feature of the types
+   `dataset_analysis`, `log_samples`, `log_patterns` or `error_logs` describes data, not a service:
+   it is never the failed entity and never enters
    `causal_features` or `blast_radius`. For a rule with no single failed entity (an unscoped rule
    whose `breakdown` or `examples` show several services failing), activate paths from every
    service they show failing well above background (a share of its own lines clearly above the other
@@ -661,7 +661,7 @@ Each entry:
     found instead>."`
   - Example of a match, with illustrative values (the value is the text between the double quotes):
     ```
-    "The export-renderer job fails with `status = 504` on the `endpoint` field; a sampled row shows `region = eu-1` and `retries = 0`. Between 09:41 and 10:41 UTC on 2026-03-07, 412 of 6,880 log lines (6.0%) in the export-renderer scope failed, all with `retries = 0` and the same timeout message, by `region`: `eu-1` (76% of its lines) and `us-2` (31%). Still failing at 09:00 (396 failing lines that hour), after 380–455 an hour in each of the 22 hours before it; first seen 02-28 11:20, the earliest in the 7 days checked; not measured: the breakdown by `zone` (it timed out)."
+    "The `export-renderer` job fails with `status = 504` on the `endpoint` field; a sampled row shows `region = eu-1` and `retries = 0`. Between 09:41 and 10:41 UTC on 2026-03-07, 412 of 6,880 log lines (6.0%) in the `export-renderer` scope failed, all with `retries = 0` and the same timeout message, by `region`: `eu-1` (76% of its lines) and `us-2` (31%). Still failing at 09:00 (396 failing lines that hour), after 380–455 an hour in each of the 22 hours before it; first seen 02-28 11:20, the earliest in the 7 days checked; not measured: the breakdown by `zone` (it timed out)."
     ```
   - Opening of sentence 1 when `examples` returned categories, with illustrative values:
     ```

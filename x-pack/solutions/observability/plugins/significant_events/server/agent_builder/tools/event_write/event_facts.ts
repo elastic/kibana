@@ -205,7 +205,6 @@ export const computeEventFacts = ({
           sourceIds: rest.source_ids,
           causalFeatures: rest.causal_features ?? [],
           blastRadius: rest.blast_radius ?? [],
-          confidence: rest.confidence ?? 0,
         };
 
   const { status } = candidate;
@@ -234,7 +233,7 @@ export const computeEventFacts = ({
     status,
     severity,
     frozenNarrative,
-    confidence: episodeContext.confidence,
+    confidence: rest.confidence,
   };
 };
 

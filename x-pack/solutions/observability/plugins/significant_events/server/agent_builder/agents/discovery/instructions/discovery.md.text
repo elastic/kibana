@@ -522,8 +522,8 @@ For each event candidate, decide from all signals that will appear in the final 
    continuation, the stored confirming signals read from the `full` event view. Rate each on its own:
    neither is set from the other.
    - **Continuation.** With only `refutes` signals, keep the stored `severity`. With new `confirms`
-     signals, the stored tier stands unless a description contradicts the evidence that set it,
-     shows the failure ended, or meets another tier's condition.
+     signals, the stored tier is the starting point: it stands unless a description contradicts
+     the evidence that set it, shows the failure ended, or the severity rules now give another tier.
    - **No new `confirms` signal in the item** (an unchanged continuation, `<chronic_and_recurring>`
      rule 2, or a recovery accepted under the checklist in `<eligibility>`): write the stored
      `confidence`. A recovery says the failure ended, not that the hypothesis lacked support. A
@@ -611,10 +611,10 @@ confirming descriptions measure.
 2. **Unchanged continuation.** Applied while routing, not during grouping. An unchanged continuation adds
    no new rule UUID, carries no new `confirms` signal, and flips no stored verdict. A recovery
    (stored `confirms` replaced by `refutes`) is not unchanged: keep the stored `title`,
-   `symptom_hypothesis`, and `summary` as they are, and set `severity` per Step 5. Otherwise copy
-   compact `title`, `summary`,
-   `symptom_hypothesis`, and `severity`. Otherwise rate severity per Step 5, and extend `summary`
-   and `symptom_hypothesis` (keep their wording) only when mechanism or impact changed.
+   `symptom_hypothesis`, and `summary` as they are, and set `severity` per Step 5. An unchanged
+   continuation copies compact `title`, `summary`, `symptom_hypothesis`, and `severity`. A changed
+   continuation rates severity per Step 5 and extends `summary` and `symptom_hypothesis` (keeping
+   their wording) only when mechanism or impact changed.
 
 </chronic_and_recurring>
 

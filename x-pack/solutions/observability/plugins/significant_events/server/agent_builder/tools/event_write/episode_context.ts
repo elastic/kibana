@@ -14,7 +14,7 @@ import {
 } from '@kbn/significant-events-schema';
 
 type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
-  Partial<Pick<SignificantEvent, 'source_ids' | 'causal_features' | 'blast_radius' | 'confidence'>>;
+  Partial<Pick<SignificantEvent, 'source_ids' | 'causal_features' | 'blast_radius'>>;
 
 export const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   const uuids = (signals ?? [])
@@ -107,19 +107,6 @@ export const mergeSignalsLatestPerRule = (
       : { ...signal, description: signal.description.slice(0, MAX_TEXT_LENGTH) }
   );
 
-/** The latest prior confidence by instant (a later entry wins a tie), or 0 when none defines one. */
-const latestPriorConfidence = (priorDocs: EpisodeContextSource[]): number => {
-  let latest: { time: number; confidence: number } | undefined;
-  for (const doc of priorDocs) {
-    if (doc.confidence === undefined || !Number.isFinite(doc.confidence)) continue;
-    // Parsed, not string-compared: stored `@timestamp` values may carry mixed offsets.
-    const parsed = Date.parse(doc['@timestamp']);
-    const time = Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed;
-    if (latest === undefined || time >= latest.time) latest = { time, confidence: doc.confidence };
-  }
-  return latest?.confidence ?? 0;
-};
-
 /** Unions source ids and topology across prior episode documents and the submitted payload. */
 export const mergeEpisodeContext = (
   priorDocs: EpisodeContextSource[],
@@ -131,7 +118,6 @@ export const mergeEpisodeContext = (
   sourceIds: string[];
   causalFeatures: CausalFeature[];
   blastRadius: BlastRadiusEntry[];
-  confidence: number;
 } => {
   const contexts: EpisodeContextSource[] = [
     ...priorDocs,
@@ -164,13 +150,10 @@ export const mergeEpisodeContext = (
     b: { entry: { feature_id: string } }
   ) => a.entry.feature_id.localeCompare(b.entry.feature_id);
 
-  const confidence = submitted.confidence ?? latestPriorConfidence(priorDocs);
-
   return {
     sourceIds: [...sourceIds].sort(),
     causalFeatures: [...causal.values()].sort(byFeatureId).map(({ entry }) => entry),
     blastRadius: [...blast.values()].sort(byFeatureId).map(({ entry }) => entry),
-    confidence,
   };
 };
 

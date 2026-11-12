@@ -204,7 +204,7 @@ describe('computeEventFacts', () => {
     );
   });
 
-  it('stores the confidence the write submits, not the stored one, whether or not a signal confirms', () => {
+  it('stores the submitted confidence over the stored one, unclamped when no signal confirms', () => {
     const stored = makeStored([makeSignal({ verdict: 'inconclusive' })], { confidence: 0.3 });
 
     expect(
