@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let discoverSessionFirstTabId = '';
     const retry = getService('retry');
     const sampleData = getService('sampleData');
+    const kibanaServer = getService('kibanaServer');
 
     const logContains = async ({
       predicate,
@@ -39,9 +40,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
     before(async () => {
       await sampleData.testResources.installKibanaSampleData('flights');
+      // Installing through the UI sets the default data view, the API does not
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      });
     });
 
     after(async () => {
+      await kibanaServer.uiSettings.unset('defaultIndex');
       await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
