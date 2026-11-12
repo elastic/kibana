@@ -68,14 +68,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
       await PageObjects.home.goToSampleDataPage();
-      await PageObjects.home.addSampleDataSet('flights');
+      await PageObjects.home.addSampleDataSetFromUi('flights');
       await PageObjects.home.isSampleDataSetInstalled('flights');
     });
 
     after(async () => {
       await PageObjects.common.navigateToApp('home');
       await PageObjects.home.goToSampleDataPage();
-      await PageObjects.home.removeSampleDataSet('flights');
+      await PageObjects.home.removeSampleDataSetFromUi('flights');
     });
 
     describe('simple dashboard', () => {

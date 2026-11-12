@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.addSampleDataSet('flights');
+      await PageObjects.home.addSampleDataSetFromUi('flights');
 
       await PageObjects.common.navigateToApp('dashboard');
       await listingTable.clickItemLink('dashboard', '[Flights] Global Flight Dashboard');
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.home.removeSampleDataSet('flights');
+      await PageObjects.home.removeSampleDataSetFromUi('flights');
     });
 
     // dashboard panel options in view mode

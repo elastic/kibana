@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await header.waitUntilLoadingHasFinished();
-      await home.addSampleDataSet('flights');
+      await home.addSampleDataSetFromUi('flights');
       await common.navigateToApp('maps');
     });
 
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await header.waitUntilLoadingHasFinished();
-      await home.removeSampleDataSet('flights');
+      await home.removeSampleDataSetFromUi('flights');
     });
 
     it('loads  maps workpads', async function () {

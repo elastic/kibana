@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await home.addSampleDataSet('flights');
+      await home.addSampleDataSetFromUi('flights');
       await common.navigateToApp('dashboard');
       await dashboard.loadDashboardInEditMode('[Flights] Global Flight Dashboard');
     });
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await home.removeSampleDataSet('flights');
+      await home.removeSampleDataSetFromUi('flights');
     });
 
     it('Add controls panel', async () => {

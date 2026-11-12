@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await header.waitUntilLoadingHasFinished();
-      await home.addSampleDataSet('logs');
+      await home.addSampleDataSetFromUi('logs');
 
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/bwc_short_urls'
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await header.waitUntilLoadingHasFinished();
-      await home.removeSampleDataSet('logs');
+      await home.removeSampleDataSetFromUi('logs');
 
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/bwc_short_urls'
