@@ -7,12 +7,14 @@
 import { getManagedTailSamplingRoute } from './get_managed_tail_sampling';
 import { validateManagedTailSamplingRoute } from './validate_managed_tail_sampling';
 import { saveManagedTailSamplingRoute } from './save_managed_tail_sampling';
+import { enableManagedTailSamplingRoute } from './enable_managed_tail_sampling';
 import { disableManagedTailSamplingRoute } from './disable_managed_tail_sampling';
 
 export const managedTailSamplingRouteDefinitions = {
   get: getManagedTailSamplingRoute,
   validate: validateManagedTailSamplingRoute,
   save: saveManagedTailSamplingRoute,
+  enable: enableManagedTailSamplingRoute,
   disable: disableManagedTailSamplingRoute,
 };
 

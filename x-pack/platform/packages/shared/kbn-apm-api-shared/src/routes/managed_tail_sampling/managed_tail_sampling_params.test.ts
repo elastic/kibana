@@ -73,6 +73,22 @@ describe('saveManagedTailSamplingRoute params', () => {
     );
   });
 
+  it('accepts the version of the stored document', () => {
+    expectParseSuccess(
+      saveManagedTailSamplingRoute.params!.safeParse({
+        body: { policies: [keepErrors], validatedHash: hash, version: 'WzEsMV0=' },
+      })
+    );
+  });
+
+  it('rejects a version over the length limit', () => {
+    expectParseError(
+      saveManagedTailSamplingRoute.params!.safeParse({
+        body: { policies: [keepErrors], validatedHash: hash, version: 'v'.repeat(129) },
+      })
+    );
+  });
+
   it('rejects a hash of the wrong length', () => {
     expectParseError(
       saveManagedTailSamplingRoute.params!.safeParse({

@@ -11,6 +11,8 @@ export const MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH = 256;
 export const MAX_TAIL_SAMPLING_POLICY_TYPE_LENGTH = 64;
 // sha256, hex encoded
 export const TAIL_SAMPLING_HASH_LENGTH = 64;
+// Saved object versions are short opaque strings, such as 'WzEsMV0='.
+export const MAX_TAIL_SAMPLING_VERSION_LENGTH = 128;
 
 /**
  * One policy of the upstream OpenTelemetry `tail_sampling` processor, for example
@@ -50,6 +52,8 @@ export interface ManagedTailSamplingResponse {
   enabled: boolean;
   policies: TailSamplingPolicy[];
   hash: string | null;
+  // Version of the stored document. Send it back on save to detect concurrent edits.
+  version?: string;
   updatedBy?: string;
   updatedAt?: string;
 }
