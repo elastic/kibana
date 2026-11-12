@@ -1,5 +1,5 @@
 {
-  "sha1": "592caf2f1c81ae01ce089db2085900dc2403c36d",
+  "sha1": "ec4519251b8dee82c330964b8e32e1418b891dae",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
         "@local-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/tests/automated_response_actions.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/tests/automated_response_actions.spec.ts",
         "line": 38,
         "column": 9
       }

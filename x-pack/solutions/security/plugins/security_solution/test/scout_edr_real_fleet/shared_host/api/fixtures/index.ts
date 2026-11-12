@@ -10,7 +10,7 @@ import {
   FLEET_AND_HOST_TIMEOUT_MS,
   withEnrolledEndpoint,
   type EnrolledEndpoint,
-} from '../../fixtures/enrolled_endpoint';
+} from '../../../fixtures/enrolled_endpoint';
 
 export { tags };
 export type { EnrolledEndpoint };

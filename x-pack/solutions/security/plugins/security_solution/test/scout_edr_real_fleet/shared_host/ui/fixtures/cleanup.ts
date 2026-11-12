@@ -7,14 +7,14 @@
 
 import { FLEET_SERVER_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { EsClient, KbnClient, ScoutLogger } from '@kbn/scout-security';
-import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
+import { deleteAllEndpointData } from '../../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import {
   deleteAgentPolicy,
   fetchFleetAgents,
   fetchIntegrationPolicyList,
   unEnrollFleetAgent,
-} from '../../../../scripts/endpoint/common/fleet_services';
-import type { StartedFleetServer } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
+} from '../../../../../scripts/endpoint/common/fleet_services';
+import type { StartedFleetServer } from '../../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 
 const TEST_SUPERUSER = 'super_superuser';
 const TEST_SUPERUSER_ROLE = 'superuser_restricted_indices';

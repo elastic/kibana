@@ -12,9 +12,9 @@ import {
   deleteIndexedFleetEndpointPolicies,
   indexFleetEndpointPolicy,
   type IndexedFleetEndpointPolicyResponse,
-} from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import type { PolicyData } from '../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../common/endpoint/types';
+} from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type { PolicyData } from '../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../common/endpoint/types';
 
 export const createEndpointPolicy = async (
   kbnClient: KbnClient,
