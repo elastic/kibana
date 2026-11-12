@@ -51,18 +51,25 @@ export const startKeyboardInteraction = ({
     onStart(ev);
     disableScroll();
 
-    const handleBlur = (blurEvent: Event) => {
-      onBlur?.(blurEvent);
-      enableScroll();
-    };
-
     document.addEventListener('keydown', handleKeyPress);
     /**
      * TODO: Blur is firing on re-render, so use `mousedown` instead
      * This should be fixed b∂y https://github.com/elastic/kibana/issues/220309
      */
     // ev.target?.addEventListener('blur', handleBlur, { once: true });
-    document.addEventListener('mousedown', handleBlur, { once: true });
+    document.addEventListener('mousedown', handleBlur);
+  };
+
+  // removes every document-level listener installed by `handleStart`, however the interaction ends
+  const teardown = () => {
+    document.removeEventListener('keydown', handleKeyPress);
+    document.removeEventListener('mousedown', handleBlur);
+    enableScroll();
+  };
+
+  const handleBlur = (blurEvent: Event) => {
+    teardown();
+    onBlur?.(blurEvent);
   };
 
   const handleMove = (ev: UserKeyboardEvent) => {
@@ -72,15 +79,13 @@ export const startKeyboardInteraction = ({
   };
 
   const handleEnd = (ev: UserKeyboardEvent) => {
-    document.removeEventListener('keydown', handleKeyPress);
     ev.preventDefault();
-    enableScroll();
+    teardown();
     onEnd(ev);
   };
 
   const handleCancel = (ev: UserKeyboardEvent) => {
-    document.removeEventListener('keydown', handleKeyPress);
-    enableScroll();
+    teardown();
     onCancel(ev);
   };
 
