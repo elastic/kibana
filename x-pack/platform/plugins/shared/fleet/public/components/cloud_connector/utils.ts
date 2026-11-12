@@ -21,6 +21,7 @@ import {
   getIacTemplateUrlFromVarGroupSelection,
   getAwsConsoleHostFromArn,
   isCloudFormationStackArn,
+  isIamRoleArn,
   parseAwsRegionFromArn,
 } from '../../../common/services/cloud_connectors';
 
@@ -772,6 +773,10 @@ export interface ArtifactLaunchUrlParams {
 
 const TEMPLATE_URL_PARAM_REGEX = /([?&])templateURL=[^&]*/;
 
+/** Whether stack parameters can be added to this static URL (a quick-create link). */
+export const isQuickCreateLaunchUrl = (url: string | undefined): url is string =>
+  !!url && TEMPLATE_URL_PARAM_REGEX.test(url);
+
 const getQuickCreateUrl = (artifactUrl: string, staticUrl: string | undefined): string => {
   const templateUrlParam = `templateURL=${encodeURIComponent(artifactUrl)}`;
   if (staticUrl && TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
@@ -826,7 +831,7 @@ export const getStaticLaunchUrl = ({
   if (provider !== AWS_PROVIDER || !staticUrl) {
     return undefined;
   }
-  if (!TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
+  if (!isQuickCreateLaunchUrl(staticUrl)) {
     return staticUrl;
   }
   return setQuickCreateStackParams(staticUrl, stackParams);
@@ -930,6 +935,21 @@ export const isStackArnInvalid = (stackArn: string | undefined): boolean => {
   const trimmed = stackArn?.trim() ?? '';
   return trimmed !== '' && !isCloudFormationStackArn(trimmed);
 };
+
+export const INVALID_ROLE_ARN_MESSAGE = i18n.translate(
+  'xpack.fleet.cloudConnector.aws.roleArnInvalid',
+  {
+    defaultMessage: 'Enter an IAM role ARN, for example arn:aws:iam::123456789012:role/MyRole',
+  }
+);
+
+/**
+ * True for a non-empty value that is not an IAM role ARN once trimmed, so a pasted value is judged
+ * as it will be saved; a whitespace-only value is invalid since it would be saved as empty. Same
+ * rule as the connector API's `role_arn`.
+ */
+export const isRoleArnInvalid = (roleArn: string | undefined): boolean =>
+  !!roleArn && !isIamRoleArn(roleArn.trim());
 
 /** Read-only link to the deployed stack; needs no render. */
 export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string | undefined => {

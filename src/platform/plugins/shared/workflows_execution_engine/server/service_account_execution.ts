@@ -9,6 +9,7 @@
 
 import Boom from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { TaskInstance } from '@kbn/task-manager-plugin/server';
 import { visitNestedSteps, WorkflowExecuteStepInputSchema } from '@kbn/workflows';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
@@ -17,10 +18,19 @@ type IdentityExecution = Pick<
   EsWorkflowExecution,
   'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity' | 'managed'
 >;
+type BindingExecution = Partial<
+  Pick<EsWorkflowExecution, 'workflowDefinition' | 'effectiveIdentity'>
+>;
+type RunAsExecution = Pick<EsWorkflowExecution, 'workflowId' | 'spaceId'> & BindingExecution;
+export type WorkflowTaskRunAs = NonNullable<TaskInstance['runAs']>;
 const executionContexts = new WeakMap<
   KibanaRequest,
-  { originalRequest: KibanaRequest; execution: IdentityExecution }
+  { originalRequest?: KibanaRequest; execution: IdentityExecution }
 >();
+const taskRunAsByRequest = new WeakMap<KibanaRequest, WorkflowTaskRunAs>();
+// Requests Task Manager minted for an execution's binding, keyed to that execution's id. Nobody
+// called these runs, so there is no caller identity to hand to the executions they start.
+const bindingRequests = new WeakMap<KibanaRequest, string>();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
   'allowed-workflow-ids': true,
@@ -28,7 +38,7 @@ const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'run-as-mode': true,
 });
 
-export const getExecutionServiceAccountId = (execution: IdentityExecution): string | undefined =>
+export const getExecutionServiceAccountId = (execution: BindingExecution): string | undefined =>
   execution.effectiveIdentity?.inheritedFrom
     ? execution.effectiveIdentity.id
     : execution.workflowDefinition?.settings?.run_as;
@@ -141,32 +151,142 @@ export const ensureInheritedBindingCurrent = async (
 export const getWorkflowOriginalRequest = (request: KibanaRequest): KibanaRequest =>
   executionContexts.get(request)?.originalRequest ?? request;
 
+const getWorkflowCaller = (request: KibanaRequest): KibanaRequest | undefined => {
+  if (bindingRequests.has(request)) {
+    return undefined;
+  }
+  const context = executionContexts.get(request);
+  return context ? context.originalRequest : request;
+};
+
+/**
+ * Rejects an unbound execution started by a run Task Manager runs as its binding: that run has no
+ * caller, and handing it the binding would delegate the service account to an unbound workflow.
+ */
+export const ensureWorkflowCallerAvailable = (
+  request: KibanaRequest,
+  execution: Pick<EsWorkflowExecution, 'workflowId'> & BindingExecution
+): void => {
+  if (getExecutionServiceAccountId(execution) || getWorkflowCaller(request)) {
+    return;
+  }
+  throw Boom.forbidden(
+    `Workflow "${execution.workflowId}" has no service account, and the workflow run that started it runs in the background as its own service account, so there is no caller to run it as. Bind "${execution.workflowId}" to a service account.`
+  );
+};
+
+const toTaskRunAs = (
+  execution: RunAsExecution,
+  serviceAccountId: string
+): WorkflowTaskRunAs & { expectedServiceAccountId: string } => ({
+  workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+  workloadId: execution.effectiveIdentity?.inheritedFrom?.workloadId ?? execution.workflowId,
+  spaceId: execution.spaceId,
+  expectedServiceAccountId: serviceAccountId,
+});
+
+/** The workload a bound execution's tasks run as, or `undefined` when the execution is unbound. */
+export const getExecutionTaskRunAs = (execution: RunAsExecution): WorkflowTaskRunAs | undefined => {
+  const serviceAccountId = getExecutionServiceAccountId(execution);
+  return serviceAccountId ? toTaskRunAs(execution, serviceAccountId) : undefined;
+};
+
+/**
+ * The workload a task for `execution` runs as when it is scheduled with a service account's
+ * request. Task Manager can't clone that credential, so a bound execution mints its own instead.
+ */
+export const getServiceAccountCallerTaskRunAs = (
+  core: CoreStart,
+  request: KibanaRequest,
+  execution: RunAsExecution
+): WorkflowTaskRunAs | undefined => {
+  const principal = core.security.authc.getPrincipal(getWorkflowOriginalRequest(request));
+  return principal?.type === 'service_account' ? getExecutionTaskRunAs(execution) : undefined;
+};
+
+/** The workload the follow-up tasks of the execution running with `request` run as, if any. */
+export const getWorkflowTaskRunAs = (request: KibanaRequest): WorkflowTaskRunAs | undefined =>
+  taskRunAsByRequest.get(request);
+
+/** Runs `execute` with the follow-up tasks it schedules through `request` running as `runAs`. */
+export const withWorkflowTaskRunAs = async <T>(
+  request: KibanaRequest,
+  runAs: WorkflowTaskRunAs | undefined,
+  execute: () => Promise<T>
+): Promise<T> => {
+  if (!runAs) {
+    return execute();
+  }
+  taskRunAsByRequest.set(request, runAs);
+  try {
+    return await execute();
+  } finally {
+    taskRunAsByRequest.delete(request);
+  }
+};
+
+/**
+ * Whether minting a binding's request failed for a reason a retry won't fix: the binding is
+ * missing, changed, or not allowed, or the token exchange said not to retry.
+ */
+export const isPermanentMintFailure = (error: unknown): boolean => {
+  if (Boom.isBoom(error)) {
+    const { statusCode } = error.output;
+    return statusCode >= 400 && statusCode < 500 && statusCode !== 408 && statusCode !== 429;
+  }
+  return (
+    error instanceof Error &&
+    error.name === 'ServiceAccountTokenExchangeError' &&
+    'retryable' in error &&
+    error.retryable === false
+  );
+};
+
+/** Runs `execute` with `request`, which Task Manager minted for the binding of `executionId`. */
+export const withWorkflowBindingRequest = async <T>(
+  request: KibanaRequest,
+  executionId: string,
+  runAs: WorkflowTaskRunAs,
+  execute: () => Promise<T>
+): Promise<T> => {
+  bindingRequests.set(request, executionId);
+  try {
+    return await withWorkflowTaskRunAs(request, runAs, execute);
+  } finally {
+    bindingRequests.delete(request);
+  }
+};
+
 export const withWorkflowExecutionIdentity = async <T>(
   core: CoreStart,
   execution: IdentityExecution,
   request: KibanaRequest,
   execute: (request: KibanaRequest) => Promise<T>
 ): Promise<T> => {
-  const originalRequest = getWorkflowOriginalRequest(request);
+  const originalRequest = getWorkflowCaller(request);
   const serviceAccountId = getExecutionServiceAccountId(execution);
   if (!serviceAccountId) {
-    return execute(originalRequest);
+    ensureWorkflowCallerAvailable(request, execution);
+    return execute(originalRequest ?? request);
   }
   if (!core.security.serviceAccounts.isEnabled()) {
     throw Boom.forbidden('Service account execution is disabled.');
   }
+  if (bindingRequests.get(request) === execution.id) {
+    executionContexts.set(request, { execution });
+    try {
+      return await execute(request);
+    } finally {
+      executionContexts.delete(request);
+    }
+  }
+  const taskRunAs = getServiceAccountCallerTaskRunAs(core, request, execution);
   return core.security.serviceAccounts.withScopedRequestForWorkload(
-    {
-      workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
-      workloadId: execution.effectiveIdentity?.inheritedFrom?.workloadId ?? execution.workflowId,
-      spaceId: execution.spaceId,
-      expectedServiceAccountId: serviceAccountId,
-      executionId: execution.id,
-    },
+    { ...toTaskRunAs(execution, serviceAccountId), executionId: execution.id },
     async (scopedRequest) => {
       executionContexts.set(scopedRequest, { originalRequest, execution });
       try {
-        return await execute(scopedRequest);
+        return await withWorkflowTaskRunAs(scopedRequest, taskRunAs, () => execute(scopedRequest));
       } finally {
         executionContexts.delete(scopedRequest);
       }

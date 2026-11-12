@@ -17,11 +17,8 @@ import {
   StringFormat,
 } from '@kbn/field-formats-plugin/common';
 import { dataViewMock } from '../__mocks__';
-import {
-  formatFieldStringValueWithHighlights,
-  formatFieldValueReact,
-  formatFieldValueText,
-} from './format_value';
+import { formatFieldValueText } from './format_value';
+import { formatFieldStringValueWithHighlights, formatFieldValueReact } from './format_value_react';
 
 const services = {
   fieldFormats: {

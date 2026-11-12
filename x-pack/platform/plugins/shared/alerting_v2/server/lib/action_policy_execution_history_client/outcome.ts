@@ -9,7 +9,7 @@ import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   type ActionPolicyEventAction,
-} from '../dispatcher/steps/constants';
+} from '../services/event_log_service/constants';
 
 /**
  * Translation between the stored `event.action` vocabulary the dispatcher

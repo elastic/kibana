@@ -8,7 +8,11 @@
 import type { ActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { createActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { createDispatcherPipelineState, createStepLogger } from '../fixtures/test_utils';
+import {
+  createAlert,
+  createDispatcherPipelineState,
+  createStepLogger,
+} from '../fixtures/test_utils';
 import { FetchPoliciesStep } from './fetch_policies_step';
 
 const logger = createStepLogger();
@@ -25,6 +29,7 @@ describe('FetchPoliciesStep', () => {
   });
 
   const buildStep = () => new FetchPoliciesStep(npSoService);
+  const buildState = () => createDispatcherPipelineState({ dispatchable: [createAlert()] });
 
   it('fetches all decrypted policies via findAllDecrypted', async () => {
     mockFindAllDecrypted.mockResolvedValue([
@@ -48,7 +53,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+    const result = await buildStep().execute(buildState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -62,13 +67,42 @@ describe('FetchPoliciesStep', () => {
     expect(policy?.throttle).toBeUndefined();
     expect(policy?.snoozedUntil).toBeNull();
 
-    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default'],
+    });
+  });
+
+  it('skips the lookup and returns an empty catalog when no alert is dispatchable', async () => {
+    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.policies?.size).toBe(0);
+    expect(mockFindAllDecrypted).not.toHaveBeenCalled();
+  });
+
+  it('fetches policies only in the spaces of the dispatchable alerts', async () => {
+    const state = createDispatcherPipelineState({
+      dispatchable: [
+        createAlert(),
+        createAlert({ space_id: 'space-a', alert_id: 'alert-2' }),
+        createAlert({ space_id: 'space-a', alert_id: 'alert-3' }),
+      ],
+    });
+
+    await buildStep().execute(state, logger);
+
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default', 'space-a'],
+    });
   });
 
   it('returns empty map when no policies exist', async () => {
     mockFindAllDecrypted.mockResolvedValue([]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+    const result = await buildStep().execute(buildState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -81,7 +115,7 @@ describe('FetchPoliciesStep', () => {
       { id: 'p1', error: { statusCode: 500, message: 'Decryption failed', error: 'Error' } },
     ]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), loggerService);
+    const result = await buildStep().execute(buildState(), loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -115,7 +149,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+    const result = await buildStep().execute(buildState(), logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
     const policy = result.data?.policies?.get('p-scoped');
@@ -158,13 +192,16 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+    const result = await buildStep().execute(buildState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(2);
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
-    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default'],
+    });
   });
 });

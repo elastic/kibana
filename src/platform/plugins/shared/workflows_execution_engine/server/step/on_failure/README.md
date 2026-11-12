@@ -43,7 +43,7 @@ on-failure:
   retry:
     max-attempts: 3   # Required: minimum 1
     delay: "5s"       # Optional: duration (e.g., "5s", "1m"). Base delay for fixed; initial delay for exponential.
-    condition: "..."   # Optional: expression (e.g. "${{error.type == 'NetworkError'}}"). Default: always retry.
+    condition: "..."   # Optional: expression (e.g. "${{error.type == 'NetworkError'}}"). Default: retry every retryable error.
     strategy: fixed    # Optional: "fixed" (default) or "exponential"
     multiplier: 2     # Optional: for exponential backoff (default 2). Ignored when strategy is fixed.
     max-delay: "5m"    # Optional: cap for exponential backoff. Ignored when strategy is fixed.
@@ -56,7 +56,8 @@ on-failure:
 - **Exponential strategy**: delay = initial × `multiplier`^attempt, capped by `max-delay` (e.g. 1s, 2s, 4s with multiplier 2)
 - Waits between retries (if delay configured); workflow enters `WAITING` state if delay exceeds task manager threshold
 - Workflow fails if all retries are exhausted
-- **Condition**: when set, retry only if the expression evaluates to true (e.g. `${{error.type == "TimeoutError"}}`). Use to retry only on transient errors.
+- **Non-retryable errors**: an error with `retryable: false` is not retried when no `condition` is set; it goes straight to the fallback, `continue`, or the step failure. Size limit errors (`StepSizeLimitExceeded`, `ActionsResponseContentLengthExceeded`) are not retryable.
+- **Condition**: when set, retry only if the expression evaluates to true (e.g. `${{error.type == "TimeoutError"}}`). Use to retry only on transient errors. The condition decides even for an error with `retryable: false`, and can read the flag as `error.retryable`.
 
 ### Fallback
 
@@ -121,7 +122,8 @@ on-failure:
 ### Which errors to retry
 
 - **Transient (good candidates for retry):** network errors, timeouts, 5xx, rate limits. Use `condition` to retry only these (e.g. `${{error.type == "TimeoutError"}}` or `${{error.type == "ConnectorExecutionError"}}`).
-- **Permanent (avoid retrying):** validation, 4xx auth, bad config. Omit retry or use `condition` to exclude (e.g. `${{error.type != "ValidationError"}}`).
+- **Permanent (avoid retrying):** validation, 4xx auth, bad config. Omit retry or use `condition` to exclude (e.g. `${{error.type != "ValidationError"}}`). Errors marked `retryable: false`, such as size limit errors, are skipped without a condition.
+- **Custom steps:** throw `new ExecutionError({ type, message, retryable: false })` for a failure that retrying cannot fix, so workflows do not need a `condition` that matches your error type.
 
 ### Graceful degradation
 

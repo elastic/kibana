@@ -28,6 +28,13 @@ export type OpenAIChatCompletionMessage = OpenAI.ChatCompletionMessage & {
   reasoning?: string | null;
 };
 
+/** Usage with the Elasticsearch inference API's `cache_write_tokens`, which the `openai` SDK types omit. */
+export type OpenAICompletionUsage = OpenAI.CompletionUsage & {
+  prompt_tokens_details?: OpenAI.CompletionUsage.PromptTokensDetails & {
+    cache_write_tokens?: number;
+  };
+};
+
 // duplicated from x-pack/platform/plugins/shared/stack_connectors/common/openai/constants.ts
 // because depending on stack_connectors from the inference plugin creates a cyclic dependency...
 export enum OpenAiProviderType {

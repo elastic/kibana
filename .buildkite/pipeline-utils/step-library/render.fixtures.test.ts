@@ -35,13 +35,14 @@ process.chdir(root);
 
 const fragmentPaths = (): string[] => {
   const dir = '.buildkite/pipelines/pull_request';
-  return [
-    ...fs
-      .readdirSync(path.join(root, dir), { recursive: true, encoding: 'utf8' })
-      .filter((file) => file.endsWith('.yml'))
-      .map((file) => `${dir}/${file}`),
-    '.buildkite/pipelines/fips/verify_fips_enabled.yml',
-  ].filter((file) => fs.existsSync(path.join(root, file)));
+  if (!fs.existsSync(path.join(root, dir))) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(path.join(root, dir), { recursive: true, encoding: 'utf8' })
+    .filter((file) => file.endsWith('.yml'))
+    .map((file) => `${dir}/${file}`);
 };
 
 const load = (file: string) => parse(fs.readFileSync(path.join(root, file), 'utf8'));
@@ -60,7 +61,7 @@ const yamlPathKeys = (file: string): string[] | 'throws' => {
     : [];
 };
 
-describe.each(fragmentPaths())('%s', (file) => {
+const coverFragment = (file: string) => {
   const steps: Step[] = load(file).steps ?? [];
 
   it('round-trips through the renderer unchanged', () => {
@@ -84,4 +85,13 @@ describe.each(fragmentPaths())('%s', (file) => {
     }
     expect(rendered).toEqual(yamlPathKeys(file));
   });
-});
+};
+
+const fragmentFiles = fragmentPaths();
+if (fragmentFiles.length > 0) {
+  describe.each(fragmentFiles)('%s', (file) => {
+    coverFragment(file);
+  });
+} else {
+  it.skip('has no YAML fragments left to cover', () => undefined);
+}

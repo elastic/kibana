@@ -161,7 +161,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     return conversationTemplatesService;
   };
 
-  const renderSnapshot = (onNotFound?: () => void) => {
+  const renderSnapshot = (onNotFound?: () => void, onConversationUpdated?: () => void) => {
     const get = jest.fn();
     const conversationsService = { get } as unknown as ConversationsService;
     const queryClient = new QueryClient({
@@ -182,6 +182,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
           conversationTemplatesService={createTemplatesService()}
           titleId="title"
           onNotFound={onNotFound}
+          onConversationUpdated={onConversationUpdated}
         />,
         { wrapper: Wrapper }
       );
@@ -259,20 +260,27 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     expect(screen.getByRole('button', { name: 'Second clicked 1' })).toBeInTheDocument();
   });
 
-  it('hands registered tabs a refetchConversation that refetches on demand', async () => {
-    const { get, renderResult } = renderSnapshot();
+  it('hands registered tabs a refetchConversation that refetches on demand and reports the update, unlike polling', async () => {
+    const onConversationUpdated = jest.fn();
+    const { get, renderResult } = renderSnapshot(undefined, onConversationUpdated);
     get
       .mockResolvedValueOnce(createConversation({ title: 'First fetch' }))
+      .mockResolvedValueOnce(createConversation({ title: 'Polled' }))
       .mockResolvedValue(createConversation({ title: 'Refetched' }));
 
     renderResult();
 
     expect(await screen.findByText('First fetch')).toBeInTheDocument();
+    await advance(5_000);
+    expect(await screen.findByText('Polled')).toBeInTheDocument();
+    expect(onConversationUpdated).not.toHaveBeenCalled();
+    expect(get).toHaveBeenCalledTimes(2);
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Refetch' }));
     });
 
-    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(onConversationUpdated).toHaveBeenCalledTimes(1));
+    expect(get).toHaveBeenCalledTimes(3);
     expect(screen.getByText('Refetched')).toBeInTheDocument();
   });
 
@@ -370,5 +378,23 @@ describe('ConversationDetailsFlyout', () => {
     const [{ flyoutMenuProps }] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
     expect(trailingActions).toHaveBeenCalledWith({ conversation });
     expect(flyoutMenuProps?.trailingActions).toEqual(trailingActions.mock.results[0].value);
+  });
+
+  it('opens resizable at the remembered width', () => {
+    localStorage.setItem('agentBuilder.conversationDetailsFlyoutWidth', '620');
+    jest.mocked(useConversation).mockReturnValue({
+      conversation: createConversation(),
+      isLoading: false,
+    } as ReturnType<typeof useConversation>);
+    jest.mocked(useAgentBuilderServices).mockReturnValue({
+      conversationTemplatesService: new ConversationTemplatesService(),
+    } as ReturnType<typeof useAgentBuilderServices>);
+
+    render(<ConversationDetailsFlyout onClose={jest.fn()} />, { wrapper: EuiProvider });
+
+    const [flyoutProps] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
+    expect(flyoutProps).toEqual(
+      expect.objectContaining({ size: 620, minWidth: 400, maxWidth: 640, resizable: true })
+    );
   });
 });

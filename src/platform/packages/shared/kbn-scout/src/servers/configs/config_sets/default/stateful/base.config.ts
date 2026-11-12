@@ -22,6 +22,7 @@ import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
 import {
   defineDockerServersConfig,
   fleetPackageRegistryDockerImage,
@@ -136,11 +137,13 @@ export const defaultConfig: ScoutServerConfig = {
       '--telemetry.optIn=false',
       // These are *very* important to have them pointing to staging
       '--telemetry.sendUsageTo=staging',
+      // Keeps test servers from downloading the real product documentation artifacts
+      `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
       `--server.maxPayload=1679958`,
       // newsfeed mock service
       `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/newsfeed')}`,
       // otel mock service
-      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/otel_metrics')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/otel_metrics')}`,
       `--newsfeed.service.urlRoot=${kbnUrl}`,
       `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       `--logging.appenders.deprecation=${JSON.stringify({
@@ -181,8 +184,6 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
       '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
       '--savedObjects.allowHttpApiAccess=false', // override default to not allow hiddenFromHttpApis saved objects access to the http APIs see https://github.com/elastic/dev/issues/2200
-      // explicitly disable internal API restriction. See https://github.com/elastic/kibana/issues/163654
-      '--server.restrictInternalApis=false',
       // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
       `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
       // x-pack/platform/test/api_integration/config.ts

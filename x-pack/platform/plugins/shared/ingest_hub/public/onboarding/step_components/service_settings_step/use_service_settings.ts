@@ -17,16 +17,17 @@ import {
 import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { makeDsView } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { reconcileInstances } from './instances';
+import { DUPLICATE_INSTANCE_ID_SEPARATOR, reconcileInstances } from './instances';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
-import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
+import { toSOMetadataUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
   resolveFieldMeta,
+  resolveVarGroupSelections,
   toTyped,
 } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
@@ -36,9 +37,13 @@ import {
   getBareNamePackage,
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { getNamespaceError } from './instance_namespace_field';
+import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
 import {
+  getConditionErrors,
   getDescriptionError,
   getIntegrationNameError,
+  getProxyUrlError,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -50,6 +55,12 @@ export interface ServiceDataStreamVars {
    * e.g. { 'aws-s3': { bucket_arn: 'arn:...' } }
    */
   varsByInput: Record<string, Record<string, string | string[]>>;
+  /**
+   * Selected option per stream-level var_group, keyed by input type then group name,
+   * e.g. { 'aws-cloudwatch': { log_group_source: 'log_group_arn' } }. Absent → manifest default
+   * (the group's first option), resolved by `resolveVarGroupSelections`.
+   */
+  varGroupSelectionsByInput?: Record<string, Record<string, string>>;
 }
 
 export interface ServiceVars {
@@ -59,7 +70,10 @@ export interface ServiceVars {
    * Per-data-stream var values. Keys are data stream ids (e.g. 'vpcflow', 'ec2_logs').
    */
   varsByDataStream: Record<string, ServiceDataStreamVars>;
-  /** Data stream namespace for this instance's policy. Empty or absent inherits the agent policy's. */
+  /**
+   * Data stream namespace of a duplicate's policy. Originals have none and take the global
+   * namespace; a duplicate with none takes it too.
+   */
   namespace?: string;
 }
 
@@ -89,6 +103,22 @@ export interface ServiceSettingsPersistedState {
   /** The last name the prefill generated. While the name still equals it, it follows the selection. */
   autoName?: string;
   description?: string;
+  /**
+   * Global data stream namespace. Every original instance deploys into it; a duplicate may pick
+   * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
+   */
+  namespace?: string;
+  /**
+   * Whether the global namespace uses dedicated index templates. Applied to the installed
+   * packages after a deploy; never applies to a duplicate's own namespace.
+   */
+  dedicatedNamespaceTemplates?: boolean;
+  /**
+   * Package policy fields every policy of the onboarding gets (e.g. the output), keyed by Fleet
+   * field name. Each deployment method applies only the ones it supports. An empty value is the
+   * Fleet default; an absent one was never chosen.
+   */
+  policySettings?: PolicySettings;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -98,7 +128,8 @@ export interface ServiceSettingsPersistedState {
 export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
 
 /** Duplicate instance ids are `<serviceId>__dup-<n>`. */
-export const getDuplicateInstanceIdPrefix = (serviceId: string): string => `${serviceId}__dup-`;
+export const getDuplicateInstanceIdPrefix = (serviceId: string): string =>
+  `${serviceId}${DUPLICATE_INSTANCE_ID_SEPARATOR}`;
 
 export const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -118,7 +149,21 @@ function mergeVarsByDataStream(
     for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
       mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
     }
-    result[dsId] = { enabledInputs: dsVars.enabledInputs, varsByInput: mergedByInput };
+    // Stream-level var_group selections merge the same way; an input the incoming draft did not
+    // touch keeps its stored choice.
+    const mergedSelections: Record<string, Record<string, string>> = {
+      ...(existing.varGroupSelectionsByInput ?? {}),
+    };
+    for (const [input, selections] of Object.entries(dsVars.varGroupSelectionsByInput ?? {})) {
+      mergedSelections[input] = { ...(mergedSelections[input] ?? {}), ...selections };
+    }
+    result[dsId] = {
+      enabledInputs: dsVars.enabledInputs,
+      varsByInput: mergedByInput,
+      ...(Object.keys(mergedSelections).length > 0 && {
+        varGroupSelectionsByInput: mergedSelections,
+      }),
+    };
   }
   return result;
 }
@@ -153,17 +198,23 @@ export function isServiceConfigIncomplete(
       activeInputs = activeInputs.filter((input) => supportedInputs.includes(input));
       if (activeInputs.length === 0) return true;
     }
-    return activeInputs.some(
-      (inp) =>
+    return activeInputs.some((inp) => {
+      const selections = resolveVarGroupSelections(
+        dsView,
+        inp,
+        dsVars.varGroupSelectionsByInput?.[inp]
+      );
+      return (
         getMissingSourceGroup(dsView, inp, dsVars.varsByInput?.[inp]) !== undefined ||
-        getRequiredTextFields(dsView, inp).some((f) => {
+        getRequiredTextFields(dsView, inp, selections).some((f) => {
           const meta = resolveFieldMeta(dsView, inp, f);
           const raw = dsVars.varsByInput?.[inp]?.[f];
           const effective = meta ? toTyped(raw, meta) : raw ?? '';
           if (Array.isArray(effective)) return effective.length === 0;
           return typeof effective === 'string' && effective.trim() === '';
         })
-    );
+      );
+    });
   });
 }
 
@@ -178,7 +229,7 @@ export function getIncompleteInstances(
     // An absent key means never configured: default to every data stream. An explicitly stored
     // empty array means the user disabled all inputs — respect it.
     const config: ServiceVars = serviceVars[inst.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
     return isServiceConfigIncomplete(service, config);
@@ -209,6 +260,54 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         globalRegion: region,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  const namespace = persisted?.namespace ?? '';
+
+  const setNamespace = useCallback(
+    (value: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        namespace: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  // The switch means nothing without a namespace, so it reads as off while there is none.
+  const dedicatedNamespaceTemplates =
+    !!persisted?.dedicatedNamespaceTemplates && !!namespace.trim();
+
+  const setDedicatedNamespaceTemplates = useCallback(
+    (value: boolean) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        dedicatedNamespaceTemplates: value,
+      });
+      // Turning it off changes nothing on the package, so nothing else would save it, and a saved
+      // "on" would come back when the deployment is reopened. Turning it on is saved once it was
+      // applied, so that it stays paired with the namespace it was applied for.
+      const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+      if (!value && deploymentId) {
+        updateDeployment(deploymentId, { dedicatedNamespaceTemplates: false });
+      }
+    },
+    [persisted, setPersisted, detectAndReviewStep?.onboardingDeploymentId, updateDeployment]
+  );
+
+  const policySettings = useMemo(
+    () => persisted?.policySettings ?? {},
+    [persisted?.policySettings]
+  );
+
+  const setPolicySetting = useCallback(
+    <K extends keyof PolicySettings>(key: K, value: PolicySettings[K]) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        policySettings: { ...(persisted?.policySettings ?? {}), [key]: value },
       });
     },
     [persisted, setPersisted]
@@ -375,7 +474,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       const inst = instances.find((i) => i.instanceId === instanceId);
       const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
       return {
-        enabledDataStreams: service?.dataStreams ?? [],
+        enabledDataStreams: service ? getDefaultEnabledDataStreams(service) : [],
         varsByDataStream: {},
       };
     },
@@ -389,19 +488,26 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       instanceId: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace?: string
+      instanceNamespace?: string,
+      /** A new display name for the instance, written in the same update. */
+      newName?: string
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
+      // Only a duplicate has a namespace of its own; an original always follows the global one.
+      const isDuplicate = instances.some((i) => i.instanceId === instanceId && i.isDuplicate);
+      const ownNamespace = isDuplicate ? instanceNamespace ?? current.namespace : undefined;
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        instances,
+        instances: newName
+          ? instances.map((i) => (i.instanceId === instanceId ? { ...i, name: newName } : i))
+          : instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
           [instanceId]: {
             enabledDataStreams,
             varsByDataStream: merged,
-            namespace: namespace ?? current.namespace,
+            namespace: ownNamespace,
           },
         },
       });
@@ -415,7 +521,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       newName: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace?: string
+      instanceNamespace?: string
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
@@ -447,7 +553,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
               ? enabledDataStreams
               : sourceVars.enabledDataStreams,
             varsByDataStream: mergedByDs,
-            namespace: namespace ?? sourceVars.namespace,
+            namespace: instanceNamespace ?? sourceVars.namespace,
           },
         },
       });
@@ -498,14 +604,55 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const integrationNameError = getIntegrationNameError(integrationName);
   const descriptionError = getDescriptionError(description);
+  const namespaceError = getNamespaceError(namespace);
+  // Only where the condition is offered: one kept from another deployment method is never sent,
+  // and could not be fixed from a hidden field.
+  const condition = policySettings.condition ?? '';
+  const conditionErrors = useMemo(
+    () =>
+      supportsPolicySetting('condition', deploymentMethod)
+        ? getConditionErrors(condition)
+        : undefined,
+    [condition, deploymentMethod]
+  );
+
+  // The proxy URL reaches only the policies of services whose package declares the var, and only
+  // for the deployment methods that send it. Elsewhere the field is hidden, so a value left over
+  // from another method or selection must not block Continue.
+  const isProxyUrlSupported = useMemo(
+    () =>
+      supportsPolicySetting('proxy_url', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return (
+          !!service &&
+          supportsIntegrationSettings(service, deploymentMethod) &&
+          !!service.declaresProxyUrl
+        );
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  const proxyUrl = policySettings.proxy_url ?? '';
+  const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
 
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
       incompleteInstances.length === 0 &&
       !integrationNameError &&
-      !descriptionError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError]
+      !descriptionError &&
+      !namespaceError &&
+      !proxyUrlError &&
+      !conditionErrors,
+    [
+      globalRegion,
+      incompleteInstances,
+      integrationNameError,
+      descriptionError,
+      namespaceError,
+      proxyUrlError,
+      conditionErrors,
+    ]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -514,10 +661,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setServiceSettingsMethod(deploymentMethod);
     // The name and description stay editable after a deploy, and a later deploy may find nothing
     // to do, so save them to the onboarding record here. Best-effort: the next deploy writes them
-    // again.
+    // again. Not the namespace: a changed one is detected against the saved one and applied by the
+    // next deploy, which saves it.
     const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
     if (deploymentId) {
-      updateDeployment(deploymentId, toSOSettingsUpdate(persisted));
+      updateDeployment(deploymentId, toSOMetadataUpdate(persisted));
     }
     onContinue();
   }, [
@@ -541,6 +689,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     description,
     setDescription,
     descriptionError,
+    namespace,
+    setNamespace,
+    namespaceError,
+    dedicatedNamespaceTemplates,
+    setDedicatedNamespaceTemplates,
+    policySettings,
+    setPolicySetting,
+    isProxyUrlSupported,
+    proxyUrlError,
+    conditionErrors,
     bareNamePackage,
     instances,
     filteredInstances,

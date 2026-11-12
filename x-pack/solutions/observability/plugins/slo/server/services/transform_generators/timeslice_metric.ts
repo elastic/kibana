@@ -10,7 +10,7 @@ import type { TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
   timesliceMetricComparatorMapping,
   is,
-  timesliceMetricIndicatorSchemaZod,
+  timesliceMetricIndicatorSchema,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
@@ -28,7 +28,7 @@ const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!is(timesliceMetricIndicatorSchemaZod, slo.indicator)) {
+    if (!is(timesliceMetricIndicatorSchema, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 

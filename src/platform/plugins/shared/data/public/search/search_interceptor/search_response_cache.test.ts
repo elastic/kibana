@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { interval, of, throwError } from 'rxjs';
+import { interval, of, Subject, throwError } from 'rxjs';
 import { shareReplay, switchMap, take } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchAbortController } from './search_abort_controller';
@@ -62,19 +62,101 @@ describe('SearchResponseCache', () => {
     );
   }
 
-  function wrapWithAbortController(response$: Observable<IKibanaSearchResponse<any>>) {
+  function wrapWithAbortController(
+    response$: Observable<IKibanaSearchResponse>,
+    groupId = 'session'
+  ) {
     return {
+      groupId,
       response$,
       searchAbortController,
     };
   }
 
   beforeEach(() => {
-    cache = new SearchResponseCache(3, 0.1);
+    cache = new SearchResponseCache(0.1);
     searchAbortController = new SearchAbortController();
   });
 
   describe('Cache eviction', () => {
+    test('keeps more than 50 responses in a group when they fit within the byte limit', () => {
+      const response$ = of(r[3]);
+
+      for (let responseIndex = 0; responseIndex < 51; responseIndex++) {
+        cache.set(String(responseIndex), wrapWithAbortController(response$));
+      }
+
+      for (let responseIndex = 0; responseIndex < 51; responseIndex++) {
+        expect(cache.has(String(responseIndex))).toBe(true);
+      }
+
+      expect(cache.hasCompletedResponses('session')).toBe(true);
+    });
+
+    test('evicts a requested group without removing other groups', () => {
+      const response$ = of(r[3]);
+      cache.set('first-a', wrapWithAbortController(response$, 'first'));
+      cache.set('second', wrapWithAbortController(response$, 'second'));
+      cache.set('first-b', wrapWithAbortController(response$, 'first'));
+
+      cache.evictGroup('first');
+
+      expect(cache.hasCompletedResponses('first')).toBe(false);
+      expect(cache.has('first-a')).toBe(false);
+      expect(cache.has('first-b')).toBe(false);
+      expect(cache.hasCompletedResponses('second')).toBe(true);
+    });
+
+    test('response arrival updates group recency before eviction', () => {
+      const largeResponse = { ...r[3], rawResponse: { value: 'a'.repeat(40000) } };
+      const response$ = new Subject<IKibanaSearchResponse>();
+      cache.set('slow', wrapWithAbortController(response$, 'slow'));
+      cache.set('idle', wrapWithAbortController(of(largeResponse), 'idle'));
+      response$.next(largeResponse);
+      response$.complete();
+      cache.set('new', wrapWithAbortController(of(largeResponse), 'new'));
+      expect(cache.has('slow')).toBe(true);
+      expect(cache.has('idle')).toBe(false);
+      expect(cache.has('new')).toBe(true);
+    });
+
+    test('only completed, non-interrupted responses make a group available', () => {
+      const response$ = new Subject<IKibanaSearchResponse>();
+      cache.set('pending', wrapWithAbortController(response$));
+      response$.next(r[0]);
+      expect(cache.hasCompletedResponses('session')).toBe(false);
+
+      response$.complete();
+      expect(cache.has('pending')).toBe(false);
+
+      searchAbortController.abort();
+      cache.set('interrupted', wrapWithAbortController(of(r[3])));
+      expect(cache.hasCompletedResponses('session')).toBe(false);
+      expect(cache.has('interrupted')).toBe(false);
+    });
+
+    test('evicts every response of the least recently used group when exceeding the byte limit', () => {
+      const response$ = of({ ...r[3], rawResponse: { value: 'a'.repeat(30000) } });
+      cache.set('first-a', wrapWithAbortController(response$, 'first'));
+      cache.set('second', wrapWithAbortController(response$, 'second'));
+      cache.set('first-b', wrapWithAbortController(response$, 'first'));
+      cache.get('second');
+
+      cache.set('third', wrapWithAbortController(response$, 'third'));
+
+      expect(cache.has('first-a')).toBe(false);
+      expect(cache.has('first-b')).toBe(false);
+      expect(cache.hasCompletedResponses('first')).toBe(false);
+      expect(cache.hasCompletedResponses('second')).toBe(true);
+      expect(cache.hasCompletedResponses('third')).toBe(true);
+    });
+
+    test('does not reinsert a synchronously evicted response', () => {
+      cache.set('large', wrapWithAbortController(of({ rawResponse: 'a'.repeat(500000) }, r[3])));
+
+      expect(cache.has('large')).toBe(false);
+    });
+
     test('clear evicts all', () => {
       const finalResult = r[r.length - 1];
       cache.set('123', wrapWithAbortController(of(finalResult)));
@@ -136,12 +218,12 @@ describe('SearchResponseCache', () => {
       expect(cache.get('123')).toBeUndefined();
     });
 
-    test('evicts oldest item if has too many cached items', async () => {
-      const finalResult = r[r.length - 1];
-      cache.set('123', wrapWithAbortController(of(finalResult)));
-      cache.set('234', wrapWithAbortController(of(finalResult)));
-      cache.set('345', wrapWithAbortController(of(finalResult)));
-      cache.set('456', wrapWithAbortController(of(finalResult)));
+    test('evicts the oldest group when completed responses exceed the byte limit', () => {
+      const finalResult = { ...r[r.length - 1], rawResponse: { value: 'a'.repeat(30000) } };
+      cache.set('123', wrapWithAbortController(of(finalResult), '123'));
+      cache.set('234', wrapWithAbortController(of(finalResult), '234'));
+      cache.set('345', wrapWithAbortController(of(finalResult), '345'));
+      cache.set('456', wrapWithAbortController(of(finalResult), '456'));
 
       expect(cache.get('123')).toBeUndefined();
       expect(cache.get('234')).not.toBeUndefined();
@@ -167,9 +249,9 @@ describe('SearchResponseCache', () => {
         },
       ]);
 
-      cache.set('123', wrapWithAbortController(largeResult$));
-      cache.set('234', wrapWithAbortController(largeResult$));
-      cache.set('345', wrapWithAbortController(largeResult$));
+      cache.set('123', wrapWithAbortController(largeResult$, '123'));
+      cache.set('234', wrapWithAbortController(largeResult$, '234'));
+      cache.set('345', wrapWithAbortController(largeResult$, '345'));
 
       await largeResult$.toPromise();
 
@@ -201,16 +283,16 @@ describe('SearchResponseCache', () => {
       expect(cache.get('234')).toBeUndefined();
     });
 
-    test('get updates the insertion time of an item', async () => {
-      const finalResult = r[r.length - 1];
-      cache.set('123', wrapWithAbortController(of(finalResult)));
-      cache.set('234', wrapWithAbortController(of(finalResult)));
-      cache.set('345', wrapWithAbortController(of(finalResult)));
+    test('get updates eviction priority when the byte limit is exceeded', () => {
+      const finalResult = { ...r[r.length - 1], rawResponse: { value: 'a'.repeat(30000) } };
+      cache.set('123', wrapWithAbortController(of(finalResult), '123'));
+      cache.set('234', wrapWithAbortController(of(finalResult), '234'));
+      cache.set('345', wrapWithAbortController(of(finalResult), '345'));
 
       cache.get('123');
       cache.get('234');
 
-      cache.set('456', wrapWithAbortController(of(finalResult)));
+      cache.set('456', wrapWithAbortController(of(finalResult), '456'));
 
       expect(cache.get('123')).not.toBeUndefined();
       expect(cache.get('234')).not.toBeUndefined();

@@ -144,8 +144,10 @@ async function getAllHelper({
       sandboxCapableOnly
         ? isSandboxCapableConnector({
             actionTypeId: connector.actionTypeId,
+            connectorId: connector.id,
             config: connector.config,
             actionTypeRegistry: connectorTypeRegistry,
+            logger,
           })
         : true
     ),
@@ -155,9 +157,11 @@ async function getAllHelper({
         sandboxCapableOnly
           ? isSandboxCapableConnector({
               actionTypeId: connector.actionTypeId,
+              connectorId: connector.id,
               config: connector.config,
               secrets: connector.secrets,
               actionTypeRegistry: connectorTypeRegistry,
+              logger,
             })
           : true
       )

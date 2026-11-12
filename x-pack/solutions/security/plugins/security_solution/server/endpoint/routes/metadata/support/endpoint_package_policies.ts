@@ -11,7 +11,8 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 
 export const getAllEndpointPackagePolicies = async (
   packagePolicyService: PackagePolicyClient,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  signal?: AbortSignal
 ): Promise<PackagePolicy[]> => {
   const result: PackagePolicy[] = [];
   const perPage = 1000;
@@ -19,6 +20,7 @@ export const getAllEndpointPackagePolicies = async (
   let hasMore = true;
 
   while (hasMore) {
+    signal?.throwIfAborted();
     const endpointPoliciesResponse = await packagePolicyService.list(soClient, {
       perPage,
       page: page++,
@@ -31,5 +33,6 @@ export const getAllEndpointPackagePolicies = async (
     }
   }
 
+  signal?.throwIfAborted();
   return result;
 };

@@ -184,6 +184,65 @@ export default ({ getService }: FtrProviderContext) => {
       expect(typeof fetched.apiKeyId).toBe('string');
     });
 
+    describe('Update API Key route', () => {
+      const getApiKeyId = async (watchlistId: string, entitySourceId: string) => {
+        const { body } = await entityAnalyticsApi
+          .getWatchlistEntitySource({ params: { watchlist_id: watchlistId, id: entitySourceId } })
+          .expect(200);
+        return body.apiKeyId as string;
+      };
+
+      const rotateApiKeyPath = (watchlistId: string, entitySourceId: string) =>
+        `/api/entity_analytics/watchlists/${watchlistId}/entity_source/${entitySourceId}/_update_api_key`;
+
+      it('should replace the API key of an existing source and invalidate the previous one', async () => {
+        await utils.createSourceIndex(sourceIndexName);
+        const { watchlistId, entitySourceId } = await utils.createWatchlistAndEntitySource(
+          'api-key-rotate',
+          sourceIndexName
+        );
+        const oldApiKeyId = await getApiKeyId(watchlistId, entitySourceId);
+        expect(typeof oldApiKeyId).toBe('string');
+
+        await supertest
+          .post(rotateApiKeyPath(watchlistId, entitySourceId))
+          .set('kbn-xsrf', 'true')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .expect(200);
+
+        const newApiKeyId = await getApiKeyId(watchlistId, entitySourceId);
+        expect(typeof newApiKeyId).toBe('string');
+        expect(newApiKeyId).not.toBe(oldApiKeyId);
+
+        const oldKeyResp = await es.security.getApiKey({ id: oldApiKeyId });
+        expect(oldKeyResp.api_keys[0].invalidated).toBe(true);
+        const newKeyResp = await es.security.getApiKey({ id: newApiKeyId });
+        expect(newKeyResp.api_keys[0].invalidated).toBe(false);
+      });
+
+      it('should return 403 and keep the existing API key when the user cannot read the index', async () => {
+        await utils.createSourceIndex(sourceIndexName);
+        const { watchlistId, entitySourceId } = await utils.createWatchlistAndEntitySource(
+          'api-key-rotate-forbidden',
+          sourceIndexName
+        );
+        const oldApiKeyId = await getApiKeyId(watchlistId, entitySourceId);
+
+        // uses restricted user (no ES index privileges), so the privilege check fails
+        const response = await makeEntitySourceRequest(
+          'post',
+          rotateApiKeyPath(watchlistId, entitySourceId)
+        );
+
+        expect(response.status).toBe(403);
+        expect(response.body.message).toContain('Insufficient privileges');
+        expect(await getApiKeyId(watchlistId, entitySourceId)).toBe(oldApiKeyId);
+        const { api_keys: keys } = await es.security.getApiKey({ id: oldApiKeyId });
+        expect(keys[0].invalidated).toBe(false);
+      });
+    });
+
     it('should invalidate the API key when an entity source is deleted', async () => {
       await utils.createSourceIndex(sourceIndexName);
       const { body: watchlist } = await entityAnalyticsApi

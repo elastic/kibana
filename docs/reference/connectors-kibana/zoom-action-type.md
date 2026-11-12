@@ -42,7 +42,7 @@ List meetings
 
 Get meeting details
 :   Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, passcode, and settings. Use this to understand what a meeting is about before looking at recordings or participants.
-    - `meetingId` (required): Meeting ID or UUID.
+    - `meetingId` (required): Numeric meeting ID (not a UUID).
 
 Get past meeting details
 :   Get summary information for a meeting that has already ended. Returns total minutes, participant count, and actual start and end times. Only works for past meetings.
@@ -73,7 +73,7 @@ Get meeting participants
 
 Get meeting registrants
 :   List people who registered for a meeting. Works for both upcoming and past meetings that have registration turned on.
-    - `meetingId` (required): Meeting ID.
+    - `meetingId` (required): Numeric meeting ID (not a UUID).
     - `status` (optional): Filter by registration status. Valid values: `pending`, `approved`, `denied`. Defaults to `approved`.
     - `pageSize` (optional): Number of results per page (1 to 300).
     - `nextPageToken` (optional): Pagination token from a previous response.

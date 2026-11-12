@@ -1,6 +1,6 @@
 ---
 name: workflows-managed-workflows
-description: Register and roll out managed workflows from a Kibana plugin using `@kbn/workflows-extensions` and `@kbn/workflows/managed`. Use when adding or modifying a code-owned workflow definition, `registerManagedWorkflowOwner`, `initManagedWorkflowsClient`, `install` / `uninstall` / `ready`, choosing `lifecycle` / `versionStrategy` / `enablement`, authoring `yaml` vs `yamlTemplate`, space-scoped vs global installs, `getWorkflowStatus`, or `execute`, or reviewing PRs that touch managed workflow definitions or rollout. Always ask for the user's plugin id first to locate the correct plugin and definition file paths.
+description: Register and roll out managed workflows from a Kibana plugin using `@kbn/workflows-extensions` and `@kbn/workflows/managed`. Use when adding or modifying a code-owned workflow definition, `registerManagedWorkflowOwner`, `initManagedWorkflowsClient`, `install` / `uninstall` / `ready` / `disable`, choosing `lifecycle` / `versionStrategy` / `enablement`, authoring `yaml` vs `yamlTemplate`, space-scoped vs global installs, `getWorkflowStatus`, or `execute`, or reviewing PRs that touch managed workflow definitions or rollout. Always ask for the user's plugin id first to locate the correct plugin and definition file paths.
 ---
 
 # Workflows — Managed Workflow Registration
@@ -64,13 +64,14 @@ See [MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md) for rationale an
 | Registry                | Definition in `managedWorkflowDefinitions` + id re-exported from `definitions/index.ts` |
 | `management`            | Explicit `lifecycle`, `versionStrategy`, `enablement` — no runtime default              |
 | `yaml` / `yamlTemplate` | Exactly one. A YAML change alone already triggers rollout via `definitionHash`          |
-| `version`               | Bump for non-YAML config, `yamlTemplate` closing over imports, or a deliberate signal   |
+| `version`               | Bump for non-YAML config, or a deliberate signal (telemetry reports `managedVersion`)   |
 | `setup()`               | `registerManagedWorkflowOwner` only — never `install`                                   |
 | `start()`               | `initManagedWorkflowsClient` → static `install`s → `ready()`                            |
 | `spaceId`               | Required on every operation; use `GLOBAL_WORKFLOW_SPACE_ID` explicitly for global       |
 | Raw request paths       | `kibana.request`, `with.request`, `with.form_data` all skip prefixing. Add `/s/<executing space>/` (usually `{{ workflow.spaceId }}`) |
 | Multi-instance          | Use `workflowIdSuffix` or full `workflowId` — bare id overwrites                        |
 | `execute`               | Real request + requesting user's space in options (not `'*'`)                           |
+| `disable`               | Requestless switch-off of the plugin's own workflow, bound ones included; enabling still needs a `manage_security` user. With `enablement: 'enforced'` the next managed update switches it back on — use `restorable` to keep it off |
 | Templates               | Add representative `values` to `templateRepresentativeValuesById` in registry tests     |
 
 ## Space scoping
@@ -150,10 +151,13 @@ When adding a managed workflow:
 
    - [ ] Id starts with `system-`; exported as a `const`
    - [ ] `pluginId` matches owning plugin
-   - [ ] `version: 1` (see the `version` row above; a YAML-only change on a fixed `yaml` definition does not need a bump)
+   - [ ] `version: 1` (see the `version` row above; a YAML-only change does not need a bump)
    - [ ] Exactly one of `yaml` or `yamlTemplate`
    - [ ] Explicit `management` policy chosen intentionally
    - [ ] Template defs use `as const satisfies ManagedWorkflowDefinition<TValues>`
+   - [ ] `yamlTemplate` returns the same YAML for the same values (no timestamps or random ids):
+         each document's `definitionHash` is the hash of its rendered YAML, so a varying render
+         reinstalls the document on every reconciliation
    - [ ] Added to `managedWorkflowDefinitions` in `definitions/index.ts`
    - [ ] Id re-exported from `definitions/index.ts`
    - [ ] Every raw request path (top-level `path` on `kibana.request`, `with.request.path`,

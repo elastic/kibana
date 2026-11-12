@@ -1,0 +1,26 @@
+{
+  "getAlertEvents": {
+    "queries": [
+      {
+        "source": "v2",
+        "method": "POST",
+        "path": "/api/v2/events/search"
+      }
+    ]
+  },
+  "scheduleDowntime": {
+    "input": {
+      "start": "2026-06-01T10:00:00Z",
+      "end": "2026-06-01T12:00:00Z"
+    }
+  },
+  "searchLogs": {
+    "queries": [
+      {
+        "source": "v2",
+        "method": "POST",
+        "path": "/api/v2/logs/events/search"
+      }
+    ]
+  }
+}

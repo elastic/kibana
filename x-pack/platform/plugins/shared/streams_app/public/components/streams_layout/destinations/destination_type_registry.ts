@@ -6,8 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
-import type { DestinationStorageKind, DestinationType } from './types';
+import { LOCAL_ELASTICSEARCH_LABEL, REMOTE_ELASTICSEARCH_LABEL } from './destination_type_config';
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type DestinationStorageKind,
+  type DestinationType,
+} from './types';
 
 /**
  * One entry per create-form choice. Only `available` choices are shown in the
@@ -32,8 +36,16 @@ export const DESTINATION_TYPE_DEFINITIONS: readonly DestinationTypeDefinition[] 
     testSubject: 'streamsCreateDestinationLocalElasticsearch',
   },
   {
+    storageKind: 'remote_elasticsearch',
+    unitType: REMOTE_ELASTICSEARCH_TYPE,
+    available: true,
+    label: REMOTE_ELASTICSEARCH_LABEL,
+    testSubject: 'streamsCreateDestinationRemoteElasticsearch',
+  },
+  {
     storageKind: 'external_storage',
-    available: false,
+    unitType: 's3',
+    available: true,
     label: i18n.translate('xpack.streams.destinations.externalStorageLabel', {
       defaultMessage: 'External storage',
     }),
