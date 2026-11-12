@@ -354,10 +354,44 @@ describe('reportConsistentFailureIssues', () => {
     ]);
   });
 
+  it('files a Cypress break by the full title in its JUnit name', async () => {
+    const file =
+      'x-pack/solutions/security/plugins/security_solution/public/management/cypress/e2e/artifacts/event_filters.cy.ts';
+    const { es } = mockEs(
+      brokenSince(computeTestID(file, 'Event Filters edits a filter'), 101, 102, {
+        config_path: null,
+        target_mode: 'unknown',
+        target_type: 'unknown',
+        suite_title: 'Event Filters',
+        config_category: null,
+      })
+    );
+    const { github, createIssue } = mockGithub();
+
+    const summary = await report({
+      es,
+      github,
+      failures: [
+        {
+          ...cypressFailure,
+          classname: `Security Solution Cypress.${file.replace(/\./g, '·')}`,
+          // Security Solution's junit_transformer follows the full title with the test's own title
+          name: 'Event Filters edits a filter edits a filter',
+        },
+      ],
+    });
+
+    expect(summary.created).toHaveLength(1);
+    expect(createIssue.mock.calls[0][0]).toBe('Failing Cypress suite: Event Filters');
+  });
+
   it('asks nothing when no failure has a test id', async () => {
     const { es, esql } = mockEs([]);
 
-    const summary = await report({ es, failures: [cypressFailure] });
+    const summary = await report({
+      es,
+      failures: [{ ...ftrFailure, classname: 'Chrome X-Pack UI Functional Tests' }],
+    });
 
     expect(esql).not.toHaveBeenCalled();
     expect(summary).toEqual({ created: [], tracked: [], skipped: [] });
