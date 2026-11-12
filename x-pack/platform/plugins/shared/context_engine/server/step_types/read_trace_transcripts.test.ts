@@ -7,6 +7,7 @@
 
 jest.mock('../dreaming/trace_rounds');
 
+import { DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS } from '../../common/step_types/read_trace_transcripts';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import { readTraceTranscripts } from '../dreaming/trace_rounds';
@@ -47,7 +48,9 @@ describe('readTraceTranscripts step', () => {
   });
 
   it("reads the AI index's trace sources as the workflow user, up to the settle time", async () => {
-    await expect(run({ ...input, after: 'trace-1', size: 20 })).resolves.toEqual({ output: read });
+    await expect(run({ ...input, after: 'trace-1', size: 20 })).resolves.toEqual({
+      output: { ...read, batches: [] },
+    });
     expect(readTraceTranscripts).toHaveBeenCalledWith({
       esClient,
       traces,
@@ -56,7 +59,30 @@ describe('readTraceTranscripts step', () => {
       after: 'trace-1',
       until: '2026-11-11T13:15:00.000Z',
       size: 20,
+      maxTokens: DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
     });
+  });
+
+  it('batches the rounds it read by conversation, up to the batch budget', async () => {
+    const round = (id: string, conversation: string) => ({
+      id,
+      type: 'trace.round',
+      title: '',
+      content: 'x'.repeat(400),
+      updated_at: '2026-11-11T13:00:00.000Z',
+      attributes: { 'trace.conversation_id': conversation },
+      permissions: { kibana: { privileges: [{ space: 'team-a' }] } },
+    });
+    const memories = [round('a1', 'a'), round('b1', 'b'), round('a2', 'a')];
+    jest.mocked(readTraceTranscripts).mockResolvedValue({ ...read, memories });
+
+    const result = await run({ ...input, max_tokens: 5000, batch_tokens: 200 });
+
+    expect(jest.mocked(readTraceTranscripts).mock.calls[0][0].maxTokens).toBe(5000);
+    expect(result.output?.batches.map((batch) => batch.map(({ id }) => id))).toEqual([
+      ['a1', 'a2'],
+      ['b1'],
+    ]);
   });
 
   it('takes the settle time it is given, and reads from since without an after', async () => {
@@ -69,7 +95,9 @@ describe('readTraceTranscripts step', () => {
 
   it('reads nothing, keeping the cursor, without trace sources or while memory or dreaming is off', async () => {
     get.mockResolvedValue({ id: 'support', traces: [] });
-    const empty = { output: { memories: [], resume_from: input.since, sources: [], skipped: 0 } };
+    const empty = {
+      output: { memories: [], batches: [], resume_from: input.since, sources: [], skipped: 0 },
+    };
     await expect(run()).resolves.toEqual(empty);
     get.mockResolvedValue({ id: 'support', traces });
     memoryEnabled = false;

@@ -141,6 +141,98 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
     );
   });
 
+  it('links stored items without memories: based on the memories their ends cite, with their permissions', async () => {
+    const team = {
+      kibana: { privileges: [{ space: 'default', name: ['ai_index:a/read'], count: 1 }] },
+    };
+    const other = {
+      kibana: { privileges: [{ space: 'default', name: ['ai_index:b/read'], count: 1 }] },
+    };
+    const stored: Record<string, Record<string, unknown>> = {
+      [customer.id]: {
+        ...customer,
+        permissions: team,
+        references: [{ uri: 'trace://round-1', relation: 'derived_from' }],
+      },
+      [montreal.id]: {
+        ...montreal,
+        permissions: team,
+        references: [
+          { uri: 'trace://round-1', relation: 'derived_from' },
+          { uri: 'session-memory://m-9', relation: 'derived_from' },
+        ],
+      },
+      'entity-city--lyon': {
+        id: 'entity-city--lyon',
+        type: 'entity.city',
+        title: 'Lyon',
+        permissions: team,
+        references: [{ uri: 'ki://mem-2', relation: 'derived_from' }],
+      },
+      'entity-city--paris': {
+        id: 'entity-city--paris',
+        type: 'entity.city',
+        title: 'Paris',
+        permissions: other,
+        references: [{ uri: 'ki://mem-3', relation: 'derived_from' }],
+      },
+    };
+    const esClient = createEsClient(stored);
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        items: [customer.id],
+        changes: {
+          relationships: [
+            { ...livesIn, description: 'The customer moved to Montreal.' },
+            { from: 'entity-city--lyon', relation: 'lives_in', to: montreal.id, description: 'D' },
+            { from: customer.id, relation: 'lives_in', to: 'entity-city--paris', description: 'D' },
+          ],
+        },
+      },
+      esClient,
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(output).toEqual({
+      created: 1,
+      updated: 0,
+      deleted: 0,
+      rejected: [
+        {
+          item: `relationship entity-city--lyon lives_in ${montreal.id}`,
+          reason: 'neither end is one of the items being linked',
+        },
+        {
+          item: `relationship ${customer.id} lives_in entity-city--paris`,
+          reason: `'${customer.id}' has different permissions than the memories behind it`,
+        },
+      ],
+    });
+    expect(stored[livesInId]).toEqual(
+      expect.objectContaining({
+        permissions: team,
+        references: [
+          { uri: `ki://${customer.id}`, relation: 'relates_to', description: 'from' },
+          { uri: `ki://${montreal.id}`, relation: 'relates_to', description: 'to' },
+          { uri: 'trace://round-1', relation: 'derived_from' },
+        ],
+      })
+    );
+  });
+
+  it('fails without the memories of a batch or the items to link', async () => {
+    const context = createMockStepContext({
+      input: { ai_index_id: 'support', changes: { relationships: [] } },
+      esClient: createEsClient({}),
+    });
+
+    await expect(definition(aiIndexService()).handler(context)).rejects.toThrow(
+      'Pass the memories of the batch, or the items to link'
+    );
+  });
+
   it('on a dry run, links the documents the batch would write and writes nothing', async () => {
     const stored: Record<string, Record<string, unknown>> = { [customer.id]: customer };
     const esClient = createEsClient(stored);

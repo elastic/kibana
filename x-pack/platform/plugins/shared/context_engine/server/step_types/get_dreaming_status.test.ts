@@ -26,7 +26,7 @@ describe('getDreamingStatusStepDefinition', () => {
     dreamingEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
-    source?: 'memories' | 'traces';
+    source?: 'memories' | 'traces' | 'relationships';
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
@@ -115,6 +115,40 @@ describe('getDreamingStatusStepDefinition', () => {
     });
     // Memory dreaming does not need trace sources.
     await expect(run()).resolves.toEqual({ output: { dream: true } });
+  });
+
+  it('links relationships only for an AI index that dreams with relationship types', async () => {
+    const withTypes = {
+      ...dreaming,
+      entities: { nodes: [{ type: 'customer' }] },
+      relationships: [{ type: 'knows' }],
+    };
+    const get = (config: Record<string, unknown>) =>
+      jest.fn().mockResolvedValue({ id: 'support', dreaming: config, traces: [] });
+
+    await expect(run({ source: 'relationships', get: get(withTypes) })).resolves.toEqual({
+      output: { dream: true },
+    });
+    await expect(run({ source: 'relationships' })).resolves.toEqual({
+      output: {
+        dream: false,
+        reason: "AI index 'support' has no relationship types to link with.",
+      },
+    });
+    // Relationship types without entity types link nothing.
+    await expect(
+      run({ source: 'relationships', get: get({ ...withTypes, entities: undefined }) })
+    ).resolves.toEqual({
+      output: {
+        dream: false,
+        reason: "AI index 'support' has no relationship types to link with.",
+      },
+    });
+    await expect(
+      run({ source: 'relationships', get: get({ ...withTypes, enabled: false }) })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
+    });
   });
 
   it('fails on any other error reading the AI index', async () => {

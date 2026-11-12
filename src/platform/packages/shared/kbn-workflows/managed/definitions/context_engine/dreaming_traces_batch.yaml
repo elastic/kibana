@@ -1,0 +1,244 @@
+version: '1'
+name: __NAME__
+description: 'Extracts long-term facts and entities from one batch of agent rounds, for trace dreaming, which runs the batches of a read at once.'
+enabled: false
+tags:
+  - context-engine
+  - memory
+  - dreaming
+  - traces
+settings:
+  timeout: '25m'
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  connector_id: __CONNECTOR_ID__
+  instructions: __INSTRUCTIONS__
+  fact_types: __FACT_TYPES__
+  entity_types: __ENTITY_TYPES__
+outputs:
+  - name: created
+    type: number
+  - name: updated
+    type: number
+  - name: deleted
+    type: number
+  - name: rejected
+    type: number
+triggers:
+  - type: manual
+    inputs:
+      additionalProperties: false
+      required:
+        - memories
+      properties:
+        memories:
+          type: array
+          description: The rounds of the batch, as readTraceTranscripts batched them.
+          items:
+            type: object
+        dry_run:
+          type: boolean
+          default: false
+          description: Report what the batch would write and reject, and write nothing.
+steps:
+  - name: extract
+    type: ai.prompt
+    connector-id: '{{ consts.connector_id }}'
+    connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: '30s'
+    with:
+      prompt: |
+        You extract long-term memory from the conversations users had with agents, of the kinds configured below:
+        {%- if consts.fact_types.size > 0 %}
+        - facts: separate pieces of knowledge, each readable on its own.
+        {%- endif %}
+        {%- if consts.entity_types.size > 0 %}
+        - entities: the things the conversations are about, each with a summary of what is known about it.
+        {%- endif %}
+
+        You are given ROUNDS (transcripts of agent rounds rebuilt from traces), whole conversations at a time.
+
+        A round is one exchange: a user message, the tools the agent called with what they returned, and the agent's answer. Each line starts with who it is from: User, Assistant, "Assistant called <tool>" or "Tool result". Take from a round what it states or settles: what the user says about themselves, their work, their preferences and their data, and what the tool results and the answer establish. What the user mentions in passing while asking for something else, such as what they own, a count, a price or something they did, counts as much as what they say on purpose. When the INSTRUCTIONS or the types call for it, also record what the agent's answer gave the user that they may come back to, such as a recommendation, a list, a schedule or a figure, as what the agent told the user. What the user is learning, working on or trying to get better at is knowledge about them, not only part of a request. Do not record what the agent only guessed or asked, small talk, the one-off request itself (but do record what it reveals), or a step of a task that does not stay true afterwards. A request the agent fulfilled with something the user may come back to, such as a schedule, a table, a plan or a list, is not one-off: when the INSTRUCTIONS or the types call for it, record what it produced, from its final version, with the specifics a later question needs, such as who has which shift on which day. A tool result is evidence; a failed or empty one establishes nothing.
+
+        Record every piece of knowledge in the ROUNDS that a configured type covers, the small ones too, not only the main topic of a conversation: a later question can be about any of them.
+
+        Return each item with a new key like "new:1", unique in your answer.
+
+        Write one item per piece of knowledge: when ROUNDS restate or refine it, write it once, with the refined values and every round that states it in source_memory_ids. When later ROUNDS change a value an item holds, such as a count, an amount, a measurement or a goal, write the latest value and keep the earlier ones with when they held, such as "gets 28 miles per gallon as of May 2023, down from 30 in February 2023". When later ROUNDS show it is no longer true, write what holds now.
+        {%- if consts.fact_types.size > 0 %}
+
+        Facts are read on their own, without the conversation, so write each one to stand alone: name what it is about in its title and content, keep every name, number, code and date exactly as stated, and give dates in full rather than as "yesterday" or "next week", working them out from when the round ended.
+
+        State the knowledge itself rather than quoting the conversation, and leave out who said it and how it was found. When a round holds several separate pieces of knowledge, write a fact for each.
+        {%- endif %}
+        {%- if consts.entity_types.size > 0 %}
+
+        Give every entity a content summary of what is known about it: its attribute values and the main facts about it. Name each entity by its canonical name, the same way every time: an entity is kept by its type and name, so one named the same in other ROUNDS is the same entity.
+        {%- endif %}
+
+        Give an entity or fact access_patterns when the ROUNDS show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the ROUNDS, such as a query a tool ran that returned rows; return none rather than invent an index or field. Each has:
+        - question_type: a short label for the kind of question.
+        - esql_template: the query with named ?param placeholders, without quotes, where the filters go. Scope an entity's queries to it, for example WHERE customer_id == ?customer.
+        - esql_example: the same query with real values from the ROUNDS in place of the placeholders.
+        - returns: a short description of what the query returns.
+        esql_example is run to verify it, and a pattern that fails is dropped, so it must be valid and runnable:
+        - Start with FROM <index>; use | between commands; use field names exactly as the ROUNDS give them, with backticks around names with spaces.
+        - Quote string literals with double quotes; do not quote numbers or booleans. Write dates in ISO 8601.
+        - Boolean fields take COUNT(*) WHERE field == true, never SUM()/AVG()/MIN()/MAX(). Only use AVG()/SUM() on numeric fields.
+        - Keep it cheap: end it with a small | LIMIT n (n <= 20).
+
+        Every item must list the ids of the ROUNDS it is based on in source_memory_ids, copied exactly as the ROUNDS give them, such as "trace:51fff8a2".
+
+        Ignore rounds that hold nothing worth remembering. An empty answer is valid.
+
+        FACT TYPES:
+        {%- for fact_type in consts.fact_types %}
+        - {{ fact_type.type }}{% if fact_type.description %}: {{ fact_type.description }}{% endif %}
+        {%- else %}
+        none: do not create facts.
+        {%- endfor %}
+        ENTITY TYPES:
+        {%- for entity_type in consts.entity_types %}
+        - {{ entity_type.type }}{% if entity_type.description %}: {{ entity_type.description }}{% endif %}{% if entity_type.attributes.size > 0 %} (attributes: {{ entity_type.attributes | join: ', ' }}){% endif %}
+        {%- else %}
+        none: do not create entities.
+        {%- endfor %}
+
+        INSTRUCTIONS:
+
+        {{ consts.instructions }}
+
+        ROUNDS (one per line; each conversation's rounds are together and in order, with its id in attributes["trace.conversation_id"]; updated_at is when the round ended):
+        {%- for round in inputs.memories %}
+        {{ round | json }}
+        {%- endfor %}
+      schema:
+        type: object
+        properties:
+          entities:
+            type: array
+            description: The entities the ROUNDS hold.
+            items:
+              type: object
+              properties:
+                ref:
+                  type: string
+                  description: A new key like "new:1", unique in your answer.
+                type:
+                  type: string
+                  description: One of the configured entity types.
+                title:
+                  type: string
+                  description: The canonical name of the entity.
+                description:
+                  type: string
+                  description: A one-line description.
+                content:
+                  type: string
+                  description: A short summary of what is known about the entity, its attribute values and the main facts about it, with exact values.
+                attributes:
+                  type: array
+                  description: Values for the attribute keys configured for this entity type.
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      value:
+                        type: string
+                    required:
+                      - key
+                      - value
+                access_patterns:
+                  type: array
+                  description: Questions a later agent could answer from the raw data about it.
+                  items:
+                    type: object
+                    properties:
+                      question_type:
+                        type: string
+                      esql_template:
+                        type: string
+                      esql_example:
+                        type: string
+                      returns:
+                        type: string
+                    required:
+                      - question_type
+                      - esql_template
+                      - esql_example
+                      - returns
+                source_memory_ids:
+                  type: array
+                  description: Ids of the ROUNDS this is based on. Required unless deleting.
+                  items:
+                    type: string
+              required:
+                - ref
+          facts:
+            type: array
+            description: The facts the ROUNDS hold.
+            items:
+              type: object
+              properties:
+                ref:
+                  type: string
+                  description: A new key like "new:1", unique in your answer.
+                type:
+                  type: string
+                  description: One of the configured fact types.
+                title:
+                  type: string
+                  description: A short label for the fact that names what it is about.
+                content:
+                  type: string
+                  description: The fact, stated so it can be used on its own, naming what it is about and keeping exact values.
+                access_patterns:
+                  type: array
+                  description: Questions a later agent could answer from the raw data about it.
+                  items:
+                    type: object
+                    properties:
+                      question_type:
+                        type: string
+                      esql_template:
+                        type: string
+                      esql_example:
+                        type: string
+                      returns:
+                        type: string
+                    required:
+                      - question_type
+                      - esql_template
+                      - esql_example
+                      - returns
+                source_memory_ids:
+                  type: array
+                  description: Ids of the ROUNDS this is based on. Required unless deleting.
+                  items:
+                    type: string
+              required:
+                - ref
+        required:
+          - entities
+          - facts
+
+  - name: apply_changes
+    type: context-engine.applyDreamChanges
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      memories: '${{ inputs.memories }}'
+      changes: '${{ steps.extract.output.content }}'
+      dry_run: '${{ inputs.dry_run == true }}'
+
+  - name: batch_output
+    type: workflow.output
+    with:
+      created: '${{ steps.apply_changes.output.created | default: 0 }}'
+      updated: '${{ steps.apply_changes.output.updated | default: 0 }}'
+      deleted: '${{ steps.apply_changes.output.deleted | default: 0 }}'
+      rejected: '${{ steps.apply_changes.output.rejected | size | default: 0 }}'
+      would_write: '${{ steps.apply_changes.output.would_write }}'

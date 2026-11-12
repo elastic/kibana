@@ -10,6 +10,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
@@ -19,7 +21,9 @@ import type { DreamingWorkflowsApi } from './schedule';
 import {
   createDreamingScheduleService,
   dreamingWorkflowIdFor,
+  relationshipsWorkflowIdFor,
   shouldDream,
+  traceDreamingBatchWorkflowIdFor,
   traceDreamingWorkflowIdFor,
 } from './schedule';
 
@@ -202,11 +206,14 @@ describe('createDreamingScheduleService', () => {
       });
 
       expect(traceDreamingWorkflowIdFor('support', SPACE)).toBe(traceWorkflowId);
-      const [[dreamingId, dreamingInstall], [traceId, traceInstall]] = client.install.mock.calls;
-      expect([dreamingId, traceId]).toEqual([
+      const [[dreamingId, dreamingInstall], [batchId, batchInstall], [traceId, traceInstall]] =
+        client.install.mock.calls;
+      expect([dreamingId, batchId, traceId]).toEqual([
         CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
         CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
       ]);
+      expect(batchInstall).toEqual(dreamingInstall);
       expect(traceInstall).toEqual(dreamingInstall);
       expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
         traceWorkflowId,
@@ -218,6 +225,49 @@ describe('createDreamingScheduleService', () => {
         type: 'workflow',
         value: traceWorkflowId,
       });
+    });
+
+    it('enables the batch workflow it runs each batch with, without making it an automation', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      const batchWorkflowId = traceDreamingBatchWorkflowIdFor('support', SPACE);
+      expect(batchWorkflowId).toBe(`${CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID}-${suffix}`);
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        batchWorkflowId,
+        { enabled: true },
+        SPACE,
+        request
+      );
+      expect(aiIndexService.addAutomation).not.toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: batchWorkflowId,
+      });
+    });
+
+    it('installs and attaches the relationships workflow last, to link what dreaming wrote', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      const relationshipsWorkflowId = relationshipsWorkflowIdFor('support', SPACE);
+      expect(relationshipsWorkflowId).toBe(`${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${suffix}`);
+      expect(client.install.mock.calls.map(([definitionId]) => definitionId)).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+      ]);
+      expect(aiIndexService.addAutomation.mock.calls.map(([, , { value }]) => value)).toEqual([
+        `${CONTEXT_ENGINE_DREAMING_WORKFLOW_ID}-${suffix}`,
+        traceWorkflowId,
+        relationshipsWorkflowId,
+      ]);
     });
 
     it('is installed whether or not the AI index has trace sources yet', async () => {
@@ -300,8 +350,9 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    // Three attempts for dreaming, then one for trace dreaming.
-    expect(client.uninstall).toHaveBeenCalledTimes(4);
+    // Three attempts for dreaming, then one each for the trace dreaming batch, trace dreaming and
+    // relationships.
+    expect(client.uninstall).toHaveBeenCalledTimes(6);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {
