@@ -3241,6 +3241,9 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_invest
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/alertzero-common-layer
 # Per-watch definitions without an override below fall back to @elastic/alertzero-common-layer.
 
+# Proposals managed workflows (proposal gate and resolution)
+src/platform/packages/shared/kbn-workflows/managed/definitions/proposals @elastic/alertzero-common-layer
+
 # Actions directories
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/actions/defend @elastic/security-defend-workflows
 
