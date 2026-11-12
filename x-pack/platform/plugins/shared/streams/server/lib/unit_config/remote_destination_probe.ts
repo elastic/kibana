@@ -9,14 +9,15 @@ import type { ProbeRemoteDestination, RemoteProbeResult } from './types';
 
 const REMOTE_PROBE_TIMEOUT_MS = 10_000;
 
-const ELASTIC_CLOUD_HOST_SUFFIX = '.elastic.cloud';
+// Same list as the streams-transpiler remote_elasticsearch destination.
+const ELASTIC_CLOUD_HOST_SUFFIXES = ['.elastic.cloud', '.elastic-cloud.com', '.cloud.es.io'];
 const PROMETHEUS_REMOTE_WRITE_PATH = '/_prometheus/api/v1/write';
 const PROMETHEUS_REMOTE_WRITE_ACTION = 'indices:data/write/prometheus/remote_write';
 // Temporary 4xx answers save with a warning, like a 5xx.
 const TRANSIENT_CLIENT_ERROR_STATUSES = new Set([408, 429]);
 
 const HOST_NOT_ALLOWED_MESSAGE =
-  'Remote Elasticsearch destinations must use an https:// Elastic Cloud endpoint whose host ends with .elastic.cloud.';
+  'Remote Elasticsearch destinations must use an https:// Elastic Cloud endpoint on .elastic.cloud, .elastic-cloud.com or .cloud.es.io. Copy the endpoint from your Elastic Cloud console.';
 const MISSING_API_KEY_MESSAGE = 'Remote Elasticsearch destinations need an API key.';
 const MALFORMED_API_KEY_MESSAGE =
   'The API key contains characters that cannot be sent in an HTTP header. Paste the key again.';
@@ -53,7 +54,7 @@ const parseAllowedEndpoint = (endpoint: string): URL | undefined => {
     !url.password &&
     !url.search &&
     !url.hash &&
-    url.hostname.endsWith(ELASTIC_CLOUD_HOST_SUFFIX);
+    ELASTIC_CLOUD_HOST_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix));
   return allowed ? url : undefined;
 };
 

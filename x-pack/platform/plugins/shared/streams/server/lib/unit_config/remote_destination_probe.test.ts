@@ -12,7 +12,7 @@ const API_KEY = 'SECRET-KEY-VALUE';
 const ENDPOINT = 'https://abc.elastic.cloud/base/';
 
 const HOST_COPY =
-  'Remote Elasticsearch destinations must use an https:// Elastic Cloud endpoint whose host ends with .elastic.cloud.';
+  'Remote Elasticsearch destinations must use an https:// Elastic Cloud endpoint on .elastic.cloud, .elastic-cloud.com or .cloud.es.io. Copy the endpoint from your Elastic Cloud console.';
 const NO_KEY_COPY = 'Remote Elasticsearch destinations need an API key.';
 const MALFORMED_KEY_COPY =
   'The API key contains characters that cannot be sent in an HTTP header. Paste the key again.';
@@ -74,6 +74,8 @@ describe('createRemoteDestinationProbe', () => {
   it.each([
     'https://abc.es.us-east-1.aws.elastic.cloud',
     'https://abc.es.us-east-1.aws.elastic.cloud:443/base/',
+    'https://abc.us-east-1.aws.elastic-cloud.com',
+    'https://my-alias.us-central1.gcp.cloud.es.io:9243',
   ])('checks the allowed host %s', async (endpoint) => {
     const fetchImpl = respond(204);
 
@@ -87,6 +89,10 @@ describe('createRemoteDestinationProbe', () => {
     'https://user:pass@abc.elastic.cloud',
     'https://notelastic.cloud',
     'https://elastic.cloud.example.com',
+    'https://elastic-cloud.com',
+    'https://notelastic-cloud.com',
+    'https://cloud.es.io.example.com',
+    'https://abc.us-east-1.aws.found.io',
     'https://abc.elastic.cloud/base/?a=1',
     'https://abc.elastic.cloud/base/#f',
     'not a url',

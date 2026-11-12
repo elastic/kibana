@@ -379,7 +379,7 @@ A successful PUT returns `{ acknowledged: true }`. When config-distributor valid
 
 Each new remote Elasticsearch destination, and each one whose endpoint or key changed, gets an empty `POST <endpoint>/_prometheus/api/v1/write` with its key before anything is stored. The PUT fails with 400 and stores nothing when:
 
-- the endpoint is not `https://` on a host ending in `.elastic.cloud`, or has credentials, a query or a fragment
+- the endpoint is not `https://` on a host ending in `.elastic.cloud`, `.elastic-cloud.com` or `.cloud.es.io`, or has credentials, a query or a fragment
 - the key is missing or has whitespace, control or non-ASCII characters
 - the save has more than 10 such remotes
 - the remote answers with a 4xx other than 408 or 429
