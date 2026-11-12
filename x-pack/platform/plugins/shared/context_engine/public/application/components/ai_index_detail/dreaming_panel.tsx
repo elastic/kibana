@@ -20,6 +20,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
   EuiTextArea,
@@ -38,6 +39,7 @@ import {
 import { matchingTemplateId } from '../../../../common/dreaming_templates';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { validateDreamingInterval } from '../../../../common/validation';
+import { useAiIndexDreaming } from '../../hooks/use_ai_index_dreaming';
 import { useAllDreamingTemplates } from '../../hooks/use_dreaming_templates';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useSaveDreamingConfig } from '../../hooks/use_save_dreaming_config';
@@ -261,7 +263,8 @@ interface DreamingPanelProps {
 export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
   const { navigateToContextEngine } = useNavigation();
   const [isJsonOpen, setIsJsonOpen] = useState(false);
-  const dreaming = aiIndex.dreaming ?? DREAMING_DISABLED;
+  const { dreaming: savedDreaming, isLoading } = useAiIndexDreaming(aiIndex.id, { enabled: true });
+  const dreaming = savedDreaming ?? DREAMING_DISABLED;
   const isSetUp = dreaming.enabled || draftBuildsAnything(draftOf(dreaming));
 
   return (
@@ -297,7 +300,9 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
         />
       </AiIndexDetailPanelDescription>
       <EuiSpacer size="l" />
-      {isSetUp ? (
+      {isLoading ? (
+        <EuiSkeletonText lines={3} data-test-subj="contextAiIndexDreamingLoading" />
+      ) : isSetUp ? (
         <DreamingEditor
           // Saved edits come back as a new config; start the editor over from it.
           key={JSON.stringify(dreaming)}

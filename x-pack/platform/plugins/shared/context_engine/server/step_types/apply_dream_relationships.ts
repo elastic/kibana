@@ -14,7 +14,7 @@ import {
   dreamRelationshipChangeSetSchema,
   type ApplyDreamRelationshipsOutput,
 } from '../../common/step_types/apply_dream_relationships';
-import type { AiIndexDest, AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexDest, AiIndexItem } from '../../common/http_api/ai_indices';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { findKiRevision, isKiDeleted } from '../ai_indices/ki_revision';
 import { applyOperations, type PlannedWrite } from '../dreaming/apply';
@@ -25,9 +25,9 @@ import {
   relationshipTypesOf,
   resolveRelationships,
 } from '../dreaming/resolve_relationships';
-import type { KiStepDependencies } from './helpers';
+import type { DreamingKiStepDependencies } from './helpers';
 import {
-  assertContextEngineEnabled,
+  assertDreamingAvailable,
   assertKiWritePrivilege,
   assertSameMemoryPermissions,
   assertWritableDest,
@@ -67,17 +67,17 @@ const findActiveKi = async ({
 
 export const getApplyDreamRelationshipsStepDefinition = ({
   getAiIndexService,
-  isContextEngineEnabled,
+  isDreamingAvailable,
   checkWritePrivilege,
   logger,
-}: KiStepDependencies) =>
+}: DreamingKiStepDependencies) =>
   createServerStepDefinition({
     ...applyDreamRelationshipsStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       const stepContext = context.contextManager.getContext();
       const { spaceId } = stepContext.workflow;
-      await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
+      await assertDreamingAvailable(isDreamingAvailable, spaceId);
       await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
       const {
@@ -96,7 +96,7 @@ export const getApplyDreamRelationshipsStepDefinition = ({
       const changeSet = parsed.data;
       assertSameMemoryPermissions(memories);
 
-      let aiIndex: AiIndexHttpItem;
+      let aiIndex: AiIndexItem;
       try {
         aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
       } catch (error) {

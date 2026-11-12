@@ -11,10 +11,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexDreamingConfig } from '../../../../common/dreaming';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
+import { useAiIndexDreaming } from '../../hooks/use_ai_index_dreaming';
 import { useAllDreamingTemplates } from '../../hooks/use_dreaming_templates';
 import { useSaveDreamingConfig } from '../../hooks/use_save_dreaming_config';
 import { DreamingPanel } from './dreaming_panel';
 
+jest.mock('../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
 jest.mock('../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
 jest.mock('../../hooks/use_dreaming_templates', () => ({ useAllDreamingTemplates: jest.fn() }));
 const navigateToContextEngine = jest.fn();
@@ -38,27 +40,34 @@ const factsOnly: AiIndexDreamingConfig = {
 const aiIndexWith = (
   dreaming: AiIndexDreamingConfig | undefined,
   overrides: Partial<AiIndexHttpItem> = {}
-): AiIndexHttpItem => ({
-  id: 'tickets',
-  managed: false,
-  dest: { type: 'index', value: 'ai-index-idx-tickets' },
-  automations: [],
-  sources: [],
-  traces: [],
-  date_created: '2026-11-01T00:00:00.000Z',
-  date_modified: '2026-11-01T00:00:00.000Z',
-  ...(dreaming && { dreaming }),
-  ...overrides,
+): { aiIndex: AiIndexHttpItem; dreaming: AiIndexDreamingConfig | undefined } => ({
+  aiIndex: {
+    id: 'tickets',
+    managed: false,
+    dest: { type: 'index', value: 'ai-index-idx-tickets' },
+    automations: [],
+    sources: [],
+    traces: [],
+    date_created: '2026-11-01T00:00:00.000Z',
+    date_modified: '2026-11-01T00:00:00.000Z',
+    ...overrides,
+  },
+  dreaming,
 });
 
-const renderPanel = (aiIndex: AiIndexHttpItem) =>
-  render(
+const renderPanel = (
+  { aiIndex, dreaming }: ReturnType<typeof aiIndexWith>,
+  isLoading: boolean = false
+) => {
+  jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming, isLoading });
+  return render(
     <I18nProvider>
       <EuiProvider>
         <DreamingPanel aiIndex={aiIndex} />
       </EuiProvider>
     </I18nProvider>
   );
+};
 
 describe('DreamingPanel', () => {
   beforeEach(() => {
@@ -79,6 +88,13 @@ describe('DreamingPanel', () => {
       isLoading: false,
       error: undefined,
     });
+  });
+
+  it('shows a skeleton while the config loads', () => {
+    renderPanel(aiIndexWith(undefined), true);
+
+    expect(screen.getByTestId('contextAiIndexDreamingLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexDreamingSetUp')).not.toBeInTheDocument();
   });
 
   it('links to the setup when dreaming was never set up', () => {

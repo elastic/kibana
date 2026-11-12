@@ -8,11 +8,11 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { isEqual } from 'lodash';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 
 /** Fields of an AI index a save can change; the id and timestamps are not compared. */
 export type AiIndexChangeField = Exclude<
-  keyof AiIndexHttpItem,
+  keyof AiIndexItem,
   'id' | 'date_created' | 'date_modified'
 >;
 
@@ -25,9 +25,9 @@ export interface AiIndexChange {
   /** The request that saved it. Handlers act on its behalf, for example to schedule workflows. */
   request: KibanaRequest;
   /** The AI index before the save; missing when the save created it. */
-  previous?: AiIndexHttpItem;
+  previous?: AiIndexItem;
   /** The AI index after the save; missing when the save deleted it. */
-  current?: AiIndexHttpItem;
+  current?: AiIndexItem;
   /**
    * The fields the save wrote, changed or not, when it wrote only some of them, such as
    * `feedback_analysis`. Missing: it wrote the whole AI index (create, replace or delete).
@@ -57,11 +57,11 @@ export interface AiIndexChangeHandler {
 
 /** The top-level fields whose value differs between two versions of an AI index. */
 export const diffAiIndex = (
-  previous: AiIndexHttpItem | undefined,
-  current: AiIndexHttpItem | undefined
+  previous: AiIndexItem | undefined,
+  current: AiIndexItem | undefined
 ): Set<AiIndexChangeField> => {
-  const before: Partial<AiIndexHttpItem> = previous ?? {};
-  const after: Partial<AiIndexHttpItem> = current ?? {};
+  const before: Partial<AiIndexItem> = previous ?? {};
+  const after: Partial<AiIndexItem> = current ?? {};
   const changed = new Set<AiIndexChangeField>();
   for (const field of new Set([...Object.keys(before), ...Object.keys(after)])) {
     if (IGNORED_FIELDS.has(field)) {

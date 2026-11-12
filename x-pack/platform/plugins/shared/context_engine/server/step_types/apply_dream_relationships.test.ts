@@ -65,10 +65,15 @@ const createEsClient = (stored: Record<string, Record<string, unknown>>) => ({
 });
 
 describe('getApplyDreamRelationshipsStepDefinition', () => {
-  const definition = (aiIndexService: Partial<AiIndexService>, checkWritePrivilege = true) =>
+  const definition = (
+    aiIndexService: Partial<AiIndexService>,
+    checkWritePrivilege = true,
+    dreamingAvailable = true
+  ) =>
     getApplyDreamRelationshipsStepDefinition({
       getAiIndexService: () => aiIndexService as AiIndexService,
       isContextEngineEnabled: async () => true,
+      isDreamingAvailable: async () => dreamingAvailable,
       checkWritePrivilege: async () => checkWritePrivilege,
       ...mockKiStepTelemetry(),
     });
@@ -258,6 +263,23 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
     await expect(definition(aiIndexService(), false).handler(context)).rejects.toThrow(
       'Insufficient privileges'
     );
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('fails while dreaming is unavailable, before writing anything', async () => {
+    const esClient = createEsClient({});
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [memory],
+        changes: { relationships: [{ ...livesIn, description: 'Moved.' }] },
+      },
+      esClient,
+    });
+
+    await expect(definition(aiIndexService(), true, false).handler(context)).rejects.toMatchObject({
+      type: 'FeatureDisabledError',
+    });
     expect(esClient.index).not.toHaveBeenCalled();
   });
 });

@@ -460,6 +460,7 @@ const deleteDocument = async (context: ApplyContext, kiId: string): Promise<Dele
       dest,
       kiId,
       writer,
+      deleteLinkedRelationships: true,
       refresh: !skipRefresh,
       abortSignal,
     });

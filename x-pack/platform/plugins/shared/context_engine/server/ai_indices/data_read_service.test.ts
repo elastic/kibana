@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/core-security-server';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
@@ -22,7 +22,7 @@ const describeAiIndexMock = jest.mocked(describeAiIndex);
 const filterReadableAiIndicesMock = jest.mocked(filterReadableAiIndices);
 const probeAiIndicesMock = jest.mocked(probeAiIndices);
 
-const aiIndex: AiIndexHttpItem = {
+const aiIndex: AiIndexItem = {
   id: 'support',
   dest: { type: 'index', value: 'ai-index-idx-support' },
   managed: false,
@@ -42,6 +42,7 @@ describe('AiIndexDataReadService', () => {
   const aiIndexService = { get: jest.fn(), list: jest.fn() };
   const logger = loggingSystemMock.createLogger();
   const isMemoryEnabled = jest.fn().mockResolvedValue(true);
+  const isDreamingEnabled = jest.fn().mockResolvedValue(true);
   const service = new AiIndexDataReadService({
     esClient,
     spaceId: 'marketing',
@@ -49,6 +50,7 @@ describe('AiIndexDataReadService', () => {
     aiIndexService,
     logger,
     isMemoryEnabled,
+    isDreamingEnabled,
   });
 
   beforeEach(() => {
@@ -137,6 +139,7 @@ describe('AiIndexDataReadService', () => {
         aiIndex,
         spaceId: 'marketing',
         includeMemory: true,
+        dreamingEnabled: true,
       });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -217,7 +220,7 @@ describe('AiIndexDataReadService', () => {
   });
 
   describe('list', () => {
-    const withId = (id: string): AiIndexHttpItem => ({ ...aiIndex, id });
+    const withId = (id: string): AiIndexItem => ({ ...aiIndex, id });
     const registry = ['readable', 'forbidden'].map(withId);
 
     it('lists the space registry filtered to readable entries and audit-logs success', async () => {

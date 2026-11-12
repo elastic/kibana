@@ -31,9 +31,9 @@ export const useSaveDreamingConfig = () => {
   const { mutateAsync, isLoading } = useMutation<unknown, Error, SaveDreamingConfigArgs>({
     mutationFn: ({ aiIndexId, config }) => setAiIndexDreaming(http, { aiIndexId, config }),
     onSuccess: (_, { aiIndexId }) => {
-      // The AI index carries its dreaming config, and its other panels save it back whole.
-      queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.detail(aiIndexId) });
-      queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
+      queryClient.invalidateQueries({
+        queryKey: contextEngineQueryKeys.aiIndex.dreaming(aiIndexId),
+      });
     },
     onError: (error) => {
       const toastMessage = getErrorMessage(error);

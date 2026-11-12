@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
+import { Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
-import { isDreamingConfigured } from '../../../common/dreaming';
+import { takesMemories } from '../../../common/dreaming';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
@@ -27,9 +27,11 @@ import {
 } from '../components/ai_index_detail';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
+import { useDreamingEnabled } from '../hooks/use_dreaming_enabled';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
@@ -106,19 +108,23 @@ export const AiIndexDetailPage = () => {
   const { discoverHref, indexManagementHref } = useAiIndexDestLinks(aiIndex?.dest);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const isMemoryEnabled = useMemoryEnabled();
+  const isDreamingEnabled = useDreamingEnabled();
   const isSourcesTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
   const isKnowledgeIndicatorsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators, exact: true }) !== null;
   const isSettingsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
-  // Dreaming, the only setting so far, builds long-term memory, so it needs the memory feature.
-  const showSettingsTab = isMemoryEnabled || isSettingsTab;
+  // Dreaming is the only setting so far.
+  const showSettingsTab = isDreamingEnabled;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
   const [showCreatedCallout, setShowCreatedCallout] = useState(
     () => location.state?.aiIndexCreated === true
   );
+  const { dreaming } = useAiIndexDreaming(resolvedAiIndexId, {
+    enabled: isDreamingEnabled && showCreatedCallout,
+  });
 
   // Hide the callout as soon as the user adds a source.
   useEffect(() => {
@@ -290,7 +296,10 @@ export const AiIndexDetailPage = () => {
       {showCreatedCallout && (
         <AiIndexCreatedCallout
           onDismiss={() => setShowCreatedCallout(false)}
-          showMemory={isMemoryEnabled && isDreamingConfigured(aiIndex?.dreaming)}
+          showMemory={
+            isMemoryEnabled &&
+            takesMemories({ managed: aiIndex?.managed ?? false, dreaming }, isDreamingEnabled)
+          }
         />
       )}
       <DescriptionPanel
@@ -374,7 +383,11 @@ export const AiIndexDetailPage = () => {
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>
-        {aiIndex ? <DreamingPanel aiIndex={aiIndex} /> : null}
+        {!isDreamingEnabled ? (
+          <Redirect to={getAiIndexDetailPath(resolvedAiIndexId)} />
+        ) : aiIndex ? (
+          <DreamingPanel aiIndex={aiIndex} />
+        ) : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detail} exact>
         {overviewTabContent}

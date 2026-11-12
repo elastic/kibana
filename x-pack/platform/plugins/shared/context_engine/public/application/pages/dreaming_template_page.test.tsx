@@ -18,7 +18,10 @@ import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDreamingTemplatePath } from '../paths';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
+import { useDreamingEnabled } from '../hooks/use_dreaming_enabled';
 import { DreamingTemplatePage } from './dreaming_template_page';
+
+jest.mock('../hooks/use_dreaming_enabled', () => ({ useDreamingEnabled: jest.fn() }));
 
 const INDEX = {
   templates: [
@@ -80,6 +83,9 @@ const renderPage = () => {
                   exact
                   component={DreamingTemplatePage}
                 />
+                <Route path={CONTEXT_ENGINE_PATHS.detail} exact>
+                  <div data-test-subj="aiIndexDetailRoute" />
+                </Route>
               </MemoryRouter>
             </QueryClientProvider>
           </KibanaContextProvider>
@@ -104,6 +110,19 @@ const putBody = (services: ReturnType<typeof renderPage>) =>
   JSON.parse(((services.http.put.mock.calls[0] as unknown[])[1] as { body: string }).body);
 
 describe('DreamingTemplatePage', () => {
+  beforeEach(() => {
+    jest.mocked(useDreamingEnabled).mockReturnValue(true);
+  });
+
+  it('redirects to the AI index while dreaming is off', () => {
+    jest.mocked(useDreamingEnabled).mockReturnValue(false);
+    const services = renderPage();
+
+    expect(screen.getByTestId('aiIndexDetailRoute')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextDreamingTemplatePage')).not.toBeInTheDocument();
+    expect(services.http.get).not.toHaveBeenCalled();
+  });
+
   it('lists the examples and Custom, starting from the first, with its facts and entities off', async () => {
     const services = renderPage();
 
@@ -159,8 +178,8 @@ describe('DreamingTemplatePage', () => {
       )
     );
     expect(services.http.put).toHaveBeenCalledWith(
-      '/api/context_engine/ai_index/tickets/_dreaming',
-      expect.objectContaining({ version: '2023-10-31' })
+      '/internal/context_engine/ai_index/tickets/dreaming',
+      expect.objectContaining({ version: '1' })
     );
     expect(putBody(services)).toEqual({
       enabled: true,

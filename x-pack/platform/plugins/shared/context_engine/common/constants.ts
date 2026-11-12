@@ -15,7 +15,7 @@ export const AI_INDEX_BY_ID_PATH = `${AI_INDEX_PATH}/{aiIndexId}`;
 /** Id-less; ids cannot start with `_` (`AI_INDEX_ID_PATTERN`), so this never collides with `{aiIndexId}`. */
 export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
 export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
-export const AI_INDEX_DREAMING_PATH = `${AI_INDEX_BY_ID_PATH}/_dreaming`;
+export const AI_INDEX_DREAMING_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/dreaming`;
 export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;

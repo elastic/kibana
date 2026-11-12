@@ -54,8 +54,6 @@ import {
   validateSignalWindowCoversInterval,
 } from '../../../common/validation';
 import { validateSignalFilter } from '../../ai_indices/signal_filter';
-import { dreamingConfigSchema } from './dreaming_schema';
-
 const aiIndexIdSchema = schema.string({
   minLength: 1,
   maxLength: MAX_AI_INDEX_ID_LENGTH,
@@ -267,14 +265,12 @@ const aiIndexPropertiesSchema = {
   memory_enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description:
-          'Deprecated and ignored. An AI Index takes memories while its `dreaming` config is set up.',
+        description: 'Deprecated and ignored.',
         deprecated: true,
       },
     })
   ),
   feedback_analysis: schema.maybe(feedbackAnalysisSchema),
-  dreaming: schema.maybe(dreamingConfigSchema),
   dest: aiIndexDestSchema,
   automations: schema.arrayOf(aiIndexAutomationSchema, {
     maxSize: MAX_AI_INDEX_AUTOMATIONS,
@@ -572,7 +568,6 @@ export const aiIndexHttpItemResponseSchema = () =>
       },
     }),
     feedback_analysis: schema.maybe(feedbackAnalysisResponseSchema()),
-    dreaming: schema.maybe(dreamingConfigSchema),
   });
 
 export const createAiIndexResponseSchema = () =>

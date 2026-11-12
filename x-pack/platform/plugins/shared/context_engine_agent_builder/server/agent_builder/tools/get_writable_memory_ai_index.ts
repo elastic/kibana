@@ -6,12 +6,15 @@
  */
 
 import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { isDreamingConfigured } from '@kbn/context-engine-plugin/common/dreaming';
-import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
+import { takesMemories } from '@kbn/context-engine-plugin/common/dreaming';
+import type { AiIndexItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 
 export const getWritableMemoryAiIndex = async ({
   aiIndexId,
@@ -25,20 +28,25 @@ export const getWritableMemoryAiIndex = async ({
   request: KibanaRequest;
   getAiIndexService: () => Promise<AiIndexService>;
   getCoreStart: () => Promise<CoreStart>;
-}): Promise<AiIndexHttpItem> => {
+}): Promise<AiIndexItem> => {
   const coreStart = await getCoreStart();
   const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
   const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
-  const memoryEnabled = await globalUiSettings.get<boolean>(
-    CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID
-  );
+  const [memoryEnabled, dreamingEnabled] = await Promise.all([
+    globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID),
+    globalUiSettings.get<boolean>(CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID),
+  ]);
   const aiIndex = await (await getAiIndexService()).get(aiIndexId, spaceId);
 
   if (!memoryEnabled) {
     throw new Error('Context Engine memory is not enabled.');
   }
-  if (!isDreamingConfigured(aiIndex.dreaming)) {
-    throw new Error(`AI index '${aiIndexId}' does not take memories: dreaming is not set up.`);
+  if (!takesMemories(aiIndex, dreamingEnabled ?? false)) {
+    throw new Error(
+      dreamingEnabled
+        ? `AI index '${aiIndexId}' does not take memories: dreaming is not set up.`
+        : `AI index '${aiIndexId}' does not take memories.`
+    );
   }
   if (isIndexPattern(aiIndex.dest.value)) {
     throw new Error(

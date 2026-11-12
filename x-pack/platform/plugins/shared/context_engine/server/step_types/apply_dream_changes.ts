@@ -14,15 +14,15 @@ import {
 } from '../../common/step_types/apply_dream_changes';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { findKiRevision, isKiDeleted, type StoredKi } from '../ai_indices/ki_revision';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { createVerifyEsql, keepVerifiedPatterns } from '../dreaming/access_patterns';
 import { applyOperations, type PlannedWrite } from '../dreaming/apply';
 import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
 import { isVisibleInSpace } from '../dreaming/permissions';
 import { referencedIds, resolveChangeSet, vocabularyOf } from '../dreaming/resolve_change_set';
-import type { KiStepDependencies } from './helpers';
+import type { DreamingKiStepDependencies } from './helpers';
 import {
-  assertContextEngineEnabled,
+  assertDreamingAvailable,
   assertKiWritePrivilege,
   assertSameMemoryPermissions,
   assertWritableDest,
@@ -36,17 +36,17 @@ const isInactiveStatus = (status: string | undefined): boolean =>
 
 export const getApplyDreamChangesStepDefinition = ({
   getAiIndexService,
-  isContextEngineEnabled,
+  isDreamingAvailable,
   checkWritePrivilege,
   logger,
-}: KiStepDependencies) =>
+}: DreamingKiStepDependencies) =>
   createServerStepDefinition({
     ...applyDreamChangesStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       const stepContext = context.contextManager.getContext();
       const { spaceId } = stepContext.workflow;
-      await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
+      await assertDreamingAvailable(isDreamingAvailable, spaceId);
       await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
       const { ai_index_id: aiIndexId, memories, dry_run: dryRun = false } = context.input;
@@ -60,7 +60,7 @@ export const getApplyDreamChangesStepDefinition = ({
       const changeSet = parsed.data;
       assertSameMemoryPermissions(memories);
 
-      let aiIndex: AiIndexHttpItem;
+      let aiIndex: AiIndexItem;
       try {
         aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
       } catch (error) {

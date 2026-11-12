@@ -10,7 +10,11 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { StepContext } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiWriter } from '../ai_indices/ki_revision';
@@ -38,12 +42,20 @@ export interface KiStepDependencies {
   logger: Logger;
 }
 
+/** Dependencies of the KI steps that behave differently while dreaming is unavailable. */
+export interface DreamingKiStepDependencies extends KiStepDependencies {
+  /** Whether Context Engine, and its global memory and dreaming settings, are on in this space. */
+  isDreamingAvailable: (spaceId: string) => Promise<boolean>;
+}
+
 /** Dependencies injected into the dreaming step definition factories. */
 export interface DreamingStepDependencies {
   getAiIndexService: () => AiIndexService;
   isContextEngineEnabled: (spaceId: string) => Promise<boolean>;
   /** Whether the global Context Engine memory setting is on. */
   isMemoryEnabled: () => Promise<boolean>;
+  /** Whether the global Context Engine dreaming setting is on. */
+  isDreamingEnabled: () => Promise<boolean>;
   /** Whether the request has the Context Engine read API privilege in this space. */
   checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
 }
@@ -216,6 +228,19 @@ export const assertContextEngineEnabled = async (
     throw new ExecutionError({
       type: 'FeatureDisabledError',
       message: `Context Engine is disabled. Enable the '${CONTEXT_ENGINE_ENABLED_SETTING_ID}' advanced setting to use this step.`,
+    });
+  }
+};
+
+/** Fails the step when Context Engine, or its global memory or dreaming setting, is off. */
+export const assertDreamingAvailable = async (
+  isDreamingAvailable: (spaceId: string) => Promise<boolean>,
+  spaceId: string
+): Promise<void> => {
+  if (!(await isDreamingAvailable(spaceId))) {
+    throw new ExecutionError({
+      type: 'FeatureDisabledError',
+      message: `Context Engine dreaming is disabled. Enable the '${CONTEXT_ENGINE_ENABLED_SETTING_ID}', '${CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID}' and '${CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID}' advanced settings to use this step.`,
     });
   }
 };

@@ -17,7 +17,10 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
@@ -87,6 +90,7 @@ export class ContextEnginePlugin
   private workflowsManagement?: WorkflowEnablementApi;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
+  private isGlobalDreamingEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private readonly aiIndexChanges: AiIndexChangeNotifier;
   private analyticsService?: ContextEngineAnalyticsService;
@@ -188,6 +192,20 @@ export class ContextEnginePlugin
         requiresPageReload: false,
         readonly: false,
       },
+      [CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID]: {
+        name: i18n.translate('xpack.contextEngine.uiSettings.dreaming.name', {
+          defaultMessage: 'Context Engine dreaming',
+        }),
+        description: i18n.translate('xpack.contextEngine.uiSettings.dreaming.description', {
+          defaultMessage:
+            'Turns the memories agents save in Context Engine AI indices into long-term facts, entities and relationships. Needs Context Engine memory. While on, an AI index takes memories only once dreaming is set up for it.',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        experimental: true,
+        requiresPageReload: false,
+        readonly: false,
+      },
     });
 
     registerSignalGeneratorTaskDefinition({
@@ -230,6 +248,19 @@ export class ContextEnginePlugin
       }
       return this.scheduleService;
     };
+    const isContextEngineEnabled = async (spaceId: string) => {
+      const [coreStart] = await coreSetup.getStartServices();
+      return isContextEngineEnabledInSpace({
+        savedObjects: coreStart.savedObjects,
+        uiSettings: coreStart.uiSettings,
+        spaceId,
+      });
+    };
+    const isDreamingAvailable = async (spaceId: string) =>
+      (await isContextEngineEnabled(spaceId)) &&
+      (await this.isGlobalMemoryEnabled()) &&
+      (await this.isGlobalDreamingEnabled());
+
     this.aiIndexChanges.register(createFeedbackAnalysisChangeHandler(getScheduleService));
     this.aiIndexChanges.register(
       createDreamingChangeHandler(() => {
@@ -237,17 +268,20 @@ export class ContextEnginePlugin
           throw new Error('Dreaming schedule service not available — plugin has not started');
         }
         return this.dreamingScheduleService;
-      })
+      }, isDreamingAvailable)
     );
 
-    const isMemoryEnabled = async (request: KibanaRequest) => {
+    const isGlobalSettingEnabled = async (request: KibanaRequest, settingId: string) => {
       const [coreStart] = await coreSetup.getStartServices();
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
       const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
-      return (
-        (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false
-      );
+      return (await globalUiSettings.get<boolean>(settingId)) ?? false;
     };
+    const isMemoryEnabled = (request: KibanaRequest) =>
+      isGlobalSettingEnabled(request, CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID);
+    const isDreamingEnabled = async (request: KibanaRequest) =>
+      (await isMemoryEnabled(request)) &&
+      (await isGlobalSettingEnabled(request, CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID));
 
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
@@ -257,6 +291,7 @@ export class ContextEnginePlugin
       getImprovementsService,
       aiIndexChanges: this.aiIndexChanges,
       isMemoryEnabled,
+      isDreamingEnabled,
       getAiIndexDataReadService: (params) => {
         if (!this.createAiIndexDataReadService) {
           throw new Error('AI index read service not available — plugin has not started');
@@ -283,15 +318,6 @@ export class ContextEnginePlugin
       analyticsService,
     });
 
-    const isContextEngineEnabled = async (spaceId: string) => {
-      const [coreStart] = await coreSetup.getStartServices();
-      return isContextEngineEnabledInSpace({
-        savedObjects: coreStart.savedObjects,
-        uiSettings: coreStart.uiSettings,
-        spaceId,
-      });
-    };
-
     const checkContextEnginePrivilege =
       (privilege: string) => async (request: KibanaRequest, spaceId: string) => {
         const [, startDeps] = await coreSetup.getStartServices();
@@ -314,6 +340,7 @@ export class ContextEnginePlugin
       logger: this.logger.get('context_steps'),
       getAiIndexService,
       isContextEngineEnabled,
+      isDreamingAvailable,
       checkWritePrivilege,
       verifyKi,
       feedbackAnalysis: {
@@ -332,6 +359,7 @@ export class ContextEnginePlugin
         getAiIndexService,
         isContextEngineEnabled,
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
+        isDreamingEnabled: () => this.isGlobalDreamingEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
       },
     });
@@ -422,6 +450,8 @@ export class ContextEnginePlugin
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
     const createImprovementsService = this.createImprovementsService;
 
+    const globalSettingsFor = (request: KibanaRequest) =>
+      coreStart.uiSettings.globalAsScopedToClient(coreStart.savedObjects.getScopedClient(request));
     this.createAiIndexDataReadService = ({ esClient, request }) =>
       new AiIndexDataReadService({
         esClient,
@@ -429,13 +459,14 @@ export class ContextEnginePlugin
         auditLogger: coreStart.security.audit.asScoped(request),
         aiIndexService,
         logger: this.logger,
-        isMemoryEnabled: async () => {
-          const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-          const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
-          return (
-            (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false
-          );
-        },
+        isMemoryEnabled: async () =>
+          (await globalSettingsFor(request).get<boolean>(
+            CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID
+          )) ?? false,
+        isDreamingEnabled: async () =>
+          (await globalSettingsFor(request).get<boolean>(
+            CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID
+          )) ?? false,
       });
     const createAiIndexDataReadService = this.createAiIndexDataReadService;
 
@@ -475,6 +506,8 @@ export class ContextEnginePlugin
       false;
     this.isGlobalMemoryEnabled = async () =>
       (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false;
+    this.isGlobalDreamingEnabled = async () =>
+      (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID)) ?? false;
 
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
       this.logger.warn(

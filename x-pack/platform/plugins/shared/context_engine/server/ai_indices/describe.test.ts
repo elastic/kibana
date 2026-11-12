@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { describeAiIndex } from './describe';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
@@ -18,7 +18,7 @@ jest.mock('./describe_aggregations');
 const describeAiIndexFieldsMock = jest.mocked(describeAiIndexFields);
 const describeAiIndexAggregationsMock = jest.mocked(describeAiIndexAggregations);
 
-const aiIndex: AiIndexHttpItem = {
+const aiIndex: AiIndexItem = {
   id: 'support',
   description: 'Support KIs',
   dest: { type: 'index', value: 'ai-index-idx-support*' },
@@ -52,7 +52,13 @@ const memoryAwareExampleQueriesBlock = [
 
 describe('describeAiIndex', () => {
   const esClient = {} as ElasticsearchClient;
-  const params = { esClient, aiIndex, spaceId: 'marketing', includeMemory: false };
+  const params = {
+    esClient,
+    aiIndex,
+    spaceId: 'marketing',
+    includeMemory: false,
+    dreamingEnabled: true,
+  };
 
   beforeEach(() => {
     describeAiIndexFieldsMock.mockReset();
@@ -425,5 +431,50 @@ describe('describeAiIndex', () => {
     expect(response).not.toContain('platform.context_engine.remember');
     expect(response).not.toContain('memory.session');
     expect(response.endsWith(exampleQueriesBlock)).toBe(true);
+  });
+
+  describe('while dreaming is off', () => {
+    const dreaming = { enabled: true, facts: [{ type: 'preference' }] };
+
+    it('renders memory capability for an AI index that is not managed, without dreamed types', async () => {
+      const response = await describeAiIndex({
+        ...params,
+        aiIndex: { ...aiIndex, dreaming },
+        includeMemory: true,
+        dreamingEnabled: false,
+      });
+
+      expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ dreamedPrefixes: [], dreamedTypes: [] })
+      );
+      expect(response).toContain('\nMemory\nThis AI index takes memories.\n');
+      expect(response).not.toContain('dreaming is set up');
+      expect(response).not.toContain('Fact types');
+      expect(response).toContain(
+        'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:'
+      );
+    });
+
+    it('follows the memory_enabled the AI index was saved with', async () => {
+      const response = await describeAiIndex({
+        ...params,
+        aiIndex: { ...aiIndex, memory_enabled: false },
+        includeMemory: true,
+        dreamingEnabled: false,
+      });
+
+      expect(response).not.toContain('\nMemory\n');
+    });
+
+    it('omits memory capability for a managed AI index', async () => {
+      const response = await describeAiIndex({
+        ...params,
+        aiIndex: { ...aiIndex, managed: true },
+        includeMemory: true,
+        dreamingEnabled: false,
+      });
+
+      expect(response).not.toContain('\nMemory\n');
+    });
   });
 });

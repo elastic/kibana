@@ -117,7 +117,7 @@ export type DreamingTypesConfig = Pick<
   'facts' | 'entities' | 'relationships'
 >;
 
-/** Response of `GET` and `PUT /api/context_engine/ai_index/{aiIndexId}/_dreaming`. */
+/** Response of `GET` and `PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming`. */
 export interface GetAiIndexDreamingResponse {
   dreaming: AiIndexDreamingConfig;
 }
@@ -146,11 +146,24 @@ export const dreamingTypesOf = ({
 };
 
 /**
- * Whether an AI index takes memories: its dreaming config is set up, on or off. `enabled` only
- * decides whether dreaming runs on its schedule.
+ * Whether an AI index's dreaming config is set up, on or off. `enabled` only decides whether
+ * dreaming runs on its schedule.
  */
 export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
   dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
+
+/**
+ * Whether an AI index takes memories. With dreaming on: while its dreaming config is set up.
+ * Otherwise: as the deprecated `memory_enabled` it was saved with says, or when it is not managed.
+ */
+export const takesMemories = (
+  {
+    dreaming,
+    managed,
+    memory_enabled: memoryEnabled,
+  }: { dreaming?: AiIndexDreamingConfig; managed: boolean; memory_enabled?: boolean },
+  dreamingEnabled: boolean
+): boolean => (dreamingEnabled ? isDreamingConfigured(dreaming) : memoryEnabled ?? !managed);
 
 /** Whether a config builds anything at all: at least one fact or entity type. */
 export const dreamingBuildsAnything = (config: DreamingTypesConfig): boolean => {

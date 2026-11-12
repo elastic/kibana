@@ -19,6 +19,7 @@ import {
   CONTEXT_ENGINE_SIGNALS_SKILL_ID,
 } from '../common/agent_builder_skills';
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
+import { CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -37,10 +38,12 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
   const setup = ({
     aiIndices,
     authorized = true,
+    dreamingEnabled = true,
   }: {
     aiIndices: unknown[];
     /** Outcome of the privilege check: granted, denied, or the error it rejects with. */
     authorized?: boolean | Error;
+    dreamingEnabled?: boolean;
   }) => {
     const checkPrivileges =
       authorized instanceof Error
@@ -57,9 +60,16 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     const getAiIndexDataReadService = jest.fn().mockReturnValue({ list });
     const asCurrentUser = {};
     const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
+    const globalSettingsGet = jest.fn().mockResolvedValue(dreamingEnabled);
     const coreSetup = {
       getStartServices: jest.fn().mockResolvedValue([
-        { elasticsearch: { client: { asScoped } } },
+        {
+          elasticsearch: { client: { asScoped } },
+          savedObjects: { getScopedClient: jest.fn() },
+          uiSettings: {
+            globalAsScopedToClient: jest.fn().mockReturnValue({ get: globalSettingsGet }),
+          },
+        },
         {
           contextEngine: { getAiIndexDataReadService },
           security,
@@ -101,6 +111,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       asCurrentUser,
       security,
       checkPrivileges,
+      globalSettingsGet,
     };
   };
 
@@ -144,6 +155,29 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         memoryEnabled: true,
       },
     ]);
+  });
+
+  it('falls back to the saved memory_enabled, then to not managed, while dreaming is globally off', async () => {
+    const { resolver, globalSettingsGet } = setup({
+      dreamingEnabled: false,
+      aiIndices: [
+        { id: 'custom', managed: false, dest: { type: 'index', value: 'idx-custom' } },
+        { id: 'managed', managed: true, dest: { type: 'index', value: 'idx-managed' } },
+        {
+          id: 'opted-out',
+          managed: false,
+          memory_enabled: false,
+          dest: { type: 'index', value: 'idx-opted-out' },
+        },
+      ],
+    });
+
+    expect(await resolver({ ids: ['custom', 'managed', 'opted-out'], request })).toEqual([
+      { id: 'custom', esqlTarget: 'idx-custom', memoryEnabled: true },
+      { id: 'managed', esqlTarget: 'idx-managed', memoryEnabled: false },
+      { id: 'opted-out', esqlTarget: 'idx-opted-out', memoryEnabled: false },
+    ]);
+    expect(globalSettingsGet).toHaveBeenCalledWith(CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID);
   });
 
   it('asks the service for the requested ids only, so just those are probed', async () => {

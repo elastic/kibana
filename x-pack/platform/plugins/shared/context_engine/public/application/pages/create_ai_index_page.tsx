@@ -25,7 +25,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AiIndexDescriptionField } from '../components/ai_index_description_field';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
-import { useMemoryEnabled } from '../hooks/use_memory_enabled';
+import { useDreamingEnabled } from '../hooks/use_dreaming_enabled';
 import { useNavigation } from '../hooks/use_navigation';
 import {
   ContextEngineSubPageHeader,
@@ -55,7 +55,7 @@ const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title'
 export const CreateAiIndexPage = () => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
-  const isMemoryFeatureEnabled = useMemoryEnabled();
+  const isDreamingEnabled = useDreamingEnabled();
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
@@ -75,8 +75,7 @@ export const CreateAiIndexPage = () => {
       description,
       sources: [],
     });
-    // An AI index takes memories once dreaming is set up, which the global memory setting allows.
-    if (created && isMemoryFeatureEnabled) {
+    if (created && isDreamingEnabled) {
       navigateToContextEngine(getAiIndexDreamingTemplatePath(created.id));
     } else if (created) {
       navigateToContextEngine(

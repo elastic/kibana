@@ -6,14 +6,23 @@
  */
 
 import { randomUUID } from 'crypto';
-import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, spaceScoped, columnValues, type EsqlResponse } from '../fixtures';
 
-const { AI_INDEX_COLLECTION_PATH, AI_INDEX_QUERY_PATH, API_HEADERS, CONTEXT_ENGINE_READ } =
-  testData;
+const {
+  AI_INDEX_COLLECTION_PATH,
+  AI_INDEX_QUERY_PATH,
+  API_HEADERS,
+  CONTEXT_ENGINE_READ,
+  INTERNAL_API_HEADERS,
+  aiIndexDreamingPath,
+} = testData;
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
 const INDEX_A = `ai-index-idx-scout-describe-${RUN_ID}-a`;
@@ -159,17 +168,12 @@ const OTHER_INDEX_ROLE: KibanaRole = {
   kibana: [CONTEXT_ENGINE_READ],
 };
 
-const registerAiIndex = (
-  id: string,
-  dest: { type: 'index' | 'data_stream'; value: string },
-  dreaming?: typeof MEMORY_DREAMING_CONFIG
-) => ({
+const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; value: string }) => ({
   id,
   description: `Scout describe fixture ${id}`,
   dest,
   automations: [],
   sources: [],
-  ...(dreaming && { dreaming }),
 });
 
 // Takes memories without scheduling a dreaming workflow.
@@ -182,8 +186,8 @@ const MEMORY_DREAMING_CONFIG = {
 };
 
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
-// `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables only the
-// behavior it exercises.
+// `uiSettings.overrides`. Memory and dreaming remain runtime-configurable so this suite enables
+// only the behavior it exercises.
 apiTest.describe('context engine AI index describe API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let describeCredentials: RoleApiCredentials;
@@ -194,6 +198,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   apiTest.beforeAll(async ({ requestAuth, esClient, apiClient, kbnClient }) => {
     await kbnClient.uiSettings.updateGlobal({
       [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+      [CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID]: true,
     });
     await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
@@ -241,11 +246,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     });
 
     for (const body of [
-      registerAiIndex(
-        SINGLE_AI_INDEX_ID,
-        { type: 'index', value: INDEX_A },
-        MEMORY_DREAMING_CONFIG
-      ),
+      registerAiIndex(SINGLE_AI_INDEX_ID, { type: 'index', value: INDEX_A }),
       registerAiIndex(TEMPLATE_AI_INDEX_ID, { type: 'index', value: INDEX_B }),
       registerAiIndex(DATA_STREAM_AI_INDEX_ID, { type: 'data_stream', value: DATA_STREAM }),
       registerAiIndex(MISSING_AI_INDEX_ID, { type: 'index', value: MISSING_INDEX }),
@@ -257,11 +258,19 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       });
       expect(response).toHaveStatusCode(201);
     }
+
+    const dreamingResponse = await apiClient.put(aiIndexDreamingPath(SINGLE_AI_INDEX_ID), {
+      headers: { ...adminCredentials.apiKeyHeader, ...INTERNAL_API_HEADERS },
+      responseType: 'json',
+      body: MEMORY_DREAMING_CONFIG,
+    });
+    expect(dreamingResponse).toHaveStatusCode(200);
   });
 
   apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
     await kbnClient.uiSettings.updateGlobal({
       [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+      [CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID]: false,
     });
     await kbnClient.uiSettings.waitForEventualCacheRefresh();
 

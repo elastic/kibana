@@ -16,12 +16,14 @@ describe('getDreamingStatusStepDefinition', () => {
   const run = ({
     contextEngineEnabled = true,
     memoryEnabled = true,
+    dreamingEnabled = true,
     canRead = true,
     get = jest.fn().mockResolvedValue({ id: 'support', dreaming, traces: [] }),
     source,
   }: {
     contextEngineEnabled?: boolean;
     memoryEnabled?: boolean;
+    dreamingEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
     source?: 'memories' | 'traces';
@@ -30,6 +32,7 @@ describe('getDreamingStatusStepDefinition', () => {
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
       isContextEngineEnabled: async () => contextEngineEnabled,
       isMemoryEnabled: async () => memoryEnabled,
+      isDreamingEnabled: async () => dreamingEnabled,
       checkReadPrivilege: async () => canRead,
     }).handler(
       createMockStepContext({
@@ -54,6 +57,12 @@ describe('getDreamingStatusStepDefinition', () => {
   it('skips the run when the global memory setting is off', async () => {
     await expect(run({ memoryEnabled: false })).resolves.toEqual({
       output: { dream: false, reason: 'The global Context Engine memory setting is off.' },
+    });
+  });
+
+  it('skips the run when the global dreaming setting is off', async () => {
+    await expect(run({ dreamingEnabled: false })).resolves.toEqual({
+      output: { dream: false, reason: 'The global Context Engine dreaming setting is off.' },
     });
   });
 

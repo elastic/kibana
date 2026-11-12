@@ -12,7 +12,7 @@ import {
   DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE,
   readTraceTranscriptsStepCommonDefinition,
 } from '../../common/step_types/read_trace_transcripts';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { readTraceTranscripts } from '../dreaming/trace_rounds';
 import type { DreamingStepDependencies } from './helpers';
@@ -28,6 +28,7 @@ export const getReadTraceTranscriptsStepDefinition = (
     getAiIndexService,
     isContextEngineEnabled,
     isMemoryEnabled,
+    isDreamingEnabled,
     checkReadPrivilege,
   }: DreamingStepDependencies,
   { getCurrentDate = () => new Date() }: { getCurrentDate?: () => Date } = {}
@@ -50,11 +51,15 @@ export const getReadTraceTranscriptsStepDefinition = (
         });
       }
       const empty = { memories: [], resume_from: since, sources: [], skipped: 0 };
-      if (!(await isContextEngineEnabled(spaceId)) || !(await isMemoryEnabled())) {
+      if (
+        !(await isContextEngineEnabled(spaceId)) ||
+        !(await isMemoryEnabled()) ||
+        !(await isDreamingEnabled())
+      ) {
         return { output: empty };
       }
 
-      let aiIndex: AiIndexHttpItem;
+      let aiIndex: AiIndexItem;
       try {
         aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
       } catch (error) {
