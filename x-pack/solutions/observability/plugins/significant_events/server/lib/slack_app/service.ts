@@ -29,6 +29,7 @@ import {
 import { RELAY_AUTH_ID } from '@kbn/connector-specs';
 import type { SignificantEventsServer } from '../../types';
 import type {
+  SlackAppAvailableChannelsResponse,
   SlackAppBindingsResponse,
   SlackAppConfirmResponse,
   SlackAppConnectResponse,
@@ -753,6 +754,26 @@ export class SlackAppService {
     }
 
     return { bindings, nextCursor: page.nextCursor };
+  }
+
+  async listAvailableChannels(request: KibanaRequest): Promise<SlackAppAvailableChannelsResponse> {
+    const { relayClient, tenantKey } = await this.requireConnectedTenant(request);
+    let page;
+    try {
+      page = await relayClient.listAvailableChannels(tenantKey);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to list available channels from Relay: ${this.toErrorMessage(error)}`
+      );
+      throw error;
+    }
+    return {
+      channels: page.channels.map(({ scope_id, display_name }) => ({
+        channel: scope_id,
+        displayName: display_name,
+      })),
+      truncated: page.truncated,
+    };
   }
 
   private async requireConnectedTenant(
