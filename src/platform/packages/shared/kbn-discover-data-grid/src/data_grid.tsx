@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { useEuiMemoizedStyles, useResizeObserver } from '@elastic/eui';
+import { keys, useEuiMemoizedStyles, useResizeObserver } from '@elastic/eui';
 import { createColumnHelper, metaHelper, tableFeatures, useTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
@@ -210,6 +210,11 @@ export const DataGrid = <TRow extends object>({
         css={styles.grid}
         style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
         onFocus={onGridFocus}
+        onKeyDownCapture={(event) => {
+          if (event.key === keys.TAB) {
+            focus.releaseFocusOwnership();
+          }
+        }}
       >
         <div ref={setHeaderRowGroupElement} role="rowgroup" css={styles.headerRowGroup}>
           {headerGroups.map((headerGroup) => (

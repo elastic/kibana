@@ -24,6 +24,7 @@ import {
 
 interface PendingFocusCommand {
   readonly address: DataGridCellAddress;
+  readonly generation: number;
   readonly resolve: (result: DataGridCommandResult) => void;
 }
 
@@ -50,6 +51,7 @@ interface UseDataGridFocusResult {
   readonly enterInteractionMode: (address: DataGridCellAddress) => boolean;
   readonly deactivateInteractionMode: (address: DataGridCellAddress) => void;
   readonly leaveInteractionMode: (address: DataGridCellAddress) => void;
+  readonly releaseFocusOwnership: () => void;
 }
 
 const completedResult: DataGridCommandResult = { status: 'completed' };
@@ -120,6 +122,8 @@ export const useDataGridFocus = ({
   const cellElementsRef = useRef(new Map<string, Map<string, HTMLDivElement>>());
   const interactionElementsRef = useRef(new Map<string, Map<string, HTMLElement>>());
   const pendingFocusRef = useRef<PendingFocusCommand | null>(null);
+  const focusRequestGenerationRef = useRef(0);
+  const focusOwnershipRef = useRef<number | null>(null);
   const pendingInteractionExitRef = useRef<DataGridCellAddress | null>(null);
   const lostOwnedFocusRef = useRef<DataGridCellAddress | null>(null);
   const scrollToRowRef = useRef(scrollToRow);
@@ -130,6 +134,8 @@ export const useDataGridFocus = ({
   onRowsBecameEmptyRef.current = onRowsBecameEmpty;
 
   const cancelPendingFocus = useCallback((reason: 'superseded' | 'grid_unmounted') => {
+    focusRequestGenerationRef.current += 1;
+    focusOwnershipRef.current = null;
     const pendingFocus = pendingFocusRef.current;
     if (!pendingFocus) {
       return;
@@ -146,6 +152,7 @@ export const useDataGridFocus = ({
     }
 
     pendingFocusRef.current = null;
+    focusOwnershipRef.current = null;
     pendingFocus.resolve({ status: 'failed', reason });
     onCommandFailureRef.current(reason);
   }, []);
@@ -169,18 +176,21 @@ export const useDataGridFocus = ({
 
   const focusCell = useCallback<DataGridApi['focusCell']>(
     (address) => {
+      cancelPendingFocus('superseded');
       const resolution = resolveAddress(address);
       if ('failure' in resolution) {
         onCommandFailureRef.current(resolution.failure);
         return Promise.resolve({ status: 'failed', reason: resolution.failure });
       }
 
+      const generation = focusRequestGenerationRef.current;
+      focusOwnershipRef.current = generation;
       if (!scrollToRowRef.current(resolution.rowIndex)) {
+        focusOwnershipRef.current = null;
         onCommandFailureRef.current('scroll_failed');
         return Promise.resolve({ status: 'failed', reason: 'scroll_failed' });
       }
 
-      cancelPendingFocus('superseded');
       pendingInteractionExitRef.current = null;
       activeCellRef.current = address;
       interactionCellRef.current = null;
@@ -191,12 +201,13 @@ export const useDataGridFocus = ({
       if (cellElement) {
         scrollElementIntoView(cellElement);
         lostOwnedFocusRef.current = null;
+        focusOwnershipRef.current = null;
         cellElement.focus({ preventScroll: true });
         return Promise.resolve(completedResult);
       }
 
       const result = new Promise<DataGridCommandResult>((resolve) => {
-        pendingFocusRef.current = { address, resolve };
+        pendingFocusRef.current = { address, generation, resolve };
       });
       return result;
     },
@@ -205,6 +216,7 @@ export const useDataGridFocus = ({
 
   const scrollToCell = useCallback<DataGridApi['scrollToCell']>(
     (address) => {
+      cancelPendingFocus('superseded');
       const resolution = resolveAddress(address);
       if ('failure' in resolution) {
         onCommandFailureRef.current(resolution.failure);
@@ -217,7 +229,7 @@ export const useDataGridFocus = ({
       }
       return Promise.resolve(completedResult);
     },
-    [resolveAddress]
+    [cancelPendingFocus, resolveAddress]
   );
 
   const registerCell = useCallback(
@@ -231,7 +243,12 @@ export const useDataGridFocus = ({
       }
 
       const pendingFocus = pendingFocusRef.current;
-      if (pendingFocus && areDataGridCellAddressesEqual(pendingFocus.address, address)) {
+      if (
+        pendingFocus &&
+        pendingFocus.generation === focusRequestGenerationRef.current &&
+        pendingFocus.generation === focusOwnershipRef.current &&
+        areDataGridCellAddressesEqual(pendingFocus.address, address)
+      ) {
         const resolution = resolveAddress(address);
         if ('failure' in resolution) {
           failPendingFocus(resolution.failure);
@@ -242,6 +259,7 @@ export const useDataGridFocus = ({
           return;
         }
         pendingFocusRef.current = null;
+        focusOwnershipRef.current = null;
         lostOwnedFocusRef.current = null;
         scrollElementIntoView(element);
         element.focus({ preventScroll: true });
@@ -282,14 +300,18 @@ export const useDataGridFocus = ({
     []
   );
 
-  const enterNavigationMode = useCallback((address: DataGridCellAddress) => {
-    pendingInteractionExitRef.current = null;
-    activeCellRef.current = address;
-    interactionCellRef.current = null;
-    lostOwnedFocusRef.current = null;
-    setActiveCell(address);
-    setInteractionCell(null);
-  }, []);
+  const enterNavigationMode = useCallback(
+    (address: DataGridCellAddress) => {
+      cancelPendingFocus('superseded');
+      pendingInteractionExitRef.current = null;
+      activeCellRef.current = address;
+      interactionCellRef.current = null;
+      lostOwnedFocusRef.current = null;
+      setActiveCell(address);
+      setInteractionCell(null);
+    },
+    [cancelPendingFocus]
+  );
 
   const enterInteractionMode = useCallback(
     (address: DataGridCellAddress): boolean => {
@@ -328,6 +350,11 @@ export const useDataGridFocus = ({
     interactionCellRef.current = null;
     setInteractionCell(null);
   }, []);
+
+  const releaseFocusOwnership = useCallback(() => {
+    cancelPendingFocus('superseded');
+    lostOwnedFocusRef.current = null;
+  }, [cancelPendingFocus]);
 
   useLayoutEffect(() => {
     const address = pendingInteractionExitRef.current;
@@ -397,6 +424,19 @@ export const useDataGridFocus = ({
     [cancelPendingFocus]
   );
 
+  useEffect(() => {
+    const onDocumentFocusIn = (event: FocusEvent) => {
+      const target = event.target;
+      if (target instanceof Node && gridRef.current?.contains(target)) {
+        return;
+      }
+      releaseFocusOwnership();
+    };
+
+    document.addEventListener('focusin', onDocumentFocusIn);
+    return () => document.removeEventListener('focusin', onDocumentFocusIn);
+  }, [gridRef, releaseFocusOwnership]);
+
   const api = useMemo<DataGridApi>(() => ({ focusCell, scrollToCell }), [focusCell, scrollToCell]);
 
   return {
@@ -410,5 +450,6 @@ export const useDataGridFocus = ({
     enterInteractionMode,
     deactivateInteractionMode,
     leaveInteractionMode,
+    releaseFocusOwnership,
   };
 };

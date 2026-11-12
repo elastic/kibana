@@ -24,6 +24,8 @@ const mockGetOffsetForIndex = jest.fn();
 const mockScrollToOffset = jest.fn();
 const mockCopyToClipboard = jest.mocked(copyToClipboard);
 let mockScrollOffsetAvailable = true;
+let mockDelayVirtualMount = false;
+let mockPendingVirtualScrolls: Array<() => void> = [];
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -78,7 +80,12 @@ jest.mock('@tanstack/react-virtual', () => {
         scrollToOffset: (offset: number) => {
           mockScrollToOffset(offset);
           const index = Math.floor(offset / 40);
-          setRequestedStart(Math.min(Math.max(index, 0), maximumStart));
+          const commitScroll = () => setRequestedStart(Math.min(Math.max(index, 0), maximumStart));
+          if (mockDelayVirtualMount) {
+            mockPendingVirtualScrolls.push(commitScroll);
+          } else {
+            commitScroll();
+          }
         },
       };
     }),
@@ -184,6 +191,8 @@ describe('DataGrid', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockScrollOffsetAvailable = true;
+    mockDelayVirtualMount = false;
+    mockPendingVirtualScrolls = [];
     mockCopyToClipboard.mockReturnValue(true);
   });
 
@@ -313,6 +322,65 @@ describe('DataGrid', () => {
 
     await expectFocus('Name 3');
     expect(mockGetOffsetForIndex).toHaveBeenLastCalledWith(3, 'auto');
+  });
+
+  it('does not let a delayed focus mount override a newer semantic scroll', async () => {
+    mockDelayVirtualMount = true;
+    const apiRef = createRef<DataGridApi>();
+    renderGrid({ apiRef });
+    if (!apiRef.current) {
+      throw new Error('Expected a data grid API.');
+    }
+
+    let pendingFocus: Promise<DataGridCommandResult> | undefined;
+    act(() => {
+      pendingFocus = apiRef.current?.focusCell({ rowId: 'row-50', columnId: 'name' });
+    });
+    expect(mockPendingVirtualScrolls).toHaveLength(1);
+
+    await expect(
+      apiRef.current.scrollToCell({ rowId: 'row-10', columnId: 'name' })
+    ).resolves.toEqual({ status: 'completed' });
+    await expect(pendingFocus).resolves.toEqual({ status: 'cancelled', reason: 'superseded' });
+    expect(mockPendingVirtualScrolls).toHaveLength(2);
+
+    const [commitStaleFocus, commitLatestScroll] = mockPendingVirtualScrolls;
+    if (!commitStaleFocus || !commitLatestScroll) {
+      throw new Error('Expected both delayed virtual scrolls.');
+    }
+    act(() => commitLatestScroll());
+    expect(screen.getByRole('gridcell', { name: 'Name 10' })).not.toBeNull();
+    act(() => commitStaleFocus());
+    expect(document.activeElement).not.toBe(screen.getByRole('gridcell', { name: 'Name 50' }));
+  });
+
+  it('does not reclaim focus when a delayed destination mounts after Tab leaves the grid', async () => {
+    mockDelayVirtualMount = true;
+    const apiRef = createRef<DataGridApi>();
+    renderGrid({ apiRef });
+    const activeCell = screen.getByRole('gridcell', { name: 'Name 0' });
+    const outsideButton = document.createElement('button');
+    document.body.append(outsideButton);
+    focusElement(activeCell);
+    if (!apiRef.current) {
+      throw new Error('Expected a data grid API.');
+    }
+
+    let pendingFocus: Promise<DataGridCommandResult> | undefined;
+    act(() => {
+      pendingFocus = apiRef.current?.focusCell({ rowId: 'row-50', columnId: 'name' });
+    });
+    fireEvent.keyDown(activeCell, { key: 'Tab' });
+    focusElement(outsideButton);
+
+    await expect(pendingFocus).resolves.toEqual({ status: 'cancelled', reason: 'superseded' });
+    const commitStaleFocus = mockPendingVirtualScrolls[0];
+    if (!commitStaleFocus) {
+      throw new Error('Expected a delayed virtual scroll.');
+    }
+    act(() => commitStaleFocus());
+    expect(document.activeElement).toBe(outsideButton);
+    outsideButton.remove();
   });
 
   it('scrolls an already mounted navigation target into the visible viewport', async () => {
