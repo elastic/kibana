@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import { checkIntegrationTool } from './check_integration_tool';
 import { buildToolContext, toolRequest } from './test_helpers';
 
@@ -40,5 +41,37 @@ describe('checkIntegrationTool agent_id handling', () => {
 
     const kuery = (listAgents.mock.calls[0][0] as { kuery: string }).kuery;
     expect(kuery).toContain('agent.id:"ad2681a0-1a5b-4b42-9a5f-000000000001"');
+  });
+
+  describe('failed installation lookup', () => {
+    const run = async (getInstallation: jest.Mock) => {
+      const { context } = buildToolContext({ grantedPrivileges: ['osquery-read'] });
+      (context.service.getPackageService as jest.Mock).mockReturnValue({
+        asInternalUser: { getInstallation },
+      });
+      const result = await checkIntegrationTool(context, loggerMock.create()).handler({}, {
+        request: toolRequest,
+        spaceId: 'default',
+      } as never);
+      if (!isToolHandlerStandardReturn(result)) {
+        throw new Error('Expected standard handler return');
+      }
+
+      return result.results[0].data as Record<string, unknown>;
+    };
+
+    it('does not claim the integration is not installed when the lookup throws', async () => {
+      const data = await run(jest.fn().mockRejectedValue(new Error('fleet down')));
+
+      expect(data.enrollment_status).toBe('unknown');
+      expect(data).not.toHaveProperty('installed');
+      expect(String(data.error)).toContain('fleet down');
+    });
+
+    it('still reports installed: false when the lookup succeeds with no package (negative control)', async () => {
+      const data = await run(jest.fn().mockResolvedValue(undefined));
+
+      expect(data).toMatchObject({ installed: false, enrollment_status: 'not_enrolled' });
+    });
   });
 });

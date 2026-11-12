@@ -44,7 +44,8 @@ const checkIntegrationSchema = lazySchema(() =>
 type EnrollmentStatus = 'enrolled' | 'not_enrolled' | 'unknown';
 
 interface IntegrationStatus {
-  installed: boolean;
+  /** Omitted when the installation lookup failed, so a failed check never reads as "not installed". */
+  installed?: boolean;
   version?: string;
   agents_enrolled: boolean;
   enrolled_count: number;
@@ -96,7 +97,6 @@ export const checkIntegrationTool = (
       logger.warn('PackageService unavailable — Osquery integration check failed');
 
       return toolResult({
-        installed: false,
         agents_enrolled: false,
         enrolled_count: 0,
         enrollment_status: 'unknown',
@@ -122,7 +122,6 @@ export const checkIntegrationTool = (
       logger.warn(`Failed to read Osquery installation: ${e}`);
 
       return toolResult({
-        installed: false,
         agents_enrolled: false,
         enrolled_count: 0,
         enrollment_status: 'unknown',

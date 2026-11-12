@@ -116,4 +116,16 @@ describe('runLiveQueryTool handler', () => {
     expect(String(result.data.message)).toContain('fleet down');
     expect(pollMock).not.toHaveBeenCalled();
   });
+
+  it('returns an error result when the saved-objects client cannot be created', async () => {
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockRejectedValue(
+      new Error('so client down')
+    );
+
+    const result = await invoke();
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(String(result.data.message)).toContain('so client down');
+    expect(createActionMock).not.toHaveBeenCalled();
+  });
 });

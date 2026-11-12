@@ -81,15 +81,14 @@ export const runLiveQueryTool = (
       return unauthorizedToolResult('writeLiveQueries');
     }
 
-    const packageService = osqueryContext.service.getPackageService();
-    const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-      osqueryContext,
-      request
-    );
-
     // SchemaService catalog = extensible allowlist (FR-005)
     let allowedTables: Set<string>;
     try {
+      const packageService = osqueryContext.service.getPackageService();
+      const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+        osqueryContext,
+        request
+      );
       const schemaResponse = await schemaService.getSchema(
         'osquery',
         packageService,

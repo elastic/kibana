@@ -280,7 +280,7 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(endpointForensicAnalysisSkill.content).toContain(
       '**If Osquery IS installed but NO agents are enrolled**'
     );
-    expect(endpointForensicAnalysisSkill.content).toContain('agents_enrolled: false');
+    expect(endpointForensicAnalysisSkill.content).toContain('enrollment_status: not_enrolled');
     expect(endpointForensicAnalysisSkill.content).toContain(
       'Do **not** call `osquery.run_live_query` — it has no agent to run on.'
     );
