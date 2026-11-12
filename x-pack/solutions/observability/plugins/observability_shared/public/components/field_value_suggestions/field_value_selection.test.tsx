@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount, render } from 'enzyme';
 import { FieldValueSelection } from './field_value_selection';
-import { EuiSelectableList, EuiThemeProvider } from '@elastic/eui';
+import { EuiSelectable, EuiSelectableList, EuiThemeProvider } from '@elastic/eui';
 
 const values = [
   { label: 'elastic co frontend', count: 1 },
@@ -178,6 +178,30 @@ describe('FieldValueSelection', () => {
       ]);
     });
 
+    it('keeps the same options when only the counts change', () => {
+      const wrapper = mount(
+        <EuiThemeProvider>
+          {renderWithValues([
+            { label: 'a', count: 1 },
+            { label: 'b', count: 1 },
+          ])}
+        </EuiThemeProvider>
+      );
+
+      wrapper.find('button[data-test-subj="fieldValueSelectionBtn"]').simulate('click');
+      const optionsBefore = wrapper.find(EuiSelectable).props().options;
+
+      wrapper.setProps({
+        children: renderWithValues([
+          { label: 'a', count: 5 },
+          { label: 'b', count: 7 },
+        ]),
+      });
+      wrapper.update();
+
+      expect(wrapper.find(EuiSelectable).props().options).toBe(optionsBefore);
+    });
+
     it('keeps a checked option that the new suggestions omit', () => {
       const wrapper = mount(
         <EuiThemeProvider>
@@ -195,8 +219,8 @@ describe('FieldValueSelection', () => {
       wrapper.update();
 
       expect(getVisibleOptions(wrapper)).toEqual([
-        { label: 'b', checked: undefined },
         { label: 'a', checked: 'on' },
+        { label: 'b', checked: undefined },
       ]);
     });
   });

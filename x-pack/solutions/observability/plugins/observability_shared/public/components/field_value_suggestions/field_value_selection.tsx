@@ -91,6 +91,10 @@ const formatOptions = (
   });
 };
 
+const hasSameLabels = (first: EuiSelectableOption[], second: EuiSelectableOption[]): boolean =>
+  first.length === second.length &&
+  isEqual(map(first, 'label').sort(), map(second, 'label').sort());
+
 // Rebuilds the list from fresh suggestions while keeping what the user has checked so far,
 // including checked options the new suggestions no longer list.
 const carryOverChecks = (
@@ -160,12 +164,16 @@ export function FieldValueSelection({
 
     setOptions((current) => {
       const next = formatOptions(values, selectedValue, excludedValue, showCount);
+      if (!(isPopoverOpen || forceOpen) || selectionChanged) {
+        return next;
+      }
       // New suggestions can arrive while the popover is open (a refetch, or results for
       // the typed search). Show them, but keep the checks made so far: rebuilding from
       // props alone would wipe them. A changed applied selection takes precedence.
-      return (isPopoverOpen || forceOpen) && !selectionChanged
-        ? carryOverChecks(next, current)
-        : next;
+      const merged = carryOverChecks(next, current);
+      // Replacing the options regenerates the rows, which swallows a click that lands
+      // mid-update. Count-only changes are not worth that, so keep the list as is.
+      return hasSameLabels(merged, current) ? current : merged;
     });
     // values/selectedValue are represented by the serialized keys above.
     // eslint-disable-next-line react-hooks/exhaustive-deps

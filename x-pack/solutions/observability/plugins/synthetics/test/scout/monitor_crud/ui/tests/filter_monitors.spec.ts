@@ -50,8 +50,19 @@ test.describe(
         await pageObjects.syntheticsApp.refreshOverview();
       });
 
+      // selectOption clicks once without checking the result, and a click that lands while
+      // the list re-renders is dropped. Retry until the option is actually checked.
       const selectTagOption = (tagName: string) =>
-        page.components.selectable('o11yFieldValueSelectionSelectable').selectOption(tagName);
+        expect(async () => {
+          await page.components
+            .selectable('o11yFieldValueSelectionSelectable')
+            .selectOption(tagName);
+          await expect(page.getByRole('option', { name: tagName })).toHaveAttribute(
+            'aria-checked',
+            'true',
+            { timeout: 2_000 }
+          );
+        }).toPass();
 
       await test.step('filter by tags with AND', async () => {
         await page.getByLabel('expands filter group for Tags filter').click();
