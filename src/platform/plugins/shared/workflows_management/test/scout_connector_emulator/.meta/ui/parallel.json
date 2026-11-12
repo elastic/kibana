@@ -1,0 +1,21 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7da835a652aea91-89b2c1ebbe5b1eb",
+      "title": "a Firecrawl workflow through the Workflows app against the connector emulator runs a step per action, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/firecrawl_workflow.spec.ts",
+        "line": 58,
+        "column": 31
+      }
+    }
+  ]
+}
