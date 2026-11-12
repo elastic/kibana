@@ -392,6 +392,7 @@ export const createGraphQLProtocol = (
               : { data: result.data },
         },
         operations: operations.filter(({ name }) => executed.has(name)),
+        ...(executed.size === 0 && operations.length > 0 ? { skipped: operations[0] } : {}),
         requestViolations: [],
         responseViolations,
       };

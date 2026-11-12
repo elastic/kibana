@@ -79,6 +79,11 @@ export interface ProtocolExchange {
   readonly response: ContractResponse;
   /** The operations the request called; GraphQL requests can call several root fields. */
   readonly operations: readonly NamedOperation[];
+  /**
+   * Set when the request is valid yet executes no operation, such as GraphQL root fields that all
+   * sit behind `@skip`: what the request would have called, for what it depends on and reads.
+   */
+  readonly skipped?: NamedOperation;
   /** Protocol messages that call no vendor operation, such as MCP's `initialize`. */
   readonly messages?: readonly string[];
   readonly requestViolations: readonly Violation[];

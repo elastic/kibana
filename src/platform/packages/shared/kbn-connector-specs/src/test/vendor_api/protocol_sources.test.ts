@@ -342,6 +342,19 @@ describe('protocol sources', () => {
       expect(diffOf('graphql', base, current)).toContainEqual([kind, id]);
     });
 
+    it('treats a value added to an enum only requests send as non-breaking', () => {
+      const inputOnly = (values: string) =>
+        project(
+          `type Query { boards(state: State): Board } type Board { id: ID! } enum State { ${values} }`,
+          ['query boards']
+        );
+
+      expect(diffOf('graphql', inputOnly('OPEN'), inputOnly('OPEN CLOSED'))).toContainEqual([
+        'non-breaking',
+        'VALUE_ADDED_TO_ENUM',
+      ]);
+    });
+
     it('treats optional arguments as non-breaking and required ones as breaking in GraphQL', () => {
       const withArgument = (argument: string) =>
         project(`type Query { board(${argument}): String }`, ['query board']);
@@ -481,6 +494,27 @@ describe('protocol sources', () => {
       ],
     ])('classifies %s in MCP', (_, change, kind, id) => {
       expect(diffOf('mcp', mcpBase, snapshot(change))).toContainEqual([kind, id]);
+    });
+
+    it('treats a tool gaining readOnlyHint, or dropping it explicitly, as non-breaking', () => {
+      const readOnly = (hint: boolean | undefined) =>
+        JSON.stringify({
+          tools: [
+            {
+              name: 'search',
+              inputSchema: { type: 'object' },
+              ...(hint === undefined ? {} : { annotations: { readOnlyHint: hint } }),
+            },
+          ],
+        });
+
+      expect(diffOf('mcp', readOnly(undefined), readOnly(true))).toEqual([
+        ['non-breaking', 'mcp-read-only-changed'],
+      ]);
+      expect(diffOf('mcp', readOnly(undefined), readOnly(false))).toEqual([]);
+      expect(diffOf('mcp', readOnly(true), readOnly(undefined))).toEqual([
+        ['breaking', 'mcp-read-only-changed'],
+      ]);
     });
 
     it('compares enum values by content, so unchanged objects are no change', () => {
@@ -900,6 +934,49 @@ describe('protocol sources', () => {
       const snapshot = await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8');
       expect(snapshot).toContain('type Card');
       expect(snapshot).not.toContain('Unused');
+    });
+
+    it('re-records offline a fragment spread between interfaces that share an object', async () => {
+      const { recorded, offline } = await recordQuery(
+        `
+        type Query { holder: Holder }
+        interface Named { id: ID! }
+        interface Titled { id: ID! }
+        type Holder implements Named { id: ID! }
+        type Both implements Named & Titled { id: ID! }
+        type OnlyTitled implements Titled { id: ID! }
+      `,
+        'query { holder { ...N } } fragment N on Named { id ... on Titled { id } }'
+      );
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
+      const snapshot = await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8');
+      expect(snapshot).toContain('type Both');
+      expect(snapshot).not.toContain('OnlyTitled');
+    });
+
+    it('re-records offline a read query whose every root field is skipped', async () => {
+      const { recorded, offline } = await recordQuery(
+        'type Query { a: String, b: String }',
+        'query { b @skip(if: true) }'
+      );
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
+      const snapshot = await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8');
+      expect(snapshot).toContain('b: String');
+      expect((await manifestOf()).operations.run).toEqual([]);
+    });
+
+    it('re-records offline a root type that implements an interface with unused fields', async () => {
+      const { recorded, offline } = await recordQuery(
+        'interface Root { a: String, b: Other } type Query implements Root { a: String, b: Other } type Other { id: ID }',
+        'query { a }'
+      );
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
     });
 
     it('keeps only the root fields used when a fragment names the root type', async () => {

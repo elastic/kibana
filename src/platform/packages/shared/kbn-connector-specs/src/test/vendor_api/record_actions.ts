@@ -117,7 +117,7 @@ const isNamedOperation = (
 // a query or a tool annotated as read-only. Messages such as MCP's `initialize` call nothing.
 const isSafeCall = (call: ContractCall): boolean =>
   call.protocolMessage === true ||
-  (call.matched !== undefined && 'name' in call.matched
+  ((call.matched !== undefined && 'name' in call.matched) || call.source !== undefined
     ? call.readOnly === true
     : SAFE_METHODS.has(toRequestedPath(call).method));
 
@@ -345,7 +345,9 @@ export const recordActions = async ({
           : `${call.source} ${call.name}`
     );
     for (const call of calls) {
-      const source = call.matched?.source;
+      // A request that executed nothing, such as GraphQL fields all behind `@skip`, has no matched
+      // operation but still depends on the schema it names.
+      const source = call.matched?.source ?? call.source;
       if (source !== undefined) {
         addNamed(namedTypes, source, call.namedTypes ?? []);
         addNamed(namedRootFields, source, call.namedRootFields ?? []);

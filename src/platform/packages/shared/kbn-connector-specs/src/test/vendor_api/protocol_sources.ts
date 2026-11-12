@@ -24,6 +24,7 @@ import {
   getNamedType,
   isEnumType,
   isInputObjectType,
+  isAbstractType,
   isInterfaceType,
   isObjectType,
   isSpecifiedDirective,
@@ -211,6 +212,12 @@ const projectSdl = (
     if (isObjectType(root)) {
       const rootFields = root.getFields();
       visitImplemented(root);
+      // A root implementing an interface needs the fields it declares, even those unused.
+      root
+        .getInterfaces()
+        .forEach((implemented) =>
+          Object.keys(implemented.getFields()).forEach((name) => fields.add(name))
+        );
       for (const field of fields) {
         visitType(getNamedType(rootFields[field].type));
         rootFields[field].args.forEach((arg) => visitType(getNamedType(arg.type)));
@@ -226,6 +233,23 @@ const projectSdl = (
       visitType(type, false);
     }
   }
+  // A fragment spread between two abstract types is valid only if they share a possible type, so
+  // keep one object of each overlap that isn't already kept.
+  const abstractNamed = namedTypes.flatMap((name) => {
+    const type = schema.getType(name);
+    return type && isAbstractType(type) ? [type] : [];
+  });
+  abstractNamed.forEach((first, index) =>
+    abstractNamed.slice(index + 1).forEach((second) => {
+      const shared = schema
+        .getPossibleTypes(first)
+        .filter((possible) => schema.isSubType(second, possible));
+      if (shared.length > 0 && !shared.some(({ name }) => reachable.has(name))) {
+        const [overlap] = [...shared].sort((a, b) => (a.name < b.name ? -1 : 1));
+        visitType(overlap, false);
+      }
+    })
+  );
   const directives = new Set<string>();
   for (const directive of schema.getDirectives()) {
     if (
@@ -382,14 +406,41 @@ const deprecationsOf = (schema: GraphQLSchema): Map<string, string> => {
   return deprecated;
 };
 
+// Enums a response can hold, as opposed to those only a request sends.
+const outputEnumsOf = (schema: GraphQLSchema): Set<string> => {
+  const enums = new Set<string>();
+  for (const type of Object.values(schema.getTypeMap())) {
+    if (isObjectType(type) || isInterfaceType(type)) {
+      for (const field of Object.values(type.getFields())) {
+        const returned = getNamedType(field.type);
+        if (isEnumType(returned)) {
+          enums.add(returned.name);
+        }
+      }
+    }
+  }
+  return enums;
+};
+
+const ENUM_VALUE_ADDED = /^Enum value (\w+)\.\w+ was added\.$/;
+
 const diffGraphQL = (base: string, current: string): SpecChange[] => {
   const before = buildSchema(base, { assumeValidSDL: true });
   const after = buildSchema(current, { assumeValidSDL: true });
+  const outputEnums = outputEnumsOf(before);
+  const isBreaking = ({ type, description }: { type: string; description: string }): boolean => {
+    if (type !== DangerousChangeType.VALUE_ADDED_TO_ENUM) {
+      return BREAKING_TYPES.has(type);
+    }
+    // A value an input-only enum gains widens what the connector may send, not what it handles.
+    const [, enumName] = ENUM_VALUE_ADDED.exec(description) ?? [];
+    return enumName === undefined || outputEnums.has(enumName);
+  };
   const changes = findSchemaChanges(before, after).map(
-    ({ type, description }): SpecChange => ({
-      kind: BREAKING_TYPES.has(type) ? 'breaking' : 'non-breaking',
-      id: type,
-      text: description,
+    (change): SpecChange => ({
+      kind: isBreaking(change) ? 'breaking' : 'non-breaking',
+      id: change.type,
+      text: change.description,
     })
   );
   const wasDeprecated = deprecationsOf(before);
@@ -544,8 +595,16 @@ const diffMcp = (base: string, current: string): SpecChange[] => {
       if (tool.outputSchema !== undefined || latest.outputSchema !== undefined) {
         diffSchema(tool.outputSchema, latest.outputSchema, 'output', 'output', report);
       }
-      if (tool.annotations?.readOnlyHint !== latest.annotations?.readOnlyHint) {
-        report('breaking', 'mcp-read-only-changed', 'its readOnlyHint changed');
+      const [wasReadOnly, isReadOnly] = [tool, latest].map(
+        ({ annotations }) => annotations?.readOnlyHint === true
+      );
+      if (wasReadOnly !== isReadOnly) {
+        // Read actions may call only read-only tools, so losing the hint breaks them.
+        report(
+          wasReadOnly ? 'breaking' : 'non-breaking',
+          'mcp-read-only-changed',
+          'its readOnlyHint changed'
+        );
       }
     }
   }

@@ -178,6 +178,26 @@ describe('GraphQL specs', () => {
     expect(calls.map(({ operation }) => operation)).toEqual(['query board']);
   });
 
+  it('records what a request depends on when every root field is skipped', async () => {
+    const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
+
+    const response = await post(mockFetch, {
+      query: 'query { boards @skip(if: true) { id } }',
+    });
+
+    expect(response.status).toBe(200);
+    expect(calls).toEqual([
+      {
+        request: 'POST https://api.example.com/v2',
+        status: 200,
+        readOnly: true,
+        namedRootFields: ['query boards'],
+        requestViolations: [],
+        responseViolations: [],
+      },
+    ]);
+  });
+
   it('rejects documents that break the schema, and still records the operations', async () => {
     const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
 
