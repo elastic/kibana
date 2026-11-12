@@ -50,16 +50,23 @@ const columns = [
   columnHelper.accessor({
     id: 'name',
     header: 'Name',
-    accessibilityLabel: 'Name',
     getValue: (row) => row.name,
     renderCell: ({ value }) => value,
   }),
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
-    accessibilityLabel: 'Value',
     getValue: (row) => row.value,
     renderCell: ({ value }) => value.toLocaleString(),
+  }),
+];
+const columnsWithAriaLabel = [
+  columnHelper.accessor({
+    id: 'name',
+    header: 'Name',
+    ariaLabel: 'Full name',
+    getValue: (row) => row.name,
+    renderCell: ({ value }) => value,
   }),
 ];
 const rows = Array.from({ length: 100 }, (_, index) => ({
@@ -86,8 +93,27 @@ describe('DataGrid', () => {
 
     expect(screen.getByRole('grid', { name: 'Example data' })).not.toBeNull();
     expect(screen.getAllByRole('columnheader')).toHaveLength(2);
+    expect(
+      screen.getByRole('columnheader', { name: 'Name' }).getAttribute('aria-label')
+    ).toBeNull();
     expect(screen.getByText('Name 1')).not.toBeNull();
     expect(screen.getByText('1')).not.toBeNull();
+  });
+
+  it('allows a column header to override its accessible name', () => {
+    render(
+      <DataGrid
+        ariaLabel="Example data"
+        columns={columnsWithAriaLabel}
+        rows={rows}
+        getRowId={(row) => row.id}
+        height={160}
+      />
+    );
+
+    const header = screen.getByRole('columnheader', { name: 'Full name' });
+    expect(header.textContent).toBe('Name');
+    expect(header.getAttribute('aria-label')).toBe('Full name');
   });
 
   it('registers data-backed columns as TanStack accessor columns', () => {

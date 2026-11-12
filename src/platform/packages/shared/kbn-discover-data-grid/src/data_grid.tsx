@@ -137,7 +137,7 @@ export const DataGrid = <TRow extends object>({
               <div
                 key={header.id}
                 role="columnheader"
-                aria-label={column?.accessibilityLabel}
+                aria-label={column?.ariaLabel}
                 css={styles.headerCell}
               >
                 {header.isPlaceholder ? null : (

@@ -31,14 +31,12 @@ const columns = [
   columnHelper.accessor({
     id: 'name',
     header: 'Name',
-    accessibilityLabel: 'Name',
     getValue: (row) => row.name,
     renderCell: ({ value }) => value,
   }),
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
-    accessibilityLabel: 'Value',
     getValue: (row) => row.value,
     renderCell: ({ value }) => value,
   }),
@@ -68,6 +66,8 @@ export const Results = () => (
 
 Keep `rows`, `columns`, and `getRowId` stable between meaningful changes. Row IDs must be unique and
 must continue to identify the same logical row when rows are inserted, removed, or reordered.
+Text headers provide their own accessible name. Set a column's optional `ariaLabel` only when its
+rendered header needs a different accessible name, such as an icon-only or abbreviated header.
 Row virtualization is enabled by default. Its estimated height and overscan can be tuned through
 `virtualization.rows`; omitting those options uses the package defaults.
 

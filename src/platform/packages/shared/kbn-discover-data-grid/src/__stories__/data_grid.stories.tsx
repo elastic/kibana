@@ -23,14 +23,12 @@ const columns = [
   columnHelper.accessor({
     id: 'field',
     header: 'Field',
-    accessibilityLabel: 'Field',
     getValue: (row) => row.field,
     renderCell: ({ value }) => value,
   }),
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
-    accessibilityLabel: 'Value',
     getValue: (row) => row.value,
     renderCell: ({ value }) => value,
   }),
