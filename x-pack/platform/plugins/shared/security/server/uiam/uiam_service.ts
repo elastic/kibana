@@ -35,6 +35,7 @@ import type {
   ClientAuthentication,
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
+import { lazySchema, z } from '@kbn/zod';
 
 import {
   getUiamClientAuthentication,
@@ -186,6 +187,26 @@ const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
 const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
 
 /**
+ * The principal UIAM records as the creator of an API key: the user for a key granted from a
+ * session, or the source key for a key granted from another API key.
+ */
+const apiKeyCreatorSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    z.object({ type: z.literal('user'), user_id: z.number() }),
+    z.object({ type: z.literal('api-key'), api_key_id: z.string() }),
+  ])
+);
+
+/** The part of UIAM's `_authenticate` payload for an API key that carries its creator. */
+const apiKeyAuthenticateResponseSchema = lazySchema(() =>
+  z.object({
+    credentials: z.object({ creator: apiKeyCreatorSchema }),
+  })
+);
+
+export type UiamApiKeyCreator = z.infer<typeof apiKeyCreatorSchema>;
+
+/**
  * Response containing a list of OAuth clients.
  */
 export interface OAuthClientsResponse {
@@ -279,6 +300,15 @@ export interface UiamServicePublic {
    * @returns A promise that resolves to a response containing per-key success/failure results.
    */
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
+
+  /**
+   * Returns the principal UIAM records as the creator of an internal API key, or `undefined` when
+   * UIAM reports none we recognize. The key is authenticated with Kibana's own client
+   * authentication, so do not call this for external (user-created) keys: UIAM rejects those when
+   * they carry it.
+   * @param authorization The `ApiKey` credential whose creator is requested.
+   */
+  getApiKeyCreator(authorization: HTTPAuthorizationHeader): Promise<UiamApiKeyCreator | undefined>;
 
   /**
    * Creates a service account via the UIAM service.
@@ -826,6 +856,46 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to convert API keys: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.getApiKeyCreator}.
+   */
+  async getApiKeyCreator(
+    authorization: HTTPAuthorizationHeader
+  ): Promise<UiamApiKeyCreator | undefined> {
+    try {
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...this.#getClientAuthenticationHeaders(),
+          Authorization: authorization.toString(),
+        },
+        dispatcher: this.#dispatcher,
+      };
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`, requestOptions)
+      );
+
+      const parsed = apiKeyAuthenticateResponseSchema.safeParse(response);
+      if (!parsed.success) {
+        this.#logger.debug(
+          `UIAM did not report a known creator for the API key: ${parsed.error.message}`
+        );
+        return undefined;
+      }
+
+      return parsed.data.credentials.creator;
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to get the creator of an API key: ${getDetailedErrorMessage(err)}`
+      );
 
       throw err;
     }

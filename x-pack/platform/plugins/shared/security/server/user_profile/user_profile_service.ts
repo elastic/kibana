@@ -13,7 +13,11 @@ import pLimit from 'p-limit';
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
+import {
+  extractApiKeyIdFromAuthzHeader,
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+} from '@kbn/core-security-server';
 import type {
   CheckUserProfilesPrivilegesResponse,
   UserProfileBulkGetParams,
@@ -25,6 +29,10 @@ import type {
 } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import {
+  createUiamApiKeyProfileIdResolver,
+  type UiamApiKeyProfileIdResolver,
+} from './uiam_api_key_profile_id_resolver';
 import type { UserProfileGrant } from './user_profile_grant';
 import type {
   SecurityLicense,
@@ -36,6 +44,7 @@ import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 import { getPrintableSessionId, type Session } from '../session_management';
+import type { UiamServicePublic } from '../uiam';
 
 const KIBANA_DATA_ROOT = 'kibana';
 const ACTIVATION_MAX_RETRIES = 10;
@@ -71,6 +80,8 @@ export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  /** Only present when UIAM is enabled. */
+  uiam?: UiamServicePublic;
 }
 
 function parseUserProfile<D extends UserProfileData>(
@@ -130,6 +141,7 @@ interface ResolvedCurrentUserProfileId {
 export class UserProfileService {
   private authz?: AuthorizationServiceSetupInternal;
   private license?: SecurityLicense;
+  private resolveUiamApiKeyProfileId?: UiamApiKeyProfileIdResolver;
   constructor(private readonly logger: Logger) {}
 
   setup({ authz, license }: UserProfileServiceSetupParams) {
@@ -137,7 +149,10 @@ export class UserProfileService {
     this.license = license;
   }
 
-  start({ clusterClient, session, getCurrentUser }: UserProfileServiceStartParams) {
+  start({ clusterClient, session, getCurrentUser, uiam }: UserProfileServiceStartParams) {
+    this.resolveUiamApiKeyProfileId =
+      uiam && createUiamApiKeyProfileIdResolver({ uiam, getCurrentUser, logger: this.logger });
+
     return {
       activate: this.activate.bind(this, clusterClient),
       getCurrent: this.getCurrent.bind(this, clusterClient, session, getCurrentUser),
@@ -465,7 +480,13 @@ export class UserProfileService {
         this.logger.debug(
           `Request to get current user profile is authenticated via API key [fake=${!!fakeRequestProfileResolution}].`
         );
-        profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+
+        // Elasticsearch doesn't know UIAM API keys, so those are resolved through UIAM instead.
+        const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+        profileId =
+          this.resolveUiamApiKeyProfileId && authorization && isUiamCredential(authorization)
+            ? await this.resolveUiamApiKeyProfileId(request, authorization)
+            : await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
       }
     }
 

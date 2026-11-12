@@ -1586,6 +1586,85 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#getApiKeyCreator', () => {
+    const authorization = new HTTPAuthorizationHeader('ApiKey', 'essu_api_key');
+    const respondWith = (creator?: unknown) =>
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          type: 'api-key',
+          api_key_id: 'api-key-id',
+          credentials: { id: 'api-key-id', type: 'api-key', internal: true, creator },
+        }),
+      });
+
+    it('authenticates the key with Kibana client authentication and returns a user creator', async () => {
+      respondWith({ type: 'user', user_id: 12345 });
+
+      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toEqual({
+        type: 'user',
+        user_id: 12345,
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'ApiKey essu_api_key',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('returns an API key creator for a key granted from another API key', async () => {
+      respondWith({ type: 'api-key', api_key_id: 'source-key-id' });
+
+      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toEqual({
+        type: 'api-key',
+        api_key_id: 'source-key-id',
+      });
+    });
+
+    it.each([
+      ['no creator', undefined],
+      ['an unknown creator type', { type: 'service-account', id: 'sa-id' }],
+      ['a user creator without a numeric id', { type: 'user', user_id: 'not-a-number' }],
+      ['an API key creator without an id', { type: 'api-key' }],
+      ['a creator that is not an object', 'user'],
+    ])('returns undefined when UIAM reports %s', async (_, creator) => {
+      respondWith(creator);
+
+      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toBeUndefined();
+      expect(uiamServiceLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined when the response has no credentials', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ type: 'api-key' }) });
+
+      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toBeUndefined();
+    });
+
+    it('logs and throws when UIAM rejects the key', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Authentication failed', code: '0x8560B2' } }),
+      });
+
+      await expect(uiamService.getApiKeyCreator(authorization)).rejects.toThrow(
+        'Authentication failed'
+      );
+      expect(uiamServiceLogger.error).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('#createServiceAccount', () => {
     const roleAssignments = {
       organization: [

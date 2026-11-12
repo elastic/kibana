@@ -19,6 +19,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
@@ -29,6 +30,7 @@ import { authorizationMock } from '../authorization/index.mock';
 import { securityMock } from '../mocks';
 import { securityTelemetry } from '../otel/instrumentation';
 import { sessionMock } from '../session_management/session.mock';
+import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
 jest.mock('../otel/instrumentation', () => ({
   securityTelemetry: {
@@ -1268,6 +1270,114 @@ describe('UserProfileService', () => {
 
       expect(securityTelemetry.recordGetCurrentProfileIdInvocation).toHaveBeenLastCalledWith({
         outcome: 'success',
+      });
+    });
+
+    describe('with UIAM api key', () => {
+      const uiamApiKey = 'essu_some-uiam-api-key';
+      let mockUiam: ReturnType<typeof uiamServiceMock.create>;
+      let mockUiamApiKeyRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
+      const startWithUiam = () => userProfileService.start({ ...mockStartParams, uiam: mockUiam });
+
+      beforeEach(() => {
+        mockUiam = uiamServiceMock.create();
+        mockUiamApiKeyRequest = httpServerMock.createKibanaRequest({
+          headers: { authorization: `ApiKey ${uiamApiKey}` },
+        });
+      });
+
+      it('resolves the profile id of the user who created the key, without asking Elasticsearch', async () => {
+        mockUiam.getApiKeyCreator.mockResolvedValue({ type: 'user', user_id: 12345 });
+
+        await expect(
+          startWithUiam().getCurrentProfileId({ request: mockUiamApiKeyRequest })
+        ).resolves.toBe('u_WZRHGrsBESr8wYFZ9sx0tPURuZgG2lmzyvWpwXPKz8U_0');
+
+        expect(mockUiam.getApiKeyCreator).toHaveBeenCalledWith(
+          new HTTPAuthorizationHeader('ApiKey', uiamApiKey)
+        );
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).not.toHaveBeenCalled();
+        expect(securityTelemetry.recordGetCurrentProfileIdInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+          apiKeyRetrievalRequired: true,
+        });
+      });
+
+      it('returns `null` for a key that was not created by a user', async () => {
+        mockUiam.getApiKeyCreator.mockResolvedValue({
+          type: 'api-key',
+          api_key_id: 'source-key-id',
+        });
+
+        await expect(
+          startWithUiam().getCurrentProfileId({ request: mockUiamApiKeyRequest })
+        ).resolves.toBeNull();
+
+        expect(securityTelemetry.recordGetCurrentProfileIdInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+          apiKeyRetrievalRequired: true,
+        });
+      });
+
+      it('prefers the profile_uid a fake request was enriched with', async () => {
+        mockStartParams.getCurrentUser.mockReturnValue(
+          securityMock.createMockAuthenticatedUser({ profile_uid: 'enriched-profile-uid' })
+        );
+        const fakeRequest = kibanaRequestFactory({
+          headers: { authorization: `ApiKey ${uiamApiKey}` },
+          path: '/',
+        });
+
+        await expect(startWithUiam().getCurrentProfileId({ request: fakeRequest })).resolves.toBe(
+          'enriched-profile-uid'
+        );
+        expect(mockUiam.getApiKeyCreator).not.toHaveBeenCalled();
+      });
+
+      it('still resolves an Elasticsearch API key through Elasticsearch', async () => {
+        mockStartParams.clusterClient
+          .asScoped()
+          .asCurrentUser.security.getApiKey.mockResolvedValue({
+            api_keys: [
+              {
+                id: 'some-api-key-id',
+                type: 'rest',
+                name: 'some-api-key',
+                creation: 0,
+                invalidated: false,
+                username: 'es-key-owner',
+                realm: 'native',
+                metadata: {},
+                profile_uid: 'es-key-owner-profile',
+              },
+            ],
+          });
+        const esKeyRequest = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `apikey ${Buffer.from('some-api-key-id:some-api-key-value').toString(
+              'base64'
+            )}`,
+          },
+        });
+
+        await expect(startWithUiam().getCurrentProfileId({ request: esKeyRequest })).resolves.toBe(
+          'es-key-owner-profile'
+        );
+
+        expect(mockUiam.getApiKeyCreator).not.toHaveBeenCalled();
+      });
+
+      it('does not look at UIAM when it is not enabled', async () => {
+        await expect(
+          userProfileService
+            .start(mockStartParams)
+            .getCurrentProfileId({ request: mockUiamApiKeyRequest })
+        ).resolves.toBeNull();
+
+        expect(mockUiam.getApiKeyCreator).not.toHaveBeenCalled();
       });
     });
 
