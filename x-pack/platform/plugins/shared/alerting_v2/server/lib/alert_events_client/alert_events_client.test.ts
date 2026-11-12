@@ -127,8 +127,8 @@ const createClient = (
     errors: [],
   }));
 
-  const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-    executeQueryRows: jest.fn().mockResolvedValue(queryRows),
+  const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQuery'>> = {
+    executeQuery: jest.fn().mockResolvedValue(queryRows),
   };
 
   const resourceManager = createMockResourceManager();
@@ -204,7 +204,7 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
 
     await client.createAlertEvent({ source: 'datadog', fingerprint: 'lifecycle-fp' });
 
-    const [{ query }] = queryService.executeQueryRows.mock.calls[0];
+    const [{ query }] = queryService.executeQuery.mock.calls[0];
     expect(query).toContain('alert.status IS NOT NULL');
     expect(query).toContain('last_episode_id = LAST(alert.id, @timestamp)');
     expect(query).toContain('last_episode_status = LAST(alert.status, @timestamp)');

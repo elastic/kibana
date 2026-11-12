@@ -42,6 +42,7 @@ export const createEditTagsAction = (
 ): EpisodeAction => ({
   id: EDIT_TAGS_ACTION_ID,
   order: 40,
+  enforcesOwnPrivileges: false,
   displayName: i18n.EDIT_TAGS,
   iconType: 'tag',
   isCompatible: ({ episodes }: EpisodeActionContext) =>

@@ -117,6 +117,7 @@ describe('useDefaultModelSettings', () => {
       featureSpecificModels: false,
     });
     expect(result.current.isDirty).toBe(true);
+    expect(result.current.dirtyFields).toContain('enableAi');
   });
 
   it('toggling enableAi back on restores the previously remembered configuration in-session', () => {

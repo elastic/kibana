@@ -33,6 +33,9 @@ const DISCOVER_NAVIGATION_TIMEOUT = 30000;
 // 10s expect.timeout on cloud CI.
 const WATERFALL_RENDER_TIMEOUT = 20000;
 
+// APM replaces all service route content with a loader until GET .../{serviceName}/agent resolves.
+const SERVICE_AGENT_GATE_TIMEOUT = 30000;
+
 const clickAndWaitForDiscover = (
   page: ScoutPage,
   target: string | Locator,
@@ -195,13 +198,20 @@ spaceTest.describe(
       transactionType: 'request',
     };
 
+    const gotoApmTransactionDetail = async (page: ScoutPage) => {
+      await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
+        params: transactionDetailParams,
+      });
+      await expect(page.testSubj.locator('apmTraceSamplesTabButton')).toBeVisible({
+        timeout: SERVICE_AGENT_GATE_TIMEOUT,
+      });
+    };
+
     spaceTest(
       'Transaction Detail - Charts open traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: transactionDetailParams,
-          });
+          await gotoApmTransactionDetail(page);
         });
 
         await spaceTest.step('Latency chart opens traces experience', async () => {
@@ -235,9 +245,7 @@ spaceTest.describe(
       'Transaction Detail - Waterfall and span links open traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: transactionDetailParams,
-          });
+          await gotoApmTransactionDetail(page);
         });
 
         await spaceTest.step('"Open in Discover" button opens traces experience', async () => {
@@ -262,9 +270,7 @@ spaceTest.describe(
       'Transaction Detail - Correlations open traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: transactionDetailParams,
-          });
+          await gotoApmTransactionDetail(page);
         });
 
         await spaceTest.step('Latency correlations opens traces experience', async () => {
@@ -332,9 +338,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: transactionDetailParams,
-          });
+          await gotoApmTransactionDetail(page);
         });
 
         await spaceTest.step('unified waterfall size warning is visible', async () => {

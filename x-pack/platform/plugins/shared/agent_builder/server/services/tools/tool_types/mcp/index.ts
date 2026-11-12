@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { getMcpToolType, listMcpTools, getNamedMcpTools } from './tool_type';
+export {
+  getMcpToolType,
+  listMcpTools,
+  getNamedMcpTools,
+  getNotMcpConnectorMessage,
+} from './tool_type';
+export { getMcpToolsHealth } from './mcp_tools_health';

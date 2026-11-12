@@ -110,14 +110,29 @@ describe('source helpers', () => {
     ]);
   });
 
-  it('uses the managed Elasticsearch-compatible bulk endpoint', () => {
+  it('uses the source scoped bulk endpoints', () => {
     expect(
-      createSourceEndpoint({
+      resolveSourceCapabilities({
         type: 'async_bulk',
-        sourceId: 'async-bulk-prod-app-logs-abc123',
-        managedInputBaseUrl: 'https://cluster.ingest.elastic.cloud',
+        sourceId: 'orders',
+        managedInputBaseUrl: 'https://cluster.ingest.elastic.cloud/',
       })
-    ).toBe('https://cluster.ingest.elastic.cloud/_es/_bulk');
+    ).toEqual(
+      expect.objectContaining({
+        endpoint: 'https://cluster.ingest.elastic.cloud/inputs/elasticsearch/orders/_bulk',
+        endpoints: [
+          {
+            id: 'bulk',
+            url: 'https://cluster.ingest.elastic.cloud/inputs/elasticsearch/orders/_bulk',
+          },
+          {
+            id: 'bulkTarget',
+            url: 'https://cluster.ingest.elastic.cloud/inputs/elasticsearch/orders/<target>/_bulk',
+          },
+        ],
+        isAvailable: true,
+      })
+    );
   });
 
   it('treats managed Prometheus as unavailable without its capability', () => {
@@ -224,6 +239,9 @@ describe('source helpers', () => {
         sourceId: 'otlp-prod-app-logs-abc123',
       })
     ).toBeUndefined();
+    expect(resolveSourceCapabilities({ type: 'async_bulk', sourceId: 'orders' })).toEqual(
+      expect.objectContaining({ endpoint: undefined, endpoints: [], isAvailable: false })
+    );
   });
 
   it.each([

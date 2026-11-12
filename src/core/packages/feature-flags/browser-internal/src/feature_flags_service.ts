@@ -10,23 +10,30 @@
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { Logger } from '@kbn/logging';
 import type {
   EvaluationContext,
   FeatureFlagsSetup,
-  FeatureFlagsStart,
+  InternalFeatureFlagsStart,
   MultiContextEvaluationContext,
 } from '@kbn/core-feature-flags-browser';
 import { apm } from '@elastic/apm-rum';
-import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
+import {
+  type Client,
+  type EvaluationDetails,
+  ClientProviderEvents,
+  OpenFeature,
+} from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
 import { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { filter, map, merge, startWith, Subject } from 'rxjs';
-import { get } from 'lodash';
 import { useObservable, type ValueObservable } from '@kbn/use-observable';
 import { buildPath } from '@kbn/core-http-browser';
-import { withTimeout } from '@kbn/std';
+import { getFlattenedObject, withTimeout } from '@kbn/std';
+import { createKibanaOfrepProvider } from './kibana_ofrep_provider';
 
 /**
  * setup method dependencies
@@ -50,9 +57,37 @@ export interface FeatureFlagsSetupDeps {
 type FeatureFlagValue = boolean | string | number;
 type FeatureFlagValueType = 'boolean' | 'string' | 'number';
 
+const HELPER_STORAGE_KEY = 'core.featureFlags.helper.enabled';
+/** Enough for every flag Kibana evaluates, with room for experiments. */
+const MAX_TRACKED_EVALUATIONS = 1000;
+
+export interface FeatureFlagsHelperDeps {
+  http: InternalHttpSetup;
+  overlays: Pick<OverlayStart, 'openFlyout'>;
+  rendering: Pick<RenderingService, 'addContext'>;
+}
+
+declare global {
+  var toggleFeatureFlagsHelper: (() => void) | undefined;
+}
+
 interface ReportedFlagValue {
   type: FeatureFlagValueType;
   value: FeatureFlagValue;
+  reason?: string;
+}
+
+/** Injected provider values, with `feature_flags.overrides` winning. */
+function seedFlags(
+  injectedMetadata: ReturnType<InternalInjectedMetadataSetup['getFeatureFlags']>
+): Record<string, unknown> {
+  if (!injectedMetadata) {
+    return {};
+  }
+  return {
+    ...injectedMetadata.initialFeatureFlags,
+    ...getFlattenedObject(injectedMetadata.overrides ?? {}),
+  };
 }
 
 const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType => {
@@ -98,9 +133,18 @@ export class FeatureFlagsService {
   private readonly logger: Logger;
   private readonly contextChanged$ = new Subject<void>();
   private readonly lastReportedValues = new Map<string, ReportedFlagValue>();
+  /** Last value returned for each flag this page has evaluated. */
+  private readonly evaluatedFlags = new Map<string, FeatureFlagValue>();
+  private helperDeps?: FeatureFlagsHelperDeps;
+  private unmountHelper?: () => void;
+  private openHelper?: () => void;
+  private closeHelperFlyout?: () => void;
+  private setMountedCornerButtonVisible?: (visible: boolean) => void;
+  private mountingHelper?: Promise<void>;
+  /** Remembered in localStorage. Independent of the developer toolbar pill. */
+  private cornerButtonVisible = false;
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
-  private overrides: Record<string, unknown> = {};
   private http?: InternalHttpSetup;
 
   /**
@@ -119,39 +163,10 @@ export class FeatureFlagsService {
    */
   public setup(deps: FeatureFlagsSetupDeps): FeatureFlagsSetup {
     const featureFlagsInjectedMetadata = deps.injectedMetadata.getFeatureFlags();
-    if (featureFlagsInjectedMetadata) {
-      this.overrides = featureFlagsInjectedMetadata.overrides;
-    }
     this.http = deps.http;
+    this.installProvider(deps.http, featureFlagsInjectedMetadata);
     return {
       getInitialFeatureFlags: () => featureFlagsInjectedMetadata?.initialFeatureFlags ?? {},
-      setProvider: (provider) => {
-        if (this.isProviderReadyPromise) {
-          throw new Error('A provider has already been set. This API cannot be called twice.');
-        }
-        const transaction = apm.startTransaction('set-provider', 'feature-flags');
-        this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
-        this.isProviderReadyPromise
-          .then(() => {
-            if (transaction) {
-              // @ts-expect-error RUM types are not correct
-              transaction.outcome = 'success';
-              transaction.end();
-            }
-          })
-          .catch((err) => {
-            this.logger.error(err);
-            apm.captureError(err);
-            if (transaction) {
-              // @ts-expect-error RUM types are not correct
-              transaction.outcome = 'failure';
-              transaction.end();
-            }
-          });
-
-        // Emit a context change event when the provider is ready to force the reevaluation of the subscribed flags.
-        OpenFeature.addHandler(ClientProviderEvents.Ready, () => this.contextChanged$.next());
-      },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
   }
@@ -159,7 +174,7 @@ export class FeatureFlagsService {
   /**
    * Start lifecycle method
    */
-  public async start(): Promise<FeatureFlagsStart> {
+  public async start(): Promise<InternalFeatureFlagsStart> {
     const featureFlagsChanged$ = new Subject<string[]>();
     this.featureFlagsClient.addHandler(ClientProviderEvents.ConfigurationChanged, (event) => {
       if (event?.flagsChanged) {
@@ -177,18 +192,25 @@ export class FeatureFlagsService {
         startWith([flagName]) // only to emit on the first call
       );
 
-    await this.waitForProviderInitialization();
+    try {
+      await this.waitForProviderInitialization();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Feature flags provider failed to initialize. Evaluations use fallbacks until it recovers: ${message}`
+      );
+    }
 
     const getBooleanValue = (flagName: string, fallbackValue: boolean) =>
-      this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue);
+      this.evaluateFlag(this.featureFlagsClient.getBooleanDetails, flagName, fallbackValue);
     const getBooleanValue$ = (flagName: string, fallbackValue: boolean) =>
       observeFeatureFlag$(flagName).pipe(map(() => getBooleanValue(flagName, fallbackValue)));
     const getStringValue = <Value extends string>(flagName: string, fallbackValue: Value) =>
-      this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue);
+      this.evaluateFlag<Value>(this.featureFlagsClient.getStringDetails, flagName, fallbackValue);
     const getStringValue$ = <Value extends string>(flagName: string, fallbackValue: Value) =>
       observeFeatureFlag$(flagName).pipe(map(() => getStringValue(flagName, fallbackValue)));
     const getNumberValue = <Value extends number>(flagName: string, fallbackValue: Value) =>
-      this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue);
+      this.evaluateFlag<Value>(this.featureFlagsClient.getNumberDetails, flagName, fallbackValue);
     const getNumberValue$ = <Value extends number>(flagName: string, fallbackValue: Value) =>
       observeFeatureFlag$(flagName).pipe(map(() => getNumberValue(flagName, fallbackValue)));
 
@@ -207,6 +229,11 @@ export class FeatureFlagsService {
       useStringValue,
       getNumberValue$,
       useNumberValue,
+      helper: {
+        open: () => {
+          void this.openHelperFlyout();
+        },
+      },
     };
   }
 
@@ -214,7 +241,134 @@ export class FeatureFlagsService {
    * Stop lifecycle method
    */
   public async stop() {
+    this.unmountHelper?.();
+    this.unmountHelper = undefined;
+    this.openHelper = undefined;
+    this.closeHelperFlyout = undefined;
+    this.setMountedCornerButtonVisible = undefined;
     await OpenFeature.close();
+  }
+
+  /**
+   * Asks the provider to fetch the server snapshot now, instead of waiting for the next poll.
+   */
+  public async refresh(): Promise<void> {
+    await OpenFeature.setContext(this.context);
+  }
+
+  /**
+   * Exposes `toggleFeatureFlagsHelper()` on the page. The helper UI stays out of the
+   * page-load bundle until the corner button or the developer toolbar opens it.
+   */
+  public registerHelper(deps: FeatureFlagsHelperDeps): void {
+    this.helperDeps = deps;
+    this.cornerButtonVisible = localStorage.getItem(HELPER_STORAGE_KEY) === 'true';
+    this.logger.info(
+      'Run toggleFeatureFlagsHelper() in the browser console to show or hide the feature flags helper button.'
+    );
+    globalThis.toggleFeatureFlagsHelper = () => {
+      void this.setCornerButtonVisible(!this.cornerButtonVisible);
+    };
+    if (this.cornerButtonVisible) {
+      void this.ensureHelperMounted();
+    }
+  }
+
+  /** Opens the flyout. Does not change the corner button or its localStorage value. */
+  private async openHelperFlyout(): Promise<void> {
+    await this.ensureHelperMounted();
+    this.openHelper?.();
+  }
+
+  /** Shows or hides the corner button. Hiding it closes an open flyout. */
+  private async setCornerButtonVisible(visible: boolean): Promise<void> {
+    this.cornerButtonVisible = visible;
+    localStorage.setItem(HELPER_STORAGE_KEY, String(visible));
+    if (visible) {
+      await this.ensureHelperMounted();
+      this.setMountedCornerButtonVisible?.(true);
+      this.logger.info('Feature flags helper button shown.');
+      return;
+    }
+
+    if (this.mountingHelper) {
+      await this.mountingHelper;
+    }
+    this.setMountedCornerButtonVisible?.(false);
+    this.closeHelperFlyout?.();
+    this.logger.info('Feature flags helper button hidden.');
+  }
+
+  private async ensureHelperMounted(): Promise<void> {
+    if (this.unmountHelper || !this.helperDeps) {
+      return;
+    }
+    this.mountingHelper ??= this.mountHelper();
+    await this.mountingHelper;
+  }
+
+  private async mountHelper(): Promise<void> {
+    const deps = this.helperDeps;
+    if (!deps) {
+      return;
+    }
+    try {
+      const { mountFeatureFlagsHelper } = await import('./helper');
+      if (this.unmountHelper || !this.helperDeps) {
+        return;
+      }
+      const mounted = mountFeatureFlagsHelper({
+        http: deps.http,
+        overlays: deps.overlays,
+        rendering: deps.rendering,
+        refreshFlags: () => this.refresh(),
+        getBrowserEvaluations: () => this.getEvaluatedFlags(),
+        cornerButtonVisible: this.cornerButtonVisible,
+      });
+      this.unmountHelper = mounted.unmount;
+      this.openHelper = mounted.open;
+      this.closeHelperFlyout = mounted.close;
+      this.setMountedCornerButtonVisible = mounted.setCornerButtonVisible;
+      mounted.setCornerButtonVisible(this.cornerButtonVisible);
+    } finally {
+      this.mountingHelper = undefined;
+    }
+  }
+
+  /**
+   * Installs the Kibana OFREP provider. Injected flags and config overrides are served until the first response.
+   */
+  private installProvider(
+    http: InternalHttpSetup,
+    injectedMetadata: ReturnType<InternalInjectedMetadataSetup['getFeatureFlags']>
+  ): void {
+    const transaction = apm.startTransaction('set-provider', 'feature-flags');
+    const provider = createKibanaOfrepProvider({
+      http,
+      initialFlags: seedFlags(injectedMetadata),
+      logger: this.logger,
+    });
+    this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
+    this.isProviderReadyPromise
+      .then(() => {
+        if (transaction) {
+          // @ts-expect-error RUM types are not correct
+          transaction.outcome = 'success';
+          transaction.end();
+        }
+      })
+      .catch((err) => {
+        this.logger.error(err);
+        apm.captureError(err);
+        if (transaction) {
+          // @ts-expect-error RUM types are not correct
+          transaction.outcome = 'failure';
+          transaction.end();
+        }
+      });
+
+    // Reevaluate subscribed flags once the provider is ready.
+    OpenFeature.addHandler(ClientProviderEvents.Ready, () => this.contextChanged$.next());
   }
 
   /**
@@ -248,25 +402,41 @@ export class FeatureFlagsService {
    * @internal
    */
   private evaluateFlag<T extends FeatureFlagValue>(
-    evaluationFn: (flagName: string, fallbackValue: T) => T,
+    evaluationFn: (flagName: string, fallbackValue: T) => EvaluationDetails<T>,
     flagName: string,
     fallbackValue: T
   ): T {
-    const override = get(this.overrides, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
-    const value =
-      typeof override !== 'undefined'
-        ? (override as T)
-        : // We have to bind the evaluation or the client will lose its internal context
-          evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    // Bind the evaluation or the client will lose its internal context.
+    // Overrides are already part of the server snapshot this provider reads
+    // and are taken into account in the `initialFlags` property when bootstrapping the client.
+    const { value, reason } = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
-    this.reportValueIfChanged(flagName, value);
+    this.rememberEvaluation(flagName, value);
+    this.reportValueIfChanged(flagName, value, reason);
 
     return value;
   }
 
-  private reportValueIfChanged(flagName: string, value: FeatureFlagValue): void {
-    if (!this.shouldReportValue(flagName, value)) {
+  /** Flags this page has evaluated. The helper uses these when the provider snapshot is empty. */
+  public getEvaluatedFlags(): Array<{ key: string; value: FeatureFlagValue }> {
+    return [...this.evaluatedFlags.entries()].map(([key, value]) => ({ key, value }));
+  }
+
+  /** Keeps the helper's flag list populated when the provider has no snapshot. */
+  private rememberEvaluation(flagName: string, value: FeatureFlagValue): void {
+    if (!this.evaluatedFlags.has(flagName) && this.evaluatedFlags.size >= MAX_TRACKED_EVALUATIONS) {
+      return;
+    }
+    this.evaluatedFlags.set(flagName, value);
+  }
+
+  private reportValueIfChanged(
+    flagName: string,
+    value: FeatureFlagValue,
+    reason: string | undefined
+  ): void {
+    if (!this.shouldReportValue(flagName, value, reason)) {
       return;
     }
 
@@ -274,21 +444,29 @@ export class FeatureFlagsService {
     // TODO: When UI has OTel instrumented, we can increment the counter in the browser directly.
     this.http
       ?.post(buildPath('/internal/feature-flags/{flagName}/counter', { flagName }), {
-        body: JSON.stringify({ value }),
+        body: JSON.stringify({ value, reason }),
       })
       .catch(() => {});
   }
 
-  private shouldReportValue(flagName: string, value: FeatureFlagValue): boolean {
+  private shouldReportValue(
+    flagName: string,
+    value: FeatureFlagValue,
+    reason: string | undefined
+  ): boolean {
     const type = getFeatureFlagValueType(value);
     const lastReportedValue = this.lastReportedValues.get(flagName);
     // Object.is takes care string, number (incl. NaN), boolean comparison
-    if (lastReportedValue?.type === type && Object.is(lastReportedValue.value, value)) {
+    if (
+      lastReportedValue?.type === type &&
+      Object.is(lastReportedValue.value, value) &&
+      lastReportedValue.reason === reason
+    ) {
       return false;
     }
 
     // Counter reporting is best effort; record before posting to cap attempts at one per unique value.
-    this.lastReportedValues.set(flagName, { type, value });
+    this.lastReportedValues.set(flagName, { type, value, reason });
     return true;
   }
 

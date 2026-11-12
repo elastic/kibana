@@ -20,13 +20,19 @@ import {
 
 const RESOLVE_TIMEOUT_MS = 2 * 60 * 1000;
 
-const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> =>
-  Promise.race([
-    promise,
-    new Promise<T>((_, reject) => {
-      setTimeout(() => reject(new Error(`timed out after ${ms}ms`)), ms).unref();
-    }),
-  ]);
+const withTimeout = async <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<T>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`timed out after ${ms}ms`)), ms);
+    timer.unref();
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
 
 const formatAnnotation = (selection: OnMergeSelection): string => {
   const range = selection.base

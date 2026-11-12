@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '../search_strategy';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';
 import { addNestedFieldFromSource, flattenNestedObject } from './add_nested_field_from_source';
 

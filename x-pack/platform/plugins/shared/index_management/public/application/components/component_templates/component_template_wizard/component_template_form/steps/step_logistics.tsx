@@ -26,7 +26,6 @@ import {
 } from '@kbn/data-lifecycle-phases';
 import { DlmPhasesSelector } from '../../../../data_lifecycle';
 import type { DlmPhasesSelectorProps, SerializedDlmPhases } from '../../../../data_lifecycle';
-import { resolveLogisticsLifecycle } from '../../../../../../../common/lib';
 import { buildDataRetentionFromSerializedDlmPhases } from '../../../../data_lifecycle/dlm_phases_selector/utils/build_data_retention';
 import type { Forms } from '../../../shared_imports';
 import {
@@ -198,7 +197,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     const buildData = useCallback(
       (formData: ReturnType<typeof getFormData>) => ({
         ...formData,
-        lifecycle: resolveLogisticsLifecycle(lifecycle, { isDataStreamTemplate: true }),
+        lifecycle,
       }),
       [lifecycle]
     );

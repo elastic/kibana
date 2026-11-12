@@ -84,7 +84,7 @@ describe('LandingLinksIconsGroups', () => {
   it('should render items in the same order as defined', () => {
     const { queryAllByTestId } = render(<LandingLinksIconsGroups items={items} />);
 
-    const renderedItems = queryAllByTestId('LandingItem');
+    const renderedItems = queryAllByTestId(/^LandingItem /);
     expect(renderedItems[0]).toHaveTextContent('dashboards title');
     expect(renderedItems[1]).toHaveTextContent('rules title');
     expect(renderedItems[2]).toHaveTextContent('network title');

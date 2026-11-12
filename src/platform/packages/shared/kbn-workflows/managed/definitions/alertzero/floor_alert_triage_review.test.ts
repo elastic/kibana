@@ -644,6 +644,53 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(shouldPost({ retag_approved_leftovers: { output: { failed: 0 } } }, 0)).toBe(false);
   });
 
+  // The approval closes the Investigation as a false positive, so an analyst's earlier closure
+  // must be visible there. The proposal API does not expose the close output, so a search counts
+  // the live alerts closed with another reason.
+  it('tells the Investigation how many alerts an analyst had already closed, only when some were', () => {
+    const search = stepByName('count_analyst_closed');
+    const step = stepByName('post_comment_already_closed_approved');
+    expect(branchStepNames('handle_approved')).toEqual(
+      expect.arrayContaining(['count_analyst_closed', 'post_comment_already_closed_approved'])
+    );
+    expect(search?.type).toBe('elasticsearch.search');
+    expect(search?.['on-failure']?.continue).toBe(true);
+    // Each clause matters: dropping the id filter counts the whole space, dropping `closed` counts
+    // open alerts, and moving `false_positive` out of `must_not` counts the wrong alerts.
+    expect(search?.with?.query).toEqual({
+      bool: {
+        filter: [
+          { terms: { _id: '${{ variables.live_alert_ids }}' } },
+          { term: { 'kibana.alert.workflow_status': 'closed' } },
+        ],
+        must_not: [{ term: { 'kibana.alert.workflow_reason': 'false_positive' } }],
+      },
+    });
+
+    const shouldPost = (total?: number) =>
+      evalExpr(step?.if as string, {
+        steps: {
+          count_analyst_closed:
+            total === undefined
+              ? { error: { message: 'x' } }
+              : { output: { hits: { total: { value: total } } } },
+        },
+      });
+    expect(shouldPost(2)).toBe(true);
+    expect(shouldPost(0)).toBe(false);
+    // A failed search leaves the comment out instead of failing the run.
+    expect(shouldPost(undefined)).toBe(false);
+
+    const render = (closed: number, total: number) =>
+      renderString((step?.with as { message: string }).message, {
+        steps: { count_analyst_closed: { output: { hits: { total: { value: closed } } } } },
+        variables: { fp_candidate_count: total },
+      }).replace(/\s+/g, ' ');
+    expect(render(2, 5)).toContain('2 of 5 alerts were already closed by an analyst');
+    expect(render(1, 1)).toContain('1 of 1 alert was already closed by an analyst');
+    expect(render(2, 5)).not.toContain('@');
+  });
+
   it('re-tags by the proposal tag and by id, in every outcome that uses the live revision', () => {
     [
       'retag_approved_leftovers',

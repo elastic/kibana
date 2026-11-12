@@ -21,7 +21,7 @@ import { useDispatch } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { LastEventIndexKey } from '@kbn/securitysolution-timeline-search-strategy';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';

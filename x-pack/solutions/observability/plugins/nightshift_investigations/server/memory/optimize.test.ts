@@ -2122,15 +2122,15 @@ describe('optimizeMemory', () => {
         {
           kind: 'tool',
           toolId: 'nightshift_sandbox_view_file',
-          params: { file_path: '/workspace/cortex/INDEX.md' },
+          params: { file_path: '/workspace/wiki/INDEX.md' },
           resultText: 'Checkout runbook',
           isError: false,
         },
         {
           kind: 'tool',
-          toolId: 'write_todos',
-          params: {},
-          resultText: 'todos saved',
+          toolId: 'nightshift_sandbox_write_file',
+          params: { file_path: 'notes.md', content: 'x' },
+          resultText: 'file written',
           isError: false,
         },
       ],
@@ -2193,7 +2193,7 @@ describe('optimizeMemory', () => {
     expect(proposeExtractions.mock.calls[0][0].transcript).not.toContain('## Final answer');
   });
 
-  it('keeps seeded Cortex reads out of every Memory call but keeps memory reads', async () => {
+  it('keeps seeded Wiki reads out of every Memory call but keeps memory reads', async () => {
     const store = createStore({
       get: jest.fn().mockImplementation(async (id: string) => page(id)),
     });
@@ -2212,8 +2212,8 @@ describe('optimizeMemory', () => {
         {
           kind: 'tool',
           toolId: 'nightshift_sandbox_view_file',
-          params: { file_path: '/workspace/cortex/INDEX.md' },
-          resultText: 'CORTEX_INDEX',
+          params: { file_path: '/workspace/wiki/INDEX.md' },
+          resultText: 'WIKI_INDEX',
           isError: false,
         },
         {
@@ -2229,7 +2229,7 @@ describe('optimizeMemory', () => {
 
     for (const propose of [proposeLabels, proposeExtractions]) {
       const { transcript } = propose.mock.calls[0][0];
-      expect(transcript).not.toContain('CORTEX_INDEX');
+      expect(transcript).not.toContain('WIKI_INDEX');
       expect(transcript).toContain('MEMORY_A');
     }
   });
