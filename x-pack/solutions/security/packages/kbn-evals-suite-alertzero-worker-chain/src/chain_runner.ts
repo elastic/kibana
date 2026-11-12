@@ -21,6 +21,7 @@ import type {
   VerdictOrigin,
   WorkerAutonomy,
 } from '@kbn/security-evals-chain-safety';
+import { SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID } from '@kbn/alertzero-common';
 import {
   ACTION_IDS,
   DEFAULT_POLL_INTERVAL_MS,
@@ -400,7 +401,7 @@ const listProposalsFor = async (
   conversationId: string
 ): Promise<ProposalDto[]> => {
   const { proposals } = (await ctx.fetch(
-    spacePath(ctx.spaceId, `${PROPOSALS_URL}?conversationId=${conversationId}`),
+    spacePath(ctx.spaceId, `${PROPOSALS_URL}?conversationId=${encodeURIComponent(conversationId)}`),
     {
       method: 'GET',
       version: PROPOSALS_API_VERSION,
@@ -483,10 +484,16 @@ const waitForProposals = async (
   conversationId: string,
   timeoutMs: number,
   pollIntervalMs: number
-): Promise<{ proposals: ProposalDto[]; unsettledAtTimeout: boolean }> => {
+): Promise<{ proposals: ProposalDto[]; unsettledAtTimeout: boolean; readError?: string }> => {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
-    const proposals = await listProposalsFor(ctx, conversationId).catch(() => []);
+    // A failed read is retried until the deadline; only a read that is still
+    // failing then is reported, so the caller never mistakes it for "no proposals".
+    let readError: string | undefined;
+    const proposals = await listProposalsFor(ctx, conversationId).catch((error: unknown) => {
+      readError = error instanceof Error ? error.message : String(error);
+      return [];
+    });
     if (proposals.length > 0 && (await allSettled(ctx, proposals))) {
       return { proposals, unsettledAtTimeout: false };
     }
@@ -494,7 +501,7 @@ const waitForProposals = async (
       // Proposals exist but never settled inside perActionProposal. Return
       // them anyway (the record shows what was read) and let the caller flag
       // harness interference — never a silent `not_exercised`.
-      return { proposals, unsettledAtTimeout: !(await allSettled(ctx, proposals)) };
+      return { proposals, unsettledAtTimeout: !(await allSettled(ctx, proposals)), readError };
     }
     await sleep(pollIntervalMs);
   }
@@ -720,8 +727,32 @@ const runChainUnserialized = async ({
     if (applied !== undefined) appliedAutonomy[worker] = applied;
     return applied;
   };
+  // Workers whose proposals only show up at read-back time (no hop of their own here)
+  // are read once, on their first proposal. The Forensics Worker stays out of WORKER_IDS
+  // because the harness provisions every id listed there.
+  const lateAutonomyWorkerIds: Partial<Record<ChainWorkerKind, string>> = {
+    'rule-tuning': WORKER_IDS.ruleTuning,
+    'endpoint-forensics': SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  };
+  const lateAutonomyRead = new Set<ChainWorkerKind>();
+  const ensureAutonomyRead = async (worker: ChainWorkerKind) => {
+    const workerId = lateAutonomyWorkerIds[worker];
+    if (workerId === undefined || appliedAutonomy[worker] !== undefined) return;
+    if (lateAutonomyRead.has(worker)) return;
+    lateAutonomyRead.add(worker);
+    try {
+      await readBackAutonomy(worker, workerId);
+    } catch (error) {
+      // The gate then judges the action at 'manual' (nothing allowlisted); flag the run so
+      // a failed read cannot pass as a model violation.
+      markInterference(
+        `autonomy of ${worker} could not be read back: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  };
 
-  let appliedVerdictOrigin: VerdictOrigin | undefined;
   /** Investigations the AD reviews raised proposals on (handoff proposals live there). */
   const reviewInvestigations: Array<{
     id: string;
@@ -987,7 +1018,6 @@ const runChainUnserialized = async ({
         markInterference(`attack_discovery_review ${reviewId} overran its per-hop timeout`);
       }
       const result = readReviewResult(reviewExecution);
-      if (result.verdict !== undefined) appliedVerdictOrigin = result.verdict;
       if (result.investigationId !== undefined) {
         reviewInvestigations.push({
           id: result.investigationId,
@@ -1008,9 +1038,10 @@ const runChainUnserialized = async ({
     reopened?: boolean;
   }> = [];
   if (investigationId) {
+    // The primary Investigation is triage's; triage emits no verdict, and an AD
+    // review's verdict belongs to that review's own Investigation, not this one.
     proposalSources.push({
       id: investigationId,
-      verdict: appliedVerdictOrigin,
       reopened: investigation?.reopened,
     });
   }
@@ -1036,12 +1067,15 @@ const runChainUnserialized = async ({
 
   const seenProposalIds = new Set<string>();
   for (const source of proposalSources) {
-    const { proposals, unsettledAtTimeout } = await waitForProposals(
+    const { proposals, unsettledAtTimeout, readError } = await waitForProposals(
       ctx,
       source.id,
       timeouts.perActionProposal,
       pollIntervalMs
     );
+    if (readError !== undefined) {
+      markInterference(`proposals on ${source.id} could not be read: ${readError}`);
+    }
     if (unsettledAtTimeout) {
       // A proposal stuck in executing, or pending with no parked
       // decision gate, past perActionProposal would be dropped by the gate as
@@ -1066,6 +1100,7 @@ const runChainUnserialized = async ({
           : RULE_TUNING_ACTION_IDS.has(actionWorkflowId)
           ? 'rule-tuning'
           : 'endpoint-forensics';
+      await ensureAutonomyRead(worker);
       actions.push({
         actionWorkflowId,
         executionStatus: proposal.status === 'succeeded' ? 'completed' : proposal.status,

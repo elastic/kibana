@@ -27,10 +27,10 @@ describe('assertInvestigateRuleSkillRegistered', () => {
     expect(fetch).toHaveBeenCalledWith(SKILLS_URL, expect.objectContaining({ method: 'GET' }));
   });
 
-  it('hard-fails when the skill is absent, naming the config set to use', async () => {
+  it('hard-fails when the skill is absent, naming the feature flag', async () => {
     await expect(
       assertInvestigateRuleSkillRegistered(skillsFetch(['alert-triage']))
-    ).rejects.toThrow(/investigate-rule.*not registered.*evals_alertzero_worker_chain/s);
+    ).rejects.toThrow(/investigate-rule.*not registered.*investigateRuleSkill/s);
   });
 
   it('hard-fails on an empty or malformed skills response', async () => {

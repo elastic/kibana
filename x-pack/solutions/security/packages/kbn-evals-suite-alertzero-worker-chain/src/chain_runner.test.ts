@@ -16,7 +16,9 @@ import {
   WorkerChainHopFailedError,
   type ChainScenario,
 } from './chain_runner';
+import { SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID } from '@kbn/alertzero-common';
 import {
+  ACTION_IDS,
   GENERATION_FAILED_HOP_STATUS,
   PARKED_HOP_STATUS,
   WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN,
@@ -1481,3 +1483,109 @@ const makeAdReviewFetch = (review: { status: string; cancellationReason: string 
   }) as unknown as HttpHandler;
   return { fetch };
 };
+
+describe('runChain proposal read-back', () => {
+  const succeeded = (id: string, actionWorkflowId: string) => ({
+    id,
+    actionWorkflowId,
+    status: 'succeeded',
+    decidedBy: { username: 'analyst' },
+    conversationId: 'conv-1',
+  });
+
+  /** Triage-only chain whose Investigation carries the given proposals and extra Workers. */
+  const triageFetch = (
+    proposals: () => unknown[],
+    extraWorkers: Array<{ id: string; autonomy: string }> = []
+  ) => {
+    const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID, null, 'supervised');
+    const base = baseFetch as unknown as (p: string, ...r: unknown[]) => Promise<unknown>;
+    const fetch = jest.fn(async (path: string, ...rest: unknown[]) => {
+      if (path.startsWith('/internal/proposals')) return { proposals: proposals() };
+      if (path.endsWith('/internal/alertzero/workers')) {
+        const { workers } = (await base(path, ...rest)) as { workers: unknown[] };
+        return {
+          workers: [
+            ...workers,
+            ...extraWorkers.map(({ id, autonomy }) => ({
+              id,
+              enabled: true,
+              settingsRevision: 1,
+              settings: { autonomy, serviceAccountId: `ns/${id}` },
+              workflowId: null,
+            })),
+          ],
+        };
+      }
+      return base(path, ...rest);
+    }) as unknown as HttpHandler;
+    return { fetch };
+  };
+
+  it('encodes the conversation id in the proposals query', async () => {
+    const { fetch } = triageFetch(() => []);
+    await runChain({ ...params(fetch, ['alert-triage']), maxWaitMs: { perActionProposal: 0 } });
+    const reads = (fetch as unknown as jest.Mock).mock.calls
+      .map(([path]) => path as string)
+      .filter((path) => path.startsWith('/internal/proposals'));
+    expect(reads).toContain('/internal/proposals?conversationId=conv-1');
+  });
+
+  it('a proposals read that keeps failing is harness interference, never "no proposals"', async () => {
+    const { fetch } = triageFetch(() => {
+      throw new Error('503 Service Unavailable');
+    });
+    const record = await runChain({
+      ...params(fetch, ['alert-triage']),
+      maxWaitMs: { perActionProposal: 0 },
+    });
+    expect(record.actions).toHaveLength(0);
+    expect(record.harnessInterference).toMatch(/could not be read: 503 Service Unavailable/);
+  });
+
+  it('a transient proposals read failure that recovers is not interference', async () => {
+    let reads = 0;
+    const { fetch } = triageFetch(() => {
+      reads += 1;
+      if (reads === 1) throw new Error('transient');
+      return [succeeded('prop-fp', ACTION_IDS.closeAlertsFp)];
+    });
+    const record = await runChain({
+      ...params(fetch, ['alert-triage']),
+      maxWaitMs: { perActionProposal: 60_000 },
+    });
+    expect(record.actions).toHaveLength(1);
+    expect(record.harnessInterference).toBeUndefined();
+  });
+
+  it('reads back the autonomy of rule-tuning and forensics Workers whose proposals appear', async () => {
+    const { fetch } = triageFetch(
+      () => [
+        succeeded('prop-edit', ACTION_IDS.editRule),
+        succeeded('prop-isolate', ACTION_IDS.isolateHost),
+      ],
+      [
+        { id: WORKER_IDS.ruleTuning, autonomy: 'assisted' },
+        { id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID, autonomy: 'supervised' },
+      ]
+    );
+    const record = await runChain(params(fetch, ['alert-triage']));
+    const byId = Object.fromEntries(record.actions.map((a) => [a.actionWorkflowId, a]));
+    expect(byId[ACTION_IDS.editRule].autonomyContext).toEqual(
+      expect.objectContaining({ worker: 'rule-tuning', autonomy: 'assisted' })
+    );
+    expect(byId[ACTION_IDS.isolateHost].autonomyContext).toEqual(
+      expect.objectContaining({ worker: 'endpoint-forensics', autonomy: 'supervised' })
+    );
+    expect(record.appliedAutonomy).toEqual(
+      expect.objectContaining({ 'rule-tuning': 'assisted', 'endpoint-forensics': 'supervised' })
+    );
+  });
+
+  it('a Worker whose autonomy cannot be read back is judged at manual and flags interference', async () => {
+    const { fetch } = triageFetch(() => [succeeded('prop-edit', ACTION_IDS.editRule)]);
+    const record = await runChain(params(fetch, ['alert-triage']));
+    expect(record.actions[0].autonomyContext?.autonomy).toBe('manual');
+    expect(record.harnessInterference).toMatch(/autonomy of rule-tuning could not be read back/);
+  });
+});

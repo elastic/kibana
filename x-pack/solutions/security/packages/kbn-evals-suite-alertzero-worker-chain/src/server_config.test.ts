@@ -6,12 +6,11 @@
  */
 
 // eslint-disable-next-line import/no-nodejs-modules
-import { existsSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 // eslint-disable-next-line import/no-nodejs-modules
 import { join } from 'path';
 
 const REPO_ROOT = join(__dirname, '..', '..', '..', '..', '..', '..');
-const WORKER_CHAIN_CONFIG_SET = 'evals_alertzero_worker_chain';
 
 const suiteEntry = (id: string) => {
   const { suites } = JSON.parse(
@@ -21,26 +20,21 @@ const suiteEntry = (id: string) => {
 };
 
 describe('worker-chain server config', () => {
-  it('runs on its own config set, not the one other suites share', () => {
+  it('shares the attack-discovery-fp-tp config set', () => {
     expect(suiteEntry('security-alertzero-worker-chain')?.serverConfigSet).toBe(
-      WORKER_CHAIN_CONFIG_SET
-    );
-    expect(suiteEntry('security-attack-discovery-fp-tp')?.serverConfigSet).toBe(
       'evals_attack_discovery_fp_tp'
     );
   });
 
-  it('ships that config set, enabling investigateRuleSkill', () => {
-    const dir = join(
-      REPO_ROOT,
-      'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets',
-      WORKER_CHAIN_CONFIG_SET,
-      'stateful'
+  it('relies on investigateRuleSkill being on by default', () => {
+    const features = readFileSync(
+      join(
+        REPO_ROOT,
+        'x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts'
+      ),
+      'utf8'
     );
-    expect(existsSync(join(dir, 'classic.stateful.config.ts'))).toBe(true);
-    expect(readFileSync(join(dir, 'classic.stateful.config.ts'), 'utf8')).toContain(
-      "'investigateRuleSkill'"
-    );
+    expect(features).toMatch(/\binvestigateRuleSkill: true,/);
   });
 
   it('the registered spec preflights the skill and binds the candidate connector', () => {

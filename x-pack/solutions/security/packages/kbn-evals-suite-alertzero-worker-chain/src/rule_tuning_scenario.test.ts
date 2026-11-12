@@ -347,5 +347,29 @@ describe('Rule Tuning proposal scenario', () => {
         runRuleTuningScenario(operator, { ...input, expectedConnectorId: CANDIDATE })
       ).rejects.toThrow('none reported');
     });
+
+    it('an unanswered run parked before diagnose_rule reports usage is not exercised, not a throw', async () => {
+      const { operator } = fixture('assisted', { connectorId: null });
+      const record = await runRuleTuningScenario(operator, {
+        ...input,
+        approve: false,
+        expectedConnectorId: CANDIDATE,
+      });
+      expect(record.harnessInterference).toBeUndefined();
+      expect(await score(record)).toEqual(expect.objectContaining({ label: 'not_exercised' }));
+    });
+
+    it('an unanswered run still fails on a connector it did report', async () => {
+      const { operator } = fixture('assisted', {
+        connectorId: '.anthropic-claude-5-sonnet-chat_completion',
+      });
+      await expect(
+        runRuleTuningScenario(operator, {
+          ...input,
+          approve: false,
+          expectedConnectorId: CANDIDATE,
+        })
+      ).rejects.toThrow(`not the candidate ${CANDIDATE}`);
+    });
   });
 });

@@ -20,8 +20,9 @@
 /**
  * Registered Worker ids (SYSTEM_SECURITY_WORKER_CATALOG). These address the
  * Workers API (settings capture/write/read/restore) and nothing else. They are
- * NOT workflow ids: the AD Worker is `floor-attack-discovery`, while the
- * workflow the harness runs for AD is the `attack-discovery-worker` runner
+ * NOT the workflow ids the harness triggers: it resolves the installed per-space
+ * workflow (`<workerId>-<space>`) and drives AD through floor_attack_discovery,
+ * which fans out to the `attack-discovery-worker` runner
  * (WORKFLOW_IDS.attackDiscoveryRunner). Guarded by constants.test.ts.
  */
 export const WORKER_IDS = {

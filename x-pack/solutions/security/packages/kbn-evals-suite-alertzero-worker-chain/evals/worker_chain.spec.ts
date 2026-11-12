@@ -77,6 +77,12 @@ interface ChainDatasetExample extends Example {
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
+/** The commit under test: Buildkite's (as kbn-evals records it), else an explicit override. */
+const evalBaseSha = (): string =>
+  asString(process.env.BUILDKITE_COMMIT) ??
+  asString(process.env.ALERTZERO_EVAL_BASE_SHA) ??
+  'unknown';
+
 evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, () => {
   const ctxOf = (fetch: HttpHandler): KbnRequestContext => ({ fetch, spaceId: SPACE_ID });
   /** Everything setup changed (Worker snapshots, the AlertZero setting), put back in afterAll even when a run fails. */
@@ -201,7 +207,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
                       }
                     ).mget(p) as never,
                 },
-                baseSha: process.env.ALERTZERO_EVAL_BASE_SHA ?? 'unknown',
+                baseSha: evalBaseSha(),
                 triageTrigger: 'manual-event',
                 forensicsSweepMode: 'blocked',
                 runAsIdentities: {
@@ -248,7 +254,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
               family: input.family as TuningFamily,
               autonomy: 'assisted',
               approve: true,
-              baseSha: asString(process.env.KIBANA_BUILD_SHA) ?? 'unknown',
+              baseSha: evalBaseSha(),
               runAsIdentity: harness.workerServiceAccounts[WORKER_IDS.ruleTuning],
               expectedConnectorId: candidateConnectorId,
             });

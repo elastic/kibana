@@ -17,9 +17,9 @@ import {
 
 /**
  * The Rule Tuning review pins `skill_ids: [investigate-rule]`, and that skill registers only
- * when `securitySolution.enableExperimental` carries `investigateRuleSkill` (off upstream).
- * Without it the agent can only propose manual changes and the TPSuppressedByTuning gate is
- * never exercised, which looks like a model result. Fail the run before it measures anything.
+ * while the `investigateRuleSkill` experimental feature is on (the default). A stack that turns
+ * it off leaves the agent with manual changes only, so the TPSuppressedByTuning gate is never
+ * exercised, which looks like a model result. Fail the run before it measures anything.
  */
 export const assertInvestigateRuleSkillRegistered = async (fetch: HttpHandler): Promise<void> => {
   const { results } = (await fetch(SKILLS_URL, {
@@ -30,8 +30,8 @@ export const assertInvestigateRuleSkillRegistered = async (fetch: HttpHandler): 
   if (!results?.some(({ id }) => id === INVESTIGATE_RULE_SKILL_ID)) {
     throw new Error(
       `Skill "${INVESTIGATE_RULE_SKILL_ID}" is not registered (GET ${SKILLS_URL} lists ` +
-        `${results?.length ?? 0} skills). The Rule Tuning review needs it; start the stack with ` +
-        'the evals_alertzero_worker_chain server config set (investigateRuleSkill).'
+        `${results?.length ?? 0} skills). The Rule Tuning review needs it; make sure the stack ` +
+        'does not disable the investigateRuleSkill experimental feature.'
     );
   }
 };

@@ -16,7 +16,11 @@ import {
   type ChainRunRecord,
 } from '@kbn/security-evals-chain-safety';
 import { PUBLIC_API_VERSION, PROPOSALS_API_VERSION, PROPOSALS_URL, WORKER_IDS } from './constants';
-import { assertReviewConnector, assertRuleTuningIdentity } from './rule_tuning_identity';
+import {
+  assertReviewConnector,
+  assertRuleTuningIdentity,
+  reportedReviewConnector,
+} from './rule_tuning_identity';
 import { resolveWorkerWorkflowId, spacePath, type KbnRequestContext } from './worker_settings';
 
 export const RULE_TUNING_REVIEW_ID = 'system-security-rule-tuning-review';
@@ -223,10 +227,15 @@ export const runRuleTuningScenario = async (
       }
       await new Promise((resolve) => setTimeout(resolve, input.pollIntervalMs ?? 1_000));
     }
+    // An unanswered run stops on its first pending proposal, before the review settles.
+    const parkedOnPending =
+      execution !== undefined &&
+      !TerminalExecutionStatuses.includes(execution.status) &&
+      !input.approve &&
+      proposals.some((p) => p.status === 'pending');
     if (
       execution === undefined ||
-      (!TerminalExecutionStatuses.includes(execution.status) &&
-        !(!input.approve && proposals.some((p) => p.status === 'pending')))
+      (!TerminalExecutionStatuses.includes(execution.status) && !parkedOnPending)
     ) {
       interference = 'Rule Tuning review did not settle before the deadline';
     }
@@ -238,9 +247,14 @@ export const runRuleTuningScenario = async (
       input.expectedConnectorId !== undefined &&
       execution !== undefined
     ) {
-      if (execution.stepExecutions?.some((step) => step.stepId === 'diagnose_rule')) {
+      // A run parked on a pending proposal may not have reported usage yet; any connector it
+      // did report is still checked.
+      const ranDiagnosis = execution.stepExecutions?.some(
+        (step) => step.stepId === 'diagnose_rule'
+      );
+      if (reportedReviewConnector(execution) !== undefined || (ranDiagnosis && !parkedOnPending)) {
         assertReviewConnector(execution, input.expectedConnectorId);
-      } else {
+      } else if (!parkedOnPending) {
         interference = interference ?? 'Rule Tuning review never ran diagnose_rule';
       }
     }

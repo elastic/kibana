@@ -64,14 +64,18 @@ export const describeReviewDiagnosis = (execution: WorkflowExecutionDto): string
  * no connector made no model call, so that failure names the step statuses instead of just
  * the gap.
  */
+/** The connector diagnose_rule reported in its usage metadata, if it has reported one yet. */
+export const reportedReviewConnector = (execution: WorkflowExecutionDto): string | undefined => {
+  const step = findStepExecution(execution, 'diagnose_rule');
+  return (step?.output as { metadata?: { usage?: { connectorId?: string } } } | undefined)?.metadata
+    ?.usage?.connectorId;
+};
+
 export const assertReviewConnector = (
   execution: WorkflowExecutionDto,
   expectedConnectorId: string
 ): string => {
-  const step = findStepExecution(execution, 'diagnose_rule');
-  const usage = (step?.output as { metadata?: { usage?: { connectorId?: string } } } | undefined)
-    ?.metadata?.usage;
-  const actual = usage?.connectorId;
+  const actual = reportedReviewConnector(execution);
   if (actual === undefined) {
     throw new Error(
       `Rule Tuning diagnose_rule ran on connector (none reported), not the candidate ` +
