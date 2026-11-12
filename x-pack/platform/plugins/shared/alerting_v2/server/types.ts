@@ -110,15 +110,12 @@ export interface AlertingServerStart {
   getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
 
   /**
-   * Returns an AlertActionsClient for the request's space and user, whose `.alert-actions` and
-   * synthetic `.rule-events` writes use the internal ES user, so a caller with no write
-   * privilege on those indices can still create an action. The action's actor carries the
-   * request user's `profile_uid` only when the user has a profile; otherwise it is recorded as
-   * an anonymous `user` actor.
-   * NOTE: the client can act on any episode in the request's space. Callers are responsible
-   * for enforcing write authorization before calling it AND for verifying that the episode
-   * belongs to the entity the caller is allowed to change. HTTP routes must check via their own
-   * authz; workflow steps must check via PrivilegeChecker before invoking the client.
+   * Returns an AlertActionsClient for the request's space and user. Every method authorizes the
+   * request user for the "Alerts: All" feature privilege (403 otherwise) and then writes as the
+   * internal ES user, so the caller needs no index privileges on `.alert-actions` / `.rule-events`.
+   * NOTE: the check is feature-level, not per alert: the client can act on any episode in the
+   * request's space. Callers that expose a narrower scope (e.g. one solution's alerts) must verify
+   * the episode belongs to what the user may change before calling it.
    */
   getAlertActionsClientWithRequest(request: KibanaRequest): Promise<AlertActionsClientApi>;
 }

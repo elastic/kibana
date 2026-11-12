@@ -17,9 +17,6 @@ export const getAlertEpisodeNotFoundMessage = (episodeId: string): string =>
 export const getEpisodeNotLatestMessage = (episodeId: string, groupHash: string): string =>
   `Alert [${episodeId}] is not the latest alert for group [${groupHash}]`;
 
-export const getAlertActionsNotPersistedMessage = (failed: number, attempted: number): string =>
-  `Failed to persist ${failed} of ${attempted} alert action documents`;
-
 export const getCannotActivateEpisodeMessage = (episodeId: string): string =>
   `Cannot activate alert [${episodeId}]. It is already active`;
 

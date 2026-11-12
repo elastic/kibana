@@ -26,7 +26,6 @@ import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import {
   getAlertEpisodeNotFoundMessage,
   getAlertSeriesNotFoundMessage,
-  getAlertActionsNotPersistedMessage,
   getEpisodeNotLatestMessage,
 } from '../errors/alert_error_messages';
 import {
@@ -42,10 +41,7 @@ import {
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
-import type {
-  BulkIndexResult,
-  StorageServiceContract,
-} from '../services/storage_service/storage_service';
+import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
@@ -66,7 +62,6 @@ import {
   loadSeriesActionStatesBySeries,
   type SeriesActionState,
 } from './context_loaders/load_series_action_states';
-import { AlertActionsStorageToken } from './tokens';
 import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
 import {
@@ -211,7 +206,7 @@ export class AlertActionsClient {
         seriesActionStates.get(encodeSeriesId(series) ?? seriesId) ?? EMPTY_SERIES_ACTION_STATE,
     });
 
-    await this.persistPreparedActionsOrThrow([prepared]);
+    await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
   }
 
@@ -260,7 +255,7 @@ export class AlertActionsClient {
       alertActionState: actionStates.get(episodeId) ?? EMPTY_ALERT_ACTION_STATE,
     });
 
-    await this.persistPreparedActionsOrThrow([prepared]);
+    await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
   }
 
@@ -399,11 +394,9 @@ export class AlertActionsClient {
    * mixed audit + synthetic `.rule-events` batches share one code path. The
    * `wait_for` refresh ensures the next API/UI read sees the new state.
    */
-  private async persistPreparedActions(
-    prepared: readonly PreparedAction[]
-  ): Promise<BulkIndexResult<Record<string, unknown>> | undefined> {
+  private async persistPreparedActions(prepared: readonly PreparedAction[]): Promise<void> {
     if (prepared.length === 0) {
-      return undefined;
+      return;
     }
 
     const docs = prepared.flatMap(({ alertActionDoc, ruleEvent }) =>
@@ -421,26 +414,10 @@ export class AlertActionsClient {
       this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY),
     ]);
 
-    return this.storageService.bulkIndexDocsAcrossIndices({
+    await this.storageService.bulkIndexDocsAcrossIndices({
       docs,
       refresh: 'wait_for',
     });
-  }
-
-  /**
-   * Persists the one action of a single-action call and throws when the bulk reports a
-   * per-document failure. Per-document failures resolve the promise, so without this a half-written
-   * action (the audit row without its synthetic rule event, or the reverse) reads as a success.
-   * The bulk methods keep their behavior and are not changed here.
-   */
-  private async persistPreparedActionsOrThrow(prepared: readonly PreparedAction[]): Promise<void> {
-    const result = await this.persistPreparedActions(prepared);
-    if (result && result.errors.length > 0) {
-      throw Boom.internal(
-        getAlertActionsNotPersistedMessage(result.errors.length, result.attempted),
-        { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR }
-      );
-    }
   }
 
   /**
