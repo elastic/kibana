@@ -222,6 +222,44 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
     );
   });
 
+  it('links a stored fact about one of the items being linked', async () => {
+    const team = {
+      kibana: { privileges: [{ space: 'default', name: ['ai_index:a/read'], count: 1 }] },
+    };
+    const olderFact = {
+      id: 'fact-older',
+      type: 'fact.preference',
+      title: 'Prefers email',
+      content: 'Customer 825464 prefers email.',
+      permissions: team,
+      references: [{ uri: 'ki://mem-2', relation: 'derived_from' }],
+    };
+    const stored: Record<string, Record<string, unknown>> = {
+      [customer.id]: { ...customer, permissions: team },
+      [olderFact.id]: olderFact,
+    };
+    const esClient = createEsClient(stored);
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        items: [customer.id],
+        changes: {
+          relationships: [
+            { from: olderFact.id, relation: 'about', to: customer.id, description: 'D' },
+          ],
+        },
+      },
+      esClient,
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(output).toEqual({ created: 1, updated: 0, deleted: 0, rejected: [] });
+    expect(stored[relationshipId(relationshipKey(olderFact.id, 'about', customer.id))]).toEqual(
+      expect.objectContaining({ type: 'memory.relationship', permissions: team })
+    );
+  });
+
   it('fails without the memories of a batch or the items to link', async () => {
     const context = createMockStepContext({
       input: { ai_index_id: 'support', changes: { relationships: [] } },

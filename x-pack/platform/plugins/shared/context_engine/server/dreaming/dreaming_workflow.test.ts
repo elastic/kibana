@@ -49,7 +49,7 @@ describe.each([
   [
     'relationships',
     stepsOf(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW.yamlTemplate(values)),
-    ['read_items', 'read_entities', 'read_relationships'],
+    ['read_items', 'read_entities', 'read_relationships', 'read_facts'],
   ],
 ])('the %s workflow', (_, steps, reads) => {
   it.each(reads)(

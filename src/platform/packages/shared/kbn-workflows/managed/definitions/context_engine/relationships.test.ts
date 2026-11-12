@@ -58,6 +58,16 @@ const evaluate = (expression: unknown, scope: Record<string, unknown>) =>
 const hits = (sources: Array<Record<string, unknown>>) => ({
   output: { hits: { hits: sources.map((source) => ({ _source: source })) } },
 });
+const latestHits = (sources: Array<Record<string, unknown>>) => ({
+  output: {
+    hits: {
+      hits: sources.map((source) => ({
+        _source: { id: source.id },
+        inner_hits: { latest: { hits: { hits: [{ _source: source }] } } },
+      })),
+    },
+  },
+});
 
 const audience = { kibana: { privileges: [{ space: 'default' }] } };
 const bob = {
@@ -86,10 +96,18 @@ const fact = {
   content: 'Bob prefers aisle seats.',
   permissions: audience,
 };
+const olderFact = {
+  id: 'fact-0',
+  type: 'fact.preference',
+  title: 'Bob avoids layovers',
+  content: 'Bob books direct flights only.',
+  permissions: audience,
+};
 
 const prompt = ({
   items = [bob, fact] as Array<Record<string, unknown>>,
   entities = [bob, lyon, paris] as Array<Record<string, unknown>>,
+  facts = [] as Array<Record<string, unknown>>,
   relationships = [] as Array<Record<string, unknown>>,
 } = {}) =>
   createWorkflowLiquidEngine().parseAndRenderSync(
@@ -97,9 +115,15 @@ const prompt = ({
     {
       consts: render().consts,
       foreach: { item: items },
-      steps: { read_entities: hits(entities), read_relationships: hits(relationships) },
+      steps: {
+        read_entities: hits(entities),
+        read_facts: latestHits(facts),
+        read_relationships: hits(relationships),
+      },
     }
   );
+const section = (rendered: string, start: string, end: string) =>
+  rendered.slice(rendered.indexOf(start), rendered.indexOf(end));
 
 describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
   it('is its own workflow on the dreaming schedule, named and keyed apart from dreaming', () => {
@@ -234,6 +258,8 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     expect(steps.map(({ name }) => name)).toEqual([
       'read_entities',
       'read_relationships',
+      'mentions',
+      'read_facts',
       'relate',
       'apply_relationships',
       'tally',
@@ -321,12 +347,80 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     const deleted = { ...lyon, governance: { lifecycle: { status: 'deleted' } } };
     const rendered = prompt({ entities: [bob, deleted, restricted] });
 
+    expect(section(rendered, 'EXISTING ENTITIES (', 'EXISTING FACTS (')).toBe(
+      'EXISTING ENTITIES (one per line, none when empty):\n\n'
+    );
+  });
+
+  it('searches the facts that name an entity of the batch, and none for a batch without entities', () => {
+    const engine = createWorkflowLiquidEngine();
+    const clauses = String(findStep(batchSteps(), 'mentions').with?.mention_clauses);
+    const quoted = { ...lyon, title: 'Lyon "Presqu\'île"' };
+    const mentionsOf = (items: Array<Record<string, unknown>>) =>
+      JSON.parse(engine.parseAndRenderSync(clauses, { foreach: { item: items } }));
+
+    expect(mentionsOf([bob, fact, quoted])).toEqual([
+      { match_phrase: { title: 'Bob' } },
+      { match_phrase: { content: 'Bob' } },
+      { match_phrase: { title: quoted.title } },
+      { match_phrase: { content: quoted.title } },
+    ]);
+    expect(mentionsOf([fact])).toEqual([{ match_none: {} }]);
+
+    const bool = findStep(batchSteps(), 'read_facts').with?.query?.bool ?? {};
     expect(
-      rendered.slice(
-        rendered.indexOf('EXISTING ENTITIES ('),
-        rendered.indexOf('EXISTING RELATIONSHIPS (')
-      )
-    ).toBe('EXISTING ENTITIES (one per line, none when empty):\n\n');
+      evaluate(bool.should, {
+        variables: { mention_clauses: '[{"match_phrase":{"title":"Bob"}}]' },
+      })
+    ).toEqual([{ match_phrase: { title: 'Bob' } }]);
+    expect(bool.minimum_should_match).toBe(1);
+  });
+
+  it('reads up to 100 matching facts, best match first, with the latest revision of each', () => {
+    const read = findStep(batchSteps(), 'read_facts').with;
+
+    expect(read?.size).toBe(100);
+    expect(read?.sort).toBeUndefined();
+    expect(read?.query?.bool?.filter).toEqual(
+      expect.arrayContaining([{ prefix: { type: 'fact.' } }])
+    );
+    expect(read?.collapse).toEqual(
+      expect.objectContaining({
+        field: 'id',
+        inner_hits: expect.objectContaining({ size: 1, sort: [{ updated_at: 'desc' }] }),
+      })
+    );
+  });
+
+  it('lists the existing facts that could be about an entity of the batch', () => {
+    const restricted = {
+      ...olderFact,
+      id: 'fact-restricted',
+      permissions: { kibana: { privileges: [{ space: 'team-b' }] } },
+    };
+    const deleted = {
+      ...olderFact,
+      id: 'fact-deleted',
+      governance: { lifecycle: { status: 'deleted' } },
+    };
+    const failed = {
+      ...olderFact,
+      id: 'fact-failed',
+      governance: { lifecycle: { status: 'verification_failed' } },
+    };
+    const rendered = prompt({ facts: [olderFact, fact, restricted, deleted, failed] });
+
+    expect(section(rendered, 'EXISTING FACTS (', 'EXISTING RELATIONSHIPS (')).toBe(
+      `EXISTING FACTS (one per line, none when empty):\n${JSON.stringify({
+        id: olderFact.id,
+        type: olderFact.type,
+        title: olderFact.title,
+        content: olderFact.content,
+      })}\n\n`
+    );
+    expect(rendered).toContain(
+      '- Link an EXISTING FACT only to an entity in ITEMS that it is about.'
+    );
   });
 
   it('shows each existing relationship by its ends and type', () => {
