@@ -29,7 +29,6 @@ const outputSchema = z.object({
     .describe('Why the step wrote nothing.'),
   summary: z.string().optional().describe('Reading written to metadata.summary.'),
 });
-
 export const summarizeInvestigationStepCommonDefinition: CommonStepDefinition<
   typeof inputSchema,
   typeof outputSchema

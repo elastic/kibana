@@ -291,6 +291,44 @@ describe('Endpoint analysis run', () => {
     );
   });
 
+  // `mark_processed` writes to the indicator, not the investigation, so nothing would start the
+  // investigation summary that renders the forensics summary card with the verdict. A note does.
+  describe('the end of the analysis', () => {
+    const topLevelNames = definition.steps.map(({ name }) => name);
+    const note = stepByName('journal_analysis_complete');
+    const message = (value: string) =>
+      liquid.parseAndRenderSync(String((note?.with?.inputs as { message?: string })?.message), {
+        steps: { resolve_verdict: { output: { value } } },
+      });
+
+    it('waits for the processed status to become searchable', () => {
+      expect(stepByName('mark_processed')?.with).toEqual(
+        expect.objectContaining({ refresh: true })
+      );
+    });
+
+    it('is journaled right after the indicator is retired as processed, on the same condition', () => {
+      expect(topLevelNames.indexOf('journal_analysis_complete')).toBe(
+        topLevelNames.indexOf('mark_processed') + 1
+      );
+      expect(note?.type).toBe('workflow.execute');
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+      expect(note?.if).toBe(stepByName('mark_processed')?.if);
+      expect(note?.['on-failure']).toEqual({ continue: true });
+      expect(allSteps.some(({ type }) => type === 'alertzero.forensics.renderSummary')).toBe(false);
+    });
+
+    it('names the verdict, or says none was reached', () => {
+      expect(message('confirmed_incident')).toBe(
+        'Endpoint analysis is complete. Verdict: confirmed incident.'
+      );
+      expect(message('not_an_incident')).toBe(
+        'Endpoint analysis is complete. Verdict: not an incident.'
+      );
+      expect(message('')).toContain('reached no verdict');
+    });
+  });
+
   describe('a run that writes nothing to the investigation', () => {
     it('is retired as failed rather than processed', () => {
       const markFailed = stepByName('mark_failed');
@@ -668,6 +706,7 @@ describe('Endpoint analysis run', () => {
 
     it('narrates problem paths and the assessment as journal notes rather than attachments', () => {
       expect(journalSteps.map(({ name }) => name).sort()).toEqual([
+        'journal_analysis_complete',
         'journal_analysis_problem',
         'journal_analysis_started',
         'journal_attack_alerts',

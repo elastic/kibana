@@ -21,6 +21,8 @@ import {
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
 import { getResolveProposalsStepDefinition } from './resolve_proposals';
+import { getRenderForensicsSummaryStepDefinition } from './render_forensics_summary';
+import { MAX_PROPOSALS as MAX_FORENSICS_SUMMARY_PROPOSALS } from '../services/forensics_summary/constants';
 import {
   getSummarizeInvestigationStepDefinition,
   type SummarizeInvestigationStepDependencies,
@@ -38,6 +40,7 @@ export const registerStepDefinitions = ({
   workflowsExtensions,
   getActionsService,
   getConversations,
+  getAgentBuilderAttachments,
   resolveChatModel,
   getProposals,
   getHuntServices,
@@ -52,6 +55,7 @@ export const registerStepDefinitions = ({
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
+  getAgentBuilderAttachments: () => AgentBuilderPluginStart['attachments'];
   resolveChatModel: SummarizeInvestigationStepDependencies['resolveChatModel'];
   getProposals?: SummarizeInvestigationStepDependencies['getProposals'];
   getHuntServices: () => HuntServices;
@@ -87,6 +91,28 @@ export const registerStepDefinitions = ({
       getConversationClient: (request) => getConversations().getScopedClient({ request }),
       resolveChatModel,
       getProposals,
+      logger,
+    })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getRenderForensicsSummaryStepDefinition({
+      getConversationClient: (request) => getConversations().getScopedClient({ request }),
+      getAttachmentsClient: (request) => getAgentBuilderAttachments().getScopedClient({ request }),
+      listProposals: async (conversationId, spaceId, request) => {
+        const { proposals } = await getHuntServices().getProposalsService().list(
+          {
+            conversationId,
+            excludeSuperseded: true,
+            excludeExpired: false,
+            order: 'newest',
+            size: MAX_FORENSICS_SUMMARY_PROPOSALS,
+            from: 0,
+          },
+          spaceId,
+          request
+        );
+        return proposals;
+      },
       logger,
     })
   );

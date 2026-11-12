@@ -97,6 +97,8 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/discover-plugin'
   - '@kbn/workflows-execution-engine'
+  - '@kbn/custom-content-common'
+  - '@kbn/custom-content-renderer'
 tags:
   - plugin
   - prod

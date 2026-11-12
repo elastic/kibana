@@ -1731,6 +1731,9 @@ steps:
   # replace the full list. The verdict goes on the indicator with the status, so
   # a false positive the analysis determined is on record even before the
   # analyst answers the close question. Blank when no analysis ran.
+  # `refresh` waits for the write to become searchable before the run moves on, so
+  # the forensics summary, which finds the indicator by searching for `processed`,
+  # sees it as soon as this step completes.
   - name: mark_processed
     type: context-engine.updateKi
     if: >-
@@ -1747,10 +1750,40 @@ steps:
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
+      refresh: true
       ki:
         attributes:
           status: processed
           forensic_verdict: "{{ steps.resolve_verdict.output.value }}"
+
+  # Marks the end of the analysis on the Investigation. `mark_processed` writes to the
+  # indicator, not the Investigation, so without a note nothing would start the
+  # investigation summary, which renders the forensics summary card with the verdict.
+  # After `mark_processed`, whose `refresh` makes the verdict searchable by then, and on
+  # the same condition. Best-effort: a failed note costs the card's refresh, not the run.
+  - name: journal_analysis_complete
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_run_outcome.output.outcome_unrecorded != true
+        and steps.resolve_proposals.output.proposals_lost != true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          {%- case steps.resolve_verdict.output.value -%}
+          {%- when 'confirmed_incident' -%}Endpoint analysis is complete. Verdict: confirmed incident.
+          {%- when 'not_an_incident' -%}Endpoint analysis is complete. Verdict: not an incident.
+          {%- when 'unclear' -%}Endpoint analysis is complete. Verdict: unclear.
+          {%- else -%}Endpoint analysis is complete. No endpoint activity was analyzed, so it reached no verdict.
+          {%- endcase -%}
 
   # Findings are on the investigation, but at least one containment proposal
   # never reached the queue. Document this then retire the indicator.

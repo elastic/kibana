@@ -471,3 +471,47 @@ describe('Forensics proposal gate', () => {
     });
   });
 });
+
+// A containment decision writes nothing to the investigation, so the gate journals it. The note is
+// also what starts the investigation summary, which refreshes the forensics summary card.
+describe('decision note', () => {
+  const names = gate.steps.map(({ name }) => name);
+  const note = stepIn(gate.steps, 'journal_decision');
+  const liquid = createWorkflowLiquidEngine();
+  const message = (output: { status?: string; decision?: string }) =>
+    liquid.parseAndRenderSync(String((note?.with?.inputs as { message: string }).message), {
+      inputs: { title: 'Isolate WKSTN-RECV01' },
+      steps: { create_and_gate_proposal: { output } },
+    });
+
+  it('is journaled once the decision is in, before the close question is asked', () => {
+    expect(note?.type).toBe('workflow.execute');
+    expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+    expect(names.indexOf('journal_decision')).toBeGreaterThan(
+      names.indexOf('create_and_gate_proposal')
+    );
+    expect(names.indexOf('journal_decision')).toBeLessThan(names.indexOf('dispatch_close_gate'));
+    expect(note?.['on-failure']).toEqual({ continue: true });
+    expect(names).not.toContain('render_forensics_summary');
+  });
+
+  it('is skipped when the wrap did not settle, which has its own notes', () => {
+    expect(
+      evaluateExpression(String(note?.if), { steps: { create_and_gate_proposal: { output: {} } } })
+    ).toBe(false);
+    expect(
+      evaluateExpression(String(note?.if), {
+        steps: { create_and_gate_proposal: { output: { status: 'succeeded' } } },
+      })
+    ).toBe(true);
+  });
+
+  it('says how the proposal settled', () => {
+    expect(message({ status: 'succeeded', decision: 'approved' })).toBe(
+      'Containment proposal "Isolate WKSTN-RECV01" was approved and the action succeeded.'
+    );
+    expect(message({ status: 'failed', decision: 'approved' })).toContain('the action failed');
+    expect(message({ status: 'expired' })).toContain('expired with no decision');
+    expect(message({ status: 'no_action', decision: 'dismissed' })).toContain('was dismissed');
+  });
+});

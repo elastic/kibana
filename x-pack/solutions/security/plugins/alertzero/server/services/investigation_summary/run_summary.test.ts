@@ -7,12 +7,17 @@
 
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { StoryAttachment, StoryEvent } from './format_story';
 import { runInvestigationSummary, type InvestigationConversationReader } from './run_summary';
 
 const request = {} as KibanaRequest;
 
 describe('runInvestigationSummary', () => {
-  const conversation = {
+  const conversation: {
+    template_id: string;
+    events: StoryEvent[];
+    attachments: StoryAttachment[];
+  } = {
     template_id: 'investigation',
     events: [
       {
