@@ -19,7 +19,10 @@ jest.mock('../ai_indices/ki_revision', () => ({
   findKiRevision: jest.fn(),
   putKiRevision: jest.fn(),
 }));
-jest.mock('../ai_indices/ki_write', () => ({ softDeleteKi: jest.fn() }));
+jest.mock('../ai_indices/ki_write', () => ({
+  ...jest.requireActual('../ai_indices/ki_write'),
+  softDeleteKi: jest.fn(),
+}));
 jest.mock('../ai_indices/ki_relationships', () => ({
   findLinkingRelationshipIds: jest.fn(async () => []),
 }));
@@ -294,6 +297,86 @@ describe('applyOperations', () => {
       expect.anything(),
       expect.objectContaining({ kiId: 'fact-1', writer, refresh: true })
     );
+  });
+
+  describe('a KI a person edited', () => {
+    const person = { uri: 'api://context_engine.ki.update', metadata: { space_id: 'team-a' } };
+
+    beforeEach(() => {
+      stored.set('entity-person-bob', {
+        id: 'entity-person-bob',
+        type: 'entity.person',
+        title: 'Robert',
+        content: 'Robert, the on-call SRE.',
+        attributes: { role: 'SRE', 'memory.number_of_occurrences': 1 },
+        references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
+        governance: { provenance: { updated_by: writer, edited_by: person } },
+      });
+    });
+
+    it('keeps what it says, recording only the sighting and the new memory', async () => {
+      const counts = await applyOperations(context(), [
+        {
+          op: 'upsert_entity',
+          id: 'entity-person-bob',
+          type: 'contractor',
+          title: 'Bob',
+          content: 'Bob.',
+          attributes: { role: 'DBA', team: 'Data' },
+          sourceMemoryIds: ['m-2'],
+          lastSeenAt: '2026-11-03T00:00:00.000Z',
+        },
+      ]);
+
+      expect(counts).toEqual({ created: 0, updated: 1, deleted: 0, rejected: [] });
+      expect(written()[0]).toEqual(
+        expect.objectContaining({
+          type: 'entity.person',
+          title: 'Robert',
+          content: 'Robert, the on-call SRE.',
+          attributes: {
+            role: 'SRE',
+            'memory.number_of_occurrences': 2,
+            'memory.last_seen_at': '2026-11-03T00:00:00.000Z',
+          },
+          references: [
+            { uri: 'ki://m-1', relation: 'derived_from' },
+            { uri: 'ki://m-2', relation: 'derived_from' },
+          ],
+          governance: expect.objectContaining({
+            provenance: expect.objectContaining({ updated_by: writer, edited_by: person }),
+          }),
+        })
+      );
+    });
+
+    it('writes nothing when the memory is already cited', async () => {
+      const counts = await applyOperations(context(), [
+        {
+          op: 'upsert_entity',
+          id: 'entity-person-bob',
+          type: 'person',
+          title: 'Bob',
+          attributes: {},
+          sourceMemoryIds: ['m-1'],
+        },
+      ]);
+
+      expect(counts).toEqual({ created: 0, updated: 0, deleted: 0, rejected: [] });
+      expect(putKiRevision).not.toHaveBeenCalled();
+    });
+
+    it('refuses to delete it', async () => {
+      const counts = await applyOperations(context(), [{ op: 'delete', id: 'entity-person-bob' }]);
+
+      expect(counts).toEqual({
+        created: 0,
+        updated: 0,
+        deleted: 0,
+        rejected: [{ item: 'delete entity-person-bob', reason: 'a person edited it' }],
+      });
+      expect(softDeleteKi).not.toHaveBeenCalled();
+    });
   });
 
   it('makes a KI built from restricted memories visible only in this space, to whoever can see them all', async () => {
