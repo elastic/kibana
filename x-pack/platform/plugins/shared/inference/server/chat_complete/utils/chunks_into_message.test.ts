@@ -464,4 +464,44 @@ describe('chunksIntoMessage', () => {
       type: ChatCompletionEventType.ChatCompletionMessage,
     });
   });
+
+  it('generates different tool call ids for two consecutive completions that carry no ids', async () => {
+    const toolOptions = {
+      toolChoice: ToolChoiceType.auto,
+      tools: {
+        myFunction: {
+          description: 'myFunction',
+          schema: { type: 'object' as const, properties: { foo: { type: 'string' as const } } },
+        },
+      },
+    };
+    const idLessCompletion = () =>
+      lastValueFrom(
+        chunksIntoMessage({ logger, toolOptions })(
+          fromEvents({
+            content: '',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [
+              {
+                index: 0,
+                toolCallId: '',
+                function: { name: 'myFunction', arguments: '{"foo":"bar"}' },
+              },
+            ],
+          })
+        )
+      );
+
+    const [first, second] = [await idLessCompletion(), await idLessCompletion()];
+
+    if (
+      first.type !== ChatCompletionEventType.ChatCompletionMessage ||
+      second.type !== ChatCompletionEventType.ChatCompletionMessage
+    ) {
+      throw new Error('expected a message event');
+    }
+    expect(first.toolCalls[0].toolCallId).not.toBe('');
+    expect(second.toolCalls[0].toolCallId).not.toBe('');
+    expect(first.toolCalls[0].toolCallId).not.toBe(second.toolCalls[0].toolCallId);
+  });
 });

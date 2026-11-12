@@ -52,22 +52,25 @@ export const createToolCallIndexResolver = () => {
   };
 };
 
-/**
- * Id given to a tool call whose provider never sent one. It is derived from the normalized
- * index, not generated randomly, so a stream normalized twice (e.g. the two subscriptions of a
- * synchronous source in `chunksIntoMessage`) gets the same id on its chunks and on the message.
- */
-const getGeneratedToolCallId = (index: number): string => `generated_tool_call_${index}`;
+const DEFAULT_GENERATED_ID_PREFIX = 'generated_tool_call';
 
 /**
  * Rewrites the `index` of streamed tool call chunks so that each tool call has a unique index,
  * see {@link createToolCallIndexResolver}. A tool call that starts without a `toolCallId` gets a
- * generated one on its first chunk, because consumers such as Agent Builder require every tool call
- * to have an id.
+ * generated one on its first chunk (`<generatedIdPrefix>_<index>`), because consumers such as Agent
+ * Builder require every tool call to have an id.
+ *
+ * The id is derived from the normalized index, not generated at random per subscription, so a
+ * stream normalized twice (e.g. the two subscriptions of a synchronous source in
+ * `chunksIntoMessage`) gets the same id on its chunks and on the message. Ids must still differ
+ * between completions, because Agent Builder rejects a duplicate tool call id across the steps of
+ * a run: pass a `generatedIdPrefix` that is unique per completion.
  */
 export function normalizeToolCallIndexes<
   T extends ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
->(): OperatorFunction<T, T> {
+>({
+  generatedIdPrefix = DEFAULT_GENERATED_ID_PREFIX,
+}: { generatedIdPrefix?: string } = {}): OperatorFunction<T, T> {
   return (source$) =>
     // defer so each subscription (e.g. a retry) starts with fresh state
     defer(() => {
@@ -89,7 +92,7 @@ export function normalizeToolCallIndexes<
 
               const toolCallId =
                 isFirstChunk && !toolCall.toolCallId
-                  ? getGeneratedToolCallId(index)
+                  ? `${generatedIdPrefix}_${index}`
                   : toolCall.toolCallId;
 
               return index === toolCall.index && toolCallId === toolCall.toolCallId
