@@ -247,12 +247,11 @@ describe('countChangedLineBlocks', () => {
     expect(countChangedLineBlocks({ a: 1 }, { a: 1, b: 2 })).toBe(1);
   });
 
-  it('falls back to the JSON patch operation count when the line diff is too large to compute', () => {
+  it('is undefined when the line diff is too large to compute', () => {
     // every line differs, so the edit length (2000) exceeds the diff's maximum edit length
     const previous = Object.fromEntries(Array.from({ length: 1000 }, (_, i) => [`a${i}`, i]));
     const current = Object.fromEntries(Array.from({ length: 1000 }, (_, i) => [`b${i}`, i]));
-    // every key is renamed: one remove and one add operation each
-    expect(countChangedLineBlocks(previous, current)).toBe(2000);
+    expect(countChangedLineBlocks(previous, current)).toBeUndefined();
   });
 });
 

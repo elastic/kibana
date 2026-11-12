@@ -9,8 +9,6 @@
 
 import { diffLines } from 'diff';
 import equal from 'fast-deep-equal';
-import * as jsondiffpatch from 'jsondiffpatch';
-import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 import { omit } from 'lodash';
 
 import type { ObjectChange } from '@kbn/change-history';
@@ -36,21 +34,18 @@ export const INITIAL_HISTORY_SEQUENCE = 1;
 
 const toDiffText = (value: object): string => JSON.stringify(value, null, 2);
 
-// The diff runs synchronously on the save path, so it is bounded to avoid blocking the event loop.
-// Maximum edit length (added + removed lines) the line diff computes before giving up, which keeps
-// the worst-case cost small and the fallback independent of machine speed.
+// Max edit length (added + removed lines) before the line diff gives up
 const MAX_DIFF_EDIT_LENGTH = 1000;
 
 /**
- * Number of contiguous changed line blocks between two snapshots rendered as pretty-printed JSON,
- * which is how the history preview's diff navigator counts changes. If the line diff is too
- * expensive to compute, falls back to the number of JSON patch operations between the snapshots.
+ * Number of changed line blocks between two pretty-printed JSON snapshots, matching the history
+ * diff navigator. Undefined if the line diff is too expensive to compute.
  */
-export const countChangedLineBlocks = (previous: object, current: object): number => {
+export const countChangedLineBlocks = (previous: object, current: object): number | undefined => {
   const changes = diffLines(toDiffText(previous), toDiffText(current), {
     maxEditLength: MAX_DIFF_EDIT_LENGTH,
   });
-  if (!changes) return jsonpatchFormatter.format(jsondiffpatch.diff(previous, current)).length;
+  if (!changes) return undefined;
 
   let blocks = 0;
   let inChangedBlock = false;
