@@ -44,7 +44,7 @@ export const servers: ScoutServerConfig = {
       // Buffers server EBT events so specs can read what an execution reported.
       `--plugin-path=${resolve(
         REPO_ROOT,
-        'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+        'src/platform/test_plugins/analytics/analytics_ftr_helpers'
       )}`,
     ],
   },
