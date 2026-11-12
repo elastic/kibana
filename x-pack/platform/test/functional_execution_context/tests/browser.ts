@@ -11,14 +11,19 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'discover',
+    'header',
+    'home',
+    'timePicker',
+  ]);
 
   describe('Browser apps', () => {
     let logs: Ecs[];
     let discoverSessionFirstTabId = '';
     const retry = getService('retry');
-    const sampleData = getService('sampleData');
-    const kibanaServer = getService('kibanaServer');
 
     const logContains = async ({
       predicate,
@@ -39,16 +44,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     };
     before(async () => {
-      await sampleData.testResources.installKibanaSampleData('flights');
-      // Installing through the UI sets the default data view, the API does not
-      await kibanaServer.uiSettings.update({
-        defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
       });
+      await PageObjects.home.addSampleDataSetFromUi('flights');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.unset('defaultIndex');
-      await sampleData.testResources.removeKibanaSampleData('flights');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.home.removeSampleDataSetFromUi('flights');
     });
 
     describe('discover app', () => {
