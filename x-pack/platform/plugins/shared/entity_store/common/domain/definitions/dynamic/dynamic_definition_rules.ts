@@ -19,8 +19,8 @@ import type {
 
 /** Name of the rule that an attribute of a `dynamic` source may not read an identity field. */
 export const NO_IDENTITY_ATTRIBUTE_RULE = 'attributes are not identity fields';
-/** Name of the rule that a suggested filter is a column of the type. */
-export const SUGGESTED_FILTER_RULE = 'suggested filters are columns';
+/** Name of the rule that a suggested filter is an attribute of a source or an identity field. */
+export const SUGGESTED_FILTER_RULE = 'suggested filters are attributes or identity fields';
 /** Name of the rule restricting `identityField` to what the inventory can group by. */
 export const SERVABLE_IDENTITY_RULE = 'servable identity';
 
