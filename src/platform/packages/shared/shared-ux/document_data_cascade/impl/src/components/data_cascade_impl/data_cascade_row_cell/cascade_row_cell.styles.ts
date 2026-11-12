@@ -15,12 +15,11 @@ export const cascadeRowCellStyles = (euiTheme: EuiThemeShape) => {
 
   return {
     cellWrapper: css({ width: '100%' }),
+    detachedCell: css({ clipPath: 'none' }),
     cellInner: css({
       border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
       borderRadius,
-      '& > *': {
-        clipPath: `inset(0 round ${borderRadius})`,
-      },
+      clipPath: `inset(0 round ${borderRadius})`,
     }),
   };
 };

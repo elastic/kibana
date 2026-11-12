@@ -12,7 +12,7 @@ import { render, waitFor } from '@testing-library/react';
 import { CascadeRowCellPrimitive } from './cascade_row_cell';
 import type {
   ChildVirtualizerController,
-  CascadeRootVirtualizerReturnValue,
+  CascadeVirtualizerReturnValue,
 } from '../../../lib/core/virtualizer';
 import type { CascadeTableRow } from '../../../lib/core/table';
 import { DataCascadeProvider, type GroupNode } from '../../../store_provider';
@@ -42,9 +42,11 @@ const renderComponent = ({
     >
       <StickyHeaderExtensionPointProvider
         stickyEnabled={false}
+        rowIndex={4}
+        rowElement={null}
+        headerElementRef={React.createRef<HTMLDivElement>()}
         extensionPointElement={document.createElement('div')}
       >
-        {/* @ts-expect-error -- we don't need to provide all the props */}
         <CascadeRowCellPrimitive
           size="m"
           onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
@@ -74,12 +76,14 @@ describe('CascadeRowCellPrimitive', () => {
         activeStickyIndex: null,
         preventRowSizeChangePropagation: jest.fn(() => jest.fn()),
         childController: {
+          isDetached: jest.fn(() => false),
+          clearPersistedAnchor: jest.fn(),
           subscribe: jest.fn(() => () => {}),
           shouldActivate: jest.fn(() => true),
           enqueue: jest.fn(() => jest.fn()),
           isReturningCell: jest.fn(() => false),
         },
-      } as unknown as CascadeRootVirtualizerReturnValue)
+      } as unknown as CascadeVirtualizerReturnValue)
   );
 
   it('will invoke the passed onCascadeLeafNodeExpanded if the leafNode has no data', () => {
@@ -198,7 +202,7 @@ describe('CascadeRowCellPrimitive', () => {
             nodePath: expect.any(Array),
             nodePathMap: expect.any(Object),
             data: expect.anything(),
-            rowIndex: expect.any(Number),
+            rowIndex: 4,
             stickyHeaderExtensionPoint: expect.objectContaining({
               stickyEnabled: false,
               extensionPointElement: expect.any(HTMLDivElement),
@@ -216,6 +220,8 @@ describe('CascadeRowCellPrimitive', () => {
       const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue(mockLeafData);
 
       const mockChildController = {
+        isDetached: jest.fn(() => false),
+        clearPersistedAnchor: jest.fn(),
         subscribe: jest.fn(() => () => {}),
         shouldActivate: jest.fn(() => true),
         enqueue: jest.fn(() => jest.fn()),
@@ -233,7 +239,7 @@ describe('CascadeRowCellPrimitive', () => {
             scrollElement: null,
             activeStickyIndex: null,
             childController: mockChildController,
-          } as unknown as CascadeRootVirtualizerReturnValue)
+          } as unknown as CascadeVirtualizerReturnValue)
       );
 
       const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {

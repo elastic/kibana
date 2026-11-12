@@ -26,11 +26,15 @@ jest.mock('./components/cascade_row_header', () => ({
 }));
 
 const ExtensionContent = () => {
-  const { extensionPointElement, stickyEnabled } = useStickyHeaderExtensionPoint();
-  return createPortal(
-    <button>{stickyEnabled ? 'Sticky toolbar' : 'Static toolbar'}</button>,
-    extensionPointElement
-  );
+  const { extensionPointElement, stickyEnabled, rowElement } = useStickyHeaderExtensionPoint();
+  return extensionPointElement
+    ? createPortal(
+        <button data-row-role={rowElement?.getAttribute('role')}>
+          {stickyEnabled ? 'Sticky toolbar' : 'Static toolbar'}
+        </button>,
+        extensionPointElement
+      )
+    : null;
 };
 
 type RowProps = CascadeRowPrimitiveProps<MockGroupData, MockGroupData>;
@@ -57,7 +61,16 @@ const createRowProps = (): RowProps => {
     activeStickyRenderSlotRef: { current: document.createElement('div') },
     virtualRowStyle: { transform: 'translateY(400px)', zIndex: 10 },
     virtualRow: { index: 0, key: rowInstance.id, start: 400, end: 1400, size: 1000, lane: 0 },
-    getVirtualizer: jest.fn(),
+    getVirtualizer: jest.fn(
+      () =>
+        ({
+          childController: {
+            subscribe: jest.fn(() => () => {}),
+            isDetached: jest.fn(() => false),
+            clearPersistedAnchor: jest.fn(),
+          },
+        } as unknown as ReturnType<RowProps['getVirtualizer']>)
+    ),
     onCascadeGroupNodeExpanded: jest.fn(),
     rowHeaderTitleSlot: () => <div>Friday</div>,
   };
@@ -103,6 +116,23 @@ describe('CascadeRowPrimitive sticky headers', () => {
     const host = screen.getByTestId('dataCascadeInlineStickyHeader');
     expect(host).toContainElement(screen.getByRole('button', { name: 'Static toolbar' }));
     expect(getComputedStyle(host).position).toBe('relative');
+  });
+
+  it('hands its element to the cell through a ref that stays attached across renders', () => {
+    const innerRef = jest.fn();
+    const props = { ...createRowProps(), innerRef };
+    const view = render(renderRow(props));
+    const row = screen.getByRole('row');
+
+    expect(screen.getByRole('button', { name: 'Sticky toolbar' })).toHaveAttribute(
+      'data-row-role',
+      'row'
+    );
+
+    view.rerender(renderRow({ ...props, isActiveSticky: true }));
+
+    // a ref callback that changed between renders would have been detached and attached again
+    expect(innerRef.mock.calls).toEqual([[row]]);
   });
 
   it('portals the active parent heading while measuring only its own row', () => {

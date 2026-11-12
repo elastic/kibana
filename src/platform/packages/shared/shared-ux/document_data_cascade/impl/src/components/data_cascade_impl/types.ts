@@ -14,9 +14,9 @@ import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeTable, CascadeTableCellContext, CascadeTableRow } from '../../lib/core/table';
 import type {
   CascadeVirtualizerProps,
-  CascadeRootVirtualizerReturnValue,
+  CascadeVirtualizerReturnValue,
 } from '../../lib/core/virtualizer';
-import type { ChildVirtualizerController } from '../../lib/core/virtualizer/child_virtualizer_controller';
+import type { ChildVirtualizerController } from '../../lib/core/virtualizer/types';
 import type { DataCascadeImplRef, DataCascadeRestorableState } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
 import type { StickyHeaderExtensionPointContextValue } from './data_cascade_row/components/cascade_row_header_extension_point';
@@ -74,7 +74,7 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
-  extends CascadeTableCellContext<G, unknown> {
+  extends Pick<CascadeTableCellContext<G, unknown>, 'row'> {
   /**
    * Size of the row cell
    */
@@ -87,7 +87,7 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Callback invoked when a leaf node gets collapsed, possibly to clean up any data associated with the leaf node or cancel any pending requests if necessary.
    */
   onCascadeLeafNodeCollapsed?: (args: OnCascadeLeafNodeCollapsedArgs<G>) => void;
-  getVirtualizer: () => CascadeRootVirtualizerReturnValue;
+  getVirtualizer: () => CascadeVirtualizerReturnValue;
   /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
@@ -188,7 +188,10 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    * Denotes if the row is the sticky candidate, i.e. the nearest expanded ancestor of the first visible row.
    */
   isActiveSticky: boolean;
-  /** Whether the inline header sticks while scrolling. */
+  /**
+   * Whether the inline header sticks while scrolling.
+   * Default is true.
+   */
   enableStickyGroupHeader?: boolean;
   /**
    * Ref that provides a reference to the DOM element that renders the cascade row.
@@ -205,7 +208,7 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
   /**
    * Accessor for the parent cascade virtualizer instance.
    */
-  getVirtualizer: () => CascadeRootVirtualizerReturnValue;
+  getVirtualizer: () => CascadeVirtualizerReturnValue;
 }
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<

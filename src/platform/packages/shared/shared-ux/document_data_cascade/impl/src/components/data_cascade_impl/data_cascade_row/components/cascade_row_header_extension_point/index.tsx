@@ -11,7 +11,11 @@ import React, { createContext, useContext, useMemo, type PropsWithChildren } fro
 
 export interface StickyHeaderExtensionPointContextValue {
   /** Stable portal container attached to the row's inline header. */
-  extensionPointElement: HTMLDivElement;
+  extensionPointElement: HTMLDivElement | null;
+  rowIndex: number;
+  /** The row's own element, `null` until it is attached. */
+  rowElement: HTMLDivElement | null;
+  headerElementRef: React.RefObject<HTMLDivElement>;
   /** Whether the header uses sticky positioning rather than remaining in normal flow. */
   stickyEnabled: boolean;
 }
@@ -27,14 +31,20 @@ const StickyHeaderExtensionPointContext =
 export function StickyHeaderExtensionPointProvider({
   extensionPointElement,
   stickyEnabled,
+  rowIndex,
+  rowElement,
+  headerElementRef,
   children,
 }: PropsWithChildren<StickyHeaderExtensionPointContextValue>) {
   const value = useMemo<StickyHeaderExtensionPointContextValue>(
     () => ({
       extensionPointElement,
       stickyEnabled,
+      rowIndex,
+      rowElement,
+      headerElementRef,
     }),
-    [extensionPointElement, stickyEnabled]
+    [extensionPointElement, stickyEnabled, rowIndex, rowElement, headerElementRef]
   );
 
   return (

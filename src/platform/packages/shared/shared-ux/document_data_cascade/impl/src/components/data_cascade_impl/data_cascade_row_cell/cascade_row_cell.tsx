@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useRef,
-  useSyncExternalStore,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowCellPrimitiveProps } from '../types';
 import {
@@ -28,7 +21,7 @@ import {
   useDataCascadeState,
   useDataCascadeActions,
 } from '../../../store_provider';
-import type { ChildVirtualizerController } from '../../../lib/core/virtualizer/child_virtualizer_controller';
+import { useControllerValue, type ChildVirtualizerController } from '../../../lib/core/virtualizer';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 import { useStickyHeaderExtensionPoint } from '../data_cascade_row/components/cascade_row_header_extension_point';
 
@@ -41,10 +34,11 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   size,
 }: CascadeRowCellPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
+  const stickyHeaderExtensionPoint = useStickyHeaderExtensionPoint();
+  const { rowIndex } = stickyHeaderExtensionPoint;
   const { leafNodes, currentGroupByColumns } = useDataCascadeState<G, L>();
   const actions = useDataCascadeActions<G, L>();
   const hasPendingRequest = useRef<boolean>(false);
-  const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
 
   const styles = useMemo(() => cascadeRowCellStyles(euiTheme), [euiTheme]);
 
@@ -73,28 +67,18 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
 
   // Subscribe to the controller's activation state.
   // This is the coordination signal — the stagger decides when heavy content should mount.
-  const isActivated = useSyncExternalStore(
-    childController.subscribe,
-    () => childController.shouldActivate(row.index),
-    () => false
+  const isActivated = useControllerValue(
+    childController,
+    (c) => c.shouldActivate(leafCacheKey),
+    false
   );
 
-  // Defer the enqueue by one paint frame so we are never attempting to render the heavy content in the same i/o cycle that's processing leaf data
-  // this way we don't block the main thread,
-  // this however means that for all cases even when the leaf data is available the skeleton will display briefly.
-  const enqueueCleanupRef = useRef<(() => void) | null>(null);
+  useEffect(
+    () => childController.enqueue(leafCacheKey, rowIndex),
+    [childController, leafCacheKey, rowIndex]
+  );
 
-  useEffect(() => {
-    if (!childController) return;
-    const rafId = requestAnimationFrame(() => {
-      enqueueCleanupRef.current = childController.enqueue(leafCacheKey, row.index);
-    });
-    return () => {
-      cancelAnimationFrame(rafId);
-      enqueueCleanupRef.current?.();
-      enqueueCleanupRef.current = null;
-    };
-  }, [childController, leafCacheKey, row.index]);
+  const isDetached = useControllerValue(childController, (c) => c.isDetached(leafCacheKey), false);
 
   const fetchGroupLeafData = useCallback(() => {
     const dataFetchFn = async () => {
@@ -105,6 +89,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       });
 
       if (!groupLeafData) {
+        childController.clearPersistedAnchor(leafCacheKey);
         return;
       }
 
@@ -115,26 +100,34 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     };
 
     return dataFetchFn().catch(() => {
-      // do nothing, error is expected to be handled by consumer for now
+      childController.clearPersistedAnchor(leafCacheKey);
+      // The consumer owns the error presentation.
     });
-  }, [actions, leafCacheKey, nodePath, nodePathMap, onCascadeLeafNodeExpanded, row]);
+  }, [
+    actions,
+    leafCacheKey,
+    nodePath,
+    nodePathMap,
+    onCascadeLeafNodeExpanded,
+    row,
+    childController,
+  ]);
 
   const fetchCascadeRowGroupLeafData = useCallback(() => {
     if (!hasPendingRequest.current) {
       hasPendingRequest.current = true;
 
       fetchGroupLeafData().finally(() => {
-        setRowLeafDataFetch(false);
         hasPendingRequest.current = false;
       });
     }
   }, [fetchGroupLeafData]);
 
   useEffect(() => {
-    if (!leafData && !isPendingRowLeafDataFetch) {
+    if (!leafData) {
       fetchCascadeRowGroupLeafData();
     }
-  }, [fetchCascadeRowGroupLeafData, leafData, isPendingRowLeafDataFetch]);
+  }, [fetchCascadeRowGroupLeafData, leafData]);
 
   useEffect(
     () => () => {
@@ -147,11 +140,8 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     [onCascadeLeafNodeCollapsed, nodePath, nodePathMap, row]
   );
 
-  const stickyHeaderExtensionPoint = useStickyHeaderExtensionPoint();
-
-  const isRowReturning = childController?.isReturningCell(leafCacheKey) ?? false;
-  const isReady =
-    Boolean(leafData) && !isPendingRowLeafDataFetch && (isActivated || isRowReturning);
+  const isRowReturning = childController.isReturningCell(leafCacheKey);
+  const isReady = Boolean(leafData) && (isActivated || isRowReturning);
 
   const memoizedChild = useMemo(() => {
     return React.createElement(children, {
@@ -161,7 +151,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       nodePath,
       nodePathMap,
       virtualizerController: childController,
-      rowIndex: row.index,
+      rowIndex,
       stickyHeaderExtensionPoint,
     });
   }, [
@@ -171,7 +161,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     nodePath,
     nodePathMap,
     childController,
-    row.index,
+    rowIndex,
     stickyHeaderExtensionPoint,
   ]);
 
@@ -179,7 +169,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     <EuiFlexGroup>
       <EuiFlexItem css={styles.cellWrapper} data-cascade-row-loading={!isReady} tabIndex={0}>
         <EuiSkeletonText lines={3} size={size === 'l' ? 'm' : size} isLoading={!isReady}>
-          <div css={styles.cellInner}>{memoizedChild}</div>
+          <div css={[styles.cellInner, isDetached && styles.detachedCell]}>{memoizedChild}</div>
         </EuiSkeletonText>
       </EuiFlexItem>
     </EuiFlexGroup>

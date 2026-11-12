@@ -16,6 +16,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { selectors } from '@elastic/eui-test-helpers';
 import { spaceTest } from '../../../common/ui/fixtures';
 import { runCascadeQuery } from '../../../common/ui/fixtures/helpers';
 
@@ -102,11 +103,16 @@ spaceTest.describe(
           // inside `docTable`, so the button is addressed from the row, which contains the
           // toolbar in both layouts.
           const fullScreenButton = expandedRow.getByTestId('dataGridFullScreenButton');
+          const fullScreenGrid = expandedRow.locator(selectors.dataGrid.FULL_SCREEN_ROOT_SELECTOR);
 
           await fullScreenButton.click();
+          await expect(fullScreenGrid).toBeVisible();
+          await expect(fullScreenButton).toBeFocused();
           await expect(expandedRowGrid.rows).not.toHaveCount(0);
 
           await fullScreenButton.click();
+          await expect(fullScreenGrid).toBeHidden();
+          await expect(fullScreenButton).toBeFocused();
           // Rows are still rendered (the grid didn't unmount/lose its data) after exiting fullscreen.
           await expect(expandedRowGrid.rows).not.toHaveCount(0);
         });

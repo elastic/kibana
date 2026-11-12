@@ -12,7 +12,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -22,8 +22,10 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import { createChildVirtualizerController } from '@kbn/shared-ux-document-data-cascade/src/lib/core/virtualizer/child_virtualizer_controller';
-import type { DataCascadeRowCellProps } from '@kbn/shared-ux-document-data-cascade';
+import {
+  createChildVirtualizerController,
+  type DataCascadeRowCellProps,
+} from '@kbn/shared-ux-document-data-cascade';
 import { createDiscoverServicesMock } from '../../../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../../../__mocks__/test_provider';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
@@ -106,8 +108,13 @@ type StickyHeaderExtensionPoint = Parameters<
   DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
 >[0]['stickyHeaderExtensionPoint'];
 
-const createStickyHeaderExtensionPoint = (): StickyHeaderExtensionPoint => ({
+const createStickyHeaderExtensionPoint = (): StickyHeaderExtensionPoint & {
+  extensionPointElement: HTMLDivElement;
+} => ({
   stickyEnabled: true,
+  rowIndex: 0,
+  rowElement: null,
+  headerElementRef: React.createRef<HTMLDivElement>(),
   extensionPointElement: document.createElement('div'),
 });
 
@@ -135,7 +142,6 @@ const renderLeafCellWithContext = ({
           dataGridDensityState={DataGridDensity.COMPACT}
           showTimeCol={true}
           dataView={dataViewWithTimefieldMock}
-          showKeyboardShortcuts={false}
           onUpdateDataGridDensity={jest.fn()}
           stickyHeaderExtensionPoint={stickyHeaderExtensionPoint}
         />
@@ -308,7 +314,11 @@ describe('ESQLDataCascadeLeafCell', () => {
               Cell={() => null}
               visibleColumns={[]}
               visibleRowData={{ startRow: 0, endRow: 0, visibleRowCount: 0 }}
-              headerRow={<div data-test-subj="gridHeaderRow" />}
+              headerRow={
+                <div data-test-subj="gridHeaderRow">
+                  <input aria-label="Column setting" defaultValue="initial" />
+                </div>
+              }
               footerRow={null}
               gridWidth={800}
               setCustomGridBodyProps={jest.fn()}
@@ -347,7 +357,7 @@ describe('ESQLDataCascadeLeafCell', () => {
       const extensionPointElement = document.createElement('div');
       document.body.appendChild(extensionPointElement);
       try {
-        renderLeafAndGridParts({ stickyEnabled: true, extensionPointElement });
+        renderLeafAndGridParts({ ...createStickyHeaderExtensionPoint(), extensionPointElement });
         expect(extensionPointElement).toContainElement(
           screen.getByTestId('unifiedDataTableToolbar')
         );
@@ -364,20 +374,27 @@ describe('ESQLDataCascadeLeafCell', () => {
       const extensionPointElement = document.createElement('div');
       document.body.appendChild(extensionPointElement);
       try {
-        renderLeafAndGridParts({ stickyEnabled: true, extensionPointElement });
+        renderLeafAndGridParts({ ...createStickyHeaderExtensionPoint(), extensionPointElement });
         const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
         const toolbar = screen.getByTestId('unifiedDataTableToolbar');
         const headerRow = screen.getByTestId('gridHeaderRow');
         expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([
           extensionPointElement,
         ]);
+        const headerInput = screen.getByRole('textbox', { name: 'Column setting' });
+        headerInput.focus();
+        fireEvent.change(headerInput, { target: { value: 'retained' } });
         act(() => unifiedDataTableMock.mock.lastCall?.[0].onFullScreenChange?.(true));
+        expect(headerInput).toHaveFocus();
+        expect(headerInput).toHaveValue('retained');
         expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([]);
         expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
         expect(screen.getByTestId('gridRoot')).toContainElement(toolbar);
         expect(body).toContainElement(headerRow);
         expect(extensionPointElement).not.toContainElement(toolbar);
         act(() => unifiedDataTableMock.mock.lastCall?.[0].onFullScreenChange?.(false));
+        expect(headerInput).toHaveFocus();
+        expect(headerInput).toHaveValue('retained');
         expect(unifiedDataTableMock.mock.lastCall?.[0].additionalSearchScopeElements).toEqual([
           extensionPointElement,
         ]);
@@ -393,10 +410,17 @@ describe('ESQLDataCascadeLeafCell', () => {
       const extensionPointElement = document.createElement('div');
       document.body.appendChild(extensionPointElement);
       try {
-        const view = renderLeafAndGridParts({ stickyEnabled: true, extensionPointElement });
+        const view = renderLeafAndGridParts({
+          ...createStickyHeaderExtensionPoint(),
+          extensionPointElement,
+        });
         const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
         const toolbar = screen.getByTestId('unifiedDataTableToolbar');
-        view.rerender({ stickyEnabled: false, extensionPointElement });
+        view.rerender({
+          ...createStickyHeaderExtensionPoint(),
+          stickyEnabled: false,
+          extensionPointElement,
+        });
         expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
         expect(extensionPointElement).toContainElement(toolbar);
         expect(extensionPointElement).toContainElement(screen.getByTestId('gridHeaderRow'));

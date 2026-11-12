@@ -279,7 +279,7 @@ export const styles = (
     inlineStickyHeader: css({
       position: 'sticky',
       top: 0,
-      padding: `${euiSizing[size]} 0`,
+      padding: `${euiSizing[size]} 0 0`,
 
       [`[data-active-sticky="true"] &`]: {
         marginInlineStart: `calc(${euiSizing[size]} * -${rowDepth})`,
@@ -288,13 +288,12 @@ export const styles = (
     }),
     rowInlineHeaderExtension: css({
       marginTop: euiSizing[size],
+      border: `${border.width.thin} solid ${border.color}`,
+      overflow: 'hidden',
       borderRadius: `${border.radius.inline} ${border.radius.inline} 0 0`,
       backgroundColor: colors.backgroundBaseSubdued,
       [`&:has(> [data-test-subj="${stickyHeaderExtensionPointTestSubjAttribute}"]:empty)`]: {
         display: 'none',
-      },
-      [`[data-active-sticky="true"] &`]: {
-        boxShadow: `inset 0 0 0 ${border.width.thin} ${border.color}`,
       },
     }),
   };

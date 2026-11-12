@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, useCombinedRefs } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
 import { type LeafNode, type GroupNode, useDataCascadeState } from '../../../store_provider';
 import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
-import {
-  isCascadeGroupRowNode,
-  getCascadeRowNodePath,
-  getCascadeRowNodePathValueRecord,
-  getCascadeRowLeafDataCacheKey,
-} from '../../../lib/utils';
+import { useControllerValue } from '../../../lib/core/virtualizer';
+import { isCascadeGroupRowNode, getCascadeRowCellId } from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
   rootRowAttribute,
@@ -65,34 +61,39 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
 
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
 
-  // A stable host lets cells keep their toolbar and column headers mounted throughout scrolling.
-  const [stickyHeaderExtensionElement] = useState(() => {
-    const element = document.createElement('div');
-    element.setAttribute('data-test-subj', stickyHeaderExtensionPointTestSubjAttribute);
-    return element;
-  });
+  const [stickyHeaderExtensionElement, setStickyHeaderExtensionElement] =
+    useState<HTMLDivElement | null>(null);
 
-  const attachStickyHeaderExtensionElement = useCallback(
-    (host: HTMLDivElement | null) => {
-      if (host && stickyHeaderExtensionElement.parentElement !== host) {
-        host.appendChild(stickyHeaderExtensionElement);
-      }
-    },
-    [stickyHeaderExtensionElement]
+  // Held in state rather than in a ref: a row's ref is attached after the layout effects of its descendants
+  // have run, so a leaf that measures itself against the row needs to be told when the element is there.
+  const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
+  const headerElementRef = useRef<HTMLDivElement>(null);
+
+  // Memoized so the ref callback keeps its identity, otherwise React detaches and re-attaches it on every render.
+  const rowRefs = useMemo(
+    () => (isGroupNode ? [innerRef] : [setRowElement, innerRef]),
+    [isGroupNode, innerRef]
   );
 
-  const cellId = useMemo(() => {
-    if (isGroupNode) return null;
-    const nodePath = getCascadeRowNodePath(currentGroupByColumns, rowInstance);
-    const nodePathMap = getCascadeRowNodePathValueRecord(currentGroupByColumns, rowInstance);
-    return getCascadeRowLeafDataCacheKey(nodePath, nodePathMap, rowInstance.id);
-  }, [currentGroupByColumns, rowInstance, isGroupNode]);
+  const measureRowRef = useCombinedRefs(rowRefs);
+
+  const cellId = useMemo(
+    () => (isGroupNode ? null : getCascadeRowCellId(currentGroupByColumns, rowInstance)),
+    [currentGroupByColumns, rowInstance, isGroupNode]
+  );
+
+  const controller = getVirtualizer().childController;
+  const isDetached = useControllerValue(
+    controller,
+    (c) => cellId !== null && c.isDetached(cellId),
+    false
+  );
 
   useEffect(() => {
     if (!rowIsExpanded && cellId) {
-      getVirtualizer().childController?.clearPersistedAnchor(cellId);
+      controller.clearPersistedAnchor(cellId);
     }
-  }, [rowIsExpanded, cellId, getVirtualizer]);
+  }, [rowIsExpanded, cellId, controller]);
 
   const styles = useMemo(() => {
     return cascadeRowStyles(
@@ -108,6 +109,7 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
     () => ({ top: virtualRow.start, zIndex: rowDepth + 1 }),
     [virtualRow.start, rowDepth]
   );
+
   const rowPositionStyle = isGroupNode ? virtualRowStyle : leafRowPositionStyle;
 
   const rowHeader = useMemo(() => {
@@ -145,10 +147,10 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
       {...treeGridRowARIAAttributes}
       data-index={virtualRow.index}
       data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
-      ref={innerRef}
-      style={rowPositionStyle}
+      ref={measureRowRef}
+      style={isDetached ? { ...rowPositionStyle, zIndex: euiTheme.levels.modal } : rowPositionStyle}
       {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
-      css={styles.rowWrapper}
+      css={[styles.rowWrapper, isDetached && { contain: 'none' }]}
     >
       <EuiFlexGroup
         direction="column"
@@ -156,33 +158,47 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
         css={styles.rowInner}
         responsive={false}
       >
-        <React.Fragment>
-          {enableStickyGroupHeader &&
-          isActiveSticky &&
-          isGroupNode &&
-          activeStickyRenderSlotRef.current
-            ? createPortal(
-                <div css={styles.rowStickyHeaderInner}>{rowHeader}</div>,
-                activeStickyRenderSlotRef.current,
-                `${rowId}-sticky-header`
-              )
-            : null}
-        </React.Fragment>
+        {/*
+         * For GroupNodes, when the conditions are right the row header is rendered into the active sticky render slot leveraging portals.
+         */}
+        {enableStickyGroupHeader &&
+        isActiveSticky &&
+        isGroupNode &&
+        activeStickyRenderSlotRef.current
+          ? createPortal(
+              <div css={styles.rowStickyHeaderInner}>{rowHeader}</div>,
+              activeStickyRenderSlotRef.current,
+              `${rowId}-sticky-header`
+            )
+          : null}
         <EuiFlexItem
-          css={[
-            !isGroupNode && styles.rowHeader,
-            enableStickyGroupHeader && !isGroupNode && rowIsExpanded && styles.inlineStickyHeader,
-          ]}
+          ref={headerElementRef}
+          css={
+            !isGroupNode
+              ? [
+                  styles.rowHeader,
+                  enableStickyGroupHeader && rowIsExpanded && styles.inlineStickyHeader,
+                ]
+              : []
+          }
           data-test-subj={!isGroupNode ? 'dataCascadeInlineStickyHeader' : undefined}
         >
           {rowHeader}
           {!isGroupNode && (
-            <div ref={attachStickyHeaderExtensionElement} css={styles.rowInlineHeaderExtension} />
+            <div css={styles.rowInlineHeaderExtension}>
+              <div
+                ref={setStickyHeaderExtensionElement}
+                data-test-subj={stickyHeaderExtensionPointTestSubjAttribute}
+              />
+            </div>
           )}
         </EuiFlexItem>
         <StickyHeaderExtensionPointProvider
           extensionPointElement={stickyHeaderExtensionElement}
           stickyEnabled={enableStickyGroupHeader}
+          rowIndex={virtualRow.index}
+          rowElement={rowElement}
+          headerElementRef={headerElementRef}
         >
           {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">
