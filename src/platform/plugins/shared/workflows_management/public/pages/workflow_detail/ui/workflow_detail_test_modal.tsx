@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useRunWorkflow, useTestWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
+  selectBreakpoints,
   selectEditorYaml,
   selectIsTestModalOpen,
   selectReplayExecutionId,
@@ -46,6 +47,7 @@ export const WorkflowDetailTestModal = () => {
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
   const yamlString = useSelector(selectEditorYaml);
+  const breakpoints = useSelector(selectBreakpoints);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const { mutateAsync: runWorkflow } = useRunWorkflow();
@@ -111,6 +113,73 @@ export const WorkflowDetailTestModal = () => {
     ]
   );
 
+  const handleDebugWorkflow = useCallback(
+    async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+      if (isReplay) {
+        if (!workflowId) {
+          const missingIdError = new Error(
+            i18n.translate('workflows.detail.testModal.reRunMissingWorkflowId', {
+              defaultMessage: 'Workflow id is missing',
+            })
+          );
+          notifications.toasts.addError(missingIdError, {
+            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
+              defaultMessage: 'Failed to re-run workflow',
+            }),
+            toastLifeTimeMs: 5000,
+          });
+          throw missingIdError;
+        }
+
+        try {
+          const result = await testSavedWorkflow({
+            workflowId,
+            inputs,
+            debug: {
+              enabled: true,
+              breakpoints,
+            },
+          });
+          if (result?.workflowExecutionId) {
+            setSelectedExecution(result.workflowExecutionId);
+          }
+        } catch (error) {
+          notifications.toasts.addError(error as Error, {
+            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
+              defaultMessage: 'Failed to re-run workflow',
+            }),
+            toastLifeTimeMs: 5000,
+          });
+          throw error;
+        }
+        return;
+      }
+
+      const executionId = await testWorkflow({
+        inputs,
+        triggerTab,
+        debug: {
+          enabled: true,
+          breakpoints,
+        },
+      });
+
+      if (executionId) {
+        selectEditorRun(executionId.workflowExecutionId);
+      }
+    },
+    [
+      breakpoints,
+      isReplay,
+      notifications.toasts,
+      selectEditorRun,
+      setSelectedExecution,
+      testSavedWorkflow,
+      testWorkflow,
+      workflowId,
+    ]
+  );
+
   const closeModal = useCallback(() => {
     dispatch(setIsTestModalOpen(false));
     dispatch(clearReplay());
@@ -166,6 +235,8 @@ export const WorkflowDetailTestModal = () => {
       yamlString={yamlString}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
+      onDebugSubmit={handleDebugWorkflow}
+      hasBreakpoints={breakpoints.length > 0}
       initialExecutionId={replayExecutionId ?? undefined}
     />
   );

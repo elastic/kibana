@@ -8,6 +8,7 @@
  */
 
 export { useFocusedStepDecoration, type StepLineRange } from './use_focused_step_decoration';
+export { useBreakpointDecorations } from './use_breakpoint_decorations';
 export { useStepDecorationsInExecution } from './use_step_decorations_in_execution';
 export { useTriggerTypeDecorations } from './use_trigger_type_decorations';
 export { useConnectorTypeDecorations } from './use_connector_type_decorations';

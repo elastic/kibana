@@ -51,8 +51,10 @@ export const useStepDecorationsInExecution = (
         return [];
       }
 
-      const glyphClassNames = ['step-execution-glyph', `step-execution-${status}-glyph`];
-      const bgClassNames = ['step-execution-background', `step-execution-${status}`];
+      const isBreakpointPaused = stepExecution.state?.breakpointPaused === true;
+      const statusKey = isBreakpointPaused ? 'breakpoint_paused' : status;
+      const glyphClassNames = ['step-execution-glyph', `step-execution-${statusKey}-glyph`];
+      const bgClassNames = ['step-execution-background', `step-execution-${statusKey}`];
 
       if (!!highlightedStepId && highlightedStepId !== stepId) {
         glyphClassNames.push('dimmed');
@@ -65,21 +67,23 @@ export const useStepDecorationsInExecution = (
         options: { glyphMarginClassName: glyphClassNames.join(' ') },
       };
 
-      // Only apply background decoration if the step is not nested
-      // This prevents overlapped backgrounds (double transparency) when parent and child are both decorated
+      // Only apply background decoration if the step is not nested, UNLESS it is actively
+      // paused at a breakpoint (in which case its header line gets the red breakpoint highlight).
+      // This prevents overlapped backgrounds (double transparency) when parent and child are both decorated.
       const isNested =
         stepInfo.parentStepId &&
         stepExecutions.some((otherStepExecution) => {
           return otherStepExecution.stepId === stepInfo.parentStepId;
         });
-      if (isNested) {
+      if (isNested && !isBreakpointPaused) {
         // For nested steps, only show the glyph decoration
         return [glyphDecoration];
       }
 
       // Background decoration for execution status - from dash line to end of step
+      const backgroundEndLine = isBreakpointPaused ? stepInfo.lineStart : stepInfo.lineEnd;
       const backgroundDecoration: monaco.editor.IModelDeltaDecoration = {
-        range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineEnd, 0),
+        range: new monaco.Range(stepInfo.lineStart, 1, backgroundEndLine, 0),
         options: {
           className: bgClassNames.join(' '),
           marginClassName: bgClassNames.join(' '),
@@ -102,6 +106,10 @@ export const useStepDecorationsInExecution = (
         '.step-execution-waiting_for_input': {
           backgroundColor: transparentize(colors.backgroundLightWarning, 0.5),
         },
+        '.step-execution-breakpoint_paused': {
+          backgroundColor: transparentize(colors.danger, 0.12),
+          boxShadow: `inset 3px 0 0 0 ${colors.danger}`,
+        },
         '.step-execution-running': {
           backgroundColor: transparentize(colors.backgroundLightPrimary, 0.5),
         },
@@ -123,6 +131,12 @@ export const useStepDecorationsInExecution = (
         },
         '.step-execution-waiting_for_input-glyph:before': {
           backgroundColor: colors.backgroundFilledWarning,
+        },
+        '.step-execution-breakpoint_paused-glyph:before': {
+          width: '9px',
+          height: '9px',
+          backgroundColor: colors.danger,
+          boxShadow: `0 0 0 2px ${transparentize(colors.danger, 0.3)}`,
         },
         '.step-execution-running-glyph:before': {
           backgroundColor: colors.backgroundFilledPrimary,

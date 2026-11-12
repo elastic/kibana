@@ -31,6 +31,7 @@ import {
   useWorkflowsCapabilities,
 } from '@kbn/workflows-ui';
 
+import { z } from '@kbn/zod/v4';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
@@ -48,6 +49,8 @@ interface ResumeExecutionButtonProps {
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   approvalLabels?: ApprovalLabels;
+  isBreakpointPause?: boolean;
+  pausedStepInput?: Record<string, unknown>;
   /** When true, opens the input modal immediately on mount */
   autoOpen?: boolean;
   /** Step execution document id for the active waitForInput pause; when it changes, re-enable after a prior submit */
@@ -73,6 +76,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   resumeMessage,
   resumeSchema,
   approvalLabels,
+  isBreakpointPause = false,
+  pausedStepInput,
   autoOpen = false,
   waitingStepExecutionId,
   submitState,
@@ -84,7 +89,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
   const telemetry = useTelemetry();
-  const [isModalOpen, setIsModalOpen] = useState(autoOpen && !approvalLabels);
+  const [isModalOpen, setIsModalOpen] = useState(autoOpen && !approvalLabels && !isBreakpointPause);
   const [localSubmitting, setLocalSubmitting] = useState(false);
   const [localSubmitted, setLocalSubmitted] = useState(false);
   const [pendingApproval, setPendingApproval] = useState<boolean | null>(null);
@@ -100,11 +105,11 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const isApprovalMode = Boolean(approvalLabels);
 
   useEffect(() => {
-    if (autoOpen && !approvalLabels) {
+    if (autoOpen && !approvalLabels && !isBreakpointPause) {
       modalOpenedAtRef.current = Date.now();
       setIsModalOpen(true);
     }
-  }, [autoOpen, approvalLabels]);
+  }, [autoOpen, approvalLabels, isBreakpointPause]);
 
   useEffect(() => {
     if (submitState) {
@@ -120,6 +125,12 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   }, [isSubmitting]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
+    if (isBreakpointPause) {
+      return {
+        schema: z.record(z.string(), z.unknown()),
+        stepContext: (pausedStepInput ?? {}) as Partial<StepContext>,
+      };
+    }
     if (!resumeSchema || isApprovalMode) return undefined;
     try {
       const jsonSchema = resumeSchema as JSONSchema7;
@@ -133,7 +144,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
     } catch {
       return undefined;
     }
-  }, [resumeSchema, isApprovalMode]);
+  }, [isBreakpointPause, pausedStepInput, resumeSchema, isApprovalMode]);
 
   const openModal = useCallback(() => {
     modalOpenedAtRef.current = Date.now();
@@ -230,7 +241,49 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
     [handleSubmit]
   );
 
-  const provideActionButton = (
+  const handleContinueBreakpoint = useCallback(() => {
+    if (modalOpenedAtRef.current == null) {
+      modalOpenedAtRef.current = Date.now();
+    }
+    void handleSubmit({});
+  }, [handleSubmit]);
+
+  const provideActionButton = isBreakpointPause ? (
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill={appearance === 'callout'}
+          color="primary"
+          size="s"
+          iconType="play"
+          onClick={handleContinueBreakpoint}
+          disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
+          isLoading={isSubmitting}
+          data-test-subj="continueBreakpointButton"
+        >
+          <FormattedMessage
+            id="workflows.executionDetail.continueBreakpointButton.label"
+            defaultMessage="Continue"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="text"
+          size="s"
+          iconType="pencil"
+          onClick={openModal}
+          disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
+          data-test-subj="editBreakpointInputButton"
+        >
+          <FormattedMessage
+            id="workflows.executionDetail.editBreakpointInputButton.label"
+            defaultMessage="Edit input & continue"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
     <EuiButton
       fill={appearance === 'callout'}
       color="warning"
@@ -350,7 +403,14 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         {isModalOpen && (
           <ResumeExecutionModal
             initialcontextOverride={contextOverride}
-            resumeMessage={resumeMessage}
+            resumeMessage={
+              isBreakpointPause
+                ? i18n.translate('workflows.executionDetail.editBreakpointInput.description', {
+                    defaultMessage:
+                      'Modify the resolved step input JSON before continuing execution.',
+                  })
+                : resumeMessage
+            }
             onClose={closeModal}
             onSubmit={handleModalSubmit}
           />
@@ -381,7 +441,14 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       {isModalOpen && (
         <ResumeExecutionModal
           initialcontextOverride={contextOverride}
-          resumeMessage={resumeMessage}
+          resumeMessage={
+            isBreakpointPause
+              ? i18n.translate('workflows.executionDetail.editBreakpointInput.description', {
+                  defaultMessage:
+                    'Modify the resolved step input JSON before continuing execution.',
+                })
+              : resumeMessage
+          }
           onClose={closeModal}
           onSubmit={handleModalSubmit}
         />

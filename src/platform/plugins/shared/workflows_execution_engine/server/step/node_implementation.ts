@@ -9,7 +9,8 @@
 
 import apm from 'elastic-apm-node';
 import type { ByteSizeValue } from '@kbn/config-schema';
-import type { SerializedError } from '@kbn/workflows';
+import type { SerializedError, StepMock } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   DEFAULT_MAX_STEP_SIZE,
@@ -19,6 +20,7 @@ import {
   toExecutionError,
 } from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
+import { RESUME_INPUT_TAKEN_FOR_KEY } from '../repositories/resume_context_revert';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
@@ -170,6 +172,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     }
 
     let input: Record<string, unknown> = {};
+    const resumeInputOverride = this.clearBreakpointPauseOnResume();
     this.stepExecutionRuntime.startStep();
 
     // Start the span after a microtask so it does not stay in the caller's APM context
@@ -185,13 +188,8 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let suspended = false;
     try {
-      if (this.stepExecutionRuntime.isInputRecorded) {
-        input = this.recordedInput();
-      } else {
-        input = await this.getInput();
-        this.stepExecutionRuntime.setInput(input);
-      }
-      const result = await this._run(input);
+      input = await this.resolveStepInput(resumeInputOverride);
+      const result = await this.executeStepWithDebugger(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.
       // This is the generic catch-all that protects every step type against
@@ -278,6 +276,30 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   // Subclasses implement this to execute the step logic
   protected abstract _run(input: Record<string, unknown>): Promise<RunStepResult>;
 
+  private async resolveStepInput(
+    resumeInputOverride: Record<string, unknown> | undefined
+  ): Promise<Record<string, unknown>> {
+    if (resumeInputOverride) {
+      this.stepExecutionRuntime.setInput(resumeInputOverride);
+      return resumeInputOverride;
+    }
+    if (this.stepExecutionRuntime.isInputRecorded) {
+      return this.recordedInput();
+    }
+    const input = await this.getInput();
+    this.stepExecutionRuntime.setInput(input);
+    return input;
+  }
+
+  private async executeStepWithDebugger(input: Record<string, unknown>): Promise<RunStepResult> {
+    if (this.shouldPauseAtBreakpoint()) {
+      this.enterBreakpointPause();
+      return { input, suspended: true };
+    }
+    const mockConfig = this.getActiveDebugMock();
+    return mockConfig ? this.runStepMock(input, mockConfig) : this._run(input);
+  }
+
   /**
    * Resolves the maximum step size in bytes.
    * Resolution order: step-level > workflow settings > plugin config > DEFAULT_MAX_STEP_SIZE.
@@ -322,6 +344,136 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       input,
       output: undefined,
       error: toExecutionError(error),
+    };
+  }
+
+  private getNodeConfiguration(): Record<string, unknown> | undefined {
+    if (
+      'configuration' in this.stepExecutionRuntime.node &&
+      this.stepExecutionRuntime.node.configuration &&
+      typeof this.stepExecutionRuntime.node.configuration === 'object'
+    ) {
+      return this.stepExecutionRuntime.node.configuration as Record<string, unknown>;
+    }
+    return undefined;
+  }
+
+  private isDebugEnabled(): boolean {
+    const execution =
+      this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
+      this.stepExecutionRuntime.workflowExecution;
+    const debug = execution?.context?.debug as { enabled?: boolean } | undefined;
+    return Boolean(execution?.isTestRun && debug?.enabled === true);
+  }
+
+  private shouldPauseAtBreakpoint(): boolean {
+    if (!this.isDebugEnabled()) {
+      return false;
+    }
+    const execution =
+      this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
+      this.stepExecutionRuntime.workflowExecution;
+    const debug = execution?.context?.debug as { breakpoints?: unknown } | undefined;
+    if (!Array.isArray(debug?.breakpoints) || debug.breakpoints.length === 0) {
+      return false;
+    }
+    const nodeConfig = this.getNodeConfiguration();
+    const stepName =
+      (typeof nodeConfig?.name === 'string' && nodeConfig.name.length > 0
+        ? nodeConfig.name
+        : undefined) ?? this.step.name;
+    if (!debug.breakpoints.includes(stepName)) {
+      return false;
+    }
+    return this.stepExecutionRuntime.getCurrentStepState?.()?.breakpointHit !== true;
+  }
+
+  private enterBreakpointPause(): void {
+    const existingState = this.stepExecutionRuntime.getCurrentStepState?.() ?? {};
+    this.stepExecutionRuntime.setCurrentStepState({
+      ...existingState,
+      breakpointPaused: true,
+      breakpointHit: true,
+    });
+    this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+  }
+
+  private clearBreakpointPauseOnResume(): Record<string, unknown> | undefined {
+    const currentState = this.stepExecutionRuntime.getCurrentStepState?.();
+    if (!currentState?.breakpointPaused) {
+      return undefined;
+    }
+    this.stepExecutionRuntime.setCurrentStepState({
+      ...currentState,
+      breakpointPaused: false,
+    });
+    const execution =
+      this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
+      this.stepExecutionRuntime.workflowExecution;
+    const context = execution?.context;
+    const rawResumeInput = context?.resumeInput;
+    const overrideInput =
+      rawResumeInput != null &&
+      typeof rawResumeInput === 'object' &&
+      !Array.isArray(rawResumeInput) &&
+      Object.keys(rawResumeInput).length > 0
+        ? (rawResumeInput as Record<string, unknown>)
+        : undefined;
+    if (context != null && typeof context === 'object' && 'resumeInput' in context) {
+      this.stepExecutionRuntime.updateWorkflowExecution({
+        context: {
+          ...context,
+          resumeInput: null,
+          pendingInteractiveResume: false,
+          [RESUME_INPUT_TAKEN_FOR_KEY]: null,
+        },
+      });
+    }
+    return overrideInput;
+  }
+
+  private getActiveDebugMock(): StepMock | undefined {
+    if (!this.isDebugEnabled()) {
+      return undefined;
+    }
+    const nodeConfig = this.getNodeConfiguration();
+    const mock = nodeConfig?.mock ?? (this.step as { mock?: StepMock }).mock;
+    if (mock && typeof mock === 'object' && ('output' in mock || 'error' in mock)) {
+      return mock as StepMock;
+    }
+    return undefined;
+  }
+
+  private runStepMock(input: Record<string, unknown>, mock: StepMock): RunStepResult {
+    const ctx = this.stepExecutionRuntime.contextManager;
+    if ('error' in mock && mock.error) {
+      const renderedError = ctx.renderValueAccordingToContext(mock.error);
+      return {
+        input,
+        output: undefined,
+        error: {
+          type:
+            typeof renderedError.type === 'string' && renderedError.type.length > 0
+              ? renderedError.type
+              : 'MockStepError',
+          message:
+            typeof renderedError.message === 'string'
+              ? renderedError.message
+              : String(renderedError.message ?? 'Mocked step error'),
+          ...(renderedError.details ? { details: renderedError.details } : {}),
+          ...(typeof renderedError.retryable === 'boolean'
+            ? { retryable: renderedError.retryable }
+            : {}),
+        },
+      };
+    }
+
+    const renderedOutput =
+      'output' in mock ? ctx.renderValueAccordingToContext(mock.output) : undefined;
+    return {
+      input,
+      output: renderedOutput,
+      error: undefined,
     };
   }
 }

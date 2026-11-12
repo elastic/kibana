@@ -235,6 +235,10 @@ export interface TestWorkflowParams {
   workflowId?: string;
   workflowYaml?: string;
   inputs: Record<string, any>;
+  debug?: {
+    enabled: boolean;
+    breakpoints?: string[];
+  };
   spaceId: string;
   request: KibanaRequest;
 }
@@ -1089,6 +1093,7 @@ export class WorkflowsManagementApi {
     workflowId,
     workflowYaml,
     inputs,
+    debug,
     spaceId,
     request,
   }: TestWorkflowParams): Promise<string> {
@@ -1158,6 +1163,7 @@ export class WorkflowsManagementApi {
       spaceId,
       inputs: manualInputs,
       isUserInteractive: true,
+      ...(debug?.enabled ? { debug } : {}),
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(

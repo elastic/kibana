@@ -88,6 +88,8 @@ export const selectHighlightedStepId = createSelector(
   (detail) => detail.highlightedStepId
 );
 
+export const selectBreakpoints = createSelector(selectDetail, (detail) => detail.breakpoints);
+
 export const selectIsTestModalOpen = createSelector(
   selectDetail,
   (detail) => detail.isTestModalOpen

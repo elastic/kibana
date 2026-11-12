@@ -88,13 +88,40 @@ const IfConditionSchema = z
     'KQL condition that controls whether this step runs, e.g. "steps.prev.output.status : \'success\'"'
   );
 
+export const BaseSerializedErrorSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    message: z.string(),
+    details: z.record(z.string(), z.unknown()).optional(),
+    /** `false` when retrying cannot succeed, so `on-failure.retry` without a `condition` skips it. */
+    retryable: z.boolean().optional(),
+  })
+);
+export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
+
+export const StepMockSchema = lazySchema(() =>
+  z
+    .union([
+      z.object({
+        output: z.unknown(),
+      }),
+      z.object({
+        error: BaseSerializedErrorSchema,
+      }),
+    ])
+    .describe('Mocked step output or error used only when running the workflow in debug mode.')
+);
+export type StepMock = z.infer<typeof StepMockSchema>;
+
 // Base step schema, with recursive steps property
-export const BaseStepSchema = z.object({
-  name: z.string().min(1),
-  type: z.string(),
-  'max-step-size': ByteSizeSchema.optional(),
-  if: IfConditionSchema.optional(),
-});
+export const BaseStepSchema = lazySchema(() =>
+  z.object({
+    name: z.string().min(1),
+    type: z.string(),
+    'max-step-size': ByteSizeSchema.optional(),
+    if: IfConditionSchema.optional(),
+  })
+);
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
 export const WorkflowOnFailureSchema = z.object({
@@ -296,13 +323,16 @@ export const StepWithOnFailureSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
 });
 
-export const BaseConnectorStepSchema = BaseStepSchema.extend({
-  type: z.string().min(1),
-  with: z.record(z.string(), z.any()).optional(),
-})
-  .merge(StepWithForEachSchema)
-  .merge(DynamicTimeoutPropSchema)
-  .merge(StepWithOnFailureSchema);
+export const BaseConnectorStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.string().min(1),
+    with: z.record(z.string(), z.any()).optional(),
+    mock: StepMockSchema.optional(),
+  })
+    .merge(StepWithForEachSchema)
+    .merge(DynamicTimeoutPropSchema)
+    .merge(StepWithOnFailureSchema)
+);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
 export const BuiltInStepProperties = [
@@ -310,6 +340,7 @@ export const BuiltInStepProperties = [
   'type',
   'with',
   'if',
+  'mock',
   'foreach',
   'timeout',
   'max-step-size',
@@ -636,10 +667,13 @@ export const DataSetStepInputSchema = z
   .describe(
     'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
   );
-export const DataSetStepSchema = BaseStepSchema.extend({
-  type: z.literal('data.set').describe('Set variables in the workflow context'),
-  with: DataSetStepInputSchema,
-});
+export const DataSetStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('data.set').describe('Set variables in the workflow context'),
+    with: DataSetStepInputSchema,
+    mock: StepMockSchema.optional(),
+  })
+);
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
@@ -711,13 +745,16 @@ export const ElasticsearchStepInputSchema = z.union([
     .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
 ]);
 // Generic Elasticsearch step schema for backend validation
-export const ElasticsearchStepSchema = BaseStepSchema.extend({
-  type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
-    message: 'Elasticsearch step type must start with "elasticsearch."',
-  }),
-  with: ElasticsearchStepInputSchema,
-  timeout: DynamicTimeoutSchema.optional(),
-});
+export const ElasticsearchStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
+      message: 'Elasticsearch step type must start with "elasticsearch."',
+    }),
+    with: ElasticsearchStepInputSchema,
+    timeout: DynamicTimeoutSchema.optional(),
+    mock: StepMockSchema.optional(),
+  })
+);
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
 // Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
@@ -773,13 +810,16 @@ export const KibanaStepInputSchema = z.union([
     })
     .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
 ]);
-export const KibanaStepSchema = BaseStepSchema.extend({
-  type: z.string().refine((val) => val.startsWith('kibana.'), {
-    message: 'Kibana step type must start with "kibana."',
-  }),
-  with: KibanaStepInputSchema,
-  timeout: DynamicTimeoutSchema.optional(),
-});
+export const KibanaStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.string().refine((val) => val.startsWith('kibana.'), {
+      message: 'Kibana step type must start with "kibana."',
+    }),
+    with: KibanaStepInputSchema,
+    timeout: DynamicTimeoutSchema.optional(),
+    mock: StepMockSchema.optional(),
+  })
+);
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
 export const ForEachStepConfigSchema = z.object({
@@ -1703,17 +1743,6 @@ export const ForEachContextSchema = z.object({
   total: z.number().int(),
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
-
-export const BaseSerializedErrorSchema = lazySchema(() =>
-  z.object({
-    type: z.string(),
-    message: z.string(),
-    details: z.record(z.string(), z.unknown()).optional(),
-    /** `false` when retrying cannot succeed, so `on-failure.retry` without a `condition` skips it. */
-    retryable: z.boolean().optional(),
-  })
-);
-export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
 
 export const WhileContextSchema = z.object({
   iteration: z.number().int(),
