@@ -19,6 +19,7 @@ import {
   createEmulatorFetch,
   createEmulatorProxy,
   emulatorCredential,
+  formatResponse,
   EMULATOR_CA_DIR_ENV,
   EMULATOR_HOST_ENV,
   EMULATOR_PORT_ENV,
@@ -116,16 +117,11 @@ const logMcpRequest = (log: ToolingLog, request: McpControlRequest) => {
 
 const logCall = (
   log: ToolingLog,
-  {
-    request,
-    operation,
-    responseSource,
-    status,
-    requestViolations,
-    responseViolations,
-  }: ContractCall,
-  prefix = ''
+  call: ContractCall,
+  { prefix = '', showResponse = false }: { prefix?: string; showResponse?: boolean } = {}
 ) => {
+  const { request, operation, responseSource, status, requestViolations, responseViolations } =
+    call;
   const served =
     responseSource === 'fixture' ||
     responseSource === 'recording' ||
@@ -134,10 +130,13 @@ const logCall = (
     served ? ` [${responseSource}]` : ''
   }`;
   const violations = [...requestViolations, ...responseViolations];
+  // What the emulator answered with, when asked to show it and the call carries its exchange
+  const response = showResponse ? formatResponse(call) : undefined;
+  const lines = [line, ...(response ? [`  ${response}`] : [])];
   if (status >= 400 || violations.length > 0) {
-    log.warning([line, ...violations.map(({ message }) => `  - ${message}`)].join('\n'));
+    log.warning([...lines, ...violations.map(({ message }) => `  - ${message}`)].join('\n'));
   } else {
-    log.info(line);
+    log.info(lines.join('\n'));
   }
 };
 
@@ -215,6 +214,7 @@ run(
       value.split(',').filter(Boolean)
     );
     const all = flagsReader.boolean('all');
+    const showResponses = flagsReader.boolean('log-responses');
     const spec = flagsReader.enum('spec', ['snapshot', 'latest']) ?? 'snapshot';
     const port = flagsReader.number('port') ?? DEFAULTS.port;
     const host = flagsReader.string('host') ?? DEFAULTS.host;
@@ -276,7 +276,8 @@ run(
         recordings,
         // So GET /_mock/calls shows what Kibana sent and got, with secrets redacted.
         capture: true,
-        onCall: (call) => logCall(log, call, single ? '' : `[${name}] `),
+        onCall: (call) =>
+          logCall(log, call, { prefix: single ? '' : `[${name}] `, showResponse: showResponses }),
       });
 
       originsByConnector.set(name, fixedHttpsOrigins(specs));
@@ -289,7 +290,9 @@ run(
       recordingCount += recordings.length;
     }
     // Each emulator logs its own calls; this logs requests none of them matches.
-    const mock = combineEmulators(emulators, { onCall: (call) => logCall(log, call) });
+    const mock = combineEmulators(emulators, {
+      onCall: (call) => logCall(log, call, { showResponse: showResponses }),
+    });
 
     for (const { connector, source, operation, violations } of mock.rejectedResponses) {
       log.warning(
@@ -416,11 +419,12 @@ run(
       the logged calls through the endpoints under ${CONTROL_PATH}.`,
     flags: {
       string: ['connector', 'spec', 'port', 'host', 'ca-dir', 'fixtures', 'recordings'],
-      boolean: ['all'],
+      boolean: ['all', 'log-responses'],
       help: `
         --connector   Connector metadata.id, for example datadog or .datadog; repeat it or separate ids with commas
                       to serve several connectors
         --all         Serve every connector with a vendor_api/manifest.json
+        --log-responses  Show what each request was answered with: its status, where the answer came from and the start of its body
         --spec        snapshot (default) for the committed snapshots, or latest to fetch each source's current spec
         --port        Port to listen on (default ${DEFAULTS.port}, or the ${EMULATOR_PORT_ENV} environment variable)
         --host        Address to listen on (default ${DEFAULTS.host}, or ${EMULATOR_HOST_ENV})
