@@ -46,7 +46,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     'SQLState 08001 (unable to establish a database connection) from transactionhistory is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
   summary:
     'Frontend requests to transactionhistory, balancereader, and ledgerwriter time out (read timeout=4) on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
-  severity: 'critical',
+  severity: 'high',
   confidence: 0.82,
   source_ids: ['logs'],
   signals: [
@@ -458,7 +458,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'active-cascade',
-          text: 'Sets status=active with severity=critical for the cascade event because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
+          text: 'Sets status=active with severity=high for the cascade event: the frontend’s balance, transaction-history, payment and deposit calls are stated timing out or refused and are still happening, which meets high without a share. Critical would need a stated block of those operations or of a mandatory component, which the descriptions do not state.',
           score: 3,
         },
         {
@@ -488,7 +488,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'active-confirmed-cascade',
-          text: 'Keeps the cascade event active at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
+          text: 'Keeps the cascade event active at high severity because freshly verified ledger signals still show the failing calls.',
           score: 2,
         },
       ],
@@ -511,7 +511,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=high because grounding states a failed outcome (read timeouts fail account-balance lookups) and users cannot view balances, which is a dependent’s own operation (the frontend’s balance lookup) stated failing because of balancereader. Weak p_value and stationary change_point_type must not cap severity at medium or low, and the assessment note names the evidence the tier rests on.',
+          text: 'Sets severity=high because the frontend’s balance calls to balancereader are stated timing out or refused after retries and are still happening: a caller’s call to a named dependency failing is enough for high without a share. Weak p_value and stationary change_point_type must not cap severity at medium or low, and the assessment note names the evidence the tier rests on.',
           score: 3,
         },
         {
