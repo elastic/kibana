@@ -113,9 +113,13 @@ itself). That repository is only read, never written to, and its closed issues a
 
 ### Keeping suite issues up to date
 
-When the daily report finds a suite flaky again, its own issue (one this command filed for that
-`describe` block, not a per-test or whole-file one) is refreshed. `--no-update-issues` turns this
-off.
+When the daily report finds a suite flaky again, its own issue (one about that `describe` block,
+flaky or consistently failing, not a per-test one) is refreshed. Without one, an open issue about
+the suite's whole file is, such as a consistently failing issue for tests in several blocks: CI
+failures of the suite's tests are already counted on it. The suites of a file that share such an
+issue are refreshed together, their tests named after their block, and the issue stays about the
+whole file. A closed one isn't reopened for a block: the block gets an issue of its own.
+`--no-update-issues` turns this off.
 
 - The body text stays as filed. Only the hidden metadata is updated (report count, history, last
   report); the test ids and branches recorded before are kept, so `/skip` still covers a branch
@@ -125,7 +129,9 @@ off.
   suite failed since the last one, or since the issue was filed, and at least
   `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
   comment. It ends with a "Newly flaky:" list of the flaky tests the issue has not shown yet, in
-  its body or an earlier comment, one bullet each. How to skip the test is at the end of the body.
+  its body or an earlier comment, one bullet each. On an issue no report has found flaky before,
+  a consistently failing one, the first comment says "Now flaky" and lists every flaky test. How
+  to skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.

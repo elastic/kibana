@@ -248,9 +248,10 @@ export const flakySuiteIssueMetadata = (
       ...pipelines,
     ],
     'report.generatedAt': report.generatedAt.toISOString(),
-    // Issues filed before the count was recorded had one report per snapshot
+    // Issues filed before the count was recorded had one report per snapshot, and consistently
+    // failing issues have none
     'report.count': previous
-      ? (previous['report.count'] ?? Math.max(previous['report.history'].length, 1)) + 1
+      ? (previous['report.count'] ?? previous['report.history'].length) + 1
       : 1,
     'report.history': history.slice(-MAX_REPORT_HISTORY),
     ...(commentedAt ? { 'report.commentedAt': commentedAt } : {}),
@@ -849,14 +850,21 @@ const lastFailedLink = ({
 };
 
 /**
+ * Whether no report has found the suite flaky yet: a consistently failing issue, which the daily
+ * report now finds flaky for the first time.
+ */
+const neverFlaky = (previous: RecordedFlakySuiteIssueMetadata | undefined): boolean =>
+  previous !== undefined && previous['report.history'].length === 0;
+
+/**
  * `Newly flaky:` and a bullet per flaky test the issue has not shown, as many as the body's tests
- * table, when it records the ones it has.
+ * table, when it records the ones it has, or every flaky test when it has never been flaky.
  */
 const newlyFlakyList = (
   suite: FlakySuite,
   previous: RecordedFlakySuiteIssueMetadata | undefined
 ): string | undefined => {
-  const shown = previous?.['report.shownTestIds'];
+  const shown = previous?.['report.shownTestIds'] ?? (neverFlaky(previous) ? [] : undefined);
   if (!shown) {
     return undefined;
   }
@@ -873,12 +881,20 @@ const newlyFlakyList = (
   ].join('\n');
 };
 
+/** `still flaky`, or `now flaky` on an issue that has never been flaky, when it was closed too. */
+const flakyState = (reopened: boolean, first: boolean): string => {
+  if (first) {
+    return reopened ? 'now flaky, after this issue was closed' : 'now flaky';
+  }
+  return reopened ? 'flaky again after this issue was closed' : 'still flaky';
+};
+
 /** Where the suite is still flaky, with the worst test's numbers on each branch. */
 const whereStillFlaky = (
   suite: FlakySuite,
-  { report, reopened }: FlakySuiteIssueCommentContext
+  { report, reopened, previous }: FlakySuiteIssueCommentContext
 ): string => {
-  const state = reopened ? 'flaky again after this issue was closed' : 'still flaky';
+  const state = flakyState(reopened, neverFlaky(previous));
   const lead =
     suite.tests.length > 1
       ? `${plural(suite.tests.length, 'test')} ${state}`

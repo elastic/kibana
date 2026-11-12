@@ -876,6 +876,51 @@ describe('refreshing a suite issue', () => {
     expect(comment).not.toContain('- test 15');
   });
 
+  describe('on an issue no report has found flaky yet, such as a consistently failing one', () => {
+    const failing: RecordedFlakySuiteIssueMetadata = {
+      'suite.filePath': SUITE_PATH,
+      'suite.title': 'Default status alert',
+      'suite.framework': 'playwright',
+      'suite.testIds': ['broken-test'],
+      'report.history': [],
+    };
+
+    it('says the suite is now flaky and names every flaky test', () => {
+      const { suite, report } = singleTestReport();
+
+      expect(
+        renderFlakySuiteIssueComment(suite, { report, reopened: false, previous: failing })
+      ).toBe(
+        [
+          'Now flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).',
+          '',
+          'Newly flaky:',
+          '',
+          '- creates default alert, triggers on down status, and recovers',
+        ].join('\n')
+      );
+      expect(
+        renderFlakySuiteIssueComment(suite, { report, reopened: true, previous: failing })
+      ).toMatch(/^Now flaky, after this issue was closed, on `main`: 10% of builds/);
+    });
+
+    it('counts the report as the first one, and records the tests it named', () => {
+      const { suite, report } = singleTestReport();
+
+      const metadata = readFlakySuiteIssueMetadata(
+        refreshFlakySuiteIssueMetadata(filedBody(failing), suite, {
+          report,
+          previous: failing,
+          comment: true,
+        })
+      );
+
+      expect(metadata?.['report.count']).toBe(1);
+      expect(metadata?.['report.shownTestIds']).toEqual([flakyTest().testId]);
+      expect(metadata?.['suite.testIds']).toEqual([flakyTest().testId, 'broken-test']);
+    });
+  });
+
   it('names no test when the issue has shown them all, or does not record which it has shown', () => {
     const { suite, report } = multiTestReport();
 
