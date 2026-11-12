@@ -18,6 +18,8 @@ export { inlineSuggest } from './inline_suggestions/inline_suggest';
 
 // Autocomplete function
 export { suggest } from './autocomplete/autocomplete';
+// The grammar-driven flow, built in parallel. Switching flows is swapping these two lines.
+// export { suggest } from './autocomplete_v2/suggest';
 
 // Document highlight function
 export { getDocumentHighlightItems } from './document_highlight';
