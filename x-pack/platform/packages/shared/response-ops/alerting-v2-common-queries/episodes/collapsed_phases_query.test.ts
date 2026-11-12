@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { buildCollapsedStatusPhasesQuery } from './collapsed_phases_query';
+import {
+  buildCollapsedStatusPhasesQuery,
+  buildCollapsedSeverityPhasesQuery,
+} from './collapsed_phases_query';
 
 const RULE_ID = 'rule-abc';
 const WINDOW_START_MS = Date.parse('2026-04-01T00:00:00Z');
@@ -28,9 +31,10 @@ describe('buildCollapsedStatusPhasesQuery', () => {
     expect(queryString).toContain('ep-2');
   });
 
-  it('aggregates start/end per episode status phase', () => {
+  it('aggregates start/end and event count per episode status phase', () => {
     expect(queryString).toContain('seg_start = MIN(@timestamp)');
     expect(queryString).toContain('seg_end = MAX(@timestamp)');
+    expect(queryString).toContain('event_count = COUNT(*)');
     expect(queryString).toContain('BY episode.id, episode.status, group_hash');
   });
 
@@ -41,7 +45,60 @@ describe('buildCollapsedStatusPhasesQuery', () => {
 
   it('keeps the phase columns', () => {
     expect(queryString).toContain(
-      'KEEP `episode.id`, `episode.status`, group_hash, seg_start, seg_end'
+      'KEEP `episode.id`, `episode.status`, group_hash, seg_start, seg_end, event_count'
     );
+  });
+
+  it('omits the time filter when no window is given', () => {
+    const untimed = buildCollapsedStatusPhasesQuery({ ruleId: RULE_ID, alertIds: ['ep-1'] }).print(
+      'basic'
+    );
+    expect(untimed).not.toContain('@timestamp >=');
+    expect(untimed).toContain('LIMIT 4');
+  });
+
+  it('does not filter by space unless a space is given', () => {
+    expect(queryString).not.toContain('space_id');
+  });
+
+  it('scopes to the space and omits the rule filter for an alert without a rule', () => {
+    const external = buildCollapsedStatusPhasesQuery({
+      spaceId: 'space-1',
+      alertIds: ['ep-1'],
+    }).print('basic');
+    expect(external).toContain('space_id == "space-1"');
+    expect(external).not.toContain('rule.id');
+    expect(external).toContain('episode.id IN ("ep-1")');
+  });
+});
+
+describe('buildCollapsedSeverityPhasesQuery', () => {
+  const queryString = buildCollapsedSeverityPhasesQuery({
+    ruleId: RULE_ID,
+    alertIds: ['ep-1'],
+  }).print('basic');
+
+  it('scopes to alert type, rule and the given episodes without a time filter', () => {
+    expect(queryString).toContain('type == "alert"');
+    expect(queryString).toContain(RULE_ID);
+    expect(queryString).toContain('episode.id IN');
+    expect(queryString).not.toContain('@timestamp >=');
+  });
+
+  it('aggregates start/end and event count per severity', () => {
+    expect(queryString).toContain(
+      'seg_start = MIN(@timestamp), seg_end = MAX(@timestamp), event_count = COUNT(*)'
+    );
+    expect(queryString).toContain('BY episode.id, severity');
+    expect(queryString).toContain('KEEP `episode.id`, severity, seg_start, seg_end, event_count');
+  });
+
+  it('scopes to the space and omits the rule filter for an alert without a rule', () => {
+    const external = buildCollapsedSeverityPhasesQuery({
+      spaceId: 'space-1',
+      alertIds: ['ep-1'],
+    }).print('basic');
+    expect(external).toContain('space_id == "space-1"');
+    expect(external).not.toContain('rule.id');
   });
 });

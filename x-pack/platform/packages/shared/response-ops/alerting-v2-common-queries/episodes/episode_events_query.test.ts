@@ -7,7 +7,10 @@
 
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import { buildEpisodeEventsQuery } from './episode_events_query';
+import {
+  buildEpisodeEventsQuery,
+  buildEpisodeEventsWithTotalCountQuery,
+} from './episode_events_query';
 
 const SPACE_ID = 'default';
 
@@ -50,5 +53,25 @@ describe('buildEpisodeEventsQuery', () => {
       limit: 1001,
     }).print('basic');
     expect(queryString).toContain('LIMIT 1001');
+  });
+});
+
+describe('buildEpisodeEventsWithTotalCountQuery', () => {
+  const queryString = buildEpisodeEventsWithTotalCountQuery(SPACE_ID, 'episode-xyz').print('basic');
+
+  it('uses the same filters as the events query', () => {
+    expect(queryString).toContain(`space_id == "${SPACE_ID}"`);
+    expect(queryString).toContain('type == "alert"');
+    expect(queryString).toContain('episode.id == "episode-xyz"');
+    expect(queryString).toContain(`SORT ${DEFAULT_TIME_FIELD} ASC`);
+    expect(queryString).not.toContain('LIMIT');
+  });
+
+  it('counts every event before sorting and keeps the total on each row', () => {
+    expect(queryString).toContain('INLINE STATS total_event_count = COUNT(*)');
+    expect(queryString.indexOf('INLINE STATS')).toBeLessThan(queryString.indexOf('SORT'));
+    expect(queryString).toContain(
+      'KEEP @timestamp, `episode.id`, `episode.status`, `rule.id`, group_hash, severity, source, data, total_event_count'
+    );
   });
 });
