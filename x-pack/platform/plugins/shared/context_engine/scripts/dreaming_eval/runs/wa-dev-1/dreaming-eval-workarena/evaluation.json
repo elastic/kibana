@@ -1,0 +1,326 @@
+{
+  "runId": "wa-dev-1",
+  "aiIndexId": "dreaming-eval-workarena",
+  "connectorId": ".anthropic-claude-4.6-sonnet-chat_completion",
+  "ranker": "the .rerank-v1-elasticsearch reranker",
+  "evaluatedAt": "2026-11-12T14:46:26.465Z",
+  "kis": 224,
+  "overall": {
+    "targets": 10,
+    "counts": {
+      "covered": 2,
+      "partial": 4,
+      "missing": 4,
+      "error": 0
+    },
+    "score": 0.4
+  },
+  "byDataset": {
+    "longmemeval_v2_enterprise": {
+      "targets": 10,
+      "counts": {
+        "covered": 2,
+        "partial": 4,
+        "missing": 4,
+        "error": 0
+      },
+      "score": 0.4
+    }
+  },
+  "byCategory": {
+    "dynamic-environment": {
+      "targets": 3,
+      "counts": {
+        "covered": 0,
+        "partial": 1,
+        "missing": 2,
+        "error": 0
+      },
+      "score": 0.16666666666666666
+    },
+    "procedure": {
+      "targets": 3,
+      "counts": {
+        "covered": 2,
+        "partial": 1,
+        "missing": 0,
+        "error": 0
+      },
+      "score": 0.8333333333333334
+    },
+    "static-environment": {
+      "targets": 4,
+      "counts": {
+        "covered": 0,
+        "partial": 2,
+        "missing": 2,
+        "error": 0
+      },
+      "score": 0.25
+    }
+  },
+  "results": [
+    {
+      "target": {
+        "id": "c0593d69",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "static-environment",
+        "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident vs Hardware vs User. Among create-request, problem, incident, hardware, and user forms, how many forms have subtabs on the page, in addition to the field-entering section? Answer in English (zero/one/two/three/four/five)\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+        "answer": "four"
+      },
+      "candidateIds": [
+        "entity-page--incident-form--28fb28525f1329c5",
+        "fact-8a66dba65f8c9530",
+        "fact-c8df4226f4de52bb",
+        "entity-page--problems--28fb28525f1329c5",
+        "fact-0aa6966febe0b6eb",
+        "fact-edbad6cc4ad67022",
+        "entity-module--change--28fb28525f1329c5",
+        "entity-page--change-requests-list--28fb28525f1329c5",
+        "fact-6ef01fdee5f2c19b",
+        "entity-page--incidents--28fb28525f1329c5"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-8a66dba65f8c9530",
+        "fact-c8df4226f4de52bb",
+        "fact-0aa6966febe0b6eb",
+        "fact-6ef01fdee5f2c19b"
+      ],
+      "reason": "The stored items confirm subtabs for Incident (Notes, Related Records, Resolution Information), Hardware (General, Financial, Contracts, Disposal), and Change Request (Planning, Closure Information, Schedule), but there is no stored information about whether the Problem or User forms have subtabs, making it impossible to confirm the total count of four without that missing data."
+    },
+    {
+      "target": {
+        "id": "a7edfb7a",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "static-environment",
+        "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident. What is the subtab name shared by all the three forms?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+        "answer": "Notes"
+      },
+      "candidateIds": [
+        "entity-page--incident-form--28fb28525f1329c5",
+        "fact-8a66dba65f8c9530",
+        "fact-0aa6966febe0b6eb",
+        "fact-edbad6cc4ad67022",
+        "fact-6ef01fdee5f2c19b",
+        "entity-module--change--28fb28525f1329c5",
+        "entity-page--change-requests-list--28fb28525f1329c5",
+        "entity-module--problem--28fb28525f1329c5",
+        "entity-page--problems--28fb28525f1329c5",
+        "fact-0c89bec8dbaf960c"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-8a66dba65f8c9530",
+        "entity-page--incident-form--28fb28525f1329c5",
+        "fact-0aa6966febe0b6eb",
+        "fact-edbad6cc4ad67022"
+      ],
+      "reason": "The stored items confirm that the Incident form has a 'Notes' tab, and the Change Request form has Planning and Closure Information tabs, but there is no stored information about the Problem form's tabs to confirm 'Notes' is shared across all three forms."
+    },
+    {
+      "target": {
+        "id": "9680f077",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "static-environment",
+        "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Hardware. In both forms -- hardware and create-request -- what is the name of the field that is mandatory yet non-mutable for only one of the two forms?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+        "answer": "Quantity"
+      },
+      "candidateIds": [
+        "fact-c8df4226f4de52bb",
+        "fact-f7ddaaad6812e772",
+        "entity-page--hardware-asset-form--28fb28525f1329c5",
+        "fact-edbad6cc4ad67022",
+        "entity-page--incident-form--28fb28525f1329c5",
+        "entity-module--change--28fb28525f1329c5",
+        "fact-0aa6966febe0b6eb",
+        "entity-page--problems--28fb28525f1329c5",
+        "entity-page--change-requests--28fb28525f1329c5",
+        "entity-page--change-requests-list--28fb28525f1329c5"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items mention a 'Quantity' field or compare mandatory/non-mutable fields between the Hardware asset form and the Change Request form."
+    },
+    {
+      "target": {
+        "id": "c80ca967",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "static-environment",
+        "question": "I am working in our ServiceNow based portal. On the `Sales Laptop` item page under `Service Catalog > Hardware`, what are the names of the two sections shown on the right side of the page? Separate them with semicolons.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+        "answer": "Order this Item; Shopping Cart"
+      },
+      "candidateIds": [
+        "entity-catalog-item--sales-laptop--28fb28525f1329c5",
+        "entity-page--hardware-assets-list--28fb28525f1329c5",
+        "fact-31608b7760f55316",
+        "entity-catalog-item--developer-laptop-mac--28fb28525f1329c5",
+        "entity-catalog-item--microsoft-surface-pro-3--28fb28525f1329c5",
+        "entity-page--hardware-assets--28fb28525f1329c5",
+        "fact-c8df4226f4de52bb",
+        "entity-page--catalog-items--28fb28525f1329c5",
+        "entity-catalog-item--loaner-laptop--28fb28525f1329c5",
+        "fact-23faa84ced90de1f"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items describe the specific UI sections shown on the right side of the Sales Laptop catalog item page (Order this Item; Shopping Cart)."
+    },
+    {
+      "target": {
+        "id": "d83c4bf7",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "dynamic-environment",
+        "question": "I am working with our ServiceNow portal while creating a hardware asset record. After clicking New and loading the blank Hardware form, what default value is shown in the State dropdown?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+        "answer": "in use"
+      },
+      "candidateIds": [
+        "fact-c8df4226f4de52bb",
+        "entity-page--hardware-assets-list--28fb28525f1329c5",
+        "entity-page--hardware-asset-form--28fb28525f1329c5",
+        "entity-page--hardware-assets--28fb28525f1329c5",
+        "entity-module--hardware-assets--28fb28525f1329c5",
+        "fact-ea0549b1ced523f6",
+        "fact-06986463ad3f829f",
+        "fact-76a423b5e6f2540b",
+        "fact-fea4774387d855a9",
+        "fact-95ef0a795537fe72"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items mention the default value shown in the State dropdown when creating a new Hardware Asset record."
+    },
+    {
+      "target": {
+        "id": "7ea13f14",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "dynamic-environment",
+        "question": "I am working with our ServiceNow portal. When marking a problem as duplicate, a popup appears to collect additional information. Which field(s) are actually in that popup? Select ONE.\n\nA. Duplicate of\nB. Duplicate of; Resolution code\nC. Duplicate of; Resolution code; Close notes\nD. Duplicate of; Resolution code; Work notes / internal comments\nE. Duplicate of; Resolution code; Customer-facing comments / additional information\nF. Duplicate of; Resolution code; Parent\nG. Duplicate of; Resolution code; Canonical problem; Notes\nH. Duplicate of; Resolution code; Reason for marking as duplicate (short explanation)\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+        "answer": "A"
+      },
+      "candidateIds": [
+        "entity-protocol--problem-list-cleanup--28fb28525f1329c5",
+        "fact-bd5c4642d6dd9211",
+        "entity-page--incident-form--28fb28525f1329c5",
+        "entity-page--problems--28fb28525f1329c5",
+        "fact-8a66dba65f8c9530",
+        "entity-page--problems-list--28fb28525f1329c5",
+        "fact-d633bef518b66500",
+        "fact-0aa6966febe0b6eb",
+        "entity-module--problem--28fb28525f1329c5",
+        "entity-module--problems--28fb28525f1329c5"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-bd5c4642d6dd9211"
+      ],
+      "reason": "The stored fact mentions that clicking 'Mark Duplicate' displays the 'Duplicate of' reference field, but describes it as appearing on the form itself rather than explicitly confirming it appears in a popup, and doesn't fully clarify the popup-only fields versus form-level changes."
+    },
+    {
+      "target": {
+        "id": "78686f4e",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "dynamic-environment",
+        "question": "I am working with our ServiceNow portal. When we remove a user record, which option exactly matches the other record types that might be automatically affected? Select ONE.\n\nA. Notification device; Expense line\nB. User preference; Time Card\nC. Notification device; Expense line; User preference; Subscription\nD. Notification device; Expense line; User preference\nE. Expense line; User preference; Live Profile; Report Viewer\nF. Notification device; User preference; Bookmark; Skill\nG. Expense line; Notification message\nH. Notification device; Expense line; User Delegation; User preference\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+        "answer": "D"
+      },
+      "candidateIds": [
+        "entity-page--users-list--28fb28525f1329c5",
+        "entity-module--users--28fb28525f1329c5",
+        "entity-module--expense-lines--28fb28525f1329c5",
+        "entity-page--expense-lines-list--28fb28525f1329c5",
+        "fact-14cb127379a82c49",
+        "fact-62544cd260eddfed",
+        "fact-a33393d631dff1dd",
+        "fact-9d63d1f5df238366",
+        "entity-page--change-requests--28fb28525f1329c5",
+        "entity-module--problem--28fb28525f1329c5"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain information about which related record types (notification device, expense line, user preference, etc.) are automatically affected when a user record is deleted in ServiceNow."
+    },
+    {
+      "target": {
+        "id": "025db8ef",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "procedure",
+        "question": "I am working with our ServiceNow portal. My boss asked me to rebalance workload between several agents by reassigning problems with a specific tag. What are the two modules that our company's workflow typically use in order to accomplish this task? Tell me the first module's name and the second module's name in order, separated by a semicolon. Mark your final answer (should be two short phrases separated by a semicolon) in \\boxed{}.",
+        "answer": "Reports;Problems"
+      },
+      "candidateIds": [
+        "entity-module--reports--28fb28525f1329c5",
+        "fact-b0ae3f2b02a70b39",
+        "entity-protocol--agent-workload-balancing--28fb28525f1329c5",
+        "fact-c03253484fe85aa9",
+        "entity-module--problems--28fb28525f1329c5",
+        "entity-module--problem--28fb28525f1329c5",
+        "entity-module--interaction--28fb28525f1329c5",
+        "entity-module--reports-view-run--28fb28525f1329c5",
+        "entity-module--performance-analytics--28fb28525f1329c5",
+        "entity-module--view-run--28fb28525f1329c5"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-c03253484fe85aa9",
+        "entity-module--reports--28fb28525f1329c5",
+        "entity-module--problems--28fb28525f1329c5"
+      ],
+      "reason": "The procedure fact explicitly states to navigate to Reports first, then to Problems, matching the expected answer of 'Reports;Problems'."
+    },
+    {
+      "target": {
+        "id": "eb3cfd03",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "procedure",
+        "question": "I am working with our ServiceNow portal. In our company's typical workflow, what are the modules we need to visit in order to restock items that are low in quantity?\nNote: within each option, the listed modules are not in order.\n\nA. Request Management > Requests, Inventory > Stockroom\nB. Approvals > My Approvals, Procurement > Sourcing\nC. Request Management > Requests, Stockroom > Stock Rules\nD. Approvals > My Approvals, Reports > View, Self-Service > Service Catalog\nE. Self-Service > Service Catalog, Approvals > My Approvals\nF. Procurement > Sourcing, Request Management > Requests, Stockroom > Transfer Orders\nG. Approvals > My Approvals, Inventory > Stockroom, Procurement > Sourcing\nH. Self-Service > Service Catalog, Reports > View\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+        "answer": "H"
+      },
+      "candidateIds": [
+        "fact-75747b9f7bee9c4f",
+        "entity-module--service-catalog--28fb28525f1329c5",
+        "fact-bc571e5c58b882ea",
+        "entity-module--requested-items--28fb28525f1329c5",
+        "entity-module--asset--28fb28525f1329c5",
+        "entity-module--users--28fb28525f1329c5",
+        "entity-module--portfolios--28fb28525f1329c5",
+        "entity-module--knowledge--28fb28525f1329c5",
+        "entity-module--reports-view-run--28fb28525f1329c5",
+        "entity-module--interaction--28fb28525f1329c5"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "entity-module--reports-view-run--28fb28525f1329c5",
+        "entity-module--service-catalog--28fb28525f1329c5"
+      ],
+      "reason": "The stored items mention both Reports > View/Run and Self-Service > Service Catalog modules, which are the two modules in the expected answer H, but they do not explicitly connect these modules to the workflow of restocking low-quantity items."
+    },
+    {
+      "target": {
+        "id": "d63e8a7f",
+        "dataset": "longmemeval_v2_enterprise",
+        "category": "procedure",
+        "question": "I am working with our ServiceNow portal. My boss asks me to onboard a new user. After creating the new user profile, I navigate to order an Apple Mac Book Pro for this user and complete the order. What step remains? (Select ONE.)\n\nA. Return to the onboarding task -> add the MacBook Request (REQ) / Request Item (RITM) number in Work notes for traceability -> change the task state from Open to Closed - Complete.\nB. Navigate back to the onboarding task -> write a brief summary in Additional comments for the hiring manager/requester -> click Close Task (or set state to Closed - Complete).\nC. Verify the Request Item (RITM) was successfully created -> link it to the parent onboarding ticket -> then mark the onboarding task as Complete/Closed - Complete to trigger the next workflow phase.\nD. Create a new hardware record -> then return to the onboarding task page and change the status/state from Open to Closed - Complete.\nE. Return to the new user profile (sys_user) -> confirm the MacBook request is associated with the user/asset context -> validate provisioning details (delivery location/approvals) -> then close the onboarding task as Closed - Complete.\nF. Open the created MacBook request -> verify it is submitted and assigned to the correct fulfillment group -> notify the requester/manager with the tracking details -> then close the onboarding task as Closed - Complete.\nG. Return to the onboarding task -> reassign/hand off the task to the next fulfillment team -> set the task state to In Progress (so they can continue fulfillment).\nH. Create a new hardware record -> open the MacBook request and attach the hardware record -> then send the new user a completion message and close the onboarding task as Closed - Complete.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+        "answer": "D"
+      },
+      "candidateIds": [
+        "entity-protocol--onboarding-a-new-user--28fb28525f1329c5",
+        "fact-cedb650820a6ca66",
+        "fact-6a462999e50582a9",
+        "fact-2dd3495442ee59d7",
+        "fact-31608b7760f55316",
+        "entity-module--users--28fb28525f1329c5",
+        "entity-module--change--28fb28525f1329c5",
+        "fact-4232ec28a66bbed6",
+        "entity-module--service-catalog--28fb28525f1329c5",
+        "entity-catalog-item--developer-laptop-mac--28fb28525f1329c5"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "entity-protocol--onboarding-a-new-user--28fb28525f1329c5",
+        "fact-2dd3495442ee59d7"
+      ],
+      "reason": "The stored protocol explicitly states that after ordering the MacBook Pro, the next step is creating a Hardware Asset record and then closing the onboarding task as 'Closed Complete', which corresponds to answer D."
+    }
+  ]
+}

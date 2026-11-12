@@ -1,0 +1,72 @@
+[
+  {
+    "id": "c0593d69",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident vs Hardware vs User. Among create-request, problem, incident, hardware, and user forms, how many forms have subtabs on the page, in addition to the field-entering section? Answer in English (zero/one/two/three/four/five)\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "four"
+  },
+  {
+    "id": "a7edfb7a",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident. What is the subtab name shared by all the three forms?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Notes"
+  },
+  {
+    "id": "9680f077",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Hardware. In both forms -- hardware and create-request -- what is the name of the field that is mandatory yet non-mutable for only one of the two forms?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Quantity"
+  },
+  {
+    "id": "c80ca967",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Sales Laptop` item page under `Service Catalog > Hardware`, what are the names of the two sections shown on the right side of the page? Separate them with semicolons.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Order this Item; Shopping Cart"
+  },
+  {
+    "id": "d83c4bf7",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal while creating a hardware asset record. After clicking New and loading the blank Hardware form, what default value is shown in the State dropdown?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "in use"
+  },
+  {
+    "id": "7ea13f14",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When marking a problem as duplicate, a popup appears to collect additional information. Which field(s) are actually in that popup? Select ONE.\n\nA. Duplicate of\nB. Duplicate of; Resolution code\nC. Duplicate of; Resolution code; Close notes\nD. Duplicate of; Resolution code; Work notes / internal comments\nE. Duplicate of; Resolution code; Customer-facing comments / additional information\nF. Duplicate of; Resolution code; Parent\nG. Duplicate of; Resolution code; Canonical problem; Notes\nH. Duplicate of; Resolution code; Reason for marking as duplicate (short explanation)\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "A"
+  },
+  {
+    "id": "78686f4e",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When we remove a user record, which option exactly matches the other record types that might be automatically affected? Select ONE.\n\nA. Notification device; Expense line\nB. User preference; Time Card\nC. Notification device; Expense line; User preference; Subscription\nD. Notification device; Expense line; User preference\nE. Expense line; User preference; Live Profile; Report Viewer\nF. Notification device; User preference; Bookmark; Skill\nG. Expense line; Notification message\nH. Notification device; Expense line; User Delegation; User preference\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "D"
+  },
+  {
+    "id": "025db8ef",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asked me to rebalance workload between several agents by reassigning problems with a specific tag. What are the two modules that our company's workflow typically use in order to accomplish this task? Tell me the first module's name and the second module's name in order, separated by a semicolon. Mark your final answer (should be two short phrases separated by a semicolon) in \\boxed{}.",
+    "answer": "Reports;Problems"
+  },
+  {
+    "id": "eb3cfd03",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. In our company's typical workflow, what are the modules we need to visit in order to restock items that are low in quantity?\nNote: within each option, the listed modules are not in order.\n\nA. Request Management > Requests, Inventory > Stockroom\nB. Approvals > My Approvals, Procurement > Sourcing\nC. Request Management > Requests, Stockroom > Stock Rules\nD. Approvals > My Approvals, Reports > View, Self-Service > Service Catalog\nE. Self-Service > Service Catalog, Approvals > My Approvals\nF. Procurement > Sourcing, Request Management > Requests, Stockroom > Transfer Orders\nG. Approvals > My Approvals, Inventory > Stockroom, Procurement > Sourcing\nH. Self-Service > Service Catalog, Reports > View\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "H"
+  },
+  {
+    "id": "d63e8a7f",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asks me to onboard a new user. After creating the new user profile, I navigate to order an Apple Mac Book Pro for this user and complete the order. What step remains? (Select ONE.)\n\nA. Return to the onboarding task -> add the MacBook Request (REQ) / Request Item (RITM) number in Work notes for traceability -> change the task state from Open to Closed - Complete.\nB. Navigate back to the onboarding task -> write a brief summary in Additional comments for the hiring manager/requester -> click Close Task (or set state to Closed - Complete).\nC. Verify the Request Item (RITM) was successfully created -> link it to the parent onboarding ticket -> then mark the onboarding task as Complete/Closed - Complete to trigger the next workflow phase.\nD. Create a new hardware record -> then return to the onboarding task page and change the status/state from Open to Closed - Complete.\nE. Return to the new user profile (sys_user) -> confirm the MacBook request is associated with the user/asset context -> validate provisioning details (delivery location/approvals) -> then close the onboarding task as Closed - Complete.\nF. Open the created MacBook request -> verify it is submitted and assigned to the correct fulfillment group -> notify the requester/manager with the tracking details -> then close the onboarding task as Closed - Complete.\nG. Return to the onboarding task -> reassign/hand off the task to the next fulfillment team -> set the task state to In Progress (so they can continue fulfillment).\nH. Create a new hardware record -> open the MacBook request and attach the hardware record -> then send the new user a completion message and close the onboarding task as Closed - Complete.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "D"
+  }
+]
