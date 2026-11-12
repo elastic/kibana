@@ -36,3 +36,4 @@ export { registerRunMaintainer } from './entity_maintainers/run';
 export { registerCheckPrivileges } from './check_privileges';
 export { registerEngineConfig } from './engine_config';
 export { registerInternalStart, registerInternalStop } from './internal_start_stop';
+export { registerRunGraphTraversal } from './graph_traversal/run';

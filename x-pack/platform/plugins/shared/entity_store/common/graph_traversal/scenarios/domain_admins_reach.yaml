@@ -1,0 +1,34 @@
+version: '2'
+id: domain-admins-reach
+name: Who can reach Domain Admins
+description: >
+  Everything that can reach the Domain Admins group, walked backwards over the Active
+  Directory relationships the identity access graph generator writes: admin groups nested
+  into it, accounts in those groups, credentials left on jump servers and domain
+  controllers, local admin through accounts and groups, logons, owned accounts, instances
+  that are the same machine as a host, and the roles that control them. The generator's
+  README reports about 17% of employees reach Domain Admins; the walk should reproduce that.
+seed:
+  type: group
+  description: The entity store id of the Domain Admins group
+direction: in
+limits:
+  max_hops: 8
+  max_nodes: 5000
+  max_frontier: 500
+  hub_degree: 5000
+hops:
+  - name: reach
+    description: One step back over every relationship that can lead to the frontier
+    relationships:
+      - member_of
+      - nested_in
+      - local_admin
+      - credentials_left
+      - accesses_frequently
+      - accesses_infrequently
+      - same_machine
+      - owns
+      - can_control
+      - runs_as
+    repeat: 8
