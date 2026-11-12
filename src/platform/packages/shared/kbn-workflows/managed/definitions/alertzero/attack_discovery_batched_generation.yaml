@@ -54,6 +54,12 @@ triggers:
           description: >
             LLM connector. Omit to use the configured default AI connector.
           type: string
+        additional_context:
+          description: >
+            Operator guidance appended to the generation prompt of every batch.
+            Omit it to add nothing; an empty string is never sent on.
+          maxLength: 4000
+          type: string
         lookback:
           default: "24h"
           description: >
@@ -184,6 +190,10 @@ steps:
               | SORT @timestamp ASC
               | LIMIT {{ inputs.batch_size }}
           connector_id: "{{ inputs.connector_id }}"
+          # Undefined when the run has no additional context, so the run step adds
+          # nothing to the prompt. `${{ }}` keeps it undefined, where `{{ }}` would
+          # render an empty string.
+          additional_context: "${{ inputs.additional_context }}"
           # Stated on the leaf step rather than threaded down from the Worker: the
           # tier is a property of the call, not of the caller. Only consulted when
           # `connector_id` is empty. An unset cyber-domain row resolves to nothing

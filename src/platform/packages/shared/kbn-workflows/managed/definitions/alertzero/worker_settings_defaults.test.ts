@@ -73,7 +73,7 @@ describe('upgradeStoredWorkerSettings', () => {
 
     expect(
       upgradeStoredWorkerSettings(ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS, withoutInterval)
-    ).toEqual({ ...withoutInterval, scheduleInterval: '24h' });
+    ).toEqual({ ...withoutInterval, scheduleInterval: '24h', extras: {} });
   });
 
   it('drops a stored extras value once the Worker declares none', () => {
@@ -121,7 +121,12 @@ describe('upgradeStoredWorkerSettings', () => {
           autonomyLevel: 'assisted',
           scheduleInterval: '24h',
         })
-      ).toEqual({ settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '24h' });
+      ).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '24h',
+        extras: {},
+      });
     });
 
     it('keeps a level with nothing allowed below it, for validation to reject', () => {

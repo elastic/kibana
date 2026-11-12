@@ -72,3 +72,27 @@ export const AlertTriageWorkerExtras = lazySchema(() =>
     .strict()
 );
 export type AlertTriageWorkerExtras = z.infer<typeof AlertTriageWorkerExtras>;
+
+/**
+ * Free-text guidance appended to the Attack Discovery generation prompt on every scheduled run, such as environment details or what the analysts care about. Sent to the model as written and not anonymized, so it must not hold sensitive identifiers. Must contain a non-whitespace character and must not contain `{{` or `{%`, because the workflow engine parses the text as a Liquid template when the Worker's workflow is saved, and evaluates a value that is wholly a `${{ … }}` expression instead of treating it as text. The text is stored in workflow consts and execution inputs, so users who can read workflows or executions in the space can see it.
+ */
+export const AdditionalContext = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(4000)
+    .regex(/^(?![\s\S]*\{[{%])[\s\S]*\S[\s\S]*$/)
+);
+export type AdditionalContext = z.infer<typeof AdditionalContext>;
+
+/**
+ * Complete Worker-specific settings for the Attack Discovery Worker, owned by Floor Watch. Sent whole on write; an empty object clears every field.
+ */
+export const AttackDiscoveryWorkerExtras = lazySchema(() =>
+  z
+    .object({
+      additionalContext: AdditionalContext.optional(),
+    })
+    .strict()
+);
+export type AttackDiscoveryWorkerExtras = z.infer<typeof AttackDiscoveryWorkerExtras>;

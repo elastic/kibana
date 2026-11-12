@@ -14,7 +14,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
 } from '../../constants';
-import { AlertTriageWorkerExtras } from '../schemas';
+import { AlertTriageWorkerExtras, AttackDiscoveryWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
 
 export const AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD_DEFAULT =
@@ -75,8 +75,14 @@ export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration<AlertTriageWorkerE
   },
 };
 
-export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration = {
+export const ATTACK_DISCOVERY_ADDITIONAL_CONTEXT_MAX_LENGTH = 4000;
+
+export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration<AttackDiscoveryWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   allowedAutonomyLevels: ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
   scheduleInterval: ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
+  extras: {
+    schema: AttackDiscoveryWorkerExtras,
+    defaultValue: ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS.extras.defaultValue,
+  },
 };

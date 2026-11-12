@@ -99,11 +99,13 @@ describe('createWorkerSettingsRegistration', () => {
         settingsVersion: 1,
         autonomyLevel: 'manual',
         scheduleInterval: '24h',
+        extras: {},
       });
       expect(registration.toSettings(registration.createDefaultValues())).toEqual({
         workerId: AD_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '24h',
+        extras: {},
       });
     });
 
@@ -115,11 +117,13 @@ describe('createWorkerSettingsRegistration', () => {
       ).toEqual({
         ...stored,
         scheduleInterval: '24h',
+        extras: {},
       });
       expect(registration.toSettings(stored)).toEqual({
         workerId: AD_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '24h',
+        extras: {},
       });
     });
 
@@ -130,7 +134,12 @@ describe('createWorkerSettingsRegistration', () => {
           autonomyLevel: 'manual',
           scheduleInterval: '30m',
         })
-      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'manual', scheduleInterval: '30m' });
+      ).toEqual({
+        workerId: AD_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '30m',
+        extras: {},
+      });
     });
 
     it('throws on an unrecognised settings version', () => {
@@ -160,12 +169,14 @@ describe('createWorkerSettingsRegistration', () => {
         workerId: AD_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '24h',
+        extras: {},
       });
       expect(
         upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(AD_WORKER_ID), stored)
       ).toEqual({
         ...stored,
         autonomyLevel: 'manual',
+        extras: {},
       });
     });
 
@@ -176,7 +187,94 @@ describe('createWorkerSettingsRegistration', () => {
           autonomyLevel: 'supervised',
           scheduleInterval: '24h',
         })
-      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'supervised', scheduleInterval: '24h' });
+      ).toEqual({
+        workerId: AD_WORKER_ID,
+        autonomy: 'supervised',
+        scheduleInterval: '24h',
+        extras: {},
+      });
+    });
+
+    describe('additional context', () => {
+      const applyContext = (additionalContext: unknown) =>
+        registration.applyPatch(registration.createDefaultValues(), {
+          extras: { additionalContext },
+        });
+
+      it('stores and projects an additional context patch', () => {
+        const applied = applyContext('Prioritise the finance subnet.');
+
+        expect(applied).toEqual({
+          values: {
+            settingsVersion: 1,
+            autonomyLevel: 'manual',
+            scheduleInterval: '24h',
+            extras: { additionalContext: 'Prioritise the finance subnet.' },
+          },
+        });
+      });
+
+      it('accepts the longest allowed value', () => {
+        expect(applyContext('x'.repeat(4000))).toEqual({ values: expect.any(Object) });
+      });
+
+      it('rejects a value over 4000 characters', () => {
+        expect(expectInvalid(applyContext('x'.repeat(4001)))).toMatch(/additionalContext/);
+      });
+
+      it('rejects an empty string so it can never be stored or sent on', () => {
+        expect(expectInvalid(applyContext(''))).toMatch(/additionalContext/);
+      });
+
+      it.each(['   ', '\n\t ', '  \n  '])('rejects the whitespace-only value %j', (value) => {
+        expect(expectInvalid(applyContext(value))).toMatch(/additionalContext/);
+      });
+
+      // The workflow engine evaluates a string that starts with `${{` and ends with `}}` (no trim)
+      // instead of passing it through, so such a value must never be stored.
+      it.each(['${{ kibanaUrl }}', '${{kibanaUrl}}', '${{ a }} and ${{ b }}', '${{}}', '${{\n}}'])(
+        'rejects the value %j that the engine would evaluate',
+        (value) => {
+          expect(expectInvalid(applyContext(value))).toMatch(/additionalContext/);
+        }
+      );
+
+      it.each(['stray }} and %} closers', 'a } b { c'])(
+        'accepts the value %j, which the engine keeps as text',
+        (value) => {
+          expect(applyContext(value)).toEqual({
+            values: expect.objectContaining({ extras: { additionalContext: value } }),
+          });
+        }
+      );
+
+      // Install parses every YAML string as Liquid, so any braces-template syntax can store the
+      // Worker's workflow as invalid even when the engine would keep the text literal.
+      it.each([
+        '${{ unterminated',
+        'Hosts {{ unclosed',
+        'Use {% foo %} tags',
+        'a {{ x | nosuchfilter }}',
+        '{% include "x" %}',
+        'Hosts use {{ braces }} and {% tags %}.',
+        'x ${{ kibanaUrl }}',
+        '${{ kibanaUrl }} y',
+        ' ${{ kibanaUrl }}',
+        '${{ kibanaUrl }}\n',
+        '{%',
+      ])('rejects the braces-template value %j', (value) => {
+        expect(expectInvalid(applyContext(value))).toMatch(/additionalContext/);
+      });
+
+      it('rejects an unknown extras field', () => {
+        expect(
+          expectInvalid(
+            registration.applyPatch(registration.createDefaultValues(), {
+              extras: { analysisWindowDays: 7 },
+            })
+          )
+        ).toMatch(/extras/);
+      });
     });
 
     it('rejects unsupported stored fields by name', () => {
@@ -196,7 +294,7 @@ describe('createWorkerSettingsRegistration', () => {
       });
 
       expect(applied).toEqual({
-        values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval },
+        values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval, extras: {} },
       });
     });
 
@@ -207,7 +305,12 @@ describe('createWorkerSettingsRegistration', () => {
       );
 
       expect(applied).toEqual({
-        values: { settingsVersion: 1, autonomyLevel: 'supervised', scheduleInterval: '15m' },
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'supervised',
+          scheduleInterval: '15m',
+          extras: {},
+        },
       });
     });
 
@@ -221,7 +324,12 @@ describe('createWorkerSettingsRegistration', () => {
       );
 
       expect(applied).toEqual({
-        values: { settingsVersion: 1, autonomyLevel: 'supervised', scheduleInterval: '15m' },
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'supervised',
+          scheduleInterval: '15m',
+          extras: {},
+        },
       });
     });
 
@@ -616,7 +724,7 @@ describe('createWorkerSettingsRegistration', () => {
   });
 
   describe('Workers that declare no extras', () => {
-    it.each([...UNSCHEDULED_WORKER_IDS, AD_WORKER_ID])(
+    it.each(UNSCHEDULED_WORKER_IDS)(
       "%s rejects another Worker's extras field, naming it",
       (workerId) => {
         const registration = createWorkerSettingsRegistration(workerId);

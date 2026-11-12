@@ -18,6 +18,13 @@ export interface WorkerCustomSettingsProps {
   settings: WorkerSettings;
   isDisabled?: boolean;
   onExtrasChange: (extras: WorkerSettingsExtras) => void;
+  /**
+   * Reports whether the component holds a value it refused to publish to the draft. Without it,
+   * Save would persist the last published value while an invalid entry is on screen.
+   */
+  onValidityChange?: (isValid: boolean) => void;
+  /** Changes when the page discards its draft, so a component holding an unpublished value drops it. */
+  resetKey?: number;
 }
 
 export type WorkerCustomSettingsComponent = FC<WorkerCustomSettingsProps>;

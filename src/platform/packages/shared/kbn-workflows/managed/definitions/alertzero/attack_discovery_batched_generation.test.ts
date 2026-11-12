@@ -98,8 +98,9 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
   });
 
   describe('inputs', () => {
-    it('exposes exactly batch_size, connector_id, lookback and max_alerts', () => {
+    it('exposes exactly additional_context, batch_size, connector_id, lookback and max_alerts', () => {
       expect(Object.keys(inputs()).sort()).toEqual([
+        'additional_context',
         'batch_size',
         'connector_id',
         'lookback',
@@ -295,6 +296,17 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(fanOut().steps?.[0].with?.generation_source).toBe(
         ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE
       );
+    });
+
+    // Structural pin only: the engine behaviour (a literal staying literal, an absent value staying
+    // undefined) is tested against the real templating engine in the alertzero plugin's
+    // `attack_discovery_additional_context.test.ts`. This package cannot import the engine.
+    describe('additional context', () => {
+      it('forwards the input to the run step so it reaches the generation prompt', () => {
+        expect(fanOut().steps?.[0].with?.additional_context).toBe(
+          '${{ inputs.additional_context }}'
+        );
+      });
     });
 
     // The offsets and the per-branch slice are a matched pair — an off-by-one

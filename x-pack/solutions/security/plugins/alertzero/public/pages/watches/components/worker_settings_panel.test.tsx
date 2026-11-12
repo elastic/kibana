@@ -100,9 +100,11 @@ const renderPanel = (
     enabled = true,
     showManagedWorkflows = true,
     canChangeAdvancedSettings = true,
+    onTriggerValidityChange,
   }: Pick<Partial<Worker>, 'blockingReasons' | 'enabled'> & {
     showManagedWorkflows?: boolean;
     canChangeAdvancedSettings?: boolean;
+    onTriggerValidityChange?: (workerId: string, isValid: boolean) => void;
   } = {}
 ) => {
   const worker: Worker = { ...createWorker(workflowId), enabled, blockingReasons };
@@ -122,7 +124,7 @@ const renderPanel = (
     workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
   };
 
-  render(
+  const { unmount } = render(
     <I18nProvider>
       <KibanaContextProvider services={core}>
         <WorkerSettingsPanel
@@ -138,13 +140,30 @@ const renderPanel = (
           canWrite
           onEnabledChange={jest.fn()}
           onSettingsChange={jest.fn()}
+          onTriggerValidityChange={onTriggerValidityChange}
         />
       </KibanaContextProvider>
     </I18nProvider>
   );
 
-  return core;
+  return Object.assign(core, { unmount });
 };
+
+describe('WorkerSettingsPanel draft validity', () => {
+  it('reports its Worker id with the validity, and clears the flag when it unmounts', () => {
+    const onTriggerValidityChange = jest.fn();
+    const { unmount } = renderPanel(WORKFLOW_ID, false, { onTriggerValidityChange });
+    expect(onTriggerValidityChange).toHaveBeenLastCalledWith(WORKER_ID, true);
+
+    fireEvent.change(screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`), {
+      target: { value: '1.9' },
+    });
+    expect(onTriggerValidityChange).toHaveBeenLastCalledWith(WORKER_ID, false);
+
+    unmount();
+    expect(onTriggerValidityChange).toHaveBeenLastCalledWith(WORKER_ID, true);
+  });
+});
 
 describe('WorkerSettingsPanel view executions link', () => {
   it.each([

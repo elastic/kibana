@@ -1,0 +1,9 @@
+{
+  "settingsVersion": 1,
+  "autonomyLevel": "manual",
+  "scheduleInterval": "24h",
+  "serviceAccountId": "kibana/az-worker-1",
+  "extras": {
+    "additionalContext": "Our payment hosts are named pay-*. Prioritise attacks that touch them."
+  }
+}

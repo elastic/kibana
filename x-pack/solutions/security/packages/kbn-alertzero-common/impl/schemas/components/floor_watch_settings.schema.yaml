@@ -80,3 +80,28 @@ components:
           $ref: '#/components/schemas/ExcludeBuildingBlocks'
         excludedRuleTags:
           $ref: '#/components/schemas/ExcludedRuleTags'
+
+    AdditionalContext:
+      type: string
+      minLength: 1
+      maxLength: 4000
+      pattern: '^(?![\s\S]*\{[{%])[\s\S]*\S[\s\S]*$'
+      description: >-
+        Free-text guidance appended to the Attack Discovery generation prompt on every scheduled
+        run, such as environment details or what the analysts care about. Sent to the model as
+        written and not anonymized, so it must not hold sensitive identifiers. Must contain a
+        non-whitespace character and must not contain `{{` or `{%`, because the workflow engine
+        parses the text as a Liquid template when the Worker's workflow is saved, and evaluates a
+        value that is wholly a `${{ … }}` expression instead of treating it as text. The text is
+        stored in workflow consts and execution inputs, so users who can read workflows or
+        executions in the space can see it.
+
+    AttackDiscoveryWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Worker-specific settings for the Attack Discovery Worker, owned by Floor Watch.
+        Sent whole on write; an empty object clears every field.
+      properties:
+        additionalContext:
+          $ref: '#/components/schemas/AdditionalContext'

@@ -64,6 +64,8 @@ interface PersistentWorkerDocument {
   values: Record<string, unknown> | null;
   yaml: string;
   version: number;
+  /** What install stores when the rendered YAML fails validation: a document with no definition. */
+  invalid: boolean;
 }
 
 const renderManagedWorkflowYaml = (id: string, values: Record<string, unknown> | null): string => {
@@ -85,6 +87,8 @@ const storedIdFromReport = (workflowId: string) =>
 
 const createPersistentHarness = () => {
   const documents = new Map<string, PersistentWorkerDocument>();
+  /** Stands in for install-time validation: a document whose YAML matches is stored invalid. */
+  let isYamlInvalid = (_yaml: string): boolean => false;
   const documentId = (id: string, spaceId: string) => `${id}-${spaceId}`;
   const findDocument = (workflowId: string) => documents.get(storedIdFromReport(workflowId));
   const install = jest.fn(
@@ -94,10 +98,18 @@ const createPersistentHarness = () => {
         spaceId: string;
         workflowIdSuffix?: string;
         values?: Record<string, unknown>;
+        expectedDocumentVersion?: number | null;
       }
     ) => {
       const idWithSuffix = documentId(id, options.workflowIdSuffix ?? options.spaceId);
       const existing = documents.get(idWithSuffix);
+      // Same contract as the managed workflows service: skip the write on a version mismatch.
+      if (
+        options.expectedDocumentVersion !== undefined &&
+        (existing == null || existing.version !== options.expectedDocumentVersion)
+      ) {
+        return;
+      }
       const values = options.values ?? existing?.values ?? null;
       const yaml = renderManagedWorkflowYaml(id, values);
       documents.set(idWithSuffix, {
@@ -106,6 +118,7 @@ const createPersistentHarness = () => {
         values,
         yaml,
         version: existing?.yaml === yaml ? existing.version : (existing?.version ?? 0) + 1,
+        invalid: isYamlInvalid(yaml),
       });
     }
   );
@@ -113,13 +126,19 @@ const createPersistentHarness = () => {
     const idWithSuffix = documentId(id, options.spaceId);
     const document = documents.get(idWithSuffix);
     return {
-      status: document ? (document.enabled ? 'intact' : 'disabled') : 'missing',
+      status: document
+        ? document.invalid
+          ? 'invalid'
+          : document.enabled
+          ? 'intact'
+          : 'disabled'
+        : 'missing',
       workflowId: reportedWorkflowId(id, options.spaceId),
       definitionId: id,
       spaceId: options.spaceId,
       installed: Boolean(document),
       enabled: document?.enabled ?? null,
-      valid: document ? true : null,
+      valid: document ? !document.invalid : null,
       managedBy: document ? 'alertzero' : null,
       storedVersion: document ? 1 : null,
       registryVersion: 1,
@@ -179,6 +198,9 @@ const createPersistentHarness = () => {
 
   return {
     documents,
+    failValidationWhen: (predicate: (yaml: string) => boolean) => {
+      isYamlInvalid = predicate;
+    },
     install,
     management,
     managedWorkflows,
@@ -453,6 +475,160 @@ describe('WorkersService', () => {
         request
       )
     ).resolves.toEqual({ outcome: 'failed' });
+  });
+
+  describe('a save whose rendered workflow fails validation', () => {
+    // Any value the schema accepts but install-time validation rejects. The schema now blocks
+    // the known Liquid collisions, so the harness marks this one invalid to exercise the guard.
+    const COLLIDING_CONTEXT = 'Hosts that collide with validation';
+    const saveAdditionalContext = (
+      service: WorkersService,
+      additionalContext: string,
+      settingsRevision: number | null
+    ) =>
+      service.update(
+        ATTACK_DISCOVERY,
+        { settings: { extras: { additionalContext } }, settingsRevision },
+        SPACE,
+        request
+      );
+
+    it('reports invalid, not updated, and puts the previous settings back', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      const first = await saveAdditionalContext(service, 'Payment hosts are named pay-*.', null);
+      if (first.outcome !== 'updated') throw new Error('Expected the first save to succeed');
+      harness.failValidationWhen((yaml) => yaml.includes(COLLIDING_CONTEXT));
+      harness.updateWorkflow.mockClear();
+
+      const result = await saveAdditionalContext(
+        service,
+        COLLIDING_CONTEXT,
+        first.response.worker.settingsRevision
+      );
+
+      expect(result).toEqual({
+        outcome: 'invalid',
+        message: 'the settings produce a workflow that fails validation',
+      });
+      const document = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`);
+      expect(document?.invalid).toBe(false);
+      expect(document?.values).toMatchObject({
+        extras: { additionalContext: 'Payment hosts are named pay-*.' },
+      });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('reports invalid and installs the defaults when nothing was installed before', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      harness.failValidationWhen((yaml) => yaml.includes(COLLIDING_CONTEXT));
+
+      const result = await saveAdditionalContext(service, COLLIDING_CONTEXT, null);
+
+      expect(result).toMatchObject({ outcome: 'invalid' });
+      const document = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`);
+      expect(document?.invalid).toBe(false);
+      expect(document?.yaml).not.toContain(COLLIDING_CONTEXT);
+    });
+
+    describe('when the previous settings cannot be put back', () => {
+      const setUpHuntWithInvalidSave = async () => {
+        const harness = createPersistentHarness();
+        const logger = loggingSystemMock.createLogger();
+        const threatIntelSupply = {
+          assertHardGate: jest.fn(async () => undefined),
+          ensureSupplyForSpace: jest.fn(async () => undefined),
+          teardownSupplyForSpace: jest.fn(async () => undefined),
+        };
+        const service = new WorkersService(
+          harness.management,
+          Promise.resolve(harness.managedWorkflows),
+          logger as Logger,
+          {},
+          async (_request, registration, options) => {
+            await harness.install(registration.id, options);
+          },
+          async () => [],
+          threatIntelSupply as unknown as ThreatIntelSupplyService
+        );
+        const first = await service.update(
+          HUNT,
+          { settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+        if (first.outcome !== 'updated') throw new Error('Expected the first save to succeed');
+        // Every write from here on is stored invalid, so only a skipped or rejected restore can
+        // leave the workflow in a state the service must report as unrestored.
+        harness.failValidationWhen(() => true);
+        harness.install.mockClear();
+        harness.updateWorkflow.mockClear();
+        const save = () =>
+          service.update(
+            HUNT,
+            {
+              enabled: true,
+              settings: { autonomy: 'manual' },
+              settingsRevision: first.response.worker.settingsRevision,
+            },
+            SPACE,
+            request
+          );
+        return { harness, logger, threatIntelSupply, save };
+      };
+
+      it('reports failed, rolls back Hunt supply and logs when the restore write throws', async () => {
+        const { harness, logger, threatIntelSupply, save } = await setUpHuntWithInvalidSave();
+        const realInstall = harness.install.getMockImplementation();
+        harness.install.mockImplementationOnce(realInstall!);
+        harness.install.mockRejectedValueOnce(new Error('restore write failed'));
+
+        const result = await save();
+
+        expect(result).toEqual({ outcome: 'failed' });
+        expect(harness.install).toHaveBeenCalledTimes(2);
+        expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('previous settings could not be restored: restore write failed')
+        );
+        expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      });
+
+      it('reports failed when the restore returns but the workflow is still invalid', async () => {
+        // The restore runs the real install, which stores the document invalid again.
+        const { harness, threatIntelSupply, save } = await setUpHuntWithInvalidSave();
+
+        const result = await save();
+
+        expect(result).toEqual({ outcome: 'failed' });
+        expect(harness.documents.get(`${HUNT}-${SPACE}`)?.invalid).toBe(true);
+        expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+      });
+
+      it('does not overwrite a save that landed after the invalid one', async () => {
+        const { harness, threatIntelSupply, save } = await setUpHuntWithInvalidSave();
+        const realInstall = harness.install.getMockImplementation()!;
+        harness.install.mockImplementationOnce(realInstall);
+        harness.install.mockImplementationOnce(async (id, options) => {
+          // A concurrent save bumps the version between the invalid write and the restore.
+          const document = harness.documents.get(`${HUNT}-${SPACE}`);
+          if (document) document.version += 1;
+          await realInstall(id, options);
+        });
+
+        const result = await save();
+
+        expect(result).toEqual({ outcome: 'failed' });
+        expect(harness.install).toHaveBeenCalledTimes(2);
+        expect(harness.install).toHaveBeenLastCalledWith(
+          HUNT,
+          expect.objectContaining({ expectedDocumentVersion: expect.any(Number) })
+        );
+        expect(harness.documents.get(`${HUNT}-${SPACE}`)?.invalid).toBe(true);
+        expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+      });
+    });
   });
 
   it('resyncs Task Manager after a settings-only save', async () => {
@@ -1761,6 +1937,7 @@ describe('WorkersService', () => {
           values: null,
           yaml: '',
           version: 1,
+          invalid: false,
         });
       }
       const fake = createKeyedSupplyStore({

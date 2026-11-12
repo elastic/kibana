@@ -150,6 +150,8 @@ export {
   RuleTuningWorkerExtras,
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
+  AdditionalContext,
+  AttackDiscoveryWorkerExtras,
   Worker,
   WorkerBlockingReason,
   WorkerRunState,
@@ -223,6 +225,7 @@ export type {
 export {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   BUDGET_PER_HOUR_DEFAULT,
+  ATTACK_DISCOVERY_ADDITIONAL_CONTEXT_MAX_LENGTH,
   BUDGET_PER_HOUR_MAX,
   BUDGET_PER_HOUR_MIN,
   TRIAGE_ALERT_COST,
