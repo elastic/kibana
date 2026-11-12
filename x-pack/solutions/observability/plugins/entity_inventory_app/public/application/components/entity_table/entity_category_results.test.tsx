@@ -117,7 +117,11 @@ describe('EntityCategoryResults', () => {
     renderResults({ ...fixtureClient, getEntities });
 
     const section = await screen.findByTestId('entityInventoryTypeSection');
-    expect(within(section).getByTestId('entityInventoryTableSkeleton')).toBeInTheDocument();
+    const skeleton = within(section).getByTestId('entityInventoryTableSkeleton');
+    const headerRows = within(skeleton).getAllByTestId('entityInventoryTableSkeletonHeaderRow');
+    expect(headerRows).toHaveLength(1);
+    expect(headerRows[0].textContent).toBe('');
+    expect(within(skeleton).getAllByTestId('entityInventoryTableSkeletonRow')).toHaveLength(8);
     expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
 
