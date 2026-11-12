@@ -49,6 +49,19 @@ export {
 } from './impl/statistics';
 export type { PairedScore } from './impl/statistics';
 export {
+  holmBonferroniAdjust,
+  countHolmFamily,
+  applyHolmCorrection,
+  getEffectivePValue,
+} from './impl/statistics';
+export type { CorrectableComparisonResult } from './impl/statistics';
+export { averageMatchedRepetitions } from './impl/statistics';
+export type { AveragedRepetitions } from './impl/statistics';
+export { retestWilcoxonWithExactTies, roundDifference } from './impl/statistics';
+export { minimumReachablePValue } from './impl/statistics';
+export { attachEffectSigns, getEffectDirection, signedRankSum } from './impl/statistics';
+export type { EffectSign, EffectDirection, WithEffectSign } from './impl/statistics';
+export {
   DEFAULT_JUDGE_SCORE_DIRECTION,
   getJudgeScoreDirection,
 } from './impl/judge_score_direction';

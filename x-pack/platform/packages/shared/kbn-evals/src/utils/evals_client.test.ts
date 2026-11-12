@@ -345,6 +345,61 @@ describe('EvalsClient', () => {
     expect(log.error).toHaveBeenCalledWith(expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'));
   });
 
+  describe('getExperimentScores with throwOnError', () => {
+    it('rethrows a failed request with its cause instead of returning []', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      const cause = new Error('socket hang up');
+      kbnClient.request.mockRejectedValue(cause);
+      const client = new EvalsClient(kbnClient, log);
+
+      const rejection = client.getExperimentScores('experiment-123', undefined, {
+        throwOnError: true,
+      });
+
+      await expect(rejection).rejects.toThrow(
+        'Failed to retrieve scores for experiment ID experiment-123: socket hang up'
+      );
+      await expect(rejection).rejects.toHaveProperty('cause', cause);
+      expect(log.error).not.toHaveBeenCalled();
+    });
+
+    it('rethrows a response that exceeds MAX_SCORES_PER_QUERY', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          scores: [createScoreDocument('example-1')],
+          total: MAX_SCORES_PER_QUERY + 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(
+        client.getExperimentScores('experiment-123', undefined, { throwOnError: true })
+      ).rejects.toThrow('exceeds MAX_SCORES_PER_QUERY');
+    });
+
+    it('names a non-Error rejection in the message', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockRejectedValue('connection refused');
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(
+        client.getExperimentScores('experiment-123', undefined, { throwOnError: true })
+      ).rejects.toThrow('experiment-123: connection refused');
+    });
+
+    it('still returns an empty experiment as []', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ scores: [], total: 0 }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(
+        client.getExperimentScores('experiment-123', undefined, { throwOnError: true })
+      ).resolves.toEqual([]);
+    });
+  });
+
   it('upsertDataset posts to the upsert route', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
@@ -697,6 +752,24 @@ describe('EvalsClient', () => {
       expect(result).toBeUndefined();
       expect(log.error).toHaveBeenCalledWith(expect.stringContaining('network error'));
     });
+
+    it('rethrows a failed request with throwOnError', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(new Error('network error'));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(
+        client.findLatestBaselineExperiment({
+          suiteId: 'smoke-tests',
+          branch: 'main',
+          throwOnError: true,
+        })
+      ).rejects.toThrow(
+        'Failed to find baseline experiment for suite smoke-tests on branch main: network error'
+      );
+      expect(log.error).not.toHaveBeenCalled();
+    });
   });
 
   describe('findLatestExperimentForBuild', () => {
@@ -827,6 +900,22 @@ describe('EvalsClient', () => {
 
       expect(result).toBeUndefined();
       expect(log.error).toHaveBeenCalledWith(expect.stringContaining('timeout'));
+    });
+
+    it('rethrows a failed request with throwOnError', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(new Error('timeout'));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(
+        client.findLatestExperimentForBuild({
+          suiteId: 'smoke-tests',
+          baseExecutionId: 'bk-build-123',
+          throwOnError: true,
+        })
+      ).rejects.toThrow('Failed to find experiment for build bk-build-123');
+      expect(log.error).not.toHaveBeenCalled();
     });
   });
 

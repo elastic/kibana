@@ -13,3 +13,16 @@ export type { PairedTestOutcome } from './run_test';
 export { selectTest, PARAMETRIC_UPGRADE_MIN_PAIRS, NORMALITY_ALPHA } from './select_test';
 export { inferMetricType } from './metric_type';
 export type { MetricType } from './metric_type';
+export {
+  holmBonferroniAdjust,
+  countHolmFamily,
+  applyHolmCorrection,
+  getEffectivePValue,
+} from './holm_correction';
+export type { CorrectableComparisonResult } from './holm_correction';
+export { averageMatchedRepetitions } from './average_repetitions';
+export type { AveragedRepetitions } from './average_repetitions';
+export { retestWilcoxonWithExactTies, roundDifference } from './wilcoxon_ties';
+export { minimumReachablePValue } from './reachable_p_value';
+export { attachEffectSigns, getEffectDirection, signedRankSum } from './effect_direction';
+export type { EffectSign, EffectDirection, WithEffectSign } from './effect_direction';
