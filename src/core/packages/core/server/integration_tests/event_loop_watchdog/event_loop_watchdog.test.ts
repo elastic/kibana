@@ -370,6 +370,8 @@ describe('event loop watchdog in a child process', () => {
       const profile = line.kibana?.event_loop_watchdog?.profile;
       expect(profile?.stopReason).toBe('max_duration');
       // At least 11.9k nodes; loadDeepCode(2_000, 40) produces ~21k on macOS, ~25k on Linux arm64, ~21k on amd64.
+      // That profile serialises to ~2.8 MB+, so this covers the MB dimension as well as node count; the raw
+      // profile size isn't on the capture line by design, so node count is what's asserted here.
       expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
       expect(profile?.frames.length).toBeGreaterThan(0);
       expect(profile?.kibanaFrames.length).toBeGreaterThan(0);
