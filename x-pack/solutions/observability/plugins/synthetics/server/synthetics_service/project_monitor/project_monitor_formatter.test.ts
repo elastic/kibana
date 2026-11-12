@@ -540,6 +540,78 @@ describe('ProjectMonitorFormatter', () => {
       expect(pushMonitorFormatter.failedMonitors).toEqual([]);
     });
   });
+
+  describe('HTTP monitors with Kerberos or NTLM', () => {
+    const httpMonitor = {
+      type: MonitorTypeEnum.HTTP,
+      id: 'intranet-health',
+      name: 'Intranet health',
+      schedule: 5,
+      urls: 'https://intranet.example.com',
+    };
+    const kerberos = {
+      enabled: true,
+      auth_type: 'password',
+      realm: 'CORP.LOCAL',
+      username: 'svc',
+      password: 'secret',
+      krb5_conf: '[libdefaults]\n  default_realm = CORP.LOCAL\n',
+    };
+    const ntlm = { enabled: true, username: 'ntlm-user', password: 'ntlm-pass' };
+
+    const validate = async (monitor: Record<string, unknown>) => {
+      const pushMonitorFormatter = new ProjectMonitorFormatter({
+        projectId: 'test-project',
+        spaceId: 'default-space',
+        monitors: [],
+        routeContext,
+      });
+      pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+      await pushMonitorFormatter.init();
+
+      const result = pushMonitorFormatter.validateProjectMonitor({
+        monitor: monitor as typeof httpMonitor,
+        publicLocations,
+        privateLocations,
+        isNewMonitor: true,
+      });
+      return { result, failedMonitors: pushMonitorFormatter.failedMonitors };
+    };
+
+    it.each([
+      ['Kerberos', { kerberos }],
+      ['NTLM', { ntlm }],
+    ])('rejects %s on an Elastic managed location', async (_name, auth) => {
+      const { result, failedMonitors } = await validate({
+        ...httpMonitor,
+        ...auth,
+        locations: ['loc-0'],
+      });
+
+      expect(result).toBeNull();
+      expect(failedMonitors).toEqual([
+        expect.objectContaining({
+          id: 'intranet-health',
+          reason: 'Monitor authentication configuration is invalid',
+          details: expect.stringContaining('only supported on private locations'),
+        }),
+      ]);
+    });
+
+    it.each([
+      ['Kerberos', { kerberos }],
+      ['NTLM', { ntlm }],
+    ])('allows %s on a private location', async (_name, auth) => {
+      const { result, failedMonitors } = await validate({
+        ...httpMonitor,
+        ...auth,
+        privateLocations: ['Test private location'],
+      });
+
+      expect(result).not.toBeNull();
+      expect(failedMonitors).toEqual([]);
+    });
+  });
 });
 
 const payloadData = [
