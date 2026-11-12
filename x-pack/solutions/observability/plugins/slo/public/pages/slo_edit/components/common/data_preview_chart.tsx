@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TooltipTableColumn } from '@elastic/charts';
+import type { Theme, TooltipTableColumn } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -37,7 +37,6 @@ import { map, max, min, values } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useFormValues } from '../../hooks/use_form_values';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useIndicatorSectionValidity } from '../../context/indicator_section_validity';
 
@@ -67,12 +66,6 @@ export function DataPreviewChart({
     to: new Date(),
   });
 
-  const [indicator, groupBy, projectRoutings] = useFormValues([
-    'indicator',
-    'groupBy',
-    'settings.projectRoutings',
-  ]);
-
   const {
     data: previewData,
     isLoading,
@@ -80,10 +73,7 @@ export function DataPreviewChart({
     isError,
   } = useDebouncedGetPreviewData({
     isIndicatorValid: isIndicatorSectionValid,
-    indicator,
     range,
-    groupBy,
-    projectRoutings,
   });
 
   const isMoreThan100 =
@@ -96,8 +86,6 @@ export function DataPreviewChart({
     formatPattern != null
       ? formatPattern
       : (uiSettings.get('format:percent:defaultPattern') as string);
-
-  const { maxValue, minValue, domain } = getChartDomain(previewData, threshold);
 
   const title = (
     <>
@@ -132,6 +120,81 @@ export function DataPreviewChart({
       </EuiFlexItem>
     );
   }
+
+  return (
+    <EuiFlexItem>
+      {title}
+      {isMoreThan100 && (
+        <>
+          <EuiSpacer size="xs" />
+          <KbnWarningCallout
+            announceOnMount
+            size="s"
+            title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.moreThan100', {
+              defaultMessage:
+                'Some of the SLI values are more than 100%. That means good query is returning more results than total query.',
+            })}
+          />
+          <EuiSpacer size="xs" />
+        </>
+      )}
+      <EuiFormRow fullWidth>
+        <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
+          {(isLoading || isError) && (
+            <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 160 }}>
+              <EuiFlexItem grow={false}>
+                {isLoading && <EuiLoadingChart size="m" />}
+                {isError && (
+                  <span>
+                    {i18n.translate('xpack.slo.sloEdit.dataPreviewChart.errorMessage', {
+                      defaultMessage: 'The current indicator settings are invalid',
+                    })}
+                  </span>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+
+          {isSuccess && (
+            <PreviewChart
+              previewData={previewData}
+              threshold={threshold}
+              thresholdDirection={thresholdDirection}
+              thresholdColor={thresholdColor}
+              thresholdMessage={thresholdMessage}
+              numberFormat={numberFormat}
+              dateFormat={dateFormat}
+              baseTheme={baseTheme}
+            />
+          )}
+        </EuiPanel>
+      </EuiFormRow>
+    </EuiFlexItem>
+  );
+}
+
+interface PreviewChartProps {
+  previewData?: GetPreviewDataResponse;
+  threshold?: number;
+  thresholdDirection?: 'above' | 'below';
+  thresholdColor?: string;
+  thresholdMessage?: string;
+  numberFormat: string;
+  dateFormat: string;
+  baseTheme: Theme;
+}
+
+function PreviewChartBody({
+  previewData,
+  threshold,
+  thresholdDirection,
+  thresholdColor,
+  thresholdMessage,
+  numberFormat,
+  dateFormat,
+  baseTheme,
+}: PreviewChartProps) {
+  const { maxValue, minValue, domain } = getChartDomain(previewData, threshold);
 
   const annotation = threshold != null && (
     <>
@@ -220,114 +283,78 @@ export function DataPreviewChart({
   ];
 
   return (
-    <EuiFlexItem>
-      {title}
-      {isMoreThan100 && (
-        <>
-          <EuiSpacer size="xs" />
-          <KbnWarningCallout
-            announceOnMount
-            size="s"
-            title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.moreThan100', {
-              defaultMessage:
-                'Some of the SLI values are more than 100%. That means good query is returning more results than total query.',
-            })}
-          />
-          <EuiSpacer size="xs" />
-        </>
-      )}
-      <EuiFormRow fullWidth>
-        <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
-          {(isLoading || isError) && (
-            <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 160 }}>
-              <EuiFlexItem grow={false}>
-                {isLoading && <EuiLoadingChart size="m" />}
-                {isError && (
-                  <span>
-                    {i18n.translate('xpack.slo.sloEdit.dataPreviewChart.errorMessage', {
-                      defaultMessage: 'The current indicator settings are invalid',
-                    })}
-                  </span>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+    <Chart size={{ height: 160, width: '100%' }}>
+      <Tooltip
+        type="vertical"
+        body={({ items }) => {
+          return <TooltipTable columns={columns} items={items} />;
+        }}
+      />
+      <Settings
+        baseTheme={baseTheme}
+        showLegend={true}
+        legendPosition={Position.Right}
+        theme={[{ lineSeriesStyle: { point: { visible: 'never' } } }]}
+        locale={i18n.getLocale()}
+      />
 
-          {isSuccess && (
-            <Chart size={{ height: 160, width: '100%' }}>
-              <Tooltip
-                type="vertical"
-                body={({ items }) => {
-                  return <TooltipTable columns={columns} items={items} />;
-                }}
-              />
-              <Settings
-                baseTheme={baseTheme}
-                showLegend={true}
-                legendPosition={Position.Right}
-                theme={[{ lineSeriesStyle: { point: { visible: 'never' } } }]}
-                locale={i18n.getLocale()}
-              />
+      {annotation}
 
-              {annotation}
+      <Axis
+        id="value"
+        title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.yTitle', {
+          defaultMessage: 'SLI',
+        })}
+        ticks={5}
+        position={Position.Left}
+        tickFormat={(d) => numeral(d).format(numberFormat)}
+        domain={domain}
+      />
+      <Axis
+        id="time"
+        title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
+          defaultMessage: 'Last 24 hours',
+        })}
+        tickFormat={(d) => moment(d).format(dateFormat)}
+        position={Position.Bottom}
+        gridLine={{ visible: true }}
+      />
 
-              <Axis
-                id="value"
-                title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.yTitle', {
-                  defaultMessage: 'SLI',
-                })}
-                ticks={5}
-                position={Position.Left}
-                tickFormat={(d) => numeral(d).format(numberFormat)}
-                domain={domain}
-              />
-              <Axis
-                id="time"
-                title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
-                  defaultMessage: 'Last 24 hours',
-                })}
-                tickFormat={(d) => moment(d).format(dateFormat)}
-                position={Position.Bottom}
-                gridLine={{ visible: true }}
-              />
+      <LineSeries
+        id="All groups"
+        // Defaults to multi layer time axis as of Elastic Charts v70
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor="date"
+        yAccessors={['value']}
+        data={(previewData?.results ?? []).map((datum) => ({
+          date: new Date(datum.date).getTime(),
+          value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
+          events: datum.events,
+        }))}
+      />
 
-              <LineSeries
-                id="All groups"
-                // Defaults to multi layer time axis as of Elastic Charts v70
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor="date"
-                yAccessors={['value']}
-                data={(previewData?.results ?? []).map((datum) => ({
-                  date: new Date(datum.date).getTime(),
-                  value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
-                  events: datum.events,
-                }))}
-              />
-
-              {map(previewData?.groups, (data, group) => (
-                <LineSeries
-                  key={group}
-                  id={group}
-                  // Defaults to multi layer time axis as of Elastic Charts v70
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="date"
-                  yAccessors={['value']}
-                  data={data.map((datum) => ({
-                    date: new Date(datum.date).getTime(),
-                    value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
-                    events: datum.events,
-                  }))}
-                />
-              ))}
-            </Chart>
-          )}
-        </EuiPanel>
-      </EuiFormRow>
-    </EuiFlexItem>
+      {map(previewData?.groups, (data, group) => (
+        <LineSeries
+          key={group}
+          id={group}
+          // Defaults to multi layer time axis as of Elastic Charts v70
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="date"
+          yAccessors={['value']}
+          data={data.map((datum) => ({
+            date: new Date(datum.date).getTime(),
+            value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
+            events: datum.events,
+          }))}
+        />
+      ))}
+    </Chart>
   );
 }
+
+const PreviewChart = React.memo(PreviewChartBody);
 
 function getChartDomain(previewData?: GetPreviewDataResponse, threshold?: number) {
   const allGroupsValues = map(previewData?.results, (datum) => datum.sliValue);

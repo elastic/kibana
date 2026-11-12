@@ -7,26 +7,26 @@
 
 import type { CreateSLOInput } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
+import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
-export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) {
+export function useFetchSloInspect(slo: CreateSLOInput | undefined, shouldInspect: boolean) {
   const { sloClient } = usePluginContext();
 
   const { isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: ['slo', 'inspect'],
+    queryKey: sloKeys.inspect(slo),
     queryFn: async ({ signal }) => {
-      try {
-        return await sloClient.fetch('POST /internal/observability/slos/_inspect', {
-          params: { body: slo },
-          signal,
-        });
-      } catch (error) {
-        // ignore error
+      if (!slo) {
+        throw new Error('No SLO to inspect');
       }
+      return sloClient.fetch('POST /internal/observability/slos/_inspect', {
+        params: { body: slo },
+        signal,
+      });
     },
-    enabled: shouldInspect,
+    enabled: shouldInspect && slo !== undefined,
+    retry: false,
     refetchOnWindowFocus: false,
-    keepPreviousData: true,
   });
 
   return {

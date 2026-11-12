@@ -20,9 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
-import type { CreateSLOForm } from '../../types';
+import { useValidatedSloInput } from '../../hooks/use_validated_slo_input';
 
 interface Props {
   isEditMode: boolean;
@@ -32,13 +30,12 @@ interface Props {
 
 export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { getValues, trigger } = useFormContext<CreateSLOForm>();
+  const getValidatedSloInput = useValidatedSloInput();
   const [sloData, setSloData] = useState<CreateSLOInput>();
   const flyoutTitleId = useGeneratedHtmlId();
 
   const handleOpenFlyout = async () => {
-    const isValid = await trigger();
-    setSloData(isValid ? transformCreateSLOFormToCreateSLOInput(getValues()) : undefined);
+    setSloData(await getValidatedSloInput());
     setIsFlyoutVisible(true);
   };
 
