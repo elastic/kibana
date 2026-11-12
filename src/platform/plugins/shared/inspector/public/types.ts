@@ -46,6 +46,8 @@ export interface InspectorViewProps<TAdapters extends Adapters = Adapters> {
 export interface InspectorViewDescription {
   component: React.ComponentType<InspectorViewProps>;
   help?: string;
+  /** Stable id used to open this view directly. Titles stay translated. */
+  id?: string;
   order?: number;
   shouldShow?: (adapters: Adapters) => boolean;
   title: string;
@@ -61,6 +63,8 @@ export interface InspectorViewDescription {
 export interface InspectorOptions {
   title?: string;
   options?: unknown;
+  /** Opens this view when its id is among the views visible for the adapters. */
+  initialViewId?: string;
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
     focusedPanelId?: string;
   };

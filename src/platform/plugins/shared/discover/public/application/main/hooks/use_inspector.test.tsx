@@ -78,4 +78,82 @@ describe('test useInspector', () => {
     ]);
     expect(toolkit.getCurrentTab().expandedDoc).toBe(undefined);
   });
+
+  test('opens the requested inspector view for a request', async () => {
+    const services = createDiscoverServicesMock();
+    jest.spyOn(services.inspector, 'open').mockImplementation(() => {
+      return { close: jest.fn() } as unknown as OverlayRef;
+    });
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+    const { result } = renderHook(
+      () => {
+        return useInspector({ inspector: services.inspector });
+      },
+      {
+        wrapper: ({ children }) => (
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+        ),
+      }
+    );
+    await act(async () => {
+      result.current({ initialViewId: 'esqlQueryProfile', initialRequestId: 'request-1' });
+    });
+
+    expect(services.inspector.open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        initialViewId: 'esqlQueryProfile',
+        options: { initialRequestId: 'request-1' },
+      })
+    );
+  });
+
+  test('lets an inspector view put a query in the editor in ES|QL mode, then closes', async () => {
+    const services = createDiscoverServicesMock();
+    const close = jest.fn();
+    const open = jest
+      .spyOn(services.inspector, 'open')
+      .mockImplementation(() => ({ close } as unknown as OverlayRef));
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { query: { esql: 'FROM logs | STATS COUNT(*) BY a, b | STATS SUM(c) BY a' } },
+      })
+    );
+    const { result } = renderHook(() => useInspector({ inspector: services.inspector }), {
+      wrapper: ({ children }) => (
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+      ),
+    });
+    await act(async () => {
+      result.current({ initialViewId: 'esqlQueryProfile', initialRequestId: 'request-1' });
+    });
+
+    const { options } = open.mock.calls[0][1] as unknown as {
+      options: {
+        initialRequestId: string;
+        editorQuery: string;
+        onApplyQuery: (query: string) => void;
+      };
+    };
+    expect(options.initialRequestId).toBe('request-1');
+    // The view needs the editor's query to tell it from the query of another request.
+    expect(options.editorQuery).toBe('FROM logs | STATS COUNT(*) BY a, b | STATS SUM(c) BY a');
+
+    await act(async () => {
+      options.onApplyQuery('FROM logs | STATS COUNT(*) BY a');
+    });
+
+    expect(toolkit.getCurrentTab().appState.query).toEqual({
+      esql: 'FROM logs | STATS COUNT(*) BY a',
+    });
+    expect(close).toHaveBeenCalled();
+  });
 });

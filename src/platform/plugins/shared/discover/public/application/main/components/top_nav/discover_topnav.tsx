@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import { ESQL_QUERY_PROFILE_VIEW_ID, useQueryProfileHeat } from '@kbn/data-plugin/public';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import {
   DiscoverFlyouts,
@@ -31,6 +32,7 @@ import {
   useDiscoverCustomizationContext,
 } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useQueryProfileMode } from '../../hooks/use_query_profile_mode';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -372,11 +374,33 @@ export const DiscoverTopNav = ({
     [esqlModeErrors]
   );
 
-  const { topNavBadges, topNavMenu, shareAction } = useDiscoverTopNav({
+  const { topNavBadges, topNavMenu, shareAction, openInspector } = useDiscoverTopNav({
     onOpenSaveModal,
     onOpenSaveAsModal,
     persistedDiscoverSession,
   });
+
+  // The query profile can show where the query spent its time next to its commands, either from
+  // the profile view or, while the profile switch in the editor is on, after every run.
+  const queryProfileHeat = useQueryProfileHeat();
+  const [isProfileModeOn, setIsProfileModeOn] = useState(false);
+  const profileModeStatus = useQueryProfileMode({
+    isOn: isProfileModeOn,
+    requests: dataStateContainer.inspectorAdapters.requests,
+    search: services.data.search,
+  });
+  const esqlProfileMode = useMemo(
+    () => ({ isOn: isProfileModeOn, onChange: setIsProfileModeOn, status: profileModeStatus }),
+    [isProfileModeOn, profileModeStatus]
+  );
+
+  const onQueryDurationClick = useCallback(() => {
+    const initialRequestId = dataStateContainer.inspectorAdapters.requests.getRequests().at(-1)?.id;
+    openInspector({
+      initialViewId: ESQL_QUERY_PROFILE_VIEW_ID,
+      initialRequestId,
+    });
+  }, [dataStateContainer, openInspector]);
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
@@ -468,6 +492,9 @@ export const DiscoverTopNav = ({
             : undefined
         }
         esqlQueryStats={esqlQueryStats}
+        onQueryDurationClick={onQueryDurationClick}
+        esqlCommandHeat={queryProfileHeat}
+        esqlProfileMode={esqlProfileMode}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
         esqlApproximation={
           isEsqlMode

@@ -242,6 +242,17 @@ export type { AggsStart } from './search/aggs';
 
 export { getTime } from '../common';
 
+export { ESQL_QUERY_PROFILE_VIEW_ID } from './utils/esql_query_profile/view_id';
+export type {
+  QueryProfileHeat,
+  QueryProfileHeatCommand,
+} from './utils/esql_query_profile/query_heat_model';
+export {
+  setQueryProfileHeat,
+  useQueryProfileHeat,
+} from './utils/esql_query_profile/query_heat_store';
+export { loadQueryProfileHeat } from './utils/esql_query_profile/load_query_profile_heat';
+
 export type { SavedObject } from '../common';
 
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';

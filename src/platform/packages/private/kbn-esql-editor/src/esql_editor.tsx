@@ -50,6 +50,8 @@ import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
 import { useEditorAiStyle } from './editor_ai.styles';
+import { useQueryHeat, useQueryHeatStyle } from './query_heat/use_query_heat';
+import { useSpeedUpQuery } from './query_heat/use_speed_up_query';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -146,6 +148,9 @@ const ESQLEditorInternal = function ESQLEditor({
   hideQuickSearch,
   hasExternalVisor,
   queryStats,
+  onQueryDurationClick,
+  commandHeat,
+  profileMode,
   enableResourceBrowser = false,
   enableCreateView = false,
   onESQLDocsFlyoutVisibilityChanged,
@@ -262,6 +267,7 @@ const ESQLEditorInternal = function ESQLEditor({
     RESIZABLE_CONTAINER_INITIAL_HEIGHT
   );
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
+  const [isEditorMounted, setIsEditorMounted] = useState(false);
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
@@ -638,6 +644,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const clearGhostHintRef = useRef<() => void>(() => {});
 
   const editorAiStyle = useEditorAiStyle();
+  const queryHeatStyle = useQueryHeatStyle();
 
   // Accepting an AI review is the user's own run, so both flows below report it as manual.
   const runAcceptedQuery = useCallback(
@@ -726,6 +733,28 @@ const ESQLEditorInternal = function ESQLEditor({
     onAfterInsert: expandToFitContent,
   });
 
+  const {
+    speedUp: speedUpCommand,
+    acceptReview: acceptSpeedUpReview,
+    discardReview: discardSpeedUpReview,
+  } = useSpeedUpQuery({
+    editorRef,
+    editorModel,
+    http: core.http,
+    notifications: core.notifications,
+    heat: commandHeat,
+    isEnabled: isNlToEsqlEnabled,
+    onSubmit: runAcceptedQuery,
+    onAfterInsert: expandToFitContent,
+  });
+  useQueryHeat({
+    editorRef,
+    editorModel,
+    isEditorReady: isEditorMounted,
+    heat: commandHeat,
+    onSpeedUpCommand: speedUpCommand,
+  });
+
   const focusEditor = useCallback(() => editorRef.current?.focus(), []);
 
   const visorNlOnSubmit = useCallback(
@@ -747,10 +776,12 @@ const ESQLEditorInternal = function ESQLEditor({
 
   // The first review that reports it was pending wins; accepting submits the query itself.
   pendingReviewRef.current = {
-    accept: () => acceptCommentReview() || acceptFixReview() || acceptVisorReview(),
+    accept: () =>
+      acceptCommentReview() || acceptFixReview() || acceptSpeedUpReview() || acceptVisorReview(),
     discard: () => {
       discardCommentReview();
       discardFixReview();
+      discardSpeedUpReview();
       discardVisorReview();
     },
   };
@@ -810,6 +841,7 @@ const ESQLEditorInternal = function ESQLEditor({
           ${sourcesBadgeStyle}
           ${ghostLineHintStyle}
           ${editorAiStyle}
+          ${queryHeatStyle}
         `}
       />
       {showRunButton ? (
@@ -981,6 +1013,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                    setIsEditorMounted(true);
                     if (expandToFitQueryOnMount) {
                       expandToFitContent();
                     }
@@ -1090,6 +1123,8 @@ const ESQLEditorInternal = function ESQLEditor({
           dataErrorsControl={dataErrorsControl}
           starredQueriesService={starredQueriesService}
           queryStats={queryStats}
+          onQueryDurationClick={onQueryDurationClick}
+          profileMode={profileMode}
           hideQueryHistory={hideQueryHistory}
           enableCreateView={enableCreateView}
           onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}

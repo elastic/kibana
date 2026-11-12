@@ -274,6 +274,83 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
   });
 
+  describe('profile mode switch', () => {
+    it('is not shown unless the host offers profiling', () => {
+      const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+
+      expect(queryByTestId('ESQLEditor-profileMode')).not.toBeInTheDocument();
+    });
+
+    it('shows its state, sits next to the query stats, and reports a change', () => {
+      const onChange = jest.fn();
+      const { getByTestId, rerender } = renderWithI18n(
+        renderESQLEditorComponent({ ...props, profileMode: { isOn: false, onChange } })
+      );
+
+      const toggle = getByTestId('ESQLEditor-profileMode');
+      expect(toggle).toHaveAttribute('aria-pressed', 'false');
+      expect(getByTestId('ESQLEditor-footer')).toContainElement(toggle);
+
+      act(() => {
+        toggle.click();
+      });
+      expect(onChange).toHaveBeenCalledWith(true);
+
+      rerender(renderESQLEditorComponent({ ...props, profileMode: { isOn: true, onChange } }));
+      expect(getByTestId('ESQLEditor-profileMode')).toHaveAttribute('aria-pressed', 'true');
+      act(() => {
+        getByTestId('ESQLEditor-profileMode').click();
+      });
+      expect(onChange).toHaveBeenLastCalledWith(false);
+    });
+  });
+
+  describe('profile mode status', () => {
+    const renderStatus = (status?: 'idle' | 'profiling' | 'error') =>
+      renderWithI18n(
+        renderESQLEditorComponent({
+          ...props,
+          profileMode: { isOn: true, onChange: jest.fn(), status },
+        })
+      );
+
+    it('shows a spinner on the button while the last run is being profiled', () => {
+      const { getByTestId, rerender } = renderStatus('profiling');
+
+      expect(
+        getByTestId('ESQLEditor-profileMode').querySelector('[class*="euiLoadingSpinner"]')
+      ).not.toBeNull();
+
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          profileMode: { isOn: true, onChange: jest.fn(), status: 'idle' },
+        })
+      );
+      expect(
+        getByTestId('ESQLEditor-profileMode').querySelector('[class*="euiLoadingSpinner"]')
+      ).toBeNull();
+    });
+
+    it('shows a warning with the reason when the profile could not be loaded', async () => {
+      const { getByTestId, findByText } = renderStatus('error');
+
+      expect(
+        getByTestId('ESQLEditor-profileMode').querySelector('[data-euiicon-type="warning"]')
+      ).not.toBeNull();
+      await userEvent.hover(getByTestId('ESQLEditor-profileMode'));
+      expect(await findByText(/profile of the last run could not be loaded/)).toBeInTheDocument();
+    });
+
+    it('looks as it always did when there is nothing to report', () => {
+      const { getByTestId } = renderStatus('idle');
+
+      const button = getByTestId('ESQLEditor-profileMode');
+      expect(button.querySelector('[data-euiicon-type="timeline"]')).not.toBeNull();
+      expect(button.querySelector('[class*="euiLoadingSpinner"]')).toBeNull();
+    });
+  });
+
   describe('data errors switch', () => {
     test('shown with errors enabled', async () => {
       const newProps = {
