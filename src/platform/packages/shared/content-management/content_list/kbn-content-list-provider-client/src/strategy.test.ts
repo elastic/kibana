@@ -342,6 +342,34 @@ describe('createClientStrategy', () => {
       const second = await findItems(createParams());
       expect(second.total).toBe(1);
     });
+
+    it('keeps the previous snapshot readable until the refetch resolves', async () => {
+      const mockItems = [createMockItem('1'), createMockItem('2')];
+      const mockFindItems = createMockFindItems(mockItems);
+      const { findItems, onInvalidate, getItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams());
+
+      onInvalidate();
+
+      expect(getItems()).toEqual(mockItems);
+    });
+
+    it('does not notify subscribers, since no new snapshot has arrived', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems, onInvalidate, subscribe } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams());
+
+      const listener = jest.fn();
+      subscribe(listener);
+
+      onInvalidate();
+      expect(listener).not.toHaveBeenCalled();
+
+      await findItems(createParams());
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('filtering', () => {

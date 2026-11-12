@@ -77,8 +77,9 @@ export interface ClientStrategy {
   findItems: FindItemsFn;
   /**
    * Called by the core provider before an explicit refetch (e.g. after a
-   * mutation) to clear the internal item cache. The next `findItems` call
-   * will fetch from the server regardless of `searchQuery`.
+   * mutation) to drop the internal cache key. The next `findItems` call
+   * will fetch from the server regardless of `searchQuery`. The previous
+   * snapshot stays readable via `getItems()` until that fetch resolves.
    */
   onInvalidate: () => void;
   /**
@@ -463,11 +464,11 @@ export const createClientStrategy = (
     };
   };
 
+  // Only drops the cache key; the next `findItems` refetches and replaces the
+  // items. Clearing them here would instead report an empty set to `getItems()`
+  // consumers until that fetch resolves, zeroing every facet count.
   const onInvalidate = () => {
     lastFetchKey = undefined;
-    rawItems = [];
-    decoratedItems = [];
-    notify();
   };
 
   const onRefresh = async () => {
