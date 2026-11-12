@@ -1136,6 +1136,20 @@ describe('URLScan.io connector', () => {
     });
   });
 
+  describe('actions that need an API key', () => {
+    it.each([
+      ['getResult', { uuid: UUID }],
+      ['getDom', { uuid: UUID }],
+      ['scanUrl', { url: 'https://example.com' }],
+      ['scanUrlAndWait', { url: 'https://example.com' }],
+    ])('%s fails without sending a request when the connector has no key', async (name, input) => {
+      const { ctx, client } = createContext({ authType: 'none' });
+      await expect(action(name).handler(ctx, input)).rejects.toThrow(/requires an API key/);
+      expect(client.get).not.toHaveBeenCalled();
+      expect(client.post).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getQuota', () => {
     it('GETs the quota endpoint outside /api/v1 and flattens the per-action windows', async () => {
       const { ctx, client } = createContext();
@@ -1300,7 +1314,8 @@ describe('URLScan.io connector', () => {
     it('bounds the search query and size', () => {
       expect(SearchScansInputSchema.safeParse({ q: 'ip:8.8.8.8' }).success).toBe(true);
       expect(SearchScansInputSchema.safeParse({ q: '' }).success).toBe(false);
-      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(2001) }).success).toBe(false);
+      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(8192) }).success).toBe(true);
+      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(8193) }).success).toBe(false);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 10_000 }).success).toBe(true);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 10_001 }).success).toBe(false);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 0 }).success).toBe(false);
@@ -1326,6 +1341,26 @@ describe('URLScan.io connector', () => {
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_000 }).success).toBe(true);
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 999 }).success).toBe(false);
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_001 }).success).toBe(false);
+    });
+  });
+
+  describe.each(['scanUrl', 'scanUrlAndWait'] as const)('%s url length', (actionName) => {
+    const prefix = 'https://example.com/';
+    const url = (length: number) => `${prefix}${'a'.repeat(length - prefix.length)}`;
+
+    it.each([
+      [2083, true],
+      [2084, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(UrlscanIo.actions[actionName].input.safeParse({ url: url(length) }).success).toBe(
+        expected
+      );
+      expect(
+        UrlscanIo.actions[actionName].input.safeParse({
+          url: 'https://example.com',
+          referer: url(length),
+        }).success
+      ).toBe(expected);
     });
   });
 });

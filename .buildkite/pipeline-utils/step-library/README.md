@@ -15,7 +15,9 @@ Buildkite's own SDK types (`@buildkite/buildkite-sdk`). Generally, prefer using
 these helper functions and the custom types; they explicitly require what
 Buildkite does not, e.g., a `key`, a `label`, and an `agents` definition.
 
-New steps are written as exported fragments in `steps/<name>.ts`:
+New steps are written as exported fragments in `steps/<name>.ts`. Group
+fragments that belong to one product area in a subfolder named for it, e.g.,
+`steps/security_solution/<name>.ts`, rather than prefixing their filenames:
 
 ```ts
 // Individual functions describe the CI intent and produce an array of Steps
@@ -25,7 +27,7 @@ export const cpsTests = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/scout/cps_testing.sh',
     label: 'Cross Project Search (CPS) UI Tests',
     key: 'cps-testing',
-    agents: spotAgent('n2-standard-8', spotZones.centralFCA),
+    agents: spotAgent('n2-standard-8', spotZones.n2),
     depends_on: ['build'],
     timeout_in_minutes: 30,
     retry: retry.agentLossOrAnyOnce,

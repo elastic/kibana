@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod';
 
-import { groupSummarySchema } from '../../schema/zod/common';
+import { groupSummarySchema } from '../../schema/common';
 
 const groupBySchema = z.union([
   z.literal('ungrouped'),

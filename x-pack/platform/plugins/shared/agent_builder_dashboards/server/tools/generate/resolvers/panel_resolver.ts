@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import type { ResolvePanelContent } from '@kbn/dashboard-agent-authoring';
 import { createVisPanelResolver, type VisPanelResolverDeps } from './vis_panel_resolver';
 import { createCustomContentPanelResolver } from './custom_content_panel_resolver';
@@ -16,9 +15,7 @@ import { createCustomContentPanelResolver } from './custom_content_panel_resolve
  */
 export const createPanelResolver = (deps: VisPanelResolverDeps): ResolvePanelContent => {
   const resolveVisPanel = createVisPanelResolver(deps);
-  const resolveCustomContentPanel = createCustomContentPanelResolver({
-    resolveTemplate: createCustomContentTemplateResolver(deps),
-  });
+  const resolveCustomContentPanel = createCustomContentPanelResolver(deps);
 
   return (request) =>
     request.renderer === 'custom_content'

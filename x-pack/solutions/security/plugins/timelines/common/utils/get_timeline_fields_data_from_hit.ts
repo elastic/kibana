@@ -8,8 +8,12 @@
 import { merge } from 'lodash/fp';
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EventHit,
+  Fields,
+  TimelineEventsDetailsItem,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';
-import type { EventHit, Fields, TimelineEventsDetailsItem } from '../search_strategy';
 import { addNestedFieldFromSource } from './add_nested_field_from_source';
 import { getDataFromFieldsHits } from './field_formatters';
 

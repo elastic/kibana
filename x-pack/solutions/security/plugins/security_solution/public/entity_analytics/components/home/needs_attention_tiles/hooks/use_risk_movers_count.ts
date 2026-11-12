@@ -6,13 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { i18n } from '@kbn/i18n';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
@@ -67,15 +65,14 @@ export const useRiskMoversCount = ({
     ['riskMoversCount', query],
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
-      const raw = await runWithTileTimeout(signal, (tileSignal) =>
-        lastValueFrom(
-          data.search.search(
-            { params: { query } },
-            { abortSignal: tileSignal, strategy: 'esql_async' }
-          )
+      const response = await runWithTileTimeout(signal, (tileSignal) =>
+        runEsqlQuery(
+          data.search,
+          query,
+          { id: 'needs_attention_tile_risk_movers_count', meta: { timeRange } },
+          tileSignal
         )
       );
-      const response = raw.rawResponse as unknown as ESQLSearchResponse;
       const row = response.values?.[0];
       const valueIndex = response.columns?.findIndex((c) => c.name === 'value') ?? 0;
       const entityIdsIndex = response.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
@@ -97,25 +94,21 @@ export const useRiskMoversCount = ({
     }
   );
 
-  const isMissingIndex =
-    (error as SecurityAppError | undefined)?.message?.includes('Unknown index') ?? false;
-  const filteredError = isMissingIndex ? undefined : (error as SecurityAppError | undefined);
+  // Only this tile's own query says the risk score index is missing: a missing entity index from
+  // the group filter lookup is a real failure, not missing risk history.
+  const isMissingIndex = isMissingIndexError(error);
+  const filteredError = isMissingIndex ? undefined : error;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
   const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
   const shownResult = isTimedOut ? undefined : queryResult;
 
-  useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.riskMovers.queryError', {
-      defaultMessage: 'There was an error loading risk movers data',
-    }),
-    // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : filteredError ?? indexError
-  );
-
   return {
     count: shownResult?.count ?? 0,
+    // True only when the count query returned a result. A skipped, failed, timed-out or no-access
+    // count is not a genuine 0, so the tile must not show `count` (0) for it.
+    hasCount: shownResult !== undefined && !error && !indexError,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.

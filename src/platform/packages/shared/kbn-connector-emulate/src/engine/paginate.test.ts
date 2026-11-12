@@ -98,6 +98,41 @@ const spec = {
     '/alerts': {
       get: { responses: listResponse({ nextLink: { type: 'string', format: 'uri' } }) },
     },
+    '/nested-search': {
+      post: {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  filter: { type: 'string' },
+                  page: {
+                    type: 'object',
+                    properties: { cursor: { type: 'string' }, limit: { type: 'integer' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: listResponse({ next_cursor: { type: 'string' } }),
+      },
+    },
+    '/users/{id}/items': {
+      get: {
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+          ...query('cursor', 'limit'),
+        ],
+        responses: listResponse({
+          response_metadata: {
+            type: 'object',
+            properties: { next_cursor: { type: 'string' } },
+          },
+        }),
+      },
+    },
     '/monitors': {
       get: {
         parameters: query('page', 'page_size'),
@@ -115,6 +150,24 @@ const spec = {
 };
 
 const pagination: PaginatedOperation[] = [
+  {
+    operation: { method: 'POST', path: '/nested-search' },
+    pagination: {
+      style: 'cursor',
+      request: { in: 'body', cursorParam: 'page.cursor', sizeParam: 'page.limit' },
+      response: { itemsPath: 'channels', nextPath: 'next_cursor' },
+      end: 'missing',
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/users/{id}/items' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'cursor', sizeParam: 'limit' },
+      response: { itemsPath: 'channels', nextPath: 'response_metadata.next_cursor' },
+      end: 'empty_string',
+    },
+  },
   {
     operation: { method: 'GET', path: '/conversations.list' },
     pagination: {
@@ -446,7 +499,88 @@ describe('withPagination', () => {
       expect([ids(first.body), ids(body)]).toEqual([['U1'], ['U2']]);
     });
 
-    it('ignores recordings for operations with a fixture', async () => {
+    const userPage = (
+      id: string,
+      cursor: string | undefined,
+      names: string[],
+      next: string
+    ): RecordedExchange => ({
+      operation: { method: 'GET', path: '/users/{id}/items' },
+      request: { pathParameters: { id }, query: cursor ? { cursor } : {} },
+      response: {
+        status: 200,
+        body: { channels: toChannels(...names), response_metadata: { next_cursor: next } },
+      },
+    });
+
+    it('pages only the recordings of the same path parameters', async () => {
+      const { fetch } = createRecordedMock([
+        userPage('1', undefined, ['A1'], 'one-next'),
+        userPage('1', 'one-next', ['A2'], ''),
+        userPage('2', undefined, ['B1'], 'two-next'),
+        userPage('2', 'two-next', ['B2'], ''),
+      ]);
+
+      const first = await getJson(fetch, '/users/2/items?limit=1');
+      const second = await getJson(fetch, '/users/2/items?limit=1&cursor=two-next');
+      const otherUser = await getJson(fetch, '/users/1/items?limit=5');
+
+      expect(ids(first.body)).toEqual(['B1']);
+      expect(first.body.response_metadata.next_cursor).toBe('two-next');
+      expect(ids(second.body)).toEqual(['B2']);
+      expect(ids(otherUser.body)).toEqual(['A1', 'A2']);
+    });
+
+    it('gives a request no recording matches the first collection', async () => {
+      const { fetch } = createRecordedMock([
+        userPage('1', undefined, ['A1'], ''),
+        userPage('2', undefined, ['B1'], ''),
+      ]);
+
+      const { body } = await getJson(fetch, '/users/3/items');
+
+      expect(ids(body)).toEqual(['A1']);
+    });
+
+    it('keeps pages together when only later ones send the object holding a nested cursor', async () => {
+      const nestedPage = (
+        body: Record<string, unknown>,
+        names: string[],
+        next?: string
+      ): RecordedExchange => ({
+        operation: { method: 'POST', path: '/nested-search' },
+        request: { body },
+        response: {
+          status: 200,
+          body: { channels: toChannels(...names), ...(next ? { next_cursor: next } : {}) },
+        },
+      });
+      const { fetch } = createRecordedMock([
+        nestedPage({ filter: 'open' }, ['A'], 'second'),
+        nestedPage({ filter: 'open', page: { cursor: 'second' } }, ['B']),
+        nestedPage({ filter: 'closed' }, ['C']),
+      ]);
+      const search = async (body: Record<string, unknown>) => {
+        const response = await fetch('https://api.example.com/nested-search', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        return response.json();
+      };
+
+      const first = await search({ filter: 'open', page: { limit: 1 } });
+      const second = await search({
+        filter: 'open',
+        page: { limit: 1, cursor: first.next_cursor },
+      });
+      const other = await search({ filter: 'closed' });
+
+      expect(first.next_cursor).toBe('second');
+      expect([ids(first), ids(second), ids(other)]).toEqual([['A'], ['B'], ['C']]);
+    });
+
+    it('serves a fixture as written instead of the recordings', async () => {
       const { fetch } = createEmulatorFetch({
         specs: [spec],
         pagination,
@@ -454,14 +588,61 @@ describe('withPagination', () => {
         fixtures: [
           {
             operation: { method: 'GET', path: '/conversations.list' },
-            response: { status: 200, body: { channels: toChannels('F') } },
+            response: {
+              status: 200,
+              body: { channels: toChannels('F', 'G'), response_metadata: { next_cursor: 'mine' } },
+            },
           },
         ],
       });
 
-      const { body } = await getJson(fetch, '/conversations.list?limit=10');
+      const { body } = await getJson(fetch, '/conversations.list?limit=1');
 
-      expect(ids(body)).toEqual(['F-1', 'F-2', 'F-3']);
+      expect(ids(body)).toEqual(['F', 'G']);
+      expect(body.response_metadata.next_cursor).toBe('mine');
+    });
+
+    it('serves a matching when fixture as written, and pages the requests it does not match', async () => {
+      const { fetch } = createEmulatorFetch({
+        specs: [spec],
+        pagination,
+        recordings: [{ exchanges: recordedPages }],
+        fixtures: [
+          {
+            operation: { method: 'GET', path: '/conversations.list' },
+            when: { query: { limit: '7' } },
+            response: { status: 200, body: { channels: [] } },
+          },
+        ],
+      });
+
+      const matched = await getJson(fetch, '/conversations.list?limit=7');
+      const other = await getJson(fetch, '/conversations.list?limit=2');
+
+      expect(ids(matched.body)).toEqual([]);
+      expect(ids(other.body)).toEqual(['CA', 'CB']);
+    });
+
+    it('serves runtime fixtures as written, and pages again once they are cleared', async () => {
+      const mock = createEmulatorFetch({
+        specs: [spec],
+        pagination,
+        recordings: [{ exchanges: recordedPages }],
+      });
+      const operation = { method: 'GET', path: '/conversations.list' };
+
+      mock.runtimeFixtures.set([{ operation, response: { status: 200, body: { channels: [] } } }]);
+      const empty = await getJson(mock.fetch, '/conversations.list?limit=2');
+      mock.runtimeFixtures.set([
+        { operation, response: { status: 200, body: { channels: toChannels('X', 'Y') } } },
+      ]);
+      const written = await getJson(mock.fetch, '/conversations.list?limit=1');
+      mock.runtimeFixtures.clear();
+      const paged = await getJson(mock.fetch, '/conversations.list?limit=2');
+
+      expect(ids(empty.body)).toEqual([]);
+      expect(ids(written.body)).toEqual(['X', 'Y']);
+      expect(ids(paged.body)).toEqual(['CA', 'CB']);
     });
   });
 });

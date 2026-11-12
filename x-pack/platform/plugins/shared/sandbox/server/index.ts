@@ -45,10 +45,14 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { SandboxSession } from './sandbox_session';
+export type { SandboxRpcInfo, SandboxRpcResult } from './rpc';
+// Light on purpose: rpc.ts does not load gRPC, which the plugin entry point defers.
+export { SandboxRpcError, sandboxRpcLogMeta } from './rpc';
 export type { SandboxPluginSetup, SandboxPluginStart } from './plugin';
 export type {
   RunCommandParams,
   RunCommandResult,
+  SecretEnvKey,
   FileMetadata,
   ReadFileResult,
   WriteFileResult,

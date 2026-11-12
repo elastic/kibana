@@ -11,19 +11,13 @@ import {
   type SignificantEvent,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import type { SignificantEventInvestigationState } from '@kbn/significant-events-plugin/common';
-import { getInvestigationProgressStatusLabel } from '../../../common/investigation_progress_status';
-
-export { getInvestigationProgressStatusLabel };
+import type { EventInvestigationState } from '../../../data/significant_events/investigation_state';
 
 /**
  * Nightshift surfaces two events buckets derived from `@kbn/significant-events-schema`
  * statuses:
  * - Needs action: `active` and `recovering` (still live until an operator deactivates it or its rule is deleted)
  * - Resolved: `inactive`
- *
- * The "Investigating" / "Investigated" badge is derived separately from
- * `event.investigations` (see `getInvestigationStatusLabel`).
  */
 type StatusGroup = 'needsAction' | 'resolved';
 
@@ -71,12 +65,6 @@ export const isNeedsActionStatus = (status: SignificantEventStatus): boolean =>
 export const isResolvedStatus = (status: SignificantEventStatus): boolean =>
   getStatusGroup(status) === 'resolved';
 
-export const getNeedsActionEvents = (events: SignificantEvent[]): SignificantEvent[] =>
-  events.filter(({ status }) => isNeedsActionStatus(status));
-
-export const getResolvedEvents = (events: SignificantEvent[]): SignificantEvent[] =>
-  events.filter(({ status }) => isResolvedStatus(status));
-
 /**
  * Recency for list ordering. Prefer `updated_at` when the API provides it on the event doc.
  */
@@ -105,40 +93,23 @@ export const byCriticalityAndUpdatedAtDesc = (
 export const getStatusColor = (status: SignificantEventStatus): StatusColor =>
   isResolvedStatus(status) ? 'success' : 'danger';
 
-type SignificantEventInvestigations = NonNullable<SignificantEvent['investigations']>;
-export type SignificantEventInvestigation = SignificantEventInvestigations[number];
+export const SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS: Record<EventInvestigationState, string> =
+  {
+    not_started: i18n.translate('xpack.nightshift.significantEvent.investigationState.notStarted', {
+      defaultMessage: 'Not started',
+    }),
+    in_progress: i18n.translate('xpack.nightshift.significantEvent.investigationState.inProgress', {
+      defaultMessage: 'In progress',
+    }),
+    completed: i18n.translate('xpack.nightshift.significantEvent.investigationState.completed', {
+      defaultMessage: 'Completed',
+    }),
+    unknown: i18n.translate('xpack.nightshift.significantEvent.investigationState.unknown', {
+      defaultMessage: 'Unknown',
+    }),
+  };
 
-export const getLatestInvestigation = (
-  event: Pick<SignificantEvent, 'investigations'>
-): SignificantEventInvestigation | undefined => event.investigations?.at(-1);
-
-export const isEventInvestigated = (event: Pick<SignificantEvent, 'investigations'>): boolean =>
-  getLatestInvestigation(event)?.completed_at != null;
-export const isInvestigationRunning = (
-  event: Pick<SignificantEvent, 'investigations'>
-): boolean => {
-  const latestInvestigation = getLatestInvestigation(event);
-  return latestInvestigation != null && latestInvestigation.completed_at == null;
-};
-
-export const hasRunningInvestigations = (events: SignificantEvent[]): boolean =>
-  events.some(isInvestigationRunning);
-
-export const getInvestigationStatusLabel = (
-  event: Pick<SignificantEvent, 'investigations'>
-): string => getInvestigationProgressStatusLabel(isEventInvestigated(event));
-
-export const SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS: Record<
-  SignificantEventInvestigationState,
-  string
-> = {
-  not_started: i18n.translate('xpack.nightshift.significantEvent.investigationState.notStarted', {
-    defaultMessage: 'Not started',
-  }),
-  in_progress: i18n.translate('xpack.nightshift.significantEvent.investigationState.inProgress', {
-    defaultMessage: 'In progress',
-  }),
-  completed: i18n.translate('xpack.nightshift.significantEvent.investigationState.completed', {
-    defaultMessage: 'Completed',
-  }),
-};
+export const SIGNIFICANT_EVENT_INVESTIGATION_STATE_UNKNOWN_TOOLTIP = i18n.translate(
+  'xpack.nightshift.significantEvent.investigationState.unknownTooltip',
+  { defaultMessage: 'Investigation status unavailable' }
+);

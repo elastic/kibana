@@ -8,11 +8,26 @@
  */
 
 export { createEmulatorFetch } from './src/fetch/create_emulator_fetch';
+export { combineEmulators, emulatorCredential } from './src/fetch/combine_emulators';
+export type { CombinedEmulator } from './src/fetch/combine_emulators';
 export { createCertificateAuthority } from './src/server/certificate_authority';
 export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
 export { createEmulatorProxy } from './src/server/create_emulator_proxy';
 export type { EmulatorProxy, EmulatorProxyOptions } from './src/server/create_emulator_proxy';
-export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
+export {
+  CONTROL_PATH,
+  createEmulatorControl,
+  createEmulatorControlHandler,
+} from './src/server/emulator_control';
+export type {
+  EmulatorCalls,
+  EmulatorControl,
+  EmulatorControlHandler,
+  EmulatorControlOptions,
+} from './src/server/emulator_control';
+export { createEmulatorMcpHandler } from './src/server/emulator_mcp';
+export type { EmulatorMcpOptions, McpControlRequest } from './src/server/emulator_mcp';
+export type { ControlledEmulator } from './src/server/controlled_emulator';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
 export type {
@@ -21,6 +36,12 @@ export type {
   EmulatorOptions,
   EmulatorSpec,
 } from './src/fetch/create_emulator_fetch';
+export type {
+  EmulatorHttpOperation,
+  EmulatorNamedOperation,
+  EmulatorOperation,
+} from './src/fetch/list_operations';
+export type { DescribedContent, OperationDescription } from './src/fetch/describe_operation';
 export { isGraphQLSpec } from './src/graphql/graphql_protocol';
 export type { GraphQLSpec } from './src/graphql/graphql_protocol';
 export { isMcpSpec } from './src/mcp/mcp_protocol';
@@ -42,8 +63,10 @@ export type {
   Recording,
   RejectedResponse,
   ResponseFixture,
+  ResponseOrigin,
   StoredResponse,
 } from './src/engine/response_engine';
+export type { RequestMatcher } from './src/engine/request_match';
 export type {
   ContractAdapter,
   ContractProtocol,
@@ -53,10 +76,30 @@ export type {
   NamedOperationRef,
   ProtocolExchange,
   Responder,
+  ResponderContext,
   Violation,
 } from './src/contract/types';
+export {
+  convertMarkdownReference,
+  isMarkdownReferenceFormat,
+  MARKDOWN_REFERENCE_FORMATS,
+  readLlmsIndex,
+} from './src/markdown';
+export type {
+  MarkdownReferenceFormat,
+  MarkdownReferenceOptions,
+  MarkdownReferencePage,
+} from './src/markdown';
 export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';
 export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
+export {
+  AWS_JSON_EXTENSION,
+  convertSmithy,
+  isAwsJsonDocument,
+  isSmithyModel,
+  toAwsJsonDocument,
+} from './src/smithy';
+export type { AwsJsonServiceInfo, ConvertSmithyOptions, SmithyModel } from './src/smithy';
 export {
   convertDiscovery,
   convertSwagger2,

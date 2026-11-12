@@ -1,0 +1,49 @@
+{
+  "createMonitor": {
+    "input": {
+      "schedule": {
+        "period": {
+          "interval": 5,
+          "unit": "MINUTES"
+        }
+      }
+    }
+  },
+  "runQuery": {
+    "queries": [
+      {
+        "source": "core",
+        "method": "POST",
+        "path": "/{index}/_search"
+      }
+    ]
+  },
+  "searchDetectors": {
+    "queries": [
+      {
+        "source": "core",
+        "method": "POST",
+        "path": "/_plugins/_security_analytics/detectors/_search"
+      }
+    ]
+  },
+  "searchMonitors": {
+    "queries": [
+      {
+        "source": "core",
+        "method": "POST",
+        "path": "/_plugins/_alerting/monitors/_search"
+      }
+    ]
+  },
+  "updateMonitor": {
+    "input": {
+      "schedule": {
+        "period": {
+          "interval": 5,
+          "unit": "MINUTES"
+        }
+      }
+    }
+  }
+}

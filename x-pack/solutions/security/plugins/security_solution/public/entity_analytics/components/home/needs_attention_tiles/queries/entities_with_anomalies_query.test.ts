@@ -10,7 +10,7 @@ import { buildEntitiesWithAnomaliesCountQuery } from './entities_with_anomalies_
 describe('buildEntitiesWithAnomaliesCountQuery', () => {
   it('queries the ML anomalies index', () => {
     const query = buildEntitiesWithAnomaliesCountQuery('.entities-v1');
-    expect(query).toContain('FROM .ml-anomalies-shared*');
+    expect(query).toContain('FROM .ml-anomalies-*');
   });
 
   it('filters to real, non-interim records above the score threshold', () => {

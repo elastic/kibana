@@ -44,6 +44,7 @@ Languages, frameworks, libraries, and tools — even when association to a speci
 Relationships between components (service-to-service calls, database connections, API integrations). Failed relationships count: connection errors, timeouts, broker failures, and fallback messages that name a target are evidence of a dependency on that target.
 
 - Example subtypes: `service_dependency`, `database_connection`, `api_integration`
+- `properties.source` and `properties.target` must exactly equal the `id` of their corresponding entity features. Reuse known entity ids; when an endpoint entity is not known, emit a companion entity with exactly that id in the same result (see Inference & Confidence)
 
 ### Schema
 

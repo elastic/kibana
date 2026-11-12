@@ -9,8 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
+import type { AgentPendingRestart } from '../../../common/types';
 import {
   AgentlessAgentRestrictionError,
+  AgentRestartPendingError,
   HostedAgentPolicyRestrictionRelatedError,
   FleetError,
 } from '../../errors';
@@ -21,6 +23,7 @@ import { ActionRunner } from './action_runner';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
+import { getPendingRestartActions } from './pending_restart';
 
 export class RestartActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -44,6 +47,7 @@ export async function restartBatch(
     actionId?: string;
     total?: number;
     spaceId?: string;
+    force?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const now = new Date().toISOString();
@@ -58,6 +62,14 @@ export async function restartBatch(
 
   const errors: Record<Agent['id'], Error> = {};
   const eligibleAgents: Agent[] = [];
+  const pendingRestarts = options.force
+    ? new Map<string, AgentPendingRestart>()
+    : await getPendingRestartActions(
+        esClient,
+        givenAgents.map((agent) => agent.id),
+        // a retried batch must not treat its own, already written action as pending
+        { excludeActionId: actionId }
+      );
 
   for (const agent of givenAgents) {
     if (isHostedAgent(restrictions, agent)) {
@@ -71,6 +83,12 @@ export async function restartBatch(
     } else if (!isAgentRestartSupported(agent)) {
       errors[agent.id] = new FleetError(
         `Agent ${agent.id} does not support the restart action (requires >= ${MINIMUM_RESTART_AGENT_VERSION}).`
+      );
+    } else if (pendingRestarts.has(agent.id)) {
+      errors[agent.id] = new AgentRestartPendingError(
+        `Agent ${agent.id} already has a pending restart action ${
+          pendingRestarts.get(agent.id)?.action_id
+        }`
       );
     } else {
       eligibleAgents.push(agent);
@@ -86,7 +104,7 @@ export async function restartBatch(
     namespaces,
   });
 
-  await createErrorActionResults(esClient, actionId, errors, 'restart not supported');
+  await createErrorActionResults(esClient, actionId, errors, 'restart validation failed');
 
   return { actionId };
 }

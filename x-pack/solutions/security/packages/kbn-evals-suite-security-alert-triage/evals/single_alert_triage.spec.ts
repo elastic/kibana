@@ -12,26 +12,21 @@
  * A single alert does NOT trigger summary mode (threshold >5 batches), so
  * expectedAttachmentReads is 0 and the attachment_read tool is not expected.
  *
- * The createSkillInvocationEvaluator trace check confirms that the
- * alert-analysis skill's SKILL.md was read during the session, ensuring the
- * trimmed prompt correctly delegates to the registered skill.
+ * The createSkillLoadedEvaluator check confirms that the alert-analysis skill
+ * was loaded with load_skill during the session, ensuring the trimmed prompt
+ * correctly delegates to the registered skill.
  */
 
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
-import {
-  selectEvaluators,
-  createSkillInvocationEvaluator,
-  type DefaultEvaluators,
-  type EvaluationDataset,
-  type EvalsExecutorClient,
-  type Example,
-} from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
-import { callConverse } from '../src/converse_task';
-import { attachmentReadCompliance } from '../src/evaluators';
+import { createEvaluateConverse } from '../src/evaluate_converse';
+import {
+  attachmentReadCompliance,
+  createSkillLoadedEvaluator,
+  createToolUsageEvaluators,
+} from '../src/evaluators';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -54,88 +49,25 @@ const SINGLE_ALERT_DOC = {
   'threat.technique.name': 'OS Credential Dumping',
 };
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface SingleAlertEvalExample extends Example {
-  input: { question: string };
-  output: { expected: string };
-  metadata?: {
-    attachments?: Array<{ type: string; data?: unknown }>;
-    expectedAttachmentReads?: number;
-  };
-}
-
-// ── Fixture factory ───────────────────────────────────────────────────────────
-
-function createEvaluateSingleAlertTriage({
-  fetch,
-  connector,
-  evaluators,
-  executorClient,
-  traceEsClient,
-  log,
-}: {
-  fetch: HttpHandler;
-  connector: { id: string };
-  evaluators: DefaultEvaluators;
-  executorClient: EvalsExecutorClient;
-  traceEsClient: EsClient;
-  log: ToolingLog;
-}) {
-  return async function evaluateSingleAlertTriage({
-    dataset,
-    criteria,
-  }: {
-    dataset: { name: string; description: string; examples: SingleAlertEvalExample[] };
-    criteria: string[];
-  }) {
-    const selectedEvaluators = selectEvaluators([
-      evaluators.criteria(criteria),
-      attachmentReadCompliance,
-      createSkillInvocationEvaluator({ traceEsClient, log, skillName: 'alert-analysis' }),
-      ...Object.values(evaluators.traceBasedEvaluators),
-    ]);
-
-    await executorClient.runExperiment(
-      {
-        datasets: [
-          {
-            name: dataset.name,
-            description: dataset.description,
-            examples: dataset.examples,
-          } satisfies EvaluationDataset,
-        ],
-        task: async ({ input, metadata }) => {
-          const { attachments = [] } = metadata ?? {};
-          return callConverse({
-            fetch,
-            connectorId: connector.id,
-            question: input.question,
-            attachments,
-            log,
-          });
-        },
-      },
-      selectedEvaluators
-    );
-  };
-}
-
 // ── Evaluate fixture extension ─────────────────────────────────────────────────
 
-type EvaluateSingleAlertTriage = ReturnType<typeof createEvaluateSingleAlertTriage>;
+type EvaluateSingleAlertTriage = ReturnType<typeof createEvaluateConverse>;
 
 const evaluate = base.extend<{ evaluateSingleAlertTriage: EvaluateSingleAlertTriage }, {}>({
   evaluateSingleAlertTriage: [
-    ({ fetch, connector, evaluators, executorClient, traceEsClient, log }, use) => {
+    ({ fetch, connector, evaluators, executorClient, log }, use) => {
       use(
-        createEvaluateSingleAlertTriage({
+        createEvaluateConverse({
           fetch,
           connector,
           evaluators,
           executorClient,
-          traceEsClient,
           log,
+          extraEvaluators: [
+            attachmentReadCompliance,
+            ...createToolUsageEvaluators(log),
+            createSkillLoadedEvaluator('alert-analysis'),
+          ],
         })
       );
     },

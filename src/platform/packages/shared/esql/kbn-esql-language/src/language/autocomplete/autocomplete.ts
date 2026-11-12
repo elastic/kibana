@@ -29,6 +29,10 @@ import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
+import {
+  getNamedSubqueries,
+  type NamedSubquery,
+} from '../../commands/definitions/utils/named_subqueries';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
 
@@ -40,7 +44,7 @@ function isSourceCommandSuggestion({ label }: { label: string }) {
   return sourceCommands.includes(label);
 }
 function isHeaderCommandSuggestion({ label }: { label: string }) {
-  return label === 'SET';
+  return esqlCommandRegistry.getCommandByName(label.toLowerCase())?.metadata.type === 'header';
 }
 
 const orderingEngine = new SuggestionOrderingEngine();
@@ -56,9 +60,9 @@ export async function suggest(
     return [];
   }
 
-  // Use the appropriate AST context for field retrieval
-  // When in a subquery, use the subquery's AST to get only its fields
-  const astForFields = astContext.astForContext;
+  const completedHeader = root.header?.filter(({ location }) => location.max < offset);
+  // Keep the current pipeline's fields and the outer header commands completed before the cursor.
+  const astForFields = { ...astContext.astForContext, header: completedHeader };
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
     getQueryForFields(innerText, astForFields),
@@ -82,6 +86,9 @@ export async function suggest(
 
     const isStartingSubquery =
       astContext.isCursorInSubquery && !astContext.astForContext.commands.length;
+    const precedingCommandNames = new Set(
+      [...(completedHeader ?? []), ...astContext.astForContext.commands].map(({ name }) => name)
+    );
 
     const commands = esqlCommandRegistry
       .getAllCommands({
@@ -116,20 +123,9 @@ export async function suggest(
         return true;
       })
       .filter((command) => {
-        // Commands with hiddenAfterCommands are not suggested when any command in the pipeline is in that list
+        // Check completed header commands as well as commands in the current pipeline.
         const hiddenAfter = command.metadata?.hiddenAfterCommands;
-        if (hiddenAfter?.length && astContext.astForContext.commands.length > 0) {
-          const commandNamesInPipeline = new Set(
-            astContext.astForContext.commands.map((cmd) => cmd.name).filter(Boolean)
-          );
-          const hasHiddenCommandInPipeline = hiddenAfter.some((name) =>
-            commandNamesInPipeline.has(name)
-          );
-          if (hasHiddenCommandInPipeline) {
-            return false;
-          }
-        }
-        return true;
+        return !hiddenAfter?.some((name) => precedingCommandNames.has(name));
       })
       .map((command) => command.name);
 
@@ -232,7 +228,9 @@ export async function suggest(
       getColumnMapOnce,
       resourceRetriever,
       offset,
-      hasMinimumLicenseRequired
+      hasMinimumLicenseRequired,
+      // Only the LET bindings completed before the cursor can be referenced.
+      getNamedSubqueries(completedHeader)
     );
 
     const lineStart = fullText.lastIndexOf('\n', offset - 1) + 1;
@@ -270,7 +268,8 @@ async function getSuggestionsWithinCommandExpression(
   getColumnMap: GetColumnMapFn,
   callbacks?: ESQLCallbacks,
   offset?: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
+  namedSubqueries: readonly NamedSubquery[] = []
 ) {
   const innerText = fullText.substring(0, offset);
   const commandDefinition = esqlCommandRegistry.getCommandByName(astContext.command.name);
@@ -313,6 +312,7 @@ async function getSuggestionsWithinCommandExpression(
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
     isTimeseriesSource: isTimeseriesSourceCommand(commands.filter((cmd) => cmd.type === 'command')),
+    namedSubqueries,
   };
 
   // Wrap getColumnsByType so the fields browser option is injected from context;
