@@ -80,6 +80,22 @@ describe('createSeveritySync', () => {
       expect(syncSeverity).toHaveBeenCalledWith({ eventId: 'event-1', severity: 'critical' });
     });
 
+    it('gives the rows their concluded severity without writing them when repair is off', async () => {
+      mockLoadInvestigationOutcomes.mockResolvedValue(available([['event-1', 'critical']]));
+      const { severitySync, syncSeverity, eventClient } = setup();
+
+      const rows = await severitySync.reconcileRows({
+        rows: [{ event_id: 'event-1', severity: 'high' }],
+        request,
+        eventClient,
+        repair: false,
+      });
+      await flush();
+
+      expect(rows).toEqual([{ event_id: 'event-1', severity: 'critical' }]);
+      expect(syncSeverity).not.toHaveBeenCalled();
+    });
+
     it('keeps the stored severities and writes nothing while the investigations are unavailable', async () => {
       mockLoadInvestigationOutcomes.mockResolvedValue(unavailable('forbidden'));
       const { reconcile, syncSeverity } = setup();

@@ -171,6 +171,34 @@ describe('event_search tool', () => {
     );
   });
 
+  it('reconciles severities without writing them back, as a read-only tool', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (searchEventsToolHandler as jest.Mock).mockResolvedValue({
+      events: [],
+      view: 'compact',
+      page: 1,
+      total: 0,
+    });
+    const reconcileRows = jest.spyOn(readerServer.severitySync, 'reconcileRows');
+    const tool = createSearchEventsTool({
+      getScopedClients: jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn().mockReturnValue({}),
+        licensing: {},
+        uiSettingsClient: {},
+        sourcesClient: mockSourcesClient([]),
+      }) as unknown as GetScopedClients,
+      server: readerServer,
+      logger: loggingSystemMock.createLogger(),
+      telemetry: createMockTelemetry() as never,
+    });
+
+    await invokeHandler(tool as never, {}, createMockToolContext());
+    const [{ reconcileSeverities }] = (searchEventsToolHandler as jest.Mock).mock.calls[0];
+    await reconcileSeverities([]);
+
+    expect(reconcileRows).toHaveBeenCalledWith(expect.objectContaining({ repair: false }));
+  });
+
   it('accepts searches that omit slugs', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({

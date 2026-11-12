@@ -31,11 +31,11 @@ interface SeveritySyncArgs {
 export interface SeveritySync {
   /**
    * For a read: returns the rows with the severity their investigations concluded, and refreshes the
-   * stored rows that were stale in the background. It never throws and never waits for the write.
-   * While the investigations cannot be read the rows come back as they are.
+   * stored rows that were stale in the background unless `repair` is `false`. It never throws and
+   * never waits for the write. While the investigations cannot be read the rows come back as they are.
    */
   reconcileRows: <T extends { event_id: string; severity: Severity }>(
-    args: SeveritySyncArgs & { rows: T[] }
+    args: SeveritySyncArgs & { rows: T[]; repair?: boolean }
   ) => Promise<T[]>;
   /**
    * For the investigation agent hook: writes the severity of the events' investigation outcomes now
@@ -143,7 +143,7 @@ export const createSeveritySync = ({
   };
 
   return {
-    reconcileRows: async ({ rows, request, eventClient }) => {
+    reconcileRows: async ({ rows, request, eventClient, repair = true }) => {
       pruneCooldowns();
       const loaded = await load({
         request,
@@ -167,7 +167,7 @@ export const createSeveritySync = ({
         stale.set(row.event_id, concluded);
         return { ...row, severity: concluded };
       });
-      if (stale.size) void writeStale({ eventClient, stale });
+      if (repair && stale.size) void writeStale({ eventClient, stale });
       return reconciled;
     },
 
