@@ -103,8 +103,12 @@ steps:
         kbn-xsrf: 'true'
         elastic-api-version: '2023-10-31'
         Content-Type: application/json
+      # The skills API requires a caller-chosen id (lowercase, <=64 chars) and
+      # caps the name at 64 chars; key both on the execution id so they stay
+      # within bounds whatever the live skill id is, and never collide.
       body:
-        name: 'aesop-variant-{{ inputs.skill_id }}'
+        id: 'aesop-variant-{{ execution.id }}'
+        name: 'AESOP variant {{ execution.id }}'
         description: >-
           AESOP prototype candidate variant of {{ inputs.skill_id }}. Created
           by the A/B compare workflow; safe to delete when no run is active.
@@ -194,13 +198,23 @@ steps:
       repetitions: '${{ inputs.repetitions }}'
       concurrency: '${{ inputs.concurrency }}'
 
+  # An arm with no ingested scores has no experiment to compare (the compare
+  # API 404s), so skip straight to cleanup instead of proposing a blind deploy.
+  - name: resolve_arms
+    type: data.set
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    with:
+      scored: >-
+        ${{ (steps.baseline_run.output.scores_ingested | default: 0) > 0
+          and (steps.variant_run.output.scores_ingested | default: 0) > 0 }}
+
   # ----------------------------------------------------------------------
   # Compare. compareExperiments returns an opaque comparison blob; the
   # proposal comment renders it as JSON so the analyst reads the delta.
   # ----------------------------------------------------------------------
   - name: compare
     type: ai.evals.compareExperiments
-    if: '${{ steps.resolve_variant.output.ok == true }}'
+    if: '${{ steps.resolve_arms.output.scored == true }}'
     with:
       experiment_ids:
         - '${{ steps.baseline_start.output.experiment_id }}'
@@ -208,7 +222,7 @@ steps:
 
   - name: resolve_comparison
     type: data.set
-    if: '${{ steps.resolve_variant.output.ok == true }}'
+    if: '${{ steps.resolve_arms.output.scored == true }}'
     with:
       comparison_json: '${{ steps.compare.output.comparison | json }}'
 
@@ -218,11 +232,16 @@ steps:
   # ----------------------------------------------------------------------
   - name: propose_deploy
     type: workflow.execute
-    if: '${{ steps.resolve_variant.output.ok == true }}'
+    if: '${{ steps.resolve_arms.output.scored == true }}'
+    # Straight to the proposals gate in default run-as mode, not through the
+    # AlertZero bridge: the bridge delegates with `run-as-mode: inherit`, which
+    # needs a parent running as a bound service account, and this run executes
+    # as the user who started it. `origin: alertzero` puts the proposal in the
+    # AlertZero decision queue.
     with:
-      workflow-id: system-create-alertzero-proposal
-      run-as-mode: inherit
+      workflow-id: system-create-proposal
       inputs:
+        origin: alertzero
         conversationId: '{{ inputs.investigation_id }}'
         title: 'AESOP: deploy variant of {{ inputs.skill_id }}'
         comment: |-
@@ -280,6 +299,8 @@ steps:
       headers:
         kbn-xsrf: 'true'
         Content-Type: application/json
+        elastic-api-version: '1'
+        x-elastic-internal-origin: 'Kibana'
       body:
         skill_id: '{{ inputs.skill_id }}'
     on-failure:
@@ -312,4 +333,4 @@ steps:
       decision: '${{ steps.propose_deploy.output.decision }}'
       deployed: '${{ steps.deploy_variant.error == null and steps.propose_deploy.output.decision == "approved" }}'
       skip_reason: >-
-        {% if steps.resolve_variant.output.ok != true %}The variant skill could not be created: {{ steps.create_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.deploy_variant.error != null %}Deploy failed after approval: {{ steps.deploy_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.cleanup_variant.error != null %}Deployed, but the scratch variant skill was not deleted: {{ steps.cleanup_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.resolve_variant.output.ok != true %}The variant skill could not be created: {{ steps.create_variant.error.message }}{% elsif steps.resolve_arms.output.scored != true %}An A/B arm produced no scores (baseline: {{ steps.baseline_run.output.scores_ingested | default: 0 }}, variant: {{ steps.variant_run.output.scores_ingested | default: 0 }}); nothing to compare.{% elsif steps.propose_deploy.output.decision == 'approved' and steps.deploy_variant.error != null %}Deploy failed after approval: {{ steps.deploy_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.cleanup_variant.error != null %}Deployed, but the scratch variant skill was not deleted: {{ steps.cleanup_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
