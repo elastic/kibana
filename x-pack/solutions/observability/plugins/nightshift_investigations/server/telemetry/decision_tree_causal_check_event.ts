@@ -10,6 +10,9 @@ import type { RootCauseChange } from '../investigation_round';
 
 export const NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT = 'nightshift-decision-tree-causal-check';
 
+/** Maximum Unicode codepoints per text field so the event stays well within the EBT batch limit. */
+export const MAX_CAUSAL_CHECK_EXPLANATION_LENGTH = 500;
+
 /**
  * Mutually-exclusive funnel outcome for a follow-up round entering decision-tree preparation:
  * - `confirmed`: feedback stated a root cause and tool results in the transcript backed it up
@@ -49,6 +52,8 @@ export interface DecisionTreeCausalCheckEvent {
   is_feedback?: boolean;
   causal_confirmed?: boolean;
   has_learning?: boolean;
+  causal_summary?: string;
+  learning?: string;
   tree_count: number;
   opened_tree_count: number;
   recorder_outcome?: RootCauseChange;
@@ -108,6 +113,22 @@ const decisionTreeCausalCheckSchema: RootSchema<DecisionTreeCausalCheckEvent> = 
     type: 'boolean',
     _meta: {
       description: 'Whether the causal check extracted a non-empty learning summary.',
+      optional: true,
+    },
+  },
+  causal_summary: {
+    type: 'text',
+    _meta: {
+      description:
+        'Causal-check summary, truncated. Only sent where the nightshift.decisionTrees.includeExplanations flag is on, because it may quote customer data.',
+      optional: true,
+    },
+  },
+  learning: {
+    type: 'text',
+    _meta: {
+      description:
+        'Extracted learning insight, truncated. Only sent where the nightshift.decisionTrees.includeExplanations flag is on, because it may quote customer data.',
       optional: true,
     },
   },

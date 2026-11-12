@@ -86,6 +86,7 @@ import { registerMemoryAiIndex } from './memory/register_memory';
 import { registerDecisionTreeTelemetryEvents, registerWikiTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
+import { createShouldIncludeCausalExplanations } from './decision_trees/should_include_explanations';
 import { createKnowledgePurgeClient } from './purge/purge_client';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import {
@@ -556,6 +557,9 @@ export class NightshiftInvestigationsPlugin
         );
         const isOnlineEvalsPaused = createIsOnlineEvalsPaused(core.getStartServices);
         const shouldIncludeExplanations = createShouldIncludeExplanations(core.getStartServices);
+        const shouldIncludeCausalExplanations = createShouldIncludeCausalExplanations(
+          core.getStartServices
+        );
         plugins.workflowsExtensions.registerStepDefinition(
           classifyOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
@@ -718,6 +722,7 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
+            shouldIncludeExplanations: shouldIncludeCausalExplanations,
             telemetry,
           })
         );

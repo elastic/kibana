@@ -30,6 +30,8 @@ describe('decisionTreeCausalCheckEvent schema', () => {
       is_feedback: true,
       causal_confirmed: true,
       has_learning: true,
+      causal_summary: 'Paygate edge timed out on charge spans.',
+      learning: 'Check external payment gateway latency.',
       tree_count: 1,
       opened_tree_count: 1,
       recorder_outcome: 'found',
