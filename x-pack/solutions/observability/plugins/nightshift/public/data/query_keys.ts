@@ -7,6 +7,7 @@
 
 export const AUTOMATIONS_QUERY_KEY = ['nightshift.automations'] as const;
 export const RUN_QUOTAS_QUERY_KEY = ['nightshiftRunQuotas'] as const;
+export const INVESTIGATION_QUOTAS_QUERY_KEY = ['nightshiftInvestigationQuotas'] as const;
 
 export const automationRunActivityQueryKey = (id: string) =>
   [...AUTOMATIONS_QUERY_KEY, id, 'activity'] as const;
