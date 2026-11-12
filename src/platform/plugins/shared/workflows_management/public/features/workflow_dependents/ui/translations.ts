@@ -162,6 +162,18 @@ export const getIssueMessage = (
         defaultMessage: 'Uses the output "{field}", but {childName} doesn’t return any outputs',
         values: { childName, field },
       });
+    case 'outputNoLongerDeclared':
+      return i18n.translate('workflows.dependents.issue.outputNoLongerDeclared', {
+        defaultMessage:
+          'Uses the output "{field}", which {childName} still returns but no longer declares, so it might stop returning it',
+        values: { childName, field },
+      });
+    case 'outputFromLastStep':
+      return i18n.translate('workflows.dependents.issue.outputFromLastStep', {
+        defaultMessage:
+          'Uses the output "{field}", but {childName} has no workflow.output step, so it gets the output of its last step instead, which might not include "{field}"',
+        values: { childName, field },
+      });
     case 'outputTypeChanged':
       return i18n.translate('workflows.dependents.issue.outputTypeChanged', {
         defaultMessage: 'Uses the output "{field}", which can now be {to} (was {from})',

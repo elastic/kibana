@@ -17,7 +17,11 @@ import {
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { isRecord } from '@kbn/workflows-yaml';
-import { collectReturnedOutputNames, collectWorkflowOutputBlocks } from './find_call_sites';
+import {
+  collectReturnedOutputNames,
+  collectWorkflowOutputBlocks,
+  hasWorkflowOutputStep,
+} from './find_call_sites';
 import type { ContractChange, ContractField, WorkflowContract } from './types';
 
 const describeType = (property: JSONSchema7, schema: JsonModelSchemaType): string | undefined => {
@@ -66,6 +70,7 @@ export const extractWorkflowContract = (definition: unknown): WorkflowContract =
   const declaredOutputs = normalizeFieldsToJsonSchema(
     isRecord(definition) ? definition.outputs : undefined
   );
+  const returnedNames = collectReturnedOutputNames(definition);
 
   const base = {
     // A workflow saved with errors is stored without a definition (and turned off).
@@ -75,11 +80,12 @@ export const extractWorkflowContract = (definition: unknown): WorkflowContract =
     hasDeclaredInputs: Boolean(inputsSchema?.properties),
     inputsSchema: inputsSchema?.properties ? inputsSchema : undefined,
     rejectsUnknownInputs: inputsSchema?.additionalProperties === false,
+    hasOutputStep: hasWorkflowOutputStep(definition),
+    returnedOutputs: returnedNames ? [...returnedNames] : undefined,
   };
 
   if (declaredOutputs?.properties) {
     const outputs = toFields(declaredOutputs);
-    const returnedNames = collectReturnedOutputNames(definition);
     return {
       ...base,
       outputs,
@@ -241,8 +247,16 @@ const diffOutputs = (saved: WorkflowContract, draft: WorkflowContract): Contract
   }
   for (const name of Object.keys(saved.outputs)) {
     if (!draft.outputs[name]) {
-      changes.push({ kind: 'outputRemoved', field: name, severity: 'breaking' });
+      changes.push({
+        kind: 'outputRemoved',
+        field: name,
+        // Undeclared values a `workflow.output` step sets still reach callers.
+        severity: draft.returnedOutputs?.includes(name) ? 'warning' : 'breaking',
+      });
     }
+  }
+  if (saved.hasOutputStep && !draft.hasOutputStep && Object.keys(saved.outputs).length > 0) {
+    changes.push({ kind: 'outputStepRemoved', field: '', severity: 'warning' });
   }
   return changes;
 };

@@ -11,6 +11,7 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useBreakingChangeConfirmation } from './use_breaking_change_confirmation';
+import type { ConfirmBreakingChange } from './workflow_dependents_context';
 import type { WorkflowDependentsImpactResponse } from '../../../../common/lib/workflow_dependents/api';
 import type { DependentImpact } from '../../../../common/lib/workflow_dependents/types';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -55,7 +56,8 @@ const impact = (
 });
 
 describe('useBreakingChangeConfirmation', () => {
-  let confirmBreakingChange: () => Promise<boolean>;
+  let confirmBreakingChange: ConfirmBreakingChange;
+  let draft: string;
   let services: ReturnType<typeof createStartServicesMock>;
   const onReviewImpact = jest.fn();
 
@@ -66,6 +68,7 @@ describe('useBreakingChangeConfirmation', () => {
   };
 
   const renderWithDraft = (draftYaml: string) => {
+    draft = draftYaml;
     const store = createMockStore();
     store.dispatch(
       setWorkflow({
@@ -92,7 +95,7 @@ describe('useBreakingChangeConfirmation', () => {
   const openConfirmation = async (): Promise<{ confirmation: Promise<boolean> }> => {
     let confirmation: Promise<boolean> = Promise.resolve(false);
     act(() => {
-      confirmation = confirmBreakingChange();
+      confirmation = confirmBreakingChange(draft);
     });
     await screen.findByTestId('workflowBreakingChangeConfirmModal');
     return { confirmation };
@@ -106,7 +109,7 @@ describe('useBreakingChangeConfirmation', () => {
   it('saves without asking the server when there are no unsaved changes', async () => {
     renderWithDraft(SAVED_YAML);
 
-    await expect(confirmBreakingChange()).resolves.toBe(true);
+    await expect(confirmBreakingChange(draft)).resolves.toBe(true);
 
     expect(services.http.post).not.toHaveBeenCalled();
   });
@@ -115,7 +118,7 @@ describe('useBreakingChangeConfirmation', () => {
     (services.http.post as jest.Mock).mockResolvedValue(impact([caller({ enabled: false })]));
     renderWithDraft(`${SAVED_YAML}\n`);
 
-    await expect(confirmBreakingChange()).resolves.toBe(true);
+    await expect(confirmBreakingChange(draft)).resolves.toBe(true);
 
     expect(services.http.post).toHaveBeenCalledWith(
       '/internal/workflows/workflow/alert-context/_dependents_impact',
@@ -159,6 +162,6 @@ describe('useBreakingChangeConfirmation', () => {
     (services.http.post as jest.Mock).mockRejectedValue(new Error('boom'));
     renderWithDraft(`${SAVED_YAML}\n`);
 
-    await expect(confirmBreakingChange()).resolves.toBe(true);
+    await expect(confirmBreakingChange(draft)).resolves.toBe(true);
   });
 });

@@ -379,10 +379,15 @@ const evaluateOutputs = (
     const contractField = field ? contract.outputs[field] : undefined;
     // A `| default:` filter replaces a missing value, so the caller keeps working.
     const lossSeverity = hasFallback ? 'warning' : 'breaking';
-    if (field && contract.outputsSource === 'none') {
+    if (field && !contract.hasOutputStep) {
+      // The caller gets whatever the child's last step returns, which may or may not hold `field`.
+      issue = { kind: 'outputFromLastStep', severity: 'warning', stepName, field };
+    } else if (field && contract.outputsSource === 'none') {
       issue = { kind: 'undeclaredOutput', severity: 'warning', stepName, field };
     } else if (field && !contractField) {
-      issue = { kind: 'removedOutput', severity: lossSeverity, stepName, field };
+      issue = contract.returnedOutputs?.includes(field)
+        ? { kind: 'outputNoLongerDeclared', severity: 'warning', stepName, field }
+        : { kind: 'removedOutput', severity: lossSeverity, stepName, field };
     } else if (field && contract.unreturnedOutputs.includes(field)) {
       issue = { kind: 'unreturnedOutput', severity: lossSeverity, stepName, field };
     } else if (field && contractField) {
@@ -433,6 +438,17 @@ const evaluateCallSite = (
 const issueKey = ({ kind, stepName, field }: DraftIssue): string =>
   `${kind}\u0000${stepName}\u0000${field}`;
 
+/** An issue is new unless the saved version had it at the same or a worse severity. */
+const isNewIssue = (
+  issue: DraftIssue,
+  savedSeverities: ReadonlyMap<string, ImpactIssue['severity']>
+): boolean => {
+  const savedSeverity = savedSeverities.get(issueKey(issue));
+  return (
+    savedSeverity === undefined || (issue.severity === 'breaking' && savedSeverity !== 'breaking')
+  );
+};
+
 const getImpactStatus = (
   issues: ImpactIssue[],
   callSites: CallSiteImpact[],
@@ -473,16 +489,20 @@ const analyzeDependent = (
   draftContract: WorkflowContract,
   contractChanges: ContractChange[]
 ): Omit<DependentImpact, 'upstream'> => {
-  const savedIssueKeys = new Set(
-    callSites.flatMap((callSite) =>
-      evaluateCallSite(callSite, parent.definition, savedContract).issues.map(issueKey)
-    )
-  );
+  const savedSeverities = new Map<string, ImpactIssue['severity']>();
+  for (const callSite of callSites) {
+    for (const issue of evaluateCallSite(callSite, parent.definition, savedContract).issues) {
+      const key = issueKey(issue);
+      if (savedSeverities.get(key) !== 'breaking') {
+        savedSeverities.set(key, issue.severity);
+      }
+    }
+  }
   const evaluations = callSites.map((callSite) =>
     evaluateCallSite(callSite, parent.definition, draftContract, savedContract)
   );
   const issues = evaluations.flatMap(({ issues: draftIssues }) =>
-    draftIssues.map((issue) => ({ ...issue, isNew: !savedIssueKeys.has(issueKey(issue)) }))
+    draftIssues.map((issue) => ({ ...issue, isNew: isNewIssue(issue, savedSeverities) }))
   );
   const impacts = evaluations.map(({ impact }) => impact);
   return {

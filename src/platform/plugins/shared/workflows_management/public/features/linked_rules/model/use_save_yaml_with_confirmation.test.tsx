@@ -29,12 +29,13 @@ const buildYaml = (enabled: boolean) =>
 
 describe('useSaveYamlWithConfirmation', () => {
   const confirmDisable = jest.fn();
+  let store: ReturnType<typeof createMockStore>;
 
   const renderSave = (
     yamlEnabledEdits: boolean[],
     confirmBreakingChange?: WorkflowDependentsContextValue['confirmBreakingChange']
   ) => {
-    const store = createMockStore();
+    store = createMockStore();
     store.dispatch(
       setWorkflow({
         id: 'wf-1',
@@ -112,6 +113,23 @@ describe('useSaveYamlWithConfirmation', () => {
 
     expect(confirmBreakingChange).toHaveBeenCalled();
     expect(confirmDisable).not.toHaveBeenCalled();
+    expect(mockSaveYaml).not.toHaveBeenCalled();
+  });
+
+  it('checks the draft again when it changes while the check is pending', async () => {
+    const editedYaml = `${buildYaml(true)}\n`;
+    const confirmBreakingChange = jest
+      .fn()
+      .mockImplementationOnce(async () => {
+        store.dispatch(setYamlString(editedYaml));
+        return true;
+      })
+      .mockResolvedValueOnce(false);
+
+    await expect(renderSave([true], confirmBreakingChange)()).resolves.toBe(false);
+
+    expect(confirmBreakingChange).toHaveBeenNthCalledWith(1, buildYaml(true));
+    expect(confirmBreakingChange).toHaveBeenNthCalledWith(2, editedYaml);
     expect(mockSaveYaml).not.toHaveBeenCalled();
   });
 });

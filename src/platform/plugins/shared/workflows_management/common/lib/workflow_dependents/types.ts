@@ -55,6 +55,10 @@ export interface WorkflowContract {
   outputsSource: OutputsSource;
   /** Declared outputs that no `workflow.output` step sets, so callers always get nothing for them. */
   unreturnedOutputs: readonly string[];
+  /** Without a `workflow.output` step, callers get the output of the workflow's last step instead. */
+  hasOutputStep: boolean;
+  /** Names the `workflow.output` steps set; undefined when there are none or they are computed. */
+  returnedOutputs?: readonly string[];
 }
 
 export type Severity = 'breaking' | 'warning' | 'info';
@@ -73,6 +77,8 @@ export type ContractChangeKind =
   | 'outputAdded'
   | 'outputRemoved'
   | 'outputNoLongerReturned'
+  /** No `workflow.output` step is left, so callers get the last step's output instead. */
+  | 'outputStepRemoved'
   | 'outputTypeChanged'
   | 'outputSchemaChanged';
 
@@ -104,6 +110,10 @@ export type ImpactIssueKind =
   | 'removedOutput'
   | 'unreturnedOutput'
   | 'undeclaredOutput'
+  /** The output is no longer declared, but a `workflow.output` step still sets it. */
+  | 'outputNoLongerDeclared'
+  /** There is no `workflow.output` step, so the caller gets the last step's output instead. */
+  | 'outputFromLastStep'
   | 'outputTypeChanged';
 
 export interface ImpactIssue {

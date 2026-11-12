@@ -31,20 +31,24 @@ export const useSaveYamlWithConfirmation = (
   const confirmBreakingChange = useConfirmBreakingChange();
 
   return useCallback(async () => {
-    if (confirmBreakingChange && !(await confirmBreakingChange())) {
-      return false;
-    }
-    const state = store.getState();
-    const workflow = selectWorkflow(state);
-    const yamlString = selectYamlString(state);
-    if (
-      workflow?.enabled &&
-      yamlString &&
-      parseDocument(yamlString).get('enabled') === false &&
-      !(await confirmDisable([workflow.id]))
-    ) {
-      return false;
-    }
+    // The draft can change while a check is pending, so check again until the checked draft is
+    // the one being saved.
+    let yamlString: string | undefined;
+    do {
+      yamlString = selectYamlString(store.getState());
+      if (confirmBreakingChange && !(await confirmBreakingChange(yamlString))) {
+        return false;
+      }
+      const workflow = selectWorkflow(store.getState());
+      if (
+        workflow?.enabled &&
+        yamlString &&
+        parseDocument(yamlString).get('enabled') === false &&
+        !(await confirmDisable([workflow.id]))
+      ) {
+        return false;
+      }
+    } while (selectYamlString(store.getState()) !== yamlString);
     await saveYaml();
     return true;
   }, [confirmBreakingChange, confirmDisable, saveYaml, store]);

@@ -32,14 +32,16 @@ const makeChild = ({
     { name: 'severity', type: 'string' },
     { name: 'score', type: 'number' },
   ],
+  emit = { severity: 'high', score: 9 },
 }: {
   inputs?: Array<Record<string, unknown>>;
   outputs?: Array<Record<string, unknown>>;
+  emit?: Record<string, unknown>;
 } = {}) => ({
   name: 'Alert context',
   triggers: [{ type: 'manual', inputs }],
   outputs,
-  steps: [{ name: 'emit', type: 'workflow.output', with: { severity: 'high', score: 9 } }],
+  steps: [{ name: 'emit', type: 'workflow.output', with: emit }],
 });
 
 const callStep = (
@@ -121,7 +123,10 @@ const kinds = (issues: readonly ImpactIssue[] = []) =>
   issues.map(({ kind, severity }) => `${kind}:${severity}`);
 
 // Removing the `severity` output breaks every workflow that reads it.
-const withoutSeverity = makeChild({ outputs: [{ name: 'score', type: 'number' }] });
+const withoutSeverity = makeChild({
+  outputs: [{ name: 'score', type: 'number' }],
+  emit: { score: 9 },
+});
 
 describe('collectWorkflowCallSites', () => {
   it('finds calls nested in control-flow steps and skips dynamic workflow ids', () => {
@@ -300,6 +305,33 @@ describe('analyzeDependents', () => {
     expect(dependentOf(analysis, 'enrich')?.issues).toContainEqual(
       expect.objectContaining({ kind: 'unreturnedOutput', field: 'score' })
     );
+  });
+
+  it('only warns when the workflow.output step still sets an output that is no longer declared', () => {
+    const analysis = analyze(makeChild({ outputs: [{ name: 'score', type: 'number' }] }));
+
+    expect(analysis.contractChanges).toEqual([
+      expect.objectContaining({ kind: 'outputRemoved', field: 'severity', severity: 'warning' }),
+    ]);
+    expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual([
+      'outputNoLongerDeclared:warning',
+    ]);
+    expect(analysis.summary.breaking).toBe(0);
+  });
+
+  it('warns callers that read outputs when no workflow.output step is left', () => {
+    const analysis = analyze({
+      ...makeChild(),
+      steps: [{ name: 'log', type: 'console', with: { message: 'done' } }],
+    });
+
+    expect(analysis.contractChanges).toEqual([
+      expect.objectContaining({ kind: 'outputStepRemoved', severity: 'warning' }),
+    ]);
+    expect(statusById(analysis).triage).toBe('warning');
+    expect(dependentOf(analysis, 'triage')?.issues).toEqual([
+      expect.objectContaining({ kind: 'outputFromLastStep', field: 'severity', isNew: true }),
+    ]);
   });
 
   it('only warns when the removed output is read with a default value', () => {
@@ -505,6 +537,25 @@ describe('analyzeDependents', () => {
 
       expect(issuesFor({ a: 'x', extra: 1 }, lenient)).toEqual(['unknownInput:warning']);
       expect(issuesFor({ a: 'x', extra: 1 }, strict, lenient)).toEqual(['unknownInput:breaking']);
+    });
+
+    it('counts a problem that turns from a warning into a break as new', () => {
+      const lenient = childWithInputs({ a: { type: 'string' } });
+      const strict = childWithInputs({ a: { type: 'string' } }, { additionalProperties: false });
+      const caller = typedCaller({ a: 'x', extra: 1 });
+
+      const stricter = analyzeWith([caller], strict, lenient);
+      expect(dependentOf(stricter, 'caller')).toMatchObject({
+        status: 'breaking',
+        issues: [expect.objectContaining({ kind: 'unknownInput', isNew: true })],
+      });
+      expect(stricter.summary.breaking).toBe(1);
+
+      const looser = analyzeWith([caller], lenient, strict);
+      expect(dependentOf(looser, 'caller')).toMatchObject({
+        status: 'safe',
+        issues: [expect.objectContaining({ kind: 'unknownInput', isNew: false })],
+      });
     });
 
     it('only warns about output type changes that widen what callers get', () => {

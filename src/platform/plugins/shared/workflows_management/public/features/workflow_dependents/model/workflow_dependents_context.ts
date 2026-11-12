@@ -12,11 +12,13 @@ import type { UseWorkflowDependentsResult } from './use_workflow_dependents';
 
 export type WorkflowLinksTab = 'usedBy' | 'runs';
 
+/** Resolves false when the user cancels saving `draftYaml` because it breaks workflows calling this one. */
+export type ConfirmBreakingChange = (draftYaml: string | undefined) => Promise<boolean>;
+
 export interface WorkflowDependentsContextValue {
   dependents: UseWorkflowDependentsResult;
   openLinks: (tab: WorkflowLinksTab) => void;
-  /** Resolves false when the user cancels a save that breaks workflows calling this one. */
-  confirmBreakingChange: () => Promise<boolean>;
+  confirmBreakingChange: ConfirmBreakingChange;
 }
 
 export const WorkflowDependentsContext = createContext<WorkflowDependentsContextValue | null>(null);
@@ -26,5 +28,5 @@ export const useWorkflowDependentsContext = (): WorkflowDependentsContextValue |
   useContext(WorkflowDependentsContext) ?? undefined;
 
 /** The save check, or undefined outside a `WorkflowDependentsProvider`, where nothing is checked. */
-export const useConfirmBreakingChange = (): (() => Promise<boolean>) | undefined =>
+export const useConfirmBreakingChange = (): ConfirmBreakingChange | undefined =>
   useContext(WorkflowDependentsContext)?.confirmBreakingChange;

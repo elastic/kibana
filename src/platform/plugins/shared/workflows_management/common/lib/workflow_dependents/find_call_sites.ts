@@ -127,6 +127,14 @@ export const collectWorkflowOutputBlocks = (
   return blocks;
 };
 
+export const hasWorkflowOutputStep = (definition: unknown): boolean => {
+  let found = false;
+  walkDefinitionSteps(definition, (step) => {
+    found = found || step.type === 'workflow.output';
+  });
+  return found;
+};
+
 /**
  * Returns the output names set by the workflow's `workflow.output` steps, or undefined when that
  * can't be known statically (no such step, or one whose `with` is a single template expression).

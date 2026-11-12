@@ -19,24 +19,21 @@ import { useStore } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import { dependentsImpactQueryOptions } from './dependents_impact_query_options';
+import type { ConfirmBreakingChange } from './workflow_dependents_context';
 import { isBreakingRun } from '../../../../common/lib/workflow_dependents/api';
 import type { DependentImpact } from '../../../../common/lib/workflow_dependents/types';
 import type { RootState } from '../../../entities/workflows/store/types';
-import {
-  selectHasChanges,
-  selectWorkflow,
-  selectYamlString,
-} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { selectWorkflow } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getIssueMessage } from '../ui/translations';
 
 /**
  * Asks the user to confirm before saving a draft that breaks workflows calling this one. The
- * server grades the exact draft being saved; when it can't, the save goes ahead.
+ * server grades the given draft; when it can't, the save goes ahead.
  */
 export const useBreakingChangeConfirmation = (
   onReviewImpact: () => void
-): { confirmBreakingChange: () => Promise<boolean>; confirmModal: JSX.Element | null } => {
+): { confirmBreakingChange: ConfirmBreakingChange; confirmModal: JSX.Element | null } => {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
   const store = useStore<RootState>();
@@ -48,46 +45,52 @@ export const useBreakingChangeConfirmation = (
   } | null>(null);
   const resolveRef = useRef<(confirmed: boolean) => void>();
 
-  const getSaveImpact = useCallback(async (): Promise<{
-    breakingDependents: DependentImpact[];
-    indirectBreaking: number;
-  }> => {
-    const none = { breakingDependents: [], indirectBreaking: 0 };
-    const state = store.getState();
-    const workflow = selectWorkflow(state);
-    const draftYaml = selectYamlString(state);
-    if (!workflow || !selectHasChanges(state)) {
-      return none;
-    }
-    try {
-      const { analysis } = await queryClient.fetchQuery(
-        dependentsImpactQueryOptions(
-          http,
-          { id: workflow.id, savedVersion: workflow.lastUpdatedAt },
-          draftYaml
-        )
-      );
-      return {
-        breakingDependents: analysis.dependents.filter(isBreakingRun),
-        indirectBreaking: analysis.summary.indirectBreaking,
-      };
-    } catch {
-      return none;
-    }
-  }, [http, queryClient, store]);
+  const getSaveImpact = useCallback(
+    async (
+      draftYaml: string | undefined
+    ): Promise<{
+      breakingDependents: DependentImpact[];
+      indirectBreaking: number;
+    }> => {
+      const none = { breakingDependents: [], indirectBreaking: 0 };
+      const workflow = selectWorkflow(store.getState());
+      if (!workflow || draftYaml === undefined || draftYaml === workflow.yaml) {
+        return none;
+      }
+      try {
+        const { analysis } = await queryClient.fetchQuery(
+          dependentsImpactQueryOptions(
+            http,
+            { id: workflow.id, savedVersion: workflow.lastUpdatedAt },
+            draftYaml
+          )
+        );
+        return {
+          breakingDependents: analysis.dependents.filter(isBreakingRun),
+          indirectBreaking: analysis.summary.indirectBreaking,
+        };
+      } catch {
+        return none;
+      }
+    },
+    [http, queryClient, store]
+  );
 
-  const confirmBreakingChange = useCallback(async () => {
-    const impact = await getSaveImpact();
-    if (impact.breakingDependents.length === 0) {
-      return true;
-    }
-    const workflowName = selectWorkflow(store.getState())?.name ?? '';
-    return new Promise<boolean>((resolve) => {
-      resolveRef.current?.(false);
-      resolveRef.current = resolve;
-      setPending({ workflowName, ...impact });
-    });
-  }, [getSaveImpact, store]);
+  const confirmBreakingChange = useCallback<ConfirmBreakingChange>(
+    async (draftYaml) => {
+      const impact = await getSaveImpact(draftYaml);
+      if (impact.breakingDependents.length === 0) {
+        return true;
+      }
+      const workflowName = selectWorkflow(store.getState())?.name ?? '';
+      return new Promise<boolean>((resolve) => {
+        resolveRef.current?.(false);
+        resolveRef.current = resolve;
+        setPending({ workflowName, ...impact });
+      });
+    },
+    [getSaveImpact, store]
+  );
 
   const close = (confirmed: boolean) => {
     resolveRef.current?.(confirmed);

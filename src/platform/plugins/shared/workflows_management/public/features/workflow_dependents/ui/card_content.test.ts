@@ -171,6 +171,8 @@ describe('getCalledCardContent', () => {
     },
     outputsSource: 'declared',
     unreturnedOutputs: ['score'],
+    hasOutputStep: true,
+    returnedOutputs: ['severity'],
   };
 
   it('lists what the called workflow accepts and returns', () => {
