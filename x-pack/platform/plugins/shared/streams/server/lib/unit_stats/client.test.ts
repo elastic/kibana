@@ -53,10 +53,8 @@ const responses = {
       { name: 'authentication_rate', type: 'double' },
       { name: 'authorization_rate', type: 'double' },
     ],
-    values: [
-      ['es-prod', 0, 0],
-      ['es-dev', 0.5, 1.9],
-    ],
+    // Only `es-dev` fails in the totals, so it is the only destination the query is asked about.
+    values: [['es-dev', 0.5, 1.9]],
   },
   destinationAuthCollections: {
     columns: [
@@ -529,20 +527,26 @@ describe('UnitStatsClient.getStats', () => {
       expect(collectionsQuery).not.toContain('"es-prod"');
     });
 
-    it('asks for no collections when no destination has failures', async () => {
+    it('asks for no failure queries when no destination fails, and gives them no failures', async () => {
       const esql = makeEsql({
-        destinationAuthRates: () => ({
-          columns: responses.destinationAuthRates.columns,
+        destinationRate: () => ({
+          columns: responses.destinationRate.columns,
           values: [
-            ['es-prod', 0, 0],
-            ['es-dev', 0, 0],
+            [4.6, 0, 0.18, 'es-prod'],
+            [4.2, 0, 0.17, 'es-dev'],
           ],
         }),
       });
 
-      await run(esql);
+      const response = await run(esql);
 
+      expect(authRatesQueries(esql)).toHaveLength(0);
       expect(collectionsQueries(esql)).toHaveLength(0);
+      ['es-prod', 'es-dev'].forEach((id) => {
+        const { failed } = response.components.destinations[id].events;
+        expect(failed.authentication).toEqual({ rate: rate(0) });
+        expect(failed.authorization).toEqual({ rate: rate(0) });
+      });
     });
 
     it('leaves a destination of a type with no failure queries without failure rates', async () => {
@@ -558,8 +562,20 @@ describe('UnitStatsClient.getStats', () => {
       );
     });
 
-    it('asks the Elasticsearch failure queries for a remote Elasticsearch destination', async () => {
-      const esql = makeEsql();
+    it('asks the Elasticsearch failure queries for a remote Elasticsearch destination that fails', async () => {
+      const esql = makeEsql({
+        destinationRate: () => ({
+          columns: responses.destinationRate.columns,
+          values: [[1.5, 1.5, 0.1, 'remote']],
+        }),
+        // The provider only asks about a destination whose result has a failed rate above zero. The
+        // totals row above gives it one, and this sums row is what puts the destination in the
+        // results at all.
+        destinationSums: () => ({
+          columns: responses.destinationSums.columns,
+          values: [[90, 'remote', '2026-10-19T11:46:00.000Z']],
+        }),
+      });
       const remoteUnit: StreamsUnit.Configuration = {
         ...unit,
         destinations: [

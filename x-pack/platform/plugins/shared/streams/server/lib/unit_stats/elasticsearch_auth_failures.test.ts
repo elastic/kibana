@@ -6,15 +6,41 @@
  */
 
 import type { ComposerQuery } from '@elastic/esql';
+import type { StreamsUnit } from '@kbn/streams-schema';
 import { getElasticsearchAuthFailures } from './elasticsearch_auth_failures';
 import type { EsqlRow } from './mappers/esql_rows';
+import { noDestinationStats } from './mappers/map_destination_stats_result';
+import { toItemRate } from './mappers/stats_values';
+import type { DestinationQueryRef } from './query_refs';
 
 const window = { start: '2026-10-20T10:00:00.000Z', end: '2026-10-20T10:15:00.000Z' };
-const params = { unitId: 'default', window, ids: ['es-prod', 'es-dev'] };
+const baseParams = { unitId: 'default', window };
+
+const destination = (id: string): DestinationQueryRef => ({
+  kind: 'destination',
+  id,
+  type: 'elasticsearch',
+});
+const destinations = [destination('es-prod'), destination('es-dev')];
 
 const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
 
-const healthy = { id: 'es-prod', authentication_rate: 0, authorization_rate: 0 };
+/** The result of a destination so far, with the failed rate that the provider reads. */
+const resultWithFailedRate = (failedRate: number | null): StreamsUnit.StatsDestinationResult => {
+  const { events, ...result } = noDestinationStats(60_000);
+
+  return {
+    ...result,
+    events: { ...events, failed: { ...events.failed, rate: toItemRate(failedRate) } },
+  };
+};
+
+/** `es-prod` has no failures and `es-dev` has some. */
+const parentResults = {
+  'es-prod': resultWithFailedRate(0),
+  'es-dev': resultWithFailedRate(2.4),
+};
+
 const failing = { id: 'es-dev', authentication_rate: 0.5, authorization_rate: 1.9 };
 const failingCollection = {
   id: 'es-dev',
@@ -25,12 +51,12 @@ const failingCollection = {
 
 /** Answers the collections query (the one with `INLINE STATS`) and the rates query separately. */
 const makeRunQuery = ({
-  rates,
+  rates = () => [],
   collections = () => [],
 }: {
-  rates: () => EsqlRow[];
+  rates?: () => EsqlRow[];
   collections?: () => EsqlRow[];
-}) =>
+} = {}) =>
   jest.fn(async (query: ComposerQuery) =>
     query.print('basic').includes('INLINE STATS') ? collections() : rates()
   );
@@ -40,31 +66,60 @@ const failWith = (error: Error) => () => {
 };
 
 describe('getElasticsearchAuthFailures', () => {
-  it('asks for no collections when no destination has failures', async () => {
-    const runQuery = makeRunQuery({ rates: () => [healthy] });
+  it('asks for nothing, and gives no failures, to destinations whose failed rate is 0', async () => {
+    const runQuery = makeRunQuery();
     const onFailure = jest.fn();
 
-    const result = await getElasticsearchAuthFailures({ runQuery, params, onFailure });
+    const result = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults: { 'es-prod': resultWithFailedRate(0), 'es-dev': resultWithFailedRate(0) },
+      onFailure,
+    });
 
-    expect(runQuery).toHaveBeenCalledTimes(1);
+    expect(runQuery).not.toHaveBeenCalled();
     expect(onFailure).not.toHaveBeenCalled();
     expect(result).toEqual({
       'es-prod': { authentication: { rate: rate(0) }, authorization: { rate: rate(0) } },
+      'es-dev': { authentication: { rate: rate(0) }, authorization: { rate: rate(0) } },
     });
   });
 
-  it('asks for the collections of the destinations with failures only', async () => {
+  it('leaves out a destination with no data, or with no result so far', async () => {
+    const runQuery = makeRunQuery();
+
+    const result = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults: { 'es-prod': resultWithFailedRate(null) },
+      onFailure: jest.fn(),
+    });
+
+    expect(runQuery).not.toHaveBeenCalled();
+    expect(result).toEqual({});
+  });
+
+  it('asks about the destinations that fail only, and gives the others no failures', async () => {
     const runQuery = makeRunQuery({
-      rates: () => [healthy, failing],
+      rates: () => [failing],
       collections: () => [failingCollection],
     });
 
-    const result = await getElasticsearchAuthFailures({ runQuery, params, onFailure: jest.fn() });
+    const result = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults,
+      onFailure: jest.fn(),
+    });
 
     expect(runQuery).toHaveBeenCalledTimes(2);
-    const collectionsQuery = runQuery.mock.calls[1][0].print('basic');
-    expect(collectionsQuery).toContain('destination.id IN ("es-dev")');
-    expect(collectionsQuery).not.toContain('"es-prod"');
+    runQuery.mock.calls.forEach(([query]) => {
+      expect(query.print('basic')).toContain('destination.id IN ("es-dev")');
+      expect(query.print('basic')).not.toContain('"es-prod"');
+    });
     expect(result['es-dev']).toEqual({
       authentication: { rate: rate(0.5) },
       authorization: {
@@ -72,7 +127,30 @@ describe('getElasticsearchAuthFailures', () => {
         collections: { 'logs-a-default': { rate: rate(1.9) } },
       },
     });
-    expect(result['es-prod'].authorization).toEqual({ rate: rate(0) });
+    expect(result['es-prod']).toEqual({
+      authentication: { rate: rate(0) },
+      authorization: { rate: rate(0) },
+    });
+  });
+
+  it('asks for no collections when the failures are not authentication or authorization', async () => {
+    const runQuery = makeRunQuery({
+      rates: () => [{ id: 'es-dev', authentication_rate: 0, authorization_rate: 0 }],
+    });
+
+    const result = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults,
+      onFailure: jest.fn(),
+    });
+
+    expect(runQuery).toHaveBeenCalledTimes(1);
+    expect(result['es-dev']).toEqual({
+      authentication: { rate: rate(0) },
+      authorization: { rate: rate(0) },
+    });
   });
 
   it('gives the destination rate and no collections for a 401, which a whole request has', async () => {
@@ -80,7 +158,13 @@ describe('getElasticsearchAuthFailures', () => {
       rates: () => [{ id: 'es-dev', authentication_rate: 2, authorization_rate: 0 }],
     });
 
-    const result = await getElasticsearchAuthFailures({ runQuery, params, onFailure: jest.fn() });
+    const result = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults,
+      onFailure: jest.fn(),
+    });
 
     expect(result['es-dev']).toEqual({
       authentication: { rate: rate(2) },
@@ -91,12 +175,15 @@ describe('getElasticsearchAuthFailures', () => {
   it('keeps the rates and reports it when the collections query fails', async () => {
     const error = new Error('collections failed');
     const onFailure = jest.fn();
-    const runQuery = makeRunQuery({
-      rates: () => [failing],
-      collections: failWith(error),
-    });
+    const runQuery = makeRunQuery({ rates: () => [failing], collections: failWith(error) });
 
-    const result = await getElasticsearchAuthFailures({ runQuery, params, onFailure });
+    const result = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults,
+      onFailure,
+    });
 
     expect(onFailure).toHaveBeenCalledWith(error, 'authentication and authorization collections');
     expect(result['es-dev']).toEqual({
@@ -105,23 +192,36 @@ describe('getElasticsearchAuthFailures', () => {
     });
   });
 
-  it('returns nothing and reports it when the rates query fails, without asking for collections', async () => {
+  it('reports it, leaves out the failing destinations, and asks for no collections when the rates query fails', async () => {
     const error = new Error('rates failed');
     const onFailure = jest.fn();
     const runQuery = makeRunQuery({ rates: failWith(error) });
 
-    const result = await getElasticsearchAuthFailures({ runQuery, params, onFailure });
+    const result = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults,
+      onFailure,
+    });
 
-    expect(result).toEqual({});
     expect(onFailure).toHaveBeenCalledTimes(1);
     expect(onFailure).toHaveBeenCalledWith(error, 'authentication and authorization rates');
     expect(runQuery).toHaveBeenCalledTimes(1);
+    // `es-prod` needed no query, so it still has its answer.
+    expect(Object.keys(result)).toEqual(['es-prod']);
   });
 
   it('leaves out a destination that the rates query has no row for', async () => {
-    const runQuery = makeRunQuery({ rates: () => [healthy] });
+    const runQuery = makeRunQuery({ rates: () => [] });
 
-    const result = await getElasticsearchAuthFailures({ runQuery, params, onFailure: jest.fn() });
+    const result = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults,
+      onFailure: jest.fn(),
+    });
 
     expect(Object.keys(result)).toEqual(['es-prod']);
   });
@@ -130,13 +230,28 @@ describe('getElasticsearchAuthFailures', () => {
     const runQuery = makeRunQuery({
       rates: () => [{ id: 'constructor', authentication_rate: 1, authorization_rate: 0 }],
     });
+    const odd = [destination('constructor')];
 
-    const result = await getElasticsearchAuthFailures({ runQuery, params, onFailure: jest.fn() });
+    const failingResult = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations: odd,
+      parentResults: Object.fromEntries([['constructor', resultWithFailedRate(1)]]),
+      onFailure: jest.fn(),
+    });
+    const noResult = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations: odd,
+      parentResults: {},
+      onFailure: jest.fn(),
+    });
 
-    expect(Object.hasOwn(result, 'constructor')).toBe(true);
-    expect(result.constructor).toEqual({
+    expect(Object.hasOwn(failingResult, 'constructor')).toBe(true);
+    expect(failingResult.constructor).toEqual({
       authentication: { rate: rate(1) },
       authorization: { rate: rate(0) },
     });
+    expect(noResult).toEqual({});
   });
 });

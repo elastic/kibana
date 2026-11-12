@@ -248,26 +248,33 @@ export class UnitStatsClient {
     const ids = destinations.map(({ id }) => id);
 
     try {
-      const [rateRows, sumsRows, authFailures] = await Promise.all([
+      const [rateRows, sumsRows] = await Promise.all([
         this.runQuery(buildDestinationRateQuery({ ...baseParams, ids })),
         this.runQuery(buildDestinationSumsQuery({ ...baseParams, ids, bucketMs })),
-        // Never throws: a failure is logged here, and the destinations keep their other stats.
-        getDestinationAuthFailures({
-          runQuery: (query) => this.runQuery(query),
-          baseParams,
-          destinations,
-          onFailure: (error, part) => {
-            const failedPart = `destination ${part}`;
-            this.logFailure(toSearchError(error, failedPart), {
-              unitId: baseParams.unitId,
-              what: failedPart,
-            });
-          },
-        }),
       ]);
       const mapped = mapDestinationStatsRows({
         rows: joinDestinationRows({ rateRows, sumsRows }),
         bucketMs,
+      });
+      const results = Object.fromEntries(
+        ids.map((id) => [id, Object.hasOwn(mapped, id) ? mapped[id] : noDestinationStats(bucketMs)])
+      );
+
+      // The failed rate of each parent result decides which destinations to ask about their auth
+      // failures. It never throws: a failure is logged here, and the destinations keep their
+      // other stats.
+      const authFailures = await getDestinationAuthFailures({
+        runQuery: (query) => this.runQuery(query),
+        baseParams,
+        destinations,
+        parentResults: results,
+        onFailure: (error, part) => {
+          const failedPart = `destination ${part}`;
+          this.logFailure(toSearchError(error, failedPart), {
+            unitId: baseParams.unitId,
+            what: failedPart,
+          });
+        },
       });
 
       return {
@@ -275,7 +282,7 @@ export class UnitStatsClient {
           ids.map((id) => [
             id,
             withAuthFailures(
-              Object.hasOwn(mapped, id) ? mapped[id] : noDestinationStats(bucketMs),
+              results[id],
               Object.hasOwn(authFailures, id) ? authFailures[id] : noAuthFailures()
             ),
           ])
