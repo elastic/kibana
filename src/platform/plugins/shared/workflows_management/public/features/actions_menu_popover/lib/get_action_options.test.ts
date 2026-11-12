@@ -71,7 +71,7 @@ describe('getActionOptions', () => {
   it('should return all base action groups', () => {
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
 
-    expect(result).toHaveLength(7);
+    expect(result).toHaveLength(8);
     expect(result[0].id).toBe('triggers');
     expect(result[1].id).toBe('elasticsearch');
     expect(result[2].id).toBe('kibana');
@@ -79,6 +79,35 @@ describe('getActionOptions', () => {
     expect(result[4].id).toBe('ai');
     expect(result[5].id).toBe('data');
     expect(result[6].id).toBe('flowControl');
+    expect(result[7].id).toBe('misc');
+  });
+
+  it('should list the console step under the misc group', () => {
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const miscGroup = result.find((group) => group.id === 'misc');
+
+    expect(miscGroup).toBeDefined();
+    if (miscGroup && isActionGroup(miscGroup)) {
+      expect(miscGroup.iconType).toBe('ellipsis');
+      expect(miscGroup.iconVariant).toBe('neutral');
+      expect(miscGroup.options).toHaveLength(1);
+      expect(miscGroup.options[0]).toMatchObject({
+        id: 'console',
+        iconType: 'commandLine',
+        iconVariant: 'neutral',
+        pathIds: ['misc', 'console'],
+      });
+    }
+  });
+
+  it('should not duplicate console when it is also returned as a connector', () => {
+    (getAllConnectors as jest.Mock).mockReturnValue([
+      { type: 'console', summary: 'Console', description: 'Log a message' },
+    ]);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+
+    expect(flattenOptions(result).filter((option) => option.id === 'console')).toHaveLength(1);
   });
 
   it('should include trigger options', () => {
@@ -194,7 +223,7 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(10);
+      expect(flowControlGroup.options).toHaveLength(12);
       const labels = flowControlGroup.options.map((opt) => opt.label);
       expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)));
       expect(flowControlGroup.options.map((opt) => opt.id).sort()).toEqual(
@@ -209,6 +238,8 @@ describe('getActionOptions', () => {
           'while',
           'workflow.execute',
           'workflow.executeAsync',
+          'workflow.fail',
+          'workflow.output',
         ].sort()
       );
     }

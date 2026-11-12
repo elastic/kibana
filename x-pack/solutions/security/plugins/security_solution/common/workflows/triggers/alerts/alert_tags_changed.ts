@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   MAX_ALERTS_PER_TRIGGER,
@@ -33,21 +33,23 @@ triggers:
       condition: 'event.tagsAdded: "high-priority"'
 \`\`\``;
 
-const alertTagsChangedEventSchema = z.object({
-  alertIds: z
-    .array(z.string().min(1).max(MAX_ID_LENGTH))
-    .max(MAX_ALERTS_PER_TRIGGER)
-    .meta({ description: ALERT_TAGS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION }),
-  tagsAdded: z
-    .array(z.string().min(1).max(MAX_TAG_LENGTH))
-    .max(MAX_TAGS_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_TAGS_ADDED_DESCRIPTION }),
-  tagsRemoved: z
-    .array(z.string().min(1).max(MAX_TAG_LENGTH))
-    .max(MAX_TAGS_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_TAGS_REMOVED_DESCRIPTION }),
-  truncated: z.boolean().meta({ description: ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
-});
+const alertTagsChangedEventSchema = lazySchema(() =>
+  z.object({
+    alertIds: z
+      .array(z.string().min(1).max(MAX_ID_LENGTH))
+      .max(MAX_ALERTS_PER_TRIGGER)
+      .meta({ description: ALERT_TAGS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION }),
+    tagsAdded: z
+      .array(z.string().min(1).max(MAX_TAG_LENGTH))
+      .max(MAX_TAGS_PER_OPERATION)
+      .meta({ description: TRIGGER_SCHEMA_TAGS_ADDED_DESCRIPTION }),
+    tagsRemoved: z
+      .array(z.string().min(1).max(MAX_TAG_LENGTH))
+      .max(MAX_TAGS_PER_OPERATION)
+      .meta({ description: TRIGGER_SCHEMA_TAGS_REMOVED_DESCRIPTION }),
+    truncated: z.boolean().meta({ description: ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
+  })
+);
 
 export const alertTagsChangedTriggerDef: CommonTriggerDefinition = {
   id: AlertTagsChangedTriggerId,

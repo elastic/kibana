@@ -277,10 +277,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const identityFields = useMemo(
     () =>
       euidApi?.euid.getEntityIdentifiersFromDocument(
-        'user',
+        euidApi.getBuiltInEntityDefinition('user'),
         entityFromStoreResult.entityRecord ?? entityFromStoreResult.entity ?? {}
       ),
-    [euidApi?.euid, entityFromStoreResult.entityRecord, entityFromStoreResult.entity]
+    [euidApi, entityFromStoreResult.entityRecord, entityFromStoreResult.entity]
   );
 
   const userIdentityFields = useMemo(() => {
@@ -499,7 +499,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             indexPatterns={securityDefaultPatterns}
             jobNameById={jobNameById}
             scopeId={scopeId}
-            isFlyoutOpen={true}
             renderIpLink={renderIpLink}
             linkRenderer={LinkRenderer}
             riskScoreState={effectiveRiskScoreState}

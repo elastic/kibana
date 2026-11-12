@@ -11,7 +11,7 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachment
 import {
   CommentAttachmentPayloadSchema,
   type CommentAttachmentData,
-} from '../../../../common/types/domain_zod/attachment/comment/v2';
+} from '../../../../common/types/domain/attachment/comment/v2';
 import {
   AttachmentActionType,
   defineAttachment,

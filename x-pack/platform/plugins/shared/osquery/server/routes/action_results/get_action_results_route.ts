@@ -107,19 +107,23 @@ export const getActionResultsRoute = (
             osqueryContext.getStartServices
           );
 
-          if (cpsActive) {
-            const [coreStartServices] = await osqueryContext.getStartServices();
-            const clusterClient = coreStartServices.elasticsearch.client;
-            const readEsClient = getReadEsClient(clusterClient, request, cpsActive);
-            const actionsIndexExists = await clusterClient.asInternalUser.indices.exists({
-              index: `${ACTIONS_INDEX}*`,
-            });
+          const [coreStartServices] = await osqueryContext.getStartServices();
+          const clusterClient = coreStartServices.elasticsearch.client;
+          const actionsIndexExists = await clusterClient.asInternalUser.indices.exists({
+            index: `${ACTIONS_INDEX}*`,
+          });
 
+          // Mirrors the search strategy's gate: without an osquery actions index and
+          // without CPS fan-out, live actions live only on `.fleet-actions`, and the
+          // strategy keeps the data-document space filter for that read. Passing the
+          // request lets the strategy's own check reuse this lookup.
+          if (actionsIndexExists || cpsActive) {
             const hasMetadata = await findOsqueryActionMetadata({
-              esClient: readEsClient,
+              esClient: getReadEsClient(clusterClient, request, cpsActive),
               spaceId,
               actionId: request.params.actionId,
               actionsIndexExists,
+              request,
             });
 
             if (!hasMetadata) {

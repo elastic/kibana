@@ -9,20 +9,29 @@
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
-import { cloneDeep, isEqual, isObject, pick } from 'lodash';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { cloneDeep, isEqual, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { getEsqlDataView } from '@kbn/discover-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
-import { getInitialAppState } from '../../utils/get_initial_app_state';
+import {
+  getConfiguredDefaultEsqlQuery,
+  getDefaultQuery,
+  getInitialAppState,
+} from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
-import { appendAdHocDataViews } from './data_views';
-import { setDataView } from './tab_state_data_view';
+import { appendAdHocDataViews, loadDataViewListOnce } from './data_views';
+import { loadDataAvailabilityOnce } from './data_availability';
+import { setDataSource, setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
-import { loadAndResolveDataView } from '../../utils/resolve_data_view';
-import { isDataViewSource } from '../../../../../../common/data_sources';
+import {
+  canOpenWithoutPersistedDataViews,
+  getInitialDataViewTarget,
+  loadAndResolveDataView,
+} from '../../utils/resolve_data_view';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
@@ -31,11 +40,18 @@ import type { ConnectedCustomizationService } from '../../../../../customization
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
-import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  TAB_STATE_URL_KEY,
+} from '../../../../../../common/constants';
+import type { TabsUrlState } from '../../../../../../common/types';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
+import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
+import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
 
 export interface InitializeSingleTabsParams {
   customizationService: ConnectedCustomizationService;
@@ -66,8 +82,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
     }
   ) {
-    const { currentDataView$, dataStateContainer$, customizationService$, scopedEbtManager$ } =
-      selectTabRuntimeState(runtimeStateManager, tabId);
+    const { dataStateContainer$, customizationService$, scopedEbtManager$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
 
     /**
      * New tab initialization with the restored data if available
@@ -92,6 +110,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       tabInitialInternalState = cloneDeep(tabState.initialInternalState);
     }
 
+    const controlGroupState = esqlControls ?? tabState.attributes.controlGroupState;
+    const initialEsqlVariables = extractEsqlVariables(controlGroupState ?? null);
+
     if (esqlControls) {
       dispatch(
         updateAttributes({
@@ -101,81 +122,111 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           },
         })
       );
+    }
 
+    if (initialEsqlVariables.length) {
       dispatch(
         internalStateSlice.actions.setEsqlVariables({
           tabId,
-          esqlVariables: extractEsqlVariables(esqlControls),
+          esqlVariables: initialEsqlVariables,
         })
       );
     }
 
-    // Get a snapshot of the current URL state before any async work is done
-    // to avoid race conditions if the URL changes during tab initialization,
-    // e.g. if the user quickly switches tabs
-    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
-    const urlAppState = {
-      ...tabInitialAppState,
-      ...(defaultUrlState ??
-        cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
-    };
-    const urlProfileState = services.profileStateRegistry.pickStateByType({
-      profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
-      stateTypes: [ProfileStateType.Url],
-    });
     const defaultPersistentProfileState = services.profileStateRegistry.pickStateByType({
       profileStateMap: profileState,
       stateTypes: [ProfileStateType.Persistent],
     });
 
+    const { persistedDiscoverSession, defaultProfileEsqlQuery } = getState();
+    const persistedTab = persistedDiscoverSession?.tabs.find((tab) => tab.id === tabId);
+    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
+
+    const readUrlState = () => {
+      const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+      const urlAppState = {
+        ...tabInitialAppState,
+        ...(defaultUrlState ??
+          cleanupUrlState(
+            urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+            services.uiSettings
+          )),
+      };
+      const hasGlobalState = Object.keys(urlGlobalState || {}).length > 0;
+      const restoredQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
+      const configuredEsqlQuery = getConfiguredDefaultEsqlQuery({
+        initialUrlState: urlAppState,
+        hasGlobalState,
+        persistedTab,
+        services,
+        defaultProfileEsqlQuery,
+        locationStateHasDataViewSpec,
+      });
+
+      return {
+        urlGlobalState,
+        urlAppState,
+        urlProfileState: services.profileStateRegistry.pickStateByType({
+          profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
+          stateTypes: [ProfileStateType.Url],
+        }),
+        hasGlobalState,
+        initialQuery: restoredQuery ?? configuredEsqlQuery,
+      };
+    };
+    const loadDataAvailability = (query: Query | AggregateQuery | undefined) =>
+      dispatch(loadDataAvailabilityOnce({ needsDataView: !isNonEmptyEsqlQuery(query) }));
+
+    // Get a snapshot of the current URL state before any async work is done
+    // to avoid race conditions if the URL changes during tab initialization,
+    // e.g. if the user quickly switches tabs
+    const tabStateBeforeAvailability = getTabState();
+    const initialUrlState = readUrlState();
+
+    await loadDataAvailability(initialUrlState.initialQuery);
+
+    // Tab operations push the selected tab ID and state to the URL before rewriting every tab
+    // state, so a URL changed while waiting only belongs to this tab if neither points elsewhere.
+    const urlTabId = urlStateStorage.get<TabsUrlState>(TAB_STATE_URL_KEY)?.tabId;
+    const isUrlOwnedByTab =
+      getTabState() === tabStateBeforeAvailability && (!urlTabId || urlTabId === tabId);
+    const { urlGlobalState, urlAppState, urlProfileState, hasGlobalState, initialQuery } =
+      isUrlOwnedByTab ? readUrlState() : initialUrlState;
+    const isEsqlMode = isOfAggregateQueryType(initialQuery);
+    const { hasESData, hasDataView } = await loadDataAvailability(initialQuery);
+
+    if (!hasESData && !hasDataView) {
+      return { showNoDataPage: true };
+    }
+
+    // Started after the shared availability checks so the duration only covers loading this tab.
     const discoverTabLoadTracker = scopedEbtManager$
       .getValue()
       .trackPerformanceEvent('discoverLoadSavedSearch');
 
-    const { persistedDiscoverSession } = getState();
-    const persistedTab = persistedDiscoverSession?.tabs.find((tab) => tab.id === tabId);
     const persistedTabSearchSource = persistedTab
       ? await fromSavedObjectTabToSearchSource({ tab: persistedTab, services })
       : undefined;
+    const currentDataView = persistedTabSearchSource?.getField('index');
+    const { dataViewId, initialAdHocDataViewSpec } = getInitialDataViewTarget({
+      dataSource: urlAppState?.dataSource,
+      initialDataViewIdOrSpec: tabInitialInternalState?.serializedSearchSource?.index,
+      currentDataView,
+    });
 
-    const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
-    const isEsqlMode = isOfAggregateQueryType(initialQuery);
+    const canOpen =
+      hasDataView ||
+      canOpenWithoutPersistedDataViews({
+        isEsqlMode,
+        locationStateHasDataViewSpec,
+        dataViewId,
+        initialAdHocDataViewSpec,
+        currentDataView,
+        adHocDataViews: runtimeStateManager.adHocDataViews$.getValue(),
+        defaultProfileAdHocDataViewIds: getState().defaultProfileAdHocDataViewIds,
+      });
 
-    const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
-    const initialAdHocDataViewSpec = isObject(initialDataViewIdOrSpec)
-      ? initialDataViewIdOrSpec
-      : undefined;
-
-    const persistedTabDataView = persistedTabSearchSource?.getField('index');
-    const initialDataViewId =
-      typeof initialDataViewIdOrSpec === 'string'
-        ? initialDataViewIdOrSpec
-        : initialAdHocDataViewSpec?.id;
-    const dataViewId = isDataViewSource(urlAppState?.dataSource)
-      ? urlAppState?.dataSource.dataViewId
-      : persistedTabDataView?.id ?? initialDataViewId;
-
-    const tabHasInitialAdHocDataViewSpec =
-      dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
-    const peristedTabHasAdHocDataView = Boolean(
-      persistedTabDataView && !persistedTabDataView.isPersisted()
-    );
-
-    const { initializationState, defaultProfileAdHocDataViewIds } = getState();
-    const profileDataViews = runtimeStateManager.adHocDataViews$
-      .getValue()
-      .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
-
-    const profileDataViewsExist = profileDataViews.length > 0;
-    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
-    const canAccessWithoutPersistedDataView =
-      isEsqlMode ||
-      tabHasInitialAdHocDataViewSpec ||
-      peristedTabHasAdHocDataView ||
-      profileDataViewsExist ||
-      locationStateHasDataViewSpec;
-
-    if (!initializationState.hasDataView && !canAccessWithoutPersistedDataView) {
+    if (!canOpen) {
       return { showNoDataPage: true };
     }
 
@@ -183,41 +234,79 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Tab initialization
      */
 
-    let dataView: DataView;
+    const resolveEsqlQuerySource = (esql: string) =>
+      resolveEsqlSource({
+        esql,
+        services,
+        esqlVariables: initialEsqlVariables,
+        timeRange:
+          urlGlobalState?.time ??
+          tabInitialGlobalState?.timeRange ??
+          services.data.query.timefilter.timefilter.getTime(),
+      });
 
-    if (isOfAggregateQueryType(initialQuery) && !isEmptyEsqlQuery(initialQuery)) {
-      // Regardless of what was requested, we always use ad hoc data views for ES|QL
-      dataView = await getEsqlDataView(
-        initialQuery,
-        persistedTabDataView ?? currentDataView$.getValue(),
-        services
-      );
-    } else {
-      // Load the requested data view if one exists, or a fallback otherwise.
-      // For empty ES|QL, updateTabs stores the previous tab's view on
-      // initialInternalState so dataViewId above is set and we skip the default.
-      const result = await loadAndResolveDataView({
+    // Decide the query the tab opens with, then resolve its data source once from it.
+    const resolveOpeningState = async (): Promise<{
+      query: Query | AggregateQuery | undefined;
+      dataView: DataView;
+      esqlSource?: EsqlSource;
+    }> => {
+      if (isNonEmptyEsqlQuery(initialQuery)) {
+        return { query: initialQuery, ...(await resolveEsqlQuerySource(initialQuery.esql)) };
+      }
+
+      await dispatch(loadDataViewListOnce());
+
+      // Classic and empty ES|QL tabs use this data view; a new tab otherwise derives its
+      // default query from it, which can be ES|QL. For empty ES|QL, updateTabs stores the
+      // previous tab's view on initialInternalState so dataViewId above is set.
+      const { dataView } = await loadAndResolveDataView({
         dataViewId,
         locationDataViewSpec: dataViewSpec,
         initialAdHocDataViewSpec,
-        currentDataView: persistedTabDataView,
+        currentDataView,
         isEsqlMode,
         services,
         savedDataViews: getState().savedDataViews,
         runtimeStateManager,
       });
+      const query =
+        initialQuery ??
+        getDefaultQuery({
+          initialUrlState: urlAppState,
+          hasGlobalState,
+          persistedTab,
+          services,
+          dataView,
+          defaultProfileEsqlQuery,
+          locationStateHasDataViewSpec,
+        });
 
-      dataView = result.dataView;
-    }
+      if (isNonEmptyEsqlQuery(query)) {
+        return { query, ...(await resolveEsqlQuerySource(query.esql)) };
+      }
+      return { query, dataView };
+    };
 
-    dispatch(setDataView({ tabId, dataView }));
+    const { query: openingQuery, dataView, esqlSource } = await resolveOpeningState();
 
-    if (!dataView.isPersisted()) {
+    if (!esqlSource && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
     }
 
+    // Get the initial app state based on a combo of the URL and persisted tab saved search
+    const initialAppState = getInitialAppState({
+      initialUrlState: urlAppState,
+      hasGlobalState,
+      persistedTab,
+      dataView,
+      services,
+      defaultProfileEsqlQuery,
+      query: openingQuery,
+    });
+
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTab?.timeRestore && dataView.isTimeBased()
+      ...(persistedTab?.timeRestore && (esqlSource?.isTimeBased() ?? dataView.isTimeBased())
         ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
@@ -235,15 +324,11 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       initialGlobalState.filters = urlGlobalState.filters;
     }
 
-    // Get the initial app state based on a combo of the URL and persisted tab saved search
-    const initialAppState = getInitialAppState({
-      initialUrlState: urlAppState,
-      hasGlobalState: Object.keys(urlGlobalState || {}).length > 0,
-      persistedTab,
-      dataView,
-      services,
-      defaultProfileEsqlQuery: getState().defaultProfileEsqlQuery,
-    });
+    dispatch(
+      esqlSource
+        ? setDataSource({ tabId, dataSource: esqlSource })
+        : setDataView({ tabId, dataView })
+    );
 
     /**
      * Sync global services

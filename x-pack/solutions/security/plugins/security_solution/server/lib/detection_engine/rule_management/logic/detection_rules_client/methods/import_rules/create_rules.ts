@@ -10,7 +10,6 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkCreateRulesParams, RulesClient } from '@kbn/alerting-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../../common';
-import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleObjectId } from '../../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../../rule_schema';
 import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule_response_to_alerting_rule';
@@ -20,19 +19,14 @@ import type {
   ImportRuleSuccess,
   ImportRuleError,
   ImportableRuleData,
+  ImportRulesOptions,
   ImportRulesResult,
 } from './types';
 
 interface CreateRulesParams {
   rules: ImportableRuleData[];
-  options: CreateRulesOptions;
+  options: ImportRulesOptions;
   deps: CreateRulesDeps;
-}
-
-interface CreateRulesOptions {
-  allowMissingConnectorSecrets?: boolean;
-  changeTracking?: SecurityRuleChangeTracking;
-  batchSize: number;
 }
 
 interface CreateRulesDeps {
@@ -48,7 +42,7 @@ export async function createRules({
   const { actionsClient, rulesClient } = deps;
 
   const bulkInputs: BulkCreateRulesParams<RuleParams>['rules'] = [];
-  const pending = new Map<RuleObjectId, ImportRuleSuccess>();
+  const byId = new Map<RuleObjectId, ImportRuleSuccess>();
   const successes: ImportRuleSuccess[] = [];
   const errors: ImportRuleError[] = [];
 
@@ -75,8 +69,9 @@ export async function createRules({
         options: { id },
         allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
       });
-      pending.set(id, {
+      byId.set(id, {
         rule_id: rule.rule_id,
+        outcome: 'created',
         telemetry: {
           id,
           type: rule.type,
@@ -104,7 +99,7 @@ export async function createRules({
   });
 
   for (const id of successfulIds) {
-    const created = pending.get(id);
+    const created = byId.get(id);
 
     if (created != null) {
       successes.push(created);
@@ -112,7 +107,7 @@ export async function createRules({
   }
 
   for (const err of bulkErrors) {
-    const failed = pending.get(err.rule.id);
+    const failed = byId.get(err.rule.id);
 
     if (failed != null) {
       errors.push(

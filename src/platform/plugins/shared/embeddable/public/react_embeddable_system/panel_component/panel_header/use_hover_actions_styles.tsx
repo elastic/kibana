@@ -23,7 +23,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       right: ${euiTheme.size.xs};
       padding: var(--paddingAroundAction);
 
-      border-radius: ${euiTheme.border.radius.medium};
+      border-radius: ${euiTheme.border.radius.control};
       border: var(--internalBorderStyle);
       border-width: ${euiTheme.border.width
         .thin}; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
@@ -66,7 +66,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           background-color: ${euiTheme.colors.backgroundBasePlain};
           ${euiShadow(euiThemeContext, 'xs')}
           padding: var(--paddingAroundAction);
-          border-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiTheme.border.radius.control};
         }
 
         // shrink down to single wrapped element with no breakpoint when panel gets small
@@ -99,7 +99,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
 
       display: inline-block;
       container: hoverActionsAnchor / inline-size;
-      border-radius: ${euiTheme.border.radius.medium};
+      border-radius: ${euiTheme.border.radius.control};
       position: relative;
       vertical-align: top;
       width: 100%;
@@ -174,6 +174,18 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         .kbnGridPanel--expanded & {
           z-index: ${euiTheme.levels.toast};
         }
+      }
+
+      // select checkbox: only rendered in selection mode, pinned inside the panel's top right corner
+      // and vertically centered on the title bar (same height and side padding as .embPanel__header)
+      .embPanel__selectPanel {
+        position: absolute;
+        top: 0;
+        right: ${euiTheme.size.s};
+        height: ${euiTheme.size.xl};
+        display: flex;
+        align-items: center;
+        z-index: ${euiTheme.levels.menu};
       }
     `;
   }, [euiTheme, showBorder, isEditMode, euiThemeContext, hoverActionStyles]);

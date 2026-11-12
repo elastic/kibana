@@ -49,8 +49,15 @@ const envStagingExpression = {
   tagValue: 'staging',
 } as const;
 
+const envOneOfProdExpression: FilterExpressionValue = {
+  operator: FilterOperator.ONE_OF,
+  tagName: 'env',
+  tagValue: ['prod'],
+};
+
 const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
 const envStagingKey = getFilterExpressionLookupKey(envStagingExpression);
+const envOneOfProdKey = getFilterExpressionLookupKey(envOneOfProdExpression);
 
 const mockUseProjectPickerState = jest.fn();
 const mockUseProjectPickerActions = jest.fn();
@@ -287,16 +294,18 @@ describe('ProjectPickerFilterForm', () => {
 
   it('clears a submit validation error when a field changes', async () => {
     const user = userEvent.setup();
-    renderForm({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-    });
-
-    await fillFilterForm(user, { tagName: '_type', tagValue: 'security' });
+    mockFetchProjectsByRouting.mockResolvedValue({ origin: null, linkedProjects: [] });
+    renderForm(
+      { filterExpressions: createFilterExpressions([[envStagingExpression]]) },
+      { filterId: envStagingKey }
+    );
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
     expect(
-      screen.getByText('This filter already exists. Change the filter or edit the existing one.')
+      await screen.findByText(
+        'No projects match this filter. Adjust so at least one project is included in your search.'
+      )
     ).toBeInTheDocument();
 
     mockFetchProjectsByRouting.mockResolvedValue({
@@ -308,13 +317,15 @@ describe('ProjectPickerFilterForm', () => {
     await selectOption(user, 'is not');
 
     expect(
-      screen.queryByText('This filter already exists. Change the filter or edit the existing one.')
+      screen.queryByText(
+        'No projects match this filter. Adjust so at least one project is included in your search.'
+      )
     ).not.toBeInTheDocument();
     expect(within(screen.getByTestId('comboBoxInput')).getByRole('combobox')).not.toHaveAttribute(
       'aria-invalid',
       'true'
     );
-    expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
+    expect(defaultActions.updateFilterExpression).not.toHaveBeenCalled();
   });
 
   it('clears the selected value when switching to an exists operator and can submit', async () => {
@@ -444,16 +455,10 @@ describe('ProjectPickerFilterForm', () => {
 
   it('appends a custom value when using a one-of operator', async () => {
     const user = userEvent.setup();
-    renderForm();
-
-    await user.click(screen.getByRole('button', { name: 'Select a tag' }));
-    await selectOption(user, 'env');
-
-    await user.click(screen.getByRole('button', { name: 'is' }));
-    await selectOption(user, 'is one of');
-
-    await user.click(screen.getByTestId('comboBoxInput'));
-    await selectOption(user, 'prod');
+    renderForm(
+      { filterExpressions: createFilterExpressions([[envOneOfProdExpression]]) },
+      { filterId: envOneOfProdKey }
+    );
 
     const comboInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
     await user.type(comboInput, 'staging{enter}');

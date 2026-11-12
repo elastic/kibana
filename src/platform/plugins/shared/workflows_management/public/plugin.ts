@@ -19,6 +19,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import {
@@ -45,6 +46,11 @@ import type {
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
+/** The server config the browser gets (`exposeToBrowser`). */
+interface WorkflowsManagementPublicConfig {
+  pages: { enabled: boolean };
+}
+
 export class WorkflowsPlugin
   implements
     Plugin<
@@ -62,9 +68,11 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
+  private readonly pagesEnabled: boolean;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<WorkflowsManagementPublicConfig>) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
+    this.pagesEnabled = initializerContext.config.get().pages.enabled;
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
@@ -112,8 +120,8 @@ export class WorkflowsPlugin
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
-      // Deep links are refined reactively in start() from global uiSettings; at bootstrap the
-      // executions link stays off (default) and the library link on, matching getDeepLinks defaults.
+      // Deep links are refined reactively in start() from global uiSettings. At bootstrap
+      // both the executions view and the template library links are on, matching getDeepLinks defaults.
       deepLinks: getDeepLinks(),
       mount: async (params: AppMountParameters) => {
         // Load application bundle
@@ -133,7 +141,7 @@ export class WorkflowsPlugin
   ): WorkflowsPublicPluginStart {
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
-    triggerSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions, { pagesEnabled: this.pagesEnabled });
 
     this.subscribeToWorkflowsSettingChange(core);
 
@@ -179,9 +187,35 @@ export class WorkflowsPlugin
         })
       )
       .subscribe(() => {
-        core.http.post('/internal/workflows/disable', { version: '1' }).catch((err) => {
-          this.logger.error('Failed to disable all workflows on opt-out', { error: err });
-        });
+        core.http
+          .post<{ failures: Array<{ id: string; error: string }> }>('/internal/workflows/disable', {
+            version: '1',
+          })
+          .then(({ failures }) => {
+            if (failures.length > 0) {
+              core.notifications.toasts.addWarning({
+                title: i18n.translate('workflows.disableAll.partialFailureTitle', {
+                  defaultMessage: 'Some workflows could not be disabled',
+                }),
+                text: i18n.translate('workflows.disableAll.partialFailureDescription', {
+                  defaultMessage:
+                    '{count, plural, one {# workflow could} other {# workflows could}} not be disabled and may still run.',
+                  values: { count: failures.length },
+                }),
+              });
+            }
+          })
+          .catch((err) => {
+            this.logger.error('Failed to disable all workflows on opt-out', { error: err });
+            core.notifications.toasts.addDanger({
+              title: i18n.translate('workflows.disableAll.failureTitle', {
+                defaultMessage: 'Could not disable workflows',
+              }),
+              text: i18n.translate('workflows.disableAll.failureDescription', {
+                defaultMessage: 'Workflows may still run. Try again.',
+              }),
+            });
+          });
       });
   }
 
@@ -198,11 +232,11 @@ export class WorkflowsPlugin
     const deepLinksFlags$: Observable<DeepLinksParams> = combineLatest({
       libraryEnabled: core.settings.globalClient.get$<boolean>(
         WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
-        false
+        true
       ),
       executionsViewEnabled: core.settings.globalClient.get$<boolean>(
         WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
-        false
+        true
       ),
     });
 
@@ -274,6 +308,7 @@ export class WorkflowsPlugin
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      securityUi: depsStart.security.uiApi,
       workflowsManagement: {
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
@@ -287,6 +322,7 @@ export class WorkflowsPlugin
     return {
       ...coreStart,
       ...depsStart,
+      security: coreStart.security,
       ...additionalServices,
     };
   }

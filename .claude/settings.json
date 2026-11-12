@@ -20,16 +20,6 @@
           }
         ]
       }
-    ],
-    "PostToolBatch": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/reviewer_time_budget.mjs"
-          }
-        ]
-      }
     ]
   }
 }

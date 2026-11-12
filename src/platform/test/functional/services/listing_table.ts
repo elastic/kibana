@@ -12,6 +12,7 @@ import {
   CONTENT_LIST_TEST_SUBJECTS,
   getContentListToolbarSubjects,
   getContentListSelectionBarSubjects,
+  getContentListUserOptionSubj,
 } from '@kbn/content-list-common';
 import { FtrService } from '../ftr_provider_context';
 
@@ -26,16 +27,31 @@ const PREFIX_MAP = {
 // truth so this service can't drift from what the components render — see the
 // class JSDoc.
 const TOOLBAR_SUBJECTS = getContentListToolbarSubjects();
+const PAGINATION_NEXT_BUTTON = 'pagination-button-next';
 const CONTENT_LIST_TABLE = CONTENT_LIST_TEST_SUBJECTS.table;
 const CONTENT_LIST_TABLE_SKELETON = CONTENT_LIST_TEST_SUBJECTS.tableSkeleton;
 const CONTENT_LIST_ITEM_LINK = CONTENT_LIST_TEST_SUBJECTS.itemLink;
+const CONTENT_LIST_INSPECT_ACTION = CONTENT_LIST_TEST_SUBJECTS.actionInspect;
+const CONTENT_LIST_EDIT_ACTION = CONTENT_LIST_TEST_SUBJECTS.actionEdit;
 const TABLE_LOADING_SELECTOR = [
+  // Legacy: swaps its own subject while fetching.
   '[data-test-subj~="listingTable-isLoading"]',
+  // Content List: skeleton on first load, `aria-busy` on subsequent refetches.
   `[data-test-subj~="${CONTENT_LIST_TABLE_SKELETON}"]`,
+  `[data-test-subj~="${CONTENT_LIST_TABLE}"][aria-busy="true"]`,
+  // Fallback for listings that render a bare EuiBasicTable with no own signal.
   '.euiBasicTable-loading',
 ].join(', ');
+/**
+ * Pass to {@link ListingTableService.selectUsers} to toggle the "no creator"
+ * option. Each framework spells that option differently; this maps to both.
+ */
+export const NO_CREATOR = 'no-creator';
+const NO_CREATOR_SPELLING = { legacy: 'null', contentList: '__no_creator__' };
+
 const CONTENT_LIST_SEARCH_BOX = TOOLBAR_SUBJECTS.searchBox;
 const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
+const CONTENT_LIST_CREATED_BY_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.createdByFilter;
 const CONTENT_LIST_SELECTION_BAR_DELETE = getContentListSelectionBarSubjects(
   TOOLBAR_SUBJECTS.selectionBar
 ).deleteButton;
@@ -76,8 +92,22 @@ export class ListingTableService extends FtrService {
     toggleButtonTestSubject: 'userFilterPopoverButton',
   });
 
+  /**
+   * Waits for either the legacy or the Content List variant of a control and
+   * returns whether the legacy one rendered.
+   */
+  private async isLegacyVariant(legacySubj: string, contentListSubj: string): Promise<boolean> {
+    const variant = await this.testSubjects.waitForFirst([legacySubj, contentListSubj], {
+      timeout: 5000,
+    });
+    if (!variant) {
+      throw new Error(`Neither ${legacySubj} nor ${contentListSubj} has rendered`);
+    }
+    return variant === legacySubj;
+  }
+
   private async getSearchFilter() {
-    if (await this.testSubjects.exists('tableListSearchBox', { timeout: 1000 })) {
+    if (await this.isLegacyVariant('tableListSearchBox', CONTENT_LIST_SEARCH_BOX)) {
       return this.testSubjects.find('tableListSearchBox');
     }
     return this.testSubjects.find(CONTENT_LIST_SEARCH_BOX);
@@ -137,12 +167,12 @@ export class ListingTableService extends FtrService {
     }
 
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('listingTable-isLoaded', { timeout: 1000 })) {
+      if (await this.testSubjects.exists('listingTable-isLoaded')) {
         return true;
       }
       // Content List keeps its table mounted behind a loading skeleton.
-      if (await this.testSubjects.exists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
-        if (!(await this.testSubjects.exists(CONTENT_LIST_TABLE_SKELETON, { timeout: 1000 }))) {
+      if (await this.testSubjects.exists(CONTENT_LIST_TABLE)) {
+        if (!(await this.testSubjects.exists(CONTENT_LIST_TABLE_SKELETON))) {
           return true;
         }
       }
@@ -152,10 +182,10 @@ export class ListingTableService extends FtrService {
 
   public async loadNextPageIfAvailable() {
     const morePages = !(
-      (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
+      (await this.testSubjects.getAttribute(PAGINATION_NEXT_BUTTON, 'disabled')) === 'true'
     );
     if (morePages) {
-      await this.testSubjects.click('pagerNextButton');
+      await this.testSubjects.click(PAGINATION_NEXT_BUTTON);
       await this.waitUntilTableIsLoaded();
     }
 
@@ -194,7 +224,7 @@ export class ListingTableService extends FtrService {
 
   public async openTagPopover(): Promise<void> {
     this.log.debug('ListingTable.openTagPopover');
-    if (await this.testSubjects.exists('tagFilterPopoverButton', { timeout: 1000 })) {
+    if (await this.isLegacyVariant('tagFilterPopoverButton', CONTENT_LIST_TAGS_FILTER_BUTTON)) {
       await this.tagPopoverToggle.open();
       return;
     }
@@ -203,7 +233,7 @@ export class ListingTableService extends FtrService {
 
   public async closeTagPopover(): Promise<void> {
     this.log.debug('ListingTable.closeTagPopover');
-    if (await this.testSubjects.exists('tagFilterPopoverButton', { timeout: 1000 })) {
+    if (await this.isLegacyVariant('tagFilterPopoverButton', CONTENT_LIST_TAGS_FILTER_BUTTON)) {
       await this.tagPopoverToggle.close();
       return;
     }
@@ -212,26 +242,35 @@ export class ListingTableService extends FtrService {
   }
 
   /**
-   * Select users in the searchbar's user filter.
+   * Toggles users in either the legacy or Content List Created by filter.
+   *
+   * Takes usernames, not display names, on both frameworks. Pass
+   * {@link NO_CREATOR} for the "no creator" option.
    */
   public async selectUsers(...userNames: string[]): Promise<void> {
-    await this.openUsersPopover();
-    // select users
-    for (const userName of userNames) {
-      await this.testSubjects.click(`userProfileSelectableOption-${userName}`);
+    const isLegacy = await this.isLegacyVariant(
+      'userFilterPopoverButton',
+      CONTENT_LIST_CREATED_BY_FILTER_BUTTON
+    );
+
+    if (isLegacy) {
+      await this.userPopoverToggle.open();
+      for (const userName of userNames) {
+        const key = userName === NO_CREATOR ? NO_CREATOR_SPELLING.legacy : userName;
+        await this.testSubjects.click(`userProfileSelectableOption-${key}`);
+      }
+      await this.userPopoverToggle.close();
+      await this.waitUntilTableIsLoaded();
+      return;
     }
-    await this.closeUsersPopover();
+
+    await this.testSubjects.click(CONTENT_LIST_CREATED_BY_FILTER_BUTTON);
+    for (const userName of userNames) {
+      const key = userName === NO_CREATOR ? NO_CREATOR_SPELLING.contentList : userName;
+      await this.testSubjects.click(getContentListUserOptionSubj('createdBy', key));
+    }
+    await this.testSubjects.click(CONTENT_LIST_CREATED_BY_FILTER_BUTTON);
     await this.waitUntilTableIsLoaded();
-  }
-
-  public async openUsersPopover(): Promise<void> {
-    this.log.debug('ListingTable.openUsersPopover');
-    await this.userPopoverToggle.open();
-  }
-
-  public async closeUsersPopover(): Promise<void> {
-    this.log.debug('ListingTable.closeUsersPopover');
-    await this.userPopoverToggle.close();
   }
 
   /**
@@ -249,15 +288,54 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickActionButton(actionSelector: string, index: number = 0) {
-    const buttons = await this.testSubjects.findAll(actionSelector);
-    await buttons[index].click();
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the buttons without an implicit wait.
+      const buttons = await this.testSubjects.findAll(actionSelector, 0);
+      const button = buttons[index];
+      if (!button) {
+        throw new Error(`Action ${actionSelector} is not available at index ${index}`);
+      }
+      await button.click();
+    });
+  }
+
+  /**
+   * Clicks a row action on the row whose title matches `name` exactly. Addressing the
+   * row by title keeps the click on the intended item when a search leaves sibling rows
+   * mounted, which the index-based {@link clickActionButton} cannot.
+   */
+  public async clickRowActionButton(actionSelector: string, name: string) {
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the rows without an implicit wait.
+      const rows = await this.find.allByCssSelector('.euiTableRow', 0);
+      for (const row of rows) {
+        // The title column is first, so the row's leading link carries its name.
+        const [titleLink] = await row.findAllByCssSelector('.euiLink', 0);
+        if (!titleLink || (await titleLink.getVisibleText()).trim() !== name) {
+          continue;
+        }
+        const [button] = await row.findAllByTestSubject(actionSelector, 0);
+        if (!button) {
+          throw new Error(`Action ${actionSelector} is not available on row "${name}".`);
+        }
+        await button.click();
+        return;
+      }
+      throw new Error(`No listing row found with name "${name}".`);
+    });
+  }
+
+  public async clickEditAction(name: string) {
+    const isLegacy = await this.isLegacyVariant('edit-action', CONTENT_LIST_EDIT_ACTION);
+    await this.clickRowActionButton(isLegacy ? 'edit-action' : CONTENT_LIST_EDIT_ACTION, name);
   }
 
   /**
    * Open the inspect flyout
    */
   public async inspectVisualization(index: number = 0) {
-    await this.clickActionButton('inspect-action', index);
+    const isLegacy = await this.isLegacyVariant('inspect-action', CONTENT_LIST_INSPECT_ACTION);
+    await this.clickActionButton(isLegacy ? 'inspect-action' : CONTENT_LIST_INSPECT_ACTION, index);
   }
 
   public async inspectorFieldsReadonly() {
@@ -348,7 +426,7 @@ export class ListingTableService extends FtrService {
     await this.searchForItemWithName(name);
     await this.retry.try(async () => {
       let matches: number;
-      if (await this.testSubjects.exists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
+      if (await this.testSubjects.exists(CONTENT_LIST_TABLE)) {
         // Content List item links carry no per-item subject; match on exact text.
         const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
         const texts = await Promise.all(links.map((link) => link.getVisibleText()));
@@ -364,7 +442,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickDeleteSelected() {
-    if (await this.testSubjects.exists('deleteSelectedItems', { timeout: 1000 })) {
+    if (await this.isLegacyVariant('deleteSelectedItems', CONTENT_LIST_SELECTION_BAR_DELETE)) {
       await this.testSubjects.click('deleteSelectedItems');
       return;
     }
@@ -400,19 +478,22 @@ export class ListingTableService extends FtrService {
    */
   public async clickItemLink(appName: AppName, name: string) {
     const legacySubj = `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`;
-    if (await this.testSubjects.exists(legacySubj, { timeout: 1000 })) {
-      await this.testSubjects.click(legacySubj);
-      return;
-    }
-    // Content List item links carry no per-item subject; match on exact text.
-    const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
-    for (const link of links) {
-      if ((await link.getVisibleText()).trim() === name) {
-        await link.click();
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.testSubjects.exists(legacySubj)) {
+        await this.testSubjects.click(legacySubj);
         return;
       }
-    }
-    throw new Error(`No listing row found with name "${name}".`);
+      // Content List item links carry no per-item subject; match on exact text.
+      // Probe without an implicit wait so a legacy table still gets re-checked.
+      const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK, 0);
+      for (const link of links) {
+        if ((await link.getVisibleText()).trim() === name) {
+          await link.click();
+          return;
+        }
+      }
+      throw new Error(`No listing row found with name "${name}".`);
+    });
   }
 
   /**
@@ -432,11 +513,11 @@ export class ListingTableService extends FtrService {
    */
   public async clickNewButton(): Promise<void> {
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('newItemButton', { timeout: 1000 })) {
+      if (await this.testSubjects.exists('newItemButton')) {
         await this.testSubjects.click('newItemButton');
         return;
       }
-      if (await this.testSubjects.exists('app-menu-overflow-button', { timeout: 1000 })) {
+      if (await this.testSubjects.exists('app-menu-overflow-button')) {
         await this.testSubjects.click('app-menu-overflow-button');
         await this.testSubjects.click('newItemButton');
         return;

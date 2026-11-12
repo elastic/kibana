@@ -9,6 +9,9 @@
 
 import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
 
+/** Whose credentials a workflow execution runs with. */
+export type WorkflowExecutionRunAs = 'service_account' | 'user';
+
 /**
  * Base parameters for all workflow execution telemetry events
  */
@@ -55,6 +58,16 @@ export interface BaseWorkflowExecutionTelemetryParams {
    */
   managedVersion?: number;
   /**
+   * Whose credentials the execution runs with: 'service_account' when it is bound to a service
+   * account, 'user' when it runs as the user or API key that triggered or scheduled it.
+   */
+  runAs: WorkflowExecutionRunAs;
+  /**
+   * Whether the service account came from the parent workflow rather than this workflow's own
+   * `settings.run_as`. Only present when runAs is 'service_account'.
+   */
+  runAsInherited?: boolean;
+  /**
    * The alert rule ID if triggered by alert. Only present when triggerType is 'alert'.
    */
   ruleId?: string;
@@ -73,6 +86,17 @@ export interface BaseWorkflowExecutionTelemetryParams {
    * Only present for sub-workflow executions when recorded on the execution context.
    */
   parentWorkflowInvocation?: 'sync' | 'async';
+  /**
+   * Every ancestor of a sub-workflow execution, root first and direct parent last, each with how it
+   * invoked the next run down. The last hop matches parentWorkflowId and parentWorkflowInvocation.
+   * Omitted for a top-level execution, and for a sub-workflow execution whose chain started before
+   * the chain was recorded.
+   */
+  executionChain?: Array<{
+    executionId: string;
+    invocation: 'sync' | 'async';
+    workflowId: string;
+  }>;
   /**
    * Event-chain depth for runs scheduled via event-driven emits.
    * Not sub-workflow composition; omitted when absent.
@@ -160,13 +184,14 @@ export enum WorkflowExecutionTelemetryEventTypes {
 /**
  * Event-driven execution was skipped in runWorkflow after a task was already scheduled (operator kill switch flipped).
  *
- * Omits composition fields (`compositionDepth`, `parentWorkflowId`, `parentWorkflowInvocation`): suppression is for
- * event-driven executions, not sub-workflow composition. Includes optional `eventChainDepth` when persisted on the execution.
+ * Omits composition fields (`compositionDepth`, `parentWorkflowId`, `parentWorkflowInvocation`, `executionChain`):
+ * suppression is for event-driven executions, not sub-workflow composition. Includes optional `eventChainDepth` when
+ * persisted on the execution.
  */
 export interface EventDrivenExecutionSuppressedParams
   extends Omit<
     BaseWorkflowExecutionTelemetryParams,
-    'compositionDepth' | 'parentWorkflowId' | 'parentWorkflowInvocation'
+    'compositionDepth' | 'parentWorkflowId' | 'parentWorkflowInvocation' | 'executionChain'
   > {
   eventName: string;
   logTriggerEventsEnabled: boolean;

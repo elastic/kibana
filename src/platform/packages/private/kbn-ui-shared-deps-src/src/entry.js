@@ -18,9 +18,6 @@ if (window.__kbnHardenPrototypes__) {
   require('@kbn/security-hardening/prototype');
 }
 
-export const Jquery = require('jquery');
-window.$ = window.jQuery = Jquery;
-
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');
 export const KbnI18n = require('@kbn/i18n');
@@ -121,6 +118,7 @@ export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
 export const KbnCodeEditor = require('@kbn/code-editor');
 export const KbnEsqlAst = require('@kbn/esql-language');
 export const KbnEbtTools = require('@kbn/ebt-tools');
+export const KbnEbtToolsReact = require('@kbn/ebt-tools/react');
 export const ElasticApmRumCore = require('@elastic/apm-rum-core');
 export const KbnReactKibanaContextCommon = require('@kbn/react-kibana-context-common');
 export const KbnReactKibanaContextRoot = require('@kbn/react-kibana-context-root');

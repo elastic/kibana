@@ -5,11 +5,27 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { RequestHandler } from '@kbn/core/server';
-import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
+import { License } from '@kbn/license-api-guard-plugin/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
-import { DATA_SOURCE_TEST_ROUTE_PATH } from '../../../common';
-import type { DataFederationConfigType } from '../../config';
+import {
+  DATA_SOURCE_TEST_ROUTE_PATH,
+  MINIMUM_LICENSE_TYPE,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+} from '../../../common';
+import {
+  DEFAULT_AWS_CLOUDFORMATION_TEMPLATE_URL,
+  type DataFederationConfigType,
+} from '../../config';
 import { testDataSourceBodySchema } from './data_source_schema';
 import { registerTestDataSourceConnection } from './test_data_source_connection';
 
@@ -18,6 +34,22 @@ const defaultConfig: DataFederationConfigType = {
   enableFederatedIdentityAuth: false,
   enableGoogleCloudStorageDataSourceType: false,
   enableAzureDataSourceType: false,
+  awsCloudFormationTemplateUrl: DEFAULT_AWS_CLOUDFORMATION_TEMPLATE_URL,
+};
+
+const createEnterpriseLicense = (): License => {
+  const license = new License();
+  license.setup({ pluginName: PLUGIN_NAME, logger: loggingSystemMock.createLogger() });
+  license.start({
+    pluginId: PLUGIN_ID,
+    minimumLicenseType: MINIMUM_LICENSE_TYPE,
+    licensing: {
+      license$: new BehaviorSubject(
+        licensingMock.createLicense({ license: { type: 'enterprise' } })
+      ),
+    },
+  });
+  return license;
 };
 
 const elasticsearchError = (statusCode: number, reason: string): Error =>
@@ -28,7 +60,10 @@ const elasticsearchError = (statusCode: number, reason: string): Error =>
 
 const setup = (config: Partial<DataFederationConfigType> = {}) => {
   const router = httpServiceMock.createRouter();
-  registerTestDataSourceConnection(router, { ...defaultConfig, ...config });
+  registerTestDataSourceConnection(router, createEnterpriseLicense(), {
+    ...defaultConfig,
+    ...config,
+  });
 
   const [[routeConfig, handler]] = router.post.mock.calls;
   const coreContext = coreMock.createRequestHandlerContext();

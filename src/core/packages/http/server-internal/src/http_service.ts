@@ -29,6 +29,8 @@ import type {
   IContextContainer,
   IContextProvider,
   IRouter,
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfCredentialRefresher,
 } from '@kbn/core-http-server';
 import type {
   InternalContextSetup,
@@ -58,6 +60,7 @@ import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import {
   createInternalHttpSelfClient,
   type InternalHttpSelfService,
+  type SelfClientOwnClientAuthenticationCheck,
   type SelfClientUiamAttestationGetter,
 } from './self_client';
 
@@ -86,6 +89,9 @@ export class HttpService
   private currentConfig?: HttpConfig;
   private selfClient?: InternalHttpSelfService;
   private selfClientUiamAttestationGetter?: SelfClientUiamAttestationGetter;
+  private selfClientOwnClientAuthenticationCheck?: SelfClientOwnClientAuthenticationCheck;
+  private selfClientUnauthorizedErrorHandler?: HttpSelfUnauthorizedErrorHandler;
+  private selfClientCredentialRefresher?: HttpSelfCredentialRefresher;
 
   private readonly log: Logger;
   private readonly env: Env;
@@ -218,6 +224,18 @@ export class HttpService
         Router.on('onPostValidate', cb);
       },
       getRegisteredDeprecatedApis: () => serverContract.getDeprecatedRoutes(),
+      setSelfClientUnauthorizedErrorHandler: (handler) => {
+        if (this.selfClientUnauthorizedErrorHandler) {
+          throw new Error('The self client unauthorized error handler was already set');
+        }
+        this.selfClientUnauthorizedErrorHandler = handler;
+      },
+      setSelfClientCredentialRefresher: (refresher) => {
+        if (this.selfClientCredentialRefresher) {
+          throw new Error('The self client credential refresher was already set');
+        }
+        this.selfClientCredentialRefresher = refresher;
+      },
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
@@ -262,13 +280,26 @@ export class HttpService
         kibanaVersion: this.env.packageInfo.version,
         log: this.log.get('self-client'),
         target: internalSetup.config.selfHttp.target,
+        // Resolved at call time: these are registered after the start contract is built.
         getUiamAttestationGetter: () => this.selfClientUiamAttestationGetter,
+        getOwnClientAuthenticationCheck: () => this.selfClientOwnClientAuthenticationCheck,
+        getUnauthorizedErrorHandler: () => this.selfClientUnauthorizedErrorHandler,
+        getCredentialRefresher: () => this.selfClientCredentialRefresher,
       })),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);
       },
       setSelfClientUiamAttestationGetter: (getter) => {
+        if (this.selfClientUiamAttestationGetter) {
+          throw new Error('The self client UIAM attestation getter was already set');
+        }
         this.selfClientUiamAttestationGetter = getter;
+      },
+      setSelfClientOwnClientAuthenticationCheck: (check) => {
+        if (this.selfClientOwnClientAuthenticationCheck) {
+          throw new Error('The self client own client authentication check was already set');
+        }
+        this.selfClientOwnClientAuthenticationCheck = check;
       },
     };
   }

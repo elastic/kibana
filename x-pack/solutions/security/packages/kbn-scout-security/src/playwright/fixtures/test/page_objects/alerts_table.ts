@@ -82,6 +82,21 @@ export class AlertsTablePage {
     await row.getByTestId('expand-event').click();
   }
 
+  /**
+   * Opens the document flyout for the first alert whose rule-name cell matches.
+   * Use when one rule can emit multiple alerts (`expandAlertDetailsFlyout` requires exactly one).
+   */
+  async expandFirstAlertDetailsFlyout(ruleName: string, timeout = 60_000) {
+    await this.alertsTable.waitFor({ state: 'visible', timeout });
+    const matchingCells = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    // One rule can emit several alerts; open the first matching row.
+    // eslint-disable-next-line playwright/no-nth-methods
+    const firstCell = matchingCells.first();
+    await firstCell.waitFor({ state: 'visible', timeout });
+    const row = firstCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    await row.getByTestId('expand-event').click();
+  }
+
   async clickRuleName(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
     // The rule column renders the rule name as a link (data-test-subj="ruleName"); filtered by the
@@ -99,11 +114,20 @@ export class AlertsTablePage {
     // container exposes no stable data-test-subj, so the `.euiDataGrid__virtualized` class is a
     // deliberate, documented exception (a stable test-subj on this container would be a good
     // follow-up in EUI/Kibana).
-    await this.alertsTable
-      .locator('.euiDataGrid__virtualized')
-      .evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
-
+    // The grid can still re-render (refetch, remount, late column widths) after it first reports
+    // loaded, which resets or shortens the scroll; re-apply it until the IP cell is mounted.
     const ipCell = this.alertsTable.getByTestId('network-details').filter({ hasText: ip });
+    const virtualized = this.alertsTable.locator('.euiDataGrid__virtualized');
+    await expect
+      .poll(
+        async () => {
+          if ((await ipCell.count()) > 0) return true;
+          await virtualized.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+          return false;
+        },
+        { intervals: [250] }
+      )
+      .toBe(true);
     await ipCell.click();
   }
 

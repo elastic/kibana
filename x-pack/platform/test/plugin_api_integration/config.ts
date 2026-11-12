@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...integrationConfig.get('kbnTestServer'),
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.eventLog.logEntries=true',
+        '--xpack.eventLog.logEntries=false',
         '--xpack.eventLog.indexEntries=true',
         // Pin cases analyticsV2 ON so the `check_registered_task_types` guard is
         // deterministic regardless of the plugin's default. With v2 enabled the
@@ -50,15 +50,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // task type is registered, matching the `check_registered_task_types` guard
         // list regardless of the plugin default.
         '--xpack.cases.templates.enabled=true',
-        // Plugin is disabled by default; pin it ON so
-        // `nightshift-investigations:reconcile_investigation_statuses` is registered
-        // and matches the `check_registered_task_types` guard list.
-        '--xpack.nightshift_investigations.enabled=true',
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
           'crowdstrikeConnectorOn',
           'microsoftDefenderEndpointOn',
         ])}`,
-        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths([
+          path.resolve(__dirname, 'plugins'),
+          path.resolve(__dirname, '../../test_plugins/response_ops/plugin_api_integration'),
+        ]),
       ],
     },
   };

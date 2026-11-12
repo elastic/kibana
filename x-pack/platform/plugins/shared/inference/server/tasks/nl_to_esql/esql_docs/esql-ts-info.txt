@@ -1,0 +1,87 @@
+# TS-INFO
+
+The `TS_INFO` processing command retrieves information about individual time series available in time series data streams, along with the dimension values that identify each series.
+
+`TS_INFO` is a more fine-grained variant of `METRICS_INFO`: where `METRICS_INFO` returns one row per distinct metric, `TS_INFO` returns one row per metric and time series combination. Any `WHERE` filters that precede `TS_INFO` narrow the set of time series considered.
+
+`TS_INFO` produces one row for every metric and time series combination that matches the preceding filters. It includes all columns from `METRICS_INFO`, plus a `dimensions` column containing a JSON-encoded representation of the dimension key/value pairs that identify the time series.
+
+The output contains the following columns, all of type `keyword`:
+
+- `metric_name`: The name of the metric field.
+- `data_stream`: The data streams that contain this metric.
+- `unit`: The unit declared in the field mapping, such as `bytes` or `packets`.
+- `metric_type`: The metric type, for example `counter`, `gauge`, or `histogram`.
+- `field_type`: The Elasticsearch field type, for example `long`, `double`, `histogram`, `tdigest`, or `exponential_histogram`.
+- `dimension_fields`: The dimension field names associated with this metric.
+- `dimensions`: A JSON-encoded object containing the dimension key/value pairs that identify the time series.
+
+## Syntax
+
+`TS_INFO`
+
+### Parameters
+
+`TS_INFO` takes no parameters.
+
+## Examples
+
+List every metric and time series pair in the targeted data stream, sorted by metric name and dimension values:
+
+```esql
+TS k8s
+| TS_INFO
+| SORT metric_name, dimensions
+```
+
+Discover time series with matching `cluster` values before retrieving metadata:
+
+```esql
+TS k8s
+| WHERE cluster == "prod"
+| TS_INFO
+| SORT metric_name, dimensions
+```
+
+Select only metric names and dimension values from the metadata rows:
+
+```esql
+TS k8s
+| WHERE cluster == "prod"
+| TS_INFO
+| KEEP metric_name, dimensions
+| SORT metric_name, dimensions
+```
+
+Filter time series metadata to gauge metrics:
+
+```esql
+TS k8s
+| TS_INFO
+| WHERE metric_type == "gauge"
+| SORT metric_name, dimensions
+```
+
+Count distinct time series for each metric:
+
+```esql
+TS k8s
+| TS_INFO
+| STATS series_count = COUNT(*) BY metric_name
+| SORT metric_name
+```
+
+Count distinct metrics reported by each time series:
+
+```esql
+TS k8s
+| TS_INFO
+| STATS metric_count = COUNT_DISTINCT(metric_name) BY dimensions
+| SORT dimensions
+```
+
+## Limitations
+
+- `TS_INFO` can only be used after a `TS` source command. Using it after `FROM` or other source commands produces an error.
+- `TS_INFO` must appear before pipeline-breaking commands such as `STATS`, `SORT`, or `LIMIT`.
+- The output replaces the original table: downstream commands operate on the metadata rows, not the raw time series documents.

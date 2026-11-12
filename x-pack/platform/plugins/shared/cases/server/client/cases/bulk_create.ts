@@ -11,7 +11,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError, isSODecoratedError, isSOError } from '../../common/error';
@@ -19,12 +19,16 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import { resolveExtractObservables } from '../../../common/utils/case_settings';
 import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
   CasePostRequest,
 } from '../../../common/types/api';
-import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
+import {
+  BulkCreateCasesResponseSchema,
+  BulkCreateCasesRequestSchema,
+} from '../../../common/types/api';
 import {
   validateCustomFieldsStructure,
   validateRequiredCustomFields,
@@ -40,7 +44,7 @@ import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseReque
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
-import type { CaseTransformedAttributes } from '../../common/types/case';
+import type { CaseTransformedAttributes, ExtractObservablesSource } from '../../common/types/case';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
@@ -77,6 +81,14 @@ export interface BulkCreateCasesClientOptions {
    * space silently breaks every automated case creation in it.
    */
   relaxRequiredFields?: boolean;
+  /**
+   * Where each case's `settings.extractObservables` value came from, keyed by the case id the
+   * caller put in the request. Stored as the server-owned `extract_observables_source`
+   * attribute. Only an automated writer knows the source (the cases connector knows a rule
+   * override from a template value). A case without an entry gets no source. The source is
+   * always `explicit`, `rule`, `template`, or `space_default`.
+   */
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
 }
 
 /**
@@ -120,11 +132,15 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    const decodedData = decodeWithExcessOrThrow(BulkCreateCasesRequestRt)(data);
+    const decodedData = decodeWithExcessOrThrowZod(BulkCreateCasesRequestSchema)(data);
     const configurations = await casesClient.configure.get();
 
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
       configurations.map((conf) => [conf.owner, conf.customFields])
+    );
+
+    const extractObservablesMap: Map<string, boolean> = new Map(
+      configurations.map((conf) => [conf.owner, conf.extractObservables])
     );
 
     const casesWithIds = getCaseWithIds(decodedData);
@@ -183,6 +199,8 @@ export const bulkCreate = async (
         globalFieldsByOwner,
         templatesEnabled: clientArgs.config.templates.enabled,
         relaxRequiredFields: options.relaxRequiredFields === true,
+        spaceExtractObservables: extractObservablesMap.get(theCase.owner),
+        extractObservablesSourceByCaseId: options.extractObservablesSourceByCaseId,
       });
       bulkCreateRequest.push(request);
     }
@@ -295,7 +313,7 @@ export const bulkCreate = async (
     for (const theCase of casesSOs) {
       userActions.push(createBulkCreateUserActionsRequest({ theCase, user }));
 
-      // The create_case user action payload does not carry `template` (CreateCaseUserActionRt
+      // The create_case user action payload does not carry `template` (CreateCaseUserActionSchema
       // strips it), so a dedicated entry is needed for the activity log to reflect which template
       // (if any) the case was created from — mirrors create.ts's single-case equivalent.
       if (clientArgs.config.templates.enabled && theCase.attributes.template != null) {
@@ -406,7 +424,9 @@ export const bulkCreate = async (
       })
     );
 
-    const createdCasesResponse = decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
+    const createdCasesResponse = decodeOrThrowZod(BulkCreateCasesResponseSchema)({
+      cases: res,
+    });
 
     createdCasesResponse.cases.forEach((createdCase) => {
       clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
@@ -489,6 +509,8 @@ const createBulkCreateCaseRequest = async ({
   globalFieldsByOwner,
   templatesEnabled,
   relaxRequiredFields,
+  spaceExtractObservables,
+  extractObservablesSourceByCaseId,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -504,10 +526,15 @@ const createBulkCreateCaseRequest = async ({
   templatesEnabled: boolean;
   /** See {@link BulkCreateCasesClientOptions.relaxRequiredFields}. */
   relaxRequiredFields: boolean;
+  /** Space-level extractObservables default from the configuration saved object. */
+  spaceExtractObservables?: boolean;
+  /** See {@link BulkCreateCasesClientOptions.extractObservablesSourceByCaseId}. */
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
-  const { id, ...caseWithoutId } = theCase;
+  const { id, ...caseWithoutIdRaw } = theCase;
+  let caseWithoutId = caseWithoutIdRaw;
 
   // Caller intent, captured before pairing/normalization can populate extended_fields from a
   // linked customFields value or a template default — mirrors create.ts's
@@ -534,11 +561,23 @@ const createBulkCreateCaseRequest = async ({
   // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
   // only sees the latter and rejects the former as missing.
 
-  /**
-   * Trim title, category, description and tags
-   * and fill out missing custom fields
-   * before saving to ES
-   */
+  const extractObservablesSource = extractObservablesSourceByCaseId?.get(id);
+
+  // Resolve the final extractObservables value.
+  // Precedence: caller-explicit > space config > owner default > false.
+  // bulkCreate has no HTTP route and its only caller (the cases connector) inherits every value
+  // from a template, the space configuration or the owner default. So a value for an owner that
+  // cannot store true is coerced to false, not rejected: stored data must not fail the rule.
+  caseWithoutId = {
+    ...caseWithoutId,
+    settings: {
+      ...caseWithoutId.settings,
+      extractObservables: resolveExtractObservables(
+        caseWithoutId.owner,
+        caseWithoutId.settings.extractObservables ?? spaceExtractObservables
+      ),
+    },
+  };
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 
@@ -639,6 +678,9 @@ const createBulkCreateCaseRequest = async ({
         user,
         newCase: normalizedCase,
       }),
+      ...(extractObservablesSource !== undefined
+        ? { extract_observables_source: extractObservablesSource }
+        : {}),
     },
   };
 };

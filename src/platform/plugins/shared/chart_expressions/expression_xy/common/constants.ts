@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisIconType } from '@kbn/chart-icons';
+
 export const XY_VIS = 'xyVis';
 export const LAYERED_XY_VIS = 'layeredXyVis';
 export const DATA_DECORATION_CONFIG = 'dataDecorationConfig';
@@ -127,7 +129,7 @@ export const AvailableReferenceLineIcons = {
   STAR_FILLED: 'starFilled',
   TAG: 'tag',
   TRIANGLE: 'triangle',
-} as const;
+} as const satisfies Record<string, VisIconType>;
 
 export const AxisModes = {
   NORMAL: 'normal',

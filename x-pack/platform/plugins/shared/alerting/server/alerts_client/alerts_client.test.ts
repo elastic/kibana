@@ -6,6 +6,8 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
@@ -504,9 +506,28 @@ describe('Alerts Client', () => {
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,
           });
+          // the fetched active alert is missing from task state, so it is restored
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
             ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': {
+                state: { start: '2023-03-28T12:27:28.159Z', duration: '0' },
+                meta: {
+                  uuid: 'abc',
+                  flapping: false,
+                  flappingHistory: [true],
+                  activeCount: 0,
+                  pendingRecoveredCount: 0,
+                  maintenanceWindowIds: [],
+                  maintenanceWindowNames: [],
+                },
+              },
+            },
           });
+          expect(logger.warn).toHaveBeenCalledWith(
+            `Restored 1 tracked alert(s) missing from task state ${ruleInfo}: 1`,
+            logTags
+          );
 
           expect(clusterClient.search).toHaveBeenCalledTimes(1);
           expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
@@ -610,16 +631,11 @@ describe('Alerts Client', () => {
 
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          try {
-            await alertsClient.initializeExecution(defaultExecutionOpts);
-          } catch (e) {
-            spy.mockRestore();
-            expect(e.message).toBe(`search failed!`);
-          }
-
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            defaultExecutionOpts
+          await expect(alertsClient.initializeExecution(defaultExecutionOpts)).rejects.toThrow(
+            'search failed!'
           );
+
+          expect(mockLegacyAlertsClient.initializeExecution).not.toHaveBeenCalled();
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error searching for tracked alerts by UUID ${ruleInfo} - search failed!`,
@@ -1592,7 +1608,7 @@ describe('Alerts Client', () => {
           expect(orphanDoc).toEqual(expect.objectContaining({ [ALERT_TRACKED]: false }));
         });
 
-        test('should untrack still-active tracked AAD docs that are not in the working set without recovering them', async () => {
+        test('should recover still-active tracked AAD docs that are missing from task state', async () => {
           const orphanAlert = {
             ...fetchedAlert1,
             [ALERT_STATUS]: 'active',
@@ -1632,19 +1648,305 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
+          expect(logger.warn).toHaveBeenCalledWith(
+            `Restored 1 tracked alert(s) missing from task state ${ruleInfo}: orphan`,
+            logTags
+          );
+
           const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
             Record<string, unknown>
           >;
+          // the existing document is updated in place, not created again
+          expect(bulkBody).toContainEqual({
+            index: {
+              _id: 'orphan-uuid',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              if_seq_no: 41,
+              if_primary_term: 665,
+              require_alias: false,
+            },
+          });
           const orphanDoc = bulkBody.find((item) => item[ALERT_UUID] === 'orphan-uuid');
           expect(orphanDoc).toEqual(
             expect.objectContaining({
-              [ALERT_TRACKED]: false,
-              [ALERT_STATUS]: 'active',
+              [ALERT_STATUS]: 'recovered',
+              [ALERT_ACTION_GROUP]: 'recovered',
+              [EVENT_ACTION]: 'close',
+              [ALERT_END]: date,
+              [ALERT_START]: '2023-03-28T12:27:28.159Z',
             })
           );
-          expect(orphanDoc).not.toEqual(
+        });
+
+        test('should reuse the existing active alert document when it is missing from task state', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          // task state is empty, e.g. the previous run persisted the alert and then died
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report the same instance id again
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // The alert keeps the uuid of the existing document
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          expect(rawActiveAlerts['1'].meta?.uuid).toBe('abc');
+          expect(alertsClient.getProcessedAlerts('new')).toEqual({});
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: 'wait_for',
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                index: {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  if_seq_no: 41,
+                  if_primary_term: 665,
+                  require_alias: false,
+                },
+              },
+              // ongoing alert doc, no new alert doc
+              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
+            ],
+          });
+        });
+
+        test('should keep the task state alert when the same instance id exists in both', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': trackedAlert1Raw,
+            },
+          });
+
+          expect(logger.warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('Restored'),
+            expect.anything()
+          );
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          expect(rawActiveAlerts).toEqual({});
+        });
+
+        test('should not restore a doc whose recovery write was lost and let the recovered state repair it', async () => {
+          // Instance 1 recovered as u1 in the previous run and the state says so, but the
+          // bulk item that wrote the recovered doc failed: u1 is still active in the index.
+          const staleActiveDoc = { ...fetchedAlert1, [ALERT_UUID]: 'u1', [ALERT_TRACKED]: true };
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'u1',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: staleActiveDoc,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, enabled: true },
+            recoveredAlertsFromState: {
+              '1': { meta: { uuid: 'u1', flappingHistory: [true, true] } },
+            },
+          });
+
+          // Instance 1 does not fire this run either
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // Not restored, so it does not recover a second time
+          expect(logger.warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('Restored'),
+            expect.anything()
+          );
+          expect(alertsClient.getProcessedAlerts('recovered')).toEqual({});
+          const { rawActiveAlerts, rawRecoveredAlerts } =
+            alertsClient.getRawAlertInstancesForState();
+          expect(rawActiveAlerts).toEqual({});
+          expect(rawRecoveredAlerts['1'].meta?.uuid).toBe('u1');
+
+          // The stale document is repaired to recovered in place
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          expect(bulkBody).toContainEqual({
+            index: {
+              _id: 'u1',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              if_seq_no: 41,
+              if_primary_term: 665,
+              require_alias: false,
+            },
+          });
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'u1')).toEqual(
             expect.objectContaining({
+              [ALERT_STATUS]: 'recovered',
+              [EVENT_ACTION]: 'close',
+            })
+          );
+        });
+
+        test('should recover the restored alert doc, not the older recovered one, when the alert stops firing', async () => {
+          // Instance 1 recovered as u1, fired again as u2 in a run that died before its
+          // state was saved. Task state still holds the recovered u1 entry only.
+          const recoveredDoc = {
+            ...fetchedAlert1,
+            [ALERT_UUID]: 'u1',
+            [ALERT_STATUS]: 'recovered',
+            [ALERT_END]: '2023-03-28T13:27:28.159Z',
+            [ALERT_TRACKED]: true,
+          };
+          const activeDoc = {
+            ...fetchedAlert1,
+            [ALERT_UUID]: 'u2',
+            [ALERT_START]: '2023-03-28T14:27:28.159Z',
+            [ALERT_FLAPPING_HISTORY]: [true, false],
+            [ALERT_TRACKED]: true,
+          };
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [
+                {
+                  _id: 'u1',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: recoveredDoc,
+                },
+                {
+                  _id: 'u2',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 42,
+                  _primary_term: 665,
+                  _source: activeDoc,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, enabled: true },
+            recoveredAlertsFromState: {
+              '1': { meta: { uuid: 'u1', flappingHistory: [true, true] } },
+            },
+          });
+
+          // Instance 1 does not fire this run
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // The recovered state now points at the restored lifecycle
+          const { rawActiveAlerts, rawRecoveredAlerts } =
+            alertsClient.getRawAlertInstancesForState();
+          expect(rawActiveAlerts).toEqual({});
+          expect(rawRecoveredAlerts['1'].meta?.uuid).toBe('u2');
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          // u2 is recovered in place
+          expect(bulkBody).toContainEqual({
+            index: {
+              _id: 'u2',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              if_seq_no: 42,
+              if_primary_term: 665,
+              require_alias: false,
+            },
+          });
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'u2')).toEqual(
+            expect.objectContaining({
+              [ALERT_STATUS]: 'recovered',
+              [EVENT_ACTION]: 'close',
               [ALERT_END]: date,
+              [ALERT_START]: '2023-03-28T14:27:28.159Z',
+            })
+          );
+          // u1 is a closed historical span: only untracked, not recovered again
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'u1')).toEqual(
+            expect.objectContaining({
+              [ALERT_STATUS]: 'recovered',
+              [ALERT_TRACKED]: false,
+              [ALERT_END]: '2023-03-28T13:27:28.159Z',
             })
           );
         });
@@ -2008,10 +2310,11 @@ describe('Alerts Client', () => {
 
           await alertsClient.initializeExecution(defaultExecutionOpts);
 
-          // Report 2 new alerts
+          // Report 3 new alerts
           const alertExecutorService = alertsClient.factory();
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
+          alertExecutorService.create('3').scheduleActions('default');
 
           await alertsClient.processAlerts();
           alertsClient.determineFlappingAlerts();
@@ -2020,7 +2323,7 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(clusterClient.bulk).toHaveBeenCalled();
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`,
             { tags: ['test.rule-type', '1', 'resolve-alert-conflicts'] }
@@ -2247,6 +2550,250 @@ describe('Alerts Client', () => {
           await expect(alertsClient.persistAlerts()).rejects.toThrow(
             'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
           );
+        });
+
+        test('should retry the bulk request if it fails with a transient error', async () => {
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          clusterClient.bulk.mockRejectedValueOnce(
+            new EsErrors.ResponseError(
+              elasticsearchClientMock.createApiResponse({ statusCode: 429 })
+            )
+          );
+          clusterClient.bulk.mockResponseOnce({ errors: false, took: 1, items: [] });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          const persistPromise = alertsClient.persistAlerts();
+          await jest.runAllTimersAsync();
+          await persistPromise;
+
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(2);
+          expect(logger.warn).toHaveBeenCalledWith(
+            expect.stringContaining('Retrying Elasticsearch operation')
+          );
+        });
+
+        test.each([
+          { isServerless: false, refresh: 'wait_for' },
+          { isServerless: true, refresh: true },
+        ])(
+          'should retry alerts that failed with a retryable error (isServerless: $isServerless)',
+          async ({ isServerless, refresh }) => {
+            jest.spyOn(Math, 'random').mockReturnValue(0);
+            clusterClient.bulk.mockResponseOnce({
+              errors: true,
+              took: 1,
+              items: [
+                {
+                  create: {
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    status: 201,
+                    _seq_no: 0,
+                    _primary_term: 1,
+                  },
+                },
+                {
+                  create: {
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    status: 429,
+                    error: {
+                      type: 'es_rejected_execution_exception',
+                      reason: 'rejected execution of coordinating operation',
+                    },
+                  },
+                },
+              ],
+            });
+            clusterClient.bulk.mockResponseOnce({
+              errors: false,
+              took: 1,
+              items: [
+                {
+                  create: {
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    status: 201,
+                    _seq_no: 1,
+                    _primary_term: 1,
+                  },
+                },
+              ],
+            });
+
+            const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+              ...alertsClientParams,
+              isServerless,
+            });
+
+            await alertsClient.initializeExecution(defaultExecutionOpts);
+
+            const alertExecutorService = alertsClient.factory();
+            alertExecutorService.create('1').scheduleActions('default');
+            alertExecutorService.create('2').scheduleActions('default');
+
+            await alertsClient.processAlerts();
+            alertsClient.determineFlappingAlerts();
+            alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+            alertsClient.logAlerts(logAlertsOpts);
+
+            const persistPromise = alertsClient.persistAlerts();
+            await jest.runAllTimersAsync();
+            await persistPromise;
+
+            const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+            const uuid2 = rawActiveAlerts['2'].meta?.uuid;
+
+            expect(clusterClient.bulk).toHaveBeenCalledTimes(2);
+            expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
+              index: '.alerts-test.alerts-default',
+              refresh,
+              require_alias: !useDataStreamForAlerts,
+              operations: [
+                {
+                  create: {
+                    _id: uuid2,
+                    ...(useDataStreamForAlerts ? {} : { require_alias: true }),
+                  },
+                },
+                getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
+              ],
+            });
+          }
+        );
+
+        test('should throw if alerts still fail with a retryable error after all retries', async () => {
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          clusterClient.bulk.mockResponse({
+            errors: true,
+            took: 1,
+            items: [
+              {
+                create: {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  status: 429,
+                  error: {
+                    type: 'circuit_breaking_exception',
+                    reason: '[parent] Data too large',
+                  },
+                },
+              },
+            ],
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          const persistExpectation = expect(alertsClient.persistAlerts()).rejects.toThrow(
+            'Failed to write 1 of 1 alerts: 1 circuit_breaking_exception'
+          );
+          await jest.runAllTimersAsync();
+          await persistExpectation;
+
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(4);
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error writing 1 alerts to .alerts-test.alerts-default ${ruleInfo} - Failed to write 1 of 1 alerts: 1 circuit_breaking_exception`,
+            logTags
+          );
+        });
+
+        test('should throw if alert conflicts are still unresolved after all retries', async () => {
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+              ],
+            },
+          });
+          clusterClient.bulk.mockResponse({
+            errors: true,
+            took: 1,
+            items: [
+              {
+                index: {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _id: 'abc',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason: '[abc]: version conflict',
+                  },
+                },
+              },
+            ],
+          });
+          for (let mgetCall = 0; mgetCall < 3; mgetCall++) {
+            clusterClient.mget.mockResponseOnce({
+              docs: [
+                {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _id: 'abc',
+                  _seq_no: 42,
+                  _primary_term: 665,
+                  found: true,
+                  _source: {},
+                },
+              ],
+            });
+          }
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: { '1': trackedAlert1Raw },
+          });
+
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          const persistExpectation = expect(alertsClient.persistAlerts()).rejects.toThrow(
+            'Failed to write 1 of 1 alerts: 1 version_conflict_engine_exception'
+          );
+          await jest.runAllTimersAsync();
+          await persistExpectation;
+
+          expect(clusterClient.mget).toHaveBeenCalledTimes(3);
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(4);
         });
       });
 

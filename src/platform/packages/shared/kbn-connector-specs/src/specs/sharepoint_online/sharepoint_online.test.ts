@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { createRecordingAxiosClient } from '../../lib/recording_axios_client';
 import { SharepointOnline } from './sharepoint_online';
 
 /**
@@ -232,7 +233,7 @@ describe('SharepointOnline', () => {
       )) as SharePointListResponse<SharePointSite>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        'https://graph.microsoft.com/v1.0/sites/getAllSites',
         {
           params: {
             $select: 'id,displayName,webUrl,siteCollection',
@@ -258,7 +259,7 @@ describe('SharepointOnline', () => {
       await SharepointOnline.actions.getAllSites.handler(certContext, {});
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        'https://graph.microsoft.com/v1.0/sites/getAllSites',
         {
           params: {
             $select: 'id,displayName,webUrl,siteCollection',
@@ -346,7 +347,7 @@ describe('SharepointOnline', () => {
       )) as SharePointListResponse<SharePointSite>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        'https://graph.microsoft.com/v1.0/sites/getAllSites',
         {
           params: {
             $select: 'id,displayName,webUrl,siteCollection',
@@ -390,7 +391,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointPage>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/pages/',
+        'https://graph.microsoft.com/v1.0/sites/site-123/pages',
         {
           params: {
             $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
@@ -431,7 +432,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointPage>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/pages/',
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/pages',
         {
           params: {
             $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
@@ -549,7 +550,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointDrive>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/drives/',
+        'https://graph.microsoft.com/v1.0/sites/site-123/drives',
         {
           params: {
             $select:
@@ -591,7 +592,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointDrive>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/drives/',
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/drives',
         {
           params: {
             $select:
@@ -646,7 +647,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointList>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/lists/',
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists',
         {
           params: {
             $select: 'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
@@ -687,7 +688,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointList>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/',
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists',
         {
           params: {
             $select: 'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
@@ -747,7 +748,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointListItem>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/lists/list-456/items/',
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists/list-456/items',
         {
           params: {
             $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
@@ -790,7 +791,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointListItem>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/b!xyz-789/items/',
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/b!xyz-789/items',
         {
           params: {
             $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
@@ -961,18 +962,51 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
+      const downloadUrl =
+        'https://contoso.sharepoint.com/sites/hr/_layouts/15/download.aspx?UniqueId=abc&tempauth=token';
       const result = await SharepointOnline.actions.downloadItemFromURL.handler(mockContext, {
-        downloadUrl: 'https://download.example.com/file',
+        downloadUrl,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://download.example.com/file', {
+      expect(mockClient.get).toHaveBeenCalledWith(downloadUrl, {
         responseType: 'arraybuffer',
+        headers: { Authorization: undefined },
       });
       expect(result).toEqual({
         contentType: 'text/plain',
         contentLength: '5',
         base64: 'SGVsbG8=',
       });
+    });
+
+    it.each([
+      'https://attacker.example.com/collect',
+      'https://contoso.sharepoint.com.attacker.example.com/file',
+      'https://evilsharepoint.com/file',
+      'http://contoso.sharepoint.com/file',
+    ])('should refuse to download from %s', async (downloadUrl) => {
+      await expect(
+        SharepointOnline.actions.downloadItemFromURL.handler(mockContext, { downloadUrl })
+      ).rejects.toThrow('downloadItemFromURL only downloads from https://*.sharepoint.com');
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('does not send the Graph bearer token with the download request', async () => {
+      const { client, requests } = createRecordingAxiosClient(
+        { Authorization: 'Bearer graph-token' },
+        () => ({ data: Uint8Array.from([72, 105]), status: 200, headers: {} })
+      );
+      const downloadUrl =
+        'https://contoso.sharepoint.com/sites/hr/_layouts/15/download.aspx?UniqueId=abc&tempauth=token';
+
+      await SharepointOnline.actions.downloadItemFromURL.handler(
+        { ...mockContext, client } as unknown as ActionContext,
+        { downloadUrl }
+      );
+
+      expect(requests).toHaveLength(1);
+      expect(requests[0].url).toBe(downloadUrl);
+      expect(requests[0].headers).not.toHaveProperty('Authorization');
     });
 
     it('should throw when downloadUrl is not provided', async () => {

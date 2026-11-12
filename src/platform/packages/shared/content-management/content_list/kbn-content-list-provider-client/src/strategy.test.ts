@@ -13,6 +13,8 @@ import { createClientStrategy } from './strategy';
 import type { ItemDecorator } from './strategy';
 import type { TableListViewFindItemsFn } from './types';
 import { defineContentListFilter, type ContentListFilterMap } from './filters';
+import type { ContentListSortField } from './sorting';
+import { defineContentListSortField } from './sorting';
 
 const createParams = (overrides?: Partial<FindItemsParams>): FindItemsParams => ({
   searchQuery: '',
@@ -136,6 +138,17 @@ describe('createClientStrategy', () => {
       });
     });
 
+    it('normalises an unparseable updatedAt to undefined instead of an Invalid Date', async () => {
+      const mockFindItems = createMockFindItems([
+        { ...createMockItem('bad-date'), updatedAt: 'not-a-date' },
+      ]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      const result = await findItems(createParams());
+
+      expect(result.items[0].updatedAt).toBeUndefined();
+    });
+
     it('handles empty results', async () => {
       const mockFindItems = createMockFindItems([]);
       const { findItems } = createClientStrategy(mockFindItems);
@@ -151,6 +164,43 @@ describe('createClientStrategy', () => {
       const { findItems } = createClientStrategy(mockFindItems);
 
       await expect(findItems(createParams())).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('tag references', () => {
+    it('forwards an included tag as a reference', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledWith(
+        '',
+        { references: [{ type: 'tag', id: 'tag-1' }] },
+        undefined
+      );
+    });
+
+    it('forwards an excluded tag as referencesToExclude', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { exclude: ['tag-2'] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledWith(
+        '',
+        { referencesToExclude: [{ type: 'tag', id: 'tag-2' }] },
+        undefined
+      );
+    });
+
+    it('omits the options argument when no tags are active', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: [] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledWith('', undefined, undefined);
     });
   });
 
@@ -175,6 +225,42 @@ describe('createClientStrategy', () => {
       await findItems(createParams({ searchQuery: 'second' }));
 
       expect(mockFindItems).toHaveBeenCalledTimes(2);
+    });
+
+    it('calls the server when the tag filter changes', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
+      await findItems(createParams({ filters: { tag: { include: ['tag-2'] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not call the server when the tag filter is unchanged', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
+      await findItems(
+        createParams({
+          filters: { tag: { include: ['tag-1'] } },
+          sort: { field: 'title', direction: 'desc' },
+          page: { index: 1, size: 5 },
+        })
+      );
+
+      expect(mockFindItems).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call the server when the same tags are selected in a different order', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: ['tag-1', 'tag-2'] } } }));
+      await findItems(createParams({ filters: { tag: { include: ['tag-2', 'tag-1'] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledTimes(1);
     });
 
     it('reuses cached items when only filters change', async () => {
@@ -265,6 +351,34 @@ describe('createClientStrategy', () => {
       onInvalidate();
       const second = await findItems(createParams());
       expect(second.total).toBe(1);
+    });
+
+    it('keeps the previous snapshot readable until the refetch resolves', async () => {
+      const mockItems = [createMockItem('1'), createMockItem('2')];
+      const mockFindItems = createMockFindItems(mockItems);
+      const { findItems, onInvalidate, getItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams());
+
+      onInvalidate();
+
+      expect(getItems()).toEqual(mockItems);
+    });
+
+    it('does not notify subscribers, since no new snapshot has arrived', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems, onInvalidate, subscribe } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams());
+
+      const listener = jest.fn();
+      subscribe(listener);
+
+      onInvalidate();
+      expect(listener).not.toHaveBeenCalled();
+
+      await findItems(createParams());
+      expect(listener).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -381,6 +495,98 @@ describe('createClientStrategy', () => {
         createParams({ sort: { field: 'updatedAt', direction: 'desc' } })
       );
       expect(resultDesc.items[resultDesc.items.length - 1].id).toBe('2');
+    });
+
+    describe('custom sort fields', () => {
+      const createDatedItem = (id: string, updatedAt: string): UserContentCommonSchema => ({
+        ...createMockItem(id),
+        updatedAt,
+      });
+      const items = [
+        createDatedItem('a', '2024-01-01T00:00:00.000Z'),
+        createDatedItem('b', '2024-01-02T00:00:00.000Z'),
+        createDatedItem('c', '2024-01-03T00:00:00.000Z'),
+        createDatedItem('d', '2024-01-04T00:00:00.000Z'),
+      ];
+      // `c` and `d` have no rank, like items outside the recently-accessed history.
+      const ranks: Record<string, number | null> = { a: 3, b: 1, c: null, d: null };
+      const rankField = defineContentListSortField({
+        id: 'rank',
+        title: 'Rank',
+        getValue: (item) => ranks[item.id] ?? null,
+        fallbackSort: { field: 'updatedAt', direction: 'desc' },
+      });
+      const sortIdsBy = async (
+        customSort: ContentListSortField,
+        sort: { field: string; direction: 'asc' | 'desc' }
+      ): Promise<string[]> => {
+        const { findItems } = createClientStrategy(
+          createMockFindItems(items),
+          undefined,
+          undefined,
+          undefined,
+          { [customSort.id]: customSort }
+        );
+        const result = await findItems(createParams({ sort }));
+        return result.items.map(({ id }) => id);
+      };
+
+      it('orders by the custom value, then by fallbackSort for items without a value', async () => {
+        const ids = await sortIdsBy(rankField, { field: 'rank', direction: 'desc' });
+        // a (3), b (1), then c and d (no rank) by updatedAt descending.
+
+        expect(ids).toEqual(['a', 'b', 'd', 'c']);
+      });
+
+      it('keeps items without a value last when sorting ascending', async () => {
+        const ids = await sortIdsBy(rankField, { field: 'rank', direction: 'asc' });
+
+        expect(ids).toEqual(['b', 'a', 'd', 'c']);
+      });
+
+      it('uses fallbackSort to break ties and does not flip its direction', async () => {
+        const tiedField = defineContentListSortField({
+          id: 'tied',
+          title: 'Tied',
+          getValue: () => 1,
+          fallbackSort: { field: 'updatedAt', direction: 'asc' },
+        });
+        const ids = await sortIdsBy(tiedField, { field: 'tied', direction: 'desc' });
+
+        expect(ids).toEqual(['a', 'b', 'c', 'd']);
+      });
+
+      it('keeps the original order for ties when there is no fallbackSort', async () => {
+        const ids = await sortIdsBy(
+          { ...rankField, fallbackSort: undefined },
+          { field: 'rank', direction: 'desc' }
+        );
+
+        expect(ids).toEqual(['a', 'b', 'c', 'd']);
+      });
+
+      it('does not fall back to the built-in resolver when getValue returns null', async () => {
+        const hideA = defineContentListSortField({
+          id: 'updatedAt',
+          title: 'Updated',
+          getValue: (item) => (item.id === 'a' ? null : undefined),
+        });
+        const ids = await sortIdsBy(hideA, { field: 'updatedAt', direction: 'asc' });
+
+        // `a` is the oldest, but `null` sorts it last instead of resolving updatedAt.
+        expect(ids).toEqual(['b', 'c', 'd', 'a']);
+      });
+
+      it('falls back to the built-in resolver when getValue returns undefined', async () => {
+        const passthrough = defineContentListSortField({
+          id: 'updatedAt',
+          title: 'Updated',
+          getValue: () => undefined,
+        });
+        const ids = await sortIdsBy(passthrough, { field: 'updatedAt', direction: 'asc' });
+
+        expect(ids).toEqual(['a', 'b', 'c', 'd']);
+      });
     });
   });
 

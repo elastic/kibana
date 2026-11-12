@@ -40,6 +40,7 @@ const context = {
     ensureRuleTypeEnabled: () => {},
   },
   getUserName: async () => {},
+  getProfileUid: async () => null,
 } as unknown as RulesClientContext;
 
 describe('validate snooze params and body', () => {
@@ -123,7 +124,9 @@ describe('snoozeRule change tracking', () => {
       apiKey: null,
       apiKeyOwner: null,
       createdBy: 'elastic',
+      createdByProfileUid: null,
       updatedBy: 'elastic',
+      updatedByProfileUid: null,
       createdAt: '2019-02-12T21:01:22.479Z',
       updatedAt: '2019-02-12T21:01:22.479Z',
       legacyId: null,

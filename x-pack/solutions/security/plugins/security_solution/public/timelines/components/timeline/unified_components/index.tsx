@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EuiDataGridProps } from '@elastic/eui';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
@@ -111,7 +112,7 @@ interface Props {
   isTextBasedQuery?: boolean;
   dataView: DataView;
   trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
-  leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
+  rowAdditionalLeadingControls?: RowControlColumn[];
   onUpdatePageIndex?: UnifiedDataTableProps['onUpdatePageIndex'];
 }
 
@@ -133,7 +134,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   isTextBasedQuery,
   dataView,
   trailingControlColumns,
-  leadingControlColumns,
+  rowAdditionalLeadingControls,
   onUpdatePageIndex,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -420,7 +421,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       isTextBasedQuery={isTextBasedQuery}
                       onFilter={onAddFilter as DocViewFilterFn}
                       trailingControlColumns={trailingControlColumns}
-                      leadingControlColumns={leadingControlColumns}
+                      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                       onUpdatePageIndex={onUpdatePageIndex}
                     />
                   </EventDetailsWidthProvider>

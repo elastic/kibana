@@ -30,8 +30,10 @@ export type {
   ValidateWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
+  WorkflowAccessControlUpdateResponseDto,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionExecutedByUser,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowExecutionListItemDto,

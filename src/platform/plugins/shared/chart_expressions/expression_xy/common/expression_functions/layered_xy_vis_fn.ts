@@ -20,10 +20,15 @@ import {
   validateAxes,
 } from './validate';
 import { appendLayerIds, getDataLayers } from '../helpers';
+import {
+  applyAxisFormatPolicies,
+  applyYAxisExtentPolicies,
+  resolveAxisFormatPolicies,
+} from '../axis_format_policy';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
-  const dataLayers = getDataLayers(layers);
+  const axisFormatPolicies = resolveAxisFormatPolicies(layers, args.yAxisConfigs);
 
   if (args.singleTable) {
     logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
@@ -37,6 +42,9 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
     );
   }
 
+  const chartLayers = applyAxisFormatPolicies(layers, axisFormatPolicies);
+  const yAxisConfigs = applyYAxisExtentPolicies(args.yAxisConfigs, axisFormatPolicies);
+  const dataLayers = getDataLayers(chartLayers);
   const hasBar = hasBarLayer(dataLayers);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMarkSizeRatioLimits(args.markSizeRatio);
@@ -48,7 +56,7 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
     throw new Error(errors.markSizeRatioWithoutAccessor());
   }
 
-  validateAxes(dataLayers, args.yAxisConfigs);
+  validateAxes(dataLayers, yAxisConfigs);
 
   return {
     type: 'render',
@@ -56,7 +64,9 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
     value: {
       args: {
         ...args,
-        layers,
+        layers: chartLayers,
+        yAxisConfigs,
+        axisFormatPolicies,
         minBarHeight: args.minBarHeight ?? 1,
         markSizeRatio: hasMarkSizeAccessors && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:

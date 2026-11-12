@@ -61,7 +61,7 @@ const customContentContainerCss = (height: number) =>
     width: '100%',
   });
 
-interface VisualizeCustomContentProps {
+export interface VisualizeCustomContentProps {
   services: VisualizationServices;
   /** The HTML/Liquid template and its declared height. */
   visualization: Record<string, unknown> & { template?: string; height?: number };
@@ -178,7 +178,7 @@ export const VisualizeCustomContent = ({
         <CustomContentComponent
           services={services.customContent}
           embeddableId="agent-builder-custom-content"
-          esqlQuery={esql}
+          esqlQueries={esql ? [esql] : []}
           timeRange={effectiveTimeRange}
           generationVersion={0}
           savedTemplate={template}

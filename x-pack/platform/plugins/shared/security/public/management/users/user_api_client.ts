@@ -9,25 +9,25 @@ import type { HttpStart } from '@kbn/core/public';
 
 import type { EditUser, User } from '../../../common';
 
-const usersUrl = '/internal/security/users';
+const USERS_URL = '/internal/security/users';
 
 export class UserAPIClient {
   constructor(private readonly http: HttpStart) {}
 
   public async getUsers() {
-    return await this.http.get<User[]>(usersUrl);
+    return await this.http.get<User[]>(USERS_URL);
   }
 
   public async getUser(username: string) {
-    return await this.http.get<User>(`${usersUrl}/${encodeURIComponent(username)}`);
+    return await this.http.get<User>(`${USERS_URL}/${encodeURIComponent(username)}`);
   }
 
   public async deleteUser(username: string) {
-    await this.http.delete(`${usersUrl}/${encodeURIComponent(username)}`);
+    await this.http.delete(`${USERS_URL}/${encodeURIComponent(username)}`);
   }
 
   public async saveUser(user: EditUser) {
-    await this.http.post(`${usersUrl}/${encodeURIComponent(user.username)}`, {
+    await this.http.post(`${USERS_URL}/${encodeURIComponent(user.username)}`, {
       body: JSON.stringify(user),
     });
   }
@@ -40,16 +40,16 @@ export class UserAPIClient {
       data.password = currentPassword;
     }
 
-    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/password`, {
+    await this.http.post(`${USERS_URL}/${encodeURIComponent(username)}/password`, {
       body: JSON.stringify(data),
     });
   }
 
   public async disableUser(username: string) {
-    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/_disable`);
+    await this.http.post(`${USERS_URL}/${encodeURIComponent(username)}/_disable`);
   }
 
   public async enableUser(username: string) {
-    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/_enable`);
+    await this.http.post(`${USERS_URL}/${encodeURIComponent(username)}/_enable`);
   }
 }

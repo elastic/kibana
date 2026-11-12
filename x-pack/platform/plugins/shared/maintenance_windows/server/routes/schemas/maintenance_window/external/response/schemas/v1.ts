@@ -83,7 +83,7 @@ export const maintenanceWindowResponseSchema = schema.object(
                 schema.boolean({
                   meta: {
                     description:
-                      'Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.',
+                      'Whether this maintenance window applies to Kibana Classic Alerting alerts. If omitted, is treated as `true`.',
                   },
                 })
               ),
@@ -99,7 +99,7 @@ export const maintenanceWindowResponseSchema = schema.object(
             {
               meta: {
                 description:
-                  'Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.',
+                  'Settings that control how this maintenance window affects Kibana Classic Alerting alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.',
               },
             }
           ),
@@ -110,7 +110,7 @@ export const maintenanceWindowResponseSchema = schema.object(
                   schema.boolean({
                     meta: {
                       description:
-                        'Whether the maintenance window applies to Alerting V2 alert episodes. If omitted, is treated as `true`.',
+                        'Whether the maintenance window applies to Kibana Universal Alerting alerts. If omitted, is treated as `true`.',
                     },
                   })
                 ),
@@ -120,7 +120,7 @@ export const maintenanceWindowResponseSchema = schema.object(
                       maxLength: MAX_KQL_LENGTH,
                       meta: {
                         description:
-                          "A KQL filter that limits which Alerting V2 alert episodes this maintenance window affects. Matching alert episodes don't send notifications while the window is active. If query isn't returned, the window affects all Alerting V2 alert episodes.",
+                          "A KQL filter that limits which Kibana Universal Alerting alerts this maintenance window affects. It can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If query isn't returned, the window affects all Kibana Universal Alerting alerts.",
                       },
                     }),
                   })
@@ -129,7 +129,7 @@ export const maintenanceWindowResponseSchema = schema.object(
               {
                 meta: {
                   description:
-                    "Settings that control how this maintenance window affects Alerting V2 alerting episodes, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alert episodes.",
+                    "Settings that control how this maintenance window affects Kibana Universal Alerting alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Kibana Universal Alerting alerts.",
                 },
               }
             )

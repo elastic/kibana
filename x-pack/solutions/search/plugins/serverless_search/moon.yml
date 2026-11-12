@@ -47,7 +47,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/search-inference-endpoints'
   - '@kbn/security-plugin-types-common'
-  - '@kbn/search-homepage'
   - '@kbn/core-http-server'
   - '@kbn/logging'
   - '@kbn/security-plugin-types-public'
@@ -58,7 +57,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
-  - '@kbn/alerting-v2-utils'
   - '@kbn/deeplinks-workflows'
   - '@kbn/features-plugin'
   - '@kbn/navigation-plugin'
@@ -77,6 +75,4 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

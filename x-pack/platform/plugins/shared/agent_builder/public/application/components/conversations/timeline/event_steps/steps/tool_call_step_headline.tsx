@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  useEuiFontSize,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -32,9 +25,14 @@ const toolBadgeToolLabel = i18n.translate(
 interface ToolCallStepHeadlineProps {
   step: ToolCallStepData;
   hasResults: boolean;
+  isAborted?: boolean;
 }
 
-export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({ step, hasResults }) => {
+export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
+  step,
+  hasResults,
+  isAborted = false,
+}) => {
   const { euiTheme } = useEuiTheme();
   const suffixFontSize = useEuiFontSize('s');
   const hasErrorResult = step.results.some(isErrorResult);
@@ -44,8 +42,29 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({ step
     color: ${hasErrorResult ? euiTheme.colors.textDanger : euiTheme.colors.textDisabled};
   `;
 
+  const intentStyles = css`
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `;
+
+  // the tool badge can be truncated (EuiBadge renders an ellipsis), but never takes more than half of the row
+  const badgeItemStyles = css`
+    min-width: 0;
+    max-width: 50%;
+  `;
+
+  const statusItemStyles = css`
+    flex-shrink: 0;
+  `;
+
   const toolBadge = (
-    <EuiBadge color={hasErrorResult ? 'danger' : 'default'}>
+    <EuiBadge
+      color={hasErrorResult ? 'danger' : 'default'}
+      title={`${toolBadgeToolLabel}: ${step.tool_id}`}
+      data-test-subj="agentBuilderToolCallBadge"
+    >
       <strong
         css={css`
           font-weight: ${euiTheme.font.weight.bold};
@@ -66,13 +85,30 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({ step
         role="status"
         aria-label={toolCallAriaLabel}
       >
-        <EuiFlexItem grow={false}>{toolBadge}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        {step.intent ? (
+          <EuiFlexItem
+            grow={false}
+            css={intentStyles}
+            title={step.intent}
+            data-test-subj="agentBuilderToolCallIntent"
+          >
+            {step.intent}
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false} css={badgeItemStyles}>
+          {toolBadge}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={statusItemStyles}>
           <span css={suffixStyles}>
             {hasResults ? (
               <FormattedMessage
                 id="xpack.agentBuilder.eventSteps.steps.toolCall.ran"
                 defaultMessage="ran"
+              />
+            ) : isAborted ? (
+              <FormattedMessage
+                id="xpack.agentBuilder.eventSteps.steps.toolCall.stopped"
+                defaultMessage="stopped"
               />
             ) : (
               <FormattedMessage
@@ -83,21 +119,6 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({ step
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {step.progression
-        ?.filter((p) => !p.metadata?.agent_execution_id)
-        .map((p, idx) => (
-          <EuiText key={`progression-${idx}`} size="s">
-            <p>
-              <span
-                css={css`
-                  color: ${euiTheme.colors.textDisabled};
-                `}
-              >
-                {p.message}
-              </span>
-            </p>
-          </EuiText>
-        ))}
     </>
   );
 };

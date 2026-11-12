@@ -30,6 +30,7 @@ import {
   LEGACY_ALERT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LENS_SO_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
@@ -108,7 +109,7 @@ describe('AttachmentService', () => {
             id: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"comment: Invalid input: expected string, received undefined, type: Invalid input: expected \\"alert\\", rule: Invalid input: expected object, received undefined, type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"actions\\", and 23 more"`
         );
       });
 
@@ -125,7 +126,7 @@ describe('AttachmentService', () => {
             id: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
+          `"comment: Invalid input: expected string, received undefined, type: Invalid input: expected \\"alert\\", rule: Invalid input: expected object, received undefined, type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"actions\\", and 26 more"`
         );
       });
 
@@ -208,7 +209,7 @@ describe('AttachmentService', () => {
             ],
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"comment: Invalid input: expected string, received undefined, type: Invalid input: expected \\"alert\\", rule: Invalid input: expected object, received undefined, type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"actions\\", and 23 more"`
         );
       });
 
@@ -225,7 +226,7 @@ describe('AttachmentService', () => {
             attachments: [{ attributes: invalidAttachment.attributes, references: [], id: '1' }],
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
+          `"comment: Invalid input: expected string, received undefined, type: Invalid input: expected \\"alert\\", rule: Invalid input: expected object, received undefined, type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"actions\\", and 26 more"`
         );
       });
 
@@ -771,6 +772,57 @@ describe('AttachmentService', () => {
       });
     });
 
+    it('throws a 404 when the attachment is in neither saved object type', async () => {
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        return Promise.resolve({
+          saved_objects: requests.map(({ id, type }) => ({
+            ...createErrorSO(type),
+            id,
+          })) as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+      });
+
+      await expect(
+        service.update({
+          savedObjectId: 'missing',
+          updatedAttributes: persistableStateAttachment,
+          options: { references: [] },
+        })
+      ).rejects.toMatchObject({
+        message: 'Attachment missing not found',
+        output: expect.objectContaining({ statusCode: 404 }),
+      });
+      expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('skips the saved object type lookup when the caller passes the type', async () => {
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        return Promise.resolve({
+          saved_objects: requests.map(({ id, type }) => ({
+            ...createErrorSO(type),
+            id,
+          })) as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
+
+      await service.update({
+        savedObjectId: '1',
+        updatedAttributes: persistableStateAttachment,
+        options: { references: [] },
+        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        CASE_COMMENT_SAVED_OBJECT,
+        '1',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
     it('should inject the references to the attributes correctly (persistable state)', async () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 
@@ -836,35 +888,56 @@ describe('AttachmentService', () => {
         expect(res).toStrictEqual(createUserAttachment());
       });
 
-      it('throws when the response is missing the attributes.rule.name', async () => {
-        const invalidAttachment = createAlertAttachment();
-        unset(invalidAttachment, 'attributes.rule.name');
+      const ruleLessUnifiedAlert = {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: 'alert-1',
+        metadata: { index: '.alerts-security.alerts-default' },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
 
-        unsecuredSavedObjectsClient.update.mockResolvedValue(invalidAttachment);
+      it('does not require metadata.rule.name for a unified alert', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: '1',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          attributes: {},
+          references: [],
+        });
 
         await expect(
           service.update({
-            updatedAttributes: createAlertAttachment().attributes,
             savedObjectId: '1',
+            savedObjectType: CASE_ATTACHMENT_SAVED_OBJECT,
+            updatedAttributes: ruleLessUnifiedAlert,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
-        );
+        ).resolves.not.toThrow();
       });
 
-      it('throws when the request is missing the attributes.rule.name', async () => {
-        const invalidAttachment = createAlertAttachment();
-        unset(invalidAttachment, 'attributes.rule.name');
-
-        unsecuredSavedObjectsClient.update.mockResolvedValue(createAlertAttachment());
+      it('updates a rule-less unified alert on a cases-comments row', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: '1',
+          type: CASE_COMMENT_SAVED_OBJECT,
+          attributes: {},
+          references: [],
+        });
 
         await expect(
           service.update({
-            updatedAttributes: invalidAttachment.attributes,
             savedObjectId: '1',
+            savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+            updatedAttributes: ruleLessUnifiedAlert,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
+        ).resolves.not.toThrow();
+        expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+          CASE_COMMENT_SAVED_OBJECT,
+          '1',
+          expect.objectContaining({ rule: { id: null, name: null } }),
+          expect.anything()
         );
       });
 
@@ -1292,6 +1365,61 @@ describe('AttachmentService', () => {
       });
     });
 
+    describe('bulkDelete return value', () => {
+      it('returns only the ids whose SO delete succeeded in this call', async () => {
+        const svc = makeService(makeMirrorWriter());
+        // id-1: legacy delete succeeded → deleted.
+        // id-2: legacy delete failed with a 500 → the SO may survive, not deleted.
+        // id-3: both types 404 → already gone before this call, not deleted by it.
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            {
+              id: 'id-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            {
+              id: 'id-2',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-2',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 500, error: 'Internal Server Error', message: 'boom' },
+            },
+            {
+              id: 'id-3',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-3',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+          ],
+        });
+
+        await expect(
+          svc.bulkDelete({ savedObjectIds: ['id-1', 'id-2', 'id-3'], refresh: false })
+        ).resolves.toEqual(['id-1']);
+      });
+
+      it('returns an empty array without calling the SO client when there are no ids', async () => {
+        const svc = makeService(makeMirrorWriter());
+
+        await expect(svc.bulkDelete({ savedObjectIds: [], refresh: false })).resolves.toEqual([]);
+        expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      });
+    });
+
     describe('fire-and-forget: a throwing analytics writer never breaks the primary SO write', () => {
       it('create: swallows a synchronous writer throw and still returns the created attachment', async () => {
         const writer = makeMirrorWriter();
@@ -1352,9 +1480,9 @@ describe('AttachmentService', () => {
           ],
         });
 
-        await expect(
-          svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })
-        ).resolves.toBeUndefined();
+        await expect(svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })).resolves.toEqual(
+          ['id-1']
+        );
         expect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringContaining('attachments mirror dispatch threw')
         );
@@ -1482,27 +1610,7 @@ describe('AttachmentService', () => {
         expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
       });
 
-      it('throws when the response is missing the attributes.rule.name field', async () => {
-        const invalidAttachment = createAlertAttachment();
-        unset(invalidAttachment, 'attributes.rule.name');
-
-        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
-          saved_objects: [invalidAttachment],
-        });
-
-        const updatedAttributes = createAlertAttachment().attributes;
-
-        await expect(
-          service.bulkUpdate({ comments: [{ savedObjectId: '1', updatedAttributes }] })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
-        );
-      });
-
-      it('throws when the request is missing the attributes.rule.name (legacy bucket)', async () => {
-        const invalidAttachment = createAlertAttachment();
-        unset(invalidAttachment, 'attributes.rule.name');
-
+      it('updates a rule-less unified alert in the legacy bucket', async () => {
         // Force the legacy write path by resolving id '1' to cases-comments.
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
@@ -1510,23 +1618,33 @@ describe('AttachmentService', () => {
             { ...createAlertAttachment(), id: '1', type: CASE_COMMENT_SAVED_OBJECT },
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
-
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
-          saved_objects: [createAlertAttachment()],
+          saved_objects: [
+            { id: '1', type: CASE_COMMENT_SAVED_OBJECT, attributes: {}, references: [] },
+          ],
         });
 
         await expect(
           service.bulkUpdate({
             comments: [
               {
-                updatedAttributes: invalidAttachment.attributes,
                 savedObjectId: '1',
+                updatedAttributes: {
+                  type: SECURITY_ALERT_ATTACHMENT_TYPE,
+                  attachmentId: 'alert-1',
+                  metadata: { index: '.alerts-security.alerts-default' },
+                  owner: SECURITY_SOLUTION_OWNER,
+                },
               },
             ],
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
-        );
+        ).resolves.not.toThrow();
+        expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
+          expect.objectContaining({
+            type: CASE_COMMENT_SAVED_OBJECT,
+            attributes: expect.objectContaining({ rule: { id: null, name: null } }),
+          }),
+        ]);
       });
 
       it('strips excess fields from the request', async () => {
@@ -1993,6 +2111,27 @@ describe('AttachmentService', () => {
           data: { content: '' },
         });
       });
+
+      it('skips a row that fails to decode and logs a warning', async () => {
+        const userAttachment = createUserAttachment();
+        const junkAttachment = {
+          ...userAttachment,
+          id: 'junk-1',
+          attributes: { ...userAttachment.attributes, type: 'junk' },
+        };
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createSOFindResponse([
+            { ...junkAttachment, score: 0 },
+            { ...userAttachment, score: 0 },
+          ])
+        );
+
+        const res = await service.find({});
+
+        expect(res.saved_objects.map(({ id }) => id)).toEqual([userAttachment.id]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('junk-1'));
+      });
     });
   });
 
@@ -2110,6 +2249,18 @@ describe('AttachmentService', () => {
       expect(filterAsString).toMatch(/"value":\s*"osquery"/);
       expect(filterAsString).toMatch(/"value":\s*"security.indicator"/);
       expect(filterAsString).not.toMatch(/"value":\s*"file"/);
+    });
+  });
+
+  describe('countAlertsWithinCase', () => {
+    it('logs and rethrows when the aggregation fails', async () => {
+      unsecuredSavedObjectsClient.find.mockRejectedValue(new Error('aggregation failed'));
+
+      await expect(service.countAlertsWithinCase('test-id')).rejects.toThrow('aggregation failed');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error while counting alerts for case test-id: Error: aggregation failed'
+      );
     });
   });
 

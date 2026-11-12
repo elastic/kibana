@@ -56,13 +56,13 @@ describe('space_filter', () => {
       expect(canMutateSourceInSpace('team-a', 'team-b')).toBe(false);
     });
 
-    it('treats missing space_id as global', () => {
-      expect(canMutateSourceInSpace(undefined, 'default')).toBe(true);
+    it('treats missing space_id as global and denies mutation', () => {
+      expect(canMutateSourceInSpace(undefined, 'default')).toBe(false);
       expect(canMutateSourceInSpace(undefined, 'team-a')).toBe(false);
     });
 
-    it('allows global catalog mutation only from default space', () => {
-      expect(canMutateSourceInSpace(GLOBAL_SPACE_ID, 'default')).toBe(true);
+    it('denies global catalog mutation from every space', () => {
+      expect(canMutateSourceInSpace(GLOBAL_SPACE_ID, 'default')).toBe(false);
       expect(canMutateSourceInSpace(GLOBAL_SPACE_ID, 'team-a')).toBe(false);
     });
   });

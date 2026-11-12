@@ -6,11 +6,11 @@
  */
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer';
-import type { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 export async function getHostAndDistinctProbabilisticCount({
   client,

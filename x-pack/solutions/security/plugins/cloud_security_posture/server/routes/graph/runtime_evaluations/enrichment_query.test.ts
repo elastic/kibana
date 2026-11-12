@@ -6,6 +6,7 @@
  */
 
 import { buildIntegrationRuntimeEvals } from './enrichment_query';
+import { parseEvalSnippet } from './merge_eval';
 
 /**
  * LIKE type-safety for non-keyword fields (e.g. user.id mapped as long in some integrations)
@@ -59,5 +60,305 @@ describe('buildIntegrationRuntimeEvals — sysdig field names', () => {
     expect(query).toContain('sysdig.vulnerability.resource_id');
     // Bare "resource.id" must not appear as a CASE return value
     expect(query).not.toMatch(/,\s*resource\.id,/);
+  });
+});
+
+describe('buildIntegrationRuntimeEvals — integration actor and target fields', () => {
+  it.each([
+    {
+      integration: 'aws_cloudtrail_otel',
+      column: 'user.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method == "AttachUserPolicy" AND aws.request.parameters.userName IS NOT NULL',
+          value: 'aws.request.parameters.userName',
+        },
+      ],
+    },
+    {
+      integration: 'aws_cloudtrail_otel',
+      column: 'user.target.name',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method == "AttachUserPolicy" AND aws.request.parameters.userName IS NOT NULL',
+          value: 'aws.request.parameters.userName',
+        },
+        {
+          condition:
+            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.service == "iam.amazonaws.com" AND rpc.method IN ("DetachUserPolicy", "CreateUser", "DeleteUser", "UpdateUser", "PutUserPolicy", "DeleteUserPolicy", "CreateAccessKey", "DeleteAccessKey", "UpdateAccessKey") AND aws.request.parameters.userName IS NOT NULL',
+          value: 'aws.request.parameters.userName',
+        },
+      ],
+    },
+    {
+      integration: 'aws_cloudtrail_otel',
+      column: 'service.target.name',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method == "GetCallerIdentity" AND rpc.service IS NOT NULL',
+          value: 'rpc.service',
+        },
+        {
+          condition:
+            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method IN ("PutObject", "GetObject", "DeleteObject") AND rpc.service IS NOT NULL',
+          value: 'rpc.service',
+        },
+      ],
+    },
+    {
+      integration: 'aws_cloudtrail_otel',
+      column: 'entity.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.service == "s3.amazonaws.com" AND rpc.method == "DeleteObject" AND aws.request.parameters.bucketName IS NOT NULL',
+          value: 'aws.request.parameters.bucketName',
+        },
+      ],
+    },
+    {
+      integration: 'aws_bedrock',
+      column: 'entity.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "aws_bedrock.invocation" AND gen_ai.request.model.id IS NOT NULL',
+          value: 'gen_ai.request.model.id',
+        },
+        {
+          condition:
+            'data_stream.dataset == "aws_bedrock.invocation" AND aws_bedrock.invocation.model_id IS NOT NULL',
+          value: 'aws_bedrock.invocation.model_id',
+        },
+      ],
+    },
+    {
+      integration: 'aws_securityhub',
+      column: 'entity.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "aws_securityhub.finding" AND resource.type != "AWS::EC2::Instance" AND resource.type != "AWS::Lambda::Function" AND resource.type != "AWS::IAM::User"',
+          value: 'resource.id',
+        },
+        {
+          condition:
+            'data_stream.dataset == "aws_securityhub.finding" AND resource.type == "AWS::Lambda::Function" AND resource.id IS NOT NULL',
+          value: 'resource.id',
+        },
+      ],
+    },
+    {
+      integration: 'azure_ai_foundry',
+      column: 'entity.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs"',
+          value: 'azure.ai_foundry.properties.backend_response_body.id',
+        },
+      ],
+    },
+    {
+      integration: 'gcp_vertexai',
+      column: 'entity.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "gcp_vertexai.prompt_response_logs" AND gcp.vertexai.prompt_response_logs.request_id IS NOT NULL',
+          value: 'gcp.vertexai.prompt_response_logs.request_id',
+        },
+        {
+          condition:
+            'data_stream.dataset == "gcp_vertexai.auditlogs" AND gcp.vertexai.audit.resource_name IS NOT NULL',
+          value: 'gcp.vertexai.audit.resource_name',
+        },
+      ],
+    },
+    {
+      integration: 'gcp_vertexai',
+      column: 'entity.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "gcp_vertexai.auditlogs" AND gcp.vertexai.audit.authentication_info.principal_subject IS NOT NULL AND gcp.vertexai.audit.authentication_info.principal_subject != ""',
+          value: 'gcp.vertexai.audit.authentication_info.principal_subject',
+        },
+      ],
+    },
+    {
+      integration: 'slack',
+      column: 'entity.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "slack.audit" AND slack.audit.entity.entity_type == "file"',
+          value: 'slack.audit.entity.id',
+        },
+        {
+          condition:
+            'data_stream.dataset == "slack.audit" AND slack.audit.entity.entity_type IN ("channel", "app", "workspace", "enterprise") AND slack.audit.entity.id IS NOT NULL',
+          value: 'slack.audit.entity.id',
+        },
+      ],
+    },
+    {
+      integration: 'slack',
+      column: 'entity.target.name',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "slack.audit" AND slack.audit.entity.entity_type == "file"',
+          value: 'slack.audit.entity.name',
+        },
+        {
+          condition:
+            'data_stream.dataset == "slack.audit" AND slack.audit.entity.entity_type IN ("channel", "app", "workspace", "enterprise") AND slack.audit.entity.name IS NOT NULL',
+          value: 'slack.audit.entity.name',
+        },
+      ],
+    },
+    {
+      integration: 'm365_defender',
+      column: 'entity.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset IN ("m365_defender.event", "m365_defender.alert") AND file.hash.sha256 IS NOT NULL',
+          value: 'file.hash.sha256',
+        },
+      ],
+    },
+    {
+      integration: 'aws_bedrock_agentcore',
+      column: 'entity.target.id',
+      branches: [
+        {
+          condition:
+            'data_stream.dataset == "aws_bedrock_agentcore.gateway_application_logs" AND aws.bedrock_agentcore.gateway.target IS NOT NULL',
+          value: 'aws.bedrock_agentcore.gateway.target',
+        },
+        {
+          condition:
+            'data_stream.dataset == "aws_bedrock_agentcore.runtime_application_logs" AND aws.bedrock_agentcore.resource_arn IS NOT NULL',
+          value: 'aws.bedrock_agentcore.resource_arn',
+        },
+        {
+          condition:
+            'data_stream.dataset == "aws_bedrock_agentcore.memory_application_logs" AND aws.bedrock_agentcore.memory.resource_arn IS NOT NULL',
+          value: 'aws.bedrock_agentcore.memory.resource_arn',
+        },
+      ],
+    },
+  ])(
+    'preserves fallback conditions and order for $integration / $column',
+    ({ integration, column, branches }) => {
+      const query = buildIntegrationRuntimeEvals({ integrations: [integration] });
+      const assignment = query
+        .split('| EVAL')
+        .flatMap((phase) => parseEvalSnippet(phase))
+        .find((item) => item.column === column);
+
+      expect({
+        ...assignment,
+        branches: assignment?.branches.map(({ condition, value }) => ({
+          condition: condition.replace(/\s+/g, ' '),
+          value,
+        })),
+      }).toEqual({
+        column,
+        hasPreserve: true,
+        branches,
+        defaultValue: 'TO_STRING(null)',
+      });
+    }
+  );
+});
+
+describe('buildIntegrationRuntimeEvals — flattened subfields', () => {
+  // A dotted path to a key of a flattened field resolves to null under unmapped_fields="NULLIFY" on
+  // ES versions that cannot read it, while FIELD_EXTRACT returns null where the key is mapped as a
+  // regular field (an index created without the integration package). Each read tries both.
+  const flattenedSubfields: Array<{
+    integration: string;
+    root: string;
+    dottedPath: string;
+    key: string;
+  }> = [
+    {
+      integration: 'm365_defender',
+      root: 'm365_defender.event.additional_fields',
+      dottedPath: 'm365_defender.event.additional_fields.SourceAccountSid',
+      key: 'SourceAccountSid',
+    },
+    {
+      integration: 'm365_defender',
+      root: 'm365_defender.event.additional_fields',
+      dottedPath: 'm365_defender.event.additional_fields.DestinationComputerObjectGuid',
+      key: 'DestinationComputerObjectGuid',
+    },
+    {
+      integration: 'snyk',
+      root: 'snyk.audit_logs.content',
+      dottedPath: 'snyk.audit_logs.content.email',
+      key: 'email',
+    },
+    {
+      integration: 'snyk',
+      root: 'snyk.audit_logs.content',
+      dottedPath: 'snyk.audit_logs.content.targetId',
+      key: 'targetId',
+    },
+    {
+      integration: 'snyk',
+      root: 'snyk.audit_logs.content',
+      dottedPath: 'snyk.audit_logs.content.serviceAccountPublicId',
+      key: 'serviceAccountPublicId',
+    },
+    {
+      integration: 'greenhouse',
+      root: 'greenhouse.audit.event.meta',
+      dottedPath: 'greenhouse.audit.event.meta.name',
+      key: 'name',
+    },
+    {
+      integration: 'cisco_meraki',
+      root: '`cisco_meraki.8021x_eap_success`',
+      dottedPath: '`cisco_meraki.8021x_eap_success.vap`',
+      key: 'vap',
+    },
+    {
+      integration: 'cisco_meraki',
+      root: 'cisco_meraki.wpa_auth',
+      dottedPath: 'cisco_meraki.wpa_auth.vap',
+      key: 'vap',
+    },
+    {
+      integration: 'cisco_meraki',
+      root: 'cisco_meraki.splash_auth',
+      dottedPath: 'cisco_meraki.splash_auth.vap',
+      key: 'vap',
+    },
+  ];
+
+  it.each(flattenedSubfields)(
+    'reads $dottedPath by dotted path, falling back to FIELD_EXTRACT',
+    ({ integration, root, dottedPath, key }) => {
+      const query = buildIntegrationRuntimeEvals({ integrations: [integration] });
+      expect(query).toContain(`COALESCE(${dottedPath}, FIELD_EXTRACT(${root}, "${key}"))`);
+    }
+  );
+
+  it('reads every flattened subfield through COALESCE', () => {
+    const query = buildIntegrationRuntimeEvals({
+      integrations: ['m365_defender', 'snyk', 'greenhouse', 'cisco_meraki'],
+    });
+    const extractCount = query.match(/FIELD_EXTRACT\(/g)?.length ?? 0;
+    const coalescedExtractCount = query.match(/COALESCE\([^,]+, FIELD_EXTRACT\(/g)?.length ?? 0;
+    expect(extractCount).toBeGreaterThan(0);
+    expect(coalescedExtractCount).toBe(extractCount);
   });
 });

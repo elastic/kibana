@@ -11,6 +11,7 @@ import { stringify } from 'yaml';
 import type { BuildkiteAgentTargetingRule } from './buildkite/index.ts';
 import { BuildkiteClient } from './buildkite/index.ts';
 import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels.ts';
+import { pdBalanced, spotZones } from './step-library/presets.ts';
 
 export const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';
@@ -23,7 +24,9 @@ export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-  diskSizeGb: 130,
+  // Boot disk (GB). Without it the agent manager provisions 100 GB. PR jobs peak at ~66 GB, so
+  // 85 GB leaves ample headroom. Steps that need more set their own `diskSizeGb`.
+  diskSizeGb: 85,
 };
 
 const getFIPSImage = () => {
@@ -41,6 +44,8 @@ const getFIPSImage = () => {
   return {
     ...DEFAULT_AGENT_IMAGE_CONFIG,
     image,
+    // FIPS image disk usage has not been measured; keep the agent manager default.
+    diskSizeGb: undefined,
   };
 };
 
@@ -82,11 +87,10 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
 
 const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
-  const zonesToUse =
-    'asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c';
+  const zonesToUse = spotZones.n2.join(',');
   const additionalProps =
     {
-      spot: { preemptible: true, spotZones: zonesToUse },
+      spot: { preemptible: true, spotZones: zonesToUse, ...pdBalanced },
       virt: { enableNestedVirtualization: true, spotZones: zonesToUse },
     }[addition] || {};
 

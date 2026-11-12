@@ -41,6 +41,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*
@@ -49,6 +50,4 @@ fileGroups:
     - __jest__/**/*
     - __mocks__/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

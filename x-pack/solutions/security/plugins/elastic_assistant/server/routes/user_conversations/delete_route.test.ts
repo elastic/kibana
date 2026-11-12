@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
@@ -43,6 +44,90 @@ describe('Delete conversation route', () => {
       );
 
       expect(response.status).toEqual(200);
+    });
+
+    test('returns 403 when deleting a conversation that the user does not own', async () => {
+      context.elasticAssistant.getCurrentUser.mockResolvedValue({
+        username: 'noone',
+        profile_uid: 'noone',
+      } as AuthenticatedUser);
+
+      const response = await server.inject(
+        getDeleteConversationRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({
+        message:
+          'conversation id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd". Deleting a conversation is only allowed for the owner of the conversation.',
+        status_code: 403,
+      });
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.deleteConversation
+      ).not.toHaveBeenCalled();
+    });
+
+    test('returns 403 when deleting a conversation shared with the space', async () => {
+      context.elasticAssistant.getCurrentUser.mockResolvedValue({
+        username: 'noone',
+        profile_uid: 'noone',
+      } as AuthenticatedUser);
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+        {
+          ...getConversationMock(getQueryConversationParams()),
+          // Shared with every user in the space. Ownership stays on createdBy.
+          users: [],
+          createdBy: { name: 'elastic', id: 'my_profile_uid' },
+        }
+      );
+
+      const response = await server.inject(
+        getDeleteConversationRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({
+        message:
+          'conversation id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd". Deleting a conversation is only allowed for the owner of the conversation.',
+        status_code: 403,
+      });
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.deleteConversation
+      ).not.toHaveBeenCalled();
+    });
+
+    test('returns 403 when deleting a conversation shared with the caller', async () => {
+      context.elasticAssistant.getCurrentUser.mockResolvedValue({
+        username: 'noone',
+        profile_uid: 'noone',
+      } as AuthenticatedUser);
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+        {
+          ...getConversationMock(getQueryConversationParams()),
+          users: [
+            { name: 'elastic', id: 'my_profile_uid' },
+            { name: 'noone', id: 'noone' },
+          ],
+          createdBy: { name: 'elastic', id: 'my_profile_uid' },
+        }
+      );
+
+      const response = await server.inject(
+        getDeleteConversationRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({
+        message:
+          'conversation id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd". Deleting a conversation is only allowed for the owner of the conversation.',
+        status_code: 403,
+      });
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.deleteConversation
+      ).not.toHaveBeenCalled();
     });
 
     test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {

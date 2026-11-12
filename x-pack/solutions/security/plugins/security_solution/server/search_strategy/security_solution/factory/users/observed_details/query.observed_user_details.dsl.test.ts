@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { buildObservedUserDetailsQuery } from './query.observed_user_details.dsl';
 import { mockOptions } from './__mocks__';
 
@@ -42,6 +42,8 @@ describe('buildUserDetailsQuery', () => {
     expect(result.runtime_mappings).toBeUndefined();
 
     const filters = (result.query as { bool: { filter: unknown[] } }).bool.filter;
-    expect(filters[0]).toEqual(euid.dsl.getEuidDocumentsContainsIdFilter('user'));
+    expect(filters[0]).toEqual(
+      euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'))
+    );
   });
 });

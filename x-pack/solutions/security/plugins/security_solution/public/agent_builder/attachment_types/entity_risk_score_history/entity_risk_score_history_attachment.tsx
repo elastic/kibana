@@ -16,9 +16,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
@@ -85,16 +83,12 @@ export const createEntityRiskScoreHistoryAttachmentDefinition = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): AttachmentUIDefinition<EntityRiskScoreHistoryAttachment> => {
   return {
     getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
@@ -110,10 +104,6 @@ export const createEntityRiskScoreHistoryAttachmentDefinition = ({
         return [];
       }
 
-      const isNewFlyoutEnabled =
-        !experimentalFeatures.newFlyoutSystemDisabled &&
-        uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true);
-
       return [
         {
           label: OPEN_RISK_HISTORY_LABEL,
@@ -128,7 +118,6 @@ export const createEntityRiskScoreHistoryAttachmentDefinition = ({
               chrome,
               openSidebarConversation,
               searchSession,
-              isNewFlyoutEnabled,
             });
           },
         },

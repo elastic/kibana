@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
-import React, { useMemo, useState, useCallback } from 'react';
+import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
 import {
-  EuiCodeBlock,
-  EuiTable,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiTableHeaderCell,
   EuiMarkdownFormat,
-  EuiSpacer,
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
-  EuiLink,
 } from '@elastic/eui';
+import { splitAuthoredMarkdown } from '@elastic/isomer-sdk/markdown';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type {
@@ -40,14 +34,15 @@ import {
   createVisualizationRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
-  renderAttachmentTagParser,
   createRenderAttachmentRenderer,
   renderTagParser,
   createRenderRenderer,
+  createConversationMarkdownComponents,
 } from './markdown_plugins';
+import { useMarkdownContainerStyles } from './use_markdown_container_styles';
 import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
-import { ExternalLinkModal } from './external_link_modal';
+import { useMarkdownLinkClick } from './use_markdown_link_click';
 
 interface Props {
   content: string;
@@ -57,6 +52,11 @@ interface Props {
   conversationId?: string;
   isStreaming?: boolean;
 }
+
+const { tagName, attributes } = renderAttachmentElement;
+
+/** A closed tag. An unfinished tag at the end of a stream stays in the markdown. */
+const COMPLETE_RENDER_ATTACHMENT_TAG = new RegExp(`<${tagName}\\b[^>]*\\/?>`, 'i');
 
 /**
  * Component handling markdown support to the assistant's responses.
@@ -71,24 +71,15 @@ export function ChatMessageText({
   isStreaming = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
-
-  const containerClassName = css`
-    overflow-wrap: anywhere;
-
-    /* Standardize spacing between numbered list items */
-    ol > li:not(:first-child) {
-      margin-top: ${euiTheme.size.s};
-    }
-
-    ol > li > p {
-      margin-bottom: ${euiTheme.size.s};
-    }
-
-    .euiMarkdownFormat > ul > li,
-    .euiMarkdownFormat > ol > li {
-      line-height: ${euiTheme.size.l};
-    }
-  `;
+  const markdownContainerStyles = useMarkdownContainerStyles();
+  const splitMessageStyles = useMemo(
+    () => css`
+      display: flex;
+      flex-direction: column;
+      gap: ${euiTheme.size.s};
+    `,
+    [euiTheme.size.s]
+  );
 
   const { attachmentsService, renderersService, conversationsService, startDependencies } =
     useAgentBuilderServices();
@@ -98,24 +89,7 @@ export function ChatMessageText({
     services: { http, application, uiSettings },
   } = useKibana();
 
-  const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
-
-  const handleLinkClick = useCallback(
-    (href: string, e: React.MouseEvent) => {
-      const internal = http?.externalUrl?.isInternalUrl(href);
-      if (!internal) {
-        // External links always show the confirmation modal
-        e.preventDefault();
-        setPendingExternalUrl(href);
-      } else if (isSidebar) {
-        // Internal link in flyout: navigate in current window
-        e.preventDefault();
-        application.navigateToUrl(new URL(href, window.location.href).toString());
-      }
-      // Internal link in full page: target="_blank" handles navigation
-    },
-    [isSidebar, http?.externalUrl, application]
-  );
+  const { handleLinkClick, externalLinkModal } = useMarkdownLinkClick();
 
   const visualizationRenderer = useMemo(
     () =>
@@ -175,73 +149,9 @@ export function ChatMessageText({
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
-      a: (props) => (
-        <EuiLink
-          {...props}
-          target="_blank"
-          rel="noreferrer"
-          external={false}
-          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-            if (props.href) handleLinkClick(props.href, e);
-          }}
-        />
-      ),
+      ...createConversationMarkdownComponents({ onLinkClick: handleLinkClick }),
       cursor: Cursor,
-      codeBlock: (props) => {
-        return (
-          <>
-            <EuiCodeBlock>{props.value}</EuiCodeBlock>
-            <EuiSpacer size="m" />
-          </>
-        );
-      },
-      esql: (props) => {
-        return (
-          <>
-            <EuiCodeBlock language="esql" isCopyable>
-              {props.value}
-            </EuiCodeBlock>
-            <EuiSpacer size="m" />
-          </>
-        );
-      },
-      table: (props) => (
-        <>
-          <EuiTable {...props} tableLayout="auto" scrollableInline responsiveBreakpoint={false} />
-          <EuiSpacer size="m" />
-        </>
-      ),
-      th: (props) => {
-        const { children, ...rest } = props;
-        return (
-          <EuiTableHeaderCell
-            minWidth="10em"
-            // This is just a recommendation and will be ignored if there aren't
-            // enough columns to fill the entire container's width.
-            maxWidth="30em"
-            {...rest}
-          >
-            {children}
-          </EuiTableHeaderCell>
-        );
-      },
-      tr: (props) => <EuiTableRow {...props} />,
-      td: (props) => {
-        const { children, ...rest } = props;
-        return (
-          <EuiTableRowCell
-            minWidth="10em"
-            // This is just a recommendation and will be ignored if there aren't
-            // enough columns to fill the entire container's width.
-            maxWidth="30em"
-            {...rest}
-          >
-            {children}
-          </EuiTableRowCell>
-        );
-      },
       [visualizationElement.tagName]: visualizationRenderer,
-      [renderAttachmentElement.tagName]: renderAttachmentRenderer,
       [renderElement.tagName]: renderRenderer,
     };
 
@@ -250,26 +160,60 @@ export function ChatMessageText({
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
-        renderAttachmentTagParser,
         renderTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [visualizationRenderer, renderAttachmentRenderer, renderRenderer, handleLinkClick]);
+  }, [visualizationRenderer, renderRenderer, handleLinkClick]);
+
+  // Skip the splitter until a closed tag appears. A tag it leaves in code stays in the
+  // original string, so that reply is not reprinted.
+  const messageSegments = useMemo(() => {
+    if (!COMPLETE_RENDER_ATTACHMENT_TAG.test(content)) {
+      return undefined;
+    }
+    const segments = splitAuthoredMarkdown(content, { elements: [tagName] });
+    return segments.some((segment) => segment.type === 'element') ? segments : undefined;
+  }, [content]);
+
+  const markdownMessage = (source: string, key: string) => (
+    <EuiText key={key} size="s" css={markdownContainerStyles}>
+      <EuiMarkdownFormat
+        textSize="s"
+        parsingPluginList={parsingPluginList}
+        processingPluginList={processingPluginList}
+      >
+        {source}
+      </EuiMarkdownFormat>
+    </EuiText>
+  );
+
+  // The column is always present, and markdown blocks are numbered on their own, so the
+  // first prose block keeps the key `markdown-0` when the first attachment tag arrives.
+  const messageChildren: React.ReactNode[] = [];
+  let markdownIndex = 0;
+  let attachmentIndex = 0;
+  for (const segment of messageSegments ?? [{ type: 'markdown' as const, source: content }]) {
+    if (segment.type === 'markdown') {
+      messageChildren.push(markdownMessage(segment.source, `markdown-${markdownIndex}`));
+      markdownIndex += 1;
+    } else {
+      messageChildren.push(
+        React.createElement(renderAttachmentRenderer, {
+          key: `attachment-${attachmentIndex}`,
+          attachmentId: segment.attributes[attributes.attachmentId],
+          version: segment.attributes[attributes.version],
+        })
+      );
+      attachmentIndex += 1;
+    }
+  }
 
   return (
     <>
-      <EuiText size="s" className={containerClassName}>
-        <EuiMarkdownFormat
-          textSize="s"
-          parsingPluginList={parsingPluginList}
-          processingPluginList={processingPluginList}
-        >
-          {content}
-        </EuiMarkdownFormat>
-      </EuiText>
-      <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
+      <div css={splitMessageStyles}>{messageChildren}</div>
+      {externalLinkModal}
     </>
   );
 }

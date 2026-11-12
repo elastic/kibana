@@ -28,6 +28,8 @@ import type { IdentityProvider, WatchlistsByEuid } from '../entities/service';
 import { createWatchlistEntitiesService } from '../entities/service';
 import { getIndexForWatchlist } from '../entities/utils';
 import { createIndexSyncService } from './sync/index_sync';
+import type { FullSyncState } from './sync/update_detection/update_detection';
+import type { SyncResult } from './sync/sources_sync';
 import { applyBulkRemoveSource } from './bulk/soft_delete';
 import type { StaleEntity } from './bulk/soft_delete';
 import { MANUAL_SOURCE_ID } from './manual/constants';
@@ -89,6 +91,33 @@ const paginatedSearch = async <T>(
 };
 
 export type EntitySourcesService = ReturnType<typeof createEntitySourcesService>;
+
+/**
+ * Runs a watchlist sync and never rejects — errors are swallowed and logged.
+ * Callers that want fire-and-forget behavior (not waiting on
+ * a potentially full entity-store scan, only on the source being saved) should call this as
+ * `void syncWatchlistInBackground(...)`;
+ */
+export const syncWatchlistInBackground = async ({
+  watchlistId,
+  logContext,
+  ...serviceParams
+}: {
+  watchlistId: string;
+  logContext: string;
+} & Parameters<typeof createEntitySourcesService>[0]): Promise<void> => {
+  const { logger } = serviceParams;
+  try {
+    const entitySourcesService = createEntitySourcesService(serviceParams);
+    await entitySourcesService.syncWatchlist(watchlistId);
+    logger.info(`[${logContext}] Background sync completed for watchlist ${watchlistId}`);
+  } catch (syncError) {
+    const errorMessage = syncError instanceof Error ? syncError.message : String(syncError);
+    logger.warn(
+      `[${logContext}] Background sync failed for watchlist ${watchlistId}: ${errorMessage}`
+    );
+  }
+};
 
 export const createEntitySourcesService = ({
   esClient,
@@ -307,66 +336,112 @@ export const createEntitySourcesService = ({
       index: getIndexForWatchlist(namespace),
     };
 
-    const { sources } = await descriptorClient.list({});
+    const { sources: existingReferencedSources } = sourceIds.length
+      ? await descriptorClient.list({ per_page: sourceIds.length }, sourceIds)
+      : { sources: [] };
 
     await Promise.all(
-      sources
-        .filter((s) => sourceIds.includes(s.id))
-        .map(async (source) => {
-          const dataEsClient = source.type === 'index' ? await getSourceEsClient(source) : esClient;
-          if (!dataEsClient) {
-            logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
-            return;
+      existingReferencedSources.map(async (source) => {
+        const dataEsClient = source.type === 'index' ? await getSourceEsClient(source) : esClient;
+        if (!dataEsClient) {
+          logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
+          return;
+        }
+
+        const indexSyncService = createIndexSyncService({
+          internalEsClient: esClient,
+          dataEsClient,
+          crudClient,
+          logger,
+          descriptorClient,
+          watchlist: meta,
+        });
+
+        const identity = buildIdentityProvider(source);
+        let prevMaxEntityId: string | undefined;
+        let lastWatchlistsByEuid: WatchlistsByEuid = new Map();
+
+        // Resolved once per source, before paging, and reused for every page below plus the tail pass
+        let fullSyncState: FullSyncState & { completedAt?: string } = { hasNewFullSync: false };
+        try {
+          fullSyncState = await indexSyncService.resolveFullSyncState(source);
+        } catch (error) {
+          logger.warn(
+            `[WatchlistSync] Failed to resolve full-sync state for source ${source.id}: ${String(
+              error
+            )}`
+          );
+        }
+
+        let anySourceCallFailed = false;
+        const trackResult = ([result]: SyncResult[]) => {
+          if (!result || result.failed) {
+            anySourceCallFailed = true;
           }
+        };
 
-          const indexSyncService = createIndexSyncService({
-            internalEsClient: esClient,
-            dataEsClient,
-            crudClient,
-            logger,
-            descriptorClient,
-            watchlist: meta,
-          });
+        for await (const page of watchlistEntitiesService.listEntityStoreEntities(identity)) {
+          trackResult(
+            await indexSyncService.plainIndexSync(
+              [
+                {
+                  source,
+                  entityStoreEntityIdsByType: page.entityIdsByType,
+                  correlationMap: page.correlationMap,
+                  watchlistsByEuid: page.watchlistsByEuid,
+                  pageRange: { gt: prevMaxEntityId, lte: page.maxEntityId },
+                },
+              ],
+              fullSyncState
+            )
+          );
+          prevMaxEntityId = page.maxEntityId;
+          lastWatchlistsByEuid = page.watchlistsByEuid;
+          if (abortSignal?.aborted) return;
+        }
 
-          const identity = buildIdentityProvider(source);
-          let prevMaxEntityId: string | undefined;
-          let lastWatchlistsByEuid: WatchlistsByEuid = new Map();
+        if (abortSignal?.aborted) return;
 
-          for await (const page of watchlistEntitiesService.listEntityStoreEntities(identity)) {
-            await indexSyncService.plainIndexSync([
+        // Tail pass: catch watchlist entries with entity.id beyond the last store page.
+        // Empty correlationMap causes detectForIndexSource to no-op (no correlation values to query).
+        trackResult(
+          await indexSyncService.plainIndexSync(
+            [
               {
                 source,
-                entityStoreEntityIdsByType: page.entityIdsByType,
-                correlationMap: page.correlationMap,
-                watchlistsByEuid: page.watchlistsByEuid,
-                pageRange: { gt: prevMaxEntityId, lte: page.maxEntityId },
+                entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+                correlationMap: new Map(),
+                watchlistsByEuid: lastWatchlistsByEuid,
+                pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
               },
-            ]);
-            prevMaxEntityId = page.maxEntityId;
-            lastWatchlistsByEuid = page.watchlistsByEuid;
-            if (abortSignal?.aborted) return;
+            ],
+            fullSyncState
+          )
+        );
+
+        if (fullSyncState.hasNewFullSync && fullSyncState.completedAt && !anySourceCallFailed) {
+          try {
+            await indexSyncService.markFullSyncProcessed(source, fullSyncState.completedAt);
+          } catch (error) {
+            logger.warn(
+              `[WatchlistSync] Failed to persist full-sync marker for source ${source.id}: ${String(
+                error
+              )}`
+            );
           }
-
-          if (abortSignal?.aborted) return;
-
-          // Tail pass: catch watchlist entries with entity.id beyond the last store page.
-          // Empty correlationMap causes detectForIndexSource to no-op (no correlation values to query).
-          await indexSyncService.plainIndexSync([
-            {
-              source,
-              entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
-              correlationMap: new Map(),
-              watchlistsByEuid: lastWatchlistsByEuid,
-              pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
-            },
-          ]);
-        })
+        }
+      })
     );
 
     if (isAborted(abortSignal, `after index sync for watchlist ${watchlistId}, skipping cleanup`))
       return;
 
-    await cleanupOrphanedEntities(meta, sourceIds, undefined, abortSignal);
+    // Use ids of sources that are both referenced and still exist (not just referenced) as
+    // "active" for cleanup — a source can end up referenced-but-deleted if removing it was
+    // interrupted between deleting the source and unlinking the reference; treating a dangling
+    // reference as active here would permanently exclude its entities from cleanup.
+    const existingSourceIds = existingReferencedSources.map((s) => s.id);
+    await cleanupOrphanedEntities(meta, existingSourceIds, undefined, abortSignal);
 
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };

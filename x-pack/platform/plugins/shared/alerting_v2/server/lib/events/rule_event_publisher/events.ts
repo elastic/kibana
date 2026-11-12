@@ -15,7 +15,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
  * envelope fields that are not part of the rule itself (`spaceId`,
  * `correlationId`). Consumers project from this: the workflow subscriber
  * exposes `{ ruleId, spaceId, tags }`, while the change-history subscriber
- * uses the full `rule` as its snapshot.
+ * uses the full `rule` as its snapshot and `rule.version` as the sequence.
  */
 export interface RuleEventPayload {
   /** Rule id. Always present, even when the full `rule` could not be resolved. */
@@ -29,10 +29,21 @@ export interface RuleEventPayload {
    */
   readonly rule?: RuleResponse;
   /**
+   * The stored `metadata.template.id`, when the rule was created from a rule
+   * template. Carried on the event because the public {@link RuleResponse}
+   * deliberately omits it while telemetry still reports it.
+   */
+  readonly templateId?: string;
+  /**
    * Shared id linking events emitted by the same bulk operation. Only present
    * for bulk emits.
    */
   readonly correlationId?: string;
+  /**
+   * Rule as it was stored before the operation. Present only for `rule.updated`,
+   * and only when the pre-update state is available.
+   */
+  readonly prevRule?: RuleResponse;
 }
 
 /**

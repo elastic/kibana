@@ -7,6 +7,7 @@
 
 import type { EntityType } from '@kbn/entity-store/common';
 import { getEuidEsqlEvaluation, getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 /**
  * Inserts `.target` after the first path segment (entity type namespace).
@@ -34,8 +35,9 @@ export const getTargetEuidEsqlEvaluation = (
   entityType: EntityType,
   outputColumn: string
 ): string => {
-  const fragment = getEuidEsqlEvaluation(entityType, outputColumn);
-  const { identitySourceFields } = getEuidSourceFields(entityType);
+  const definition = getBuiltInEntityDefinition(entityType);
+  const fragment = getEuidEsqlEvaluation(definition, outputColumn);
+  const { identitySourceFields } = getEuidSourceFields(definition);
 
   // Sort by length descending to prevent partial matches
   // (e.g., `host.hostname` must be replaced before `host.name`)
@@ -53,6 +55,6 @@ export const getTargetEuidEsqlEvaluation = (
  * Returns the list of target EUID source fields for the given entity type.
  */
 export const getTargetEuidSourceFields = (entityType: EntityType): string[] => {
-  const { identitySourceFields } = getEuidSourceFields(entityType);
+  const { identitySourceFields } = getEuidSourceFields(getBuiltInEntityDefinition(entityType));
   return identitySourceFields.map(toTargetField);
 };

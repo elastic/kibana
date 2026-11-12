@@ -21,33 +21,10 @@ export async function deleteConnectorById(
   });
 }
 
-export async function deleteAllConnectors(kbnClient: KbnClient): Promise<void> {
-  const list = await kbnClient.request<
-    Array<{ id: string; is_preconfigured?: boolean; is_system_action?: boolean }>
-  >({
-    method: 'GET',
-    path: '/api/actions/connectors',
-  });
-  const connectors = Array.isArray(list.data) ? list.data : [];
-  // Preconfigured and system connectors cannot be deleted via the API (the
-  // DELETE endpoint returns 400), so only remove user-created connectors.
-  const deletable = connectors.filter(
-    (connector) => !connector.is_preconfigured && !connector.is_system_action
-  );
-  await Promise.all(
-    deletable.map((connector) =>
-      kbnClient.request({
-        method: 'DELETE',
-        path: `/api/actions/connector/${encodeURIComponent(connector.id)}`,
-        headers: XSFR,
-      })
-    )
-  );
-}
-
 export async function createGenAiConnectorForProxy(
   kbnClient: KbnClient,
-  proxy: LlmProxy
+  proxy: LlmProxy,
+  { defaultModel = 'gpt-4' }: { defaultModel?: string } = {}
 ): Promise<{ id: string }> {
   const res = await kbnClient.request<{ id: string }>({
     method: 'POST',
@@ -58,7 +35,7 @@ export async function createGenAiConnectorForProxy(
       config: {
         apiProvider: 'OpenAI',
         apiUrl: `http://localhost:${proxy.getPort()}`,
-        defaultModel: 'gpt-4',
+        defaultModel,
       },
       secrets: { apiKey: 'myApiKey' },
       connector_type_id: '.gen-ai',

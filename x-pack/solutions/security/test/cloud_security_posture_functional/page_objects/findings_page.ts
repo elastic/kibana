@@ -30,6 +30,8 @@ const GROUP_SELECTOR_OPTION_TEST_SUBJECTS: Record<string, string> = {
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const es = getService('es');
@@ -119,15 +121,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     async navigateToAction(actionTestSubject: string) {
-      return await retry.try(async () => {
-        await testSubjects.click(actionTestSubject);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
-
-        if (!result) {
-          throw new Error('Integration installation page not found');
+      const sourcePath = new URL(await browser.getCurrentUrl()).pathname;
+      await retry.tryForTime(30000, async () => {
+        if (await testSubjects.exists('createPackagePolicy_pageTitle')) return;
+        if (new URL(await browser.getCurrentUrl()).pathname === sourcePath) {
+          await testSubjects.click(actionTestSubject);
         }
+        await testSubjects.existOrFail('createPackagePolicy_pageTitle', { timeout: 5000 });
       });
     },
   });
@@ -298,6 +298,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const latestFindingsTable = createDataTableObject('latest_findings_table');
   const latestVulnerabilitiesTable = createDataTableObject('latest_vulnerabilities_table');
 
+  const waitForFindingsTable = (expectedRowsCount: number) =>
+    retry.waitFor(
+      `findings table to render ${expectedRowsCount} rows`,
+      async () => (await latestFindingsTable.getRowsCount()) === expectedRowsCount
+    );
+
   const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
   const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
   const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
@@ -308,9 +314,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
   };
 
-  const createFlyoutObject = (tableTestSubject: string) => ({
+  // The finding flyout is a system flyout (EuiFlyout) with no dedicated test subject on its
+  // root, so it is located by the EuiFlyout class. Only one flyout is open on the findings page.
+  const createFlyoutObject = (cssSelector: string) => ({
     async getElement() {
-      return await testSubjects.find(tableTestSubject);
+      return await find.byCssSelector(cssSelector);
     },
     async clickTakeActionButton() {
       const element = await this.getElement();
@@ -330,7 +338,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
-  const misconfigurationsFlyout = createFlyoutObject('rightSection');
+  const misconfigurationsFlyout = createFlyoutObject('.euiFlyout');
 
   const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {
@@ -373,6 +381,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const row = await element.findAllByTestSubject('grouping-accordion');
       return await row[rowIndex];
     },
+    // The counters keep rendering the previous result set while the grouping query is in
+    // flight, so they have to be polled rather than read once.
+    async waitForCounts({ groupCount, unitCount }: { groupCount: string; unitCount: string }) {
+      await retry.try(async () => {
+        expect(await this.getGroupCount()).to.be(groupCount);
+        expect(await this.getUnitCount()).to.be(unitCount);
+      });
+    },
   });
   const isLatestFindingsTableThere = async () => {
     const table = await testSubjects.findAll('docTable');
@@ -389,6 +405,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     navigateToMisconfigurations,
     latestFindingsTable,
     latestVulnerabilitiesTable,
+    waitForFindingsTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
     thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,

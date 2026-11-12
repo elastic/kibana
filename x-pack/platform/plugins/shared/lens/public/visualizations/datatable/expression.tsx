@@ -109,7 +109,7 @@ export const getDatatableRenderer = (dependencies: {
       type: PERFORMANCE_TRACKER_TYPES.PANEL,
       subType: 'lens_datatable_renderer',
     });
-
+    const renderMode = handlers.getRenderMode();
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
@@ -181,6 +181,7 @@ export const getDatatableRenderer = (dependencies: {
           columnCellValueActions={columnCellValueActions}
           columnFilterable={columnsFilterable}
           interactive={isInteractive()}
+          viewMode={renderMode === 'preview' ? 'non-interactive' : renderMode}
           theme={dependencies.core.theme}
           renderComplete={renderComplete}
           syncColors={config.syncColors}

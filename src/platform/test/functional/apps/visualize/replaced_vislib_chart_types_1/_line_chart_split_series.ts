@@ -25,6 +25,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
   const xyChartSelector = 'xyVisChart';
+  const getRequestTimestamp = async () =>
+    retry.tryForTime(10000, async () => {
+      const timestamp = (await inspector.getTableData()).find(([label]) =>
+        label.includes('Request timestamp')
+      )?.[1];
+      if (!timestamp) throw new Error('Request timestamp is not yet available in the inspector');
+      return timestamp;
+    });
 
   describe('line charts - split series', function () {
     const initLineChart = async function () {
@@ -137,19 +145,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check inspector panel request stats for timestamp
       await inspector.open();
       await inspector.openInspectorRequestsView();
-      const requestStatsBefore: string[][] = await inspector.getTableData();
-      const requestTimestampBefore = requestStatsBefore.filter((r) =>
-        r[0].includes('Request timestamp')
-      )[0][1];
+      const requestTimestampBefore = await getRequestTimestamp();
 
       // pause to allow time for autorefresh to fire another request
       await common.sleep(intervalS * 1000 * 1.5);
 
       // get the latest timestamp from request stats
-      const requestStatsAfter: string[][] = await inspector.getTableData();
-      const requestTimestampAfter = requestStatsAfter.filter((r) =>
-        r[0].includes('Request timestamp')
-      )[0][1];
+      const requestTimestampAfter = await getRequestTimestamp();
       log.debug(
         `Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`
       );

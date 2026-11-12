@@ -8,6 +8,7 @@
  */
 
 export { ExecutionError } from './errors/execution_error';
+export { yieldToEventLoop } from './lib/yield_to_event_loop';
 export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
 export { buildWorkflowFilters } from './lib/workflow_filters';
@@ -17,7 +18,11 @@ export type {
   ManagedFilter,
   WorkflowQueryFilter,
 } from './lib/workflow_filters';
-export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
+export type {
+  ResumeExternalHitlParams,
+  WorkflowsApiRequestHandlerContext,
+  WorkflowsClient,
+} from './types';
 
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';

@@ -34,6 +34,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
         },
       },
       chrome: {},
+      notifications: { toasts: {} },
     } as unknown as CoreStart);
 
   const createStartDependencies = () =>
@@ -69,8 +70,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
     );
-    // TODO: temporarily disabled
-    expect(registerActionAsync).not.toHaveBeenCalledWith(
+    expect(registerActionAsync).toHaveBeenCalledWith(
       ENHANCE_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );

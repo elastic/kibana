@@ -56,7 +56,7 @@ const baseFlyoutState = {
 };
 
 const defaultProps = {
-  esqlQuery: undefined as string | undefined,
+  esqlQueries: [] as string[],
   template: undefined as string | undefined,
   timeRange: undefined,
   isApproximate: false,
@@ -89,14 +89,18 @@ describe('EditCustomContentFlyout', () => {
         draftTemplate: '<p>hi</p>',
       });
       render(
-        <EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />
+        <EditCustomContentFlyout
+          {...defaultProps}
+          esqlQueries={['FROM logs']}
+          template="<p>hi</p>"
+        />
       );
       expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
     });
 
     it('is enabled when the query differs from the saved value', () => {
       mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM other' });
-      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
+      render(<EditCustomContentFlyout {...defaultProps} esqlQueries={['FROM logs']} />);
       expect(screen.getByRole('button', { name: 'Apply and close' })).not.toBeDisabled();
     });
 
@@ -130,6 +134,19 @@ describe('EditCustomContentFlyout', () => {
         templateSizeBytes: '<div></div>'.length,
       });
     });
+  });
+
+  it('hands the queries of the panel to the state, so a preview can fetch them all', () => {
+    render(
+      <EditCustomContentFlyout
+        {...defaultProps}
+        esqlQueries={['FROM logs', 'FROM metrics', 'FROM traces']}
+      />
+    );
+
+    expect(mockUseEditFlyoutState).toHaveBeenCalledWith(
+      expect.objectContaining({ esqlQueries: ['FROM logs', 'FROM metrics', 'FROM traces'] })
+    );
   });
 
   it('links to the custom panels docs', () => {
@@ -168,7 +185,11 @@ describe('EditCustomContentFlyout', () => {
         draftTemplate: '<p>hi</p>',
       });
       render(
-        <EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />
+        <EditCustomContentFlyout
+          {...defaultProps}
+          esqlQueries={['FROM logs']}
+          template="<p>hi</p>"
+        />
       );
       expect(screen.getByRole('button', { name: 'Run preview' })).not.toBeDisabled();
     });
@@ -190,7 +211,7 @@ describe('EditCustomContentFlyout', () => {
         draftTemplate: '<p>hi</p>',
         handleRender,
       });
-      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM other" />);
+      render(<EditCustomContentFlyout {...defaultProps} esqlQueries={['FROM other']} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Run preview' }));
 

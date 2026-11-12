@@ -98,6 +98,23 @@ describe('serializeEditorContent', () => {
     expect(serializeEditorContent(div)).toBe('Hi can you tell\nme the\nwheather ?');
   });
 
+  it('skips the trailing <br> the browser adds to keep the last line visible', () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('line1\nline2\n'));
+    div.appendChild(document.createElement('br'));
+
+    expect(serializeEditorContent(div)).toBe('line1\nline2\n');
+  });
+
+  it('skips a trailing <br> followed by an empty text node', () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('ALL'));
+    div.appendChild(document.createElement('br'));
+    div.appendChild(document.createTextNode(''));
+
+    expect(serializeEditorContent(div)).toBe('ALL');
+  });
+
   it('preserves line breaks adjacent to badges', () => {
     const div = document.createElement('div');
     div.appendChild(document.createTextNode('Use '));
@@ -125,7 +142,21 @@ describe('serializeEditorContent', () => {
     });
     div.appendChild(badge);
 
-    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://entry-1)');
+    expect(serializeEditorContent(div)).toBe('[#visualization/Pacific Sales](sml://entry-1)');
+  });
+
+  it('serializes a mention badge with its kind', () => {
+    const div = document.createElement('div');
+    div.appendChild(
+      createCommandBadgeElement({
+        commandId: CommandId.Mention,
+        label: 'Julian Rosado',
+        id: 'u_julian_0',
+        metadata: { kind: 'user' },
+      })
+    );
+
+    expect(serializeEditorContent(div)).toBe('[@Julian Rosado](mention://u_julian_0?kind=user)');
   });
 
   it('serializes an image placeholder element', () => {
@@ -252,6 +283,22 @@ describe('deserializeInputSegments', () => {
   });
 
   it('parses an SML badge', () => {
+    const segments = deserializeInputSegments('[#visualization/Pacific Sales](sml://entry-1)');
+
+    expect(segments).toEqual([
+      {
+        type: 'badge',
+        data: {
+          commandId: CommandId.Sml,
+          label: 'visualization/Pacific Sales',
+          id: 'entry-1',
+          metadata: {},
+        },
+      },
+    ]);
+  });
+
+  it('drops the previous trigger from the label of a badge serialized with it', () => {
     const segments = deserializeInputSegments('[@visualization/Pacific Sales](sml://entry-1)');
 
     expect(segments).toEqual([
@@ -262,6 +309,22 @@ describe('deserializeInputSegments', () => {
           label: 'visualization/Pacific Sales',
           id: 'entry-1',
           metadata: {},
+        },
+      },
+    ]);
+  });
+
+  it('parses a mention badge with its kind', () => {
+    const segments = deserializeInputSegments('[@Elastic AI Agent](mention://my-agent?kind=agent)');
+
+    expect(segments).toEqual([
+      {
+        type: 'badge',
+        data: {
+          commandId: CommandId.Mention,
+          label: 'Elastic AI Agent',
+          id: 'my-agent',
+          metadata: { kind: 'agent' },
         },
       },
     ]);
@@ -332,8 +395,8 @@ describe('round-trip serialization', () => {
     expect(serializeEditorContent(div)).toBe(original);
   });
 
-  it('round-trips SML badge', () => {
-    const original = 'Ref [@visualization/Pacific Sales](sml://entry-1) here';
+  it('round-trips a mention badge', () => {
+    const original = 'Hi [@Julian Rosado](mention://u_julian_0?kind=user), look';
     const segments = deserializeInputSegments(original);
 
     const div = document.createElement('div');
@@ -346,5 +409,41 @@ describe('round-trip serialization', () => {
     }
 
     expect(serializeEditorContent(div)).toBe(original);
+  });
+
+  it('round-trips SML badge', () => {
+    const original = 'Ref [#visualization/Pacific Sales](sml://entry-1) here';
+    const segments = deserializeInputSegments(original);
+
+    const div = document.createElement('div');
+    for (const segment of segments) {
+      if (segment.type === 'text') {
+        div.appendChild(document.createTextNode(segment.value));
+      } else if (segment.type === 'badge') {
+        div.appendChild(createCommandBadgeElement(segment.data));
+      }
+    }
+
+    expect(serializeEditorContent(div)).toBe(original);
+  });
+});
+
+describe('badges with special characters', () => {
+  it('round-trips a label with brackets and an id with a colon, parenthesis and question mark', () => {
+    const data = {
+      commandId: CommandId.Sml,
+      label: 'dashboard/[Elastic Security] Rules \\ v2',
+      id: 'dashboard:a b)c?d',
+      metadata: {},
+    };
+    const div = document.createElement('div');
+    div.appendChild(createCommandBadgeElement(data));
+
+    const serialized = serializeEditorContent(div);
+
+    expect(serialized).toBe(
+      '[#dashboard/\\[Elastic Security\\] Rules \\\\ v2](sml://dashboard%3Aa%20b%29c%3Fd)'
+    );
+    expect(deserializeInputSegments(serialized)).toEqual([{ type: 'badge', data }]);
   });
 });

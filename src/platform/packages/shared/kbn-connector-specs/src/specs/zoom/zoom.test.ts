@@ -182,16 +182,11 @@ describe('Zoom', () => {
       });
     });
 
-    it('should double-encode a UUID that starts with /', async () => {
-      const mockResponse = { data: { id: 111, topic: 'Test' } };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await Zoom.actions.getMeetingDetails.handler(mockContext, {
-        meetingId: '/abc+123==',
-      });
-
-      const expectedId = encodeURIComponent(encodeURIComponent('/abc+123=='));
-      expect(mockClient.get).toHaveBeenCalledWith(`https://api.zoom.us/v2/meetings/${expectedId}`);
+    it('should reject a meeting UUID, as the endpoint only takes the numeric ID', async () => {
+      await expect(
+        Zoom.actions.getMeetingDetails.handler(mockContext, { meetingId: '/abc+123==' })
+      ).rejects.toThrow();
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
 
     it('should strip whitespace from a meeting ID', async () => {
@@ -514,6 +509,27 @@ describe('Zoom', () => {
 
       expect(result.text).toBe(shortContent);
       expect(result.truncated).toBe(false);
+    });
+
+    it('should download from a zoom.us subdomain', async () => {
+      mockClient.get.mockResolvedValue({ data: Buffer.from('ok'), headers: {} });
+      const downloadUrl = 'https://us06web.zoom.us/rec/download/transcript.vtt';
+
+      await Zoom.actions.downloadRecordingFile.handler(mockContext, { downloadUrl });
+
+      expect(mockClient.get).toHaveBeenCalledWith(downloadUrl, { responseType: 'arraybuffer' });
+    });
+
+    it.each([
+      'https://attacker.example.com/collect',
+      'https://zoom.us.attacker.example.com/rec/download/file',
+      'https://evilzoom.us/rec/download/file',
+      'http://zoom.us/rec/download/file',
+    ])('should refuse to send the Zoom token to %s', async (downloadUrl) => {
+      await expect(
+        Zoom.actions.downloadRecordingFile.handler(mockContext, { downloadUrl })
+      ).rejects.toThrow('downloadRecordingFile only downloads from https://zoom.us');
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
 
     it('should propagate download errors', async () => {

@@ -23,8 +23,14 @@ const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca4959
 const REGION_BEFORE_SERVICE_HOSTS = new Set(['es', 'aoss']);
 
 /**
+ * Global endpoints such as iam.amazonaws.com and sts.amazonaws.com carry no
+ * region in their hostname and are signed in us-east-1.
+ */
+const GLOBAL_ENDPOINT_SIGNING_REGION = 'us-east-1';
+
+/**
  * Parse an AWS hostname into service and region.
- * Supports: {service}.{region}.amazonaws.com
+ * Supports: {service}.{region}.amazonaws.com and global {service}.amazonaws.com
  */
 export function parseAwsHost(
   hostname: string
@@ -33,8 +39,8 @@ export function parseAwsHost(
     return null;
   }
   const parts = hostname.replace('.amazonaws.com', '').split('.');
-  if (parts.length < 2) {
-    return null;
+  if (parts.length === 1) {
+    return { service: parts[0], region: GLOBAL_ENDPOINT_SIGNING_REGION };
   }
 
   if (parts.length === 2) {
@@ -64,6 +70,25 @@ export function parseAwsHost(
  */
 export function escapeSigV4ReservedChars(value: string): string {
   return value.replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+}
+
+/**
+ * The SigV4 canonical URI for every AWS service except S3 is the request path
+ * URI-encoded a *second* time: a path segment the caller already percent-encoded
+ * (e.g. an ARN's `:` and `/` as `%3A`/`%2F`) must appear in the string-to-sign
+ * with its `%` re-encoded (`%253A`/`%252F`). The request still goes on the wire
+ * single-encoded, so AWS decodes it once to route and re-encodes it once to
+ * verify the signature. Signing the single-encoded form instead yields a generic
+ * `SignatureDoesNotMatch` (confirmed live against `eks:ListTagsForResource` and
+ * the EKS access-entry endpoints, whose path carries an ARN). Segments without
+ * reserved characters are unchanged, so this is a no-op for plain paths.
+ * S3 uses the single-encoded path and is handled by the caller.
+ */
+export function canonicalizeUriPath(path: string): string {
+  return path
+    .split('/')
+    .map((segment) => escapeSigV4ReservedChars(encodeURIComponent(segment)))
+    .join('/');
 }
 
 /**
@@ -111,6 +136,9 @@ export async function signRequest(
 
   const hasBody = body !== undefined && body !== '';
   const payloadHash = hasBody ? await sha256Hash(body) : EMPTY_BODY_SHA256;
+  const contentType =
+    Object.entries(existingHeaders).find(([key]) => key.toLowerCase() === 'content-type')?.[1] ??
+    'application/json';
 
   // Build canonical headers: host + content-type (if body) + x-amz-date + any existing x-amz-* headers
   const headersToSign: Record<string, string> = {
@@ -119,7 +147,7 @@ export async function signRequest(
   };
 
   if (hasBody) {
-    headersToSign['content-type'] = 'application/json';
+    headersToSign['content-type'] = contentType;
   }
 
   // Include any x-amz-* headers set by the action handler (AWS requires them signed)
@@ -134,9 +162,12 @@ export async function signRequest(
   const canonicalHeaders = sortedHeaderKeys.map((k) => `${k}:${headersToSign[k]}\n`).join('');
   const signedHeaders = sortedHeaderKeys.join(';');
 
+  // Non-S3 services sign the double-URI-encoded path; S3 signs the path as-is.
+  const canonicalUri = service === 's3' ? path : canonicalizeUriPath(path);
+
   const canonicalRequest = [
     method,
-    path,
+    canonicalUri,
     canonicalQuerystring,
     canonicalHeaders,
     signedHeaders,
@@ -169,7 +200,7 @@ export async function signRequest(
   }
 
   if (hasBody) {
-    result['Content-Type'] = 'application/json';
+    result['Content-Type'] = contentType;
   }
 
   return result;

@@ -13,6 +13,10 @@ import {
 } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import {
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from '@kbn/nightshift-shared';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
 import { pollUntil } from './poll_until';
 
@@ -75,11 +79,13 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   const getNonTerminalExecutions = async ({
     documentId,
     spaceId,
+    request,
   }: {
     documentId: string;
     spaceId: string;
+    request: KibanaRequest;
   }) => {
-    const { results, total } = await managementApi.getWorkflowExecutions(
+    const { results, total } = await managementApi.getClient(request).getWorkflowExecutions(
       {
         workflowId: documentId,
         statuses: [...NonTerminalExecutionStatuses],
@@ -99,7 +105,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
     request: KibanaRequest;
   }) => {
-    const { results } = await getNonTerminalExecutions({ documentId, spaceId });
+    const { results } = await getNonTerminalExecutions({ documentId, spaceId, request });
     if (results.length === 0) {
       return;
     }
@@ -114,7 +120,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
 
     await pollUntil(
-      () => getNonTerminalExecutions({ documentId, spaceId }),
+      () => getNonTerminalExecutions({ documentId, spaceId, request }),
       ({ total }) => total === 0
     );
   };
@@ -165,7 +171,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     request: KibanaRequest;
     spaceId: string;
   }) => {
-    const existing = await managementApi.getWorkflow(documentId, spaceId);
+    const existing = await managementApi.getClient(request).getWorkflow(documentId, spaceId);
 
     if (!existing) {
       if (enabled) {
@@ -243,6 +249,16 @@ export const createSignificantEventsScheduledWorkflowsService = ({
 
   return {
     async ensureWorkflow({ enabled, request, spaceId, config }) {
+      // Installing enabled workflows binds work to a space, and Nightshift only runs in the
+      // default one. Disabling stays allowed everywhere, so a space set up on an earlier build
+      // can still be taken down.
+      if (enabled && !isNightshiftSupportedSpace(spaceId)) {
+        log.warn(
+          `Not installing the scheduled Significant Events discovery workflows in space ${spaceId}: ${NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE}`
+        );
+        return;
+      }
+
       const client = await getManagedWorkflowsClient();
 
       if (enabled) {

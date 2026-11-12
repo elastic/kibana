@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
+import { storedWorkflowAccessControlSchema } from '../../common/access_control';
 import { pickWorkflowDocumentVersion } from '../../common/utils';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 import { buildWorkflowFilters } from '../lib/workflow_filters';
@@ -30,6 +31,19 @@ export interface WorkflowLookupOptions {
   managedFilter?: ManagedFilter;
 }
 
+/** How many workflows {@link WorkflowRepository.getWorkflowStatuses} reads in one request. */
+export const WORKFLOW_STATUSES_CHUNK_SIZE = 1000;
+
+/**
+ * Whether a workflow exists in the space it was asked for, as far as one read could tell.
+ * A soft-deleted workflow is `missing`. `unknown` means the read failed, and says nothing about
+ * the workflow.
+ */
+export type WorkflowStatus =
+  | { status: 'present'; name?: string }
+  | { status: 'missing' }
+  | { status: 'unknown' };
+
 export class WorkflowRepository {
   private options: WorkflowRepositoryOptions;
 
@@ -43,7 +57,7 @@ export class WorkflowRepository {
   async getWorkflow(
     workflowId: string,
     spaceId: string,
-    options?: WorkflowLookupOptions
+    options?: WorkflowLookupOptions & { includeDeleted?: boolean }
   ): Promise<EsWorkflow | null> {
     try {
       const { must, must_not } = buildWorkflowFilters({
@@ -52,12 +66,13 @@ export class WorkflowRepository {
           id: spaceId,
           includeGlobal: options?.includeGlobal ?? false,
         },
-        deleted: 'not_deleted',
+        deleted: options?.includeDeleted ? 'all' : 'not_deleted',
         managed: options?.managedFilter,
       });
 
       const response = await this.options.esClient.search({
         index: this.options.indexName,
+        allow_partial_search_results: false,
         query: {
           bool: {
             must,
@@ -68,6 +83,9 @@ export class WorkflowRepository {
         track_total_hits: false,
       });
 
+      if (response.timed_out || response._shards.failed > 0) {
+        throw new Error('Could not load workflow access from incomplete search results.');
+      }
       if (response.hits.hits.length === 0) {
         return null;
       }
@@ -79,6 +97,7 @@ export class WorkflowRepository {
 
       // Map index _source → EsWorkflow (read created_at / updated_at; EsWorkflow uses createdAt / lastUpdatedAt).
       const source = document._source as Record<string, unknown>;
+      const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
       const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
       const managedBy = typeof source.managedBy === 'string' ? source.managedBy : undefined;
       const billable = typeof source.billable === 'boolean' ? source.billable : undefined;
@@ -90,6 +109,8 @@ export class WorkflowRepository {
         typeof source.managedVersion === 'number' ? source.managedVersion : undefined;
       return {
         id: workflowId,
+        ...(source.owner_id ? { owner_id: source.owner_id as string } : {}),
+        ...(accessControl ? { access_control: accessControl } : {}),
         name: source.name as string,
         description: source.description as string | undefined,
         enabled: source.enabled as boolean,
@@ -130,6 +151,57 @@ export class WorkflowRepository {
     return map.get(`${spaceId}:${workflowId}`) ?? false;
   }
 
+  /** Reads the enabled state from the translog after an execution becomes searchable. */
+  async isWorkflowEnabledRealtime(workflowId: string, spaceId: string): Promise<boolean> {
+    try {
+      const response = await this.options.esClient.get<{
+        enabled?: boolean;
+        spaceId?: string;
+        deleted_at?: string | null;
+      }>({
+        index: this.options.indexName,
+        id: workflowId,
+        _source_includes: ['enabled', 'spaceId', 'deleted_at'],
+        realtime: true,
+      });
+      const source = response._source;
+      return source?.spaceId === spaceId && source.enabled === true && !source.deleted_at;
+    } catch (error) {
+      if (error.statusCode === 404) return false;
+      throw error;
+    }
+  }
+
+  /** Checks managed child eligibility in the execution space or global catalog without comparing revisions. */
+  async isManagedChildAdmissibleRealtime(workflowId: string, spaceId: string): Promise<boolean> {
+    try {
+      const response = await this.options.esClient.get<{
+        enabled?: boolean;
+        spaceId?: string;
+        managed?: boolean;
+        valid?: boolean;
+        deleted_at?: string | null;
+      }>({
+        index: this.options.indexName,
+        id: workflowId,
+        _source_includes: ['enabled', 'spaceId', 'managed', 'valid', 'deleted_at'],
+        realtime: true,
+      });
+      const source = response._source;
+      return Boolean(
+        source &&
+          (source.spaceId === spaceId || source.spaceId === GLOBAL_WORKFLOW_SPACE_ID) &&
+          source.enabled === true &&
+          source.managed === true &&
+          source.valid === true &&
+          !source.deleted_at
+      );
+    } catch (error) {
+      if (error.statusCode === 404) return false;
+      throw error;
+    }
+  }
+
   /**
    * Bulk-check whether the given (workflowId, spaceId) pairs refer to enabled,
    * non-soft-deleted workflows. Runs a single `_search` fetching only the
@@ -146,7 +218,16 @@ export class WorkflowRepository {
     refs: Array<{ workflowId: string; spaceId: string }>,
     options?: WorkflowLookupOptions
   ): Promise<Map<string, boolean>> {
-    const result = new Map<string, boolean>();
+    const states = await this.getWorkflowExecutionStates(refs, options);
+    return new Map([...states].map(([key, state]) => [key, state.enabled]));
+  }
+
+  /** Loads current enabled state and ACLs in one query, with missing and deleted workflows disabled. */
+  async getWorkflowExecutionStates(
+    refs: Array<{ workflowId: string; spaceId: string }>,
+    options?: WorkflowLookupOptions
+  ): Promise<Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'>>> {
+    const result = new Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'>>();
     if (refs.length === 0) {
       return result;
     }
@@ -184,7 +265,8 @@ export class WorkflowRepository {
     try {
       const response = await this.options.esClient.search({
         index: this.options.indexName,
-        _source: ['enabled', 'spaceId'],
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
+        allow_partial_search_results: false,
         size: uniqueKeys.size,
         track_total_hits: false,
         query: {
@@ -196,6 +278,9 @@ export class WorkflowRepository {
         },
       });
 
+      if (response.timed_out || response._shards.failed > 0) {
+        throw new Error('Could not load workflow access from incomplete search results.');
+      }
       const requestedSpacesByWorkflowId = refs.reduce<Map<string, Set<string>>>((acc, ref) => {
         const existing = acc.get(ref.workflowId) ?? new Set<string>();
         existing.add(ref.spaceId);
@@ -204,16 +289,23 @@ export class WorkflowRepository {
       }, new Map<string, Set<string>>());
 
       for (const hit of response.hits.hits) {
-        const source = hit._source as { enabled?: boolean; spaceId?: string } | undefined;
+        const source = hit._source as
+          | (Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'> & { spaceId?: string })
+          | undefined;
         if (source) {
+          const state = {
+            enabled: source.enabled ?? false,
+            owner_id: source.owner_id,
+            access_control: storedWorkflowAccessControlSchema.parse(source.access_control),
+          };
           if (source.spaceId === GLOBAL_WORKFLOW_SPACE_ID && options?.includeGlobal) {
             const requestedSpaces = requestedSpacesByWorkflowId.get(hit._id ?? '');
             requestedSpaces?.forEach((requestedSpaceId) => {
-              result.set(`${requestedSpaceId}:${hit._id}`, source.enabled ?? false);
+              result.set(`${requestedSpaceId}:${hit._id}`, state);
             });
           } else {
             const key = `${source.spaceId}:${hit._id}`;
-            result.set(key, source.enabled ?? false);
+            result.set(key, state);
           }
         }
       }
@@ -227,11 +319,114 @@ export class WorkflowRepository {
 
     for (const key of uniqueKeys) {
       if (!result.has(key)) {
-        result.set(key, false);
+        result.set(key, { enabled: false });
       }
     }
 
     return result;
+  }
+
+  /**
+   * Reads whether each workflow exists in the space it was asked for, keyed by
+   * `${spaceId}:${workflowId}`, with an entry for every ref. Global workflows cannot be bound to a
+   * service account, so a ref whose ID points at a global workflow is `missing`.
+   *
+   * - `present`: the workflow is in that space and not soft-deleted.
+   * - `missing`: the read found no document with that ID, found it in another space, or found it
+   *   soft-deleted.
+   * - `unknown`: the document or its chunk could not be read, or the index does not exist. A
+   *   missing index can mean the index is being restored, so it is not taken as proof that the
+   *   workflows are gone.
+   *
+   * Reads the workflows by ID in chunks of {@link WORKFLOW_STATUSES_CHUNK_SIZE}, one after another.
+   * A failed chunk makes only its own workflows `unknown`. Throws once `signal` is aborted.
+   */
+  async getWorkflowStatuses(
+    refs: ReadonlyArray<{ workflowId: string; spaceId: string }>,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<Map<string, WorkflowStatus>> {
+    const result = new Map<string, WorkflowStatus>();
+    const spacesById = new Map<string, Set<string>>();
+    for (const { workflowId, spaceId } of refs) {
+      spacesById.set(workflowId, (spacesById.get(workflowId) ?? new Set()).add(spaceId));
+    }
+
+    const setForId = (workflowId: string, toStatus: (spaceId: string) => WorkflowStatus) => {
+      for (const spaceId of spacesById.get(workflowId) ?? []) {
+        result.set(`${spaceId}:${workflowId}`, toStatus(spaceId));
+      }
+    };
+
+    const ids = [...spacesById.keys()];
+    for (let start = 0; start < ids.length; start += WORKFLOW_STATUSES_CHUNK_SIZE) {
+      signal?.throwIfAborted();
+      const chunk = ids.slice(start, start + WORKFLOW_STATUSES_CHUNK_SIZE);
+      const statuses = await this.readWorkflowStatusChunk(chunk, signal);
+      // A document the response leaves out has no evidence about it either way.
+      chunk.forEach((workflowId) =>
+        setForId(workflowId, statuses.get(workflowId) ?? (() => ({ status: 'unknown' })))
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Reads one chunk for {@link getWorkflowStatuses}, and returns, for each workflow ID the
+   * response answered, the status of that ID in a given space. A failed request answers every ID
+   * `unknown`, unless `signal` was aborted, which throws.
+   */
+  private async readWorkflowStatusChunk(
+    chunk: string[],
+    signal: AbortSignal | undefined
+  ): Promise<Map<string, (spaceId: string) => WorkflowStatus>> {
+    const statuses = new Map<string, (spaceId: string) => WorkflowStatus>();
+    const unknown = (): WorkflowStatus => ({ status: 'unknown' });
+
+    let response;
+    try {
+      response = await this.options.esClient.mget<
+        Pick<EsWorkflow, 'name'> & { spaceId?: string; deleted_at?: string | null }
+      >(
+        {
+          index: this.options.indexName,
+          ids: chunk,
+          _source_includes: ['name', 'spaceId', 'deleted_at'],
+        },
+        { signal }
+      );
+    } catch (error) {
+      signal?.throwIfAborted();
+      this.options.logger.warn(
+        `Could not read ${chunk.length} workflow(s) to check whether they exist: ${error}`
+      );
+      chunk.forEach((workflowId) => statuses.set(workflowId, unknown));
+      return statuses;
+    }
+
+    for (const doc of response.docs) {
+      const found = 'error' in doc ? undefined : doc.found;
+      const source = !('error' in doc) && doc.found ? doc._source : undefined;
+      if (found === false) {
+        statuses.set(doc._id, () => ({ status: 'missing' }));
+      } else if (typeof source?.spaceId !== 'string') {
+        // A read error, or a document without a space, says nothing about the workflow.
+        statuses.set(doc._id, unknown);
+      } else {
+        const { spaceId: storedSpaceId, deleted_at: deletedAt, name } = source;
+        statuses.set(doc._id, (spaceId) => {
+          // A soft-deleted workflow never runs. A bulk overwrite can revive it, but that write
+          // goes through `withWorkflowBindingChange`, which checks `manage_security` and binds
+          // again, so the old binding is not needed.
+          if (spaceId !== storedSpaceId || deletedAt) {
+            return { status: 'missing' };
+          }
+          return typeof name === 'string' ? { status: 'present', name } : { status: 'present' };
+        });
+      }
+    }
+
+    return statuses;
   }
 
   /**

@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const toasts = getService('toasts');
-  const kibanaServer = getService('kibanaServer');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
@@ -138,8 +137,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
       misconfigurationsFlyout = findings.misconfigurationsFlyout;
-      // Disable the new flyout so the CSP findings flyout uses its legacy selectors
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableNewFlyout': false });
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
       await findings.waitForPluginInitialized();
       // Prepare mocked findings
@@ -150,7 +147,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await findings.index.remove();
       await findings.detectionRuleApi.remove();
-      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     beforeEach(async () => {
@@ -190,7 +186,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await pageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          const rulePageTitle = await testSubjects.find('header-page-title');
+          const rulePageTitle = await testSubjects.find('appHeaderTitle');
           expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
         });
       });
@@ -223,7 +219,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         // Rule page title is not immediately available, so we need to retry until it is
         await retry.try(async () => {
-          const rulePageTitle = await testSubjects.find('header-page-title');
+          const rulePageTitle = await testSubjects.find('appHeaderTitle');
           expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
         });
       });
@@ -264,9 +260,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const flyout = await misconfigurationsFlyout.getElement();
         await (await flyout.findByTestSubject('csp:findings-flyout-alert-count')).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await (await testSubjects.find('header-page-title')).getVisibleText()).to.be(
-          'Alerts'
-        );
+        expect(await (await testSubjects.find('appHeaderTitle')).getVisibleText()).to.be('Alerts');
       });
     });
   });

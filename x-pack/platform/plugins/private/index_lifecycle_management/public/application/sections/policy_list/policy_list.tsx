@@ -139,7 +139,7 @@ export const PolicyList: React.FunctionComponent<Props> = ({
   } else if (policies.length === 0) {
     body = (
       <EuiPageTemplate.EmptyPrompt
-        iconType="managementApp"
+        iconType="gear"
         title={
           <h2>
             <FormattedMessage

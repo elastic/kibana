@@ -9,11 +9,13 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 
 import { intersection } from 'lodash';
 
-import { AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
-
 import type { Agent } from '../../types';
 
-import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  FleetError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { outputType } from '../../../common/constants';
 
@@ -31,9 +33,10 @@ import {
   bulkCreateAgentActionResults,
   createAgentAction,
   createErrorActionResults,
+  getAgentsWithoutActionResults,
   getUnenrollAgentActions,
 } from './actions';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 
 export class UnenrollActionRunner extends ActionRunner {
@@ -69,26 +72,36 @@ export async function unenrollBatch(
     spaceId?: string;
     startTime?: string;
     skipActionCreation?: boolean;
+    skipAgentlessValidation?: boolean;
   }
 ): Promise<{ actionId: string }> {
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents);
   const outgoingErrors: Record<Agent['id'], Error> = {};
 
   // And which are allowed to unenroll
-  const agentsToUpdate = options.force
-    ? givenAgents
-    : givenAgents.reduce<Agent[]>((agents, agent) => {
-        if (isAgentUnenrolled(agent, options.revoke)) {
-          outgoingErrors[agent.id] = new FleetError(`Agent ${agent.id} already unenrolled`);
-        } else if (isHostedAgent(hostedPolicies, agent)) {
-          outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
-            `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
-          );
-        } else {
-          agents.push(agent);
-        }
-        return agents;
-      }, []);
+  const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
+    // force skips all the validations: escape hatch, for example to remove orphaned agentless agents
+    if (
+      !options.skipAgentlessValidation &&
+      !options.force &&
+      isAgentlessAgent(restrictions, agent)
+    ) {
+      outgoingErrors[agent.id] = new AgentlessAgentRestrictionError(
+        `Cannot unenroll managed agent ${agent.id}`
+      );
+    } else if (options.force) {
+      agents.push(agent);
+    } else if (isAgentUnenrolled(agent, options.revoke)) {
+      outgoingErrors[agent.id] = new FleetError(`Agent ${agent.id} already unenrolled`);
+    } else if (isHostedAgent(restrictions, agent)) {
+      outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
+      );
+    } else {
+      agents.push(agent);
+    }
+    return agents;
+  }, []);
 
   const now = new Date().toISOString();
   const actionId = options.actionId ?? uuidv4();
@@ -202,7 +215,7 @@ export async function updateActionsForForceUnenroll(
       // filtering out agents with action results
       const agentsToUpdate = await getAgentsWithoutActionResults(
         esClient,
-        action.action_id!,
+        [action.action_id!],
         commonAgents
       );
       if (agentsToUpdate.length > 0) {
@@ -216,36 +229,6 @@ export async function updateActionsForForceUnenroll(
       }
     }
   }
-}
-
-async function getAgentsWithoutActionResults(
-  esClient: ElasticsearchClient,
-  actionId: string,
-  commonAgents: string[]
-): Promise<string[]> {
-  try {
-    const res = await esClient.search({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      query: {
-        bool: {
-          must: [{ term: { action_id: actionId } }, { terms: { agent_id: commonAgents } }],
-        },
-      },
-      size: commonAgents.length,
-    });
-    const agentsToUpdate = commonAgents.filter(
-      (agentId) => !res.hits.hits.find((hit) => (hit._source as any)?.agent_id === agentId)
-    );
-    return agentsToUpdate;
-  } catch (err) {
-    if (err.statusCode === 404) {
-      // .fleet-actions-results does not yet exist
-      appContextService.getLogger().debug(err);
-    } else {
-      throw err;
-    }
-  }
-  return commonAgents;
 }
 
 export async function invalidateAPIKeysForAgents(agents: Agent[]) {

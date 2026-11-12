@@ -15,7 +15,12 @@ import type { CollectionVariant } from '../home/card_utils';
 import { COLLECTION_QUERYPARAM } from '../home/card_utils';
 import { CollectionFlyout } from '../home/components/collection_flyout';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import {
+  useAuthz,
+  useAutomaticImportAuthz,
+  useBreadcrumbs,
+  useStartServices,
+} from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -39,7 +44,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImport, application, cloud } = useStartServices();
+  const { automaticImport, cloud } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
 
@@ -62,11 +67,9 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   }, [history, search]);
   const euiTheme = useEuiTheme();
 
-  const automaticImportCapabilities = (
-    application.capabilities as Record<string, { view?: boolean } | undefined>
-  ).automatic_import;
-  const canReadAutomaticImportIntegrations =
-    automaticImportCapabilities?.view ?? Boolean(automaticImport);
+  const { canView: canReadAutomaticImportIntegrations, canCreate: canCreateAutomaticImport } =
+    useAutomaticImportAuthz();
+  const canUploadPackages = useAuthz().integrations.uploadPackages;
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
     ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
@@ -111,7 +114,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards: rawFilteredCards,
-    allCards,
     onCategoryChange,
     availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
@@ -126,22 +128,38 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     [rawFilteredCards, openCollection]
   );
 
-  // Resolve the open collection card from allCards so it survives category/search filters.
+  // Resolve the open collection card from rawFilteredCards so the flyout variants
+  // reflect the active filter state (category, signal, setup method, etc.).
   const openCollectionCard = useMemo(
     () =>
       openCollectionGroupId
-        ? allCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
+        ? rawFilteredCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
         : undefined,
-    [openCollectionGroupId, allCards]
+    [openCollectionGroupId, rawFilteredCards]
   );
 
-  const collectionReturnPath = useMemo(
-    () =>
-      openCollectionGroupId
-        ? `${pathname}?${COLLECTION_QUERYPARAM}=${openCollectionGroupId}`
-        : undefined,
-    [openCollectionGroupId, pathname]
-  );
+  // Clear stale ?collection= param when active filters remove or degrade the open collection
+  // so it does not unexpectedly re-open the flyout after the filter is cleared.
+  // Guard on isLoading AND errors: rawFilteredCards is empty while packages load or when the
+  // catalog fetch fails, so openCollectionCard would be undefined in both cases — wipe the
+  // param only once the catalog has loaded successfully.
+  useEffect(() => {
+    if (isLoading || eprPackageLoadingError || !openCollectionGroupId || openCollectionCard) return;
+    closeCollection();
+  }, [
+    isLoading,
+    eprPackageLoadingError,
+    openCollectionGroupId,
+    openCollectionCard,
+    closeCollection,
+  ]);
+
+  const collectionReturnPath = useMemo(() => {
+    if (!openCollectionGroupId) return undefined;
+    const params = new URLSearchParams(search);
+    params.set(COLLECTION_QUERYPARAM, openCollectionGroupId);
+    return `${pathname}?${params.toString()}`;
+  }, [openCollectionGroupId, pathname, search]);
 
   const collectionVariants: CollectionVariant[] = useMemo(() => {
     if (!openCollectionCard?.groupMembers || !collectionReturnPath) return [];
@@ -243,11 +261,14 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
           categories={mainCategories}
           selectedCategories={selectedCategories}
           onCategoryChange={onCategoryChange}
+          showCreatedIntegrations={canReadAutomaticImportIntegrations}
           CreateIntegrationCardButton={
-            canReadAutomaticImportIntegrations
+            canCreateAutomaticImport || canUploadPackages
               ? automaticImport?.components.CreateIntegrationSideCardButton
               : undefined
           }
+          canCreateIntegration={canCreateAutomaticImport}
+          canUploadIntegrationPackage={canUploadPackages}
           hasCreatedIntegrations={hasCreatedIntegrations}
           createdIntegrationsCount={integrations.length}
           isLoadingCreatedIntegrations={isLoadingCreatedIntegrations}

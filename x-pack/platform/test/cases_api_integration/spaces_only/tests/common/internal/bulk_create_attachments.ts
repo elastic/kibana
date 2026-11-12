@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import type { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import { nullUser, postCaseReq, postUnifiedCommentReq } from '../../../../common/lib/mock';
 import {
   createCase,
   removeServerGeneratedPropertiesFromSavedObject,
   getAuthWithSuperUser,
-  bulkCreateAttachments,
+  bulkCreateAttachmentsRaw,
   deleteAllCaseItems,
+  getCase,
 } from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -30,20 +30,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should bulk create attachments in space1', async () => {
       const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
-      const patchedCase = await bulkCreateAttachments({
+      const { body: createdAttachments } = await bulkCreateAttachmentsRaw({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        params: [postCommentUserReq],
+        params: [postUnifiedCommentReq],
         auth: authSpace1,
       });
 
-      const comment = removeServerGeneratedPropertiesFromSavedObject(
-        patchedCase.comments![0] as UserCommentAttachmentAttributes
-      );
-
+      expect(createdAttachments.length).to.be(1);
+      const comment = removeServerGeneratedPropertiesFromSavedObject(createdAttachments[0]);
       expect(comment).to.eql({
-        type: postCommentUserReq.type,
-        comment: postCommentUserReq.comment,
+        type: postUnifiedCommentReq.type,
+        data: postUnifiedCommentReq.data,
         created_by: nullUser,
         pushed_at: null,
         pushed_by: null,
@@ -52,16 +50,21 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // updates the case correctly after adding a comment
-      expect(patchedCase.totalComment).to.eql(patchedCase.comments!.length);
+      const patchedCase = await getCase({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        auth: authSpace1,
+      });
+      expect(patchedCase.totalComment).to.eql(1);
       expect(patchedCase.updated_by).to.eql(nullUser);
     });
 
     it('should not post a comment on a case in a different space', async () => {
       const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
-      await bulkCreateAttachments({
+      await bulkCreateAttachmentsRaw({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        params: [postCommentUserReq],
+        params: [postUnifiedCommentReq],
         auth: getAuthWithSuperUser('space2'),
         expectedHttpCode: 404,
       });

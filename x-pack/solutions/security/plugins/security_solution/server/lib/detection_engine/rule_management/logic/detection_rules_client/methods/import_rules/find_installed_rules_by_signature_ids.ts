@@ -11,13 +11,14 @@ import type {
   RuleResponse,
   RuleSignatureId,
 } from '../../../../../../../../common/api/detection_engine';
+import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 import { internalRuleToAPIResponse } from '../../converters/internal_rule_to_api_response';
 import { findRules } from '../../../search/find_rules';
 
 /**
  * Look up installed rules by `rule_id`, returned as a map keyed by `rule_id`.
  *
- * Callers must cap `ruleIds.length` at `RULE_IMPORT_BULK_CREATE_BATCH_SIZE`
+ * Callers must cap `ruleIds.length` at `RULE_IMPORT_BATCH_SIZE`
  * so the KQL OR-list stays under ES's 1024 `max_clause_count` floor.
  *
  * @param rulesClient - Alerting rules client used for the underlying `findRules` call.
@@ -31,27 +32,28 @@ export const findInstalledRulesBySignatureIds = async ({
 }: {
   rulesClient: RulesClient;
   ruleIds: RuleSignatureId[];
-}): Promise<Record<string, RuleResponse>> => {
-  if (ruleIds.length === 0) return {};
+}): Promise<Record<string, RuleResponse>> =>
+  withSecuritySpan('ruleManagement.findInstalledRulesBySignatureIds', async () => {
+    if (ruleIds.length === 0) return {};
 
-  const filter = `alert.attributes.params.ruleId: (${ruleIds
-    .map((id) => `"${escapeQuotes(id)}"`)
-    .join(' OR ')})`;
+    const filter = `alert.attributes.params.ruleId: (${ruleIds
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' OR ')})`;
 
-  const { data } = await findRules({
-    rulesClient,
-    filter,
-    page: 1,
-    perPage: ruleIds.length,
-    fields: undefined,
-    sortField: undefined,
-    sortOrder: undefined,
+    const { data } = await findRules({
+      rulesClient,
+      filter,
+      page: 1,
+      perPage: ruleIds.length,
+      fields: undefined,
+      sortField: undefined,
+      sortOrder: undefined,
+    });
+
+    const installedRulesById: Record<string, RuleResponse> = {};
+    for (const rule of data) {
+      const response = internalRuleToAPIResponse(rule);
+      installedRulesById[response.rule_id] = response;
+    }
+    return installedRulesById;
   });
-
-  const installedRulesById: Record<string, RuleResponse> = {};
-  for (const rule of data) {
-    const response = internalRuleToAPIResponse(rule);
-    installedRulesById[response.rule_id] = response;
-  }
-  return installedRulesById;
-};

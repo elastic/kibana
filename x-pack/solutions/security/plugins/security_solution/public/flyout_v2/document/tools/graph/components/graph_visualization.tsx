@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -35,7 +35,11 @@ import { PREFIX } from '../../../../../flyout/shared/test_ids';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_range';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
+import type { GraphEntryPoint } from '../../../../../common/lib/telemetry';
+import { getGraphEntryPoint } from '../../../../shared/utils/get_graph_entry_point';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -47,6 +51,8 @@ export const GRAPH_VISUALIZATION_TEST_ID = `${PREFIX}GraphVisualization` as cons
 export const GRAPH_ID = 'graph-visualization' as const;
 
 const MAX_DOCUMENTS_TO_LOAD = 50;
+/** Initial window of the entity graph when the enclosing entity flyout did not pin one. */
+const DEFAULT_ENTITY_GRAPH_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
 /**
  * Node-click callbacks. This component interprets the clicked node and routes it to the
@@ -66,11 +72,14 @@ interface GraphNodeCallbacks {
     entityId: string;
     entityName: string | undefined;
   }) => void;
-  /** Open a grouped-entities or grouped-events preview. */
+  /**
+   * Open a grouped-entities or grouped-events preview. `params.scopeId` is this graph's filter
+   * scope and must be forwarded to the panel so its filter actions reach this graph.
+   */
   onShowGrouped: (
     params: Omit<
       GraphGroupedNodePreviewPanelProps,
-      'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+      'showLoadingState' | 'onShowDocument' | 'onShowEntity' | 'onTelemetryEvent'
     >
   ) => void;
   /**
@@ -85,6 +94,13 @@ interface EventGraphVisualizationProps extends GraphNodeCallbacks {
   mode: 'event';
   /** Scope ID for the flyout panel */
   scopeId: string;
+  /**
+   * Scope for the graph's filter state. Defaults to a scope unique to this mounted graph so
+   * graphs open at the same time don't share filters. Consumers that only ever mount one graph
+   * and restore grouped-node previews from the URL (the legacy expandable flyout) pass a stable
+   * scope, so restored previews still reach the graph after a reload.
+   */
+  graphScopeId?: string;
   /** Event/alert document IDs that are the origin of the graph */
   eventIds: string[];
   /** Timestamp of the source event/alert */
@@ -98,8 +114,15 @@ interface EntityGraphVisualizationProps extends GraphNodeCallbacks {
   mode: 'entity';
   /** Scope ID for the flyout panel */
   scopeId: string;
+  /** Scope for the graph's filter state. See `EventGraphVisualizationProps.graphScopeId`. */
+  graphScopeId?: string;
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
   entityId: string;
+  /**
+   * Where the user opened the graph from, for telemetry. `undefined` is for a graph that was not
+   * opened by a user action in this session (restored from the URL): no telemetry is reported.
+   */
+  entryPoint: GraphEntryPoint | undefined;
 }
 
 export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
@@ -112,6 +135,11 @@ export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraph
  */
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
   const { scopeId, onShowDocument, onShowEntity, onShowGrouped, onShowNetwork } = props;
+
+  // Filter state is keyed by scope, and flyout v2 keeps previous graph flyouts mounted in its
+  // history, so each mounted graph needs its own scope to avoid sharing filters with another graph.
+  const graphInstanceId = useId();
+  const graphScopeId = props.graphScopeId ?? `${scopeId}-graph${graphInstanceId}`;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const height = useFlyoutBodyAvailableHeight(wrapperRef);
@@ -145,9 +173,23 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   }, [cps?.cpsManager]);
 
   const toasts = useToasts();
+  const entryPoint =
+    props.mode === 'entity'
+      ? props.entryPoint
+      : getGraphEntryPoint({ mode: 'event', isAlert: props.isAlert });
+  const { onTelemetryEvent, reportGraphOpened, reportDrillThrough } = useGraphTelemetry(entryPoint);
+
+  const hasReportedGraphOpened = useRef(false);
+  useEffect(() => {
+    if (hasReportedGraphOpened.current) return;
+    hasReportedGraphOpened.current = true;
+    reportGraphOpened();
+  }, [reportGraphOpened]);
 
   const { dataView, status } = useDataView(PageScope.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
+  // Entity mode only: a scope that pins a time range seeds the graph's picker.
+  const entityGraphTimeRange = getScopeFlyoutTimeRange(scopeId) ?? DEFAULT_ENTITY_GRAPH_TIME_RANGE;
 
   // Interpret the clicked node and route it to the appropriate consumer-provided preview opener.
   const onOpenEventPreview = useCallback(
@@ -158,12 +200,14 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
       if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
         onShowDocument(singleDocumentData.id, singleDocumentData.index, docMode === 'single-event');
+        reportDrillThrough(docMode === 'single-event' ? 'event' : 'alert');
       } else if (docMode === 'single-entity' && singleDocumentData && isEntityNodeEnriched(node)) {
         onShowEntity({
           engineType: singleDocumentData.entity?.engine_type,
           entityId: singleDocumentData.id,
           entityName: singleDocumentData.entity?.name,
         });
+        reportDrillThrough('entity');
       } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
         const entityItems = documentsData
           .slice(0, MAX_DOCUMENTS_TO_LOAD)
@@ -176,18 +220,23 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             entity: doc.entity,
             id: doc.id,
             icon: node.icon,
+            risk: doc.entity.riskScore,
           }));
-        onShowGrouped({ docMode, entityItems, documentIds: [], dataViewId: undefined });
+        onShowGrouped({
+          docMode,
+          entityItems,
+          documentIds: [],
+          dataViewId: undefined,
+          scopeId: graphScopeId,
+        });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
-        const documentIds = documentsData
-          .slice(0, MAX_DOCUMENTS_TO_LOAD)
-          .map((doc) => doc.event?.id)
-          .filter((id): id is string => id !== undefined);
+        const documentIds = documentsData.slice(0, MAX_DOCUMENTS_TO_LOAD).map((doc) => doc.id);
         onShowGrouped({
           docMode,
           documentIds,
           dataViewId: dataViewIndexPattern,
           entityItems: [],
+          scopeId: graphScopeId,
         });
       } else {
         toasts.addDanger({
@@ -197,7 +246,15 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         });
       }
     },
-    [onShowDocument, onShowEntity, onShowGrouped, dataViewIndexPattern, toasts]
+    [
+      onShowDocument,
+      onShowEntity,
+      onShowGrouped,
+      dataViewIndexPattern,
+      toasts,
+      graphScopeId,
+      reportDrillThrough,
+    ]
   );
 
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -237,8 +294,17 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
           kind: 'absolute',
         },
       });
+      reportDrillThrough('timeline');
     },
-    [investigateInTimeline, toasts]
+    [investigateInTimeline, toasts, reportDrillThrough]
+  );
+
+  const onOpenNetworkPreview = useCallback(
+    (ip: string) => {
+      onShowNetwork(ip);
+      reportDrillThrough('network');
+    },
+    [onShowNetwork, reportDrillThrough]
   );
 
   return (
@@ -253,7 +319,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       {status === 'ready' && (
         <React.Suspense fallback={<EuiLoadingSpinner />}>
           <GraphInvestigationLazy
-            scopeId={scopeId}
+            scopeId={graphScopeId}
             initialState={
               props.mode === 'event'
                 ? {
@@ -269,8 +335,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                     dataView,
                     entityIds: [{ id: props.entityId, isOrigin: true }],
                     timeRange: {
-                      from: 'now-30d',
-                      to: 'now',
+                      from: entityGraphTimeRange.from,
+                      to: entityGraphTimeRange.to,
                     },
                     projectRouting,
                   }
@@ -279,7 +345,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
-            onOpenNetworkPreview={onShowNetwork}
+            onOpenNetworkPreview={onOpenNetworkPreview}
+            onTelemetryEvent={onTelemetryEvent}
           />
         </React.Suspense>
       )}

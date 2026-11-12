@@ -18,9 +18,11 @@ import type { OverviewStatusMetaData } from '../../../../../../../../common/runt
 export const MetricItemBody = ({
   monitor,
   onLocationClick,
+  isInteractive = true,
 }: {
   monitor: OverviewStatusMetaData;
   onLocationClick?: (locationId: string, locationLabel: string) => void;
+  isInteractive?: boolean;
 }) => {
   const tags = monitor.tags;
   const history = useHistory();
@@ -33,11 +35,15 @@ export const MetricItemBody = ({
       <EuiFlexItem grow={false}>
         <MonitorTypeBadge
           monitorType={monitor.type}
-          onClick={() => {
-            history.push({
-              search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
-            });
-          }}
+          onClick={
+            isInteractive
+              ? () => {
+                  history.push({
+                    search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
+                  });
+                }
+              : undefined
+          }
         />
       </EuiFlexItem>
       {monitor.remote && (
@@ -52,7 +58,10 @@ export const MetricItemBody = ({
       )}
       {monitor.locations.length > 1 && (
         <EuiFlexItem grow={false}>
-          <LocationsBadge monitor={monitor} onLocationClick={onLocationClick} />
+          <LocationsBadge
+            monitor={monitor}
+            onLocationClick={isInteractive ? onLocationClick : undefined}
+          />
         </EuiFlexItem>
       )}
     </>
@@ -69,9 +78,13 @@ export const MetricItemBody = ({
             disableExpand={true}
             maxWidth="100%"
             prependChildren={leadingBadges}
-            onClick={(tag) => {
-              history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
-            }}
+            onClick={
+              isInteractive
+                ? (tag) => {
+                    history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
+                  }
+                : undefined
+            }
           />
         </div>
       ) : (

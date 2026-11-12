@@ -12,6 +12,7 @@ export type LoadListGetFn<TItem> = (opts?: { signal?: AbortSignal }) => Promise<
 export interface LoadListResult<TItem> {
   items: TItem[];
   hasLoaded: boolean;
+  /** Fetches the list again. Clears the items and rejects with the fetch error when it fails. */
   reload: () => Promise<void>;
 }
 
@@ -26,10 +27,11 @@ export const useLoadList = <TItem>(get: LoadListGetFn<TItem>): LoadListResult<TI
         if (!signal?.aborted) {
           setItems(nextItems);
         }
-      } catch {
+      } catch (error) {
         if (!signal?.aborted) {
           setItems([]);
         }
+        throw error;
       } finally {
         if (!signal?.aborted) {
           setHasLoaded(true);
@@ -41,7 +43,8 @@ export const useLoadList = <TItem>(get: LoadListGetFn<TItem>): LoadListResult<TI
 
   useEffect(() => {
     const controller = new AbortController();
-    void load({ signal: controller.signal });
+    // A failed initial load leaves the list empty; there is no caller to report the error to.
+    load({ signal: controller.signal }).catch(() => {});
     return () => {
       controller.abort();
     };

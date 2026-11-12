@@ -32,6 +32,7 @@ import { getCombinedFilter } from './get_combined_filter';
 import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_discovery_alerts_aggregation';
 import { getScheduledIndexPattern } from './get_scheduled_index_pattern';
 import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';
+import { isServiceAccountGeneration } from './is_service_account_generation';
 
 const FIRST_PAGE = 1; // CAUTION: sever-side API uses a 1-based page index convention (for consistency with similar existing APIs)
 const DEFAULT_PER_PAGE = 10;
@@ -397,5 +398,23 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     }
 
     return result?.generations[0];
+  };
+
+  /**
+   * Returns true when a generation in the space was written by a service account (e.g. an
+   * AlertZero Worker), so its Attack discoveries belong to no single user
+   */
+  public isServiceAccountGeneration = async ({
+    eventLogIndex,
+    executionUuid,
+    spaceId,
+  }: {
+    eventLogIndex: string;
+    executionUuid: string;
+    spaceId: string;
+  }): Promise<boolean> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    return isServiceAccountGeneration({ esClient, eventLogIndex, executionUuid, spaceId });
   };
 }

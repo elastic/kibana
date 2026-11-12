@@ -27,6 +27,9 @@ export interface AgentPolicyServiceInterface {
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];
   deployPolicy: (typeof agentPolicyService)['deployPolicy'];
+  getSpacesForPoliciesUsingOutput: (typeof agentPolicyService)['getSpacesForPoliciesUsingOutput'];
+  getSpacesForPoliciesUsingFleetServerHost: (typeof agentPolicyService)['getSpacesForPoliciesUsingFleetServerHost'];
+  getSpacesForPoliciesUsingDownloadSource: (typeof agentPolicyService)['getSpacesForPoliciesUsingDownloadSource'];
 }
 
 // Agent services
@@ -69,6 +72,8 @@ export { cloudConnectorService } from './cloud_connector';
 export type { CloudConnectorServiceInterface } from './cloud_connector';
 
 export { iacProvisionerService } from './iac_provisioner';
+export { provisioningCallbackService } from './provisioning_callback';
+export type { ProvisioningCallbackReceiveResult } from './provisioning_callback';
 export type { IacProvisionerService } from './iac_provisioner';
 
 export * from './cloud_connectors';

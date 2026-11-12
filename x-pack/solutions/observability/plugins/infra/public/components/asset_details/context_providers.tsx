@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ProfilingSchemaStateProvider } from '@kbn/observability-shared-plugin/public';
 import { ReloadRequestTimeProvider } from '../../hooks/use_reload_request_time';
 import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
 import { DatePickerProvider } from './hooks/use_date_picker';
@@ -59,7 +60,7 @@ export const ContextProviders = ({
                 renderMode={renderMode}
                 preferredSchema={preferredSchema}
               >
-                {children}
+                <ProfilingSchemaStateProvider>{children}</ProfilingSchemaStateProvider>
               </AssetDetailsRenderPropsProvider>
             </EntityDetailsTimeRangeMetadataProvider>
           </MetadataStateProvider>

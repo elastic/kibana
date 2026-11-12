@@ -34,7 +34,6 @@ test.describe(
         await dataFederation.createDataSourceFlyoutName.fill(
           `scout-test-connection-${randomUUID().slice(0, 8)}`
         );
-        await dataFederation.createDataSourceFlyoutS3Region.fill('us-east-1');
         await dataFederation.selectDataSourceAuthentication('Anonymous');
         await dataFederation.createDataSourceFlyoutTestConnection.click();
 
@@ -52,7 +51,7 @@ test.describe(
       });
 
       await test.step('editing the configuration discards the result', async () => {
-        await dataFederation.createDataSourceFlyoutS3Region.fill('eu-west-1');
+        await dataFederation.createDataSourceFlyoutDescription.fill('edited');
         await expect(dataFederation.createDataSourceFlyoutTestConnectionUntestable).toBeHidden();
       });
 

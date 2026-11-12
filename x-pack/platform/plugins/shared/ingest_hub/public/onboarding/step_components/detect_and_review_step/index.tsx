@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,23 +21,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
-import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
+import { pagePathGetters, useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import type { EsAssetReference, KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import {
-  SERVICE_SETTINGS_SESSION_KEY,
-  type ServiceSettingsPersistedState,
-} from '../service_settings_step/use_service_settings';
+import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import { useServiceDataDetection } from './use_service_data_detection';
 import { DeploymentSummary } from './deployment_summary';
 import { AgentSetupCallout } from './agent_setup_callout';
+import { AWS_MAIN_PACKAGE_NAME } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { InstalledContent } from './installed_content';
 import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
-
-const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
-  globalRegion: '',
-  serviceVars: {},
-};
+import { StepFooter } from '../step_footer';
 
 interface DetectAndReviewStepProps {
   onContinue: () => void;
@@ -46,15 +39,12 @@ interface DetectAndReviewStepProps {
 }
 
 export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepProps) {
-  useKibana<CoreStart & { cloud?: CloudStart }>();
+  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
 
   const { servicesStep, awsServicesMap, deploymentMethod } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
-    SERVICE_SETTINGS_SESSION_KEY,
-    DEFAULT_SERVICE_SETTINGS
-  );
+  const serviceSettings = useReconciledServiceSettings();
 
   // Build a display name map: instanceId → name from settings, falling back to matrix name.
   const serviceNames: Record<string, string> = useMemo(() => {
@@ -70,7 +60,8 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
     return names;
   }, [selectedServiceIds, awsServicesMap, serviceSettings]);
 
-  const { statusByInstanceId, receivingCount, totalCount } = useServiceDataDetection();
+  const { statusByInstanceId, agentInfoByServiceId, receivingCount, unverifiedCount, totalCount } =
+    useServiceDataDetection();
 
   // Installed content — read from AWS package installation.
   const { data: awsPackageData } = useGetPackageInfoByKeyQuery('aws', undefined, { full: true });
@@ -80,6 +71,25 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
 
   // Resolve the href to [Metrics AWS] Overview for the "Take me to my data" button.
   const overviewHref = useAwsOverviewDashboardUrl(installationInfo);
+
+  // Finish opens Installed integrations with the instances of a deployed package, where this
+  // session is listed: the main `aws` package when the session covers it, else the first one. The
+  // session is listed under every package it covers.
+  const onboardingInstancesPackageName = useMemo(() => {
+    const packageNames = new Set(
+      selectedServiceIds.flatMap((id) => {
+        const packageName = awsServicesMap?.get(id)?.packageName;
+        return packageName ? [packageName] : [];
+      })
+    );
+    return packageNames.has(AWS_MAIN_PACKAGE_NAME) || packageNames.size === 0
+      ? AWS_MAIN_PACKAGE_NAME
+      : [...packageNames][0];
+  }, [selectedServiceIds, awsServicesMap]);
+  const [installedAppPath, installedPath] = pagePathGetters.integrations_installed({
+    viewInstances: onboardingInstancesPackageName,
+  });
+  const finishHref = services.http.basePath.prepend(`${installedAppPath}${installedPath}`);
 
   const hasDeployedServices = selectedServiceIds.length > 0;
 
@@ -121,8 +131,10 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
             awsServicesMap={awsServicesMap}
             serviceNames={serviceNames}
             statusByInstanceId={statusByInstanceId}
+            agentInfoByServiceId={agentInfoByServiceId}
             deploymentMethod={deploymentMethod}
             receivingCount={receivingCount}
+            unverifiedCount={unverifiedCount}
             totalCount={totalCount}
           />
           <EuiHorizontalRule />
@@ -137,34 +149,37 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
         </>
       )}
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+      <StepFooter onBack={onBack}>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={finishHref}
+              onClick={onContinue}
+              data-test-subj="detectAndReviewStep-finishButton"
+            >
               <FormattedMessage
-                id="xpack.ingestHub.detectAndReviewStep.backButton"
-                defaultMessage="Back"
+                id="xpack.ingestHub.detectAndReviewStep.finishButton"
+                defaultMessage="Finish"
               />
             </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="sortRight"
-            iconSide="right"
-            href={overviewHref}
-            onClick={onContinue}
-            data-test-subj="detectAndReviewStep-continueButton"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.detectAndReviewStep.continueButton"
-              defaultMessage="Take me to my data"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="sortRight"
+              iconSide="right"
+              href={overviewHref}
+              onClick={onContinue}
+              data-test-subj="detectAndReviewStep-continueButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.detectAndReviewStep.continueButton"
+                defaultMessage="Take me to my data"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </StepFooter>
     </div>
   );
 }

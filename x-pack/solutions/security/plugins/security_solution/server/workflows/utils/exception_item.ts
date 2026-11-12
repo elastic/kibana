@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -138,9 +138,11 @@ export const toExceptionItemOutput = (
  * `rule_default` exception list, tolerating the rest of the (large) rule
  * shape.
  */
-const ruleWithExceptionsListSchema = z.object({
-  exceptions_list: z.array(RuleExceptionList).optional(),
-});
+const ruleWithExceptionsListSchema = lazySchema(() =>
+  z.object({
+    exceptions_list: z.array(RuleExceptionList).optional(),
+  })
+);
 
 /**
  * Finds the `list_id` of the rule's own default exception list (the list

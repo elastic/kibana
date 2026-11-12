@@ -69,7 +69,9 @@ export const createCleanupWorkflowService = ({
   return {
     async ensureEnabled({ request, spaceId }) {
       const workflowDocumentId = `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
-      let existing = await managementApi.getWorkflow(workflowDocumentId, spaceId);
+      let existing = await managementApi
+        .getClient(request)
+        .getWorkflow(workflowDocumentId, spaceId);
 
       if (!existing) {
         const managedWorkflowsClient = await getManagedWorkflowsClient();
@@ -77,7 +79,7 @@ export const createCleanupWorkflowService = ({
           spaceId,
           workflowIdSuffix: spaceId,
         });
-        existing = await managementApi.getWorkflow(workflowDocumentId, spaceId);
+        existing = await managementApi.getClient(request).getWorkflow(workflowDocumentId, spaceId);
         if (!existing) {
           log.warn(
             `Managed cleanup workflow ${workflowDocumentId} was not installed; skipping enablement`

@@ -57,9 +57,8 @@ interface KIQueryGenerationTaskOutput {
   queries: Query[];
   toolUsage?: SignificantEventsToolUsage;
   traceId?: string | null;
-  /** Resolved KI source and grounding mode for this task's run. */
+  /** Resolved KI source for this task's run. */
   ki_source?: 'canonical' | 'snapshot' | 'auto' | 'none';
-  grounding_mode?: 'baseline' | 'grounded';
   /** Reasoning-loop diagnostics from the shared agent, for treatment verification. */
   reasoning_diagnostics?: ReasoningPromptDiagnostics;
   sample_logs?: string[];
@@ -82,10 +81,6 @@ export const getToolUsageFromOutput = (
 ): SignificantEventsToolUsage | undefined =>
   output && !Array.isArray(output) ? output.toolUsage : undefined;
 
-/**
- * Reads the attempt diagnostics a task returns when `collectQueryAttempts` is on.
- * `undefined` means the task did not collect them, which is distinct from an empty run.
- */
 export const getQueryAttempts = (output: unknown): QueryAttempt[] | undefined =>
   output &&
   typeof output === 'object' &&

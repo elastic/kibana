@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -14,7 +15,10 @@ import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { queryKeys } from '../query_keys';
-import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import {
+  useAdditionalEpisodesDataSource,
+  useQueryV2Source,
+} from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
@@ -23,9 +27,15 @@ import { mergeEpisodes } from '../utils/merge_episodes';
 import {
   EMPTY_SOURCE_ERRORS,
   fetchFromV2AndSource,
+  resolveEpisodeSourceQueries,
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
 import { useToastSourceErrors } from './use_toast_source_errors';
+import {
+  buildSeverityRegistry,
+  toSeverityRegistryMap,
+  createSeverityRankResolver,
+} from '../components/severity/severity_registry';
 
 interface CombinedEpisodesResult {
   episodes: AlertEpisode[];
@@ -58,8 +68,14 @@ export const useFetchAlertingEpisodesQuery = ({
   timeRange,
 }: UseFetchAlertingEpisodesQueryOptions) => {
   const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
+  const queryV2Source = useQueryV2Source();
   const spaceId = useSpaceId(services.spaces);
   const dataView = useAlertingEpisodesDataView({ services });
+
+  const severityRankResolver = useMemo(() => {
+    const entries = buildSeverityRegistry(additionalEpisodesDataSource?.severityExtensions);
+    return createSeverityRankResolver(toSeverityRegistryMap(entries));
+  }, [additionalEpisodesDataSource?.severityExtensions]);
 
   const queryKey = queryKeys.list(
     spaceId,
@@ -67,13 +83,19 @@ export const useFetchAlertingEpisodesQuery = ({
     filterState,
     sortState,
     timeRange ?? undefined,
-    additionalEpisodesDataSource?.id
+    additionalEpisodesDataSource?.id,
+    queryV2Source
   );
 
   const query = useQuery<CombinedEpisodesResult>({
     enabled: dataView != null,
     queryKey,
     queryFn: async ({ signal: abortSignal }) => {
+      const sourceQueries = resolveEpisodeSourceQueries({
+        sources: filterState?.sources,
+        queryV2Source,
+        additionalSource: additionalEpisodesDataSource,
+      });
       const { v2, additional, errors } = await fetchFromV2AndSource({
         v2: () =>
           fetchAlertingEpisodes({
@@ -85,7 +107,7 @@ export const useFetchAlertingEpisodesQuery = ({
             sortState,
             timeRange,
           }),
-        source: additionalEpisodesDataSource,
+        source: sourceQueries.additionalSource,
         fromSource: (source) =>
           source
             .fetchEpisodes({
@@ -97,6 +119,7 @@ export const useFetchAlertingEpisodesQuery = ({
               timeRange,
             })
             .then((episodes) => episodes.map((episode) => ({ ...episode, source_id: source.id }))),
+        queryV2Source: sourceQueries.queryV2Source,
       });
 
       const v2Episodes: AlertEpisode[] = (v2 ?? []).map((ep) => ({
@@ -105,7 +128,12 @@ export const useFetchAlertingEpisodesQuery = ({
       }));
 
       return {
-        episodes: mergeEpisodes([v2Episodes, ...additional], sortState, pageSize),
+        episodes: mergeEpisodes(
+          [v2Episodes, ...additional],
+          sortState,
+          pageSize,
+          severityRankResolver
+        ),
         sourceErrors: errors,
       };
     },

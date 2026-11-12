@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract, RunContext } from '@kbn/task-manager-plugin/server';
 import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { LicenseCheckState, LicenseType } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -21,6 +21,7 @@ import {
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
 import { ResolutionRulesClient } from '../../domain/resolution/rules';
 import { EntityMetadataClient } from '../../domain/entity_metadata';
+import { RelationshipsClient } from '../../domain/relationships';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
@@ -33,6 +34,7 @@ import { createWorkflowTriggerEmitter } from '../../workflow/create_workflow_tri
 const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies LicenseCheckState;
 
 export interface ExecuteMaintainerRunParams {
+  setCustomTaskRunEventFields?: RunContext['setCustomTaskRunEventFields'];
   status: Partial<EntityMaintainerStatus>;
   request: KibanaRequest;
   taskId: string;
@@ -119,6 +121,7 @@ export async function executeMaintainerRun({
   workflowsExtensions,
   analytics,
   logger,
+  setCustomTaskRunEventFields,
 }: ExecuteMaintainerRunParams): Promise<{ state: EntityMaintainerStatus } | null> {
   if (status.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
     logger.debug(`Entity maintainer task is stopped, skipping run`);
@@ -157,6 +160,11 @@ export async function executeMaintainerRun({
     esClient: coreStart.elasticsearch.client.asInternalUser,
     namespace: maintainerStatus.metadata.namespace,
   });
+  const relationshipsClient = new RelationshipsClient({
+    logger,
+    esClient,
+    namespace: maintainerStatus.metadata.namespace,
+  });
   const taskLogger = logger.get(taskId);
   const abortSignal = signal ?? new AbortController().signal;
   const telemetryClient = createMaintainerTelemetryClient({
@@ -175,6 +183,7 @@ export async function executeMaintainerRun({
     },
     run: () =>
       runEntityMaintainerTask({
+        setCustomTaskRunEventFields,
         status: maintainerStatus,
         fakeRequest: request,
         logger: taskLogger,
@@ -190,6 +199,7 @@ export async function executeMaintainerRun({
           taskLogger
         ),
         entityMetadataClient,
+        relationshipsClient,
         id,
         analytics,
         telemetryClient,
@@ -212,6 +222,7 @@ export async function persistMaintainerState({
 }
 
 export async function runEntityMaintainerTask({
+  setCustomTaskRunEventFields,
   status,
   fakeRequest,
   logger,
@@ -223,10 +234,12 @@ export async function runEntityMaintainerTask({
   crudClient,
   resolutionRulesClient,
   entityMetadataClient,
+  relationshipsClient,
   id,
   analytics,
   telemetryClient,
 }: {
+  setCustomTaskRunEventFields?: RunContext['setCustomTaskRunEventFields'];
   status: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
   logger: Logger;
@@ -238,6 +251,7 @@ export async function runEntityMaintainerTask({
   crudClient: EntityUpdateClient;
   resolutionRulesClient: ResolutionRulesClient;
   entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient;
   id: string;
   analytics: TelemetryReporter;
   telemetryClient: InternalMaintainerTelemetryClient;
@@ -271,6 +285,7 @@ export async function runEntityMaintainerTask({
         crudClient,
         resolutionRulesClient,
         entityMetadataClient,
+        relationshipsClient,
         telemetry: telemetryClient,
       });
       analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
@@ -281,6 +296,7 @@ export async function runEntityMaintainerTask({
     }
     logger.debug(`Executing run`);
     status.state = await run({
+      setCustomTaskRunEventFields,
       status: { ...status },
       signal,
       logger,
@@ -290,6 +306,7 @@ export async function runEntityMaintainerTask({
       crudClient,
       resolutionRulesClient,
       entityMetadataClient,
+      relationshipsClient,
       telemetry: telemetryClient,
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {

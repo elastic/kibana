@@ -20,7 +20,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type { AssetCriticalityGetPrivilegesResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
 import type {
@@ -187,6 +187,10 @@ import type {
   UpdateWatchlistEntitySourceRequestBodyInput,
   UpdateWatchlistEntitySourceResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update.gen';
+import type {
+  UpdateWatchlistEntitySourceApiKeyRequestParamsInput,
+  UpdateWatchlistEntitySourceApiKeyResponse,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update_api_key.gen';
 import type {
   UploadWatchlistCsvRequestParamsInput,
   UploadWatchlistCsvResponse,
@@ -537,7 +541,7 @@ Delete the asset criticality record for a specific entity.
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteAssetCriticalityRecordResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -590,7 +594,7 @@ Delete an entity source configuration.
     const path = `${basePath}/api/entity_analytics/monitoring/engine/delete`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteMonitoringEngineResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -771,7 +775,7 @@ Removes a privileged user from monitoring by their document ID.
     const path = `${basePath}/api/asset_criticality/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindAssetCriticalityRecordsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -785,7 +789,7 @@ Removes a privileged user from monitoring by their document ID.
     );
   },
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   async getAnomalyOverview<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAnomalyOverviewProps,
@@ -810,7 +814,7 @@ Removes a privileged user from monitoring by their document ID.
     });
   },
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   async getAnomalySummary<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAnomalySummaryProps,
@@ -848,7 +852,7 @@ Removes a privileged user from monitoring by their document ID.
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetAssetCriticalityRecordResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -976,7 +980,7 @@ Get an entity source configuration by ID.
     const path = `${basePath}/api/risk_score/history`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetRiskScoreHistoryResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1152,7 +1156,7 @@ List all entity source configurations.
     const path = `${basePath}/api/entity_analytics/monitoring/entity_source/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListEntitySourcesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1180,7 +1184,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
     const path = `${basePath}/api/entity_analytics/monitoring/users/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListPrivMonUsersResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1207,7 +1211,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListWatchlistEntitySourcesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1459,7 +1463,7 @@ Search Indices for Privileges Monitoring import.
     const path = `${basePath}/api/entity_analytics/monitoring/privileges/indices`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, SearchPrivilegesIndicesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1664,6 +1668,35 @@ Updates the details of an existing monitored privileged user by their document I
     );
   },
   /**
+   * Replace the API key of an index entity source with a new one owned by the user making this request, for example after the user who created the source is removed or loses access to the index. The new key is created and saved first; the previous key is invalidated only afterwards, so a failure leaves the source with its previous key. The user must be able to read the source's index pattern.
+   */
+  async updateWatchlistEntitySourceApiKey<TResponseType extends ScoutResponseType = 'json'>(
+    props: UpdateWatchlistEntitySourceApiKeyProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, UpdateWatchlistEntitySourceApiKeyResponse>>
+  > {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.post<
+      ScoutResponseBody<TResponseType, UpdateWatchlistEntitySourceApiKeyResponse>
+    >(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
       * **Deprecated in 9.4.0.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
 
       */
@@ -1849,6 +1882,9 @@ export interface UpdateWatchlistProps {
 export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceApiKeyProps {
+  params: UpdateWatchlistEntitySourceApiKeyRequestParamsInput;
 }
 export interface UploadWatchlistCsvProps {
   params: UploadWatchlistCsvRequestParamsInput;

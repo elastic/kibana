@@ -10,9 +10,9 @@
  * event bus.
  *
  * This module is the single import point for code that needs to talk about
- * "alerting framework events" as a whole (e.g. when typing `EventBus<...>` or
- * `EventBusSubscriber<...>`). It re-exports each publisher's event types and
- * exposes the {@link AlertingDomainEvent} discriminated union.
+ * "alerting framework events" as a whole (e.g. when typing `EventBus<...>`). It
+ * re-exports each publisher's event types and exposes the
+ * {@link AlertingDomainEvent} discriminated union.
  *
  * New publishers (e.g. the rule executor or dispatcher) should:
  *  1. Define their concrete event type and runtime `*_TYPE` constant inside
@@ -23,10 +23,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createToken } from '@kbn/core-di';
+import type { EventOrigin } from '../../event_origin/origin_schemas';
 import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
+import type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
+import type { ActionPolicyEvent } from '../action_policy_event_publisher/events';
 
 export type {
   AlertActionEvent,
@@ -88,6 +91,27 @@ export {
   RULE_EXECUTION_FAILED_EVENT_TYPE,
 } from '../rule_executor_event_publisher/events';
 
+export type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
+export { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../alert_status_changed_event_publisher/events';
+
+export type {
+  ActionPolicyCreatedEvent,
+  ActionPolicyDeletedEvent,
+  ActionPolicyDisabledEvent,
+  ActionPolicyEnabledEvent,
+  ActionPolicyEvent,
+  ActionPolicyEventPayload,
+  ActionPolicyUpdatedEvent,
+  BaseActionPolicyEvent,
+} from '../action_policy_event_publisher/events';
+export {
+  ACTION_POLICY_CREATED_EVENT_TYPE,
+  ACTION_POLICY_DELETED_EVENT_TYPE,
+  ACTION_POLICY_DISABLED_EVENT_TYPE,
+  ACTION_POLICY_ENABLED_EVENT_TYPE,
+  ACTION_POLICY_UPDATED_EVENT_TYPE,
+} from '../action_policy_event_publisher/events';
+
 /**
  * Discriminated union of every domain event the alerting framework publishes
  * on its event bus.
@@ -96,7 +120,12 @@ export {
  * (and its own envelope shape if it diverges). Extend this union by adding
  * each subdomain's sub-union here.
  */
-export type AlertingDomainEvent = AlertActionEvent | RuleEvent | RuleExecutorEvent;
+export type AlertingDomainEvent =
+  | AlertActionEvent
+  | RuleEvent
+  | RuleExecutorEvent
+  | AlertStatusChangedEvent
+  | ActionPolicyEvent;
 
 /**
  * Publisher-side context threaded through every alerting bus publish call.
@@ -124,6 +153,12 @@ export interface AlertingPublisherContext {
    * from the live HTTP socket.
    */
   readonly request: KibanaRequest;
+  /**
+   * Who published the event, and where it came from. `channel` comes from the
+   * request. `app` is set when one is known. Subscribers that need the caller's
+   * credentials (e.g. workflow scheduling) must skip `actor: 'internal'`.
+   */
+  readonly origin: EventOrigin;
 }
 
 /**

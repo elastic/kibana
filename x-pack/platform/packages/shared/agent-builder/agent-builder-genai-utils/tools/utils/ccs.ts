@@ -8,6 +8,7 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { isVisibleSearchSource } from '@kbn/agent-builder-common';
 import type { MappingField } from './mappings';
 import { flattenMapping, getIndexMappings } from './mappings';
 import type { GetIndexMappingsResult } from './mappings/get_index_mappings';
@@ -18,6 +19,7 @@ import {
 } from './field_caps';
 import { batchByUrlLength } from './batch_by_url_length';
 import { listSearchSources } from '../steps/list_search_sources';
+import { getViewFields, listViews } from './views';
 
 /**
  * Returns true if the resource name targets a remote cluster (contains ':'),
@@ -117,7 +119,7 @@ export const getBatchedFieldsFromFieldCaps = async ({
   return merged;
 };
 
-export type IndexFieldType = 'index' | 'dataStream' | 'alias' | 'indexPattern';
+export type IndexFieldType = 'index' | 'dataStream' | 'alias' | 'indexPattern' | 'view';
 
 export interface IndexFieldsResult {
   type: IndexFieldType;
@@ -129,15 +131,18 @@ type LocalResolution =
   | { input: string; kind: 'index'; concreteName: string }
   | { input: string; kind: 'dataStream'; concreteName: string }
   | { input: string; kind: 'alias'; concreteName: string }
-  | { input: string; kind: 'indexPattern' };
+  | { input: string; kind: 'view'; concreteName: string }
+  | { input: string; kind: 'indexPattern' }
+  | { input: string; kind: 'unresolved' };
 
 /**
  * Classify a single local input by resolving it via `listSearchSources`
  * (which wraps `_resolve/index` + 404 handling). Only inputs that resolve
  * to exactly one concrete resource (index or data stream) are routed to a
- * mapping API; aliases get `_field_caps` for the unified field list; every-
- * thing else (wildcards, missing names) goes through `_field_caps` as a
- * pattern.
+ * mapping API; aliases get `_field_caps` for the unified field list. A name
+ * that matches nothing is `unresolved` so the caller can check ES|QL views
+ * once for the whole batch. Everything else (wildcards, multiple targets)
+ * goes through `_field_caps` as a pattern.
  */
 const resolveLocalTarget = async ({
   input,
@@ -167,6 +172,10 @@ const resolveLocalTarget = async ({
     }
   }
 
+  if (total === 0) {
+    return { input, kind: 'unresolved' };
+  }
+
   return { input, kind: 'indexPattern' };
 };
 
@@ -181,11 +190,15 @@ export const getIndexFields = async ({
   esClient,
   cleanup = true,
   includeFrozen = false,
+  includeViews = false,
+  skipUnauthorized = false,
 }: {
   indices: string[];
   esClient: ElasticsearchClient;
   cleanup?: boolean;
   includeFrozen?: boolean;
+  includeViews?: boolean;
+  skipUnauthorized?: boolean;
 }): Promise<Record<string, IndexFieldsResult>> => {
   const local = indices.filter((i) => !isCcsTarget(i));
   const remote = indices.filter((i) => isCcsTarget(i));
@@ -197,6 +210,15 @@ export const getIndexFields = async ({
       local.map((input) => resolveLimit(() => resolveLocalTarget({ input, esClient })))
     );
 
+    // Views are invisible to `_resolve/index`. Fetch the cluster view list once, and only
+    // when at least one name matched nothing, instead of once per resolved index.
+    const viewNames =
+      includeViews && resolutions.some((resolution) => resolution.kind === 'unresolved')
+        ? (await listViews({ esClient }))
+            .map((view) => view.name)
+            .filter((name) => isVisibleSearchSource(name))
+        : [];
+
     // All buckets share the same `{input, concrete}` shape. For `indexPattern`
     // entries we don't have a resolved concrete name, so we use `input` (the
     // user's verbatim string) — `_field_caps` treats it as a pattern anyway.
@@ -205,8 +227,20 @@ export const getIndexFields = async ({
       dataStream: [],
       alias: [],
       indexPattern: [],
+      view: [],
     };
     for (const r of resolutions) {
+      if (r.kind === 'unresolved') {
+        // Only an exact view name is a view. A pattern such as `logs-*` that happens to
+        // match one view must stay an index pattern.
+        const matchedView = viewNames.find((name) => name === r.input);
+        if (matchedView) {
+          buckets.view.push({ input: r.input, concrete: matchedView });
+        } else {
+          buckets.indexPattern.push({ input: r.input, concrete: r.input });
+        }
+        continue;
+      }
       const concrete = r.kind === 'indexPattern' ? r.input : r.concreteName;
       buckets[r.kind].push({ input: r.input, concrete });
     }
@@ -232,20 +266,33 @@ export const getIndexFields = async ({
         }))
       );
 
-    const [indexMappings, dsResults, aliasResults, patternResults] = await Promise.all([
-      buckets.index.length > 0
-        ? fetchLimit(() =>
-            getIndexMappings({
-              indices: buckets.index.map((i) => i.concrete),
-              cleanup,
-              esClient,
-            })
-          )
-        : Promise.resolve({} as GetIndexMappingsResult),
-      fetchPerInputFieldCaps(buckets.dataStream),
-      fetchPerInputFieldCaps(buckets.alias),
-      fetchPerInputFieldCaps(buckets.indexPattern),
-    ]);
+    const viewResults = Promise.all(
+      buckets.view.map(async (b) => ({
+        input: b.input,
+        // A stale view definition must not fail mapping for the other names in this request.
+        fields: await fetchLimit(() =>
+          getViewFields({ name: b.concrete, esClient }).catch(() => [])
+        ),
+      }))
+    );
+
+    const [indexMappings, dsResults, aliasResults, patternResults, resolvedViewResults] =
+      await Promise.all([
+        buckets.index.length > 0
+          ? fetchLimit(() =>
+              getIndexMappings({
+                indices: buckets.index.map((i) => i.concrete),
+                cleanup,
+                skipUnauthorized,
+                esClient,
+              })
+            )
+          : Promise.resolve({} as GetIndexMappingsResult),
+        fetchPerInputFieldCaps(buckets.dataStream),
+        fetchPerInputFieldCaps(buckets.alias),
+        fetchPerInputFieldCaps(buckets.indexPattern),
+        viewResults,
+      ]);
 
     for (const { input, concrete } of buckets.index) {
       const entry = indexMappings[concrete];
@@ -269,6 +316,9 @@ export const getIndexFields = async ({
     }
     for (const { input, fields } of patternResults) {
       result[input] = { type: 'indexPattern', fields };
+    }
+    for (const { input, fields } of resolvedViewResults) {
+      result[input] = { type: 'view', fields };
     }
   }
 

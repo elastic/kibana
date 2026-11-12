@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, memo, useCallback } from 'react';
+import React, { useEffect, useMemo, memo, useCallback, useRef } from 'react';
 import { EuiForm, euiBreakpoint, useEuiTheme } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
@@ -21,6 +21,7 @@ import {
   removeDimension,
 } from '../../../state_management/lens_slice';
 import { LayerPanel } from './layer_panel';
+import { getVisibleLayerIds } from './get_visible_layer_ids';
 import { generateId } from '../../../id_generator';
 import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';
 import {
@@ -85,13 +86,11 @@ export function ConfigPanel(
       return { isOnlyLayer: true, selectedLayerId: layerIds[0] };
     }
 
-    const visibleLayerIds = layerIds.filter((id) => {
-      const config = activeVisualization.getConfiguration({
-        layerId: id,
-        frame: props.framePublicAPI,
-        state: visualization.state,
-      });
-      return !config.hidden;
+    const visibleLayerIds = getVisibleLayerIds({
+      activeVisualization,
+      visualizationState: visualization.state,
+      framePublicAPI: props.framePublicAPI,
+      layerIds,
     });
 
     const isOnlyVisibleLayer = visibleLayerIds.length === 1;
@@ -115,13 +114,23 @@ export function ConfigPanel(
     }, 0);
   };
 
+  // Refocus the layer content when the chart type, the selected layer or the number of layers
+  // changes, but not on the initial render, so focus (and the screen reader announcement) stays
+  // on the page on open.
+  const previousFocusKey = useRef<string | null>(null);
   useEffect(() => {
+    // A chart switch can briefly leave no selected layer: wait for it to settle.
+    if (!selectedLayerId) {
+      return;
+    }
+    const focusKey = `${activeVisualization.id}:${selectedLayerId}:${layerIds.length}`;
+    const previous = previousFocusKey.current;
+    previousFocusKey.current = focusKey;
     // Do not trigger in ES|QL mode, as the focus should remain in the editor.
-    if (selectedLayerId && !canEditTextBasedQuery) {
+    if (previous && previous !== focusKey && !canEditTextBasedQuery) {
       focusLayerTabsContent();
     }
-    // Needs layerIds to refocus when layers are removed
-  }, [canEditTextBasedQuery, selectedLayerId, layerIds.length]);
+  }, [activeVisualization.id, canEditTextBasedQuery, selectedLayerId, layerIds.length]);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -280,7 +289,7 @@ export function ConfigPanel(
   // This will be used only in dimension editors like metric charts which adds a hidden layer.
   // That's why we don't update the currently selected or focused layer.
   const addLayer: AddLayerFunction = useCallback(
-    (layerType, extraArg, ignoreInitialValues, seriesType) => {
+    (layerType, { extraArg, ignoreInitialValues, seriesType } = {}) => {
       const layerId = generateId();
       dispatchLens(
         addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
@@ -363,11 +372,13 @@ export function ConfigPanel(
         addLayer={addLayer}
         isOnlyLayer={isOnlyLayer}
         onEmptyDimensionAdd={(columnId, { groupId }) => {
+          // the layer's datasource can differ from the active one on mixed panels
+          // (e.g. a form-based reference line layer on an ES|QL chart)
+          const layerDatasourceId =
+            props.framePublicAPI.datasourceLayers?.[selectedLayerId]?.datasourceId ??
+            activeDatasourceId;
           // avoid state update if the datasource does not support initializeDimension
-          if (
-            activeDatasourceId != null &&
-            datasourceMap[activeDatasourceId]?.initializeDimension
-          ) {
+          if (layerDatasourceId != null && datasourceMap[layerDatasourceId]?.initializeDimension) {
             dispatchLens(
               setLayerDefaultDimension({
                 layerId: selectedLayerId,

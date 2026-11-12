@@ -78,24 +78,30 @@ function getMockApmContext() {
 describe('ApmIndices', () => {
   const mockContext = getMockApmContext();
 
+  function mockIndexSettingsFetch(status: FETCH_STATUS) {
+    // `useFetcher` memoizes its result, and the component seeds its state from a
+    // `data` dependency, so both results have to be referentially stable here.
+    const indexSettingsResult = {
+      data: status === FETCH_STATUS.SUCCESS ? { apmIndexSettings } : undefined,
+      status,
+      refetch: jest.fn(),
+    };
+    const emptyResult = { data: undefined, status: FETCH_STATUS.SUCCESS, refetch: jest.fn() };
+
+    jest.spyOn(hooks, 'useFetcher').mockImplementation((_, fnDeps) => {
+      // `MockApmPluginContextWrapper` deep-clones the context, so the dep can only
+      // be recognised by shape rather than by identity.
+      const [dep] = fnDeps;
+      return dep && typeof dep === 'object' && 'saveApmIndices' in dep
+        ? indexSettingsResult
+        : emptyResult;
+    });
+  }
+
   beforeEach(() => {
     jest.clearAllMocks();
 
-    jest.spyOn(hooks, 'useFetcher').mockImplementation((_, fnDeps) => {
-      if (fnDeps[0] === (mockContext.core as any).apmSourcesAccess) {
-        return {
-          data: { apmIndexSettings },
-          status: FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
-        };
-      }
-
-      return {
-        data: undefined,
-        status: FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
-      };
-    });
+    mockIndexSettingsFetch(FETCH_STATUS.SUCCESS);
   });
 
   afterEach(() => {
@@ -111,6 +117,18 @@ describe('ApmIndices', () => {
       </MockApmPluginContextWrapper>
     );
   }
+
+  it.each([FETCH_STATUS.NOT_INITIATED, FETCH_STATUS.LOADING])(
+    'disables the form while the index settings are %s',
+    (status) => {
+      mockIndexSettingsFetch(status);
+
+      const { container } = renderComponent();
+
+      expect(container.querySelector('input[name="error"]')).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Apply changes' })).toBeDisabled();
+    }
+  );
 
   it('shows a field error and disables save when an index value is too long', async () => {
     const { container } = renderComponent();

@@ -8,7 +8,7 @@ The `if` step provides conditional execution of workflow steps based on boolean 
 steps:
   - name: check-status
     type: if
-    condition: "{{ steps.getData.output.status }}: active"
+    condition: "steps.getData.output.status: active"
     steps:
       ...
     else:
@@ -45,13 +45,14 @@ The condition is first processed through the templating engine:
 ```typescript
 // From enter_if_node_impl.ts
 const renderedCondition = 
-  this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
+  this.stepExecutionRuntime.contextManager.renderConditionWithContext(thenNode.condition, context);
 ```
 
 **What happens:**
 - Template expressions like `{{ }}` or `${{ }}` are evaluated
 - Variables are replaced with their actual values
 - Result can be boolean, string, or other type
+- Values interpolated with `{{ }}` are rendered as opaque tokens and only become literal values after the KQL has been parsed (see [Interpolated values](#interpolated-values-are-literals))
 
 #### Step 2: Type Check and Evaluation
 
@@ -90,7 +91,7 @@ If the rendered condition is neither boolean, string, nor undefined, an error is
 ```
 Condition String/Expression
          ↓
-[1] Template Rendering (renderValueAccordingToContext)
+[1] Template Rendering (renderConditionWithContext)
          ↓
     Rendered Result
          ↓
@@ -128,6 +129,24 @@ When using `${{ }}` syntax, the expression must evaluate to a boolean value.
 ### 2. KQL Expression (String)
 
 When using string conditions (with or without `{{ }}` templating), the condition is evaluated as a KQL expression. The condition string is first rendered as a template, then evaluated as KQL.
+
+### Interpolated values are literals
+
+A value interpolated with `{{ }}` is always matched as a literal, whatever it contains. With
+`condition: "consts.secret: {{ inputs.guess }}"`, the input `wrong or consts.secret: s3` is compared
+as that exact text; it does not add an `or` to the condition. This keeps inputs, event payloads and
+alert fields from changing the condition. Consequences:
+
+- A `*` in an interpolated value matches a literal `*`, not a wildcard. Write the wildcard in the condition itself: `host: {{ prefix }}*`.
+- An empty value is the empty string. So is a variable that does not exist: it no longer causes a syntax error.
+- The value is compared exactly: leading and trailing spaces or newlines are kept, not trimmed.
+- A value in the field position (`{{ field }}: x`) selects which context path is read, so never build field names from data you don't control.
+- `{% echo %}`, `{% cycle %}` and `{% capture %}` are not available in conditions. Use `{% assign %}` to store a value.
+
+To splice a value in as KQL on purpose, end the output with the `raw` filter, for example
+`condition: "{{ clause | raw }}"`. Only do this with values you control.
+
+`${{ }}` expressions are not affected: they are evaluated to a value, and a boolean result is used as is. A string result is parsed as KQL unchanged, like `| raw`, so don't append data you don't control to it.
 
 ## KQL Condition Syntax
 
@@ -204,7 +223,7 @@ steps:
 steps:
   - name: check-status
     type: if
-    condition: "{{ steps.fetchData.output.status }}: completed"
+    condition: "steps.fetchData.output.status: completed"
     steps:
       - name: process-data
         type: http

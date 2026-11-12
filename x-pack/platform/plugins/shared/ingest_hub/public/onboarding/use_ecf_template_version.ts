@@ -12,8 +12,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ECF_LATEST_VERSION_API_PATH,
   type GetEcfLatestVersionResponse,
-} from '../../common/ecf_version_api';
-import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/ecf_template_version';
+} from '../../common/providers/aws/ecf_version_api';
+import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/providers/aws/ecf_template_version';
 
 /** Result of `useEcfTemplateVersion`. */
 export interface UseEcfTemplateVersionResult {

@@ -7,7 +7,11 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import { fetchClassicAlertsAsEpisodes } from './fetch_classic_episodes';
+import type { AlertEpisode } from '../../queries/episodes_query';
+import {
+  enrichClassicEpisodesWithSnoozeState,
+  fetchClassicAlertsAsEpisodes,
+} from './fetch_classic_episodes';
 import { CLASSIC_ALERT_EPISODE_SOURCE_FIELDS } from '../utils/map_alert';
 
 const mockHttp = httpServiceMock.createStartContract();
@@ -106,11 +110,11 @@ describe('fetchClassicAlertsAsEpisodes', () => {
 
     const episodes = await callFetch();
     expect(episodes[0].last_snooze_action).toBe(ALERT_EPISODE_ACTION_TYPE.SNOOZE);
-    expect(episodes[0].snooze_expiry).toBeNull();
+    expect(episodes[0].snoozed_until).toBeNull();
     expect(episodes[0].is_muted).toBe(true);
   });
 
-  it('sets last_snooze_action and snooze_expiry for time-snoozed alerts', async () => {
+  it('sets last_snooze_action and snoozed_until for time-snoozed alerts', async () => {
     const expiresAt = '2099-01-01T00:00:00.000Z';
     mockPost((url: string) => {
       if (url === RAC_FIND_PATH) {
@@ -139,7 +143,7 @@ describe('fetchClassicAlertsAsEpisodes', () => {
 
     const episodes = await callFetch();
     expect(episodes[0].last_snooze_action).toBe(ALERT_EPISODE_ACTION_TYPE.SNOOZE);
-    expect(episodes[0].snooze_expiry).toBe(expiresAt);
+    expect(episodes[0].snoozed_until).toBe(expiresAt);
     expect(episodes[0]).not.toHaveProperty('is_muted');
   });
 
@@ -158,7 +162,7 @@ describe('fetchClassicAlertsAsEpisodes', () => {
 
     const episodes = await callFetch();
     expect(episodes[0]).not.toHaveProperty('last_snooze_action');
-    expect(episodes[0]).not.toHaveProperty('snooze_expiry');
+    expect(episodes[0]).not.toHaveProperty('snoozed_until');
   });
 
   it('gracefully falls back when snooze state fetch fails', async () => {
@@ -174,7 +178,7 @@ describe('fetchClassicAlertsAsEpisodes', () => {
     expect(episodes[0]).not.toHaveProperty('last_snooze_action');
   });
 
-  it('sets both snooze_expiry and is_muted when alert is snoozed and muted', async () => {
+  it('sets both snoozed_until and is_muted when alert is snoozed and muted', async () => {
     const expiresAt = '2099-06-01T00:00:00.000Z';
     mockPost((url: string) => {
       if (url === RAC_FIND_PATH) {
@@ -202,7 +206,33 @@ describe('fetchClassicAlertsAsEpisodes', () => {
     });
 
     const episodes = await callFetch();
-    expect(episodes[0].snooze_expiry).toBe(expiresAt);
+    expect(episodes[0].snoozed_until).toBe(expiresAt);
     expect(episodes[0].is_muted).toBe(true);
+  });
+});
+
+describe('enrichClassicEpisodesWithSnoozeState', () => {
+  const episode = { 'rule.id': 'rule-1' } as AlertEpisode;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('rethrows an aborted snooze lookup', async () => {
+    const abortError = new Error('The user aborted a request.');
+    abortError.name = 'AbortError';
+    mockHttp.post.mockRejectedValue(abortError);
+
+    await expect(enrichClassicEpisodesWithSnoozeState([episode], mockHttp)).rejects.toBe(
+      abortError
+    );
+  });
+
+  it('returns the episodes unchanged when the snooze lookup fails', async () => {
+    mockHttp.post.mockRejectedValue(new Error('boom'));
+
+    await expect(enrichClassicEpisodesWithSnoozeState([episode], mockHttp)).resolves.toEqual([
+      episode,
+    ]);
   });
 });

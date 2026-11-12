@@ -20,6 +20,7 @@ import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
   syntheticsParamType,
+  syntheticsSecretConnectionType,
 } from '../common/types/saved_objects';
 
 import { PLUGIN } from '../common/constants/plugin';
@@ -30,6 +31,7 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+export const SECRET_CONNECTION_WRITE_API = 'secret-connection-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
 export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
 
@@ -43,11 +45,11 @@ const canRunTestManuallyPrivilege: SubFeaturePrivilegeGroupConfig = {
       name: i18n.translate('xpack.synthetics.features.canRunTestManually', {
         defaultMessage: 'Can run tests manually',
       }),
-      // `includeIn: 'none'` — never granted implicitly. The run-test route accepts
-      // EITHER `uptime-write` (which base `all` already has, so existing roles keep
-      // working) OR this `monitor-run-manually` privilege, which lets an admin grant manual
-      // test runs to an otherwise read-only role without granting write access.
-      includeIn: 'none',
+      // Included in `all` so the role editor reflects what base `all` already allows.
+      // The run-test route accepts EITHER `uptime-write` OR this `monitor-run-manually`
+      // privilege, which lets an admin grant manual test runs to an otherwise read-only
+      // role without granting write access.
+      includeIn: 'all',
       api: [MONITOR_RUN_MANUALLY_API],
       savedObject: {
         all: [],
@@ -95,6 +97,25 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
+const canManageSecretConnectionsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_manage_secret_connections',
+      name: i18n.translate('xpack.synthetics.features.canManageSecretConnections', {
+        defaultMessage: 'Can manage',
+      }),
+      includeIn: 'all',
+      api: [SECRET_CONNECTION_WRITE_API],
+      savedObject: {
+        all: [syntheticsSecretConnectionType],
+        read: [],
+      },
+      ui: ['canManageSecretConnections'],
+    },
+  ],
+};
+
 const canReadParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent',
   privileges: [
@@ -124,13 +145,13 @@ const canManageRulesPrivilege: SubFeaturePrivilegeGroupConfig = {
       name: i18n.translate('xpack.synthetics.features.canManageRules.label', {
         defaultMessage: 'Can manage rules',
       }),
-      // `includeIn: 'none'` — never granted implicitly. Default-alerting write
-      // routes accept EITHER `uptime-write` (which base `all` already has, so
-      // existing roles keep working) OR this `write_synthetics_default_rules`
-      // privilege. Alerting grants match base `all` so a read-only role can
-      // create, update, delete, enable, run, and backfill Synthetics/Uptime
-      // rules without monitor, settings, parameter, or private-location writes.
-      includeIn: 'none',
+      // Included in `all` so the role editor reflects what base `all` already allows.
+      // Default-alerting write routes accept EITHER `uptime-write` OR this
+      // `write_synthetics_default_rules` privilege. Alerting grants match base `all`
+      // so a read-only role can create, update, delete, enable, run, and backfill
+      // Synthetics/Uptime rules without monitor, settings, parameter, or
+      // private-location writes.
+      includeIn: 'all',
       api: [WRITE_SYNTHETICS_DEFAULT_RULES_API],
       savedObject: {
         all: [],
@@ -164,7 +185,7 @@ export const syntheticsFeature = {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
+      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac', 'bulkGetUserProfiles'],
       savedObject: {
         all: [
           syntheticsSettingsObjectType,
@@ -176,7 +197,11 @@ export const syntheticsFeature = {
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
-        read: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
+        read: [
+          privateLocationSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
+          syntheticsSecretConnectionType,
+        ],
       },
       alerting: {
         rule: {
@@ -197,11 +222,12 @@ export const syntheticsFeature = {
     read: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'lists-read', 'rac'],
+      api: ['uptime-read', 'lists-read', 'rac', 'bulkGetUserProfiles'],
       savedObject: {
         all: [],
         read: [
           syntheticsParamType,
+          syntheticsSecretConnectionType,
           syntheticsSettingsObjectType,
           syntheticsMonitorSavedObjectType,
           legacySyntheticsMonitorTypeSingle,
@@ -233,7 +259,7 @@ export const syntheticsFeature = {
       }),
       description: i18n.translate('xpack.synthetics.features.app.runTest.description', {
         defaultMessage:
-          'This feature allows a read-only user to trigger manual test runs of existing monitors, without granting the ability to create, edit, or delete monitors.',
+          'This feature allows a read-only user to trigger manual test runs of existing monitors, without granting the ability to create, edit, or delete monitors. Users with the All privilege can always run tests manually, even if this is unchecked.',
       }),
       privilegeGroups: [canRunTestManuallyPrivilege],
     },
@@ -258,6 +284,16 @@ export const syntheticsFeature = {
       privilegeGroups: [canManagePrivateLocationsPrivilege],
     },
     {
+      name: i18n.translate('xpack.synthetics.features.app.secretConnections', {
+        defaultMessage: 'Secret provider connections',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.secretConnections.description', {
+        defaultMessage:
+          'This feature allows you to manage connections to external secret managers, such as HashiCorp Vault, used to resolve secret references in monitors and global parameters.',
+      }),
+      privilegeGroups: [canManageSecretConnectionsPrivilege],
+    },
+    {
       name: i18n.translate('xpack.synthetics.features.app.params', {
         defaultMessage: 'Global Parameters',
       }),
@@ -272,7 +308,7 @@ export const syntheticsFeature = {
       }),
       description: i18n.translate('xpack.synthetics.features.app.rules.description', {
         defaultMessage:
-          'Create, update, delete, enable, disable, run, and backfill Synthetics and Uptime alert rules, including the default status and TLS rules. This does not grant permission to create or edit monitors.',
+          'Create, update, delete, enable, disable, run, and backfill Synthetics and Uptime alert rules, including the default status and TLS rules. This does not grant permission to create or edit monitors. Users with the All privilege can always manage rules, even if this is unchecked.',
       }),
       privilegeGroups: [canManageRulesPrivilege],
     },

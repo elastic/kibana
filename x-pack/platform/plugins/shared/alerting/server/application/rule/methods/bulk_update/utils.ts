@@ -47,21 +47,32 @@ export const loadRulesByIds = async (
     return [];
   }
 
-  const finder =
-    await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
-      {
+  // createPointInTimeFinder ≈ finder setup; find ≈ ES pages + decrypt.
+  const finder = await withSpan(
+    {
+      name: 'loadRulesByIds.createPointInTimeFinder',
+      type: 'rules',
+      labels: { count: String(ids.length) },
+    },
+    () =>
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
         filter: convertRuleIdsToKueryNode(ids),
         type: RULE_SAVED_OBJECT_TYPE,
         perPage: 100,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-      }
-    );
+      })
+  );
 
   const loaded: Array<SavedObject<RawRule>> = [];
   try {
-    for await (const response of finder.find()) {
-      loaded.push(...response.saved_objects);
-    }
+    await withSpan(
+      { name: 'loadRulesByIds.find', type: 'rules', labels: { count: String(ids.length) } },
+      async () => {
+        for await (const response of finder.find()) {
+          loaded.push(...response.saved_objects);
+        }
+      }
+    );
   } finally {
     await finder.close();
   }
@@ -72,6 +83,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   context,
   actionsClient,
   username,
+  profileUid,
   item,
   original,
   allowMissingConnectorSecrets,
@@ -81,6 +93,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   context: RulesClientContext;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   username: string | null;
+  profileUid: string | null;
   item: BulkUpdateRulesItem<Params>;
   original: SavedObject<RawRule>;
   allowMissingConnectorSecrets?: boolean;
@@ -169,6 +182,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
       id: ruleType.id,
       ruleName: data.name,
       username,
+      profileUid,
       shouldUpdateApiKey: originalRule.enabled,
       errorMessage: 'Error updating rule: could not create API key',
       apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
@@ -195,6 +209,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
       notifyWhen,
       revision,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: new Date().toISOString(),
       artifacts: artifactsWithRefs,
       enabled: originalRule.enabled,

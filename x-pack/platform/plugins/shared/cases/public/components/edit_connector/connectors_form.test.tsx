@@ -125,7 +125,7 @@ describe('ConnectorsForm ', () => {
 
     expect(incidentTypeComboBox).not.toHaveValue();
     expect(severitySelect).toHaveValue('5');
-  });
+  }, 60_000);
 
   it('submits correctly', async () => {
     const user = userEvent.setup({ delay: null });

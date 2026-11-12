@@ -22,6 +22,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { CoreSetup } from '@kbn/core/public';
+import type { AiopsUsage } from '../track_usage';
 import type { ChangePointDetectionSharedComponent } from '../shared_components';
 
 import type { LogCategorizationEmbeddableWrapperProps } from '../components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper';
@@ -55,6 +56,7 @@ export interface AiopsPluginStart {
   getPatternAnalysisAvailable: () => Promise<(dataView: DataView) => boolean>;
   PatternAnalysisComponent: React.ComponentType<LogCategorizationEmbeddableWrapperProps>;
   ChangePointDetectionComponent: ChangePointDetectionSharedComponent;
+  aiopsUsage: AiopsUsage;
 }
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;

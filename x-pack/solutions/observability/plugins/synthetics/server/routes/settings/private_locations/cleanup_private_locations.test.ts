@@ -7,24 +7,29 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { cleanupPrivateLocationRoute } from './cleanup_private_locations';
-import { resetSyncPrivateCleanUpState } from '../../../tasks/sync_private_locations_monitors_task';
+import {
+  runCleanUpTaskNow,
+  setLeftoverCleanUpDisabled,
+} from '../../../tasks/clean_up_package_policies_task';
 
-jest.mock('../../../tasks/sync_private_locations_monitors_task', () => ({
-  resetSyncPrivateCleanUpState: jest.fn(),
+jest.mock('../../../tasks/clean_up_package_policies_task', () => ({
+  runCleanUpTaskNow: jest.fn(),
+  setLeftoverCleanUpDisabled: jest.fn(),
 }));
 
-const resetSyncPrivateCleanUpStateMock = resetSyncPrivateCleanUpState as jest.MockedFunction<
-  typeof resetSyncPrivateCleanUpState
+const runCleanUpTaskNowMock = runCleanUpTaskNow as jest.MockedFunction<typeof runCleanUpTaskNow>;
+const setLeftoverCleanUpDisabledMock = setLeftoverCleanUpDisabled as jest.MockedFunction<
+  typeof setLeftoverCleanUpDisabled
 >;
 
 describe('cleanupPrivateLocationRoute', () => {
   const server = { logger: { debug: jest.fn(), error: jest.fn() } };
 
-  const callRoute = async () => {
+  const callRoute = async (query: Record<string, unknown> = {}) => {
     const response = httpServerMock.createResponseFactory();
     const result = await cleanupPrivateLocationRoute().handler({
       server,
-      request: { query: {} },
+      request: { query },
       response,
     } as any);
     return { response, result };
@@ -32,21 +37,31 @@ describe('cleanupPrivateLocationRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    runCleanUpTaskNowMock.mockResolvedValue(undefined);
+    setLeftoverCleanUpDisabledMock.mockResolvedValue(undefined);
   });
 
-  it('reports success once cleanup has been scheduled', async () => {
-    resetSyncPrivateCleanUpStateMock.mockResolvedValue(undefined);
-
+  it('re-enables the daily clean up and runs it now', async () => {
     const { result } = await callRoute();
 
     expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(setLeftoverCleanUpDisabledMock).toHaveBeenCalledWith(server, false);
+    expect(runCleanUpTaskNowMock).toHaveBeenCalledWith(server);
+    expect(setLeftoverCleanUpDisabledMock.mock.invocationCallOrder[0]).toBeLessThan(
+      runCleanUpTaskNowMock.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('disables the daily clean up without running it when disable is true', async () => {
+    const { result } = await callRoute({ disable: true });
+
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(setLeftoverCleanUpDisabledMock).toHaveBeenCalledWith(server, true);
+    expect(runCleanUpTaskNowMock).not.toHaveBeenCalled();
   });
 
   it('fails the request when cleanup could not be scheduled', async () => {
-    // Reporting success here would claim cleanup was scheduled when it was not,
-    // leaving the caller polling for work that only happens whenever the periodic
-    // sync next runs.
-    resetSyncPrivateCleanUpStateMock.mockRejectedValue(new Error('already running'));
+    runCleanUpTaskNowMock.mockRejectedValue(new Error('already running'));
 
     const { response } = await callRoute();
 
@@ -54,6 +69,19 @@ describe('cleanupPrivateLocationRoute', () => {
       statusCode: 500,
       body: {
         message: 'Failed to schedule private location cleanup: already running',
+      },
+    });
+  });
+
+  it('fails the request when cleanup could not be disabled', async () => {
+    setLeftoverCleanUpDisabledMock.mockRejectedValue(new Error('version conflict'));
+
+    const { response } = await callRoute({ disable: true });
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: {
+        message: 'Failed to disable private location cleanup: version conflict',
       },
     });
   });

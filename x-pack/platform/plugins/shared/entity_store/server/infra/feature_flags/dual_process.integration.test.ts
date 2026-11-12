@@ -16,7 +16,7 @@
  * Tracked in: https://github.com/elastic/kibana/issues/288610
  */
 
-import { Subject } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import type { CoreStart } from '@kbn/core/server';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -62,15 +62,18 @@ function buildCoreStart(
   });
   mockRepo.update.mockResolvedValue({} as never);
 
-  const getBooleanValue =
+  const startupFlag$ =
     flagOnStartup !== undefined
-      ? jest.fn().mockResolvedValue(flagOnStartup)
-      : jest.fn().mockRejectedValue(new Error('getBooleanValue not mocked for this test'));
+      ? of(flagOnStartup)
+      : throwError(() => new Error('startup flag read not mocked for this test'));
 
   const coreStart = {
     featureFlags: {
-      getBooleanValue$: jest.fn().mockReturnValue(flagSubject.asObservable()),
-      getBooleanValue,
+      // First subscription is the startup snapshot; later ones drive in-session transitions.
+      getBooleanValue$: jest
+        .fn()
+        .mockImplementationOnce(() => startupFlag$)
+        .mockReturnValue(flagSubject.asObservable()),
     },
     savedObjects: {
       createInternalRepository: jest.fn().mockReturnValue(mockRepo),
@@ -83,11 +86,13 @@ function buildCoreStart(
 describe('dual-process FF reactive path — integration', () => {
   let stop$: Subject<void>;
   let logger: ReturnType<typeof loggerMock.create>;
+  let isNonPriorityTaskScheduled: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     stop$ = new Subject<void>();
     logger = loggerMock.create();
+    isNonPriorityTaskScheduled = jest.fn().mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -105,7 +110,7 @@ describe('dual-process FF reactive path — integration', () => {
       const so = makeSavedObject('user', 'default');
       const { coreStart, mockRepo } = buildCoreStart(flagSubject, { saved_objects: [so] });
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       flagSubject.next(true);
       flagSubject.next(false);
       await flushPromises();
@@ -127,7 +132,7 @@ describe('dual-process FF reactive path — integration', () => {
       const so = makeSavedObject('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STOPPED });
       const { coreStart, mockRepo } = buildCoreStart(flagSubject, { saved_objects: [so] });
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       flagSubject.next(true);
       flagSubject.next(false);
       await flushPromises();
@@ -145,7 +150,7 @@ describe('dual-process FF reactive path — integration', () => {
         ],
       });
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       flagSubject.next(true);
       flagSubject.next(false);
       await flushPromises();
@@ -159,7 +164,7 @@ describe('dual-process FF reactive path — integration', () => {
         saved_objects: [makeSavedObject('user', 'space-a'), makeSavedObject('user', 'space-b')],
       });
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       flagSubject.next(true);
       flagSubject.next(false);
       await flushPromises();
@@ -190,7 +195,7 @@ describe('dual-process FF reactive path — integration', () => {
       const so = makeSavedObject('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STOPPED });
       const { coreStart, mockRepo } = buildCoreStart(flagSubject, { saved_objects: [so] });
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       flagSubject.next(false);
       flagSubject.next(true);
       await flushPromises();
@@ -211,7 +216,7 @@ describe('dual-process FF reactive path — integration', () => {
       });
       const { coreStart, mockRepo } = buildCoreStart(flagSubject, { saved_objects: [so] });
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       flagSubject.next(false);
       flagSubject.next(true);
       await flushPromises();
@@ -226,7 +231,7 @@ describe('dual-process FF reactive path — integration', () => {
       });
       const { coreStart, mockRepo } = buildCoreStart(flagSubject, { saved_objects: [so] });
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       flagSubject.next(false);
       flagSubject.next(true);
       await flushPromises();
@@ -249,7 +254,7 @@ describe('dual-process FF reactive path — integration', () => {
         false // FF is off
       );
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       await flushPromises();
 
       expect(mockRepo.update).toHaveBeenCalledWith(
@@ -269,7 +274,7 @@ describe('dual-process FF reactive path — integration', () => {
         true // FF is on
       );
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       await flushPromises();
 
       expect(mockRepo.update).toHaveBeenCalledWith(
@@ -280,14 +285,34 @@ describe('dual-process FF reactive path — integration', () => {
       );
     });
 
+    it('keeps an operator-stopped engine stopped across a restart when FF is on', async () => {
+      const flagSubject = new Subject<boolean>();
+      const so = makeSavedObject('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STOPPED });
+      const { coreStart, mockRepo } = buildCoreStart(
+        flagSubject,
+        { saved_objects: [so] },
+        true // FF is on
+      );
+      isNonPriorityTaskScheduled.mockResolvedValue(false);
+
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
+      await flushPromises();
+
+      expect(isNonPriorityTaskScheduled).toHaveBeenCalledWith('user', 'default');
+      expect(mockRepo.update).not.toHaveBeenCalled();
+    });
+
     it('logs an error and does not throw when the startup reconciliation fails', async () => {
       const flagSubject = new Subject<boolean>();
       const { coreStart } = buildCoreStart(flagSubject, { saved_objects: [] });
-      (coreStart.featureFlags.getBooleanValue as jest.Mock).mockRejectedValue(
-        new Error('LD unreachable')
-      );
+      (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReset();
+      (coreStart.featureFlags.getBooleanValue$ as jest.Mock)
+        .mockImplementationOnce(() => throwError(() => new Error('LD unreachable')))
+        .mockReturnValue(flagSubject.asObservable());
 
-      expect(() => subscribeToDualProcessFlag({ coreStart, logger, stop$ })).not.toThrow();
+      expect(() =>
+        subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled })
+      ).not.toThrow();
 
       await flushPromises();
 
@@ -333,15 +358,19 @@ describe('dual-process FF reactive path — integration', () => {
 
       const coreStart = {
         featureFlags: {
-          getBooleanValue$: jest.fn().mockReturnValue(flagSubject.asObservable()),
-          getBooleanValue: jest.fn().mockRejectedValue(new Error('not mocked')),
+          getBooleanValue$: jest
+            .fn()
+            .mockImplementationOnce(() =>
+              throwError(() => new Error('startup flag read not mocked for this test'))
+            )
+            .mockReturnValue(flagSubject.asObservable()),
         },
         savedObjects: {
           createInternalRepository: jest.fn().mockReturnValue(mockRepo),
         },
       } as unknown as CoreStart;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       flagSubject.next(true);
       flagSubject.next(false);

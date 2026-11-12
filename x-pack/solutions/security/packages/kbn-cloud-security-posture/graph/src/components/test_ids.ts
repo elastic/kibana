@@ -31,11 +31,11 @@ export const GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID =
 export const GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}ShowEntityRelationshipsTooltip` as const;
 
-export const GRAPH_LABEL_EXPAND_POPOVER_TEST_ID =
-  `${GRAPH_INVESTIGATION_TEST_ID}GraphLabelExpandPopover` as const;
-export const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID =
+export const GRAPH_EVENT_EXPAND_POPOVER_TEST_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}GraphEventExpandPopover` as const;
+export const GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}ShowEventsWithThisAction` as const;
-export const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID =
+export const GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}ShowEventDetails` as const;
 
 export const GRAPH_ACTIONS_TOGGLE_SEARCH_ID = `${GRAPH_INVESTIGATION_TEST_ID}ToggleSearch` as const;
@@ -46,10 +46,11 @@ export const GRAPH_CONTROLS_ZOOM_IN_ID = `${GRAPH_INVESTIGATION_TEST_ID}ZoomIn` 
 export const GRAPH_CONTROLS_ZOOM_OUT_ID = `${GRAPH_INVESTIGATION_TEST_ID}ZoomOut` as const;
 export const GRAPH_CONTROLS_CENTER_ID = `${GRAPH_INVESTIGATION_TEST_ID}Center` as const;
 export const GRAPH_CONTROLS_FIT_VIEW_ID = `${GRAPH_INVESTIGATION_TEST_ID}FitView` as const;
+export const GRAPH_CONTROLS_LAYERS_ID = `${GRAPH_INVESTIGATION_TEST_ID}Layers` as const;
 
 export const GRAPH_ID = `${GRAPH_INVESTIGATION_TEST_ID}Graph` as const;
 export const GRAPH_ENTITY_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityNode` as const;
-export const GRAPH_LABEL_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}LabelNode` as const;
+export const GRAPH_EVENT_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EventNode` as const;
 export const GRAPH_RELATIONSHIP_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNode` as const;
 export const GRAPH_STACK_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackNode` as const;
 export const GRAPH_EDGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}Edge` as const;
@@ -59,8 +60,8 @@ export const GRAPH_STACKED_SHAPE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackedShap
 export const GRAPH_MINIMAP_ID = `${GRAPH_INVESTIGATION_TEST_ID}Minimap` as const;
 export const GRAPH_MINIMAP_ENTITY_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapEntityNode` as const;
-export const GRAPH_MINIMAP_LABEL_NODE_ID =
-  `${GRAPH_INVESTIGATION_TEST_ID}MinimapLabelNode` as const;
+export const GRAPH_MINIMAP_EVENT_NODE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}MinimapEventNode` as const;
 export const GRAPH_MINIMAP_RELATIONSHIP_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapRelationshipNode` as const;
 export const GRAPH_MINIMAP_UNKNOWN_NODE_ID =
@@ -74,6 +75,10 @@ export const GRAPH_ENTITY_NODE_BUTTON_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeButton` as const;
 export const GRAPH_ENTITY_NODE_DETAILS_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeDetails` as const;
+export const GRAPH_ENTITY_NODE_RISK_BADGE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeRiskBadge` as const;
+export const GRAPH_ENTITY_NODE_LAYERS_PANEL_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeLayersPanel` as const;
 
 export const GRAPH_IPS_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsText` as const;
 export const GRAPH_IPS_BUTTON_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsButton` as const;
@@ -86,6 +91,8 @@ export const GRAPH_IPS_PLUS_COUNT_BUTTON_ID =
 export const GRAPH_IPS_POPOVER_CONTENT_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverContent` as const;
 export const GRAPH_IPS_POPOVER_IP_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverId` as const;
+export const GRAPH_IPS_POPOVER_IP_LINK_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverIpLink` as const;
 export const GRAPH_IPS_POPOVER_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPopover` as const;
 
 export const GRAPH_FLAGS_BADGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsBadge` as const;
@@ -123,3 +130,5 @@ export const GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeHoverOutline` as const;
 export const GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeLabelText` as const;
+export const GRAPH_RELATIONSHIP_NODE_ICON_BADGE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeIconBadge` as const;

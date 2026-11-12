@@ -92,7 +92,8 @@ export const findLiveQueryRoute = (
                 ),
                 sort: {
                   direction: (request.query.sortOrder ?? 'desc') as Direction,
-                  field: request.query.sort ?? 'created_at',
+                  // `created_at` is not mapped on the actions index, so sorting on it fails the search.
+                  field: request.query.sort ?? '@timestamp',
                 },
                 spaceId,
               },
@@ -111,7 +112,8 @@ export const findLiveQueryRoute = (
                 request,
                 cpsActive
               );
-              const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+              // A fanned-out CPS read does not also add CCS `*:` remote expressions.
+              const ccsEnabled = !cpsActive && (await hasConnectedRemoteClusters(internalEsClient));
               let integrationNamespaces: string[] | undefined;
 
               if (osqueryContext?.service?.getIntegrationNamespaces) {
@@ -147,7 +149,6 @@ export const findLiveQueryRoute = (
               const resultCountsMap = await getResultCountsForActions(
                 readEsClient,
                 allActionIds,
-                spaceId,
                 integrationNamespaces,
                 ccsEnabled
               );

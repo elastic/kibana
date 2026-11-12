@@ -38,10 +38,9 @@ export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({
     try {
       await api.cancelExecution(executionId);
       notifications?.toasts.addSuccess({
-        title: i18n.translate(
-          'workflowsManagement.executionDetail.cancelButton.successNotificationTitle',
-          { defaultMessage: 'Execution cancelled' }
-        ),
+        title: i18n.translate('workflows.executionDetail.cancelButton.successNotificationTitle', {
+          defaultMessage: 'Execution cancelled',
+        }),
       });
       telemetry.reportWorkflowRunCancelled({
         workflowExecutionId: executionId,
@@ -53,10 +52,9 @@ export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({
     } catch (error) {
       const errorObj = error instanceof Error ? error : new Error(String(error));
       notifications?.toasts.addError?.(error, {
-        title: i18n.translate(
-          'workflowsManagement.executionDetail.cancelButton.errorNotificationTitle',
-          { defaultMessage: 'Error cancelling execution' }
-        ),
+        title: i18n.translate('workflows.executionDetail.cancelButton.errorNotificationTitle', {
+          defaultMessage: 'Error cancelling execution',
+        }),
       });
       telemetry.reportWorkflowRunCancelled({
         workflowExecutionId: executionId,
@@ -79,7 +77,7 @@ export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({
       fullWidth
     >
       <FormattedMessage
-        id="workflowsManagement.executionDetail.cancelButton"
+        id="workflows.executionDetail.cancelButton"
         defaultMessage="Cancel execution"
       />
     </EuiButton>

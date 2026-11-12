@@ -167,3 +167,11 @@ export const DEFAULT_TIME_RANGE_DISPLAY = {
 export const DEFAULT_ROWS_PER_PAGE = 100;
 
 export const DEFAULT_SAMPLE_SIZE = 500;
+
+/**
+ * Generous ceiling for CSV report generation in the split `reporting_*.spec.ts` suites — CI
+ * under load can take well over the client's default 30s.
+ */
+export const REPORT_GENERATION_TIMEOUT = 120_000;
+export const SEARCH_SOURCE_ALERT_INDEX_PREFIX = 'search-source-alert';
+export const SEARCH_SOURCE_ALERT_OUTPUT_INDEX_PREFIX = 'search-source-alert-output';

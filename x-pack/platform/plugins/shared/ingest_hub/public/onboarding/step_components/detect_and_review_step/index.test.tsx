@@ -17,6 +17,12 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   useGetPackageInfoByKeyQuery: jest.fn(),
+  pagePathGetters: {
+    integrations_installed: ({ viewInstances }: { viewInstances?: string }) => [
+      '/app/integrations',
+      `/installed?viewInstances=${viewInstances}`,
+    ],
+  },
 }));
 
 jest.mock('./use_service_data_detection', () => ({
@@ -48,7 +54,9 @@ jest.mock('./agent_setup_callout', () => ({
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: {} }),
+  useKibana: () => ({
+    services: { http: { basePath: { prepend: (path: string) => `/base${path}` } } },
+  }),
 }));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -67,6 +75,7 @@ const mockUseAwsOverviewDashboardUrl = useAwsOverviewDashboardUrl as jest.Mock;
 function setupMocks({
   deploymentMethod = 'managed_integration' as 'managed_integration' | 'agent_based' | 'ecf',
   selectedServiceIds = [] as string[],
+  awsServicesMap = new Map() as Map<string, { packageName: string }>,
   packageData = undefined as object | undefined,
   overviewHref = undefined as string | undefined,
 } = {}) {
@@ -79,7 +88,7 @@ function setupMocks({
       deployErrors: {},
     },
     deploymentMethod,
-    awsServicesMap: new Map(),
+    awsServicesMap,
     updateDetectAndReviewStep: jest.fn(),
   });
   mockUseSessionStorage.mockReturnValue([
@@ -166,6 +175,59 @@ describe('DetectAndReviewStep', () => {
       renderStep();
       const btn = screen.getByTestId('detectAndReviewStep-continueButton');
       expect(btn).not.toHaveAttribute('href');
+    });
+  });
+
+  describe('finish button', () => {
+    it('renders next to the continue button', () => {
+      setupMocks();
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveTextContent('Finish');
+      expect(screen.getByTestId('detectAndReviewStep-continueButton')).toBeInTheDocument();
+    });
+
+    it('links to the instances of the aws package on Installed integrations', () => {
+      setupMocks({
+        selectedServiceIds: ['cloudtrail', 'bedrock'],
+        awsServicesMap: new Map([
+          ['cloudtrail', { packageName: 'aws' }],
+          ['bedrock', { packageName: 'aws_bedrock' }],
+        ]),
+      });
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/installed?viewInstances=aws'
+      );
+    });
+
+    it('links to the instances of the deployed package when the session does not cover aws', () => {
+      setupMocks({
+        selectedServiceIds: ['bedrock'],
+        awsServicesMap: new Map([['bedrock', { packageName: 'aws_bedrock' }]]),
+      });
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/installed?viewInstances=aws_bedrock'
+      );
+    });
+
+    it('falls back to the aws package before the services are known', () => {
+      setupMocks();
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/installed?viewInstances=aws'
+      );
+    });
+
+    it('calls onContinue when clicked', () => {
+      setupMocks();
+      const onContinue = jest.fn();
+      renderStep({ onContinue });
+      fireEvent.click(screen.getByTestId('detectAndReviewStep-finishButton'));
+      expect(onContinue).toHaveBeenCalledTimes(1);
     });
   });
 

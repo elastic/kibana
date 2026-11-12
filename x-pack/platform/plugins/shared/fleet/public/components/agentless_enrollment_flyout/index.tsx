@@ -34,12 +34,13 @@ import {
 import { getDashboardsCount, buildDashboardsListLink } from '../../services';
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
+import { getComponentAlertLevel } from '../agentless_status_details_flyout/component_health';
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
 import { AgentlessStepConfigureConnector } from './step_configure_connector';
 import { AgentlessStepViewDashboards } from './step_view_dashboards';
 import type { AgentlessEnrollmentFlyoutProps } from './types';
-import { resolveIntegrationTitle } from './utils';
+import { getAgentlessEnrollmentState, resolveIntegrationTitle } from './utils';
 
 // re-export the flyout contract types so external consumers can import them from this module
 export type {
@@ -62,6 +63,7 @@ export const AgentlessEnrollmentFlyout = ({
   packageInfo,
   selectedInput,
   agentPolicy,
+  packagePolicy,
   connectors,
 }: AgentlessEnrollmentFlyoutProps) => {
   const core = useStartServices();
@@ -82,7 +84,9 @@ export const AgentlessEnrollmentFlyout = ({
   );
   const { data: agentsData } = useGetAgentsQuery(
     { kuery: agentKuery },
-    { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }
+    // Keep polling after the agent is online when component health is displayed, so the
+    // diagnostics reflect recoveries and later failures. Step statuses stay latched.
+    { refetchInterval: agentOnline && !packagePolicy ? false : REFRESH_INTERVAL_MS }
   );
   const agentData = agentsData?.data?.items?.[0];
   const agentsError = agentsData?.error;
@@ -104,7 +108,9 @@ export const AgentlessEnrollmentFlyout = ({
   useEffect(() => {
     if (agentOnline) return;
     if (agentData) {
-      if (agentData.status === 'online') {
+      // Judged by the integration's units, like the step content: an agent failing only outside
+      // the integration runs it, and an online one that does not run it yet is still pending.
+      if (getAgentlessEnrollmentState(agentData, packagePolicy) === 'success') {
         setAgentOnline(true);
         setConfirmEnrollmentStatus('complete');
         setConfirmDataStatus('loading');
@@ -119,7 +125,11 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmEnrollmentStatus('loading');
       setConfirmDataStatus('disabled');
     }
-  }, [agentOnline, agentData]);
+  }, [agentOnline, agentData, packagePolicy]);
+
+  // An online agent with a failed component is not a successful deployment.
+  const hasFailedComponents =
+    !!agentData && !!packagePolicy && getComponentAlertLevel(agentData, packagePolicy) === 'failed';
 
   // Activate the "View dashboards" step as soon as data is confirmed
   useEffect(() => {
@@ -196,10 +206,12 @@ export const AgentlessEnrollmentFlyout = ({
                 <AgentlessStepConfirmEnrollment
                   agent={agentData}
                   agentPolicy={agentPolicy}
+                  packagePolicy={packagePolicy}
+                  policyName={policyName}
                   integrationTitle={integrationTitle}
                 />
               ),
-              status: confirmEnrollmentStatus,
+              status: hasFailedComponents ? 'danger' : confirmEnrollmentStatus,
             },
             {
               title: isConnector

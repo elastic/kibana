@@ -155,7 +155,7 @@ describe('ProductDocSetting', () => {
       isInstalling: false,
       isWarmingUpModel: false,
       status: createMockStatus({
-        inferenceModelState: InferenceModelState.NOT_INSTALLED,
+        inferenceModelState: InferenceModelState.READY,
         currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
         endpoint: {
           inference_id: LEGACY_CUSTOM_INFERENCE_ID,

@@ -1,0 +1,22 @@
+{
+  "sha1": "2350166beeacc15c74420a2109726caae9cbb5b9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "481ad018571f62c-b2011d308b93625",
+      "title": "FIPS distribution starts Kibana in FIPS mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/dev/build/test/scout_fips/api/tests/smoke.spec.ts",
+        "line": 13,
+        "column": 17
+      }
+    }
+  ]
+}

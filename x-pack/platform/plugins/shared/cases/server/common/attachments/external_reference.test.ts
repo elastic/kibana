@@ -184,12 +184,12 @@ describe('externalReferenceAttachmentTransformer', () => {
       ).toBe(false);
     });
 
-    it('does not match unmigrated external reference subtypes', () => {
-      const unmigrated = {
+    it('does not match unmapped external reference subtypes', () => {
+      const unmapped = {
         ...legacyEndpointAttributes,
         externalReferenceAttachmentTypeId: 'some-unknown-type',
       };
-      expect(externalReferenceAttachmentTransformer.isType(unmigrated as never)).toBe(false);
+      expect(externalReferenceAttachmentTransformer.isType(unmapped as never)).toBe(false);
     });
 
     it('isUnifiedType detects only unified', () => {

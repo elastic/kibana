@@ -10,10 +10,13 @@ import {
   getOwnerDefaultValue,
   createFormDeserializer,
   createFormSerializer,
+  getInitialCreateCaseSettings,
+  getSpaceExtractObservables,
 } from './utils';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { ConnectorTypes, CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import { GENERAL_CASES_OWNER } from '../../../common';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants/owners';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
@@ -77,6 +80,19 @@ describe('utils', () => {
       );
     });
 
+    it('replaces settings when the caller passes a complete settings object', () => {
+      expect(
+        getInitialCaseValue({
+          owner: 'securitySolution',
+          settings: { syncAlerts: true, extractObservables: false },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          settings: { syncAlerts: true, extractObservables: false },
+        })
+      );
+    });
+
     it('returns extra fields', () => {
       const extraFields = {
         owner: 'foobar',
@@ -103,6 +119,49 @@ describe('utils', () => {
         },
         ...extraFields,
       });
+    });
+  });
+
+  describe('getSpaceExtractObservables', () => {
+    it('returns the configuration value when present', () => {
+      expect(
+        getSpaceExtractObservables({ ...casesConfigurationsMock, extractObservables: false })
+      ).toBe(false);
+    });
+
+    it('defaults to false when the configuration omits the field', () => {
+      const { extractObservables: _omit, ...withoutField } = casesConfigurationsMock;
+      // @ts-expect-error testing omitted extractObservables
+      expect(getSpaceExtractObservables(withoutField)).toBe(false);
+    });
+  });
+
+  describe('getInitialCreateCaseSettings', () => {
+    it('keeps owner syncAlerts and uses the space extractObservables default', () => {
+      expect(
+        getInitialCreateCaseSettings('securitySolution', {
+          ...casesConfigurationsMock,
+          extractObservables: false,
+        })
+      ).toEqual({ syncAlerts: true, extractObservables: false });
+    });
+
+    it('returns false for extractObservables when the owner has observables disabled, regardless of space config', () => {
+      expect(
+        getInitialCreateCaseSettings(OBSERVABILITY_OWNER, {
+          ...casesConfigurationsMock,
+          extractObservables: true,
+        })
+      ).toEqual({ syncAlerts: false, extractObservables: false });
+    });
+
+    it('returns false for extractObservables for the Stack owner, regardless of space config', () => {
+      expect(
+        getInitialCreateCaseSettings(GENERAL_CASES_OWNER, {
+          ...casesConfigurationsMock,
+          extractObservables: true,
+        })
+      ).toEqual({ syncAlerts: false, extractObservables: false });
     });
   });
 
@@ -198,6 +257,64 @@ describe('utils', () => {
         connector: casesConfigurationsMock.connector,
         owner: casesConfigurationsMock.owner,
       });
+    });
+
+    it('inherits extractObservables from the space configuration when the form value is undefined', () => {
+      const { extractObservables: _omit, ...dataWithoutExtract } = dataToSerialize;
+
+      expect(
+        createFormSerializer(
+          [],
+          { ...casesConfigurationsMock, extractObservables: false },
+          // @ts-expect-error testing omitted extractObservables
+          dataWithoutExtract
+        )
+      ).toEqual({
+        ...serializedFormData,
+        settings: {
+          syncAlerts: false,
+          extractObservables: false,
+        },
+      });
+    });
+
+    it.each([GENERAL_CASES_OWNER, OBSERVABILITY_OWNER])(
+      'sends extractObservables false for the %s owner even when the form value is true',
+      (owner) => {
+        const { settings } = createFormSerializer(
+          [],
+          { ...casesConfigurationsMock, owner, extractObservables: true },
+          { ...dataToSerialize, extractObservables: true }
+        );
+
+        expect(settings.extractObservables).toBe(false);
+      }
+    );
+
+    it.each([GENERAL_CASES_OWNER, OBSERVABILITY_OWNER])(
+      'sends extractObservables false for the %s owner when the form value is undefined and the space configuration is true',
+      (owner) => {
+        const { extractObservables: _omit, ...dataWithoutExtract } = dataToSerialize;
+
+        const { settings } = createFormSerializer(
+          [],
+          { ...casesConfigurationsMock, owner, extractObservables: true },
+          // @ts-expect-error testing omitted extractObservables
+          dataWithoutExtract
+        );
+
+        expect(settings.extractObservables).toBe(false);
+      }
+    );
+
+    it('keeps an explicit true for the Security owner', () => {
+      const { settings } = createFormSerializer(
+        [],
+        { ...casesConfigurationsMock, owner: SECURITY_SOLUTION_OWNER, extractObservables: false },
+        { ...dataToSerialize, extractObservables: true }
+      );
+
+      expect(settings.extractObservables).toBe(true);
     });
 
     it('normalizes action connectors', () => {

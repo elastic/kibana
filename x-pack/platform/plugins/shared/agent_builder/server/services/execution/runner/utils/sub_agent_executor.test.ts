@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { EMPTY } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
+import { ChatTriggerMode } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import { createSubAgentExecutor } from './sub_agent_executor';
 
@@ -16,17 +18,18 @@ describe('createSubAgentExecutor', () => {
   let executeAgent: jest.Mock;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
-  const createExecutor = (interactivity: InteractivityConfig) => {
+  const createExecutor = (interactivity: InteractivityConfig, workflowExecutionId?: string) => {
     const executionService = { executeAgent } as unknown as AgentExecutionService;
     return createSubAgentExecutor({
       request,
       getExecutionService: () => executionService,
       interactivity,
+      workflowExecutionId,
     });
   };
 
   beforeEach(() => {
-    executeAgent = jest.fn().mockResolvedValue({});
+    executeAgent = jest.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
     request = httpServerMock.createKibanaRequest();
   });
 
@@ -48,6 +51,7 @@ describe('createSubAgentExecutor', () => {
       subagentPurpose: 'testing',
     });
     await executor.sendToSubAgent({
+      agentId: 'child',
       conversationId: 'conversation-id',
       prompt: 'go',
       parentExecutionId: 'parent-execution-id',
@@ -57,6 +61,27 @@ describe('createSubAgentExecutor', () => {
     for (const [params] of executeAgent.mock.calls) {
       expect(params.interactive).toEqual({ enabled: false, auto_approved_apis: autoApprovedApis });
     }
+  });
+
+  it('runs a follow-up as the agent backing the sub-agent', async () => {
+    const executor = createExecutor({ enabled: true });
+
+    await executor.sendToSubAgent({
+      agentId: 'child',
+      conversationId: 'conversation-id',
+      prompt: 'go again',
+      parentExecutionId: 'parent-execution-id',
+    });
+
+    expect(executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          agentId: 'child',
+          conversationId: 'conversation-id',
+          autoCreateConversationWithId: false,
+        }),
+      })
+    );
   });
 
   it('omits the grant entirely when the parent has none', async () => {
@@ -72,4 +97,194 @@ describe('createSubAgentExecutor', () => {
       expect.objectContaining({ interactive: { enabled: false } })
     );
   });
+
+  describe('workflow execution id', () => {
+    const runAll = async (executor: ReturnType<typeof createExecutor>) => {
+      await executor.executeSubAgent({
+        agentId: 'child',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+      });
+      await executor.createSubAgent({
+        agentId: 'child',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        conversationId: 'conversation-id',
+        parentConversationId: 'parent-conversation-id',
+        subagentName: 'child',
+        subagentPurpose: 'testing',
+      });
+      await executor.sendToSubAgent({
+        agentId: 'child',
+        conversationId: 'conversation-id',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+      });
+      return executeAgent.mock.calls.map(([call]) => call.params);
+    };
+
+    it("passes the parent's workflow execution id to every sub-agent", async () => {
+      const [standalone, created, sent] = await runAll(
+        createExecutor({ enabled: false }, 'workflow-run-1')
+      );
+
+      // Persistent sub-agents report it on their rounds. No sub-agent sends it to EIS.
+      expect(created.workflowExecutionId).toBe('workflow-run-1');
+      expect(sent.workflowExecutionId).toBe('workflow-run-1');
+      // A standalone run reports no round events; it passes the id on to its own sub-agents.
+      expect(standalone.workflowExecutionId).toBe('workflow-run-1');
+    });
+
+    it('passes none when the parent run has none', async () => {
+      const calls = await runAll(createExecutor({ enabled: false }));
+
+      calls.forEach((params) => expect(params).not.toHaveProperty('workflowExecutionId'));
+    });
+  });
+
+  describe('per-delegation pre-approvals', () => {
+    const delegated: AutoApprovedApi[] = [
+      { target: 'kibana', api: 'alerting.delete-alerting-rule-id' },
+    ];
+
+    it.each<{ description: string; delegatedApis: AutoApprovedApi[]; expected: AutoApprovedApi[] }>(
+      [
+        {
+          description: 'adds them to the ones the parent already carries',
+          delegatedApis: delegated,
+          expected: [...autoApprovedApis, ...delegated],
+        },
+        {
+          description: 'does not duplicate a grant the parent already carries',
+          delegatedApis: [...autoApprovedApis],
+          expected: autoApprovedApis,
+        },
+      ]
+    )('$description', async ({ delegatedApis, expected }) => {
+      const executor = createExecutor({ enabled: true, auto_approved_apis: autoApprovedApis });
+
+      await executor.executeSubAgent({
+        agentId: 'child',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        autoApprovedApis: delegatedApis,
+      });
+
+      expect(executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          interactive: { enabled: false, auto_approved_apis: expected },
+        })
+      );
+    });
+
+    it('carries them into the round that creates a persistent sub-agent, but no later one', async () => {
+      const executor = createExecutor({ enabled: true });
+
+      await executor.createSubAgent({
+        agentId: 'child',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        conversationId: 'conversation-id',
+        parentConversationId: 'parent-conversation-id',
+        subagentName: 'child',
+        autoApprovedApis: delegated,
+      });
+      await executor.sendToSubAgent({
+        agentId: 'child',
+        conversationId: 'conversation-id',
+        prompt: 'go again',
+        parentExecutionId: 'parent-execution-id',
+      });
+
+      expect(executeAgent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          interactive: { enabled: false, auto_approved_apis: delegated },
+        })
+      );
+      expect(executeAgent).toHaveBeenLastCalledWith(
+        expect.objectContaining({ interactive: { enabled: false } })
+      );
+    });
+  });
+});
+
+describe('createSubAgentExecutor and background sub-agents', () => {
+  it('runs a background sub-agent on its own task, waking the parent only when asked to', async () => {
+    const executor = createExecutorWith({ enabled: false });
+    const background = { parentTriggerMode: ChatTriggerMode.Always };
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      background,
+    });
+    await executor.createSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      conversationId: 'conversation-id',
+      parentConversationId: 'parent-conversation-id',
+      subagentName: 'child',
+      background,
+    });
+    await executor.sendToSubAgent({
+      agentId: 'child',
+      prompt: 'and then',
+      parentExecutionId: 'parent-execution-id',
+      conversationId: 'conversation-id',
+      background,
+    });
+
+    expect(executeAgentMock).toHaveBeenCalledTimes(3);
+    for (const [params] of executeAgentMock.mock.calls) {
+      expect(params.params.parentTriggerMode).toBe(ChatTriggerMode.Always);
+      expect(params.useTaskManager).toBe(true);
+      expect(params.requestImmediateClaim).toBe(true);
+    }
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      background: { parentTriggerMode: ChatTriggerMode.Never },
+    });
+    expect(executeAgentMock.mock.calls[3][0].params.parentTriggerMode).toBe(ChatTriggerMode.Never);
+
+    // No wake asked for: the run still gets its own task, and the result waits for the next run.
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      background: {},
+    });
+    expect(executeAgentMock.mock.calls[4][0].params.parentTriggerMode).toBeUndefined();
+    expect(executeAgentMock.mock.calls[4][0].useTaskManager).toBe(true);
+  });
+
+  it('leaves a foreground sub-agent alone', async () => {
+    const executor = createExecutorWith({ enabled: false });
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+    });
+
+    expect(executeAgentMock.mock.calls[0][0].params.parentTriggerMode).toBeUndefined();
+    expect(executeAgentMock.mock.calls[0][0].useTaskManager).toBeUndefined();
+  });
+
+  let executeAgentMock: jest.Mock;
+
+  const createExecutorWith = (interactivity: InteractivityConfig) => {
+    executeAgentMock = jest.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
+    return createSubAgentExecutor({
+      request: httpServerMock.createKibanaRequest(),
+      getExecutionService: () =>
+        ({ executeAgent: executeAgentMock } as unknown as AgentExecutionService),
+      interactivity,
+    });
+  };
 });

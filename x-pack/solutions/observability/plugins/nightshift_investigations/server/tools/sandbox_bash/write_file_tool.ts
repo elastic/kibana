@@ -11,8 +11,13 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
-import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
+import {
+  getConversationId,
+  getSandboxCallContext,
+  getSandboxCaller,
+  resolveAbsolutePath,
+} from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_WRITE_FILE_TOOL_ID = 'nightshift_sandbox_write_file';
@@ -35,14 +40,14 @@ export const createSandboxWriteFileTool = ({
   sandboxWorkspaceManager,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   logger: Logger;
 }): BuiltinToolDefinition<typeof writeFileSchema> => ({
   id: SANDBOX_WRITE_FILE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Write (overwrite) a file in the sandbox. Parent directories are created automatically. Use sandbox_str_replace for partial edits; use this tool for new files or complete rewrites.',
+    'Write (overwrite) a file in the sandbox. Parent directories are created automatically. Use nightshift_sandbox_str_replace for partial edits; use this tool for new files or complete rewrites.',
   tags: ['sandbox', 'file'],
   schema: writeFileSchema,
   annotations: {
@@ -52,6 +57,7 @@ export const createSandboxWriteFileTool = ({
     idempotentHint: false,
     openWorldHint: false,
   },
+  excludeFromMcp: true,
   handler: async (params, context) => {
     const rawConversationId = getConversationId(context);
     if (!rawConversationId) {
@@ -69,9 +75,13 @@ export const createSandboxWriteFileTool = ({
       };
     }
 
-    let session: SandboxSession;
+    let session: AuditedSandboxSession;
     try {
-      session = sandboxStart.getSession(context.request, rawConversationId);
+      session = sandboxStart.getSession(
+        context.request,
+        rawConversationId,
+        getSandboxCaller(context)
+      );
     } catch (err) {
       return {
         results: [

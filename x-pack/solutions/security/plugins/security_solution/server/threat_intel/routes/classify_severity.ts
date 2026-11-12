@@ -6,8 +6,11 @@
  */
 
 import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_THREAT_INTEL_CLASSIFY_SEVERITY_TELEMETRY_PLUGIN_ID,
+} from '@kbn/alertzero-common';
+import {
   CLASSIFY_SEVERITY_API_PATH,
-  THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
   classifySeverityBodySchema,
   classifySeverityResponseSchema,
   CLASSIFY_SEVERITY_MAX_BODY_BYTES,
@@ -52,7 +55,8 @@ export const registerClassifySeverityRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+          telemetryPluginId: ALERTZERO_THREAT_INTEL_CLASSIFY_SEVERITY_TELEMETRY_PLUGIN_ID,
           logger,
         });
         if (!modelOutcome.ok) {

@@ -50,9 +50,20 @@ export const createDataSourceFlyoutStrings = {
       defaultMessage: 'Name',
     }),
 
+  nameDescription: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.nameDescription', {
+      defaultMessage:
+        'Unique name for use in datasets. All lowercase, dash, underscore, and numbers are supported.',
+    }),
+
   descriptionLabel: () =>
     i18n.translate('xpack.dataFederation.createFlyout.descriptionLabel', {
-      defaultMessage: 'Description',
+      defaultMessage: 'Description (optional)',
+    }),
+
+  descriptionDescription: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.descriptionDescription', {
+      defaultMessage: 'A brief description to identify this data source.',
     }),
 
   cancelButton: () =>

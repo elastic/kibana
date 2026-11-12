@@ -6,6 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import rison from '@kbn/rison';
 import type {
@@ -20,7 +21,6 @@ import {
   getDataStreamDegradedDocsResponseRt,
   getDataStreamFailedDocsResponseRt,
   getDataStreamsStatsResponseRt,
-  getDataStreamsTypesPrivilegesResponseRt,
   getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
@@ -34,8 +34,6 @@ import type {
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
   GetDataStreamsTotalDocsQuery,
-  GetDataStreamsTypesPrivilegesQuery,
-  GetDataStreamsTypesPrivilegesResponse,
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
@@ -49,40 +47,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     private readonly telemetryClient?: ITelemetryClient
   ) {}
 
-  public async getDataStreamsTypesPrivileges(
-    params: GetDataStreamsTypesPrivilegesQuery
-  ): Promise<GetDataStreamsTypesPrivilegesResponse> {
-    const types =
-      'types' in params
-        ? rison.encodeArray(params.types.length === 0 ? KNOWN_TYPES : params.types)
-        : undefined;
-
-    const response = await this.http
-      .get<GetDataStreamsTypesPrivilegesResponse>(
-        '/internal/dataset_quality/data_streams/types_privileges',
-        {
-          query: {
-            ...params,
-            types,
-          },
-        }
-      )
-      .catch((error) => {
-        throw new DatasetQualityError(
-          `Failed to fetch data streams types privileges: ${error}`,
-          error
-        );
-      });
-
-    const { datasetTypesPrivileges } = decodeOrThrow(
-      getDataStreamsTypesPrivilegesResponseRt,
-      (message: string) =>
-        new DatasetQualityError(`Failed to decode data streams types privileges: ${message}`)
-    )(response);
-
-    return { datasetTypesPrivileges };
-  }
-
   public async getDataStreamsStats(
     params: GetDataStreamsStatsQuery
   ): Promise<DataStreamStatServiceResponse> {
@@ -90,24 +54,29 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       'types' in params && params.types
         ? rison.encodeArray(params.types.length === 0 ? KNOWN_TYPES : params.types)
         : undefined;
+    const statsTypes =
+      'statsTypes' in params && params.statsTypes
+        ? rison.encodeArray(params.statsTypes)
+        : undefined;
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
         query: {
           ...params,
           types,
+          statsTypes,
         },
       })
       .catch((error) => {
         throw new DatasetQualityError(`Failed to fetch data streams stats: ${error}`, error);
       });
 
-    const { dataStreamsStats, datasetUserPrivileges } = decodeOrThrow(
+    const { dataStreamsStats, canViewIntegrations } = decodeOrThrow(
       getDataStreamsStatsResponseRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
-    return { dataStreamsStats, datasetUserPrivileges };
+    return { dataStreamsStats, canViewIntegrations };
   }
 
   public async getDataStreamsTotalDocs(params: GetDataStreamsTotalDocsQuery) {
@@ -229,7 +198,9 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }): Promise<UpdateFailureStoreResponse> {
     const response = await this.http
       .put<UpdateFailureStoreResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/update_failure_store', {
+          dataStream,
+        }),
         {
           body: JSON.stringify({
             failureStoreEnabled,

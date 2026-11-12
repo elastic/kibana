@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
 import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
@@ -18,6 +18,7 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
@@ -316,21 +317,16 @@ export const TakeActionDropdown = memo(
         ecsRowData: dataAsNestedObject,
       });
 
-    const documents = useMemo(
-      () => [
-        {
-          _id: dataAsNestedObject._id,
-          _index: dataAsNestedObject._index ?? '',
-          ...(searchHit?._source ?? {}),
-        },
-      ],
-      [dataAsNestedObject._id, dataAsNestedObject._index, searchHit]
+    const documentIds = useMemo(
+      () =>
+        toDocumentSelections([{ _id: dataAsNestedObject._id, _index: dataAsNestedObject._index }]),
+      [dataAsNestedObject._id, dataAsNestedObject._index]
     );
 
     const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
       useRunDocumentWorkflowPanel({
         closePopover: closePopoverHandler,
-        documents,
+        documentIds,
       });
 
     const showAlertActions = !isEvent && Boolean(alertSummaryData.ruleId);

@@ -9,7 +9,7 @@
 
 import { isDeepStrictEqual } from 'node:util';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { ExecutionStatus } from '@kbn/workflows';
+import { evaluatesProvidedInputExpressions, ExecutionStatus } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
@@ -55,10 +55,12 @@ export const validateWorkflowInputs = async (
   });
 
   // Caller-provided values are data. Evaluate only the explicit whole-expression
-  // form and preserve ordinary strings that happen to resemble Liquid templates.
+  // form, and only for a run a person or API caller started directly. Preserve
+  // ordinary strings that happen to resemble Liquid templates.
+  const evaluatesExpressions = evaluatesProvidedInputExpressions(workflowExecution.triggeredBy);
   const renderProvidedValue = (value: unknown): unknown => {
     if (typeof value === 'string') {
-      return value.startsWith('${{') && value.endsWith('}}')
+      return evaluatesExpressions && value.startsWith('${{') && value.endsWith('}}')
         ? templateEngine.render(value, renderContext)
         : value;
     }
@@ -76,6 +78,21 @@ export const validateWorkflowInputs = async (
     return value;
   };
 
+  const markInputValidationFailed = (message: string): Promise<void> => {
+    const update = {
+      id: workflowExecution.id,
+      status: ExecutionStatus.FAILED,
+      error: {
+        type: 'InputValidationError',
+        message,
+      },
+    };
+    if (workflowExecution.concurrencyGroupKey) {
+      return workflowExecutionRepository.updateWorkflowExecution(update, { refresh: true });
+    }
+    return workflowExecutionRepository.updateWorkflowExecution(update);
+  };
+
   let inputsWithDefaults: Record<string, unknown> | undefined;
   try {
     inputsWithDefaults = applyInputDefaults(
@@ -89,14 +106,7 @@ export const validateWorkflowInputs = async (
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     try {
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'InputValidationError',
-          message: `Workflow input validation failed: ${message}`,
-        },
-      });
+      await markInputValidationFailed(`Workflow input validation failed: ${message}`);
     } catch (updateError) {
       logger.error(
         `Failed to mark execution ${workflowExecution.id} as FAILED after input validation error: ${updateError}`
@@ -111,14 +121,7 @@ export const validateWorkflowInputs = async (
       .join('; ');
 
     try {
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'InputValidationError',
-          message: `Workflow input validation failed: ${issues}`,
-        },
-      });
+      await markInputValidationFailed(`Workflow input validation failed: ${issues}`);
     } catch (updateError) {
       logger.error(
         `Failed to mark execution ${workflowExecution.id} as FAILED after input validation error: ${updateError}`

@@ -13,6 +13,10 @@ import { TestProviders } from '../../mock';
 
 jest.mock('../../lib/kibana');
 
+// This test takes ~80ms in isolation. On CI it has repeatedly exceeded the default 5s budget when
+// the Jest process itself stalls under agent load, so give it headroom (see #278243).
+jest.setTimeout(30_000);
+
 describe('MlPopover', () => {
   test('shows upgrade popover on mouse click', async () => {
     const { getByTestId } = render(<MlPopover />, {

@@ -12,32 +12,58 @@ import {
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ComponentsNode } from '@kbn/isomer-components';
+import { i18n } from '@kbn/i18n';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
-import { getConnectorSpec } from '@kbn/connector-specs';
-import type { ActionScope } from '@kbn/connector-specs';
-
-function formatAnnotationHint(scope: ActionScope | undefined): string {
-  if (!scope || scope === 'read') return '';
-  return scope === 'destroy' ? '[DESTROY]' : '[WRITE]';
-}
+import {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  getConnectorSpec,
+  isSpecificActionsSelection,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 
 /**
  * Creates the definition for the `connector` attachment type.
  *
  * Connector attachments represent a connector instance attached to a conversation,
  * along with its available sub-actions. When a ConnectorSpec is found, the
- * sub-actions (with `isTool: true`) are listed directly from the spec so the
- * agent knows how to call them via the connector tool id `platform.core.execute_connector_sub_action`
- * using the `connectorId` + `subAction` + `params` JSON shape in the attachment text.
+ * sub-actions (recommended isTool actions, or an explicit selected_actions allowlist)
+ * are listed so the agent knows how to call them via
+ * `platform.core.execute_connector_sub_action` using the
+ * `connectorId` + `subAction` + `params` JSON shape in the attachment text.
+ *
+ * `resolve` attaches a connector by reference, reading it as the requesting user.
  */
-export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.connector,
-  ConnectorAttachmentData
-> => {
+export const createConnectorAttachmentType = ({
+  getActionSavedObjectsClient,
+}: {
+  getActionSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+}): AttachmentTypeDefinition<AttachmentType.connector, ConnectorAttachmentData> => {
   return {
     id: AttachmentType.connector,
 
     isReadonly: true,
+
+    resolve: async (origin, { request }) => {
+      const soClient = await getActionSavedObjectsClient(request);
+      const { attributes } = await soClient.get<{
+        name?: string;
+        actionTypeId: string;
+        config?: Record<string, unknown>;
+      }>('action', origin);
+      const selectedActions = attributes.config?.selectedActions as SelectedActions;
+      return {
+        connector_id: origin,
+        connector_name: attributes.name ?? origin,
+        connector_type: attributes.actionTypeId,
+        ...(isSpecificActionsSelection(selectedActions)
+          ? { selected_actions: selectedActions }
+          : {}),
+      };
+    },
 
     validate: (input) => {
       const parseResult = connectorAttachmentDataSchema.safeParse(input);
@@ -52,12 +78,11 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         connector_id: connectorId,
         connector_name: connectorName,
         connector_type: connectorType,
+        selected_actions: selectedActions,
       } = attachment.data;
 
       const spec = getConnectorSpec(connectorType);
-      const subActionEntries = spec
-        ? Object.entries(spec.actions).filter(([, action]) => action.isTool)
-        : [];
+      const subActionEntries = spec ? filterActionsBySelection(spec.actions, selectedActions) : [];
 
       return {
         getRepresentation: () => {
@@ -79,18 +104,26 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
           if (subActionEntries.length > 0) {
             parts.push('');
             parts.push(`Available sub-actions (call ${toolId} with connectorId="${connectorId}"):`);
+            if (Array.isArray(selectedActions)) {
+              parts.push('Note: only selected sub-actions are enabled; do not call others.');
+            }
             for (const [actionName, action] of subActionEntries) {
-              const actionDesc = action.description ?? actionName;
               const paramsSummary = action.input
                 ? formatSchemaForLlm(action.input)
                 : 'No parameters';
-              const hint = formatAnnotationHint(action.scope);
-              parts.push(`  - ${actionName}${hint ? ` ${hint}` : ''}: ${actionDesc}`);
+              parts.push(`  - ${formatConnectorActionLine(actionName, action)}`);
               parts.push(`    Parameters: ${paramsSummary}`);
             }
 
             if (spec?.skill) {
               parts.push('');
+              if (Array.isArray(selectedActions)) {
+                parts.push(
+                  'Note: not every action may be available on this instance. ' +
+                    'Before calling any action, verify it appears in the list above.'
+                );
+                parts.push('');
+              }
               parts.push(spec.skill);
             }
           }
@@ -99,6 +132,53 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         },
 
         getBoundedTools: () => [],
+      };
+    },
+
+    toSurfaceComposition: ({
+      data: {
+        connector_name: connectorName,
+        connector_type: connectorType,
+        selected_actions: selectedActions,
+      },
+    }) => {
+      const spec = getConnectorSpec(connectorType);
+      const actionNames = spec
+        ? filterActionsBySelection(spec.actions, selectedActions).map(([actionName]) => actionName)
+        : [];
+      const typeName = spec?.metadata.displayName ?? connectorType;
+      const description = spec?.metadata.description;
+
+      const fields: ComponentsNode = {
+        type: 'fields',
+        items: [
+          {
+            label: i18n.translate('xpack.agentBuilderPlatform.attachments.connector.surface.type', {
+              defaultMessage: 'Type',
+            }),
+            value: typeName,
+          },
+          ...(actionNames.length > 0
+            ? [
+                {
+                  label: i18n.translate(
+                    'xpack.agentBuilderPlatform.attachments.connector.surface.actions',
+                    { defaultMessage: 'Actions' }
+                  ),
+                  value: actionNames.join(', '),
+                },
+              ]
+            : []),
+        ],
+      };
+
+      return {
+        type: 'view',
+        title: connectorName,
+        body: [
+          ...(description ? [{ type: 'markdown' as const, text: description }] : []),
+          ...(typeName ? [fields] : []),
+        ],
       };
     },
 

@@ -193,6 +193,169 @@ export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
   },
 
   // ==========================================================================
+  // AlertZero Worker Roles
+  // ==========================================================================
+
+  /**
+   * alertzero_alert_triage - Service account role for the AlertZero Alert Triage worker
+   */
+  alertzero_alert_triage: {
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: [
+          'feature_actions.read',
+          'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
+          'feature_alertzero.all',
+          'feature_contextEngine.all',
+          'feature_proposals.all',
+          'feature_securitySolutionAlertsV1.all',
+          'feature_securitySolutionNotes.all',
+          'feature_securitySolutionRulesV4.minimal_read',
+          'feature_workflowsManagement.minimal_read',
+          'feature_workflowsManagement.workflow_execute',
+          'feature_workflowsManagement.workflow_execution_cancel',
+          'feature_workflowsManagement.workflow_execution_read',
+          'feature_workflowsManagement.workflow_execution_read_managed',
+          'feature_workflowsManagement.workflow_read',
+          'feature_workflowsManagement.workflow_read_managed',
+        ],
+        resources: ['*'],
+      },
+    ],
+  },
+
+  /**
+   * alertzero_attack_discovery - Service account role for the AlertZero Attack Discovery worker
+   */
+  alertzero_attack_discovery: {
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: [
+          'feature_actions.read',
+          'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
+          'feature_alertzero.all',
+          'feature_contextEngine.all',
+          'feature_proposals.all',
+          'feature_securitySolutionAlertsV1.all',
+          'feature_securitySolutionAttackDiscovery.all',
+          'feature_workflowsManagement.minimal_read',
+          'feature_workflowsManagement.workflow_execute',
+          'feature_workflowsManagement.workflow_execution_read',
+          'feature_workflowsManagement.workflow_execution_read_managed',
+          'feature_workflowsManagement.workflow_read',
+          'feature_workflowsManagement.workflow_read_managed',
+        ],
+        resources: ['*'],
+      },
+    ],
+  },
+
+  /**
+   * alertzero_endpoint_analysis - Service account role for the AlertZero Endpoint Analysis worker
+   */
+  alertzero_endpoint_analysis: {
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: [
+          'feature_actions.read',
+          'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
+          'feature_alertzero.all',
+          'feature_contextEngine.all',
+          'feature_proposals.all',
+          'feature_securitySolutionAlertsV1.all',
+          'feature_siemV5.actions_log_management_read',
+          'feature_siemV5.host_isolation_all',
+          'feature_siemV5.minimal_read',
+          'feature_siemV5.process_operations_all',
+        ],
+        resources: ['*'],
+      },
+    ],
+  },
+
+  /**
+   * alertzero_threat_hunt - Service account role for the AlertZero Continuous Threat Hunt worker
+   */
+  alertzero_threat_hunt: {
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: [
+          'feature_actions.read',
+          'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
+          'feature_alertzero.all',
+          'feature_contextEngine.all',
+          'feature_proposals.all',
+          'feature_siemV5.actions_log_management_read',
+          'feature_siemV5.host_isolation_all',
+          'feature_siemV5.minimal_read',
+          'feature_siemV5.process_operations_all',
+        ],
+        resources: ['*'],
+      },
+    ],
+  },
+
+  /**
+   * alertzero_rule_tuning - Service account role for the AlertZero Rule Tuning worker
+   */
+  alertzero_rule_tuning: {
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: [
+          'feature_actions.read',
+          'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
+          'feature_alertzero.all',
+          'feature_contextEngine.all',
+          'feature_proposals.all',
+          'feature_securitySolutionAlertsV1.all',
+          'feature_securitySolutionRulesV4.read',
+          'feature_workflowsManagement.read',
+        ],
+        resources: ['*'],
+      },
+    ],
+  },
+
+  /**
+   * alertzero_rule_coverage - Service account role for the AlertZero Rule Coverage worker
+   */
+  alertzero_rule_coverage: {
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: [
+          'feature_actions.read',
+          'feature_agentBuilder.read',
+          'feature_agenticInvestigations.investigations_all',
+          'feature_agenticInvestigations.minimal_all',
+          'feature_alertzero.all',
+          'feature_contextEngine.all',
+          'feature_fleet.read',
+          'feature_proposals.all',
+          'feature_securitySolutionRulesV4.all',
+          'feature_workflowsManagement.read',
+        ],
+        resources: ['*'],
+      },
+    ],
+  },
+
+  // ==========================================================================
   // IMPORTANT: Update Instructions
   // ==========================================================================
   //

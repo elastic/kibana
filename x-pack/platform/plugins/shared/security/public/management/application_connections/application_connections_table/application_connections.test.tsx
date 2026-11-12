@@ -9,6 +9,8 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
@@ -59,9 +61,11 @@ function renderPage(coreStart: CoreStartMock) {
   );
   return render(
     coreStart.rendering.addContext(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <ApplicationConnectionsPage http={coreStart.http} />
-      </Providers>
+      <MockAppHeaderProvider>
+        <Providers services={coreStart} authc={authc} history={history}>
+          <ApplicationConnectionsPage http={coreStart.http} />
+        </Providers>
+      </MockAppHeaderProvider>
     )
   );
 }
@@ -117,12 +121,19 @@ describe('ApplicationConnections', () => {
       coreStart.docLinks.links.applicationConnections.oauthClients
     );
 
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Application connections'
+    );
     const manageClientsLink = getByTestId('applicationConnectionsManageClientsLink');
     expect(manageClientsLink).toBeInTheDocument();
     expect(manageClientsLink).toHaveAttribute(
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients'
     );
+    fireEvent.click(manageClientsLink);
+    expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/manage/tools/mcp_clients',
+    });
 
     expect(getByPlaceholderText('Search')).toBeInTheDocument();
     expect(getByTestId('applicationConnectionsTable')).toBeInTheDocument();

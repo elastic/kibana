@@ -12,12 +12,13 @@ import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import pRetry from 'p-retry';
 import { z } from '@kbn/zod/v4';
 import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
+import type { JudgeModel } from '../evaluator_utils';
 import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 
 // Stamp results with judgeVersion so future rubric changes can be filtered in the golden cluster.
-export const ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION = 'calibrated-v3';
+export const ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION = 'calibrated-v5';
 
 /**
  * Three-point judgement returned by the LLM judge. Mapped to a numeric
@@ -52,12 +53,13 @@ TREAT THE FOLLOWING AS EQUIVALENT (do NOT penalise):
 - Column alias differences of ANY kind — wording, capitalization, punctuation, or length (e.g. \`STATS count = COUNT(*)\` vs \`STATS total = COUNT(*)\`; \`1-minute\` vs \`1-Minute Load\`; \`avg_load_1\` vs \`1-Minute Load\`). Aliases are cosmetic labels only; never return "equivalent_with_caveats" or "not_equivalent" because of them.
 - BY grouping aliases: \`BY response.keyword\` vs \`BY \`Response Code\` = response.keyword\` (and \`BY bucket = BUCKET(...)\` vs \`BY BUCKET(...)\`) — the left-hand name is only a label; the grouped field/expression is what matters. Do NOT treat BY alias assignment as invalid or non-equivalent.
 - Keyword multi-field twins on the same mapping: \`url\` vs \`url.keyword\`, \`host\` vs \`host.keyword\`, \`category\` vs \`category.keyword\` (and the same pattern for any \`field\` / \`field.keyword\` pair). Prefer "equivalent" when both refer to the same logical field; do NOT return "equivalent_with_caveats" solely for the \`.keyword\` suffix.
-- Presence vs absence of a time-picker bind-param filter (\`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`) on categorical/metric queries — the visualization time picker supplies that window. Applies to \`@timestamp\`, \`order_date\`, or any other event-time field.
+- Presence vs absence of a time-picker bind-param filter on \`@timestamp\` (\`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\`) on categorical/metric queries — Kibana applies the time picker to \`@timestamp\` on its own.
 - Equivalent function forms: \`DATE_EXTRACT("hour", @timestamp)\` vs \`HOUR(@timestamp)\`; \`SUBSTRING(x, 1, 3)\` vs \`LEFT(x, 3)\`.
 - Equivalent comparison forms: \`x >= 5 AND x <= 10\` vs \`x BETWEEN 5 AND 10\`; \`a == "x" AND b == "y"\` vs \`a == "x" | WHERE b == "y"\`.
 - Output column ordering or extra cosmetic \`KEEP\`/\`DROP\` clauses that don't change the answer.
 - Presence vs absence of \`SORT <time bucket> ASC\` on a time-series query — charts order the time axis; do NOT penalise either form.
 - Different but compatible bucketing where the granularity is interchangeable for the question (e.g. \`BUCKET(@timestamp, 1h)\` vs \`BUCKET(@timestamp, 50, ?_tstart, ?_tend)\` over the same window when the question is "by hour").
+- \`@timestamp\` time series: \`TBUCKET(100, ?_tstart, ?_tend)\` and \`BUCKET(@timestamp, <count>, ?_tstart, ?_tend)\` are equivalent, including presence vs absence of \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\`. Kibana supplies the \`@timestamp\` window, and passing \`?_tstart\` / \`?_tend\` to \`TBUCKET\` sizes the same buckets. A non-\`@timestamp\` date field (e.g. \`order_date\`) must still use \`BUCKET(<field>, <count>, ?_tstart, ?_tend)\`; \`TBUCKET\` there is not equivalent, because it buckets \`@timestamp\` instead.
 - Broader index patterns that still cover the same logical dataset: \`logs-*\` vs \`logs-endpoint.*\` when the gold uses the broader pattern.
 - Different but equivalent ordering of clauses (\`SORT ... | LIMIT n\` vs \`LIMIT n | SORT ...\` when the result set fits in n).
 
@@ -65,6 +67,7 @@ TREAT THE FOLLOWING AS NOT EQUIVALENT (DO penalise):
 - Wrong aggregation: gold uses \`AVG\`, candidate uses \`MAX\` (or \`SUM\` vs \`COUNT\`, etc.).
 - Wrong index source: gold queries \`logs-*\`, candidate queries \`metrics-*\` or \`.alerts-*\`.
 - Missing critical filter: gold filters \`event.action == "failure"\` and the candidate has no equivalent filter at all.
+- Missing time-picker filter on a non-\`@timestamp\` date field: gold has \`WHERE order_date >= ?_tstart AND order_date < ?_tend\` (or buckets \`order_date\` with \`?_tstart\` / \`?_tend\`) and the candidate has neither, so its chart ignores the time picker. Return "equivalent_with_caveats" at most.
 - Different subject: gold groups by \`user.name\`, candidate groups by \`host.name\`.
 - Hallucinated or wrong field: candidate references \`source.user\` when the gold (and the question) clearly means \`user.name\`.
 - Different question being answered (gold counts authentication failures, candidate lists all processes).
@@ -158,16 +161,19 @@ export function createCalibratedEsqlEquivalenceEvaluator<
   log,
   predictionExtractor,
   groundTruthExtractor,
+  judgeModel,
 }: {
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
   predictionExtractor: (output: TTaskOutput) => string;
   groundTruthExtractor: (expected: TExample['output']) => string;
+  judgeModel?: JudgeModel;
 }): Evaluator<TExample, TTaskOutput> {
   return {
     name: ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME,
     kind: 'LLM',
     direction: 'maximize',
+    getModel: () => judgeModel,
     evaluate: async ({ output, expected }) => {
       const prediction = predictionExtractor(output);
       const groundTruth = groundTruthExtractor(expected);
