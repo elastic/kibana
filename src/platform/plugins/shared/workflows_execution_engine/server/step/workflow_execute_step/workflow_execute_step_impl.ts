@@ -70,16 +70,16 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     );
   }
 
-  private getInput(): {
+  private async getInput(): Promise<{
     workflowId: string;
     inputs: Record<string, unknown>;
     runAsMode: WorkflowRunAsMode;
-  } {
+  }> {
     const step = this.init.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
     const renderedWith =
-      this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+      await this.init.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync(
         step.with || {}
-      ) as Record<string, unknown>;
+      );
     const runAsMode = step.with['run-as-mode'] ?? 'default';
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
@@ -138,7 +138,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     stepExecutionRuntime.startStep();
 
     try {
-      const { workflowId, inputs, runAsMode } = this.getInput();
+      const { workflowId, inputs, runAsMode } = await this.getInput();
       const inheritParentIdentity = runAsMode !== 'default';
 
       // Persist resolved inputs for observability in the execution UI

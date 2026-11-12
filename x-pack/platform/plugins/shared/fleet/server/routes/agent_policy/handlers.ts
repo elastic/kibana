@@ -85,6 +85,7 @@ import {
   defaultFleetErrorHandler,
 } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { assertOnboardingAccess } from '../../services/package_policies/onboarding_access';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -611,7 +612,17 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, bumpRevision, ...data } = request.body;
+  const { force, bumpRevision, id: bodyId, ...data } = request.body;
+
+  // The agent policy id is immutable: reject a body id that differs from the path id and never
+  // persist it, so it cannot end up in the saved object attributes.
+  if (bodyId !== undefined && bodyId !== request.params.agentPolicyId) {
+    return response.badRequest({
+      body: {
+        message: `Cannot change agent policy ID: body id does not match path agentPolicyId "${request.params.agentPolicyId}"`,
+      },
+    });
+  }
 
   const spaceIds = data.space_ids;
   let spaceId = fleetContext.spaceId;
@@ -767,6 +778,14 @@ export const deleteAgentPoliciesHandler: RequestHandler<
       throw new FleetError('To delete managed integrations, use the managed integrations API.');
     }
   }
+
+  // Deleting the agent policy deletes or detaches its package policies, which those managed by a
+  // cloud onboarding instance only allow from the onboarding flow. `force` does not bypass this.
+  const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
+    soClient,
+    request.body.agentPolicyId
+  );
+  assertOnboardingAccess(packagePolicies, undefined);
 
   const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
     soClient,

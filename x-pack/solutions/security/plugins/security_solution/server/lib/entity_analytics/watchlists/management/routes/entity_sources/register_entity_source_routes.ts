@@ -11,6 +11,7 @@ import { getEntitySourceRoute } from './get';
 import { updateEntitySourceRoute } from './update';
 import { deleteEntitySourceRoute } from './delete';
 import { listEntitySourcesRoute } from './list';
+import { updateEntitySourceApiKeyRoute } from './update_api_key';
 
 export const registerEntitySourceRoutes = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -23,4 +24,5 @@ export const registerEntitySourceRoutes = (
   updateEntitySourceRoute(router, logger, getStartServices, hasEncryptionKey);
   deleteEntitySourceRoute(router, logger, getStartServices, hasEncryptionKey);
   listEntitySourcesRoute(router, logger, getStartServices, hasEncryptionKey);
+  updateEntitySourceApiKeyRoute(router, logger, getStartServices, hasEncryptionKey);
 };

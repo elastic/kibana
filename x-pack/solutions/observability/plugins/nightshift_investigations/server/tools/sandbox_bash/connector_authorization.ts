@@ -11,10 +11,9 @@ import type { SandboxCallContext } from './tool_utils';
 
 interface AuthorizedConnector {
   connector: Awaited<ReturnType<ActionsClient['get']>>;
-  inMemoryConnector: ActionsPluginStart['inMemoryConnectors'][number];
 }
 
-/** Authorizes an agent's preconfigured connector for reading and execution in the current space. */
+/** Authorizes an agent's connector, preconfigured or saved, for reading and execution in the current space. */
 export const authorizeConnector = async (
   connectorId: string,
   callContext: SandboxCallContext,
@@ -59,14 +58,5 @@ export const authorizeConnector = async (
     return { errorMessage: `Not authorized to use connector '${connectorId}': ${err}` };
   }
 
-  const inMemoryConnector = actions.inMemoryConnectors.find(({ id }) => id === connectorId);
-  if (!inMemoryConnector) {
-    return {
-      errorMessage:
-        `Connector '${connectorId}' is not a preconfigured connector. Only connectors defined ` +
-        `in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.`,
-    };
-  }
-
-  return { connector, inMemoryConnector };
+  return { connector };
 };

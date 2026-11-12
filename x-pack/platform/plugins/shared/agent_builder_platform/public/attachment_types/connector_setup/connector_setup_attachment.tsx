@@ -23,12 +23,11 @@ import {
   type HeaderBadge,
 } from '@kbn/agent-builder-browser/attachments';
 import { AGENTBUILDER_APP_ID } from '@kbn/agent-builder-plugin/public';
+import { AGENT_BUILDER_MANAGE_PATHS } from '@kbn/deeplinks-agent-builder';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   type ConnectorSetupAttachment,
 } from '../../../common/attachments';
-
-const CONNECTORS_MANAGE_PATH = '/manage/connectors';
 
 interface ConnectorSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -203,7 +202,7 @@ export const createConnectorSetupAttachmentDefinition = (
           icon: 'external',
           type: ActionButtonType.SECONDARY,
           href: deps.application.getUrlForApp(AGENTBUILDER_APP_ID, {
-            path: CONNECTORS_MANAGE_PATH,
+            path: AGENT_BUILDER_MANAGE_PATHS.connectors,
           }),
           openInNewTab: true,
           handler: () => {

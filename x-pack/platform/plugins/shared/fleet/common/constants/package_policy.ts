@@ -19,3 +19,6 @@ export const inputsFormat = {
 export const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
 
 export const MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY = 1000;
+
+/** The longest agent condition expression of an integration, input or stream. */
+export const PACKAGE_POLICY_CONDITION_MAX_LENGTH = 10000;

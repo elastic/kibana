@@ -18,10 +18,12 @@ import {
   MAX_EXTENDED_FIELD_VALUE_BYTES,
 } from '../../../common/constants';
 import type { CasePostRequest } from '../../../common';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import type { BulkCreateCasesRequest } from '../../../common/types/api';
+import { GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { bulkCreate } from './bulk_create';
+import { bulkCreate as bulkCreateCases } from './bulk_create';
+import type { BulkCreateCasesClientOptions } from './bulk_create';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
@@ -56,6 +58,26 @@ describe('bulkCreate', () => {
       ...overrides,
     },
   ];
+
+  // The cases connector always passes a source per case id. Tests that do not check the source
+  // pass an empty map, so the cases are stored without a source.
+  const bulkCreate = (
+    data: Parameters<typeof bulkCreateCases>[0],
+    clientArgs: Parameters<typeof bulkCreateCases>[1],
+    casesClient: Parameters<typeof bulkCreateCases>[2],
+    options: Partial<BulkCreateCasesClientOptions> = {}
+  ) =>
+    bulkCreateCases(data, clientArgs, casesClient, {
+      extractObservablesSourceByCaseId: new Map(),
+      ...options,
+    });
+
+  // Stack cannot store extractObservables true, so its fixture case sets it to false.
+  const getStackCases = () =>
+    getCases({
+      owner: GENERAL_CASES_OWNER,
+      settings: { syncAlerts: true, extractObservables: false },
+    });
 
   const caseSO = mockCases[0];
   const casesClientMock = createCasesClientMock();
@@ -510,11 +532,7 @@ describe('bulkCreate', () => {
     });
 
     it('validates the cases correctly', async () => {
-      await bulkCreate(
-        { cases: [getCases()[0], getCases({ owner: 'cases' })[0]] },
-        clientArgs,
-        casesClientMock
-      );
+      await bulkCreate({ cases: [getCases()[0], getStackCases()[0]] }, clientArgs, casesClientMock);
 
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
         entities: [
@@ -543,11 +561,7 @@ describe('bulkCreate', () => {
     });
 
     it('validates with assign+create operations when cases have assignees', async () => {
-      await bulkCreate(
-        { cases: [getCases()[0], getCases({ owner: 'cases' })[0]] },
-        clientArgs,
-        casesClientMock
-      );
+      await bulkCreate({ cases: [getCases()[0], getStackCases()[0]] }, clientArgs, casesClientMock);
 
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
         entities: [
@@ -1482,7 +1496,7 @@ describe('bulkCreate', () => {
     });
 
     it('validate required custom fields from different owners', async () => {
-      const casesWithDifferentOwners = [getCases()[0], getCases({ owner: 'cases' })[0]];
+      const casesWithDifferentOwners = [getCases()[0], getStackCases()[0]];
 
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
@@ -1517,7 +1531,7 @@ describe('bulkCreate', () => {
     });
 
     it('should fill out missing custom fields from different owners correctly', async () => {
-      const casesWithDifferentOwners = [getCases()[0], getCases({ owner: 'cases' })[0]];
+      const casesWithDifferentOwners = [getCases()[0], getStackCases()[0]];
 
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
@@ -2314,6 +2328,212 @@ describe('bulkCreate', () => {
       const bulkCreateCall =
         clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
       expect(bulkCreateCall.settings.extractObservables).toBe(true);
+    });
+
+    describe('extract_observables_source', () => {
+      const getSavedCases = (ids: string[]) => ids.map((id) => ({ ...caseSoForDefaults, id }));
+
+      const getStoredRequests = (clientArgs: ReturnType<typeof createCasesClientMockArgs>) =>
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases;
+
+      describe('with a source map', () => {
+        it('uses the map entry of each case id', async () => {
+          const clientArgs = createClientArgsWithConfig(true);
+          clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+            saved_objects: getSavedCases(['case-a', 'case-b', 'case-c']),
+          });
+          const [baseCase] = getCases({ settings: { syncAlerts: true } });
+
+          await bulkCreate(
+            {
+              cases: [
+                { ...baseCase, id: 'case-a' },
+                { ...baseCase, id: 'case-b' },
+                { ...baseCase, id: 'case-c' },
+              ],
+            },
+            clientArgs,
+            extractObservablesCasesClient,
+            {
+              extractObservablesSourceByCaseId: new Map([
+                ['case-a', 'rule'],
+                ['case-b', 'template'],
+                ['case-c', 'space_default'],
+              ]),
+            }
+          );
+
+          expect(
+            getStoredRequests(clientArgs).map(({ id, extract_observables_source: source }) => [
+              id,
+              source,
+            ])
+          ).toEqual([
+            ['case-a', 'rule'],
+            ['case-b', 'template'],
+            ['case-c', 'space_default'],
+          ]);
+        });
+
+        it('does not guess "explicit" for a case without an entry when the caller set extractObservables', async () => {
+          const clientArgs = createClientArgsWithConfig(true);
+          clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+            saved_objects: getSavedCases(['case-a']),
+          });
+
+          await bulkCreate(
+            { cases: getCases({ id: 'case-a' }) },
+            clientArgs,
+            extractObservablesCasesClient,
+            { extractObservablesSourceByCaseId: new Map() }
+          );
+
+          const [request] = getStoredRequests(clientArgs);
+          expect(request).not.toHaveProperty('extract_observables_source');
+        });
+
+        it('ignores entries for case ids that are not in the request', async () => {
+          const clientArgs = createClientArgsWithConfig(true);
+          clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+            saved_objects: getSavedCases(['case-a']),
+          });
+
+          await bulkCreate(
+            { cases: getCases({ id: 'case-a' }) },
+            clientArgs,
+            extractObservablesCasesClient,
+            {
+              extractObservablesSourceByCaseId: new Map([
+                ['case-a', 'template'],
+                ['unknown-case', 'rule'],
+              ]),
+            }
+          );
+
+          expect(getStoredRequests(clientArgs)).toHaveLength(1);
+          expect(getStoredRequests(clientArgs)[0].extract_observables_source).toBe('template');
+        });
+      });
+
+      it('rejects a request that carries settings.extractObservablesSource', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await expect(
+          bulkCreate(
+            {
+              cases: getCases({
+                settings: { syncAlerts: true, extractObservablesSource: 'rule' },
+              }),
+            } as unknown as BulkCreateCasesRequest,
+            clientArgs,
+            extractObservablesCasesClient
+          )
+        ).rejects.toThrow('Excess keys are not allowed');
+        expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+      });
+
+      it('rejects a request that carries a top-level extract_observables_source', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await expect(
+          bulkCreate(
+            {
+              cases: getCases({ extract_observables_source: 'rule' }),
+            } as unknown as BulkCreateCasesRequest,
+            clientArgs,
+            extractObservablesCasesClient
+          )
+        ).rejects.toThrow('Excess keys are not allowed');
+        expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('extractObservables owner rule', () => {
+    const ownerRuleCasesClient = createCasesClientMock();
+    const blockedOwners = [GENERAL_CASES_OWNER, OBSERVABILITY_OWNER];
+
+    const createClientArgs = (
+      configuration: { owner: string; extractObservables?: boolean } = {
+        owner: SECURITY_SOLUTION_OWNER,
+      }
+    ) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [mockCases[0]],
+      });
+      ownerRuleCasesClient.configure.get = jest
+        .fn()
+        .mockResolvedValue([{ customFields: [], ...configuration }]);
+      return clientArgs;
+    };
+
+    it.each(blockedOwners)(
+      'coerces an inherited true to false for the %s owner instead of rejecting it',
+      async (owner) => {
+        const clientArgs = createClientArgs({ owner });
+        const cases = getCases({ owner, settings: { syncAlerts: true, extractObservables: true } });
+
+        await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+        const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+        expect(request.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it.each(blockedOwners)(
+      'coerces a true from the space configuration to false for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs({ owner, extractObservables: true });
+        const cases = getCases({ owner, settings: { syncAlerts: true } });
+
+        await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+        const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+        expect(request.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it.each(blockedOwners)('accepts an explicit false for the %s owner', async (owner) => {
+      const clientArgs = createClientArgs({ owner });
+      const cases = getCases({ owner, settings: { syncAlerts: true, extractObservables: false } });
+
+      await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+      const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(request.settings.extractObservables).toBe(false);
+    });
+
+    it.each(blockedOwners)(
+      'stores false when the value is omitted for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs({ owner });
+        const cases = getCases({ owner, settings: { syncAlerts: true } });
+
+        await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+        const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+        expect(request.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it('accepts an explicit true for the Security owner', async () => {
+      const clientArgs = createClientArgs();
+
+      await bulkCreate({ cases: getCases() }, clientArgs, ownerRuleCasesClient);
+
+      const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(request.settings.extractObservables).toBe(true);
+    });
+
+    it('accepts an explicit true for an unknown owner', async () => {
+      const clientArgs = createClientArgs({ owner: 'securitySolutionFixture' });
+      const cases = getCases({ owner: 'securitySolutionFixture' });
+
+      await bulkCreate({ cases }, clientArgs, ownerRuleCasesClient);
+
+      const request = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(request.settings.extractObservables).toBe(true);
     });
   });
 });

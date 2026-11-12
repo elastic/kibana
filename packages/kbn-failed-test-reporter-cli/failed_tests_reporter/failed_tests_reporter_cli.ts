@@ -27,7 +27,7 @@ import { reportConsistentFailureIssues } from './consistent_failure_issues';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
 import type { TestFailure } from './get_failures';
-import { GithubApi } from './github_api';
+import { DEFAULT_GITHUB_REPO, GithubApi } from './github_api';
 import { processJUnitReports } from './process_junit_reports';
 import type { ProcessReportsParams } from './process_reports_types';
 import { processScoutReports } from './process_scout_reports';
@@ -85,6 +85,11 @@ async function checkConsistentFailures({
     await es.close();
   }
 }
+
+// Whether a failure no issue tracks yet gets a per-test issue (the legacy behaviour, default).
+// 'false' leaves new issues to the daily flaky suite reporter and `--report-failing-suites`.
+// Tracked issues are updated either way. Set in the pipeline env, flip back to fall back.
+const PER_TEST_ISSUES = process.env.REPORT_FAILED_TESTS_PER_TEST_ISSUES !== 'false';
 
 export function runFailedTestsReporterCli() {
   run(
@@ -153,6 +158,11 @@ export function runFailedTestsReporterCli() {
 
         if (reportPaths.length) {
           log.info('found', reportPaths.length, 'reports', reportPaths);
+          if (!PER_TEST_ISSUES) {
+            log.info(
+              'REPORT_FAILED_TESTS_PER_TEST_ISSUES=false: no per-test issues will be opened, only existing ones updated'
+            );
+          }
 
           // Separate JUnit and Scout reports
           const junitReports = reportPaths.filter((p) => p.endsWith('.xml'));
@@ -177,6 +187,9 @@ export function runFailedTestsReporterCli() {
             pipeline,
             prependTitle,
             updateGithub,
+            perTestIssues: PER_TEST_ISSUES,
+            // the suite issues come from the repository the per-test issues are in
+            suiteIssueComments: !(reportFailingSuites && failingSuitesRepo === DEFAULT_GITHUB_REPO),
             indexInEs,
             reportUpdate,
             bkMeta,

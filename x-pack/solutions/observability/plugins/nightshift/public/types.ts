@@ -6,7 +6,10 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
+import type {
+  AgenticInvestigationsPublicPluginSetup,
+  AgenticInvestigationsPublicPluginStart,
+} from '@kbn/agentic-investigations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
@@ -26,6 +29,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 
 export interface NightshiftSetupDependencies {
   share: SharePluginSetup;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginSetup;
 }
 
 export interface NightshiftStartDependencies {

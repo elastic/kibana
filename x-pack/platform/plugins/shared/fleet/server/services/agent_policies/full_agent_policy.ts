@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
-import { isEmpty, omit, pick } from 'lodash';
+import { castArray, isEmpty, omit, pick } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { PrivilegeType } from '@kbn/apm-types';
 
@@ -920,7 +920,20 @@ export function generateFleetServerOutputSSLConfig(
       baseRest[key] = value;
     }
   }
-  const baseSsl = { ...baseDottedSsl, ...baseNestedSsl };
+  // The nested ssl wins over the dotted keys, except for the CA list where both are combined: when the output CA is
+  // only set with a dotted key, the nested list only has the CA of the proxy of the output (see
+  // transformOutputToFullPolicyOutput). The nested list goes last to keep the proxy CA at the end of the list.
+  const certificateAuthorities = [
+    ...castArray(baseDottedSsl.certificate_authorities ?? []),
+    ...castArray(baseNestedSsl?.certificate_authorities ?? []),
+  ];
+  const baseSsl: OutputSsl = {
+    ...baseDottedSsl,
+    ...baseNestedSsl,
+    ...(certificateAuthorities.length > 0
+      ? { certificate_authorities: certificateAuthorities }
+      : {}),
+  };
 
   const outputConfig: FullAgentPolicyOutput = { ...baseRest, type: 'elasticsearch' };
 
@@ -1100,6 +1113,10 @@ export function getBinarySourceSettings(
     sourceURI: primarySource.host,
     sources: downloadSources.map((ds) => ds.host),
   };
+
+  if (typeof primarySource?.reserve_diskspace === 'boolean') {
+    config.reserve_diskspace = { enabled: primarySource.reserve_diskspace };
+  }
 
   if (primarySource?.ssl) {
     config.ssl = {

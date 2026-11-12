@@ -223,6 +223,19 @@ describe('KubernetesConnector', () => {
       );
     });
 
+    it('drops trailing slashes from the API server URL', async () => {
+      mockRequest.mockResolvedValue(okResponse({ items: [] }));
+
+      await KubernetesConnector.actions.listNamespaces.handler(
+        { ...mockContext, config: { apiUrl: `${API_URL}/` } } as ActionContext,
+        {}
+      );
+
+      expect(mockRequest).toHaveBeenLastCalledWith(
+        expect.objectContaining({ url: `${API_URL}/api/v1/namespaces` })
+      );
+    });
+
     it('percent-encodes path segments that need escaping', async () => {
       mockRequest.mockResolvedValue(okResponse({ items: [] }));
 
@@ -434,7 +447,7 @@ describe('KubernetesConnector', () => {
           method: 'PATCH',
           url: `${API_URL}/apis/apps/v1/namespaces/default/deployments/web`,
           params: { fieldManager: 'kibana', force: 'true' },
-          headers: { 'Content-Type': 'application/apply-patch+json' },
+          headers: { 'Content-Type': 'application/apply-patch+yaml' },
         })
       );
     });

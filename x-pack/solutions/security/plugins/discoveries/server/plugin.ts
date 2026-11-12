@@ -427,6 +427,7 @@ export class DiscoveriesPlugin
 
       const { failedIds } = await installStatic({
         enabled: true,
+        logger: this.logger,
         workflowsExtensions: plugins.workflowsExtensions,
       });
 

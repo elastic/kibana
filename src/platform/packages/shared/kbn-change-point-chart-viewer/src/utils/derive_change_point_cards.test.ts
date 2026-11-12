@@ -218,6 +218,7 @@ describe('derive_change_point_cards', () => {
       expect(cards![0].lineEsql).not.toContain('WHERE');
       expect(cards![0].entityValues).toEqual({});
       expect(cards![0].entityDescription).toBeUndefined();
+      expect(cards![0].dashboardEsql).toBe(ESQL_NO_BY);
     });
 
     it('builds separate line queries per entity via WHERE when CHANGE_POINT uses BY', () => {
@@ -242,6 +243,7 @@ describe('derive_change_point_cards', () => {
       });
 
       expect(cards).toHaveLength(2);
+      expect(cards![0].dashboardEsql).toContain('| WHERE host == "a" | CHANGE_POINT');
       expect(cards![0].lineEsql).toContain('| WHERE host == "a"');
       expect(cards![1].lineEsql).toContain('| WHERE host == "b"');
       expect(cards![0].lineEsql).not.toContain('| WHERE host == "b"');
@@ -642,6 +644,7 @@ describe('derive_change_point_cards', () => {
       expect(cards).toHaveLength(1);
       // The card entity label must only use columns present in the table (host, not service).
       expect(cards[0].entityValues).toEqual({ host: 'web-1' });
+      expect(cards[0].dashboardEsql).toBeUndefined();
 
       // getCardForRow must resolve the same label and return the card.
       expect(

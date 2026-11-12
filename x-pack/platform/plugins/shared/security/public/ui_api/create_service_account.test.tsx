@@ -89,6 +89,53 @@ describe('getCreateServiceAccount UI API', () => {
   });
 
   it.each([
+    [
+      'backend failure',
+      Object.assign(new Error('Backend unavailable'), {
+        request: {},
+        response: { status: 500 },
+        body: { message: 'Backend unavailable' },
+      }),
+    ],
+    ['network failure', new Error('fetch failed')],
+  ])('shows a toast on %s and allows retry', async (_, error) => {
+    const { core, account, onCreated, onClose } = await renderComponent();
+    core.security.serviceAccounts.create.mockRejectedValueOnce(error);
+    const roles = screen.getByRole('combobox', { name: 'Set privileges' });
+    await waitFor(() => expect(roles).toBeEnabled());
+    fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+      target: { value: account.name },
+    });
+    fireEvent.click(roles);
+    fireEvent.click(await screen.findByTestId('roleOption-viewer'));
+    fireEvent.keyDown(roles, { key: 'Escape' });
+    const submit = screen.getByTestId('createServiceAccountSubmit');
+    fireEvent.click(submit);
+
+    await waitFor(() =>
+      expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to create "workflow-runner"',
+      })
+    );
+    expect(core.notifications.toasts.addError).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('createServiceAccountFlyout')).toBeVisible();
+    expect(screen.getByTestId('serviceAccountNameInput')).toHaveValue(account.name);
+    expect(screen.getByTestId('serviceAccountRolesSelector')).toHaveTextContent('viewer');
+    expect(submit).toBeEnabled();
+    expect(onCreated).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.click(submit);
+
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith(account));
+    expect(core.security.serviceAccounts.create).toHaveBeenCalledTimes(2);
+    expect(core.security.serviceAccounts.create).toHaveBeenLastCalledWith({
+      name: account.name,
+      roles: account.roles,
+    });
+  });
+
+  it.each([
     { enabled: false, canCreate: true },
     { enabled: true, canCreate: false },
     { enabled: false, canCreate: false },
