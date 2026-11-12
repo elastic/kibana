@@ -10,12 +10,13 @@ export const MAX_TEXT_PART_CHARS = 16_000;
 /** Characters kept of the arguments of one tool call. */
 export const MAX_TOOL_ARGUMENTS_CHARS = 2000;
 /** Characters kept of one tool result, such as a page an agent opened or the rows a query returned. */
-export const MAX_TOOL_RESULT_CHARS = 8000;
+export const MAX_TOOL_RESULT_CHARS = 16_000;
 /**
- * Characters kept of a whole round, about 50k tokens, well inside a dreaming batch. Its start (the
- * question) and end (the answer) are kept.
+ * Characters kept of a whole round, about 400k tokens: a round longer than a dreaming batch is read
+ * in parts, so this only bounds what one read holds. Its start (the question) and end (the
+ * answer) are kept.
  */
-export const MAX_ROUND_CHARS = 200_000;
+export const MAX_ROUND_CHARS = 1_600_000;
 
 const ELLIPSIS = ' […]';
 
