@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
 import moment from 'moment-timezone';
 import {
@@ -27,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { SessionSummary } from '../../../../common/sessions';
+import { SESSIONS_LIST_MAX_SEARCH_LENGTH, type SessionSummary } from '../../../../common/sessions';
 import type { ApplicationSource } from '../../../../common/types/applications';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
@@ -40,9 +41,10 @@ import { useFormatters } from '../../../hooks/use_formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { ANONYMOUS_USER } from '../../../labels';
-import { clientOf, locationOf } from '../../../utils/describe_session';
+import { clientOf, journeyOf, locationOf, shortSessionId } from '../../../utils/describe_session';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import { pickSessionsListQuery } from '../../../utils/sessions_list_query';
+import { SEARCH_DEBOUNCE_MS } from '../../sessions/components/sessions_filters';
 import { sessionsListRequestQuery } from '../../sessions/hooks/sessions_list_request';
 import {
   hasSessionsListFilters,
@@ -118,7 +120,13 @@ function RailItem({
     }
   }, [selected]);
 
+  // Who the user is when known; otherwise where the session went, as anonymous sessions all look
+  // alike by their user.
+  const journey = journeyOf(session);
+  const title = session.user ?? journey ?? ANONYMOUS_USER;
+  const titleIsJourney = !session.user && journey !== null;
   const details = [
+    titleIsJourney ? ANONYMOUS_USER : null,
     moment(session.startTime).tz(timeZone).format('MMM D, HH:mm'),
     clientOf(session),
     locationOf(session),
@@ -153,8 +161,13 @@ function RailItem({
     >
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="baseline">
         <EuiFlexItem css={css({ minWidth: 0 })}>
-          <EuiText size="s" className="eui-textTruncate">
-            <strong>{session.user ?? ANONYMOUS_USER}</strong>
+          <EuiText
+            size="s"
+            className="eui-textTruncate"
+            data-test-subj="digitalExperienceSessionsRailItemTitle"
+            css={titleIsJourney ? css({ fontFamily: euiTheme.font.familyCode }) : undefined}
+          >
+            <strong>{title}</strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -163,9 +176,24 @@ function RailItem({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiText size="xs" color="subdued" className="eui-textTruncate">
-        {details.join(' · ')}
-      </EuiText>
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="baseline">
+        <EuiFlexItem css={css({ minWidth: 0 })}>
+          <EuiText size="xs" color="subdued" className="eui-textTruncate">
+            {details.join(' · ')}
+          </EuiText>
+        </EuiFlexItem>
+        {/* To match a session against an ID from a ticket, a log or the breadcrumb. */}
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="digitalExperienceSessionsRailItemId"
+            css={css({ fontFamily: euiTheme.font.familyCode })}
+          >
+            {shortSessionId(session.sessionId)}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {session.journey.length > 0 && <JourneyBar journey={session.journey} />}
       {(session.jsErrorCount > 0 || session.failedRequestCount > 0 || session.bounced) && (
         <EuiFlexGroup gutterSize="xs" responsive={false} wrap css={css({ marginTop: 4 })}>
@@ -256,6 +284,27 @@ export function SessionsRail({
     { unsetValueOnError: true }
   );
 
+  // Searches as the user types, once they pause, like the sessions list.
+  const [search, setSearch] = useState(state.search ?? '');
+  const applySearch = useCallback(
+    (value: string) => {
+      if (value.trim() !== (state.search ?? '')) {
+        // Replaced, so Back doesn't step through each search as it was typed.
+        updateUrlQuery({ search: value.trim() || undefined }, { replace: true, remove: ['page'] });
+      }
+    },
+    [state.search, updateUrlQuery]
+  );
+  useDebounce(() => applySearch(search), SEARCH_DEBOUNCE_MS, [search]);
+  // Follows the URL, e.g. when the user goes back; spaces still being typed around it stay.
+  useEffect(
+    () =>
+      setSearch((current) =>
+        current.trim() === (state.search ?? '') ? current : state.search ?? ''
+      ),
+    [state.search]
+  );
+
   const total = response?.total ?? 0;
   const firstShown = state.page * state.perPage + 1;
   const lastShown = Math.min(total, (state.page + 1) * state.perPage);
@@ -313,16 +362,13 @@ export function SessionsRail({
         <EuiFieldSearch
           compressed
           fullWidth
-          defaultValue={state.search ?? ''}
+          value={search}
+          maxLength={SESSIONS_LIST_MAX_SEARCH_LENGTH}
           placeholder={SEARCH_PLACEHOLDER}
           aria-label={SEARCH_PLACEHOLDER}
-          // On Enter, not on each key: each search is a request.
-          onSearch={(value) =>
-            updateUrlQuery(
-              { search: value.trim() || undefined },
-              { replace: true, remove: ['page'] }
-            )
-          }
+          onChange={(event) => setSearch(event.target.value)}
+          // Enter searches at once, without waiting for the pause.
+          onSearch={applySearch}
           data-test-subj="digitalExperienceSessionsRailSearch"
         />
       </div>

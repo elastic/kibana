@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -587,6 +587,60 @@ describe('SessionDetailPage', () => {
       'href',
       SESSIONS_HREF
     );
+  });
+
+  it('titles a session in the list by its user, else by the pages it went through', async () => {
+    mockList.mockResolvedValue({
+      sessions: [
+        listedSession('abcdef123456', 'jane@example.com', 1),
+        { ...listedSession('feed0000beef', null), journey: ['/', '/cart', '/checkout', '/pay'] },
+      ],
+      total: 2,
+      page: 0,
+      perPage: 25,
+    });
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    const known = await screen.findByTestId('digitalExperienceSessionsRailItem-abcdef123456');
+    expect(within(known).getByTestId('digitalExperienceSessionsRailItemTitle')).toHaveTextContent(
+      'jane@example.com'
+    );
+    expect(within(known).getByTestId('digitalExperienceSessionsRailItemId')).toHaveTextContent(
+      'abcdef12'
+    );
+
+    const anonymous = screen.getByTestId('digitalExperienceSessionsRailItem-feed0000beef');
+    expect(
+      within(anonymous).getByTestId('digitalExperienceSessionsRailItemTitle')
+    ).toHaveTextContent('/ → /cart → /checkout +1');
+    expect(anonymous).toHaveTextContent('Anonymous');
+    expect(within(anonymous).getByTestId('digitalExperienceSessionsRailItemId')).toHaveTextContent(
+      'feed0000'
+    );
+  });
+
+  it('searches the sessions list as the user types, once they pause', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+    await screen.findByTestId('digitalExperienceSessionsRailItem-abcdef123456');
+    expect(mockList).toHaveBeenCalledTimes(1);
+
+    fireEvent.change(screen.getByTestId('digitalExperienceSessionsRailSearch'), {
+      target: { value: 'jane' },
+    });
+
+    await waitFor(() => expect(mockList).toHaveBeenCalledTimes(2));
+    expect(mockList).toHaveBeenLastCalledWith(
+      'GET /internal/digital_experience/applications/{serviceName}/sessions',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          // A new search starts on the first page.
+          query: expect.objectContaining({ query: 'jane', page: 0 }),
+        }),
+      })
+    );
+    expect(mockList).toHaveBeenCalledTimes(2);
   });
 
   it('hides the sessions list, and shows it again from the header', async () => {

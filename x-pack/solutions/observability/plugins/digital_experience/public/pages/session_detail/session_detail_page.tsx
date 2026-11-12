@@ -38,6 +38,7 @@ import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_p
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { ANONYMOUS_USER, SESSIONS_LABEL } from '../../labels';
+import { shortSessionId } from '../../utils/describe_session';
 import { formatSessionDuration } from '../../utils/format_session_duration';
 import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 import { JourneyFilters } from './components/journey_filters';
@@ -49,9 +50,6 @@ import { SessionWaterfall, pageColors } from './components/session_waterfall';
 import { sessionEsqlQuery, sessionTimeRange } from './utils/session_discover';
 import { groupEventsByVisit, layoutWaterfall } from './utils/session_timeline';
 import { ACTIVITY_KINDS, type ActivityFilters, type ActivityKind } from './utils/visit_activity';
-
-/** Characters of the session ID shown in the breadcrumb; the header has it in full. */
-const SHORT_ID_LENGTH = 8;
 
 const BACK_TO_SESSIONS = i18n.translate(
   'xpack.digitalExperience.sessionDetail.backToSessionsButtonLabel',
@@ -378,7 +376,7 @@ export function SessionDetailPage({
   useRouteBreadcrumb([
     { text: serviceName, href: overviewHref },
     { text: SESSIONS_LABEL, href: backHref },
-    { text: sessionId.slice(0, SHORT_ID_LENGTH) },
+    { text: shortSessionId(sessionId) },
   ]);
 
   const {
