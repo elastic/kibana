@@ -344,6 +344,7 @@ describe('runFindingsPass', () => {
     const unconfirmed = {
       ...output,
       verdict: 'Cause not confirmed: a bad deploy.',
+      outcome: 'cause_not_confirmed',
       missing_data: [
         { what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' },
         { what: 'client app versions' },
@@ -387,7 +388,7 @@ describe('runFindingsPass', () => {
   });
 
   it('records an empty gap list when the cause is found, and survives a failed index write', async () => {
-    const found = setup();
+    const found = setup({ answers: [answerWith({ ...output, outcome: 'cause_found' })] });
     found.saveBlindSpots.mockRejectedValue(new Error('index unavailable'));
     await run(found.deps, found.memory, { answer: 'done' });
 
@@ -396,6 +397,29 @@ describe('runFindingsPass', () => {
     );
     expect(found.patchMetadata).toHaveBeenCalled();
     expect(found.writer.setHypotheses).toHaveBeenCalled();
+  });
+
+  it('stores the outcome the recorder chose, not one read from the verdict text', async () => {
+    const calm = setup({
+      answers: [
+        answerWith({
+          ...output,
+          verdict: 'No incident in 03:00-06:00Z: all services were healthy.',
+          outcome: 'no_incident',
+        }),
+      ],
+    });
+    await run(calm.deps, calm.memory, { answer: 'No incident' });
+    const silent = setup({
+      answers: [answerWith({ ...output, verdict: 'Cause not confirmed: a bad deploy.' })],
+    });
+    await run(silent.deps, silent.memory, { answer: 'Cause not confirmed' });
+
+    expect(calm.saveBlindSpots).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'no_incident', missing_data: [] })
+    );
+    // No outcome from the recorder means none is stored: it is not guessed from the text.
+    expect(silent.saveBlindSpots.mock.calls[0][0]).not.toHaveProperty('outcome');
   });
 
   it('asks a live pass for the live schema and a final pass for the full one', async () => {
@@ -410,6 +434,7 @@ describe('runFindingsPass', () => {
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
       expect.arrayContaining([
         'verdict',
+        'outcome',
         'severity',
         'impact_summary',
         'impact_entities',

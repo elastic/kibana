@@ -15,6 +15,11 @@ export const MISSING_DATA_REASONS = [
 
 export type MissingDataReason = (typeof MISSING_DATA_REASONS)[number];
 
+/** How an investigation ended, as the recorder judged it from the conversation. */
+export const FINDINGS_OUTCOMES = ['cause_found', 'cause_not_confirmed', 'no_incident'] as const;
+
+export type FindingsOutcome = (typeof FINDINGS_OUTCOMES)[number];
+
 /** A gap in the data that kept an investigation from confirming its cause. */
 export interface MissingDataItem {
   what: string;

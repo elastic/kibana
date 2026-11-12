@@ -99,8 +99,6 @@ export interface FindingsPassParams {
 const MAX_METADATA_TEXT_LENGTH = 10_000;
 const FALLBACK_SUMMARY_CHARS = 1_000;
 
-const isCauseNotConfirmed = (verdict: string | undefined): boolean =>
-  /^cause not confirmed/i.test(verdict?.trim() ?? '');
 /** A malformed structured answer is the usual failure, so a pass asks again before giving up. */
 const MAX_ATTEMPTS = 2;
 
@@ -581,7 +579,7 @@ export const runFindingsPass = async (
     ],
   ];
   if (final && record) {
-    const { missing_data: gaps = [], hypotheses } = record;
+    const { missing_data: gaps = [], hypotheses, outcome } = record;
     writes.push([
       'blind spots',
       async () => {
@@ -595,7 +593,7 @@ export const runFindingsPass = async (
         await deps.getBlindSpots?.(request)?.save({
           conversation_id: conversationId,
           '@timestamp': new Date().toISOString(),
-          outcome: isCauseNotConfirmed(verdict) ? 'cause_not_confirmed' : 'cause_found',
+          ...(outcome ? { outcome } : {}),
           missing_data: gaps,
           hypotheses: hypotheses.map(({ candidate, status, settled_by: settledBy }) => ({
             candidate,
