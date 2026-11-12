@@ -30,6 +30,7 @@ import {
   buildLensConfig,
   buildVegaConfig,
   buildCustomContentConfig,
+  toCustomContentQueryChanges,
   selectDefaultTimeRange,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
@@ -371,15 +372,21 @@ Ground first: make sure the target index exists and every field you reference is
           }
 
           const existingTemplate = getExistingTemplate(existingData);
+          const existingQueries = existingData ? readCustomContentQueries(existingData) : [];
           const { esqlQueries, template, height } = await buildCustomContentConfig({
             nlQuery,
-            index,
-            esql,
-            hasData,
-            regenerateESQL: regenerateEsql,
-            datasets,
+            ...toCustomContentQueryChanges({
+              nlQuery,
+              index,
+              esql,
+              hasData,
+              regenerateESQL: regenerateEsql,
+              datasets,
+              existingQueries,
+              isNewPanel: !existingData,
+            }),
             existing: existingData && {
-              esqlQueries: readCustomContentQueries(existingData),
+              esqlQueries: existingQueries,
               template: existingTemplate,
             },
             timeRange: requestedTimeRange,

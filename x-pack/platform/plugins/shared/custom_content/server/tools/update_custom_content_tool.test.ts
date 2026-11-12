@@ -18,6 +18,8 @@ import { createUpdateCustomContentTool } from './update_custom_content_tool';
 const mockBuild = jest.fn();
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildCustomContentConfig: (params: unknown) => mockBuild(params),
+  toCustomContentQueryChanges: jest.requireActual('@kbn/agent-builder-visualizations-server')
+    .toCustomContentQueryChanges,
 }));
 
 const makeAttachment = (data: Record<string, unknown>) => ({
@@ -122,9 +124,6 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(mockBuild).toHaveBeenCalledWith(
         expect.objectContaining({
           nlQuery: 'Show KPIs',
-          index: 'logs-*',
-          esql: undefined,
-          regenerateESQL: undefined,
           existing: { esqlQueries: ['FROM logs'], template: '<p>old</p>' },
         })
       );
@@ -246,11 +245,13 @@ describe('createUpdateCustomContentTool handler', () => {
 
       expect(mockBuild).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining({ regenerateESQL: true })
+        expect.objectContaining({
+          datasets: [{ description: 'Also show the error count', index: undefined }],
+        })
       );
       expect(mockBuild).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ nlQuery: undefined, esql: 'FROM metrics-*' })
+        expect.objectContaining({ nlQuery: undefined, datasets: [{ esql: 'FROM metrics-*' }] })
       );
     });
 
@@ -280,7 +281,7 @@ describe('createUpdateCustomContentTool handler', () => {
 
       const { ctx } = await callHandler({ embeddable_id: 'p1', esqlQuery: null }, existing);
 
-      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ esql: null }));
+      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ clearQueries: true }));
       expect(ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({

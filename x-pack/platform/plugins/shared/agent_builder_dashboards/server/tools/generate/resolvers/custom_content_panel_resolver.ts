@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
+import {
+  buildCustomContentConfig,
+  toCustomContentQueryChanges,
+} from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   type CustomContentState,
@@ -38,11 +41,16 @@ export const createCustomContentPanelResolver = ({
       const existing = existingPanel?.config as CustomContentState | undefined;
       const { esqlQueries, template } = await buildCustomContentConfig({
         nlQuery,
-        index,
-        esql,
-        hasData,
-        regenerateESQL,
-        datasets,
+        ...toCustomContentQueryChanges({
+          nlQuery,
+          index,
+          esql,
+          hasData,
+          regenerateESQL,
+          datasets,
+          existingQueries: existing?.esql_query ?? [],
+          isNewPanel: !existing,
+        }),
         resolveEsqlVariables,
         existing: existing && { esqlQueries: existing.esql_query, template: existing.template },
         modelProvider,

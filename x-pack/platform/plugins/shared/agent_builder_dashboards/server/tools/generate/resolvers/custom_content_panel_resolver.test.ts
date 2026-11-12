@@ -19,6 +19,8 @@ import { createCustomContentPanelResolver } from './custom_content_panel_resolve
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildCustomContentConfig: jest.fn(),
+  toCustomContentQueryChanges: jest.requireActual('@kbn/agent-builder-visualizations-server')
+    .toCustomContentQueryChanges,
 }));
 
 const mockedBuild = jest.mocked(buildCustomContentConfig);
@@ -74,10 +76,7 @@ describe('createCustomContentPanelResolver', () => {
 
       expect(mockedBuild).toHaveBeenCalledWith({
         nlQuery: 'Show KPI',
-        index: 'logs-*',
-        esql: undefined,
-        hasData: true,
-        regenerateESQL: undefined,
+        datasets: [{ description: 'Show KPI', index: 'logs-*' }],
         resolveEsqlVariables: undefined,
         existing: undefined,
         ...deps,
@@ -111,7 +110,9 @@ describe('createCustomContentPanelResolver', () => {
     it('passes a user-supplied query through', async () => {
       await resolve(addRequest({ esql: 'FROM metrics-*', hasData: true }));
 
-      expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ esql: 'FROM metrics-*' }));
+      expect(mockedBuild).toHaveBeenCalledWith(
+        expect.objectContaining({ datasets: [{ esql: 'FROM metrics-*' }] })
+      );
     });
   });
 
@@ -264,7 +265,9 @@ describe('createCustomContentPanelResolver', () => {
       );
 
       expect(mockedBuild).toHaveBeenCalledWith(
-        expect.objectContaining({ regenerateESQL: true, hasData: true, index: 'logs-*' })
+        expect.objectContaining({
+          datasets: [{ description: 'Also show the average bytes', index: 'logs-*' }],
+        })
       );
     });
 

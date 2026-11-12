@@ -10,7 +10,10 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
-import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
+import {
+  buildCustomContentConfig,
+  toCustomContentQueryChanges,
+} from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
   CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
@@ -104,17 +107,23 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
 
     let built: Awaited<ReturnType<typeof buildCustomContentConfig>>;
     try {
+      const existingQueries = currentData ? readContextQueries(currentData) : [];
       built = await buildCustomContentConfig({
         nlQuery: prompt,
-        index,
-        esql: esqlQuery,
-        regenerateESQL: regenerateEsql,
-        datasets,
+        ...toCustomContentQueryChanges({
+          nlQuery: prompt,
+          index,
+          esql: esqlQuery,
+          regenerateESQL: regenerateEsql,
+          datasets,
+          existingQueries,
+          isNewPanel: false,
+        }),
         resolveEsqlVariables: currentData?.esql_variables?.length
           ? async () => currentData.esql_variables
           : undefined,
         existing: {
-          esqlQueries: currentData ? readContextQueries(currentData) : [],
+          esqlQueries: existingQueries,
           template: currentData?.panel_template || undefined,
         },
         modelProvider,

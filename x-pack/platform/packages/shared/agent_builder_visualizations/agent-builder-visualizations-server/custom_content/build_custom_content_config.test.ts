@@ -12,6 +12,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
 import { generateCustomContentEsql } from '../shared/custom_content_esql';
 import { buildCustomContentConfig } from './build_custom_content_config';
+import { toCustomContentQueryChanges } from './to_datasets';
 
 jest.mock('../shared/custom_content_esql', () => ({ generateCustomContentEsql: jest.fn() }));
 jest.mock('@kbn/custom-content-server', () => ({ createCustomContentTemplateResolver: jest.fn() }));
@@ -32,8 +33,30 @@ const deps = {
   esClient: {} as IScopedClusterClient,
 };
 
-const build = (params: Partial<Parameters<typeof buildCustomContentConfig>[0]>) =>
-  buildCustomContentConfig({ nlQuery: 'Show KPI', ...deps, ...params });
+type BuildParams = Partial<Parameters<typeof buildCustomContentConfig>[0]> &
+  Partial<
+    Omit<Parameters<typeof toCustomContentQueryChanges>[0], 'existingQueries' | 'isNewPanel'>
+  >;
+
+// What the callers do: say what the queries should become with the single-query fields, or datasets.
+const build = ({ index, esql, hasData, regenerateESQL, datasets, ...params }: BuildParams) => {
+  const nlQuery = 'nlQuery' in params ? params.nlQuery : 'Show KPI';
+  return buildCustomContentConfig({
+    ...deps,
+    ...params,
+    nlQuery,
+    ...toCustomContentQueryChanges({
+      nlQuery,
+      index,
+      esql,
+      hasData,
+      regenerateESQL,
+      datasets,
+      existingQueries: params.existing?.esqlQueries ?? [],
+      isNewPanel: !params.existing,
+    }),
+  });
+};
 
 describe('buildCustomContentConfig', () => {
   beforeEach(() => {
@@ -200,8 +223,8 @@ describe('buildCustomContentConfig', () => {
 
   describe('the template', () => {
     it('is kept, without a model call, when an edit has no prompt and keeps the query', async () => {
-      const result = await buildCustomContentConfig({
-        ...deps,
+      const result = await build({
+        nlQuery: undefined,
         existing: { esqlQueries: [STORED], template: OLD_TEMPLATE },
       });
 
@@ -210,8 +233,8 @@ describe('buildCustomContentConfig', () => {
     });
 
     it('is written again, with an empty prompt, when an edit only changes the query', async () => {
-      const result = await buildCustomContentConfig({
-        ...deps,
+      const result = await build({
+        nlQuery: undefined,
         esql: EXPLICIT,
         existing: { esqlQueries: [STORED], template: OLD_TEMPLATE },
       });
@@ -226,8 +249,8 @@ describe('buildCustomContentConfig', () => {
     });
 
     it('is written again when an edit removes the query', async () => {
-      await buildCustomContentConfig({
-        ...deps,
+      await build({
+        nlQuery: undefined,
         hasData: false,
         existing: { esqlQueries: [STORED], template: OLD_TEMPLATE },
       });
@@ -262,7 +285,7 @@ describe('buildCustomContentConfig', () => {
     });
 
     it('keeps them, and the template, when an edit has no prompt and keeps the query', async () => {
-      const result = await buildCustomContentConfig({ ...deps, existing });
+      const result = await build({ nlQuery: undefined, existing });
 
       expect(mockResolveTemplate).not.toHaveBeenCalled();
       expect(result).toEqual({
@@ -296,12 +319,6 @@ describe('buildCustomContentConfig', () => {
   });
 
   describe('datasets', () => {
-    it('refuses to be given the single-query fields along with datasets', async () => {
-      await expect(
-        build({ datasets: [{ description: 'totals' }], esql: 'FROM a' })
-      ).rejects.toThrow('datasets replaces');
-    });
-
     const stored = [STORED, 'FROM metrics', 'FROM traces'];
     const existing = { esqlQueries: stored, template: OLD_TEMPLATE };
 
@@ -386,14 +403,14 @@ describe('buildCustomContentConfig', () => {
     });
 
     it('keeps the template, without a model call, when nothing changes and there is no prompt', async () => {
-      const result = await buildCustomContentConfig({ ...deps, existing, datasets: [{}] });
+      const result = await build({ nlQuery: undefined, existing, datasets: [{}] });
 
       expect(mockResolveTemplate).not.toHaveBeenCalled();
       expect(result).toEqual({ esqlQueries: stored, template: OLD_TEMPLATE });
     });
 
     it('rewrites the template when a query changes, even with no prompt', async () => {
-      await buildCustomContentConfig({ ...deps, existing, datasets: [{}, { esql: 'FROM other' }] });
+      await build({ nlQuery: undefined, existing, datasets: [{}, { esql: 'FROM other' }] });
 
       expect(mockResolveTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ prompt: '', changedQueries: [false, true, false] })

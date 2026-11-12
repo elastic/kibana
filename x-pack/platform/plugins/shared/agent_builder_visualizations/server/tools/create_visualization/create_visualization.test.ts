@@ -21,6 +21,8 @@ import { createVisualizationTool } from './create_visualization';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildCustomContentConfig: jest.fn(),
+  toCustomContentQueryChanges: jest.requireActual('@kbn/agent-builder-visualizations-server')
+    .toCustomContentQueryChanges,
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
   selectDefaultTimeRange: jest.fn(),
@@ -759,9 +761,7 @@ describe('createVisualizationTool handler', () => {
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
           nlQuery: 'a status board per host',
-          index: 'logs-*',
-          esql: 'FROM logs | STATS count() BY host',
-          hasData: true,
+          datasets: [{ esql: 'FROM logs | STATS count() BY host' }],
           existing: undefined,
         })
       );
@@ -896,7 +896,11 @@ describe('createVisualizationTool handler', () => {
       });
 
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
-        expect.objectContaining({ esql: undefined })
+        expect.objectContaining({
+          datasets: [
+            { description: 'document count per minute as a line chart', index: undefined },
+          ],
+        })
       );
     });
 
@@ -913,7 +917,7 @@ describe('createVisualizationTool handler', () => {
       });
 
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
-        expect.objectContaining({ hasData: false })
+        expect.objectContaining({ clearQueries: true })
       );
       expect(attachments.add.mock.calls[0][0].data).not.toHaveProperty('esql');
       expect(result.results[0].data.esql).toBeUndefined();
@@ -941,9 +945,6 @@ describe('createVisualizationTool handler', () => {
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
           nlQuery: 'use a darker background',
-          esql: undefined,
-          hasData: undefined,
-          regenerateESQL: undefined,
           existing: {
             esqlQueries: ['FROM logs | STATS count() BY host'],
             template: '<div>old</div>',
@@ -966,7 +967,7 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          hasData: true,
+          datasets: [{ description: 'add the total', index: undefined }],
           existing: { esqlQueries: [], template: '<div>old</div>' },
         })
       );
@@ -990,11 +991,13 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockBuildCustomContent).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining({ regenerateESQL: true })
+        expect.objectContaining({
+          datasets: [{ description: 'also split by operating system', index: undefined }],
+        })
       );
       expect(mockBuildCustomContent).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ esql: 'FROM metrics-*' })
+        expect.objectContaining({ datasets: [{ esql: 'FROM metrics-*' }] })
       );
     });
 

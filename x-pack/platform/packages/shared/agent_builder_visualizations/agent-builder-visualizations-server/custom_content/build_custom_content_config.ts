@@ -28,23 +28,14 @@ export type ResolveCustomContentEsqlVariables = (
 interface BuildCustomContentConfigParams {
   /** What to show, or what to change on an existing panel. */
   nlQuery?: string;
-  /** Index, alias or data stream the query is generated from. */
-  index?: string;
-  /** A query the user supplied verbatim. It wins over `hasData`; `null` removes the stored query. */
-  esql?: string | null;
   /**
-   * `false`: the panel has no data, so no query. `true`: the panel has a query, generated when it
-   * has none. Omitted on an edit: keep the current data state.
-   */
-  hasData?: boolean;
-  /** Regenerate the query from `nlQuery`, starting from the stored one so unrelated parts survive. */
-  regenerateESQL?: boolean;
-  /**
-   * The panel's queries by position, for a panel with data of more than one shape. It replaces
-   * `esql`, `hasData`, `regenerateESQL` and `index`: each dataset describes or supplies the query at
-   * its position, an empty one keeps it, and a position past the stored queries adds one.
+   * What to do with the panel's queries, by position: each dataset describes or supplies the query
+   * at its position, an empty one keeps it, and a position past the stored queries adds one. Queries
+   * it does not reach are kept. Without it the queries stay as they are.
    */
   datasets?: readonly CustomContentDataset[];
+  /** Remove every query, for a panel with static content. Wins over `datasets`. */
+  clearQueries?: boolean;
   /**
    * The panel being edited. Absent for a new panel. Its queries are in the order the template reads
    * them: the first is the main query (`rows`), the others `queries[1]`, `queries[2]`, ...
@@ -61,8 +52,7 @@ interface BuildCustomContentConfigParams {
 interface BuildCustomContentConfigResult {
   /**
    * The queries the panel ends up with, in the order the template reads them, none for a panel
-   * without data. Without `datasets` only the first can be generated, replaced or removed, and the
-   * others are kept as they are, only while the panel has a first one.
+   * without data.
    */
   esqlQueries: string[];
   /** The HTML template. On an edit that neither has a prompt nor changes the query, the existing one. */
@@ -70,35 +60,6 @@ interface BuildCustomContentConfigResult {
   /** Height the template needs, in CSS pixels. Absent when the existing template was kept. */
   height?: number;
 }
-
-/**
- * Decides which ES|QL query a custom content panel ends up with. A supplied query always wins. A
- * new panel gets a generated query unless it is declared data-free. An edit keeps the stored query
- * unless it is replaced, removed or explicitly regenerated, so a style-only edit never pays for
- * generation.
- */
-const resolveQuery = async ({
-  esql,
-  hasData,
-  regenerate,
-  existingQuery,
-  isNewPanel,
-  generate,
-}: {
-  esql?: string | null;
-  hasData?: boolean;
-  regenerate?: boolean;
-  existingQuery?: string;
-  isNewPanel: boolean;
-  generate: (existingQueries: string[]) => Promise<string>;
-}): Promise<string | undefined> => {
-  if (esql?.trim()) return esql;
-  if (esql === null || hasData === false) return undefined;
-  if (isNewPanel) return generate([]);
-  if (regenerate) return generate(existingQuery ? [existingQuery] : []);
-  if (existingQuery) return existingQuery;
-  return hasData === true ? generate([]) : undefined;
-};
 
 /**
  * Builds the query and the template of a custom content panel, for a new panel or an edit. The
@@ -111,11 +72,8 @@ const resolveQuery = async ({
  */
 export const buildCustomContentConfig = async ({
   nlQuery,
-  index,
-  esql,
-  hasData,
-  regenerateESQL,
   datasets,
+  clearQueries,
   existing,
   timeRange,
   resolveEsqlVariables,
@@ -134,24 +92,20 @@ export const buildCustomContentConfig = async ({
     );
 
   const existingQueries = existing?.esqlQueries ?? [];
-  const [existingQuery, ...existingAdditionalQueries] = existingQueries;
 
   const generateQuery = async (params: {
     nlQuery: string;
     index?: string;
     existingQueries: string[];
-    suppliedQuery?: string | null;
     /** True when the query is one of several that feed the panel. */
-    isDataset?: boolean;
+    isDataset: boolean;
   }) =>
     generateCustomContentEsql({
       nlQuery: params.nlQuery,
       index: params.index,
       existingQueries: params.existingQueries,
       isDataset: params.isDataset,
-      esqlVariables: await getEsqlVariables([params.suppliedQuery, ...params.existingQueries], {
-        anyVariable: true,
-      }),
+      esqlVariables: await getEsqlVariables(params.existingQueries, { anyVariable: true }),
       modelProvider,
       events,
       logger,
@@ -159,49 +113,27 @@ export const buildCustomContentConfig = async ({
       ...(timeRange ? { timeRange } : {}),
     });
 
-  if (datasets && (esql !== undefined || hasData !== undefined || regenerateESQL)) {
-    throw new Error(
-      'datasets replaces esql, hasData and regenerateESQL: put each query on its dataset.'
-    );
-  }
-
-  let esqlQueries: string[];
+  let esqlQueries: string[] = [...existingQueries];
   // Per position: whether the query is new or changing, so it is sampled for the template.
-  let changedQueries: boolean[];
-  if (datasets) {
+  let changedQueries: boolean[] = existingQueries.map(() => false);
+  if (clearQueries) {
+    esqlQueries = [];
+    changedQueries = [];
+  } else if (datasets) {
+    const isDataset = Math.max(datasets.length, existingQueries.length) > 1;
     const resolved = await resolveDatasets({
       datasets,
       existingQueries,
-      generate: ({ description, index: datasetIndex }, existingForPosition) =>
+      generate: ({ description, index }, existingForPosition) =>
         generateQuery({
           nlQuery: description,
-          index: datasetIndex ?? index,
+          index,
           existingQueries: existingForPosition,
-          isDataset: true,
+          isDataset,
         }),
     });
     esqlQueries = resolved.queries;
     changedQueries = resolved.changed;
-  } else {
-    const esqlQuery = await resolveQuery({
-      esql,
-      hasData,
-      regenerate: regenerateESQL,
-      existingQuery,
-      isNewPanel: !existing,
-      generate: (existingForQuery) =>
-        generateQuery({
-          nlQuery: nlQuery ?? '',
-          index,
-          existingQueries: existingForQuery,
-          suppliedQuery: esql,
-        }),
-    });
-    // The other queries extend the first, so there is nothing for them to extend without it.
-    esqlQueries = esqlQuery ? [esqlQuery, ...existingAdditionalQueries] : [];
-    changedQueries = esqlQueries.map(
-      (_, position) => position === 0 && esqlQuery !== existingQuery
-    );
   }
 
   const hasChanges = changedQueries.some(Boolean) || esqlQueries.length !== existingQueries.length;
