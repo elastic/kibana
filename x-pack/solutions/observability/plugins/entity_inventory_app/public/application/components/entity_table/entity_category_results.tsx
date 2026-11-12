@@ -22,6 +22,8 @@ const TYPES_EBT_DETAIL = 'types';
 export interface EntityCategoryResultsProps {
   /** The type ids the page lists; when absent, every type of the `types` response is listed. */
   entityTypes?: readonly string[];
+  /** Lists every type whose id starts with this prefix, in addition to `entityTypes`. */
+  entityTypePrefix?: string;
 }
 
 /**
@@ -29,7 +31,7 @@ export interface EntityCategoryResultsProps {
  * asks for that the response does not have gets a "not available" prompt instead of a section.
  * One truncation callout above the sections names every type whose shown list was truncated.
  */
-export const EntityCategoryResults = ({ entityTypes }: EntityCategoryResultsProps) => {
+export const EntityCategoryResults = ({ entityTypes, entityTypePrefix }: EntityCategoryResultsProps) => {
   const { types, loading, error, refresh } = useEntityTypes();
   const [truncatedTypes, setTruncatedTypes] = useState<ReadonlySet<string>>(() => new Set());
   const onTruncatedChange = useCallback((type: string, truncated: boolean) => {
@@ -60,7 +62,13 @@ export const EntityCategoryResults = ({ entityTypes }: EntityCategoryResultsProp
     return <EntityTableLoading />;
   }
 
-  const pageTypes = entityTypes ? types.filter(({ type }) => entityTypes.includes(type)) : types;
+  const isFiltered = entityTypes !== undefined || entityTypePrefix !== undefined;
+  const pageTypes = isFiltered
+    ? types.filter(
+        ({ type }) =>
+          entityTypes?.includes(type) || (entityTypePrefix && type.startsWith(entityTypePrefix))
+      )
+    : types;
   const missingTypes = (entityTypes ?? []).filter((id) => !types.some(({ type }) => type === id));
   const truncatedTypeNames = pageTypes
     .filter(({ type }) => truncatedTypes.has(type))
