@@ -369,7 +369,7 @@ describe('event loop watchdog in a child process', () => {
       const [line] = profileLogLines(result);
       const profile = line.kibana?.event_loop_watchdog?.profile;
       expect(profile?.stopReason).toBe('max_duration');
-      // At least the D52 floor (11.9k nodes); loadDeepCode(2_000, 40) produces ~21k on macOS, ~25k on Linux arm64, ~21k on amd64.
+      // At least 11.9k nodes; loadDeepCode(2_000, 40) produces ~21k on macOS, ~25k on Linux arm64, ~21k on amd64.
       expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
       expect(profile?.frames.length).toBeGreaterThan(0);
       expect(profile?.kibanaFrames.length).toBeGreaterThan(0);
@@ -407,7 +407,8 @@ describe('event loop watchdog in a child process', () => {
       const heapAfterThird =
         statsAfterThird[statsAfterThird.length - 1].kibana?.event_loop_watchdog?.stats?.heapUsed ??
         NaN;
-      // Bound left for Tina to set from the measured 10-run data (plan target: within 4 MB).
+      // Measured deltas across 10 runs were all negative (-138 KB to -320 KB); 4 MB is a
+      // deliberately loose guard against per-capture retention, not a tight regression bound.
       expect(heapAfterThird - heapBeforeFirst).toBeLessThan(4 * 1024 * 1024);
     }, 210_000);
 

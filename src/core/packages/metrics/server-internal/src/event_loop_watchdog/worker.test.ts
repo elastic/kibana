@@ -1083,8 +1083,6 @@ describe('runWatchdogWorker', () => {
           .filter((l) => l.includes('"Event loop block profiled:'));
         expect(lines).toHaveLength(1);
         const lineBytes = Buffer.byteLength(lines[0], 'utf8');
-        // Printed so D52's headroom figure can be checked against the real logger output.
-        process.stdout.write(`worst-case capture log line bytes: ${lineBytes}\n`);
         expect(lineBytes).toBeLessThanOrEqual(4_094);
 
         const parsed = JSON.parse(lines[0]);

@@ -110,7 +110,7 @@ export interface ProfilingStats {
    * while the profiler was starting.
    */
   emptyTooLate: number;
-  /** Captures that failed to start or to stop. */
+  /** Captures that failed to start, to stop, or to summarise. */
   captureFailed: number;
   /** Blocks past `startAfter` that ended without a capture because of the cooldown. */
   skippedCooldown: number;
