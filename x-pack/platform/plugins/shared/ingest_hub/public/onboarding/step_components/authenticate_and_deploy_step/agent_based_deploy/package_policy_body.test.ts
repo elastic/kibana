@@ -294,3 +294,76 @@ describe('buildGroupPackagePolicy — proxy URL', () => {
     expect((await buildWithProxy('http://proxy:3128', false)).vars).toBeUndefined();
   });
 });
+
+describe('buildGroupPackagePolicy — dedicated index template for a custom dataset', () => {
+  const withDatasetVar = {
+    ...guardduty,
+    varDefsByInput: {
+      'aws-s3': {
+        'data_stream.dataset': {
+          name: 'data_stream.dataset',
+          type: 'text',
+          default: 'aws.guardduty',
+        },
+      },
+    },
+    varDefsByDataStream: {
+      guardduty: {
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput: {
+          'aws-s3': {
+            'data_stream.dataset': {
+              name: 'data_stream.dataset',
+              type: 'text',
+              default: 'aws.guardduty',
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+  const datasetGroup: DeployGroup = {
+    ...group,
+    members: [{ ...group.members[0], service: withDatasetVar }],
+  };
+  const buildWithDataset = (dataset: string, createDatasetTemplates?: boolean) =>
+    buildGroupPackagePolicy(datasetGroup, pkgInfo, {
+      namespace: '',
+      globalRegion: 'us-east-1',
+      storedServiceVars: {
+        guardduty: {
+          enabledDataStreams: ['guardduty'],
+          varsByDataStream: {
+            guardduty: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { 'data_stream.dataset': dataset } },
+            },
+          },
+          ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
+        },
+      },
+      authenticateAndDeployStep: {},
+      pkgVersion: '1.0.0',
+    } as BuildPackagePolicyOpts);
+
+  it('asks Fleet not to create the template when the user opted out', async () => {
+    expect(await buildWithDataset('aws.prod', false)).toHaveProperty(
+      'create_dataset_templates',
+      false
+    );
+  });
+
+  it('says so when the template is on, which is the default', async () => {
+    expect(await buildWithDataset('aws.prod')).toHaveProperty('create_dataset_templates', true);
+  });
+
+  it('leaves the flag out for the generic dataset, where Fleet shows no switch', async () => {
+    expect(await buildWithDataset('generic', false)).not.toHaveProperty('create_dataset_templates');
+  });
+
+  it('never sends the choice as a package var', async () => {
+    const body = await buildWithDataset('aws.prod', false);
+    expect(JSON.stringify(body.inputs)).not.toContain('createDatasetTemplates');
+  });
+});

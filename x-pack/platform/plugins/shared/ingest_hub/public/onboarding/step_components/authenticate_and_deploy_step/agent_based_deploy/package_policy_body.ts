@@ -15,7 +15,11 @@ import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
 import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
-import { buildGroupPolicyNameStem, deriveGroupPolicyName } from '../deploy_group_helpers';
+import {
+  buildGroupPolicyNameStem,
+  deriveGroupPolicyName,
+  getCreateDatasetTemplates,
+} from '../deploy_group_helpers';
 import {
   getPolicySettings,
   getPolicyVarSettings,
@@ -272,6 +276,7 @@ export async function buildGroupPackagePolicy(
   condition?: string;
   additional_datastreams_permissions?: string[];
   vars?: Record<string, string | SecretRefValue | null>;
+  create_dataset_templates?: boolean;
   inputs: Record<string, unknown>;
 }> {
   const { members } = group;
@@ -288,6 +293,11 @@ export async function buildGroupPackagePolicy(
   } = opts;
   const descriptionField = description?.trim() ? { description: description.trim() } : {};
   const policySettingsFields = getPolicySettings(policySettings, 'agent_based');
+  const createDatasetTemplates = getCreateDatasetTemplates(group, storedServiceVars);
+  const createDatasetTemplatesField =
+    createDatasetTemplates !== undefined
+      ? { create_dataset_templates: createDatasetTemplates }
+      : {};
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
@@ -365,6 +375,7 @@ export async function buildGroupPackagePolicy(
         package: { name: firstService.packageName, version: pkgVersion },
         ...(group.namespace ? { namespace: group.namespace } : {}),
         ...policySettingsFields,
+        ...createDatasetTemplatesField,
         ...(vars ? { vars } : {}),
         inputs: { ...disabledOtherInputs, ...selfDisabled },
       };
@@ -398,6 +409,7 @@ export async function buildGroupPackagePolicy(
     package: { name: firstService.packageName, version: pkgVersion },
     ...(group.namespace ? { namespace: group.namespace } : {}),
     ...policySettingsFields,
+    ...createDatasetTemplatesField,
     ...(vars ? { vars } : {}),
     // disabled entries first so our enabled inputs win if there's any key overlap
     inputs: { ...disabledOtherInputs, ...disabledOwnInputs, ...prunedInputs },
