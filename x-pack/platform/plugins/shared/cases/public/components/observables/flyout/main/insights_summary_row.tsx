@@ -9,14 +9,14 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import { FormattedNumber } from '@kbn/i18n-react';
 import * as i18n from '../translations';
 
 export interface InsightsSummaryRowProps {
   isLoading: boolean;
   isError: boolean;
   text: ReactNode;
-  count: number;
+  /** The count as shown, formatted by the caller. */
+  count: ReactNode;
   /** Opens the tool with the details; the count is not clickable without it. */
   onShowDetails?: () => void;
   'data-test-subj': string;
@@ -80,7 +80,7 @@ export const InsightsSummaryRow = ({
             size="xs"
             data-test-subj={`${dataTestSubj}Button`}
           >
-            <FormattedNumber value={count} />
+            {count}
           </EuiButtonEmpty>
         </EuiBadge>
       </EuiFlexItem>

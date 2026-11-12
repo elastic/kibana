@@ -75,6 +75,12 @@ export const SHOW_RELATED_CASES = i18n.translate(
   { defaultMessage: 'Show the other cases with this observable' }
 );
 
+export const CASES_COUNT_ABOVE_MAX = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.casesCountAboveMax', {
+    values: { max },
+    defaultMessage: '{max, number}+',
+  });
+
 export const LOADING_RELATED_CASES = i18n.translate(
   'xpack.cases.caseView.observables.loadingRelatedCases',
   { defaultMessage: 'Counting the other cases with this observable' }

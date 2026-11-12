@@ -8,8 +8,22 @@
 import React from 'react';
 import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedNumber } from '@kbn/i18n-react';
+import { MAX_CASES_BY_OBSERVABLES_CANDIDATES } from '../../../common/constants';
 import { getEmptyCellValue } from '../empty_value';
 import * as i18n from './translations';
+
+/**
+ * How many other cases hold the observable. Past the most cases the cases tool lists, the count
+ * shows as that limit with a `+`: the tool cannot show the rest.
+ */
+export const ObservableCasesCountValue = ({ count }: { count: number }) =>
+  count > MAX_CASES_BY_OBSERVABLES_CANDIDATES ? (
+    <>{i18n.CASES_COUNT_ABOVE_MAX(MAX_CASES_BY_OBSERVABLES_CANDIDATES)}</>
+  ) : (
+    <FormattedNumber value={count} />
+  );
+
+ObservableCasesCountValue.displayName = 'ObservableCasesCountValue';
 
 export interface ObservableCasesCountProps {
   /** The count, or nothing when it could not be loaded. */
@@ -54,7 +68,7 @@ export const ObservableCasesCount = ({
         size="xs"
         data-test-subj={dataTestSubj}
       >
-        <FormattedNumber value={count} />
+        <ObservableCasesCountValue count={count} />
       </EuiButtonEmpty>
     </EuiBadge>
   );

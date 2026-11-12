@@ -9,6 +9,7 @@ import React from 'react';
 import type { ObservableWithMetadata } from '../../../../../common/types/api';
 import type { CaseUI } from '../../../../../common/ui/types';
 import { useCountCasesByObservables } from '../../../../containers/use_count_cases_by_observables';
+import { ObservableCasesCountValue } from '../../observable_cases_count';
 import { ExpandablePanel } from '../shared/expandable_panel';
 import { InsightsSummaryRow } from './insights_summary_row';
 import * as i18n from '../translations';
@@ -22,8 +23,9 @@ export interface ObservableCasesOverviewProps {
 
 /**
  * The preview of the cases tool, styled like the Security alert flyout insights: a panel whose
- * title opens the tool, with the number of other cases holding the observable. The number is the
- * same uncapped count as the observables table's Related cases column.
+ * title opens the tool, with the number of other cases holding the observable. The number shows
+ * like the observables table's Related cases column: exact up to the most cases the tool lists,
+ * then that limit with a `+`.
  */
 export const ObservableCasesOverview = ({
   observable: { typeKey, value },
@@ -50,7 +52,7 @@ export const ObservableCasesOverview = ({
         isLoading={isLoading}
         isError={isError}
         text={i18n.RELATED_CASES(total)}
-        count={total}
+        count={<ObservableCasesCountValue count={total} />}
         onShowDetails={total > 0 ? onShowCases : undefined}
         data-test-subj="cases-observable-flyout-related-cases"
       />

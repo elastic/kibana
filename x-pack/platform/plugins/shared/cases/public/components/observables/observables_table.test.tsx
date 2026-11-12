@@ -383,6 +383,21 @@ describe('ObservablesTable', () => {
       });
     });
 
+    it('shows 10,000+ past the most cases the cases tool lists', () => {
+      mockCounts([
+        { typeKey: first.typeKey, value: first.value, total: 287_636 },
+        { typeKey: second.typeKey, value: second.value, total: 10_000 },
+      ]);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(
+        screen.getByTestId(`cases-observables-table-related-cases-${first.id}`)
+      ).toHaveTextContent(/^10,000\+$/);
+      expect(
+        screen.getByTestId(`cases-observables-table-related-cases-${second.id}`)
+      ).toHaveTextContent(/^10,000$/);
+    });
+
     it('shows a spinner while counting', () => {
       mockCounts([], { isLoading: true });
       renderWithTestingProviders(<ObservablesTable {...props} />);

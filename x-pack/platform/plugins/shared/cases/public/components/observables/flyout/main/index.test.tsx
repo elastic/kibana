@@ -222,6 +222,24 @@ describe('ObservableFlyout', () => {
     expect(flyoutApi.openObservableCases).toHaveBeenCalledTimes(1);
   });
 
+  it('shows the exact count up to the most cases the cases tool lists', () => {
+    mockCount({ total: 10_000 });
+    renderPanel();
+
+    expect(screen.getByTestId('cases-observable-flyout-related-casesButton')).toHaveTextContent(
+      /^10,000$/
+    );
+  });
+
+  it('shows 10,000+ past the most cases the cases tool lists', () => {
+    mockCount({ total: 287_636 });
+    renderPanel();
+
+    expect(screen.getByTestId('cases-observable-flyout-related-casesButton')).toHaveTextContent(
+      /^10,000\+$/
+    );
+  });
+
   it('shows a count of 0 that opens nothing', () => {
     mockCount({ total: 0 });
     renderPanel();
