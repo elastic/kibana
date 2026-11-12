@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OverviewFilterOptions } from '../overview_filters';
+import type { OverviewFilterOptions, OverviewPercentile } from '../overview_filters';
 import type { HttpRequests, WebVitals } from './applications';
 
 /** One bucket of the Overview trend; both charts read the same buckets. */
@@ -13,14 +13,14 @@ export interface OverviewTrendPoint {
   /** Start of the bucket, in epoch milliseconds. */
   timestamp: number;
   pageLoads: number;
-  /** 75th percentile of the load time in milliseconds, `null` without a timed page load. */
-  loadTimeP75Ms: number | null;
+  /** The requested percentile of the load time in milliseconds, `null` without a timed page load. */
+  loadTimePercentileMs: number | null;
 }
 
 /** A percentile over the page loads of the time range. */
 export interface LoadTime {
-  /** 75th percentile in milliseconds, `null` without a timed page load. */
-  p75Ms: number | null;
+  /** The requested percentile in milliseconds, `null` without a timed page load. */
+  percentileMs: number | null;
   /** Page loads that reported a load event, which the percentile is taken over. */
   sampleCount: number;
 }
@@ -28,6 +28,8 @@ export interface LoadTime {
 /** One EDOT Browser application over the requested time range and environment. */
 export interface ApplicationOverview {
   serviceName: string;
+  /** The percentile of the load time and its trend, 75 unless the request asked for another. */
+  percentile: OverviewPercentile;
   pageLoads: { count: number };
   loadTime: LoadTime;
   jsErrors: { count: number };

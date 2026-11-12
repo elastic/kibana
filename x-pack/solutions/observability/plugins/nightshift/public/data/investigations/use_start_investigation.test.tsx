@@ -62,17 +62,22 @@ describe('useStartInvestigation', () => {
     expect(addError).not.toHaveBeenCalled();
   });
 
-  it('surfaces start failures as toast errors and keeps the panel open', async () => {
-    investigationsFetch.mockRejectedValueOnce(new Error('start failed'));
+  it('surfaces the API message of a start failure and keeps the panel open', async () => {
+    investigationsFetch.mockRejectedValueOnce(
+      Object.assign(new Error('Too Many Requests'), {
+        body: { message: 'The daily limit for manual investigations has been reached' },
+      })
+    );
     const onStarted = jest.fn();
     const { result } = renderStartInvestigation(onStarted);
 
     act(() => result.current.startInvestigation('Why is checkout slow?'));
 
     await waitFor(() => expect(addError).toHaveBeenCalled());
-    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: 'Failed to start investigation',
-    });
+    expect(addError).toHaveBeenCalledWith(
+      new Error('The daily limit for manual investigations has been reached'),
+      { title: 'Failed to start investigation' }
+    );
     expect(addSuccess).not.toHaveBeenCalled();
     expect(onStarted).not.toHaveBeenCalled();
   });

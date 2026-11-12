@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import {
   getPrivilegedUserWatchlistSavedObjectId,
@@ -381,7 +381,7 @@ export const installPrebuiltWatchlists = async ({
   }
 
   for (const namespace of namespaces) {
-    const soClient = buildScopedInternalSavedObjectsClientUnsafe({
+    const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({
       coreStart,
       namespace,
       includedHiddenTypes: [watchlistEntitySourceTypeName],

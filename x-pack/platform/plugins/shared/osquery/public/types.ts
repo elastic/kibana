@@ -73,21 +73,6 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 
-/**
- * @internal
- */
-export interface OsqueryTimelinesStart {
-  getHoverActions: () => {
-    getAddToTimelineButton: (props: {
-      dataProvider: unknown[];
-      field: string;
-      ownFocus: boolean;
-      showTooltip: boolean;
-      startServices: { analytics: unknown; i18n: unknown; theme: unknown };
-    }) => unknown;
-  };
-}
-
 export interface StartPlugins {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
@@ -98,7 +83,6 @@ export interface StartPlugins {
   cps?: CPSPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
-  timelines?: OsqueryTimelinesStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   appName?: string;

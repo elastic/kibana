@@ -114,11 +114,20 @@ export class AlertsTablePage {
     // container exposes no stable data-test-subj, so the `.euiDataGrid__virtualized` class is a
     // deliberate, documented exception (a stable test-subj on this container would be a good
     // follow-up in EUI/Kibana).
-    await this.alertsTable
-      .locator('.euiDataGrid__virtualized')
-      .evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
-
+    // The grid can still re-render (refetch, remount, late column widths) after it first reports
+    // loaded, which resets or shortens the scroll; re-apply it until the IP cell is mounted.
     const ipCell = this.alertsTable.getByTestId('network-details').filter({ hasText: ip });
+    const virtualized = this.alertsTable.locator('.euiDataGrid__virtualized');
+    await expect
+      .poll(
+        async () => {
+          if ((await ipCell.count()) > 0) return true;
+          await virtualized.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+          return false;
+        },
+        { intervals: [250] }
+      )
+      .toBe(true);
     await ipCell.click();
   }
 

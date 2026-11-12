@@ -23,7 +23,7 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { getLatestVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import type { AiIndexCatalogEntry } from '../types';
+import type { AiIndexCatalogEntry, ResolvedCapabilities } from '../types';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -41,6 +41,7 @@ export const selectTools = async ({
   agentConfiguration,
   aiIndexCatalog,
   aiIndicesEnabled,
+  capabilities,
   attachmentsService,
   spaceId,
   runner,
@@ -55,6 +56,7 @@ export const selectTools = async ({
   agentConfiguration: AgentConfiguration;
   aiIndexCatalog?: AiIndexCatalogEntry[];
   aiIndicesEnabled: boolean;
+  capabilities: ResolvedCapabilities;
   spaceId: string;
   runner: ScopedRunner;
 }): Promise<SelectToolsResult> => {
@@ -73,11 +75,11 @@ export const selectTools = async ({
     formatContext,
   });
 
-  const versionedAttachmentTools = createVersionedAttachmentTools({
-    attachmentsService,
-    formatContext,
-    runner,
-  });
+  // Only the five generic attachment tools are gated. Tools an attachment type declares
+  // (getTools) or binds to one attachment (getBoundedTools) are selected separately and stay.
+  const versionedAttachmentTools = capabilities.attachmentTools
+    ? createVersionedAttachmentTools({ attachmentsService, formatContext, runner })
+    : [];
 
   // The read tools come from the `ki-retrieval` skill, which carries the guidance for using them.
   // Memory tools have no skill of their own, so they stay static.
@@ -144,7 +146,7 @@ const withOrigin = (tools: ExecutableTool[], origin: ToolOrigin): ExecutableTool
 
 /**
  * Creates executable tools for managing versioned conversation attachments.
- * These tools allow the LLM to add, read, update, delete, restore, list, and diff attachments.
+ * These tools allow the LLM to read, update, add, list, and diff attachments.
  */
 const createVersionedAttachmentTools = ({
   attachmentsService,

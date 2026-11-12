@@ -10,8 +10,6 @@ export type {
   EventBus,
   EventBusContextRest,
   EventBusHandlerArgs,
-  EventBusSubscriber,
   Subscription,
 } from './types';
-export { EventBusSubscriberToken } from './types';
 export { AsyncDomainEventBus } from './event_bus';

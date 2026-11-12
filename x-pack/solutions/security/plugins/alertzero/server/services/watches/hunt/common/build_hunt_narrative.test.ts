@@ -85,7 +85,7 @@ const result = (overrides: Partial<HuntCoordinatorCoreResult> = {}): HuntCoordin
   ...overrides,
 });
 
-const hitTier1 = (): HuntCoordinatorTier1 =>
+const hitTier1 = (overrides: Partial<HuntForThreatResult> = {}): HuntCoordinatorTier1 =>
   tier1({
     status: 'environment_hits_found',
     has_confirmed_hit: true,
@@ -131,6 +131,7 @@ const hitTier1 = (): HuntCoordinatorTier1 =>
         required: true,
       },
     ],
+    ...overrides,
   });
 
 const ctx = {
@@ -140,6 +141,35 @@ const ctx = {
 const TECHNOLOGY_WORD = /technolog/i;
 
 describe('buildHuntNarrative', () => {
+  it('lists every IOC from matched.iocs when present on the sample hits', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        tier1: hitTier1({
+          hits: [
+            {
+              id: 'e1',
+              index: 'logs-aws.cloudtrail.2026.09.25',
+              matched: {
+                ioc: { type: 'ip', value: '192.0.2.30' },
+                field: 'source.ip',
+                iocs: [
+                  { type: 'ip', value: '192.0.2.30', field: 'source.ip' },
+                  { type: 'ip', value: '192.0.2.31', field: 'destination.ip' },
+                ],
+              },
+            },
+          ],
+        }),
+        has_confirmed_hit: true,
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain(
+      '- **Indicators seen in the sample:** `192.0.2.30` and `192.0.2.31`'
+    );
+  });
+
   it('tells the IOC Hunt and Behavior Hunt story for a run both tiers confirmed, as markdown sections', () => {
     const narrative = buildHuntNarrative(
       result({
