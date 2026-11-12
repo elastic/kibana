@@ -11,6 +11,7 @@ import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import {
   editorExtensions,
   joinIndices,
+  lookupIndexFields,
   mockContext,
   policies,
   timeseriesIndices,
@@ -26,11 +27,20 @@ const defaultColumns: ESQLFieldWithMetadata[] = Array.from(
   ({ name, type }) => ({ name, type, userDefined: false } as ESQLFieldWithMetadata)
 );
 
+const defaultLookupColumns = lookupIndexFields.map(
+  ({ name, type }) => ({ name, type, userDefined: false } as ESQLFieldWithMetadata)
+);
+
+// The query the editor is asked to resolve when it needs the columns of a single index.
+const SINGLE_SOURCE_QUERY = /^\s*FROM\s+(\S+)\s*$/i;
+
 export const DEFAULT_WORLD: ScenarioWorld = {
   columns: defaultColumns,
   sources: mockContext.sources ?? [],
   policies,
   joinIndices,
+  lookupColumns: Object.fromEntries(joinIndices.map(({ name }) => [name, defaultLookupColumns])),
+  canCreateLookupIndex: true,
   timeseriesIndices,
   inferenceEndpoints: mockContext.inferenceEndpoints ?? [],
   recommendedQueries,
@@ -48,10 +58,15 @@ export const createCallbacks = (overrides: Partial<ScenarioWorld> = {}): ESQLCal
   const world: ScenarioWorld = { ...DEFAULT_WORLD, ...overrides };
 
   return {
-    getColumnsFor: async () => [...world.columns],
+    getColumnsFor: async ({ query } = { query: '' }) => {
+      const [, source = ''] = query.match(SINGLE_SOURCE_QUERY) ?? [];
+
+      return [...(world.lookupColumns[source] ?? world.columns)];
+    },
     getSources: async () => [...world.sources],
     getPolicies: async () => [...world.policies],
     getJoinIndices: async () => ({ indices: [...world.joinIndices] }),
+    canCreateLookupIndex: async () => world.canCreateLookupIndex,
     getTimeseriesIndices: async () => ({ indices: [...world.timeseriesIndices] }),
     getInferenceEndpoints: async (taskType) => ({
       inferenceEndpoints: world.inferenceEndpoints.filter(

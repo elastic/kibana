@@ -50,6 +50,10 @@ export interface ScenarioWorld {
   readonly sources: readonly ESQLSourceResult[];
   readonly policies: readonly ScenarioPolicy[];
   readonly joinIndices: readonly IndexAutocompleteItem[];
+  /** The columns of each lookup index, by index name. */
+  readonly lookupColumns: Readonly<Record<string, readonly ESQLFieldWithMetadata[]>>;
+  /** The user may create lookup indices. */
+  readonly canCreateLookupIndex: boolean;
   readonly timeseriesIndices: readonly IndexAutocompleteItem[];
   readonly inferenceEndpoints: readonly InferenceEndpointAutocompleteItem[];
   readonly recommendedQueries: readonly RecommendedQuery[];
