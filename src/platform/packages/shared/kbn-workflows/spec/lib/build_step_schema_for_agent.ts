@@ -73,8 +73,9 @@ export function buildBuiltInStepSchema(step: BaseStepDefinition): z.ZodType {
     type: z.literal(step.id).describe(step.description),
   };
 
+  // A record (e.g. `data.set`, `workflow.output`) has no shape but still takes `with`.
   const inputShape = getShape(step.inputSchema);
-  if (Object.keys(inputShape).length > 0) {
+  if (getZodSchemaType(step.inputSchema) === 'record' || Object.keys(inputShape).length > 0) {
     props.with = step.inputSchema;
   }
 

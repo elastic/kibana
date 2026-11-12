@@ -3636,6 +3636,31 @@ describe('CasesService', () => {
       const namespaces = ['default'];
       const search = 'awesome case';
 
+      const unifiedCommentClause = {
+        bool: {
+          filter: [{ terms: { 'cases-attachments.type': ['comment'] } }],
+          must: [{ match_phrase: { 'cases-attachments.data.content': search } }],
+        },
+      };
+      const unifiedAlertClause = {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'cases-attachments.type': ['security.alert', 'observability.alert', 'stack.alert'],
+              },
+            },
+          ],
+          must: [{ match: { 'cases-attachments.attachmentId': search } }],
+        },
+      };
+      const unifiedEventClause = {
+        bool: {
+          filter: [{ terms: { 'cases-attachments.type': ['security.event'] } }],
+          must: [{ match: { 'cases-attachments.attachmentId': search } }],
+        },
+      };
+
       const mockEmptySearchResponse = () => {
         // The SO mock doesn't include `search` by default, so wire it up here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -3653,6 +3678,7 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match_phrase: { 'cases-comments.comment': search } },
+          unifiedCommentClause,
         ]);
       });
 
@@ -3668,7 +3694,9 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match: { 'cases-comments.alertId': search } },
+          unifiedAlertClause,
           { match: { 'cases-comments.eventId': search } },
+          unifiedEventClause,
         ]);
       });
 
@@ -3684,8 +3712,71 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match: { 'cases-comments.alertId': search } },
+          unifiedAlertClause,
           { match_phrase: { 'cases-comments.comment': search } },
+          unifiedCommentClause,
         ]);
+      });
+
+      it('searches both the legacy and the unified attachment saved object types', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, ['cases-comments.comment']);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.type).toEqual(['cases-comments', 'cases-attachments']);
+      });
+
+      it('aggregates case ids over all matching attachments instead of reading one page of hits', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, ['cases-comments.comment']);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.size).toBe(0);
+        expect(searchCall.aggs).toEqual({
+          references: {
+            nested: { path: 'references' },
+            aggs: {
+              cases: {
+                filter: { term: { 'references.type': 'cases' } },
+                aggs: { caseIds: { terms: { field: 'references.id', size: 10000 } } },
+              },
+            },
+          },
+        });
+      });
+
+      it('returns the case ids from the aggregation buckets', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = jest.fn().mockResolvedValue({
+          hits: { hits: [] },
+          aggregations: {
+            references: {
+              cases: { caseIds: { buckets: [{ key: 'case-1' }, { key: 'case-2' }] } },
+            },
+          },
+        });
+
+        const caseIds = await service.getCaseIdsByAttachmentSearch(namespaces, 'alert-1', [
+          'cases-comments.alertId',
+        ]);
+
+        expect(caseIds).toEqual(['case-1', 'case-2']);
+      });
+
+      it('ignores search fields that are not attachment fields', async () => {
+        mockEmptySearchResponse();
+
+        const caseIds = await service.getCaseIdsByAttachmentSearch(namespaces, search, [
+          'cases.title',
+        ]);
+
+        expect(caseIds).toEqual([]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect((unsecuredSavedObjectsClient as any).search).not.toHaveBeenCalled();
       });
     });
 

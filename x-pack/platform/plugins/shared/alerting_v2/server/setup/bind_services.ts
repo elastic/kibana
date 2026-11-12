@@ -16,7 +16,7 @@ import {
 } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
-import { AlertActionsClient } from '../lib/alert_actions_client';
+import { AlertActionsClient, onAlertActionsClientActivation } from '../lib/alert_actions_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { EpisodesClient } from '../lib/episodes_client';
 import { DirectorService } from '../lib/director/director';
@@ -123,11 +123,12 @@ import {
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
+import { AuthService } from '../lib/services/auth_service/auth_service';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { SpaceUiSettingsClientToken } from '../settings/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
-  bind(AlertActionsClient).toSelf().inRequestScope();
+  bind(AlertActionsClient).toSelf().inRequestScope().onActivation(onAlertActionsClientActivation);
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
@@ -398,6 +399,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(MatcherSuggestionsService).toSelf().inRequestScope();
   bind(PrivilegeChecker).toSelf().inRequestScope();
+  bind(AuthService).toSelf().inRequestScope();
 
   bind(DispatcherService).toSelf().inSingletonScope();
   bind(DispatcherServiceInternalToken).toService(DispatcherService);

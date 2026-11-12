@@ -27,6 +27,7 @@ import {
   createMockConnectorFindResult,
 } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { ConfigSchema } from '../../config';
+import type { CaseError } from '../../common/error';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -1552,6 +1553,244 @@ describe('client', () => {
         });
       });
     });
+
+    describe('extractObservables owner rule', () => {
+      const blockedOwners = ['cases', 'observability'];
+
+      const getTemplate = (
+        key: string,
+        extractObservables: boolean
+      ): TemplatesConfiguration[0] => ({
+        key,
+        name: key,
+        caseFields: { settings: { syncAlerts: true, extractObservables } },
+      });
+
+      const mockStoredConfiguration = ({
+        owner,
+        extractObservables,
+        templates = [],
+      }: {
+        owner: string;
+        extractObservables: boolean;
+        templates?: TemplatesConfiguration;
+      }) => {
+        clientArgs.services.caseConfigureService.get.mockResolvedValue({
+          id: 'test-id',
+          version: 'test-version',
+          attributes: {
+            connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+            closure_type: 'close-by-user',
+            owner,
+            customFields: [],
+            templates,
+            observableTypes: [],
+            extractObservables,
+            workflowTags: [],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
+            updated_at: null,
+            updated_by: null,
+          },
+        } as never);
+        clientArgs.services.caseConfigureService.patch.mockResolvedValue({
+          id: 'test-id',
+          version: 'test-version',
+          attributes: {},
+        } as never);
+      };
+
+      const getRejection = async (promise: Promise<unknown>): Promise<CaseError> => {
+        try {
+          await promise;
+        } catch (error) {
+          return error;
+        }
+        throw new Error('Expected the update to be rejected');
+      };
+
+      beforeEach(() => {
+        clientArgs.services.caseConfigureService.patch.mockReset();
+      });
+
+      it.each(blockedOwners)(
+        'rejects a change from false to true with a 400 for the %s owner',
+        async (owner) => {
+          mockStoredConfiguration({ owner, extractObservables: false });
+
+          const error = await getRejection(
+            update(
+              'test-id',
+              { version: 'test-version', extractObservables: true },
+              clientArgs,
+              casesClientInternal
+            )
+          );
+
+          expect(error.message).toContain(
+            `Setting extractObservables to true is not allowed for the "${owner}" owner`
+          );
+          expect(error.boomify().output.statusCode).toBe(400);
+          expect(clientArgs.services.caseConfigureService.patch).not.toHaveBeenCalled();
+        }
+      );
+
+      it.each(blockedOwners)('rejects a new template with true for the %s owner', async (owner) => {
+        mockStoredConfiguration({ owner, extractObservables: false });
+
+        const error = await getRejection(
+          update(
+            'test-id',
+            { version: 'test-version', templates: [getTemplate('template_1', true)] },
+            clientArgs,
+            casesClientInternal
+          )
+        );
+
+        expect(error.boomify().output.statusCode).toBe(400);
+        expect(clientArgs.services.caseConfigureService.patch).not.toHaveBeenCalled();
+      });
+
+      it('rejects a template that changes from false to true', async () => {
+        mockStoredConfiguration({
+          owner: 'cases',
+          extractObservables: false,
+          templates: [getTemplate('template_1', false)],
+        });
+
+        const error = await getRejection(
+          update(
+            'test-id',
+            { version: 'test-version', templates: [getTemplate('template_1', true)] },
+            clientArgs,
+            casesClientInternal
+          )
+        );
+
+        expect(error.boomify().output.statusCode).toBe(400);
+        expect(clientArgs.services.caseConfigureService.patch).not.toHaveBeenCalled();
+      });
+
+      it('rejects a new template with true when another template already stores true', async () => {
+        mockStoredConfiguration({
+          owner: 'cases',
+          extractObservables: false,
+          templates: [getTemplate('template_1', true)],
+        });
+
+        const error = await getRejection(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: [getTemplate('template_1', true), getTemplate('template_2', true)],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        );
+
+        expect(error.boomify().output.statusCode).toBe(400);
+        expect(clientArgs.services.caseConfigureService.patch).not.toHaveBeenCalled();
+      });
+
+      it('does not write mappings or field definitions when the update is rejected', async () => {
+        mockStoredConfiguration({ owner: 'cases', extractObservables: false });
+
+        await getRejection(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              extractObservables: true,
+              connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        );
+
+        expect(casesClientInternal.configuration.updateMappings).not.toHaveBeenCalled();
+        expect(casesClientInternal.configuration.createMappings).not.toHaveBeenCalled();
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).not.toHaveBeenCalled();
+        expect(clientArgs.services.caseConfigureService.patch).not.toHaveBeenCalled();
+      });
+
+      it.each(blockedOwners)('accepts a value of false for the %s owner', async (owner) => {
+        mockStoredConfiguration({
+          owner,
+          extractObservables: false,
+          templates: [getTemplate('template_1', false)],
+        });
+
+        await update(
+          'test-id',
+          {
+            version: 'test-version',
+            extractObservables: false,
+            templates: [getTemplate('template_1', false)],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalled();
+      });
+
+      it.each(blockedOwners)(
+        'accepts a request that keeps a stored true for the %s owner',
+        async (owner) => {
+          mockStoredConfiguration({
+            owner,
+            extractObservables: true,
+            templates: [getTemplate('template_1', true)],
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              extractObservables: true,
+              templates: [getTemplate('template_1', true)],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalled();
+        }
+      );
+
+      it('accepts a patch that does not send extractObservables or templates', async () => {
+        mockStoredConfiguration({ owner: 'cases', extractObservables: true });
+
+        await update('test-id', { version: 'test-version' }, clientArgs, casesClientInternal);
+
+        expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalled();
+      });
+
+      it('accepts a change from false to true for the securitySolution owner', async () => {
+        mockStoredConfiguration({ owner: 'securitySolution', extractObservables: false });
+
+        await update(
+          'test-id',
+          {
+            version: 'test-version',
+            extractObservables: true,
+            templates: [getTemplate('template_1', true)],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('create', () => {
@@ -2178,6 +2417,148 @@ describe('client', () => {
         const deleteOrder =
           clientArgs.services.caseConfigureService.delete.mock.invocationCallOrder[0];
         expect(ensureOrder).toBeLessThan(deleteOrder);
+      });
+    });
+
+    describe('extractObservables owner rule', () => {
+      const blockedOwners = ['cases', 'observability'];
+
+      const getTemplate = (
+        key: string,
+        extractObservables: boolean
+      ): TemplatesConfiguration[0] => ({
+        key,
+        name: key,
+        caseFields: { settings: { syncAlerts: true, extractObservables } },
+      });
+
+      const getRejection = async (promise: Promise<unknown>): Promise<CaseError> => {
+        try {
+          await promise;
+        } catch (error) {
+          return error;
+        }
+        throw new Error('Expected the create to be rejected');
+      };
+
+      beforeEach(() => {
+        clientArgs.config = ConfigSchema.validate({});
+        clientArgs.services.caseConfigureService.find.mockReset().mockResolvedValue({
+          saved_objects: [{ id: 'existing-config-id', attributes: { owner: 'cases' } }],
+        } as never);
+        clientArgs.services.caseConfigureService.delete.mockReset();
+        clientArgs.services.caseConfigureService.post.mockReset().mockResolvedValue({
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version',
+          attributes: {
+            connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+            closure_type: 'close-by-user',
+            owner: 'cases',
+            customFields: [],
+            templates: [],
+            observableTypes: [],
+            extractObservables: false,
+            workflowTags: [],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
+            updated_at: null,
+            updated_by: null,
+          },
+        } as never);
+      });
+
+      it.each(blockedOwners)(
+        'rejects extractObservables true with a 400 for the %s owner',
+        async (owner) => {
+          const error = await getRejection(
+            create(
+              { ...baseRequest, owner, extractObservables: true },
+              clientArgs,
+              casesClientInternal
+            )
+          );
+
+          expect(error.message).toContain(
+            `Setting extractObservables to true is not allowed for the "${owner}" owner`
+          );
+          expect(error.boomify().output.statusCode).toBe(400);
+        }
+      );
+
+      it.each(blockedOwners)(
+        'rejects a template with extractObservables true for the %s owner',
+        async (owner) => {
+          const error = await getRejection(
+            create(
+              { ...baseRequest, owner, templates: [getTemplate('template_1', true)] },
+              clientArgs,
+              casesClientInternal
+            )
+          );
+
+          expect(error.boomify().output.statusCode).toBe(400);
+        }
+      );
+
+      it('does not delete the existing configuration or write when the request is rejected', async () => {
+        await getRejection(
+          create(
+            { ...baseRequest, owner: 'cases', extractObservables: true },
+            clientArgs,
+            casesClientInternal
+          )
+        );
+
+        expect(clientArgs.services.caseConfigureService.delete).not.toHaveBeenCalled();
+        expect(clientArgs.services.caseConfigureService.post).not.toHaveBeenCalled();
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).not.toHaveBeenCalled();
+      });
+
+      it.each(blockedOwners)(
+        'accepts false and an omitted value for the %s owner',
+        async (owner) => {
+          await create(
+            {
+              ...baseRequest,
+              owner,
+              extractObservables: false,
+              templates: [getTemplate('template_1', false)],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+          await create({ ...baseRequest, owner }, clientArgs, casesClientInternal);
+
+          expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalledTimes(2);
+        }
+      );
+
+      it('stores false when the value is omitted for an owner that cannot auto-extract', async () => {
+        await create({ ...baseRequest, owner: 'cases' }, clientArgs, casesClientInternal);
+
+        expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attributes: expect.objectContaining({ extractObservables: false }),
+          })
+        );
+      });
+
+      it('accepts true for the securitySolution owner', async () => {
+        await create(
+          {
+            ...baseRequest,
+            owner: 'securitySolution',
+            extractObservables: true,
+            templates: [getTemplate('template_1', true)],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalled();
       });
     });
   });

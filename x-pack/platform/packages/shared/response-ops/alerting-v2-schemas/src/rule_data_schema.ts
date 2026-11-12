@@ -86,7 +86,7 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 /** Metadata (required) */
 
 const METADATA_DESCRIPTION = 'Rule metadata.';
-const METADATA_NAME_DESCRIPTION = 'Rule name (must be unique within the space).';
+const METADATA_NAME_DESCRIPTION = 'Rule name.';
 const METADATA_DESCRIPTION_DESCRIPTION =
   'Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.';
 const METADATA_TAGS_DESCRIPTION = 'Tags for categorization, e.g. ["production", "infra"].';

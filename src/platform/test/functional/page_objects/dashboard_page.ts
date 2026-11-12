@@ -244,6 +244,7 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
+  // Scout equivalent: DashboardApp.navigateToListingFromCurrentDashboard (kbn-scout dashboard_app.ts)
   public async gotoDashboardLandingPage() {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
