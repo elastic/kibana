@@ -23,6 +23,7 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   ExecutionType,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
@@ -188,7 +189,9 @@ export class WorkflowsService {
     public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
     public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
-    public readonly kibanaVersion: string
+    public readonly kibanaVersion: string,
+    /** `workflowsManagement.pages.enabled`. */
+    private readonly pagesEnabled = false
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(core);
@@ -273,6 +276,7 @@ export class WorkflowsService {
           accessControlFilter: await access.readFilter(request),
         });
       },
+      pagesEnabled: this.pagesEnabled,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -733,6 +737,10 @@ export class WorkflowsService {
   ): Promise<GetAvailableConnectorsResponse> {
     await this.ensureInitialized();
     return this.validationService.getAvailableConnectors(spaceId, request);
+  }
+
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return { includePageTrigger: this.pagesEnabled };
   }
 
   public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {

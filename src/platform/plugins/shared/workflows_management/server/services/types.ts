@@ -84,4 +84,6 @@ export interface WorkflowValidationDeps {
     spaceId: string,
     request: KibanaRequest
   ) => Promise<Array<{ id: string; name?: string; definition?: unknown }>>;
+  /** `workflowsManagement.pages.enabled`. Without it, `type: page` fails like an unknown trigger. */
+  pagesEnabled: boolean;
 }

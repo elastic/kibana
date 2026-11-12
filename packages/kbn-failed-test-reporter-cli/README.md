@@ -8,7 +8,11 @@ Reads the JUnit and Scout reports of a CI job and files or updates one `failed-t
 failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job. With
 `--report-failing-suites` it also files one `Failing … suite` issue per test file whose tests
 started failing every attempt build after build, by the Scout test events, in `elastic/kibana` or
-the `--failing-suites-repo owner/name` given.
+the `--failing-suites-repo owner/name` given. A suite that already has an issue of its own, flaky
+or failing, gets a comment on it instead, with the builds the tests failed in and the commits
+since they last passed: at most once a day for each pipeline and branch while the break lasts
+(`failing.postedAt` in the issue's metadata), and right away when the issue is closed and was
+updated in the last 30 days, which reopens it.
 
 `REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening per-test issues: a failure that
 an issue already tracks, per-test or flaky suite, still bumps it, and one that none tracks is
@@ -30,10 +34,12 @@ Tests without an exact file path get no link.
 
 For every failure the reporter asks ci-stats which `failed-test` issue tracks the test, by name,
 file or Scout test id, and links it from the failure's HTML report, the Buildkite annotation and
-the Slack message. If that issue is a flaky suite issue (see below), the failure is recorded there
-as on a per-test issue: the count goes up, the issue is reopened if needed and a comment names the
-test and the build. The count is kept in the issue's `failed-test` metadata; the daily report's
-body and `flaky-test-suite` metadata are left alone.
+the Slack message. If that issue is a suite issue, flaky or failing (see below), only its count
+goes up, without a comment or a reopen: the daily report posts where the suite is still flaky and
+reopens it, and `--report-failing-suites` posts breaks. A job that doesn't run that check on the
+same repository, `elastic/kibana`, reopens the issue and comments on it as on a per-test issue,
+naming the test, as nothing else would post its breaks. The count is kept in the issue's
+`failed-test` metadata; the daily report's body and `flaky-test-suite` metadata are left alone.
 
 ## `node scripts/report_flaky_test_issues`
 
@@ -124,7 +130,8 @@ off.
   (18 / 441), last failed […]", one line per branch when there are several) is posted when the
   suite failed since the last one, or since the issue was filed, and at least
   `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. How to skip the test is at the end of the body.
+  comment. It ends with a "Newly flaky:" list of the flaky tests the issue has not shown yet, in
+  its body or an earlier comment, one bullet each. How to skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.
@@ -145,8 +152,9 @@ refreshes them any more.
 The body ends with `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's file,
 title, framework and test ids, the branches its tests failed on (`suite.branches`, pull requests
 left out), the pipelines its file failed on (`suite.pipelines`), and the reports that found it
-flaky (`report.count`, `report.generatedAt`, the last 30 in `report.history`, and
-`report.commentedAt` once a comment was posted). This command uses it to recognise its own issues;
+flaky (`report.count`, `report.generatedAt`, the last 30 in `report.history`,
+`report.commentedAt` once a comment was posted, and in `report.shownTestIds` the tests the body
+and the comments have shown). This command uses it to recognise its own issues;
 `elastic/kibana-operations` (`triage/`) reads it too: `/skip` for the `describe` block to skip and
 the branches to skip it on, the failed-test alerts for the pipelines and the report count.
 

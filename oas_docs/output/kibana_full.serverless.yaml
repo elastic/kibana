@@ -2455,6 +2455,7 @@ paths:
                 agentNotFoundResponseExample:
                   value:
                     attributes:
+                      code: agentNotFound
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Not Found
                     message: Agent custom-agent-id not found
@@ -2584,6 +2585,7 @@ paths:
                   description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have custom access control — its access is governed by the platform, not per-agent grants.
                   value:
                     attributes:
+                      code: badRequest
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Bad Request
                     message: The default agent (elastic-ai-agent) does not support custom access controls.
@@ -2602,6 +2604,7 @@ paths:
                 agentNotFoundResponseExample:
                   value:
                     attributes:
+                      code: agentNotFound
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Not Found
                     message: Agent custom-agent-id not found
@@ -3308,6 +3311,8 @@ paths:
                 duplicateEntryResponseExample:
                   description: Two entries name the same user id.
                   value:
+                    attributes:
+                      code: badRequest
                     error: Bad Request
                     message: Duplicate ACL entry for user "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0"
                     statusCode: 400
@@ -3331,6 +3336,7 @@ paths:
                 conversationNotFoundResponseExample:
                   value:
                     attributes:
+                      code: conversationNotFound
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Not Found
                     message: Conversation my-conversation-id not found
@@ -23385,6 +23391,7 @@ paths:
                   description: The `conversation_id` is unknown, or the `agent_id` is unknown or not usable by the caller
                   value:
                     attributes:
+                      code: conversationNotFound
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Not Found
                     message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
@@ -40040,6 +40047,10 @@ paths:
                           description: The ID of the proxy to use for this download source. See the proxies API for more information.
                           nullable: true
                           type: string
+                        reserve_diskspace:
+                          description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                          type: boolean
+                          x-state: Generally available
                         secrets:
                           additionalProperties: false
                           type: object
@@ -40219,6 +40230,10 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                reserve_diskspace:
+                  description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                  type: boolean
+                  x-state: Generally available
                 secrets:
                   additionalProperties: false
                   type: object
@@ -40339,6 +40354,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available
                       secrets:
                         additionalProperties: false
                         type: object
@@ -40606,6 +40625,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available
                       secrets:
                         additionalProperties: false
                         type: object
@@ -40792,6 +40815,10 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                reserve_diskspace:
+                  description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                  type: boolean
+                  x-state: Generally available
                 secrets:
                   additionalProperties: false
                   type: object
@@ -40912,6 +40939,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available
                       secrets:
                         additionalProperties: false
                         type: object
@@ -160716,12 +160747,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -160749,12 +160778,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -160802,12 +160829,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -162369,12 +162394,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -162402,12 +162425,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -162531,12 +162552,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -163585,6 +163604,14 @@ components:
                   type: object
                 proxy_url:
                   type: string
+                reserve_diskspace:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                  required:
+                    - enabled
                 secrets:
                   additionalProperties: true
                   type: object
@@ -167583,7 +167610,7 @@ components:
               items:
                 maxLength: 1000000
                 type: string
-              maxItems: 1
+              maxItems: 10
               type: array
             hide_border:
               description: When true, the panel border is hidden. Defaults to false.
@@ -172207,12 +172234,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -172240,12 +172265,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -172302,12 +172325,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -179694,12 +179715,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -179727,12 +179746,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -179856,12 +179873,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -181343,12 +181358,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -181376,12 +181389,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -181447,12 +181458,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
