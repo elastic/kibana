@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
@@ -19,7 +19,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import {
+  type AttachmentRenderProps,
+  type InlineRenderCallbacks,
+} from '@kbn/agent-builder-browser/attachments';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { THREAT_FIELD_LABEL } from '../../../detection_engine/rule_management/components/rule_details/translations';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
@@ -27,8 +32,16 @@ import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/mo
 import { FiltersDisplay } from './filters_display';
 import { MitreAttackDisplay } from './mitre_display';
 import { RuleTypeDetails } from './rule_type_details';
-import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
+import {
+  parseRuleFromAttachment,
+  getRuleTypeLabel,
+  getQueryLabel,
+  getRuleIdFromAttachment,
+  isLatestAttachmentVersion,
+  isRuleDraftAttachment,
+} from './helpers';
 import type { RuleAttachment } from './helpers';
+import { buildPendingChangeButtons } from './rule_action_buttons';
 import {
   INDEX_FIELD_LABEL,
   RULE_TYPE_FIELD_LABEL,
@@ -115,11 +128,18 @@ const getRuleDisplayFields = (rule: RuleResponse) => ({
 
 interface RuleInlineContentProps extends AttachmentRenderProps<RuleAttachment> {
   aiRuleCreation: AiRuleCreationService;
+  application: ApplicationStart;
+  uiSettings: IUiSettingsClient;
+  /** Absent when the card renders outside the chat timeline. */
+  registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
 }
 
 export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   attachment,
   aiRuleCreation,
+  application,
+  uiSettings,
+  registerActionButtons,
 }) => {
   const savingAttachmentIds = useObservable(aiRuleCreation.saving$);
   const isSaving = savingAttachmentIds?.has(attachment.id) ?? false;
@@ -139,6 +159,36 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     );
     return oldSource !== newSource;
   }, [originalRule, rule]);
+
+  // Older versions stay in the timeline; saving one would revert later changes to the rule.
+  const savedRuleId = getRuleIdFromAttachment(attachment);
+  const hasPendingChanges = hasDiff && isLatestAttachmentVersion(attachment);
+
+  const pendingChangeButtons = useMemo(
+    () =>
+      rule && savedRuleId && hasPendingChanges
+        ? buildPendingChangeButtons({
+            rule,
+            aiRuleCreation,
+            application,
+            uiSettings,
+            attachmentId: attachment.id,
+            ruleId: savedRuleId,
+          })
+        : [],
+    [rule, savedRuleId, hasPendingChanges, aiRuleCreation, application, uiSettings, attachment.id]
+  );
+
+  useEffect(() => {
+    if (!registerActionButtons) {
+      return;
+    }
+    registerActionButtons(pendingChangeButtons);
+    return () => registerActionButtons([]);
+  }, [registerActionButtons, pendingChangeButtons]);
+
+  // The limitations describe the create tool, so they apply only to a rule drafted in chat.
+  const showLimitations = !attachment.origin && !isRuleDraftAttachment(attachment);
 
   if (!rule) {
     return null;
@@ -266,10 +316,20 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      <EuiSpacer size="s" />
-      <EuiCallOut size="s" color="primary" iconType="info" title={LIMITATIONS_TITLE}>
-        <EuiText size="xs">{LIMITATIONS_BODY}</EuiText>
-      </EuiCallOut>
+      {showLimitations && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="primary"
+            iconType="info"
+            title={LIMITATIONS_TITLE}
+          >
+            <EuiText size="xs">{LIMITATIONS_BODY}</EuiText>
+          </EuiCallOut>
+        </>
+      )}
 
       {hasDiff && originalRule && (
         <>

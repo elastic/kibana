@@ -1197,4 +1197,198 @@ describe('RuleInlineContent integration', () => {
       expect(screen.queryByText('Changes from saved rule')).not.toBeInTheDocument();
     });
   });
+
+  describe('pending change buttons', () => {
+    const mockUseRule = useRule as jest.Mock;
+    const cardRule = { ...baseRule, type: 'query', query: 'host.name: *', threat: [] };
+    const changedSavedRule = { ...cardRule, query: 'old.query: *' };
+
+    afterEach(() => {
+      mockUseRule.mockReturnValue({ data: undefined });
+    });
+
+    const renderCard = ({
+      rule = cardRule,
+      savedRule,
+      origin = 'saved-rule-id',
+      versionData,
+      application = makeApplication(),
+      uiSettings = makeUiSettings(),
+      registerActionButtons = jest.fn(),
+      withCallbacks = true,
+    }: {
+      rule?: Record<string, unknown>;
+      savedRule?: Record<string, unknown>;
+      origin?: string;
+      versionData?: { version: number; versionCount: number; createdAt: string };
+      application?: ApplicationStart;
+      uiSettings?: IUiSettingsClient;
+      registerActionButtons?: jest.Mock;
+      withCallbacks?: boolean;
+    } = {}) => {
+      mockUseRule.mockReturnValue({ data: savedRule });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation: new AiRuleCreationService(),
+        uiSettings,
+      });
+      const renderCardContent = () =>
+        definition.renderInlineContent!(
+          {
+            attachment: {
+              id: 'test',
+              type: 'security.rule',
+              origin,
+              ...(versionData ? { versionData } : {}),
+              data: { text: JSON.stringify(rule) },
+            },
+            isSidebar: false,
+          },
+          withCallbacks ? { registerActionButtons } : undefined
+        );
+      const utils = render(<>{renderCardContent()}</>);
+      return {
+        ...utils,
+        registerActionButtons,
+        rerenderCard: () => utils.rerender(<>{renderCardContent()}</>),
+      };
+    };
+
+    const lastRegisteredLabels = (registerActionButtons: jest.Mock): string[] =>
+      (registerActionButtons.mock.calls.at(-1)?.[0] ?? []).map(
+        (button: { label: string }) => button.label
+      );
+
+    it('registers "Update rule" and "Apply to rule form" for the latest card that differs from the saved rule', () => {
+      const { registerActionButtons } = renderCard({
+        rule: { ...cardRule, type: 'esql', query: 'FROM logs-* | LIMIT 1' },
+        savedRule: { ...cardRule, type: 'esql', query: 'FROM logs-* | LIMIT 2' },
+        uiSettings: { get: jest.fn(() => true) } as unknown as IUiSettingsClient,
+      });
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([
+        'Update rule',
+        'Apply to rule form',
+      ]);
+    });
+
+    it('registers no buttons for an older card version, even when it differs from the saved rule', () => {
+      const { registerActionButtons } = renderCard({
+        savedRule: changedSavedRule,
+        versionData: { version: 1, versionCount: 3, createdAt: '2026-11-12T00:00:00Z' },
+      });
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+    });
+
+    it('registers no buttons when the card matches the saved rule', () => {
+      const { registerActionButtons } = renderCard({ savedRule: cardRule });
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+    });
+
+    it('ignores differences in server-populated properties (license, meta)', () => {
+      const { registerActionButtons } = renderCard({
+        savedRule: { ...cardRule, license: 'Elastic License v2', meta: { from: '1m' } },
+      });
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+    });
+
+    it('registers no buttons while the saved rule has not loaded, then registers them once it loads with a diff', () => {
+      const { registerActionButtons, rerenderCard } = renderCard();
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+
+      mockUseRule.mockReturnValue({ data: changedSavedRule });
+      rerenderCard();
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([
+        'Apply to rule form',
+        'Update rule',
+      ]);
+    });
+
+    it('registers no buttons for a create-intent card', () => {
+      const { registerActionButtons } = renderCard({ origin: undefined });
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+    });
+
+    it('registers no buttons when the user cannot edit rules', () => {
+      const { registerActionButtons } = renderCard({
+        savedRule: changedSavedRule,
+        application: {
+          ...makeApplication(),
+          capabilities: { [RULES_FEATURE_LATEST]: { edit_rules: false, read_rules: true } },
+        } as unknown as ApplicationStart,
+      });
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+    });
+
+    it('clears its buttons on unmount', () => {
+      const { registerActionButtons, unmount } = renderCard({ savedRule: changedSavedRule });
+      expect(lastRegisteredLabels(registerActionButtons)).toHaveLength(2);
+
+      unmount();
+
+      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+    });
+
+    it('renders without the inline callbacks', () => {
+      renderCard({ savedRule: changedSavedRule, withCallbacks: false });
+
+      expect(screen.getByText('Changes from saved rule')).toBeInTheDocument();
+    });
+
+    it('keeps the diff accordion on an older card version for history', () => {
+      renderCard({
+        savedRule: changedSavedRule,
+        versionData: { version: 1, versionCount: 3, createdAt: '2026-11-12T00:00:00Z' },
+      });
+
+      expect(screen.getByText('Changes from saved rule')).toBeInTheDocument();
+    });
+  });
+
+  describe('limitations callout', () => {
+    const renderCallout = (attachment: { id?: string; origin?: string }) => {
+      const definition = createRuleAttachmentDefinition({
+        application: makeApplication(),
+        aiRuleCreation: new AiRuleCreationService(),
+        uiSettings: makeUiSettings(),
+      });
+      return render(
+        <>
+          {definition.renderInlineContent!({
+            attachment: {
+              id: attachment.id ?? 'test',
+              type: 'security.rule',
+              origin: attachment.origin,
+              data: { text: JSON.stringify({ ...baseRule, type: 'esql', query: 'FROM logs-*' }) },
+            },
+            isSidebar: false,
+          })}
+        </>
+      );
+    };
+
+    it('shows the callout for a rule drafted in chat (no origin)', () => {
+      renderCallout({});
+
+      expect(screen.getByText('AI rule creation limitations')).toBeInTheDocument();
+    });
+
+    it('hides the callout for a card linked to a saved rule', () => {
+      renderCallout({ origin: 'saved-rule-id' });
+
+      expect(screen.queryByText('AI rule creation limitations')).not.toBeInTheDocument();
+    });
+
+    it('hides the callout for the AlertZero rule draft', () => {
+      renderCallout({ id: 'rule-draft' });
+
+      expect(screen.queryByText('AI rule creation limitations')).not.toBeInTheDocument();
+    });
+  });
 });

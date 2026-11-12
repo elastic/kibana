@@ -13,7 +13,7 @@ import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants'
 import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import { createRuleAttachmentDefinition, registerRuleAttachment } from './rule_attachment';
-import { buildRuleActionButtons } from './rule_action_buttons';
+import { buildPendingChangeButtons, buildRuleActionButtons } from './rule_action_buttons';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 const validRule = {
@@ -34,10 +34,10 @@ const mockAttachments: AttachmentServiceStartContract = {
   addAttachmentType: mockAddAttachmentType,
 } as unknown as AttachmentServiceStartContract;
 
-const makeApplication = (canEdit: boolean) =>
+const makeApplication = (canEdit: boolean, canRead = false) =>
   ({
     capabilities: {
-      [RULES_FEATURE_LATEST]: { edit_rules: canEdit },
+      [RULES_FEATURE_LATEST]: { edit_rules: canEdit, read_rules: canRead },
     },
     navigateToApp: jest.fn(),
   } as unknown as ApplicationStart);
@@ -60,7 +60,7 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('definition shape', () => {
-    it('exposes a static getActionButtons so buttons render on every attachment version', () => {
+    it('exposes getActionButtons for the buttons that do not depend on the saved rule', () => {
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({
         application,
@@ -104,12 +104,12 @@ describe('createRuleAttachmentDefinition', () => {
       expect(primaryLabel(buildButtons({ text: JSON.stringify(validRule) }))).toBe('Create rule');
     });
 
-    it('labels an attachment with `origin` set "Update rule"', () => {
-      // `origin` is the persisted, reload-safe link to the saved rule and is the source of truth
-      // for the button: once a card is linked to a saved rule it is an update target.
+    it('gives an attachment with `origin` set only "View rule"', () => {
+      // `origin` links the card to a saved rule. Update rule depends on the saved rule, so the
+      // card body registers it; the static buttons only offer View rule.
       expect(
-        primaryLabel(buildButtons({ text: JSON.stringify(validRule) }, { origin: 'rule-1' }))
-      ).toBe('Update rule');
+        buildButtons({ text: JSON.stringify(validRule) }, { origin: 'rule-1' }).map((b) => b.label)
+      ).toEqual(['View rule']);
     });
 
     it('returns no buttons when the user cannot edit rules', () => {
@@ -264,21 +264,6 @@ describe('buildRuleActionButtons', () => {
     expect(primaryButton(buttons)?.icon).toBe('plusCircle');
   });
 
-  it('returns an "Update rule" primary action for an update-intent attachment', () => {
-    const buttons = buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' });
-    expect(primaryButton(buttons)?.label).toBe('Update rule');
-    expect(primaryButton(buttons)?.icon).toBe('save');
-  });
-
-  it('requests a save with the ruleId injected for an update-intent attachment', () => {
-    const buttons = buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' });
-    primaryButton(buttons)!.handler();
-    expect(aiRuleCreation.requestSaveRule).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'rule-123' }),
-      expect.objectContaining({ attachmentId: 'air:testcard' })
-    );
-  });
-
   it('requests a save with the attachmentId for a create-intent attachment', () => {
     const buttons = buildRuleActionButtons({ ...baseProps });
     primaryButton(buttons)!.handler();
@@ -328,9 +313,131 @@ describe('buildRuleActionButtons', () => {
     expect(labels(buildRuleActionButtons(baseProps))).toContain('Apply to rule form');
   });
 
-  it('includes View rule for update intent whenever a ruleId is set', () => {
+  describe('update intent', () => {
+    const updateProps = () => ({ ...baseProps, intent: 'update' as const, ruleId: 'rule-123' });
+
+    it('returns only View rule', () => {
+      expect(labels(buildRuleActionButtons(updateProps()))).toEqual(['View rule']);
+    });
+
+    it('returns View rule for a user who can read but not edit rules', () => {
+      expect(
+        labels(
+          buildRuleActionButtons({ ...updateProps(), application: makeApplication(false, true) })
+        )
+      ).toEqual(['View rule']);
+    });
+
+    it('returns no buttons for a user who cannot read rules', () => {
+      expect(
+        buildRuleActionButtons({ ...updateProps(), application: makeApplication(false, false) })
+      ).toEqual([]);
+    });
+
+    it('returns no buttons when there is no saved rule id', () => {
+      expect(buildRuleActionButtons({ ...updateProps(), ruleId: undefined })).toEqual([]);
+    });
+
+    it('returns View rule for an ES|QL rule when ENABLE_ESQL is disabled', () => {
+      expect(
+        labels(
+          buildRuleActionButtons({
+            ...updateProps(),
+            rule: { ...baseProps.rule!, type: 'esql' } as unknown as RuleResponse,
+            uiSettings: makeUiSettings(false),
+          })
+        )
+      ).toEqual(['View rule']);
+    });
+
+    it('"View rule" opens the rule details page of the saved rule', () => {
+      const application = makeApplication(true);
+      buildRuleActionButtons({ ...updateProps(), application })[0].handler();
+      expect(application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
+        path: expect.stringContaining('/id/rule-123'),
+      });
+    });
+  });
+});
+
+describe('buildPendingChangeButtons', () => {
+  let aiRuleCreation: AiRuleCreationService;
+  let baseProps: Parameters<typeof buildPendingChangeButtons>[0];
+
+  const byLabel = (buttons: ReturnType<typeof buildPendingChangeButtons>, label: string) =>
+    buttons.find((b) => b.label === label);
+
+  beforeEach(() => {
+    aiRuleCreation = new AiRuleCreationService();
+    jest.spyOn(aiRuleCreation, 'requestSaveRule');
+    jest.spyOn(aiRuleCreation, 'setAiCreatedRule');
+    baseProps = {
+      rule: { name: 'Test Rule', type: 'esql' } as unknown as RuleResponse,
+      aiRuleCreation,
+      application: makeApplication(true),
+      uiSettings: makeUiSettings(),
+      attachmentId: 'air:testcard',
+      ruleId: 'rule-123',
+    };
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('makes an enabled "Update rule" the primary action for an ES|QL rule', () => {
+    const buttons = buildPendingChangeButtons(baseProps);
+    expect(buttons.map((b) => [b.label, b.type, Boolean(b.disabled)])).toEqual([
+      ['Update rule', 'primary', false],
+      ['Apply to rule form', 'secondary', false],
+    ]);
+  });
+
+  it('makes "Apply to rule form" the primary action and disables "Update rule" for a non-ES|QL rule', () => {
+    const buttons = buildPendingChangeButtons({
+      ...baseProps,
+      rule: { ...baseProps.rule, type: 'query' } as unknown as RuleResponse,
+    });
+    expect(buttons.map((b) => [b.label, b.type, Boolean(b.disabled)])).toEqual([
+      ['Apply to rule form', 'primary', false],
+      ['Update rule', 'secondary', true],
+    ]);
+    expect(byLabel(buttons, 'Update rule')?.disabledReason).toEqual(expect.any(String));
+  });
+
+  it('"Update rule" requests a save of the saved rule id with the attachmentId', () => {
+    byLabel(buildPendingChangeButtons(baseProps), 'Update rule')!.handler();
+    expect(aiRuleCreation.requestSaveRule).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'rule-123' }),
+      expect.objectContaining({ attachmentId: 'air:testcard' })
+    );
+  });
+
+  it('"Update rule" guards against a double-submit while a save is in flight', () => {
+    aiRuleCreation.requestSaveRule({ name: 'in flight' } as unknown as RuleResponse, {
+      attachmentId: 'air:testcard',
+    });
+    (aiRuleCreation.requestSaveRule as jest.Mock).mockClear();
+
+    byLabel(buildPendingChangeButtons(baseProps), 'Update rule')!.handler();
+    expect(aiRuleCreation.requestSaveRule).not.toHaveBeenCalled();
+  });
+
+  it('"Apply to rule form" applies the rule and opens the edit page of the saved rule', () => {
+    byLabel(buildPendingChangeButtons(baseProps), 'Apply to rule form')!.handler();
+    expect(aiRuleCreation.setAiCreatedRule).toHaveBeenCalledWith(baseProps.rule, 'air:testcard');
+    expect(baseProps.application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
+      path: expect.stringContaining('/id/rule-123/edit'),
+    });
+  });
+
+  it('returns no buttons when the user lacks RULES_UI_EDIT_PRIVILEGE', () => {
     expect(
-      labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' }))
-    ).toContain('View rule');
+      buildPendingChangeButtons({ ...baseProps, application: makeApplication(false, true) })
+    ).toEqual([]);
+  });
+
+  it('returns no buttons for an ES|QL rule when ENABLE_ESQL is disabled', () => {
+    expect(buildPendingChangeButtons({ ...baseProps, uiSettings: makeUiSettings(false) })).toEqual(
+      []
+    );
   });
 });

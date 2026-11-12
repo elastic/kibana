@@ -72,9 +72,15 @@ export const createRuleAttachmentDefinition = ({
         defaultMessage: 'Security Rule',
       }),
     getIcon: () => 'securityApp',
-    renderInlineContent: (props) => (
+    renderInlineContent: (props, callbacks) => (
       <UserPrivilegesContext.Provider value={privileges}>
-        <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />
+        <RuleInlineContent
+          {...props}
+          aiRuleCreation={aiRuleCreation}
+          application={application}
+          uiSettings={uiSettings}
+          registerActionButtons={callbacks?.registerActionButtons}
+        />
       </UserPrivilegesContext.Provider>
     ),
     // Runs outside the render boundary, so a parse throw here would take down the whole card.

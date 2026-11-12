@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSavedRuleId, isRuleDraftAttachment } from './helpers';
+import { getSavedRuleId, isLatestAttachmentVersion, isRuleDraftAttachment } from './helpers';
 import type { RuleAttachment } from './helpers';
 
 const ruleAttachment = (text: string, origin?: string): RuleAttachment => ({
@@ -38,5 +38,23 @@ describe('isRuleDraftAttachment', () => {
 
   it('is false for any other attachment id', () => {
     expect(isRuleDraftAttachment({ id: 'attachment-1' })).toBe(false);
+  });
+});
+
+describe('isLatestAttachmentVersion', () => {
+  const versionData = (version: number, versionCount: number) => ({
+    versionData: { version, versionCount, createdAt: '2026-11-12T00:00:00Z' },
+  });
+
+  it('is true when the attachment carries no version data', () => {
+    expect(isLatestAttachmentVersion({})).toBe(true);
+  });
+
+  it('is true for the latest version', () => {
+    expect(isLatestAttachmentVersion(versionData(3, 3))).toBe(true);
+  });
+
+  it('is false for an older version', () => {
+    expect(isLatestAttachmentVersion(versionData(1, 3))).toBe(false);
   });
 });
