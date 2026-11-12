@@ -179,17 +179,22 @@ describe('listAttributeValues', () => {
       expect(response.values).toEqual(['checkout', 'default']);
     });
 
-    it('shows a value as its label, and a value without one as it is', async () => {
+    it('has the query apply the labels, and returns the values as the query answers them', async () => {
       const { dependencies, esClient } = createDependencies([
         deployment(['cluster'], 'k8s.deployment', { eu: 'Europe' }),
       ]);
       answerByPattern(esClient, {
         [KUBELET]: { values: ['eu'] },
-        [STATE]: { values: ['eu', 'us'] },
+        [STATE]: { values: ['Europe', 'us'] },
       });
 
       const response = await listAttributeValues(dependencies, request());
 
+      const [kubelet, state] = valuesQueries(esClient);
+      expect(kubelet.query).not.toContain('CASE(');
+      expect(state.query).toContain('CASE(');
+      expect(state.params).toContainEqual({ lk0: 'eu' });
+      expect(state.params).toContainEqual({ lv0: 'Europe' });
       // The first source has no labels, so its `eu` stays as it is beside the labelled one.
       expect(response.values).toEqual(['Europe', 'eu', 'us']);
     });

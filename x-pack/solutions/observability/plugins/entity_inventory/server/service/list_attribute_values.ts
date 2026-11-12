@@ -101,8 +101,8 @@ const planAttributeValues = async (
 
 /**
  * Lists the values a dropdown can offer for `attribute` over the types in scope: one query per
- * plan that can contribute, run concurrently, each plan's value labels applied, merged into
- * sorted distinct values. Throws what `planAttributeValues` throws. A source whose probe or query
+ * plan that can contribute, run concurrently, the value labels applied by the query itself, merged
+ * into sorted distinct values. Throws what `planAttributeValues` throws. A source whose probe or query
  * failed, or whose answer is partial, is reported in `errors[]` and does not fail the request.
  * `truncated` is true only when the limit left values out; then a selected value beyond the cut
  * may come back in `invalidSelections`.
@@ -111,7 +111,7 @@ export const listAttributeValues = async (
   dependencies: AttributeValuesDependencies,
   request: ListAttributeValuesRequest
 ): Promise<AttributeValuesResponse> => {
-  const { attribute, selected, limit, signal } = request;
+  const { selected, limit, signal } = request;
   const typePlans = await planAttributeValues(dependencies, {
     ...request,
     limit: planRowLimit(limit),
@@ -137,7 +137,7 @@ export const listAttributeValues = async (
   const outcomes = await Promise.allSettled(runnable.map(({ query }) => run(query)));
 
   const errors: SourceError[] = typePlans.flatMap(({ probeErrors }) => probeErrors);
-  const labelled = new Set<string>();
+  const offered = new Set<string>();
   outcomes.forEach((outcome, position) => {
     const { plan } = runnable[position];
     if (outcome.status === 'rejected') {
@@ -162,21 +162,19 @@ export const listAttributeValues = async (
         reason: partialValuesReason(),
       });
     }
-    const labels = plan.attributes.find(({ name }) => name === attribute)?.valueLabels;
     outcome.value.rows.forEach((row) => {
-      const raw = row[ATTRIBUTE_VALUE_COLUMN];
-      if (raw === null || raw === undefined || Array.isArray(raw)) {
+      const value = row[ATTRIBUTE_VALUE_COLUMN];
+      if (value === null || value === undefined || Array.isArray(value)) {
         return;
       }
-      const text = String(raw);
-      labelled.add(labels !== undefined && Object.hasOwn(labels, text) ? labels[text] : text);
+      offered.add(String(value));
     });
   });
 
-  const values = [...labelled].sort();
+  const values = [...offered].sort();
   return {
     values: values.slice(0, limit),
-    invalidSelections: selected.filter((value) => !labelled.has(value)),
+    invalidSelections: selected.filter((value) => !offered.has(value)),
     truncated: values.length > limit,
     errors: uniqueErrors(errors),
   };

@@ -132,6 +132,56 @@ describe('buildAttributeValuesQuery', () => {
     expect(query?.params).toEqual([{ from: window.from }, { to: window.to }, { a0v0: 'true' }]);
   });
 
+  describe('with value labels', () => {
+    const labelled = (labels: Record<string, string>) => ({
+      ...plans[0],
+      attributes: plans[0].attributes.map((attribute) =>
+        attribute.name === 'cluster' ? { ...attribute, valueLabels: labels } : attribute
+      ),
+    });
+    const buildLabelled = (labels: Record<string, string>) =>
+      buildAttributeValuesQuery({
+        plan: labelled(labels),
+        identity,
+        columns,
+        attribute: 'cluster',
+        selections: {},
+        window,
+        limit: LIMIT,
+      });
+
+    it('groups by the label, so the sort and the limit see what the response shows', () => {
+      const query = buildLabelled({ aarch64: 'arm64', arm: 'arm64' });
+
+      expect(query?.esql).toContain(
+        'BY `value` = CASE(TO_STRING(`orchestrator.cluster.name`) == ?lk0, ?lv0, ' +
+          'TO_STRING(`orchestrator.cluster.name`) == ?lk1, ?lv1, TO_STRING(`orchestrator.cluster.name`))'
+      );
+      expect(query?.params).toEqual([
+        { from: window.from },
+        { to: window.to },
+        { lk0: 'aarch64' },
+        { lv0: 'arm64' },
+        { lk1: 'arm' },
+        { lv1: 'arm64' },
+      ]);
+    });
+
+    it('sends the labels as parameters, never as text', () => {
+      expect(buildLabelled({ 'a"b': "c'd" })?.esql).not.toContain("c'd");
+    });
+
+    it('keeps the plain grouping for an attribute with no labels', () => {
+      expect(buildLabelled({})?.esql).toContain(
+        'BY `value` = TO_STRING(`orchestrator.cluster.name`)\n'
+      );
+    });
+
+    it('produces a query that parses', () => {
+      expect(() => buildLabelled({ eu: 'Europe' })).not.toThrow();
+    });
+  });
+
   it('produces a query that parses', () => {
     plans.forEach(({ index }) => {
       const query = build(index, 'cluster', { paused: ['true'] });

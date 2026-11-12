@@ -16,7 +16,7 @@ import { resolveIdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
 import { CONTINUATION, INDEX_MODE, TIMESTAMP } from './constants';
 import { assertValidLimit, sourceCommandOf } from './utils';
-import type { GeneratedQuery, QueryPlan, TimeWindow } from './types';
+import type { GeneratedQuery, NamedParams, QueryPlan, TimeWindow } from './types';
 
 /** The column the query returns: the distinct values of the attribute, as text. */
 export const ATTRIBUTE_VALUE_COLUMN = 'value';
@@ -36,6 +36,28 @@ export interface AttributeValuesQueryInput {
 
 const VALUE = quoteIdentifier(ATTRIBUTE_VALUE_COLUMN);
 const LAST_SEEN = quoteIdentifier(LAST_SEEN_COLUMN);
+
+// The expression that reads a field as the label the response shows: the raw values the author
+// maps become their label and any other value stays as it is. The mapping runs before the grouping,
+// so the sort and the limit see the labels and several raw values of one label are one row.
+const labelledValueOf = (
+  field: string,
+  valueLabels?: Record<string, string>
+): { expression: string; params: NamedParams } => {
+  const raw = `TO_STRING(${quoteIdentifier(field)})`;
+  const entries = Object.entries(valueLabels ?? {});
+  if (entries.length === 0) {
+    return { expression: raw, params: [] };
+  }
+  const cases = entries.flatMap((_, index) => [`${raw} == ?lk${index}`, `?lv${index}`]);
+  return {
+    expression: `CASE(${cases.join(', ')}, ${raw})`,
+    params: entries.flatMap(([key, label], index) => [
+      { [`lk${index}`]: key },
+      { [`lv${index}`]: label },
+    ]),
+  };
+};
 
 /**
  * Builds the query listing the distinct values of an attribute in one plan, among the documents
@@ -59,6 +81,10 @@ export const buildAttributeValuesQuery = ({
   }
 
   const { engine, filter } = plan;
+  const labelled = labelledValueOf(
+    field,
+    plan.attributes.find(({ name }) => name === attribute)?.valueLabels
+  );
   const predicates = [
     ...(engine === 'FROM' ? [`${INDEX_MODE} != "time_series"`] : []),
     `${TIMESTAMP} >= ?from AND ${TIMESTAMP} < ?to`,
@@ -72,7 +98,7 @@ export const buildAttributeValuesQuery = ({
     'SET unmapped_fields="nullify";',
     sourceCommandOf(plan),
     `| WHERE ${predicates.join(`${CONTINUATION}AND `)}`,
-    `| STATS ${LAST_SEEN} = MAX(${TIMESTAMP}) BY ${VALUE} = TO_STRING(${quoteIdentifier(field)})`,
+    `| STATS ${LAST_SEEN} = MAX(${TIMESTAMP}) BY ${VALUE} = ${labelled.expression}`,
     `| WHERE ${VALUE} IS NOT NULL`,
     `| KEEP ${VALUE}, ${LAST_SEEN}`,
     `| SORT ${VALUE} ASC`,
@@ -82,7 +108,12 @@ export const buildAttributeValuesQuery = ({
   assertParses(esql);
   return {
     esql,
-    params: [{ from: window.from }, { to: window.to }, ...attributePredicate.params],
+    params: [
+      { from: window.from },
+      { to: window.to },
+      ...attributePredicate.params,
+      ...labelled.params,
+    ],
   };
 };
 
