@@ -90,22 +90,21 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
   });
 
   describe('Model version 3 to 4', () => {
-    const observableTypes = [
+    const observableTypeSettings = [
       { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
       {
         key: 'employee-id',
-        label: 'Employee ID',
-        paths: [{ path: 'user.employee_id', enabled: true }],
+        paths: [{ path: 'user.employee_id', enabled: true, excludedValues: ['E000000'] }],
         valuePattern: '^E\\d{6}$',
       },
-      { key: 'ticket-ref', label: 'Ticket ref' },
     ];
+    const observableTypes = [{ key: 'employee-id', label: 'Employee ID' }];
 
     it('does not change a document', () => {
       const document = createConfigureDocument({
         owner: SECURITY_SOLUTION_OWNER,
         extractObservables: true,
-        observableTypes: [{ key: 'ticket-ref', label: 'Ticket ref' }],
+        observableTypes,
       });
 
       const migrated = migrator.migrate<Record<string, unknown>, Record<string, unknown>>({
@@ -117,28 +116,34 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
       expect(migrated.attributes).toEqual(document.attributes);
     });
 
-    it('keeps the new observable type fields on a rollback to version 3', () => {
+    it('keeps the settings and the unchanged observable types on a rollback to version 3', () => {
       const migrated = migrator.migrate<Record<string, unknown>, Record<string, unknown>>({
-        document: createConfigureDocument({ owner: SECURITY_SOLUTION_OWNER, observableTypes }),
+        document: createConfigureDocument({
+          owner: SECURITY_SOLUTION_OWNER,
+          observableTypes,
+          observableTypeSettings,
+        }),
         fromVersion: 4,
         toVersion: 3,
       });
 
       expect(migrated.attributes.observableTypes).toEqual(observableTypes);
+      expect(migrated.attributes.observableTypeSettings).toEqual(observableTypeSettings);
     });
   });
 
   describe('Model version 4 schemas', () => {
     const modelVersions = caseConfigureSavedObjectType.modelVersions as SavedObjectsModelVersionMap;
     const create = modelVersions['4']?.schemas?.create as ObjectType;
+    const forwardCompatibility = modelVersions['4']?.schemas?.forwardCompatibility as ObjectType;
 
-    it('accepts custom types, built-in overrides, and manual-only types', () => {
+    it('accepts settings of built-in types, custom types, and a type without paths', () => {
       expect(() =>
         create.validate({
-          observableTypes: [
+          observableTypeSettings: [
             { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-            { key: 'employee-id', label: 'Employee ID', valuePattern: '^E\\d{6}$', paths: [] },
-            { key: 'ticket-ref', label: 'Ticket ref' },
+            { key: 'employee-id', valuePattern: '^E\\d{6}$', paths: [] },
+            { key: 'ticket-ref' },
           ],
         })
       ).not.toThrow();
@@ -147,7 +152,7 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
     it('accepts excluded values on a path', () => {
       expect(() =>
         create.validate({
-          observableTypes: [
+          observableTypeSettings: [
             {
               key: 'observable-type-ipv4',
               paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
@@ -158,10 +163,9 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
     });
 
     it('keeps keys of a later version on read, in an entry and in a path', () => {
-      const forwardCompatibility = modelVersions['4']?.schemas?.forwardCompatibility as ObjectType;
       const attributes = {
         extractObservables: true,
-        observableTypes: [
+        observableTypeSettings: [
           {
             key: 'observable-type-agent-id',
             futureEntryKey: 'entry',
@@ -169,8 +173,8 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
               { path: 'agent.id', enabled: false, excludedValues: ['a'], futurePathKey: 'path' },
             ],
           },
-          { key: 'employee-id', label: 'Employee ID', valuePattern: '^E\\d{6}$' },
         ],
+        futureAttribute: 'attribute',
       };
 
       expect(forwardCompatibility.validate(attributes)).toEqual(attributes);
@@ -179,7 +183,7 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
     it('rejects a path without the enabled flag', () => {
       expect(() =>
         create.validate({
-          observableTypes: [{ key: 'employee-id', label: 'Employee ID', paths: [{ path: 'a' }] }],
+          observableTypeSettings: [{ key: 'employee-id', paths: [{ path: 'a' }] }],
         })
       ).toThrow();
     });
