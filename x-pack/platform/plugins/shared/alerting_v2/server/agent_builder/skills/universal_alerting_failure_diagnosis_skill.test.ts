@@ -6,15 +6,22 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   ALERTING_TOOL_IDS,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
   UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
   getUniversalAlertingFailureDiagnosisSkillBadge,
 } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { createAlertingV2Availability } from './alerting_v2_availability';
-import { createUniversalAlertingFailureDiagnosisSkill } from './universal_alerting_failure_diagnosis_skill';
+import {
+  createUniversalAlertingFailureDiagnosisSkill,
+  withExperimentalFeaturesRequired,
+} from './universal_alerting_failure_diagnosis_skill';
 
 const createDeps = () => ({
   logger: {
@@ -56,6 +63,64 @@ describe('createUniversalAlertingFailureDiagnosisSkill', () => {
     const skill = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
+  });
+
+  describe('universal alerting experimental features gate', () => {
+    const createContext = (experimentalFeaturesEnabled: boolean) => {
+      const uiSettings = uiSettingsServiceMock.createClient();
+      uiSettings.get.mockResolvedValue(experimentalFeaturesEnabled);
+      return {
+        uiSettings,
+        context: { request: httpServerMock.createKibanaRequest(), uiSettings, spaceId: 'default' },
+      };
+    };
+
+    const createBaseAvailability = (): AvailabilityConfig & {
+      handler: jest.Mock;
+    } => ({
+      cacheMode: 'none',
+      handler: jest.fn().mockResolvedValue({ status: 'available' }),
+    });
+
+    it('is unavailable when alerting:v2:experimentalFeatures is off', async () => {
+      const base = createBaseAvailability();
+      const { context, uiSettings } = createContext(false);
+
+      await expect(withExperimentalFeaturesRequired(base).handler(context)).resolves.toEqual({
+        status: 'unavailable',
+        reason: `The ${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID} skill requires the ${ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID} setting`,
+      });
+      expect(uiSettings.get).toHaveBeenCalledWith(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
+      expect(base.handler).not.toHaveBeenCalled();
+    });
+
+    it('defers to the shared alerting availability when experimental features are on', async () => {
+      const base = createBaseAvailability();
+      base.handler.mockResolvedValue({
+        status: 'unavailable',
+        reason: 'not an Observability space',
+      });
+      const { context } = createContext(true);
+
+      await expect(withExperimentalFeaturesRequired(base).handler(context)).resolves.toEqual({
+        status: 'unavailable',
+        reason: 'not an Observability space',
+      });
+      expect(base.handler).toHaveBeenCalledWith(context);
+    });
+
+    it('keeps the shared availability cache mode', () => {
+      expect(withExperimentalFeaturesRequired(createBaseAvailability()).cacheMode).toBe('none');
+    });
+
+    it('is applied to the registered skill', async () => {
+      const skill = createUniversalAlertingFailureDiagnosisSkill(createDeps());
+      const { context } = createContext(false);
+
+      await expect(skill.availability?.handler(context)).resolves.toEqual(
+        expect.objectContaining({ status: 'unavailable' })
+      );
+    });
   });
 
   it('exposes only the rule inline tools to attach and fix rules', async () => {

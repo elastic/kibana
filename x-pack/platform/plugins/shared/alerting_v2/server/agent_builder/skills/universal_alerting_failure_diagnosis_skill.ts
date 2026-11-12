@@ -11,6 +11,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import {
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
   UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
@@ -22,6 +23,25 @@ import { manageRuleTool } from '../tools/manage_rule';
 type UniversalAlertingFailureDiagnosisSkillDeps = ManageRuleToolDeps &
   AttachRuleToolDeps & { availability: AvailabilityConfig };
 
+/** Hides the skill unless the space has Universal Alerting experimental features enabled. */
+export const withExperimentalFeaturesRequired = (
+  availability: AvailabilityConfig
+): AvailabilityConfig => ({
+  ...availability,
+  handler: async (context) => {
+    const experimentalFeaturesEnabled = await context.uiSettings.get<boolean>(
+      ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
+    if (!experimentalFeaturesEnabled) {
+      return {
+        status: 'unavailable',
+        reason: `The ${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID} skill requires the ${ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID} setting`,
+      };
+    }
+    return availability.handler(context);
+  },
+});
+
 export const createUniversalAlertingFailureDiagnosisSkill = (
   deps: UniversalAlertingFailureDiagnosisSkillDeps
 ) =>
@@ -32,7 +52,7 @@ export const createUniversalAlertingFailureDiagnosisSkill = (
     description:
       'Diagnose why a universal alerting rule execution failed and propose a fix. Use when the user asks why a rule failed, or hands over a failed rule execution (error message, timings, rule definition) from the execution history. For each error it lists the possible root causes, including missing index privileges and mapping problems. Covers ES|QL errors (unknown column, unknown index, type mismatch), authorization errors, recovery and no-data query failures, oversized query responses, and execution timeouts. At this stage it only diagnoses rule failures: action policy failures, notification workflow failures and connector issues are out of scope. Not for creating new rules (use the rule-authoring skill).',
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
-    availability: deps.availability,
+    availability: withExperimentalFeaturesRequired(deps.availability),
     content: `## When to Use This Skill
 
 Use this skill when:
