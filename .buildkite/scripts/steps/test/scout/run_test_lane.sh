@@ -65,11 +65,11 @@ flaky_count() {
   jq -r '.stats.flaky // 0' "$report" 2>/dev/null || echo 0
 }
 
-# True if a config's JSON report exists and records no unexpected test results
+# True if a config's JSON report exists and records no unexpected test results or run-level errors
 all_tests_passed() {
   local report
   report="$(json_report_path "$1")"
-  [[ -f "$report" ]] && jq -e '.stats.unexpected == 0' "$report" > /dev/null 2>&1
+  [[ -f "$report" ]] && jq -e '.stats.unexpected == 0 and (.errors | length) == 0' "$report" > /dev/null 2>&1
 }
 
 # After a config fails, persist its failed spec files so the next attempt can re-run only those.
@@ -271,6 +271,9 @@ run_scout_tests() {
 
   local start_time
   start_time=$(date +%s)
+
+  # Node does not create the report directory itself
+  mkdir -p "$HANG_DIAGNOSTICS_DIR"
 
   set +e
   timeout --kill-after=1m "$CONFIG_RUN_TIMEOUT" \

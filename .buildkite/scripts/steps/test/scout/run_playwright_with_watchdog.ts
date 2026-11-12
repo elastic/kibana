@@ -23,9 +23,12 @@ import { constants } from 'node:os';
  * Usage: node run_playwright_with_watchdog.ts <json report path> <command> [args...]
  */
 
-const REPORT_GRACE_MS = 2 * 60 * 1000;
-const CHECK_INTERVAL_MS = 5 * 1000;
-const DIAGNOSTIC_REPORT_WAIT_MS = 10 * 1000;
+// Env overrides exist for the tests
+const durationMs = (name: string, fallbackMs: number) => Number(process.env[name] ?? fallbackMs);
+
+const REPORT_GRACE_MS = durationMs('SCOUT_WATCHDOG_REPORT_GRACE_MS', 2 * 60 * 1000);
+const CHECK_INTERVAL_MS = durationMs('SCOUT_WATCHDOG_CHECK_INTERVAL_MS', 5 * 1000);
+const DIAGNOSTIC_REPORT_WAIT_MS = durationMs('SCOUT_WATCHDOG_DIAGNOSTIC_WAIT_MS', 10 * 1000);
 const SIGNAL_GRACE_MS = 30 * 1000;
 const TIMEOUT_EXIT_CODE = 124;
 
