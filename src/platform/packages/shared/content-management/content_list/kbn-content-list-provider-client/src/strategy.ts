@@ -255,9 +255,15 @@ const toTagReferences = (tagIds?: string[]): SavedObjectReference[] | undefined 
 /**
  * Identifies a server fetch. Tag filters are part of the key because they are
  * sent to the server, so changing them has to invalidate the cached snapshot.
+ * IDs are sorted so the same set selected in a different order — or restored
+ * from the URL — reuses the snapshot instead of refetching it.
  */
 const getFetchKey = (searchQuery: string, tagFilter?: IncludeExcludeFilter): string =>
-  JSON.stringify([searchQuery, tagFilter?.include ?? [], tagFilter?.exclude ?? []]);
+  JSON.stringify([
+    searchQuery,
+    [...(tagFilter?.include ?? [])].sort(),
+    [...(tagFilter?.exclude ?? [])].sort(),
+  ]);
 
 const RESERVED_FILTER_KEYS = new Set<string>(['search']);
 

@@ -253,6 +253,16 @@ describe('createClientStrategy', () => {
       expect(mockFindItems).toHaveBeenCalledTimes(1);
     });
 
+    it('does not call the server when the same tags are selected in a different order', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: ['tag-1', 'tag-2'] } } }));
+      await findItems(createParams({ filters: { tag: { include: ['tag-2', 'tag-1'] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledTimes(1);
+    });
+
     it('reuses cached items when only filters change', async () => {
       const item1: UserContentCommonSchema = { ...createMockItem('1'), createdBy: 'u_jane' };
       const item2: UserContentCommonSchema = { ...createMockItem('2'), createdBy: 'u_diego' };
