@@ -325,11 +325,11 @@ export interface UiamServicePublic {
   /**
    * Returns the principal UIAM records as the creator of the internal UIAM API key a request
    * carries, or `undefined` when UIAM reports none we support. Any other credential, and an
-   * external (user-created) key, resolves to `undefined` without asking UIAM: the key is
-   * authenticated with Kibana's own client authentication, which UIAM rejects for external keys.
+   * external (user-created) key, resolves to `undefined` without asking UIAM: the lookup carries
+   * the client authentication the request already has, which UIAM rejects for external keys.
    * Results are cached per key, so the caller must have authenticated the key: a cached creator
-   * outlives a revoked or expired key. A failed request is thrown for the caller to log and is not
-   * cached, while a response without a supported creator resolves to `undefined`.
+   * outlives a revoked or expired key. A failed request is thrown for the caller to log and is
+   * not cached, while a response without a supported creator resolves to `undefined`.
    */
   getApiKeyCreator(params: GetUiamApiKeyCreatorParams): Promise<UiamApiKeyCreator | undefined>;
 
@@ -917,23 +917,22 @@ export class UiamService implements UiamServicePublic {
       return cached;
     }
 
-    const lookup = this.#fetchApiKeyCreator(authorization);
+    const lookup = this.#fetchApiKeyCreator(request);
     this.#apiKeyCreators.set(cacheKey, lookup);
     // A failed lookup says nothing about the key, so it is not kept.
     lookup.catch(() => this.#apiKeyCreators.delete(cacheKey));
     return lookup;
   }
 
-  async #fetchApiKeyCreator(
-    authorization: HTTPAuthorizationHeader
-  ): Promise<UiamApiKeyCreator | undefined> {
+  async #fetchApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined> {
     const requestOptions: RequestInit & { dispatcher?: Agent } = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': this.#userAgentHeader,
-        ...this.#getClientAuthenticationHeaders(),
-        Authorization: authorization.toString(),
+        // Whatever client authentication already speaks for the key is kept, as for every other
+        // call made for a request, because the key may be bound to another client.
+        ...this.#getRequestAuthenticationHeaders(request),
       },
       dispatcher: this.#dispatcher,
     };

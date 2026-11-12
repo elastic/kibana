@@ -1589,13 +1589,22 @@ describe('UiamService', () => {
 
   describe('#getApiKeyCreator', () => {
     const authorization = new HTTPAuthorizationHeader('ApiKey', 'essu_api_key');
+    // A background task's fake request, which Kibana's own client authentication speaks for.
     const getCreator = (credential: HTTPAuthorizationHeader = authorization) =>
       uiamService.getApiKeyCreator({
-        request: httpServerMock.createKibanaRequest({
+        request: httpServerMock.createFakeKibanaRequest({
           headers: { authorization: credential.toString() },
         }),
         user: null,
       });
+    const getCreatorForRealRequest = (headers: Record<string, string>) =>
+      uiamService.getApiKeyCreator({
+        request: httpServerMock.createKibanaRequest({
+          headers: { authorization: authorization.toString(), ...headers },
+        }),
+        user: null,
+      });
+    const lastRequestHeaders = () => fetchSpy.mock.calls[0][1].headers;
     const respondWith = (creator?: string | Record<string, string | number>) =>
       fetchSpy.mockResolvedValue({
         ok: true,
@@ -1628,6 +1637,37 @@ describe('UiamService', () => {
           dispatcher: AGENT_MOCK,
         }
       );
+    });
+
+    describe('client authentication', () => {
+      beforeEach(() => respondWith({ type: 'user', user_id: 12345 }));
+
+      it("uses Kibana's own for a self-call carrying a valid attestation", async () => {
+        await getCreatorForRealRequest({
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'secret',
+            authorization
+          ),
+        });
+
+        expect(lastRequestHeaders()).toEqual(
+          expect.objectContaining({ [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret' })
+        );
+      });
+
+      it("keeps another client's relayed authentication instead of replacing it with Kibana's", async () => {
+        await getCreatorForRealRequest({ [ES_CLIENT_AUTHENTICATION_HEADER]: 'relayed-secret' });
+
+        expect(lastRequestHeaders()).toEqual(
+          expect.objectContaining({ [ES_CLIENT_AUTHENTICATION_HEADER]: 'relayed-secret' })
+        );
+      });
+
+      it("does not borrow Kibana's for a real request that carries neither", async () => {
+        await getCreatorForRealRequest({});
+
+        expect(lastRequestHeaders()).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+      });
     });
 
     it.each([
