@@ -67,7 +67,7 @@ export const AESOP_DRIFT_MONITOR_INTERVAL_MINUTES = 60;
 export const AESOP_DRIFT_MONITOR_LOOKBACK_MINUTES = 120;
 
 /** API version for the internal drift-monitor routes the A/B workflow calls. */
-export const AESOP_DRIFT_MONITOR_ROUTES_API_VERSION = '2026-11-11' as const;
+export const AESOP_DRIFT_MONITOR_ROUTES_API_VERSION = '1';
 
 /** Internal route paths the A/B compare workflow calls around deploys. */
 export const AESOP_DRIFT_MONITOR_ROUTE_PATH =
