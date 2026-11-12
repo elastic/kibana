@@ -41,6 +41,30 @@ describe('getReturnedOutputNames', () => {
     ).toEqual(['real']);
   });
 
+  it('ignores workflow.output steps that fail or cancel the run', () => {
+    const emitOnFailure = (status: string) => ({
+      name: 'on_error',
+      type: 'workflow.output',
+      status,
+      with: { message: 'boom' },
+    });
+    expect(
+      getReturnedOutputNames({
+        steps: [
+          {
+            name: 'emit',
+            type: 'workflow.output',
+            status: 'completed',
+            with: { severity: 'high' },
+          },
+          emitOnFailure('failed'),
+          emitOnFailure('cancelled'),
+        ],
+      })
+    ).toEqual(['severity']);
+    expect(getReturnedOutputNames({ steps: [emitOnFailure('failed')] })).toBeUndefined();
+  });
+
   it('is undefined without a workflow.output step or when one sets a computed value', () => {
     expect(getReturnedOutputNames({ steps: [{ name: 'log', type: 'console' }] })).toBeUndefined();
     expect(

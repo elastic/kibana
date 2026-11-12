@@ -83,6 +83,7 @@ export type {
   ConnectorIdItem,
   StepPropertyItem,
   StepNameInfo,
+  VariableItem,
   YamlValidationErrorSeverity,
   StepPropertyValidationResult,
   YamlValidationDiagnostic,
@@ -106,6 +107,7 @@ export type { ValidationBudget } from './common/validation/budget';
 
 // Variable validation rules (the `variable-validation` rule group)
 export { collectAllVariables } from './common/validation/variables/collect_all_variables';
+export { parseVariablePath } from './common/validation/parse_variable_path';
 export { validateVariables } from './common/validation/variables/validate_variables';
 export { validateLiquidYamlScalars } from './common/validation/variables/validate_liquid_yaml_scalars';
 export { validateLiquidForLoopCollections } from './common/validation/variables/validate_liquid_for_loop_collections';

@@ -29,16 +29,20 @@ const visitSteps = (node: unknown, visit: (step: Record<string, unknown>) => voi
   }
 };
 
+// Callers only get the output of a run that completes; `failed` and `cancelled` fail the call.
+const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
+  step.type === 'workflow.output' && (step.status === undefined || step.status === 'completed');
+
 /**
- * Returns the output names a workflow's `workflow.output` steps set, or undefined when it has no
- * such step (callers then get its last step's output) or one of them sets a computed value.
+ * Returns the output names a workflow's completing `workflow.output` steps set, or undefined when it
+ * has no such step (callers then get its last step's output) or one of them sets a computed value.
  */
 export const getReturnedOutputNames = (definition: unknown): string[] | undefined => {
   const names = new Set<string>();
   let hasOutputStep = false;
   let isComputed = false;
   visitSteps(isRecord(definition) ? definition.steps : undefined, (step) => {
-    if (step.type !== 'workflow.output') {
+    if (!isCompletingOutputStep(step)) {
       return;
     }
     hasOutputStep = true;

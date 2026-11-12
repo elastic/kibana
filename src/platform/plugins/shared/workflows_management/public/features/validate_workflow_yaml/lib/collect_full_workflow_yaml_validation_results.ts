@@ -13,6 +13,7 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextRegistry, YamlValidationResult } from '@kbn/workflows-yaml';
+import { collectAllVariables } from '@kbn/workflows-yaml';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
@@ -123,9 +124,15 @@ export async function collectFullWorkflowYamlValidationResults({
       ...validateWorkflowExecutionIdentity(workflowLookup, lineCounter, context.isManaged)
     );
     results.push(...validateWorkflowInputs(workflowLookup, workflows, lineCounter));
-    results.push(
-      ...validateWorkflowOutputReferences(workflowLookup, workflows, yamlString, lineCounter)
-    );
+    if (workflowGraph) {
+      const variableItems = collectAllVariables(
+        yamlString,
+        yamlDocument,
+        lineCounter,
+        workflowGraph
+      );
+      results.push(...validateWorkflowOutputReferences(workflowLookup, workflows, variableItems));
+    }
 
     const esqlSignal = signal ?? new AbortController().signal;
     results.push(
