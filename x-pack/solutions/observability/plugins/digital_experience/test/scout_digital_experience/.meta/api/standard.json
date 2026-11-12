@@ -1,5 +1,5 @@
 {
-  "sha1": "36e3640991617a2daec73e2d70789b290a734c09",
+  "sha1": "71bc38d8bbed32a936a9b753b9f2a4e534da3f25",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -312,34 +312,6 @@
       }
     },
     {
-      "id": "96751bbc81384b5-1471f41c4236001",
-      "title": "Digital Experience sessions automatic update updates outdated transforms with the stored API key, which only reads the source data and writes sessions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_auto_update.spec.ts",
-        "line": 112,
-        "column": 47
-      }
-    },
-    {
-      "id": "96751bbc81384b5-827d114c66c77c3",
-      "title": "Digital Experience sessions automatic update keeps summarizing sessions after its API key is deleted, and enabling again restores automatic updates",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_auto_update.spec.ts",
-        "line": 160,
-        "column": 32
-      }
-    },
-    {
       "id": "61b75f41cdfdef8-8a5b577f1ca42bf",
       "title": "Enabling Digital Experience sessions enables sessions for an admin",
       "expectedStatus": "passed",
@@ -349,8 +321,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_enable.spec.ts",
-        "line": 63,
-        "column": 5
+        "line": 56,
+        "column": 12
       }
     },
     {
@@ -363,8 +335,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_enable.spec.ts",
-        "line": 72,
-        "column": 23
+        "line": 65,
+        "column": 42
       }
     },
     {

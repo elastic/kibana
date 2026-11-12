@@ -41,6 +41,29 @@ export interface DecisionEdgeRef {
   condition?: string;
 }
 
+/**
+ * One step of a path the agent names. A string is the node id. An object adds the label of the
+ * edge that arrived at that node, and only when several edges join the same pair.
+ */
+export type DecisionPathStep = string | { id: string; condition?: string };
+
+const pathStepId = (step: DecisionPathStep): string => (typeof step === 'string' ? step : step.id);
+
+/** The edges between consecutive steps. A single id is not an edge, so the caller rejects it. */
+export const edgesFromWalk = (steps: readonly DecisionPathStep[]): DecisionEdgeRef[] => {
+  const refs: DecisionEdgeRef[] = [];
+  for (let index = 1; index < steps.length; index++) {
+    const target = steps[index];
+    const condition = typeof target === 'string' ? undefined : target.condition;
+    refs.push({
+      source_node_id: pathStepId(steps[index - 1]),
+      target_node_id: pathStepId(target),
+      ...(condition ? { condition } : {}),
+    });
+  }
+  return refs;
+};
+
 /** Nodes the agent collapsed into a single surviving node; their counts are summed into it. */
 export interface DecisionNodeMerge {
   from: string[];

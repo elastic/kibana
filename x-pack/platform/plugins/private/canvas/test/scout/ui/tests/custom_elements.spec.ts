@@ -20,9 +20,9 @@
  *
  * Auth: canvas:all is required (editing a workpad, managing custom elements).
  *
- * Note: `.canvasElementCard__wrapper` and `.euiCard__title` are CSS class selectors
- * on the saved-elements card — brittle but unavoidable until the element cards
- * get `data-test-subj` attributes. The edit/delete icon buttons already have
+ * Note: `.canvasElementCard__wrapper` is a CSS class selector on the saved-elements
+ * card — brittle but unavoidable until the element cards get `data-test-subj`
+ * attributes. The edit/delete icon buttons already have
  * `canvasElementCard__editButton` and `canvasElementCard__deleteButton` testSubj.
  *
  * TODO: add `data-test-subj` to the element card wrapper and title in Canvas source.
@@ -75,8 +75,7 @@ test.describe('Canvas custom elements', { tag: ['@local-stateful-classic'] }, ()
 
       // eslint-disable-next-line playwright/no-nth-methods
       const card = canvas.elementCards.first();
-      const cardTitle = card.locator('.euiCard__title');
-      await expect(cardTitle).toContainText(NEW_ELEMENT_NAME);
+      await expect(card).toContainText(NEW_ELEMENT_NAME);
       await card.click();
 
       // Workpad should now have 5 elements (original 4 + the new one)
@@ -106,10 +105,9 @@ test.describe('Canvas custom elements', { tag: ['@local-stateful-classic'] }, ()
       await canvas.fillOutCustomElementForm(EDITED_ELEMENT_NAME, EDITED_ELEMENT_DESC);
 
       // eslint-disable-next-line playwright/no-nth-methods
-      await expect(canvas.elementCards.first().locator('.euiCard__title')).toContainText(
-        EDITED_ELEMENT_NAME,
-        { timeout: 10_000 }
-      );
+      await expect(canvas.elementCards.first()).toContainText(EDITED_ELEMENT_NAME, {
+        timeout: 10_000,
+      });
 
       await canvas.closeSavedElementsModal();
     });

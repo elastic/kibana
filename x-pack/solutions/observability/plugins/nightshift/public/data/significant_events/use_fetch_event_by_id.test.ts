@@ -39,6 +39,7 @@ let capturedQueryFn: ((args: { signal?: AbortSignal }) => Promise<unknown>) | un
 let capturedEnabled: boolean | undefined;
 
 jest.mock('@kbn/react-query', () => ({
+  useQueryClient: () => ({ getQueryData: () => undefined }),
   useQuery: (params: {
     queryKey: readonly unknown[];
     enabled: boolean;

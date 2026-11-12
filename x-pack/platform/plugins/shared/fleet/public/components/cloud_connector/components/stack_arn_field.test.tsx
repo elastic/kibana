@@ -16,16 +16,31 @@ const VALID_STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-
 const ERROR_TEXT = /Enter a CloudFormation stack ARN/;
 
 describe('StackArnField', () => {
-  const renderField = (props: { value?: string; onChange?: (value: string) => void } = {}) =>
+  const renderField = (
+    props: { value?: string; onChange?: (value: string) => void; readOnly?: boolean } = {}
+  ) =>
     render(
       <I18nProvider>
         <StackArnField
           value={props.value ?? ''}
           onChange={props.onChange ?? jest.fn()}
+          readOnly={props.readOnly}
           data-test-subj={TEST_SUBJ}
         />
       </I18nProvider>
     );
+
+  it('is editable by default and read-only when asked', () => {
+    const { rerender } = renderField();
+    expect(screen.getByTestId(TEST_SUBJ)).not.toHaveAttribute('readonly');
+
+    rerender(
+      <I18nProvider>
+        <StackArnField value="" onChange={jest.fn()} readOnly data-test-subj={TEST_SUBJ} />
+      </I18nProvider>
+    );
+    expect(screen.getByTestId(TEST_SUBJ)).toHaveAttribute('readonly');
+  });
 
   it('shows no error for an empty or valid value', () => {
     const { rerender } = renderField({ value: '' });

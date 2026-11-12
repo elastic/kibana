@@ -8,9 +8,23 @@
  */
 
 import Path from 'path';
-import { Package, getPluginPackagesFilter } from '..';
+import { Package, getPackages, getPluginPackagesFilter } from '..';
 
 const repoRoot = Path.resolve(__dirname, '../../../../../..');
+
+it('loads a relocated test plugin only when its path is explicitly requested', () => {
+  const plugin = getPackages(repoRoot).find(
+    ({ id }) => id === '@kbn/kbn-tp-custom-visualizations-plugin'
+  );
+  if (!plugin) {
+    throw new Error('Custom visualizations test plugin was not discovered');
+  }
+
+  expect(plugin.getPluginCategories().testPlugin).toBe(true);
+  expect(getPluginPackagesFilter()(plugin)).toBe(false);
+  expect(getPluginPackagesFilter({ paths: [plugin.directory] })(plugin)).toBe(true);
+});
+
 const resolverTestPlugin = Package.fromManifest(
   repoRoot,
   Path.resolve(repoRoot, 'x-pack/solutions/security/test_plugins/resolver_test/kibana.jsonc')

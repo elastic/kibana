@@ -50,7 +50,7 @@ jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
   useFlowBreadcrumb: jest.fn(),
 }));
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
     onPageRefreshStart: jest.fn(),
