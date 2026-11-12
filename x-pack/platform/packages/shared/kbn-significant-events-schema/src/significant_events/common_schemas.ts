@@ -365,8 +365,8 @@ export const CONFIDENCE_CONTRACT_RULE = dedent`
     - it is still happening in the latest hour the descriptions give;
     - the signals agree with each other and with the knowledge-base topology where both speak (an edge no row shows is context, not a disagreement);
     - the descriptions say where it fails (a service, operation or scope).
-    Every check the descriptions show keeps confidence high. Each one they do not show lowers it, and several that are not shown make it low.
-    These never lower confidence, whatever the tier: a reach, outcome or rate that was not measured and so set a lower tier; a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
+    Every check the descriptions show keeps the confidence score near the top of the 0.0–1.0 range. Each one they do not show lowers the score, and several that are not shown put it in the lower half of the range.
+    These never lower the confidence score: a reach, outcome or rate that was not measured; a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
     An event written without signals is rated on the evidence its author holds. Confidence reflects the evidence held, never how strong or unusual the detection was.
   `;
 

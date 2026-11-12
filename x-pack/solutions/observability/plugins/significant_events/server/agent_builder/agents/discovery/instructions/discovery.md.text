@@ -546,7 +546,7 @@ For each event candidate, decide from all signals that will appear in the final 
    - Apply the `confidence` field description to the symptom-support line of the picture. When a
      check of the contract is not shown, write one line in your message naming that check, what it
      follows from and how far it lowers the value, then set the value. When every check is shown,
-     name the evidence that supports the value and set it high.
+     name the evidence that supports the value.
 
 ### Step 6: Emit output
 

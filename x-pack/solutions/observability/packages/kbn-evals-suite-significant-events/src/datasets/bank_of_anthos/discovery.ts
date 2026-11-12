@@ -477,8 +477,8 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 3,
         },
         {
-          id: 'confirmed-severe-confidence-not-low',
-          text: 'The cascade event is confirmed directly by query rows and the failure, its timing and its scope are shown directly by the rows, so its confidence is not low, even if the detections’ p_value is weak.',
+          id: 'confirmed-cascade-confidence-not-low',
+          text: 'The cascade event is confirmed directly by query rows and the failure, its timing and its scope are shown directly by the rows, so its confidence score is not low, even if the detections’ p_value is weak.',
           score: 2,
         },
         {

@@ -71,7 +71,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'detection_metadata_not_confidence',
-    text: '`p_value`, `change_point_type`, and `recent_detection_count` are not inputs to confidence. A confirmed, well-supported finding is not given a low confidence because its `p_value` is weak, and a weakly supported one is not given a high confidence because its `p_value` is strong.',
+    text: '`p_value`, `change_point_type`, and `recent_detection_count` are not inputs to confidence. A confirmed, well-supported finding is not given a low confidence score because its `p_value` is weak, and a weakly supported one is not given a high confidence score because its `p_value` is strong.',
     score: 2,
   },
   {
