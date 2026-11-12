@@ -120,7 +120,7 @@ describe('HuntWatchClient.ingestThreatReport', () => {
     }));
     const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
       huntWorkerWorkflowId: 'worker-1',
-      esClient: { indices: { refresh: jest.fn() } },
+      esClient: { indices: { refresh: jest.fn() }, deleteByQuery: jest.fn() },
     });
     await client.ingestThreatReport({
       'content.body_text': 'text',
@@ -263,7 +263,7 @@ describe('HuntWatchClient.runHunts', () => {
     });
     const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
       huntWorkerWorkflowId: 'worker-1',
-      esClient: { indices: { refresh: async () => ({}) } },
+      esClient: { indices: { refresh: async () => ({}) }, deleteByQuery: async () => ({}) },
     });
     const { runs, invalidBatches } = await client.runHunts(['rep-1']);
     expect(runs.size).toBe(0);
@@ -284,7 +284,7 @@ describe('HuntWatchClient.runHunts', () => {
     });
     const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
       huntWorkerWorkflowId: 'worker-1',
-      esClient: { indices: { refresh: async () => ({}) } },
+      esClient: { indices: { refresh: async () => ({}) }, deleteByQuery: async () => ({}) },
     });
     const { runs, invalidBatches } = await client.runHunts(['rep-0', 'rep-1']);
     expect(runs.size).toBe(0);
@@ -306,7 +306,7 @@ describe('HuntWatchClient.runHunts', () => {
     });
     const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
       huntWorkerWorkflowId: 'worker-1',
-      esClient: { indices: { refresh: async () => ({}) } },
+      esClient: { indices: { refresh: async () => ({}) }, deleteByQuery: async () => ({}) },
       pollIntervalMs: 1,
     });
     await client.runHunts(ids);
@@ -324,7 +324,7 @@ describe('HuntWatchClient.runHunts', () => {
     });
     const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
       huntWorkerWorkflowId: 'worker-1',
-      esClient: { indices: { refresh: async () => ({}) } },
+      esClient: { indices: { refresh: async () => ({}) }, deleteByQuery: async () => ({}) },
     });
     const { runs, invalidBatches } = await client.runHunts(['rep-0', 'rep-1']);
     expect(runs.size).toBe(0);
@@ -340,7 +340,7 @@ describe('HuntWatchClient.runHunts', () => {
     });
     const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
       huntWorkerWorkflowId: 'worker-1',
-      esClient: { indices: { refresh: async () => ({}) } },
+      esClient: { indices: { refresh: async () => ({}) }, deleteByQuery: async () => ({}) },
     });
     const { runs, invalidBatches } = await client.runHunts(['rep-0', 'rep-1']);
     expect(runs.size).toBe(0);

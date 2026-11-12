@@ -32,7 +32,9 @@ export const HUNT_WATCH_MIN_TIMEOUT_MS = PER_HUNT_MS * HUNT_REPORTS_PER_PHASE * 
  */
 export const pinSingleRepetition = (
   env: NodeJS.ProcessEnv,
-  warn: (message: string) => void = console.warn
+  warn: (message: string) => void = (message) => {
+    process.stderr.write(`${message}\n`);
+  }
 ): void => {
   const requested = env.EVAL_REPETITIONS;
   if (requested !== undefined && requested !== '' && parseInt(requested, 10) !== 1) {
