@@ -10,7 +10,11 @@ import type { RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import { InventoryRequestError } from '../inventory/errors/inventory_request_error';
 import { executeEsql, planRowLimit, toSourceError } from '../inventory/executor';
 import type { EsqlQueryResult, SourceError } from '../inventory/executor';
-import { ATTRIBUTE_VALUE_COLUMN, generateAttributeValuesQueries } from '../inventory/generator';
+import {
+  ATTRIBUTE_VALUE_COLUMN,
+  generateAttributeValuesQueries,
+  LAST_SEEN_COLUMN,
+} from '../inventory/generator';
 import type { GeneratedQuery, QueryPlan } from '../inventory/generator';
 import type { ListAttributeValuesRequest } from '../inventory/types';
 import type { AttributeValuesResponse } from '../routes/types';
@@ -141,6 +145,17 @@ export const listAttributeValues = async (
     const { plan } = runnable[position];
     if (outcome.status === 'rejected') {
       errors.push(toSourceError(plan.indexPattern, outcome.reason));
+      return;
+    }
+    // `last_seen` is `MAX(@timestamp)`: typed `null` when no readable index behind the pattern maps
+    // it, which is the only signal for a pattern that matches nothing the user may read.
+    const lastSeen = outcome.value.columns.find(({ name }) => name === LAST_SEEN_COLUMN);
+    if (lastSeen === undefined || lastSeen.type === 'null') {
+      errors.push({
+        indexPattern: plan.indexPattern,
+        status: null,
+        reason: `no readable index behind "${plan.indexPattern}" maps @timestamp`,
+      });
       return;
     }
     if (outcome.value.isPartial) {

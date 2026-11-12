@@ -834,8 +834,14 @@ describe('InventoryService.listAttributeValues', () => {
         return probeResponse(false);
       }
       return {
-        columns: [{ name: 'value', type: 'keyword' }],
-        values: [['false'], ['true']],
+        columns: [
+          { name: 'value', type: 'keyword' },
+          { name: 'last_seen', type: 'date' },
+        ],
+        values: [
+          ['false', '2026-11-01T10:00:00.000Z'],
+          ['true', '2026-11-01T10:00:00.000Z'],
+        ],
         is_partial: false,
         took: 3,
         documents_found: 2,

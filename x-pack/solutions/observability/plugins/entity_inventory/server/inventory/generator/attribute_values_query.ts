@@ -74,7 +74,7 @@ export const buildAttributeValuesQuery = ({
     `| WHERE ${predicates.join(`${CONTINUATION}AND `)}`,
     `| STATS ${LAST_SEEN} = MAX(${TIMESTAMP}) BY ${VALUE} = TO_STRING(${quoteIdentifier(field)})`,
     `| WHERE ${VALUE} IS NOT NULL`,
-    `| KEEP ${VALUE}`,
+    `| KEEP ${VALUE}, ${LAST_SEEN}`,
     `| SORT ${VALUE} ASC`,
     `| LIMIT ${limit}`,
   ].join('\n');

@@ -90,7 +90,7 @@ describe('buildAttributeValuesQuery', () => {
       `    AND ${identity.presenceFilter}`,
       '| STATS `last_seen` = MAX(`@timestamp`) BY `value` = TO_STRING(`orchestrator.cluster.name`)',
       '| WHERE `value` IS NOT NULL',
-      '| KEEP `value`',
+      '| KEEP `value`, `last_seen`',
       '| SORT `value` ASC',
       `| LIMIT ${LIMIT}`,
     ]);

@@ -236,11 +236,15 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const body: AttributeValuesResponse = response.body;
 
-        // Elasticsearch drops the indices the user cannot read, so no source can be probed; each is
-        // reported in `errors`, and that is not truncation.
+        // Elasticsearch drops the indices the user cannot read, so every source's query reads
+        // nothing usable; each is reported in `errors`, and that is not truncation.
         expect(body.values).toStrictEqual([]);
-        expect(body.errors.map(({ indexPattern }) => indexPattern).sort()).toStrictEqual(
-          [STATE_PATTERN, OTEL_PATTERN].sort()
+        expect(body.errors).toStrictEqual(
+          [STATE_PATTERN, OTEL_PATTERN].map((indexPattern) => ({
+            indexPattern,
+            status: null,
+            reason: `no readable index behind "${indexPattern}" maps @timestamp`,
+          }))
         );
         expect(body.truncated).toBe(false);
       }

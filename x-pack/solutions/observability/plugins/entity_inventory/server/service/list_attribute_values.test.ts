@@ -73,7 +73,9 @@ const createDependencies = (definitions: RegisteredDefinitions) => {
   return { dependencies: { getDynamicDefinition, esClient, logger }, esClient, logger };
 };
 
-type Answer = { values: Array<string | null>; isPartial?: boolean } | { throws: Error };
+type Answer =
+  | { values: Array<string | null>; isPartial?: boolean; isUnreadable?: boolean }
+  | { throws: Error };
 
 const isProbe = (query: string) => query.includes('| LIMIT 0');
 
@@ -86,15 +88,21 @@ const probeResponse = () => ({
   documents_found: 0,
 });
 
+// `last_seen` is typed `null` when no readable index behind the pattern maps `@timestamp`.
 const valuesResponse = ({
   values,
   isPartial = false,
+  isUnreadable = false,
 }: {
   values: Array<string | null>;
   isPartial?: boolean;
+  isUnreadable?: boolean;
 }) => ({
-  columns: [{ name: 'value', type: 'keyword' }],
-  values: values.map((value) => [value]),
+  columns: [
+    { name: 'value', type: 'keyword' },
+    { name: 'last_seen', type: isUnreadable ? 'null' : 'date' },
+  ],
+  values: values.map((value) => [value, '2026-11-01T10:00:00.000Z']),
   is_partial: isPartial,
   took: 3,
   documents_found: values.length,
@@ -351,6 +359,25 @@ describe('listAttributeValues', () => {
       expect(response.values).toEqual(['eu']);
       expect(response.errors).toEqual([
         expect.objectContaining({ indexPattern: STATE, reason: expect.stringContaining('shard') }),
+      ]);
+    });
+
+    it('reports a source with no readable index and keeps the values of the others', async () => {
+      const { dependencies, esClient } = createDependencies([deployment(['cluster'])]);
+      answerByPattern(esClient, {
+        [KUBELET]: { values: [], isUnreadable: true },
+        [STATE]: { values: ['eu'] },
+      });
+
+      const response = await listAttributeValues(dependencies, request());
+
+      expect(response.values).toEqual(['eu']);
+      expect(response.errors).toEqual([
+        {
+          indexPattern: KUBELET,
+          status: null,
+          reason: `no readable index behind "${KUBELET}" maps @timestamp`,
+        },
       ]);
     });
 
