@@ -37,7 +37,7 @@ triggers:
         description: "Slug of the target source. Together with the source id it keys concurrency."
       - name: sourceType
         type: string
-        required: true
+        default: ""
         description: "Type of the target source."
       - name: skipFeatures
         type: boolean
