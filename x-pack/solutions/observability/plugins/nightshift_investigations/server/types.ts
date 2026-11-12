@@ -18,6 +18,7 @@ import type {
 } from '@kbn/alerting-v2-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -38,6 +39,7 @@ import type {
 } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { EvalsPluginSetup, EvalsPluginStart } from '@kbn/evals-plugin/server';
+import type { NightshiftSourcesServerStart } from '@kbn/nightshift-sources-plugin/server';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
@@ -100,10 +102,12 @@ export interface NightshiftInvestigationsSetupDeps {
 }
 
 export interface NightshiftInvestigationsStartDeps {
+  isomer: IsomerPluginStart;
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
   alertingVTwo?: AlertingV2ServerStart;
+  nightshiftSources: NightshiftSourcesServerStart;
   proposals?: ProposalsPluginStart;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   /** Scores investigations online. Without it no round is scored. */

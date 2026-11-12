@@ -63,7 +63,7 @@ export const LOCKED_DESCRIPTION = i18n.translate(
   'xpack.nightshift.detectionOnboarding.lockedDescription',
   {
     defaultMessage:
-      'A user with Nightshift manage access and the Manage engines privilege has to set up detection for this space. Ask them to add a source.',
+      'A user with nightshift manage access and the Manage engines privilege has to set up detection for this space. Ask them to add a source.',
   }
 );
 

@@ -258,7 +258,7 @@ const RowTitle: FC<RowTitleProps> = memo(({ type, value }) => {
           font-weight: ${euiTheme.font.weight.semiBold};
         `}
       >{`${type}:`}</span>
-      &nbsp;
+      {'\u00a0'}
       <span
         css={css`
           max-width: ${MAX_WIDTH}px;

@@ -36,7 +36,8 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
-import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
+import { FLYOUT_LINK_TEST_ID } from '../../../flyout/shared/components/test_ids';
 
 import * as i18n from './translations';
 
@@ -63,8 +64,7 @@ export interface UserSummaryProps {
   userName: string;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
-  isFlyoutOpen?: boolean;
-  /** When provided, replaces FlyoutLink for IP addresses (v2 system-flyout context). */
+  /** When provided, replaces OpenFlyoutLink for IP addresses. */
   linkRenderer?: EntityTableLinkRenderer;
   /** When using Entity Store v2: pre-fetched risk state from entity store. */
   riskScoreState?: RiskScoreState<EntityType.user>;
@@ -75,9 +75,8 @@ export interface UserSummaryProps {
   /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
   showInspectButtonAlways?: boolean;
   /**
-   * Optional renderer for the host.ip value. Defaults to the expandable-flyout `FlyoutLink`.
-   * Callers rendering this overview outside the expandable-flyout system (e.g. the attack
-   * Entities tool) can supply a link that opens the network flyout via the new flyout system.
+   * Optional renderer for the host.ip value. Defaults to `OpenFlyoutLink`. Callers (e.g. the
+   * attack Entities tool) can supply their own link to control how the network flyout opens.
    */
   renderIpLink?: (ip: string) => React.ReactNode;
 }
@@ -111,7 +110,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
     userName,
     indexPatterns,
     jobNameById,
-    isFlyoutOpen = false,
     linkRenderer: LinkRenderer,
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
@@ -328,11 +326,10 @@ export const UserOverview = React.memo<UserSummaryProps>(
                       {ip}
                     </LinkRenderer>
                   ) : (
-                    <FlyoutLink
+                    <OpenFlyoutLink
                       field="host.ip"
                       value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
+                      data-test-subj={FLYOUT_LINK_TEST_ID}
                     />
                   );
                 }}
@@ -351,7 +348,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
         firstSeenFromEntityStore,
         lastSeenFromEntityStore,
         firstColumn,
-        isFlyoutOpen,
         renderIpLink,
         LinkRenderer,
       ]

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../common/connections';
 import { useApmParams } from '../../../hooks/use_apm_params';

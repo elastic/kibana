@@ -37,6 +37,9 @@ const createFeatureFlagsServiceMock = (): jest.Mocked<PublicMethodsOf<FeatureFla
     setup: jest.fn().mockImplementation(createFeatureFlagsSetup),
     start: jest.fn().mockImplementation(async () => createFeatureFlagsStart()),
     stop: jest.fn().mockImplementation(Promise.resolve),
+    refresh: jest.fn().mockResolvedValue(undefined),
+    registerHelper: jest.fn(),
+    getEvaluatedFlags: jest.fn().mockReturnValue([]),
   });
 };
 

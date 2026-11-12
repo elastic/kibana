@@ -14,7 +14,6 @@ import {
   type OtelLogDocument,
   type Timerange,
 } from '@kbn/synthtrace-client';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { getDefaultSeed } from './digital_experience_apps';
 import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
@@ -24,11 +23,7 @@ import {
   type DigitalExperienceMobileScenarioOpts,
 } from './digital_experience_mobile_apps';
 
-const range = timerange(
-  new Date('2026-10-16T12:00:00.000Z'),
-  new Date('2026-10-16T12:30:00.000Z'),
-  {} as ToolingLog
-);
+const range = timerange(new Date('2026-10-16T12:00:00.000Z'), new Date('2026-10-16T12:30:00.000Z'));
 
 const FROM = range.from.getTime();
 
@@ -66,8 +61,7 @@ const serviceOf = (doc: EdotReactNativeDocument) =>
 const platformOf = (doc: EdotReactNativeDocument) =>
   (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['telemetry.sdk.name'];
 
-// Failing: See https://github.com/elastic/kibana/issues/303624
-describe.skip('digital experience mobile apps', () => {
+describe('digital experience mobile apps', () => {
   // A 30-minute run is enough for every app to show every signal, and shared by the tests
   let docs: EdotReactNativeDocument[];
   beforeAll(() => {
@@ -192,11 +186,7 @@ describe.skip('digital experience mobile apps', () => {
 
     describe('installations and versions', () => {
       // Each installation opens the app every 90 minutes, so they come back over a longer range
-      const longRange = timerange(
-        range.from,
-        new Date(range.from.getTime() + 6 * 60 * 60_000),
-        {} as ToolingLog
-      );
+      const longRange = timerange(range.from, new Date(range.from.getTime() + 6 * 60 * 60_000));
       let longDocs: EdotReactNativeDocument[];
       beforeAll(() => {
         longDocs = collect({ scale: 0.2 }, longRange);
@@ -247,8 +237,8 @@ describe.skip('digital experience mobile apps', () => {
         const hours = [0, 1, 2, 3].map((hour) => new Date(from + hour * 60 * 60_000));
         const workerDocs = hours
           .slice(1)
-          .flatMap((end, i) => collect(opts, timerange(hours[i], end, {} as ToolingLog)));
-        const unsplit = collect(opts, timerange(hours[0], hours[3], {} as ToolingLog));
+          .flatMap((end, i) => collect(opts, timerange(hours[i], end)));
+        const unsplit = collect(opts, timerange(hours[0], hours[3]));
         const sortKey = (doc: EdotReactNativeDocument) => JSON.stringify(doc);
         expect(workerDocs.map(sortKey).sort()).toEqual(unsplit.map(sortKey).sort());
         DIGITAL_EXPERIENCE_MOBILE_APPS.forEach(({ serviceName }) => {
@@ -337,18 +327,10 @@ describe.skip('digital experience mobile apps', () => {
     });
 
     it('generates the same data for the same seed, however the range is split', () => {
-      const shortRange = timerange(
-        range.from,
-        new Date(range.from.getTime() + 5 * 60_000),
-        {} as ToolingLog
-      );
+      const shortRange = timerange(range.from, new Date(range.from.getTime() + 5 * 60_000));
       const whole = collect({}, shortRange);
-      const first = timerange(
-        shortRange.from,
-        new Date(shortRange.from.getTime() + 2 * 60_000),
-        {} as ToolingLog
-      );
-      const second = timerange(first.to, shortRange.to, {} as ToolingLog);
+      const first = timerange(shortRange.from, new Date(shortRange.from.getTime() + 2 * 60_000));
+      const second = timerange(first.to, shortRange.to);
       const split = [
         ...collect({}, first),
         // A later batch doesn't cut sessions off at its own start

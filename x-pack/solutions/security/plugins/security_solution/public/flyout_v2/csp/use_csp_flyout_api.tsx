@@ -75,9 +75,8 @@ export interface CspFlyoutApi {
  * flyout properties so call sites don't repeat them. `useOpenFlyout` also reports open/close
  * telemetry for every method below.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout, nor
- * about the cloud security posture plugin's `CspSecuritySolutionContext` contract: callers remain
- * responsible for gating on `useIsNewFlyoutEnabled()` and adapting this to that contract (see
+ * This API does not know about the cloud security posture plugin's `CspSecuritySolutionContext`
+ * contract: callers remain responsible for adapting this to that contract (see
  * `useOpenFindingInSystemFlyout` in `cloud_security_posture/hooks`).
  *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).

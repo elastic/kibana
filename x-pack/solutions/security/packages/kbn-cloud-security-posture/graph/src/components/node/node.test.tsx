@@ -10,11 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ReactFlow, Position } from '@xyflow/react';
 import { TestProviders } from '../mock/test_providers';
-import { DiamondNode } from './diamond_node';
-import { EllipseNode } from './ellipse_node';
-import { HexagonNode } from './hexagon_node';
-import { PentagonNode } from './pentagon_node';
-import { RectangleNode } from './rectangle_node';
+import { EntityCardNode } from './entity_card_node';
 import type { NodeProps, EntityNodeViewModel, NodeToolbarItem } from '../types';
 import {
   GRAPH_NODE_EXPAND_BUTTON_ID,
@@ -32,17 +28,13 @@ jest.mock('../constants', () => ({
 }));
 
 const nodeTypes = {
-  diamond: DiamondNode,
-  ellipse: EllipseNode,
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  rectangle: RectangleNode,
+  entity: EntityCardNode,
 };
 
 const renderNodeInFlow = (nodeData: Partial<EntityNodeViewModel> = {}) => {
   const data: Omit<EntityNodeViewModel, 'id' | 'label'> = {
     color: 'primary' as const,
-    shape: 'hexagon' as const,
+    kind: 'entity' as const,
     interactive: true,
     ...nodeData,
   };
@@ -55,7 +47,7 @@ const renderNodeInFlow = (nodeData: Partial<EntityNodeViewModel> = {}) => {
         nodes={[
           {
             id: nodeData.id || 'test-node-id',
-            type: nodeData.shape || 'hexagon',
+            type: nodeData.kind || 'entity',
             position: { x: 0, y: 0 },
             data,
           },
@@ -195,17 +187,17 @@ describe('Entity Nodes', () => {
   });
 
   describe('Stacked Cards', () => {
-    const createNodeProps = (shape: string, count?: number): NodeProps => ({
-      id: `test-${shape}-node`,
+    const createNodeProps = (kind: string, count?: number): NodeProps => ({
+      id: `test-${kind}-node`,
       data: {
-        id: `test-${shape}-node`,
-        label: `Test ${shape}`,
+        id: `test-${kind}-node`,
+        label: `Test ${kind}`,
         color: 'primary',
-        shape,
+        kind,
         interactive: true,
         count,
       } as EntityNodeViewModel,
-      type: shape,
+      type: kind,
       selected: false,
       dragging: false,
       dragHandle: '',
@@ -222,51 +214,38 @@ describe('Entity Nodes', () => {
       draggable: true,
     });
 
-    const nodeComponents = [
-      { shape: 'diamond', component: DiamondNode },
-      { shape: 'ellipse', component: EllipseNode },
-      { shape: 'hexagon', component: HexagonNode },
-      { shape: 'pentagon', component: PentagonNode },
-      { shape: 'rectangle', component: RectangleNode },
-    ];
-
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    describe.each(nodeComponents)(
-      '$shape node stacked cards',
-      ({ shape, component: NodeComponent }) => {
-        it.each([2, 1000])('shows 1 stacked card when count is %d', (count) => {
-          const props = createNodeProps(shape, count);
-          render(
-            <ReactFlow>
-              <NodeComponent {...props} />
-            </ReactFlow>
-          );
+    it.each([2, 1000])('shows 1 stacked card when count is %d', (count) => {
+      const props = createNodeProps('entity', count);
+      render(
+        <ReactFlow>
+          <EntityCardNode {...props} />
+        </ReactFlow>
+      );
 
-          expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
-          expect(screen.getAllByTestId(GRAPH_STACKED_SHAPE_ID)).toHaveLength(1);
-        });
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
+      expect(screen.getAllByTestId(GRAPH_STACKED_SHAPE_ID)).toHaveLength(1);
+    });
 
-        it.each([
-          { count: 1, description: 'count is 1' },
-          { count: 0, description: 'count is 0' },
-          { count: -1, description: 'count is negative' },
-          { count: undefined, description: 'count is undefined' },
-        ])('hides stacked cards when $description', ({ count }) => {
-          const props = createNodeProps(shape, count);
-          render(
-            <ReactFlow>
-              <NodeComponent {...props} />
-            </ReactFlow>
-          );
+    it.each([
+      { count: 1, description: 'count is 1' },
+      { count: 0, description: 'count is 0' },
+      { count: -1, description: 'count is negative' },
+      { count: undefined, description: 'count is undefined' },
+    ])('hides stacked cards when $description', ({ count }) => {
+      const props = createNodeProps('entity', count);
+      render(
+        <ReactFlow>
+          <EntityCardNode {...props} />
+        </ReactFlow>
+      );
 
-          expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
-          expect(screen.queryAllByTestId(GRAPH_STACKED_SHAPE_ID)).toHaveLength(0);
-        });
-      }
-    );
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
+      expect(screen.queryAllByTestId(GRAPH_STACKED_SHAPE_ID)).toHaveLength(0);
+    });
   });
 
   describe('Risk Score Badge', () => {
