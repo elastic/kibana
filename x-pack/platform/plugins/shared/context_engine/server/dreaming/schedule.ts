@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -71,6 +72,10 @@ export const traceDreamingBatchWorkflowIdFor = (aiIndexId: string, spaceId: stri
     spaceId
   )}`;
 
+/** The id of the workflow that links the facts and entities of an AI index. */
+export const relationshipsWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
+
 /** Whether an AI index has dreaming on and configured to build something. */
 export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
   dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
@@ -101,6 +106,8 @@ export const dreamingTemplateValuesFor = (
  * The workflows of an AI index that dreams. Trace dreaming has no switch of its own: it runs with
  * dreaming, and each run skips itself while the AI index has no trace sources. Its batch workflow
  * is what it runs per batch, so it is installed first and is not an automation of the AI index.
+ * The relationships workflow links what the dreaming workflows write, so it comes after them, and
+ * each run skips itself while the dreaming config has no relationship types.
  */
 const DREAMING_WORKFLOWS = [
   {
@@ -119,6 +126,12 @@ const DREAMING_WORKFLOWS = [
     definitionId: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
     label: 'trace dreaming',
     workflowIdFor: traceDreamingWorkflowIdFor,
+    attach: true,
+  },
+  {
+    definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+    label: 'relationships',
+    workflowIdFor: relationshipsWorkflowIdFor,
     attach: true,
   },
 ] as const;

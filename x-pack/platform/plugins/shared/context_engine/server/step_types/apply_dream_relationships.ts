@@ -18,8 +18,8 @@ import type { AiIndexDest, AiIndexHttpItem } from '../../common/http_api/ai_indi
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { findKiRevision, isKiDeleted } from '../ai_indices/ki_revision';
 import { applyOperations, type PlannedWrite } from '../dreaming/apply';
-import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
-import { isVisibleInSpace } from '../dreaming/permissions';
+import { citedMemoryIds, kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
+import { isVisibleInSpace, type KiPermissions } from '../dreaming/permissions';
 import {
   relationshipRefsOf,
   relationshipTypesOf,
@@ -35,6 +35,25 @@ import {
 } from './helpers';
 
 const INACTIVE_STATUSES: ReadonlySet<string> = new Set(['deleted', 'verification_failed']);
+
+/**
+ * Linking stored facts and entities, without the memories behind them: each memory an end cites
+ * stands for that end's permissions, which its KI took from it. A relationship is then based on
+ * the memories its ends cite, takes their permissions, and is rejected when its ends differ.
+ */
+export const permissionsOfCitedMemories = (
+  ends: Iterable<DreamedKi>
+): Map<string, KiPermissions | undefined> => {
+  const permissions = new Map<string, KiPermissions | undefined>();
+  for (const end of ends) {
+    for (const memoryId of citedMemoryIds(end)) {
+      if (!permissions.has(memoryId)) {
+        permissions.set(memoryId, end.permissions);
+      }
+    }
+  }
+  return permissions;
+};
 
 const findActiveKi = async ({
   esClient,
@@ -83,9 +102,16 @@ export const getApplyDreamRelationshipsStepDefinition = ({
       const {
         ai_index_id: aiIndexId,
         memories,
+        items,
         documents = [],
         dry_run: dryRun = false,
       } = context.input;
+      if (!memories && !items) {
+        throw new ExecutionError({
+          type: 'ValidationError',
+          message: 'Pass the memories of the batch, or the items to link',
+        });
+      }
       const parsed = dreamRelationshipChangeSetSchema.safeParse(context.input.changes);
       if (!parsed.success) {
         throw new ExecutionError({
@@ -94,7 +120,9 @@ export const getApplyDreamRelationshipsStepDefinition = ({
         });
       }
       const changeSet = parsed.data;
-      assertSameMemoryPermissions(memories);
+      if (memories) {
+        assertSameMemoryPermissions(memories);
+      }
 
       let aiIndex: AiIndexHttpItem;
       try {
@@ -145,16 +173,21 @@ export const getApplyDreamRelationshipsStepDefinition = ({
         }
       }
 
-      const memoryPermissions = new Map(
-        memories
-          .filter(({ governance }) => !INACTIVE_STATUSES.has(governance?.lifecycle?.status ?? ''))
-          .map(({ id, permissions }) => [id, permissions])
-      );
+      const memoryPermissions = memories
+        ? new Map(
+            memories
+              .filter(
+                ({ governance }) => !INACTIVE_STATUSES.has(governance?.lifecycle?.status ?? '')
+              )
+              .map(({ id, permissions }) => [id, permissions])
+          )
+        : permissionsOfCitedMemories(ends.values());
       const resolved = resolveRelationships(changeSet, {
         relationshipTypes: relationshipTypesOf(aiIndex.dreaming),
         memoryPermissions,
         ends,
         existing,
+        ...(!memories && items && { items: new Set(items) }),
       });
       const plannedWrites = dryRun ? new Map<string, PlannedWrite>() : undefined;
       const { rejected: refused, ...counts } = await applyOperations(
