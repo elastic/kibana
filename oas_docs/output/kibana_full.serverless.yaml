@@ -21767,7 +21767,8 @@ paths:
                             type: string
                       type: array
                     observableTypes:
-                      description: Custom observable type configuration details.
+                      description: |
+                        Custom observable type configuration details, and the changes to the built-in observable types. An entry for a built-in type has its built-in label and only the fields that differ from the defaults.
                       items:
                         type: object
                         properties:
@@ -21778,6 +21779,31 @@ paths:
                           label:
                             description: The observable type label.
                             example: My observable type
+                            type: string
+                          paths:
+                            description: The alert fields that auto-extraction reads for this type.
+                            items:
+                              type: object
+                              properties:
+                                enabled:
+                                  description: When `false`, auto-extraction skips this field.
+                                  example: true
+                                  type: boolean
+                                excludedValues:
+                                  description: Values of this field that auto-extraction skips. The match is exact and case-sensitive.
+                                  example:
+                                    - 'E000000'
+                                  items:
+                                    type: string
+                                  type: array
+                                path:
+                                  description: The name of the alert field.
+                                  example: user.employee_id
+                                  type: string
+                            type: array
+                          valuePattern:
+                            description: A regular expression. Auto-extraction keeps only the values that match it.
+                            example: ^E\d{6}$
                             type: string
                       type: array
                     owner:
@@ -21978,7 +22004,8 @@ paths:
                           type: string
                     type: array
                   observableTypes:
-                    description: Custom observable type configuration details.
+                    description: |
+                      Custom observable type configuration details, and the changes to the built-in observable types. An entry for a built-in type has its built-in label and only the fields that differ from the defaults.
                     items:
                       type: object
                       properties:
@@ -21989,6 +22016,31 @@ paths:
                         label:
                           description: The observable type label.
                           example: My observable type
+                          type: string
+                        paths:
+                          description: The alert fields that auto-extraction reads for this type.
+                          items:
+                            type: object
+                            properties:
+                              enabled:
+                                description: When `false`, auto-extraction skips this field.
+                                example: true
+                                type: boolean
+                              excludedValues:
+                                description: Values of this field that auto-extraction skips. The match is exact and case-sensitive.
+                                example:
+                                  - 'E000000'
+                                items:
+                                  type: string
+                                type: array
+                              path:
+                                description: The name of the alert field.
+                                example: user.employee_id
+                                type: string
+                          type: array
+                        valuePattern:
+                          description: A regular expression. Auto-extraction keeps only the values that match it.
+                          example: ^E\d{6}$
                           type: string
                     type: array
                   owner:
@@ -22069,6 +22121,8 @@ paths:
         content:
           application/json:
             examples:
+              updateCaseConfigurationObservableTypesRequest:
+                $ref: '#/components/examples/Cases_update_case_configuration_observable_types_request'
               updateCaseConfigurationRequest:
                 $ref: '#/components/examples/Cases_update_case_configuration_request'
             schema:
@@ -22190,7 +22244,8 @@ paths:
                           type: string
                     type: array
                   observableTypes:
-                    description: Custom observable type configuration details.
+                    description: |
+                      Custom observable type configuration details, and the changes to the built-in observable types. An entry for a built-in type has its built-in label and only the fields that differ from the defaults.
                     items:
                       type: object
                       properties:
@@ -22201,6 +22256,31 @@ paths:
                         label:
                           description: The observable type label.
                           example: My observable type
+                          type: string
+                        paths:
+                          description: The alert fields that auto-extraction reads for this type.
+                          items:
+                            type: object
+                            properties:
+                              enabled:
+                                description: When `false`, auto-extraction skips this field.
+                                example: true
+                                type: boolean
+                              excludedValues:
+                                description: Values of this field that auto-extraction skips. The match is exact and case-sensitive.
+                                example:
+                                  - 'E000000'
+                                items:
+                                  type: string
+                                type: array
+                              path:
+                                description: The name of the alert field.
+                                example: user.employee_id
+                                type: string
+                          type: array
+                        valuePattern:
+                          description: A regular expression. Auto-extraction keeps only the values that match it.
+                          example: ^E\d{6}$
                           type: string
                     type: array
                   owner:
@@ -148590,6 +148670,25 @@ components:
         owner: cases
         tags:
           - security
+    Cases_update_case_configuration_observable_types_request:
+      description: |
+        The first entry turns off the `agent.id` field of the built-in agent ID type and skips one static value. The second entry is a custom type with one field and a value pattern.
+      summary: Change the observable types that auto-extraction reads.
+      value:
+        observableTypes:
+          - key: observable-type-agent-id
+            paths:
+              - enabled: false
+                excludedValues:
+                  - static-integration-id
+                path: agent.id
+          - key: employee-id
+            label: Employee ID
+            paths:
+              - enabled: true
+                path: user.employee_id
+            valuePattern: ^E\d{6}$
+        version: WzExOSw0XQ==
     Cases_update_case_configuration_request:
       summary: Update the case settings.
       value:
@@ -153774,6 +153873,73 @@ components:
         - page
         - perPage
         - total
+    Cases_observable_types_request:
+      description: |
+        The custom observable types, and the changes to the built-in observable types. An entry with a label is a custom type. An entry without a label changes the fields of the built-in type with the same key. The configuration stores only the fields that differ from the defaults of the built-in type.
+      items:
+        type: object
+        properties:
+          key:
+            description: |
+              The observable type key. For a built-in type, use the key of that type, for example `observable-type-agent-id`.
+            example: employee-id
+            maxLength: 36
+            minLength: 1
+            pattern: ^[a-z0-9_-]+$
+            type: string
+          label:
+            description: |
+              The observable type label. It is required for a custom type. A built-in type has no label in a request.
+            example: Employee ID
+            maxLength: 50
+            minLength: 1
+            type: string
+          paths:
+            description: |
+              The alert fields that auto-extraction reads for this type. For a built-in type, send only the fields that you turn off, add, or give excluded values. A field name can appear one time in an entry.
+            items:
+              type: object
+              properties:
+                enabled:
+                  description: When `false`, auto-extraction skips this field.
+                  example: true
+                  type: boolean
+                excludedValues:
+                  description: |
+                    Values of this field that auto-extraction skips. The match is exact and case-sensitive.
+                  example:
+                    - 'E000000'
+                  items:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  maxItems: 50
+                  minItems: 0
+                  type: array
+                path:
+                  description: The name of the alert field.
+                  example: user.employee_id
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+              required:
+                - path
+                - enabled
+            maxItems: 50
+            minItems: 0
+            type: array
+          valuePattern:
+            description: |
+              A regular expression. Auto-extraction keeps only the values that match it. It applies only to a custom type, and to values of at most 1024 characters. A request with an expression that does not compile returns a 400 error.
+            example: ^E\d{6}$
+            maxLength: 256
+            minLength: 1
+            type: string
+        required:
+          - key
+      maxItems: 19
+      minItems: 0
+      type: array
     Cases_owner:
       description: |
         The application that owns the cases: Stack Management, Observability, or Elastic Security.
@@ -154324,6 +154490,8 @@ components:
           description: |
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
           type: boolean
+        observableTypes:
+          $ref: '#/components/schemas/Cases_observable_types_request'
         owner:
           $ref: '#/components/schemas/Cases_owner'
         templates:
@@ -154924,6 +155092,8 @@ components:
           description: |
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
           type: boolean
+        observableTypes:
+          $ref: '#/components/schemas/Cases_observable_types_request'
         templates:
           $ref: '#/components/schemas/Cases_templates'
         version:
