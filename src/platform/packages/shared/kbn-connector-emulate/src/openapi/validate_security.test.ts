@@ -203,6 +203,9 @@ describe('validateSecurity with checkScopes', () => {
     const forbidden = await call('GET', '/both', { authorization: `Bearer ${oneScheme}` });
 
     expect(forbidden.status).toBe(403);
+    expect(forbidden.headers.get('www-authenticate')).toBe(
+      'Bearer error="insufficient_scope", scope="d"'
+    );
     expect((await forbidden.json()).violations[0].message).toBe(
       'Token was granted b, but the operation needs one of d'
     );
