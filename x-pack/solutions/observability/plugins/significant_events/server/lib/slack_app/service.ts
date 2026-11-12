@@ -470,10 +470,10 @@ export class SlackAppService {
           return agentId;
         }
       }
-      this.logger.debug('No Nightshift agent is available, Slack turns will use the default agent');
+      this.logger.debug('No nightshift agent is available, Slack turns will use the default agent');
     } catch (error) {
       this.logger.warn(
-        `Failed to look up the Nightshift agents, Slack turns will use the default agent: ${this.toErrorMessage(
+        `Failed to look up the nightshift agents, Slack turns will use the default agent: ${this.toErrorMessage(
           error
         )}`
       );

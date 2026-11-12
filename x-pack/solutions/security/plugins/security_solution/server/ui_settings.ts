@@ -35,6 +35,7 @@ import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
   DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
+  DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -596,6 +597,30 @@ export const initUiSettings = (
         { maxSize: Object.values(gapReasonType).length }
       ),
     },
+    ...(experimentalFeatures.automaticTroubleshootingUniversalSkill && {
+      [DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING]: {
+        name: i18n.translate(
+          'xpack.securitySolution.uiSettings.defendConfigurationTroubleshootingUniversalSkillLabel',
+          {
+            defaultMessage: 'Automatic Troubleshooting universal skill',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.defendConfigurationTroubleshootingUniversalSkillDescription',
+          {
+            defaultMessage:
+              'Makes the Automatic Troubleshooting universal skill available in Agent Builder. Controlled by a feature flag.',
+          }
+        ),
+        type: 'boolean',
+        value: true,
+        readonly: true,
+        readonlyMode: 'ui',
+        category: [APP_ID],
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+      },
+    }),
     ...getAlertAnalysisWorkflowSettings(),
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled

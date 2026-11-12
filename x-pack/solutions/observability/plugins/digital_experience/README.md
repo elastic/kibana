@@ -23,11 +23,18 @@ The monitored applications in the selected time range, served by
 `GET /internal/digital_experience/applications`, which requires the Digital Experience and APM
 privileges like the app.
 
-- **Summary:** applications, page loads, JS errors per page load, failed HTTP requests and the
-  applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
-  source; the search narrows only the table.
+- **Summary:** applications, sessions, page loads, JS errors per page load, failed HTTP requests and
+  the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
+  source; the search narrows only the table. The sessions are the total of the EDOT Browser
+  applications, which only the sessions index counts, so it shows a dash while they are read from
+  the raw events (sessions not set up, a range past their lookback, no access to them) and for Classic
+  RUM, which has no sessions.
 - **Partial data:** when one source fails to load, a warning above the summary names it.
-- **Page loads chart:** page loads over time; drag over it to zoom into that range.
+- **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
+  is kept in local storage; drag over it to zoom into that range. The sessions are counted only
+  while the applications are read from the sessions index, so the toggle disables **Sessions**, and
+  says why, when they are not or when only Classic RUM is selected. The choice is kept until they are
+  back, the chart showing page loads meanwhile.
 - **Filters:** environment and source (kept in the URL), and a search on the name.
 - **Table:** per application, its source, page loads, JS errors per page load, LCP / INP / CLS / FCP /
   TTFB p75 colored by rating (with the good / needs improvement / poor shares in the tooltip), JS
@@ -37,6 +44,46 @@ privileges like the app.
   selected environment, a button to show all environments.
 - With all sources, a name with data in both shows its EDOT Browser row with a "+ Classic RUM" hint
   that switches the list to the Classic RUM rows.
+
+**Where the EDOT Browser rows come from:** the sessions index (see [Sessions](#sessions)) when it can
+answer, which takes one cheap search over session summaries instead of aggregating every raw event,
+and the raw OTel events otherwise. The response has the same shape either way, and Classic RUM
+always reads its own indices. The sessions are read when all of these hold, which is checked on every
+request with the transforms' metadata, read as the internal user:
+
+- sessions are set up, their transforms are current (not outdated), healthy (not lagging or failed)
+  and past their first checkpoint, so a build in progress is never shown as lower numbers;
+- the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
+- the user can read `digital-experience-sessions-*`, otherwise the raw events are read quietly;
+- the sessions hold at least one application, so applications that send no `session.id`, which the
+  transform skips, still appear when no application sends one.
+
+A failing sessions search falls back to the raw events too, with a warning in the server log. The
+counts (page loads, JS errors, HTTP requests, failed requests, web vital samples and their ratings)
+are the sums of what each session counted with the list's own filters, so both sources count the same
+events of a session, and the environments are the sessions'. What differs when the sessions are read:
+
+- **Time range:** a session that overlaps the range counts in full, with its events outside the range,
+  as in the Sessions tab. The page loads chart puts a session's page loads at its start, in the same
+  buckets, and leaves out the sessions that started before the range, so its shape differs and its
+  total is a little lower than the table's.
+- **Percentiles:** the p75 of a web vital is the p75 of the sessions' own p75s, as the summaries keep
+  no samples. It is exact when a session has at most one sample of that vital, and higher than the
+  p75 of the samples otherwise: on 3 hours of the synthtrace EDOT Browser data, with about seven
+  samples of a vital per session, it was 2% to 8% higher for LCP, INP, FCP and TTFB and 3% to 18%
+  higher for CLS. The sample counts and the good, needs improvement and poor shares are sums over the
+  sessions, so they only differ by the events below. The Overview, whose figures need samples, always
+  reads the raw events.
+- **Freshness:** the sessions are about `frequency` and the sync delay (a minute) behind the events.
+- **Access:** the sessions hold what the user who enabled them could read, not what the current user
+  can read in the raw indices (see the security note under [Sessions](#sessions)).
+- **Events without `session.id`:** the transform skips them, so they are not counted. In the
+  synthtrace data that is 8.7% of the HTTP requests and 3.8% of the exceptions (every page load and
+  web vital carried one), so the JS errors and HTTP requests of the list are that much lower than
+  from the raw events. An application that sends none is missing while others have sessions.
+- **Failed summaries:** a session the dest pipeline could not summarize has no counts, so its events
+  count as zero.
+- **Last seen:** the end of the application's latest session, which any event can extend.
 
 Numbers, percents, dates and the chart's time zone follow the Advanced Settings.
 
@@ -160,6 +207,15 @@ journey, click and error counts, p75 Core Web Vitals, and user, browser, OS and 
 Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and
 it skips events with an empty `service.name` or `session.id`. User, user agent and geo each come
 from their own latest event that carries them.
+
+The document also holds what the applications list counts, so the list can read it instead of the
+raw events: the environment (`deployment.environment.name`, else the deprecated
+`deployment.environment`, from its latest event that has one), `page_load_count`
+(`browser.navigation_timing` events), `js_error_count` (`exception` events), the HTTP request and
+failed request counts, and per Core Web Vital its samples and how many are good, need improvement
+or poor (`web_vital_samples`, which add up across sessions, unlike the p75). They use the list's own
+filters, so both count the same events. `page_view_count` and `error_count` keep the Sessions tab's
+definitions: they include soft navigations and `event.outcome: failure`, which the list leaves out.
 
 The journey lists distinct pages in first-view order (revisits are not repeated), from the first 30
 page-view URLs. The OTel templates map `url.*` fields as `wildcard`, which `top_metrics` cannot
@@ -298,7 +354,9 @@ There is no disable action yet. One must invalidate the stored API key and delet
 
 ### Reading sessions
 
-Session routes require `read_digital_experience` and query Elasticsearch as the current user, so
+The applications list reads the sessions index as the current user too, and without `read` on it the
+raw events answer instead (see [Applications](#applications-)). Session routes require
+`read_digital_experience` and query Elasticsearch as the current user, so
 readers also need `read` on `digital-experience-sessions-*` (and on the source indices for the
 session detail timeline). Without it they answer 403 naming those privileges; other failures are
 logged and answer 500 without Elasticsearch details:
