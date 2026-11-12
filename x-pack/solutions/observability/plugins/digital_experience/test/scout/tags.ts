@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+// Every spec sets the flag with `PUT /internal/core/_settings`, which only local servers register
+// (`coreApp.allowDynamicConfigOverrides`), so all of them run locally only.
 
-// Flag-on specs. Local only: they ingest mock data and set up sessions, which haven't been tried
-// against Cloud deployments yet.
+// Flag-on specs.
 export const DIGITAL_EXPERIENCE_TAGS = [
   '@local-stateful-classic',
   '@local-serverless-observability_complete',
@@ -20,12 +20,12 @@ export const DIGITAL_EXPERIENCE_WITH_UX_TAGS = ['@local-stateful-classic'];
 
 export const DIGITAL_EXPERIENCE_SERVERLESS_TAGS = ['@local-serverless-observability_complete'];
 
-// Flag-off specs: every Observability deployment, Cloud included. They turn the flag off
-// themselves, so a rollout rule for the deployment doesn't change what they test.
+// Flag-off specs: every Observability project type, Logs Essentials included.
 export const DIGITAL_EXPERIENCE_DISABLED_TAGS = [
-  ...tags.stateful.classic,
-  ...tags.serverless.observability.all,
+  '@local-stateful-classic',
+  '@local-serverless-observability_complete',
+  '@local-serverless-observability_logs_essentials',
 ];
 
 // Stateful only: the ux plugin, which owns the legacy navigation, is disabled on serverless.
-export const DIGITAL_EXPERIENCE_DISABLED_WITH_UX_TAGS = tags.stateful.classic;
+export const DIGITAL_EXPERIENCE_DISABLED_WITH_UX_TAGS = ['@local-stateful-classic'];

@@ -7,7 +7,9 @@ Each spec sets the flag it needs in `beforeAll` and removes the override in `aft
 | Specs | Flag | Deployments (`tags.ts`) |
 | --- | --- | --- |
 | Flag-on (most specs) | `FLAG_ON_OVERRIDE` | local stateful and serverless Observability Complete |
-| Flag-off (`feature_disabled`, `app_access_disabled`, `navigation_disabled`) | `FLAG_OFF_OVERRIDE` | every Observability deployment, Cloud included |
+| Flag-off (`feature_disabled`, `app_access_disabled`, `navigation_disabled`) | `FLAG_OFF_OVERRIDE` | local stateful and serverless Observability Complete and Logs Essentials |
+
+All specs are local only: `apiServices.core.settings` calls `PUT /internal/core/_settings`, which Kibana only registers with `coreApp.allowDynamicConfigOverrides`, and Cloud deployments don't set it.
 
 Specs in a config run one at a time, so one spec's flag doesn't leak into another. Each `global.teardown.ts` also removes the override, in case a spec stopped before its `afterAll`.
 
