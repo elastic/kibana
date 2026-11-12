@@ -24,11 +24,15 @@ export {
 export {
   customContentStateSchema,
   customContentPanelUpdateSchema,
-  customContentDatasetsSchema,
+  customContentDataQueriesSchema,
   readEsqlQuery,
   toEsqlQueryState,
 } from './schema';
-export type { CustomContentState, CustomContentDataset, CustomContentDatasets } from './schema';
+export type {
+  CustomContentState,
+  CustomContentDataQuery,
+  CustomContentDataQueries,
+} from './schema';
 export {
   fitsEsqlQueriesTotalLength,
   ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,

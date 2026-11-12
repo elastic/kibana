@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomContentDataset } from './schema';
+import type { CustomContentDataQuery } from './schema';
 
 export interface QueryChangesParams {
   /** What to show, or what to change. Describes the query when one is generated. */
@@ -19,7 +19,7 @@ export interface QueryChangesParams {
   /** Regenerate the first query from `nlQuery`, starting from the stored one. */
   regenerateESQL?: boolean;
   /** The panel's queries by position, which the fields above would only repeat. */
-  datasets?: readonly CustomContentDataset[];
+  dataQueries?: readonly CustomContentDataQuery[];
   /** The queries the panel holds now. */
   existingQueries: readonly string[];
   isNewPanel: boolean;
@@ -27,13 +27,13 @@ export interface QueryChangesParams {
 
 export interface CustomContentQueryChanges {
   /** What each position should become; positions it does not reach are kept. */
-  datasets?: CustomContentDataset[];
+  dataQueries?: CustomContentDataQuery[];
   /** Remove every query, which leaves a panel with static content. */
   removeAllQueries?: boolean;
 }
 
 /**
- * Says what the callers' single-query fields do to the queries of a panel as `datasets`, the one
+ * Says what the callers' single-query fields do to the queries of a panel as `dataQueries`, the one
  * way `buildCustomContentConfig` is told about queries. A supplied query wins. A new panel gets a
  * generated query unless it is declared data-free. An edit keeps the stored query unless it is
  * replaced, removed or regenerated, so a style-only edit never pays for generation.
@@ -44,27 +44,27 @@ export const toCustomContentQueryChanges = ({
   esql,
   hasData,
   regenerateESQL,
-  datasets,
+  dataQueries,
   existingQueries,
   isNewPanel,
 }: QueryChangesParams): CustomContentQueryChanges => {
-  if (datasets) {
+  if (dataQueries) {
     if (esql !== undefined || hasData === false || regenerateESQL) {
       throw new Error(
-        'datasets replaces esql, hasData: false and regenerateESQL: put each query on its dataset.'
+        'dataQueries replaces esql, hasData: false and regenerateESQL: put each query on its data query.'
       );
     }
     // `index` is where the queries without their own are generated from.
     return {
-      datasets: datasets.map((dataset) =>
-        dataset.description && !dataset.index && index ? { ...dataset, index } : dataset
+      dataQueries: dataQueries.map((dataQuery) =>
+        dataQuery.description && !dataQuery.index && index ? { ...dataQuery, index } : dataQuery
       ),
     };
   }
 
-  if (esql?.trim()) return { datasets: [{ esql }] };
+  if (esql?.trim()) return { dataQueries: [{ esql }] };
   if (esql === null || hasData === false) return { removeAllQueries: true };
 
   const generate = isNewPanel || regenerateESQL || (hasData === true && !existingQueries[0]);
-  return generate ? { datasets: [{ description: nlQuery ?? '', index }] } : {};
+  return generate ? { dataQueries: [{ description: nlQuery ?? '', index }] } : {};
 };

@@ -9,7 +9,7 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERIES,
   CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH,
 } from '@kbn/custom-content-common';
-import { resolveDatasets } from './resolve_datasets';
+import { resolveDataQueries } from './resolve_data_queries';
 
 const generate = jest.fn();
 
@@ -20,13 +20,13 @@ beforeEach(() => {
   });
 });
 
-describe('resolveDatasets', () => {
+describe('resolveDataQueries', () => {
   it('refuses queries that are too long together before paying to generate any', async () => {
     const long = 'x'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH);
 
     await expect(
-      resolveDatasets({
-        datasets: [{ esql: long }, { esql: 'FROM b' }, { description: 'totals' }],
+      resolveDataQueries({
+        dataQueries: [{ esql: long }, { esql: 'FROM b' }, { description: 'totals' }],
         existingQueries: [],
         generate,
       })
@@ -36,8 +36,8 @@ describe('resolveDatasets', () => {
 
   describe('a new panel', () => {
     it('generates a query from each description, by position', async () => {
-      const { queries, changed } = await resolveDatasets({
-        datasets: [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }],
+      const { queries, changed } = await resolveDataQueries({
+        dataQueries: [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }],
         existingQueries: [],
         generate,
       });
@@ -64,8 +64,8 @@ describe('resolveDatasets', () => {
     });
 
     it('uses a supplied query as it is and does not generate it', async () => {
-      const { queries } = await resolveDatasets({
-        datasets: [{ esql: 'FROM mine' }, { description: 'top hosts' }],
+      const { queries } = await resolveDataQueries({
+        dataQueries: [{ esql: 'FROM mine' }, { description: 'top hosts' }],
         existingQueries: [],
         generate,
       });
@@ -75,8 +75,8 @@ describe('resolveDatasets', () => {
     });
 
     it('lets a supplied query win over a description', async () => {
-      const { queries } = await resolveDatasets({
-        datasets: [{ esql: 'FROM mine', description: 'ignored' }],
+      const { queries } = await resolveDataQueries({
+        dataQueries: [{ esql: 'FROM mine', description: 'ignored' }],
         existingQueries: [],
         generate,
       });
@@ -97,8 +97,8 @@ describe('resolveDatasets', () => {
         return `FROM ${description}`;
       });
 
-      const pending = resolveDatasets({
-        datasets: [{ description: 'a' }, { description: 'b' }, { description: 'c' }],
+      const pending = resolveDataQueries({
+        dataQueries: [{ description: 'a' }, { description: 'b' }, { description: 'c' }],
         existingQueries: [],
         generate,
       });
@@ -110,15 +110,17 @@ describe('resolveDatasets', () => {
     });
 
     it.each([[{}], [{ index: 'logs' }], [{ description: '  ' }]])(
-      'rejects a dataset with nothing to build a query from: %j',
-      async (dataset) => {
+      'rejects a data query with nothing to build a query from: %j',
+      async (dataQuery) => {
         await expect(
-          resolveDatasets({
-            datasets: [{ description: 'ok' }, dataset],
+          resolveDataQueries({
+            dataQueries: [{ description: 'ok' }, dataQuery],
             existingQueries: [],
             generate,
           })
-        ).rejects.toThrow(/Dataset 2 adds a new query, so it needs a `description` or an `esql`/);
+        ).rejects.toThrow(
+          /Data query 2 adds a new query, so it needs a `description` or an `esql`/
+        );
       }
     );
   });
@@ -126,9 +128,9 @@ describe('resolveDatasets', () => {
   describe('an existing panel', () => {
     const existingQueries = ['FROM main', 'FROM second', 'FROM third'];
 
-    it('keeps the queries of empty datasets and of positions the list does not reach', async () => {
-      const { queries, changed } = await resolveDatasets({
-        datasets: [{}],
+    it('keeps the queries of empty data queries and of positions the list does not reach', async () => {
+      const { queries, changed } = await resolveDataQueries({
+        dataQueries: [{}],
         existingQueries,
         generate,
       });
@@ -139,8 +141,8 @@ describe('resolveDatasets', () => {
     });
 
     it('regenerates only the position that has a description, seeded with its stored query', async () => {
-      const { queries, changed } = await resolveDatasets({
-        datasets: [{}, { description: 'top 10 hosts' }],
+      const { queries, changed } = await resolveDataQueries({
+        dataQueries: [{}, { description: 'top 10 hosts' }],
         existingQueries,
         generate,
       });
@@ -161,8 +163,8 @@ describe('resolveDatasets', () => {
     });
 
     it('replaces the query at a position with a supplied one', async () => {
-      const { queries, changed } = await resolveDatasets({
-        datasets: [{}, {}, { esql: 'FROM replaced' }],
+      const { queries, changed } = await resolveDataQueries({
+        dataQueries: [{}, {}, { esql: 'FROM replaced' }],
         existingQueries,
         generate,
       });
@@ -172,8 +174,8 @@ describe('resolveDatasets', () => {
     });
 
     it('reports an unchanged position as unchanged when its replacement is identical', async () => {
-      const { changed } = await resolveDatasets({
-        datasets: [{ esql: 'FROM main' }],
+      const { changed } = await resolveDataQueries({
+        dataQueries: [{ esql: 'FROM main' }],
         existingQueries,
         generate,
       });
@@ -181,8 +183,8 @@ describe('resolveDatasets', () => {
     });
 
     it('adds a query after the stored ones', async () => {
-      const { queries, changed } = await resolveDatasets({
-        datasets: [{}, {}, {}, { description: 'a fourth' }],
+      const { queries, changed } = await resolveDataQueries({
+        dataQueries: [{}, {}, {}, { description: 'a fourth' }],
         existingQueries,
         generate,
       });
@@ -200,29 +202,29 @@ describe('resolveDatasets', () => {
 
     it('rejects a new position with nothing to build a query from', async () => {
       await expect(
-        resolveDatasets({
-          datasets: [{}, {}, {}, {}],
+        resolveDataQueries({
+          dataQueries: [{}, {}, {}, {}],
           existingQueries,
           generate,
         })
-      ).rejects.toThrow(/Dataset 4 adds a new query/);
+      ).rejects.toThrow(/Data query 4 adds a new query/);
     });
   });
 
   it('rejects a list that would leave the panel with more queries than it can hold', async () => {
-    const datasets = Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 }, () => ({
+    const dataQueries = Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 }, () => ({
       esql: 'FROM x',
     }));
-    await expect(resolveDatasets({ datasets, existingQueries: [], generate })).rejects.toThrow(
-      new RegExp(`holds at most ${CUSTOM_CONTENT_MAX_ESQL_QUERIES} queries`)
-    );
+    await expect(
+      resolveDataQueries({ dataQueries, existingQueries: [], generate })
+    ).rejects.toThrow(new RegExp(`holds at most ${CUSTOM_CONTENT_MAX_ESQL_QUERIES} queries`));
   });
 
   it('fails when a query cannot be generated, naming nothing that was half-applied', async () => {
     generate.mockRejectedValueOnce(new Error('no query produced'));
     await expect(
-      resolveDatasets({
-        datasets: [{ description: 'a' }, { description: 'b' }],
+      resolveDataQueries({
+        dataQueries: [{ description: 'a' }, { description: 'b' }],
         existingQueries: [],
         generate,
       })

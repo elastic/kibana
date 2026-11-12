@@ -19,14 +19,14 @@ describe('toCustomContentQueryChanges', () => {
   describe('a new panel', () => {
     it('generates the first query from the request, from the given index', () => {
       expect(changes({ isNewPanel: true, hasData: true, index: 'logs-*' })).toEqual({
-        datasets: [{ description: 'Show KPI', index: 'logs-*' }],
+        dataQueries: [{ description: 'Show KPI', index: 'logs-*' }],
       });
     });
 
     it('is data-free when hasData is false, unless a query is supplied', () => {
       expect(changes({ isNewPanel: true, hasData: false })).toEqual({ removeAllQueries: true });
       expect(changes({ isNewPanel: true, hasData: false, esql: 'FROM a' })).toEqual({
-        datasets: [{ esql: 'FROM a' }],
+        dataQueries: [{ esql: 'FROM a' }],
       });
     });
   });
@@ -41,7 +41,7 @@ describe('toCustomContentQueryChanges', () => {
 
     it('replaces the first query with a supplied one, which wins over regenerating', () => {
       expect(changes({ existingQueries, esql: 'FROM a', regenerateESQL: true })).toEqual({
-        datasets: [{ esql: 'FROM a' }],
+        dataQueries: [{ esql: 'FROM a' }],
       });
     });
 
@@ -52,27 +52,27 @@ describe('toCustomContentQueryChanges', () => {
 
     it('regenerates the first query, or generates one when the panel has none and has data', () => {
       expect(changes({ existingQueries, regenerateESQL: true })).toEqual({
-        datasets: [{ description: 'Show KPI', index: undefined }],
+        dataQueries: [{ description: 'Show KPI', index: undefined }],
       });
       expect(changes({ hasData: true })).toEqual({
-        datasets: [{ description: 'Show KPI', index: undefined }],
+        dataQueries: [{ description: 'Show KPI', index: undefined }],
       });
     });
   });
 
-  describe('datasets', () => {
+  describe('data queries', () => {
     it('are used as they are, with the index for the descriptions that have none of their own', () => {
       expect(
         changes({
           index: 'logs',
-          datasets: [
+          dataQueries: [
             { description: 'totals' },
             { description: 'hosts', index: 'hosts' },
             { esql: 'FROM a' },
           ],
         })
       ).toEqual({
-        datasets: [
+        dataQueries: [
           { description: 'totals', index: 'logs' },
           { description: 'hosts', index: 'hosts' },
           { esql: 'FROM a' },
@@ -81,10 +81,10 @@ describe('toCustomContentQueryChanges', () => {
     });
 
     it('cannot be combined with the single-query fields', () => {
-      const datasets = [{ description: 'totals' }];
-      expect(() => changes({ datasets, esql: 'FROM a' })).toThrow('datasets replaces');
-      expect(() => changes({ datasets, hasData: false })).toThrow('datasets replaces');
-      expect(() => changes({ datasets, regenerateESQL: true })).toThrow('datasets replaces');
+      const dataQueries = [{ description: 'totals' }];
+      expect(() => changes({ dataQueries, esql: 'FROM a' })).toThrow('dataQueries replaces');
+      expect(() => changes({ dataQueries, hasData: false })).toThrow('dataQueries replaces');
+      expect(() => changes({ dataQueries, regenerateESQL: true })).toThrow('dataQueries replaces');
     });
   });
 });

@@ -61,7 +61,7 @@ const customContentTarget = (
     esql?: string | null;
     has_data?: boolean;
     regenerate_esql?: boolean;
-    datasets?: Array<{ description?: string; esql?: string; index?: string }>;
+    dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
   } = {}
 ) => ({
   type: 'custom_content' as const,
@@ -75,7 +75,7 @@ const attachmentTarget = (
     esql?: string | null;
     has_data?: boolean | null;
     regenerate_esql?: boolean | null;
-    datasets?: Array<{ description?: string; esql?: string; index?: string }>;
+    dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
   } = {}
 ) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
 
@@ -759,7 +759,7 @@ describe('createVisualizationTool handler', () => {
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
           nlQuery: 'a status board per host',
-          datasets: [{ esql: 'FROM logs | STATS count() BY host' }],
+          dataQueries: [{ esql: 'FROM logs | STATS count() BY host' }],
           existing: undefined,
         })
       );
@@ -794,10 +794,10 @@ describe('createVisualizationTool handler', () => {
       expect(JSON.stringify(data)).not.toContain('row["host"]');
     });
 
-    describe('datasets', () => {
-      const datasets = [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }];
+    describe('data queries', () => {
+      const dataQueries = [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }];
 
-      it('hands the datasets of a new panel to the builder and stores every query it returns', async () => {
+      it('hands the data queries of a new panel to the builder and stores every query it returns', async () => {
         mockBuildCustomContent.mockResolvedValue({
           esqlQueries: ['FROM logs | STATS n = COUNT(*)', 'FROM logs | STATS n = COUNT(*) BY host'],
           template: '<div>two queries</div>',
@@ -806,11 +806,11 @@ describe('createVisualizationTool handler', () => {
 
         const { result, attachments } = await runHandler({
           query: 'totals above a host list',
-          target: customContentTarget({ datasets }),
+          target: customContentTarget({ dataQueries }),
         });
 
         expect(mockBuildCustomContent).toHaveBeenCalledWith(
-          expect.objectContaining({ datasets, existing: undefined })
+          expect.objectContaining({ dataQueries, existing: undefined })
         );
         expect(attachments.add).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -829,7 +829,7 @@ describe('createVisualizationTool handler', () => {
           {
             query: 'show the busiest',
             target: attachmentTarget('att-1', {
-              datasets: [{}, { description: 'the ten busiest services' }],
+              dataQueries: [{}, { description: 'the ten busiest services' }],
             }),
           },
           { attachments: storedAttachment({ esql: ['FROM a', 'FROM b'] }) }
@@ -859,30 +859,30 @@ describe('createVisualizationTool handler', () => {
         (result.results[0].data as { message: string }).message;
 
       it.each([[{ esql: 'FROM x' }], [{ has_data: false }]])(
-        'rejects datasets combined with the single-query fields of a new panel: %j',
+        'rejects data queries combined with the single-query fields of a new panel: %j',
         async (extra) => {
           const { result } = await runHandler({
             query: 'x',
-            target: customContentTarget({ datasets, ...extra }),
+            target: customContentTarget({ dataQueries, ...extra }),
           });
 
           expect(result.results[0].type).toBe(ToolResultType.error);
-          expect(messageOf(result)).toContain('"datasets" replaces');
+          expect(messageOf(result)).toContain('"dataQueries" replaces');
           expect(mockBuildCustomContent).not.toHaveBeenCalled();
         }
       );
 
-      it('rejects datasets combined with regenerate_esql on an attachment update', async () => {
+      it('rejects data queries combined with regenerate_esql on an attachment update', async () => {
         const { result } = await runHandler(
           {
             query: 'x',
-            target: attachmentTarget('att-1', { datasets, regenerate_esql: true }),
+            target: attachmentTarget('att-1', { dataQueries, regenerate_esql: true }),
           },
           { attachments: storedAttachment() }
         );
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect(messageOf(result)).toContain('"datasets" replaces');
+        expect(messageOf(result)).toContain('"dataQueries" replaces');
         expect(mockBuildCustomContent).not.toHaveBeenCalled();
       });
     });
@@ -895,7 +895,7 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          datasets: [
+          dataQueries: [
             { description: 'document count per minute as a line chart', index: undefined },
           ],
         })
@@ -965,7 +965,7 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          datasets: [{ description: 'add the total', index: undefined }],
+          dataQueries: [{ description: 'add the total', index: undefined }],
           existing: { esqlQueries: [], template: '<div>old</div>' },
         })
       );
@@ -990,12 +990,12 @@ describe('createVisualizationTool handler', () => {
       expect(mockBuildCustomContent).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          datasets: [{ description: 'also split by operating system', index: undefined }],
+          dataQueries: [{ description: 'also split by operating system', index: undefined }],
         })
       );
       expect(mockBuildCustomContent).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ datasets: [{ esql: 'FROM metrics-*' }] })
+        expect.objectContaining({ dataQueries: [{ esql: 'FROM metrics-*' }] })
       );
     });
 

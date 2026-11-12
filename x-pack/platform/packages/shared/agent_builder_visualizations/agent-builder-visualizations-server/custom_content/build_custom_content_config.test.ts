@@ -38,8 +38,8 @@ type BuildParams = Partial<Parameters<typeof buildCustomContentConfig>[0]> &
     Omit<Parameters<typeof toCustomContentQueryChanges>[0], 'existingQueries' | 'isNewPanel'>
   >;
 
-// What the callers do: say what the queries should become with the single-query fields, or datasets.
-const build = ({ index, esql, hasData, regenerateESQL, datasets, ...params }: BuildParams) => {
+// What the callers do: say what the queries should become with the single-query fields, or data queries.
+const build = ({ index, esql, hasData, regenerateESQL, dataQueries, ...params }: BuildParams) => {
   const nlQuery = 'nlQuery' in params ? params.nlQuery : 'Show KPI';
   return buildCustomContentConfig({
     ...deps,
@@ -51,7 +51,7 @@ const build = ({ index, esql, hasData, regenerateESQL, datasets, ...params }: Bu
       esql,
       hasData,
       regenerateESQL,
-      datasets,
+      dataQueries,
       existingQueries: params.existing?.esqlQueries ?? [],
       isNewPanel: !params.existing,
     }),
@@ -318,7 +318,7 @@ describe('buildCustomContentConfig', () => {
     });
   });
 
-  describe('datasets', () => {
+  describe('data queries', () => {
     const stored = [STORED, 'FROM metrics', 'FROM traces'];
     const existing = { esqlQueries: stored, template: OLD_TEMPLATE };
 
@@ -329,7 +329,7 @@ describe('buildCustomContentConfig', () => {
 
       const result = await build({
         nlQuery: 'A KPI row and a ranked list',
-        datasets: [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }],
+        dataQueries: [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }],
       });
 
       expect(result.esqlQueries).toEqual(['FROM totals', 'FROM top hosts']);
@@ -350,7 +350,7 @@ describe('buildCustomContentConfig', () => {
     });
 
     it('uses a supplied query as it is, without generating it', async () => {
-      const result = await build({ datasets: [{ esql: EXPLICIT }, { esql: 'FROM b' }] });
+      const result = await build({ dataQueries: [{ esql: EXPLICIT }, { esql: 'FROM b' }] });
 
       expect(mockGenerate).not.toHaveBeenCalled();
       expect(result.esqlQueries).toEqual([EXPLICIT, 'FROM b']);
@@ -360,7 +360,7 @@ describe('buildCustomContentConfig', () => {
       const result = await build({
         nlQuery: 'Add the p95 to the second table',
         existing,
-        datasets: [{}, { esql: 'FROM metrics | STATS p95 = PERCENTILE(x, 95)' }],
+        dataQueries: [{}, { esql: 'FROM metrics | STATS p95 = PERCENTILE(x, 95)' }],
       });
 
       expect(result.esqlQueries).toEqual([
@@ -379,7 +379,7 @@ describe('buildCustomContentConfig', () => {
       await build({
         nlQuery: 'Show ten',
         existing,
-        datasets: [{}, { description: 'the ten busiest services' }],
+        dataQueries: [{}, { description: 'the ten busiest services' }],
       });
 
       expect(mockGenerate).toHaveBeenCalledTimes(1);
@@ -395,21 +395,21 @@ describe('buildCustomContentConfig', () => {
       const result = await build({
         nlQuery: 'Add a table of errors',
         existing,
-        datasets: [{}, {}, {}, { esql: 'FROM errors' }],
+        dataQueries: [{}, {}, {}, { esql: 'FROM errors' }],
       });
 
       expect(result.esqlQueries).toEqual([...stored, 'FROM errors']);
     });
 
     it('keeps the template, without a model call, when nothing changes and there is no prompt', async () => {
-      const result = await build({ nlQuery: undefined, existing, datasets: [{}] });
+      const result = await build({ nlQuery: undefined, existing, dataQueries: [{}] });
 
       expect(mockResolveTemplate).not.toHaveBeenCalled();
       expect(result).toEqual({ esqlQueries: stored, template: OLD_TEMPLATE });
     });
 
     it('rewrites the template when a query changes, even with no prompt', async () => {
-      await build({ nlQuery: undefined, existing, datasets: [{}, { esql: 'FROM other' }] });
+      await build({ nlQuery: undefined, existing, dataQueries: [{}, { esql: 'FROM other' }] });
 
       expect(mockResolveTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ prompt: '', changedQueries: [false, true, false] })
@@ -422,7 +422,7 @@ describe('buildCustomContentConfig', () => {
       await build({
         existing,
         resolveEsqlVariables,
-        datasets: [{}, { esql: 'FROM changed | WHERE h == ?host' }],
+        dataQueries: [{}, { esql: 'FROM changed | WHERE h == ?host' }],
       });
 
       expect(resolveEsqlVariables).toHaveBeenCalledTimes(1);
@@ -432,9 +432,9 @@ describe('buildCustomContentConfig', () => {
       );
     });
 
-    it('fails the build when a dataset cannot be turned into a query', async () => {
-      await expect(build({ existing, datasets: [{}, {}, {}, {}] })).rejects.toThrow(
-        /Dataset 4 adds a new query/
+    it('fails the build when a data query cannot be turned into a query', async () => {
+      await expect(build({ existing, dataQueries: [{}, {}, {}, {}] })).rejects.toThrow(
+        /Data query 4 adds a new query/
       );
     });
   });

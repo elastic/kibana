@@ -15,7 +15,7 @@ import {
 import {
   customContentStateSchema,
   customContentPanelUpdateSchema,
-  customContentDatasetsSchema,
+  customContentDataQueriesSchema,
   readEsqlQuery,
   toEsqlQueryState,
 } from './schema';
@@ -195,10 +195,10 @@ describe('customContentPanelUpdateSchema', () => {
   });
 });
 
-describe('customContentDatasetsSchema', () => {
+describe('customContentDataQueriesSchema', () => {
   it('accepts descriptions, supplied queries and empty entries', () => {
     expect(
-      customContentDatasetsSchema.safeParse([
+      customContentDataQueriesSchema.safeParse([
         { description: 'totals', index: 'logs' },
         { esql: 'FROM logs | LIMIT 5' },
         {},
@@ -206,44 +206,48 @@ describe('customContentDatasetsSchema', () => {
     ).toBe(true);
   });
 
-  it('rejects an empty list and more datasets than a panel can hold', () => {
-    expect(customContentDatasetsSchema.safeParse([]).success).toBe(false);
+  it('rejects an empty list and more data queries than a panel can hold', () => {
+    expect(customContentDataQueriesSchema.safeParse([]).success).toBe(false);
     expect(
-      customContentDatasetsSchema.safeParse(
+      customContentDataQueriesSchema.safeParse(
         Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 }, () => ({ esql: 'FROM x' }))
       ).success
     ).toBe(false);
   });
 
-  it('bounds the text of a dataset', () => {
+  it('bounds the text of a data query', () => {
     expect(
-      customContentDatasetsSchema.safeParse([
+      customContentDataQueriesSchema.safeParse([
         { description: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1) },
       ]).success
     ).toBe(false);
     expect(
-      customContentDatasetsSchema.safeParse([
+      customContentDataQueriesSchema.safeParse([
         { esql: 'a'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH + 1) },
       ]).success
     ).toBe(false);
-    expect(customContentDatasetsSchema.safeParse([{ index: 'a'.repeat(257) }]).success).toBe(false);
+    expect(customContentDataQueriesSchema.safeParse([{ index: 'a'.repeat(257) }]).success).toBe(
+      false
+    );
   });
 });
 
-describe('customContentPanelUpdateSchema datasets', () => {
+describe('customContentPanelUpdateSchema data queries', () => {
   const parse = (input: Record<string, unknown>) =>
     customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', ...input });
 
-  it('accepts datasets with a prompt', () => {
-    expect(parse({ prompt: 'Show it', datasets: [{ description: 'totals' }] }).success).toBe(true);
+  it('accepts data queries with a prompt', () => {
+    expect(parse({ prompt: 'Show it', dataQueries: [{ description: 'totals' }] }).success).toBe(
+      true
+    );
   });
 
-  it('counts datasets as a change', () => {
-    expect(parse({ datasets: [{ esql: 'FROM logs' }] }).success).toBe(true);
+  it('counts data queries as a change', () => {
+    expect(parse({ dataQueries: [{ esql: 'FROM logs' }] }).success).toBe(true);
   });
 
-  it('needs a prompt when a dataset has a description', () => {
-    const result = parse({ datasets: [{ description: 'totals' }] });
+  it('needs a prompt when a data query has a description', () => {
+    const result = parse({ dataQueries: [{ description: 'totals' }] });
     expect(result.success).toBe(false);
     expect(JSON.stringify(result)).toContain('needs a prompt');
   });
@@ -254,9 +258,9 @@ describe('customContentPanelUpdateSchema datasets', () => {
     [{ regenerateEsql: true }],
     [{ index: 'logs' }],
   ])('cannot be combined with the single-query fields: %j', (extra) => {
-    const result = parse({ prompt: 'Show it', datasets: [{ esql: 'FROM a' }], ...extra });
+    const result = parse({ prompt: 'Show it', dataQueries: [{ esql: 'FROM a' }], ...extra });
     expect(result.success).toBe(false);
-    expect(JSON.stringify(result)).toContain('datasets replaces');
+    expect(JSON.stringify(result)).toContain('dataQueries replaces');
   });
 });
 

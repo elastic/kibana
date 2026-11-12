@@ -34,7 +34,7 @@ FROM kibana_sample_data_flights
  * for headline numbers, which are one row with a column per number, and keeps the query to the data
  * it was described for, since the panel's other queries cover the rest.
  */
-export const CUSTOM_CONTENT_DATASET_INSTRUCTIONS = `
+export const CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS = `
 ## One of several queries
 
 This query is one of several that feed the same panel, and the template reads each by its own name. It returns ONLY the data it was described for: the panel's other queries cover the rest, so do not widen it to include them.
@@ -70,7 +70,7 @@ export const generateCustomContentEsql = async ({
     ...params,
     extraInstructions:
       queryCount > 1
-        ? `${CUSTOM_CONTENT_ESQL_INSTRUCTIONS}${CUSTOM_CONTENT_DATASET_INSTRUCTIONS}`
+        ? `${CUSTOM_CONTENT_ESQL_INSTRUCTIONS}${CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS}`
         : CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
   });
   if (!query) {

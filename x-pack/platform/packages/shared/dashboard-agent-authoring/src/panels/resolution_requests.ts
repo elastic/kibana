@@ -57,8 +57,8 @@ const getPanelEditError = (
 
 type ResolutionRequestResult = { request: PanelResolutionRequest } | { error: string };
 
-/** The single-query fields `datasets` stands in for, so sending both is ambiguous. */
-const getReplacedByDatasets = ({
+/** The single-query fields `dataQueries` stands in for, so sending both is ambiguous. */
+const getReplacedByDataQueries = ({
   esql,
   hasData,
   regenerateESQL,
@@ -75,10 +75,10 @@ const getReplacedByDatasets = ({
   ...(index !== undefined ? ['`index`'] : []),
 ];
 
-const datasetsReplaceError = (id: string, replaced: string[]): string =>
-  `Panel "${id}" uses \`datasets\`, which replaces ${replaced.join(
+const dataQueriesReplaceError = (id: string, replaced: string[]): string =>
+  `Panel "${id}" uses \`dataQueries\`, which replaces ${replaced.join(
     ', '
-  )}: put each query's \`esql\` and \`index\` on its dataset and drop the others.`;
+  )}: put each query's \`esql\` and \`index\` on its data query and drop the others.`;
 
 const getStoredQueries = (panel: AttachmentPanel): string[] =>
   (panel.config as { esql_query?: string[] }).esql_query ?? [];
@@ -89,28 +89,28 @@ const toCreationResolutionRequest = (
   id: string
 ): ResolutionRequestResult => {
   if (content.renderer === 'custom_content') {
-    const { renderer, query, esql, hasData, regenerateESQL, index, datasets } = content;
-    if (datasets) {
-      const replaced = getReplacedByDatasets(content);
+    const { renderer, query, esql, hasData, regenerateESQL, index, dataQueries } = content;
+    if (dataQueries) {
+      const replaced = getReplacedByDataQueries(content);
       if (replaced.length > 0) {
-        return { error: datasetsReplaceError(id, replaced) };
+        return { error: dataQueriesReplaceError(id, replaced) };
       }
       if (query === undefined) {
         return {
-          error: `Panel "${id}" is new. Provide \`query\` to say how it looks and uses each dataset.`,
+          error: `Panel "${id}" is new. Provide \`query\` to say how it looks and uses each data query.`,
         };
       }
-      const empty = datasets.findIndex(
-        (dataset) => !dataset.description?.trim() && !dataset.esql?.trim()
+      const empty = dataQueries.findIndex(
+        (dataQuery) => !dataQuery.description?.trim() && !dataQuery.esql?.trim()
       );
       if (empty !== -1) {
         return {
-          error: `Dataset ${
+          error: `Data query ${
             empty + 1
           } of the new panel "${id}" needs a \`description\` or an \`esql\` query.`,
         };
       }
-      return { request: { renderer, nlQuery: query, datasets } };
+      return { request: { renderer, nlQuery: query, dataQueries } };
     }
     if (query === undefined || hasData === undefined) {
       const missing = [
@@ -164,22 +164,22 @@ const toEditResolutionRequest = (
   const base = { existingPanel };
 
   if (content.renderer === 'custom_content') {
-    const { renderer, query, esql, hasData, regenerateESQL, index, datasets } = content;
-    if (datasets) {
-      const replaced = getReplacedByDatasets(content);
+    const { renderer, query, esql, hasData, regenerateESQL, index, dataQueries } = content;
+    if (dataQueries) {
+      const replaced = getReplacedByDataQueries(content);
       if (replaced.length > 0) {
-        return { error: datasetsReplaceError(existingPanel.id, replaced) };
+        return { error: dataQueriesReplaceError(existingPanel.id, replaced) };
       }
       const existingCount = getStoredQueries(existingPanel).length;
-      const changesWhatIsShown = datasets.some(
-        (dataset, position) => Boolean(dataset.description?.trim()) || position >= existingCount
+      const changesWhatIsShown = dataQueries.some(
+        (dataQuery, position) => Boolean(dataQuery.description?.trim()) || position >= existingCount
       );
       if (query === undefined && changesWhatIsShown) {
         return {
-          error: `Panel "${existingPanel.id}" edit needs \`query\` when a dataset has a \`description\` or adds a query: say how the panel should now use the data.`,
+          error: `Panel "${existingPanel.id}" edit needs \`query\` when a data query has a \`description\` or adds a query: say how the panel should now use the data.`,
         };
       }
-      return { request: { ...base, renderer, nlQuery: query, datasets } };
+      return { request: { ...base, renderer, nlQuery: query, dataQueries } };
     }
     if (regenerateESQL && hasData === false) {
       return {

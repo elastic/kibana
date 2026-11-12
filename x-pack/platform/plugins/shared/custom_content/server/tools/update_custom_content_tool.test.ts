@@ -55,7 +55,7 @@ const callHandler = async (
     esqlQuery?: string | null;
     regenerateEsql?: boolean;
     index?: string;
-    datasets?: Array<{ description?: string; esql?: string; index?: string }>;
+    dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
   },
   attachmentData?: Record<string, unknown>
 ) => {
@@ -169,23 +169,23 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(data).not.toHaveProperty('additional_esql_queries');
     });
 
-    it('hands the datasets to the builder, in place of the single-query fields', async () => {
-      const datasets = [{}, { description: 'the ten busiest services' }];
+    it('hands the data queries to the builder, in place of the single-query fields', async () => {
+      const dataQueries = [{}, { description: 'the ten busiest services' }];
 
       await callHandler(
-        { embeddable_id: 'p1', prompt: 'Show the busiest services', datasets },
+        { embeddable_id: 'p1', prompt: 'Show the busiest services', dataQueries },
         { ...existing, additional_esql_queries: ['FROM metrics'] }
       );
 
       expect(mockBuild).toHaveBeenCalledWith(
         expect.objectContaining({
-          datasets,
+          dataQueries,
           existing: expect.objectContaining({ esqlQueries: ['FROM logs', 'FROM metrics'] }),
         })
       );
     });
 
-    it('stores the queries the builder returns after a dataset adds one', async () => {
+    it('stores the queries the builder returns after a data query adds one', async () => {
       mockBuild.mockResolvedValueOnce({
         esqlQueries: ['FROM logs', 'FROM metrics', 'FROM errors'],
         template: '<div>three tables</div>',
@@ -196,7 +196,7 @@ describe('createUpdateCustomContentTool handler', () => {
         {
           embeddable_id: 'p1',
           prompt: 'Add an errors table',
-          datasets: [{}, {}, { description: 'errors by service' }],
+          dataQueries: [{}, {}, { description: 'errors by service' }],
         },
         { ...existing, additional_esql_queries: ['FROM metrics'] }
       );
@@ -244,12 +244,12 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(mockBuild).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          datasets: [{ description: 'Also show the error count', index: undefined }],
+          dataQueries: [{ description: 'Also show the error count', index: undefined }],
         })
       );
       expect(mockBuild).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ nlQuery: undefined, datasets: [{ esql: 'FROM metrics-*' }] })
+        expect.objectContaining({ nlQuery: undefined, dataQueries: [{ esql: 'FROM metrics-*' }] })
       );
     });
 

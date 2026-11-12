@@ -7,12 +7,12 @@
 
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { CustomContentDataset } from '@kbn/custom-content-common';
+import type { CustomContentDataQuery } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
 import { generateCustomContentEsql } from '../shared/custom_content_esql';
-import { resolveDatasets } from './resolve_datasets';
+import { resolveDataQueries } from './resolve_data_queries';
 
 type GenerateParams = Parameters<typeof generateCustomContentEsql>[0];
 
@@ -29,12 +29,12 @@ interface BuildCustomContentConfigParams {
   /** What to show, or what to change on an existing panel. */
   nlQuery?: string;
   /**
-   * What to do with the panel's queries, by position: each dataset describes or supplies the query
+   * What to do with the panel's queries, by position: each data query describes or supplies the query
    * at its position, an empty one keeps it, and a position past the stored queries adds one. Queries
    * it does not reach are kept. Without it the queries stay as they are.
    */
-  datasets?: readonly CustomContentDataset[];
-  /** Remove every query, for a panel with static content. Wins over `datasets`. */
+  dataQueries?: readonly CustomContentDataQuery[];
+  /** Remove every query, for a panel with static content. Wins over `dataQueries`. */
   removeAllQueries?: boolean;
   /**
    * The panel being edited. Absent for a new panel. Its queries are in the order the template reads
@@ -72,7 +72,7 @@ interface BuildCustomContentConfigResult {
  */
 export const buildCustomContentConfig = async ({
   nlQuery,
-  datasets,
+  dataQueries,
   removeAllQueries,
   existing,
   timeRange,
@@ -122,9 +122,9 @@ export const buildCustomContentConfig = async ({
   if (removeAllQueries) {
     esqlQueries = [];
     changedQueries = [];
-  } else if (datasets) {
-    const resolved = await resolveDatasets({
-      datasets,
+  } else if (dataQueries) {
+    const resolved = await resolveDataQueries({
+      dataQueries,
       existingQueries,
       generate: ({ description, index }, storedQuery, _position, queryCount) =>
         generateQuery({ nlQuery: description, index, storedQuery, queryCount }),

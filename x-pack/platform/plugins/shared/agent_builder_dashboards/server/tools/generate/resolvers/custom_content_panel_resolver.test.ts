@@ -70,12 +70,12 @@ describe('createCustomContentPanelResolver', () => {
   describe('new panels', () => {
     it('builds the panel from the request and the host deps, with nothing existing', async () => {
       const result = await resolve(
-        addRequest({ datasets: [{ description: 'Show KPI', index: 'logs-*' }] })
+        addRequest({ dataQueries: [{ description: 'Show KPI', index: 'logs-*' }] })
       );
 
       expect(mockedBuild).toHaveBeenCalledWith({
         nlQuery: 'Show KPI',
-        datasets: [{ description: 'Show KPI', index: 'logs-*' }],
+        dataQueries: [{ description: 'Show KPI', index: 'logs-*' }],
         removeAllQueries: undefined,
         resolveEsqlVariables: undefined,
         existing: undefined,
@@ -108,17 +108,17 @@ describe('createCustomContentPanelResolver', () => {
     });
   });
 
-  it('hands the datasets of a new panel to the builder, which generates a query for each', async () => {
-    const datasets = [{ description: 'totals', index: 'logs' }, { esql: 'FROM logs | LIMIT 5' }];
+  it('hands the data queries of a new panel to the builder, which generates a query for each', async () => {
+    const dataQueries = [{ description: 'totals', index: 'logs' }, { esql: 'FROM logs | LIMIT 5' }];
     mockedBuild.mockResolvedValue({
       esqlQueries: ['FROM logs | STATS n = COUNT(*)', 'FROM logs | LIMIT 5'],
       template: '<div>two queries</div>',
       height: 300,
     });
 
-    const result = await resolve(addRequest({ nlQuery: 'totals above a list', datasets }));
+    const result = await resolve(addRequest({ nlQuery: 'totals above a list', dataQueries }));
 
-    expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ datasets }));
+    expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ dataQueries }));
     expect(result).toMatchObject({
       panelContent: {
         config: {
@@ -215,8 +215,8 @@ describe('createCustomContentPanelResolver', () => {
       expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
     });
 
-    it('hands the datasets of an edit to the builder, and stores the queries it returns', async () => {
-      const datasets = [{}, { description: 'the ten busiest services' }];
+    it('hands the data queries of an edit to the builder, and stores the queries it returns', async () => {
+      const dataQueries = [{}, { description: 'the ten busiest services' }];
       mockedBuild.mockResolvedValue({
         esqlQueries: ['FROM logs-*', 'FROM metrics | LIMIT 10'],
         template: '<div>updated</div>',
@@ -229,13 +229,13 @@ describe('createCustomContentPanelResolver', () => {
             template: '<div>old</div>',
             esql_query: ['FROM logs-*', 'FROM metrics-*'],
           }),
-          { nlQuery: 'Show the busiest', datasets }
+          { nlQuery: 'Show the busiest', dataQueries }
         )
       );
 
       expect(mockedBuild).toHaveBeenCalledWith(
         expect.objectContaining({
-          datasets,
+          dataQueries,
           existing: expect.objectContaining({ esqlQueries: ['FROM logs-*', 'FROM metrics-*'] }),
         })
       );

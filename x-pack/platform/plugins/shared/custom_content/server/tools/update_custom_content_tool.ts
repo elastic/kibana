@@ -60,14 +60,14 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 - When the edit needs different data, such as a new measure ("also show the average bytes"), a new grouping or filter, or another time window, also set \`regenerateEsql: true\` (and \`index\` when known). Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from \`prompt\`, keeping the parts the request does not change, and samples the new schema before generating so the template matches the data. Do not write the query yourself.
 - When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query generation or sampling, preserving layout and design.
 - Pass \`esqlQuery\` only when the user supplied a query to use as it is; pass \`esqlQuery: null\` to remove the query entirely.
-- A panel can hold several queries (read by the template as \`queries[1]\`, \`queries[2]\`, … next to \`rows\`, the first query). Use \`datasets\` to change or add them: an entry with \`description\` regenerates the query at its position, one with \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. \`datasets\` replaces \`esqlQuery\`, \`regenerateEsql\` and \`index\`, and a description needs a \`prompt\` saying how the panel should now use the data. Queries cannot be removed with it. To only restyle, omit \`datasets\`: the panel's queries are kept.
+- A panel can hold several queries (read by the template as \`queries[1]\`, \`queries[2]\`, … next to \`rows\`, the first query). Use \`dataQueries\` to change or add them: an entry with \`description\` regenerates the query at its position, one with \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. \`dataQueries\` replaces \`esqlQuery\`, \`regenerateEsql\` and \`index\`, and a description needs a \`prompt\` saying how the panel should now use the data. Queries cannot be removed with it. To only restyle, omit \`dataQueries\`: the panel's queries are kept.
 
 This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\` content; it targets the panel by id and needs no attachment.
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated panel inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\` — without it the user cannot preview or step back through earlier versions of the panel.`,
   schema: updateCustomContentSchema,
   handler: async (
-    { embeddable_id, prompt, esqlQuery, regenerateEsql, index, datasets },
+    { embeddable_id, prompt, esqlQuery, regenerateEsql, index, dataQueries },
     { attachments, events, logger, esClient, modelProvider }
   ) => {
     const panelAttachments = attachments
@@ -113,7 +113,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           index,
           esql: esqlQuery,
           regenerateESQL: regenerateEsql,
-          datasets,
+          dataQueries,
           existingQueries,
           isNewPanel: false,
         }),

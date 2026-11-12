@@ -10,7 +10,7 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateVisualizationEsql } from './generate_visualization_esql';
 import {
-  CUSTOM_CONTENT_DATASET_INSTRUCTIONS,
+  CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS,
   CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
   generateCustomContentEsql,
 } from './custom_content_esql';
@@ -47,12 +47,12 @@ describe('generateCustomContentEsql', () => {
     expect(result).toBe('FROM logs-*');
   });
 
-  it('adds the dataset instructions when the query is one of several', async () => {
+  it('adds the multi-query instructions when the query is one of several', async () => {
     await generateCustomContentEsql({ ...params, queryCount: 2 });
 
     expect(mockGenerate).toHaveBeenCalledWith({
       ...params,
-      extraInstructions: `${CUSTOM_CONTENT_ESQL_INSTRUCTIONS}${CUSTOM_CONTENT_DATASET_INSTRUCTIONS}`,
+      extraInstructions: `${CUSTOM_CONTENT_ESQL_INSTRUCTIONS}${CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS}`,
     });
   });
 
@@ -101,10 +101,14 @@ describe('generateCustomContentEsql', () => {
       expect(CUSTOM_CONTENT_ESQL_INSTRUCTIONS).toContain('never sort a funnel by its values');
     });
 
-    it('lets a dataset of headline numbers be one row, and keeps it to its own data', () => {
-      expect(CUSTOM_CONTENT_DATASET_INSTRUCTIONS).toContain('ONE row with one column per number');
-      expect(CUSTOM_CONTENT_DATASET_INSTRUCTIONS).toContain('ONLY the data it was described for');
-      expect(CUSTOM_CONTENT_DATASET_INSTRUCTIONS).toContain('snake_case');
+    it('lets a data query of headline numbers be one row, and keeps it to its own data', () => {
+      expect(CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS).toContain(
+        'ONE row with one column per number'
+      );
+      expect(CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS).toContain(
+        'ONLY the data it was described for'
+      );
+      expect(CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS).toContain('snake_case');
     });
 
     it('asks for one row per item', () => {

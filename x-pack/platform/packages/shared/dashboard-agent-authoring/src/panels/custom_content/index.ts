@@ -10,7 +10,7 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-  customContentDatasetsSchema,
+  customContentDataQueriesSchema,
   type CustomContentQueryChanges,
 } from '@kbn/custom-content-common';
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -27,7 +27,7 @@ import { defineRequestPanelKind } from '../panel_kind';
 
 /**
  * Request to generate a new custom content panel's template. What the queries should become is said
- * the one way the builder is told: `datasets`, or `removeAllQueries` for static content.
+ * the one way the builder is told: `dataQueries`, or `removeAllQueries` for static content.
  */
 export interface CustomContentPanelAddRequest
   extends PanelResolutionRequestBase,
@@ -97,10 +97,10 @@ const customContentPanelContentSchema = lazySchema(() =>
       .describe(
         'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true; on an existing panel, when regenerating or adding data.'
       ),
-    datasets: customContentDatasetsSchema
+    dataQueries: customContentDataQueriesSchema
       .optional()
       .describe(
-        'For a panel that needs several queries (see the description of each entry). Replaces esql, hasData, regenerateESQL and index: do not send them with it. "query" still says how the panel looks and how it uses each query; each dataset says what one query returns. Required "query" for a new panel, and for an edit when a dataset has a description or adds a query.'
+        'For a panel that needs several queries (see the description of each entry). Replaces esql, hasData, regenerateESQL and index: do not send them with it. "query" still says how the panel looks and how it uses each query; each data query says what one query returns. Required "query" for a new panel, and for an edit when a data query has a description or adds a query.'
       ),
   })
 );

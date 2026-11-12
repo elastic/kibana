@@ -21,7 +21,7 @@ import {
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
 import {
-  customContentDatasetsSchema,
+  customContentDataQueriesSchema,
   toCustomContentQueryChanges,
 } from '@kbn/custom-content-common';
 import {
@@ -103,8 +103,8 @@ const attachmentRegenerateEsqlField = lazySchema(() =>
     )
 );
 
-const datasetsField = lazySchema(() =>
-  customContentDatasetsSchema
+const dataQueriesField = lazySchema(() =>
+  customContentDataQueriesSchema
     .optional()
     .describe(
       '(optional, custom content only) For a panel that needs several queries, such as headline numbers plus a ranked list: the panel\'s queries by position, instead of "esql", "regenerate_esql" and a "has_data": false. Pass "has_data": true with it. Each entry describes what ONE query returns, in words (not the layout, which stays in "query"), or gives one ready to use; the template reads the first as rows and the n-th as queries[n].rows. On an update an entry with a description regenerates the query at its position, one with esql replaces it, {} keeps it, and an entry past the current queries adds one; queries not listed are kept and none can be removed. Omit it to keep every query.'
@@ -149,7 +149,7 @@ const customContentTargetSchema = lazySchema(() =>
       ),
     esql: optionalEsqlField,
     has_data: customContentHasDataField,
-    datasets: datasetsField,
+    dataQueries: dataQueriesField,
   })
 );
 
@@ -174,7 +174,7 @@ const attachmentTargetSchema = lazySchema(() =>
     esql: optionalEsqlField,
     has_data: attachmentHasDataField,
     regenerate_esql: attachmentRegenerateEsqlField,
-    datasets: datasetsField,
+    dataQueries: dataQueriesField,
   })
 );
 
@@ -272,8 +272,10 @@ const readTarget = (target: CreateVisualizationTarget) => ({
       ? target.has_data ?? undefined
       : undefined,
   regenerateEsql: target.type === 'attachment' ? target.regenerate_esql ?? undefined : undefined,
-  datasets:
-    target.type === 'custom_content' || target.type === 'attachment' ? target.datasets : undefined,
+  dataQueries:
+    target.type === 'custom_content' || target.type === 'attachment'
+      ? target.dataQueries
+      : undefined,
 });
 
 export const createVisualizationTool = (): BuiltinToolDefinition<
@@ -289,8 +291,8 @@ You say what to build via "target", discriminated by "target.type":
       ', '
     )}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
-- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Always set "has_data": true (a query is generated unless you pass "esql") or false when the panel genuinely has no data (a banner, a legend, a note). When the panel needs data of more than one shape — headline numbers above a ranked list — pass "datasets" instead of "esql": one entry per query, each describing what that query returns (with "has_data": true); the template reads the first as rows and the n-th as queries[n].rows, and "query" stays the layout.
-- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none). For a custom content edit that needs different data (a new measure, grouping, filter or time window, for example "also show the average bytes"), pass "regenerate_esql": true: without it the stored query is kept and the new data can never appear; with it the stored query is regenerated from "query", keeping the parts the request does not change. Layout, copy and style edits (colors, sizes, wording) keep the stored query. To change or add one query of a panel that has several, pass "datasets" for just those positions ({} keeps a query; unlisted queries are kept; queries cannot be removed with it).
+- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Always set "has_data": true (a query is generated unless you pass "esql") or false when the panel genuinely has no data (a banner, a legend, a note). When the panel needs data of more than one shape — headline numbers above a ranked list — pass "dataQueries" instead of "esql": one entry per query, each describing what that query returns (with "has_data": true); the template reads the first as rows and the n-th as queries[n].rows, and "query" stays the layout.
+- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none). For a custom content edit that needs different data (a new measure, grouping, filter or time window, for example "also show the average bytes"), pass "regenerate_esql": true: without it the stored query is kept and the new data can never appear; with it the stored query is regenerated from "query", keeping the parts the request does not change. Layout, copy and style edits (colors, sizes, wording) keep the stored query. To change or add one query of a panel that has several, pass "dataQueries" for just those positions ({} keeps a query; unlisted queries are kept; queries cannot be removed with it).
 
 Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
 
@@ -322,7 +324,7 @@ Ground first: make sure the target index exists and every field you reference is
         esql,
         hasData,
         regenerateEsql,
-        datasets,
+        dataQueries,
       } = readTarget(target);
       try {
         // Step 1: Read any existing attachment so edits reuse its renderer + config.
@@ -350,9 +352,9 @@ Ground first: make sure the target index exists and every field you reference is
           ? getEffectiveRenderer(existingData)
           : requestedRenderer ?? 'lens';
 
-        if (datasets && renderer !== 'custom_content') {
+        if (dataQueries && renderer !== 'custom_content') {
           throw new Error(
-            '"datasets" only applies to custom content: a Lens or Vega visualization has one query. Use "esql" to supply it.'
+            '"dataQueries" only applies to custom content: a Lens or Vega visualization has one query. Use "esql" to supply it.'
           );
         }
 
@@ -367,9 +369,9 @@ Ground first: make sure the target index exists and every field you reference is
               '"regenerate_esql" cannot be combined with "has_data": false, which removes the query. Pass only one of them.'
             );
           }
-          if (datasets && (esql || regenerateEsql || hasData === false)) {
+          if (dataQueries && (esql || regenerateEsql || hasData === false)) {
             throw new Error(
-              '"datasets" replaces "esql", "regenerate_esql" and "has_data": false: put each query\'s "esql" on its dataset and pass "has_data": true, or omit it.'
+              '"dataQueries" replaces "esql", "regenerate_esql" and "has_data": false: put each query\'s "esql" on its data query and pass "has_data": true, or omit it.'
             );
           }
 
@@ -383,7 +385,7 @@ Ground first: make sure the target index exists and every field you reference is
               esql,
               hasData,
               regenerateESQL: regenerateEsql,
-              datasets,
+              dataQueries,
               existingQueries,
               isNewPanel: !existingData,
             }),

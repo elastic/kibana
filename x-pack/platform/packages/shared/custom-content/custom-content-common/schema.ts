@@ -50,7 +50,7 @@ export const toEsqlQueryState = (esqlQuery: string | undefined): string[] | unde
  * A panel's queries as an agent asks for them, by position. Shared by the chat tool and the
  * dashboard generation tool, so both describe the same thing to the model.
  */
-export const customContentDatasetsSchema = lazySchema(() =>
+export const customContentDataQueriesSchema = lazySchema(() =>
   z
     .array(
       z.object({
@@ -86,9 +86,9 @@ export const customContentDatasetsSchema = lazySchema(() =>
     )
 );
 
-export type CustomContentDatasets = z.output<typeof customContentDatasetsSchema>;
+export type CustomContentDataQueries = z.output<typeof customContentDataQueriesSchema>;
 /** One of a panel's queries, as an agent asks for it. */
-export type CustomContentDataset = CustomContentDatasets[number];
+export type CustomContentDataQuery = CustomContentDataQueries[number];
 
 /**
  * Generation input for the create-panel and update-panel tools. `prompt` instructs this operation
@@ -126,31 +126,32 @@ const createUpdateFields = () => ({
     .describe(
       'Exact index, alias, or data stream to generate the query from. Pass it with regenerateEsql whenever known.'
     ),
-  datasets: customContentDatasetsSchema.optional(),
+  dataQueries: customContentDataQueriesSchema.optional(),
 });
 
 const hasSomethingToChange = ({
   prompt,
   esqlQuery,
-  datasets,
+  dataQueries,
 }: {
   prompt?: string;
   esqlQuery?: string | null;
-  datasets?: unknown[];
-}) => prompt !== undefined || esqlQuery === null || Boolean(esqlQuery?.trim()) || Boolean(datasets);
+  dataQueries?: unknown[];
+}) =>
+  prompt !== undefined || esqlQuery === null || Boolean(esqlQuery?.trim()) || Boolean(dataQueries);
 
 const atLeastOneChange = {
-  message: 'At least one of prompt, esqlQuery or datasets must be provided.',
+  message: 'At least one of prompt, esqlQuery or data queries must be provided.',
 };
 
-const datasetsReplaceSingleQueryFields = {
+const dataQueriesReplaceSingleQueryFields = {
   message:
-    "datasets replaces esqlQuery, regenerateEsql and index: put each query's esql and index on its dataset.",
+    "dataQueries replaces esqlQuery, regenerateEsql and index: put each query's esql and index on its data query.",
 };
 
-const datasetDescriptionsNeedPrompt = {
+const dataQueryDescriptionsNeedPrompt = {
   message:
-    'A dataset with a description changes what the panel shows, so it needs a prompt describing the change.',
+    'A data query with a description changes what the panel shows, so it needs a prompt describing the change.',
 };
 
 const regenerateNeedsPrompt = {
@@ -187,14 +188,14 @@ export const customContentPanelUpdateSchema = lazySchema(() =>
       regenerateExcludesRemoval
     )
     .refine(
-      ({ datasets, esqlQuery, regenerateEsql, index }) =>
-        !datasets || (esqlQuery === undefined && !regenerateEsql && index === undefined),
-      datasetsReplaceSingleQueryFields
+      ({ dataQueries, esqlQuery, regenerateEsql, index }) =>
+        !dataQueries || (esqlQuery === undefined && !regenerateEsql && index === undefined),
+      dataQueriesReplaceSingleQueryFields
     )
     .refine(
-      ({ datasets, prompt }) =>
-        prompt !== undefined || !datasets?.some(({ description }) => description !== undefined),
-      datasetDescriptionsNeedPrompt
+      ({ dataQueries, prompt }) =>
+        prompt !== undefined || !dataQueries?.some(({ description }) => description !== undefined),
+      dataQueryDescriptionsNeedPrompt
     )
 );
 

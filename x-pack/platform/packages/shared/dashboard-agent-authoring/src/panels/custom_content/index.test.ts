@@ -46,21 +46,21 @@ describe('custom content panel kind content schema', () => {
     expect(parse({ query: '' }).success).toBe(false);
   });
 
-  it('accepts datasets to ask for several queries', () => {
+  it('accepts data queries to ask for several queries', () => {
     expect(
       parse({
         query: 'totals above a host list',
-        datasets: [{ description: 'totals', index: 'logs' }, { esql: 'FROM logs | LIMIT 5' }],
+        dataQueries: [{ description: 'totals', index: 'logs' }, { esql: 'FROM logs | LIMIT 5' }],
       }).success
     ).toBe(true);
   });
 
-  it('rejects an empty datasets list and more datasets than a panel can hold', () => {
-    expect(parse({ query: 'x', datasets: [] }).success).toBe(false);
+  it('rejects an empty data queries list and more data queries than a panel can hold', () => {
+    expect(parse({ query: 'x', dataQueries: [] }).success).toBe(false);
     expect(
       parse({
         query: 'x',
-        datasets: Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 }, () => ({
+        dataQueries: Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 }, () => ({
           esql: 'FROM a',
         })),
       }).success
