@@ -26,6 +26,8 @@ export class ResponseConsolePage {
   readonly getFileDownloadButton: Locator;
   readonly getFilePasscodeMessage: Locator;
   readonly getFileDeleteMessage: Locator;
+  readonly isolatePendingHostStatus: Locator;
+  readonly isolateSuccessHostStatus: Locator;
   readonly overlay: Locator;
   readonly respondAction: Locator;
   readonly userMenu: Locator;
@@ -58,6 +60,12 @@ export class ResponseConsolePage {
     this.getFileDeleteMessage = this.getFileSuccess.getByTestId(
       `${GET_FILE_DOWNLOAD_LINK}-fileDeleteMessage`
     );
+    this.isolatePendingHostStatus = page.testSubj
+      .locator('isolate-pending')
+      .getByTestId('isolate-actionResult-hostStatus');
+    this.isolateSuccessHostStatus = page.testSubj
+      .locator('isolate-success')
+      .getByTestId('isolate-actionResult-hostStatus');
     this.overlay = page.testSubj.locator('consolePageOverlay');
     this.respondAction = page.testSubj.locator('endpointResponseActions-action-item');
     this.userMenu = page.testSubj.locator('userMenuButton');

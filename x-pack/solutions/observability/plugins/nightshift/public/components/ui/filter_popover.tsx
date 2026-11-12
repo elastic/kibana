@@ -10,7 +10,9 @@ import {
   EuiFilterButton,
   EuiNotificationBadge,
   EuiPopover,
+  EuiPopoverFooter,
   EuiSelectable,
+  EuiText,
   useEuiTheme,
   type EuiSelectableOption,
 } from '@elastic/eui';
@@ -23,6 +25,8 @@ interface FilterPopoverProps<Value extends string> {
   counts: Record<Value, number> | undefined;
   getLabel: (value: Value) => string;
   getPrepend?: (value: Value) => React.ReactNode;
+  /** Shown under the options, for a caveat that applies to the whole filter. */
+  footerNote?: string;
   onChange: (selected: Value[]) => void;
   testSubject: string;
 }
@@ -34,6 +38,7 @@ export const FilterPopover = <Value extends string>({
   counts,
   getLabel,
   getPrepend,
+  footerNote,
   onChange,
   testSubject,
 }: FilterPopoverProps<Value>): React.ReactElement => {
@@ -92,6 +97,13 @@ export const FilterPopover = <Value extends string>({
           </div>
         )}
       </EuiSelectable>
+      {footerNote ? (
+        <EuiPopoverFooter data-test-subj={`${testSubject}Note`}>
+          <EuiText size="xs" color="subdued">
+            {footerNote}
+          </EuiText>
+        </EuiPopoverFooter>
+      ) : null}
     </EuiPopover>
   );
 };

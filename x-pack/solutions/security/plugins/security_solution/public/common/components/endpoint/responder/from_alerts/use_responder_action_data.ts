@@ -6,7 +6,7 @@
  */
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { useKibana } from '../../../../lib/kibana';
 import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';

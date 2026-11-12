@@ -106,7 +106,7 @@ describe('destination models', () => {
     ).toBeUndefined();
   });
 
-  it('stores a telemetry-scoped index per signal, a description, and a plaintext api_key', () => {
+  it('stores a telemetry-scoped index per signal, a description, and an API key reference', () => {
     expect(
       createUnitDestination({
         id: 'es-app',
@@ -115,7 +115,7 @@ describe('destination models', () => {
         signals: ['logs', 'traces'],
         indexBySignal: { logs: 'logs-app-default', traces: 'traces-app-default' },
         writePatternsBySignal: {},
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-app-api-key',
       })
     ).toEqual({
       id: 'es-app',
@@ -126,7 +126,7 @@ describe('destination models', () => {
       config: [
         { name: 'index', telemetry: ['logs'], value: 'logs-app-default' },
         { name: 'index', telemetry: ['traces'], value: 'traces-app-default' },
-        { name: 'api_key', value: 'encoded-key' },
+        { name: 'api_key', value: { credential: 'es-app-api-key' } },
       ],
     });
   });
@@ -140,14 +140,14 @@ describe('destination models', () => {
         signals: ['logs', 'metrics', 'traces'],
         indexBySignal: {},
         writePatternsBySignal: {},
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-auto-api-key',
       })
     ).toEqual({
       id: 'es-auto',
       name: 'Auto',
       type: 'elasticsearch',
       supported_telemetry: ['logs', 'metrics', 'traces'],
-      config: [{ name: 'api_key', value: 'encoded-key' }],
+      config: [{ name: 'api_key', value: { credential: 'es-auto-api-key' } }],
     });
   });
 
@@ -159,7 +159,7 @@ describe('destination models', () => {
         signals: ['logs', 'metrics'],
         indexBySignal: {},
         writePatternsBySignal: { logs: ['logs-billing-*'], metrics: ['metrics-billing-*'] },
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-billing-api-key',
       })
     ).toEqual({
       id: 'es-billing',
@@ -169,7 +169,7 @@ describe('destination models', () => {
       config: [
         { name: 'write_patterns', telemetry: ['logs'], value: ['logs-billing-*'] },
         { name: 'write_patterns', telemetry: ['metrics'], value: ['metrics-billing-*'] },
-        { name: 'api_key', value: 'encoded-key' },
+        { name: 'api_key', value: { credential: 'es-billing-api-key' } },
       ],
     });
   });

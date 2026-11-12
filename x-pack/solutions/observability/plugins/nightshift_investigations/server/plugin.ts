@@ -23,8 +23,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { LockManagerService } from '@kbn/lock-manager';
@@ -39,11 +37,7 @@ import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { createEnsureFailureSweep } from './lib/managed_workflows/ensure_failure_sweep';
 import { sweepInvestigationFailuresStepDefinition } from './step_definitions/sweep_investigation_failures';
-import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
-import { installOnlineEvalsWorkflow } from './lib/managed_workflows/install_online_evals_workflow';
-import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
-import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
-import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
+import { installStaticWorkflows } from './lib/managed_workflows/install_static_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import {
   createInvestigatorServiceAccountService,
@@ -83,7 +77,7 @@ import { decisionTreeReinforceStepDefinition } from './step_definitions/decision
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createWikiStore, registerWikiAiIndex } from './wiki/register_wiki';
 import { registerMemoryAiIndex } from './memory/register_memory';
-import { registerWikiTelemetryEvents } from './telemetry';
+import { registerDecisionTreeTelemetryEvents, registerWikiTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
@@ -253,11 +247,10 @@ export class NightshiftInvestigationsPlugin
     }
 
     this.decisionTreesEnabled =
-      this.ctx.config.get().decision_trees.enabled &&
-      this.wikiEnabled &&
-      Boolean(plugins.sandbox?.isAvailable);
+      this.ctx.config.get().decision_trees.enabled && Boolean(plugins.sandbox?.isAvailable);
     if (this.decisionTreesEnabled) {
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
+      registerDecisionTreeTelemetryEvents(core.analytics);
     }
 
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
@@ -511,6 +504,7 @@ export class NightshiftInvestigationsPlugin
             connectorNames: [],
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
+            analytics: core.analytics,
             logger: decisionTreeLogger,
           })) {
             plugins.agentBuilder.tools.register(tool);
@@ -651,14 +645,15 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
           })
         );
-        // Registered unconditionally: the combined materialize workflow installs with Wiki
-        // or Memory, so a trees-off install would otherwise reference an unknown step type.
-        // The handler no-ops on the flag instead, matching wiki/memory above.
+        // Registered unconditionally: the combined materialize workflow installs with Wiki,
+        // Memory, or decision trees, so a trees-off install would otherwise reference an unknown
+        // step type. The handler no-ops on the flag instead, matching wiki/memory above.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
+            analytics: core.analytics,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
@@ -686,8 +681,8 @@ export class NightshiftInvestigationsPlugin
           })
         );
         // Registered unconditionally for the same reason as the tree hydrate above: the
-        // combined optimize workflow installs with Wiki or Memory and now runs the
-        // reinforcement phase too. The handler no-ops on the flag.
+        // combined optimize workflow installs with Wiki, Memory, or decision trees and now
+        // runs the reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
@@ -717,6 +712,10 @@ export class NightshiftInvestigationsPlugin
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          getUserProfileService: async () => {
+            const [start] = await core.getStartServices();
+            return start.userProfile;
+          },
           isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
           isWikiEnabled: () => this.wikiEnabled,
           listSandboxConnectors,
@@ -1102,24 +1101,15 @@ export class NightshiftInvestigationsPlugin
   private async installManagedWorkflows(
     managedWorkflowsClient: Promise<ManagedWorkflowsClient>
   ): Promise<void> {
-    const client = await managedWorkflowsClient;
     // Each space reaches the global investigation through an entry point bound to the Nightshift
     // service account, installed with the bound Slack thread workflow when an admin sets the space
     // up (see lib/service_account). Not installing the Slack thread's global copy here lets
     // ready() remove any left from earlier versions.
-    await installInvestigationWorkflow({ client });
-    await installOnlineEvalsWorkflow({ client });
-    await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    await installStaticWorkflows({
+      client: await managedWorkflowsClient,
+      wikiOrMemoryEnabled: this.wikiEnabled || this.memoryEnabled,
+      decisionTreesEnabled: this.decisionTreesEnabled,
     });
-    if (this.wikiEnabled || this.memoryEnabled) {
-      await installSandboxMaterializeWorkspaceWorkflow({ client });
-      await installAgentOptimizationsWorkflow({ client });
-    }
-    if (this.decisionTreesEnabled) {
-      await installDecisionTreeWorkflows({ client });
-    }
-    await client.ready();
   }
 
   stop(): void {}

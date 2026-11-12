@@ -14,7 +14,6 @@ import {
   timerange,
   type EdotBrowserDocument,
 } from '@kbn/synthtrace-client';
-import type { ToolingLog } from '@kbn/tooling-log';
 import type { Readable } from 'stream';
 import type { Logger } from '../utils/create_logger';
 import { OtelSynthtraceEsClientImpl, getOtelDocumentIndex } from './otel_synthtrace_es_client';
@@ -70,8 +69,7 @@ describe('OtelSynthtraceEsClient', () => {
     const site = { origin: 'https://shop.example.com', pages: [{ path: '/' }] };
     const generator = timerange(
       new Date('2026-10-16T12:00:00.000Z'),
-      new Date('2026-10-16T12:02:00.000Z'),
-      {} as ToolingLog
+      new Date('2026-10-16T12:02:00.000Z')
     )
       .interval('1m')
       .generator((timestamp) =>

@@ -25,9 +25,12 @@ import { StreamsUnitService } from './streams_unit_service';
 import { createConfigDistributorClient } from '../unit_config/config_distributor_client';
 import { createEncryptionKeyStore } from '../unit_config/encryption_key_store';
 import { createCredentialPreparer } from '../unit_config/seal_credentials';
+import { createRemoteDestinationProbe } from '../unit_config/remote_destination_probe';
 import type {
   PrepareUnitCredentials,
+  ProbeRemoteDestination,
   PublishUnitConfig,
+  RemoteProbeResult,
   StoredUnitCredential,
   UnitCredential,
   ValidateUnitConfig,
@@ -119,6 +122,7 @@ const createService = ({
   encryptedSavedObjectsClient,
   canEncrypt = true,
   logger = loggerMock.create(),
+  probeRemoteDestination,
 }: {
   soClient: ReturnType<typeof savedObjectsClientMock.create>;
   publishUnit?: PublishUnitConfig;
@@ -127,6 +131,7 @@ const createService = ({
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
   canEncrypt?: boolean;
   logger?: Logger;
+  probeRemoteDestination?: ProbeRemoteDestination;
 }) => {
   return new StreamsUnitService({
     soClient,
@@ -136,6 +141,7 @@ const createService = ({
     prepareCredentials: prepareCredentials ?? undefined,
     encryptedSavedObjectsClient,
     canEncrypt,
+    probeRemoteDestination,
   });
 };
 
@@ -789,6 +795,272 @@ describe('StreamsUnitService', () => {
       });
 
       expect(soClient.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('remote destination check', () => {
+    type Destination = StreamsUnit.Configuration['destinations'][number];
+
+    const REMOTE_KEY = 'SECRET-KEY-VALUE';
+
+    const remoteDestination = (
+      id = 'remote-1',
+      endpoint = 'https://abc.elastic.cloud'
+    ): Destination => ({
+      id,
+      type: 'remote_elasticsearch',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'endpoint', value: endpoint },
+        { name: 'api_key', value: { credential: `${id}-api-key` } },
+      ],
+    });
+
+    const unitWith = (destinations: Destination[]): StreamsUnit.Configuration => ({
+      ...unit,
+      destinations,
+    });
+
+    const remoteUnit = unitWith([remoteDestination()]);
+    const remoteSecrets: StreamsUnit.Secrets = { 'remote-1-api-key': REMOTE_KEY };
+
+    const storedWith = (
+      storedUnit: StreamsUnit.Configuration,
+      storedSecrets: StreamsUnit.Secrets
+    ) =>
+      asSavedObject<StreamsConfigurationSavedObjectAttributes>('streams-configuration', {
+        unit_id: 'default',
+        unit: storedUnit,
+        secrets: storedSecrets,
+      });
+
+    const soClientWith = (stored?: SavedObject<StreamsConfigurationSavedObjectAttributes>) => {
+      const soClient = createSoClient();
+      soClient.get.mockImplementation(async (type: string) => {
+        if (type === 'streams-configuration' && stored) {
+          return stored;
+        }
+        throw notFoundError;
+      });
+      soClient.create.mockImplementation(async (type: string, attributes) =>
+        asSavedObject(type, attributes)
+      );
+      return soClient;
+    };
+
+    const probeReturning = (result: RemoteProbeResult) =>
+      jest.fn<Promise<RemoteProbeResult>, Parameters<ProbeRemoteDestination>>(async () => result);
+
+    it('checks a new remote with its key before validating', async () => {
+      const probe = probeReturning({ outcome: 'ok' });
+      const validateUnit = jest.fn().mockResolvedValue({});
+      const service = createService({
+        soClient: soClientWith(),
+        validateUnit,
+        probeRemoteDestination: probe,
+      });
+
+      await service.upsertUnit({ unitId: 'default', unit: remoteUnit, secrets: remoteSecrets });
+
+      expect(probe).toHaveBeenCalledTimes(1);
+      expect(probe).toHaveBeenCalledWith({
+        endpoint: 'https://abc.elastic.cloud',
+        apiKey: REMOTE_KEY,
+      });
+      expect(probe.mock.invocationCallOrder[0]).toBeLessThan(
+        validateUnit.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('rejects the save and stores nothing when the check rejects', async () => {
+      const soClient = soClientWith();
+      const validateUnit = jest.fn().mockResolvedValue({});
+      const service = createService({
+        soClient,
+        validateUnit,
+        probeRemoteDestination: probeReturning({ outcome: 'rejected', message: 'nope' }),
+      });
+
+      await expect(
+        service.upsertUnit({ unitId: 'default', unit: remoteUnit, secrets: remoteSecrets })
+      ).rejects.toMatchObject({ message: 'nope', statusCode: 400 });
+      expect(validateUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('saves and reports an unverified remote', async () => {
+      const soClient = soClientWith();
+      const service = createService({
+        soClient,
+        probeRemoteDestination: probeReturning({
+          outcome: 'unverified',
+          reason: 'unexpected_status',
+          status: 503,
+        }),
+      });
+
+      const result = await service.upsertUnit({
+        unitId: 'default',
+        unit: remoteUnit,
+        secrets: remoteSecrets,
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          remote_destinations_unverified: [
+            {
+              destination_id: 'remote-1',
+              host: 'abc.elastic.cloud',
+              reason: 'unexpected_status',
+              status: 503,
+            },
+          ],
+        })
+      );
+      expect(soClient.create).toHaveBeenCalledWith(
+        'streams-configuration',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('checks an edited endpoint with the stored key', async () => {
+      const probe = probeReturning({ outcome: 'ok' });
+      const service = createService({
+        soClient: soClientWith(storedWith(remoteUnit, remoteSecrets)),
+        probeRemoteDestination: probe,
+      });
+
+      await service.upsertUnit({
+        unitId: 'default',
+        unit: unitWith([remoteDestination('remote-1', 'https://def.elastic.cloud')]),
+        secrets: undefined,
+      });
+
+      expect(probe).toHaveBeenCalledWith({
+        endpoint: 'https://def.elastic.cloud',
+        apiKey: REMOTE_KEY,
+      });
+    });
+
+    it('does not check an unchanged remote on an unrelated save', async () => {
+      const probe = probeReturning({ outcome: 'ok' });
+      const service = createService({
+        soClient: soClientWith(storedWith(remoteUnit, remoteSecrets)),
+        probeRemoteDestination: probe,
+      });
+
+      await service.upsertUnit({
+        unitId: 'default',
+        unit: unitWith([
+          remoteDestination(),
+          {
+            id: 'es-local',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs'],
+            config: [{ name: 'api_key', value: { credential: 'es-local-api-key' } }],
+          },
+        ]),
+        secrets: { 'es-local-api-key': 'local-key' },
+      });
+
+      expect(probe).not.toHaveBeenCalled();
+    });
+
+    it('rejects a save with more than 10 new or changed remotes without checking any', async () => {
+      const soClient = soClientWith();
+      const probe = probeReturning({ outcome: 'ok' });
+      const ids = Array.from({ length: 11 }, (_, index) => `remote-${index}`);
+      const service = createService({ soClient, probeRemoteDestination: probe });
+
+      await expect(
+        service.upsertUnit({
+          unitId: 'default',
+          unit: unitWith(ids.map((id) => remoteDestination(id))),
+          secrets: Object.fromEntries(ids.map((id) => [`${id}-api-key`, REMOTE_KEY])),
+        })
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message:
+          'At most 10 new or changed remote Elasticsearch destinations can be checked in one save.',
+      });
+      expect(probe).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects a 401 end to end with the real probe', async () => {
+      const logger = loggerMock.create();
+      const soClient = soClientWith();
+      const fetchImpl = jest.fn().mockResolvedValue({ status: 401, text: async () => '' });
+      const service = createService({
+        soClient,
+        logger,
+        probeRemoteDestination: createRemoteDestinationProbe({ fetchImpl }),
+      });
+
+      const error = await service
+        .upsertUnit({ unitId: 'default', unit: remoteUnit, secrets: remoteSecrets })
+        .then(
+          () => undefined,
+          (rejection: StatusError) => rejection
+        );
+
+      expect(error).toMatchObject({
+        statusCode: 400,
+        message:
+          'abc.elastic.cloud rejected the API key (HTTP 401). Check that the key is valid and has not expired.',
+      });
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(fetchImpl).toHaveBeenCalledWith(
+        'https://abc.elastic.cloud/_prometheus/api/v1/write',
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: `ApiKey ${REMOTE_KEY}` }),
+        })
+      );
+      expect(JSON.stringify({ message: error?.message, ...error })).not.toContain(REMOTE_KEY);
+      expect(JSON.stringify(loggerMock.collect(logger))).not.toContain(REMOTE_KEY);
+    });
+
+    it('rejects a key with a newline end to end without sending a request', async () => {
+      const logger = loggerMock.create();
+      const soClient = soClientWith();
+      const fetchImpl = jest.fn();
+      const service = createService({
+        soClient,
+        logger,
+        probeRemoteDestination: createRemoteDestinationProbe({ fetchImpl }),
+      });
+
+      const error = await service
+        .upsertUnit({
+          unitId: 'default',
+          unit: remoteUnit,
+          secrets: { 'remote-1-api-key': `${REMOTE_KEY}\n` },
+        })
+        .then(
+          () => undefined,
+          (rejection: StatusError) => rejection
+        );
+
+      expect(error).toMatchObject({
+        statusCode: 400,
+        message:
+          'The API key contains characters that cannot be sent in an HTTP header. Paste the key again.',
+      });
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(fetchImpl).not.toHaveBeenCalled();
+      expect(JSON.stringify({ message: error?.message, ...error })).not.toContain(REMOTE_KEY);
+      expect(JSON.stringify(loggerMock.collect(logger))).not.toContain(REMOTE_KEY);
+    });
+
+    it('republishUnit never checks', async () => {
+      const probe = probeReturning({ outcome: 'ok' });
+      const soClient = soClientWith(storedWith(remoteUnit, remoteSecrets));
+      const service = createService({ soClient, probeRemoteDestination: probe });
+
+      await service.republishUnit('default');
+
+      expect(probe).not.toHaveBeenCalled();
     });
   });
 

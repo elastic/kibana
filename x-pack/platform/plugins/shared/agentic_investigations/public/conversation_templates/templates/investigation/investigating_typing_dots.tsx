@@ -8,6 +8,7 @@
 import { css, keyframes } from '@emotion/react';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { useSvgAiGradient } from '@kbn/shared-ux-ai-components';
 
 const DOT_DELAYS_MS = [0, 150, 300] as const;
 const DOT_SIZE_PX = 3;
@@ -24,16 +25,14 @@ const typingDotPulse = keyframes`
   }
 `;
 
-export interface InvestigatingTypingDotsProps {
-  /** CSS color or gradient fill for the dots. Defaults to currentColor. */
-  color?: string;
-}
-
-/** Staggered typing-style dots used next to in-progress investigation status. */
-export const InvestigatingTypingDots = ({
-  color = 'currentColor',
-}: InvestigatingTypingDotsProps): React.ReactElement => {
+/** Staggered typing-style dots, filled with a gradient, for in-progress investigation status. */
+export const InvestigatingTypingDots = (): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const {
+    colors: { startColor, endColor },
+  } = useSvgAiGradient({ variant: 'outlined' });
+  // The dots can't use `background-clip: text`, so they take the label's gradient colors as a fill.
+  const dotsFill = `linear-gradient(135deg, ${startColor} 2.98%, ${endColor} 66.24%)`;
 
   return (
     <span
@@ -63,7 +62,7 @@ export const InvestigatingTypingDots = ({
             width: ${DOT_SIZE_PX}px;
             height: ${DOT_SIZE_PX}px;
             border-radius: 50%;
-            background: ${color};
+            background: ${dotsFill};
             animation: ${typingDotPulse} 1.2s ${euiTheme.animation.resistance} infinite;
             animation-delay: ${delayMs}ms;
           `}

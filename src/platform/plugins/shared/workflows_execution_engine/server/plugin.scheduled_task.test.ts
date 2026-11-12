@@ -82,6 +82,16 @@ jest.mock('./concurrency/concurrency_manager', () => ({
     evaluateConcurrencyKey: (...args: unknown[]) => mockEvaluateConcurrencyKey(...args),
   })),
 }));
+jest.mock('./concurrency/concurrency_group_lock', () => ({
+  setConcurrencyGroupLock: jest.fn(),
+  getConcurrencyGroupLock: jest.fn(),
+  withConcurrencyGroupLock: (
+    _lock: unknown,
+    _spaceId: string,
+    _key: string | null | undefined,
+    fn: () => Promise<unknown>
+  ) => fn(),
+}));
 
 const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
