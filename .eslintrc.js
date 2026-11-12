@@ -158,11 +158,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'warn',
-
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
       },
       overrides: [
         {
@@ -215,19 +211,6 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
-        'src/platform/test/*api_integration*/**/*.{js,ts}',
-        'x-pack/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
-        'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
-        'x-pack/platform/test/*functional/tests/**/*.{js,ts}',
-      ],
-      // `mocha/*` rules run in oxlint (.oxlint/mocha.mts). The mocha env stays for `no-undef`.
-      env: {
-        mocha: true,
-      },
-    },
-    {
       files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       // `eslint-plugin-playwright` rules run in oxlint (.oxlint/playwright.mts). The plugin stays
@@ -251,11 +234,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'error',
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
-        'sort-keys': 'error',
       },
     },
 
@@ -389,11 +368,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'warn',
-
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
       },
     },
     /**

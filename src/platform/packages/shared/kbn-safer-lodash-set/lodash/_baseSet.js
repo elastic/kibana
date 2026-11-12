@@ -14,6 +14,9 @@ var assignValue = require('lodash/_assignValue'),
     isObject = require('lodash/isObject'),
     toKey = require('lodash/_toKey');
 
+/** Used to check objects for own properties. */
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
 /**
  * The base implementation of `_.set`.
  *
