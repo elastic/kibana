@@ -22,7 +22,7 @@ const DOCS_WRITE_PATTERN_PLACEHOLDER = i18n.translate(
 );
 
 const DOCS_PREFIX_HELP = i18n.translate('xpack.streams.destinations.docsWritePatternsHelpText', {
-  defaultMessage: 'Must start with logs-, metrics- or traces-.',
+  defaultMessage: 'Documents must start with logs-, metrics- or traces-.',
 });
 
 export const DocsIndexField = ({
