@@ -310,6 +310,38 @@ describe('createAgentGraph', () => {
     expect(researchInvoke).toHaveBeenCalledTimes(1);
   });
 
+  it('pauses on one confirmation at a time when the model batches confirmation-gated calls', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    researchInvoke.mockResolvedValueOnce(
+      new AIMessage({
+        content: '',
+        tool_calls: [
+          { id: 'c1', name: 'my_tool', args: { host: 'a' } },
+          { id: 'c2', name: 'my_tool', args: { host: 'b' } },
+        ],
+      })
+    );
+    const confirm = (id: string) => ({ id, type: 'confirmation', title: 't', message: 'm' });
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: '', artifact: { prompt: confirm('p1') } }),
+      new ToolMessage({ tool_call_id: 'c2', content: '', artifact: { prompt: confirm('p2') } }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.interrupted).toBe(true);
+    expect(result.prompts).toEqual([confirm('p1')]);
+    expect(result.pendingToolCallIds).toEqual(['c1']);
+    expect(result.steps).toEqual([
+      expect.objectContaining({ tool_call_id: 'c1', results: [] }),
+      expect.objectContaining({
+        tool_call_id: 'c2',
+        results: [expect.objectContaining({ type: 'error' })],
+      }),
+    ]);
+    expect(researchInvoke).toHaveBeenCalledTimes(1);
+  });
+
   it('throws cycleLimitExceeded when the research agent keeps calling tools past its budget', async () => {
     const { graph, researchInvoke } = createTestGraph();
     let call = 0;

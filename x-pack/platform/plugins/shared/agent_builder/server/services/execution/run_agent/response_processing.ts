@@ -17,9 +17,11 @@ import {
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import {
   isAskUserQuestionPrompt,
+  isConfirmationPrompt,
   type PromptRequest,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import {
   extractTextContent,
   extractToolCallsWithReasoning,
@@ -64,6 +66,10 @@ const emptyResponseError = (message: string) =>
 const LANGGRAPH_ERROR_SUFFIX = /\n Please fix your mistakes\.$/;
 const stripLangGraphErrorSuffix = (content: string): string =>
   content.replace(LANGGRAPH_ERROR_SUFFIX, '');
+
+export const DEFERRED_CONFIRMATION_MESSAGE =
+  'Not executed: this action requires user confirmation and only one confirmation can be pending at a time. ' +
+  'Re-issue this exact call, on its own, after the pending confirmation has been answered and its call has returned.';
 
 const reasoningStep = (data: Omit<ReasoningStep, 'type'>): ReasoningStep => ({
   type: ConversationRoundStepType.reasoning,
@@ -212,9 +218,34 @@ export const processToolNodeResponse = (
   const completedToolCallIds: string[] = [];
   const prompts: ToolPromptEntry[] = [];
 
+  let hasConfirmationPrompt = false;
+
   for (const message of toolMessages) {
     const toolCallId = message.tool_call_id;
     const interruptPrompt = extractInterruptPrompt(message.artifact);
+
+    // Confirmation-gated calls are approved one at a time: when the model batches several in one
+    // turn, only the first is surfaced and the rest are resolved as deferred so the model re-issues
+    // them after the first completes. A gated call returns its prompt before its handler runs, so
+    // deferring it has no side effect.
+    if (interruptPrompt && isConfirmationPrompt(interruptPrompt)) {
+      if (hasConfirmationPrompt) {
+        const results = [createErrorResult(DEFERRED_CONFIRMATION_MESSAGE)];
+        updates.push(
+          stepUpdates.resolveToolCall({
+            toolCallId,
+            toolId: toolIdFor(toolCallId),
+            results,
+            progression: drainProgress(toolCallId),
+          })
+        );
+        renderState[toolCallId] = { content: JSON.stringify({ results }), cycle };
+        completedToolCallIds.push(toolCallId);
+        continue;
+      }
+      hasConfirmationPrompt = true;
+    }
+
     if (interruptPrompt) {
       prompts.push({ toolCallId, prompt: interruptPrompt });
       if (isAskUserQuestionPrompt(interruptPrompt)) {

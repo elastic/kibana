@@ -27,6 +27,7 @@ export const ENDPOINT_RESPONSE_ACTIONS_REFERENCE = `## Error Handling Reference
 | Insufficient privileges | \`error: insufficient_privileges\` | Tell analyst which privilege is missing; suggest Security UI |
 | Page out of range | \`error: invalid_argument\` | Narrow the request with \`hostNameFilter\` instead of paging further |
 | Unexpected failure | \`error: unknown_error\` | Report the message; do not retry blindly |
+| Write call deferred | error result starting \`Not executed:\` (another confirmation was already pending) | Nothing was dispatched and the analyst did not decline it. Once the pending call has returned, re-issue the deferred call on its own |
 | Failure after dispatch | \`error: unknown_error\` + \`actionMayHaveBeenSent: true\` | The action may already have been sent. Do NOT call the write tool again; check \`get_response_action_status\` / Response Actions history for the host first |
 
 ## Bounded Fields in \`get_response_action_status\`
@@ -46,6 +47,7 @@ When a counter shows dropped items, say that only a sample is shown and give the
 
 - When the analyst asks which hosts are available, call \`list_endpoints\` first.
 - Call \`isolate_host\` / \`unisolate_host\` directly: they resolve the hostname themselves and return \`endpoint_not_found\` or \`ambiguous_hostname\` rather than guessing, so no \`get_endpoint_status\` pre-check is needed. Use \`get_endpoint_status\` when the analyst asks for the current state.
+- When the analyst names several hosts (e.g. "isolate host-a and host-b"), handle them one at a time: call the write tool for the first host, wait for its result, then call it for the next. Each host gets its own confirmation card; never batch the calls.
 - Always surface the action ID from write tools — it is the audit anchor in Response Actions history. If a write tool reports \`status: pending\` with no outcome, the action was still dispatched: report its ID and check it with \`get_response_action_status\`; never re-issue it.
 - For follow-up on a prior action ("what happened to scan X?"), use \`get_response_action_status\` with the action ID.
 - For this skill's status and response action lookups, use \`list_endpoints\`, \`get_endpoint_status\`, and \`get_response_action_status\` instead of \`platform.core.search\` or raw Elasticsearch queries. Other skills' diagnostic queries are unaffected.
