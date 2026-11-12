@@ -193,6 +193,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
       id: skippedExecutionId,
       spaceId,
       workflowId: workflow.id,
+      ...(workflow.workflowUid ? { workflowUid: workflow.workflowUid } : {}),
       ...pickManagedWorkflowFields(workflow),
       isTestRun: workflow.isTestRun,
       workflowDefinition: workflow.definition,

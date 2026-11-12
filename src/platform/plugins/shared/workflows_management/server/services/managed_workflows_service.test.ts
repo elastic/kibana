@@ -2577,6 +2577,7 @@ describe('ManagedWorkflowsService', () => {
       crudService.getWorkflowDocumentSource.mockResolvedValue(
         createWorkflowSource({
           spaceId: '*',
+          workflowUid: 'uid-current',
           definition: { name: 'Managed Workflow', enabled: true } as WorkflowYaml,
         })
       );
@@ -2604,6 +2605,7 @@ describe('ManagedWorkflowsService', () => {
           managedBy: PLUGIN_ID,
           originManagedWorkflowId: WORKFLOW_ID,
           managedVersion: 1,
+          workflowUid: 'uid-current',
         }),
         {
           spaceId: SPACE_ID,

@@ -568,6 +568,7 @@ export class ManagedWorkflowsService {
           managedBy: existing.managedBy,
           originManagedWorkflowId: existing.originManagedWorkflowId,
           managedVersion: existing.managedVersion,
+          workflowUid: existing.workflowUid,
         },
         { spaceId }
       ),
