@@ -113,9 +113,6 @@ export interface AlertingServerStart {
    * Returns an AlertActionsClient for the request's space and user. Every method authorizes the
    * request user for the "Alerts: All" feature privilege (403 otherwise) and then writes as the
    * internal ES user, so the caller needs no index privileges on `.alert-actions` / `.rule-events`.
-   * NOTE: the check is feature-level, not per alert: the client can act on any episode in the
-   * request's space. Callers that expose a narrower scope (e.g. one solution's alerts) must verify
-   * the episode belongs to what the user may change before calling it.
    */
   getAlertActionsClientWithRequest(request: KibanaRequest): Promise<AlertActionsClientApi>;
 }
