@@ -10,6 +10,7 @@ import { firstValueFrom, take, toArray } from 'rxjs';
 import type { App, AppUpdater, CoreSetup, CoreStart } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { DIGITAL_EXPERIENCE_LOCATOR_ID } from '../common/locator';
 import { hasDigitalExperienceAccess } from './capabilities';
 import { DigitalExperiencePlugin } from './plugin';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
@@ -39,11 +40,13 @@ const setup = ({
   coreSetup.getStartServices.mockResolvedValue([coreStart, pluginsStart, {}]);
 
   const registerSections = jest.fn();
+  const createLocator = jest.fn();
   const plugin = new DigitalExperiencePlugin();
   plugin.setup(
     coreSetup as unknown as CoreSetup<DigitalExperienceStartDeps>,
     {
       observabilityShared: { navigation: { registerSections } },
+      share: { url: { locators: { create: createLocator } } },
     } as unknown as DigitalExperienceSetupDeps
   );
 
@@ -51,7 +54,7 @@ const setup = ({
   const sections$: Observable<Array<{ label: string; entries: unknown[] }>> =
     registerSections.mock.calls[0][0];
   const start = () => plugin.start(coreStart, pluginsStart);
-  return { app, start, sections$ };
+  return { app, start, sections$, createLocator };
 };
 
 describe('hasDigitalExperienceAccess', () => {
@@ -71,6 +74,13 @@ describe('DigitalExperiencePlugin', () => {
 
     expect(app.id).toBe('digital_experience');
     expect(app.title).toBe('Digital experience');
+  });
+
+  it('registers its locator, whoever can use the app', () => {
+    const { createLocator } = setup({ show: false });
+
+    expect(createLocator).toHaveBeenCalledTimes(1);
+    expect(createLocator.mock.calls[0][0].id).toBe(DIGITAL_EXPERIENCE_LOCATOR_ID);
   });
 
   it.each([

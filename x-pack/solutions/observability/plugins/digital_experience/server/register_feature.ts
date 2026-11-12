@@ -9,11 +9,16 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
+  CREATE_SHORT_URL_SUB_FEATURE_PRIVILEGE_ID,
   DIGITAL_EXPERIENCE_API_PRIVILEGES,
   DIGITAL_EXPERIENCE_FEATURE_ID,
   DIGITAL_EXPERIENCE_UI_PRIVILEGES,
   MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
 } from '../common/feature';
+import { SAVED_VIEW_TYPE } from '../common/saved_views';
+
+/** The saved object type of the share plugin's short URLs. */
+const SHORT_URL_TYPE = 'url';
 
 export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup): void => {
   features.registerKibanaFeature({
@@ -33,13 +38,15 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
         app: [DIGITAL_EXPERIENCE_FEATURE_ID, 'kibana'],
         api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read, DIGITAL_EXPERIENCE_API_PRIVILEGES.manage],
         ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.show, DIGITAL_EXPERIENCE_UI_PRIVILEGES.save],
-        savedObject: { all: [], read: [] },
+        // Saving, updating and deleting the views of the space.
+        savedObject: { all: [SAVED_VIEW_TYPE], read: [SAVED_VIEW_TYPE] },
       },
       read: {
         app: [DIGITAL_EXPERIENCE_FEATURE_ID, 'kibana'],
         api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read],
         ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.show],
-        savedObject: { all: [], read: [] },
+        // Applying the views of the space, not changing them.
+        savedObject: { all: [], read: [SAVED_VIEW_TYPE] },
       },
     },
     subFeatures: [
@@ -72,6 +79,30 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
                 api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
                 ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions],
                 savedObject: { all: [], read: [] },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.digitalExperience.featureRegistry.shortUrlsSubFeatureName', {
+          defaultMessage: 'Short URLs',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: CREATE_SHORT_URL_SUB_FEATURE_PRIVILEGE_ID,
+                name: i18n.translate(
+                  'xpack.digitalExperience.featureRegistry.createShortUrlPrivilegeName',
+                  { defaultMessage: 'Create short URLs' }
+                ),
+                // Part of `all`, as in Discover and Dashboard, and taken off in a custom role.
+                // Short URLs are saved objects of the space that other apps' links share.
+                includeIn: 'all',
+                ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.createShortUrl],
+                savedObject: { all: [SHORT_URL_TYPE], read: [] },
               },
             ],
           },

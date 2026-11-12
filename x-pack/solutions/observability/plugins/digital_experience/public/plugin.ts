@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
+import { DigitalExperienceLocatorDefinition } from '../common/locator';
 import { hasDigitalExperienceAccess } from './capabilities';
 import { APPLICATIONS_LABEL, DIGITAL_EXPERIENCE_LABEL } from './labels';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
@@ -25,6 +26,9 @@ export class DigitalExperiencePlugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
+    // Also registered on the server, which creates the short URLs that name it.
+    plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
+
     plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart]) =>

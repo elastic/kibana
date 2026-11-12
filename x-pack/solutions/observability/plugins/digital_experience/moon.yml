@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/observability-shared-plugin'
   - '@kbn/react-hooks'
   - '@kbn/rison'
+  - '@kbn/share-plugin'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/ui-callout'
@@ -59,6 +60,7 @@ dependsOn:
   - '@kbn/timerange'
   - '@kbn/typed-react-router-config'
   - '@kbn/unified-search-plugin'
+  - '@kbn/utility-types'
   - '@kbn/ux-plugin'
   - '@kbn/zod'
 tags:
