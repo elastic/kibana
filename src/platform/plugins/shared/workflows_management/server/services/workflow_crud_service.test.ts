@@ -4797,6 +4797,11 @@ describe('workflow page lifecycle', () => {
       ['triggers:', '  - type: page', 'steps: [unclosed'].join('\n'),
       undefined,
     ],
+    [
+      'no definition for a misspelled triggers key',
+      ['trigers:', '  - type: page', 'steps: 1'].join('\n'),
+      undefined,
+    ],
   ])('passes %s', async (_, yaml, definition) => {
     const { service, client, pagesService, request } = setup();
     const stored = storeWrites(client);

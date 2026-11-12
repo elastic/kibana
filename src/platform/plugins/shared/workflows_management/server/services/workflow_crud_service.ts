@@ -165,8 +165,9 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 
 /**
  * Reads the triggers of a workflow that failed validation, without the schema, so the page sync
- * can retire a page whose trigger was removed in the same save. Undefined for a YAML syntax error:
- * the parser recovers from it, so the trigger list it returns may be cut short.
+ * can retire a page whose trigger was removed in the same save. Undefined when the triggers cannot
+ * be read: a YAML syntax error, which the parser recovers from with a list that may be cut short,
+ * or a missing or misspelled `triggers` key. A typo must not retire a shared link.
  */
 const parseLooseTriggers = (yaml: string): WorkflowPageTriggers | undefined => {
   const parsed = parseYamlToJSONWithoutValidation(yaml);
@@ -179,8 +180,11 @@ const parseLooseTriggers = (yaml: string): WorkflowPageTriggers | undefined => {
     return undefined;
   }
   const { triggers } = parsed.json as { triggers?: unknown };
+  if (!Array.isArray(triggers)) {
+    return undefined;
+  }
   return {
-    triggers: (Array.isArray(triggers) ? triggers : []).map((trigger) => ({
+    triggers: triggers.map((trigger) => ({
       type: typeof trigger?.type === 'string' ? trigger.type : undefined,
       id: typeof trigger?.id === 'string' ? trigger.id : undefined,
     })),
