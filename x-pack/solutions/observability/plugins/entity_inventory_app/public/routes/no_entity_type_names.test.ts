@@ -14,7 +14,7 @@ const PUBLIC_DIR = join(__dirname, '..');
 // `mock_inventory_api/` is the filters' stand-in for the routes, replaced by #6355.
 const ALLOWED_FILES: readonly string[] = ['routes/config.tsx'];
 const ALLOWED_DIRECTORIES: readonly string[] = ['mock_inventory_api', '__fixtures__'];
-const TEST_ONLY_FILE = /(\.test\.tsx?$)|(^fixture_)|(^mocks\.tsx$)/;
+const TEST_ONLY_FILE = /(\.test\.tsx?$)|(^mocks\.tsx$)/;
 const TYPE_NAME_LITERAL = /(['"`])(host|k8s\.deployment)\1/;
 
 const listProductionFiles = (directory: string): string[] =>

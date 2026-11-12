@@ -10,10 +10,10 @@
  * the app imports this file, so it stays out of the plugin bundle.
  */
 
-import type { EntityInventoryApiClient } from './client';
-import { LIST_FIXTURES_BY_TYPE, NORMAL_ROW_COUNT } from './fixture_data';
-import { createFixtureEntityInventoryApiClient, throwIfAborted } from './fixture_client';
-import type { InventoryListResponse } from './types';
+import type { EntityInventoryApiClient } from '../inventory_api/client';
+import { LIST_FIXTURES_BY_TYPE, NORMAL_ROW_COUNT } from './inventory_data';
+import { createFixtureEntityInventoryApiClient, throwIfAborted } from './inventory_client';
+import type { InventoryListResponse } from '../inventory_api/types';
 
 /** The list scenarios the scenario client can return. */
 export type FixtureScenario =

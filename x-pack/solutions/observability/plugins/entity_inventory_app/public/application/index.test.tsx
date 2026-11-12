@@ -18,7 +18,7 @@ import { RouterProvider } from '@kbn/typed-react-router-config';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { EntityInventoryApiClient } from '../inventory_api/client';
-import { createFixtureEntityInventoryApiClient } from '../inventory_api/fixture_client';
+import { createFixtureEntityInventoryApiClient } from '../__fixtures__/inventory_client';
 import { createAppServicesMock, createCoreStartMock, createStartDependenciesMock } from '../mocks';
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';

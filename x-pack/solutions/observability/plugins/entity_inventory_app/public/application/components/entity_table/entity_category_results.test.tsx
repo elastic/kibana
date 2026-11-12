@@ -11,13 +11,13 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../../inventory_api/client';
-import { createFixtureEntityInventoryApiClient } from '../../../inventory_api/fixture_client';
+import { createFixtureEntityInventoryApiClient } from '../../../__fixtures__/inventory_client';
 import {
   HOST_TYPE_FIXTURE,
   K8S_DEPLOYMENT_TYPE_FIXTURE,
-} from '../../../inventory_api/fixture_data';
-import type { FixtureScenario } from '../../../inventory_api/fixture_scenarios';
-import { createScenarioEntityInventoryApiClient } from '../../../inventory_api/fixture_scenarios';
+} from '../../../__fixtures__/inventory_data';
+import type { FixtureScenario } from '../../../__fixtures__/inventory_scenarios';
+import { createScenarioEntityInventoryApiClient } from '../../../__fixtures__/inventory_scenarios';
 import { createAppServicesMock } from '../../../mocks';
 import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
 import {

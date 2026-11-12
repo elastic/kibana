@@ -10,8 +10,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-service';
-import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
-import { buildScenarioListResponse } from '../../../inventory_api/fixture_scenarios';
+import { HOST_TYPE_FIXTURE } from '../../../__fixtures__/inventory_data';
+import { buildScenarioListResponse } from '../../../__fixtures__/inventory_scenarios';
 import type {
   InventoryEntityType,
   InventoryListResponse,

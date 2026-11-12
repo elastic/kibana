@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EntityInventoryApiClient } from './client';
-import { buildListResponseFixture, TYPES_RESPONSE_FIXTURE } from './fixture_data';
+import type { EntityInventoryApiClient } from '../inventory_api/client';
+import { buildListResponseFixture, TYPES_RESPONSE_FIXTURE } from './inventory_data';
 
 const createAbortError = (): Error => {
   const error = new Error('The request was aborted');

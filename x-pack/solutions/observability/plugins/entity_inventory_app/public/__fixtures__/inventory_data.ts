@@ -11,7 +11,7 @@ import type {
   InventoryListResponse,
   InventoryRow,
   InventoryTypesResponse,
-} from './types';
+} from '../inventory_api/types';
 
 // The columns `buildColumns` produces for the entity store's built-in `host`: `entity.id`, the
 // identity fields in ranking order, the attributes in source order with names shared across
