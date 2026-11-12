@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isCallbackDeliveryError, parseRetryAfter, throwIfNotDelivered } from './errors';
+import { isCallbackDeliveryError, parseRetryAfterMs, throwIfNotDelivered } from './errors';
 
 const errorFor = (status: number, retryAfterMs?: number) => {
   try {
@@ -43,26 +43,26 @@ describe('throwIfNotDelivered', () => {
   );
 });
 
-describe('parseRetryAfter', () => {
+describe('parseRetryAfterMs', () => {
   const now = Date.parse('Wed, 21 Oct 2026 07:28:00 GMT');
 
   it('parses delta-seconds', () => {
-    expect(parseRetryAfter('30', now)).toBe(30_000);
-    expect(parseRetryAfter(' 0 ', now)).toBe(0);
+    expect(parseRetryAfterMs('30', now)).toBe(30_000);
+    expect(parseRetryAfterMs(' 0 ', now)).toBe(0);
   });
 
   it('parses an HTTP-date relative to now', () => {
-    expect(parseRetryAfter('Wed, 21 Oct 2026 07:28:45 GMT', now)).toBe(45_000);
+    expect(parseRetryAfterMs('Wed, 21 Oct 2026 07:28:45 GMT', now)).toBe(45_000);
   });
 
   it('floors an HTTP-date in the past at 0', () => {
-    expect(parseRetryAfter('Wed, 21 Oct 2026 07:27:00 GMT', now)).toBe(0);
+    expect(parseRetryAfterMs('Wed, 21 Oct 2026 07:27:00 GMT', now)).toBe(0);
   });
 
   it.each([undefined, null, '', '   ', 'soon', '-5', '1.5'])(
     'returns undefined for %p',
     (value) => {
-      expect(parseRetryAfter(value, now)).toBeUndefined();
+      expect(parseRetryAfterMs(value, now)).toBeUndefined();
     }
   );
 });

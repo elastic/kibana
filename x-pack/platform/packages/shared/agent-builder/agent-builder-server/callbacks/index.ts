@@ -16,6 +16,6 @@ export type {
 export {
   CallbackDeliveryError,
   isCallbackDeliveryError,
-  parseRetryAfter,
+  parseRetryAfterMs,
   throwIfNotDelivered,
 } from './errors';

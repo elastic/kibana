@@ -238,7 +238,7 @@ export type {
 export {
   CallbackDeliveryError,
   isCallbackDeliveryError,
-  parseRetryAfter,
+  parseRetryAfterMs,
   throwIfNotDelivered,
 } from './callbacks';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

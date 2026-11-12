@@ -31,7 +31,7 @@ export const isCallbackDeliveryError = (error: unknown): error is CallbackDelive
  * The delay in milliseconds a `Retry-After` header asks for, as delta-seconds or an HTTP-date
  * (RFC 9110); `undefined` when the value is missing or unparseable.
  */
-export const parseRetryAfter = (
+export const parseRetryAfterMs = (
   value: string | null | undefined,
   now: number = Date.now()
 ): number | undefined => {
