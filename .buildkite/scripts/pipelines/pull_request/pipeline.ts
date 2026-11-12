@@ -300,6 +300,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await doAnyChangesMatch([
         /^src\/platform\/packages\/shared\/kbn-connector-specs\//,
         /^src\/platform\/packages\/shared\/kbn-connector-emulate\//,
+        /^src\/platform\/plugins\/shared\/workflows_management\/test\/scout_connector_emulator\//,
         /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/connector_emulator/,
         /^\.buildkite\/pipeline-utils\/step-library\/steps\/connector_emulator_scout\.ts/,
         /^\.buildkite\/scripts\/steps\/test\/connector_emulator_scout\.sh/,

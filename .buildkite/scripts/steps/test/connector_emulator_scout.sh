@@ -25,9 +25,14 @@ else
   kibana_args=(--kibanaInstallDir "$KIBANA_BUILD_LOCATION")
 fi
 
-CONFIG_PATH="src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/playwright.config.ts"
-# The connectors the suites under that folder run, by the emulator's name for them: the connector
-# id without the dot. Add a connector here when adding a suite for it.
+# The suites that run connectors against the emulator, which scout_ci_config.yml keeps out of the
+# Scout lanes. Each run starts its own Kibana and Elasticsearch, and the emulator serves them all.
+CONFIG_PATHS=(
+  "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/playwright.config.ts"
+  "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel.playwright.config.ts"
+)
+# The connectors those suites run, by the emulator's name for them: the connector id without the
+# dot. Add a connector here when adding a suite for it.
 CONNECTORS="firecrawl"
 EMULATOR_SPEC="${CONNECTOR_EMULATOR_SPEC:-snapshot}"
 EMULATOR_LOG="target/connector_emulator.log"
@@ -95,35 +100,56 @@ if [[ "$emulator_ready" != "true" ]]; then
 fi
 grep -E "now running|proxyUrl" "$EMULATOR_LOG" || true
 
-echo "--- Scout Connector Emulator Tests"
-echo "Config: $CONFIG_PATH"
+FINAL_EXIT_CODE=0
+results=()
+failedConfigs=()
 
-start=$(date +%s)
+for CONFIG_PATH in "${CONFIG_PATHS[@]}"; do
+  echo "--- Scout Connector Emulator Tests: $CONFIG_PATH"
 
-set +e
-node scripts/scout run-tests --location local --arch stateful --domain classic --config "$CONFIG_PATH" "${kibana_args[@]}"
-EXIT_CODE=$?
-set -e
+  start=$(date +%s)
 
-timeSec=$(($(date +%s)-start))
-if [[ $timeSec -gt 60 ]]; then
-  min=$((timeSec/60))
-  sec=$((timeSec-(min*60)))
-  duration="${min}m ${sec}s"
-else
-  duration="${timeSec}s"
+  set +e
+  node scripts/scout run-tests --location local --arch stateful --domain classic --config "$CONFIG_PATH" "${kibana_args[@]}"
+  EXIT_CODE=$?
+  set -e
+
+  timeSec=$(($(date +%s)-start))
+  if [[ $timeSec -gt 60 ]]; then
+    min=$((timeSec/60))
+    sec=$((timeSec-(min*60)))
+    duration="${min}m ${sec}s"
+  else
+    duration="${timeSec}s"
+  fi
+
+  upload_events_if_available
+
+  if [[ $EXIT_CODE -eq 2 ]]; then
+    echo "No tests found for Connector Emulator ($CONFIG_PATH, ${duration})"
+    echo "^^^ +++"
+    failedConfigs+=("$CONFIG_PATH (no tests)")
+    FINAL_EXIT_CODE=10
+  elif [[ $EXIT_CODE -ne 0 ]]; then
+    echo "Scout test exited with code $EXIT_CODE for Connector Emulator ($CONFIG_PATH, ${duration})"
+    echo "^^^ +++"
+    failedConfigs+=("$CONFIG_PATH")
+    FINAL_EXIT_CODE=10
+  else
+    results+=("$CONFIG_PATH (${duration})")
+  fi
+done
+
+echo "--- Scout Connector Emulator Tests: Summary"
+echo "Passed: ${#results[@]}"
+echo "Failed: ${#failedConfigs[@]}"
+if [[ ${#results[@]} -gt 0 ]]; then
+  echo "Successful tests:"
+  printf '%s\n' "${results[@]}"
+fi
+if [[ ${#failedConfigs[@]} -gt 0 ]]; then
+  echo "Failed tests:"
+  printf '  %s\n' "${failedConfigs[@]}"
 fi
 
-upload_events_if_available
-
-if [[ $EXIT_CODE -eq 2 ]]; then
-  echo "No tests found for Connector Emulator ($CONFIG_PATH, ${duration})"
-  echo "^^^ +++"
-  exit 10
-elif [[ $EXIT_CODE -ne 0 ]]; then
-  echo "Scout test exited with code $EXIT_CODE for Connector Emulator ($CONFIG_PATH, ${duration})"
-  echo "^^^ +++"
-  exit 10
-fi
-
-echo "Connector Emulator passed for $CONFIG_PATH (${duration})"
+exit $FINAL_EXIT_CODE

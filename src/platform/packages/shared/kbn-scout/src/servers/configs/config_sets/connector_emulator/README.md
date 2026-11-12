@@ -25,7 +25,16 @@ node scripts/scout run-tests --arch stateful --domain classic --config <suite>/p
 
 `run-tests` picks this set up from a suite under a `test/scout_connector_emulator` folder. A suite that finds Kibana doesn't trust the emulator (TLS errors from the actions API) was started before the emulator created its CA: restart the Scout servers.
 
-The example suite is [`kbn-connector-specs/test/scout_connector_emulator`](../../../../../../kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts). In CI, the `Connector Emulator Scout` step runs it (`.buildkite/scripts/steps/test/connector_emulator_scout.sh`): on pull requests that change `kbn-connector-specs`, `kbn-connector-emulate` or this set, and weekly in the connector pipeline, with the committed vendor specs and with the vendors' latest ones. The step starts the emulator for the connectors it lists, so add a connector there when adding a suite for it. The Scout lanes don't run this package's suites, as they have no emulator.
+Two suites use this set, both for Firecrawl:
+
+- [`kbn-connector-specs/test/scout_connector_emulator/api`](../../../../../../kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts) runs each of its actions through the actions API, with no browser.
+- [`workflows_management/test/scout_connector_emulator/ui`](../../../../../../../../plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/firecrawl_workflow.spec.ts) writes a workflow with a step per action in the Workflows app, saves and runs it, and checks the steps' outputs and what the emulator saw. To watch it in a browser, start the emulator and the Scout servers as above, then run it headed:
+
+  ```sh
+  node scripts/playwright test --config src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel.playwright.config.ts --project local --headed
+  ```
+
+In CI, the `Connector Emulator Scout` step runs it (`.buildkite/scripts/steps/test/connector_emulator_scout.sh`): on pull requests that change `kbn-connector-specs`, `kbn-connector-emulate` or this set, and weekly in the connector pipeline, with the committed vendor specs and with the vendors' latest ones. The step starts the emulator for the connectors it lists, so add a connector there when adding a suite for it. The Scout lanes don't run this package's suites, as they have no emulator.
 
 ## Running tests in parallel
 

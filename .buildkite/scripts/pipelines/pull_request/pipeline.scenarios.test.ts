@@ -159,6 +159,12 @@ const SCENARIOS: Scenario[] = [
     ],
   },
   {
+    name: 'connector emulator workflows suite path',
+    changedFiles: [
+      'src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/firecrawl_workflow.spec.ts',
+    ],
+  },
+  {
     name: 'connector emulator path',
     changedFiles: [
       'src/platform/packages/shared/kbn-connector-emulate/src/fetch/create_emulator_fetch.ts',

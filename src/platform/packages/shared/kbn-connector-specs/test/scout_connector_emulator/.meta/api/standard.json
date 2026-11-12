@@ -1,0 +1,99 @@
+{
+  "sha1": "4d6202bcab446c3baaf70f7b6c3f67d6f3d11e57",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e2747c63e369408-22abdf4f80e9143",
+      "title": "the Firecrawl actions through Kibana against the connector emulator scrape sends the page to scrape and returns what the vendor answers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "id": "e2747c63e369408-80809b117e29a6b",
+      "title": "the Firecrawl actions through Kibana against the connector emulator search sends the query and the limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 123,
+        "column": 16
+      }
+    },
+    {
+      "id": "e2747c63e369408-652bb6ba129a12c",
+      "title": "the Firecrawl actions through Kibana against the connector emulator map sends the site, the search term and the limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 135,
+        "column": 11
+      }
+    },
+    {
+      "id": "e2747c63e369408-32e4768f4ff3bbf",
+      "title": "the Firecrawl actions through Kibana against the connector emulator crawl starts a crawl and returns its id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 145,
+        "column": 88
+      }
+    },
+    {
+      "id": "e2747c63e369408-3c6f2db3e5af233",
+      "title": "the Firecrawl actions through Kibana against the connector emulator getCrawlStatus asks for the crawl it is given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 158,
+        "column": 13
+      }
+    },
+    {
+      "id": "e2747c63e369408-8d0c58b33b209e9",
+      "title": "the Firecrawl actions through Kibana against the connector emulator crawlAndWait polls the crawl until it has completed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 166,
+        "column": 95
+      }
+    },
+    {
+      "id": "e2747c63e369408-0f26de6863a99b0",
+      "title": "the Firecrawl actions through Kibana against the connector emulator reports a vendor error as an error, without a result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    }
+  ]
+}
