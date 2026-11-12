@@ -41,7 +41,9 @@ steps:
   # columns at compile time while KQL() just matches nothing (same reason
   # the online-evals generator wraps its gen_ai filters in KQL). The STATS
   # BY dedupes a trace that loaded the skill more than once. One row per
-  # trace, first column the trace id.
+  # trace, first column the trace id. `unmapped_fields` nullifies trace_id
+  # until the first agent trace creates the data stream; otherwise every
+  # tick on a trace-less cluster fails with `Unknown column [trace_id]`.
   - name: find_traces
     type: elasticsearch.esql.query
     timeout: '60s'
@@ -54,6 +56,7 @@ steps:
                 '@timestamp':
                   gte: 'now-__LOOKBACK_MINUTES__m'
       query: |-
+        SET unmapped_fields="nullify";
         FROM traces-agent_builder.otel-*
         | WHERE KQL("attributes.gen_ai.operation.name:execute_tool AND attributes.gen_ai.tool.name:load_skill AND attributes.gen_ai.tool.call.arguments:*{{ consts.SKILL_ID }}*")
         | STATS loads = COUNT(*) BY trace_id

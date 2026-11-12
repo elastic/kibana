@@ -58,9 +58,10 @@ const renderTemplate = (template: string, values: Record<string, string | number
 export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   id: AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Version 2 wraps the trace match in KQL(). yamlTemplate hashing does not see
-  // the imported YAML, so installed instances only re-render on a version bump.
-  version: 2,
+  // Version 3 nullifies unmapped fields so trace-less clusters stop failing.
+  // yamlTemplate hashing does not see the imported YAML, so installed
+  // instances only re-render on a version bump.
+  version: 3,
   billable: false,
   yamlTemplate: ({ skillId, intervalMinutes, lookbackMinutes }) =>
     renderTemplate(AESOP_DRIFT_MONITOR_YAML, {
