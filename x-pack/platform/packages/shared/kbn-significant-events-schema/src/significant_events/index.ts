@@ -58,6 +58,7 @@ export {
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
   significantEventCloseReasonSchema,
   operatorFallbackAssessmentNote,
+  severitySyncAssessmentNote,
   MAX_DEACTIVATION_REASON_LENGTH,
   INACTIVE_SERIES_LOOKBACK_HOURS,
 } from './events';

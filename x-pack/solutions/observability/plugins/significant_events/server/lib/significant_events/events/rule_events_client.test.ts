@@ -1015,7 +1015,7 @@ describe('RuleEventsClient', () => {
   });
 
   describe('syncSeverity', () => {
-    const stored = createStatusEvent({ severity: 'low' });
+    const stored = createStatusEvent({ severity: 'low', workflow_execution_id: 'discovery-run' });
     const setup = ({
       latest = stored as SignificantEvent | undefined,
       updates = [{ updated: true }] as Array<{ updated: boolean }>,
@@ -1032,31 +1032,40 @@ describe('RuleEventsClient', () => {
       };
     };
 
-    it('writes a new version with the severity and everything else copied', async () => {
+    it('writes a new version with the severity, copied but for the workflow that wrote the prior one', async () => {
       const { client, updateEvent } = setup();
 
       expect(await client.syncSeverity({ eventId: stored.event_id, severity: 'high' })).toBe(
         'updated'
       );
       expect(updateEvent).toHaveBeenCalledWith({
-        event: { ...stored, severity: 'high', '@timestamp': expect.any(String) },
+        event: {
+          ...stored,
+          severity: 'high',
+          '@timestamp': expect.any(String),
+          assessment_note: 'Severity set to high by its investigation.',
+          workflow_execution_id: undefined,
+        },
         prior: stored,
         origin: { actor: 'agent_tool' },
       });
     });
 
-    it('writes nothing when the severity already matches, or the event is unknown', async () => {
-      const matching = setup();
-      const unknown = setup({ latest: undefined });
+    it.each([
+      ['the severity already matches', stored, stored.event_id, 'low', 'unchanged'],
+      ['the event is unknown', stored, 'gone', 'low', 'not_found'],
+      [
+        'the event is closed',
+        { ...stored, status: 'inactive' as const },
+        stored.event_id,
+        'high',
+        'closed',
+      ],
+    ] as const)('writes nothing when %s', async (_name, latest, eventId, severity, expected) => {
+      const { client, updateEvent } = setup({ latest });
 
-      expect(
-        await matching.client.syncSeverity({ eventId: stored.event_id, severity: 'low' })
-      ).toBe('unchanged');
-      expect(await unknown.client.syncSeverity({ eventId: 'gone', severity: 'low' })).toBe(
-        'not_found'
-      );
-      expect(matching.updateEvent).not.toHaveBeenCalled();
-      expect(unknown.updateEvent).not.toHaveBeenCalled();
+      expect(await client.syncSeverity({ eventId, severity })).toBe(expected);
+      expect(updateEvent).not.toHaveBeenCalled();
     });
 
     it.each([

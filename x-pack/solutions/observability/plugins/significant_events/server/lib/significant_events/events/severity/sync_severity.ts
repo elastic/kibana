@@ -26,7 +26,8 @@ interface SeveritySyncArgs {
  * Keeps the stored severity of an event in step with its investigation, which owns it once it has
  * recorded its findings. The investigation's outcome is the source of truth and the stored severity
  * is a copy, refreshed when the investigation agent finishes (`syncEvents`) and when a read finds a
- * row stale (`reconcileRows`).
+ * row stale (`reconcileRows`). A closed event's copy is not refreshed (see `syncSeverity`), so reads
+ * still give it its investigation's severity.
  */
 export interface SeveritySync {
   /**
@@ -125,7 +126,7 @@ export const createSeveritySync = ({
         group.map(async ([eventId, severity]) => {
           try {
             const writeResult = await eventClient.syncSeverity({ eventId, severity });
-            if (writeResult === 'superseded' || writeResult === 'not_found') {
+            if (writeResult !== 'updated' && writeResult !== 'unchanged') {
               coolingDownUntil.set(eventId, Date.now() + COOLDOWN_MS);
             }
           } catch (error) {
@@ -180,7 +181,7 @@ export const createSeveritySync = ({
         for (const [eventId, { severity }] of loaded.outcomes) {
           try {
             const writeResult = await eventClient.syncSeverity({ eventId, severity });
-            if (writeResult === 'superseded' || writeResult === 'not_found') {
+            if (writeResult !== 'updated' && writeResult !== 'unchanged') {
               log.debug(`Severity of event ${eventId} not written through (${writeResult})`);
             }
           } catch (error) {

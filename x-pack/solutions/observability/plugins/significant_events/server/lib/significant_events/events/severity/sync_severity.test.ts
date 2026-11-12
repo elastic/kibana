@@ -21,7 +21,7 @@ interface Row {
   event_id: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
-type Outcome = 'updated' | 'unchanged' | 'superseded' | 'not_found';
+type Outcome = 'updated' | 'unchanged' | 'superseded' | 'not_found' | 'closed';
 
 const available = (entries: Array<[string, Row['severity']]>) => ({
   status: 'available',
@@ -152,26 +152,32 @@ describe('createSeveritySync', () => {
       expect(mostRunning).toBe(3);
     });
 
-    it('does not write an event that is already being written, and leaves a lost race alone for a minute', async () => {
-      const rows = staleRows('again', 1);
-      mockLoadInvestigationOutcomes.mockResolvedValue(allCritical(rows));
-      let finish: (outcome: Outcome) => void = () => undefined;
-      const syncSeverity = jest.fn(() => new Promise<Outcome>((resolve) => (finish = resolve)));
-      const { reconcile } = setup(syncSeverity);
+    it.each<[string, Outcome]>([
+      ['a lost race', 'superseded'],
+      ['a closed event', 'closed'],
+    ])(
+      'does not write an event that is already being written, and leaves %s alone for a minute',
+      async (_name, outcome) => {
+        const rows = staleRows('again', 1);
+        mockLoadInvestigationOutcomes.mockResolvedValue(allCritical(rows));
+        let finish: (result: Outcome) => void = () => undefined;
+        const syncSeverity = jest.fn(() => new Promise<Outcome>((resolve) => (finish = resolve)));
+        const { reconcile } = setup(syncSeverity);
 
-      await reconcile(rows);
-      await reconcile(rows);
-      expect(syncSeverity).toHaveBeenCalledTimes(1);
+        await reconcile(rows);
+        await reconcile(rows);
+        expect(syncSeverity).toHaveBeenCalledTimes(1);
 
-      finish('superseded');
-      await flush();
-      await reconcile(rows);
-      expect(syncSeverity).toHaveBeenCalledTimes(1);
+        finish(outcome);
+        await flush();
+        await reconcile(rows);
+        expect(syncSeverity).toHaveBeenCalledTimes(1);
 
-      await jest.advanceTimersByTimeAsync(60_001);
-      await reconcile(rows);
-      expect(syncSeverity).toHaveBeenCalledTimes(2);
-    });
+        await jest.advanceTimersByTimeAsync(60_001);
+        await reconcile(rows);
+        expect(syncSeverity).toHaveBeenCalledTimes(2);
+      }
+    );
 
     it('warns once per read, with the count, when writes fail', async () => {
       const rows = staleRows('fail', 3);

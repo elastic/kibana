@@ -21,6 +21,7 @@ import {
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   operatorFallbackAssessmentNote,
+  severitySyncAssessmentNote,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   SEVERITY_OPTIONS,
@@ -1103,6 +1104,8 @@ export class RuleEventsClient {
   /**
    * Writes a severity as a new version through the head guard, retrying a head moved by another
    * change. A head whose severity another writer changed is left alone: that writer resolved it later.
+   * A closed event is left alone too: a new version would move its close time and replace its closing
+   * note, which Discovery's reuse of closed series reads.
    */
   async syncSeverity({
     eventId,
@@ -1110,16 +1113,24 @@ export class RuleEventsClient {
   }: {
     eventId: string;
     severity: Severity;
-  }): Promise<'updated' | 'unchanged' | 'superseded' | 'not_found'> {
+  }): Promise<'updated' | 'unchanged' | 'superseded' | 'not_found' | 'closed'> {
     let firstSeverity: Severity | undefined;
     for (let attempt = 0; attempt <= SYNC_SEVERITY_MAX_RETRIES; attempt++) {
       const latest = (await this.findLatestByEventIds([eventId])).get(eventId);
       if (!latest) return 'not_found';
       if (latest.severity === severity) return 'unchanged';
+      if (latest.status === ALERT_EPISODE_STATUS.INACTIVE) return 'closed';
       firstSeverity ??= latest.severity;
       if (latest.severity !== firstSeverity) return 'superseded';
       const written = await this.updateEvent({
-        event: { ...latest, '@timestamp': new Date().toISOString(), severity },
+        // No workflow writes this version, so it must not keep the prior version's producer.
+        event: {
+          ...latest,
+          '@timestamp': new Date().toISOString(),
+          severity,
+          assessment_note: severitySyncAssessmentNote(severity),
+          workflow_execution_id: undefined,
+        },
         prior: latest,
         // The status stays as it is, so the write reports no status change.
         origin: { actor: 'agent_tool' },
