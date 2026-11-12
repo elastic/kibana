@@ -509,8 +509,8 @@ export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
 
-/** Custom types plus one override entry for each built-in type. */
-export const MAX_OBSERVABLE_TYPE_ENTRIES =
+/** One settings entry for each built-in type and each custom type. */
+export const MAX_OBSERVABLE_TYPE_SETTINGS =
   MAX_CUSTOM_OBSERVABLE_TYPES + OBSERVABLE_TYPES_BUILTIN.length;
 
 export const MAX_OBSERVABLE_TYPE_PATHS = 50;

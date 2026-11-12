@@ -13,9 +13,10 @@ import type {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { ConfigurationAttributes } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { decodeOrThrowZod } from '../../common/runtime_types';
-import { CASE_CONFIGURE_SAVED_OBJECT, OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
   transformESConnectorToExternalModel,
@@ -33,37 +34,13 @@ import type {
   ConfigurationSavedObjectTransformed,
   ConfigurationTransformedAttributes,
   ConfigurationPersistedAttributes,
-  ConfigurationWriteAttributes,
 } from '../../common/types/configure';
 import {
   ConfigurationPartialAttributesSchema,
-  ConfigurationPartialWriteAttributesSchema,
   ConfigurationTransformedAttributesSchema,
-  ConfigurationWriteAttributesSchema,
 } from '../../common/types/configure';
 import { OWNER_INFO } from '../../../common/constants/owners';
 import type { Owner } from '../../../common/constants/types';
-
-const BUILTIN_OBSERVABLE_TYPE_LABELS = new Map(
-  OBSERVABLE_TYPES_BUILTIN.map(({ key, label }) => [key, label])
-);
-
-const withBuiltinLabels = (
-  observableTypes: NonNullable<ConfigurationPersistedAttributes['observableTypes']>
-): ConfigurationTransformedAttributes['observableTypes'] =>
-  observableTypes.map(({ label, ...observableType }) => ({
-    ...observableType,
-    label: label ?? BUILTIN_OBSERVABLE_TYPE_LABELS.get(observableType.key) ?? observableType.key,
-  }));
-
-const withoutBuiltinLabels = (
-  observableTypes: NonNullable<ConfigurationWriteAttributes['observableTypes']>
-): NonNullable<ConfigurationPersistedAttributes['observableTypes']> =>
-  observableTypes.map(({ label, ...observableType }) =>
-    BUILTIN_OBSERVABLE_TYPE_LABELS.has(observableType.key)
-      ? observableType
-      : { ...observableType, label }
-  );
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
@@ -143,9 +120,9 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
 
-      const decodedAttributes = decodeOrThrowZod(ConfigurationWriteAttributesSchema)(
+      const decodedAttributes = decodeOrThrowZod(ConfigurationTransformedAttributesSchema)(
         attributes
-      ) as ConfigurationWriteAttributes;
+      ) as ConfigurationTransformedAttributes;
 
       const esConfigInfo = transformAttributesToESModel(decodedAttributes);
 
@@ -175,9 +152,9 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
 
-      const decodedAttributes = decodeOrThrowZod(ConfigurationPartialWriteAttributesSchema)(
+      const decodedAttributes = decodeOrThrowZod(ConfigurationPartialAttributesSchema)(
         updatedAttributes
-      ) as Partial<ConfigurationWriteAttributes>;
+      ) as Partial<ConfigurationTransformedAttributes>;
 
       const esUpdateInfo = transformAttributesToESModel(decodedAttributes);
 
@@ -235,15 +212,14 @@ function transformUpdateResponseToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  const { observableTypes, ...attributes } = restUpdatedAttributes as Partial<
-    Omit<ConfigurationPersistedAttributes, 'connector'>
+  const attributes = restUpdatedAttributes as Partial<
+    Omit<ConfigurationTransformedAttributes, 'connector'>
   >;
 
   return {
     ...updatedConfiguration,
     attributes: {
-      ...(attributes as Partial<Omit<ConfigurationTransformedAttributes, 'connector'>>),
-      ...(observableTypes && { observableTypes: withBuiltinLabels(observableTypes) }),
+      ...attributes,
       ...(transformedConnector && { connector: transformedConnector }),
     },
   };
@@ -267,7 +243,15 @@ function transformToExternalModel(
     ? []
     : (configuration.attributes.templates as ConfigurationTransformedAttributes['templates']);
 
-  const observableTypes = withBuiltinLabels(configuration.attributes.observableTypes ?? []);
+  const observableTypes = !configuration.attributes.observableTypes
+    ? []
+    : (configuration.attributes
+        .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
+
+  const observableTypeSettings = !configuration.attributes.observableTypeSettings
+    ? []
+    : (configuration.attributes
+        .observableTypeSettings as ConfigurationTransformedAttributes['observableTypeSettings']);
 
   const ownerAutoExtractDefault =
     OWNER_INFO[configuration.attributes.owner as Owner]?.features.observables.autoExtractDefault ??
@@ -285,6 +269,7 @@ function transformToExternalModel(
       customFields,
       templates,
       observableTypes,
+      observableTypeSettings,
       extractObservables,
       workflowTags,
     },
@@ -303,19 +288,19 @@ function transformFindResponseToExternalModel(
   };
 }
 
-function transformAttributesToESModel(configuration: ConfigurationWriteAttributes): {
+function transformAttributesToESModel(configuration: ConfigurationAttributes): {
   attributes: ConfigurationPersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-function transformAttributesToESModel(configuration: Partial<ConfigurationWriteAttributes>): {
+function transformAttributesToESModel(configuration: Partial<ConfigurationAttributes>): {
   attributes: Partial<ConfigurationPersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
-function transformAttributesToESModel(configuration: Partial<ConfigurationWriteAttributes>): {
+function transformAttributesToESModel(configuration: Partial<ConfigurationAttributes>): {
   attributes: Partial<ConfigurationPersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
-  const { connector, observableTypes, ...restWithoutConnector } = configuration;
+  const { connector, ...restWithoutConnector } = configuration;
 
   const transformedConnector = {
     ...(connector && {
@@ -330,7 +315,6 @@ function transformAttributesToESModel(configuration: Partial<ConfigurationWriteA
   return {
     attributes: {
       ...restWithoutConnector,
-      ...(observableTypes && { observableTypes: withoutBuiltinLabels(observableTypes) }),
       ...transformedConnector,
     },
     referenceHandler: buildReferenceHandler(connector?.id),

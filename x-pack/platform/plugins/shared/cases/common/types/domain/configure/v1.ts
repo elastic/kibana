@@ -61,21 +61,44 @@ export const CustomFieldConfigurationSchema = z.union([
 
 export const CustomFieldsConfigurationSchema = z.array(CustomFieldConfigurationSchema);
 
-export const ObservableTypesConfigurationSchema = lazySchema(() =>
-  z.array(
-    CaseObservableTypeSchema.extend({
-      paths: z
-        .array(
-          z.object({
-            path: z.string(),
-            enabled: z.boolean(),
-            excludedValues: z.array(z.string()).optional(),
-          })
-        )
-        .optional(),
-      valuePattern: z.string().optional(),
-    })
-  )
+export const ObservableTypesConfigurationSchema = z.array(CaseObservableTypeSchema);
+
+export const ObservableTypePathConfigurationSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The alert field that extraction reads
+     */
+    path: z.string(),
+    /**
+     * Whether extraction reads the field
+     */
+    enabled: z.boolean(),
+    /**
+     * Values of the field that extraction skips, compared exactly
+     */
+    excludedValues: z.array(z.string()).optional(),
+  })
+);
+
+export const ObservableTypeSettingConfigurationSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The key of a built-in or a custom observable type
+     */
+    key: z.string(),
+    /**
+     * The alert fields of the type. For a built-in type, these change or add to its default fields.
+     */
+    paths: z.array(ObservableTypePathConfigurationSchema).optional(),
+    /**
+     * A regular expression that a value must match. Custom types only.
+     */
+    valuePattern: z.string().optional(),
+  })
+);
+
+export const ObservableTypeSettingsConfigurationSchema = lazySchema(() =>
+  z.array(ObservableTypeSettingConfigurationSchema)
 );
 
 export const WorkflowTagsConfigurationSchema = z.array(z.string());
@@ -105,37 +128,43 @@ export const TemplateConfigurationSchema = z.object({
 
 export const TemplatesConfigurationSchema = z.array(TemplateConfigurationSchema);
 
-export const ConfigurationBasicWithoutOwnerSchema = z.object({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeSchema,
-  /**
-   * The custom fields configured for the case
-   */
-  customFields: CustomFieldsConfigurationSchema,
-  /**
-   * Templates configured for the case
-   */
-  templates: TemplatesConfigurationSchema,
-  /**
-   * Observable types configured for the case
-   */
-  observableTypes: ObservableTypesConfigurationSchema,
-  /**
-   * Whether to extract observables from the case
-   */
-  extractObservables: z.boolean(),
-  /**
-   * Tags used to filter workflows available in Cases workflow selectors.
-   * An empty array shows all workflows.
-   */
-  workflowTags: WorkflowTagsConfigurationSchema,
-});
+export const ConfigurationBasicWithoutOwnerSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeSchema,
+    /**
+     * The custom fields configured for the case
+     */
+    customFields: CustomFieldsConfigurationSchema,
+    /**
+     * Templates configured for the case
+     */
+    templates: TemplatesConfigurationSchema,
+    /**
+     * Observable types configured for the case
+     */
+    observableTypes: ObservableTypesConfigurationSchema,
+    /**
+     * The extraction settings of the built-in and custom observable types, by type key
+     */
+    observableTypeSettings: ObservableTypeSettingsConfigurationSchema.optional(),
+    /**
+     * Whether to extract observables from the case
+     */
+    extractObservables: z.boolean(),
+    /**
+     * Tags used to filter workflows available in Cases workflow selectors.
+     * An empty array shows all workflows.
+     */
+    workflowTags: WorkflowTagsConfigurationSchema,
+  })
+);
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({
   /**
@@ -174,5 +203,11 @@ export type ConfigurationAttributes = z.infer<typeof ConfigurationAttributesSche
 export type Configuration = z.infer<typeof ConfigurationSchema>;
 export type Configurations = z.infer<typeof ConfigurationsSchema>;
 export type ObservableTypesConfiguration = z.infer<typeof ObservableTypesConfigurationSchema>;
-export type ObservableTypeConfiguration = ObservableTypesConfiguration[number];
+export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchema>;
+export type ObservableTypeSettingsConfiguration = z.infer<
+  typeof ObservableTypeSettingsConfigurationSchema
+>;
+export type ObservableTypeSettingConfiguration = z.infer<
+  typeof ObservableTypeSettingConfigurationSchema
+>;
 export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfigurationSchema>;
