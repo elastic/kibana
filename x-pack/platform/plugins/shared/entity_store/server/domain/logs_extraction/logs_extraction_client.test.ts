@@ -2723,6 +2723,39 @@ describe('LogsExtractionClient sampling wiring', () => {
     probeQueries().map((query) => Number(query.match(/\| LIMIT (\d+)/)?.[1]));
 
   /**
+   * The window a query actually reads. Both the run's bounds and the slice cursors are emitted as
+   * separate `@timestamp` comparisons, so the effective window is the tightest of each side. Taken
+   * as max/min rather than by position, so clause order cannot change what this reports.
+   */
+  const boundsOf = (query: string): { from: string; to: string } => {
+    const lowers = [...query.matchAll(/@timestamp >= TO_DATETIME\("([^"]+)"\)/g)].map((m) => m[1]);
+    const uppers = [...query.matchAll(/@timestamp <= TO_DATETIME\("([^"]+)"\)/g)].map((m) => m[1]);
+    return {
+      from: lowers.sort().at(-1)!,
+      to: uppers.sort().at(0)!,
+    };
+  };
+
+  /** Distinct slice windows read by the extraction queries, in order. Entity pages of one slice
+   * share its bounds, so repeats are collapsed. */
+  const sliceWindows = (): Array<{ from: string; to: string }> =>
+    extractionQueries()
+      .map(boundsOf)
+      .filter(
+        (bounds, index, all) =>
+          index === 0 || bounds.from !== all[index - 1].from || bounds.to !== all[index - 1].to
+      );
+
+  /** Every ES|QL call in order, reduced to the parts a boundary regression would move. */
+  const querySequence = () =>
+    mockExecuteEsqlQuery.mock.calls.map(([args]) => ({
+      kind: args.telemetry?.name,
+      ...boundsOf(args.query),
+      sample: args.query.match(/\| SAMPLE ([\d.]+)/)?.[1] ?? null,
+      limit: args.query.match(/\| LIMIT (\d+)/)?.[1] ?? null,
+    }));
+
+  /**
    * The real probe query has `LIMIT scaledProbeLimit` baked in, so no single probe response can
    * ever report more sampled docs than this - a mock feeding a higher value describes a result
    * the query could never produce.
@@ -3220,6 +3253,182 @@ describe('LogsExtractionClient sampling wiring', () => {
       // the base size - reconstructed from sliceSamplingRate, with no page size persisted.
       expect(probeLimits()[0]).toBe(25_000);
     });
+  });
+
+  describe('slice boundary parity', () => {
+    // #288599 made the slice bounds owned entirely by the boundary probe, and the failure mode it
+    // soaked for is silent: a regression skips or duplicates entities without raising anything.
+    // Feeding the sampling rate back into those bounds is exactly that kind of change, so these
+    // assert the bounds themselves rather than the entity counts a mock cannot produce.
+
+    /** Two scaled slices tiling the 11:50-11:59 window, as in the pinned-rate case. */
+    const mockTwoScaledSlices = () => {
+      const SCALED_PROBE_DOCS = 22_500;
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(
+          mockLogPaginationCursorProbeRow(
+            '2025-01-15T11:51:00.000Z',
+            REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+          )
+        )
+        .mockResolvedValueOnce(
+          mockLogPaginationCursorProbeRow('2025-01-15T11:54:30.000Z', SCALED_PROBE_DOCS)
+        )
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(
+          mockLogPaginationCursorProbeRow('2025-01-15T11:59:00.000Z', SCALED_PROBE_DOCS)
+        )
+        .mockResolvedValueOnce(extractionRow);
+    };
+
+    it('tiles the window with contiguous slices, leaving no unread gap', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      mockTwoScaledSlices();
+
+      await client.extractLogs('user');
+
+      const slices = sliceWindows();
+      expect(slices.length).toBeGreaterThan(1);
+      expect(slices[0].from).toBe('2025-01-15T11:50:00.000Z');
+      for (let i = 1; i < slices.length; i++) {
+        // Each slice resumes from exactly where the previous one ended. Any other value is a gap
+        // (entities never read) or a jump (entities read twice under different bounds).
+        expect(slices[i].from).toBe(slices[i - 1].to);
+      }
+    });
+
+    it('discards the probe boundary when the first probe of a slice is replaced', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      mockTwoScaledSlices();
+
+      await client.extractLogs('user');
+
+      // The base probe reported 11:51, the re-probe 11:54:30. Only the second may reach the
+      // extraction query: extracting to 11:51 while the cursor advanced to 11:54:30 would strand
+      // every log in between.
+      expect(sliceWindows()[0].to).toBe('2025-01-15T11:54:30.000Z');
+      expect(sliceWindows().map(({ to }) => to)).not.toContain('2025-01-15T11:51:00.000Z');
+    });
+
+    it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority, EXTRACTION_MODE.nonPriority])(
+      '%s mode reads an unsampled window with an unchanged query sequence',
+      async (mode) => {
+        const { client } = createSamplingContext(mode);
+        mockLowVolumeSequence();
+
+        await client.extractLogs('user');
+
+        // Snapshotted so an accidental change to probe sizing, slice bounds or sampling on the
+        // paths this work does not target shows up as a diff rather than passing silently.
+        expect(querySequence()).toMatchSnapshot();
+      }
+    );
+
+    it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
+      '%s mode reads a high-volume window with an unchanged query sequence',
+      async (mode) => {
+        const { client } = createSamplingContext(mode);
+        mockHighVolumeSequence();
+
+        await client.extractLogs('user');
+
+        expect(querySequence()).toMatchSnapshot();
+      }
+    );
+  });
+
+  describe('resume boundary parity', () => {
+    const checkpoint = '2025-01-15T11:50:00.000Z';
+    const pinnedSliceEnd = '2025-01-15T11:54:30.000Z';
+
+    it('re-enters an interrupted slice on exactly its persisted bounds', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionState: {
+          checkpointTimestamp: checkpoint,
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: null,
+          sliceEndTimestamp: pinnedSliceEnd,
+          sliceSamplingRate: 0.2,
+        },
+      });
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await client.extractLogs('user');
+
+      // Re-drawing the boundary would strand the logs of already-paged entities between the old
+      // end and the new one, so the resumed slice must read the persisted bounds verbatim.
+      expect(sliceWindows()[0]).toEqual({ from: checkpoint, to: pinnedSliceEnd });
+    });
+
+    it('continues from the pinned slice end once the resumed slice completes', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionState: {
+          checkpointTimestamp: checkpoint,
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: null,
+          sliceEndTimestamp: pinnedSliceEnd,
+          sliceSamplingRate: 0.2,
+        },
+      });
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:59:00.000Z', 22_500))
+        .mockResolvedValueOnce(extractionRow);
+
+      await client.extractLogs('user');
+
+      const slices = sliceWindows();
+      expect(slices[0].to).toBe(pinnedSliceEnd);
+      // The slice after the resumed one picks up where it ended, with no gap across the resume.
+      expect(slices[1].from).toBe(pinnedSliceEnd);
+    });
+
+    it('re-reads the whole slice when the cursor has no pinned slice end', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionState: {
+          checkpointTimestamp: checkpoint,
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: null,
+          sliceEndTimestamp: null,
+          sliceSamplingRate: null,
+        },
+      });
+      mockLowVolumeSequence();
+
+      await client.extractLogs('user');
+
+      // Without the bounds the cursor was created under they cannot be reproduced, so the cursor
+      // is dropped and the slice re-probed from the checkpoint. Upserts are idempotent, so
+      // re-reading is safe where resuming against a re-drawn boundary would not be.
+      expect(probeLimits()[0]).toBe(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE);
+      expect(sliceWindows()[0].from).toBe(checkpoint);
+    });
+
+    it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
+      '%s mode resumes with an unchanged query sequence',
+      async (mode) => {
+        const { client } = createSamplingContext(mode, {
+          logExtractionState: {
+            checkpointTimestamp: checkpoint,
+            paginationId: 'entity-cursor',
+            lastExecutionTimestamp: null,
+            sliceEndTimestamp: pinnedSliceEnd,
+            sliceSamplingRate: null,
+          },
+        });
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(extractionRow)
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+          .mockResolvedValueOnce({ columns: [], values: [] });
+
+        await client.extractLogs('user');
+
+        expect(querySequence()).toMatchSnapshot();
+      }
+    );
   });
 
   describe('preconfigured sampling rate', () => {

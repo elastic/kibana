@@ -1,0 +1,176 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LogsExtractionClient sampling wiring resume boundary parity priority mode resumes with an unchanged query sequence 1`] = `
+Array [
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:54:30.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:54:30.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:54:30.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+]
+`;
+
+exports[`LogsExtractionClient sampling wiring resume boundary parity single mode resumes with an unchanged query sequence 1`] = `
+Array [
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:54:30.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:54:30.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:54:30.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+]
+`;
+
+exports[`LogsExtractionClient sampling wiring slice boundary parity nonPriority mode reads an unsampled window with an unchanged query sequence 1`] = `
+Array [
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+]
+`;
+
+exports[`LogsExtractionClient sampling wiring slice boundary parity priority mode reads a high-volume window with an unchanged query sequence 1`] = `
+Array [
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:53:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:53:00.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:53:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+]
+`;
+
+exports[`LogsExtractionClient sampling wiring slice boundary parity priority mode reads an unsampled window with an unchanged query sequence 1`] = `
+Array [
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+]
+`;
+
+exports[`LogsExtractionClient sampling wiring slice boundary parity single mode reads a high-volume window with an unchanged query sequence 1`] = `
+Array [
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:53:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:53:00.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:53:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+]
+`;
+
+exports[`LogsExtractionClient sampling wiring slice boundary parity single mode reads an unsampled window with an unchanged query sequence 1`] = `
+Array [
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "probe_query",
+    "limit": "5000",
+    "sample": "0.1",
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+  Object {
+    "from": "2025-01-15T11:50:00.000Z",
+    "kind": "extraction_query",
+    "limit": "10000",
+    "sample": null,
+    "to": "2025-01-15T11:59:00.000Z",
+  },
+]
+`;
