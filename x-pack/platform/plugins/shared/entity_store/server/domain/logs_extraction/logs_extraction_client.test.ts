@@ -3044,9 +3044,15 @@ describe('LogsExtractionClient sampling wiring', () => {
 
   it('the budget counts processed volume, so a sampled over-cap window does not fire the cap', async () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
-    // 4 consecutive slices, each at the realistic per-probe ceiling (50K raw). Cumulative raw
-    // reaches 100K (the cap) by slice 2 already - raw accounting would have fired there. Cumulative
-    // processed volume, throttled by the rate each slice computes, stays under 45K after all 4.
+    // Slice 1 resolves rate 100K / 450K = 0.2222 and scales to 225K raw, whose probe limit is
+    // 22,500 sampled docs. Saturating that returns 225K raw for 50K processed. Slice 2 returns
+    // well under the limit, so it is the last page: 50K raw for ~11K processed.
+    //
+    // Cumulative raw reaches 275K, far past the 100K cap - raw accounting would have fired inside
+    // slice 1. Cumulative processed volume, throttled by the rate, stays at ~61K, so the cap never
+    // fires. Both slices must actually run for that to mean anything, which the slice-count
+    // assertion below pins down.
+    const SCALED_PROBE_LIMIT = 22_500;
     mockExecuteEsqlQuery
       .mockResolvedValueOnce(
         mockLogPaginationCursorProbeRow(
@@ -3054,44 +3060,25 @@ describe('LogsExtractionClient sampling wiring', () => {
           REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
         )
       )
-      // Re-probe at the scaled page size, once slice 1 resolves the rate for the run.
       .mockResolvedValueOnce(
-        mockLogPaginationCursorProbeRow(
-          '2025-01-15T11:51:00.000Z',
-          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
-        )
+        mockLogPaginationCursorProbeRow('2025-01-15T11:54:30.000Z', SCALED_PROBE_LIMIT)
       )
       .mockResolvedValueOnce(extractionRow)
       .mockResolvedValueOnce(
         mockLogPaginationCursorProbeRow(
-          '2025-01-15T11:52:00.000Z',
+          '2025-01-15T11:59:00.000Z',
           REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
         )
       )
-      .mockResolvedValueOnce(extractionRow)
-      .mockResolvedValueOnce(
-        mockLogPaginationCursorProbeRow(
-          '2025-01-15T11:53:00.000Z',
-          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
-        )
-      )
-      .mockResolvedValueOnce(extractionRow)
-      .mockResolvedValueOnce(
-        mockLogPaginationCursorProbeRow(
-          '2025-01-15T11:54:00.000Z',
-          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
-        )
-      )
-      .mockResolvedValueOnce(extractionRow)
-      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
-      .mockResolvedValueOnce({ columns: [], values: [] });
+      .mockResolvedValueOnce(extractionRow);
 
     const result = await client.extractLogs('user');
 
     expect(result.success).toBe(true);
+    expect(sliceWindows()).toHaveLength(2);
     expect(result.success && result.logsCapApplied).toBe(false);
     expect(result.success && result.logsProcessed).toBeGreaterThan(0);
-    expect(result.success && result.logsProcessed).toBeLessThan(45_000);
+    expect(result.success && result.logsProcessed).toBeLessThan(100_000);
   });
 
   it('rounds a slice contribution up rather than to nearest, so a small nonzero amount is never lost to zero', async () => {
@@ -3490,6 +3477,30 @@ describe('LogsExtractionClient sampling wiring', () => {
       expect(probeLimits()[0]).toBe(25_000);
     });
 
+    it('leaves an unsampled interrupted slice unsampled even when an override is now set', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
+        nonPriorityLogExtractionState: {
+          checkpointTimestamp: '2025-01-15T11:50:00.000Z',
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: null,
+          sliceEndTimestamp: '2025-01-15T11:54:30.000Z',
+          // The interrupted slice was unsampled, so it persisted no rate.
+          sliceSamplingRate: null,
+        },
+      });
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await client.extractLogs('user');
+
+      // Its earlier entity pages were read unsampled. Sampling the remainder at the override
+      // would draw the rest of the same slice from a different population.
+      expect(extractionQueries()[0]).not.toContain('SAMPLE');
+    });
+
     it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
       '%s mode ignores the override and never scales',
       async (mode) => {
@@ -3588,6 +3599,24 @@ describe('LogsExtractionClient sampling wiring', () => {
       eligibleRunsAdd: jest
         .spyOn(entityStoreMetrics.extractionSampleEligibleRuns, 'add')
         .mockImplementation(),
+    });
+
+    it('records the slice raw target once per slice, not once per probe', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      const rawTargetRecord = jest
+        .spyOn(entityStoreMetrics.extractionSliceRawTarget, 'record')
+        .mockImplementation();
+      mockHighVolumeSequence({ samples: true });
+
+      await client.extractLogs('user');
+
+      // The first slice is probed twice, but only the scaled probe's boundary becomes a slice.
+      // Recording the discarded base size too would put a never-extracted slice in the histogram
+      // and read as though half the slices were not scaled.
+      const sizes = rawTargetRecord.mock.calls.map(([size]) => size);
+      expect(sizes).not.toContain(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE * 10);
+      expect(new Set(sizes).size).toBe(1);
+      expect(rawTargetRecord).toHaveBeenCalledTimes(sliceWindows().length);
     });
 
     it('a sampled run records the applied rate and counts as sampled', async () => {

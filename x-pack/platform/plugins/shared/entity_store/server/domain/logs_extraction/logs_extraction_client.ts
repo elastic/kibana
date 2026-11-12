@@ -834,9 +834,19 @@ export class LogsExtractionClient {
 
     // An operator-supplied rate is known before any probe runs, so the base probe that exists only
     // to discover the rate is skipped and every slice, the first included, is probed once at the
-    // scaled size. Seeded after the resume branch so a slice interrupted under an earlier rate
-    // keeps the one persisted with its bounds, and only later slices pick up a changed override.
-    if (samplingEligible && pinnedSamplingRate === undefined && samplingRateOverride != null) {
+    // scaled size.
+    //
+    // Skipped entirely while a slice is being resumed, including when that slice was unsampled and
+    // persisted no rate at all. Its earlier entity pages were already read on whatever terms the
+    // interrupted run used, so sampling the remainder at an override would draw the rest of the
+    // same slice from a different population. Later slices resolve the override from their own
+    // probe as usual.
+    if (
+      samplingEligible &&
+      resumeSliceEnd === undefined &&
+      pinnedSamplingRate === undefined &&
+      samplingRateOverride != null
+    ) {
       const overrideRate = clampSamplingRateOverride(samplingRateOverride);
       // An override of 1 emits no SAMPLE stage, so it is left unpinned and nothing is scaled.
       if (overrideRate < 1) {
@@ -882,7 +892,6 @@ export class LogsExtractionClient {
           // rather than being fixed for the whole loop.
           const probeSliceAt = async (pageSize: number) => {
             const sampleProbability = pickSampleProbability(pageSize);
-            entityStoreMetrics.extractionSliceRawTarget.record(pageSize, metricAttributes);
 
             const result = await this.runLogPaginationCursorProbeForNextPage({
               indexPatterns,
@@ -942,6 +951,10 @@ export class LogsExtractionClient {
               probed = await probeSliceAt(scaledMaxLogsPerPage);
             }
           }
+
+          // Recorded once the slice's boundary is settled, so a base-size probe that was replaced
+          // by a scaled one contributes nothing: its boundary never became a slice.
+          entityStoreMetrics.extractionSliceRawTarget.record(probed.pageSize, metricAttributes);
 
           if (!probed.result.hasLogsToProcess && probed.sampleProbability >= 1) {
             // Sampling wasn't active for this probe (the page was too small — see
