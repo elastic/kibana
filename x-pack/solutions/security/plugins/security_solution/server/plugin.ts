@@ -901,15 +901,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeOptions
     );
 
-    // AESOP prototype: the A/B compare workflow's arms run through this task
-    // provider. Registered behind the flag so the evals plugin never sees it
-    // ship dark.
     if (plugins.evals && this.config.experimentalFeatures.aesopPrototypeEnabled) {
       plugins.evals.registerTaskProvider(createAesopVariantTaskProvider());
     }
 
-    // AESOP prototype: agent type is registered behind the flag; the agent
-    // instance is ensured in start().
     if (plugins.agentBuilder && this.config.experimentalFeatures.aesopPrototypeEnabled) {
       registerAesopExplorerAgentType(plugins.agentBuilder);
     }
@@ -1001,8 +996,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
     }
 
-    // AESOP prototype: ensure the explorer agent exists in the default space.
-    // Fire-and-forget like the managed-workflow installs above.
     if (plugins.agentBuilder && this.config.experimentalFeatures.aesopPrototypeEnabled) {
       void installAesopExplorerAgent({
         agentBuilder: plugins.agentBuilder,

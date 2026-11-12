@@ -46,11 +46,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
    * managed workflows are uninstalled.
    */
   threatIntelSupplyEnabled: boolean;
-  /**
-   * True when the `aesopPrototypeEnabled` experimental flag is on. When
-   * false, any previously installed AESOP prototype workflows are
-   * uninstalled.
-   */
+  /** When false, previously installed AESOP prototype workflows are uninstalled. */
   aesopPrototypeEnabled: boolean;
   /**
    * Resolves after TI bootstrap (templates, migrations, seed). Only awaited when
@@ -74,11 +70,8 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   }
 
   try {
-    // AESOP prototype: only the A/B compare workflow installs at boot (static
-    // lifecycle, global space). The drift monitor is a template definition
-    // instantiated per skill when a variant deploys; installing it here would
-    // need `values` the boot has no business inventing. Flag-off cleanup
-    // uninstalls any per-skill instances the reconciliation sweep finds.
+    // The drift monitor is a per-skill template installed on deploy, so only
+    // the A/B workflow installs at boot; flag-off removes both.
     if (aesopPrototypeEnabled) {
       await managedWorkflowsClient.install(AESOP_AB_COMPARE_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,

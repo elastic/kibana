@@ -410,15 +410,8 @@ export const allowedExperimentalValues = Object.freeze({
   siemRuleMigrationsAgentBuilderEnabled: false,
 
   /**
-   * AESOP v3 prototype: an end-to-end spike of the skill lifecycle loop —
-   * explore skill-usage telemetry, A/B a candidate skill variant against the
-   * live one through the evals plugin (CODE + judge evaluators), gate the
-   * winning variant behind analyst approval, deploy it (skill PUT), and
-   * monitor it for drift with online evaluation.
-   *
-   * Off by default. Everything it adds is namespaced
-   * `aesop.prototype.*` / `system-security-aesop-*` so the spike can be
-   * removed in one commit.
+   * AESOP prototype: A/B a skill variant through evals, deploy it on approval,
+   * and monitor it for drift.
    */
   aesopPrototypeEnabled: false,
 });

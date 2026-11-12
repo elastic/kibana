@@ -12,13 +12,8 @@ import {
 } from '@kbn/evals-plugin/server/task_providers/tracing';
 
 /**
- * AESOP prototype: task provider for the A/B compare workflow. Runs one
- * Agent Builder converse call with `configuration_overrides.skill_ids` pinned
- * to a single skill, so the two arms of the A/B differ only in the skill the
- * agent loads — same agent, same connector, same dataset. The skill is
- * chosen per arm through the workflow step's `params.skill_id` (the live
- * skill id for the baseline arm, the scratch variant's id for the variant
- * arm), so one registration serves both.
+ * AESOP prototype: converse with `configuration_overrides.skill_ids` pinned to
+ * the step's `params.skill_id`, so both A/B arms differ only in the loaded skill.
  */
 
 const CONVERSE_PATH = '/api/agent_builder/converse';

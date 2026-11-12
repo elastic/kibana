@@ -261,10 +261,7 @@ export const managedWorkflowDefinitions = [
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW,
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW,
-  // AESOP prototype (securitySolution): registry membership is FF-off safe
-  // because installation is gated on the `securitySolution.aesopPrototypeEnabled`
-  // experimental flag in the security plugin's start, exactly like the Detonate
-  // prototype.
+  // Install is gated on securitySolution's `aesopPrototypeEnabled` flag.
   AESOP_AB_COMPARE_WORKFLOW,
   AESOP_DRIFT_MONITOR_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,

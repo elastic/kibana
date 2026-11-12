@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-/**
- * AESOP v3 prototype — shared contract.
- *
- * AESOP (Agent Skill Optimization Protocol) is an end-to-end spike of the
- * skill lifecycle loop on current stack capabilities: explore skill-usage
- * telemetry, A/B a candidate skill variant against the live skill through the
- * evals plugin (CODE + judge evaluators), gate the winning variant behind
- * analyst approval, deploy it (skill PUT), and monitor for drift with online
- * evaluation.
- *
- * Everything this prototype adds is namespaced `aesop.prototype.*` /
- * `system-security-aesop-*` so the spike can be removed in one commit.
+/*
+ * AESOP (Agent Skill Optimization Protocol) prototype. Everything it adds is
+ * namespaced `aesop.prototype.*` / `system-security-aesop-*` so it can be
+ * removed in one commit.
  */
 
 /** Everything this prototype adds is prefixed with this. */
@@ -38,11 +30,7 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW_ID = 'system-security-aesop-drift-moni
 /** Tags the AESOP managed workflows carry. */
 export const AESOP_WORKFLOW_TAGS = ['security', 'aesop_prototype'] as const;
 
-/**
- * Evaluation config for the A/B run. The CODE evaluators are the five ported
- * from the skill-eval platform spike (#261057); the judge evaluator is
- * configured at runtime (connector picked in the workflow inputs).
- */
+/** CODE evaluators for the A/B run; the judge connector comes from workflow inputs. */
 export const AESOP_CODE_EVALUATORS = [
   'skill-secret-scanner',
   'skill-prompt-injection',

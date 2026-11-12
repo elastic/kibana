@@ -17,16 +17,11 @@ import {
 } from '../../common/aesop_prototype';
 
 /**
- * One drift-monitor instance per skill, mirroring the context_engine
- * feedback-analysis schedule: install writes the templated document (disabled),
- * and the enablement-only `updateWorkflow` is what registers the scheduled
- * trigger under an API key minted from this request. Managed workflows accept
- * exactly one mutation — `{ enabled }` — so re-enabling re-mints the key and
- * never touches the template.
+ * One drift-monitor instance per skill. Install writes it disabled; enabling it
+ * registers the schedule under an API key minted from this request.
  *
- * Instances install in the deploying request's concrete space, not the global
- * one: scheduling global workflows is unsupported (elastic/security-team#17380)
- * because a scheduled run has no invoking space to stamp its executions with.
+ * Instances live in the request's concrete space: scheduling global workflows
+ * is unsupported (elastic/security-team#17380).
  */
 
 /** The one workflows management call this module makes, declared structurally rather than imported:

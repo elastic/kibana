@@ -15,13 +15,7 @@ export const AESOP_AB_COMPARE_WORKFLOW_ID = 'system-security-aesop-ab-compare';
 
 export const AESOP_DRIFT_MONITOR_WORKFLOW_ID = 'system-security-aesop-drift-monitor';
 
-/**
- * AESOP prototype (securitySolution): the A/B skill-compare loop as one
- * stored workflow — create a variant skill, run both arms through the evals
- * plugin with the five CODE evaluators plus the judge, compare the two
- * experiments, propose the deploy, and PUT the winning content onto the live
- * skill on approval.
- */
+/** AESOP prototype: A/B a skill variant through evals and deploy it on approval. */
 export const AESOP_AB_COMPARE_WORKFLOW = {
   id: AESOP_AB_COMPARE_WORKFLOW_ID,
   pluginId: 'securitySolution',
@@ -50,11 +44,7 @@ const renderTemplate = (template: string, values: Record<string, string | number
     template
   );
 
-/**
- * AESOP prototype (securitySolution): online-evaluation monitor for one
- * deployed skill. Installed disabled and instantiated per skill; enabling an
- * instance is what registers its scheduled trigger.
- */
+/** AESOP prototype: per-skill online-evaluation monitor; enabling an instance schedules it. */
 export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   id: AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   pluginId: 'securitySolution',

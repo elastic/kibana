@@ -9,12 +9,8 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools } from '@kbn/agent-builder-common';
 
 /**
- * AESOP prototype: read-only skill-usage explorer. Answers "how is a skill
- * actually being used?" from the Agent Builder traces so a human (or the
- * A/B workflow) can ground a variant in observed usage before writing one.
- *
- * Read-only by construction: the only tools it exposes are ES|QL execution
- * against the traces indices; it registers no write tool of any kind.
+ * AESOP prototype: answers "how is this skill used?" from Agent Builder traces.
+ * Read-only: its only tool is ES|QL over the traces indices.
  */
 export const aesopSkillExplorerSkill = defineSkillType({
   id: 'aesop-skill-explorer',
