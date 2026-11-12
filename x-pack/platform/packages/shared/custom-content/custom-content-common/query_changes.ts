@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CustomContentDataset } from '@kbn/custom-content-common';
+import type { CustomContentDataset } from './schema';
 
-export interface ToDatasetsParams {
+export interface QueryChangesParams {
   /** What to show, or what to change. Describes the query when one is generated. */
   nlQuery?: string;
   /** Index, alias or data stream queries are generated from. */
   index?: string;
-  /** A query the user supplied verbatim, replacing the first; `null` removes the panel's queries. */
+  /** A query the user supplied, to use as it is, replacing the first; `null` removes the panel's queries. */
   esql?: string | null;
   /** `false`: the panel has no data. `true`: it has, generated when it has none. */
   hasData?: boolean;
@@ -47,7 +47,7 @@ export const toCustomContentQueryChanges = ({
   datasets,
   existingQueries,
   isNewPanel,
-}: ToDatasetsParams): CustomContentQueryChanges => {
+}: QueryChangesParams): CustomContentQueryChanges => {
   if (datasets) {
     if (esql !== undefined || hasData === false || regenerateESQL) {
       throw new Error(

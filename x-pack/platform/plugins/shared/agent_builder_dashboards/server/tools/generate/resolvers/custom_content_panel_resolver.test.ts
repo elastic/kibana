@@ -19,8 +19,6 @@ import { createCustomContentPanelResolver } from './custom_content_panel_resolve
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildCustomContentConfig: jest.fn(),
-  toCustomContentQueryChanges: jest.requireActual('@kbn/agent-builder-visualizations-server')
-    .toCustomContentQueryChanges,
 }));
 
 const mockedBuild = jest.mocked(buildCustomContentConfig);
@@ -39,7 +37,6 @@ const addRequest = (
 ): CustomContentPanelAddRequest => ({
   renderer: 'custom_content',
   nlQuery: 'Show KPI',
-  hasData: false,
   ...overrides,
 });
 
@@ -72,11 +69,14 @@ describe('createCustomContentPanelResolver', () => {
 
   describe('new panels', () => {
     it('builds the panel from the request and the host deps, with nothing existing', async () => {
-      const result = await resolve(addRequest({ hasData: true, index: 'logs-*' }));
+      const result = await resolve(
+        addRequest({ datasets: [{ description: 'Show KPI', index: 'logs-*' }] })
+      );
 
       expect(mockedBuild).toHaveBeenCalledWith({
         nlQuery: 'Show KPI',
         datasets: [{ description: 'Show KPI', index: 'logs-*' }],
+        removeAllQueries: undefined,
         resolveEsqlVariables: undefined,
         existing: undefined,
         ...deps,
@@ -100,19 +100,11 @@ describe('createCustomContentPanelResolver', () => {
         height: 200,
       });
 
-      const result = await resolve(addRequest({ hasData: false }));
+      const result = await resolve(addRequest({ removeAllQueries: true }));
 
       expect(result).toMatchObject({
         panelContent: { config: { esql_query: undefined, template: '<div>banner</div>' } },
       });
-    });
-
-    it('passes a user-supplied query through', async () => {
-      await resolve(addRequest({ esql: 'FROM metrics-*', hasData: true }));
-
-      expect(mockedBuild).toHaveBeenCalledWith(
-        expect.objectContaining({ datasets: [{ esql: 'FROM metrics-*' }] })
-      );
     });
   });
 
@@ -124,9 +116,7 @@ describe('createCustomContentPanelResolver', () => {
       height: 300,
     });
 
-    const result = await resolve(
-      addRequest({ nlQuery: 'totals above a list', hasData: true, datasets })
-    );
+    const result = await resolve(addRequest({ nlQuery: 'totals above a list', datasets }));
 
     expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ datasets }));
     expect(result).toMatchObject({
@@ -142,7 +132,7 @@ describe('createCustomContentPanelResolver', () => {
   it('hands the control values resolver of the request to the builder', async () => {
     const resolveEsqlVariables = jest.fn();
 
-    await resolve(addRequest({ hasData: true, resolveEsqlVariables }));
+    await resolve(addRequest({ resolveEsqlVariables }));
 
     expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ resolveEsqlVariables }));
   });
@@ -218,7 +208,7 @@ describe('createCustomContentPanelResolver', () => {
       const result = await resolve(
         editRequest(customContentPanel({ esql_query: ['FROM logs-*', 'FROM metrics-*'] }), {
           nlQuery: 'Make it static',
-          hasData: false,
+          removeAllQueries: true,
         })
       );
 
@@ -254,23 +244,6 @@ describe('createCustomContentPanelResolver', () => {
       });
     });
 
-    it('forwards the data flags', async () => {
-      await resolve(
-        editRequest(panel, {
-          nlQuery: 'Also show the average bytes',
-          regenerateESQL: true,
-          hasData: true,
-          index: 'logs-*',
-        })
-      );
-
-      expect(mockedBuild).toHaveBeenCalledWith(
-        expect.objectContaining({
-          datasets: [{ description: 'Also show the average bytes', index: 'logs-*' }],
-        })
-      );
-    });
-
     it('keeps the settings of the panel that are not the query or the template', async () => {
       const result = await resolve(editRequest(panel, { nlQuery: 'Make it blue' }));
 
@@ -294,7 +267,7 @@ describe('createCustomContentPanelResolver', () => {
         height: 200,
       });
 
-      const result = await resolve(editRequest(panel, { esql: null }));
+      const result = await resolve(editRequest(panel, { removeAllQueries: true }));
 
       expect(result).toMatchObject({
         panelContent: { config: { title: 'Errors by host', esql_query: undefined } },
@@ -305,7 +278,7 @@ describe('createCustomContentPanelResolver', () => {
   it('turns a builder failure into a failed attempt with its message', async () => {
     mockedBuild.mockRejectedValue(new Error('Could not generate an ES|QL query for this panel'));
 
-    expect(await resolve(addRequest({ hasData: true }))).toEqual({
+    expect(await resolve(addRequest())).toEqual({
       type: 'failure',
       error: 'Could not generate an ES|QL query for this panel',
     });

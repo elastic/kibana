@@ -25,10 +25,12 @@ import { createDraftQuery, flyoutReducer } from './flyout_reducer';
 import type { DraftQuery } from './flyout_reducer';
 
 export interface EditFlyoutState {
-  /** The queries being edited, the first of which is `rows` in the template. Never empty. */
+  /**
+   * The queries as the editor holds them, with ids and fetched data, the first being `rows` in the
+   * template. Never empty, so there is always a tab to type into. `getRunnableQueries` gives the
+   * text that is run and saved.
+   */
   draftQueries: DraftQuery[];
-  /** The queries the draft will run and save: the ones filled in, none without a first query. */
-  draftEsqlQueries: string[];
   /** The position of a blank query that others follow, which blocks applying and previewing. */
   emptyQueryPosition: number | undefined;
   canAddQuery: boolean;
@@ -169,7 +171,6 @@ export const useEditFlyoutState = ({
     ]
   );
 
-  const draftEsqlQueries = getRunnableQueries(state.draftQueries);
   const emptyQueryPosition = findEmptyQueryPosition(state.draftQueries);
 
   const handleRender = useCallback(async () => {
@@ -242,7 +243,6 @@ export const useEditFlyoutState = ({
 
   return {
     draftQueries: state.draftQueries,
-    draftEsqlQueries,
     emptyQueryPosition,
     canAddQuery:
       Boolean(state.draftQueries[0]?.text.trim()) &&

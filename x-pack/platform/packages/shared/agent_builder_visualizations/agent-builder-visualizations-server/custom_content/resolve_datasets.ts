@@ -57,12 +57,12 @@ export const resolveDatasets = async ({
   }
 
   // Fail before any generation is paid for when the queries the caller supplied are too long already.
-  const verbatim = Array.from({ length: total }, (_, position) =>
+  const fixedQueries = Array.from({ length: total }, (_, position) =>
     datasets[position]?.esql?.trim()
       ? datasets[position].esql ?? ''
       : existingQueries[position] ?? ''
   );
-  if (!fitsEsqlQueriesTotalLength(verbatim)) throw new Error(ESQL_QUERIES_TOTAL_LENGTH_MESSAGE);
+  if (!fitsEsqlQueriesTotalLength(fixedQueries)) throw new Error(ESQL_QUERIES_TOTAL_LENGTH_MESSAGE);
 
   const queries = await Promise.all(
     Array.from({ length: total }, async (_, position): Promise<string> => {

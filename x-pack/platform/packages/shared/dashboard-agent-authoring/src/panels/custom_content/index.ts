@@ -11,7 +11,7 @@ import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   customContentDatasetsSchema,
-  type CustomContentDataset,
+  type CustomContentQueryChanges,
 } from '@kbn/custom-content-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
@@ -25,38 +25,27 @@ import { defineRequestPanelKind } from '../panel_kind';
  * The host provides the resolver that turns these requests into panel content.
  */
 
-/** Request to generate a new custom content panel's template. */
-export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase {
+/**
+ * Request to generate a new custom content panel's template. What the queries should become is said
+ * the one way the builder is told: `datasets`, or `removeAllQueries` for static content.
+ */
+export interface CustomContentPanelAddRequest
+  extends PanelResolutionRequestBase,
+    CustomContentQueryChanges {
   renderer: 'custom_content';
   /** What to display. */
   nlQuery: string;
-  /** ES|QL query feeding the template. Wins over `hasData`. */
-  esql?: string;
-  /** True: generate the query from `nlQuery`. False: static content with no query. Always stated. */
-  hasData: boolean;
-  /** Index, alias or data stream to generate the query from. */
-  index?: string;
-  /** The panel's queries by position, instead of `esql` / `index`. Then `hasData` is true. */
-  datasets?: CustomContentDataset[];
   existingPanel?: undefined;
 }
 
 /** Request to refine an existing custom content panel's template. */
-export interface CustomContentPanelEditRequest extends PanelResolutionRequestBase {
+export interface CustomContentPanelEditRequest
+  extends PanelResolutionRequestBase,
+    CustomContentQueryChanges {
   renderer: 'custom_content';
   existingPanel: AttachmentPanel;
   /** What to change. Omitted when the edit only changes the query. */
   nlQuery?: string;
-  /** New ES|QL query. Omit to keep the existing query; pass `null` to remove it. */
-  esql?: string | null;
-  /** True: ensure the panel has data, generating a query only when it has none. False: remove it. */
-  hasData?: boolean;
-  /** Regenerate the query from `nlQuery`, keeping the parts the request does not change. */
-  regenerateESQL?: boolean;
-  /** Index, alias or data stream to generate the query from. */
-  index?: string;
-  /** The panel's queries by position, instead of `esql` / `hasData` / `regenerateESQL` / `index`. */
-  datasets?: CustomContentDataset[];
 }
 
 /** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
@@ -87,7 +76,7 @@ const customContentPanelContentSchema = lazySchema(() =>
       .nullable()
       .optional()
       .describe(
-        'An ES|QL query the user supplied verbatim; it wins over hasData and, on an existing panel, replaces the current one (omit to keep it, pass null to remove it). Do not write a query yourself; set hasData to true and let the server generate it.'
+        'An ES|QL query the user supplied, to use as it is; it wins over hasData and, on an existing panel, replaces the current one (omit to keep it, pass null to remove it). Do not write a query yourself; set hasData to true and let the server generate it.'
       ),
     hasData: z
       .boolean()

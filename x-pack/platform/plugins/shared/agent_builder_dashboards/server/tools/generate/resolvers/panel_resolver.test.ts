@@ -18,8 +18,6 @@ import { createPanelResolver } from './panel_resolver';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildCustomContentConfig: jest.fn(),
-  toCustomContentQueryChanges: jest.requireActual('@kbn/agent-builder-visualizations-server')
-    .toCustomContentQueryChanges,
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
 }));

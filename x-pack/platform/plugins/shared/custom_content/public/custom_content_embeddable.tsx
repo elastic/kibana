@@ -294,7 +294,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
             const handleGenerateWithChatFromFlyout = (
               draftTemplate: string,
-              draftEsqlQueries: string[]
+              newEsqlQueries: string[]
             ) => {
               if (!agentBuilder) return;
               hasSaved = true;
@@ -305,7 +305,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
-                    esqlQueries: draftEsqlQueries,
+                    esqlQueries: newEsqlQueries,
                     embeddableId: uuid,
                     panelTitle: titleManager.api.title$.getValue() ?? undefined,
                     panelHeight: measurePanelHeight(),

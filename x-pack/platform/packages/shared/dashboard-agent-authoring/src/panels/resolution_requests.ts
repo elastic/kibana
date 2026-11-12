@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import { toCustomContentQueryChanges } from '@kbn/custom-content-common';
 import type { PanelContent } from '../resolve_panel';
 import {
   buildConfigPanelContent,
@@ -79,6 +80,9 @@ const datasetsReplaceError = (id: string, replaced: string[]): string =>
     ', '
   )}: put each query's \`esql\` and \`index\` on its dataset and drop the others.`;
 
+const getStoredQueries = (panel: AttachmentPanel): string[] =>
+  (panel.config as { esql_query?: string[] }).esql_query ?? [];
+
 /** Maps request content for a new panel onto the resolution request for its renderer. */
 const toCreationResolutionRequest = (
   content: PanelRequestContent,
@@ -106,7 +110,7 @@ const toCreationResolutionRequest = (
           } of the new panel "${id}" needs a \`description\` or an \`esql\` query.`,
         };
       }
-      return { request: { renderer, nlQuery: query, hasData: true, datasets } };
+      return { request: { renderer, nlQuery: query, datasets } };
     }
     if (query === undefined || hasData === undefined) {
       const missing = [
@@ -123,7 +127,18 @@ const toCreationResolutionRequest = (
       };
     }
     return {
-      request: { renderer, nlQuery: query, esql: esql ?? undefined, hasData, index },
+      request: {
+        renderer,
+        nlQuery: query,
+        ...toCustomContentQueryChanges({
+          nlQuery: query,
+          index,
+          esql: esql ?? undefined,
+          hasData,
+          existingQueries: [],
+          isNewPanel: true,
+        }),
+      },
     };
   }
 
@@ -155,8 +170,7 @@ const toEditResolutionRequest = (
       if (replaced.length > 0) {
         return { error: datasetsReplaceError(existingPanel.id, replaced) };
       }
-      const existingCount =
-        (existingPanel.config as { esql_query?: unknown[] }).esql_query?.length ?? 0;
+      const existingCount = getStoredQueries(existingPanel).length;
       const changesWhatIsShown = datasets.some(
         (dataset, position) => Boolean(dataset.description?.trim()) || position >= existingCount
       );
@@ -187,7 +201,20 @@ const toEditResolutionRequest = (
       };
     }
     return {
-      request: { ...base, renderer, nlQuery: query, esql, hasData, regenerateESQL, index },
+      request: {
+        ...base,
+        renderer,
+        nlQuery: query,
+        ...toCustomContentQueryChanges({
+          nlQuery: query,
+          index,
+          esql,
+          hasData,
+          regenerateESQL,
+          existingQueries: getStoredQueries(existingPanel),
+          isNewPanel: false,
+        }),
+      },
     };
   }
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { InlineRenderCallbacks } from '@kbn/agent-builder-browser/attachments';
-import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
+import { toQueryList, type VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 import type { VisualizationServices } from './services';
 
 const LazyVisualizeLens = React.lazy(() =>
@@ -52,6 +52,9 @@ export const InlineVisualization = ({
   timeRange,
   registerActionButtons,
 }: InlineVisualizationProps) => {
+  // Attachments saved before custom content could have several queries hold a single string.
+  const esqlQueries = useMemo(() => toQueryList(esql), [esql]);
+
   const renderVisualization = () => {
     switch (renderer) {
       case 'vega':
@@ -68,7 +71,7 @@ export const InlineVisualization = ({
           <LazyVisualizeCustomContent
             services={services}
             visualization={visualization}
-            esql={esql}
+            esqlQueries={esqlQueries}
             timeRange={timeRange}
             registerActionButtons={registerActionButtons}
           />

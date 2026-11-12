@@ -23,7 +23,6 @@ import {
   CUSTOM_CONTENT_DEFAULT_HEIGHT,
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
 } from '@kbn/custom-content-common';
-import { toQueryList } from '@kbn/agent-builder-visualizations-common';
 import type { VisualizationServices } from '../services';
 import {
   visualizationWrapperStyles,
@@ -65,8 +64,8 @@ export interface VisualizeCustomContentProps {
   services: VisualizationServices;
   /** The HTML/Liquid template and its declared height. */
   visualization: Record<string, unknown> & { template?: string; height?: number };
-  /** ES|QL queries backing the template, the first read as `rows`. A single string is one query. */
-  esql?: string | readonly string[];
+  /** ES|QL queries backing the template, the first read as `rows`. None for static content. */
+  esqlQueries: readonly string[];
   timeRange?: TimeRange;
   registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
 }
@@ -81,7 +80,7 @@ export interface VisualizeCustomContentProps {
 export const VisualizeCustomContent = ({
   services,
   visualization,
-  esql,
+  esqlQueries,
   timeRange,
   registerActionButtons,
 }: VisualizeCustomContentProps) => {
@@ -94,8 +93,6 @@ export const VisualizeCustomContent = ({
   // The panel reports its own loading state through a progress bar; inline in a
   // conversation there is no dashboard render-completion contract to satisfy.
   const onLoadingChange = useCallback(() => {}, []);
-
-  const esqlQueries = useMemo(() => toQueryList(esql), [esql]);
 
   const template = typeof visualization.template === 'string' ? visualization.template : undefined;
   // The chart default is tuned for a chart; custom content is whatever the model built,

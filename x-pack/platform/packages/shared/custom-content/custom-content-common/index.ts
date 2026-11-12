@@ -34,5 +34,7 @@ export {
   ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,
 } from './esql_queries_total_length';
 
+export { toCustomContentQueryChanges } from './query_changes';
+export type { CustomContentQueryChanges } from './query_changes';
 export { stripMarkdownFences } from './strip_markdown_fences';
 export { CUSTOM_CONTENT_LIQUID_OPTIONS } from './liquid_options';

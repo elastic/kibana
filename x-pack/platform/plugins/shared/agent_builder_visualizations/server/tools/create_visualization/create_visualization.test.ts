@@ -21,8 +21,6 @@ import { createVisualizationTool } from './create_visualization';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildCustomContentConfig: jest.fn(),
-  toCustomContentQueryChanges: jest.requireActual('@kbn/agent-builder-visualizations-server')
-    .toCustomContentQueryChanges,
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
   selectDefaultTimeRange: jest.fn(),

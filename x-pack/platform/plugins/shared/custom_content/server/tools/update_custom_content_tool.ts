@@ -10,14 +10,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
-import {
-  buildCustomContentConfig,
-  toCustomContentQueryChanges,
-} from '@kbn/agent-builder-visualizations-server';
+import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
   CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
   customContentPanelUpdateSchema,
+  toCustomContentQueryChanges,
 } from '@kbn/custom-content-common';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -61,7 +59,7 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 - Provide \`prompt\` to describe what to create or change. The server generates the HTML template.
 - When the edit needs different data, such as a new measure ("also show the average bytes"), a new grouping or filter, or another time window, also set \`regenerateEsql: true\` (and \`index\` when known). Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from \`prompt\`, keeping the parts the request does not change, and samples the new schema before generating so the template matches the data. Do not write the query yourself.
 - When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query generation or sampling, preserving layout and design.
-- Pass \`esqlQuery\` only when the user supplied a query verbatim; pass \`esqlQuery: null\` to remove the query entirely.
+- Pass \`esqlQuery\` only when the user supplied a query to use as it is; pass \`esqlQuery: null\` to remove the query entirely.
 - A panel can hold several queries (read by the template as \`queries[1]\`, \`queries[2]\`, … next to \`rows\`, the first query). Use \`datasets\` to change or add them: an entry with \`description\` regenerates the query at its position, one with \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. \`datasets\` replaces \`esqlQuery\`, \`regenerateEsql\` and \`index\`, and a description needs a \`prompt\` saying how the panel should now use the data. Queries cannot be removed with it. To only restyle, omit \`datasets\`: the panel's queries are kept.
 
 This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\` content; it targets the panel by id and needs no attachment.

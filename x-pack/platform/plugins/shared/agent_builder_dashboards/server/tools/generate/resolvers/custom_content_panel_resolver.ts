@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  buildCustomContentConfig,
-  toCustomContentQueryChanges,
-} from '@kbn/agent-builder-visualizations-server';
+import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   type CustomContentState,
@@ -34,23 +31,13 @@ export const createCustomContentPanelResolver = ({
   esClient,
 }: VisPanelResolverDeps) => {
   return async (request: CustomContentPanelResolutionRequest): Promise<PanelContentAttempt> => {
-    const { nlQuery, index, esql, hasData, datasets, existingPanel, resolveEsqlVariables } =
-      request;
-    const regenerateESQL = request.existingPanel ? request.regenerateESQL : undefined;
+    const { nlQuery, datasets, removeAllQueries, existingPanel, resolveEsqlVariables } = request;
     try {
       const existing = existingPanel?.config as CustomContentState | undefined;
       const { esqlQueries, template } = await buildCustomContentConfig({
         nlQuery,
-        ...toCustomContentQueryChanges({
-          nlQuery,
-          index,
-          esql,
-          hasData,
-          regenerateESQL,
-          datasets,
-          existingQueries: existing?.esql_query ?? [],
-          isNewPanel: !existing,
-        }),
+        datasets,
+        removeAllQueries,
         resolveEsqlVariables,
         existing: existing && { esqlQueries: existing.esql_query, template: existing.template },
         modelProvider,

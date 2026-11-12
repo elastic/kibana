@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toCustomContentQueryChanges } from './to_datasets';
+import { toCustomContentQueryChanges } from './query_changes';
 
 const changes = (params: Partial<Parameters<typeof toCustomContentQueryChanges>[0]>) =>
   toCustomContentQueryChanges({

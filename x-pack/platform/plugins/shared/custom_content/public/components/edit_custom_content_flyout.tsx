@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButtonEmpty,
@@ -32,6 +32,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
+import { getRunnableQueries } from '../utils/get_runnable_queries';
 import { EsqlDataSection } from './esql_data_section';
 import { getTelemetry } from '../telemetry';
 import { getServices } from '../services';
@@ -79,7 +80,6 @@ export const EditCustomContentFlyout = ({
 
   const {
     draftQueries,
-    draftEsqlQueries,
     emptyQueryPosition,
     canAddQuery,
     addQuery,
@@ -106,28 +106,30 @@ export const EditCustomContentFlyout = ({
     onRunPreview,
   });
 
+  const queriesToSave = useMemo(() => getRunnableQueries(draftQueries), [draftQueries]);
+
   const handleGenerateWithChat = useCallback(() => {
     getTelemetry().trackGenerateWithChatClicked({
       triggerSource: 'flyout',
       hasExistingTemplate: Boolean(draftTemplate),
     });
-    onGenerateWithChat?.(draftTemplate, draftEsqlQueries);
-  }, [onGenerateWithChat, draftTemplate, draftEsqlQueries]);
+    onGenerateWithChat?.(draftTemplate, queriesToSave);
+  }, [onGenerateWithChat, draftTemplate, queriesToSave]);
 
   const hasChanges =
     draftTemplate !== (template ?? '') ||
-    draftEsqlQueries.length !== esqlQueries.length ||
-    draftEsqlQueries.some((text, index) => text !== esqlQueries[index]);
+    queriesToSave.length !== esqlQueries.length ||
+    queriesToSave.some((text, index) => text !== esqlQueries[index]);
 
   const handleSave = useCallback(() => {
     getTelemetry().trackPanelSaved({
       isNewPanel: isNewPanel ?? false,
       hasTemplate: Boolean(draftTemplate),
-      hasEsqlQuery: draftEsqlQueries.length > 0,
+      hasEsqlQuery: queriesToSave.length > 0,
       templateSizeBytes: draftTemplate.length,
     });
-    onSave(draftEsqlQueries, draftTemplate || undefined);
-  }, [draftEsqlQueries, draftTemplate, isNewPanel, onSave]);
+    onSave(queriesToSave, draftTemplate || undefined);
+  }, [queriesToSave, draftTemplate, isNewPanel, onSave]);
 
   const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT);
   const [maxEditorHeight, setMaxEditorHeight] = useState<number | undefined>(undefined);

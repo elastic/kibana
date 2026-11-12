@@ -18,4 +18,3 @@ export {
   buildCustomContentConfig,
   type ResolveCustomContentEsqlVariables,
 } from './custom_content/build_custom_content_config';
-export { toCustomContentQueryChanges } from './custom_content/to_datasets';

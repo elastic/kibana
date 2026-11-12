@@ -2232,7 +2232,7 @@ describe('executeDashboardUpsert', () => {
         renderer: 'custom_content',
         resolveEsqlVariables: expect.any(Function),
         nlQuery: 'updated prompt',
-        esql: 'FROM logs | STATS count = COUNT(*)',
+        datasets: [{ esql: 'FROM logs | STATS count = COUNT(*)' }],
         existingPanel,
       });
       expect(result.failures).toEqual([]);
@@ -2280,9 +2280,7 @@ describe('executeDashboardUpsert', () => {
         renderer: 'custom_content',
         resolveEsqlVariables: expect.any(Function),
         nlQuery: 'Show error rate KPI',
-        esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
-        hasData: true,
-        index: 'logs-*',
+        datasets: [{ esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host' }],
       });
       expect(result.failures).toEqual([]);
       expect(result.dashboardData.panels).toEqual([
@@ -2327,11 +2325,11 @@ describe('executeDashboardUpsert', () => {
 
       expect(result.failures).toEqual([]);
       expect(resolvePanelContent).toHaveBeenCalledWith(
-        expect.objectContaining({ renderer: 'custom_content', hasData: false })
+        expect.objectContaining({ renderer: 'custom_content', removeAllQueries: true })
       );
     });
 
-    it('turns datasets on a new custom_content panel into a request with hasData: true', async () => {
+    it('passes the datasets of a new custom_content panel to the panel resolver', async () => {
       const resolvePanelContent = createResolverMock(async () =>
         createResolvedPanelContent({
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
@@ -2363,7 +2361,6 @@ describe('executeDashboardUpsert', () => {
         expect.objectContaining({
           renderer: 'custom_content',
           nlQuery: 'totals above a host list',
-          hasData: true,
           datasets,
         })
       );
@@ -2405,7 +2402,7 @@ describe('executeDashboardUpsert', () => {
       expect(result.failures).toEqual([]);
     });
 
-    it('passes hasData, regenerateESQL and index of a custom_content edit to the panel resolver', async () => {
+    it('turns regenerateESQL and index of a custom_content edit into a dataset that regenerates the query', async () => {
       const existingPanel: AttachmentPanel = {
         id: 'cc-1',
         type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
@@ -2443,8 +2440,7 @@ describe('executeDashboardUpsert', () => {
         expect.objectContaining({
           renderer: 'custom_content',
           nlQuery: 'show errors by host',
-          regenerateESQL: true,
-          index: 'logs-*',
+          datasets: [{ description: 'show errors by host', index: 'logs-*' }],
           existingPanel,
         })
       );
@@ -2487,8 +2483,7 @@ describe('executeDashboardUpsert', () => {
       expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({
           renderer: 'custom_content',
-          esql: 'FROM metrics-* | STATS count = COUNT(*)',
-          hasData: true,
+          datasets: [{ esql: 'FROM metrics-* | STATS count = COUNT(*)' }],
           existingPanel,
         })
       );
@@ -2524,7 +2519,11 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(resolvePanelContent).toHaveBeenCalledWith(
-        expect.objectContaining({ renderer: 'custom_content', hasData: false, existingPanel })
+        expect.objectContaining({
+          renderer: 'custom_content',
+          removeAllQueries: true,
+          existingPanel,
+        })
       );
       expect(result.failures).toEqual([]);
     });

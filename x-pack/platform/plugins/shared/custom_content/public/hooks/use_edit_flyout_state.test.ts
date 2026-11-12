@@ -74,7 +74,6 @@ describe('useEditFlyoutState', () => {
     it('initializes draft state from props', () => {
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
       expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['FROM logs | LIMIT 10']);
-      expect(result.current.draftEsqlQueries).toEqual(['FROM logs | LIMIT 10']);
       expect(result.current.draftTemplate).toBe('hello');
     });
 
@@ -82,7 +81,7 @@ describe('useEditFlyoutState', () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({ ...baseParams, esqlQueries: ['FROM a', 'FROM b'] })
       );
-      expect(result.current.draftEsqlQueries).toEqual(['FROM a', 'FROM b']);
+      expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['FROM a', 'FROM b']);
     });
 
     it('starts a panel without a query with an empty first one to type into', () => {
@@ -102,7 +101,6 @@ describe('useEditFlyoutState', () => {
         })
       );
       expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['']);
-      expect(result.current.draftEsqlQueries).toEqual([]);
       expect(result.current.draftTemplate).toBe('');
     });
   });
@@ -114,7 +112,6 @@ describe('useEditFlyoutState', () => {
 
       act(() => result.current.addQuery());
       expect(result.current.draftQueries).toHaveLength(2);
-      expect(result.current.draftEsqlQueries).toEqual(['FROM logs | LIMIT 10']);
 
       Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES }).forEach(() =>
         act(() => result.current.addQuery())
@@ -132,7 +129,6 @@ describe('useEditFlyoutState', () => {
         useEditFlyoutState({ ...baseParams, esqlQueries: ['FROM a', '', 'FROM c'] })
       );
       expect(result.current.emptyQueryPosition).toBe(2);
-      expect(result.current.draftEsqlQueries).toEqual(['FROM a', '', 'FROM c']);
     });
 
     it('stops the fetch of a query that is removed', async () => {
@@ -161,10 +157,10 @@ describe('useEditFlyoutState', () => {
       const [, second] = result.current.draftQueries;
 
       act(() => result.current.setQueryText(second.id, 'FROM c'));
-      expect(result.current.draftEsqlQueries).toEqual(['FROM a', 'FROM c']);
+      expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['FROM a', 'FROM c']);
 
       act(() => result.current.removeQuery(second.id));
-      expect(result.current.draftEsqlQueries).toEqual(['FROM a']);
+      expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['FROM a']);
     });
   });
 

@@ -20,7 +20,10 @@ import {
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import { customContentDatasetsSchema } from '@kbn/custom-content-common';
+import {
+  customContentDatasetsSchema,
+  toCustomContentQueryChanges,
+} from '@kbn/custom-content-common';
 import {
   ToolResultType,
   SupportedChartType,
@@ -30,7 +33,6 @@ import {
   buildLensConfig,
   buildVegaConfig,
   buildCustomContentConfig,
-  toCustomContentQueryChanges,
   selectDefaultTimeRange,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
@@ -105,7 +107,7 @@ const datasetsField = lazySchema(() =>
   customContentDatasetsSchema
     .optional()
     .describe(
-      '(optional, custom content only) For a panel that needs several queries, such as headline numbers plus a ranked list: the panel\'s queries by position, instead of "esql", "regenerate_esql" and a "has_data": false. Pass "has_data": true with it. Each entry describes what ONE query returns, in words (not the layout, which stays in "query"), or supplies one verbatim; the template reads the first as rows and the n-th as queries[n].rows. On an update an entry with a description regenerates the query at its position, one with esql replaces it, {} keeps it, and an entry past the current queries adds one; queries not listed are kept and none can be removed. Omit it to keep every query.'
+      '(optional, custom content only) For a panel that needs several queries, such as headline numbers plus a ranked list: the panel\'s queries by position, instead of "esql", "regenerate_esql" and a "has_data": false. Pass "has_data": true with it. Each entry describes what ONE query returns, in words (not the layout, which stays in "query"), or gives one ready to use; the template reads the first as rows and the n-th as queries[n].rows. On an update an entry with a description regenerates the query at its position, one with esql replaces it, {} keeps it, and an entry past the current queries adds one; queries not listed are kept and none can be removed. Omit it to keep every query.'
     )
 );
 

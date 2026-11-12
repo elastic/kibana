@@ -7,12 +7,12 @@
 
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { toCustomContentQueryChanges } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
 import { generateCustomContentEsql } from '../shared/custom_content_esql';
 import { buildCustomContentConfig } from './build_custom_content_config';
-import { toCustomContentQueryChanges } from './to_datasets';
 
 jest.mock('../shared/custom_content_esql', () => ({ generateCustomContentEsql: jest.fn() }));
 jest.mock('@kbn/custom-content-server', () => ({ createCustomContentTemplateResolver: jest.fn() }));

@@ -68,7 +68,7 @@ export const customContentDatasetsSchema = lazySchema(() =>
           .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
           .optional()
           .describe(
-            'An ES|QL query the user supplied verbatim for this position. It wins over "description" and, on an existing panel, replaces the query at this position.'
+            'An ES|QL query the user supplied for this position, to use as it is. It wins over "description" and, on an existing panel, replaces the query at this position.'
           ),
         index: z
           .string()
@@ -82,7 +82,7 @@ export const customContentDatasetsSchema = lazySchema(() =>
     .min(1)
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES)
     .describe(
-      `The panel's ES|QL queries, by position, for a panel that needs data of more than one shape, such as headline numbers plus a ranked list. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`, so the order matters. Each entry describes one query ("description"), or supplies one verbatim ("esql"). With a single query use the single-query fields instead. Do not combine with the single-query fields. On an existing panel: an entry with "description" regenerates the query at that position, one with "esql" replaces it, an empty entry {} keeps it, an entry past the current queries adds one, and queries not listed are kept. Queries cannot be removed this way. At most ${CUSTOM_CONTENT_MAX_ESQL_QUERIES}.`
+      `The panel's ES|QL queries, by position, for a panel that needs data of more than one shape, such as headline numbers plus a ranked list. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`, so the order matters. Each entry describes one query ("description"), or gives one ready to use ("esql"). With a single query use the single-query fields instead. Do not combine with the single-query fields. On an existing panel: an entry with "description" regenerates the query at that position, one with "esql" replaces it, an empty entry {} keeps it, an entry past the current queries adds one, and queries not listed are kept. Queries cannot be removed this way. At most ${CUSTOM_CONTENT_MAX_ESQL_QUERIES}.`
     )
 );
 
@@ -109,7 +109,7 @@ const createUpdateFields = () => ({
     .nullable()
     .optional()
     .describe(
-      'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the existing query. Pass null to remove it entirely. Do not write a query yourself: to change the data, set regenerateEsql to true and describe the change in "prompt". The server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
+      'An ES|QL query the user supplied, to use as it is; it replaces the current one. Omit to keep the existing query. Pass null to remove it entirely. Do not write a query yourself: to change the data, set regenerateEsql to true and describe the change in "prompt". The server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
     ),
   regenerateEsql: lazySchema(() =>
     z

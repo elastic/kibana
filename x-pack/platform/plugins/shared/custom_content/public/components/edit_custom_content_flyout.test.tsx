@@ -41,9 +41,17 @@ const mockTelemetry = {
 
 jest.mock('../telemetry', () => ({ getTelemetry: () => mockTelemetry }));
 
+const drafts = (...texts: string[]) =>
+  texts.map((text, id) => ({
+    id,
+    text,
+    isDataLoading: false,
+    esqlData: null,
+    esqlDataError: null,
+  }));
+
 const baseFlyoutState = {
-  draftQueries: [],
-  draftEsqlQueries: [] as string[],
+  draftQueries: drafts(),
   canAddQuery: false,
   addQuery: jest.fn(),
   removeQuery: jest.fn(),
@@ -87,7 +95,7 @@ describe('EditCustomContentFlyout', () => {
     it('is disabled when nothing has been edited', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
-        draftEsqlQueries: ['FROM logs'],
+        draftQueries: drafts('FROM logs'),
         draftTemplate: '<p>hi</p>',
       });
       render(
@@ -103,7 +111,7 @@ describe('EditCustomContentFlyout', () => {
     it('is enabled when the query differs from the saved value', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
-        draftEsqlQueries: ['FROM other'],
+        draftQueries: drafts('FROM other'),
       });
       render(<EditCustomContentFlyout {...defaultProps} esqlQueries={['FROM logs']} />);
       expect(screen.getByRole('button', { name: 'Apply and close' })).not.toBeDisabled();
@@ -123,7 +131,7 @@ describe('EditCustomContentFlyout', () => {
       const onClose = jest.fn();
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
-        draftEsqlQueries: ['FROM logs'],
+        draftQueries: drafts('FROM logs'),
         draftTemplate: '<div></div>',
       });
       render(<EditCustomContentFlyout {...defaultProps} onSave={onSave} onClose={onClose} />);
@@ -144,7 +152,7 @@ describe('EditCustomContentFlyout', () => {
   it('is enabled when a query is added or removed, even if the first is unchanged', () => {
     mockUseEditFlyoutState.mockReturnValue({
       ...baseFlyoutState,
-      draftEsqlQueries: ['FROM logs', 'FROM metrics'],
+      draftQueries: drafts('FROM logs', 'FROM metrics'),
     });
     render(<EditCustomContentFlyout {...defaultProps} esqlQueries={['FROM logs']} />);
     expect(screen.getByRole('button', { name: 'Apply and close' })).not.toBeDisabled();
@@ -153,7 +161,7 @@ describe('EditCustomContentFlyout', () => {
   it('cannot be applied or previewed while a blank query has others after it', () => {
     mockUseEditFlyoutState.mockReturnValue({
       ...baseFlyoutState,
-      draftEsqlQueries: ['FROM logs', '', 'FROM c'],
+      draftQueries: drafts('FROM logs', '', 'FROM c'),
       draftTemplate: '<p>hi</p>',
       emptyQueryPosition: 2,
     });
@@ -207,7 +215,7 @@ describe('EditCustomContentFlyout', () => {
     it('is enabled whenever there is a template, even with no unsaved edits', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
-        draftEsqlQueries: ['FROM logs'],
+        draftQueries: drafts('FROM logs'),
         draftTemplate: '<p>hi</p>',
       });
       render(
@@ -233,7 +241,7 @@ describe('EditCustomContentFlyout', () => {
       const handleRender = jest.fn();
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
-        draftEsqlQueries: ['FROM logs'],
+        draftQueries: drafts('FROM logs'),
         draftTemplate: '<p>hi</p>',
         handleRender,
       });
@@ -271,7 +279,7 @@ describe('EditCustomContentFlyout', () => {
       const onGenerateWithChat = jest.fn();
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
-        draftEsqlQueries: ['FROM logs'],
+        draftQueries: drafts('FROM logs'),
         draftTemplate: '<p>hi</p>',
       });
       render(<EditCustomContentFlyout {...defaultProps} onGenerateWithChat={onGenerateWithChat} />);

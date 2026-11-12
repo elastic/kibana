@@ -18,8 +18,6 @@ import { createUpdateCustomContentTool } from './update_custom_content_tool';
 const mockBuild = jest.fn();
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildCustomContentConfig: (params: unknown) => mockBuild(params),
-  toCustomContentQueryChanges: jest.requireActual('@kbn/agent-builder-visualizations-server')
-    .toCustomContentQueryChanges,
 }));
 
 const makeAttachment = (data: Record<string, unknown>) => ({
