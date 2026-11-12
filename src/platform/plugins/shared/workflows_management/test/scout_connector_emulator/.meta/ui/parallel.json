@@ -1,5 +1,5 @@
 {
-  "sha1": "246baa7efa4ccaea397460ef379cf57a2417922c",
+  "sha1": "828c936ae38acb3fc7c6a5d92e548a4d228d082a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -57,41 +57,41 @@
       }
     },
     {
-      "id": "ce010b29f59f2b3-63ea1cd653e6761",
-      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Sentry: runs every read action, and the emulator answers each request",
+      "id": "ce010b29f59f2b3-a3c5518a98e33f1",
+      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Sentry: runs every action, and the emulator answers each request",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
-        "line": 81,
+        "line": 82,
         "column": 47
       }
     },
     {
-      "id": "ce010b29f59f2b3-a3e4d2e4e99c71f",
-      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Grafana: runs every read action, and the emulator answers each request",
+      "id": "ce010b29f59f2b3-04749bf2c3f534c",
+      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Grafana: runs every action, and the emulator answers each request",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
-        "line": 81,
+        "line": 82,
         "column": 47
       }
     },
     {
-      "id": "ce010b29f59f2b3-4c7fcb405e12cd8",
-      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Sublime Security: runs every read action, and the emulator answers each request",
+      "id": "ce010b29f59f2b3-0e297e0caa6478a",
+      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Sublime Security: runs every action, and the emulator answers each request",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
-        "line": 81,
+        "line": 82,
         "column": 47
       }
     },

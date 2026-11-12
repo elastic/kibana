@@ -135,3 +135,41 @@ export const authorizeConnector = async ({
     throw new Error(`The OAuth callback answered ${callback.status} ${location}`);
   }
 };
+
+/**
+ * Fails unless Kibana's requests for a connector reach the emulator, which a reachable emulator
+ * doesn't show: Kibana only sends them there when started with the `connector_emulator` server
+ * config set. Runs one `read` action of the connector through the actions API and needs the
+ * emulator to have seen the call. Runs before anything that changes state at a vendor, which would
+ * otherwise go to the vendor if Kibana didn't send its requests through the emulator.
+ */
+export const assertRequestsReachEmulator = async ({
+  kbnClient,
+  spaceId,
+  connectorId,
+  control,
+  action: { subAction, subActionParams },
+}: {
+  kbnClient: KbnClient;
+  spaceId: string;
+  connectorId: string;
+  control: EmulatorControl;
+  action: { subAction: string; subActionParams: Record<string, unknown> };
+}): Promise<void> => {
+  await control.reset();
+  await kbnClient.request({
+    method: 'POST',
+    path: `/s/${spaceId}/api/actions/connector/${connectorId}/_execute`,
+    body: { params: { subAction, subActionParams } },
+  });
+  const { calls } = await control.calls();
+  if (calls.length === 0) {
+    throw new Error(
+      `Kibana sent no request of the connector to the emulator, so its actions would reach the ` +
+        `vendor. Start the Scout servers with the connector_emulator config set, after the ` +
+        `emulator: node scripts/scout start-server --arch stateful --domain classic ` +
+        `--serverConfigSet connector_emulator`
+    );
+  }
+  await control.reset();
+};

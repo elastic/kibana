@@ -30,22 +30,38 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const toSnakeCase = (name: string) => name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
 
+/** What the connector's actions API takes to run one action: the guard runs a read action with it. */
+export interface ActionCall {
+  readonly subAction: string;
+  readonly subActionParams: Record<string, unknown>;
+}
+
+export interface GeneratedWorkflow {
+  /** A step per action, in the order of the connector's spec. */
+  readonly steps: ConnectorStep[];
+  /**
+   * A `read` action to run through Kibana before the workflow, to see that its requests reach the
+   * emulator. The steps also include actions that change state at the vendor, which must never run
+   * unless they do.
+   */
+  readonly probe: ActionCall;
+}
+
 /**
  * The steps of a workflow that runs every action of a connector the emulator can answer, with
  * inputs generated from each action's schema (required properties only, with the overrides in the
- * connector's `vendor_api/fixtures.json`, as when recording).
- *
- * An action is left out when it isn't `read` scoped, so the workflow changes nothing at the vendor,
- * or when the connector's vendor API manifest has no operation for it (e.g. one that calls the
- * vendor's MCP server), which the emulator has no spec to answer.
+ * connector's `vendor_api/fixtures.json`, as when recording), including the actions that change
+ * state at the vendor, as the emulator keeps no state and checks their requests against the spec.
+ * An action is left out when the connector's vendor API manifest has no operation for it (e.g. one
+ * that calls the vendor's MCP server), which the emulator has no spec to answer.
  *
  * @param folder the connector's folder in `src/specs`
  * @param connectorId the connector's `metadata.id`, e.g. `.sentry`
  */
-export const generateReadSteps = async (
+export const generateSteps = async (
   folder: string,
   connectorId: string
-): Promise<ConnectorStep[]> => {
+): Promise<GeneratedWorkflow> => {
   const spec = getConnectorSpec(connectorId);
   if (!spec) {
     throw new Error(`No connector has the id ${connectorId}`);
@@ -63,12 +79,13 @@ export const generateReadSteps = async (
   const fixtures = await readJson(path.join(vendorApi, 'fixtures.json'));
 
   const { operations } = manifest;
-  const answerable = Object.entries(spec.actions).filter(([action, { scope }]) => {
+  const answerable = Object.entries(spec.actions).filter(([action]) => {
     const calls = operations[action];
-    return scope === 'read' && Array.isArray(calls) && calls.length > 0;
+    return Array.isArray(calls) && calls.length > 0;
   });
 
   const steps: ConnectorStep[] = [];
+  let probe: ActionCall | undefined;
   for (const [action, definition] of answerable) {
     const fixture = isRecord(fixtures) ? fixtures[action] : undefined;
     const override = isRecord(fixture)
@@ -85,9 +102,15 @@ export const generateReadSteps = async (
       );
     }
     steps.push([toSnakeCase(action), `${connectorId.replace(/^\./, '')}.${action}`, input]);
+    if (probe === undefined && definition.scope === 'read') {
+      probe = { subAction: action, subActionParams: input };
+    }
   }
-  if (steps.length === 0) {
-    throw new Error(`${connectorId} has no read action the emulator can answer`);
+  if (probe === undefined) {
+    throw new Error(
+      `${connectorId} has no read action the emulator can answer, which is needed to check that ` +
+        'its requests reach the emulator before any action that changes state runs'
+    );
   }
-  return steps;
+  return { steps, probe };
 };

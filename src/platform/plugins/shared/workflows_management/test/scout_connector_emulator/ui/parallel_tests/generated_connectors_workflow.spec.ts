@@ -15,11 +15,12 @@ import {
   runWorkflow,
 } from '../fixtures/connector_workflow';
 import {
+  assertRequestsReachEmulator,
   connectToEmulator,
   createConnectorInSpace,
   deleteConnectorInSpace,
 } from '../fixtures/emulator';
-import { generateReadSteps } from '../fixtures/generated_steps';
+import { generateSteps } from '../fixtures/generated_steps';
 
 interface GeneratedConnector {
   /** The connector's folder in `src/specs`. */
@@ -31,7 +32,7 @@ interface GeneratedConnector {
 }
 
 /**
- * Connectors whose workflow is generated from their specs: one step per `read` action the emulator
+ * Connectors whose workflow is generated from their specs: one step per action the emulator
  * can answer, with inputs from the action's schema. A connector has to be enabled for Workflows
  * (its `supportedFeatureIds`) for the editor to accept its steps. To test another connector, add it here (with
  * the config it needs to be created, and nothing else) and to the connectors the emulator serves
@@ -85,13 +86,13 @@ test.describe(
     for (const { folder, title, id, config } of CONNECTORS) {
       const name = id.replace(/^\./, '');
 
-      test(`${title}: runs every read action, and the emulator answers each request`, async ({
+      test(`${title}: runs every action, and the emulator answers each request`, async ({
         kbnClient,
         scoutSpace,
         page,
         pageObjects,
       }) => {
-        const steps = await generateReadSteps(folder, id);
+        const { steps, probe } = await generateSteps(folder, id);
         const control = await connectToEmulator(name);
         const connectorId = await createConnectorInSpace(kbnClient, scoutSpace.id, {
           connectorTypeId: id,
@@ -101,6 +102,15 @@ test.describe(
         });
 
         try {
+          // Before any step that changes state at the vendor: the vendor is the emulator.
+          await assertRequestsReachEmulator({
+            kbnClient,
+            spaceId: scoutSpace.id,
+            connectorId,
+            control,
+            action: probe,
+          });
+
           await runWorkflow(
             { page, pageObjects },
             {
