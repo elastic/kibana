@@ -42,8 +42,9 @@ export interface SeededScenario {
  * the shared space — a previous run's investigation can absorb this run's attack and its
  * teardown then misses it. Document ids need no rewrite: they already derive from the run
  * marker. The rewrite is a plain substring replacement over the serialized documents, so the
- * names also disappear from messages, command lines and file paths that spell them out; longer
- * names are replaced first so one name that prefixes another is never half-rewritten.
+ * names also disappear from messages, command lines and file paths that spell them out. It is a
+ * single pass with longer names tried first, so a name that prefixes or is contained in another
+ * is never half-rewritten.
  */
 const runOwnEntityNames = (
   docs: ReadonlyArray<Ad2IndexedAlert | Ad2IndexedRawEvent>,
@@ -64,13 +65,22 @@ const runOwnEntityNames = (
   const replacements = [...names]
     .map((name) => [name, `${name}-${runMarker}`] as const)
     .sort(([a], [b]) => b.length - a.length);
-  const rewritten = docs.map((doc) => {
-    let encoded = JSON.stringify(doc.source);
-    for (const [name, runOwned] of replacements) {
-      encoded = encoded.split(name).join(runOwned);
-    }
-    return { ...doc, source: JSON.parse(encoded) };
-  });
+  if (replacements.length === 0) {
+    return { docs: [...docs], entityNames: [] };
+  }
+  const runOwnedByName = new Map<string, string>(replacements);
+  // One pass over an alternation ordered longest-first: each match is replaced once and the
+  // output is never rescanned, so a name inside an already rewritten name is left alone.
+  const pattern = new RegExp(
+    replacements.map(([name]) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
+    'g'
+  );
+  const rewritten = docs.map((doc) => ({
+    ...doc,
+    source: JSON.parse(
+      JSON.stringify(doc.source).replace(pattern, (name) => runOwnedByName.get(name) ?? name)
+    ),
+  }));
   return { docs: rewritten, entityNames: replacements.map(([, runOwned]) => runOwned) };
 };
 

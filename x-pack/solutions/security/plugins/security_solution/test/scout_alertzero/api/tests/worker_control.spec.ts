@@ -102,8 +102,8 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
   // does not pin it (an override makes it read-only), so this suite turns it on itself and puts
   // the captured baseline back in teardown.
   let restoreAlertZero: (() => Promise<void>) | undefined;
-  // The worker's pre-suite state, captured in beforeAll: `undefined` until read, `null` when the
-  // worker was already clean. Teardown restores it instead of resetting to disabled: this suite
+  // The worker's pre-suite state, captured in beforeAll; stays `undefined` if the read failed
+  // (e.g. it raced the gate enable). A clean worker reads as `{ enabled: false }`. Teardown restores it instead of resetting to disabled: this suite
   // does not own the worker, and another suite (or an operator) may have deliberately left it
   // enabled with its own account bound.
   let workerBaseline: { enabled: boolean; serviceAccountId?: string } | undefined;

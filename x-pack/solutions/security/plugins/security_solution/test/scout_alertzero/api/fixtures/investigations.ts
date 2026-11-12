@@ -60,12 +60,15 @@ export const discoverRunInvestigations = async (
         `GET`,
         `${CONVERSATIONS_URL}/${encodeURIComponent(conversation.id)}`
       );
-      if (detail.statusCode === 200) {
-        if (entityNames.some((name) => JSON.stringify(detail.body).includes(name))) {
-          ids.push(conversation.id);
-        }
+      // Deleted between the list and the read: nothing to discover, and not an error. Any other
+      // failure would hide a run-owned Investigation from teardown, so it throws.
+      if (detail.statusCode === 404) {
+        continue;
       }
-      // Deleted between the list and the read: nothing to discover, and not an error.
+      const body = ok(detail, `read investigation ${conversation.id}`);
+      if (entityNames.some((name) => JSON.stringify(body).includes(name))) {
+        ids.push(conversation.id);
+      }
     }
     const total = response.pagination?.total ?? 0;
     if (page * CONVERSATIONS_PAGE_SIZE >= total) {

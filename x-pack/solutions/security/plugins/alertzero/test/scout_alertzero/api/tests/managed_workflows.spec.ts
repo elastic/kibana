@@ -50,11 +50,6 @@ const WORKFLOW_EXECUTIONS_PATH = (workflowId: string, page = 1) =>
 const TERMINAL_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
 /** Ceiling for draining the triage run the enable started (cancel + poll to terminal). */
 const DRAIN_TIMEOUT_MS = 60_000;
-/**
- * Budget for the `afterAll` hook: one drain (its poll ceiling plus the list/cancel round trips)
- * and the worker, account and settings cleanup around it. Playwright's default hook timeout
- * (60s) covers a drain that runs to its ceiling only if nothing else is slow.
- */
 /** Three drains (sweep, batches, closure reviews), each up to DRAIN_TIMEOUT_MS, plus cleanup. */
 const TEARDOWN_TIMEOUT_MS = 3 * DRAIN_TIMEOUT_MS + 30_000 + 3 * 60_000;
 /** Ceiling for a managed workflow to be installed and report valid after startup or an enable. */

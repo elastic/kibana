@@ -336,7 +336,14 @@ apiTest.describe(
     apiTest(
       'turns a seeded attack chain into an approved host isolation',
       async ({ apiClient, samlAuth, esClient, kbnClient, config }) => {
-        apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS + 3 * testData.PROPOSAL_TIMEOUT_MS);
+        // The sum of the bounded waits below: the AD execution, six proposal-sized waits (two
+        // worker installs, two proposal polls, two waiting-for-input checks) and three
+        // action-sized ones (new execution, isolate action, its completion).
+        apiTest.setTimeout(
+          testData.GENERATION_TIMEOUT_MS +
+            6 * testData.PROPOSAL_TIMEOUT_MS +
+            3 * testData.ACTION_TIMEOUT_MS
+        );
         const api = await getAdminApi(apiClient, samlAuth);
 
         // Explicit setup: force the per-space anonymization fields install before the workflows
