@@ -243,7 +243,7 @@ export const EsqlDataSection = ({
           >
             {i18n.translate('xpack.customContent.editFlyout.esqlSection.emptyQueryDescription', {
               defaultMessage:
-                'Fill it in or remove it. Leaving it out would move the queries after it up one position in the template.',
+                'Fill it in. The template reads each query by its position, so only the last query can be removed.',
             })}
           </KbnWarningCallout>
         </>
