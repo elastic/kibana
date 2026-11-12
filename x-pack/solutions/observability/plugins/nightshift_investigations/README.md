@@ -199,7 +199,16 @@ An automation's workflow runs as the space's automations account (`settings.run_
 
 The workflows plugin requires `manage_security` for every create, update and delete of a workflow bound to a service account. Creating, changing (including enabling or disabling) and deleting automations therefore requires `manage_security` in addition to Nightshift manage, and the routes refuse other callers before writing anything. The Automations page shows the edit actions disabled for them, with a callout that says why. Creating or changing an automation also requires the space to be set up. `_enable` binds automations that already exist. When service accounts are off, automations keep running as their authors.
 
-### Agent Builder hooks
+#
+### Deleted automation workflows
+
+Generated automation workflows remain editable during TP. If one is deleted, open the automation
+flyout and choose **Repair** to recreate it from the saved configuration. Repair leaves the automation
+paused; enable it explicitly afterward. Previous runs no longer appear in its run history. Pause and
+Delete remain available without repair. This is a temporary workaround pending workflow lifecycle
+support; it does not preserve historical workflow associations.
+
+## Agent Builder hooks
 
 Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. The investigation agent and the decision-tree reinforcement agent therefore always name the space's bound hook entry points, so hooks run as the agent account:
 

@@ -136,7 +136,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 13400
   newsfeed: 10708
-  nightshift: 5038
+  nightshift: 5665
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -173,6 +173,7 @@ pageLoadAssetSize:
   screenshotMode: 979
   screenshotting: 1655
   searchAssistant: 1887
+  searchBoost: 1569
   searchGettingStarted: 2697
   searchHomepage: 4290
   searchInferenceEndpoints: 4743
