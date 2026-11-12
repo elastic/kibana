@@ -33,9 +33,11 @@ jest.setTimeout(10_000);
 const setup = async ({
   noSearchSessionId,
   hideTable = false,
+  onDropFieldToChart,
 }: {
   noSearchSessionId?: boolean;
   hideTable?: boolean;
+  onDropFieldToChart?: () => void;
 } = {}) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
   const services = createDiscoverServicesMock();
@@ -105,7 +107,7 @@ const setup = async ({
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
-      <DiscoverHistogramLayout {...props} />
+      <DiscoverHistogramLayout {...props} onDropFieldToChart={onDropFieldToChart} />
     </DiscoverToolkitTestProvider>
   );
 
@@ -140,6 +142,22 @@ describe('Discover histogram layout component', () => {
       expect(await screen.findByTestId('unifiedHistogramRendered')).toBeInTheDocument();
       expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
       expect(screen.queryByTestId('dscShowTableButton')).toBeInTheDocument();
+    });
+  });
+
+  describe('chart drop zone', () => {
+    it('should render the drop overlay only while the chart is visible', async () => {
+      const user = userEvent.setup();
+      await setup({ onDropFieldToChart: jest.fn() });
+      expect(await screen.findByTestId('dscChartDropOverlay')).toBeInTheDocument();
+      await user.click(screen.getByTestId('dscHideHistogramButton'));
+      expect(screen.queryByTestId('dscChartDropOverlay')).not.toBeInTheDocument();
+    });
+
+    it('should not render the drop overlay when the dragged field cannot be a breakdown', async () => {
+      await setup();
+      expect(await screen.findByTestId('unifiedHistogramRendered')).toBeInTheDocument();
+      expect(screen.queryByTestId('dscChartDropOverlay')).not.toBeInTheDocument();
     });
   });
 });

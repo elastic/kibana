@@ -36,6 +36,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
+import { resolveBreakdownField } from '@kbn/unified-histogram';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDiscoverCustomizationContext } from '../../../../customizations';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -115,12 +116,13 @@ export function DiscoverLayout() {
   const isProjectChromeStyle = useIsProjectChromeStyle();
 
   const { main$ } = dataStateContainer.data$;
-  const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
+  const [query, savedQuery, columns, sort, grid, breakdownField] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
     state.columns,
     state.sort,
     state.grid,
+    state.breakdownField,
   ]);
   const isEsqlMode = useIsEsqlMode();
   useRegisterDiscoverEsqlFeedback();
@@ -334,6 +336,27 @@ export function DiscoverLayout() {
     return () => onAddColumnWithTracking(draggingFieldName);
   }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
+  const onDropFieldToChart = useMemo(() => {
+    if (!draggingFieldName || !canSetBreakdownField || draggingFieldName === breakdownField) {
+      return undefined;
+    }
+
+    // Only fields the chart can group by are accepted, mirroring the breakdown selector
+    const field = resolveBreakdownField({
+      breakdownField: draggingFieldName,
+      dataSource: currentDataSource,
+      columns: currentDataSource.kind === 'esql' ? currentDataSource.resultColumns : undefined,
+    });
+
+    return field ? () => onAddBreakdownField(field) : undefined;
+  }, [
+    draggingFieldName,
+    canSetBreakdownField,
+    breakdownField,
+    currentDataSource,
+    onAddBreakdownField,
+  ]);
+
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
@@ -355,6 +378,7 @@ export function DiscoverLayout() {
           onAddFilter={onAddFilter}
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
+          onDropFieldToChart={onDropFieldToChart}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -367,6 +391,7 @@ export function DiscoverLayout() {
     onAddFilter,
     onFieldEdited,
     onDropFieldToTable,
+    onDropFieldToChart,
     dataStateContainer,
   ]);
 
