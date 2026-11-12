@@ -47509,7 +47509,6 @@
     "xpack.nightshift.investigations.cardCopyLinkLabel": "リンクをコピー",
     "xpack.nightshift.investigations.cardOpenInChatLabel": "チャットで開く",
     "xpack.nightshift.investigations.cardOpenMenuLabel": "アクションメニューを開く",
-    "xpack.nightshift.investigations.emptyDescription": "調査が見つかりませんでした",
     "xpack.nightshift.investigations.inProgressSectionTitle": "進行中",
     "xpack.nightshift.investigations.loadingErrorTitle": "調査を読み込めません",
     "xpack.nightshift.investigations.notRatedSectionTitle": "未評価",
