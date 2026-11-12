@@ -522,8 +522,8 @@ For each event candidate, decide from all signals that will appear in the final 
    continuation, the stored confirming signals read from the `full` event view. Rate each on its own:
    neither is set from the other.
    - **Continuation.** With only `refutes` signals, keep the stored `severity`. With new `confirms`
-     signals, the stored tier stands unless a description contradicts the evidence that set it or
-     shows the failure ended.
+     signals, the stored tier stands unless a description contradicts the evidence that set it,
+     shows the failure ended, or meets another tier's condition.
    - **No new `confirms` signal in the item** (an unchanged continuation, `<chronic_and_recurring>`
      rule 2, or a recovery accepted under the checklist in `<eligibility>`): write the stored
      `confidence`. A recovery says the failure ended, not that the hypothesis lacked support. A

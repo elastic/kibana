@@ -43,9 +43,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   title:
     'Ledger services — database connection errors and read timeouts across balance, history, and payment paths',
   symptom_hypothesis:
-    'SQLState 08001 (unable to establish a database connection) from transactionhistory is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
+    'SQLState 08001 (unable to establish a database connection) from transactionhistory fails ledger reads and cascades to frontend balance, history, payment, and deposit paths.',
   summary:
-    'Frontend requests to transactionhistory, balancereader, and ledgerwriter time out (read timeout=4) on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
+    'Frontend requests to transactionhistory, balancereader, and ledgerwriter time out (read timeout=4) on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Balance and transaction-history reads and payment and deposit submissions fail with timeouts and refusals. Onset ~14:30 UTC with no sign of recovery.',
   severity: 'high',
   confidence: 0.82,
   source_ids: ['logs'],

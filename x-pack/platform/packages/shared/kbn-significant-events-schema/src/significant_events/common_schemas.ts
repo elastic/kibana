@@ -348,7 +348,7 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
-    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating and is never grounds for "medium". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail), never by adding shares across signals or taking the highest of differently scoped ones.
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating. Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
     Tie-break: when two adjacent tiers fit the same evidence, choose the lower when the evidence for the higher tier is missing or it is unresolved whether the operation still completes.
@@ -362,11 +362,11 @@ export const CONFIDENCE_CONTRACT_RULE = dedent`
     Confidence is a score from 0.0 to 1.0 for how strongly the evidence you hold supports the symptom this event reports. It rates the evidence, not the impact: severity rates the impact, and neither is set from the other.
     Check these in the confirming descriptions:
     - the rows show the failure itself (an error signature or a stated outcome), not only log-line volume;
-    - it is still happening in the latest hour the descriptions give;
+    - it is still happening in the latest hour the descriptions give (not checked when they show the failure ended: an ended failure is still a real symptom);
     - the signals agree with each other and with the knowledge-base topology where both speak (an edge no row shows is context, not a disagreement);
     - the descriptions say where it fails (a service, operation or scope).
-    With every check shown the score is near the top of the range. Each check not shown lowers it, and several put it in the lower half.
-    These never lower the score: a reach, outcome or rate that was not measured; a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
+    With every check shown the score is near the top of the range. Each check not shown lowers it by how far it weakens support for the symptom.
+    These never lower the score: anything that was not measured (a reach, outcome or rate, or a check whose query failed); a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
     An event written without signals is rated on the evidence its author holds. The score never reflects how strong or unusual the detection was.
   `;
 

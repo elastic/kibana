@@ -255,8 +255,9 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
     `affected` does not explain it.
   - text field: the plain field that is the first argument of a top-level `AND` `MATCH_PHRASE` or
     `MATCH` in `{failure}` (not under `NOT` or `OR`, not inside a function); `:`, `LIKE`, `KQL()`,
-    `QSTR()` and multi-field conditions give none. When `{failure}` gives none, it is the first field of
-    the `sample` (or `re-sample`) result that holds a string with a space. Examples need it usable: the
+    `QSTR()` and multi-field conditions give none. When `{failure}` gives none, it is the field of the
+    `sample` (or `re-sample`) result that holds the log or error message, not another free-text
+    field such as a user agent or a request body; none when no field holds it. Examples need it usable: the
     sample result has a field of that name holding a string with a space.
   - `off_topic` rule: its final sample's verdict is `off_topic` (`<verdicts>`). The isolating condition
     built from that row's observed error replaces `{failure}` in its second `spread` and its profile
@@ -425,7 +426,8 @@ Reading `trend`:
   `0 at 09:00` when its row is missing). "Complete hours" and "earlier hours" are working terms:
   never write them. With no failing hour before the latest, say "no failing line in the M hours
   before 09:00"; with no hour before it, state only the latest count. Leave the direction to the
-  reader and omit the partial current hour unless it is the only data.
+  reader and omit the partial current hour unless the latest complete hour had no failing line or
+  it is the only data.
 
 Reading `baseline` (the onset always goes in the description; the days and daily shares only when
 sentence 3 allows them):
