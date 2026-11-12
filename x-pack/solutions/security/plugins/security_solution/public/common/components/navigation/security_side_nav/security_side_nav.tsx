@@ -56,6 +56,7 @@ const LAUNCHPAD_PAGES: ReadonlySet<SecurityPageName> = new Set([
   SecurityPageName.siemMigrationsManage,
   SecurityPageName.siemMigrationsRules,
   SecurityPageName.siemMigrationsDashboards,
+  SecurityPageName.siemMigrationsWorkflows,
 ]);
 
 /**
@@ -113,6 +114,7 @@ const useSolutionSideNavItems = (
         SecurityPageName.siemMigrationsManage,
         SecurityPageName.siemMigrationsRules,
         SecurityPageName.siemMigrationsDashboards,
+        SecurityPageName.siemMigrationsWorkflows,
       ].includes(id);
 
     const { launchpadPanelItems, launchpadCategories } =
