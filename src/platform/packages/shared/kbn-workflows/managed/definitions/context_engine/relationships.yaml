@@ -287,7 +287,7 @@ steps:
                 [{%- assign separator = "" -%}
                 {%- for item in foreach.item -%}
                 {%- assign kind = item.type | split: "." | first -%}
-                {%- if kind == 'entity' -%}
+                {%- if kind == 'entity' and item.type != 'entity.user' -%}
                 {{ separator }}{"match_phrase":{"title":{{ item.title | json }}}},{"match_phrase":{"content":{{ item.title | json }}}}
                 {%- assign separator = "," -%}
                 {%- endif -%}
