@@ -18988,7 +18988,6 @@
     "xpack.alertingV2.signalOverview.statTotalFirings": "合計イベント数",
     "xpack.alertingV2.signalOverview.title": "ルールイベント",
     "xpack.alertingV2.sourceRuleSummaryFlyout.classicRulesBadge": "クラシック",
-    "xpack.alertingV2.sourceRuleSummaryFlyout.close": "閉じる",
     "xpack.alertingV2.sourceRuleSummaryFlyout.closeButton": "閉じる",
     "xpack.alertingV2.sourceRuleSummaryFlyout.createdBy": "作成者",
     "xpack.alertingV2.sourceRuleSummaryFlyout.createdDate": "作成日",
