@@ -13,9 +13,9 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';

@@ -170,7 +170,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       align-items: center;
       gap: ${euiTheme.size.xxs};
       border-radius: ${euiTheme.border.radius.control};
-      padding-inline-end: ${showActionsMenu || isDeleting ? euiTheme.size.xxs : 0};
+      padding-inline-end: ${euiTheme.size.xxs};
 
       &:hover,
       &:focus-within {
@@ -191,7 +191,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         opacity: 1;
       }
     `;
-  }, [euiTheme, isActive, isPopoverOpen, showActionsMenu, isDeleting]);
+  }, [euiTheme, isActive, isPopoverOpen]);
 
   const isUnread = read === false;
 
@@ -307,7 +307,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   const menuButton = (
     <EuiToolTip content={labels.openMenu} disableScreenReaderOutput>
       <EuiButtonIcon
-        iconType="boxesVertical"
+        iconType="ellipsis"
         display="empty"
         size="xs"
         aria-label={labels.openMenu}
@@ -375,23 +375,25 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
               <EuiLoadingSpinner size="s" />
             </div>
           </EuiFlexItem>
-        ) : showActionsMenu ? (
+        ) : (
           <EuiFlexItem grow={false}>
             <div css={iconSlotStyles} className={ACTIONS_CLASS}>
-              <EuiPopover
-                button={menuButton}
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="downRight"
-                repositionOnScroll
-                aria-label={labels.actionsMenu}
-              >
-                <EuiContextMenuPanel items={menuItems} />
-              </EuiPopover>
+              {showActionsMenu && (
+                <EuiPopover
+                  button={menuButton}
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downRight"
+                  repositionOnScroll
+                  aria-label={labels.actionsMenu}
+                >
+                  <EuiContextMenuPanel items={menuItems} />
+                </EuiPopover>
+              )}
             </div>
           </EuiFlexItem>
-        ) : null}
+        )}
       </EuiFlexGroup>
 
       {isRenameModalOpen ? (

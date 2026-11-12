@@ -115,9 +115,7 @@ describe('ConversationListItemRow', () => {
     const statusIcon = within(link).getByText('New');
     const title = within(link).getByText('My conversation');
 
-    expect(
-      statusIcon.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    expect(statusIcon.compareDocumentPosition(title)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('renders no status icon when the conversation has no status', () => {
@@ -132,7 +130,7 @@ describe('ConversationListItemRow', () => {
 
   describe('actions menu', () => {
     const isBefore = (first: HTMLElement, second: HTMLElement) =>
-      Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
+      first.compareDocumentPosition(second) === Node.DOCUMENT_POSITION_FOLLOWING;
 
     const iconOf = (label: string) =>
       screen

@@ -12,7 +12,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import type { ListConversationsResponseItem } from '../../../../common/http_api/conversations';
 import { useConversationList } from '../../hooks/use_conversation_list';
-import { ConversationSearchModal, formatConversationDate } from './conversation_search_modal';
+import { ConversationSearchModal } from './conversation_search_modal';
 
 jest.mock('../../hooks/use_conversation_list', () => ({
   useConversationList: jest.fn(),
@@ -118,9 +118,9 @@ describe('ConversationSearchModal', () => {
 
     renderModal();
 
-    expect(screen.getByTestId('agentBuilderConversationSearchResultType-templated')).toHaveTextContent(
-      'Incident'
-    );
+    expect(
+      screen.getByTestId('agentBuilderConversationSearchResultType-templated')
+    ).toHaveTextContent('Incident');
     expect(screen.getByTestId('agentBuilderConversationSearchResultType-plain')).toHaveTextContent(
       'Chat'
     );
@@ -179,17 +179,5 @@ describe('ConversationSearchModal access tooltip', () => {
     fireEvent.mouseOver(screen.getByText(label));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(label);
-  });
-});
-
-describe('formatConversationDate', () => {
-  const now = moment('2026-11-11T12:00:00.000Z');
-
-  it('shows month and day for dates in the current year', () => {
-    expect(formatConversationDate('2026-06-03T10:00:00.000Z', now)).toBe('Jun 03');
-  });
-
-  it('adds the year for older dates', () => {
-    expect(formatConversationDate('2025-06-03T10:00:00.000Z', now)).toBe('Jun 03, 2025');
   });
 });

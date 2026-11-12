@@ -6,35 +6,24 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import moment from 'moment';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
-  EuiTextTruncate,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT, ConversationAccessControlMode } from '@kbn/agent-builder-common';
-import type { ListConversationsResponseItem } from '../../../../common/http_api/conversations';
-import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { useInfiniteScroll } from '../../hooks/use_infinite_scroll';
-import {
-  createActiveConversationListItemStyles,
-  createConversationListItemStyles,
-} from './conversation_list_item_styles';
+import { ConversationSearchResult } from './conversation_search_result';
 import { NoConversationsPrompt } from './embeddable_conversation_header/no_conversations_prompt';
 
 const labels = {
@@ -51,20 +40,6 @@ const labels = {
   results: i18n.translate('xpack.agentBuilder.conversationSearchModal.results', {
     defaultMessage: 'Results',
   }),
-  defaultType: i18n.translate('xpack.agentBuilder.conversationSearchModal.defaultType', {
-    defaultMessage: 'Chat',
-  }),
-  public: i18n.translate('xpack.agentBuilder.conversationSearchModal.public', {
-    defaultMessage: 'Public',
-  }),
-  private: i18n.translate('xpack.agentBuilder.conversationSearchModal.private', {
-    defaultMessage: 'Private',
-  }),
-};
-
-export const formatConversationDate = (updatedAt: string, now: moment.Moment = moment()) => {
-  const date = moment(updatedAt);
-  return date.format(date.isSame(now, 'year') ? 'MMM DD' : 'MMM DD, YYYY');
 };
 
 const MODAL_WIDTH = 768;
@@ -86,7 +61,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   const [searchValue, setSearchValue] = useState('');
 
   const { euiTheme } = useEuiTheme();
-  const { conversationTemplatesService } = useAgentBuilderServices();
   const modalTitleId = useGeneratedHtmlId();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -129,9 +103,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   const conversations = isSearching ? searchResults : sortedConversations;
   const isLoading = isSearching ? isSearchLoading : isLoadingCached;
 
-  const itemStyles = createConversationListItemStyles(euiTheme);
-  const activeItemStyles = createActiveConversationListItemStyles(euiTheme);
-
   const listStyles = css`
     overflow-y: auto;
     max-height: ${LIST_MAX_HEIGHT}px;
@@ -141,28 +112,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   const headingStyles = css`
     padding: ${euiTheme.size.xs} 0;
   `;
-
-  const getTypeLabel = (templateId: string | undefined) => {
-    if (!templateId) {
-      return labels.defaultType;
-    }
-    return conversationTemplatesService.getTemplateUIDefinition(templateId)?.name ?? templateId;
-  };
-
-  const renderAccessIcon = (conversation: ListConversationsResponseItem) => {
-    const isPublic =
-      conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
-    const label = isPublic ? labels.public : labels.private;
-    return (
-      <EuiToolTip content={label} disableScreenReaderOutput>
-        <EuiIcon
-          type={isPublic ? 'lockOpen' : 'lock'}
-          color={isPublic ? euiTheme.colors.textParagraph : euiTheme.colors.textDisabled}
-          aria-label={label}
-        />
-      </EuiToolTip>
-    );
-  };
 
   const renderList = () => {
     if (isLoading) {
@@ -190,54 +139,18 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
           {isSearching ? labels.results : labels.recentChats}
         </EuiText>
         <EuiFlexGroup direction="column" gutterSize="xs">
-          {conversations.map((conversation) => {
-            const isActive = currentConversationId === conversation.id;
-            return (
-              <EuiFlexItem grow={false} key={conversation.id}>
-                <button
-                  css={isActive ? activeItemStyles : itemStyles}
-                  onClick={() => {
-                    onSelectConversation(conversation.id);
-                    onClose();
-                  }}
-                  data-test-subj={`agentBuilderConversationSearchResult-${conversation.id}`}
-                  {...getEbtProps({
-                    element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                    action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
-                  })}
-                >
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>{renderAccessIcon(conversation)}</EuiFlexItem>
-                    <EuiFlexItem
-                      css={css`
-                        min-width: 0;
-                      `}
-                    >
-                      <EuiTextTruncate text={conversation.title || conversation.id} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="xs"
-                        color="subdued"
-                        data-test-subj={`agentBuilderConversationSearchResultType-${conversation.id}`}
-                      >
-                        {getTypeLabel(conversation.template_id)}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="xs"
-                        color="subdued"
-                        data-test-subj={`agentBuilderConversationSearchResultDate-${conversation.id}`}
-                      >
-                        {formatConversationDate(conversation.updated_at)}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </button>
-              </EuiFlexItem>
-            );
-          })}
+          {conversations.map((conversation) => (
+            <EuiFlexItem grow={false} key={conversation.id}>
+              <ConversationSearchResult
+                conversation={conversation}
+                isActive={currentConversationId === conversation.id}
+                onSelect={(conversationId) => {
+                  onSelectConversation(conversationId);
+                  onClose();
+                }}
+              />
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
         {isSearching && (
           <>
