@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   getSelectedJobId$,
@@ -74,6 +74,16 @@ describe('SelectedJob', () => {
     renderIt();
 
     expect(await screen.findByText('mine')).toBeInTheDocument();
+    expect(getSelectedJobId$('selected-*').getValue()).toBe('mine');
+  });
+
+  it('deselects the job when it no longer exists', async () => {
+    mockJobsSummary.mockResolvedValue([]);
+    setSelectedJobId('selected-*', 'mine');
+    renderIt();
+
+    await waitFor(() => expect(getSelectedJobId$('selected-*').getValue()).toBeUndefined());
+    expect(screen.queryByTestId('mlDiscoverADManagementSelectedJob')).not.toBeInTheDocument();
   });
 
   it('follows the selection', async () => {

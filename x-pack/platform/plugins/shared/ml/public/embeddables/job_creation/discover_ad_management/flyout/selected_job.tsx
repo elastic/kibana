@@ -70,15 +70,21 @@ export const SelectedJob: FC<Props> = ({ indexPattern }) => {
     mlApi.jobs
       .jobsSummary([selectedJobId])
       .then((jobs) => {
+        if (!isCurrent) return;
         const job = jobs.find(({ id }) => id === selectedJobId);
-        if (isCurrent && job) setDescription({ jobId: job.id, text: job.description });
+        if (job) {
+          setDescription({ jobId: job.id, text: job.description });
+          return;
+        }
+        // The job has been deleted since it was selected
+        selectJob(undefined);
       })
-      // The id is shown without a description
+      // The id is shown without a description, and stays selected
       .catch(() => {});
     return () => {
       isCurrent = false;
     };
-  }, [mlApi, selectedJobId]);
+  }, [mlApi, selectedJobId, selectJob]);
 
   // The page is for the time range of the chart, which is not known to the page which is opened in another tab
   useEffect(() => {
