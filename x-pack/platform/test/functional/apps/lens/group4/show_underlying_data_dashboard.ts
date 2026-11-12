@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.saveAndReturn();
       await testSubjects.existOrFail('dashboardViewOnlyMode');
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
-      await queryBar.switchQueryLanguage('kql');
+      await queryBar.expectQueryLanguageOrFail('kql');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       await queryBar.setQuery('request.keyword : "/apm"');
       await queryBar.submitQuery();
