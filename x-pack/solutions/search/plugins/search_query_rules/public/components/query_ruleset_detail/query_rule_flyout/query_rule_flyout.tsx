@@ -104,12 +104,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   const pinExcludeText =
     pinType === 'pinned' ? (
       <FormattedMessage
-        id="xpack.search.queryRulesetDetail.queryRuleFlyout.actionType.pinned.description"
+        id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.actionType.pinned.description"
         defaultMessage="Pin documents to the top of the search results."
       />
     ) : (
       <FormattedMessage
-        id="xpack.search.queryRulesetDetail.queryRuleFlyout.actionType.exclude.description"
+        id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.actionType.exclude.description"
         defaultMessage="Exclude documents from the search results."
       />
     );
@@ -139,7 +139,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiText size="s">
                 <b>
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.actionTypeHeading"
+                    id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.actionTypeHeading"
                     defaultMessage="I want to"
                   />
                 </b>
@@ -165,7 +165,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiText size="s">
                 <b>
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.documentCount"
+                    id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.documentCount"
                     defaultMessage="{documentCount, plural, one {# document} other {# documents}}"
                     values={{
                       documentCount,
@@ -176,7 +176,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiSpacer size="s" />
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.findDocuments"
+                  id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.findDocuments"
                   defaultMessage="Find your documents IDs into "
                 />
                 <EuiLink
@@ -191,7 +191,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   }}
                 >
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.DiscoverDocumentsLink"
+                    id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.DiscoverDocumentsLink"
                     defaultMessage="Discover"
                   />
                 </EuiLink>
@@ -204,13 +204,13 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   <KbnWarningCallout
                     announceOnMount
                     title={i18n.translate(
-                      'xpack.search.queryRuleset.queryRuleFlyout.documentActionUsingidsLabel',
+                      'xpack.queryRules.queryRuleset.queryRuleFlyout.documentActionUsingidsLabel',
                       { defaultMessage: "Document action using 'ids' are unsupported" }
                     )}
                     size="s"
                     text={
                       <FormattedMessage
-                        id="xpack.search.queryRuleset.queryRuleFlyout.idsActionDeprecation"
+                        id="xpack.queryRules.queryRuleset.queryRuleFlyout.idsActionDeprecation"
                         defaultMessage="Query rules pinning/excluding documents using ids only are not supported in the UIs. Please convert them to pinning by docs"
                       />
                     }
@@ -238,7 +238,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   size="s"
                   title={
                     <FormattedMessage
-                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.organicResultsCallout"
+                      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.organicResultsCallout"
                       defaultMessage="All other organic results will be displayed below"
                     />
                   }
@@ -263,7 +263,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiText size="s">
                 <b>
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteriaHeading"
+                    id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.criteriaHeading"
                     defaultMessage="Criteria"
                   />
                 </b>
@@ -283,7 +283,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   <EuiText size="xs" color="subdued">
                     <p>
                       <FormattedMessage
-                        id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteria.custom.description"
+                        id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.criteria.custom.description"
                         defaultMessage="Define the conditions that trigger this rule."
                       />
                     </p>
@@ -300,12 +300,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                       setCriteriaCalloutActive(false);
                     }}
                     aria-label={i18n.translate(
-                      'xpack.search.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout.ariaLabel',
+                      'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout.ariaLabel',
                       { defaultMessage: 'All criteria must be met for the rule to be applied' }
                     )}
                     title={
                       <FormattedMessage
-                        id="xpack.search.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout"
+                        id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout"
                         defaultMessage="All criteria must be met for the rule to be applied"
                       />
                     }
@@ -350,7 +350,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                         size="s"
                         title={
                           <FormattedMessage
-                            id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteriaRequiredCallout"
+                            id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.criteriaRequiredCallout"
                             defaultMessage="At least one criteria is required."
                           />
                         }
@@ -369,7 +369,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     fill={criteriaCount === 0}
                   >
                     <FormattedMessage
-                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.addCriteriaButton"
+                      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.addCriteriaButton"
                       defaultMessage="AND"
                     />
                   </EuiButton>
@@ -387,7 +387,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               onClick={onClose}
             >
               <FormattedMessage
-                id="xpack.search.queryRulesetDetail.queryRuleFlyout.closeButton"
+                id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -408,12 +408,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
             >
               {createMode ? (
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.createButton"
+                  id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.createButton"
                   defaultMessage="Create rule"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.updateButton"
+                  id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.updateButton"
                   defaultMessage="Update rule"
                 />
               )}

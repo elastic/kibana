@@ -28,7 +28,7 @@ const steps: ConverseStep[] = [
     tool_id: TOOL_ID_KI_SEARCH,
     tool_call_id: 'ki-1',
     tool_call_group_id: 'ki-group',
-    params: { kind: ['feature', 'query'], stream_names: ['logs'] },
+    params: { kind: ['feature', 'query'], source_ids: ['logs'] },
     results: [{ type: 'other', data: { knowledge_indicators: [{ kind: 'query' }] } }],
   },
   {
@@ -70,7 +70,7 @@ describe('extractOrderedToolCalls', () => {
       index: 1,
       toolId: TOOL_ID_KI_SEARCH,
       groupId: 'ki-group',
-      params: { kind: ['feature', 'query'], stream_names: ['logs'] },
+      params: { kind: ['feature', 'query'], source_ids: ['logs'] },
     });
     expect(didToolCallReturnRows(calls[1])).toBe(true);
     expect(didToolCallReturnRows(calls[2])).toBe(false);
@@ -493,7 +493,7 @@ describe('extractEventSearchCandidateCount', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENT_SEARCH,
         tool_call_id: 'event-search-1',
-        params: { state: 'active', stream_names: ['logs'] },
+        params: { state: 'active', source_ids: ['logs'] },
         results: [{ type: 'other', data: { events: [{ event_id: 'a' }], total: 1 } }],
       },
     ];
@@ -506,7 +506,7 @@ describe('extractEventSearchCandidateCount', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENT_SEARCH,
         tool_call_id: 'event-search-1',
-        params: { state: 'active', stream_names: ['logs'] },
+        params: { state: 'active', source_ids: ['logs'] },
         results: [{ type: 'other', data: { events: [{ event_id: 'a' }, { event_id: 'b' }] } }],
       },
     ];
@@ -519,7 +519,7 @@ describe('extractEventSearchCandidateCount', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENT_SEARCH,
         tool_call_id: 'event-search-1',
-        params: { state: 'active', stream_names: ['logs'] },
+        params: { state: 'active', source_ids: ['logs'] },
         results: [{ type: 'other', data: { events: [], total: 0 } }],
       },
     ];

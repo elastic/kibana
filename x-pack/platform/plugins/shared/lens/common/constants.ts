@@ -20,7 +20,7 @@ export const LENS_APP_NAME = APP_ID;
 export const LENS_DASHBOARD_APP_TYPE = 'lens-dashboard-app';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
-export const LENS_ICON = 'lensApp';
+export const LENS_ICON = 'productLens';
 export const STAGE_ID = 'production';
 
 export const LENS_API_VERSION = '2023-10-31';

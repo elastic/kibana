@@ -7,15 +7,13 @@
 
 import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
 import { CoreStart, Request } from '@kbn/core-di-server';
-import { PluginStart, type CoreDiServiceStart } from '@kbn/core-di';
+import { type CoreDiServiceStart } from '@kbn/core-di';
 import { Global } from '@kbn/core-di-internal';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { AlertingServerStartDependencies } from '../../types';
-import { EventOriginToken } from '../event_origin/token';
+import { EventOriginActorToken } from '../event_origin/token';
 import { RulesClient } from '../rules_client';
 import {
   LoggerServiceToken,
@@ -23,7 +21,7 @@ import {
 } from '../services/logger_service/logger_service';
 import { RuleSavedObjectsClientToken } from '../services/rules_saved_object_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
-import { spaceIdToNamespace } from '../space_id_to_namespace';
+import { SpacesService } from '../services/spaces_service/spaces_service';
 import { createInternalUserRequest } from './internal_user_request';
 
 /**
@@ -38,8 +36,7 @@ export class InternalRulesClientProvider {
   constructor(
     @inject(CoreStart('injection')) private readonly injection: CoreDiServiceStart,
     @inject(CoreStart('savedObjects')) savedObjects: SavedObjectsServiceStart,
-    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: SpacesPluginStart,
+    @inject(SpacesService) private readonly spacesService: SpacesService,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.internalSavedObjectsClient = savedObjects.getUnsafeInternalClient({
@@ -58,10 +55,10 @@ export class InternalRulesClientProvider {
       scope.bind(Global).toConstantValue(Request);
       scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
       scope.bind(Global).toConstantValue(RequestSpaceIdToken);
-      scope.bind(EventOriginToken).toConstantValue('internal');
-      scope.bind(Global).toConstantValue(EventOriginToken);
+      scope.bind(EventOriginActorToken).toConstantValue('internal');
+      scope.bind(Global).toConstantValue(EventOriginActorToken);
 
-      const namespace = spaceIdToNamespace(this.spaces, spaceId);
+      const namespace = this.spacesService.spaceIdToNamespace(spaceId);
       scope
         .bind(RuleSavedObjectsClientToken)
         .toConstantValue(

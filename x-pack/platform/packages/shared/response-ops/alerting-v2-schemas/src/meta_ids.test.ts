@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import {
   createRuleDataSchema,
   updateRuleDataSchema,
@@ -98,7 +98,7 @@ import { errorResponseSchema } from './error_response_schema';
  * shared OAS document (alerting v1 already claims ids like `rule_response`).
  */
 const getMeta = (schema: z.ZodType): { id?: string; description?: string } =>
-  (z.globalRegistry.get(schema) as { id?: string; description?: string } | undefined) ?? {};
+  (schema.meta() as { id?: string; description?: string } | undefined) ?? {};
 
 const getMetaId = (schema: z.ZodType): string | undefined => getMeta(schema).id;
 
@@ -166,10 +166,10 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   // matched rules
   [matchRulesBodySchema, 'alerting_match_rules_request'],
   // execution history
-  [ruleExecutionViewSchema, 'alerting_rule_execution'],
-  [listRuleExecutionsResponseSchema, 'alerting_rule_executions_response'],
-  [policyExecutionHistoryItemSchema, 'alerting_policy_execution_history_item'],
-  [listPolicyExecutionHistoryResponseSchema, 'alerting_policy_execution_history_response'],
+  [ruleExecutionViewSchema, 'alerting_rule_execution_history_item'],
+  [listRuleExecutionsResponseSchema, 'alerting_rule_execution_history_response'],
+  [policyExecutionHistoryItemSchema, 'alerting_action_policy_execution_history_item'],
+  [listPolicyExecutionHistoryResponseSchema, 'alerting_action_policy_execution_history_response'],
   /* shared bulk primitives, reused by every by-ID / by-query bulk endpoint */
   [bulkByIdsSchema, 'alerting_bulk_by_ids_request'],
   [bulkByQuerySchema, 'alerting_bulk_by_query_request'],

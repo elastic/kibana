@@ -96,11 +96,72 @@ const testBuckets = buildMockMitreEntitySummaryBuckets({
   ],
 });
 
+const atlasBuckets = buildMockMitreEntitySummaryBuckets({
+  tactics: [
+    buildMockMitreTacticSummary({
+      id: 'AML.TA0000',
+      name: 'AI Model Access',
+      reference: 'https://atlas.mitre.org/tactics/AML.TA0000',
+      position: 0,
+    }),
+  ],
+  techniques: [
+    buildMockMitreTechniqueSummary({
+      id: 'AML.T0044',
+      name: 'Full AI Model Access',
+      reference: 'https://atlas.mitre.org/techniques/AML.T0044',
+      tactic_ids: ['AML.TA0000'],
+    }),
+    buildMockMitreTechniqueSummary({
+      id: 'AML.T0024',
+      name: 'Exfiltration via AI Inference API',
+      reference: 'https://atlas.mitre.org/techniques/AML.T0024',
+      tactic_ids: ['AML.TA0000'],
+    }),
+  ],
+  subtechniques: [
+    buildMockMitreSubtechniqueSummary({
+      id: 'AML.T0024.002',
+      name: 'Extract AI Model',
+      reference: 'https://atlas.mitre.org/techniques/AML.T0024.002',
+      technique_id: 'AML.T0024',
+    }),
+  ],
+});
+
+const buildNode = (list: jest.Mock) =>
+  addMitreMappingsNode({
+    model: {} as Parameters<typeof addMitreMappingsNode>[0]['model'],
+    mitreDataClient: { list, getById: jest.fn() } as MitreAttackDataClient,
+  });
+
+const buildState = () =>
+  ({
+    userQuery: 'detect model theft',
+    rule: { query: 'from logs-*' },
+    errors: [],
+  } as unknown as Parameters<ReturnType<typeof addMitreMappingsNode>>[0]);
+
+const mockModelResponse = (response: unknown): void => {
+  (MITRE_MAPPING_SELECTION_PROMPT.pipe as jest.Mock).mockReturnValue({
+    pipe: jest.fn().mockReturnValue({ invoke: jest.fn().mockResolvedValue(response) }),
+  });
+};
+
+const listByFramework = (atlas: () => Promise<unknown>) =>
+  jest
+    .fn()
+    .mockImplementation((params: { framework: string }) =>
+      params.framework === 'atlas'
+        ? atlas()
+        : Promise.resolve({ framework: 'enterprise', ...testBuckets })
+    );
+
 describe('formatMitreMapping', () => {
   it('formats a tactic with a matching technique and subtechnique', () => {
     const result = formatMitreMapping(
       { tactics: ['TA0001'], techniques: [{ id: 'T1078', subtechnique: ['T1078.001'] }] },
-      testBuckets
+      { enterprise: testBuckets }
     );
 
     expect(result).toEqual([
@@ -129,12 +190,12 @@ describe('formatMitreMapping', () => {
     ]);
   });
 
-  it('outputs an empty technique array when no selected technique belongs to the tactic', () => {
-    // T1078 is not an Execution technique, so the TA0002 mapping keeps the
-    // tactic but drops the technique — `technique: []` must still be valid output.
+  it('re-homes a technique under its own tactic when it does not belong to the selected tactic', () => {
+    // T1078 belongs only to TA0001 (not Execution), so TA0002 keeps `technique: []` and the
+    // technique is re-homed under its single tactic (TA0001).
     const result = formatMitreMapping(
       { tactics: ['TA0002'], techniques: [{ id: 'T1078' }] },
-      testBuckets
+      { enterprise: testBuckets }
     );
 
     expect(result).toEqual([
@@ -147,13 +208,148 @@ describe('formatMitreMapping', () => {
         },
         technique: [],
       },
+      {
+        framework: 'MITRE ATT&CK',
+        tactic: {
+          id: 'TA0001',
+          name: 'Initial Access',
+          reference: 'https://attack.mitre.org/tactics/TA0001/',
+        },
+        technique: [
+          {
+            id: 'T1078',
+            name: 'Valid Accounts',
+            reference: 'https://attack.mitre.org/techniques/T1078/',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('adds no extra tactic entry for a technique already under a selected tactic', () => {
+    const result = formatMitreMapping(
+      { tactics: ['TA0001', 'TA0002'], techniques: [{ id: 'T1078' }] },
+      { enterprise: testBuckets }
+    );
+
+    expect(result.map(({ tactic }) => tactic.id)).toEqual(['TA0001', 'TA0002']);
+    expect(result[0].technique).toEqual([expect.objectContaining({ id: 'T1078' })]);
+    expect(result[1].technique).toEqual([]);
+  });
+
+  it('drops a technique with an unknown id without adding a tactic entry', () => {
+    const result = formatMitreMapping(
+      { tactics: ['TA0002'], techniques: [{ id: 'T9999' }] },
+      { enterprise: testBuckets }
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({ tactic: expect.objectContaining({ id: 'TA0002' }), technique: [] }),
+    ]);
+  });
+
+  it('drops a multi-tactic technique when none of its tactics is selected', () => {
+    const bucketsWithMulti = buildMockMitreEntitySummaryBuckets({
+      ...testBuckets,
+      techniques: [
+        ...testBuckets.techniques,
+        buildMockMitreTechniqueSummary({
+          id: 'T9001',
+          name: 'Multi Tactic Technique',
+          reference: 'https://attack.mitre.org/techniques/T9001/',
+          tactic_ids: ['TA0001', 'TA0003'],
+        }),
+      ],
+    });
+
+    const result = formatMitreMapping(
+      { tactics: ['TA0002'], techniques: [{ id: 'T9001' }] },
+      { enterprise: bucketsWithMulti }
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({ tactic: expect.objectContaining({ id: 'TA0002' }), technique: [] }),
+    ]);
+  });
+
+  it('drops a technique with empty tactic_ids without throwing', () => {
+    const bucketsWithOrphan = buildMockMitreEntitySummaryBuckets({
+      ...testBuckets,
+      techniques: [
+        ...testBuckets.techniques,
+        buildMockMitreTechniqueSummary({
+          id: 'T9000',
+          name: 'Orphan Technique',
+          reference: 'https://attack.mitre.org/techniques/T9000/',
+          tactic_ids: [],
+        }),
+      ],
+    });
+
+    const result = formatMitreMapping(
+      { tactics: ['TA0002'], techniques: [{ id: 'T9000' }] },
+      { enterprise: bucketsWithOrphan }
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({ tactic: expect.objectContaining({ id: 'TA0002' }), technique: [] }),
+    ]);
+  });
+
+  it('maps ATT&CK and ATLAS tactics to their own frameworks', () => {
+    const result = formatMitreMapping(
+      {
+        tactics: ['TA0001', 'AML.TA0000'],
+        techniques: [{ id: 'T1078' }, { id: 'AML.T0024', subtechnique: ['AML.T0024.002'] }],
+      },
+      { enterprise: testBuckets, atlas: atlasBuckets }
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        framework: 'MITRE ATT&CK',
+        tactic: expect.objectContaining({ id: 'TA0001' }),
+        technique: [expect.objectContaining({ id: 'T1078' })],
+      }),
+      expect.objectContaining({
+        framework: 'MITRE ATLAS',
+        tactic: expect.objectContaining({ id: 'AML.TA0000' }),
+        technique: [
+          expect.objectContaining({
+            id: 'AML.T0024',
+            subtechnique: [expect.objectContaining({ id: 'AML.T0024.002' })],
+          }),
+        ],
+      }),
+    ]);
+  });
+
+  it('re-homes an ATLAS technique selected under an ATT&CK tactic to its ATLAS tactic', () => {
+    const result = formatMitreMapping(
+      { tactics: ['TA0001'], techniques: [{ id: 'AML.T0044' }] },
+      { enterprise: testBuckets, atlas: atlasBuckets }
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        framework: 'MITRE ATT&CK',
+        tactic: expect.objectContaining({ id: 'TA0001' }),
+        technique: [],
+      }),
+      expect.objectContaining({
+        framework: 'MITRE ATLAS',
+        tactic: expect.objectContaining({ id: 'AML.TA0000' }),
+        technique: [expect.objectContaining({ id: 'AML.T0044' })],
+      }),
     ]);
   });
 
   it('tolerates missing arrays in a malformed model response', () => {
-    expect(formatMitreMapping({} as Parameters<typeof formatMitreMapping>[0], testBuckets)).toEqual(
-      []
-    );
+    expect(
+      formatMitreMapping({} as Parameters<typeof formatMitreMapping>[0], {
+        enterprise: testBuckets,
+      })
+    ).toEqual([]);
   });
 });
 
@@ -172,7 +368,9 @@ describe('addMitreMappingsNode', () => {
       pipe: jest.fn().mockReturnValue({ invoke }),
     });
 
-    const mockList = jest.fn().mockResolvedValue({ framework: 'enterprise', ...testBuckets });
+    const mockList = listByFramework(() =>
+      Promise.resolve({ framework: 'atlas', ...atlasBuckets })
+    );
     const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
 
     const node = addMitreMappingsNode({
@@ -188,7 +386,7 @@ describe('addMitreMappingsNode', () => {
 
     const result = await node(state);
 
-    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(mockList).toHaveBeenCalledTimes(2);
     expect(result.rule?.threat).toEqual([
       expect.objectContaining({
         framework: 'MITRE ATT&CK',
@@ -234,8 +432,46 @@ describe('addMitreMappingsNode', () => {
     // The node must not throw — a rule without threat mappings is recoverable;
     // a failed rule creation is not.
     expect(result.warnings).toEqual(
-      expect.arrayContaining([expect.stringContaining('Managed MITRE data is not initialized')])
+      expect.arrayContaining([expect.stringContaining('MITRE data is unavailable')])
     );
+    expect(result.rule?.threat).toBeUndefined();
+  });
+
+  it('returns ATT&CK and ATLAS mappings together', async () => {
+    mockModelResponse({
+      tactics: ['TA0001', 'AML.TA0000'],
+      techniques: [{ id: 'T1078' }, { id: 'AML.T0024', subtechnique: ['AML.T0024.002'] }],
+    });
+    const node = buildNode(
+      listByFramework(() => Promise.resolve({ framework: 'atlas', ...atlasBuckets }))
+    );
+
+    const result = await node(buildState());
+
+    expect(result.warnings).toBeUndefined();
+    expect(result.rule?.threat?.map(({ framework }) => framework)).toEqual([
+      'MITRE ATT&CK',
+      'MITRE ATLAS',
+    ]);
+  });
+
+  it('keeps the ATT&CK mapping without a warning when ATLAS fails to resolve', async () => {
+    mockModelResponse({ tactics: ['TA0001'], techniques: [{ id: 'T1078' }] });
+    const node = buildNode(listByFramework(() => Promise.reject(new Error('atlas down'))));
+
+    const result = await node(buildState());
+
+    expect(result.warnings).toBeUndefined();
+    expect(result.rule?.threat).toEqual([expect.objectContaining({ framework: 'MITRE ATT&CK' })]);
+  });
+
+  it('warns and omits threat when every framework fails to resolve', async () => {
+    mockModelResponse({ tactics: ['TA0001'], techniques: [{ id: 'T1078' }] });
+    const node = buildNode(jest.fn().mockRejectedValue(new Error('boom')));
+
+    const result = await node(buildState());
+
+    expect(result.warnings).toEqual([expect.stringContaining('Failed to add MITRE mappings')]);
     expect(result.rule?.threat).toBeUndefined();
   });
 

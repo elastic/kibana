@@ -1,5 +1,5 @@
 {
-  "sha1": "5859da0700ea75022fb98587f976e492ce859d1c",
+  "sha1": "862d5442cd839680b21009e1b0182a1da7f2ba50",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,7 +30,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 183,
+        "line": 184,
         "column": 2
       }
     },
@@ -44,8 +44,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 193,
+        "line": 194,
         "column": 45
+      }
+    },
+    {
+      "id": "50b3a018a3d8e65-7078c5c0531f8e9",
+      "title": "Create the empty index for the Logs ML pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 200,
+        "column": 1
       }
     },
     {
@@ -544,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 307,
+        "line": 304,
         "column": 15
       }
     },
@@ -560,7 +576,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 347,
+        "line": 344,
         "column": 9
       }
     },
@@ -704,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_integration_links.spec.ts",
-        "line": 39,
-        "column": 37
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -800,8 +816,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 106,
-        "column": 25
+        "line": 111,
+        "column": 13
       }
     },
     {
@@ -816,8 +832,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 133,
-        "column": 10
+        "line": 139,
+        "column": 22
       }
     },
     {
@@ -832,7 +848,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 197,
+        "line": 204,
         "column": 19
       }
     },
@@ -848,7 +864,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 200,
+        "line": 207,
         "column": 19
       }
     },
@@ -864,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 222,
+        "line": 229,
         "column": 13
       }
     },
@@ -880,7 +896,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 257,
+        "line": 264,
         "column": 20
       }
     },
@@ -1010,6 +1026,102 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
         "line": 243,
         "column": 20
+      }
+    },
+    {
+      "id": "fbb291d6959c0a6-5c671e0024319ad",
+      "title": "Logs ML pages - ML read privileges shows the missing ML all privileges prompt on the anomalies page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/logs_ml/logs_ml_read_privileges.spec.ts",
+        "line": 24,
+        "column": 25
+      }
+    },
+    {
+      "id": "fbb291d6959c0a6-d5fe976691ae65a",
+      "title": "Logs ML pages - ML read privileges shows the missing ML all privileges prompt on the categories page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/logs_ml/logs_ml_read_privileges.spec.ts",
+        "line": 28,
+        "column": 13
+      }
+    },
+    {
+      "id": "0e70de33268bb43-50890afdfc4ff7e",
+      "title": "Logs ML pages - setup shows the setup screen on the anomalies page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/logs_ml/logs_ml_setup.spec.ts",
+        "line": 26,
+        "column": 25
+      }
+    },
+    {
+      "id": "0e70de33268bb43-ee364802f024d2d",
+      "title": "Logs ML pages - setup shows the setup screen on the categories page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/logs_ml/logs_ml_setup.spec.ts",
+        "line": 30,
+        "column": 13
+      }
+    },
+    {
+      "id": "c9781c88a3b83fa-581e724ed93274a",
+      "title": "Logs ML pages - no ML privileges shows the missing ML read privileges prompt on the anomalies page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/logs_ml/logs_no_ml_privileges.spec.ts",
+        "line": 49,
+        "column": 15
+      }
+    },
+    {
+      "id": "c9781c88a3b83fa-c5716b3c6c27642",
+      "title": "Logs ML pages - no ML privileges shows the missing ML read privileges prompt on the categories page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/logs_ml/logs_no_ml_privileges.spec.ts",
+        "line": 56,
+        "column": 34
       }
     },
     {
@@ -1602,6 +1714,22 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
         "line": 46,
         "column": 33
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-729973b4d109879",
+      "title": "Clean up the Logs ML pages index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 51,
+        "column": 1
       }
     }
   ]

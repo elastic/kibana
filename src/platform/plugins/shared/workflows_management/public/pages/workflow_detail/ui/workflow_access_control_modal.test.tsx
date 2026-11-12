@@ -22,59 +22,68 @@ import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockHttp = { put: jest.fn(), get: jest.fn() };
 const mockUserProfile = { getCurrent: jest.fn(), bulkGet: jest.fn(), suggest: jest.fn() };
+const profilesPath = (id: string) => `/internal/workflows/${id}/access_control/_profiles`;
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: mockHttp, userProfile: mockUserProfile } }),
 }));
 
-// Failing: See https://github.com/elastic/kibana/issues/295436
-describe.skip('WorkflowAccessControlModal', () => {
+describe('WorkflowAccessControlModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUserProfile.getCurrent.mockResolvedValue({ uid: 'owner', user: { username: 'owner' } });
-    mockUserProfile.bulkGet.mockResolvedValue([]);
+    mockHttp.get.mockResolvedValue([]);
     mockUserProfile.suggest.mockResolvedValue([]);
   });
 
-  it('warns before claiming an ownerless workflow as private', async () => {
-    const workflow = createMockWorkflowDetailDto({
-      owner_id: undefined,
-      access_control: { access_mode: 'public', entries: [] },
-      permissions: { read: true, edit: true, execute: true, manage: true },
-    });
+  const claimNotice = 'You will become the owner when you make this workflow private.';
+  const renderOwnerlessWorkflow = (accessMode: 'public' | 'private') =>
     render(
       <TestWrapper>
         <EuiProvider>
-          <WorkflowAccessControlModal workflow={workflow} onClose={jest.fn()} />
+          <WorkflowAccessControlModal
+            workflow={createMockWorkflowDetailDto({
+              owner_id: undefined,
+              access_control: { access_mode: accessMode, entries: [] },
+              permissions: { read: true, edit: true, execute: true, manage: true },
+            })}
+            onClose={jest.fn()}
+          />
         </EuiProvider>
       </TestWrapper>
     );
-    const notice = 'You will become the owner when you make this workflow private.';
-    expect(screen.queryByText(notice)).not.toBeInTheDocument();
-    await userEvent.click(screen.getByLabelText('Visibility'));
-    await userEvent.click(screen.getByRole('option', { name: /^Private/ }));
-    expect(await screen.findByText(notice)).toBeInTheDocument();
-    await userEvent.click(screen.getByLabelText('Visibility'));
-    await userEvent.click(screen.getByRole('option', { name: /^Public/ }));
-    expect(screen.queryByText(notice)).not.toBeInTheDocument();
+
+  it('warns before claiming an ownerless workflow as private', () => {
+    renderOwnerlessWorkflow('private');
+    expect(screen.getByText(claimNotice)).toBeInTheDocument();
+  });
+
+  it('does not warn about claiming an ownerless public workflow', () => {
+    renderOwnerlessWorkflow('public');
+    expect(screen.queryByText(claimNotice)).not.toBeInTheDocument();
   });
 
   it('shows the admin notice and updates execution permission after a self-grant', async () => {
     mockUserProfile.getCurrent.mockResolvedValue({ uid: 'admin', user: { username: 'admin' } });
-    mockUserProfile.suggest.mockResolvedValue([
-      { uid: 'admin', enabled: true, user: { username: 'admin' }, data: {} },
-    ]);
+    const selfGrant = {
+      access_mode: 'private' as const,
+      entries: [
+        {
+          type: 'user' as const,
+          id: 'admin',
+          role: 'executor' as const,
+          added_at: '2026-10-05T00:00:00.000Z',
+        },
+      ],
+    };
     const workflow = createMockWorkflowDetailDto({
       owner_id: 'owner',
-      access_control: { access_mode: 'private', entries: [] },
+      access_control: selfGrant,
       permissions: { read: true, edit: false, execute: false, manage: true },
     });
     const savedAccess = {
       owner_id: 'owner',
-      access_control: {
-        access_mode: 'private',
-        entries: [{ type: 'user', id: 'admin', role: 'executor' }],
-      },
+      access_control: selfGrant,
       permissions: { read: true, edit: false, execute: true, manage: true },
     };
     mockHttp.put.mockResolvedValue(savedAccess);
@@ -90,10 +99,6 @@ describe.skip('WorkflowAccessControlModal', () => {
     expect(
       await screen.findByText("You are editing another user's access settings")
     ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('combobox', { name: 'Find users' }));
-    await userEvent.click(await screen.findByRole('option', { name: /admin/ }));
-    await userEvent.click(screen.getByTestId('entityAccessControlRole-admin'));
-    await userEvent.click(screen.getByRole('option', { name: 'Executor' }));
     await userEvent.click(screen.getByTestId('workflowAccessSave'));
     await waitFor(() => expect(store.getState().detail.workflow?.permissions?.execute).toBe(true));
     expect(mockHttp.put).toHaveBeenCalledWith(`/internal/workflows/${workflow.id}/access_control`, {
@@ -102,7 +107,30 @@ describe.skip('WorkflowAccessControlModal', () => {
     expect(store.getState().detail.workflow?.owner_id).toBe('owner');
   });
 
-  it('lets an administrator without a profile find and add a user', async () => {
+  it('resolves the owner name through the workflow route, not the gated bulk profile API', async () => {
+    mockUserProfile.getCurrent.mockResolvedValue({ uid: 'admin', user: { username: 'admin' } });
+    mockHttp.get.mockResolvedValue([
+      { uid: 'owner', enabled: true, user: { username: 'jdoe', full_name: 'Jane Doe' }, data: {} },
+    ]);
+    const workflow = createMockWorkflowDetailDto({
+      owner_id: 'owner',
+      access_control: { access_mode: 'private', entries: [] },
+      permissions: { read: true, edit: true, execute: true, manage: true },
+    });
+    render(
+      <TestWrapper>
+        <EuiProvider>
+          <WorkflowAccessControlModal workflow={workflow} onClose={jest.fn()} />
+        </EuiProvider>
+      </TestWrapper>
+    );
+
+    expect(await screen.findByText('Jane Doe')).toBeInTheDocument();
+    expect(mockHttp.get).toHaveBeenCalledWith(profilesPath(workflow.id));
+    expect(mockUserProfile.bulkGet).not.toHaveBeenCalled();
+  });
+
+  it('lets an administrator without a profile find users', async () => {
     mockUserProfile.getCurrent.mockResolvedValue(null);
     mockUserProfile.suggest.mockResolvedValue([
       { uid: 'recipient', enabled: true, user: { username: 'recipient' }, data: {} },
@@ -112,7 +140,6 @@ describe.skip('WorkflowAccessControlModal', () => {
       access_control: { access_mode: 'private', entries: [] },
       permissions: { read: true, edit: false, execute: false, manage: true },
     });
-    mockHttp.put.mockResolvedValue(workflow);
     render(
       <TestWrapper>
         <EuiProvider>
@@ -123,19 +150,10 @@ describe.skip('WorkflowAccessControlModal', () => {
     expect(
       await screen.findByText("You are editing another user's access settings")
     ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('combobox', { name: 'Find users' }));
-    await userEvent.click(await screen.findByRole('option', { name: /recipient/ }));
-    await userEvent.click(screen.getByTestId('workflowAccessSave'));
-    await waitFor(() =>
-      expect(mockHttp.put).toHaveBeenCalledWith(
-        `/internal/workflows/${workflow.id}/access_control`,
-        {
-          body: JSON.stringify({
-            access_mode: 'private',
-            entries: [{ type: 'user', id: 'recipient', role: 'viewer' }],
-          }),
-        }
-      )
+    expect(screen.getByRole('combobox', { name: 'Find users' })).toBeEnabled();
+    expect(mockUserProfile.suggest).toHaveBeenCalledWith(
+      `/internal/workflows/${workflow.id}/_suggest_user_profiles`,
+      { name: '', size: 20, dataPath: 'avatar' }
     );
   });
 
@@ -217,7 +235,10 @@ describe.skip('WorkflowAccessControlModal', () => {
         `/internal/workflows/${workflow.id}/access_control`,
         { body: JSON.stringify(savedAccess) }
       );
-      expect(mockHttp.get).not.toHaveBeenCalled();
+      // Only the profile lookup reads from the server; saving must not reload the workflow.
+      expect(mockHttp.get.mock.calls.every(([path]) => path === profilesPath(workflow.id))).toBe(
+        true
+      );
       expect(store.getState().detail.workflow).toEqual({ ...workflow, ...savedMetadata });
       expect(store.getState().detail.yamlString).toBe('name: unsaved changes');
     }

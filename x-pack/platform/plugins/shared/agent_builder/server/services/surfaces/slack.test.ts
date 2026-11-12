@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { slackSurface } from './slack';
 
 describe('slackSurface', () => {
-  it('renders the composition as Block Kit', () => {
+  it('renders the composition as Block Kit', async () => {
+    const runtime = await isomerPluginMock.createStartContract().getRuntime();
     const composition = {
       type: 'view' as const,
       body: [{ type: 'markdown' as const, text: 'There are **3** [alerts](https://example.com).' }],
     };
 
-    expect(slackSurface.render(composition)).toEqual({
+    expect(slackSurface.render(composition, runtime, {})).toEqual({
       text: expect.any(String),
       blocks: [
         {
@@ -34,5 +36,31 @@ describe('slackSurface', () => {
         },
       ],
     });
+  });
+
+  it("resolves Kibana app links against the space's base URL", async () => {
+    const runtime = await isomerPluginMock.createStartContract().getRuntime();
+    const composition = {
+      type: 'view' as const,
+      body: [
+        {
+          type: 'link' as const,
+          label: 'Edit in Management',
+          app: 'agent_builder',
+          path: '/manage/skills/s1',
+        },
+      ],
+    };
+
+    expect(
+      JSON.stringify(
+        slackSurface.render(composition, runtime, {
+          baseUrl: 'https://kibana.example.com/base/s/ops',
+        })
+      )
+    ).toContain('https://kibana.example.com/base/s/ops/app/agent_builder/manage/skills/s1');
+    expect(JSON.stringify(slackSurface.render(composition, runtime, {}))).not.toContain(
+      'Edit in Management'
+    );
   });
 });

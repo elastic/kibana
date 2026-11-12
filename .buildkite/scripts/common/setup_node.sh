@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 echo "--- Setup Node"
 
-NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
+NODE_VERSION="$(cat "$KIBANA_DIR/.nvmrc")"
 export NODE_VERSION
 NODE_VARIANT=""
 mkdir -p "$NODE_CACHE_DIR"

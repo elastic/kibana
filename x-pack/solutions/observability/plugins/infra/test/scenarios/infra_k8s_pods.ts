@@ -27,7 +27,12 @@ const scenario: Scenario<InfraDocument> = async (runOptions) => {
           // Deterministic pod UIDs for synthtrace fixtures — not security-sensitive
           // (avoids CodeQL js/insecure-randomness on generateShortId / Math.random).
           const uid = `pod-${idx}`;
-          return infra.pod(uid, `node-${idx}`);
+          // Name differs from the uid so the Metric Detail title shows it is read from
+          // `kubernetes.pod.name`, mirroring the SemConv scenario.
+          return infra.pod(uid, `node-${idx}`, {
+            name: `ecs-pod-${idx}`,
+            ip: `10.244.0.${idx + 10}`,
+          });
         });
 
       const pods = range

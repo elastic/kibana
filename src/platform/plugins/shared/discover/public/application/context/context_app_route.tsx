@@ -65,8 +65,11 @@ export function ContextAppRoute() {
   const { dataViewId: encodedDataViewId, id } = useParams<ContextUrlParams>();
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
-  const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
   const rootProfileState = useRootProfile();
+  const { dataView, error } = useDataView({
+    index: locationState?.dataViewSpec || dataViewId,
+    rootProfileState,
+  });
   const [scopedEbtManager] = useState(() => ebtManager.createScopedEBTManager());
 
   const [expandedDoc, setExpandedDocState] = useState<DataTableRecord | undefined>();

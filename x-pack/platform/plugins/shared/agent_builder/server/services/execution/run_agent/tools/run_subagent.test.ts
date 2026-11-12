@@ -6,8 +6,15 @@
  */
 
 import { Subject, ReplaySubject } from 'rxjs';
-import { ChatEventType, SELF_AGENT_ID, SubagentMode } from '@kbn/agent-builder-common';
+import {
+  ChatTriggerMode,
+  ChatEventType,
+  SELF_AGENT_ID,
+  SubagentMode,
+  internalTools,
+} from '@kbn/agent-builder-common';
 import type {
+  AgentApprovals,
   AutoApprovedApi,
   ChatEvent,
   ConversationRound,
@@ -65,6 +72,7 @@ const callHandler = async (
     description: string;
     prompt: string;
     run_in_background?: boolean;
+    trigger_mode?: ChatTriggerMode;
     effort?: EffortLevels;
     mode?: SubagentMode;
     name?: string;
@@ -355,19 +363,65 @@ describe('createSubagentTool', () => {
     });
   });
 
-  it('returns execution_id immediately when run_in_background is true', async () => {
+  it('offers no trigger_mode, and promises no wake, while a finished sub-agent cannot wake the parent', async () => {
     const events$ = new ReplaySubject<ChatEvent>();
-    const registerExecution = jest.fn();
-
+    const executeSubAgent = jest.fn().mockResolvedValue({
+      executionId: 'bg-exec-id',
+      events$: events$.asObservable(),
+    });
     const tool = createSubagentTool({
       ownerAgentId: 'test-agent',
       allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
-        executeSubAgent: jest.fn().mockResolvedValue({
-          executionId: 'bg-exec-id',
-          events$: events$.asObservable(),
-        }),
+        executeSubAgent,
+        createSubAgent: jest.fn(),
+        sendToSubAgent: jest.fn(),
+        getExecution: jest.fn(),
+      },
+      backgroundExecutionService: {
+        registerExecution: jest.fn(),
+        getState: jest.fn(),
+        hasPending: jest.fn(),
+        checkForCompletions: jest.fn(),
+      } as any,
+    });
+
+    expect(tool.schema.shape).not.toHaveProperty('trigger_mode');
+
+    const { context } = createMockContext();
+    const result = await callHandler(
+      tool,
+      { description: 'background task', prompt: 'Do it', run_in_background: true },
+      context
+    );
+
+    expect(result.results[0].data).toEqual({
+      agent_execution_id: 'bg-exec-id',
+      mode: 'background',
+      status: 'queued',
+    });
+    expect(executeSubAgent).toHaveBeenCalledWith(expect.objectContaining({ background: {} }));
+
+    events$.complete();
+  });
+
+  it('returns execution_id immediately when run_in_background is true', async () => {
+    const events$ = new ReplaySubject<ChatEvent>();
+    const registerExecution = jest.fn();
+    const executeSubAgent = jest.fn().mockResolvedValue({
+      executionId: 'bg-exec-id',
+      events$: events$.asObservable(),
+    });
+
+    const tool = createSubagentTool({
+      backgroundWakeEnabled: true,
+      ownerAgentId: 'test-agent',
+      allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+      executionId: 'parent-exec-id',
+      parentConversationId: 'parent-convo',
+      subAgentExecutor: {
+        executeSubAgent,
         getExecution: jest.fn(),
         createSubAgent: jest.fn(),
         sendToSubAgent: jest.fn(),
@@ -396,8 +450,28 @@ describe('createSubagentTool', () => {
       agent_execution_id: 'bg-exec-id',
       mode: 'background',
       status: 'queued',
+      trigger_mode: 'always',
     });
-    expect(registerExecution).toHaveBeenCalledWith('bg-exec-id');
+    expect(registerExecution).toHaveBeenCalledWith('bg-exec-id', 'test-agent');
+    expect(executeSubAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ background: { parentTriggerMode: 'always' } })
+    );
+    expect(executeSubAgent.mock.calls[0][0]).not.toHaveProperty('abortSignal');
+
+    const queued = await callHandler(
+      tool,
+      {
+        description: 'later',
+        prompt: 'Leave it for later',
+        run_in_background: true,
+        trigger_mode: ChatTriggerMode.Never,
+      },
+      context
+    );
+    expect(queued.results[0].data).toEqual(expect.objectContaining({ trigger_mode: 'never' }));
+    expect(executeSubAgent).toHaveBeenLastCalledWith(
+      expect.objectContaining({ background: { parentTriggerMode: 'never' } })
+    );
 
     // Clean up — complete the observable (it's still running in the background)
     events$.complete();
@@ -600,6 +674,7 @@ describe('createSubagentTool', () => {
       });
 
       const tool = createSubagentTool({
+        backgroundWakeEnabled: true,
         ownerAgentId: 'test-agent',
         allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
@@ -636,8 +711,12 @@ describe('createSubagentTool', () => {
         agent_execution_id: 'bg-child',
         mode: 'background',
         status: 'queued',
+        trigger_mode: 'always',
       });
-      expect(registerExecution).toHaveBeenCalledWith('bg-child');
+      expect(registerExecution).toHaveBeenCalledWith('bg-child', 'test-agent');
+      expect(createSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ background: { parentTriggerMode: 'always' } })
+      );
       expect(subagentTracker.get('bg-agent')).toBeDefined();
 
       events$.complete();
@@ -868,6 +947,8 @@ describe('createSubagentTool', () => {
       parentConversationId,
       childConversationExists = false,
       allowSelf = false,
+      subagentApprovals,
+      discoveryEnabled,
     }: {
       executeSubAgent?: jest.Mock;
       createSubAgent?: jest.Mock;
@@ -875,12 +956,14 @@ describe('createSubagentTool', () => {
       parentConversationId?: string;
       childConversationExists?: boolean;
       allowSelf?: boolean;
+      subagentApprovals?: AgentApprovals;
+      discoveryEnabled?: boolean;
     } = {}) =>
       createSubagentTool({
         ownerAgentId: 'test-agent',
         allowedSubagents: allowSelf
           ? [{ id: SELF_AGENT_ID, description: 'Self.' }]
-          : [{ id: 'test-agent', description: 'Test.' }],
+          : [{ id: 'test-agent', description: 'Test.', approvals: subagentApprovals }],
         executionId: 'parent-exec-id',
         subAgentExecutor: {
           executeSubAgent,
@@ -891,6 +974,7 @@ describe('createSubagentTool', () => {
         subagentTracker,
         parentConversationId,
         conversationExists: jest.fn().mockResolvedValue(childConversationExists),
+        discoveryEnabled,
       });
 
     it('asks the user to confirm the grant before spawning the sub-agent', async () => {
@@ -1173,6 +1257,53 @@ describe('createSubagentTool', () => {
       );
     });
 
+    it("skips the prompt for APIs the sub-agent's own defaults already cover", async () => {
+      const executeSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
+      const tool = createTool({
+        executeSubAgent,
+        subagentApprovals: { auto_approved_apis: { elasticsearch: ['indices.*'] } },
+      });
+      const { context, prompts } = createMockContext();
+
+      const result = await callHandler(
+        tool,
+        {
+          description: 'x',
+          prompt: 'y',
+          auto_approved_apis: { elasticsearch: ['indices.delete'] },
+        },
+        context
+      );
+
+      expect(prompts.checkConfirmationStatus).not.toHaveBeenCalled();
+      expect(prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.not.objectContaining({ autoApprovedApis: expect.anything() })
+      );
+      expect(result.results[0].data).toEqual(
+        expect.objectContaining({ destructive_access: 'granted' })
+      );
+    });
+
+    it("prompts only for the APIs the sub-agent's own defaults do not cover", async () => {
+      const tool = createTool({
+        subagentApprovals: { auto_approved_apis: { elasticsearch: ['indices.delete'] } },
+      });
+      const { context, prompts } = createMockContext();
+
+      await callHandler(
+        tool,
+        { description: 'x', prompt: 'y', auto_approved_apis: requestedApis },
+        context
+      );
+
+      const { message } = prompts.askForConfirmation.mock.calls[0][0];
+      expect(message).toContain('Kibana: `alerting.delete-alerting-rule-id`');
+      expect(message).not.toContain('`indices.delete`');
+    });
+
     it('rejects an API identifier that exists on neither backend, without prompting', async () => {
       const executeSubAgent = jest.fn();
       const tool = createTool({ executeSubAgent });
@@ -1197,6 +1328,28 @@ describe('createSubagentTool', () => {
         })
       );
     });
+
+    it.each([true, false])(
+      'points at the discovery tool on an unknown API only when discovery is enabled (%s)',
+      async (discoveryEnabled) => {
+        const tool = createTool({ discoveryEnabled });
+        const { context } = createMockContext();
+
+        const result = await callHandler(
+          tool,
+          {
+            description: 'x',
+            prompt: 'y',
+            auto_approved_apis: { elasticsearch: ['indices.nope'] },
+          },
+          context
+        );
+
+        expect(result.results[0].data.message.includes(internalTools.discoverApis)).toBe(
+          discoveryEnabled
+        );
+      }
+    );
 
     it('does not prompt for a grant when a persistent name is already taken', async () => {
       const createSubAgent = jest.fn();

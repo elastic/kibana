@@ -32,6 +32,7 @@ import type { Lead as SynthesizedLead, RelatedEntity } from './types';
 
 export interface LeadDataClientDeps {
   readonly esClient: ElasticsearchClient;
+  readonly internalEsClient: ElasticsearchClient;
   readonly logger: Logger;
   readonly spaceId: string;
 }
@@ -412,6 +413,7 @@ const LEAD_UPDATE_RETRY_ON_CONFLICT = 3;
 
 export const createLeadDataClient = ({
   esClient,
+  internalEsClient,
   logger,
   spaceId,
 }: LeadDataClientDeps): LeadDataClient => {
@@ -541,7 +543,11 @@ export const createLeadDataClient = ({
       // Adhoc generate does not go through enable, so persist must reconcile the
       // index mapping on every write. createIndex is idempotent (exists -> putMapping)
       // and picks up new fields such as origin on pre-existing strict indices.
-      const indexService = createLeadIndexService({ esClient, logger, spaceId });
+      const indexService = createLeadIndexService({
+        esClient: internalEsClient,
+        logger,
+        spaceId,
+      });
       await indexService.createIndex();
 
       const bulkBody: object[] = [];

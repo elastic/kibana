@@ -7,8 +7,9 @@
 
 import type { BehaviorSubject } from 'rxjs';
 
+import type { ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ViewMode, useSearchApi } from '@kbn/presentation-publishing';
+import type { PublishingSubject, ViewMode, useSearchApi } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-publishing';
 
 import type { LensRuntimeState } from '@kbn/lens-common';
@@ -20,7 +21,7 @@ interface GeneralLensApi {
   searchSessionId$: BehaviorSubject<string | undefined>;
   disabledActionIds$: BehaviorSubject<string[] | undefined>;
   setDisabledActionIds: (ids: string[] | undefined) => void;
-  viewMode$: BehaviorSubject<ViewMode | undefined>;
+  viewMode$: PublishingSubject<ViewMode>;
   settings: {
     syncColors$: BehaviorSubject<boolean>;
     syncCursor$: BehaviorSubject<boolean>;
@@ -31,6 +32,8 @@ interface GeneralLensApi {
   isApproximate$: BehaviorSubject<boolean | undefined>;
   hideTitle$: BehaviorSubject<boolean | undefined>;
   reload$: BehaviorSubject<void>;
+  disableTriggers$: BehaviorSubject<boolean>;
+  projectRouting$: PublishingSubject<ProjectRouting | undefined>;
 }
 
 export type LensParentApi = SearchApi &

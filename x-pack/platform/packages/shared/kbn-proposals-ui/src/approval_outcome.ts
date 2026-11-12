@@ -32,24 +32,24 @@ export type ApprovalPhase =
   | ApprovalOutcomeStatus
   | 'failed'
   | 'expired'
-  | 'no_action';
+  | 'no_action'
+  /** A to-do proposal (`isTodoProposal`) the analyst marked as applied. */
+  | 'marked_applied';
 
 export interface ApprovalOutcomeBadge {
   color: EuiBadgeProps['color'];
   iconType: IconType;
   label: string;
   isLoading: boolean;
+  isDisabled?: boolean;
 }
 
 export interface ApprovalOutcomeBanner {
   color: 'success' | 'primary' | 'danger';
   title: string;
-  hint?: string;
   /** Swaps the icon for a spinner, for a decision that is still being submitted. */
   isLoading: boolean;
 }
-
-const IN_PROGRESS_HINT = APPROVAL_MODAL_TRANSLATIONS.inProgressHint;
 
 /** `undefined` for `pending`: that state keeps whatever badge/caption the caller already renders. */
 export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBadge | undefined => {
@@ -74,6 +74,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.applyingBadge,
         isLoading: true,
+        isDisabled: true,
       };
     case 'declining':
       return {
@@ -81,6 +82,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.decliningBadge,
         isLoading: true,
+        isDisabled: true,
       };
     case 'failed':
       return {
@@ -98,9 +100,16 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
       };
     case 'no_action':
       return {
-        color: 'default',
+        color: 'success',
         iconType: 'check',
         label: APPROVAL_MODAL_TRANSLATIONS.noActionBadge,
+        isLoading: false,
+      };
+    case 'marked_applied':
+      return {
+        color: 'success',
+        iconType: 'check',
+        label: APPROVAL_MODAL_TRANSLATIONS.markedAppliedBadge,
         isLoading: false,
       };
     default:
@@ -128,14 +137,12 @@ export const getApprovalOutcomeBanner = (
       return {
         color: 'primary',
         title: APPROVAL_MODAL_TRANSLATIONS.applyingBannerTitle,
-        hint: IN_PROGRESS_HINT,
         isLoading: true,
       };
     case 'declining':
       return {
         color: 'primary',
         title: APPROVAL_MODAL_TRANSLATIONS.decliningBannerTitle,
-        hint: IN_PROGRESS_HINT,
         isLoading: true,
       };
     case 'failed':
@@ -146,8 +153,14 @@ export const getApprovalOutcomeBanner = (
       };
     case 'no_action':
       return {
-        color: 'primary',
+        color: 'success',
         title: APPROVAL_MODAL_TRANSLATIONS.noActionBannerTitle,
+        isLoading: false,
+      };
+    case 'marked_applied':
+      return {
+        color: 'success',
+        title: APPROVAL_MODAL_TRANSLATIONS.markedAppliedBannerTitle,
         isLoading: false,
       };
     default:

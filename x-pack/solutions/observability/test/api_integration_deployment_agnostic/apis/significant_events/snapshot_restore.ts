@@ -18,6 +18,7 @@ import {
 import { STREAMS_SNAPSHOT_REPO_PATH } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/common_paths';
 import type { StreamsSupertestRepositoryClient } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
 import { createStreamsRepositoryAdminClient as createPlatformStreamsRepositoryAdminClient } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
+import { createTestSource, deleteTestSource } from './helpers/test_source';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -51,6 +52,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Full workflow with snapshot and restore', () => {
+      let snapshotSourceId: string | undefined;
+
       before(async () => {
         // Create snapshot repository
         await esClient.snapshot.createRepository({
@@ -83,6 +86,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
         } catch (e) {
           // Ignore errors if repository doesn't exist
+        }
+
+        if (snapshotSourceId) {
+          try {
+            await deleteTestSource(roleScopedSupertest, snapshotSourceId);
+          } catch (e) {
+            // Ignore errors if the source was already removed
+          }
         }
 
         // Disable streams to clean up
@@ -176,23 +187,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         expect(configResponse.status).to.eql(200);
 
-        // Add a significant event query that should survive snapshot/restore
-        await bulkQueries(significantEventsApiClient, 'logs.otel.web-app', [
+        // Add a significant event query that should survive snapshot/restore.
+        // The query is stored on a source id; the snapshot covers the KI data stream.
+        const source = await createTestSource(
+          roleScopedSupertest,
+          'Snapshot query source',
+          'FROM logs.otel.web-app'
+        );
+        snapshotSourceId = source.id;
+        const queryEsql = `FROM ${source.viewName} | WHERE KQL("attributes.response_time_ms > 100")`;
+        await bulkQueries(significantEventsApiClient, source.id, [
           {
             index: {
               id: 'slow-requests',
               title: 'Slow Requests',
               description: '',
-              esql: {
-                query:
-                  'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
-              },
+              esql: { query: queryEsql },
             },
           },
         ]);
 
         // Verify query was created
-        const streamWithQuery = await getQueries(significantEventsApiClient, 'logs.otel.web-app');
+        const streamWithQuery = await getQueries(significantEventsApiClient, source.id);
         expect(streamWithQuery.queries).to.have.length(1);
         expect(streamWithQuery.queries[0].title).to.eql('Slow Requests');
 
@@ -352,12 +368,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // Verify significant event query survived the restore
-        const restoredQueries = await getQueries(significantEventsApiClient, 'logs.otel.web-app');
+        const restoredQueries = await getQueries(significantEventsApiClient, source.id);
         expect(restoredQueries.queries).to.have.length(1);
         expect(restoredQueries.queries[0].title).to.eql('Slow Requests');
-        expect(restoredQueries.queries[0].esql.query).to.eql(
-          'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")'
-        );
+        expect(restoredQueries.queries[0].esql.query).to.eql(queryEsql);
 
         // Verify the underlying alerting rule also survived and is still enabled
         const rulesAfterRestore = await alertingApi.searchRulesV2(roleAuthc, {

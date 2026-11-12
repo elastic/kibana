@@ -6,17 +6,25 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
-import type { CortexPageStore } from '../cortex/page_store';
-import type { SandboxSecretsClient } from '../sandbox_secrets';
+import type { WikiPageStore } from '../wiki/page_store';
+import type {
+  ListSandboxConnectors,
+  ListSandboxConnectorTypes,
+} from '../lib/list_sandbox_connectors';
+import type { SandboxAllowlistClient } from '../sandbox_allowlist';
 import type { CustomContextClient } from '../custom_context';
+import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
 import type { MemoryPageStore } from '../memory/page_store';
+import type { KnowledgePurgeClient } from '../purge/purge_client';
 import type { GetTriggerEmitter } from '../types';
+import type { InvestigatorServiceAccountService } from '../lib/service_account/investigator_service_account';
 
 export type GetInvestigationsClient = (
   request: KibanaRequest,
@@ -25,6 +33,15 @@ export type GetInvestigationsClient = (
 
 export type GetAlertsClient = (request: KibanaRequest) => Promise<AlertsClient> | undefined;
 
+export type GetEpisodeLookup = (
+  request: KibanaRequest,
+  spaceId?: string
+) => {
+  esClient: ElasticsearchClient;
+  getRulesClient?: () => Promise<RulesClientApi>;
+  spaceId: string;
+};
+
 export type GetAutomationsSoClient = (
   request: KibanaRequest,
   spaceId: string
@@ -32,26 +49,37 @@ export type GetAutomationsSoClient = (
 
 export type GetWorkflowsManagement = () => WorkflowsServerPluginSetup | undefined;
 
-export type GetCortexPageStore = (request: KibanaRequest) => CortexPageStore;
+export type GetWikiPageStore = (request: KibanaRequest) => WikiPageStore;
 
 export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore;
 
 /** Request-scoped store: reads and writes run as the caller's Elasticsearch user. */
 export type GetMemoryPageStore = (request: KibanaRequest) => MemoryPageStore;
 
+export type GetKnowledgePurgeClient = (request: KibanaRequest) => KnowledgePurgeClient;
+
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;
+  getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
-  getCortexPageStore: GetCortexPageStore;
-  isCortexEnabled: () => boolean;
-  sandboxSecretsClient: SandboxSecretsClient;
+  getUserProfileService: () => Promise<CoreStart['userProfile']>;
+  isUniversalAlertingAvailable: () => boolean;
+  getWikiPageStore: GetWikiPageStore;
+  isWikiEnabled: () => boolean;
+  listSandboxConnectors: ListSandboxConnectors;
+  listSandboxConnectorTypes: ListSandboxConnectorTypes;
+  sandboxAllowlistClient: SandboxAllowlistClient;
   customContextClient: CustomContextClient;
+  onboardingClient: OnboardingClient;
   getDecisionTreeStore: GetDecisionTreeStore;
   isDecisionTreesEnabled: () => boolean;
   getMemoryPageStore: GetMemoryPageStore;
   isMemoryEnabled: () => boolean;
+  getInvestigatorServiceAccountService: () => InvestigatorServiceAccountService;
+  getSpaceId: (request: KibanaRequest) => string;
+  getKnowledgePurgeClient: GetKnowledgePurgeClient;
 }

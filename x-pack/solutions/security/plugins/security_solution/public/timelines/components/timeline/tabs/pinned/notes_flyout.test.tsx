@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Dispatch } from 'redux-v4';
-import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
+import type { DataTableRecord, RowControlColumn } from '@kbn/discover-utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
@@ -31,8 +31,6 @@ import { initialUserPrivilegesState } from '../../../../../common/components/use
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import type { UnifiedTimelineDataGridCellContext } from '../../types';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 /**
@@ -53,7 +51,6 @@ jest.mock('../../../../../common/components/user_privileges');
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -67,29 +64,16 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-type ControlColumnCellRender = (
-  props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
-) => React.JSX.Element;
-
 jest.mock('../../body/unified_timeline_body', () => ({
   UnifiedTimelineBody: ({
-    leadingControlColumns,
+    rowAdditionalLeadingControls,
   }: {
-    leadingControlColumns: EuiDataGridControlColumn[];
+    rowAdditionalLeadingControls: RowControlColumn[];
   }) => {
-    const RowCellRender = leadingControlColumns[0].rowCellRender as ControlColumnCellRender;
-
-    return (
-      <RowCellRender
-        colIndex={0}
-        columnId="default-timeline-control-column"
-        isDetails={false}
-        isExpandable={false}
-        isExpanded={false}
-        rowIndex={0}
-        setCellProps={() => {}}
-      />
-    );
+    return rowAdditionalLeadingControls[0].render(() => <></>, {
+      record: {} as DataTableRecord,
+      rowIndex: 0,
+    });
   },
 }));
 
@@ -102,7 +86,6 @@ const useKibanaMock = useKibana as jest.Mock;
 describe('PinnedTabContent Leading actions - notes', () => {
   let props = {} as PinnedTabContentComponentProps;
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
-  const mockOpenFlyout = jest.fn();
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
@@ -151,12 +134,8 @@ describe('PinnedTabContent Leading actions - notes', () => {
     });
 
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     useKibanaMock.mockReturnValue(kibanaMockResult);
 
@@ -174,32 +153,7 @@ describe('PinnedTabContent Leading actions - notes', () => {
     };
   });
 
-  it('should open the legacy notes flyout when the new flyout is disabled', async () => {
-    render(
-      <TestProviders>
-        <PinnedTabContentComponent {...props} />
-      </TestProviders>
-    );
-
-    const notesButton = await screen.findByTestId('timeline-notes-button-small');
-    expect(notesButton).not.toBeDisabled();
-
-    fireEvent.click(notesButton);
-
-    await waitFor(() => {
-      expect(mockOpenFlyout).toHaveBeenCalledWith(
-        expect.objectContaining({
-          right: expect.objectContaining({ id: 'document-details-right' }),
-          left: expect.objectContaining({ id: 'document-details-left' }),
-        })
-      );
-    });
-    expect(flyoutApi.openNotes).not.toHaveBeenCalled();
-  });
-
-  it('should open the new notes flyout when the new flyout is enabled', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
+  it('should open the notes flyout', async () => {
     render(
       <TestProviders>
         <PinnedTabContentComponent {...props} />
@@ -217,6 +171,5 @@ describe('PinnedTabContent Leading actions - notes', () => {
         origin: FLYOUT_ORIGIN.TIMELINE,
       });
     });
-    expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });

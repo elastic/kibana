@@ -739,6 +739,8 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
   packagePoliciesInfo?: { count: number };
+  /** Set by the integrations catalog: whether the tile opens "Add integration" (vs. Integration Details). */
+  addIntegrationFromCatalog?: boolean;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

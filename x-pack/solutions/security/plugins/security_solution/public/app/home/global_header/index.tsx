@@ -22,8 +22,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   isDashboardViewPath,
   isDetectionsPath,
-  isRuleChangesHistoryPath,
-  isRulesManagementPath,
+  isOnboardingPath,
+  isPageWithAppHeaderPath,
 } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -62,8 +62,8 @@ export const GlobalHeader = React.memo(() => {
   const pageScope = getScopeFromPath(pathname);
   const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
-  const changesHistoryPath = isRuleChangesHistoryPath(pathname);
-  const rulesManagementPath = isRulesManagementPath(pathname);
+  const pageWithAppHeaderPath = isPageWithAppHeaderPath(pathname);
+  const onboardingPath = isOnboardingPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -72,9 +72,10 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules page app header renders its own actions (ML job settings, Add integrations),
+    // Pages with a page app header render their own actions (ML job settings, Add integrations),
     // so clear the global header action menu there to avoid duplicating them.
-    if (changesHistoryPath || rulesManagementPath) {
+    // Onboarding is a page without the global header action menu
+    if (pageWithAppHeaderPath || onboardingPath) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -101,8 +102,8 @@ export const GlobalHeader = React.memo(() => {
     theme,
     kibanaServiceI18n,
     dashboardViewPath,
-    changesHistoryPath,
-    rulesManagementPath,
+    pageWithAppHeaderPath,
+    onboardingPath,
   ]);
 
   return (

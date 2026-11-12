@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
+  EuiLiveAnnouncer,
   EuiSpacer,
   EuiText,
-  euiYScrollWithShadows,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { importJsonFlyoutStrings } from './import_json_strings';
+import { useScrollableListStyles } from './use_scrollable_list_styles';
 
 const RELATED_ITEMS_COLUMNS: Array<EuiBasicTableColumn<AsCodeRelatedItem>> = [
   {
@@ -49,7 +48,7 @@ export const ImportJsonWarningsCallout = ({
   relatedItemsCount,
   getWarningsSummary,
 }: ImportJsonWarningsCalloutProps) => {
-  const euiThemeContext = useEuiTheme();
+  const listStyles = useScrollableListStyles();
   const warningsAccordionId = useGeneratedHtmlId({
     prefix: `${dataTestSubjPrefix}Warnings`,
   });
@@ -59,18 +58,22 @@ export const ImportJsonWarningsCallout = ({
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [isRelatedItemsExpanded, setIsRelatedItemsExpanded] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const listStyles = useMemo(
-    () => css`
-      ${euiYScrollWithShadows(euiThemeContext, { height: 'auto' })}
-      max-height: 240px;
-      padding-top: ${euiThemeContext.euiTheme.size.s};
-      padding-bottom: ${euiThemeContext.euiTheme.size.s};
-    `,
-    [euiThemeContext]
-  );
   const warningsSummary =
     getWarningsSummary?.(warnings.length) ??
     importJsonFlyoutStrings.getWarningsSummary(warnings.length);
+  const calloutTitle =
+    relatedItems.length > 0
+      ? importJsonFlyoutStrings.getReviewWarningsTitle()
+      : importJsonFlyoutStrings.getWarningsTitle();
+  const announcement = [
+    calloutTitle,
+    warnings.length > 0 ? warningsSummary : '',
+    relatedItems.length > 0
+      ? importJsonFlyoutStrings.getRelatedItemsSummary(relatedItemsCount)
+      : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   if (!isVisible || (warnings.length === 0 && relatedItems.length === 0)) {
     return null;
@@ -79,13 +82,8 @@ export const ImportJsonWarningsCallout = ({
   return (
     <>
       <KbnWarningCallout
-        announceOnMount
         size="s"
-        title={
-          relatedItems.length > 0
-            ? importJsonFlyoutStrings.getReviewWarningsTitle()
-            : importJsonFlyoutStrings.getWarningsTitle()
-        }
+        title={calloutTitle}
         text={relatedItems.length > 0 ? undefined : warningsSummary}
         data-test-subj={`${dataTestSubjPrefix}Warnings`}
         onDismiss={() => {
@@ -167,6 +165,7 @@ export const ImportJsonWarningsCallout = ({
           </>
         )}
       </KbnWarningCallout>
+      <EuiLiveAnnouncer>{announcement}</EuiLiveAnnouncer>
       <EuiSpacer size="m" />
     </>
   );

@@ -7,6 +7,7 @@
 
 import {
   EuiMarkdownFormat,
+  type EuiMarkdownFormatProps,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
@@ -24,6 +25,8 @@ interface Props {
   alertIds?: string[];
   /** Wraps long text and field chip values to fit narrow containers, e.g. a chat card. */
   wrapFieldValues?: boolean;
+  /** Text size of the markdown. Defaults to `xs`, as used on the Attacks page. */
+  textSize?: EuiMarkdownFormatProps['textSize'];
 }
 
 const wrappedMarkdownCss = css`
@@ -37,6 +40,7 @@ const AttackDiscoveryMarkdownFormatterComponent: React.FC<Props> = ({
   markdown,
   alertIds,
   wrapFieldValues = false,
+  textSize = 'xs',
 }) => {
   const attackDiscoveryParsingPluginList = useMemo(
     () => [...getDefaultEuiMarkdownParsingPlugins(), AttackDiscoveryMarkdownParser],
@@ -63,7 +67,7 @@ const AttackDiscoveryMarkdownFormatterComponent: React.FC<Props> = ({
         data-test-subj="attackDiscoveryMarkdownFormatter"
         parsingPluginList={attackDiscoveryParsingPluginList}
         processingPluginList={attackDiscoveryProcessingPluginList}
-        textSize="xs"
+        textSize={textSize}
       >
         {markdown}
       </EuiMarkdownFormat>

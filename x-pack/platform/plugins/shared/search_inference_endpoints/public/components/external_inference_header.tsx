@@ -45,13 +45,13 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
       title={i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
         defaultMessage: 'External Inference',
       })}
-      description={i18n.translate(
-        'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
-        {
+      description={{
+        text: i18n.translate('xpack.searchInferenceEndpoints.allInferenceEndpoints.description', {
           defaultMessage:
-            'Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch. Set up and manage NLP tasks using unique endpoints, to build AI-powered search.',
-        }
-      )}
+            'Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch. Connect to third-party model providers, or to models you host yourself through any OpenAI-compatible API, to build AI-powered search.',
+        }),
+        learnMoreUrl: docLinks.selfHostedInference,
+      }}
       menu={menu}
       docLink={docLinks.createInferenceEndpoint}
       spacing="bleed"

@@ -13,3 +13,8 @@ export type { GridPanelData } from './grid/grid_panel';
 export type { GridSectionData } from './grid/grid_section';
 
 export { isLayoutEqual } from './grid/utils/equality_checks';
+export {
+  startAutoScroll,
+  stopAutoScroll,
+  handleAutoscroll,
+} from './grid/use_grid_layout_events/sensors/autoscroll';

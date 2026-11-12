@@ -70,6 +70,27 @@ export interface StatusSlotRenderProps {
  */
 export type RenderStatus = (props: StatusSlotRenderProps) => React.ReactNode;
 
+/** Props passed to the `renderSeverity` render prop. */
+export interface SeveritySlotRenderProps {
+  /** Conversation id — used as the mutation target. */
+  conversationId: string;
+  /** The severity the conversation carries, for use until fresher data has been read. */
+  severity?: string;
+  /**
+   * Calls the flyout's internal refetch after a successful mutation, so the header
+   * reflects the server-confirmed state without waiting for the 5 s poll.
+   */
+  refetchConversation?: () => Promise<void>;
+}
+
+/**
+ * A render prop that the consuming plugin provides to render an interactive severity picker in
+ * the header blocks, beside status and assignees. Called only while the investigation has a
+ * severity; the header then leaves the severity to it rather than showing a read-only badge under
+ * the title.
+ */
+export type RenderSeverity = (props: SeveritySlotRenderProps) => React.ReactNode;
+
 /**
  * Props passed to the `renderLinkedInvestigations` render prop.
  *

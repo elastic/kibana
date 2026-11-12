@@ -48,13 +48,13 @@ export const getWorkflowExecutionActionContext = (
 
 const ActionsHeader = () => (
   <EuiText size="xs" css={{ fontWeight: 600, textAlign: 'center', width: '100%' }}>
-    {i18n.translate('workflowsManagement.executionsPage.column.actions', {
+    {i18n.translate('workflows.executionsPage.column.actions', {
       defaultMessage: 'Actions',
     })}
   </EuiText>
 );
 
-const menuAriaLabel = i18n.translate('workflowsManagement.executionsPage.actions.menuAriaLabel', {
+const menuAriaLabel = i18n.translate('workflows.executionsPage.actions.menuAriaLabel', {
   defaultMessage: 'Execution actions',
 });
 
@@ -83,7 +83,7 @@ const useExecutionActionListItems = (
 
     if (canExecuteWorkflow) {
       items.push({
-        label: i18n.translate('workflowsManagement.executionsPage.actions.reRun', {
+        label: i18n.translate('workflows.executionsPage.actions.reRun', {
           defaultMessage: 'Re-run',
         }),
         iconType: 'refresh',
@@ -102,7 +102,7 @@ const useExecutionActionListItems = (
 
     if (canUpdateWorkflow) {
       items.push({
-        label: i18n.translate('workflowsManagement.executionsPage.actions.editWorkflow', {
+        label: i18n.translate('workflows.executionsPage.actions.editWorkflow', {
           defaultMessage: 'Edit workflow',
         }),
         iconType: 'pencil',
@@ -120,7 +120,7 @@ const useExecutionActionListItems = (
 
     if (canReadWorkflowExecution && onViewAllExecutionsForWorkflow) {
       items.push({
-        label: i18n.translate('workflowsManagement.executionsPage.actions.viewAllExecutions', {
+        label: i18n.translate('workflows.executionsPage.actions.viewAllExecutions', {
           defaultMessage: 'View all executions',
         }),
         iconType: 'eye',
@@ -180,14 +180,11 @@ export const WorkflowExecutionActionsMenu = ({
     onReRunExecution
   );
 
-  const showActionsLabel = i18n.translate(
-    'workflowsManagement.executionsPage.actions.showActions',
-    {
-      defaultMessage: 'Show actions',
-    }
-  );
+  const showActionsLabel = i18n.translate('workflows.executionsPage.actions.showActions', {
+    defaultMessage: 'Show actions',
+  });
 
-  const takeActionLabel = i18n.translate('workflowsManagement.executionsPage.actions.takeAction', {
+  const takeActionLabel = i18n.translate('workflows.executionsPage.actions.takeAction', {
     defaultMessage: 'Take action',
   });
 

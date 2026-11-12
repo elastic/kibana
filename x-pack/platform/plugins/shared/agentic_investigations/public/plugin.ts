@@ -9,7 +9,9 @@ import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
+import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
+import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
@@ -25,6 +27,7 @@ import type {
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
+  AlertFlyoutRegistration,
 } from './types';
 
 const LazyInvestigationCardComponent = React.lazy(async () => {
@@ -61,6 +64,7 @@ export class AgenticInvestigationsPublicPlugin
   private readonly escalationsEnabled: boolean;
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;
+  private readonly alertFlyouts = new Map<string, AlertFlyoutRegistration>();
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -73,7 +77,12 @@ export class AgenticInvestigationsPublicPlugin
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
     registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
-    return { registerFlyoutGroupedAttachment: this.groupedAttachments.register };
+    return {
+      registerFlyoutGroupedAttachment: this.groupedAttachments.register,
+      registerAlertFlyout: (source, registration) => {
+        this.alertFlyouts.set(source, registration);
+      },
+    };
   }
 
   start(
@@ -81,19 +90,39 @@ export class AgenticInvestigationsPublicPlugin
     startDeps: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
     const { agentBuilder } = startDeps;
+    // Read where a subject renders, so a solution can register after this plugin starts.
+    const getAlertFlyout = (source?: string, snapshot?: AlertSubjectSnapshot) => {
+      const registration = source ? this.alertFlyouts.get(source) : undefined;
+      return registration && (registration.canOpen?.(snapshot) ?? true)
+        ? registration.Component
+        : undefined;
+    };
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
+      registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({
           conversationEvents: agentBuilder.conversationEvents,
           application: core.application,
         });
       }
-      registerSubjectAttachmentTypes(agentBuilder);
+      registerSubjectAttachmentTypes(agentBuilder, {
+        // The alert flyout renders shared alerting components that read core and their plugins
+        // from this context, so core is passed whole.
+        ...core,
+        share: startDeps.share,
+        data: startDeps.data,
+        dataViews: startDeps.dataViews,
+        expressions: startDeps.expressions,
+        spaces: startDeps.spaces,
+        unifiedDocViewer: startDeps.unifiedDocViewer,
+        charts: startDeps.charts,
+        getAlertFlyout,
+      });
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
-        startDeps: { ...startDeps, agentBuilder },
+        startDeps: { ...startDeps, agentBuilder, getAlertFlyout },
         // Escalations are AlertZero-only for now: without them there is no escalation template,
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
@@ -114,5 +143,6 @@ export class AgenticInvestigationsPublicPlugin
 
   stop() {
     this.impactEntityOpener = undefined;
+    this.alertFlyouts.clear();
   }
 }

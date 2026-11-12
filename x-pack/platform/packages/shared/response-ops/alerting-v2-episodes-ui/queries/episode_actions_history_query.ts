@@ -6,7 +6,10 @@
  */
 
 import { buildEpisodeActionsHistoryQuery as buildEpisodeActionsHistoryQueryCommon } from '@kbn/alerting-v2-common-queries';
-import type { BuildEpisodeActionsHistoryQueryOptions as BuildEpisodeActionsHistoryQueryOptionsCommon } from '@kbn/alerting-v2-common-queries';
+import type {
+  BuildEpisodeActionsHistoryQueryOptions as BuildEpisodeActionsHistoryQueryOptionsCommon,
+  EpisodeSeriesFilter,
+} from '@kbn/alerting-v2-common-queries';
 
 export const DEFAULT_ACTIONS_HISTORY_PAGE_SIZE = 25;
 
@@ -19,16 +22,16 @@ export type BuildEpisodeActionsHistoryQueryOptions = Omit<
 };
 
 /**
- * Returns individual action records for an episode (both episode-level and group-level),
+ * Returns individual action records for an episode (both episode-level and series-level),
  * sorted newest-first, one keyset page at a time.
  */
 export const buildEpisodeActionsHistoryQuery = (
   spaceId: string,
   episodeId: string,
-  groupHash: string,
+  series: EpisodeSeriesFilter | null | undefined,
   { before, limit = DEFAULT_ACTIONS_HISTORY_PAGE_SIZE }: BuildEpisodeActionsHistoryQueryOptions = {}
 ) =>
-  buildEpisodeActionsHistoryQueryCommon(spaceId, episodeId, groupHash, {
+  buildEpisodeActionsHistoryQueryCommon(spaceId, episodeId, series, {
     before,
     limit,
   });

@@ -24,6 +24,7 @@
   "kbn_references": [
     "@kbn/app-header",
     "@kbn/features-plugin",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/home-plugin",
@@ -90,7 +91,6 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-shared",
     "@kbn/deeplinks-vectordb",
-    "@kbn/deeplinks-workplace-ai",
     "@kbn/core-user-profile-server",
     "@kbn/core-http-browser",
     "@kbn/ui-callout",

@@ -6,11 +6,11 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/**/*"
   ],
   "kbn_references": [
     "@kbn/app-header",
-    "@kbn/config-schema",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
@@ -26,6 +26,7 @@
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/management-plugin",
+    "@kbn/scout",
     "@kbn/share-plugin",
     "@kbn/utility-types"
   ],

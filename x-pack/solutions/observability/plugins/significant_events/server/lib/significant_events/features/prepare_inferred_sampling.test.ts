@@ -24,7 +24,7 @@ const createFeature = (runId: string): FeatureWithFilter =>
   ({
     id: 'feature-1',
     uuid: 'feature-uuid-1',
-    stream_name: 'logs.test-default',
+    source_id: 'logs.test-default',
     type: 'system',
     description: 'A test feature',
     properties: {},
@@ -43,7 +43,7 @@ const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
 const createParams = (kiClient: KnowledgeIndicatorClient) => ({
   esClient: {} as ElasticsearchClient,
   kiClient,
-  streamName: 'logs.test-default',
+  sourceId: 'logs.test-default',
   samplingSource: 'logs.test-default',
   start: 100,
   end: 200,

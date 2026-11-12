@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/managed-content-badge'
   - '@kbn/presentation-publishing'
   - '@kbn/esql-utils'
+  - '@kbn/geo-precision'
   - '@kbn/apm-data-view'
   - '@kbn/shared-ux-utility'
   - '@kbn/react-kibana-context-render'
@@ -115,6 +116,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'
@@ -124,6 +126,4 @@ fileGroups:
     - server/config.ts
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

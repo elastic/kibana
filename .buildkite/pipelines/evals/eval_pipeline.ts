@@ -10,7 +10,6 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
@@ -20,6 +19,8 @@ const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.su
 export interface EvalsSuiteShard {
   id: string;
   specFiles: string[];
+  /** Evaluation connector for this shard's steps, overriding the suite-wide judge. */
+  judge?: string;
 }
 
 export interface EvalsSuiteSpecModelGroup {
@@ -37,6 +38,7 @@ export interface EvalsSuiteMetadataEntry {
   scoutDomain?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  defaultJudge?: string;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
   specModelGroups?: EvalsSuiteSpecModelGroup[];
@@ -158,11 +160,11 @@ function normalizeEvaluationConnectorId(raw: string): string {
 
 /**
  * Boot disk (GB) for eval agents. These steps spell out their own agent block, so they do not
- * inherit the repo-wide agent defaults. `undefined` uses the agent image default; set a number
- * (here or in `DEFAULT_AGENT_IMAGE_CONFIG`) to override it. Keep `EVAL_AGENT_DISK_SIZE_GB` in
- * `steps/evals/run_suite.sh` and `llm_evals.yml` in sync.
+ * inherit the repo-wide agent defaults. `undefined` uses the agent manager default; set a number
+ * to override it. Keep `EVAL_AGENT_DISK_SIZE_GB` in `steps/evals/run_suite.sh` and
+ * `llm_evals.yml` in sync.
  */
-const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
+const EVAL_AGENT_DISK_SIZE_GB: number | undefined = undefined;
 
 /**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
@@ -183,13 +185,11 @@ function toBuildkiteYamlString(value: string): string {
 function buildEvalsYaml({
   selectedSuites,
   resolveModelGroups,
-  evaluationConnectorId,
-  hasEisJudge,
+  resolveJudge,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
-  evaluationConnectorId: string | undefined;
-  hasEisJudge: boolean;
+  resolveJudge: (suite: EvalsSuiteMetadataEntry) => EvalJudge;
 }): string {
   const preemptible = isPreemptibleEnabled();
   const suiteSteps = selectedSuites
@@ -197,6 +197,7 @@ function buildEvalsYaml({
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
       const suiteModelGroups = resolveModelGroups(suite);
+      const { evaluationConnectorId, hasEisJudge } = resolveJudge(suite);
       // Label-derived values cross a pipeline boundary; serialize as `$`-safe YAML.
       const modelGroupsEnv =
         suiteModelGroups.length > 0
@@ -265,11 +266,15 @@ function buildEvalsYaml({
   ].join('\n');
 }
 
+interface EvalJudge {
+  evaluationConnectorId: string | undefined;
+  hasEisJudge: boolean;
+}
+
 interface EvalSelection {
   runnableSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
-  evaluationConnectorId: string | undefined;
-  hasEisJudge: boolean;
+  resolveJudge: (suite: EvalsSuiteMetadataEntry) => EvalJudge;
 }
 
 /**
@@ -314,7 +319,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     .find((label) => label.startsWith('models:judge:'))
     ?.slice('models:judge:'.length)
     ?.trim();
-  const evaluationConnectorId = rawEvaluationConnectorId
+  const labelEvaluationConnectorId = rawEvaluationConnectorId
     ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
     : undefined;
 
@@ -344,8 +349,17 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     return suite.defaultModelGroups ?? [];
   };
 
-  const hasEisJudge =
-    !!rawEvaluationConnectorId?.startsWith('eis/') || !!evaluationConnectorId?.startsWith('eis-');
+  const resolveJudge = (suite: EvalsSuiteMetadataEntry): EvalJudge => {
+    const evaluationConnectorId =
+      labelEvaluationConnectorId ??
+      (suite.defaultJudge ? normalizeEvaluationConnectorId(suite.defaultJudge) : undefined);
+    return {
+      evaluationConnectorId,
+      hasEisJudge:
+        !!rawEvaluationConnectorId?.startsWith('eis/') ||
+        !!evaluationConnectorId?.startsWith('eis-'),
+    };
+  };
 
   if (selectedEvalSuites.length === 0) {
     return null;
@@ -365,8 +379,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   return {
     runnableSuites,
     resolveModelGroups,
-    evaluationConnectorId,
-    hasEisJudge,
+    resolveJudge,
   };
 }
 
@@ -385,8 +398,7 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
   return buildEvalsYaml({
     selectedSuites: selection.runnableSuites,
     resolveModelGroups: selection.resolveModelGroups,
-    evaluationConnectorId: selection.evaluationConnectorId,
-    hasEisJudge: selection.hasEisJudge,
+    resolveJudge: selection.resolveJudge,
   });
 }
 

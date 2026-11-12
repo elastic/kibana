@@ -35,7 +35,7 @@ const TITLE_CASE_GLOSSARY = [
   'Saved Objects',
   'Advanced Settings',
   'Data Views',
-  'MITRE ATT&CK® Coverage',
+  'MITRE coverage',
   'License Management',
   'Developer Tools',
   'Stack Management',
@@ -49,12 +49,14 @@ const TITLE_CASE_GLOSSARY = [
   'Cloud Connect',
   'SIEM Readiness',
   'V2 Alerting Preview',
-  'Alerts (V1)',
+  'Alerts (Classic)',
   'Ingest Hub',
   'Elastic Inference',
   'ES|QL Data Federation',
   'ES|QL Views',
   'AlertZero',
+  // Legal: "nightshift" must stay lowercase, so the sidenav must not capitalise it (elastic/nightshift-program#2179)
+  'nightshift',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));

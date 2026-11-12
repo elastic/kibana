@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
-import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
@@ -33,6 +32,8 @@ import {
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
+import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { getSaveWorkflowTooltipContent } from '../../../shared/ui';
@@ -127,7 +128,7 @@ export const WorkflowDetailHeader = React.memo(
       canReadManagedWorkflowExecution,
     } = useWorkflowsCapabilities();
 
-    const { activeTab, setActiveTab } = useWorkflowUrlState();
+    const { activeTab, isViewingExecution, setActiveTab } = useWorkflowUrlState();
     const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);
@@ -153,7 +154,8 @@ export const WorkflowDetailHeader = React.memo(
       [workflow]
     );
 
-    const saveYaml = useSaveYaml();
+    const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
+    const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
     const isSaving = useSelector(selectIsSavingYaml);
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
@@ -205,14 +207,14 @@ export const WorkflowDetailHeader = React.memo(
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
       return getSaveWorkflowTooltipContent({
-        isExecutionsTab,
+        isExecutionsTab: isViewingExecution,
         canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
         isCreate,
         hasUnsavedChanges,
         isManagedWorkflow,
       });
     }, [
-      isExecutionsTab,
+      isViewingExecution,
       workflowId,
       canCreateWorkflow,
       canUpdateWorkflow,
@@ -272,7 +274,7 @@ export const WorkflowDetailHeader = React.memo(
     const openHistoryModal = useCallback(() => {
       changeHistoryModal?.openModal();
     }, [changeHistoryModal]);
-    const showHistoryButton = Boolean(canReadWorkflow && !isExecutionsTab && changeHistoryModal);
+    const showHistoryButton = Boolean(canReadWorkflow && !isViewingExecution && changeHistoryModal);
 
     const historyItem = useMemo<AppMenuItemType | undefined>(() => {
       if (!showHistoryButton) {
@@ -303,7 +305,10 @@ export const WorkflowDetailHeader = React.memo(
         }),
         labelProps: {},
         checked: isEnabled,
-        onChange: (checked: boolean) => {
+        onChange: async (checked: boolean) => {
+          if (!checked && !(await confirmDisable([workflowId]))) {
+            return;
+          }
           updateWorkflow({ workflow: { enabled: checked } });
         },
         disabled: isLoading || !canUpdateWorkflow || !isSchemaValid || hasUnsavedChanges,
@@ -313,6 +318,7 @@ export const WorkflowDetailHeader = React.memo(
     }, [
       workflowId,
       isEnabled,
+      confirmDisable,
       updateWorkflow,
       isLoading,
       canUpdateWorkflow,
@@ -348,14 +354,17 @@ export const WorkflowDetailHeader = React.memo(
             defaultMessage: 'Unsaved changes',
           }),
           color: 'primary',
-          onClick: () => setHighlightDiff((state) => !state),
-          onClickAriaLabel: highlightDiff
-            ? i18n.translate('workflows.unsavedChangesBadge.hideDiff', {
-                defaultMessage: 'Hide diff highlighting',
-              })
-            : i18n.translate('workflows.unsavedChangesBadge.showDiff', {
-                defaultMessage: 'Show diff highlighting',
-              }),
+          // A new workflow has no saved version to diff against, so the badge is not a toggle.
+          ...(workflowId && {
+            onClick: () => setHighlightDiff((state) => !state),
+            onClickAriaLabel: highlightDiff
+              ? i18n.translate('workflows.unsavedChangesBadge.hideDiff', {
+                  defaultMessage: 'Unsaved changes, hide diff highlighting',
+                })
+              : i18n.translate('workflows.unsavedChangesBadge.showDiff', {
+                  defaultMessage: 'Unsaved changes, show diff highlighting',
+                }),
+          }),
           'data-test-subj': 'workflowUnsavedChangesBadge',
         });
       } else if (workflowId && savedLabel) {
@@ -391,13 +400,13 @@ export const WorkflowDetailHeader = React.memo(
       return {
         primaryActionItem: {
           id: 'saveWorkflow',
-          label: i18n.translate('keepWorkflows.buttonText', {
+          label: i18n.translate('workflows.saveButtonText', {
             defaultMessage: 'Save',
           }),
           iconType: 'save',
           run: handleSaveWorkflow,
           disableButton:
-            isExecutionsTab ||
+            isViewingExecution ||
             !canSaveWorkflow ||
             isLoading ||
             isSaving ||
@@ -412,7 +421,7 @@ export const WorkflowDetailHeader = React.memo(
         items,
       };
     }, [
-      isExecutionsTab,
+      isViewingExecution,
       workflowId,
       executionsToggleItem,
       historyItem,
@@ -466,6 +475,7 @@ export const WorkflowDetailHeader = React.memo(
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
         )}
+        {disableConfirmModal}
       </>
     );
   }

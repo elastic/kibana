@@ -17,6 +17,8 @@ import type {
   ConversationRoundOrigin,
   ConversationOrigin,
   ConversationRoundAuthor,
+  ConversationRoundAuthorDecoration,
+  EventActor,
   ExecutionStatus,
   InteractivityConfig,
   InteractivityConfigInput,
@@ -52,6 +54,11 @@ export interface BaseExecutionParams {
    */
   parentExecutionId?: string;
   /**
+   * Set on a background sub-agent: how its parent gets the result when it finishes. `always`
+   * starts the parent conversation, `never` leaves the message for the parent's next run.
+   */
+  parentTriggerMode?: ChatTriggerMode;
+  /**
    * Connector telemetry to attribute this execution's LLM calls to a specific feature
    * (sets `metadata.connectorTelemetry` on inference calls). When omitted, the default
    * Agent Builder telemetry is used.
@@ -66,6 +73,13 @@ export interface BaseExecutionParams {
    */
   reasoningLevel?: ChatCompletionReasoningEffort;
   projectRouting?: string;
+  /**
+   * Id of the workflow execution whose `ai.agent` step started this execution, inherited by the
+   * sub-agents it spawns. Reported on round telemetry so a round joins to the workflow run, and
+   * sent to EIS as the `interactionId` of every LLM call the main agent's execution makes (not a
+   * sub-agent's). Set by the workflow step from its own context; no route accepts it.
+   */
+  workflowExecutionId?: string;
 }
 
 /**
@@ -99,6 +113,16 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   readOnly?: boolean;
   /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
   origin?: ExecutionConversationOrigin;
+  /**
+   * Display decoration for the user message this request writes. Honoured only when the request
+   * principal is a service account, which has no display name on any backend; silently dropped
+   * for interactive users. Never affects the actor's `id`, `username` or `type`.
+   */
+  author?: ConversationRoundAuthorDecoration;
+  /** Actor of the user message this request writes, when it is not the request principal. */
+  actor?: EventActor;
+  /** The background sub-agent the message reports; consumed in the same write, refused once reported. */
+  reportsBackgroundExecution?: string;
   /** Callback delivery configuration for this execution. */
   callback?: {
     /** URL to deliver the execution result to. */
@@ -155,6 +179,11 @@ export type AgentExecutionParams = StoredConversationExecutionParams | Standalon
 /**
  * Common fields shared by all agent execution documents.
  */
+export interface ExecutionRunAs {
+  type: 'service_account';
+  serviceAccountId: string;
+}
+
 interface BaseAgentExecution {
   /** Unique id of the execution. */
   executionId: string;
@@ -170,6 +199,11 @@ interface BaseAgentExecution {
   spaceId: string;
   /** The user the request that created this execution authenticated as. */
   owner?: UserIdAndName;
+  /**
+   * The service account the execution runs as, captured from the agent's binding at dispatch.
+   * Absent when the execution runs with the caller's own credentials.
+   */
+  runAs?: ExecutionRunAs;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
   /** Why the execution was aborted, present when status is 'aborted' and the origin recorded it. */

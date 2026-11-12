@@ -8,9 +8,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
+  EuiSpacer,
   EuiSuperSelect,
   useEuiTheme,
   type EuiSuperSelectOption,
@@ -48,6 +51,8 @@ export function DataSourceSelect({
   onChange,
   onBlur,
   loadDataSources,
+  createdDataSourceNames,
+  onDataSourceCreated,
 }: {
   dataSources: DataSource[];
   value: string;
@@ -55,10 +60,12 @@ export function DataSourceSelect({
   onChange: (value: string) => void;
   onBlur: () => void;
   loadDataSources: () => Promise<void>;
+  createdDataSourceNames: readonly string[];
+  onDataSourceCreated: (name: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { dataSourcesClient, reportUiCounter },
+    services: { dataSourcesClient, docLinks, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const [isCreateDataSourceOpen, setIsCreateDataSourceOpen] = useState(false);
 
@@ -125,6 +132,7 @@ export function DataSourceSelect({
       } catch (error) {
         return getFlyoutSaveErrorMessage(error);
       }
+      onDataSourceCreated(dataSource.name);
       reportUiCounter?.(getDatasourceCreateEvents(dataSource.type));
       try {
         await loadDataSources();
@@ -138,8 +146,10 @@ export function DataSourceSelect({
       setIsCreateDataSourceOpen(false);
       return null;
     },
-    [dataSourcesClient, loadDataSources, onChange, reportUiCounter]
+    [dataSourcesClient, loadDataSources, onChange, onDataSourceCreated, reportUiCounter]
   );
+
+  const showAuthenticationCallout = Boolean(value) && !createdDataSourceNames.includes(value);
 
   return (
     <>
@@ -155,6 +165,31 @@ export function DataSourceSelect({
         placeholder={createDatasetWizardStrings.dataSourcePlaceholder}
         isInvalid={isInvalid}
       />
+      {showAuthenticationCallout ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            iconType="info"
+            title={createDatasetWizardStrings.dataSourceAuthenticationCalloutTitle}
+            data-test-subj="createDatasetDataSourceAuthenticationCallout"
+          >
+            <p>
+              {createDatasetWizardStrings.dataSourceAuthenticationCalloutDescription}{' '}
+              <EuiLink
+                color="primary"
+                href={docLinks.links.dataFederation.grantReadAccess}
+                target="_blank"
+                external
+                data-test-subj="createDatasetDataSourceAuthenticationLearnMore"
+              >
+                {createDatasetWizardStrings.learnMore}
+              </EuiLink>
+            </p>
+          </EuiCallOut>
+        </>
+      ) : null}
       {isCreateDataSourceOpen ? (
         <CreateDataSourceFlyout
           existingDataSourceNames={existingDataSourceNames}

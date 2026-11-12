@@ -12,6 +12,7 @@ import {
   COMMENT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import {
+  getCaseBulkDeleteAttachmentsUrl,
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
@@ -31,6 +32,10 @@ import type {
   UnifiedAttachment,
   UnifiedAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  CasesByAttachmentIDsRequest,
+  GetCaseIDsByAttachmentIDsResponse,
+} from '@kbn/cases-plugin/server/client/cases/get';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -117,6 +122,12 @@ export const createFileAttachment = async ({
   return theCase;
 };
 
+const getBulkCreateAttachmentsUrl = (caseId: string, space: string | null): string =>
+  `${getSpaceUrlPrefix(space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_create`;
+
+/**
+ * Bulk creates attachments, then re-reads the case so callers get it with all its attachments.
+ */
 export const bulkCreateAttachments = async ({
   supertest,
   caseId,
@@ -130,17 +141,50 @@ export const bulkCreateAttachments = async ({
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<Case> => {
-  const { body: theCase } = await supertest
-    .post(
-      `${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_create`
-    )
+  const { body } = await supertest
+    .post(getBulkCreateAttachmentsUrl(caseId, auth.space))
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(params)
     .expect(expectedHttpCode);
 
+  if (expectedHttpCode !== 200) {
+    return body;
+  }
+
+  const {
+    body: { case: theCase },
+  } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/resolve`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .expect(200);
+
   return theCase;
 };
+
+/**
+ * Calls the internal bulk create route and returns the raw response (the created attachments).
+ */
+export const bulkCreateAttachmentsRaw = async ({
+  supertest,
+  caseId,
+  params,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params: BulkCreateUnifiedAttachmentsRequest;
+  auth?: { user: User; space: string | null };
+  expectedHttpCode?: number;
+}): Promise<{ body: UnifiedAttachment[] }> =>
+  supertest
+    .post(getBulkCreateAttachmentsUrl(caseId, auth.space))
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
 
 export const createCaseAndBulkCreateAttachments = async ({
   supertest,
@@ -296,6 +340,58 @@ export const updateComment = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const bulkDeleteAttachments = async ({
+  supertest,
+  caseId,
+  savedObjectIds,
+  includeRelated,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  savedObjectIds: string[];
+  includeRelated?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseBulkDeleteAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .auth(auth.user.username, auth.user.password)
+    .send({ ids: savedObjectIds, include_related: includeRelated })
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const bulkDeleteAttachmentReferences = async ({
+  supertest,
+  caseId,
+  type,
+  attachmentIds,
+  includeRelated,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  type: string;
+  attachmentIds: string[];
+  includeRelated?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<void> => {
+  await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseBulkDeleteAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .auth(auth.user.username, auth.user.password)
+    .send({ type, attachmentIds, include_related: includeRelated })
+    .expect(expectedHttpCode);
 };
 
 export const bulkDeleteFileAttachments = async ({
@@ -493,4 +589,28 @@ export const updateAttachmentV2 = async ({
     .expect(expectedHttpCode);
 
   return attachment;
+};
+
+/**
+ * Calls the cases client's getCasesByAttachmentIDs, which has no public route, through the fixture plugin.
+ */
+export const getCasesByAttachmentIds = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  params: CasesByAttachmentIDsRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<GetCaseIDsByAttachmentIDsResponse> => {
+  const { body } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}/api/cases_fixture/cases:getCasesByAttachmentIds`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return body;
 };

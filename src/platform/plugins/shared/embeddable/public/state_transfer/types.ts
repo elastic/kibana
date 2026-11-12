@@ -41,6 +41,10 @@ export interface EmbeddableEditorState {
    */
   originatingPath?: string;
   /**
+   * Type of the container the editor was opened from (e.g. 'dashboard')
+   */
+  originatingContainer?: string;
+  /**
    * Breadcrumbs from the originating app context (e.g. [Dashboards, Visualizations]).
    * Consumers prepend these to their own breadcrumbs.
    */

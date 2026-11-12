@@ -25,7 +25,6 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import type { CaseUI } from '../../containers/types';
 import type { MarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
@@ -53,7 +52,7 @@ export interface AddCommentProps {
   id: string;
   caseId: string;
   onCommentSaving?: () => void;
-  onCommentPosted: (newCase: CaseUI) => void;
+  onCommentPosted: () => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
   attachActionButton?: JSX.Element | null;
@@ -134,8 +133,8 @@ export const AddComment = React.memo(
               attachments,
             },
             {
-              onSuccess: (theCase) => {
-                onCommentPosted(theCase);
+              onSuccess: () => {
+                onCommentPosted();
               },
             }
           );

@@ -36,7 +36,7 @@ import {
   showMoreLabel,
 } from './translations';
 import { ConversationQueueSkeleton } from './conversation_queue_skeleton';
-import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
+import { ConversationCard } from '../conversation_card';
 import { ConversationCardCompact } from '../conversation_card/conversation_card_compact';
 import { type BaseActionsProps } from '../actions';
 import { ShowMoreFooter } from '../show_more_footer';
@@ -69,7 +69,8 @@ interface ConversationQueueProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
-  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  /** When false, cards are inert and their chat control and menu are disabled. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
   /** A function, not a value: the URL is per-card and only the caller can resolve it. */
   getChatHref?: (id: Investigation['id']) => string | undefined;
   /** How a decided row was settled; per-card, like `getChatHref`. */
@@ -124,8 +125,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     isFiltered = false,
     onClickAction,
     onClickCard,
-    onClickRecommendedAction,
     onOpenChat,
+    canOpenInvestigationDetails = true,
     getChatHref,
     getOutcomeLabel,
     selectedIds,
@@ -150,10 +151,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     }
     const rows = isOpen ? briefingList : heldRows;
 
-    // Filtered, the badge counts the matching rows. Rows still to load may match too, so
-    // the figure is a floor then.
-    const badgeCount = isFiltered ? `${rows.length}${remaining > 0 ? '+' : ''}` : count;
-
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -167,10 +164,10 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {isCountUnavailable ? null : badgeCount === undefined ? (
+          {isCountUnavailable ? null : count === undefined ? (
             <EuiLoadingSpinner size="s" aria-label={CONVERSATION_QUEUE_COUNT_LOADING} />
           ) : (
-            <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>{badgeCount}</EuiBadge>
+            <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>{count}</EuiBadge>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -204,7 +201,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             onClickAction,
             onClickCard,
             onOpenChat,
-            onClickRecommendedAction,
+            canOpenInvestigationDetails,
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,
             canCloseInvestigation,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSavedRuleId } from './helpers';
+import { getSavedRuleId, isRuleDraftAttachment } from './helpers';
 import type { RuleAttachment } from './helpers';
 
 const ruleAttachment = (text: string, origin?: string): RuleAttachment => ({
@@ -28,5 +28,15 @@ describe('getSavedRuleId', () => {
 
   it('is undefined for an unsaved rule', () => {
     expect(getSavedRuleId(ruleAttachment('not json'))).toBeUndefined();
+  });
+});
+
+describe('isRuleDraftAttachment', () => {
+  it('is true for the drafted rule attachment id', () => {
+    expect(isRuleDraftAttachment({ id: 'rule-draft' })).toBe(true);
+  });
+
+  it('is false for any other attachment id', () => {
+    expect(isRuleDraftAttachment({ id: 'attachment-1' })).toBe(false);
   });
 });

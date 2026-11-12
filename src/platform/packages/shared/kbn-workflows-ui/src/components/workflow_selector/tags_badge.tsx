@@ -30,7 +30,7 @@ export const TagsBadge: React.FC<TagsBadgeProps> = ({ tags }) => {
 
   return (
     <EuiPopover
-      aria-label={i18n.translate('workflows.tagsBadge.popoverAriaLabel', {
+      aria-label={i18n.translate('workflowsUi.tagsBadge.popoverAriaLabel', {
         defaultMessage: 'Tags',
       })}
       button={

@@ -19,7 +19,11 @@ properties:
       - type
   customFields:
     type: array
-    description: Custom fields case configuration.
+    deprecated: true
+    description: >
+      Custom fields case configuration.
+      Deprecated. Use the field library (`/api/cases/field_definitions`) to manage
+      field definitions and `extended_fields` on case create/update to set field values.
     items:
       type: object
       required:
@@ -33,6 +37,8 @@ properties:
     type: boolean
     description: >
       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+      Observable extraction is available only for Security cases. For Stack and Observability cases,
+      changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
   templates:
     $ref: 'templates.yaml'
   workflowTags:
