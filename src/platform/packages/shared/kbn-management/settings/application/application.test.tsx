@@ -42,7 +42,7 @@ import type { SettingsApplicationServices } from './services';
 import { SettingsApplicationKibanaProvider } from './services';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
-import type { Space } from '@kbn/spaces-plugin/common';
+import type { SolutionView, Space } from '@kbn/spaces-plugin/common';
 import {
   analyticsServiceMock,
   applicationServiceMock,
@@ -72,22 +72,26 @@ const renderWithKibanaProvider = ({
   history = scopedHistoryMock.create({ pathname: '', search: '' }),
   client = uiSettingsServiceMock.createStartContract(),
   metadata = { getAll: jest.fn().mockResolvedValue({}) },
+  bySolutionView = false,
+  solution = 'classic',
 }: {
   history?: ReturnType<typeof scopedHistoryMock.create>;
   client?: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   metadata?: IUiSettingsMetadataClient;
+  bySolutionView?: boolean;
+  solution?: SolutionView;
 } = {}) => {
   const activeSpace: Space = {
     id: asSpaceId('default'),
     name: 'Default',
     disabledFeatures: [],
-    solution: 'classic',
+    solution,
   };
   const application = applicationServiceMock.createStartContract();
   application.capabilities = {
     advancedSettings: { show: true, save: true },
     globalSettings: { show: true, save: true },
-    filterSettings: { bySolutionView: false },
+    filterSettings: { bySolutionView },
   } as any;
 
   return render(
@@ -250,6 +254,60 @@ describe('Settings application', () => {
 
     expect(await findByDisplayValue('new')).toBeInTheDocument();
     expect(metadata.getAll).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps hiding settings from other solutions after a setting update', async () => {
+    const update$ = new Subject<{ key: string; newValue: unknown; oldValue: unknown }>();
+    const client = uiSettingsServiceMock.createStartContract();
+    client.getUpdate$.mockReturnValue(update$);
+    const createUserValues = (visibleValue: string) => ({
+      'visible:setting': {
+        name: 'Visible setting',
+        type: 'string' as const,
+        value: 'default',
+        userValue: visibleValue,
+      },
+      'hidden:setting': {
+        name: 'Hidden setting',
+        type: 'string' as const,
+        value: 'default',
+        userValue: 'hidden-value',
+      },
+    });
+    client.getAll.mockReturnValue(createUserValues('visible-value'));
+    const namespaceDefinitions: UiSettingsMetadataState = {
+      'visible:setting': {
+        ...createUserValues('visible-value')['visible:setting'],
+        solutionViews: ['oblt'],
+      },
+      'hidden:setting': {
+        ...createUserValues('visible-value')['hidden:setting'],
+        solutionViews: ['es'],
+      },
+    };
+    const metadata = {
+      getAll: jest.fn(async (scope: UiSettingsScope) =>
+        scope === 'namespace' ? namespaceDefinitions : {}
+      ),
+    };
+
+    const { findByDisplayValue, queryByDisplayValue } = renderWithKibanaProvider({
+      client,
+      metadata,
+      bySolutionView: true,
+      solution: 'oblt',
+    });
+
+    expect(await findByDisplayValue('visible-value')).toBeInTheDocument();
+    await waitFor(() => expect(queryByDisplayValue('hidden-value')).toBeNull());
+
+    client.getAll.mockReturnValue(createUserValues('new-value'));
+    act(() => {
+      update$.next({ key: 'visible:setting', newValue: 'new-value', oldValue: 'visible-value' });
+    });
+
+    expect(await findByDisplayValue('new-value')).toBeInTheDocument();
+    expect(queryByDisplayValue('hidden-value')).toBeNull();
   });
 
   it('replaces history while typing so browser back does not step through each character', async () => {
