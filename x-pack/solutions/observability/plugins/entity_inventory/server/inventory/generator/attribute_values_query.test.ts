@@ -150,13 +150,15 @@ describe('buildAttributeValuesQuery', () => {
         limit: LIMIT,
       });
 
-    it('groups by the label, so the sort and the limit see what the response shows', () => {
+    it('maps the grouped values to their labels and groups again, before the sort and the limit', () => {
       const query = buildLabelled({ aarch64: 'arm64', arm: 'arm64' });
 
-      expect(query?.esql).toContain(
-        'BY `value` = CASE(TO_STRING(`orchestrator.cluster.name`) == ?lk0, ?lv0, ' +
-          'TO_STRING(`orchestrator.cluster.name`) == ?lk1, ?lv1, TO_STRING(`orchestrator.cluster.name`))'
-      );
+      expect(query?.esql.split('\n').slice(4, 8)).toEqual([
+        '| STATS `last_seen` = MAX(`@timestamp`) BY `value` = TO_STRING(`orchestrator.cluster.name`)',
+        '| EVAL `value` = CASE(`value` == ?lk0, ?lv0, `value` == ?lk1, ?lv1, `value`)',
+        '| STATS `last_seen` = MAX(`last_seen`) BY `value`',
+        '| WHERE `value` IS NOT NULL',
+      ]);
       expect(query?.params).toEqual([
         { from: window.from },
         { to: window.to },
