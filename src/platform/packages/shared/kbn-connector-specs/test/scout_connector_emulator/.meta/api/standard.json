@@ -1,9 +1,100 @@
 {
-  "sha1": "4d6202bcab446c3baaf70f7b6c3f67d6f3d11e57",
+  "sha1": "536806ddef6ff991bdd487da25dfd0fd1d8d4d22",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "bb2f6b52c9c3f62-6695c317398dbd8",
+      "title": "the Brave Search actions through Kibana against the connector emulator webSearch sends the query and the page size, and returns the results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/brave_search_actions.spec.ts",
+        "line": 52,
+        "column": 5
+      }
+    },
+    {
+      "id": "bb2f6b52c9c3f62-b6e21c40c462799",
+      "title": "the Brave Search actions through Kibana against the connector emulator webSearch asks for the page after the first one with an offset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/brave_search_actions.spec.ts",
+        "line": 71,
+        "column": 16
+      }
+    },
+    {
+      "id": "bb2f6b52c9c3f62-9c6b7ff3918781a",
+      "title": "the Brave Search actions through Kibana against the connector emulator reports a vendor error as an error, without a result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/brave_search_actions.spec.ts",
+        "line": 82,
+        "column": 26
+      }
+    },
+    {
+      "id": "fbfc45e69a08ee6-ec9d778750a98cd",
+      "title": "the Censys actions through Kibana against the connector emulator getHost asks for the host in the connector organization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
+        "line": 51,
+        "column": 5
+      }
+    },
+    {
+      "id": "fbfc45e69a08ee6-aaf34b20c3cde97",
+      "title": "the Censys actions through Kibana against the connector emulator getHostEnrichment asks for the compact record of the host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
+        "line": 66,
+        "column": 73
+      }
+    },
+    {
+      "id": "fbfc45e69a08ee6-3f81e836405d80b",
+      "title": "the Censys actions through Kibana against the connector emulator getHostHistory sends the time window of the timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
+        "line": 80,
+        "column": 17
+      }
+    },
+    {
+      "id": "fbfc45e69a08ee6-744316aa7ec383e",
+      "title": "the Censys actions through Kibana against the connector emulator reports a vendor error as an error, without a result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
+        "line": 93,
+        "column": 24
+      }
+    },
     {
       "id": "e2747c63e369408-22abdf4f80e9143",
       "title": "the Firecrawl actions through Kibana against the connector emulator scrape sends the page to scrape and returns what the vendor answers",
@@ -13,7 +104,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
-        "line": 104,
+        "line": 106,
         "column": 7
       }
     },
@@ -26,7 +117,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
-        "line": 123,
+        "line": 125,
         "column": 16
       }
     },
@@ -39,7 +130,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
-        "line": 135,
+        "line": 137,
         "column": 11
       }
     },
@@ -52,7 +143,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
-        "line": 145,
+        "line": 147,
         "column": 88
       }
     },
@@ -65,7 +156,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
-        "line": 158,
+        "line": 160,
         "column": 13
       }
     },
@@ -78,7 +169,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
-        "line": 166,
+        "line": 168,
         "column": 95
       }
     },
@@ -91,8 +182,86 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
-        "line": 196,
+        "line": 198,
         "column": 34
+      }
+    },
+    {
+      "id": "1e45ec98f69c79f-264d8e68c7f89b4",
+      "title": "the Jina Reader actions through Kibana against the connector emulator browse sends the page to turn into markdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/jina_actions.spec.ts",
+        "line": 50,
+        "column": 5
+      }
+    },
+    {
+      "id": "1e45ec98f69c79f-0bc1109bb1020ac",
+      "title": "the Jina Reader actions through Kibana against the connector emulator search sends the query to the search host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/jina_actions.spec.ts",
+        "line": 65,
+        "column": 73
+      }
+    },
+    {
+      "id": "01b75757c3a958d-cb2c9f142f275cf",
+      "title": "the Shodan actions through Kibana against the connector emulator searchHosts sends the query and the page, with the key kept out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/shodan_actions.spec.ts",
+        "line": 50,
+        "column": 5
+      }
+    },
+    {
+      "id": "01b75757c3a958d-2230ffda3e9baab",
+      "title": "the Shodan actions through Kibana against the connector emulator getHostInfo asks for the host it is given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/shodan_actions.spec.ts",
+        "line": 68,
+        "column": 59
+      }
+    },
+    {
+      "id": "01b75757c3a958d-91d5fd427168153",
+      "title": "the Shodan actions through Kibana against the connector emulator countResults sends the query and the facets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/shodan_actions.spec.ts",
+        "line": 77,
+        "column": 13
+      }
+    },
+    {
+      "id": "01b75757c3a958d-bba172864b267ad",
+      "title": "the Shodan actions through Kibana against the connector emulator reports a vendor error as an error, without a result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/shodan_actions.spec.ts",
+        "line": 90,
+        "column": 17
       }
     }
   ]
