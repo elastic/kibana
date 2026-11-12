@@ -63,8 +63,6 @@ export interface TableGridAppearance {
   stripes: boolean;
   rowHover: 'highlight' | 'none';
   header: 'underline' | 'shade';
-  cellPadding: 'm';
-  fontSize: 's';
 }
 
 export interface TableGridScrollState {

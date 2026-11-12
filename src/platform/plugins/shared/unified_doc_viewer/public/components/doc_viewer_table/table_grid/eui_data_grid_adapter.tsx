@@ -51,6 +51,8 @@ const getCellContext = <TRow,>(
 
 const getGridStyle = <TRow,>(model: TableGridModel<TRow>): EuiDataGridStyle => ({
   ...model.appearance,
+  cellPadding: 'm',
+  fontSize: 's',
 });
 
 type EuiCellActions = NonNullable<EuiDataGridProps['columns'][number]['cellActions']>;

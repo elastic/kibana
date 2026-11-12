@@ -41,8 +41,6 @@ const defaultAppearance: TableGridAppearance = {
   stripes: true,
   rowHover: 'highlight',
   header: 'underline',
-  cellPadding: 'm',
-  fontSize: 's',
 };
 
 export interface UseTableGridModelParams {
