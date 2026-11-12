@@ -15,6 +15,7 @@ export const CONTEXT_ENGINE_EVENT_TYPES = {
   KiDelete: `${TELEMETRY_PREFIX}_ki_delete`,
   KiRestore: `${TELEMETRY_PREFIX}_ki_restore`,
   KiVerification: `${TELEMETRY_PREFIX}_ki_verification`,
+  MemoryMaintenanceRun: `${TELEMETRY_PREFIX}_memory_maintenance_run`,
 } as const;
 
 export type ContextEngineOutcome = 'success' | 'failure' | 'aborted';
@@ -166,10 +167,65 @@ const KI_VERIFICATION_EVENT: EventTypeOpts<ReportKiVerificationEventParams> = {
   schema: kiVerificationEventSchema,
 };
 
+export interface ReportMemoryMaintenanceRunEventParams {
+  ai_index_id: string;
+  mode: 'report' | 'apply' | 'dry_run';
+  braked: boolean;
+  reviewed: number;
+  written: number;
+  merged: number;
+  superseded: number;
+  rewritten: number;
+  summarized: number;
+  tombstoned: number;
+  needs_review: number;
+  rejected: number;
+}
+
+const count = (description: string) =>
+  ({ type: 'long', _meta: { description, optional: false } } as const);
+
+const memoryMaintenanceRunEventSchema: RootSchema<ReportMemoryMaintenanceRunEventParams> = {
+  ai_index_id: {
+    type: 'keyword',
+    _meta: { description: 'The id of the AI index the run maintained.', optional: false },
+  },
+  mode: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'How the run ended: "report" planned changes only, "apply" wrote them, "dry_run" was a manual run that wrote nothing.',
+      optional: false,
+    },
+  },
+  braked: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the run stopped before writing because it would tombstone too much.',
+      optional: false,
+    },
+  },
+  reviewed: count('Facts and entities the model reviewed.'),
+  written: count('Facts, entities and relationships written, or that would be.'),
+  merged: count('Items other items were merged into.'),
+  superseded: count('Items merged into another, or that lost a contradiction.'),
+  rewritten: count('Items rewritten after some of their memories were deleted.'),
+  summarized: count('Entities whose summary was refreshed.'),
+  tombstoned: count('Items and relationships tombstoned without a model.'),
+  needs_review: count('Changes left for a person.'),
+  rejected: count('Changes that broke a rule.'),
+};
+
+const MEMORY_MAINTENANCE_RUN_EVENT: EventTypeOpts<ReportMemoryMaintenanceRunEventParams> = {
+  eventType: CONTEXT_ENGINE_EVENT_TYPES.MemoryMaintenanceRun,
+  schema: memoryMaintenanceRunEventSchema,
+};
+
 export const contextEngineServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   KI_CREATE_EVENT,
   KI_UPDATE_EVENT,
   KI_DELETE_EVENT,
   KI_RESTORE_EVENT,
   KI_VERIFICATION_EVENT,
+  MEMORY_MAINTENANCE_RUN_EVENT,
 ];

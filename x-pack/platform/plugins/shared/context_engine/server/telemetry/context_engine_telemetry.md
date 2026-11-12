@@ -31,6 +31,7 @@ The usage collector runs regardless of the setting.
 | `context_engine_ki_delete` | The `context-engine.deleteKi` workflow step or the internal DELETE KI route soft-deletes a KI document, or fails to. |
 | `context_engine_ki_restore` | The internal POST KI restore route restores a soft-deleted KI document, or fails to. |
 | `context_engine_ki_verification` | The `context-engine.verifyKi` step, or `context-engine.createKi` given `verifiers`, completes a verifier run, or fails to. |
+| `context_engine_memory_maintenance_run` | A memory maintenance run ends with its `context-engine.recordMaintenanceRun` step: after a report, an apply, a manual dry run, or the brake. |
 
 KI write HTTP routes (PATCH update, DELETE soft-delete, POST restore) report through `withKiWriteTelemetry` like the workflow steps. ECS audit events in `server/audit/audit_events.ts` still record AI index and KI operations for security auditing; other AI index HTTP routes (reads, index management) are not covered by these EBT events.
 
@@ -59,6 +60,19 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 | `workflow_id` | The id of the workflow that ran this verification step. |
 | `ai_index_id` | The AI index the KI belongs to, when provided by the caller. |
 | `error_type` | As in KI write events. Present only on `failure`. |
+
+### Memory maintenance run event
+
+| Field | Description |
+|---|---|
+| `ai_index_id` | The id of the AI index the run maintained. |
+| `mode` | `report` (planned changes only), `apply` (wrote them), or `dry_run` (a manual run that wrote nothing). |
+| `braked` | Whether the run stopped before writing because it would tombstone more than the AI index allows. |
+| `reviewed` | Facts and entities the model reviewed. |
+| `written` | Facts, entities and relationships written, or that would be. |
+| `merged` / `superseded` / `rewritten` / `summarized` / `tombstoned` | Changes of each kind made, or that would be. |
+| `needs_review` | Changes left for a person. |
+| `rejected` | Changes that broke a rule. |
 
 ## Usage collector
 

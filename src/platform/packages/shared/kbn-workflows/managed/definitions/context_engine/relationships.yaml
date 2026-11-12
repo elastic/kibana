@@ -306,6 +306,7 @@ steps:
                 - from and to are different items.
                 - Link a fact only to the entities it is about, with relation about: from is the fact, to is the entity. Never use another type from or to a fact.
                 - Every other type links two entities. Use one only when its description fits both ends; otherwise leave the pair unlinked.
+                - Never link a pair the other way round when an EXISTING relationship already links it: with "Priya manages Alex", do not create "Alex reports_to Priya".
                 - Leave out EXISTING relationships that do not change.
                 - An empty list is a valid answer.
 

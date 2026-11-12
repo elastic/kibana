@@ -9,17 +9,19 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import type { ContextEngineDreamingWorkflowTemplateValues } from '@kbn/workflows/managed';
+import type { ContextEngineMaintenanceWorkflowTemplateValues } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   DEFAULT_DREAMING_INTERVAL,
   MIN_DREAMING_INTERVAL_MINUTES,
   dreamingBuildsAnything,
   dreamingTypesOf,
+  maintenanceConfigOf,
   type AiIndexDreamingConfig,
 } from '../../common/dreaming';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
@@ -46,14 +48,14 @@ import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 export interface DreamingScheduleService {
   /**
    * Installs and enables the dreaming and trace dreaming workflows of an AI index that dreams,
-   * and removes them from one that does not.
+   * and its maintenance workflow while maintenance is on, and removes them otherwise.
    */
   reconcile(params: {
     aiIndex: AiIndexItem;
     spaceId: string;
     request: KibanaRequest;
   }): Promise<void>;
-  /** Removes both dreaming workflows of an AI index. */
+  /** Removes the dreaming and maintenance workflows of an AI index. */
   remove(params: { aiIndexId: string; spaceId: string; request: KibanaRequest }): Promise<void>;
 }
 
@@ -76,17 +78,26 @@ export const traceDreamingBatchWorkflowIdFor = (aiIndexId: string, spaceId: stri
 export const relationshipsWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
+/** The id of the memory maintenance workflow of an AI index. */
+export const maintenanceWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
+
 /** Whether an AI index has dreaming on and configured to build something. */
 export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
   dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
 
-/** The dreaming workflow template values for an AI index. */
+/** Whether an AI index dreams and has memory maintenance turned on. */
+export const shouldMaintain = (aiIndex: { dreaming?: AiIndexDreamingConfig }): boolean =>
+  shouldDream(aiIndex) && aiIndex.dreaming?.maintenance?.enabled === true;
+
+/** The dreaming and maintenance workflow template values for an AI index. */
 export const dreamingTemplateValuesFor = (
   aiIndex: AiIndexItem,
   dreaming: AiIndexDreamingConfig,
   spaceId: string
-): ContextEngineDreamingWorkflowTemplateValues => {
+): ContextEngineMaintenanceWorkflowTemplateValues => {
   const { facts, entities, relationships } = dreamingTypesOf(dreaming);
+  const maintenance = maintenanceConfigOf(dreaming.maintenance);
   return {
     aiIndexId: aiIndex.id,
     instanceKey: managedWorkflowIdSuffixFor(aiIndex.id, spaceId),
@@ -99,6 +110,10 @@ export const dreamingTemplateValuesFor = (
     factTypes: facts,
     entityTypes: entities,
     relationshipTypes: relationships,
+    maintenanceIntervalMinutes:
+      parseIntervalMinutes(maintenance.schedule.interval) ?? MIN_DREAMING_INTERVAL_MINUTES,
+    maintenanceMode: maintenance.mode,
+    maxTombstoneShare: maintenance.max_tombstone_share,
   };
 };
 
@@ -129,7 +144,17 @@ const DREAMING_WORKFLOWS = [
   },
 ] as const;
 
-type DreamingWorkflow = (typeof DREAMING_WORKFLOWS)[number];
+/** Maintains what the dreaming workflows write, on its own schedule, while it is turned on. */
+const MAINTENANCE_WORKFLOW = {
+  definitionId: CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
+  label: 'memory maintenance',
+  workflowIdFor: maintenanceWorkflowIdFor,
+  attach: true,
+} as const;
+
+type DreamingWorkflow = (typeof DREAMING_WORKFLOWS)[number] | typeof MAINTENANCE_WORKFLOW;
+
+const ALL_WORKFLOWS: readonly DreamingWorkflow[] = [...DREAMING_WORKFLOWS, MAINTENANCE_WORKFLOW];
 
 export const createDreamingScheduleService = ({
   logger,
@@ -186,19 +211,28 @@ export const createDreamingScheduleService = ({
   const automationFor = (workflow: DreamingWorkflow, aiIndexId: string, spaceId: string) =>
     ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) } as const);
 
+  const detach = async (
+    workflow: DreamingWorkflow,
+    aiIndex: AiIndexItem,
+    spaceId: string,
+    request: KibanaRequest
+  ) => {
+    await uninstall(workflow, aiIndex.id, spaceId, request);
+    if (workflow.attach && !aiIndex.managed) {
+      await getAiIndexService().removeAutomation(
+        aiIndex.id,
+        spaceId,
+        automationFor(workflow, aiIndex.id, spaceId)
+      );
+    }
+  };
+
   return {
     async reconcile({ aiIndex, spaceId, request }) {
       const { id: aiIndexId, dreaming } = aiIndex;
       if (!dreaming || !shouldDream(aiIndex)) {
-        for (const workflow of DREAMING_WORKFLOWS) {
-          await uninstall(workflow, aiIndexId, spaceId, request);
-          if (workflow.attach && !aiIndex.managed) {
-            await getAiIndexService().removeAutomation(
-              aiIndexId,
-              spaceId,
-              automationFor(workflow, aiIndexId, spaceId)
-            );
-          }
+        for (const workflow of ALL_WORKFLOWS) {
+          await detach(workflow, aiIndex, spaceId, request);
         }
         log.debug(() => `Removed dreaming for AI index '${aiIndexId}' in space '${spaceId}'`);
         return;
@@ -212,8 +246,9 @@ export const createDreamingScheduleService = ({
       }
 
       const values = dreamingTemplateValuesFor(aiIndex, dreaming, spaceId);
+      const maintain = shouldMaintain(aiIndex);
       const client = await getManagedWorkflowsClient();
-      for (const workflow of DREAMING_WORKFLOWS) {
+      for (const workflow of maintain ? ALL_WORKFLOWS : DREAMING_WORKFLOWS) {
         await client.install(workflow.definitionId, {
           spaceId,
           workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
@@ -231,14 +266,21 @@ export const createDreamingScheduleService = ({
           );
         }
 
+        const intervalMinutes =
+          workflow === MAINTENANCE_WORKFLOW
+            ? values.maintenanceIntervalMinutes
+            : values.intervalMinutes;
         log.info(
-          `Installed ${workflow.label} for AI index '${aiIndexId}' in space '${spaceId}' every ${values.intervalMinutes}m, running as the user who saved its config`
+          `Installed ${workflow.label} for AI index '${aiIndexId}' in space '${spaceId}' every ${intervalMinutes}m, running as the user who saved its config`
         );
+      }
+      if (!maintain) {
+        await detach(MAINTENANCE_WORKFLOW, aiIndex, spaceId, request);
       }
     },
 
     async remove({ aiIndexId, spaceId, request }) {
-      for (const workflow of DREAMING_WORKFLOWS) {
+      for (const workflow of ALL_WORKFLOWS) {
         await uninstall(workflow, aiIndexId, spaceId, request);
       }
       log.debug(() => `Removed dreaming for deleted AI index '${aiIndexId}' in space '${spaceId}'`);

@@ -11,6 +11,7 @@ import DREAMING_YAML from './dreaming.yaml';
 import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
 import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
+import MAINTENANCE_YAML from './maintenance.yaml';
 import RELATIONSHIPS_YAML from './relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
@@ -177,7 +178,7 @@ export type ContextEngineRelationshipsWorkflowTemplateValues =
 export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
   id: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 2,
+  version: 3,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(RELATIONSHIPS_YAML, {
@@ -192,3 +193,40 @@ export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID = 'system-context-engine-maintenance';
+
+/** The dreaming config, which maintenance reuses, and its own settings. */
+export interface ContextEngineMaintenanceWorkflowTemplateValues
+  extends ContextEngineDreamingWorkflowTemplateValues {
+  /** How often maintenance runs. */
+  maintenanceIntervalMinutes: number;
+  /** `report` plans changes and writes nothing; `apply` writes them. */
+  maintenanceMode: 'report' | 'apply';
+  /** The share of the items a run reviews it may tombstone before it stops without writing. */
+  maxTombstoneShare: number;
+}
+
+/**
+ * Maintains the long-term facts and entities of one AI index: merges duplicates, settles
+ * contradictions, rewrites items whose memories were deleted, refreshes entity summaries, and
+ * removes duplicate and inverse relationships.
+ */
+export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW = {
+  id: CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(MAINTENANCE_YAML, {
+      __NAME__: `Memory maintenance: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
+      __INTERVAL_MINUTES__: values.maintenanceIntervalMinutes,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+      __MODE__: values.maintenanceMode,
+      __MAX_TOMBSTONE_SHARE__: values.maxTombstoneShare,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineMaintenanceWorkflowTemplateValues>;
