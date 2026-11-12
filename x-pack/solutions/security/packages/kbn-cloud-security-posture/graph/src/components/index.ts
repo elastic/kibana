@@ -27,8 +27,8 @@ export type { GraphProps } from './graph/graph';
 export type {
   NodeViewModel,
   EdgeViewModel,
-  GroupNodeViewModel,
-  LabelNodeViewModel,
+  ConnectorGroupNodeViewModel,
+  EventNodeViewModel,
   EntityNodeViewModel,
   RelationshipNodeViewModel,
   NodeProps,
