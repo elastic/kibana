@@ -138,7 +138,7 @@ describe('useCloseSignificantEvent', () => {
     });
   });
 
-  it('explains the missing Alerts privilege when the update is forbidden', async () => {
+  it('shows the server message when the update is forbidden', async () => {
     significantEventsFetch.mockRejectedValueOnce(
       Object.assign(new Error('Forbidden'), {
         body: {
@@ -160,9 +160,7 @@ describe('useCloseSignificantEvent', () => {
 
     await waitFor(() => expect(addError).toHaveBeenCalled());
     expect(addError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: expect.stringContaining('requires the Alerts "All" privilege'),
-      }),
+      expect.objectContaining({ message: 'Unauthorized to access "Alerts: All"' }),
       { title: 'Failed to mark significant event inactive' }
     );
   });
