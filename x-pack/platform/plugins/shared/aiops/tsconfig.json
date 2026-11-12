@@ -50,6 +50,7 @@
     "@kbn/licensing-plugin",
     "@kbn/logging",
     "@kbn/ml-agg-utils",
+    "@kbn/ml-cancellable-search",
     "@kbn/ml-category-validator",
     "@kbn/ml-date-picker",
     "@kbn/ml-error-utils",

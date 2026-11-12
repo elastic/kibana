@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useReducer, useState } from 'react';
 import { chunk } from 'lodash';
-import { useCancellableSearch } from '@kbn/ml-cancellable-search';
+import { useCancellableSearch, type RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { getESQLWithSafeLimit } from '@kbn/esql-utils';
 import type { DataStatsFetchProgress, FieldStats } from '../../../../../common/types/field_stats';
 import { useDataVisualizerKibana } from '../../../kibana_context';

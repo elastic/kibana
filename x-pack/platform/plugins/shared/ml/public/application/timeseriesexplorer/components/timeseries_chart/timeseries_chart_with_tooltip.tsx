@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Annotation } from '@kbn/ml-common-types/annotations';

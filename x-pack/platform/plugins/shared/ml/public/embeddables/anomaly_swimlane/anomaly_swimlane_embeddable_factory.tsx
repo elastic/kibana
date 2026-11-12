@@ -18,13 +18,13 @@ import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embe
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { PublishesUnifiedSearch, ViewMode } from '@kbn/presentation-publishing';
 import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import {
   apiHasExecutionContext,
   fetch$,
   getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
-  RequestCancellationManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,

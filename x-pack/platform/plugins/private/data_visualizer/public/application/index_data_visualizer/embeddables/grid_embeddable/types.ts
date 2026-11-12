@@ -9,7 +9,7 @@ import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { Observable } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';

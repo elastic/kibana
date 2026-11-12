@@ -22,7 +22,7 @@ import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';

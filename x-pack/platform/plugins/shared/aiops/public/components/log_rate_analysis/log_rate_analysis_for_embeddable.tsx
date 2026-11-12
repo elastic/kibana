@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 
 import type { TimeRange } from '@kbn/es-query';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';

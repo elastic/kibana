@@ -14,6 +14,7 @@ import type {
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { RequestCancellationManager } from './request_cancellation_manager';
 
 export interface UseCancellableSearch {
   runRequest: <
@@ -27,18 +28,10 @@ export interface UseCancellableSearch {
   isLoading: boolean;
 }
 
-/**
- * Structural type of `RequestCancellationManager` from `@kbn/presentation-publishing`,
- * so this package doesn't need to depend on it.
- */
-export interface RequestCancellationLike {
-  readonly signal: AbortSignal;
-}
-
 // Similar to aiops/hooks/use_cancellable_search.ts
 export function useCancellableSearch(
   data: DataPublicPluginStart,
-  requestCancellationManager?: RequestCancellationLike
+  requestCancellationManager?: RequestCancellationManager
 ) {
   const abortController = useRef(new AbortController());
   const [isLoading, setIsFetching] = useState<boolean>(false);

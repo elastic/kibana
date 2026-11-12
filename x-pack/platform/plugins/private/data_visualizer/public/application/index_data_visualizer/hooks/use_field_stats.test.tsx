@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { Observable } from 'rxjs';
-import { RequestCancellationManager } from '@kbn/presentation-publishing';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 import { SUPPORTED_FIELD_TYPES } from '../../../../common/constants';

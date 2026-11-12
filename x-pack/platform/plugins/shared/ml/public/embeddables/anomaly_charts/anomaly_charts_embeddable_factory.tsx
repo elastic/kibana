@@ -13,6 +13,7 @@ import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subscription, distinctUntilChanged, map, merge } from 'rxjs';
 import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import {
   apiHasExecutionContext,
   fetch$,
@@ -20,7 +21,6 @@ import {
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
-  RequestCancellationManager,
   timeRangeComparators,
   titleComparators,
   useStateFromPublishingSubject,

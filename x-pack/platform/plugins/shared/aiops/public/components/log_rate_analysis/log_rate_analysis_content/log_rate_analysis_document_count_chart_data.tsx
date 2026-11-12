@@ -9,7 +9,7 @@ import { type FC, useEffect } from 'react';
 import type { Moment } from 'moment';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 
 import {
   useAppDispatch,

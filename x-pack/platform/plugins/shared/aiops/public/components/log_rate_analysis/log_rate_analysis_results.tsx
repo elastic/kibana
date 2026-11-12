@@ -25,7 +25,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import {
   clearAllRowState,
   setGroupResults,

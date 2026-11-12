@@ -10,6 +10,7 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import {
@@ -21,7 +22,6 @@ import {
   useBatchedPublishingSubjects,
   titleComparators,
   timeRangeComparators,
-  RequestCancellationManager,
 } from '@kbn/presentation-publishing';
 import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { initializeStateApi } from '@kbn/presentation-publishing';

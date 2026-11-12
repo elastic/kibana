@@ -14,13 +14,13 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
   apiHasExecutionContext,
   getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
-  RequestCancellationManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,

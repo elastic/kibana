@@ -16,7 +16,8 @@ import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
-import type { PublishesFilters, RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
+import type { PublishesFilters } from '@kbn/presentation-publishing';
 import {
   ChangePointDetectionControlsContextProvider,
   type ChangePointAnnotation,

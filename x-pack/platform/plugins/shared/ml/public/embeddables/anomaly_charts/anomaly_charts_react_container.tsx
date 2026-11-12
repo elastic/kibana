@@ -23,7 +23,7 @@ import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type {
   AnomalyChartsEmbeddableServices,
   AnomalyChartsApi,

@@ -1,22 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 /**
- * Coordinates the lifetime of requests started for a single embeddable's load, so that
- * implementing `CanCancelRequests` only requires wiring this manager's `signal` into
- * whatever request APIs an embeddable's data fetching code calls.
+ * Coordinates the lifetime of requests started for a single ML embeddable load.
  *
- * Calling `cancel` before `startLoad` is called again keeps the current signal aborted -
- * callers that check `signal.aborted` before starting a request will correctly skip it,
- * satisfying the "prevent requests from being started" half of `CanCancelRequests`.
+ * Wire `signal` into the request APIs that embeddable's data fetching code calls.
+ * Calling `cancel` before `startLoad` keeps the current signal aborted, so callers
+ * that check `signal.aborted` before starting a request skip it.
  */
 export class RequestCancellationManager {
   private abortController = new AbortController();

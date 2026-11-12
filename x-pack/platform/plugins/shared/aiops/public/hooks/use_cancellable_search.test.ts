@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { Observable } from 'rxjs';
-import { RequestCancellationManager } from '@kbn/presentation-publishing';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 import { useAiopsAppContext } from './use_aiops_app_context';

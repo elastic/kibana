@@ -6,7 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { fetch$, type RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
+import { fetch$ } from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
   catchError,

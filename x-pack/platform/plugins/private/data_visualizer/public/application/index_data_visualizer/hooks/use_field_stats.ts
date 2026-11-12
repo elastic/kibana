@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 import { combineLatest, from, Subject } from 'rxjs';

@@ -7,7 +7,8 @@
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { RequestCancellationManager, type StateComparators } from '@kbn/presentation-publishing';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { FieldStatsInitialState } from '../../../../../common/embeddables/types';

@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { FormattedMessage } from '@kbn/i18n-react';

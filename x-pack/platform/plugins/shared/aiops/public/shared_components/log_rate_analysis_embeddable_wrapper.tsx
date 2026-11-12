@@ -20,7 +20,8 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
-import type { PublishesFilters, RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
+import type { PublishesFilters } from '@kbn/presentation-publishing';
 import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { ReloadContextProvider } from '../hooks/use_reload';

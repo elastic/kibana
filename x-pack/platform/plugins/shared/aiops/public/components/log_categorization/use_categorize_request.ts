@@ -19,7 +19,7 @@ import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_
 import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import type { RandomSamplerStorage } from './sampling_menu';

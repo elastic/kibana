@@ -23,7 +23,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { tz } from 'moment';
 import { pick, throttle } from 'lodash';
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { MlDependencies } from '../../application/app';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';

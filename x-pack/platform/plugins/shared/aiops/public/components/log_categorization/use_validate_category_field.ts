@@ -16,7 +16,7 @@ import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
 
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export function useValidateFieldRequest(requestCancellationManager?: RequestCancellationManager) {
