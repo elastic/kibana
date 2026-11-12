@@ -72,19 +72,22 @@ export const GRAPH_GROUPED_ITEM_TYPE: Record<GraphGroupedItemType, GraphGroupedI
 /**
  * Where the user opened the graph from. `entity_data_grid` is the Entity Analytics entities grid
  * row action (the actions column); `entity_flyout` is an entity flyout opened from anywhere,
- * including by clicking the entity name in that grid.
+ * including by clicking the entity name in that grid; `ai_chat_attachment` is a graph opened from the
+ * Agent Builder entity graph attachment.
  */
 export type GraphEntryPoint =
   | 'alert_flyout'
   | 'event_flyout'
   | 'entity_flyout'
-  | 'entity_data_grid';
+  | 'entity_data_grid'
+  | 'ai_chat_attachment';
 
 export const GRAPH_ENTRY_POINT: Record<GraphEntryPoint, GraphEntryPoint> = {
   alert_flyout: 'alert_flyout',
   event_flyout: 'event_flyout',
   entity_flyout: 'entity_flyout',
   entity_data_grid: 'entity_data_grid',
+  ai_chat_attachment: 'ai_chat_attachment',
 };
 
 /** What a graph node drills through to outside the graph. */

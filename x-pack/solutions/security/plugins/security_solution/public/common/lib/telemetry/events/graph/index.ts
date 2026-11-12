@@ -38,7 +38,7 @@ export const graphEntityGraphEvent: GraphTelemetryEvent = {
       _meta: {
         description: `Where the graph was opened or previewed from (${list(
           GRAPH_ENTRY_POINT
-        )}). entity_data_grid is the entities grid row action (actions column); entity_flyout is an entity flyout opened from anywhere, including by clicking the entity name in the grid`,
+        )}). entity_data_grid is the entities grid row action (actions column); entity_flyout is an entity flyout opened from anywhere, including by clicking the entity name in the grid; ai_chat_attachment is a graph opened from the Agent Builder entity graph attachment`,
         optional: false,
       },
     },

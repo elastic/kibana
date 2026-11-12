@@ -165,6 +165,14 @@ describe('<EntityGraphPreviewContainer />', () => {
     expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_data_grid');
   });
 
+  it('reports through the entry point it is given', async () => {
+    const { findByTestId } = renderContainer({ entryPoint: 'ai_chat_attachment' });
+    await findByTestId(GRAPH_PREVIEW_TEST_ID);
+
+    expect(mockUseGraphTelemetry).toHaveBeenCalledWith('ai_chat_attachment');
+    expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_flyout');
+  });
+
   it('tracks ui metric when graph is available', async () => {
     const { findByTestId } = renderContainer();
     await findByTestId(GRAPH_PREVIEW_TEST_ID);

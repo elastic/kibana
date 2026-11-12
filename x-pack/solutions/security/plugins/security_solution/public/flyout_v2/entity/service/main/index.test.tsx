@@ -744,6 +744,35 @@ describe('<Service />', () => {
           })
         );
       });
+
+      it('opens the graph view and renders the content with the graph entry point it was opened with', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord, [aliasRecord]);
+        const { getByTestId } = render(
+          <TestProviders>
+            <Service {...mockProps} mode="resolved" graphEntryPoint="ai_chat_attachment" />
+          </TestProviders>
+        );
+
+        expect(mockContentProps).toHaveBeenLastCalledWith(
+          expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+        );
+        fireEvent.click(getByTestId('openGraphView'));
+        expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityId: mockProps.entityId,
+            entryPoint: 'ai_chat_attachment',
+          })
+        );
+      });
+
+      it('renders the content with the entity flyout entry point when none is given', () => {
+        renderResolved();
+
+        expect(mockContentProps).toHaveBeenLastCalledWith(
+          expect.objectContaining({ graphEntryPoint: 'entity_flyout' })
+        );
+      });
     });
   });
 });

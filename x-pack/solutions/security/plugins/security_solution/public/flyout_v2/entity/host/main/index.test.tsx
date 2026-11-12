@@ -46,39 +46,46 @@ jest.mock('../../../../common/lib/kibana', () => {
 const mockFlyoutApi = createFlyoutApiMock();
 
 // Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the tools.
+const mockContentProps = jest.fn();
 jest.mock('./content', () => {
   const actual = jest.requireActual('./content');
   const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
     '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header'
   );
-  const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="openAnomalyInsights"
-        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES })}
-      />
-      <button
-        type="button"
-        data-test-subj="openGraphView"
-        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW })}
-      />
-      {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
+  const Content = (props: {
+    openDetailsPanel: (path: EntityDetailsPath) => void;
+    graphEntryPoint?: string;
+  }) => {
+    mockContentProps(props);
+    return (
+      <>
         <button
-          key={subTab as string}
           type="button"
-          data-test-subj={`openCspInsights-${subTab}`}
-          onClick={() =>
-            props.openDetailsPanel({
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: subTab as typeof CspInsightLeftPanelSubTab,
-            })
-          }
+          data-test-subj="openAnomalyInsights"
+          onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES })}
         />
-      ))}
-      <actual.Content {...props} />
-    </>
-  );
+        <button
+          type="button"
+          data-test-subj="openGraphView"
+          onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW })}
+        />
+        {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
+          <button
+            key={subTab as string}
+            type="button"
+            data-test-subj={`openCspInsights-${subTab}`}
+            onClick={() =>
+              props.openDetailsPanel({
+                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                subTab: subTab as typeof CspInsightLeftPanelSubTab,
+              })
+            }
+          />
+        ))}
+        <actual.Content {...props} />
+      </>
+    );
+  };
   return { ...actual, Content };
 });
 
@@ -512,6 +519,39 @@ describe('<Host />', () => {
             scopeId: 'test-scope-id',
             entryPoint: 'entity_flyout',
           })
+        );
+      });
+
+      it('opens the graph view and renders the content with the graph entry point it was opened with', () => {
+        mockIsEntityStoreV2Enabled = true;
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord, [aliasRecord]);
+        const { getByTestId } = render(
+          <TestProviders>
+            <Host
+              {...mockProps}
+              entityId={targetEntityId}
+              mode="resolved"
+              graphEntryPoint="ai_chat_attachment"
+            />
+          </TestProviders>
+        );
+
+        expect(mockContentProps).toHaveBeenLastCalledWith(
+          expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+        );
+        fireEvent.click(getByTestId('openGraphView'));
+        expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+          expect.objectContaining({ entityId: targetEntityId, entryPoint: 'ai_chat_attachment' })
+        );
+      });
+
+      it('renders the content with the entity flyout entry point when none is given', () => {
+        mockIsEntityStoreV2Enabled = true;
+        renderResolved();
+
+        expect(mockContentProps).toHaveBeenLastCalledWith(
+          expect.objectContaining({ graphEntryPoint: 'entity_flyout' })
         );
       });
 

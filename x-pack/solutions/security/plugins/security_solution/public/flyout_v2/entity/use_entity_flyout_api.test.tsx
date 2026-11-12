@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EntityType } from '../../../common/entity_analytics/types';
 import { RiskScoreLeftPanelSubTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useEntityFlyoutApi } from './use_entity_flyout_api';
+import { useEntityFlyoutApi, type EntityFlyoutApi } from './use_entity_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -298,6 +298,42 @@ describe('useEntityFlyoutApi', () => {
       scopeId: undefined,
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it.each([
+    ['openHostFlyout', (api: EntityFlyoutApi) => api.openHostFlyout],
+    ['openHostFlyoutAsChild', (api: EntityFlyoutApi) => api.openHostFlyoutAsChild],
+  ])('%s hands the graph entry point to the host flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ hostName: 'host-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
+  });
+
+  it.each([
+    ['openUserFlyout', (api: EntityFlyoutApi) => api.openUserFlyout],
+    ['openUserFlyoutAsChild', (api: EntityFlyoutApi) => api.openUserFlyoutAsChild],
+  ])('%s hands the graph entry point to the user flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ userName: 'user-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
+  });
+
+  it.each([
+    ['openServiceFlyout', (api: EntityFlyoutApi) => api.openServiceFlyout],
+    ['openServiceFlyoutAsChild', (api: EntityFlyoutApi) => api.openServiceFlyoutAsChild],
+  ])('%s hands the graph entry point to the service flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ serviceName: 'svc-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
   });
 
   it('openGenericEntityFlyout writes a genericEntity descriptor to the URL', () => {

@@ -249,6 +249,17 @@ describe('useGraphTelemetry', () => {
     });
   });
 
+  it('reports the AI chat attachment entry point', () => {
+    const { result } = renderHook(() => useGraphTelemetry('ai_chat_attachment'));
+
+    result.current.reportGraphOpened();
+
+    expect(mockReportEvent).toHaveBeenCalledWith(GraphEventTypes.EntityGraph, {
+      id: 'graph_opened',
+      entryPoint: 'ai_chat_attachment',
+    });
+  });
+
   describe('without an entry point', () => {
     it('does not report a package event', () => {
       const { result } = renderHook(() => useGraphTelemetry(undefined));

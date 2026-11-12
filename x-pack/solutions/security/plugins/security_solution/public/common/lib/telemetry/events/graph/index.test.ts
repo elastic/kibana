@@ -7,7 +7,7 @@
 
 import { telemetryEvents } from '../telemetry_events';
 import { graphTelemetryEvents } from '.';
-import { GRAPH_EVENT_ID, GraphEventTypes } from './types';
+import { GRAPH_ENTRY_POINT, GRAPH_EVENT_ID, GraphEventTypes } from './types';
 
 describe('graph telemetry events', () => {
   it('defines a schema for every GraphEventTypes member', () => {
@@ -91,6 +91,17 @@ describe('graph telemetry events', () => {
     expect(isEmpty._meta.optional).toBe(true);
     expect(isEmpty._meta.description.length).toBeGreaterThan(0);
     expect(isEmpty._meta.description).toContain('graph_preview_shown');
+  });
+
+  it('lists every entry point, including the AI chat attachment, in the entryPoint field', () => {
+    const [{ schema }] = graphTelemetryEvents;
+    const { description } = (schema.entryPoint as { _meta: { description: string } })._meta;
+
+    Object.keys(GRAPH_ENTRY_POINT).forEach((entryPoint) => {
+      expect(description).toContain(entryPoint);
+    });
+    expect(Object.keys(GRAPH_ENTRY_POINT)).toContain('ai_chat_attachment');
+    expect(description).toContain('Agent Builder entity graph attachment');
   });
 
   it('uses a single entity_graph event type', () => {
