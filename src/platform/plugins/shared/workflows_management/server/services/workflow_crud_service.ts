@@ -17,6 +17,7 @@ import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/ent
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   DEFAULT_MAX_RETRIES,
+  delayMs,
   isElasticsearchWriteConflict,
   isOccConflictError,
   OCC_CONFLICT_STATUS_CODE,
@@ -139,6 +140,17 @@ export type {
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
 
+/**
+ * Per-document read errors of a shard that is not ready yet, such as right after another Kibana
+ * node or plugin created the workflow index. They clear on their own, so the read is retried.
+ */
+const SHARD_UNAVAILABLE_READ_ERROR_TYPES: ReadonlySet<string> = new Set([
+  'no_shard_available_action_exception',
+  'unavailable_shards_exception',
+]);
+/** Waits between reads while the shard is unavailable: about 3 seconds in all. */
+const SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS = [100, 200, 400, 800, 1600] as const;
+
 interface ApplyWorkflowUpdateResult {
   response: UpdatedWorkflowResponseDto;
   finalData: WorkflowProperties;
@@ -239,16 +251,42 @@ export class WorkflowCrudService {
   /**
    * Reads workflow documents by id with one real-time multi-get, across all spaces and including
    * deleted ones. Being real-time, it sees a write another Kibana node made before it is refreshed,
-   * which is what a writer needs after losing that write with a 409.
+   * which is what a writer needs after losing that write with a 409. Retries while the index's
+   * shard is not ready yet, and throws on any other failed read.
    */
   async getWorkflowDocumentsWithVersionByIds(
     ids: readonly string[]
   ): Promise<Map<string, VersionedWorkflowDocument>> {
     const uniqueIds = [...new Set(ids)];
-    const documents = new Map<string, VersionedWorkflowDocument>();
     if (uniqueIds.length === 0) {
-      return documents;
+      return new Map();
     }
+
+    for (let attempt = 0; ; attempt++) {
+      const { documents, unavailable } = await this.readWorkflowDocumentsWithVersion(uniqueIds);
+      if (!unavailable) {
+        return documents;
+      }
+      const message = `Could not read workflow ${unavailable.id}: ${unavailable.reason}`;
+      if (attempt >= SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS.length) {
+        throw new Error(message);
+      }
+      const retryDelayMs = SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS[attempt];
+      this.deps.logger.debug(`${message}. Retrying in ${retryDelayMs} ms.`);
+      await delayMs(retryDelayMs);
+    }
+  }
+
+  /**
+   * One real-time multi-get. Documents on a shard that is not ready yet are returned in
+   * `unavailable` (the first one) instead of thrown, so the caller can retry.
+   */
+  private async readWorkflowDocumentsWithVersion(ids: string[]): Promise<{
+    documents: Map<string, VersionedWorkflowDocument>;
+    unavailable?: { id: string; reason: string };
+  }> {
+    const documents = new Map<string, VersionedWorkflowDocument>();
+    let unavailable: { id: string; reason: string } | undefined;
 
     let response;
     try {
@@ -256,23 +294,26 @@ export class WorkflowCrudService {
         .getCoreStart()
         .elasticsearch.client.asInternalUser.mget<WorkflowProperties>({
           index: workflowIndexName,
-          ids: uniqueIds,
+          ids,
           realtime: true,
         });
     } catch (error) {
       // No workflow has been written yet, so the index does not exist.
       if (isNotFoundError(error)) {
-        return documents;
+        return { documents };
       }
       throw error;
     }
 
     for (const doc of response.docs) {
       if ('error' in doc) {
-        // Elasticsearch answers 200 with this error on every document when the index does not
-        // exist yet, which is the state of a fresh deployment before its first write.
-        if (doc.error.type !== 'index_not_found_exception') {
-          // Any other failed read would otherwise look like a missing workflow.
+        const { type } = doc.error;
+        if (SHARD_UNAVAILABLE_READ_ERROR_TYPES.has(type)) {
+          unavailable ??= { id: doc._id, reason: extractBulkItemError(doc.error) };
+        } else if (type !== 'index_not_found_exception') {
+          // Elasticsearch answers 200 with index_not_found_exception on every document when the
+          // index does not exist yet, the state of a fresh deployment before its first write. Any
+          // other failed read would otherwise look like a missing workflow.
           throw new Error(`Could not read workflow ${doc._id}: ${extractBulkItemError(doc.error)}`);
         }
       } else if (doc.found) {
@@ -286,7 +327,7 @@ export class WorkflowCrudService {
         });
       }
     }
-    return documents;
+    return { documents, unavailable };
   }
 
   /**

@@ -589,14 +589,14 @@ describe('WorkflowCrudService', () => {
       );
     });
 
-    it('throws instead of reporting a workflow as missing when it cannot be read', async () => {
+    it('throws without retrying instead of reporting a workflow as missing when it cannot be read', async () => {
       const { deps, mget } = makeMgetDeps();
       mget.mockResolvedValue({
         docs: [
           {
             _index: workflowIndexName,
             _id: 'wf-1',
-            error: { type: 'shard_not_available', reason: 'shard unavailable' },
+            error: { type: 'illegal_argument_exception', reason: 'invalid read' },
           },
         ],
       });
@@ -604,8 +604,76 @@ describe('WorkflowCrudService', () => {
       const service = new WorkflowCrudService(deps);
 
       await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1'])).rejects.toThrow(
-        'Could not read workflow wf-1: shard unavailable'
+        'Could not read workflow wf-1: invalid read'
       );
+      expect(mget).toHaveBeenCalledTimes(1);
+    });
+
+    describe('while the shard is not ready', () => {
+      // The response Elasticsearch gives right after another node or plugin creates the index.
+      const shardUnavailableResponse = {
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            error: {
+              type: 'no_shard_available_action_exception',
+              reason: 'No shard available for [MultiGetShardRequest/unset]',
+            },
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('reads again until the shard is ready', async () => {
+        const { deps, mget } = makeMgetDeps();
+        mget
+          .mockResolvedValueOnce(shardUnavailableResponse)
+          .mockResolvedValueOnce(shardUnavailableResponse)
+          .mockResolvedValueOnce({
+            docs: [
+              {
+                _index: workflowIndexName,
+                _id: 'wf-1',
+                found: true,
+                _seq_no: 0,
+                _primary_term: 1,
+                _source: makeSource(),
+              },
+            ],
+          });
+
+        const service = new WorkflowCrudService(deps);
+        const read = service.getWorkflowDocumentsWithVersionByIds(['wf-1']);
+        await jest.advanceTimersByTimeAsync(100 + 200);
+
+        await expect(read).resolves.toEqual(
+          new Map([['wf-1', { source: expect.any(Object), seqNo: 0, primaryTerm: 1 }]])
+        );
+        expect(mget).toHaveBeenCalledTimes(3);
+      });
+
+      it('throws when the shard is still not ready after the retries', async () => {
+        const { deps, mget } = makeMgetDeps();
+        mget.mockResolvedValue(shardUnavailableResponse);
+
+        const service = new WorkflowCrudService(deps);
+        const read = service.getWorkflowDocumentsWithVersionByIds(['wf-1']);
+        const assertion = expect(read).rejects.toThrow(
+          'Could not read workflow wf-1: No shard available for [MultiGetShardRequest/unset]'
+        );
+        await jest.advanceTimersByTimeAsync(100 + 200 + 400 + 800 + 1600);
+
+        await assertion;
+        expect(mget).toHaveBeenCalledTimes(6);
+      });
     });
   });
 
