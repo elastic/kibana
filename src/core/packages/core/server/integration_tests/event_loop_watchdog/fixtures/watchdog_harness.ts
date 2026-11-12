@@ -236,11 +236,24 @@ const scenarios: Record<string, () => Promise<void>> = {
   // A 10 s capture of code with many distinct stacks, at the worker's 32 MB limit. Containers run
   // Kibana with --max-old-space-size, which replaces that limit, so this covers other installs.
   profile_large: async () => {
-    const run = await loadDeepCode(2_000, 30);
+    const run = await loadDeepCode(2_000, 40);
     const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
     watchdog.setProfiling(true);
     run(12_000);
     await sleep(STATS_INTERVAL_MS * 3);
+    await watchdog.stop();
+  },
+  // Three large captures with a 1 s cooldown; checks that repeated captures don't restart the
+  // worker or retain the previous profiles across captures.
+  profile_repeated: async () => {
+    const run = await loadDeepCode(2_000, 40);
+    const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
+    watchdog.setProfiling(true);
+    await sleep(STATS_INTERVAL_MS * 2);
+    for (let i = 0; i < 3; i++) {
+      run(12_000);
+      await sleep(STATS_INTERVAL_MS * 3);
+    }
     await watchdog.stop();
   },
   // The worker crashes while it profiles the main thread; the profiler's thread afterwards shows
