@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
+  - '@kbn/core-test-helpers-kbn-server'
 tags:
   - plugin
   - prod

@@ -11,6 +11,7 @@
   ],
   "kbn_references": [
     "@kbn/config-schema",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/core-test-helpers-kbn-server"
   ]
 }
