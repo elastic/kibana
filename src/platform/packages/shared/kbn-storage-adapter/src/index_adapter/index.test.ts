@@ -861,3 +861,45 @@ describe('StorageIndexAdapter - transient error retries', () => {
     expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('StorageIndexAdapter - clean', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+    esClient.indices.delete = jest.fn().mockResolvedValue({ acknowledged: true });
+    esClient.indices.deleteIndexTemplate = jest.fn().mockResolvedValue({ acknowledged: true });
+  });
+
+  it('deletes a hidden backing index', async () => {
+    // Elasticsearch omits hidden indices unless the wildcard expansion asks for them.
+    (esClient.indices.get as jest.Mock).mockImplementation(
+      (params: { expand_wildcards?: string | string[] }) => {
+        const wildcards = Array.isArray(params.expand_wildcards)
+          ? params.expand_wildcards
+          : params.expand_wildcards?.split(',') ?? [];
+        const includesHidden = wildcards.includes('hidden') || wildcards.includes('all');
+        if (!includesHidden) {
+          return Promise.resolve({});
+        }
+        return Promise.resolve({
+          'test_index-000001': {
+            settings: { index: { hidden: 'true' } },
+            aliases: { test_index: { is_write_index: true } },
+          },
+        });
+      }
+    );
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(adapter.getClient().clean()).resolves.toEqual({
+      acknowledged: true,
+      result: 'deleted',
+    });
+
+    expect(esClient.indices.delete).toHaveBeenCalledWith({ index: 'test_index-000001' });
+  });
+});
