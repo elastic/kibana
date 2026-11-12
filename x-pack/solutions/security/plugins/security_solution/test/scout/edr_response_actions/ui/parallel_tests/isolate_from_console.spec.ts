@@ -80,13 +80,15 @@ spaceTest.describe(
             responseConsole.submitCommand()
           );
           submittedActionIds.push(submitted.id);
-          await expect(responseConsole.isolatePendingHostStatus).toHaveText('isolate is pending');
+          await expect(responseConsole.hostStatusFor('isolate', 'pending')).toHaveText(
+            'isolate is pending'
+          );
           return submitted;
         });
 
         await spaceTest.step('the agent response completes the action', async () => {
           await completeHostAction({ esClient, config, action });
-          await expect(responseConsole.isolateSuccessHostStatus).toHaveText(
+          await expect(responseConsole.hostStatusFor('isolate', 'success')).toHaveText(
             'isolate completed successfully'
           );
         });
