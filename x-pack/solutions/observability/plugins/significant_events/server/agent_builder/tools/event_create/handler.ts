@@ -19,7 +19,13 @@ import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
  */
 export type EventCreateInput = Pick<
   EventsWriteInput,
-  'title' | 'symptom_hypothesis' | 'summary' | 'source_ids' | 'severity' | 'confidence'
+  | 'title'
+  | 'symptom_hypothesis'
+  | 'summary'
+  | 'source_ids'
+  | 'severity'
+  | 'confidence'
+  | 'workflow_execution_id'
 > & {
   status?: EventsWriteInput['status'];
 };

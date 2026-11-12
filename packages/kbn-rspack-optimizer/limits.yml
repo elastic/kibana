@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 3928
   advancedSettings: 1981
   agentBuilder: 745
-  agentBuilderDashboards: 3743
+  agentBuilderDashboards: 4468
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
@@ -136,7 +136,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 13400
   newsfeed: 10708
-  nightshift: 5038
+  nightshift: 5665
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
