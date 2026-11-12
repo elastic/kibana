@@ -751,6 +751,8 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
+    this.serverStatus$.complete();
+
     this.coreApp.stop();
     this.httpRateLimiter.stop();
     await this.analytics.stop();
