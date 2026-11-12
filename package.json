@@ -1860,6 +1860,7 @@
     "@kbn/dev-validation-runner": "workspace:*",
     "@kbn/developer-toolbar": "workspace:*",
     "@kbn/developer-toolbar-plugin": "workspace:*",
+    "@kbn/developer-toolbar-profilers-plugin": "workspace:*",
     "@kbn/docs-utils": "workspace:*",
     "@kbn/dot-text": "workspace:*",
     "@kbn/dot-text-loader": "workspace:*",
