@@ -80,7 +80,7 @@ Navigation only — details are in the referenced sections.
 
 ### 1) Ownership — CODEOWNERS + inventory overrides (prefixes with tests only)
 
-The **Ownership** table lists paths **only when** that prefix’s subtree contains Scout, Cypress, or FTR-style automated test source (for example `**/test/scout/**`, `*.cy.ts`, `test/api_integration/**`, `test/security_solution_api_integration/**`). **Prefixes** come from **`list_owned_paths_for_team.sh`**, which merges `.github/CODEOWNERS` with **[`team_inventory_path_overrides.json`](scripts/team_inventory_path_overrides.json)** (stats-only attribution; overrides do **not** replace or mirror GitHub ownership). **Jest unit files** (`*.test.ts` / `*.test.tsx` next to source) **do not** qualify a path for this table and **must not** appear in the report narrative as test inventory.
+The **Ownership** table lists paths **only when** that prefix’s subtree contains Scout, Cypress, or FTR-style automated test source (for example `**/test/scout/**`, `*.cy.ts`, `test/api_integration/**`, `test_suites/test-suites-security-solution-apis/**`). **Prefixes** come from **`list_owned_paths_for_team.sh`**, which merges `.github/CODEOWNERS` with **[`team_inventory_path_overrides.json`](scripts/team_inventory_path_overrides.json)** (stats-only attribution; overrides do **not** replace or mirror GitHub ownership). **Jest unit files** (`*.test.ts` / `*.test.tsx` next to source) **do not** qualify a path for this table and **must not** appear in the report narrative as test inventory.
 
 ```bash
 bash x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats/scripts/list_owned_paths_for_team.sh @elastic/<slug> \
@@ -161,7 +161,7 @@ Reference: Cypress runner / config excludes tags per environment; inventory reco
 
 ### 4) FTR-oriented / integration-style
 
-Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Use `count_test_cases.mjs --ftr` for both total TC count and skip inventory — same word-boundary and brace-depth rules as §3, static skips only (**`context(`** groups suites, not TCs). **Other** FTR/Mocha patterns may exist — **flag** in the report if counts look inconsistent.
+Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test_suites/test-suites-security-solution-apis/**`, etc. Use `count_test_cases.mjs --ftr` for both total TC count and skip inventory — same word-boundary and brace-depth rules as §3, static skips only (**`context(`** groups suites, not TCs). **Other** FTR/Mocha patterns may exist — **flag** in the report if counts look inconsistent.
 
 ```bash
 SKILL_DIR="x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats"

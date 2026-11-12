@@ -18,7 +18,7 @@ Analyze flaky or skipped Security Solution Cypress tests to determine root cause
 **Test locations:**
 - Cypress: `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/`
 - Scout: `x-pack/solutions/security/plugins/security_solution/test/scout/`
-- API integration: `x-pack/solutions/security/test/security_solution_api_integration/`
+- API integration: `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/`
 - Unit tests: co-located with source (`*.test.ts`, `*.test.tsx`)
 
 ## Tools
@@ -84,7 +84,7 @@ Search for existing coverage of the same behavior:
 
 1. **Other Cypress tests** covering the same feature/flow
 2. **Scout tests** in `test/scout/`
-3. **API tests** in `test/security_solution_api_integration/`
+3. **API tests** in `test_suites/test-suites-security-solution-apis/`
 4. **Unit tests** co-located with source
 
 Don't rely on test names — check what the test actually asserts.

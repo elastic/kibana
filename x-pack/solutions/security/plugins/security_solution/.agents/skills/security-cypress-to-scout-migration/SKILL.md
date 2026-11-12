@@ -40,7 +40,7 @@ The general skill's Gate 4 has two parts — use the flaky-test-doctor for deepe
 | Cypress tests | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/` |
 | Scout tests | `x-pack/solutions/security/plugins/security_solution/test/scout/` |
 | Scout package | `@kbn/scout-security` (imports: `spaceTest`, `test`, `tags`, `expect`) |
-| API integration | `x-pack/solutions/security/test/security_solution_api_integration/` |
+| API integration | `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/` |
 | Unit tests | Co-located with source (`*.test.ts`, `*.test.tsx`) |
 
 ## Triage: where to search for duplicates (Gate 1)
@@ -51,15 +51,15 @@ Search these locations by domain:
 
 | Domain | API integration test path |
 |--------|--------------------------|
-| Detection rules / alerts | `test/security_solution_api_integration/test_suites/detections_response/` |
-| Entity Analytics | `test/security_solution_api_integration/test_suites/entity_analytics/` |
-| Endpoint / EDR | `test/security_solution_api_integration/test_suites/edr_workflows/` |
-| Timeline / Saved Objects | `test/security_solution_api_integration/test_suites/investigation/` |
-| Lists / Exceptions | `test/security_solution_api_integration/test_suites/lists_and_exception_lists/` |
-| GenAI / AI Assistant | `test/security_solution_api_integration/test_suites/genai/` |
-| AI4DSOC | `test/security_solution_api_integration/test_suites/ai4dsoc/` |
-| SIEM Migrations | `test/security_solution_api_integration/test_suites/siem_migrations/` |
-| Explore (hosts, network, users) | `test/security_solution_api_integration/test_suites/explore/` |
+| Detection rules / alerts | `test_suites/test-suites-security-solution-apis/test_suites/detections_response/` |
+| Entity Analytics | `test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/` |
+| Endpoint / EDR | `test_suites/test-suites-security-solution-apis/test_suites/edr_workflows/` |
+| Timeline / Saved Objects | `test_suites/test-suites-security-solution-apis/test_suites/investigation/` |
+| Lists / Exceptions | `test_suites/test-suites-security-solution-apis/test_suites/lists_and_exception_lists/` |
+| GenAI / AI Assistant | `test_suites/test-suites-security-solution-apis/test_suites/genai/` |
+| AI4DSOC | `test_suites/test-suites-security-solution-apis/test_suites/ai4dsoc/` |
+| SIEM Migrations | `test_suites/test-suites-security-solution-apis/test_suites/siem_migrations/` |
+| Explore (hosts, network, users) | `test_suites/test-suites-security-solution-apis/test_suites/explore/` |
 | Cases | Separate `x-pack/platform/test/cases_api_integration/` suite |
 
 All paths relative to `x-pack/solutions/security/`. Also check unit tests co-located with the source component.

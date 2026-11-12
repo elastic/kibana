@@ -23,7 +23,7 @@ describe('Endpoint Exceptions API validations', () => {
   //  API TESTS FOR THIS ARTIFACT TYPE SHOULD BE COVERED WITH INTEGRATION TESTS.
   //  ADD THEM HERE:
   //
-  //  `x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows`
+  //  `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/edr_workflows`
   //
   // -----------------------------------------------------------------------------
 });

@@ -67,5 +67,5 @@ export const NO_FLOATING_PROMISES_GLOBS = [
  */
 export const NO_FLOATING_PROMISES_EXEMPT_GLOBS = [
   '*spaces_api_integration/common/services/basic_auth_supertest.ts',
-  '*security_solution_api_integration/scripts/mki_api_ftr_execution.ts',
+  '*test-suites-security-solution-apis/scripts/mki_api_ftr_execution.ts',
 ];

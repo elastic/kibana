@@ -5473,7 +5473,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-design-tools
       '@kbn/detections-response-ftr-services':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
+        version: link:x-pack/solutions/security/test_helpers/detections-response-ftr-services
       '@kbn/dev':
         specifier: workspace:*
         version: link:src/dev
@@ -6016,7 +6016,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-test-subj-selector
       '@kbn/test-suites-security-solution-apis':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_api_integration
+        version: link:x-pack/solutions/security/test_suites/test-suites-security-solution-apis
       '@kbn/test-suites-src':
         specifier: workspace:*
         version: link:src/platform/test
@@ -9974,9 +9974,9 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test/security_solution_api_integration: {}
+  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
 
-  x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
+  x-pack/solutions/security/test_helpers/detections-response-ftr-services: {}
 
   x-pack/solutions/security/test/security_solution_endpoint: {}
 
