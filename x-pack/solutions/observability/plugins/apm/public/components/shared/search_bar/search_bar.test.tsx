@@ -7,7 +7,7 @@
 
 import { getByTestId, fireEvent, getByText, act, waitFor } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';

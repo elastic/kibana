@@ -1453,6 +1453,7 @@ packages:
   - 'x-pack/platform/plugins/private/reporting'
   - 'x-pack/platform/plugins/private/rollup'
   - 'x-pack/platform/plugins/private/runtime_fields'
+  - 'x-pack/platform/plugins/private/search_boost'
   - 'x-pack/platform/plugins/private/snapshot_restore'
   - 'x-pack/platform/plugins/private/subscription_status'
   - 'x-pack/platform/plugins/private/task_manager_dependencies'

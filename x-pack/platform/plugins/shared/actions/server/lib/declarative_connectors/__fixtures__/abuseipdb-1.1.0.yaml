@@ -1,5 +1,5 @@
 schemaVersion: 1
-id: .declarative-abuseipdb
+id: .abuseipdb
 version: 1.1.0
 metadata:
   displayName: AbuseIPDB (Declarative PoC)

@@ -16,7 +16,7 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { StreamsV2LayoutGate } from '../components/streams_layout';
+import { StreamsLayout } from '../components/streams_layout';
 import { RedirectToDefaultLayoutTab } from '../components/streams_layout/redirect_to_default_layout_tab';
 import { IndexInspectPage } from '../components/index_inspect/index_inspect_page';
 import { DEFAULT_INDEX_INSPECT_TAB } from '../components/index_inspect/types';
@@ -107,7 +107,7 @@ const streamsAppRoutes = {
             ]),
           },
           '/v2/unit/{unitId}/{tab}': {
-            element: <StreamsV2LayoutGate />,
+            element: <StreamsLayout />,
             params: t.intersection([
               t.type({
                 path: t.type({
