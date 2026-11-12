@@ -1,29 +1,76 @@
 {
   "7.11.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 7.11.0 and 10.1.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "title": "kibana_sample_data_logs",
+      "name": "Kibana Sample Data Logs",
+      "timeFieldName": "timestamp",
+      "fields": "[{\"name\": \"timestamp\", \"type\": \"date\", \"esTypes\": [\"date\"], \"count\": 0, \"scripted\": false, \"searchable\": true, \"aggregatable\": true, \"readFromDocValues\": true}, {\"name\": \"bytes\", \"type\": \"number\", \"esTypes\": [\"long\"], \"count\": 2, \"scripted\": false, \"searchable\": true, \"aggregatable\": true, \"readFromDocValues\": true}, {\"name\": \"message\", \"type\": \"string\", \"esTypes\": [\"text\"], \"count\": 0, \"scripted\": false, \"searchable\": true, \"aggregatable\": false, \"readFromDocValues\": false}, {\"name\": \"message.keyword\", \"type\": \"string\", \"esTypes\": [\"keyword\"], \"count\": 0, \"scripted\": false, \"searchable\": true, \"aggregatable\": true, \"readFromDocValues\": true, \"subType\": {\"multi\": {\"parent\": \"message\"}}}]",
+      "sourceFilters": "[{\"value\": \"secret_*\"}]",
+      "fieldFormatMap": "{\"bytes\": {\"id\": \"bytes\", \"params\": {\"pattern\": \"0,0.[000]b\"}}}",
+      "fieldAttrs": "{\"message\": {\"customLabel\": \"Log message\", \"count\": 1}}",
+      "runtimeFieldMap": "{\"hour_of_day\": {\"type\": \"long\", \"script\": {\"source\": \"emit(doc['timestamp'].value.getHour());\"}}}",
+      "allowNoIndex": false,
+      "allowHidden": false
+    },
+    {
+      "title": "logs-*",
+      "name": "Logs",
+      "timeFieldName": "@timestamp",
+      "fields": "[{\"name\": \"@timestamp\", \"type\": \"date\", \"esTypes\": [\"date\"], \"count\": 0, \"scripted\": false, \"searchable\": true, \"aggregatable\": true, \"readFromDocValues\": true}]",
+      "sourceFilters": "[]",
+      "fieldFormatMap": "{}",
+      "fieldAttrs": "{}",
+      "runtimeFieldMap": "{}",
+      "allowNoIndex": true,
+      "allowHidden": true
+    },
+    {
+      "title": "my-index"
+    },
+    {
+      "title": "remote_cluster:metrics-*",
+      "name": "Rollup metrics",
+      "type": "rollup",
+      "typeMeta": "{\"params\": {\"rollup_index\": \"rollup_metrics\"}, \"aggs\": {\"date_histogram\": {\"@timestamp\": {\"agg\": \"date_histogram\", \"fixed_interval\": \"1h\", \"time_zone\": \"UTC\"}}}}",
+      "timeFieldName": "@timestamp",
+      "fields": "[]"
     }
   ],
   "10.1.0": [
     {
-      "fields": "string?",
-      "title": "string",
-      "type": "string?",
-      "typeMeta": "string?",
-      "timeFieldName": "string?",
-      "sourceFilters": "string?",
-      "fieldFormatMap": "string?",
-      "fieldAttrs": "string?",
-      "runtimeFieldMap": "string?",
-      "allowNoIndex": "boolean?",
-      "name": "string?",
-      "allowHidden": "boolean?"
+      "title": "kibana_sample_data_logs",
+      "name": "Kibana Sample Data Logs",
+      "timeFieldName": "timestamp",
+      "fields": "[{\"name\": \"timestamp\", \"type\": \"date\", \"esTypes\": [\"date\"], \"count\": 0, \"scripted\": false, \"searchable\": true, \"aggregatable\": true, \"readFromDocValues\": true}, {\"name\": \"bytes\", \"type\": \"number\", \"esTypes\": [\"long\"], \"count\": 2, \"scripted\": false, \"searchable\": true, \"aggregatable\": true, \"readFromDocValues\": true}, {\"name\": \"message\", \"type\": \"string\", \"esTypes\": [\"text\"], \"count\": 0, \"scripted\": false, \"searchable\": true, \"aggregatable\": false, \"readFromDocValues\": false}, {\"name\": \"message.keyword\", \"type\": \"string\", \"esTypes\": [\"keyword\"], \"count\": 0, \"scripted\": false, \"searchable\": true, \"aggregatable\": true, \"readFromDocValues\": true, \"subType\": {\"multi\": {\"parent\": \"message\"}}}]",
+      "sourceFilters": "[{\"value\": \"secret_*\"}]",
+      "fieldFormatMap": "{\"bytes\": {\"id\": \"bytes\", \"params\": {\"pattern\": \"0,0.[000]b\"}}}",
+      "fieldAttrs": "{\"message\": {\"customLabel\": \"Log message\", \"count\": 1}}",
+      "runtimeFieldMap": "{\"hour_of_day\": {\"type\": \"long\", \"script\": {\"source\": \"emit(doc['timestamp'].value.getHour());\"}}}",
+      "allowNoIndex": false,
+      "allowHidden": false
+    },
+    {
+      "title": "logs-*",
+      "name": "Logs",
+      "timeFieldName": "@timestamp",
+      "fields": "[{\"name\": \"@timestamp\", \"type\": \"date\", \"esTypes\": [\"date\"], \"count\": 0, \"scripted\": false, \"searchable\": true, \"aggregatable\": true, \"readFromDocValues\": true}]",
+      "sourceFilters": "[]",
+      "fieldFormatMap": "{}",
+      "fieldAttrs": "{}",
+      "runtimeFieldMap": "{}",
+      "allowNoIndex": true,
+      "allowHidden": true
+    },
+    {
+      "title": "my-index"
+    },
+    {
+      "title": "remote_cluster:metrics-*",
+      "name": "Rollup metrics",
+      "type": "rollup",
+      "typeMeta": "{\"params\": {\"rollup_index\": \"rollup_metrics\"}, \"aggs\": {\"date_histogram\": {\"@timestamp\": {\"agg\": \"date_histogram\", \"fixed_interval\": \"1h\", \"time_zone\": \"UTC\"}}}}",
+      "timeFieldName": "@timestamp",
+      "fields": "[]"
     }
   ]
 }
