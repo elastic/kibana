@@ -10,7 +10,7 @@ A developer tool for inspecting React components directly in the Kibana UI. It p
 
 ### Grab component context for coding agents
 
-The "Grab" button (move icon) in the developer toolbar, or the keyboard shortcut (`⌘ + ⇧ + '` on Mac or `Ctrl + Shift + '` on Windows/Linux), toggles grab mode. It works like inspect mode, but the highlighted element becomes a drag handle: drag it straight into your coding agent's chat (Cursor, Claude Code, a terminal, etc.) like you would drag an image into Slack, and an agent-friendly description is dropped as plain text. The same description is copied to the clipboard on drag start or on click, so you can also paste it. Grab mode stays active until you toggle it off or press `Esc`. Only one mode can be active at a time, turning on inspect or grab turns the other one off:
+The "Grab" button (move icon) in the developer toolbar, or the keyboard shortcut (`⌘ + ⇧ + '` on Mac or `Ctrl + Shift + '` on Windows/Linux), toggles grab mode. It works like inspect mode, but the highlighted element becomes a drag handle: drag it straight into your coding agent's chat (Cursor, Claude Code, a terminal, etc.) like you would drag an image into Slack, and an agent-friendly description is dropped as plain text. The same description is copied to the clipboard on drag start, on click or on `⌘ + C` / `Ctrl + C` while an element is highlighted, so you can also paste it. Grab mode stays active until you toggle it off or press `Esc`. Only one mode can be active at a time, turning on inspect or grab turns the other one off:
 
 ```
 <button class="euiButton" type="button" data-test-subj="saveButton">Save</button>
@@ -19,7 +19,7 @@ The "Grab" button (move icon) in the developer toolbar, or the keyboard shortcut
   in FooApp (src/platform/plugins/shared/foo/public/application.tsx:30:9)
 ```
 
-The first line is the grabbed element (children stripped, text content kept). Each `in` line pairs a component with the location of the JSX it renders, from the closest component up to the application root. EUI internals and other compiled code without source information are skipped, unnamed components (e.g. `memo(() => …)`) and JSX created outside of a render show up as `Anonymous`.
+The first line is the grabbed element (children stripped, text content kept). Each `in` line pairs a component with the location of the JSX it renders, from the closest component outwards. EUI internals and other compiled code without source information are skipped, unnamed components (e.g. `memo(() => …)`) and JSX created outside of a render show up as `Anonymous`. The stack is pruned to what an agent can act on: wrapper frames (`Anonymous`, providers, boundaries, higher order components and anything located in the routing, link and rendering context packages) are dropped except for the closest frame, consecutive frames of the same file or component are collapsed, and beyond the three closest frames only the frames where the stack crosses into another plugin or package are kept, so the application rendering a shared component is still named.
 
 ## How it Works
 

@@ -78,7 +78,7 @@ describe('useSetUpNightshiftServiceAccount', () => {
       'POST /internal/nightshift/onboarding/enable',
     ]);
     await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith({ title: 'Elastic Nightshift enabled' })
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Elastic nightshift enabled' })
     );
   });
 });

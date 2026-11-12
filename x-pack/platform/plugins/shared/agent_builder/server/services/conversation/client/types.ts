@@ -14,7 +14,6 @@ import type {
   SubstitutionStep,
   InjectedContextStep,
   BackgroundAgentCompleteStep,
-  TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
   PreExecutionWorkflowStep,
@@ -126,6 +125,8 @@ export interface AppendEventsRequest {
   skipIfTerminalExistsFor?: string;
   /** Changes the active execution in the same write. */
   activeExecution?: ActiveExecutionUpdate;
+  /** Drops this background execution from the pending list in the same write; refused once it is gone. */
+  consumeBackgroundExecution?: string;
 }
 
 export interface ReplaceRoundEventsRequest {
@@ -192,7 +193,6 @@ export type PersistentConversationRoundStep =
   | ReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
-  | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
   | PreExecutionWorkflowStep

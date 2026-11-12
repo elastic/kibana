@@ -8,6 +8,7 @@
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
+import type { PolicySettings } from '../../common/policy_settings';
 
 export interface PolicyCleanupOps {
   /** Policy IDs where every instance was removed — delete the whole policy. */
@@ -75,6 +76,8 @@ export interface BuildPolicyBodyOpts {
   namespace: string;
   /** The global namespace, which every instance without a namespace of its own deploys into. */
   globalNamespace?: string;
+  /** Package policy fields from Step 2 that every policy gets, such as the output. */
+  policySettings?: PolicySettings;
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   servicesMap: Map<string, AwsServiceMatrixEntry>;
   /** When set, use this cloud_connector on the policy instead of preserving the existing one.

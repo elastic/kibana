@@ -22,11 +22,9 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_UI_EBT,
-  isPrivatelySharedConversation,
   isPublicConversation,
   normalizeConversationAccessControl,
   type Conversation,
-  type ConversationAccessControl,
 } from '@kbn/agent-builder-common';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -39,16 +37,8 @@ import {
 } from '../../../hooks/use_conversation_template_display';
 import { useToasts } from '../../../hooks/use_toasts';
 import { labels } from './conversation_metadata_i18n';
-
-const FLYOUT_WIDTH = 500;
-
-const getVisibilityLabel = (accessControl: ConversationAccessControl | undefined): string => {
-  if (isPublicConversation(accessControl)) {
-    return labels.public;
-  }
-
-  return isPrivatelySharedConversation(accessControl) ? labels.restricted : labels.private;
-};
+import { getConversationVisibilityLabel } from './conversation_visibility';
+import { useConversationFlyoutWidthProps } from '../../../../flyout/conversation_details_flyout_width';
 
 const getRenameEbtProps = (action: string) =>
   getEbtProps({
@@ -88,6 +78,7 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
   onClose,
 }) => {
   const flyoutSessionProps = useConversationFlyoutSessionProps(labels.flyoutTitle);
+  const widthProps = useConversationFlyoutWidthProps();
   const { rename: canRename } = useConversationPermissions();
   const { conversationActions } = useConversationContext();
   const { addErrorToast } = useToasts();
@@ -175,7 +166,9 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
     { label: labels.lastEdited, value: <MetadataDate value={conversation.updated_at} /> },
     {
       label: labels.visibility,
-      value: <EuiText size="s">{getVisibilityLabel(conversation.access_control)}</EuiText>,
+      value: (
+        <EuiText size="s">{getConversationVisibilityLabel(conversation.access_control)}</EuiText>
+      ),
     },
     // Public chats have no member list, so a count would be misleading.
     ...(isPublic
@@ -208,7 +201,7 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
   return (
     <EuiFlyout
       type="push"
-      size={FLYOUT_WIDTH}
+      {...widthProps}
       ownFocus={false}
       onClose={onClose}
       closeButtonProps={{ 'aria-label': labels.close }}

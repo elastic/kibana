@@ -113,6 +113,24 @@ describe('retryTransientErrors', () => {
     expect(esCallMock).toHaveBeenCalledTimes(1);
   });
 
+  it('stops retrying at maxAttempts', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(retryTransientEsErrors(esCallMock, { maxAttempts: 2 })).rejects.toThrow(error);
+    expect(setTimeoutMock.mock.calls).toEqual([[2000], [4000]]);
+    expect(esCallMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not retry at all with maxAttempts 0, for a caller that cannot wait', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(retryTransientEsErrors(esCallMock, { maxAttempts: 0 })).rejects.toThrow(error);
+    expect(setTimeoutMock).not.toHaveBeenCalled();
+    expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps the additional retry options across subsequent attempts', async () => {
     let attempt = 0;
     const esCallMock = jest.fn(async () => {
