@@ -23,9 +23,11 @@ export interface ProcessReportsParams {
   prependTitle: string;
   updateGithub: boolean;
   /**
-   * Whether a failure no `failed-test` issue tracks yet gets a per-test issue. Tracked issues are
-   * updated either way. Off once the daily flaky suite reporter files the issues instead, see
-   * `REPORT_FAILED_TESTS_PER_TEST_ISSUES`.
+   * Whether failures get per-test issues: a new one for a test no `failed-test` issue tracks yet,
+   * a comment on an existing one. Suite issues are updated either way. Off once the daily flaky
+   * suite reporter files the issues instead, see `REPORT_FAILED_TESTS_PER_TEST_ISSUES`: the
+   * per-test issues are then handed over to suite issues, and a failure no suite issue tracks
+   * updates none.
    */
   perTestIssues: boolean;
   /**

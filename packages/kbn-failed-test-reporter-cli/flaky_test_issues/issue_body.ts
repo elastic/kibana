@@ -52,8 +52,8 @@ export interface FlakySuiteIssueContext {
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
   /**
-   * Numbers of closed issues about one of the suite's tests that failed after they were closed,
-   * which this issue takes over from.
+   * Numbers of issues about one of the suite's tests that this issue takes over from: closed
+   * before their test failed again, or open per-test issues closed as its duplicates once filed.
    */
   supersededIssues?: number[];
 }
@@ -766,9 +766,7 @@ const issueList = (numbers: readonly number[]): string =>
 
 const supersededIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
   ctx.supersededIssues && ctx.supersededIssues.length > 0
-    ? `Previously tracked in ${issueList(
-        ctx.supersededIssues
-      )}, closed before the suite failed again.`
+    ? `Previously tracked in ${issueList(ctx.supersededIssues)}.`
     : undefined;
 
 const relatedIssues = (ctx: FlakySuiteIssueContext): string | undefined =>

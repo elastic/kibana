@@ -36,6 +36,7 @@ import {
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
+import { handOver, isOpenPerTestIssue, perTestIssuesToHandOver } from './hand_over';
 import { isPullRequestRef } from './markdown';
 import { isSkippedTest, skippedBranches } from './skipped';
 import { groupIntoSuites, type FlakySuite } from './suites';
@@ -86,6 +87,13 @@ export interface ReportFlakySuiteIssuesOptions {
    * comment) before it can get another comment. Failures in between are covered by the next one.
    */
   commentCooldownDays: number;
+  /**
+   * Hand the open per-test issues of `githubRepo` over to suite issues, once CI no longer updates
+   * them: they stop counting as tracking their test, and those about a suite's flaky tests are
+   * closed as duplicates of the suite's issue once it is filed or refreshed. Issues labelled
+   * `skipped-test` are left open.
+   */
+  handOverPerTestIssues: boolean;
   dryRun: boolean;
 }
 
@@ -102,10 +110,11 @@ export type SkipReason =
   /** The suite has no issue, but this run already created `maxNewIssues`. */
   | 'max-new-issues'
   /**
-   * Every test of the suite has an issue in `githubRepo`: a per-test issue about it, or an issue
-   * about the suite or its file, open or closed after the test last failed. A single test without
-   * one gets the suite its issue. A suite issue of its own is refreshed instead, unless it already
-   * has this report, or is closed and the suite has not failed since.
+   * Every test of the suite has an issue in `githubRepo`: a per-test issue about it (an open one
+   * only when not handing them over), or an issue about the suite or its file, open or closed
+   * after the test last failed. A single test without one gets the suite its issue. A suite issue
+   * of its own is refreshed instead, unless it already has this report, or is closed and the suite
+   * has not failed since.
    */
   | 'tracked'
   /** Same, for the tracking repository. */
@@ -126,9 +135,17 @@ export type FlakySuiteAction = SuiteRef &
         issue: IssueRef;
         /** Closed issues about its tests that no longer counted (`isSuperseded`). */
         supersedes?: IssueRef[];
+        /** Per-test issues about its tests closed as its duplicates (`handOverPerTestIssues`). */
+        handedOver?: IssueRef[];
       }
     /** The suite's own issue recorded this report; `commented` with its numbers on new failures. */
-    | { action: 'updated'; issue: IssueRef; commented: boolean; reopened: boolean }
+    | {
+        action: 'updated';
+        issue: IssueRef;
+        commented: boolean;
+        reopened: boolean;
+        handedOver?: IssueRef[];
+      }
     | { action: 'skipped'; reason: SkipReason; issue?: IssueRef; match?: IssueMatch }
     | { action: 'failed'; attempted: 'create' | 'update'; error: string; issue?: IssueRef }
   );
@@ -239,15 +256,15 @@ const isSuperseded = (matched: MatchedIssue, test: FlakySuite): boolean => {
 interface Coverage {
   /**
    * The issue standing in for the suite when every one of its tests has one in the index: an
-   * issue about the suite or its file covers them all, a per-test issue only its own test.
-   * Undefined as soon as a test has none, that test deserves the suite issue.
+   * issue about the suite or its file covers them all, a per-test issue only its own test, unless
+   * it is handed over. Undefined as soon as a test has none, that test deserves the suite issue.
    */
   tracked?: MatchedIssue;
   /** Issues about one of the tests that no longer count (`isSuperseded`), strongest first. */
   superseded: MatchedIssue[];
 }
 
-const coverage = (suite: FlakySuite, index: IssueIndex): Coverage => {
+const coverage = (suite: FlakySuite, index: IssueIndex, handingOver: boolean): Coverage => {
   const covering: MatchedIssue[] = [];
   const superseded = new Map<number, MatchedIssue>();
   let uncovered = false;
@@ -255,6 +272,9 @@ const coverage = (suite: FlakySuite, index: IssueIndex): Coverage => {
     const single = { ...suite, tests: [test] };
     const counting = findMatchingIssues(single, candidateIssues(single, index)).filter(
       (matched) => {
+        if (handingOver && isOpenPerTestIssue(matched)) {
+          return false;
+        }
         if (!isTracking(matched) || !isSuperseded(matched, single)) {
           return true;
         }
@@ -399,8 +419,10 @@ export const issueLabels = (suite: Pick<FlakySuite, 'owners'>, githubRepo: strin
  * test last failed: an issue about the suite or its file covers them all, a per-test issue only
  * its own test. Issues about some of the tests, or merely mentioning the file, are linked from
  * the new issue instead, and so are the closed ones it takes over from. With `updateIssues`, a
- * suite tracked by its own issue in `githubRepo` has that issue refreshed. A failed write is
- * recorded and the run goes on with the next suite.
+ * suite tracked by its own issue in `githubRepo` has that issue refreshed. With
+ * `handOverPerTestIssues`, the open per-test issues of `githubRepo` don't count, and are closed as
+ * duplicates of the suite's issue once it is filed or refreshed. A failed write is recorded and
+ * the run goes on with the next suite.
  */
 export const reportFlakySuiteIssues = async (
   options: ReportFlakySuiteIssuesOptions
@@ -415,6 +437,7 @@ export const reportFlakySuiteIssues = async (
     omitSkippedTests,
     updateIssues,
     commentCooldownDays,
+    handOverPerTestIssues,
     dryRun,
   } = options;
   const omitted = omitSkippedTests ? report.flaky.filter(isSkippedTest) : [];
@@ -449,7 +472,8 @@ export const reportFlakySuiteIssues = async (
     const fetched = await fetchFailedTestIssues(upstream, closedSince, log);
     const upstreamIndex = indexIssues(fetched.issues.map(describeIssue));
     tracking = { repo: upstream.repo, open: fetched.open, closed: fetched.closed };
-    trackedUpstream = (suite) => coverage(suite, upstreamIndex).tracked;
+    // never written to, so its per-test issues can't be handed over and keep counting
+    trackedUpstream = (suite) => coverage(suite, upstreamIndex, false).tracked;
   }
 
   const actions: FlakySuiteAction[] = [];
@@ -469,7 +493,23 @@ export const reportFlakySuiteIssues = async (
     record({ action: 'skipped', ...suiteRef(suite), reason: 'all-tests-skipped' });
   }
 
-  /** The superseded issues are linked as such, the other matches as possibly related. */
+  /** The open per-test issues the suite's issue takes over, when handing them over. */
+  const perTestIssuesOf = (suite: FlakySuite): GithubIssue[] =>
+    handOverPerTestIssues ? perTestIssuesToHandOver(suite, index) : [];
+
+  /** Closes the issues as duplicates of the suite's issue; those closed, for its action. */
+  const handOverTo = async (
+    suiteIssue: { number: number; id: number },
+    perTest: readonly GithubIssue[]
+  ): Promise<{ handedOver?: IssueRef[] }> => {
+    const handedOver = await handOver({ github, log, dryRun, issues: perTest, suiteIssue });
+    return handedOver.length > 0 ? { handedOver: handedOver.map((issue) => issueRef(issue)) } : {};
+  };
+
+  /**
+   * The superseded and handed over issues are linked as previously tracking the suite, the other
+   * matches as possibly related.
+   */
   const create = async (suite: FlakySuite, related: MatchedIssue[], superseded: MatchedIssue[]) => {
     const ref = suiteRef(suite);
     if (counts.created >= maxNewIssues) {
@@ -478,7 +518,11 @@ export const reportFlakySuiteIssues = async (
       return;
     }
     const title = flakySuiteIssueTitle(suite);
-    const supersededNumbers = superseded.map(({ issue }) => issue.number);
+    const handingOver = perTestIssuesOf(suite);
+    const supersededNumbers = [
+      ...superseded.map(({ issue }) => issue.number),
+      ...handingOver.map(({ number }) => number),
+    ];
     const body = renderFlakySuiteIssueBody(suite, {
       report,
       relatedIssues: related
@@ -490,7 +534,7 @@ export const reportFlakySuiteIssues = async (
       const created = await github.createIssue(title, body, issueLabels(suite, githubRepo));
       log.info(
         `created #${created.number} ${created.html_url}: ${describeSuite(suite)}` +
-          (superseded.length > 0
+          (supersededNumbers.length > 0
             ? ` (previously tracked in ${supersededNumbers.map((n) => `#${n}`).join(', ')})`
             : '')
       );
@@ -503,6 +547,7 @@ export const reportFlakySuiteIssues = async (
         ...(superseded.length > 0
           ? { supersedes: superseded.map(({ issue }) => issueRef(issue)) }
           : {}),
+        ...(await handOverTo(created, handingOver)),
       });
     } catch (error) {
       log.error(`failed to create an issue for ${describeSuite(suite)}: ${errorMessage(error)}`);
@@ -514,7 +559,8 @@ export const reportFlakySuiteIssues = async (
    * Metadata first. The body's text stays as filed, this report's numbers go in the
    * comment. A comment that then fails is not retried: the metadata already records it, so the
    * next qualifying report comments instead. Recording it after the comment would take another
-   * edit, and a failure there would mean a duplicate comment rather than a missed one.
+   * edit, and a failure there would mean a duplicate comment rather than a missed one. The
+   * per-test issues of the suites refreshed are handed over last, to the issue as now open.
    */
   const update = async (
     suite: FlakySuite,
@@ -537,13 +583,16 @@ export const reportFlakySuiteIssues = async (
         `${reopen ? 'reopened' : 'updated'} #${issue.number}${comment ? ' with a comment' : ''}: ` +
           describeSuite(suite)
       );
-      recordEach((ref) => ({
-        action: 'updated',
-        ...ref,
-        issue: { ...issueRef(issue), state: 'open' },
-        commented: comment,
-        reopened: reopen,
-      }));
+      for (const member of members) {
+        record({
+          action: 'updated',
+          ...suiteRef(member),
+          issue: { ...issueRef(issue), state: 'open' },
+          commented: comment,
+          reopened: reopen,
+          ...(await handOverTo(issue, perTestIssuesOf(member))),
+        });
+      }
     } catch (error) {
       log.error(
         `failed to update #${issue.number} for ${describeSuite(suite)}: ${errorMessage(error)}`
@@ -577,7 +626,7 @@ export const reportFlakySuiteIssues = async (
     }
     const ref = suiteRef(suite);
     const matches = findMatchingIssues(suite, candidateIssues(suite, index));
-    const { tracked, superseded } = coverage(suite, index);
+    const { tracked, superseded } = coverage(suite, index, handOverPerTestIssues);
     const own = updateIssues ? refreshedIssue(suite, matches) : undefined;
     if (own) {
       const members = isWholeFileIssue(own.issue) ? suitesSharing(suite, own.issue) : [suite];

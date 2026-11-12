@@ -14,12 +14,15 @@ since they last passed: at most once a day for each pipeline and branch while th
 (`failing.postedAt` in the issue's metadata), and right away when the issue is closed and was
 updated in the last 30 days, which reopens it.
 
-`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening per-test issues: a failure that
-an issue already tracks, per-test or flaky suite, still bumps it, and one that none tracks is
-indexed and written to the failure report but gets no issue, its suite issue comes from
-`report_flaky_test_issues` below once it qualifies as flaky. Unset or `true` (the default) is the
-legacy behaviour, where every new failure opens a per-test issue. It only disables the per-test
-issues: `--report-failing-suites` still files `Failing … suite` issues. Set it in the pipeline env
+`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening or updating per-test issues: a
+failure that a suite issue tracks still bumps it, and one that none tracks is indexed and written
+to the failure report but touches no issue, not even a per-test issue about the test. Its suite
+issue comes from `report_flaky_test_issues` below once it qualifies as flaky, or from
+`--report-failing-suites` once it fails every attempt. Both hand the per-test issues over to the
+suite issue (see "Which issues count as tracking a test"): the consistent failure check of such a
+job, and the daily report with `--hand-over-per-test-issues`. Unset or `true` (the default) is the
+legacy behaviour, where every failure opens or updates a per-test issue. It only disables the
+per-test issues: `--report-failing-suites` still files `Failing … suite` issues. Set it in the pipeline env
 next to `REPORT_FAILED_TESTS_TO_GITHUB`, only on pipelines the daily flaky report reads
 (`FLAKY_TESTS_PIPELINES` of `kibana-report-flaky-tests`) and together with `REPORT_FAILING_SUITES`,
 anywhere else a new failure would never get an issue. Flip it back to fall back to the legacy
@@ -112,6 +115,17 @@ target and by pipeline, and links issues that mention the same file as possibly 
   new comments and the stale sweep closes them. The suite's own issue is the exception: it is
   reopened instead (below).
 - Closed issues last updated more than `--closed-since-days` ago (default 365) are not looked at.
+
+With `--hand-over-per-test-issues` (`FLAKY_TESTS_HAND_OVER_PER_TEST_ISSUES=true` in the pipeline),
+for when CI no longer updates per-test issues, an open per-test issue doesn't count: the suite gets
+its issue anyway. Once that issue is filed or refreshed, the open per-test issues of its flaky
+tests are closed as its duplicates (`handedOver` in the summary), and a new issue lists them as
+"Previously tracked in #N". Closing an issue as a duplicate links it to the suite issue and
+notifies whoever follows it, without a comment, which the failed-test Slack alert would take for
+a new failure. An issue labelled `skipped-test` is left open and linked as possibly related, as it
+tracks a skip. The consistent failure check of `report_failed_tests` hands over the per-test
+issues of the tests it finds broken the same way, on a job with
+`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false`.
 
 While issues are filed in a sandbox, the issues of `elastic/kibana` count too (`--tracking-repo`,
 default `elastic/kibana`; empty disables it, and it is skipped when it names `--github-repo`

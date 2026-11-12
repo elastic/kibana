@@ -110,6 +110,7 @@ const issue = (
   overrides: Partial<GithubIssue> = {}
 ): GithubIssue => ({
   number,
+  id: 1000 + number,
   html_url: `https://github.com/elastic/appex-qa-ai/issues/${number}`,
   node_id: `node-${number}`,
   title: `Issue ${number}`,
@@ -127,6 +128,7 @@ const mockGithub = (issues: GithubIssue[] = []) => {
     );
   const createIssue = jest.fn().mockImplementation(async (title: string, body: string) => ({
     number: 500,
+    id: 1500,
     html_url: 'https://github.com/elastic/appex-qa-ai/issues/500',
     node_id: 'node-500',
     body,
@@ -138,6 +140,7 @@ const mockGithub = (issues: GithubIssue[] = []) => {
     );
   const editIssue = jest.fn();
   const addIssueComment = jest.fn();
+  const closeAsDuplicate = jest.fn();
   return {
     github: {
       listIssues,
@@ -145,13 +148,30 @@ const mockGithub = (issues: GithubIssue[] = []) => {
       getIssue,
       editIssue,
       addIssueComment,
+      closeAsDuplicate,
     } as unknown as GithubApi,
     listIssues,
     createIssue,
     editIssue,
     addIssueComment,
+    closeAsDuplicate,
   };
 };
+
+/** A per-test issue as `report_failed_tests` files it for a Scout test of the ES|QL spec. */
+const perTestIssue = (number: number, testId: string, overrides: Partial<GithubIssue> = {}) =>
+  issue(
+    number,
+    `A test failed on a tracked branch\n\n| Test ID | ${testId} |\n| Location | ${SPEC} |\n\n` +
+      `<!-- kibanaCiData = ${JSON.stringify({
+        'failed-test': {
+          'test.class': 'Discover ES|QL mode',
+          'test.name': 'x',
+          'test.type': 'scout',
+        },
+      })} -->`,
+    overrides
+  );
 
 /** A failing suite issue the check filed for `test-1` of the ES|QL spec, on `kibana-on-merge` `main`. */
 const failingSuiteIssue = (postedAt: Date, overrides: Partial<GithubIssue> = {}) => {
@@ -194,6 +214,7 @@ const report = (
     github: mockGithub().github,
     repo: 'elastic/appex-qa-ai',
     build,
+    handOverPerTestIssues: false,
     dryRun: false,
     ...overrides,
   });
@@ -273,6 +294,7 @@ describe('reportConsistentFailureIssues', () => {
       commented: [],
       tracked: [],
       skipped: [],
+      handedOver: [],
     });
   });
 
@@ -298,7 +320,13 @@ describe('reportConsistentFailureIssues', () => {
 
     expect(listIssues).not.toHaveBeenCalled();
     expect(createIssue).not.toHaveBeenCalled();
-    expect(summary).toEqual({ created: [], commented: [], tracked: [], skipped: [] });
+    expect(summary).toEqual({
+      created: [],
+      commented: [],
+      tracked: [],
+      skipped: [],
+      handedOver: [],
+    });
   });
 
   it('leaves a build whose retry has not reported the test out of the count', async () => {
@@ -420,19 +448,6 @@ describe('reportConsistentFailureIssues', () => {
   });
 
   it('skips a suite whose every test has a per-test issue, but not one with a test without', async () => {
-    const perTestIssue = (number: number, testId: string) =>
-      issue(
-        number,
-        `A test failed on a tracked branch\n\n| Test ID | ${testId} |\n| Location | ${SPEC} |\n\n` +
-          `<!-- kibanaCiData = ${JSON.stringify({
-            'failed-test': {
-              'test.class': 'Discover ES|QL mode',
-              'test.name': 'x',
-              'test.type': 'scout',
-            },
-          })} -->`
-      );
-
     const covered = await report({
       es: mockEs([...brokenSince('test-1', 101, 102), ...brokenSince('test-2', 101, 102)]).es,
       github: mockGithub([perTestIssue(1, 'test-1'), perTestIssue(2, 'test-2')]).github,
@@ -457,6 +472,79 @@ describe('reportConsistentFailureIssues', () => {
       failures: [scoutFailure('test-1', 'a')],
     });
     expect(closedPerTest.created).toHaveLength(1);
+  });
+
+  describe('handing over per-test issues', () => {
+    const brokenTests = () => ({
+      es: mockEs([...brokenSince('test-1', 101, 102), ...brokenSince('test-2', 101, 102)]).es,
+      failures: [scoutFailure('test-1', 'a'), scoutFailure('test-2', 'b')],
+      handOverPerTestIssues: true,
+    });
+
+    it('files the suite issue even when every broken test has a per-test issue, and closes them as its duplicates', async () => {
+      const { github, createIssue, addIssueComment, closeAsDuplicate } = mockGithub([
+        perTestIssue(1, 'test-1'),
+        perTestIssue(2, 'test-2'),
+        perTestIssue(3, 'test-3'),
+      ]);
+
+      const summary = await report({ ...brokenTests(), github });
+
+      expect(createIssue).toHaveBeenCalledTimes(1);
+      const [, body] = createIssue.mock.calls[0];
+      expect(body).toContain('Previously tracked in #1, #2.');
+      expect(body).toContain('Possibly related: #3.');
+      expect(closeAsDuplicate.mock.calls).toEqual([
+        [1, 1500],
+        [2, 1500],
+      ]);
+      // a comment would set off the failed-test Slack alert
+      expect(addIssueComment).not.toHaveBeenCalled();
+      expect(summary.tracked).toEqual([]);
+      expect(summary.handedOver).toEqual([
+        'https://github.com/elastic/appex-qa-ai/issues/1',
+        'https://github.com/elastic/appex-qa-ai/issues/2',
+      ]);
+    });
+
+    it('hands them over to the suite issue the break is posted on, even within the day', async () => {
+      const existing = failingSuiteIssue(new Date(NOW.getTime() - 2 * HOUR_MS));
+      const { github, createIssue, addIssueComment, closeAsDuplicate } = mockGithub([
+        existing,
+        perTestIssue(3, 'test-1'),
+      ]);
+
+      const summary = await report({
+        es: mockEs(brokenSince('test-1', 101, 102)).es,
+        github,
+        failures: [scoutFailure('test-1', 'shows results')],
+        handOverPerTestIssues: true,
+        now: NOW,
+      });
+
+      expect(createIssue).not.toHaveBeenCalled();
+      expect(addIssueComment).not.toHaveBeenCalled();
+      expect(closeAsDuplicate).toHaveBeenCalledWith(3, 1042);
+      expect(summary.tracked).toEqual([{ filePath: SPEC, url: existing.html_url }]);
+      expect(summary.handedOver).toEqual(['https://github.com/elastic/appex-qa-ai/issues/3']);
+    });
+
+    it('leaves the per-test issue of a skipped test open and out of the count', async () => {
+      const { github, createIssue, closeAsDuplicate } = mockGithub([
+        perTestIssue(1, 'test-1', { labels: [{ name: 'skipped-test' }] }),
+      ]);
+
+      await report({
+        es: mockEs(brokenSince('test-1', 101, 102)).es,
+        github,
+        failures: [scoutFailure('test-1', 'a')],
+        handOverPerTestIssues: true,
+      });
+
+      expect(createIssue).toHaveBeenCalledTimes(1);
+      expect(createIssue.mock.calls[0][1]).toContain('Possibly related: #1.');
+      expect(closeAsDuplicate).not.toHaveBeenCalled();
+    });
   });
 
   it('caps the issues a job files, most broken tests first', async () => {
@@ -493,6 +581,12 @@ describe('reportConsistentFailureIssues', () => {
     const summary = await report({ es, failures: [cypressFailure] });
 
     expect(esql).not.toHaveBeenCalled();
-    expect(summary).toEqual({ created: [], commented: [], tracked: [], skipped: [] });
+    expect(summary).toEqual({
+      created: [],
+      commented: [],
+      tracked: [],
+      skipped: [],
+      handedOver: [],
+    });
   });
 });

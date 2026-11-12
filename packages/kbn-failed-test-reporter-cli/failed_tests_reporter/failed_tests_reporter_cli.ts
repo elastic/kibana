@@ -47,11 +47,13 @@ async function checkConsistentFailures({
   log,
   failures,
   repo,
+  handOverPerTestIssues,
   dryRun,
 }: {
   log: ToolingLog;
   failures: TestFailure[];
   repo: string;
+  handOverPerTestIssues: boolean;
   dryRun: boolean;
 }) {
   const { BUILDKITE_PIPELINE_SLUG: pipeline, BUILDKITE_BRANCH: branch } = process.env;
@@ -79,6 +81,7 @@ async function checkConsistentFailures({
       github: new GithubApi({ log, token: process.env.GITHUB_TOKEN, dryRun, repo }),
       repo,
       build: { pipeline, branch },
+      handOverPerTestIssues,
       dryRun,
     });
   } finally {
@@ -86,9 +89,10 @@ async function checkConsistentFailures({
   }
 }
 
-// Whether a failure no issue tracks yet gets a per-test issue (the legacy behaviour, default).
-// 'false' leaves new issues to the daily flaky suite reporter and `--report-failing-suites`.
-// Tracked issues are updated either way. Set in the pipeline env, flip back to fall back.
+// Whether failures get per-test issues (the legacy behaviour, default): a new one for a test no
+// issue tracks yet, a comment on an existing one. 'false' leaves issues to the daily flaky suite
+// reporter and `--report-failing-suites`, which hands the per-test issues over to suite issues;
+// suite issues are updated either way. Set in the pipeline env, flip back to fall back.
 const PER_TEST_ISSUES = process.env.REPORT_FAILED_TESTS_PER_TEST_ISSUES !== 'false';
 
 export function runFailedTestsReporterCli() {
@@ -160,7 +164,7 @@ export function runFailedTestsReporterCli() {
           log.info('found', reportPaths.length, 'reports', reportPaths);
           if (!PER_TEST_ISSUES) {
             log.info(
-              'REPORT_FAILED_TESTS_PER_TEST_ISSUES=false: no per-test issues will be opened, only existing ones updated'
+              'REPORT_FAILED_TESTS_PER_TEST_ISSUES=false: per-test issues will be neither opened nor updated, only suite issues'
             );
           }
 
@@ -214,6 +218,7 @@ export function runFailedTestsReporterCli() {
                 log,
                 failures: [...junitFailures, ...scoutFailures],
                 repo: failingSuitesRepo,
+                handOverPerTestIssues: !PER_TEST_ISSUES,
                 dryRun: !updateGithub,
               });
             } catch (error) {

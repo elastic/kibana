@@ -91,7 +91,7 @@ describe('processScoutReports', () => {
     expect(createFailureIssue.mock.calls[0][1]).toBe(fresh);
   });
 
-  it('opens no issue for new failures when issue creation is off', async () => {
+  it('neither updates nor opens per-test issues when they are off', async () => {
     const tracked = createFailure({ id: 'tracked' });
     const fresh = createFailure({ id: 'fresh' });
     getScoutFailures.mockResolvedValue([tracked, fresh]);
@@ -100,9 +100,9 @@ describe('processScoutReports', () => {
 
     await processScoutReports(['/tmp/report.ndjson'], params);
 
-    expect(updateFailureIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue).not.toHaveBeenCalled();
     expect(createFailureIssue).not.toHaveBeenCalled();
-    expect(fresh.failureCount).toBe(0);
+    expect([tracked.failureCount, fresh.failureCount]).toEqual([0, 0]);
     expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(2);
   });
 });

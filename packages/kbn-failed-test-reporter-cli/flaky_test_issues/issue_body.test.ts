@@ -543,7 +543,7 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(renderFlakySuiteIssueBody(suite, { report, relatedIssues: [7, 8] })).toMatchSnapshot();
   });
 
-  it('names the closed issues it takes over from before the possibly related ones', () => {
+  it('names the issues it takes over from before the possibly related ones', () => {
     const { suite, report } = singleTestReport();
     const body = renderFlakySuiteIssueBody(suite, {
       report,
@@ -551,9 +551,7 @@ describe('renderFlakySuiteIssueBody', () => {
       supersededIssues: [7, 8],
     });
 
-    const superseded = body.indexOf(
-      'Previously tracked in #7, #8, closed before the suite failed again.'
-    );
+    const superseded = body.indexOf('Previously tracked in #7, #8.');
     expect(superseded).toBeGreaterThan(-1);
     expect(body.indexOf('Possibly related: #9.')).toBeGreaterThan(superseded);
     expect(renderFlakySuiteIssueBody(suite, { report, supersededIssues: [] })).not.toContain(

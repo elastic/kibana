@@ -75,6 +75,8 @@ export interface FailingSuiteIssueContext {
   branch: string;
   /** Numbers of issues that mention the suite's file or are about some of its tests. */
   relatedIssues?: number[];
+  /** Numbers of the per-test issues of its tests closed as its duplicates once it is filed. */
+  supersededIssues?: number[];
   /** When the issue is filed, recorded as the break's first post on its pipeline and branch. */
   postedAt?: Date;
 }
@@ -242,10 +244,16 @@ const lastFailure = (suite: FailingSuite): string | undefined => {
   return `${lead}\n\n${codeBlock(formatFullFailureMessage(test.errorMessage))}`;
 };
 
+const issueList = (numbers: readonly number[]): string =>
+  numbers.map((number) => `#${number}`).join(', ');
+
+const supersededIssues = ({
+  supersededIssues: numbers,
+}: FailingSuiteIssueContext): string | undefined =>
+  numbers && numbers.length > 0 ? `Previously tracked in ${issueList(numbers)}.` : undefined;
+
 const relatedIssues = ({ relatedIssues: numbers }: FailingSuiteIssueContext): string | undefined =>
-  numbers && numbers.length > 0
-    ? `Possibly related: ${numbers.map((number) => `#${number}`).join(', ')}.`
-    : undefined;
+  numbers && numbers.length > 0 ? `Possibly related: ${issueList(numbers)}.` : undefined;
 
 /** `` `a` ``, `` `a` and `b` `` or `` `a`, `b` and `c` ``. */
 const listOf = (items: readonly string[]): string =>
@@ -283,6 +291,7 @@ export const renderFailingSuiteIssueBody = (
       testsList(suite),
       suiteDetails(suite),
       lastFailure(suite),
+      supersededIssues(ctx),
       relatedIssues(ctx),
       SKIP_TIP,
     ]
