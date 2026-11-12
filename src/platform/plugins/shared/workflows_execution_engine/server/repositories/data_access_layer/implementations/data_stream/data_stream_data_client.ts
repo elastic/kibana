@@ -24,12 +24,15 @@ import type {
   DataClient,
   DocumentVersionFields,
   ExecutionsCountRequest,
+  ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionByIdsItem,
   GetExecutionsByIdsOptions,
   GetExecutionsByIdsResponse,
 } from '../../types';
 import { isBulkUpdaterItem } from '../../types';
+
+const DELETE_PAGE_SIZE = 1000;
 
 const isSoftDeleted = (source: object): boolean =>
   (source as { deleted?: unknown }).deleted === true;
@@ -203,7 +206,102 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     return bulkResponse;
   }
 
-  // A missing legacy index is ignored. The data stream refresh must fail if the stream is missing.
+  public async deleteByQuery(
+    _request: ExecutionsDeleteByQueryRequest
+  ): Promise<estypes.DeleteByQueryResponse> {
+    const startedAt = Date.now();
+    let deleted = 0;
+    let batches = 0;
+    let versionConflicts = 0;
+    let timedOut = false;
+    const failures: estypes.BulkIndexByScrollFailure[] = [];
+
+    // Data stream documents are soft-deleted (deleted: true), page by page. Soft-deleted
+    // documents are filtered out of the next page, so the loop ends on a short page.
+    let hasMore = true;
+    while (hasMore) {
+      const searchResponse = await this.deps.esClient.search({
+        index: this.deps.dataStreamName,
+        query: this.excludeDeleted(_request.query),
+        size: DELETE_PAGE_SIZE,
+        _source: false,
+        ignore_unavailable: true,
+      });
+      // A timed-out page is partial. Stop after it so callers do not treat the purge as finished.
+      if (searchResponse.timed_out) {
+        timedOut = true;
+      }
+      const hits = searchResponse.hits.hits;
+      if (hits.length === 0) {
+        break;
+      }
+      batches++;
+
+      const bulkResponse = await this.privateBulk({
+        // Each page must be visible to the next search.
+        refresh: true,
+        items: hits.map((hit) => ({
+          operation: 'update',
+          document: { id: hit._id, deleted: true } as unknown as Partial<TExecution> & {
+            id: string;
+          },
+          index: hit._index,
+          retryOnConflict: 3,
+        })),
+      });
+
+      let pageDeleted = 0;
+      for (const item of bulkResponse.items) {
+        if (!item.error) {
+          pageDeleted++;
+        } else {
+          const isConflict = item.error.type === 'version_conflict_engine_exception';
+          if (isConflict) {
+            versionConflicts++;
+          }
+          failures.push({
+            cause: item.error,
+            id: item.id,
+            index: item.index,
+            status: isConflict ? 409 : 500,
+          });
+        }
+      }
+      deleted += pageDeleted;
+
+      // Stop on a short page, a timed-out page, or when nothing in the page could be deleted.
+      hasMore = !timedOut && hits.length >= DELETE_PAGE_SIZE && pageDeleted > 0;
+    }
+
+    // Legacy plain indexes hold regular documents, which are hard-deleted.
+    if (this.additionalIndexesToQuery.length > 0) {
+      const legacyResponse = await this.deps.esClient.deleteByQuery({
+        ..._request,
+        index: this.additionalIndexesToQuery,
+        ignore_unavailable: true,
+      });
+      deleted += legacyResponse.deleted ?? 0;
+      batches += legacyResponse.batches ?? 0;
+      versionConflicts += legacyResponse.version_conflicts ?? 0;
+      failures.push(...(legacyResponse.failures ?? []));
+      timedOut = timedOut || legacyResponse.timed_out === true;
+    }
+
+    return {
+      deleted,
+      batches,
+      version_conflicts: versionConflicts,
+      noops: 0,
+      retries: { bulk: 0, search: 0 },
+      timed_out: timedOut,
+      took: Date.now() - startedAt,
+      task: '',
+      failures,
+    };
+  }
+
+  // The stream refresh must fail if the stream is missing. Legacy indexes are optional, so a
+  // missing one is ignored; otherwise a purge retry would keep seeing a stale version.
   public async refresh(): Promise<void> {
     await this.deps.esClient.indices.refresh({ index: this.deps.dataStreamName });
     if (this.additionalIndexesToQuery.length > 0) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EsWorkflowExecution, ExecutionStatus, type WorkflowRepository } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -18,7 +18,7 @@ export const ensureBoundExecutionAdmitted = async (
     WorkflowRepository,
     'isWorkflowEnabledRealtime' | 'isManagedChildAdmissibleRealtime'
   >,
-  executions: Pick<WorkflowExecutionRepository, 'updateWorkflowExecution'>
+  executions: Pick<WorkflowExecutionRepository, 'discardUnstartedExecution'>
 ): Promise<void> => {
   const inheritsIdentity = !!execution.effectiveIdentity?.inheritedFrom;
   if (!execution.workflowDefinition?.settings?.run_as && !inheritsIdentity) return;
@@ -39,19 +39,7 @@ export const ensureBoundExecutionAdmitted = async (
       throw new WorkflowDisabledError(workflowId);
     }
   } catch (error) {
-    // The record is already searchable and still in progress. Mark it finished before giving up,
-    // so a concurrent delete sees a skipped run instead of one that will never start.
-    await executions.updateWorkflowExecution(
-      {
-        id,
-        status: ExecutionStatus.SKIPPED,
-        cancellationReason:
-          error instanceof Error ? error.message : 'Workflow was no longer admissible',
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: 'system',
-      },
-      { refresh: 'wait_for' }
-    );
+    await executions.discardUnstartedExecution(id, spaceId);
     throw error;
   }
 };

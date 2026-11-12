@@ -24,6 +24,21 @@ describe('PlainIndexDataClient', () => {
     return { esClient, logger, dataAccess };
   };
 
+  it('deleteByQuery targets the configured index', async () => {
+    const { esClient, dataAccess } = createDataAccess();
+    esClient.deleteByQuery.mockResolvedValue({ deleted: 2, total: 2 } as never);
+
+    const query = { term: { workflowId: 'wf-1' } };
+    await dataAccess.deleteByQuery({ query, refresh: true, conflicts: 'proceed' });
+
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+      index: '.workflows-executions',
+      query,
+      refresh: true,
+      conflicts: 'proceed',
+    });
+  });
+
   it('refresh targets the configured index', async () => {
     const { esClient, dataAccess } = createDataAccess();
 

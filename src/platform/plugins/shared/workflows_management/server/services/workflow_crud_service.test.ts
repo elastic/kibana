@@ -119,9 +119,11 @@ const makeDeps = (
   } as unknown as WorkflowValidationService;
   const workflowExecutionsDataClient = {
     refresh: jest.fn().mockResolvedValue(undefined),
+    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
     refresh: jest.fn().mockResolvedValue(undefined),
+    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
     getSpaceId: () => 'default',
@@ -3558,6 +3560,7 @@ describe('WorkflowCrudService force deletion access', () => {
       }
       expect(client.index).not.toHaveBeenCalled();
       expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+      expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     }
   });
 });
@@ -3684,7 +3687,7 @@ describe('batched ordinary workflow deletion', () => {
     );
   });
 
-  it('bounds hard-delete concurrency across the batch and leaves executions', async () => {
+  it('bounds hard-delete concurrency and shares execution-data cleanup across the batch', async () => {
     const core = {
       ...coreMock.createStart(),
       elasticsearch: elasticsearchServiceMock.createStart(),
@@ -3710,6 +3713,8 @@ describe('batched ordinary workflow deletion', () => {
     expect(maximum).toBeGreaterThan(1);
     expect(maximum).toBeLessThanOrEqual(10);
     expect(client.search).toHaveBeenCalledTimes(1);
+    expect(deps.workflowExecutionsDataClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    expect(deps.stepExecutionsDataClient.deleteByQuery).toHaveBeenCalledTimes(1);
   });
 
   it('does not retry a bulk deletion against a concurrently changed definition', async () => {
@@ -4426,6 +4431,8 @@ describe('managed orphan cleanup without a request', () => {
       );
       expectBindingUntouched(bindings);
       expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+      expect(deps.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('deletes an unbound orphan', async () => {

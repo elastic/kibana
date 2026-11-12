@@ -21,6 +21,9 @@ export type ExecutionsSearchRequest = Omit<estypes.SearchRequest, 'index'>;
 /** Count body without index — DAL resolves the target. */
 export type ExecutionsCountRequest = Omit<estypes.CountRequest, 'index'>;
 
+/** Delete-by-query body without index — DAL resolves the target. */
+export type ExecutionsDeleteByQueryRequest = Omit<estypes.DeleteByQueryRequest, 'index'>;
+
 /** Partial document with required id. */
 export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: string };
 
@@ -91,7 +94,13 @@ export interface WritableDataClient<TExecution extends { id: string }> {
   bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse>;
 
   /**
-   * Makes all writes so far visible to search and count.
+   * Deletes all execution documents matching the given query.
+   * Throws on storage errors.
+   */
+  deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<estypes.DeleteByQueryResponse>;
+
+  /**
+   * Makes all writes so far visible to search, delete-by-query, and count.
    * Throws on storage errors.
    */
   refresh(): Promise<void>;
@@ -117,6 +126,9 @@ export type StepExecutionsSearchRequest = ExecutionsSearchRequest;
 
 export type WorkflowExecutionsCountRequest = ExecutionsCountRequest;
 export type StepExecutionsCountRequest = ExecutionsCountRequest;
+
+export type WorkflowExecutionsDeleteByQueryRequest = ExecutionsDeleteByQueryRequest;
+export type StepExecutionsDeleteByQueryRequest = ExecutionsDeleteByQueryRequest;
 
 export type WorkflowExecutionUpsertDocument = UpsertDocument<EsWorkflowExecution>;
 export type StepExecutionUpsertDocument = UpsertDocument<EsWorkflowStepExecution>;

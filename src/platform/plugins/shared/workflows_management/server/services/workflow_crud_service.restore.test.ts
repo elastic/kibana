@@ -339,8 +339,12 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
       validationService,
       getCoreStart: () => coreMock.createStart(),
       changeHistoryService,
-      workflowExecutionsDataClient: {} as any,
-      stepExecutionsDataClient: {} as any,
+      workflowExecutionsDataClient: {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      } as any,
+      stepExecutionsDataClient: {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      } as any,
     };
 
     client.search.mockResolvedValue({

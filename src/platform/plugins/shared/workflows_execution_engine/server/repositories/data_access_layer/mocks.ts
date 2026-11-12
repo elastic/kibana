@@ -35,6 +35,7 @@ export const createMockWorkflowDataClient = (
     count: jest.fn(),
     getByIds: jest.fn(),
     bulk: jest.fn(),
+    deleteByQuery: jest.fn(),
     refresh: jest.fn(),
     ...overrides,
   } as jest.Mocked<WorkflowExecutionsDataClient>);
@@ -47,6 +48,7 @@ export const createMockStepDataClient = (
     count: jest.fn(),
     getByIds: jest.fn(),
     bulk: jest.fn(),
+    deleteByQuery: jest.fn(),
     refresh: jest.fn(),
     ...overrides,
   } as jest.Mocked<StepExecutionsDataClient>);

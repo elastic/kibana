@@ -512,4 +512,112 @@ describe('DataStreamDataClient', () => {
       expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: DATA_STREAM });
     });
   });
+
+  describe('deleteByQuery', () => {
+    const query = { term: { workflowId: 'wf-1' } };
+
+    const searchPage = (count: number, timedOut = false) =>
+      ({
+        timed_out: timedOut,
+        hits: {
+          hits: Array.from({ length: count }, (_, i) => ({
+            _id: `id-${i}`,
+            _index: BACKING_INDEX,
+          })),
+        },
+      } as never);
+
+    const bulkPage = (count: number) =>
+      ({
+        errors: false,
+        items: Array.from({ length: count }, (_, i) => updatedBulkItem(`doc-${i}`, i)),
+      } as never);
+
+    it('pages until a short page and hard-deletes the legacy index', async () => {
+      const { esClient, versionManager, dataAccess } = createClient([LEGACY_INDEX]);
+      versionManager.bulkGetVersions.mockImplementation(async (ids: string[]) =>
+        Object.fromEntries(
+          ids.map((id) => [id, { index: BACKING_INDEX, seqNo: 1, primaryTerm: 1 }])
+        )
+      );
+      esClient.search.mockResolvedValueOnce(searchPage(1000)).mockResolvedValueOnce(searchPage(1));
+      esClient.bulk.mockResolvedValueOnce(bulkPage(1000)).mockResolvedValueOnce(bulkPage(1));
+      esClient.deleteByQuery.mockResolvedValue({
+        deleted: 4,
+        batches: 1,
+        version_conflicts: 2,
+        failures: [{ id: 'legacy-fail', index: LEGACY_INDEX, status: 409 }],
+        timed_out: false,
+      } as never);
+
+      const result = await dataAccess.deleteByQuery({ query, refresh: true });
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          index: DATA_STREAM,
+          size: 1000,
+          query: excludeDeletedQuery(query),
+        })
+      );
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+        query,
+        refresh: true,
+        index: [LEGACY_INDEX],
+        ignore_unavailable: true,
+      });
+      expect(result.deleted).toBe(1000 + 1 + 4);
+      expect(result.batches).toBe(3);
+      expect(result.version_conflicts).toBe(2);
+      expect(result.failures).toEqual([
+        expect.objectContaining({ id: 'legacy-fail', index: LEGACY_INDEX }),
+      ]);
+      expect(result.timed_out).toBe(false);
+    });
+
+    it('propagates a timed-out legacy cleanup', async () => {
+      const { esClient, dataAccess } = createClient([LEGACY_INDEX]);
+      esClient.search.mockResolvedValueOnce(searchPage(0));
+      esClient.deleteByQuery.mockResolvedValue({
+        deleted: 0,
+        batches: 1,
+        version_conflicts: 0,
+        failures: [],
+        timed_out: true,
+      } as never);
+
+      const result = await dataAccess.deleteByQuery({ query });
+
+      expect(result.timed_out).toBe(true);
+      expect(result.deleted).toBe(0);
+    });
+
+    it('stops paging when a data stream search times out', async () => {
+      const { esClient, versionManager, dataAccess } = createClient([LEGACY_INDEX]);
+      versionManager.bulkGetVersions.mockImplementation(async (ids: string[]) =>
+        Object.fromEntries(
+          ids.map((id) => [id, { index: BACKING_INDEX, seqNo: 1, primaryTerm: 1 }])
+        )
+      );
+      esClient.search
+        .mockResolvedValueOnce(searchPage(1000, true))
+        .mockResolvedValueOnce(searchPage(1000));
+      esClient.bulk.mockResolvedValueOnce(bulkPage(1000));
+      esClient.deleteByQuery.mockResolvedValue({
+        deleted: 1,
+        batches: 1,
+        version_conflicts: 0,
+        failures: [],
+        timed_out: false,
+      } as never);
+
+      const result = await dataAccess.deleteByQuery({ query });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(result.timed_out).toBe(true);
+      expect(result.deleted).toBe(1000 + 1);
+    });
+  });
 });

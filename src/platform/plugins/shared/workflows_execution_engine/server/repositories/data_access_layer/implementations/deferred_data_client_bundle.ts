@@ -90,6 +90,7 @@ export class DeferredDataClientBundle implements DataClientBundle {
       count: async (r) => get().then((c) => c.count(r)),
       getByIds: async (ids, opts) => get().then((c) => c.getByIds(ids, opts)),
       bulk: async (r) => get().then((c) => c.bulk(r)),
+      deleteByQuery: async (r) => get().then((c) => c.deleteByQuery(r)),
       refresh: async () => get().then((c) => c.refresh()),
     };
 

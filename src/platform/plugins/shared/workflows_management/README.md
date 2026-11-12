@@ -503,11 +503,13 @@ history reads.
 The owner or an administrator can hard-delete a private workflow. Administrator
 overrides are audited. The request must
 include `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
-require no ACL acknowledgment. Hard deletion removes the workflow document and
-leaves its executions. Data stream retention removes those executions.
+require no ACL acknowledgment. Their documents are removed before best-effort
+history cleanup, and cleanup failures do not fail deletion.
 Hard deletion of a private workflow first marks it as deleted and disabled, then
-removes the workflow document. Its executions stay until data stream retention
-removes them. Remaining execution data uses Workflows feature privileges.
+removes its steps and executions before removing the workflow document. If history
+cleanup fails or is incomplete, the API returns an error and retains the
+soft-deleted workflow and its ACL. The caller can retry force deletion after the
+error is resolved.
 Direct Elasticsearch document deletion bypasses these checks. Private workflows
 are excluded from Agent Builder's search index, which currently supports feature
 privileges only.
