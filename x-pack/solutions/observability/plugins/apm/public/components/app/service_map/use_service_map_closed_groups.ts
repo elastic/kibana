@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   groupServiceNodes,
+  isServiceGroupNode,
   isServiceNodeData,
   type ServiceMapEdge,
   type ServiceMapGrouping,
@@ -60,10 +61,11 @@ export function useServiceMapClosedGroups({
     }
 
     const grouped = groupServiceNodes(nodes, edges, grouping);
+    const closedGroupCount = grouped.nodes.filter((node) => isServiceGroupNode(node)).length;
     return {
       nodes: grouped.nodes,
       edges: grouped.edges,
-      countLine: formatServiceGroupingCountLine(grouping),
+      countLine: formatServiceGroupingCountLine(grouping, closedGroupCount),
     };
   }, [nodes, edges, serviceGrouping, isGroupingEnabled, mockFromUrl]);
 }

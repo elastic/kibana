@@ -46,6 +46,15 @@ export const DEFAULT_SERVICE_MAP_VIEW_FILTERS: ServiceMapViewFilters = {
   anomalySeverityFilter: [],
 };
 
+/**
+ * Badge fields a service and a closed group both carry. Filters read only these,
+ * so a group is not treated as a service.
+ */
+type ServiceMapFilterNodeData = Pick<
+  ServiceNodeData,
+  'alertsCount' | 'alertsByStatus' | 'sloStatus' | 'serviceAnomalyStats'
+>;
+
 /** Builds a Set of node IDs that appear on at least one edge (as source or target). */
 export function buildConnectedNodeIdSet(edges: ServiceMapEdgeType[]): Set<string> {
   const connected = new Set<string>();
@@ -60,7 +69,7 @@ export function buildConnectedNodeIdSet(edges: ServiceMapEdgeType[]): Set<string
  * SLO bucket for map filters and option counts: `undefined` or `noSLOs` (no SLO summary on the node)
  * is treated as **`noData`** so tallies and combo options stay aligned with `SloStatus`.
  */
-export function getNormalizedSloStatusForMapFilters(data: ServiceNodeData): SloStatus {
+export function getNormalizedSloStatusForMapFilters(data: ServiceMapFilterNodeData): SloStatus {
   const raw = data.sloStatus;
   if (raw === undefined || raw === 'noSLOs') {
     return 'noData';
@@ -70,7 +79,7 @@ export function getNormalizedSloStatusForMapFilters(data: ServiceNodeData): SloS
 
 /** Alert count for a status on one service (used by filters and filter-option counts). */
 export function getServiceNodeAlertCountForStatus(
-  data: ServiceNodeData,
+  data: ServiceMapFilterNodeData,
   status: AlertStatus
 ): number {
   const fromBreakdown = data.alertsByStatus?.[status];
@@ -97,12 +106,14 @@ function nodeMatchesConnectionFilter(
 }
 
 /** ML severity band for map filters, derived from the same score → severity rules as service inventory. */
-export function getMlSeverityForServiceMapNode(data: ServiceNodeData): ML_ANOMALY_SEVERITY {
+export function getMlSeverityForServiceMapNode(
+  data: ServiceMapFilterNodeData
+): ML_ANOMALY_SEVERITY {
   return getSeverity(data.serviceAnomalyStats?.anomalyScore);
 }
 
 function serviceMatchesFilters(
-  data: ServiceNodeData,
+  data: ServiceMapFilterNodeData,
   nodeId: string,
   connectedIds: Set<string>,
   filters: ServiceMapViewFilters
@@ -155,10 +166,9 @@ export function applyServiceMapVisibility(
   const connectedIds = buildConnectedNodeIdSet(edges);
 
   for (const node of nodes) {
-    // Closed groups carry the same rolled-up badge/stats fields as services for filters.
     if (
       (isServiceNodeData(node.data) || isServiceGroupNodeData(node.data)) &&
-      serviceMatchesFilters(node.data as ServiceNodeData, node.id, connectedIds, filters)
+      serviceMatchesFilters(node.data, node.id, connectedIds, filters)
     ) {
       visibleIds.add(node.id);
     }

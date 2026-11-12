@@ -160,6 +160,57 @@ describe('groupServiceNodes', () => {
     expect(edgeKeys.every((k) => !k.startsWith('calls:search>calls:search'))).toBe(true);
   });
 
+  it('keeps the transaction type with the most requests', () => {
+    const grouping: ServiceMapGrouping = {
+      services: ['alpha', 'beta'],
+      automatic: 'namePrefix',
+      strategies: [
+        {
+          source: 'namePrefix',
+          passes: true,
+          groups: [
+            {
+              id: 'namePrefix:app',
+              kind: 'attribute',
+              attribute: 'namePrefix',
+              value: 'app',
+            },
+          ],
+          assignment: [0, 0],
+        },
+      ],
+    };
+    const nodes = [
+      serviceNode('alpha', {
+        stats: {
+          transactionType: 'request',
+          throughput: 1,
+          failedTransactionRate: 0,
+          latency: 100,
+          requestCount: 10,
+        },
+      }),
+      serviceNode('beta', {
+        stats: {
+          transactionType: 'messaging',
+          throughput: 9,
+          failedTransactionRate: 0,
+          latency: 200,
+          requestCount: 90,
+        },
+      }),
+    ];
+
+    const { nodes: nextNodes } = groupServiceNodes(nodes, [], grouping);
+    const group = nextNodes.find((node) => isServiceGroupNodeData(node.data));
+
+    expect(isServiceGroupNodeData(group!.data) && group!.data.stats).toMatchObject({
+      transactionType: 'messaging',
+      throughput: 10,
+      requestCount: 100,
+    });
+  });
+
   it('rolls up alerts, SLO, and highest anomaly', () => {
     const nodes = [
       serviceNode('frontend', {

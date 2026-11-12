@@ -10,22 +10,17 @@ import type { ServiceGroupingSource, ServiceMapGrouping } from '../../../../comm
 
 /**
  * Count line for the map, e.g. "20 services in 3 groups, by name prefix".
- * `groupCount` is closed groups only (2+ members) — same nodes drawn as group squares.
- * Groups of 1 stay service nodes and are not counted here.
+ * `closedGroupCount` is the number of group squares actually drawn (members that
+ * resolved to nodes and collapsed). Groups of 1 stay service nodes.
  */
-export function formatServiceGroupingCountLine(grouping: ServiceMapGrouping): string | undefined {
+export function formatServiceGroupingCountLine(
+  grouping: ServiceMapGrouping,
+  closedGroupCount: number
+): string | undefined {
   const strategy = grouping.strategies.find((s) => s.source === grouping.automatic);
   if (!strategy) {
     return undefined;
   }
-
-  const memberCounts = strategy.groups.map(() => 0);
-  for (const groupIndex of strategy.assignment) {
-    if (groupIndex >= 0 && groupIndex < memberCounts.length) {
-      memberCounts[groupIndex] += 1;
-    }
-  }
-  const closedGroupCount = memberCounts.filter((count) => count >= 2).length;
 
   return i18n.translate('xpack.apm.serviceMap.groupingCountLine', {
     defaultMessage:

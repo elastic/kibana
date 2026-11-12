@@ -30,7 +30,9 @@ import { DisabledPrompt } from '../../components/app/service_map/disabled_prompt
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
+import { useServiceMapClosedGroups } from '../../components/app/service_map/use_service_map_closed_groups';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
+import { ServiceMapGroupingCountLine } from '../../components/app/service_map/service_map_grouping_count_line';
 import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
 import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
@@ -320,13 +322,23 @@ export function ServiceMapEmbeddable({
     onEmptyStateChange(data.nodes.length === 0);
   }, [onEmptyStateChange, status, data.nodes.length]);
 
-  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+  const { nodes: nodesWithBadges, status: badgesStatus } = useServiceMapBadges({
     environment,
     start: badgesStart,
     end: badgesEnd,
     kuery: badgesKuery ?? kuery,
     nodes: data.nodes,
     nodesStatus: status,
+  });
+
+  const {
+    nodes: nodesForGraph,
+    edges: edgesForGraph,
+    countLine: groupingCountLine,
+  } = useServiceMapClosedGroups({
+    nodes: nodesWithBadges,
+    edges: data.edges,
+    serviceGrouping: data.serviceGrouping,
   });
 
   // Strip badge-dependent filters (alert/SLO/anomaly) until badge data resolves. On failure,
@@ -507,9 +519,11 @@ export function ServiceMapEmbeddable({
           />
         )}
         {useContextualMap ? (
+          // Focused hop map stays one node per service. Closed groups would hide the focal
+          // service and break expand/collapse, which keys off service ids.
           <ContextualServiceMapGraph
             height="100%"
-            nodes={isLoading ? [] : nodesForGraph}
+            nodes={isLoading ? [] : nodesWithBadges}
             edges={isLoading ? [] : data.edges}
             focalServiceId={serviceName!}
             baseMaxHops={baseMaxHops}
@@ -532,30 +546,35 @@ export function ServiceMapEmbeddable({
             flyoutOptions={flyoutOptions}
           />
         ) : (
-          <ServiceMapGraph
-            height="100%"
-            nodes={isLoading ? [] : nodesForGraph}
-            edges={isLoading ? [] : data.edges}
-            serviceName={serviceName}
-            highlightedServiceNames={highlightedServiceNames}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-            isFullscreen={false}
-            fullMapHref={fullMapHref}
-            isEmbedded
-            isInteractive={viewMode !== 'non-interactive'}
-            showEmbeddedControls={showEmbeddedControls}
-            showFocusMap={showFocusMapInPopover}
-            alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
-            clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
-            mapOrientation={mapOrientation}
-            onMapOrientationChange={onMapOrientationChange}
-            viewFilters={viewFiltersForGraph}
-            onViewFiltersChange={onViewFiltersChange}
-            flyoutOptions={flyoutOptions}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+            {!isLoading && <ServiceMapGroupingCountLine countLine={groupingCountLine} />}
+            <div style={{ flex: 1, minHeight: 0 }}>
+              <ServiceMapGraph
+                height="100%"
+                nodes={isLoading ? [] : nodesForGraph}
+                edges={isLoading ? [] : edgesForGraph}
+                serviceName={serviceName}
+                highlightedServiceNames={highlightedServiceNames}
+                environment={environment}
+                kuery={kuery}
+                start={start}
+                end={end}
+                isFullscreen={false}
+                fullMapHref={fullMapHref}
+                isEmbedded
+                isInteractive={viewMode !== 'non-interactive'}
+                showEmbeddedControls={showEmbeddedControls}
+                showFocusMap={showFocusMapInPopover}
+                alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+                clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+                mapOrientation={mapOrientation}
+                onMapOrientationChange={onMapOrientationChange}
+                viewFilters={viewFiltersForGraph}
+                onViewFiltersChange={onViewFiltersChange}
+                flyoutOptions={flyoutOptions}
+              />
+            </div>
+          </div>
         )}
       </div>
       {sloOverviewFlyout && (

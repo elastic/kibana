@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +44,7 @@ import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
 import { useServiceMapClosedGroups } from './use_service_map_closed_groups';
 import { ServiceMapGraph } from './graph';
+import { ServiceMapGroupingCountLine } from './service_map_grouping_count_line';
 import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
 import { useServiceMapSearchContext } from './service_map_search_context';
 
@@ -300,16 +300,7 @@ export function ServiceMap({
             ref={ref}
           >
             {isLoading && <LoadingSpinner />}
-            {!isLoading && groupingCountLine && (
-              <EuiText
-                size="s"
-                color="subdued"
-                data-test-subj="serviceMapGroupingCountLine"
-                style={{ padding: `${euiTheme.size.s} ${euiTheme.size.m} 0` }}
-              >
-                <p>{groupingCountLine}</p>
-              </EuiText>
-            )}
+            {!isLoading && <ServiceMapGroupingCountLine countLine={groupingCountLine} />}
             <ServiceMapGraph
               height={mapHeight}
               nodes={isLoading ? [] : nodesForGraph}

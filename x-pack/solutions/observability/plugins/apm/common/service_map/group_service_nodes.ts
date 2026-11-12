@@ -159,6 +159,8 @@ function rollupStats(members: ServiceNodeData[]): ServiceMapServiceStats | undef
   let failedWeight = 0;
   let worstLatency: number | null = null;
   let transactionType: string | undefined;
+  // Request count of the member whose type we kept. Undefined until the first member with stats.
+  let leadingRequestCount: number | undefined;
   let hasStats = false;
 
   for (const member of members) {
@@ -167,7 +169,12 @@ function rollupStats(members: ServiceNodeData[]): ServiceMapServiceStats | undef
       continue;
     }
     hasStats = true;
-    transactionType ??= stats.transactionType;
+    // Sums include every member. The type is the one with the most requests, same as a
+    // single service's main type. A tie keeps the earlier member.
+    if (leadingRequestCount === undefined || stats.requestCount > leadingRequestCount) {
+      leadingRequestCount = stats.requestCount;
+      transactionType = stats.transactionType;
+    }
     throughput += stats.throughput;
     requestCount += stats.requestCount;
 
