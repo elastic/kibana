@@ -87,7 +87,7 @@ export const sanitize = (value: string, { maxBytes, keep }: SanitizeOptions): st
 
 /**
  * Resolves a profiler `callFrame.url` to a repo-relative path, a `node:` specifier, or a basename
- * (without Applying length truncation, so the caller can match `src/` / `x-pack/` / `node_modules/@kbn/`
+ * (without applying length truncation, so the caller can match `src/` / `x-pack/` / `node_modules/@kbn/`
  * before capping).
  */
 export const relativeLocation = (url: string, root: string): string | undefined => {
