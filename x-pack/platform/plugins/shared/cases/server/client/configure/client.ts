@@ -52,6 +52,7 @@ import { ConfigurationSchema, ConfigurationsSchema } from '../../../common/types
 import {
   validateDuplicatedKeysInRequest,
   validateDuplicatedObservableTypesInRequest,
+  validateObservableTypePathsInRequest,
 } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
@@ -351,6 +352,10 @@ export async function update(
       requestFields: request.observableTypes,
     });
 
+    validateObservableTypePathsInRequest({
+      requestFields: request.observableTypes,
+    });
+
     const { version, templates, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
@@ -521,6 +526,10 @@ export async function create(
     });
 
     validateDuplicatedObservableTypesInRequest({
+      requestFields: validatedConfigurationRequest.observableTypes,
+    });
+
+    validateObservableTypePathsInRequest({
       requestFields: validatedConfigurationRequest.observableTypes,
     });
 

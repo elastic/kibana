@@ -8,7 +8,6 @@
 import React, { memo, useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-
 interface FormFieldsProps {
   isSubmitting?: boolean;
 }
@@ -27,10 +26,22 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
     [isSubmitting]
   );
 
+  const valuePatternFieldProps = useMemo(
+    () => ({
+      euiFieldProps: {
+        'data-test-subj': 'observable-type-value-pattern-input',
+        fullWidth: true,
+        isLoading: isSubmitting,
+      },
+    }),
+    [isSubmitting]
+  );
+
   return (
     <>
       <UseField path="key" component={HiddenField} />
       <UseField path="label" component={TextField} componentProps={labelFieldProps} />
+      <UseField path="valuePattern" component={TextField} componentProps={valuePatternFieldProps} />
     </>
   );
 };

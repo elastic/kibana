@@ -5,7 +5,9 @@
  * 2.0.
  */
 import type { ObservablePost } from '../types/api';
+import { DEFAULT_OBSERVABLE_TYPES } from './default_observable_types';
 import { getIPType, getObservablesFromEcs, processObservable } from './get_observables_from_ecs';
+import { resolveObservableTypes } from './resolve_observable_types';
 
 describe('getIPType', () => {
   it('should return IPV4 for a valid IPv4 address', () => {
@@ -209,5 +211,141 @@ describe('getObservablesFromEcsDataArray', () => {
         description: 'Auto extracted observable',
       },
     ]);
+  });
+
+  it('should split IPv4 and IPv6 values of one path into their own types, in value order', () => {
+    expect(
+      getObservablesFromEcs([
+        [
+          { field: 'source.ip', value: ['2001:db8::1', '10.0.0.1'] },
+          { field: 'destination.ip', value: ['10.0.0.2'] },
+        ],
+      ])
+    ).toEqual([
+      {
+        typeKey: 'observable-type-ipv6',
+        value: '2001:db8::1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.2',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should skip empty values on every path', () => {
+    expect(
+      getObservablesFromEcs([
+        [
+          { field: 'host.name', value: [''] },
+          { field: 'file.path', value: ['', 'path1'] },
+          { field: 'agent.id', value: [''] },
+        ],
+      ])
+    ).toEqual([
+      {
+        typeKey: 'observable-type-file-path',
+        value: 'path1',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should follow the given observable types', () => {
+    const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
+      { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+      {
+        key: 'employee-id',
+        label: 'Employee ID',
+        paths: [{ path: 'user.employee_id', enabled: true }],
+        valuePattern: '^E\\d{6}$',
+      },
+      {
+        key: 'broken',
+        label: 'Broken',
+        paths: [{ path: 'user.name', enabled: true }],
+        valuePattern: '(',
+      },
+    ]);
+
+    expect(
+      getObservablesFromEcs(
+        [
+          [
+            { field: 'agent.id', value: ['agent1'] },
+            { field: 'user.employee_id', value: ['E123456', 'not-an-id'] },
+            { field: 'user.name', value: ['alice'] },
+            { field: 'host.name', value: ['host1'] },
+          ],
+        ],
+        observableTypes
+      )
+    ).toEqual([
+      { typeKey: 'employee-id', value: 'E123456', description: 'Auto extracted observable' },
+      {
+        typeKey: 'observable-type-hostname',
+        value: 'host1',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should skip an excluded value only on the field that excludes it', () => {
+    const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
+      {
+        key: 'observable-type-ipv4',
+        paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+      },
+    ]);
+
+    expect(
+      getObservablesFromEcs(
+        [
+          [
+            { field: 'source.ip', value: ['127.0.0.1', '10.0.0.1'] },
+            { field: 'destination.ip', value: ['127.0.0.1'] },
+          ],
+        ],
+        observableTypes
+      )
+    ).toEqual([
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '127.0.0.1',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should compare excluded values exactly and with case', () => {
+    const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
+      {
+        key: 'observable-type-hostname',
+        paths: [{ path: 'host.name', enabled: true, excludedValues: ['localhost'] }],
+      },
+    ]);
+
+    expect(
+      getObservablesFromEcs(
+        [[{ field: 'host.name', value: ['localhost', 'LocalHost', 'localhost.lan'] }]],
+        observableTypes
+      ).map(({ value }) => value)
+    ).toEqual(['LocalHost', 'localhost.lan']);
+  });
+
+  it('should ignore fields that no default type reads', () => {
+    expect(getObservablesFromEcs([[{ field: 'user.name', value: ['alice'] }]])).toEqual([]);
   });
 });

@@ -9,7 +9,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { ActionConnector, ObservableTypeConfiguration } from '../../../common/types/domain';
+import type {
+  ActionConnector,
+  ObservableTypeConfiguration,
+  ObservableTypesConfiguration,
+} from '../../../common/types/domain';
 import { getNoneConnector } from '../../../common/utils/connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
@@ -351,7 +355,10 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         updatedObservableTypes = [...structuredClone(observableTypes), data];
       } else {
         updatedObservableTypes = structuredClone(observableTypes);
-        updatedObservableTypes[existingObservableIndex] = data;
+        updatedObservableTypes[existingObservableIndex] = {
+          ...updatedObservableTypes[existingObservableIndex],
+          ...data,
+        };
       }
 
       persistCaseConfigure({
@@ -378,6 +385,31 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       templates,
       workflowTags,
       onCloseObservableTypesFlyout,
+    ]
+  );
+
+  const onChangeObservableTypes = useCallback(
+    (updatedObservableTypes: ObservableTypesConfiguration) => {
+      persistCaseConfigure({
+        connector,
+        closureType,
+        customFields,
+        templates,
+        observableTypes: updatedObservableTypes,
+        workflowTags,
+        id: configurationId,
+        version: configurationVersion,
+      });
+    },
+    [
+      connector,
+      closureType,
+      customFields,
+      templates,
+      workflowTags,
+      persistCaseConfigure,
+      configurationId,
+      configurationVersion,
     ]
   );
 
@@ -461,6 +493,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     ConnectorEditFlyout,
     onEditObservableType,
     onDeleteObservableType,
+    onChangeObservableTypes,
     onChangeWorkflowTags,
     AddOrEditObservableTypeFlyout,
   };

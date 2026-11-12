@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiPanel,
@@ -17,10 +17,12 @@ import {
 } from '@elastic/eui';
 
 import { MAX_CUSTOM_OBSERVABLE_TYPES } from '../../../common/constants';
+import { getCustomObservableTypes } from '../../../common/observables/resolve_observable_types';
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { ObservableTypesConfiguration } from '../../../common/types/domain';
 import { ObservableTypesList } from './observable_types_list';
+import { ObservableTypesTable } from './observable_types_table';
 
 export interface ObservableTypesProps {
   observableTypes: ObservableTypesConfiguration;
@@ -35,6 +37,11 @@ export interface ObservableTypesProps {
    * rows. Only used by the cases redesign settings page.
    */
   useLineSeparators?: boolean;
+  /**
+   * Shows every observable type with the alert fields that auto-extraction reads.
+   * Without it, only the custom types are listed.
+   */
+  handleChangeObservableTypes?: (observableTypes: ObservableTypesConfiguration) => void;
 }
 const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   disabled,
@@ -43,10 +50,15 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   handleAddObservableType,
   handleDeleteObservableType,
   handleEditObservableType,
-  observableTypes,
+  handleChangeObservableTypes,
+  observableTypes: configuredObservableTypes,
   useLineSeparators = false,
 }) => {
   const { permissions } = useCasesContext();
+  const observableTypes = useMemo(
+    () => getCustomObservableTypes(configuredObservableTypes),
+    [configuredObservableTypes]
+  );
   const canModifyObservableTypes = !disabled && permissions.settings;
 
   const onAddObservableType = useCallback(() => {
@@ -66,7 +78,16 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
 
   const listAndFooter = (
     <>
-      {observableTypes.length ? (
+      {handleChangeObservableTypes ? (
+        <ObservableTypesTable
+          disabled={!canModifyObservableTypes}
+          observableTypes={configuredObservableTypes}
+          onChange={handleChangeObservableTypes}
+          onDeleteObservableType={handleDeleteObservableType}
+          onEditObservableType={onEditObservableType}
+        />
+      ) : null}
+      {!handleChangeObservableTypes && observableTypes.length ? (
         <ObservableTypesList
           disabled={!canModifyObservableTypes}
           observableTypes={observableTypes}
@@ -76,7 +97,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
         />
       ) : null}
       <EuiSpacer size="s" />
-      {!observableTypes.length ? (
+      {!handleChangeObservableTypes && !observableTypes.length ? (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false} data-test-subj="empty-observable-types">
             {i18n.NO_OBSERVABLE_TYPES}

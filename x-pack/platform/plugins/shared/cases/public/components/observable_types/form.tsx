@@ -19,13 +19,29 @@ export interface ObservableTypesFormProps {
   initialValue: ObservableTypeConfiguration | null;
 }
 
+const observableTypeSerializer = ({
+  valuePattern,
+  ...observableType
+}: ObservableTypeConfiguration): ObservableTypeConfiguration => ({
+  ...observableType,
+  valuePattern: valuePattern || undefined,
+});
+
 const FormComponent: React.FC<ObservableTypesFormProps> = ({ onChange, initialValue }) => {
-  const defaultValue = useMemo(() => ({ key: uuidv4(), label: '' }), []);
+  const defaultValue = useMemo(
+    () => ({
+      key: initialValue?.key ?? uuidv4(),
+      label: initialValue?.label ?? '',
+      valuePattern: initialValue?.valuePattern ?? '',
+    }),
+    [initialValue]
+  );
 
   const { form } = useForm({
-    defaultValue: initialValue || defaultValue,
+    defaultValue,
     options: { stripEmptyFields: false },
     schema,
+    serializer: observableTypeSerializer,
   });
 
   const { submit, isValid, isSubmitting } = form;

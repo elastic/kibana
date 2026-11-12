@@ -94,6 +94,62 @@ describe('ObservableTypesForm ', () => {
     });
   });
 
+  describe('value pattern', () => {
+    let formState: FormState<ObservableTypeConfiguration>;
+    const onChangeState = (state: FormState<ObservableTypeConfiguration>) => (formState = state);
+
+    const renderForm = async (initialValue: ObservableTypeConfiguration) => {
+      renderWithTestingProviders(
+        <ObservableTypesForm onChange={onChangeState} initialValue={initialValue} />
+      );
+      await waitFor(() => {
+        expect(formState).not.toBeUndefined();
+      });
+    };
+
+    it('submits the value pattern without the paths', async () => {
+      await renderForm({
+        key: 'employee-id',
+        label: 'Employee ID',
+        paths: [{ path: 'user.employee_id', enabled: true }],
+      });
+
+      fireEvent.change(screen.getByTestId('observable-type-value-pattern-input'), {
+        target: { value: '^E\\d{6}$' },
+      });
+
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toEqual(true);
+      expect(data).toEqual({ key: 'employee-id', label: 'Employee ID', valuePattern: '^E\\d{6}$' });
+    });
+
+    it('removes an empty value pattern', async () => {
+      await renderForm({ key: 'employee-id', label: 'Employee ID', valuePattern: '^E' });
+
+      fireEvent.change(screen.getByTestId('observable-type-value-pattern-input'), {
+        target: { value: '' },
+      });
+
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toEqual(true);
+      expect(data.valuePattern).toBeUndefined();
+    });
+
+    it('does not allow an invalid value pattern', async () => {
+      await renderForm({ key: 'employee-id', label: 'Employee ID' });
+
+      fireEvent.change(screen.getByTestId('observable-type-value-pattern-input'), {
+        target: { value: '(' },
+      });
+
+      const { isValid } = await formState!.submit();
+
+      expect(isValid).toEqual(false);
+    });
+  });
+
   describe('when initial value is missing', () => {
     it('should pass generated key to onChange handler', async () => {
       let formState: FormState<ObservableTypeConfiguration>;

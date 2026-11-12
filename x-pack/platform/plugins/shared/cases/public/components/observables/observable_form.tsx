@@ -17,6 +17,7 @@ import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { TextAreaField, SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
+import { getCustomObservableTypes } from '../../../common/observables/resolve_observable_types';
 import type { ObservablePatch, ObservablePost } from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -35,10 +36,12 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
   const { validateFields } = useFormContext();
 
   const options = useMemo(() => {
-    return [...OBSERVABLE_TYPES_BUILTIN, ...data.observableTypes].map((observableType) => ({
-      value: observableType.key,
-      inputDisplay: observableType.label,
-    }));
+    return [...OBSERVABLE_TYPES_BUILTIN, ...getCustomObservableTypes(data.observableTypes)].map(
+      (observableType) => ({
+        value: observableType.key,
+        inputDisplay: observableType.label,
+      })
+    );
   }, [data.observableTypes]);
 
   const handleSelectedTypeChange = useCallback(
