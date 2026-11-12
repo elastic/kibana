@@ -22,6 +22,7 @@ import type {
   FunctionParameterType,
   FunctionReturnType,
 } from '../../commands/definitions/types';
+import { timeUnitsToSuggest } from '../../commands/definitions/constants';
 import { getDateLiterals, getSafeInsertText } from '../../commands/definitions/utils';
 import type { Location } from '../../commands/registry/types';
 import {
@@ -116,3 +117,6 @@ export const dateLiterals = (): string[] => getDateLiterals().map(({ text }) => 
 
 /** The time units DATE_DIFF accepts as its first argument, as inserted. */
 export const dateDiffUnits = (): string[] => [...DATE_DIFF_TIME_UNITS];
+
+/** The names of the time units suggested after a number. */
+export const timeUnits = (): string[] => timeUnitsToSuggest.map(({ name }) => name);
