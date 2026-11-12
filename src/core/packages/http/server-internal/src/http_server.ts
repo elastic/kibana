@@ -219,6 +219,8 @@ export class HttpServer {
   private config?: HttpConfig;
   private subscriptions: Subscription[] = [];
   private registeredRouters = new Set<IRouter>();
+  /** Routes already handed to Hapi. A second start must not register them again. */
+  private readonly configuredRoutes = new WeakSet<RouterRoute>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
   private handleServerResponseEvent?: (req: Request) => void;
@@ -386,16 +388,15 @@ export class HttpServer {
       return;
     }
     if (this.isListening()) {
+      // Plugins often register routes from `getStartServices()`, which resolves during plugin
+      // start, after an early listen. Mount those routes without binding the port again.
+      this.configureRegisteredRoutes();
       this.log.info('The HTTP server is already listening for requests. Skipping new start call.');
       return;
     }
     this.log.debug('starting http server');
 
-    for (const router of this.registeredRouters) {
-      for (const route of router.getRoutes()) {
-        this.configureRoute(route);
-      }
-    }
+    this.configureRegisteredRoutes();
 
     await this.server.start();
     const serverPath =
@@ -1075,7 +1076,20 @@ export class HttpServer {
     return typeof securityConfig === 'function' ? securityConfig() : securityConfig;
   }
 
+  private configureRegisteredRoutes() {
+    for (const router of this.registeredRouters) {
+      for (const route of router.getRoutes()) {
+        this.configureRoute(route);
+      }
+    }
+  }
+
   private configureRoute(route: RouterRoute) {
+    if (this.configuredRoutes.has(route)) {
+      return;
+    }
+    this.configuredRoutes.add(route);
+
     const optionsLogger = this.log.get('options');
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests

@@ -166,6 +166,34 @@ test('skips a second start when the server is already listening', async () => {
   await supertest(innerServer.listener).get('/foo/ping').expect(200, 'pong');
 });
 
+test('mounts routes registered after the server is already listening', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  const routeSecurity = {
+    authz: {
+      requiredPrivileges: ['foo'],
+    },
+  };
+
+  router.get(
+    { path: '/ping', validate: false, security: routeSecurity },
+    (context, req, res) => res.ok({ body: 'pong' })
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
+  registerRouter(router);
+  await server.start();
+
+  router.get(
+    { path: '/later', validate: false, security: routeSecurity },
+    (context, req, res) => res.ok({ body: 'later' })
+  );
+
+  await supertest(innerServer.listener).get('/foo/later').expect(404);
+  await server.start();
+  await supertest(innerServer.listener).get('/foo/later').expect(200, 'later');
+  await supertest(innerServer.listener).get('/foo/ping').expect(200, 'pong');
+});
+
 test('warns when start is called after stop', async () => {
   await server.setup({ config$ });
   await server.start();

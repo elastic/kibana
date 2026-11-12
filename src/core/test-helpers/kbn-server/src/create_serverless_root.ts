@@ -133,6 +133,9 @@ export function createTestServerlessInstances({
       await kbUtils.preboot();
       const coreSetup = await kbUtils.setup();
       const coreStart = await kbUtils.start();
+      // Wait for 100ms to ensure the status is updated before returning the coreStart
+      // status service has a debounce to swallow rapid-fired changes.
+      await new Promise((resolve) => setTimeout(resolve, 100));
       return {
         root: kbUtils,
         coreSetup,

@@ -26,6 +26,7 @@ describe('Basic smoke test', function () {
       });
       serverlessES = await startES();
       serverlessKibana = await startKibana();
+      await new Promise((resolve) => process.nextTick(resolve));
       root = serverlessKibana.root;
     });
 
