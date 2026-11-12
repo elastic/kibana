@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEsqlFilterableSource } from '@kbn/data-source';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { apiPublishesDataSources } from '@kbn/presentation-publishing';
 import { coreServices, dataViewsService } from '../../services/kibana_services';
@@ -21,14 +22,11 @@ export const getDataViewIdFromESQLQuery = async (query: string, options: Options
     : undefined;
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
-  const publishedSource = preferredSources?.find(({ title }) => title === indexPattern);
-  if (publishedSource?.id) {
-    const publishedDataView = await dataViewsService
-      .get(publishedSource.id, false)
-      .catch(() => undefined);
-    if (publishedDataView?.id) {
-      return publishedDataView.id;
-    }
+  const publishedDataView = preferredSources?.find(
+    (source) => !isEsqlFilterableSource(source) && source.title === indexPattern
+  );
+  if (publishedDataView?.id) {
+    return publishedDataView.id;
   }
 
   const [dataView] = await dataViewsService.find(indexPattern);

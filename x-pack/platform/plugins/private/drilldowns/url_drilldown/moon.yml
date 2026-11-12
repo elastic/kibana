@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/plugins/private/drilldowns/url_drilldown
 dependsOn:
+  - '@kbn/data-source'
   - '@kbn/core'
   - '@kbn/embeddable-plugin'
   - '@kbn/expressions-plugin'
