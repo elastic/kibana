@@ -15,6 +15,9 @@ The states, from the top of the results area down:
 - When any section shows a truncated list with rows, one warning callout above the sections names the row limit (`MAX_LIST_LIMIT`, 9,999) and each truncated type.
 - When some sources failed, a warning icon in the section header lists them in its tooltip; the table stays up. With no rows, the empty state says the result may be incomplete. The response's `unavailableColumns` are not shown.
 
+> [!WARNING]
+> The list limit is 9,999, not 10,000. ES|QL [returns at most 10,000 rows by default](https://www.elastic.co/docs/reference/query-languages/esql/limitations#result-set-size-limit), so the server queries one row more than requested to detect a cut list. `MAX_LIST_LIMIT` holds the number; do not hardcode it.
+
 The table renders the columns the `_list` response returns, in response order, all visible by default. A header is the column name, except the `id` and `last_seen` kinds ("Entity ID", "Last seen"); a cell is rendered by its column's `kind`. The app holds no per-type display config. The one exception is the page-to-type map in `public/routes/config.tsx`, which stays until entity definitions carry a category; a test fails if another production file names a type. The filters' stand-in types in `public/mock_inventory_api/` also name types until the filters read the routes.
 
 The table reads `GET /internal/entity_inventory/types` and `POST /internal/entity_inventory/entities/{type}/_list` of the `entity_inventory` server plugin through the HTTP client in `public/inventory_api/http_client.ts`, typed from that plugin's route repository. The response types and `MAX_LIST_LIMIT` come from that plugin's `common/` (`@kbn/entity-inventory-plugin/common`); only the route repository type comes from its `server/`. `createFixtureEntityInventoryApiClient()` in `public/__fixtures__/` serves static fixtures and exists for tests only; a test fails if a production file imports a fixture or `public/mocks.tsx`.
