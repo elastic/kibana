@@ -233,9 +233,11 @@ export const flakySuiteIssueMetadata = (
   const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
   const commentedAt = comment ? report.generatedAt.toISOString() : previous?.['report.commentedAt'];
   const testIds = suite.tests.map((test) => test.testId);
+  // a new issue shows its tests in the body, a refresh's comment only those flaky where it says
+  const shownNow = previous ? commentedTestIds(suite, report.thresholds) : testIds;
   const shownTestIds =
     !previous || comment
-      ? union(testIds, previous?.['report.shownTestIds'])
+      ? union(shownNow, previous?.['report.shownTestIds'])
       : previous['report.shownTestIds'];
   return {
     'suite.filePath': suite.filePath,
@@ -923,11 +925,38 @@ const testLine = (
   return `- ${name}: ${withLastFailed(numbers, latest)}`;
 };
 
+/** What a comment covers: the branches where the suite is flaky and not skipped, worst first. */
+const commentBranches = (suite: FlakySuite, thresholds: BranchThresholds): string[] => {
+  const flaky = flakyBranches(suite, thresholds);
+  const skipped = branchSkips(suite);
+  return worstPerKey(
+    suite,
+    (test) => test.byBranch,
+    (stats) => stats.branch
+  )
+    .map(({ worst }) => worst.branch)
+    .filter((branch) => flaky.has(branch) && !skipped.has(branch));
+};
+
+/** The tests a comment lists, those flaky on one of its branches, with their counts there. */
+const commentTests = (suite: FlakySuite, thresholds: BranchThresholds) => {
+  const branches = commentBranches(suite, thresholds);
+  return suite.tests
+    .map((test) => ({ test, stats: flakyOn(test, branches, thresholds) }))
+    .filter(({ stats }) => stats.length > 0);
+};
+
+/** The tests a comment names, as many as the body's tests table: what it records as shown. */
+const commentedTestIds = (suite: FlakySuite, thresholds: BranchThresholds): string[] =>
+  commentTests(suite, thresholds)
+    .slice(0, MAX_TEST_ROWS)
+    .map(({ test }) => test.testId);
+
 /**
  * The comment of a refresh that found new failures: where the suite is flaky and not skipped, then
- * a line per test that failed there, as many as the body's tests table, with its own numbers and
- * newest failure, and the tests the issue has not shown marked as newly flaky. The body keeps the
- * full tables.
+ * a line per test flaky there, as many as the body's tests table, with its own numbers and newest
+ * failure, and the tests the issue has not shown marked as newly flaky. The body keeps the full
+ * tables.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
@@ -937,26 +966,14 @@ export const renderFlakySuiteIssueComment = (
   const state = flakyState(reopened, first);
   const leadFor = (count: number) =>
     count > 1 ? `${plural(count, 'test')} ${state}` : `${state[0].toUpperCase()}${state.slice(1)}`;
-  const flaky = flakyBranches(suite, report.thresholds);
-  const skipped = branchSkips(suite);
-  const branches = worstPerKey(
-    suite,
-    (test) => test.byBranch,
-    (stats) => stats.branch
-  ).filter(({ worst }) => flaky.has(worst.branch) && !skipped.has(worst.branch));
-  const where =
-    branches.length === 1
-      ? `${reopened ? ',' : ''} on ${inlineCode(branches[0].worst.branch)}`
-      : '';
+  const branches = commentBranches(suite, report.thresholds);
   if (branches.length === 0) {
     return `${leadFor(suite.tests.length)}.`;
   }
 
+  const where = branches.length === 1 ? `${reopened ? ',' : ''} on ${inlineCode(branches[0])}` : '';
   const newlyFlaky = newlyFlakyTestIds(suite, previous);
-  const branchNames = branches.map(({ worst }) => worst.branch);
-  const listed = suite.tests
-    .map((test) => ({ test, stats: flakyOn(test, branchNames, report.thresholds) }))
-    .filter(({ stats }) => stats.length > 0);
+  const listed = commentTests(suite, report.thresholds);
   const rest = listed.length - MAX_TEST_ROWS;
   return [
     `${leadFor(listed.length)}${where}:`,

@@ -750,6 +750,43 @@ describe('refreshing a suite issue', () => {
     expect(refresh(previous, false)).toBeUndefined();
   });
 
+  it('records as shown only the tests the comment names, so one it left out is newly flaky later', () => {
+    const { suite, report } = multiTestReport();
+    // b and c are flaky only on main, which is skipped: the comment names only a
+    const skippedOnMain = {
+      ...suite,
+      tests: suite.tests.map((test) => ({
+        ...test,
+        byBranch: test.byBranch.map((stats) =>
+          stats.branch === 'main' ? { ...stats, skipped: true } : stats
+        ),
+      })),
+    };
+    const shown = { ...previous, 'report.shownTestIds': ['a'] };
+
+    const metadata = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(shown), skippedOnMain, {
+        report,
+        previous: shown,
+        comment: true,
+      })
+    );
+    expect(metadata?.['report.shownTestIds']).toEqual(['a']);
+
+    // main is no longer skipped: b and c are named for the first time
+    const later = renderFlakySuiteIssueComment(suite, {
+      report,
+      reopened: false,
+      previous: { ...shown, ...metadata },
+    });
+    expect(later).toContain(
+      '`reverts breakdown, interval, and visibility on a saved session` (newly flaky)'
+    );
+    expect(later).toContain(
+      '`persists hide/show of the histogram on a saved session` (newly flaky)'
+    );
+  });
+
   it('takes the report that filed the issue as the last one posted until a comment is recorded', () => {
     expect(lastPostedAt(previous)).toBe('2026-09-07T09:04:41.000Z');
     expect(lastPostedAt({ ...previous, 'report.commentedAt': '2026-09-08T09:04:41.000Z' })).toBe(
