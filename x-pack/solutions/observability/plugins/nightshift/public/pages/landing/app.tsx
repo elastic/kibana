@@ -20,6 +20,7 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { useQueryClient } from '@kbn/react-query';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
@@ -33,6 +34,7 @@ import {
   type InvestigationViewSource,
 } from '../../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
+import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../../data/investigations/use_fetch_investigations';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
@@ -110,6 +112,7 @@ export function NightshiftApp({
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (debouncedSearchQuery || isInitialLoading || isFetching) {
@@ -200,6 +203,8 @@ export function NightshiftApp({
       .openConversationDetails({
         conversationId: selectedInvestigationId,
         trailingActions: [shareInvestigationAction],
+        onConversationUpdated: () =>
+          queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY }),
         // Closed by the user, not replaced by another selection or unmounted.
         onClose: () => {
           if (!isCancelled) {
@@ -218,7 +223,13 @@ export function NightshiftApp({
       isCancelled = true;
       closeFlyout?.();
     };
-  }, [agentBuilder, handleFlyoutClose, selectedInvestigationId, shareInvestigationAction]);
+  }, [
+    agentBuilder,
+    handleFlyoutClose,
+    queryClient,
+    selectedInvestigationId,
+    shareInvestigationAction,
+  ]);
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
