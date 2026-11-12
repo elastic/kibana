@@ -55,11 +55,11 @@ describe('declarative connector registry', () => {
 
     registry.register(createConnectorTypeFromSpec(materialized, setup));
 
-    expect(registry.getSpec('.declarative-abuseipdb')).toBe(materialized);
+    expect(registry.getSpec('.abuseipdb')).toBe(materialized);
     expect(registry.list()).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: '.declarative-abuseipdb',
+          id: '.abuseipdb',
           source: ACTION_TYPE_SOURCES.spec,
           isTestable: true,
           name: 'AbuseIPDB (Declarative PoC)',

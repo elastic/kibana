@@ -115,6 +115,20 @@ describe('declarativeJsonSchemaToZod', () => {
     expect(
       z.toJSONSchema(declarativeJsonSchemaToZod({ type: 'string', format: 'uri', maxLength: 12 }))
     ).toMatchObject({ type: 'string', format: 'uri', maxLength: 12 });
+    const ipv4Schema = declarativeJsonSchemaToZod({
+      type: 'string',
+      format: 'ipv4',
+      minLength: 7,
+      maxLength: 15,
+    });
+    expect(ipv4Schema.parse('255.255.255.255')).toBe('255.255.255.255');
+    expect(() => ipv4Schema.parse('256.1.1.1')).toThrow();
+    expect(z.toJSONSchema(ipv4Schema)).toMatchObject({
+      type: 'string',
+      format: 'ipv4',
+      minLength: 7,
+      maxLength: 15,
+    });
     expect(() =>
       schema.parse({ url: 'https://a.co/long', ip: '1.2.3.4', timestamp: '2024-01-01T00:00:00Z' })
     ).toThrow();

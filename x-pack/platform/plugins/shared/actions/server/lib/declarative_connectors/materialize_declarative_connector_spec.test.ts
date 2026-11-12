@@ -31,7 +31,7 @@ describe('materializeDeclarativeConnectorSpec', () => {
   const materialized = materializeDeclarativeConnectorSpec(connector);
 
   it('builds a ConnectorSpec from the catalog contract', () => {
-    expect(materialized.metadata.id).toBe('.declarative-abuseipdb');
+    expect(materialized.metadata.id).toBe('.abuseipdb');
     expect(materialized.actions.checkIp.isTool).toBe(true);
     expect(materialized.actions.checkIp.scope).toBe('read');
     expect(materialized.actions.reportIp.scope).toBe('write');
@@ -55,7 +55,7 @@ describe('materializeDeclarativeConnectorSpec', () => {
   it('registers through createConnectorTypeFromSpec and validates config, params, and secrets', () => {
     const actionType = createConnectorTypeFromSpec(materialized, createSetupMock());
 
-    expect(actionType.id).toBe('.declarative-abuseipdb');
+    expect(actionType.id).toBe('.abuseipdb');
     expect(actionType.isTestable).toBe(true);
     expect(actionType.source).toBe(ACTION_TYPE_SOURCES.spec);
 

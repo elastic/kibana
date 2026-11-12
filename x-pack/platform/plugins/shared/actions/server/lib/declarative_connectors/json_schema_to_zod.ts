@@ -12,9 +12,6 @@ import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { DeclarativeFieldMeta, DeclarativeJsonSchema } from './types';
 import { DeclarativeConnectorSpecError } from './types';
 
-const IPV4_PATTERN =
-  /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
-
 const stripFieldMeta = (definition: DeclarativeJsonSchema): Record<string, unknown> => {
   const { meta: _meta, properties, items, ...rest } = definition;
   return {
@@ -62,9 +59,6 @@ const applyFieldMeta = (
   return result;
 };
 
-const applyIpv4Format = (schema: z.ZodString): z.ZodType =>
-  schema.refine((value) => IPV4_PATTERN.test(value), 'Invalid IPv4 address');
-
 const convertLeaf = (definition: DeclarativeJsonSchema): z.ZodType => {
   // fromJSONSchema handles enum before type-specific constraints, and its URI
   // parser returns early before applying string length constraints. Convert
@@ -72,7 +66,10 @@ const convertLeaf = (definition: DeclarativeJsonSchema): z.ZodType => {
   const schemaDefinition = stripFieldMeta(definition);
   const enumValues = definition.enum;
   delete schemaDefinition.enum;
-  if (definition.type === 'string' && definition.format === 'uri') {
+  if (
+    definition.type === 'string' &&
+    (definition.format === 'uri' || definition.format === 'ipv4')
+  ) {
     delete schemaDefinition.format;
   }
 
@@ -87,7 +84,14 @@ const convertLeaf = (definition: DeclarativeJsonSchema): z.ZodType => {
     result = (result as z.ZodString).url();
   }
   if (definition.type === 'string' && definition.format === 'ipv4') {
-    result = applyIpv4Format(result as z.ZodString);
+    let ipv4Schema = z.ipv4();
+    if (definition.minLength !== undefined) {
+      ipv4Schema = ipv4Schema.min(definition.minLength);
+    }
+    if (definition.maxLength !== undefined) {
+      ipv4Schema = ipv4Schema.max(definition.maxLength);
+    }
+    result = ipv4Schema;
   }
   if (enumValues !== undefined) {
     // Keep only enum values accepted by the converted type schema. The enum
