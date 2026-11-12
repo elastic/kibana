@@ -558,6 +558,20 @@ describe('ConfigureCases', () => {
         );
       });
     });
+
+    it('keeps the overrides when a custom type is deleted', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      await userEvent.click(await screen.findByTestId('employee-id-observable-type-delete'));
+      const modal = await screen.findByTestId('confirm-delete-modal');
+      await userEvent.click(within(modal).getByText('Delete'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith(
+          expect.objectContaining({ observableTypes: [override] })
+        );
+      });
+    });
   });
 
   it('renders observable types as line-separated rows without a subdued panel', async () => {
