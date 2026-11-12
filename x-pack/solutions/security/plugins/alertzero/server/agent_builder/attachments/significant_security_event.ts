@@ -118,8 +118,12 @@ const formatSignificantSecurityEventForAgent = (
             }`;
       const scope = [
         `${detection.total} event(s)`,
-        detection.host_count !== undefined ? `${detection.host_count} host(s)` : undefined,
-        detection.user_count !== undefined ? `${detection.user_count} user(s)` : undefined,
+        detection.host_count !== undefined
+          ? `${detection.host_count}${detection.hosts_truncated ? '+' : ''} host(s)`
+          : undefined,
+        detection.user_count !== undefined
+          ? `${detection.user_count}${detection.users_truncated ? '+' : ''} user(s)`
+          : undefined,
         detection.from_sample ? 'from sampled hits' : undefined,
       ]
         .filter((part): part is string => part !== undefined)

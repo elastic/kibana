@@ -309,7 +309,7 @@ describe('NightshiftPage', () => {
     renderPage();
     expect(navigateToApp).not.toHaveBeenCalled();
     await waitFor(() =>
-      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('nightshift')
     );
     expect(await screen.findByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
