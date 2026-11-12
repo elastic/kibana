@@ -148,3 +148,10 @@ export { RuleQueryInspector } from './application/components/rule_query_inspecto
 export type { RuleQueryInspectorProps } from './application/components/rule_query_inspector';
 
 export { getIsExperimentalFeatureEnabled } from './common/get_experimental_features';
+
+export type {
+  ConnectorFlyoutTab,
+  ConnectorFlyoutTabChanges,
+  ConnectorFlyoutTabProps,
+  ConnectorFlyoutTabTarget,
+} from './application/lib/connector_flyout_tabs';

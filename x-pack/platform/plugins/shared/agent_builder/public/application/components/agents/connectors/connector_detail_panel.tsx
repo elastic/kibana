@@ -204,6 +204,7 @@ export const ConnectorDetailPanel: React.FC<ConnectorDetailPanelProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { actionTypeRegistry } = useKibana().services.plugins.triggersActionsUi;
+  const { editConnector } = useConnectorsActions();
 
   const actionType = actionTypeRegistry.has(connector.actionTypeId)
     ? actionTypeRegistry.get(connector.actionTypeId)
@@ -236,13 +237,27 @@ export const ConnectorDetailPanel: React.FC<ConnectorDetailPanelProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      headerActions={(openConfirmRemove) =>
-        canEditAgent ? (
-          <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
-            {labels.agentConnectors.removeConnectorButtonLabel}
-          </EuiButtonEmpty>
-        ) : null
-      }
+      headerActions={(openConfirmRemove) => (
+        <EuiFlexGroup gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="pencil"
+              size="xs"
+              data-test-subj="agentBuilderConnectorEditButton"
+              onClick={() => editConnector(connector)}
+            >
+              {labels.connectors.editConnectorButtonLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {canEditAgent && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+                {labels.agentConnectors.removeConnectorButtonLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
       confirmRemove={{
         title: labels.agentConnectors.removeConnectorConfirmTitle(connector.name),
         body: labels.agentConnectors.removeConnectorConfirmBody,

@@ -14,13 +14,15 @@ import {
   getFinitePositiveNumber,
   getEstimatedBase64OutputBytes,
 } from '../../connector_utils';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ConnectorSpec, ContentEntry } from '../../connector_spec';
+import { contentSourceActions, type ContentSourceImpl } from '../../lib/content_source_actions';
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 const DEFAULT_PAGE_SIZE = 250;
 const MAX_PAGE_SIZE = 1000;
 const DEFAULT_FOLDER_ID = 'root';
 const ID_MAX_LENGTH = 200;
+const URL_MAX_LENGTH = 2048;
 const QUERY_MAX_LENGTH = 2000;
 const PAGE_TOKEN_MAX_LENGTH = 2048;
 const MAX_FILE_IDS = 250;
@@ -44,6 +46,8 @@ interface GoogleDriveFileMetadata {
   name: string;
   mimeType: string;
   size?: string;
+  modifiedTime?: string;
+  webViewLink?: string;
 }
 
 /**
@@ -97,6 +101,90 @@ function resolveExportMimeType(
     ? SHEETS_EXPORT_MIME_TYPE
     : DEFAULT_EXPORT_MIME_TYPE;
 }
+
+// --- Supporting methods for Context ---
+
+// A folder given as the address copied from the browser: .../folders/<id>[?...] or ...?id=<id>.
+const folderIdOf = (folder: string | undefined): string => {
+  const value = (folder ?? '').trim();
+  if (!/^https?:\/\//i.test(value)) {
+    return value || DEFAULT_FOLDER_ID;
+  }
+  return /\/folders\/([\w-]+)/.exec(value)?.[1] ?? /[?&]id=([\w-]+)/.exec(value)?.[1] ?? value;
+};
+
+const ENTRY_FIELDS = 'id, name, mimeType, size, modifiedTime, webViewLink';
+
+const toEntry = (file: GoogleDriveFileMetadata, folder: string): ContentEntry => ({
+  id: file.id,
+  name: file.name,
+  isFolder: file.mimeType === `${GOOGLE_WORKSPACE_MIME_PREFIX}folder`,
+  folder,
+  mimeType: file.mimeType,
+  modifiedAt: file.modifiedTime,
+  size: file.size === undefined ? undefined : Number(file.size),
+  url: file.webViewLink ?? `https://drive.google.com/open?id=${file.id}`,
+});
+
+/** Google Drive as a content source: how connector memory lists, looks up and reads files. */
+const driveContent: ContentSourceImpl = {
+  list: async (ctx, { folder, pageToken }) => {
+    const parent = folderIdOf(folder);
+    try {
+      const { data } = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
+        params: {
+          q: `'${escapeQueryValue(parent)}' in parents and trashed=false`,
+          pageSize: MAX_PAGE_SIZE,
+          fields: `nextPageToken, files(${ENTRY_FIELDS})`,
+          ...(pageToken ? { pageToken } : {}),
+          ...SHARED_DRIVE_LIST_PARAMS,
+        },
+      });
+      return {
+        entries: (data.files ?? []).map((file: GoogleDriveFileMetadata) => toEntry(file, parent)),
+        nextPageToken: data.nextPageToken,
+      };
+    } catch (error: unknown) {
+      throwGoogleDriveError(error);
+      throw error;
+    }
+  },
+
+  getMetadata: async (ctx, id) => {
+    try {
+      const { data } = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${id}`, {
+        params: { fields: `${ENTRY_FIELDS}, parents, trashed`, supportsAllDrives: true },
+      });
+      if (data.trashed) {
+        throw Object.assign(new Error('File not found'), { status: 404 });
+      }
+      return toEntry(data, data.parents?.[0] ?? DEFAULT_FOLDER_ID);
+    } catch (error: unknown) {
+      throwGoogleDriveError(error);
+      throw error;
+    }
+  },
+
+  getContent: async (ctx, { id, maxBytes }) => {
+    const file = (await GoogleDriveConnector.actions.downloadFile.handler(ctx, {
+      fileId: id,
+      responseType: 'text',
+    })) as { content: string; encoding: string };
+    if (file.encoding !== 'utf-8' || (maxBytes && Buffer.byteLength(file.content) > maxBytes)) {
+      return undefined;
+    }
+    return file.content;
+  },
+
+  entriesOf: (data) => {
+    const files = (data as { files?: unknown } | undefined)?.files;
+    return Array.isArray(files)
+      ? files
+          .filter((file): file is GoogleDriveFileMetadata => !!file?.id && !!file?.name)
+          .map((file) => toEntry(file, ''))
+      : [];
+  },
+};
 
 export const GoogleDriveConnector: ConnectorSpec = {
   metadata: {
@@ -379,7 +467,6 @@ export const GoogleDriveConnector: ConnectorSpec = {
           );
 
           const fileMetadata = metadataResponse.data as GoogleDriveFileMetadata;
-          fileMetadataForError = fileMetadata;
           const isGoogleDoc = fileMetadata.mimeType?.startsWith(GOOGLE_WORKSPACE_MIME_PREFIX);
 
           let useTextResponse = typedInput.responseType === 'text';
@@ -512,6 +599,23 @@ export const GoogleDriveConnector: ConnectorSpec = {
         }
       },
     },
+
+    ...contentSourceActions({
+      impl: driveContent,
+      folder: () =>
+        z
+          .string()
+          .max(URL_MAX_LENGTH)
+          .optional()
+          .describe('Folder id or link; empty is the top of My Drive.'),
+      id: () => z.string().min(1).max(ID_MAX_LENGTH).describe('The file id.'),
+    }),
+  },
+
+  contentSource: {
+    example: 'folder id or link (empty is My Drive)',
+    read: { action: 'downloadFile', id: ['fileId'] },
+    results: { listFiles: driveContent.entriesOf, searchFiles: driveContent.entriesOf },
   },
 
   skill: [

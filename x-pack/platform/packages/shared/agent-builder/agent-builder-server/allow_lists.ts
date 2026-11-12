@@ -137,6 +137,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
   ...Object.values(contextEngineMemoryTools),
+  'platform.context_engine.lookup_connector_memory',
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',

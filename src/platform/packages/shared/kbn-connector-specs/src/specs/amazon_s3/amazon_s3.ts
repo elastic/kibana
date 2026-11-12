@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { type ConnectorSpec } from '../../connector_spec';
+import { contentSourceActions, type ContentSourceImpl } from '../../lib/content_source_actions';
 import {
   downloadAmazonS3BucketObject,
   generateAmazonS3BucketObjectPresignedUrl,
@@ -35,6 +36,87 @@ const BUCKET_NAME_MAX_LENGTH = 63;
 const OBJECT_KEY_MAX_LENGTH = 1024;
 const REGION_MAX_LENGTH = 64;
 const CONTINUATION_TOKEN_MAX_LENGTH = 2048;
+
+// Content-source locations are "bucket" or "bucket/prefix"; ids are "bucket/key".
+const splitLocation = (location: string): [string, string] => {
+  const slash = location.indexOf('/');
+  return slash < 0 ? [location, ''] : [location.slice(0, slash), location.slice(slash + 1)];
+};
+
+const toEntry = (
+  bucket: string,
+  key: string,
+  modifiedAt: string,
+  size: number,
+  mimeType?: string
+) => {
+  const slash = key.lastIndexOf('/');
+  return {
+    id: `${bucket}/${key}`,
+    name: key.slice(slash + 1),
+    isFolder: false,
+    folder: slash < 0 ? bucket : `${bucket}/${key.slice(0, slash)}`,
+    mimeType,
+    modifiedAt,
+    size,
+    url: `s3://${bucket}/${key}`,
+  };
+};
+
+/** Amazon S3 as a content source: how connector memory lists, looks up and reads objects. */
+const s3Content: ContentSourceImpl = {
+  list: async (ctx, { folder = '', pageToken }) => {
+    const [bucket, prefix] = splitLocation(folder);
+    const listing = await listAmazonS3BucketObjects(
+      ctx,
+      bucket,
+      undefined,
+      prefix,
+      1000,
+      pageToken
+    );
+    return {
+      entries: listing.objects
+        .filter((object) => !object.key.endsWith('/'))
+        .map((object) => ({
+          ...toEntry(bucket, object.key, object.lastModified, object.size),
+          depth: object.key.slice(prefix.length).split('/').length - 1,
+        })),
+      nextPageToken: listing.isTruncated ? listing.nextContinuationToken : undefined,
+    };
+  },
+
+  getMetadata: async (ctx, id) => {
+    const [bucket, key] = splitLocation(id);
+    const metadata = await getAmazonS3BucketObjectMetadata(ctx, bucket, key);
+    if (!metadata) throw new Error('Object not found');
+    return toEntry(
+      bucket,
+      key,
+      metadata.lastModified,
+      metadata.contentLength,
+      metadata.contentType
+    );
+  },
+
+  getContent: async (ctx, { id, maxBytes }) => {
+    const [bucket, key] = splitLocation(id);
+    const metadata = await getAmazonS3BucketObjectMetadata(ctx, bucket, key);
+    if (!metadata) throw new Error('Object not found');
+    if (maxBytes && metadata.contentLength > maxBytes) return undefined;
+    const object = await downloadAmazonS3BucketObject(ctx, bucket, key);
+    return object.content ? Buffer.from(object.content, 'base64').toString('utf-8') : undefined;
+  },
+
+  entriesOf: (data) => {
+    const { bucket, objects } = (data ?? {}) as Partial<AmazonS3BucketObjectListing>;
+    return typeof bucket === 'string' && Array.isArray(objects)
+      ? objects
+          .filter((object) => object?.key && !object.key.endsWith('/'))
+          .map((object) => toEntry(bucket, object.key, object.lastModified, object.size))
+      : [];
+  },
+};
 
 export const AmazonS3: ConnectorSpec = {
   metadata: {
@@ -235,6 +317,29 @@ export const AmazonS3: ConnectorSpec = {
         return (await downloadAmazonS3BucketObject(ctx, input.bucket, input.key)) as AmazonS3Object;
       },
     },
+
+    ...contentSourceActions({
+      impl: s3Content,
+      folder: () =>
+        z
+          .string()
+          .min(1)
+          .max(BUCKET_NAME_MAX_LENGTH + OBJECT_KEY_MAX_LENGTH + 1)
+          .describe('"bucket" or "bucket/prefix".'),
+      id: () =>
+        z
+          .string()
+          .min(1)
+          .max(BUCKET_NAME_MAX_LENGTH + OBJECT_KEY_MAX_LENGTH + 1)
+          .describe('The object, as "bucket/key".'),
+    }),
+  },
+
+  contentSource: {
+    example: 'my-bucket/docs/',
+    required: true,
+    read: { action: 'downloadFile', id: ['bucket', 'key'], separator: '/' },
+    results: { listBucketObjects: s3Content.entriesOf },
   },
 
   skill: [

@@ -351,4 +351,67 @@ describe('AmazonS3', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow('AccessDenied');
     });
   });
+  describe('content source actions', () => {
+    it('lists objects under bucket/prefix with depth, skipping folder markers', async () => {
+      mockListAmazonS3BucketObjects.mockResolvedValue({
+        objects: [
+          { key: 'docs/', size: 0, lastModified: 't' },
+          { key: 'docs/a.md', size: 1, lastModified: 't' },
+          { key: 'docs/x/b.md', size: 2, lastModified: 't' },
+        ],
+        isTruncated: true,
+        nextContinuationToken: 'next',
+      });
+
+      const result = await AmazonS3.actions.contextList.handler(mockContext, {
+        folder: 'my-bucket/docs/',
+      });
+
+      expect(mockListAmazonS3BucketObjects).toHaveBeenCalledWith(
+        mockContext,
+        'my-bucket',
+        undefined,
+        'docs/',
+        1000,
+        undefined
+      );
+      expect(result).toEqual({
+        entries: [
+          expect.objectContaining({
+            id: 'my-bucket/docs/a.md',
+            folder: 'my-bucket/docs',
+            depth: 0,
+          }),
+          expect.objectContaining({ id: 'my-bucket/docs/x/b.md', depth: 1 }),
+        ],
+        nextPageToken: 'next',
+      });
+    });
+
+    it('turns what an agent saw in a listing into entries, skipping folder markers', () => {
+      const entries = AmazonS3.contentSource?.results?.listBucketObjects({
+        bucket: 'b',
+        objects: [{ key: 'd/' }, { key: 'd/a.md', size: 1, lastModified: 't' }],
+      });
+
+      expect(entries).toEqual([expect.objectContaining({ id: 'b/d/a.md', folder: 'b/d' })]);
+    });
+
+    it('reads text, and nothing when the object exceeds maxBytes', async () => {
+      mockGetAmazonS3BucketObjectMetadata.mockResolvedValue({ contentLength: 5 });
+      mockDownloadAmazonS3BucketObject.mockResolvedValue({
+        content: Buffer.from('hello').toString('base64'),
+      });
+
+      expect(
+        await AmazonS3.actions.contextGetContent.handler(mockContext, { id: 'my-bucket/a.md' })
+      ).toEqual({ text: 'hello' });
+      expect(
+        await AmazonS3.actions.contextGetContent.handler(mockContext, {
+          id: 'my-bucket/a.md',
+          maxBytes: 2,
+        })
+      ).toEqual({});
+    });
+  });
 });

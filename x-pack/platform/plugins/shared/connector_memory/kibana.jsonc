@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/connector-memory-plugin",
+  "owner": "@elastic/search-ml-ux",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Prototype: learns from agent traffic to connectors and caches document summaries and links as Context Engine knowledge indicators.",
+  "plugin": {
+    "id": "connectorMemory",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "connectorMemory"],
+    "requiredPlugins": ["agentBuilder", "contextEngine", "actions", "management", "triggersActionsUi", "workflowsExtensions"],
+    "optionalPlugins": ["security", "spaces", "inference", "workflowsManagement"]
+  }
+}

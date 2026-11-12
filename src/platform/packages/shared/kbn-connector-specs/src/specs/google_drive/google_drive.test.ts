@@ -833,4 +833,71 @@ describe('GoogleDriveConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+  describe('content source actions', () => {
+    const { contextList, contextGetMetadata, contextGetContent } = GoogleDriveConnector.actions;
+
+    it('lists a folder as entries, defaulting to the root', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          files: [
+            { id: 'f1', name: 'Doc', mimeType: 'text/plain', size: '12', webViewLink: 'u1' },
+            { id: 'd1', name: 'Dir', mimeType: 'application/vnd.google-apps.folder' },
+          ],
+          nextPageToken: 'next',
+        },
+      });
+
+      const result = await contextList.handler(mockContext, {});
+
+      expect(mockClient.get.mock.calls[0][1].params.q).toContain("'root' in parents");
+      expect(result).toEqual({
+        entries: [
+          expect.objectContaining({ id: 'f1', isFolder: false, folder: 'root', size: 12 }),
+          expect.objectContaining({ id: 'd1', isFolder: true }),
+        ],
+        nextPageToken: 'next',
+      });
+    });
+
+    it.each([
+      ['an id', 'abc_123-X', 'abc_123-X'],
+      [
+        'a folder link',
+        'https://drive.google.com/drive/folders/abc_123-X?usp=sharing',
+        'abc_123-X',
+      ],
+      ['an old-style link', 'https://drive.google.com/open?id=abc_123-X', 'abc_123-X'],
+    ])('lists a folder given as %s', async (_name, folder, id) => {
+      mockClient.get.mockResolvedValue({ data: { files: [] } });
+
+      await contextList.handler(mockContext, { folder });
+
+      expect(mockClient.get.mock.calls[0][1].params.q).toContain(`'${id}' in parents`);
+    });
+
+    it('treats a trashed file as not found', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { id: 'f1', name: 'Doc', mimeType: 'text/plain', trashed: true },
+      });
+
+      await expect(contextGetMetadata.handler(mockContext, { id: 'f1' })).rejects.toThrow();
+    });
+
+    it('returns text only for utf-8 content within maxBytes', async () => {
+      mockClient.get
+        .mockResolvedValueOnce({ data: { id: 'f1', name: 'a', mimeType: 'text/plain' } })
+        .mockResolvedValueOnce({ data: 'hello' });
+      expect(await contextGetContent.handler(mockContext, { id: 'f1' })).toEqual({ text: 'hello' });
+
+      mockClient.get
+        .mockResolvedValueOnce({ data: { id: 'f1', name: 'a', mimeType: 'text/plain' } })
+        .mockResolvedValueOnce({ data: 'hello' });
+      expect(await contextGetContent.handler(mockContext, { id: 'f1', maxBytes: 2 })).toEqual({});
+
+      mockClient.get
+        .mockResolvedValueOnce({ data: { id: 'f2', name: 'b', mimeType: 'application/pdf' } })
+        .mockResolvedValueOnce({ data: new ArrayBuffer(4) });
+      expect(await contextGetContent.handler(mockContext, { id: 'f2' })).toEqual({});
+    });
+  });
 });

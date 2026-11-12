@@ -1,0 +1,44 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/actions-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/context-engine-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/security-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/zod",
+    "@kbn/core-http-server",
+    "@kbn/inference-plugin",
+    "@kbn/inference-common",
+    "@kbn/management-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/react-query",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-http-browser",
+    "@kbn/ui-callout",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
+    "@kbn/connector-specs"
+  ]
+}

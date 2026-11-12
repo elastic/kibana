@@ -1,0 +1,5 @@
+{
+  "contextList": { "input": { "folder": "my-bucket/docs/" } },
+  "contextGetMetadata": { "input": { "id": "my-bucket/docs/a.md" } },
+  "contextGetContent": { "input": { "id": "my-bucket/docs/a.md" } }
+}

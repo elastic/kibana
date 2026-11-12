@@ -1,5 +1,37 @@
 {
   "operations": {
+    "contextGetContent": [
+      {
+        "method": "get",
+        "path": "/files/{fileId}",
+        "source": "v3"
+      }
+    ],
+    "contextGetMetadata": [
+      {
+        "method": "get",
+        "path": "/files/{fileId}",
+        "source": "v3"
+      }
+    ],
+    "contextList": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "files",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/files",
+        "source": "v3"
+      }
+    ],
     "downloadFile": [
       {
         "method": "get",
