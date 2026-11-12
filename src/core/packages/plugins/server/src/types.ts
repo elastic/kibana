@@ -24,6 +24,7 @@ import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-int
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { SharedGlobalConfigKeys } from './shared_global_config';
+import type { PluginInitialization } from './plugin_initialization';
 type Maybe<T> = T | undefined;
 
 /**
@@ -298,6 +299,26 @@ export interface Plugin<
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
+  /**
+   * Expensive, Elasticsearch-bound work, kept out of `setup()` and `start()` so it never delays
+   * Kibana being ready.
+   *
+   * Core calls it once, with the same arguments as `start()`, after every plugin's `start()` has
+   * returned, and does not wait for it: HTTP opens and other plugins run while it is in progress.
+   * Code that needs the initialized state awaits `this.initialization.initialize()` itself, in
+   * route handlers, task runners and start contract functions (see
+   * {@link PluginInitializerContext.initialization}). Do not await that call from inside this
+   * method: it would wait for itself and never settle.
+   *
+   * Core logs a failure but does not otherwise handle it: a rejection nobody awaits behaves like a
+   * rejected promise started from `start()` without awaiting it. Catch the errors the plugin can
+   * recover from.
+   *
+   * @remarks Runs on every Kibana instance against the same cluster, concurrently and without
+   * coordination, so the work must be safe to run more than once.
+   */
+  initialize?(core: CoreStart, plugins: TPluginsStart): Promise<void>;
+
   stop?(): MaybePromise<void>;
 }
 
@@ -443,6 +464,29 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
      */
     get: <T = ConfigSchema>() => T;
   };
+  /**
+   * The way to wait for this plugin's {@link Plugin.initialize} work.
+   *
+   * Keep it on the instance and await `initialize()` in the route handlers, task runners and
+   * start contract functions that need the initialized state:
+   *
+   * @example
+   * ```ts
+   * constructor(ctx: PluginInitializerContext) {
+   *   this.initialization = ctx.initialization;
+   * }
+   * start() {
+   *   return {
+   *     search: async () => {
+   *       await this.initialization.initialize();
+   *       // work that needs the indices
+   *     },
+   *     getLabel: () => 'no init needed',
+   *   };
+   * }
+   * ```
+   */
+  initialization: PluginInitialization;
 }
 
 /**

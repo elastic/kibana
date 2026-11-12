@@ -19,7 +19,7 @@ evaluate.describe('Agent Builder Dashboards - Enhance', { tag: tags.serverless.s
       dataset: {
         name: 'agent builder dashboards: enhance',
         description:
-          'A seeded logs dashboard with declared defects, enhanced in appearance or content mode. Scores the mode question, mode compliance, defect resolution, layout rules, and composition order.',
+          'A seeded logs dashboard with declared defects, enhanced in appearance or content mode. Scores the mode question, mode compliance, defect resolution, layout rules, composition order, and that a mode answer naming specific charts changes only those charts.',
         examples: DASHBOARD_ENHANCE_EXAMPLES,
       },
     });

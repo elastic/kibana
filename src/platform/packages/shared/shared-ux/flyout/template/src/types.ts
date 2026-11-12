@@ -204,12 +204,18 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   tooltip?: ReactNode;
 }
 
+/** Colors a `FlyoutTemplate.Footer.PrimaryAction` can take. */
+export type FlyoutFooterPrimaryActionColor = 'primary' | 'danger';
+
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
 export type FlyoutFooterPrimaryActionProps = Omit<
   EuiButtonPropsForButton,
   ActionOwnedProps | 'onClick'
 > &
-  FlyoutFooterActionBaseProps;
+  FlyoutFooterActionBaseProps & {
+    /** Button color; defaults to `primary`. Use `danger` for a destructive action. */
+    color?: FlyoutFooterPrimaryActionColor;
+  };
 
 type FlyoutFooterSecondaryActionCommonProps = Omit<
   EuiButtonPropsForButton,
@@ -376,3 +382,20 @@ export type FlyoutTemplateProps = Omit<EuiFlyoutProps, TemplateOwnedFlyoutProps>
     /** Called when the user clicks a tab. */
     onTabChange?: (id: string) => void;
   };
+
+/** The root props that drive the tab bar. Inside a frame, they belong to the declaration. */
+export type FlyoutTemplateTabRootProps = Pick<
+  FlyoutTemplateProps,
+  'tabs' | 'tabBarProps' | 'defaultSelectedTabId' | 'selectedTabId' | 'onTabChange'
+>;
+
+/**
+ * Props for `FlyoutTemplate.Frame`: the root props that configure the `EuiFlyout`. `children`
+ * renders `FlyoutTemplate` declarations, possibly behind components that suspend.
+ */
+export type FlyoutTemplateFrameProps = Omit<
+  FlyoutTemplateProps,
+  keyof FlyoutTemplateTabRootProps | 'children'
+> & {
+  children?: ReactNode;
+};

@@ -60,7 +60,8 @@ export function buildStreamVars(
   service: AwsServiceMatrixEntry,
   dsVars: ServiceDataStreamVars,
   globalRegion: string,
-  activeInput: string
+  activeInput: string,
+  policyVars: Record<string, string> = {}
 ): Record<string, string | boolean | string[]> {
   const result: Record<string, string | boolean | string[]> = {};
   // Vars of a var_group option that is not selected are left out: a value typed under one
@@ -129,6 +130,13 @@ export function buildStreamVars(
     }
   }
 
+  // Package vars set from the shared settings form that a package declares at stream level
+  // instead (e.g. `proxy_url` on amazon_security_lake). A value set for the service wins, and a
+  // stream that does not declare the var must not get it: Fleet rejects it as "not found".
+  for (const [key, value] of Object.entries(policyVars)) {
+    if (!result[key] && resolveFieldMeta(service, activeInput, key)) result[key] = value;
+  }
+
   return result;
 }
 
@@ -180,7 +188,9 @@ const EMPTY_DS_VARS: Readonly<ServiceDataStreamVars> = { enabledInputs: [], vars
 export function buildPackageInputs(
   services: AwsServiceMatrixEntry[],
   storedServiceVars: Record<string, ServiceVars>,
-  globalRegion: string
+  globalRegion: string,
+  /** Var settings of the shared settings form, for streams that declare them. */
+  policyVars?: Record<string, string>
 ): Record<string, PackageInputEntry> {
   const inputs: Record<string, PackageInputEntry> = {};
 
@@ -208,7 +218,7 @@ export function buildPackageInputs(
 
       for (const inputType of activeInputs) {
         const inputKey = `${ptName}-${inputType}`;
-        const streamVars = buildStreamVars(dsView, dsVars, globalRegion, inputType);
+        const streamVars = buildStreamVars(dsView, dsVars, globalRegion, inputType, policyVars);
         // Fleet validates a stream's var_groups only when the policy carries the selection;
         // without it the group-controlled vars are skipped server-side.
         const varGroupSelections =
@@ -308,21 +318,25 @@ export interface AgentCredentialVars {
  * Builds the package-level vars of a policy body. For a credential var the typed value wins; when
  * the user kept the stored secret instead (empty value), the policy's existing ref is sent back.
  * Fleet's agentless PUT is a full replace, so a credential var that is simply left out would have
- * its stored secret deleted.
+ * its stored secret deleted. `policyVars` are the package vars set from the shared settings form.
  */
 export function buildPackageVars(
   globalRegion: string,
   staticKeys: AuthenticateAndDeployStepState['staticKeys'],
   pkgVarNames: Set<string>,
   agentCredentials?: AgentCredentialVars,
-  existingSecretRefs?: ExistingSecretRefs
-): Record<string, string | SecretRefValue> | undefined {
-  const vars: Record<string, string | SecretRefValue> = {};
+  existingSecretRefs?: ExistingSecretRefs,
+  policyVars?: Record<string, string | null>
+): Record<string, string | null | SecretRefValue> | undefined {
+  const vars: Record<string, string | null | SecretRefValue> = {};
   if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
   // 'region' (distinct from 'default_region') is a package-level var on aws_cloudwatch_input_otel
   // today; ECS packages use 'default_region'. The pkgVarNames guard ensures it only fires when
   // the deployed package actually declares it.
   if (globalRegion && pkgVarNames.has('region')) vars.region = globalRegion;
+  // Settings from the shared settings form that are package vars (e.g. `proxy_url`). The caller
+  // passes only the ones the package declares. `null` clears the value a deployed policy has.
+  Object.assign(vars, policyVars);
 
   // The credentials that have a stored secret are replaced as a set: an access key id only works
   // with its own secret access key, so a typed value for a stored credential only counts when every

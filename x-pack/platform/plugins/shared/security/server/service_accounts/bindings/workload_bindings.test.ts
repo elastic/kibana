@@ -18,8 +18,17 @@ import { licenseMock } from '../../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { auditLoggerMock, auditServiceMock } from '../../audit/mocks';
 import type { ServiceAccountMintInterceptor } from '../fake_requests';
+import { serviceAccountsMetrics } from '../metrics';
 import { ServiceAccountTokenExchangeError } from '../token_exchange_error';
 import type { ServiceAccountsBackend } from '../types';
+
+jest.mock('../metrics', () => {
+  const actual = jest.requireActual('../metrics');
+  return {
+    ...actual,
+    serviceAccountsMetrics: { recordOperation: jest.fn(), startAssume: jest.fn() },
+  };
+});
 
 const PLUGIN_ID = 'alerting';
 // What a mutation names: the space is taken from the request, not the caller.
@@ -53,6 +62,7 @@ describe('ServiceAccountWorkloadBindings', () => {
   let auditLogger: ReturnType<typeof auditLoggerMock.create>;
   let mintedRequest: KibanaRequest;
   let bindings: ServiceAccountWorkloadBindings;
+  let assumeAttempt: { succeeded: jest.Mock; failed: jest.Mock };
 
   const build = (overrides: Partial<Record<string, unknown>> = {}) =>
     new ServiceAccountWorkloadBindings({
@@ -83,6 +93,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
 
     backend = {
+      type: 'uiam',
       create: jest.fn(),
       list: jest.fn(),
       get: jest.fn(),
@@ -106,6 +117,10 @@ describe('ServiceAccountWorkloadBindings', () => {
     auditLogger = auditLoggerMock.create();
     audit = auditServiceMock.create();
     audit.asScoped.mockReturnValue(auditLogger);
+
+    assumeAttempt = { succeeded: jest.fn(), failed: jest.fn() };
+    jest.mocked(serviceAccountsMetrics.recordOperation).mockClear();
+    jest.mocked(serviceAccountsMetrics.startAssume).mockReset().mockReturnValue(assumeAttempt);
 
     bindings = build();
   });
@@ -1092,6 +1107,128 @@ describe('ServiceAccountWorkloadBindings', () => {
           expect(audit.asScoped).not.toHaveBeenCalled();
         });
       });
+    });
+  });
+
+  describe('metrics', () => {
+    const WORKLOAD_ATTRIBUTES = { pluginId: PLUGIN_ID, workloadType: 'rule' };
+
+    it('counts a bind', async () => {
+      await bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+        serviceAccountId: 'service-account-id',
+        ...WORKLOAD,
+      });
+
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+        operation: 'workload_bind',
+        backend: 'uiam',
+        workload: WORKLOAD_ATTRIBUTES,
+      });
+    });
+
+    it('counts a refused unbind with its status', async () => {
+      checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+      await expect(
+        bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+        operation: 'workload_unbind',
+        backend: 'uiam',
+        workload: WORKLOAD_ATTRIBUTES,
+        errorType: '403',
+      });
+    });
+
+    it('records a successful assume before the callback runs', async () => {
+      const execute = jest.fn(async () => {
+        expect(assumeAttempt.succeeded).toHaveBeenCalledTimes(1);
+      });
+
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, execute);
+
+      expect(serviceAccountsMetrics.startAssume).toHaveBeenCalledWith({
+        backend: 'uiam',
+        workload: WORKLOAD_ATTRIBUTES,
+      });
+      expect(execute).toHaveBeenCalled();
+      expect(assumeAttempt.failed).not.toHaveBeenCalled();
+    });
+
+    it('does not count a failing callback as a failed assume', async () => {
+      await expect(
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {
+          throw new Error('execution failed');
+        })
+      ).rejects.toThrowError('execution failed');
+
+      expect(assumeAttempt.succeeded).toHaveBeenCalledTimes(1);
+      expect(assumeAttempt.failed).not.toHaveBeenCalled();
+    });
+
+    it('classifies a workload with no binding', async () => {
+      store.getVerified.mockResolvedValue(null);
+
+      await expect(
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+
+      expect(assumeAttempt.failed).toHaveBeenCalledWith('binding_not_found');
+    });
+
+    it('classifies a binding that fails integrity verification', async () => {
+      store.getVerified.mockRejectedValue(
+        Boom.forbidden(
+          'The service account binding for this workload failed integrity verification.'
+        )
+      );
+
+      await expect(
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(assumeAttempt.failed).toHaveBeenCalledWith('binding_integrity');
+    });
+
+    it('classifies a binding to another account than the caller expected', async () => {
+      store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'another-account' }));
+
+      await expect(
+        bindings.withScopedRequest(
+          PLUGIN_ID,
+          { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: 'service-account-id' },
+          async () => undefined
+        )
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      // The first reason wins, so the fallback classification that follows changes nothing.
+      expect(assumeAttempt.failed).toHaveBeenNthCalledWith(1, 'account_mismatch');
+    });
+
+    it('classifies a failed first mint by the exchange failure', async () => {
+      backend.createFakeRequest.mockRejectedValue(
+        new ServiceAccountTokenExchangeError(new Error('unavailable'), {
+          retryable: true,
+          statusCode: 503,
+        })
+      );
+
+      await expect(
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+      ).rejects.toBeInstanceOf(ServiceAccountTokenExchangeError);
+
+      expect(assumeAttempt.failed).toHaveBeenCalledWith('exchange_unavailable');
+    });
+
+    it('classifies an assume refused because bindings are unavailable', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(assumeAttempt.failed).toHaveBeenCalledWith('unavailable');
     });
   });
 

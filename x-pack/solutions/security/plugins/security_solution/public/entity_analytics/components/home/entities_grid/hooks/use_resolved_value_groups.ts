@@ -150,7 +150,7 @@ export const useResolvedValueGroups = ({
           entityExpression: viewEntityExpression,
         },
         selectedGroup,
-        createEsqlRunner(context.searchService, signal)
+        createEsqlRunner(context.searchService, 'entities_grid_resolved_value_groups', signal)
       );
     },
     {

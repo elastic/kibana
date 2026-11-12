@@ -7,7 +7,7 @@
 
 import type { EntityAnalyticsMigrationsParams } from '.';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../risk_score/tasks/helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../utils/internal_saved_objects_client';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../execution_context';
 
 const TASK_TYPE = 'security-solution-ea-risk-score-copy-timestamp-to-event-ingested';
@@ -72,7 +72,7 @@ export const createMigrationTask =
           buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORE_MIGRATION, TASK_ID),
           async () => {
             const esClient = coreStart.elasticsearch.client.asInternalUser;
-            const soClient = buildScopedInternalSavedObjectsClientUnsafe({
+            const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({
               coreStart,
               namespace: '*',
             });

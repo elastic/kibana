@@ -8,6 +8,8 @@
 import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit } from './unit_repository';
+import { getPipelineRoutes, toPublishedUnit } from './unit_connections';
+import { PIPELINE_ENTRY, type RouteRule } from './unit_pipeline';
 
 /** A distributor diagnostic from a failed save, as the processing flyout shows it. */
 export interface ProcessingDiagnostic extends Pick<StreamsUnit.Diagnostic, 'code' | 'message'> {
@@ -64,5 +66,118 @@ export const getProcessingDiagnostics = (
         processorId: index === undefined ? undefined : processors[index]?.id,
       },
     ];
+  });
+};
+
+/** A distributor diagnostic from a failed save, traced back to a routing node and rule. */
+export interface RoutingDiagnostic extends Pick<StreamsUnit.Diagnostic, 'code' | 'message'> {
+  pipelineId: string;
+  /** Position of the rule in the routing node, when the diagnostic points at one. */
+  ruleIndex?: number;
+}
+
+// Like processors, a routing rule is located by its place in the unit document as sent:
+// `/pipelines/0/config/1/value/2/when` for compiler errors, or a `pipelines.0.config.1.value.2`
+// prefix on schema violations.
+const PIPELINE_POINTER = /^\/pipelines\/(\d+)(?:\/config\/(\d+)(?:\/value\/(\d+))?)?(?:\/|$)/;
+const PIPELINE_LOCATION_PREFIX =
+  /^pipelines\.(\d+)(?:\.config\.(\d+)(?:\.value\.(\d+))?)?(?:[.:\s]|$)/;
+
+interface PipelineLocation {
+  pipelineIndex: number;
+  entryIndex?: number;
+  routeIndex?: number;
+}
+
+const readPipelineLocation = (
+  path: string | undefined,
+  message: string
+): PipelineLocation | undefined => {
+  const match = path ? PIPELINE_POINTER.exec(path) : PIPELINE_LOCATION_PREFIX.exec(message);
+  if (!match) {
+    return undefined;
+  }
+  const [, pipelineIndex, entryIndex, routeIndex] = match;
+  return {
+    pipelineIndex: Number(pipelineIndex),
+    entryIndex: entryIndex === undefined ? undefined : Number(entryIndex),
+    routeIndex: routeIndex === undefined ? undefined : Number(routeIndex),
+  };
+};
+
+const isSameCondition = (left: RouteRule, right: RouteRule): boolean =>
+  left.when === right.when && (left.action ?? 'move') === (right.action ?? 'move');
+
+/**
+ * The staged position of the rule at `routeIndex` of the sent pipeline's routes entry
+ * `entryIndex`: the staged rule with the same condition and action, counting the
+ * earlier ones that share them.
+ */
+const findStagedRuleIndex = (
+  savedUnit: Unit,
+  sent: Unit['unit']['pipelines'][number],
+  entryIndex: number,
+  routeIndex: number
+): number | undefined => {
+  const sentRoutes = sent.config.flatMap((entry, index) =>
+    entry.name === PIPELINE_ENTRY.routes
+      ? entry.value.map((route, position) => ({
+          route,
+          isTarget: index === entryIndex && position === routeIndex,
+        }))
+      : []
+  );
+  const target = sentRoutes.findIndex(({ isTarget }) => isTarget);
+  if (target === -1) {
+    return undefined;
+  }
+  const { route } = sentRoutes[target];
+  const occurrence = sentRoutes
+    .slice(0, target)
+    .filter((earlier) => isSameCondition(earlier.route, route)).length;
+  const matches = getPipelineRoutes(savedUnit, sent.id).flatMap((staged, index) =>
+    isSameCondition(staged, route) ? [index] : []
+  );
+  return matches[occurrence];
+};
+
+/**
+ * Distributor diagnostics from a failed unit save that point at a routing node of
+ * `savedUnit`, the staged unit that was saved. The unit as sent leaves out rules
+ * without targets and narrows the telemetry of the others, so a rule is matched
+ * back by its condition and action, in order.
+ */
+export const getRoutingDiagnostics = (error: unknown, savedUnit: Unit): RoutingDiagnostic[] => {
+  const sentPipelines = toPublishedUnit(savedUnit).unit.pipelines;
+  return readDiagnostics(error).flatMap((diagnostic): RoutingDiagnostic[] => {
+    if (!isRecord(diagnostic) || typeof diagnostic.message !== 'string') {
+      return [];
+    }
+    const { code, message, path } = diagnostic;
+    const location = readPipelineLocation(typeof path === 'string' ? path : undefined, message);
+    const sent = location ? sentPipelines[location.pipelineIndex] : undefined;
+    if (!location || !sent || !sent.config.some(({ name }) => name === PIPELINE_ENTRY.routes)) {
+      return [];
+    }
+    const entry = location.entryIndex === undefined ? undefined : sent.config[location.entryIndex];
+    // Diagnostics on the pipeline's sources or processors are not about its routing.
+    if (entry && entry.name !== PIPELINE_ENTRY.routes) {
+      return [];
+    }
+    const routing: RoutingDiagnostic = {
+      code: typeof code === 'string' ? code : '',
+      message,
+      pipelineId: sent.id,
+    };
+    if (!entry || location.entryIndex === undefined || location.routeIndex === undefined) {
+      return [routing];
+    }
+    const ruleIndex = findStagedRuleIndex(
+      savedUnit,
+      sent,
+      location.entryIndex,
+      location.routeIndex
+    );
+    return [ruleIndex === undefined ? routing : { ...routing, ruleIndex }];
   });
 };
