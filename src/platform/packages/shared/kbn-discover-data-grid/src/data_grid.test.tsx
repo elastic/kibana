@@ -354,6 +354,54 @@ describe('DataGrid', () => {
     expect(document.activeElement).not.toBe(screen.getByRole('gridcell', { name: 'Name 50' }));
   });
 
+  it('re-resolves a delayed pending focus after row reordering', async () => {
+    mockDelayVirtualMount = true;
+    const apiRef = createRef<DataGridApi>();
+    const { rerender } = renderGrid({ apiRef });
+    const outsideButton = document.createElement('button');
+    document.body.append(outsideButton);
+    focusElement(outsideButton);
+    if (!apiRef.current) {
+      throw new Error('Expected a data grid API.');
+    }
+
+    let pendingFocus: Promise<DataGridCommandResult> | undefined;
+    act(() => {
+      pendingFocus = apiRef.current?.focusCell({ rowId: 'row-50', columnId: 'name' });
+    });
+    expect(mockGetOffsetForIndex).toHaveBeenLastCalledWith(50, 'auto');
+
+    const rowsWithoutTarget = rows.filter(({ id }) => id !== 'row-50');
+    const reorderedRows = [
+      ...rowsWithoutTarget.slice(0, 70),
+      rows[50],
+      ...rowsWithoutTarget.slice(70),
+    ];
+    rerender(
+      <DataGrid
+        ariaLabel="Example data"
+        columns={columns}
+        rows={reorderedRows}
+        getRowId={getRowId}
+        height={160}
+        apiRef={apiRef}
+      />
+    );
+
+    expect(mockGetOffsetForIndex).toHaveBeenLastCalledWith(70, 'auto');
+    expect(mockPendingVirtualScrolls).toHaveLength(2);
+    const commitReorderedFocus = mockPendingVirtualScrolls[1];
+    if (!commitReorderedFocus) {
+      throw new Error('Expected a rescheduled virtual scroll.');
+    }
+    act(() => commitReorderedFocus());
+
+    await expect(pendingFocus).resolves.toEqual({ status: 'completed' });
+    const focusedCell = await expectFocus('Name 50');
+    expect(focusedCell.parentElement?.getAttribute('aria-rowindex')).toBe('71');
+    outsideButton.remove();
+  });
+
   it('does not reclaim focus when a delayed destination mounts after Tab leaves the grid', async () => {
     mockDelayVirtualMount = true;
     const apiRef = createRef<DataGridApi>();

@@ -373,17 +373,18 @@ export const useDataGridFocus = ({
       previousModel,
       currentModel
     );
-    const logicalOrderChanged =
-      !areIdListsEqual(previousModel.rowIds, rowIds) ||
-      !areIdListsEqual(previousModel.columnIds, columnIds);
+    const rowOrderChanged = !areIdListsEqual(previousModel.rowIds, rowIds);
+    const columnOrderChanged = !areIdListsEqual(previousModel.columnIds, columnIds);
+    const logicalOrderChanged = rowOrderChanged || columnOrderChanged;
     previousModelRef.current = currentModel;
 
     const pendingFocus = pendingFocusRef.current;
     if (pendingFocus) {
-      if (!rowIds.includes(pendingFocus.address.rowId)) {
-        failPendingFocus('row_not_found');
-      } else if (!columnIds.includes(pendingFocus.address.columnId)) {
-        failPendingFocus('column_not_found');
+      const resolution = resolveAddress(pendingFocus.address);
+      if ('failure' in resolution) {
+        failPendingFocus(resolution.failure);
+      } else if (rowOrderChanged && !scrollToRowRef.current(resolution.rowIndex)) {
+        failPendingFocus('scroll_failed');
       }
     }
 
@@ -415,7 +416,7 @@ export const useDataGridFocus = ({
       lostOwnedFocusRef.current = null;
       void focusCell(reconciledActiveCell);
     }
-  }, [columnIds, currentModel, failPendingFocus, focusCell, gridRef, rowIds]);
+  }, [columnIds, currentModel, failPendingFocus, focusCell, gridRef, resolveAddress, rowIds]);
 
   useEffect(
     () => () => {
