@@ -16,6 +16,7 @@
  * ingest_loghub.ts, ingest_openrca.ts and ingest_rcaeval.ts.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
@@ -322,12 +323,19 @@ const OTLP_BATCH_SIZE = 5000;
 
 export async function checkOtlpEndpoint(endpoint: string): Promise<boolean> {
   try {
-    const res = await fetch(`${endpoint}/v1/traces`, {
-      method: 'GET',
-      signal: AbortSignal.timeout(3000),
-    });
-    // The OTLP endpoint returns 405 for GET, which still means it's reachable
-    return res.status === 405 || res.ok;
+    const deadline = timeoutSignal(3000);
+    try {
+      const res = await fetch(`${endpoint}/v1/traces`, {
+        method: 'GET',
+        signal: deadline,
+      });
+      // A 405 or 2xx means the endpoint is up. The body is unused, so cancel it before dispose().
+      const reachable = res.status === 405 || res.ok;
+      await res.body?.cancel().catch(() => undefined);
+      return reachable;
+    } finally {
+      deadline.dispose();
+    }
   } catch {
     return false;
   }

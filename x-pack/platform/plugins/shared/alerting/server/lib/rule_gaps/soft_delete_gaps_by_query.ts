@@ -106,24 +106,25 @@ export const softDeleteGapsByQuery = async ({
   ruleIds,
   eventLogClient,
   logger,
-}: SoftDeleteGapsByQueryParams): Promise<void> => {
-  for (const ruleIdChunk of chunk(ruleIds, MAX_RULE_IDS_PER_QUERY)) {
-    try {
-      await softDeleteChunk({ ruleIdChunk, eventLogClient, logger });
-    } catch (err) {
-      // A client-side timeout aborts the request, but Elasticsearch runs the
-      // update to completion server-side, so this is not a failure to act on.
-      if (err instanceof EsErrors.TimeoutError) {
-        logger.warn(
-          `softDeleteGapsByQuery: client timed out waiting on gap soft-deletion for ${ruleIdChunk.length} rules. Elasticsearch may still be completing it.`
-        );
-        continue;
-      }
+}: SoftDeleteGapsByQueryParams): Promise<void> =>
+  withSpan({ name: 'softDeleteGapsByQuery', type: 'rule' }, async () => {
+    for (const ruleIdChunk of chunk(ruleIds, MAX_RULE_IDS_PER_QUERY)) {
+      try {
+        await softDeleteChunk({ ruleIdChunk, eventLogClient, logger });
+      } catch (err) {
+        // A client-side timeout aborts the request, but Elasticsearch runs the
+        // update to completion server-side, so this is not a failure to act on.
+        if (err instanceof EsErrors.TimeoutError) {
+          logger.warn(
+            `softDeleteGapsByQuery: client timed out waiting on gap soft-deletion for ${ruleIdChunk.length} rules. Elasticsearch may still be completing it.`
+          );
+          continue;
+        }
 
-      const message = err instanceof Error ? err.message : String(err);
-      logger.error(
-        `softDeleteGapsByQuery: Failed to soft delete gaps for ${ruleIdChunk.length} rules: ${message}`
-      );
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error(
+          `softDeleteGapsByQuery: Failed to soft delete gaps for ${ruleIdChunk.length} rules: ${message}`
+        );
+      }
     }
-  }
-};
+  });

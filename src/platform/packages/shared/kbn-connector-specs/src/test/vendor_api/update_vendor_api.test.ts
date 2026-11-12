@@ -371,9 +371,37 @@ actions:
       { source: 'main', method: 'get', path: '/legacy' },
     ]);
     expect(Object.keys((await readJson('snapshots/main.openapi.json')).paths)).toEqual(['/items']);
-    expect(warnings).toEqual([
-      'overlay.yaml action 1 matches nothing in any source; the vendor may have fixed it',
-    ]);
+  });
+
+  describe('with an overlay action that matches nothing', () => {
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      warnings = [];
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths['/gone']
+    remove: true
+`
+      );
+    });
+
+    it('stays quiet offline, as the route may just be left out of the snapshot', async () => {
+      await update();
+
+      expect(warnings).toEqual([]);
+    });
+
+    it('warns with --refresh, as the vendor spec has been fetched', async () => {
+      await update({ refresh: true });
+
+      expect(warnings).toEqual([
+        'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
+      ]);
+    });
   });
 
   it('keeps the components that overlay updates reference in the snapshot', async () => {

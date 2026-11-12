@@ -11,7 +11,6 @@ export type * from './types';
 export * from './utils';
 
 export * from './logs_context_service';
-export * from './components';
 
 export { DEFAULT_LOGS_PROFILE, type DefaultLogsProfile } from './recommended_fields/default_logs';
 

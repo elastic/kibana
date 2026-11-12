@@ -102,7 +102,7 @@ export class SiemMigrationsDataBaseClient {
     /* Returns the next batch of search results */
     const next = async (): Promise<Array<Stored<T>>> => {
       if (!pitId) {
-        // eslint-disable-next-line require-atomic-updates
+        // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
         pitId = await pitPromise;
       }
       if (!currentBatchSearch) {
@@ -128,7 +128,7 @@ export class SiemMigrationsDataBaseClient {
       }
       const response = await currentBatchSearch;
       if (response.pit_id) {
-        // eslint-disable-next-line require-atomic-updates
+        // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
         pitId = response.pit_id;
       }
       return this.processResponseHits(response);

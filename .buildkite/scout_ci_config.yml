@@ -40,6 +40,7 @@ plugins:
     - discoverCustomizationExamples
     - discoveries
     - embeddable_alerts_table
+    - entity_inventory
     - entity_store
     - error_boundary_example
     - esql_views
@@ -89,6 +90,7 @@ plugins:
     - saved_objects_management
     - saved_objects_tagging
     - searchExamples
+    - search_boost
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
@@ -104,6 +106,7 @@ plugins:
     - snapshot_restore
     - spaces
     - stack_connectors
+    - stateContainersExamples
     - streams
     - streams_app
     - subscription_status

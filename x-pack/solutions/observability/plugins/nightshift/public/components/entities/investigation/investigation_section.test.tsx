@@ -15,12 +15,46 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       agenticInvestigations: {
-        InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
-          <div data-test-subj="investigationCard">{item.title}</div>
+        // Like the real card, the actions sit beside the button that opens the investigation.
+        InvestigationCard: ({
+          investigation: item,
+          onClick,
+          actions,
+        }: {
+          investigation: InvestigationSummary;
+          onClick?: (investigation: InvestigationSummary) => void;
+          actions?: React.ReactNode;
+        }) => (
+          <div data-test-subj="investigationCard">
+            <button type="button" onClick={() => onClick?.(item)}>
+              {item.title}
+            </button>
+            {actions}
+          </div>
         ),
       },
     },
   }),
+}));
+
+jest.mock('./investigation_card_actions', () => ({
+  InvestigationCardActions: ({ assignees }: { assignees?: React.ReactNode }) => (
+    <div>{assignees}</div>
+  ),
+}));
+
+const mockUseInvestigationAssignees = jest.fn(
+  (_investigations: InvestigationSummary[]) => (item: InvestigationSummary) =>
+    (
+      <button type="button" data-test-subj={`assignees-${item.id}`}>
+        {(item.metadata.assignees ?? []).join(',')}
+      </button>
+    )
+);
+
+jest.mock('./use_investigation_assignees', () => ({
+  useInvestigationAssignees: (investigations: InvestigationSummary[]) =>
+    mockUseInvestigationAssignees(investigations),
 }));
 
 const investigation: InvestigationSummary = {
@@ -118,7 +152,7 @@ describe('InvestigationSection', () => {
 
     const showMore = screen.getByTestId('nightshiftInvestigationSectionShowMore-critical');
     expect(showMore).toBeInTheDocument();
-    expect(showMore).toHaveTextContent('Show 3 more');
+    expect(showMore).toHaveTextContent('Show 3 more of 10');
   });
 
   it('loads more investigations for this section only', () => {
@@ -129,12 +163,50 @@ describe('InvestigationSection', () => {
     expect(onShowMore).toHaveBeenCalledTimes(1);
   });
 
+  it("shows each card's assignees, resolved once for the whole section", () => {
+    const assigned: InvestigationSummary = {
+      ...investigation,
+      id: 'investigation-2',
+      metadata: { ...investigation.metadata, assignees: ['uid-1', 'uid-2'] },
+    };
+    mockUseInvestigationAssignees.mockClear();
+
+    renderSection({ investigations: [investigation, assigned], total: 2 });
+
+    expect(mockUseInvestigationAssignees).toHaveBeenLastCalledWith([investigation, assigned]);
+    expect(screen.getByTestId('assignees-investigation-1')).toHaveTextContent('');
+    expect(screen.getByTestId('assignees-investigation-2')).toHaveTextContent('uid-1,uid-2');
+  });
+
+  it('does not open the investigation when its assignees are clicked', () => {
+    const onInvestigationClick = jest.fn();
+    render(
+      <I18nProvider>
+        <InvestigationSection
+          id="critical"
+          investigations={[investigation]}
+          total={1}
+          hasMore={false}
+          onShowMore={jest.fn()}
+          onRetry={jest.fn()}
+          onInvestigationClick={onInvestigationClick}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('assignees-investigation-1'));
+    expect(onInvestigationClick).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText('Checkout errors'));
+    expect(onInvestigationClick).toHaveBeenCalledWith(investigation);
+  });
+
   it('retries a failed section load', () => {
     const onRetry = jest.fn();
     renderSection({ error: new Error('Network unavailable'), onRetry });
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-critical'));
     expect(onRetry).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+    expect(screen.queryByText('No open investigations')).not.toBeInTheDocument();
   });
 });

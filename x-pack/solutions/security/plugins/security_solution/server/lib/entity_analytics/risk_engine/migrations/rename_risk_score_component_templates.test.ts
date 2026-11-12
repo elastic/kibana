@@ -23,8 +23,8 @@ jest.mock('../../risk_score/risk_score_data_client', () => ({
   })),
 }));
 
-jest.mock('../../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
+jest.mock('../../utils/internal_saved_objects_client', () => ({
+  buildNamespacedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
 }));
 
 const buildSavedObjectResponse = (namespaces = ['default']) => ({

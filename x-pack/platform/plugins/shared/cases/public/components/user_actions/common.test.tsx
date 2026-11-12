@@ -211,7 +211,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
         {
           type: AttachmentActionType.BUTTON,
           label: 'Open alert',
-          iconType: 'popout',
+          iconType: 'external',
           onClick: jest.fn(),
         },
         'doc-action-test-subj'

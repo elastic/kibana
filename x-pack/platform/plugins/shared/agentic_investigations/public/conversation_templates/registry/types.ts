@@ -13,10 +13,13 @@ import type {
   RenderAssignees,
   RenderStatus,
 } from '@kbn/agentic-investigations-common';
+import type { SubjectServices } from '../../subjects/attachments/subject_services';
 import type { AgenticInvestigationsPublicStartDependencies, ImpactEntityOpener } from '../../types';
 
 export type TemplateStartDependencies = AgenticInvestigationsPublicStartDependencies & {
   agentBuilder: AgentBuilderPluginStart;
+  /** The flyout registered for an alert source; the subject rows in a template read it too. */
+  getAlertFlyout?: SubjectServices['getAlertFlyout'];
 };
 
 /** What the connected render props read through `useKibana`. */

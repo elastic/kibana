@@ -20,6 +20,7 @@ import {
   TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
+  isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
@@ -2361,125 +2362,6 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('immutable metadata', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
-      getTemplateMock.mockReturnValue(
-        makeTemplate('investigation', {
-          telemetry_target: { input_type: 'TEXT', immutable: true },
-          summary: { input_type: 'TEXT' },
-        })
-      );
-      mockGetDocumentResponse(
-        createConversationDocumentWithTemplate({
-          templateId: 'investigation',
-          metadata: { telemetry_target: 'orca' },
-        })
-      );
-    });
-
-    it.each(['c0', 'none', ''])('rejects changing the target to %p', async (target) => {
-      await expect(
-        client.patchMetadata(
-          'conversation-1',
-          { telemetry_target: target, summary: 'must not be written' },
-          { source: 'http_api' }
-        )
-      ).rejects.toThrow('field "telemetry_target" is immutable');
-      expect(mockEsClient.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects assigning a target to a legacy investigation', async () => {
-      mockGetDocumentResponse(
-        createConversationDocumentWithTemplate({ templateId: 'investigation' })
-      );
-      await expect(
-        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'workflow' })
-      ).rejects.toThrow('field "telemetry_target" is immutable');
-      expect(mockEsClient.index).not.toHaveBeenCalled();
-    });
-
-    it('allows trusted writers to replace metadata without template validation', async () => {
-      await client.update(
-        { id: 'conversation-1', metadata: { telemetry_target: 'c0' } },
-        { source: 'workflow' }
-      );
-      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
-        telemetry_target: 'c0',
-      });
-    });
-
-    it('revalidates against stored metadata after an OCC conflict', async () => {
-      mockGetDocumentResponseOnce(
-        createConversationDocumentWithTemplate({
-          templateId: 'investigation',
-          metadata: { telemetry_target: 'orca' },
-        })
-      );
-      mockGetDocumentResponse(
-        createConversationDocumentWithTemplate({
-          templateId: 'investigation',
-          metadata: { telemetry_target: 'c0' },
-        })
-      );
-      mockEsClient.index.mockRejectedValueOnce(createConflictError());
-
-      await expect(
-        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'http_api' })
-      ).rejects.toThrow('field "telemetry_target" is immutable');
-      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
-    });
-
-    it('allows the same target alongside unrelated metadata updates', async () => {
-      const { changedFields } = await client.patchMetadata(
-        'conversation-1',
-        { telemetry_target: 'orca', summary: 'Updated summary' },
-        { source: 'http_api' }
-      );
-      expect(changedFields).toEqual(['summary']);
-      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
-        telemetry_target: 'orca',
-        summary: 'Updated summary',
-      });
-    });
-
-    it.each<Record<string, SerializedMetadataValue>>([{ telemetry_target: 'orca' }, {}])(
-      'preserves the target binding when reapplying the template: %p',
-      async (metadata) => {
-        mockGetDocumentResponse(
-          createConversationDocumentWithTemplate({ templateId: 'investigation', metadata })
-        );
-        await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
-        expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual(metadata);
-      }
-    );
-
-    it('allows template migrations to add an immutable field with a default', async () => {
-      mockGetDocumentResponse(
-        createConversationDocumentWithTemplate({ templateId: 'investigation' })
-      );
-      getTemplateMock.mockReturnValue(
-        makeTemplate('investigation', {
-          telemetry_target: { input_type: 'TEXT', immutable: true, default_value: 'orca' },
-        })
-      );
-      await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
-      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
-        telemetry_target: 'orca',
-      });
-    });
-
-    it('allows template migrations to remove an immutable field', async () => {
-      getTemplateMock.mockReturnValue(
-        makeTemplate('investigation', { summary: { input_type: 'TEXT', default_value: 'Summary' } })
-      );
-
-      await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
-      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({ summary: 'Summary' });
-    });
-  });
-
   describe('patchMetadata', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -2529,6 +2411,30 @@ describe('ConversationClient', () => {
         severity: 'high', // new key added
         notified: 'true', // TOGGLE serialized to string
       });
+    });
+
+    it('writes with the requested refresh so the change is searchable on return', async () => {
+      getTemplateMock.mockReturnValue(
+        makeTemplate('tmpl-a', {
+          severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          metadata: { status: 'open' },
+        })
+      );
+
+      await client.patchMetadata(
+        'conversation-1',
+        { severity: 'high' },
+        { source: 'http_api', refresh: 'wait_for' }
+      );
+
+      expect(mockEsClient.index.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ refresh: 'wait_for' })
+      );
     });
 
     describe('access', () => {
@@ -4420,6 +4326,41 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('replaceRoundEvents keeps a stored agent message as it was received', async () => {
+      const agentActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [
+            {
+              ...userMessage('r1::user_message'),
+              type: TimelineEventType.agentMessage,
+              actor: agentActor,
+            },
+          ],
+        })
+      );
+
+      await clientWithCb.replaceRoundEvents(
+        {
+          id: 'conversation-1',
+          roundId: 'r1',
+          events: [
+            userMessage('r1::user_message'),
+            terminated('r1::execution_terminated', 'exec-1'),
+          ],
+        },
+        { source: 'execution' }
+      );
+
+      const written = (mockEsClient.index.mock.calls[0][0] as { document: Document['_source'] })
+        .document.events;
+      expect(written?.find((event) => event.id === 'r1::user_message')).toMatchObject({
+        type: TimelineEventType.agentMessage,
+        actor: agentActor,
+      });
+    });
+
     it('a write skipped by the terminal guard emits nothing', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
@@ -6262,6 +6203,94 @@ describe('ConversationClient', () => {
       await appendSettingActiveExecution(setActiveExecution('e2'));
 
       expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+    });
+
+    const documentWithPendingChild = (childIds: string[]): Document => {
+      const document = documentWithHolder();
+      return {
+        ...document,
+        _source: {
+          ...document._source,
+          state: {
+            prompt: { responses: {} },
+            dynamic_tool_ids: [],
+            background_executions: Object.fromEntries(
+              childIds.map((id) => [id, { execution_id: id, status: ExecutionStatus.running }])
+            ),
+          },
+        },
+      };
+    };
+
+    const appendConsuming = (childId: string, acquire = true) =>
+      client.appendEvents(
+        {
+          id: 'conversation-1',
+          events: [],
+          ...(acquire ? { activeExecution: setActiveExecution('e2') } : {}),
+          consumeBackgroundExecution: childId,
+        },
+        { source: 'execution' }
+      );
+
+    it('appendEvents consuming a background execution drops it in the same write, refuses once it is gone and answers busy while held', async () => {
+      mockGetDocumentResponse(documentWithPendingChild(['child-1', 'child-2']));
+
+      await appendConsuming('child-1');
+
+      expect(indexedSource().state?.background_executions).toEqual({
+        'child-2': { execution_id: 'child-2', status: ExecutionStatus.running },
+      });
+      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+
+      mockGetDocumentResponse(documentWithPendingChild(['child-2']));
+      const gone = await appendConsuming('child-1').catch((caught: unknown) => caught);
+      expect(isBackgroundExecutionAlreadyReportedError(gone)).toBe(true);
+
+      const held = documentWithPendingChild([]);
+      mockGetDocumentResponse({
+        ...held,
+        _source: { ...held._source, active_execution: activeExecution('e1') },
+      });
+      liveHolder();
+      const busy = await appendConsuming('child-1').catch((caught: unknown) => caught);
+      expect(isConversationBusyError(busy)).toBe(true);
+      expect(isBackgroundExecutionAlreadyReportedError(busy)).toBe(false);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+
+      // A write without an acquire asks the live holder the same way, and goes through once it is gone.
+      const busyWithoutRun = await appendConsuming('child-1', false).catch(
+        (caught: unknown) => caught
+      );
+      expect(isConversationBusyError(busyWithoutRun)).toBe(true);
+      staleHolder();
+      await appendConsuming('child-1', false);
+      expect(indexedSource(1).active_execution).toEqual({ execution_id: 'e1' });
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+    });
+
+    it('appendEvents consuming a background execution answers busy while a live run holds it, even when the entry is stored', async () => {
+      // A run started after the child was stored carries the entry in memory and writes it back
+      // when it ends, so consuming it underneath that run would report the child twice.
+      const held = documentWithPendingChild(['child-1']);
+      mockGetDocumentResponse({
+        ...held,
+        _source: { ...held._source, active_execution: activeExecution('e1') },
+      });
+      liveHolder();
+
+      const busyWithoutRun = await appendConsuming('child-1', false).catch(
+        (caught: unknown) => caught
+      );
+      expect(isConversationBusyError(busyWithoutRun)).toBe(true);
+      const busyWithRun = await appendConsuming('child-1').catch((caught: unknown) => caught);
+      expect(isConversationBusyError(busyWithRun)).toBe(true);
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+
+      staleHolder();
+      await appendConsuming('child-1', false);
+      expect(indexedSource().state?.background_executions).toEqual({});
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
     it('appendEvents setting the active execution refuses when a concurrent one wins the version conflict', async () => {

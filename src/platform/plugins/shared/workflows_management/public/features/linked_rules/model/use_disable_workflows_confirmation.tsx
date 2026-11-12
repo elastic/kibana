@@ -41,7 +41,7 @@ export const useDisableWorkflowsConfirmation = (): {
         (data) => ({ data, isError: false }),
         () => ({ data: undefined, isError: true })
       );
-      if (result.data?.total === 0) {
+      if (result.data?.total === 0 && result.data.hiddenTotal === 0) {
         return true;
       }
       return new Promise((resolve) => {

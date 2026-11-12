@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { EMPTY, startWith } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
@@ -14,11 +16,11 @@ import type { ActionButton, AttachmentPreviewState } from '@kbn/agent-builder-br
 import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services';
-import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentCard, ATTACHMENT_INNER_RADIUS } from './attachment_card';
 import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
@@ -61,12 +63,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   screenContext,
   previewBadgeState,
 }) => {
-  const {
-    openCanvas: openCanvasContext,
-    closeCanvas,
-    previewedAttachmentKey,
-    setPreviewedAttachmentKey,
-  } = useCanvasContext();
+  const { openCanvas: openCanvasContext, previewedAttachmentKey } = useCanvasContext();
   const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
@@ -93,6 +90,14 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     attachment.id,
     attachment.versionData?.version
   );
+  const appPreviewState$ = useMemo(
+    () =>
+      (uiDefinition?.getPreviewState$?.(attachment) ?? EMPTY).pipe(
+        startWith<AttachmentPreviewState>('none')
+      ),
+    [uiDefinition, attachment]
+  );
+  const appPreviewState = useObservable(appPreviewState$, 'none');
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -115,11 +120,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         openCanvas,
         openSidebarConversation,
         isCanvas: false,
-        setPreviewBadgeState: (nextPreviewState) => {
-          setPreviewedAttachmentKey(
-            nextPreviewState === 'previewing' ? attachmentPreviewKey : null
-          );
-        },
       }) ?? [],
     [
       uiDefinition,
@@ -128,8 +128,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       agentId,
       updateOrigin,
       openCanvas,
-      setPreviewedAttachmentKey,
-      attachmentPreviewKey,
       openSidebarConversation,
     ]
   );
@@ -145,7 +143,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
   const resolvedPreviewBadgeState: AttachmentPreviewState =
-    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
+    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : appPreviewState);
 
   if (!uiDefinition) {
     return null;
@@ -157,24 +155,15 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const isHeaderOnly = !uiDefinition.renderInlineContent;
 
   return (
-    <EuiSplitPanel.Outer
-      grow
-      hasShadow={false}
-      hasBorder={true}
-      css={css`
-        overflow: visible; // allow vis actions to overflow
-        border-radius: ${AB_PANEL_RADIUS}px;
-        ${maxWidth !== undefined ? `max-width: ${maxWidth}px;` : ''}
-      `}
-    >
+    <AttachmentCard color={header?.color} maxWidth={maxWidth}>
       <AttachmentHeader
-        icon={header?.icon}
+        icon={header?.icon ?? uiDefinition?.getIcon?.()}
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}
+        color={header?.color}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
-        onClosePreview={closeCanvas}
         isHeaderOnly={isHeaderOnly}
       />
       {!isHeaderOnly && (
@@ -182,18 +171,18 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
           grow={false}
           paddingSize="none"
           css={css`
-            border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+            border-radius: 0 0 ${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px;
             overflow: hidden;
 
             /* Nested panels default to EUI medium radius (6px); match the card shell (12px). */
             > .euiPanel {
-              border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+              border-radius: 0 0 ${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px;
             }
 
             /* No header rendered (no action buttons): the content is the top of the card too. */
             &:first-child,
             &:first-child > .euiPanel {
-              border-radius: ${AB_PANEL_RADIUS}px;
+              border-radius: ${ATTACHMENT_INNER_RADIUS}px;
             }
           `}
         >
@@ -214,7 +203,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
           </TimelineRenderErrorBoundary>
         </EuiSplitPanel.Inner>
       )}
-    </EuiSplitPanel.Outer>
+    </AttachmentCard>
   );
 };
 

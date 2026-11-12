@@ -50,6 +50,7 @@ describe('mapClassicAlertToEpisode', () => {
     'kibana.alert.duration.us': 7_200_000_000,
     'kibana.alert.severity': 'critical',
     'kibana.alert.case_ids': ['case-1', 'case-2'],
+    'kibana.alert.reason': 'CPU usage is 95%, above the threshold of 90%',
   };
 
   it('maps all fields correctly', () => {
@@ -69,6 +70,7 @@ describe('mapClassicAlertToEpisode', () => {
       last_tags: ['tag-a', 'tag-b'],
       severity: 'critical',
       rule_category: 'Test',
+      reason: 'CPU usage is 95%, above the threshold of 90%',
       supports_actions: false,
       supports_timeline: false,
     });
@@ -117,6 +119,7 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode['episode.id']).toBe('uuid-minimal');
     expect(episode['episode.status']).toBe(ALERT_EPISODE_STATUS.INACTIVE);
     expect(episode['rule.name']).toBeUndefined();
+    expect(episode.reason).toBeUndefined();
     expect(episode.severity).toBeNull();
     expect(episode.last_tags).toEqual([]);
     expect(episode.last_assignee_uid).toBeNull();

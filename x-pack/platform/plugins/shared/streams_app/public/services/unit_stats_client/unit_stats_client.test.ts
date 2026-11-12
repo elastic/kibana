@@ -201,6 +201,49 @@ describe('createUnitStatsClient', () => {
       expect(result.window).toEqual(STATS_FIXTURE_RESPONSES.data.meta.window);
     });
 
+    describe('with a source after a full request of destinations', () => {
+      const components: StreamsUnit.StatsComponentRef[] = [
+        ...destinations(MAX_STREAMS_UNIT_STATS_COMPONENTS),
+        { kind: 'source', id: 'otlp-input' },
+      ];
+      const fetchWithSource = (fetch: jest.Mock) =>
+        createClient(fetch).fetchStats(
+          { components, window: { kind: 'default' } },
+          { signal: new AbortController().signal }
+        );
+
+      it('merges the sources of every request', async () => {
+        const fetch = jest
+          .fn()
+          .mockResolvedValueOnce(STATS_FIXTURE_RESPONSES.noData)
+          .mockResolvedValueOnce(STATS_FIXTURE_RESPONSES.data);
+
+        const result = await fetchWithSource(fetch);
+
+        expect(sizesOfCalls(fetch)).toEqual([MAX_STREAMS_UNIT_STATS_COMPONENTS, 1]);
+        expect(result.sources['otlp-input']).toEqual({
+          status: 'ready',
+          stats: { acceptedRate: 3700 },
+        });
+        expect(result.destinations['destination-0'].status).toBe('noData');
+      });
+
+      it('gives the sources of a failed request an error', async () => {
+        const fetch = jest
+          .fn()
+          .mockResolvedValueOnce(STATS_FIXTURE_RESPONSES.noData)
+          .mockRejectedValueOnce(new Error('Service Unavailable'));
+
+        const result = await fetchWithSource(fetch);
+
+        expect(result.sources['otlp-input']).toMatchObject({
+          status: 'error',
+          error: { code: STATS_REQUEST_FAILED_ERROR_CODE, reason: 'Service Unavailable' },
+        });
+        expect(result.destinations['destination-0'].status).toBe('noData');
+      });
+    });
+
     it('keeps the other requests when one fails, and gives its components an error', async () => {
       const fetch = jest
         .fn()

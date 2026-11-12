@@ -263,13 +263,13 @@ describe('ScoutPlaywrightReporter', () => {
       title: 'statically skipped',
     });
 
-    it('emits one test-outcome event per test, with the outcome and attempt count', async () => {
+    it('emits one test-outcome event per test, with the outcome and attempt count', () => {
       reporter.onBegin(
         createMockConfig(),
         createMockSuite([expectedTest, flakyTest, unexpectedTest, skippedTest])
       );
 
-      await reporter.onEnd(createMockFullResult('failed'));
+      reporter.onEnd(createMockFullResult('failed'));
 
       const outcomeByTitle = Object.fromEntries(
         getTestOutcomeEvents().map((event) => [event.test?.title, event.test])
@@ -299,13 +299,13 @@ describe('ScoutPlaywrightReporter', () => {
       expect(getTestOutcomeEvents()).toHaveLength(4);
     });
 
-    it('derives run-end stats from final outcomes, counting a flaky test as a pass', async () => {
+    it('derives run-end stats from final outcomes, counting a flaky test as a pass', () => {
       reporter.onBegin(
         createMockConfig(),
         createMockSuite([expectedTest, flakyTest, unexpectedTest, skippedTest])
       );
 
-      await reporter.onEnd(createMockFullResult('failed'));
+      reporter.onEnd(createMockFullResult('failed'));
 
       expect(getRunEndEvent()?.test_run?.tests).toEqual({
         passes: 2,
@@ -316,7 +316,7 @@ describe('ScoutPlaywrightReporter', () => {
       });
     });
 
-    it('produces empty stats when the suite was never captured (no onBegin)', async () => {
+    it('produces empty stats when the suite was never captured (no onBegin)', () => {
       // Reporter constructed but onBegin never called — should not throw.
       const freshReporter = new ScoutPlaywrightReporter({ runId: 'no-begin' });
       const freshLogEventSpy: jest.SpyInstance = jest
@@ -325,7 +325,7 @@ describe('ScoutPlaywrightReporter', () => {
       jest.spyOn((freshReporter as any).report, 'save').mockImplementation(() => {});
       jest.spyOn((freshReporter as any).report, 'conclude').mockImplementation(() => {});
 
-      await freshReporter.onEnd(createMockFullResult('passed'));
+      freshReporter.onEnd(createMockFullResult('passed'));
 
       const runEndEvent = freshLogEventSpy.mock.calls
         .map(([event]) => event)
@@ -337,6 +337,32 @@ describe('ScoutPlaywrightReporter', () => {
         flaky: 0,
         total: 0,
       });
+    });
+  });
+
+  describe('onEnd contract', () => {
+    it('returns synchronously so the run is never waiting on a reporter hook', () => {
+      expect(reporter.onEnd(createMockFullResult('passed'))).toBeUndefined();
+    });
+
+    it('swallows a failure to write events and still concludes the report', () => {
+      const concludeSpy = jest.spyOn((reporter as any).report, 'conclude');
+      logEventSpy.mockImplementation(() => {
+        throw new Error('ENOSPC: no space left on device');
+      });
+
+      expect(() => reporter.onEnd(createMockFullResult('passed'))).not.toThrow();
+      expect(concludeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('swallows a failed save and still concludes the report', () => {
+      const concludeSpy = jest.spyOn((reporter as any).report, 'conclude');
+      jest.spyOn((reporter as any).report, 'save').mockImplementation(() => {
+        throw new Error('Save destination path already exists');
+      });
+
+      expect(() => reporter.onEnd(createMockFullResult('passed'))).not.toThrow();
+      expect(concludeSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

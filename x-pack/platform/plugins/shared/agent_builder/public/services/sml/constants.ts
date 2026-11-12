@@ -6,4 +6,4 @@
  */
 
 /** Default max SML search results for UI (command menu, prefetch). */
-export const SML_SEARCH_DEFAULT_SIZE = 20;
+export const SML_SEARCH_DEFAULT_SIZE = 30;

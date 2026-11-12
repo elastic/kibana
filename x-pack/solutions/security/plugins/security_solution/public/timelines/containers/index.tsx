@@ -18,9 +18,9 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import type {
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
-} from '@kbn/timelines-plugin/common/api/search_strategy';
+  RunTimeMappings,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import type { EsHitRecord } from '@kbn/discover-utils';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';

@@ -31,7 +31,6 @@ export const FIELDS_SELECTOR_CLOSE = '[data-test-subj="entityAnalyticsFieldsSele
 
 export const LAST_UPDATED = '[data-test-subj="entity-analytics-toolbar-updated-at"]';
 
-export const FLYOUT_RIGHT_PANEL = '[data-test-subj="rightSection"]';
 export const FLYOUT_TITLE_TEXT = '[data-test-subj="flyoutTitleText"]';
 /** Resolution group header — opens the primary (target) entity flyout */
 export const GROUP_HEADER_OPEN_ENTITY_FLYOUT_BUTTON =
