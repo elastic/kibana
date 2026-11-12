@@ -67,4 +67,64 @@ describe('getEventDetailsAgentIdField()', () => {
       });
     }
   );
+
+  describe('for microsoft_defender_endpoint', () => {
+    const MDE_ID = 'f8c1b8e4a1d3c2b1a09f8e7d6c5b4a3928170615';
+    const EVIDENCE_INSTANCE_ID = '64a7162b-1111-2222-3333-444455556666';
+    const [alertField, incidentField, cloudField] =
+      RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.microsoft_defender_endpoint;
+    const withValue = (field: string, value: string) => ({
+      category: parseEcsFieldPath(field).category,
+      field,
+      values: [value],
+      originalValue: [value],
+    });
+    const getEventDetails = (
+      overrides: Parameters<
+        typeof endpointAlertDataMock.generateAlertDetailsItemDataForAgentType
+      >[1] = {}
+    ) =>
+      endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(
+        'microsoft_defender_endpoint',
+        {
+          [alertField]: undefined,
+          [incidentField]: undefined,
+          [cloudField]: undefined,
+          ...overrides,
+        }
+      );
+
+    it('should return the m365_defender alert `mde_device_id` over `cloud.instance.id`', () => {
+      expect(
+        getEventDetailsAgentIdField(
+          'microsoft_defender_endpoint',
+          getEventDetails({
+            [cloudField]: withValue(cloudField, EVIDENCE_INSTANCE_ID),
+            [alertField]: withValue(alertField, MDE_ID),
+          })
+        )
+      ).toEqual(expect.objectContaining({ found: true, field: alertField, agentId: MDE_ID }));
+    });
+
+    it('should return the m365_defender incident `mde_device_id` over `cloud.instance.id`', () => {
+      expect(
+        getEventDetailsAgentIdField(
+          'microsoft_defender_endpoint',
+          getEventDetails({
+            [cloudField]: withValue(cloudField, EVIDENCE_INSTANCE_ID),
+            [incidentField]: withValue(incidentField, MDE_ID),
+          })
+        )
+      ).toEqual(expect.objectContaining({ found: true, field: incidentField, agentId: MDE_ID }));
+    });
+
+    it('should return `cloud.instance.id` when no `mde_device_id` field is present', () => {
+      expect(
+        getEventDetailsAgentIdField(
+          'microsoft_defender_endpoint',
+          getEventDetails({ [cloudField]: withValue(cloudField, MDE_ID) })
+        )
+      ).toEqual(expect.objectContaining({ found: true, field: cloudField, agentId: MDE_ID }));
+    });
+  });
 });

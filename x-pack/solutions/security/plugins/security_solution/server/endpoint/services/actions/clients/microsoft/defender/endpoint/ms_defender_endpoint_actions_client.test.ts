@@ -1492,30 +1492,8 @@ describe('MS Defender response actions client', () => {
             (Array.isArray(searchRequest.index) &&
               searchRequest.index.includes('logs-microsoft_defender_endpoint.log-default'))
           ) {
-            const msLogIndexEsHit = new MicrosoftDefenderDataGenerator(
-              'seed'
-            ).generateEndpointLogEsHit({
-              cloud: { instance: { id: '1-2-3' } },
-            });
-            msLogIndexEsHit.inner_hits = {
-              most_recent: {
-                hits: {
-                  hits: [
-                    {
-                      _index: '',
-                      _source: {
-                        agent: { id: '1-2-3' },
-                        cloud: { instance: { id: '1-2-3' } },
-                      },
-                    },
-                  ],
-                },
-              },
-            };
             return Promise.resolve(
-              new MicrosoftDefenderDataGenerator('seed').generateEndpointLogEsSearchResponse([
-                msLogIndexEsHit,
-              ])
+              microsoftDefenderMock.createAgentLookupEsResponse({ '1-2-3': '1-2-3' })
             );
           }
 
@@ -2679,23 +2657,146 @@ describe('MS Defender response actions client', () => {
         msClientMock.isolate(responseActionsClientMock.createIsolateOptions())
       ).resolves.toBeTruthy();
 
-      expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith({
-        _source: false,
-        collapse: {
-          field: 'cloud.instance.id',
-          inner_hits: {
-            _source: ['agent', 'cloud.instance.id', 'event.created'],
-            name: 'most_recent',
-            size: 1,
-            sort: [{ 'event.created': 'desc' }],
-          },
-        },
-        ignore_unavailable: true,
-        index: ['logs-microsoft_defender_endpoint.log-default'], // << Important: should NOT contain a index pattern
-        query: {
-          bool: { filter: [{ terms: { 'cloud.instance.id': ['1-2-3'] } }] },
+      const idMatchQuery = (id: string) => ({
+        bool: {
+          should: [
+            { terms: { 'cloud.instance.id': [id] } },
+            { terms: { 'm365_defender.alert.evidence.mde_device_id': [id] } },
+            { terms: { 'm365_defender.incident.alert.evidence.mde_device_id': [id] } },
+          ],
+          minimum_should_match: 1,
         },
       });
+
+      expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith({
+        index: ['logs-microsoft_defender_endpoint.log-default'], // << Important: should NOT contain a index pattern
+        size: 0,
+        ignore_unavailable: true,
+        query: { bool: { filter: [idMatchQuery('1-2-3')] } },
+        aggs: {
+          agents: {
+            filters: { filters: { '1-2-3': idMatchQuery('1-2-3') } },
+            aggs: {
+              most_recent: {
+                top_hits: {
+                  size: 1,
+                  _source: ['agent.id'],
+                  sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should not use `collapse` (which fails on multi-valued fields)', async () => {
+      await msClientMock.isolate(responseActionsClientMock.createIsolateOptions());
+
+      expect(clientConstructorOptionsMock.esClient.search).not.toHaveBeenCalledWith(
+        expect.objectContaining({ collapse: expect.anything() })
+      );
+    });
+
+    it('should use the requested id (not the raw doc value) as the policy agentId', async () => {
+      // Alert/incident docs store evidence instance ids on `cloud.instance.id` (an array). The
+      // policy must keep the requested machine id from the bucket key.
+      const evidenceInstanceId = '64a7162b-1111-2222-3333-444455556666';
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
+        response: microsoftDefenderMock.createAgentLookupEsResponse(
+          { '1-2-3': '1-2-3' },
+          { '1-2-3': { cloud: { instance: { id: [evidenceInstanceId] } } } }
+        ),
+      });
+
+      await msClientMock.isolate(responseActionsClientMock.createIsolateOptions());
+
+      expect(clientConstructorOptionsMock.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            agent: expect.objectContaining({
+              policy: [expect.objectContaining({ agentId: '1-2-3', elasticAgentId: '1-2-3' })],
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should return 400 when no bucket has a matching document', async () => {
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
+        response: microsoftDefenderMock.createAgentLookupEsResponse({ '1-2-3': undefined }),
+      });
+
+      await expect(
+        msClientMock.isolate(responseActionsClientMock.createIsolateOptions())
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: 'Unable to find Elastic agent IDs for Microsoft Defender agent ids: [1-2-3]',
+      });
+    });
+
+    it('should treat a matching document without `agent.id` as not found', async () => {
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
+        response: microsoftDefenderMock.createAgentLookupEsResponse({ '1-2-3': null }),
+      });
+
+      await expect(
+        msClientMock.isolate(responseActionsClientMock.createIsolateOptions())
+      ).rejects.toMatchObject({ statusCode: 400 });
+    });
+
+    it('should return 404 with the missing id when only some requested ids are found', async () => {
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
+        response: microsoftDefenderMock.createAgentLookupEsResponse({
+          '1-2-3': '1-2-3',
+          'not-there': undefined,
+        }),
+      });
+
+      await expect(
+        // `isolate` only supports a single id, so exercise the lookup directly
+        (
+          msClientMock as unknown as {
+            fetchAgentPolicyInfo: (ids: string[]) => Promise<unknown>;
+          }
+        ).fetchAgentPolicyInfo(['1-2-3', 'not-there'])
+      ).rejects.toMatchObject({
+        statusCode: 404,
+        message: 'Microsoft Defender agent id [not-there] not found',
+      });
+    });
+
+    it('should search the m365_defender `event` data stream (and not the non-existent `log` one)', async () => {
+      (
+        clientConstructorOptionsMock.endpointService.getInternalFleetServices()
+          .getIntegrationNamespaces as jest.Mock
+      ).mockResolvedValue({ microsoft_defender_endpoint: [], m365_defender: ['default'] });
+      (clientConstructorOptionsMock.esClient.search as unknown as jest.Mock).mockResolvedValue(
+        microsoftDefenderMock.createAgentLookupEsResponse({ '1-2-3': '1-2-3' })
+      );
+
+      await msClientMock.isolate(responseActionsClientMock.createIsolateOptions());
+
+      expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: expect.arrayContaining(['logs-m365_defender.event-default']),
+        })
+      );
+      expect(clientConstructorOptionsMock.esClient.search).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: expect.arrayContaining(['logs-m365_defender.log-default']),
+        })
+      );
     });
 
     it('should error is unable to find MS agent in ingested data', async () => {
