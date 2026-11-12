@@ -49,10 +49,13 @@ export const MAX_GROUP_SIZE = 150;
 export const SPLIT_RESOLUTIONS = [1, 2, 4, 8, 16] as const;
 /** A group is split again at most this many times. */
 export const MAX_SPLIT_DEPTH = 4;
-/** A split is rejected when more than this share of the services lands in tiny parts. */
-export const SPLIT_MAX_TINY_PART_SHARE = 0.3;
-/** Parts this small count as tiny when judging a split. */
-export const SPLIT_TINY_PART_MAX_SIZE = 3;
+/**
+ * A run, when picking a resolution, or a split of a large group is rejected when more than this
+ * share of its services lands in tiny parts: a large group beats a map broken into fragments.
+ */
+export const MAX_TINY_PART_SHARE = 0.3;
+/** Parts this small count as tiny when judging a run or a split. */
+export const TINY_PART_MAX_SIZE = 3;
 
 /**
  * Safety limit: community detection stops merging groups after this many
