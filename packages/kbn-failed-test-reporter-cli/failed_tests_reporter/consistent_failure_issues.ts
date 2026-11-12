@@ -311,8 +311,9 @@ export const reportConsistentFailureIssues = async (
   /**
    * Posts the break on the issue already about the suite, at most once per `POST_INTERVAL_MS` for
    * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
-   * of the post goes in the issue's metadata first, read from GitHub as it is now: other jobs of
-   * the build find the same break.
+   * of the last post is read from GitHub as it is now, as other jobs of the build find the same
+   * break, and recorded once the comment is posted: a comment that failed isn't taken as posted,
+   * and the next build posts it.
    */
   const postBreak = async (suite: FailingSuite, issue: GithubIssue) => {
     const ref = { filePath: suite.filePath, url: issue.html_url };
@@ -334,8 +335,8 @@ export const reportConsistentFailureIssues = async (
       { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
       FLAKY_TEST_SUITE_METADATA_PREFIX
     );
-    await github.editIssue(issue.number, { body: newBody, ...(reopen ? { state: 'open' } : {}) });
     await github.addIssueComment(issue.number, renderFailingSuiteComment(suite, build));
+    await github.editIssue(issue.number, { body: newBody, ...(reopen ? { state: 'open' } : {}) });
     log.info(
       `${dryRun ? 'Would post' : 'Posted'} the break on #${issue.number}` +
         `${reopen ? ', reopened' : ''}: ${describeSuite(suite)}`

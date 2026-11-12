@@ -374,6 +374,22 @@ describe('reportConsistentFailureIssues', () => {
     expect(posted.addIssueComment.mock.calls[0][1]).toContain('on `9.6`');
   });
 
+  it('records the post only once the comment is posted, so the next build posts a failed one', async () => {
+    const { es } = mockEs(brokenSince('test-1', 101, 102));
+    const existing = failingSuiteIssue(new Date(NOW.getTime() - 25 * HOUR_MS), {
+      state: 'closed',
+      state_reason: 'completed',
+    });
+    const { github, editIssue, addIssueComment } = mockGithub([existing]);
+    addIssueComment.mockRejectedValueOnce(new Error('GitHub is down'));
+
+    await expect(
+      report({ es, github, failures: [scoutFailure('test-1', 'shows results')], now: NOW })
+    ).rejects.toThrow('GitHub is down');
+    // neither recorded as posted nor reopened without the comment
+    expect(editIssue).not.toHaveBeenCalled();
+  });
+
   it('reopens an issue about the suite closed lately, but leaves one closed as a duplicate alone', async () => {
     const failures = [scoutFailure('test-1', 'shows results')];
     // closed right after the last post: the reopen does not wait for the next day
