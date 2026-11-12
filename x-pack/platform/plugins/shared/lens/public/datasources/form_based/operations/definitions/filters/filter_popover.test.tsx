@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { EuiPopover, EuiLink } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
@@ -16,24 +16,36 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
-import { LabelInput } from '../shared_components';
 import { QueryStringInput } from '@kbn/kql/public';
 import { QueryInput } from '@kbn/visualization-ui-components';
 import type { Query } from '@kbn/es-query';
 
 jest.mock('.', () => ({}));
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual<typeof import('@elastic/eui')>('@elastic/eui');
+  return {
+    ...original,
+    EuiPopover: jest.fn((props: React.ComponentProps<typeof original.EuiPopover>) => (
+      <original.EuiPopover {...props} />
+    )),
+  };
+});
+
 jest.mock('@kbn/visualization-ui-components', () => {
-  const original = jest.requireActual('@kbn/visualization-ui-components');
+  const original = jest.requireActual<typeof import('@kbn/visualization-ui-components')>(
+    '@kbn/visualization-ui-components'
+  );
 
   return {
     ...original,
+    QueryInput: jest.fn(original.QueryInput),
     isQueryValid: jest.fn((q: Query) => (q.query === 'bytes >= 1 and' ? false : true)),
   };
 });
 
 jest.mock('@kbn/kql/public', () => ({
-  QueryStringInput: () => 'QueryStringInput',
+  QueryStringInput: jest.fn(() => 'QueryStringInput'),
 }));
 
 describe('filter popover', () => {
@@ -64,6 +76,9 @@ describe('filter popover', () => {
   );
 
   beforeEach(() => {
+    jest.mocked(EuiPopover).mockClear();
+    jest.mocked(QueryInput).mockClear();
+    jest.mocked(QueryStringInput).mockClear();
     mockOnClick = jest.fn();
 
     defaultProps = {
@@ -81,54 +96,57 @@ describe('filter popover', () => {
   });
 
   describe('interactions', () => {
-    it('should open/close according to isOpen', () => {
-      const instance = mount(
+    it('should open/close according to isOpen', async () => {
+      const { rerender } = render(
         wrapInContext(<FilterPopover {...{ ...defaultProps, isOpen: true }} />)
       );
 
-      expect(instance.find(EuiPopover).prop('isOpen')).toEqual(true);
+      expect(screen.getByTestId('indexPattern-filters-label')).toBeInTheDocument();
 
-      instance.setProps({
-        children: wrapInContext(<FilterPopover {...{ ...defaultProps, isOpen: false }} />),
+      rerender(wrapInContext(<FilterPopover {...{ ...defaultProps, isOpen: false }} />));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('indexPattern-filters-label')).not.toBeInTheDocument();
       });
-      instance.update();
-
-      expect(instance.find(EuiPopover).prop('isOpen')).toEqual(false);
     });
 
     it('should report click event', () => {
-      const instance = mount(wrapInContext(<FilterPopover {...defaultProps} />));
+      render(wrapInContext(<FilterPopover {...defaultProps} />));
 
       expect(mockOnClick).not.toHaveBeenCalled();
 
-      instance.find(EuiPopover).find('button').simulate('click', {});
+      fireEvent.click(
+        within(screen.getByTestId('indexPattern-filters-existingFilterContainer')).getByRole(
+          'button',
+          { name: 'trigger' }
+        )
+      );
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
     it('should trigger close', () => {
       const props = { ...defaultProps, triggerClose: jest.fn() };
-      const instance = mount(wrapInContext(<FilterPopover {...props} />));
-      expect(instance.find(EuiPopover).prop('isOpen')).toEqual(true);
+      render(wrapInContext(<FilterPopover {...props} />));
+      const labelInput = screen.getByTestId('indexPattern-filters-label');
+      expect(labelInput).toBeInTheDocument();
 
       // Trigger from EuiPopover
       act(() => {
-        instance.find(EuiPopover).prop('closePopover')!();
+        jest.mocked(EuiPopover).mock.lastCall?.[0].closePopover();
       });
       expect(props.triggerClose).toHaveBeenCalledTimes(1);
 
       // Trigger from submit
-      act(() => {
-        instance.find(LabelInput).prop('onSubmit')!();
-      });
+      fireEvent.keyDown(labelInput, { key: 'Enter' });
+      fireEvent.keyUp(labelInput, { key: 'Enter' });
       expect(props.triggerClose).toHaveBeenCalledTimes(2);
     });
   });
 
   it('passes correct props to QueryStringInput', () => {
-    const instance = mount(wrapInContext(<FilterPopover {...defaultProps} />));
-    instance.update();
-    expect(instance.find(QueryStringInput).props()).toEqual(
+    render(wrapInContext(<FilterPopover {...defaultProps} />));
+    expect(jest.mocked(QueryStringInput).mock.lastCall?.[0]).toEqual(
       expect.objectContaining({
         dataTestSubj: 'indexPattern-filters-queryStringInput',
         indexPatterns: [{ type: 'id', value: '1' }],
@@ -140,10 +158,12 @@ describe('filter popover', () => {
 
   it('should call setFilter when modifying QueryInput', () => {
     const setFilter = jest.fn();
-    const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
-    instance.find(QueryInput).prop('onChange')!({
-      query: 'modified : query',
-      language: 'lucene',
+    render(wrapInContext(<FilterPopover {...defaultProps} setFilter={setFilter} />));
+    act(() => {
+      jest.mocked(QueryInput).mock.lastCall?.[0].onChange({
+        query: 'modified : query',
+        language: 'lucene',
+      });
     });
     expect(setFilter).toHaveBeenCalledWith({
       input: {
@@ -157,25 +177,32 @@ describe('filter popover', () => {
 
   it('should not call setFilter if QueryInput value is not valid', () => {
     const setFilter = jest.fn();
-    const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
-    instance.find(QueryInput).prop('onChange')!({
-      query: 'bytes >= 1 and',
-      language: 'kuery',
+    render(wrapInContext(<FilterPopover {...defaultProps} setFilter={setFilter} />));
+    expect(jest.mocked(QueryInput)).toHaveBeenCalled();
+    act(() => {
+      jest.mocked(QueryInput).mock.lastCall?.[0].onChange({
+        query: 'bytes >= 1 and',
+        language: 'kuery',
+      });
     });
     expect(setFilter).not.toHaveBeenCalled();
   });
 
-  it('should call setFilter when modifying LabelInput', () => {
+  it('should call setFilter when modifying LabelInput', async () => {
     const setFilter = jest.fn();
-    const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
-    instance.find(LabelInput).prop('onChange')!('Modified label');
-    expect(setFilter).toHaveBeenCalledWith({
-      input: {
-        language: 'kuery',
-        query: 'bytes >= 1',
-      },
-      label: 'Modified label',
-      id: '1',
+    render(wrapInContext(<FilterPopover {...defaultProps} setFilter={setFilter} />));
+    fireEvent.change(screen.getByTestId('indexPattern-filters-label'), {
+      target: { value: 'Modified label' },
+    });
+    await waitFor(() => {
+      expect(setFilter).toHaveBeenCalledWith({
+        input: {
+          language: 'kuery',
+          query: 'bytes >= 1',
+        },
+        label: 'Modified label',
+        id: '1',
+      });
     });
   });
 });

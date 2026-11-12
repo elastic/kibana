@@ -23,15 +23,13 @@ import {
   createMockFramePublicAPI,
   renderWithReduxStore,
 } from '../../mocks';
-import { screen } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { SuggestionPanelProps } from './suggestion_panel';
 import { SuggestionPanel, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
-import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { IconChartDatatable } from '@kbn/chart-icons';
-import { mountWithReduxStore } from '../../mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { applyChanges, setState, setToggleFullscreen } from '../../state_management';
@@ -40,14 +38,28 @@ import { userEvent } from '@testing-library/user-event';
 import { EditorFrameServiceProvider } from '../editor_frame_service_context';
 
 const SELECTORS = {
-  APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsApplyChanges__suggestions"]',
-  SUGGESTIONS_PANEL: '[data-test-subj="lnsSuggestionsPanel"]',
-  SUGGESTION_TILE_BUTTON: 'button[data-test-subj="lnsSuggestion"]',
+  APPLY_CHANGES_BUTTON: 'lnsApplyChanges__suggestions',
+  SUGGESTIONS_PANEL: 'lnsSuggestionsPanel',
+  SUGGESTION_TILE_BUTTON: 'lnsSuggestion',
 };
 
 jest.mock('./suggestion_helpers');
 
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual<typeof import('@elastic/eui')>('@elastic/eui');
+  return {
+    ...actual,
+    EuiIcon: jest.fn((props: React.ComponentProps<typeof actual.EuiIcon>) => (
+      <span data-test-subj="mock-eui-icon">
+        <actual.EuiIcon {...props} />
+      </span>
+    )),
+  };
+});
+
 const getSuggestionsMock = getSuggestions as jest.Mock;
+const getSuggestionTile = (name: string) =>
+  within(screen.getByTestId(SELECTORS.SUGGESTIONS_PANEL)).getByRole('listitem', { name });
 
 describe('suggestion_panel', () => {
   let mockVisualization: Visualization;
@@ -68,6 +80,7 @@ describe('suggestion_panel', () => {
     mockVisualization = createMockVisualization();
     mockDatasource = createMockDatasource('a');
     expressionRendererMock = createExpressionRendererMock();
+    jest.mocked(EuiIcon).mockClear();
 
     getSuggestionsMock.mockReturnValue([
       {
@@ -123,8 +136,12 @@ describe('suggestion_panel', () => {
     };
   });
 
+  afterEach(() => {
+    localStorage.removeItem('LENS_SUGGESTIONS_PANEL_HIDDEN');
+  });
+
   it('should avoid completely to render SuggestionPanel when in fullscreen mode', async () => {
-    const { instance, lensStore } = mountWithReduxStore(
+    const { store } = renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={defaultVisualizationMap}
         datasourceMap={defaultDatasourceMap}
@@ -132,25 +149,28 @@ describe('suggestion_panel', () => {
         <SuggestionPanelWrapper {...defaultProps} />
       </EditorFrameServiceProvider>
     );
-    expect(instance.find(SuggestionPanel).exists()).toBe(true);
+    expect(screen.getByTestId(SELECTORS.SUGGESTIONS_PANEL)).toBeInTheDocument();
 
-    lensStore.dispatch(setToggleFullscreen());
-    instance.update();
-    expect(instance.find(SuggestionPanel).exists()).toBe(false);
+    act(() => {
+      store.dispatch(setToggleFullscreen());
+    });
+    expect(screen.queryByTestId(SELECTORS.SUGGESTIONS_PANEL)).not.toBeInTheDocument();
 
-    lensStore.dispatch(setToggleFullscreen());
-    instance.update();
-    expect(instance.find(SuggestionPanel).exists()).toBe(true);
+    act(() => {
+      store.dispatch(setToggleFullscreen());
+    });
+    expect(screen.getByTestId(SELECTORS.SUGGESTIONS_PANEL)).toBeInTheDocument();
   });
 
   it('should display apply-changes prompt when changes not applied', async () => {
-    const { instance, lensStore } = mountWithReduxStore(
+    const { store } = renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={defaultVisualizationMap}
         datasourceMap={defaultDatasourceMap}
       >
         <SuggestionPanelWrapper {...defaultProps} />
       </EditorFrameServiceProvider>,
+      undefined,
       {
         preloadedState: {
           ...preloadedState,
@@ -166,41 +186,42 @@ describe('suggestion_panel', () => {
       }
     );
 
-    expect(instance.exists(SELECTORS.APPLY_CHANGES_BUTTON)).toBeTruthy();
-    expect(instance.exists(SELECTORS.SUGGESTION_TILE_BUTTON)).toBeFalsy();
+    expect(screen.getByTestId(SELECTORS.APPLY_CHANGES_BUTTON)).toBeInTheDocument();
+    expect(screen.queryByTestId(SELECTORS.SUGGESTION_TILE_BUTTON)).not.toBeInTheDocument();
 
-    instance.find(SELECTORS.APPLY_CHANGES_BUTTON).simulate('click');
+    fireEvent.click(screen.getByTestId(SELECTORS.APPLY_CHANGES_BUTTON));
 
     // check changes applied
-    expect(lensStore.dispatch).toHaveBeenCalledWith(applyChanges());
+    expect(store.dispatch).toHaveBeenCalledWith(applyChanges());
 
     // simulate workspace panel behavior
-    lensStore.dispatch(setChangesApplied(true));
-    instance.update();
+    act(() => {
+      store.dispatch(setChangesApplied(true));
+    });
 
     // check UI updated
-    expect(instance.exists(SELECTORS.APPLY_CHANGES_BUTTON)).toBeFalsy();
-    expect(instance.exists(SELECTORS.SUGGESTION_TILE_BUTTON)).toBeTruthy();
+    expect(screen.queryByTestId(SELECTORS.APPLY_CHANGES_BUTTON)).not.toBeInTheDocument();
+    expect(screen.getAllByTestId(SELECTORS.SUGGESTION_TILE_BUTTON).length).toBeGreaterThan(0);
   });
 
   it('should list passed in suggestions', async () => {
-    const { instance } = mountWithReduxStore(
+    renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={defaultVisualizationMap}
         datasourceMap={defaultDatasourceMap}
       >
         <SuggestionPanelWrapper {...defaultProps} />
       </EditorFrameServiceProvider>,
+      undefined,
       {
         preloadedState,
       }
     );
 
     expect(
-      instance
-        .find('[data-test-subj="lnsSuggestion"]')
-        .find(EuiPanel)
-        .map((el) => el.parents(EuiToolTip).prop('content'))
+      within(screen.getByTestId(SELECTORS.SUGGESTIONS_PANEL))
+        .getAllByTestId(SELECTORS.SUGGESTION_TILE_BUTTON)
+        .map((tile) => tile.getAttribute('aria-label'))
     ).toEqual(['Current visualization', 'Suggestion1', 'Suggestion2']);
   });
 
@@ -229,45 +250,50 @@ describe('suggestion_panel', () => {
     });
 
     it('should not update suggestions if current state is moved to staged preview', async () => {
-      const { instance, lensStore } = mountWithReduxStore(
+      const { store } = renderWithReduxStore(
         <EditorFrameServiceProvider
           visualizationMap={defaultVisualizationMap}
           datasourceMap={defaultDatasourceMap}
         >
           <SuggestionPanelWrapper {...defaultProps} />
         </EditorFrameServiceProvider>,
+        undefined,
         {
           preloadedState,
         }
       );
       getSuggestionsMock.mockClear();
-      lensStore.dispatch(setState({ stagedPreview }));
-      instance.update();
+      act(() => {
+        store.dispatch(setState({ stagedPreview }));
+      });
       expect(getSuggestionsMock).not.toHaveBeenCalled();
     });
 
     it('should update suggestions if staged preview is removed', async () => {
-      const { instance, lensStore } = mountWithReduxStore(
+      const { store } = renderWithReduxStore(
         <EditorFrameServiceProvider
           visualizationMap={defaultVisualizationMap}
           datasourceMap={defaultDatasourceMap}
         >
           <SuggestionPanelWrapper {...defaultProps} />
         </EditorFrameServiceProvider>,
+        undefined,
         {
           preloadedState,
         }
       );
       getSuggestionsMock.mockClear();
-      lensStore.dispatch(setState({ stagedPreview, ...suggestionState }));
-      instance.update();
-      lensStore.dispatch(setState({ stagedPreview: undefined, ...suggestionState }));
-      instance.update();
+      act(() => {
+        store.dispatch(setState({ stagedPreview, ...suggestionState }));
+      });
+      act(() => {
+        store.dispatch(setState({ stagedPreview: undefined, ...suggestionState }));
+      });
       expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
     });
 
     it('should select currently active suggestion', async () => {
-      const getSuggestionByName = (name: string) => screen.getByRole('listitem', { name });
+      const getSuggestionByName = getSuggestionTile;
 
       renderWithReduxStore(
         <EditorFrameServiceProvider
@@ -287,7 +313,7 @@ describe('suggestion_panel', () => {
     });
 
     it('should rollback suggestion if current panel is clicked', async () => {
-      const { instance, lensStore } = mountWithReduxStore(
+      const { store } = renderWithReduxStore(
         <EditorFrameServiceProvider
           visualizationMap={defaultVisualizationMap}
           datasourceMap={defaultDatasourceMap}
@@ -296,46 +322,36 @@ describe('suggestion_panel', () => {
         </EditorFrameServiceProvider>
       );
 
-      act(() => {
-        instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).simulate('click');
-      });
+      fireEvent.click(getSuggestionTile('Suggestion2'));
+      fireEvent.click(getSuggestionTile('Current visualization'));
 
-      instance.update();
-
-      act(() => {
-        instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(0).simulate('click');
-      });
-
-      instance.update();
-
-      expect(lensStore.dispatch).toHaveBeenCalledWith({
+      expect(store.dispatch).toHaveBeenCalledWith({
         type: 'lens/rollbackSuggestion',
       });
       // check that it immediately applied any state changes in case auto-apply disabled
-      expect(lensStore.dispatch).toHaveBeenLastCalledWith({
+      expect(store.dispatch).toHaveBeenLastCalledWith({
         type: applyChanges.type,
       });
     });
   });
 
   it('should dispatch visualization switch action if suggestion is clicked', async () => {
-    const { instance, lensStore } = mountWithReduxStore(
+    const { store } = renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={defaultVisualizationMap}
         datasourceMap={defaultDatasourceMap}
       >
         <SuggestionPanelWrapper {...defaultProps} />
       </EditorFrameServiceProvider>,
+      undefined,
       {
         preloadedState,
       }
     );
 
-    act(() => {
-      instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(1).simulate('click');
-    });
+    fireEvent.click(getSuggestionTile('Suggestion1'));
 
-    expect(lensStore.dispatch).toHaveBeenCalledWith(
+    expect(store.dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'lens/switchVisualization',
         payload: {
@@ -348,7 +364,7 @@ describe('suggestion_panel', () => {
         },
       })
     );
-    expect(lensStore.dispatch).toHaveBeenLastCalledWith({ type: applyChanges.type });
+    expect(store.dispatch).toHaveBeenLastCalledWith({ type: applyChanges.type });
   });
 
   it('should render render icon if there is no preview expression', async () => {
@@ -381,21 +397,25 @@ describe('suggestion_panel', () => {
 
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    const { instance } = mountWithReduxStore(
+    renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={defaultVisualizationMap}
         datasourceMap={defaultDatasourceMap}
       >
         <SuggestionPanelWrapper {...defaultProps} />
       </EditorFrameServiceProvider>,
+      undefined,
       {
         preloadedState,
       }
     );
 
-    expect(instance.find(SELECTORS.SUGGESTIONS_PANEL).find(EuiIcon)).toHaveLength(1);
-    expect(instance.find(SELECTORS.SUGGESTIONS_PANEL).find(EuiIcon).prop('type')).toEqual(
-      IconChartDatatable
+    expect(
+      within(screen.getByTestId(SELECTORS.SUGGESTIONS_PANEL)).getAllByTestId('mock-eui-icon')
+    ).toHaveLength(1);
+    expect(jest.mocked(EuiIcon)).toHaveBeenCalledWith(
+      expect.objectContaining({ type: IconChartDatatable }),
+      expect.anything()
     );
   });
 
@@ -417,22 +437,23 @@ describe('suggestion_panel', () => {
       },
     };
 
-    const { instance } = mountWithReduxStore(
+    const { container } = renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={defaultVisualizationMap}
         datasourceMap={defaultDatasourceMap}
       >
         <SuggestionPanelWrapper {...defaultProps} />
       </EditorFrameServiceProvider>,
+      undefined,
       {
         preloadedState: newPreloadedState,
       }
     );
-    expect(instance.isEmptyRender()).toEqual(true);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should hide the selections when the accordion is hidden', async () => {
-    const { instance } = mountWithReduxStore(
+    renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={defaultVisualizationMap}
         datasourceMap={defaultDatasourceMap}
@@ -440,12 +461,12 @@ describe('suggestion_panel', () => {
         <SuggestionPanelWrapper {...defaultProps} />
       </EditorFrameServiceProvider>
     );
-    expect(instance.find(EuiAccordion)).toHaveLength(1);
-    act(() => {
-      instance.find(EuiAccordion).at(0).simulate('change');
-    });
+    const toggle = screen.getByTestId('lensSuggestionsPanelToggleButton');
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(toggle);
 
-    expect(instance.find(SELECTORS.SUGGESTIONS_PANEL)).toEqual({});
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId(SELECTORS.SUGGESTIONS_PANEL)).toBeEmptyDOMElement();
   });
 
   it('should render preview expression if there is one', () => {
@@ -474,7 +495,7 @@ describe('suggestion_panel', () => {
       .mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    mountWithReduxStore(
+    renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={defaultVisualizationMap}
         datasourceMap={defaultDatasourceMap}

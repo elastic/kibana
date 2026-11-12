@@ -6,12 +6,10 @@
  */
 
 import React from 'react';
-import type { ShallowWrapper } from 'enzyme';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { fireEvent, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiComboBox } from '@elastic/eui';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { renderWithProviders } from '../../../test_utils/test_utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
@@ -42,16 +40,55 @@ jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
 
 jest.mock('../operations');
 
-const getFieldSelectComboBox = (wrapper: ReactWrapper) =>
-  wrapper
-    .find(EuiComboBox)
-    .filter('[data-test-subj="indexPattern-dimension-field"]') as ReactWrapper<
-    EuiComboBoxProps<string | number | string[] | undefined>
-  >;
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual<typeof import('@elastic/eui')>('@elastic/eui');
+  return {
+    ...actual,
+    EuiComboBox: jest.fn((props: React.ComponentProps<typeof actual.EuiComboBox>) => (
+      <actual.EuiComboBox {...props} />
+    )),
+  };
+});
+
+jest.mock('./field_select', () => {
+  const actual = jest.requireActual<typeof import('./field_select')>('./field_select');
+  return { ...actual, FieldSelect: jest.fn(actual.FieldSelect) };
+});
+
+const getComboBoxProps = (testSubject: string) => {
+  const call = jest
+    .mocked(EuiComboBox)
+    .mock.calls.filter(([props]) => props['data-test-subj'] === testSubject)
+    .at(-1);
+  if (!call) {
+    throw new Error(`Expected combo box ${testSubject}`);
+  }
+  return call[0];
+};
+
+const getFunctionInput = () =>
+  within(screen.getByTestId('indexPattern-reference-function')).getByRole('combobox');
 
 describe('reference editor', () => {
-  let wrapper: ReactWrapper | ShallowWrapper;
-  let paramEditorUpdater: jest.Mock<ReferenceEditorProps['paramEditorUpdater']>;
+  let rerenderEditor:
+    | ((setter: Parameters<ReferenceEditorProps['paramEditorUpdater']>[0]) => void)
+    | undefined;
+  let paramEditorUpdater: jest.MockedFunction<ReferenceEditorProps['paramEditorUpdater']>;
+
+  const renderEditor = (element: React.ReactElement<ReferenceEditorProps>) => {
+    let props = element.props;
+    const { rerender } = renderWithProviders(element);
+    rerenderEditor = (setter) => {
+      const nextLayer =
+        typeof setter === 'function'
+          ? setter(props.layer)
+          : 'columns' in setter
+          ? setter
+          : { ...props.layer, columns: { ...props.layer.columns, [props.columnId]: setter } };
+      props = { ...props, layer: nextLayer };
+      rerender(<ReferenceEditor {...props} />);
+    };
+  };
 
   const layer = {
     indexPatternId: '1',
@@ -97,23 +134,16 @@ describe('reference editor', () => {
   }
 
   beforeEach(() => {
-    paramEditorUpdater = jest.fn().mockImplementation((newLayer) => {
-      if (wrapper instanceof ReactWrapper) {
-        wrapper.setProps({ layer: newLayer });
-      }
+    rerenderEditor = undefined;
+    paramEditorUpdater = jest.fn((setter) => {
+      rerenderEditor?.(setter);
     });
 
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    if (wrapper) {
-      wrapper.unmount();
-    }
-  });
-
   it('should indicate that all functions and available fields are compatible in the empty state', () => {
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         validation={{
@@ -124,16 +154,14 @@ describe('reference editor', () => {
       />
     );
 
-    const functions = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-reference-function"]')
-      .prop('options');
+    // Inspect every option, including entries outside EUI's virtualized menu viewport.
+    const functions = getComboBoxProps('indexPattern-reference-function').options;
 
     expect(functions).not.toContainEqual(
       expect.objectContaining({ 'data-test-subj': expect.stringContaining('Incompatible') })
     );
 
-    const fields = getFieldSelectComboBox(wrapper).prop('options');
+    const fields = getComboBoxProps('indexPattern-dimension-field').options;
 
     expect(fields![0].options).not.toContainEqual(
       expect.objectContaining({ 'data-test-subj': expect.stringContaining('Incompatible') })
@@ -157,7 +185,7 @@ describe('reference editor', () => {
         },
       },
     } as FormBasedLayer;
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         layer={newLayer}
@@ -169,14 +197,14 @@ describe('reference editor', () => {
       />
     );
 
-    const fields = getFieldSelectComboBox(wrapper).prop('options');
-
-    const findFieldDataTestSubj = (l: string) => {
-      return fields![0].options!.find(({ label }) => label === l)!['data-test-subj'];
-    };
-    expect(findFieldDataTestSubj('timestampLabel')).toContain('Incompatible');
-    expect(findFieldDataTestSubj('source')).toContain('Incompatible');
-    expect(findFieldDataTestSubj('memory')).toContain('lns-fieldOption-memory');
+    fireEvent.click(
+      within(screen.getByTestId('indexPattern-dimension-field')).getByRole('combobox')
+    );
+    expect(screen.getByTestId('lns-fieldOptionIncompatible-timestamp')).toHaveTextContent(
+      'timestampLabel'
+    );
+    expect(screen.getByTestId('lns-fieldOptionIncompatible-source')).toHaveTextContent('source');
+    expect(screen.getByTestId('lns-fieldOption-memory')).toHaveTextContent('memory');
   });
 
   it('should indicate functions that are incompatible with the current', () => {
@@ -193,7 +221,7 @@ describe('reference editor', () => {
         },
       },
     } as FormBasedLayer;
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         layer={newLayer}
@@ -205,17 +233,14 @@ describe('reference editor', () => {
       />
     );
 
-    const functions = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-reference-function"]')
-      .prop('options');
-
-    expect(
-      functions.find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!['data-test-subj']
-    ).toContain('incompatible');
+    fireEvent.click(getFunctionInput());
+    expect(screen.getByTestId(/(?:^|\s)lns-indexPatternDimension-average(?:\s|$)/)).toHaveAttribute(
+      'data-test-subj',
+      'lns-indexPatternDimension-average incompatible'
+    );
   });
 
-  it('should not update when selecting the same operation', () => {
+  it('should not update when selecting the same operation', async () => {
     const newLayer = {
       indexPatternId: '1',
       columnOrder: ['ref'],
@@ -229,7 +254,7 @@ describe('reference editor', () => {
         },
       },
     } as FormBasedLayer;
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         layer={newLayer}
@@ -241,20 +266,14 @@ describe('reference editor', () => {
       />
     );
 
-    const comboBox = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox
-      .prop('options')!
-      .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
-
-    act(() => {
-      comboBox.prop('onChange')!([option]);
-    });
+    await userEvent.click(getFunctionInput());
+    fireEvent.click(
+      within(await screen.findByRole('listbox')).getByRole('option', { name: 'Average' })
+    );
     expect(insertOrReplaceColumn).not.toHaveBeenCalled();
   });
 
-  it('should keep the field when replacing an existing reference with a compatible function', () => {
+  it('should keep the field when replacing an existing reference with a compatible function', async () => {
     const onChooseFunction = jest.fn();
     const newLayer = {
       indexPatternId: '1',
@@ -269,7 +288,7 @@ describe('reference editor', () => {
         },
       },
     } as FormBasedLayer;
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         layer={newLayer}
@@ -282,16 +301,10 @@ describe('reference editor', () => {
       />
     );
 
-    const comboBox = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox
-      .prop('options')!
-      .find(({ label }: EuiComboBoxOptionOption) => label === 'Maximum')!;
-
-    act(() => {
-      comboBox.prop('onChange')!([option]);
-    });
+    await userEvent.click(getFunctionInput());
+    fireEvent.click(
+      within(await screen.findByRole('listbox')).getByRole('option', { name: 'Maximum' })
+    );
 
     expect(onChooseFunction).toHaveBeenCalledWith(
       'max',
@@ -301,7 +314,7 @@ describe('reference editor', () => {
     );
   });
 
-  it('should transition to another function with incompatible field', () => {
+  it('should transition to another function with incompatible field', async () => {
     const newLayer = {
       indexPatternId: '1',
       columnOrder: ['ref'],
@@ -316,7 +329,7 @@ describe('reference editor', () => {
       },
     } as FormBasedLayer;
     const onChooseFunction = jest.fn();
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         onChooseFunction={onChooseFunction}
@@ -329,16 +342,13 @@ describe('reference editor', () => {
       />
     );
 
-    const comboBox = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox
-      .prop('options')!
-      .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
-
-    act(() => {
-      comboBox.prop('onChange')!([option]);
-    });
+    await userEvent.click(getFunctionInput());
+    fireEvent.change(getFunctionInput(), { target: { value: 'Average' } });
+    fireEvent.click(
+      within(await screen.findByRole('listbox')).getByTestId(
+        /(?:^|\s)lns-indexPatternDimension-average(?:\s|$)/
+      )
+    );
 
     expect(onChooseFunction).toHaveBeenCalledWith('average', undefined);
   });
@@ -358,7 +368,7 @@ describe('reference editor', () => {
         },
       },
     } as FormBasedLayer;
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         currentIndexPattern={createMockedIndexPatternWithoutType('number')}
@@ -371,12 +381,9 @@ describe('reference editor', () => {
       />
     );
 
-    const subFunctionSelect = wrapper
-      .find('[data-test-subj="indexPattern-reference-function"]')
-      .first();
-
-    expect(subFunctionSelect.prop('isInvalid')).toEqual(true);
-    expect(subFunctionSelect.prop('selectedOptions')).toEqual(
+    expect(getFunctionInput()).toHaveAttribute('aria-invalid', 'true');
+    expect(getFunctionInput()).toHaveValue('Average');
+    expect(getComboBoxProps('indexPattern-reference-function').selectedOptions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           'data-test-subj': 'lns-indexPatternDimension-average incompatible',
@@ -389,7 +396,7 @@ describe('reference editor', () => {
 
   it('should not display hidden sub-function types', () => {
     // This may happen for saved objects after changing the type of a field
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         column={undefined}
@@ -401,21 +408,18 @@ describe('reference editor', () => {
       />
     );
 
-    const subFunctionSelect = wrapper
-      .find('[data-test-subj="indexPattern-reference-function"]')
-      .first();
-    expect(subFunctionSelect.prop('isInvalid')).toEqual(true);
+    expect(getFunctionInput()).toHaveAttribute('aria-invalid', 'true');
 
-    expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
+    expect(getComboBoxProps('indexPattern-reference-function').selectedOptions).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ value: 'math' })])
     );
-    expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
+    expect(getComboBoxProps('indexPattern-reference-function').selectedOptions).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ value: 'formula' })])
     );
   });
 
   it('should hide the function selector when using a field-only selection style', () => {
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         column={undefined}
@@ -427,10 +431,7 @@ describe('reference editor', () => {
       />
     );
 
-    const comboBox = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-reference-function"]');
-    expect(comboBox).toHaveLength(0);
+    expect(screen.queryByTestId('indexPattern-reference-function')).not.toBeInTheDocument();
   });
 
   it('should pass the incomplete operation info to FieldSelect', () => {
@@ -450,7 +451,7 @@ describe('reference editor', () => {
         ref: { operationType: 'max' },
       },
     } as FormBasedLayer;
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         incompleteColumn={newLayer.incompleteColumns?.ref}
@@ -463,12 +464,18 @@ describe('reference editor', () => {
       />
     );
 
-    const fieldSelect = wrapper.find(FieldSelect);
-    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
-    expect(fieldSelect.prop('selectedField')).toEqual('bytes');
-    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
-    expect(fieldSelect.prop('incompleteOperation')).toEqual('max');
-    expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(false);
+    expect(jest.mocked(FieldSelect).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        fieldIsInvalid: true,
+        selectedField: 'bytes',
+        selectedOperationType: 'average',
+        incompleteOperation: 'max',
+        markAllFieldsCompatible: false,
+      })
+    );
+    expect(
+      within(screen.getByTestId('indexPattern-dimension-field')).getByRole('combobox')
+    ).toHaveValue('bytes');
   });
 
   it('should pass the incomplete field info to FieldSelect', () => {
@@ -488,7 +495,7 @@ describe('reference editor', () => {
         ref: { sourceField: 'timestamp' },
       },
     } as FormBasedLayer;
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         layer={newLayer}
@@ -501,15 +508,21 @@ describe('reference editor', () => {
       />
     );
 
-    const fieldSelect = wrapper.find(FieldSelect);
-    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(false);
-    expect(fieldSelect.prop('selectedField')).toEqual('timestamp');
-    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
-    expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
+    expect(jest.mocked(FieldSelect).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        fieldIsInvalid: false,
+        selectedField: 'timestamp',
+        selectedOperationType: 'average',
+        incompleteOperation: undefined,
+      })
+    );
+    expect(
+      within(screen.getByTestId('indexPattern-dimension-field')).getByRole('combobox')
+    ).toHaveValue('timestampLabel');
   });
 
   it('should show the FieldSelect as invalid in the empty state for field-only forms', () => {
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         column={undefined}
@@ -521,12 +534,18 @@ describe('reference editor', () => {
       />
     );
 
-    const fieldSelect = wrapper.find(FieldSelect);
-    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
-    expect(fieldSelect.prop('selectedField')).toBeUndefined();
-    expect(fieldSelect.prop('selectedOperationType')).toBeUndefined();
-    expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
-    expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(true);
+    expect(jest.mocked(FieldSelect).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        fieldIsInvalid: true,
+        selectedField: undefined,
+        selectedOperationType: undefined,
+        incompleteOperation: undefined,
+        markAllFieldsCompatible: true,
+      })
+    );
+    expect(
+      within(screen.getByTestId('indexPattern-dimension-field')).getByRole('combobox')
+    ).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('should show the FieldSelect as invalid if the selected field is missing', () => {
@@ -543,7 +562,7 @@ describe('reference editor', () => {
         },
       },
     } as FormBasedLayer;
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         layer={newLayer}
@@ -555,12 +574,20 @@ describe('reference editor', () => {
       />
     );
 
-    const fieldSelect = wrapper.find(FieldSelect);
-    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
-    expect(fieldSelect.prop('selectedField')).toEqual('missing');
-    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
-    expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
-    expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(false);
+    expect(jest.mocked(FieldSelect).mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        fieldIsInvalid: true,
+        selectedField: 'missing',
+        selectedOperationType: 'average',
+        incompleteOperation: undefined,
+        markAllFieldsCompatible: false,
+      })
+    );
+    const fieldInput = within(screen.getByTestId('indexPattern-dimension-field')).getByRole(
+      'combobox'
+    );
+    expect(fieldInput).toHaveValue('missing');
+    expect(fieldInput).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('should show the ParamEditor for functions that offer one', () => {
@@ -580,7 +607,7 @@ describe('reference editor', () => {
         } as LastValueIndexPatternColumn,
       },
     };
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         column={lastValueLayer.columns.ref}
@@ -592,9 +619,7 @@ describe('reference editor', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]').exists()).toBe(
-      true
-    );
+    expect(screen.getByTestId('lns-indexPattern-lastValue-sortField')).toBeInTheDocument();
   });
 
   it('should hide the ParamEditor for incomplete functions', () => {
@@ -617,7 +642,7 @@ describe('reference editor', () => {
         ref: { operationType: 'max' },
       },
     };
-    wrapper = mount(
+    renderEditor(
       <ReferenceEditor
         {...getDefaultArgs()}
         incompleteColumn={lastValueLayer.incompleteColumns.ref}
@@ -630,8 +655,6 @@ describe('reference editor', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]').exists()).toBe(
-      false
-    );
+    expect(screen.queryByTestId('lns-indexPattern-lastValue-sortField')).not.toBeInTheDocument();
   });
 });

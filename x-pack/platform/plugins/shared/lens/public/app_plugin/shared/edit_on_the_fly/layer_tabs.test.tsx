@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { act } from 'react-dom/test-utils';
-import type { ReactWrapper } from 'enzyme';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 
 import type { LensLayerType } from '@kbn/lens-common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -18,10 +17,9 @@ import {
   mockVisualizationMap,
   mockDatasourceMap,
   mockStoreDeps,
-  mountWithReduxStore,
+  renderWithReduxStore,
 } from '../../../mocks';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
-import type { MountStoreProps } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { generateId } from '../../../id_generator';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
@@ -77,12 +75,9 @@ function AddLayerButtonsTestComponent({
   );
 }
 
-const addNewLayer = (instance: ReactWrapper, type: LensLayerType = LayerTypes.REFERENCELINE) =>
-  act(() => {
-    instance.find(`button[data-test-subj="${type}"]`).first().simulate('click');
-  });
-
-const waitMs = (time: number) => new Promise((r) => setTimeout(r, time));
+const addNewLayer = (type: LensLayerType = LayerTypes.REFERENCELINE) => {
+  fireEvent.click(within(screen.getByTestId('lnsAddLayerButtonWrapper')).getByTestId(type));
+};
 
 let container: HTMLDivElement | undefined;
 
@@ -103,13 +98,13 @@ afterEach(() => {
 describe('LayerTabs', () => {
   const frame = createMockFramePublicAPI();
 
-  function prepareAndMountComponent(
+  function prepareAndRenderComponent(
     props: ReturnType<typeof getDefaultProps>,
-    customStoreProps?: Partial<MountStoreProps>
+    customStoreProps?: Parameters<typeof renderWithReduxStore>[2]
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
     const { visualizationMap, datasourceMap, ...rest } = props;
-    return mountWithReduxStore(
+    return renderWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
         <div>
           {/* Render the add layer button component separately like in the actual UI */}
@@ -117,6 +112,7 @@ describe('LayerTabs', () => {
           <LayerTabsWrapper {...rest} />
         </div>
       </EditorFrameServiceProvider>,
+      { container },
       {
         preloadedState: {
           datasourceStates: {
@@ -138,9 +134,6 @@ describe('LayerTabs', () => {
           visualizationMap,
         }),
         ...customStoreProps,
-      },
-      {
-        attachTo: container,
       }
     );
   }
@@ -224,19 +217,12 @@ describe('LayerTabs', () => {
 
       datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ visualizationMap, datasourceMap });
-      const { instance, lensStore } = await prepareAndMountComponent(props);
+      const { store } = await prepareAndRenderComponent(props);
 
-      // Wait for component to mount and update
-      await waitMs(0);
-      instance.update();
-
-      addNewLayer(instance, LayerTypes.ANNOTATIONS);
-
-      // Wait for state updates
-      await waitMs(0);
+      addNewLayer(LayerTypes.ANNOTATIONS);
 
       // One call for adding the layer, one call for setting it as the current selected layer
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(store.dispatch).toHaveBeenCalledTimes(2));
 
       expect(visualizationMap.testVis.setDimension).toHaveBeenCalledWith({
         columnId: 'newId',
@@ -273,11 +259,11 @@ describe('LayerTabs', () => {
       datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-      addNewLayer(instance);
+      const { store } = await prepareAndRenderComponent(props);
+      addNewLayer();
 
       // One call for adding the layer, one call for setting it as the current selected layer
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(store.dispatch).toHaveBeenCalledTimes(2);
       expect(datasourceMap.formBased.initializeDimension).not.toHaveBeenCalled();
     });
 
@@ -304,11 +290,11 @@ describe('LayerTabs', () => {
         },
       ]);
       const props = getDefaultProps({ datasourceMap, visualizationMap });
-      const { instance, lensStore } = await prepareAndMountComponent(props);
+      const { store } = await prepareAndRenderComponent(props);
 
-      addNewLayer(instance);
+      addNewLayer();
       // One call for adding the layer, one call for setting it as the current selected layer
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(store.dispatch).toHaveBeenCalledTimes(2);
       expect(datasourceMap.formBased.initializeDimension).not.toHaveBeenCalled();
     });
 
@@ -349,11 +335,11 @@ describe('LayerTabs', () => {
       datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-      addNewLayer(instance);
+      const { store } = await prepareAndRenderComponent(props);
+      addNewLayer();
 
       // One call for adding the layer, one call for setting it as the current selected layer
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(store.dispatch).toHaveBeenCalledTimes(2);
       expect(datasourceMap.formBased.initializeDimension).toHaveBeenCalledWith(
         {},
         'newId',
@@ -401,13 +387,13 @@ describe('LayerTabs', () => {
 
       const props = getDefaultProps({ visualizationMap, datasourceMap });
 
-      const { instance } = await prepareAndMountComponent(props);
+      await prepareAndRenderComponent(props);
 
       // Layer tabs should not be rendered when there's only one layer
-      expect(instance.find('[data-test-subj="lnsLayerActions"]').exists()).toBe(false);
+      expect(screen.queryByTestId('lnsLayerActions')).not.toBeInTheDocument();
 
       // UnifiedTabs component should not be rendered
-      expect(instance.find('UnifiedTabs').exists()).toBe(false);
+      expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
     });
 
     it('should show layer actions menu when multiple layers', async () => {
@@ -432,7 +418,7 @@ describe('LayerTabs', () => {
 
       const props = getDefaultProps({ visualizationMap, datasourceMap });
 
-      const { instance } = await prepareAndMountComponent(props, {
+      await prepareAndRenderComponent(props, {
         preloadedState: {
           datasourceStates: {
             formBased: {
@@ -451,13 +437,17 @@ describe('LayerTabs', () => {
       });
 
       // The tab action button should exist
-      expect(instance.find('[data-test-subj="lnsLayerActions"]').exists()).toBe(true);
+      expect(screen.getAllByTestId('lnsLayerActions').length).toBeGreaterThan(0);
 
       // A single compatible action renders directly as an icon button, without a context menu
-      expect(instance.find('button[aria-label="Layer actions"]').exists()).toBe(false);
+      expect(screen.queryByRole('button', { name: 'Layer actions' })).not.toBeInTheDocument();
 
       // The delete action should exist
-      expect(instance.find('button[aria-label="Delete layer"]').exists()).toBe(true);
+      expect(
+        within(screen.getAllByTestId('lnsLayerActions')[0]).getByRole('button', {
+          name: 'Delete layer',
+        })
+      ).toBeInTheDocument();
     });
 
     it('should call the remove callback when deleting layer', async () => {
@@ -491,25 +481,25 @@ describe('LayerTabs', () => {
 
       const props = getDefaultProps({ visualizationMap, datasourceMap });
 
-      const { instance, lensStore } = await prepareAndMountComponent(props);
+      const { store } = await prepareAndRenderComponent(props);
 
       // Click the delete layer button (rendered directly, no context menu for a single action)
-      act(() => {
-        instance.find('button[aria-label="Delete layer"]').first().simulate('click');
-      });
-      instance.update();
-
-      // Wait for state updates
-      await waitMs(0);
+      fireEvent.click(
+        within(screen.getAllByTestId('lnsLayerActions')[0]).getByRole('button', {
+          name: 'Delete layer',
+        })
+      );
 
       // lens/removeOrClearLayer action should be dispatched
-      expect(lensStore.dispatch).toHaveBeenCalledWith({
-        payload: {
-          layerId: 'layer1',
-          layerIds: ['layer1', 'layer2'],
-          visualizationId: 'testVis',
-        },
-        type: 'lens/removeOrClearLayer',
+      await waitFor(() => {
+        expect(store.dispatch).toHaveBeenCalledWith({
+          payload: {
+            layerId: 'layer1',
+            layerIds: ['layer1', 'layer2'],
+            visualizationId: 'testVis',
+          },
+          type: 'lens/removeOrClearLayer',
+        });
       });
     });
   });

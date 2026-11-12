@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { render, screen, within } from '@testing-library/react';
-import { shallow, mount } from 'enzyme';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { render, screen, within, act, fireEvent } from '@testing-library/react';
+import { EuiComboBox } from '@elastic/eui';
+import { userEvent } from '@testing-library/user-event';
+import { renderWithProviders } from '../../../../../test_utils/test_utils';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -19,7 +18,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../../../mocks';
-import { ValuesInput } from './values_input';
 import type {
   TermsIndexPatternColumn,
   LastValueIndexPatternColumn,
@@ -34,7 +32,6 @@ import { termsOperation, operationDefinitionMap } from '..';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
-import { IncludeExcludeRow } from './include_exclude_options';
 import {
   TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS,
   TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD,
@@ -70,10 +67,13 @@ jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+  const original = jest.requireActual<typeof import('@elastic/eui')>('@elastic/eui');
 
   return {
     ...original,
+    EuiComboBox: jest.fn((props: React.ComponentProps<typeof original.EuiComboBox>) => (
+      <original.EuiComboBox {...props} />
+    )),
     htmlIdGenerator: (fn: unknown) => {
       let counter = 0;
       return () => counter++;
@@ -90,6 +90,44 @@ jest.mock('lodash', () => {
     debounce: (fn: unknown) => fn,
   };
 });
+
+jest.mock('../../../dimension_panel/field_select', () => {
+  const actual = jest.requireActual<typeof import('../../../dimension_panel/field_select')>(
+    '../../../dimension_panel/field_select'
+  );
+  return {
+    ...actual,
+    FieldSelect: jest.fn((props: React.ComponentProps<typeof actual.FieldSelect>) => (
+      <actual.FieldSelect {...props} />
+    )),
+  };
+});
+
+const getComboBoxProps = (testSubject: string) => {
+  const props = jest
+    .mocked(EuiComboBox)
+    .mock.calls.map(([comboBoxProps]) => comboBoxProps)
+    .reverse()
+    .find((comboBoxProps) => comboBoxProps['data-test-subj'] === testSubject);
+  if (!props) {
+    throw new Error(`Combo box not rendered: ${testSubject}`);
+  }
+  return props;
+};
+
+const chooseOption = async (testSubject: string, label: string) => {
+  const input = within(screen.getByTestId(testSubject)).getByRole('combobox');
+  await userEvent.click(input);
+  fireEvent.change(input, { target: { value: label } });
+  const options = within(
+    await screen.findByTestId(new RegExp(`(?:^|\\s)${testSubject}-optionsList(?:\\s|$)`))
+  );
+  await userEvent.click(
+    testSubject === 'indexPattern-reference-function'
+      ? options.getByRole('option', { name: label })
+      : options.getByTestId(`lns-fieldOption-${label}`)
+  );
+};
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -1339,9 +1377,6 @@ describe('terms', () => {
   });
 
   describe('field input', () => {
-    // @ts-expect-error
-    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
-
     const defaultFieldInputProps = {
       indexPattern: defaultProps.indexPattern,
       currentFieldIsInvalid: false,
@@ -1373,7 +1408,7 @@ describe('terms', () => {
     it('should render the default field input for no field (incomplete operation)', () => {
       const updateLayerSpy = jest.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1385,13 +1420,12 @@ describe('terms', () => {
       );
 
       // Fallback field input has no add button
-      expect(instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('indexPattern-terms-add-field') !== null).toBeFalsy();
       // check the error state too
       expect(
-        instance
-          .find('[data-test-subj="indexPattern-field-selection-row"]')
-          .first()
-          .prop('isInvalid')
+        screen
+          .getByTestId('indexPattern-field-selection-row')
+          .querySelector('[aria-invalid="true"]') !== null
       ).toBeTruthy();
     });
 
@@ -1411,7 +1445,7 @@ describe('terms', () => {
         },
         sourceField: 'unsupported',
       } as TermsIndexPatternColumn;
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1422,8 +1456,10 @@ describe('terms', () => {
         />
       );
       expect(
-        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-      ).toBe('Invalid field. Check your data view or pick another field.');
+        within(screen.getByTestId('indexPattern-field-selection-row')).getByText(
+          'Invalid field. Check your data view or pick another field.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('should show an error message when first field is not supported', () => {
@@ -1442,7 +1478,7 @@ describe('terms', () => {
         },
         sourceField: 'timestamp',
       } as TermsIndexPatternColumn;
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1454,8 +1490,10 @@ describe('terms', () => {
         />
       );
       expect(
-        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-      ).toBe('This field does not work with the selected function.');
+        within(screen.getByTestId('indexPattern-field-selection-row')).getByText(
+          'This field does not work with the selected function.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('should show an error message when any field but the first is invalid', () => {
@@ -1475,7 +1513,7 @@ describe('terms', () => {
         sourceField: 'geo.src',
       };
       layer.columns.col1 = col1;
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1486,8 +1524,10 @@ describe('terms', () => {
         />
       );
       expect(
-        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-      ).toBe('Invalid field: "unsupported". Check your data view or pick another field.');
+        within(screen.getByTestId('indexPattern-field-selection-row')).getByText(
+          'Invalid field: "unsupported". Check your data view or pick another field.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('should show an error message when any field but the first is not supported', () => {
@@ -1507,7 +1547,7 @@ describe('terms', () => {
         },
         sourceField: 'geo.src',
       } as TermsIndexPatternColumn;
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1518,14 +1558,16 @@ describe('terms', () => {
         />
       );
       expect(
-        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-      ).toBe('Invalid field: "timestamp". Check your data view or pick another field.');
+        within(screen.getByTestId('indexPattern-field-selection-row')).getByText(
+          'Invalid field: "timestamp". Check your data view or pick another field.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('should render the an add button for single layer and disabled the remove button', () => {
       const updateLayerSpy = jest.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1536,25 +1578,18 @@ describe('terms', () => {
         />
       );
 
-      expect(
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()
-      ).toBeTruthy();
+      expect(screen.queryByTestId('indexPattern-terms-add-field') !== null).toBeTruthy();
 
-      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).not.toBe(
-        0
-      );
+      expect(screen.queryAllByTestId(/^indexPattern-terms-removeField-/).length).not.toBe(0);
       expect(
-        instance
-          .find('[data-test-subj^="indexPattern-terms-removeField-"]')
-          .first()
-          .prop('isDisabled')
+        (screen.getAllByTestId(/^indexPattern-terms-removeField-/)[0] as HTMLButtonElement).disabled
       ).toBeTruthy();
     });
 
-    it('should switch to the first supported operation when in single term mode and the picked field is not supported', () => {
+    it('should switch to the first supported operation when in single term mode and the picked field is not supported', async () => {
       const updateLayerSpy = jest.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1566,8 +1601,10 @@ describe('terms', () => {
       );
 
       // pick a date field
+      expect(FieldSelect).toHaveBeenCalled();
+      const fieldSelectProps = jest.mocked(FieldSelect).mock.calls.at(-1)?.[0];
       act(() => {
-        instance.find(FieldSelect).prop('onChoose')!({
+        fieldSelectProps?.onChoose({
           type: 'field',
           field: 'timestamp',
           operationType: 'date_histogram',
@@ -1588,7 +1625,7 @@ describe('terms', () => {
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['bytes'];
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1599,17 +1636,11 @@ describe('terms', () => {
         />
       );
 
-      expect(
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()
-      ).toBeTruthy();
-      // the produced Enzyme DOM has the both the React component and the actual html
-      // tags with the same "data-test-subj" assigned. Here it is enough to check that multiple are rendered
-      expect(
-        instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length
-      ).toBeGreaterThan(1);
-      expect(
-        instance.find('[data-test-subj^="indexPattern-terms-dragToReorder-"]').length
-      ).toBeGreaterThan(1);
+      expect(screen.queryByTestId('indexPattern-terms-add-field') !== null).toBeTruthy();
+      expect(screen.queryAllByTestId(/^indexPattern-terms-removeField-/).length).toBeGreaterThan(1);
+      expect(screen.queryAllByTestId(/^indexPattern-terms-dragToReorder-/).length).toBeGreaterThan(
+        1
+      );
     });
 
     it('should return to single value UI when removing second item of two', () => {
@@ -1617,7 +1648,7 @@ describe('terms', () => {
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1628,25 +1659,18 @@ describe('terms', () => {
         />
       );
 
-      expect(
-        instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length
-      ).toBeGreaterThan(1);
+      expect(screen.queryAllByTestId(/^indexPattern-terms-removeField-/).length).toBeGreaterThan(1);
 
-      act(() => {
-        instance
-          .find('[data-test-subj="indexPattern-terms-removeField-1"]')
-          .first()
-          .simulate('click');
-      });
+      fireEvent.click(screen.getByTestId('indexPattern-terms-removeField-1'));
 
-      expect(instance.find('[data-test-subj="indexPattern-terms-removeField-"]').length).toBe(0);
+      expect(screen.queryAllByTestId('indexPattern-terms-removeField-').length).toBe(0);
     });
 
     it('should disable remove button and reorder drag when single value and one temporary new field', () => {
       const updateLayerSpy = jest.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
-      let instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1658,28 +1682,17 @@ describe('terms', () => {
       );
 
       // add a new field
-      act(() => {
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
-      });
+      fireEvent.click(screen.getByTestId('indexPattern-terms-add-field'));
 
-      instance = instance.update();
       // now two delete buttons should be visualized
-      expect(instance.find('[data-test-subj="indexPattern-terms-removeField-1"]').exists()).toBe(
-        true
-      );
+      expect(screen.queryByTestId('indexPattern-terms-removeField-1') !== null).toBe(true);
       // first button is disabled
       expect(
-        instance
-          .find('[data-test-subj="indexPattern-terms-removeField-0"]')
-          .first()
-          .prop('isDisabled')
+        (screen.getByTestId('indexPattern-terms-removeField-0') as HTMLButtonElement).disabled
       ).toBe(true);
       // while second delete is still enabled
       expect(
-        instance
-          .find('[data-test-subj="indexPattern-terms-removeField-1"]')
-          .first()
-          .prop('isDisabled')
+        (screen.getByTestId('indexPattern-terms-removeField-1') as HTMLButtonElement).disabled
       ).toBe(false);
     });
 
@@ -1688,7 +1701,7 @@ describe('terms', () => {
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).sourceField = 'scripted';
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1700,10 +1713,9 @@ describe('terms', () => {
       );
 
       expect(
-        instance
-          .find('[data-test-subj="indexPattern-field-selection-row"]')
-          .first()
-          .prop('isInvalid')
+        screen
+          .getByTestId('indexPattern-field-selection-row')
+          .querySelector('[aria-invalid="true"]') !== null
       ).toBeFalsy();
     });
 
@@ -1713,7 +1725,7 @@ describe('terms', () => {
 
       (layer.columns.col1 as TermsIndexPatternColumn).sourceField = 'scripted';
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1725,21 +1737,22 @@ describe('terms', () => {
       );
 
       expect(
-        instance
-          .find('[data-test-subj="indexPattern-field-selection-row"]')
-          .first()
-          .prop('isInvalid')
+        screen
+          .getByTestId('indexPattern-field-selection-row')
+          .querySelector('[aria-invalid="true"]') !== null
       ).toBeTruthy();
       expect(
-        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-      ).toBe('Scripted fields are not supported when using multiple fields');
+        within(screen.getByTestId('indexPattern-field-selection-row')).getByText(
+          'Scripted fields are not supported when using multiple fields'
+        )
+      ).toBeInTheDocument();
     });
 
     it('should not filter scripted fields when in single value', () => {
       const updateLayerSpy = jest.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1750,9 +1763,7 @@ describe('terms', () => {
         />
       );
 
-      expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field"]').at(1).prop('options')
-      ).toEqual(
+      expect(getComboBoxProps('indexPattern-dimension-field').options).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             options: expect.arrayContaining([
@@ -1768,7 +1779,7 @@ describe('terms', () => {
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1779,10 +1790,7 @@ describe('terms', () => {
         />
       );
 
-      // get inner instance
-      expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field-0"]').at(1).prop('options')
-      ).toEqual(
+      expect(getComboBoxProps('indexPattern-dimension-field-0').options).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             options: expect.arrayContaining([
@@ -1798,7 +1806,7 @@ describe('terms', () => {
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory', 'bytes'];
-      let instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1810,16 +1818,9 @@ describe('terms', () => {
       );
 
       // add a new field
-      act(() => {
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
-      });
+      fireEvent.click(screen.getByTestId('indexPattern-terms-add-field'));
 
-      instance = instance.update();
-
-      // Get the inner instance with the data-test-subj
-      expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field-3"]').at(1).prop('options')
-      ).toEqual(
+      expect(getComboBoxProps('indexPattern-dimension-field-3').options).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             options: expect.not.arrayContaining([
@@ -1836,7 +1837,7 @@ describe('terms', () => {
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
-      const instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1847,10 +1848,7 @@ describe('terms', () => {
         />
       );
 
-      // get inner instance
-      expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field-0"]').at(1).prop('options')
-      ).toEqual(
+      expect(getComboBoxProps('indexPattern-dimension-field-0').options).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             options: expect.arrayContaining([
@@ -1870,7 +1868,7 @@ describe('terms', () => {
         'bytes',
         'dest',
       ];
-      let instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1882,23 +1880,19 @@ describe('terms', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().prop('isDisabled')
+        (screen.getByTestId('indexPattern-terms-add-field') as HTMLButtonElement).disabled
       ).toBeTruthy();
       // clicking again will no increase the number of fields
-      act(() => {
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
-      });
-      instance = instance.update();
-      expect(
-        instance.find('[data-test-subj="indexPattern-terms-removeField-4"]').exists()
-      ).toBeFalsy();
+      fireEvent.click(screen.getByTestId('indexPattern-terms-add-field'));
+
+      expect(screen.queryByTestId('indexPattern-terms-removeField-4') !== null).toBeFalsy();
     });
 
     it('should let the user add new empty field up to the limit', () => {
       const updateLayerSpy = jest.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
-      let instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1909,30 +1903,24 @@ describe('terms', () => {
         />
       );
       expect(
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().prop('isDisabled')
+        (screen.getByTestId('indexPattern-terms-add-field') as HTMLButtonElement).disabled
       ).toBeFalsy();
 
       // click 3 times to add new fields
       for (const _ of [1, 2, 3]) {
-        act(() => {
-          instance
-            .find('[data-test-subj="indexPattern-terms-add-field"]')
-            .first()
-            .simulate('click');
-        });
-        instance = instance.update();
+        fireEvent.click(screen.getByTestId('indexPattern-terms-add-field'));
       }
 
       expect(
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().prop('isDisabled')
+        (screen.getByTestId('indexPattern-terms-add-field') as HTMLButtonElement).disabled
       ).toBeTruthy();
     });
 
-    it('should update the parentFormatter on transition between single to multi terms', () => {
+    it('should update the parentFormatter on transition between single to multi terms', async () => {
       const updateLayerSpy = jest.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
-      let instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1943,16 +1931,9 @@ describe('terms', () => {
         />
       );
       // add a new field
-      act(() => {
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
-      });
-      instance = instance.update();
+      fireEvent.click(screen.getByTestId('indexPattern-terms-add-field'));
 
-      act(() => {
-        instance.find(EuiComboBox).last().prop('onChange')!([
-          { value: { type: 'field', field: 'bytes' }, label: 'bytes' },
-        ]);
-      });
+      await chooseOption('indexPattern-dimension-field-1', 'bytes');
 
       expect(updateLayerSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1967,7 +1948,7 @@ describe('terms', () => {
       );
     });
 
-    it('should preserve custom label when set by the user', () => {
+    it('should preserve custom label when set by the user', async () => {
       const updateLayerSpy = jest.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
@@ -1985,7 +1966,7 @@ describe('terms', () => {
         },
         sourceField: 'source',
       } as TermsIndexPatternColumn;
-      let instance = mount(
+      renderWithProviders(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -1996,16 +1977,9 @@ describe('terms', () => {
         />
       );
       // add a new field
-      act(() => {
-        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
-      });
-      instance = instance.update();
+      fireEvent.click(screen.getByTestId('indexPattern-terms-add-field'));
 
-      act(() => {
-        instance.find(EuiComboBox).last().prop('onChange')!([
-          { value: { type: 'field', field: 'bytes' }, label: 'bytes' },
-        ]);
-      });
+      await chooseOption('indexPattern-dimension-field-2', 'bytes');
 
       expect(updateLayerSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2022,7 +1996,7 @@ describe('terms', () => {
   describe('param editor', () => {
     it('should render current other bucket value', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2032,16 +2006,14 @@ describe('terms', () => {
         />
       );
 
-      const select = instance
-        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
-        .find(EuiSwitch);
+      const select = screen.getByTestId('indexPattern-terms-other-bucket');
 
-      expect(select.prop('checked')).toEqual(false);
+      expect(select).not.toBeChecked();
     });
 
     it('should hide other bucket setting for rollups', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2055,12 +2027,12 @@ describe('terms', () => {
         />
       );
 
-      expect(instance.find('[data-test-subj="indexPattern-terms-other-bucket"]').length).toEqual(0);
+      expect(screen.queryAllByTestId('indexPattern-terms-other-bucket').length).toEqual(0);
     });
 
     it('should disable missing bucket setting as long as other bucket is not set', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2070,16 +2042,14 @@ describe('terms', () => {
         />
       );
 
-      const select = instance
-        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
-        .find(EuiSwitch);
+      const select = screen.getByTestId('indexPattern-terms-missing-bucket');
 
-      expect(select.prop('disabled')).toEqual(true);
+      expect(select).toBeDisabled();
     });
 
     it('should enable missing bucket setting as long as other bucket is set', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2097,16 +2067,14 @@ describe('terms', () => {
         />
       );
 
-      const select = instance
-        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
-        .find(EuiSwitch);
+      const select = screen.getByTestId('indexPattern-terms-missing-bucket');
 
-      expect(select.prop('disabled')).toEqual(false);
+      expect(select).toBeEnabled();
     });
 
     it('should disable missing bucket and other bucket setting for rarity sorting', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2122,22 +2090,18 @@ describe('terms', () => {
         />
       );
 
-      const select1 = instance
-        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
-        .find(EuiSwitch);
+      const select1 = screen.getByTestId('indexPattern-terms-missing-bucket');
 
-      expect(select1.prop('disabled')).toEqual(true);
+      expect(select1).toBeDisabled();
 
-      const select2 = instance
-        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
-        .find(EuiSwitch);
+      const select2 = screen.getByTestId('indexPattern-terms-other-bucket');
 
-      expect(select2.prop('disabled')).toEqual(true);
+      expect(select2).toBeDisabled();
     });
 
     it('should disable missing bucket and other bucket setting when ordered by significance', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2153,22 +2117,18 @@ describe('terms', () => {
         />
       );
 
-      const select1 = instance
-        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
-        .find(EuiSwitch);
+      const select1 = screen.getByTestId('indexPattern-terms-missing-bucket');
 
-      expect(select1.prop('disabled')).toEqual(true);
+      expect(select1).toBeDisabled();
 
-      const select2 = instance
-        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
-        .find(EuiSwitch);
+      const select2 = screen.getByTestId('indexPattern-terms-other-bucket');
 
-      expect(select2.prop('disabled')).toEqual(true);
+      expect(select2).toBeDisabled();
     });
 
     describe('accuracy mode', () => {
       const renderWithAccuracy = (accuracy: boolean, rareTerms: boolean) =>
-        shallow(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             layer={layer}
@@ -2187,37 +2147,37 @@ describe('terms', () => {
           />
         );
 
-      const getSwitchComponent = (accuracy: boolean, rareTerms: boolean) =>
-        renderWithAccuracy(accuracy, rareTerms)
-          .find('[data-test-subj="indexPattern-accuracy-mode"]')
-          .find(EuiSwitch);
+      const getSwitchComponent = (accuracy: boolean, rareTerms: boolean) => {
+        const { container } = renderWithAccuracy(accuracy, rareTerms);
+        return within(container).getByTestId('indexPattern-accuracy-mode');
+      };
 
       it('should be checked when enabled and not rare terms', () => {
         const switchComponent = getSwitchComponent(true, false);
-        expect(switchComponent.prop('checked')).toEqual(true);
-        expect(switchComponent.prop('disabled')).toEqual(false);
+        expect(switchComponent).toBeChecked();
+        expect(switchComponent).toBeEnabled();
       });
 
       it('should NOT be checked when NOT enabled and not rare terms', () => {
         const switchComponent = getSwitchComponent(false, false);
-        expect(switchComponent.prop('checked')).toEqual(false);
-        expect(switchComponent.prop('disabled')).toEqual(false);
+        expect(switchComponent).not.toBeChecked();
+        expect(switchComponent).toBeEnabled();
       });
 
       it('should always be unchecked and disabled when rare terms', () => {
         const switchWithAccuracyEnabled = getSwitchComponent(true, true);
-        expect(switchWithAccuracyEnabled.prop('disabled')).toEqual(true);
-        expect(switchWithAccuracyEnabled.prop('checked')).toEqual(false);
+        expect(switchWithAccuracyEnabled).toBeDisabled();
+        expect(switchWithAccuracyEnabled).not.toBeChecked();
 
         const switchWithAccuracyDisabled = getSwitchComponent(false, true);
-        expect(switchWithAccuracyDisabled.prop('disabled')).toEqual(true);
-        expect(switchWithAccuracyDisabled.prop('checked')).toEqual(false);
+        expect(switchWithAccuracyDisabled).toBeDisabled();
+        expect(switchWithAccuracyDisabled).not.toBeChecked();
       });
     });
 
     describe('include/exclude', () => {
       const renderWithIncludeExclude = (dataType: string, hasSecondaryFields: boolean) =>
-        shallow(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             layer={layer}
@@ -2238,8 +2198,10 @@ describe('terms', () => {
           />
         );
 
-      const getComboboxes = (dataType: string, hasSecondaryFields: boolean) =>
-        renderWithIncludeExclude(dataType, hasSecondaryFields).find(IncludeExcludeRow);
+      const getComboboxes = (dataType: string, hasSecondaryFields: boolean) => {
+        const { container } = renderWithIncludeExclude(dataType, hasSecondaryFields);
+        return within(container).queryAllByTestId('lens-include-terms-combobox');
+      };
 
       it('should be present for a string dataType and not multifields', () => {
         const combobox = getComboboxes('string', false);
@@ -2264,7 +2226,7 @@ describe('terms', () => {
 
     it('should disable size input and show max doc count input', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2280,18 +2242,18 @@ describe('terms', () => {
         />
       );
 
-      const numberInputs = instance.find(ValuesInput);
+      const numberInputs = screen.getAllByTestId('indexPattern-terms-values');
 
       expect(numberInputs).toHaveLength(2);
 
-      expect(numberInputs.first().prop('disabled')).toBeTruthy();
-      expect(numberInputs.last().prop('disabled')).toBeFalsy();
-      expect(numberInputs.last().prop('value')).toEqual(3);
+      expect((numberInputs[0] as HTMLInputElement).disabled).toBeTruthy();
+      expect((numberInputs[1] as HTMLInputElement).disabled).toBeFalsy();
+      expect((numberInputs[1] as HTMLInputElement).valueAsNumber).toEqual(3);
     });
 
     it('should disable missing bucket setting if field is not a string', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2310,16 +2272,14 @@ describe('terms', () => {
         />
       );
 
-      const select = instance
-        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
-        .find(EuiSwitch);
+      const select = screen.getByTestId('indexPattern-terms-missing-bucket');
 
-      expect(select.prop('disabled')).toEqual(true);
+      expect(select).toBeDisabled();
     });
 
     it('should update state when clicking other bucket toggle', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2329,14 +2289,12 @@ describe('terms', () => {
         />
       );
 
-      instance
-        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
-        .find(EuiSwitch)
-        .simulate('change', {
-          target: {
-            checked: true,
-          },
-        });
+      fireEvent.click(
+        within(screen.getByTestId('indexPattern-terms-advanced')).getByRole('button', {
+          name: 'Advanced',
+        })
+      );
+      fireEvent.click(screen.getByTestId('indexPattern-terms-other-bucket'));
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -2355,7 +2313,7 @@ describe('terms', () => {
 
     it('should render current order by value and options', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2365,12 +2323,11 @@ describe('terms', () => {
         />
       );
 
-      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
+      const select = screen.getByTestId('indexPattern-terms-orderBy') as HTMLSelectElement;
 
-      expect(select.prop('value')).toEqual('alphabetical');
+      expect(select.value).toEqual('alphabetical');
 
-      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
-      expect(select.prop('options')!.map((option) => option.value)).toEqual([
+      expect(Array.from(select.options, (option) => option.value)).toEqual([
         'column$$$col2',
         'alphabetical',
         'rare',
@@ -2423,7 +2380,7 @@ describe('terms', () => {
 
     it('should disable rare ordering for floating point types', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2435,12 +2392,11 @@ describe('terms', () => {
         />
       );
 
-      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
+      const select = screen.getByTestId('indexPattern-terms-orderBy') as HTMLSelectElement;
 
-      expect(select.prop('value')).toEqual('alphabetical');
+      expect(select.value).toEqual('alphabetical');
 
-      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
-      expect(select.prop('options')!.map((option) => option.value)).toEqual([
+      expect(Array.from(select.options, (option) => option.value)).toEqual([
         'column$$$col2',
         'alphabetical',
         'custom',
@@ -2449,7 +2405,7 @@ describe('terms', () => {
 
     it('should update state with the order by value', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2459,14 +2415,9 @@ describe('terms', () => {
         />
       );
 
-      instance
-        .find(EuiSelect)
-        .find('[data-test-subj="indexPattern-terms-orderBy"]')
-        .simulate('change', {
-          target: {
-            value: 'column$$$col2',
-          },
-        });
+      fireEvent.change(screen.getByTestId('indexPattern-terms-orderBy'), {
+        target: { value: 'column$$$col2' },
+      });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -2489,7 +2440,7 @@ describe('terms', () => {
 
     it('should render current order direction value and options', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2499,15 +2450,20 @@ describe('terms', () => {
         />
       );
 
-      const selection = instance.find(EuiButtonGroup);
-      expect(selection.prop('idSelected')).toContain('asc');
-      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
-      expect(selection.prop('options').map((option) => option.value)).toEqual(['asc', 'desc']);
+      const selection = within(screen.getByTestId('indexPattern-terms-orderDirection-groups'));
+      expect(selection.getByTestId('indexPattern-terms-orderDirection-groups-asc')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      expect(selection.getAllByRole('button').map((button) => button.textContent)).toEqual([
+        'Ascending',
+        'Descending',
+      ]);
     });
 
     it('should update state with the order direction value', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2517,7 +2473,11 @@ describe('terms', () => {
         />
       );
 
-      instance.find(EuiButtonGroup).simulate('change', 'desc');
+      fireEvent.click(
+        within(screen.getByTestId('indexPattern-terms-orderDirection-groups')).getByTestId(
+          'indexPattern-terms-orderDirection-groups-desc'
+        )
+      );
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -2557,7 +2517,7 @@ describe('terms', () => {
           },
         },
       };
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={currentLayer}
@@ -2567,16 +2527,11 @@ describe('terms', () => {
         />
       );
 
-      expect(instance.find(`ReferenceEditor`)).toHaveLength(1);
+      expect(screen.getAllByTestId('indexPattern-reference-function')).toHaveLength(1);
 
-      instance
-        .find(EuiSelect)
-        .find('[data-test-subj="indexPattern-terms-orderBy"]')
-        .simulate('change', {
-          target: {
-            value: 'column$$$col2',
-          },
-        });
+      fireEvent.change(screen.getByTestId('indexPattern-terms-orderBy'), {
+        target: { value: 'column$$$col2' },
+      });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...currentLayer,
@@ -2597,7 +2552,7 @@ describe('terms', () => {
       });
     });
 
-    it('should update column when changing the operation for orderAgg', () => {
+    it('should update column when changing the operation for orderAgg', async () => {
       const updateLayerSpy = jest.fn();
       const currentLayer = {
         ...layer,
@@ -2620,7 +2575,7 @@ describe('terms', () => {
           },
         },
       };
-      const instance = mount(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={currentLayer}
@@ -2629,19 +2584,8 @@ describe('terms', () => {
           currentColumn={currentLayer.columns.col1 as TermsIndexPatternColumn}
         />
       );
-      const refEditor = instance.find(`ReferenceEditor`);
-      expect(refEditor).toHaveLength(1);
-
-      const functionComboBox = refEditor
-        .find(EuiComboBox)
-        .filter('[data-test-subj="indexPattern-reference-function"]');
-      const option = functionComboBox
-        .prop('options')!
-        .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
-
-      act(() => {
-        functionComboBox.prop('onChange')!([option]);
-      });
+      expect(screen.getAllByTestId('indexPattern-reference-function')).toHaveLength(1);
+      await chooseOption('indexPattern-reference-function', 'Average');
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...currentLayer,
@@ -2664,7 +2608,7 @@ describe('terms', () => {
       });
     });
 
-    it('should update column when changing the field for orderAgg', () => {
+    it('should update column when changing the field for orderAgg', async () => {
       const updateLayerSpy = jest.fn();
       const currentLayer = {
         ...layer,
@@ -2687,7 +2631,7 @@ describe('terms', () => {
           },
         },
       };
-      const instance = mount(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={currentLayer}
@@ -2696,19 +2640,9 @@ describe('terms', () => {
           currentColumn={currentLayer.columns.col1 as TermsIndexPatternColumn}
         />
       );
-      const refEditor = instance.find(`ReferenceEditor`);
-      expect(refEditor).toHaveLength(1);
+      expect(screen.getAllByTestId('indexPattern-reference-function')).toHaveLength(1);
+      await chooseOption('indexPattern-dimension-field', 'memory');
 
-      const comboBoxes = refEditor.find(EuiComboBox);
-
-      const fieldComboBox = comboBoxes.filter('[data-test-subj="indexPattern-dimension-field"]');
-
-      const option = fieldComboBox
-        .prop('options')[0]
-        .options!.find(({ label }: EuiComboBoxOptionOption) => label === 'memory')!;
-      act(() => {
-        fieldComboBox.prop('onChange')!([option]);
-      });
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...currentLayer,
         columns: {
@@ -2732,7 +2666,7 @@ describe('terms', () => {
 
     it('should render current size value', () => {
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -2742,10 +2676,10 @@ describe('terms', () => {
         />
       );
 
-      expect(instance.find(EuiFieldNumber).prop('value')).toEqual('3');
+      expect(screen.getByTestId('indexPattern-terms-values')).toHaveValue(3);
     });
 
-    it('should not update the column when the change creates incomplete column', () => {
+    it('should not update the column when the change creates incomplete column', async () => {
       const updateLayerSpy = jest.fn();
       const currentLayer = {
         ...layer,
@@ -2768,7 +2702,7 @@ describe('terms', () => {
           },
         },
       };
-      const instance = mount(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={currentLayer}
@@ -2777,63 +2711,55 @@ describe('terms', () => {
           currentColumn={currentLayer.columns.col1 as TermsIndexPatternColumn}
         />
       );
-      const refEditor = instance.find(`ReferenceEditor`);
-      expect(refEditor).toHaveLength(1);
-
-      const comboBoxes = refEditor.find(EuiComboBox);
-
-      const functionComboBox = comboBoxes.filter(
-        '[data-test-subj="indexPattern-reference-function"]'
-      );
-      const option = functionComboBox
-        .prop('options')!
-        .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
-      act(() => {
-        functionComboBox.prop('onChange')!([option]);
-      });
-      instance.update();
+      expect(screen.getAllByTestId('indexPattern-reference-function')).toHaveLength(1);
+      await chooseOption('indexPattern-reference-function', 'Average');
 
       expect(
-        instance
-          .find('ReferenceEditor')
-          .find(EuiComboBox)
-          .filter('[data-test-subj="indexPattern-dimension-field"]')
-          .prop('isInvalid')
+        within(screen.getByTestId('indexPattern-dimension-field'))
+          .getByRole('combobox')
+          .getAttribute('aria-invalid') === 'true'
       ).toBeTruthy();
       expect(updateLayerSpy).not.toHaveBeenCalled();
     });
 
     it('should update state with the size value', () => {
-      const updateLayerSpy = jest.fn();
-      const instance = mount(
-        <InlineOptions
-          {...defaultProps}
-          layer={layer}
-          paramEditorUpdater={updateLayerSpy}
-          columnId="col1"
-          currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
-        />
-      );
+      jest.useFakeTimers();
+      try {
+        const updateLayerSpy = jest.fn();
+        renderWithProviders(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            paramEditorUpdater={updateLayerSpy}
+            columnId="col1"
+            currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
+          />
+        );
 
-      act(() => {
-        instance.find(ValuesInput).prop('onChange')!(7);
-      });
+        act(() => jest.advanceTimersByTime(256));
+        fireEvent.change(screen.getByTestId('indexPattern-terms-values'), {
+          target: { value: '7' },
+        });
+        act(() => jest.advanceTimersByTime(256));
 
-      expect(updateLayerSpy).toHaveBeenCalledWith({
-        ...layer,
-        columns: {
-          ...layer.columns,
-          col1: {
-            ...layer.columns.col1,
-            label: 'Top 7 values of source',
-            params: {
-              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
-              size: 7,
-              otherBucket: true,
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              label: 'Top 7 values of source',
+              params: {
+                ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+                size: 7,
+                otherBucket: true,
+              },
             },
           },
-        },
-      });
+        });
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
   describe('getErrorMessage', () => {

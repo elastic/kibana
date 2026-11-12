@@ -7,7 +7,6 @@
 
 import type { PropsWithChildren, ReactElement } from 'react';
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Provider } from 'react-redux';
 import type { RenderOptions } from '@testing-library/react';
@@ -19,7 +18,7 @@ import type {
   VisualizationMap,
   LensAppServices,
 } from '@kbn/lens-common';
-import { mountWithProviders, renderWithProviders } from '../test_utils/test_utils';
+import { renderWithProviders } from '../test_utils/test_utils';
 import { makeConfigureStore } from '../state_management';
 import { getResolvedDateRange } from '../utils';
 import { mockVisualizationMap } from './visualization_mock';
@@ -125,43 +124,3 @@ export function makeLensStore({
   store.dispatch = jest.spyOn(store, 'dispatch') as jest.Mock;
   return { store, deps: storeDeps };
 }
-
-export interface MountStoreProps {
-  storeDeps?: LensStoreDeps;
-  preloadedState?: Partial<LensAppState>;
-}
-
-// legacy enzyme usage: remove when all tests are migrated to @testing-library/react
-export const mountWithReduxStore = (
-  component: React.ReactElement,
-  store?: MountStoreProps,
-  options?: {
-    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
-    wrappingComponentProps?: Record<string, unknown>;
-    attachTo?: HTMLElement;
-  }
-) => {
-  const { store: lensStore, deps } = makeLensStore(store);
-
-  let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
-    <Provider store={lensStore}>{children}</Provider>
-  );
-  if (options?.wrappingComponent) {
-    wrappingComponent = ({ children }) => {
-      return options?.wrappingComponent?.({
-        ...options?.wrappingComponentProps,
-        children: wrappingComponent({ children }),
-      });
-    };
-  }
-
-  let instance: ReactWrapper;
-  act(() => {
-    instance = mountWithProviders(component, {
-      ...options,
-      wrappingComponent,
-    } as unknown as ReactWrapper);
-  });
-
-  return { instance: instance!, lensStore, deps };
-};

@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
-import { mountWithProviders } from '../../../../../test_utils/test_utils';
+import { renderWithProviders } from '../../../../../test_utils/test_utils';
 import type { FormBasedLayer, RangeIndexPatternColumn, IndexPattern } from '@kbn/lens-common';
 import { rangeOperation } from '..';
 import {
@@ -24,8 +23,6 @@ import {
   MIN_HISTOGRAM_BARS,
   SLICES,
 } from './constants';
-import { RangePopover } from './advanced_editor';
-import { DragDropBuckets } from '@kbn/visualization-ui-components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 
 // mocking random id generator function
@@ -364,6 +361,9 @@ describe('ranges', () => {
   });
 
   describe('paramEditor', () => {
+    const getRangeTriggers = () => screen.getAllByTestId('dataView-ranges-popover-trigger');
+    const getRangeEditor = () => within(screen.getByRole('dialog', { name: 'Range editor' }));
+
     describe('Modify intervals in basic mode', () => {
       beforeEach(() => {
         layer = getDefaultLayer();
@@ -371,7 +371,7 @@ describe('ranges', () => {
 
       it('should start update the state with the default maxBars value', () => {
         const updateLayerSpy = jest.fn();
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -381,13 +381,15 @@ describe('ranges', () => {
           />
         );
 
-        expect(instance.find(EuiRange).prop('value')).toEqual(String(GRANULARITY_DEFAULT_VALUE));
+        expect(screen.getByTestId('lns-indexPattern-range-maxBars-field')).toHaveValue(
+          String(GRANULARITY_DEFAULT_VALUE)
+        );
       });
 
       it('should update state when changing Max bars number', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -399,16 +401,11 @@ describe('ranges', () => {
 
         act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          instance.find(EuiRange).prop('onChange')!(
-            {
-              currentTarget: {
-                value: '' + MAX_HISTOGRAM_VALUE,
-              },
-            } as React.ChangeEvent<HTMLInputElement>,
-            true
-          );
-
+        });
+        fireEvent.change(screen.getByTestId('lns-indexPattern-range-maxBars-field'), {
+          target: { value: String(MAX_HISTOGRAM_VALUE) },
+        });
+        act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
@@ -430,7 +427,7 @@ describe('ranges', () => {
       it('should update the state using the plus or minus buttons by the step amount', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -442,13 +439,11 @@ describe('ranges', () => {
 
         act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-          // minus button
-          instance
-            .find('[data-test-subj="lns-indexPattern-range-maxBars-minus"]')
-            .find('button')
-            .simulate('click');
+        });
+        // minus button
+        fireEvent.click(screen.getByTestId('lns-indexPattern-range-maxBars-minus'));
+        act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-          instance.update();
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -465,14 +460,10 @@ describe('ranges', () => {
           },
         });
 
+        // plus button
+        fireEvent.click(screen.getByTestId('lns-indexPattern-range-maxBars-plus'));
         act(() => {
-          // plus button
-          instance
-            .find('[data-test-subj="lns-indexPattern-range-maxBars-plus"]')
-            .find('button')
-            .simulate('click');
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-          instance.update();
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -492,15 +483,14 @@ describe('ranges', () => {
     });
 
     describe('Specify range intervals manually', () => {
-      // @ts-expect-error
-      window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
+      Object.assign(window, { '__@hello-pangea/dnd-disable-dev-warnings': true });
 
       beforeEach(() => setToRangeMode());
 
       it('should show one range interval to start with', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -510,13 +500,13 @@ describe('ranges', () => {
           />
         );
 
-        expect(instance.find(DragDropBuckets).children).toHaveLength(1);
+        expect(getRangeTriggers()).toHaveLength(1);
       });
 
       it('should use the parentFormat to create the trigger label', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -526,9 +516,7 @@ describe('ranges', () => {
           />
         );
 
-        expect(
-          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
-        ).toBe('0 - 1000');
+        expect(getRangeTriggers()[0]).toHaveTextContent(/^0 - 1000$/);
       });
 
       it('should not print error if the parentFormat is not provided', () => {
@@ -536,7 +524,7 @@ describe('ranges', () => {
         // we intercept the formatter without an id assigned an print "Error"
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -554,15 +542,13 @@ describe('ranges', () => {
           />
         );
 
-        expect(
-          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
-        ).not.toBe('Error');
+        expect(getRangeTriggers()[0]).not.toHaveTextContent(/^Error$/);
       });
 
       it('should add a new range', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -572,27 +558,15 @@ describe('ranges', () => {
           />
         );
 
-        instance.find(EuiButtonEmpty).simulate('click');
-
-        act(() => {
-          instance.update();
-        });
-
-        expect(instance.find(RangePopover)).toHaveLength(2);
+        fireEvent.click(screen.getByRole('button', { name: 'Add range' }));
+        expect(getRangeTriggers()).toHaveLength(2);
 
         // edit the range and check
-        instance
-          .find('RangePopover input[type="number"]')
-          .first()
-          .simulate('change', {
-            target: {
-              value: '50',
-            },
-          });
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
+        fireEvent.change(getRangeEditor().getAllByRole('spinbutton')[0], {
+          target: { value: '50' },
+        });
         act(() => {
-          instance.update();
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -616,7 +590,7 @@ describe('ranges', () => {
       it('should add a new range with custom label', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -626,26 +600,15 @@ describe('ranges', () => {
           />
         );
 
-        instance.find(EuiButtonEmpty).simulate('click');
-        act(() => {
-          instance.update();
-        });
-        expect(instance.find(RangePopover)).toHaveLength(2);
+        fireEvent.click(screen.getByRole('button', { name: 'Add range' }));
+        expect(getRangeTriggers()).toHaveLength(2);
 
         // edit the label and check
-        instance
-          .find('RangePopover input[type="text"]')
-          .first()
-          .simulate('change', {
-            target: {
-              value: 'customlabel',
-            },
-          });
-
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
+        fireEvent.change(getRangeEditor().getByTestId('indexPattern-ranges-label'), {
+          target: { value: 'customlabel' },
+        });
         act(() => {
-          instance.update();
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -669,7 +632,7 @@ describe('ranges', () => {
       it('should open a popover to edit an existing range', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -679,23 +642,12 @@ describe('ranges', () => {
           />
         );
 
-        instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
-        act(() => {
-          instance.update();
+        fireEvent.click(getRangeTriggers()[0]);
+        fireEvent.change(getRangeEditor().getAllByRole('spinbutton')[1], {
+          target: { value: '50' },
         });
-
-        instance
-          .find('RangePopover input[type="number"]')
-          .last()
-          .simulate('change', {
-            target: {
-              value: '50',
-            },
-          });
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
         act(() => {
-          instance.update();
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -716,7 +668,7 @@ describe('ranges', () => {
       it('should not accept invalid ranges', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -726,34 +678,11 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act closures are made to make it work properly the update flush
-        act(() => {
-          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
-        });
-
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
-
-          // edit the range "to" field
-          instance
-            .find('RangePopover input[type="number"]')
-            .last()
-            .simulate('change', {
-              target: {
-                value: '-1',
-              },
-            });
-        });
-
-        act(() => {
-          instance.update();
-
-          // and check
-          expect(instance.find(RangePopover).find(EuiFieldNumber).last().prop('isInvalid')).toBe(
-            true
-          );
-        });
+        fireEvent.click(getRangeTriggers()[0]);
+        // edit the range "to" field
+        const toInput = getRangeEditor().getAllByRole('spinbutton')[1];
+        fireEvent.change(toInput, { target: { value: '-1' } });
+        expect(toInput).toHaveAttribute('aria-invalid', 'true');
       });
 
       it('should be possible to remove a range if multiple', () => {
@@ -766,7 +695,7 @@ describe('ranges', () => {
           label: '',
         });
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -776,22 +705,9 @@ describe('ranges', () => {
           />
         );
 
-        expect(instance.find(RangePopover)).toHaveLength(2);
-
-        // This series of act closures are made to make it work properly the update flush
-        act(() => {
-          instance
-            .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
-            .at(0)
-            .simulate('click');
-        });
-
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
-
-          expect(instance.find(RangePopover)).toHaveLength(1);
-        });
+        expect(getRangeTriggers()).toHaveLength(2);
+        fireEvent.click(screen.getByTestId('lns-customBucketContainer-remove-1'));
+        expect(getRangeTriggers()).toHaveLength(1);
       });
 
       it('should handle correctly open ranges when saved', () => {
@@ -804,7 +720,7 @@ describe('ranges', () => {
           label: '',
         });
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -814,29 +730,18 @@ describe('ranges', () => {
           />
         );
 
-        act(() => {
-          instance.find(RangePopover).last().find(EuiLink).find('button').simulate('click');
-        });
+        fireEvent.click(getRangeTriggers()[1]);
 
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
-
-          // Check UI values for open ranges
-          expect(
-            instance.find(RangePopover).last().find(EuiFieldNumber).first().prop('value')
-          ).toBe('');
-
-          expect(instance.find(RangePopover).last().find(EuiFieldNumber).last().prop('value')).toBe(
-            ''
-          );
-        });
+        // Check UI values for open ranges
+        const [fromInput, toInput] = getRangeEditor().getAllByRole('spinbutton');
+        expect(fromInput).toHaveValue(null);
+        expect(toInput).toHaveValue(null);
       });
 
       it('should correctly handle the default formatter for the field', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -852,9 +757,7 @@ describe('ranges', () => {
           />
         );
 
-        expect(instance.find(RangePopover).find(EuiText).prop('children')).toMatch(
-          /^Custom format:/
-        );
+        expect(getRangeTriggers()[0]).toHaveTextContent(/^Custom format:/);
       });
 
       it('should correctly pick the dimension formatter for the field', () => {
@@ -866,7 +769,7 @@ describe('ranges', () => {
           params: { decimals: 0 },
         };
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -882,15 +785,13 @@ describe('ranges', () => {
           />
         );
 
-        expect(instance.find(RangePopover).find(EuiText).prop('children')).toMatch(
-          /^Bytes format:/
-        );
+        expect(getRangeTriggers()[0]).toHaveTextContent(/^Bytes format:/);
       });
 
       it('should not update the state on mount', () => {
         const updateLayerSpy = jest.fn();
 
-        mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -910,7 +811,7 @@ describe('ranges', () => {
           params: { decimals: 3 },
         };
 
-        const instance = mountWithProviders(
+        renderWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -920,10 +821,7 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act closures are made to make it work properly the update flush
-        act(() => {
-          instance.find(EuiLink).first().find('button').simulate('click');
-        });
+        fireEvent.click(screen.getByRole('button', { name: 'Remove custom ranges' }));
 
         expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({
           id: 'bytes',

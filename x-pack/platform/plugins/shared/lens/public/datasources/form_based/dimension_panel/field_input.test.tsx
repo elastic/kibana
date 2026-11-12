@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
-import { EuiComboBox } from '@elastic/eui';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { GenericOperationDefinition } from '../operations';
 import type {
@@ -33,7 +30,7 @@ import {
 import { FieldInput, getErrorMessage } from './field_input';
 import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
 import { getOperationSupportMatrix } from '.';
-import { FieldSelect } from './field_select';
+import * as fieldSelect from './field_select';
 
 function getStringBasedOperationColumn(field = 'source') {
   return {
@@ -150,6 +147,9 @@ const getLabelElement = () =>
 describe('FieldInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
   it('should render a field select box', () => {
     renderFieldInput();
@@ -289,7 +289,7 @@ describe('FieldInput', () => {
   it('should prioritize incomplete fields over selected column field to display', () => {
     const layer = getLayer();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
+    render(
       <FieldInput
         {...defaultProps}
         layer={layer}
@@ -301,19 +301,17 @@ describe('FieldInput', () => {
       />
     );
 
-    expect(instance.find(EuiComboBox).first().prop('selectedOptions')).toEqual([
-      {
-        label: 'dest',
-        value: { type: 'field', field: 'dest', operationType: 'terms' },
-      },
-    ]);
+    const control = screen.getByTestId('indexPattern-dimension-field');
+    expect(within(control).getByRole('combobox')).toHaveValue('dest');
+    expect(control).toHaveAttribute('data-selected-field', 'dest');
   });
 
   it('should forward the onDeleteColumn function', () => {
     const onDeleteColumn = jest.fn();
     const layer = getLayer();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
+    const fieldSelectSpy = jest.spyOn(fieldSelect, 'FieldSelect');
+    render(
       <FieldInput
         {...defaultProps}
         layer={layer}
@@ -324,9 +322,7 @@ describe('FieldInput', () => {
       />
     );
 
-    act(() => {
-      instance.find(EuiComboBox).first().prop('onChange')!([]);
-    });
+    fieldSelectSpy.mock.lastCall?.[0].onDeleteColumn?.();
 
     expect(onDeleteColumn).toHaveBeenCalled();
     expect(defaultProps.updateLayer).not.toHaveBeenCalled();
@@ -347,7 +343,8 @@ describe('FieldInput', () => {
     it('should not render the time dimension category if it has tsdb metric column but the group is not a breakdown', () => {
       const layer = getLayerWithTSDBMetric();
       const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-      const instance = mount(
+      const fieldSelectSpy = jest.spyOn(fieldSelect, 'FieldSelect');
+      render(
         <FieldInput
           {...defaultProps}
           indexPattern={createMockedIndexPatternWithAdditionalFields([
@@ -367,13 +364,16 @@ describe('FieldInput', () => {
         />
       );
 
-      expect(instance.find(FieldSelect).prop('showTimeSeriesDimensions')).toBeFalsy();
+      expect(fieldSelectSpy.mock.lastCall?.[0]).toEqual(
+        expect.objectContaining({ showTimeSeriesDimensions: false })
+      );
     });
 
     it('should render the time dimension category if it has tsdb metric column and the group is a breakdown one', () => {
       const layer = getLayerWithTSDBMetric();
       const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-      const instance = mount(
+      const fieldSelectSpy = jest.spyOn(fieldSelect, 'FieldSelect');
+      render(
         <FieldInput
           {...defaultProps}
           indexPattern={createMockedIndexPatternWithAdditionalFields([
@@ -400,7 +400,9 @@ describe('FieldInput', () => {
         />
       );
 
-      expect(instance.find(FieldSelect).prop('showTimeSeriesDimensions')).toBeTruthy();
+      expect(fieldSelectSpy.mock.lastCall?.[0]).toEqual(
+        expect.objectContaining({ showTimeSeriesDimensions: true })
+      );
     });
   });
 });

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import type {
   FramePublicAPI,
   DatasourcePublicAPI,
@@ -19,7 +18,6 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { XyStyleSettings } from './style_settings';
-import { XyAxisSettings } from './axis_settings';
 
 describe('xy style settings', () => {
   let frame: FramePublicAPI;
@@ -186,20 +184,22 @@ describe('xy style settings', () => {
           } as XYDataLayerConfig,
         ],
       };
-      const component = shallow(
-        <XyStyleSettings frame={frame} state={state} setState={mockSetState} />
-      );
+      render(<XyStyleSettings frame={frame} state={state} setState={mockSetState} />);
 
+      fireEvent.click(getLeftAxisButton());
       expect(
-        component.find(XyAxisSettings).at(0).prop('setCurrentTimeMarkerVisibility')
-      ).toBeFalsy();
+        within(screen.getByTestId('yLeft-axis')).queryByTestId('lnsshowCurrentTimeMarker')
+      ).not.toBeInTheDocument();
+      fireEvent.click(getBottomAxisButton());
+      const currentTimeMarker = within(screen.getByTestId('x-axis')).getByTestId(
+        'lnsshowCurrentTimeMarker'
+      );
+      expect(currentTimeMarker).toBeInTheDocument();
+      expect(currentTimeMarker).toBeChecked();
+      fireEvent.click(getRightAxisButton());
       expect(
-        component.find(XyAxisSettings).at(1).prop('setCurrentTimeMarkerVisibility')
-      ).toBeTruthy();
-      expect(component.find(XyAxisSettings).at(1).prop('currentTimeMarkerVisible')).toBe(true);
-      expect(
-        component.find(XyAxisSettings).at(2).prop('setCurrentTimeMarkerVisibility')
-      ).toBeFalsy();
+        within(screen.getByTestId('yRight-axis')).queryByTestId('lnsshowCurrentTimeMarker')
+      ).not.toBeInTheDocument();
     });
 
     it('should pass in information about current data bounds', async () => {
