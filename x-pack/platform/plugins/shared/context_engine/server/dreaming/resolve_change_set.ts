@@ -19,6 +19,8 @@ import { batchKeyOf, entityId, factId, TRACE_ROUND_ID_PREFIX } from './ids';
 import { audienceKeyOf, type KiPermissions } from './permissions';
 
 const NEW_REF_PREFIX = 'new:';
+/** How fact ids start: a ref like it that names no existing fact is a made-up id, not a new key. */
+const FACT_ID_PREFIX = 'fact-';
 
 /** The id of a memory the model was shown: as cited, or a round cited without its `trace:` prefix. */
 const shownIdOf = (id: string, shown: ReadonlySet<string>): string =>
@@ -225,7 +227,7 @@ export const resolveChangeSet = (
         operations.push({ op: 'delete', id: fact.ref });
         return;
       }
-      if (!current && !fact.ref.startsWith(NEW_REF_PREFIX)) {
+      if (!current && !fact.ref.startsWith(NEW_REF_PREFIX) && fact.ref.startsWith(FACT_ID_PREFIX)) {
         reject(`'${fact.ref}' is neither an existing fact nor a new key`);
       }
       const type =
