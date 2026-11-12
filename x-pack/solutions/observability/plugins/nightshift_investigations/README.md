@@ -2,6 +2,21 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Local development
+
+To run investigations on a local Kibana against the ORCA-bench telemetry cluster, with the shared
+eval sandbox, start Elasticsearch and Kibana, then run:
+
+```bash
+node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js
+```
+
+It needs only dev Vault access. It writes a managed block to `config/kibana.dev.yml`, binds the
+default space to the Nightshift service accounts and saves the ORCA connector on the investigator.
+`--remove` undoes it. See the
+[`nightshift-local-dev` skill](../../../../../.agents/skills/nightshift-local-dev/SKILL.md) for
+what it changes, running ORCA questions, troubleshooting and rotating the shared credential.
+
 ## Automation instructions
 
 After choosing a trigger, its panel shows an instructions field limited to 5,000 characters.
