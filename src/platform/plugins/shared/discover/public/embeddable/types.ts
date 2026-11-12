@@ -96,6 +96,8 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
     selectedTabId?: string;
+    /** The panel state has no selected tab, so the first tab is shown by default. */
+    isSelectedTabImplicit?: boolean;
     tabs?: DiscoverSessionTab[];
   };
 

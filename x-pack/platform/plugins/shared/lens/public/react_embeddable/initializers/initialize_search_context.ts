@@ -12,9 +12,8 @@ import type {
   PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
-  StateComparators,
 } from '@kbn/presentation-publishing';
-import { initializeTimeRangeManager, timeRangeComparators } from '@kbn/presentation-publishing';
+import { initializeTimeRangeManager } from '@kbn/presentation-publishing';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { Observable } from 'rxjs';
@@ -26,15 +25,6 @@ import { getChartScopedFilterQuery, getTextBasedLayerQueries } from '@kbn/lens-c
 import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import type { LensEmbeddableStartServices } from '../types';
-
-export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
-  ...timeRangeComparators,
-  query: 'skip',
-  filters: 'skip',
-  timeslice: 'skip',
-  searchSessionId: 'skip',
-  lastReloadRequestTime: 'skip',
-};
 
 export interface SearchContextConfig {
   api: PublishesUnifiedSearch &

@@ -21,8 +21,6 @@ import {
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
-  timeRangeComparators,
-  titleComparators,
   useBatchedPublishingSubjects,
   type CanCancelRequests,
   type HasTypeDisplayName,
@@ -43,6 +41,7 @@ import { omit } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, combineLatest, merge, ReplaySubject } from 'rxjs';
 import { CHANGE_POINT_GRID_EMBEDDABLE_TYPE } from '../../../common';
+import { changePointGridStateComparison } from '../../../common/embeddable/change_point_grid_state_comparison';
 import { ACTION_EXPLORE_DATA } from '../constants';
 import type { DiscoverServices } from '../../build_services';
 import type { ChangePointGridEmbeddableState } from '../../../server/embeddable/change_point_grid_schema';
@@ -86,6 +85,7 @@ export const getChangePointGridEmbeddableFactory = ({
   discoverServices: DiscoverServices;
 }): EmbeddablePublicDefinition<ChangePointGridEmbeddableState, ChangePointGridApi> => ({
   type: CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+  stateComparison: changePointGridStateComparison,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -140,9 +140,9 @@ export const getChangePointGridEmbeddableFactory = ({
         ...(applyDashboardContext ? {} : { static_context: initialState.static_context }),
       }),
       anyStateChange$: merge(titleManager.anyStateChange$, timeRangeManager.anyStateChange$),
+      // The query and context are set when the panel is created and cannot change afterwards.
       getComparators: () => ({
-        ...titleComparators,
-        ...timeRangeComparators,
+        ...changePointGridStateComparison.comparators,
         esql: 'skip',
         apply_dashboard_context: 'skip',
         static_context: 'skip',

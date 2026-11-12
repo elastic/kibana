@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { StateComparators } from '@kbn/presentation-publishing';
 import {
   type PublishesBlockingError,
   type PublishesDataLoading,
@@ -13,18 +12,9 @@ import {
   type PublishesSavedObjectId,
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
-import deepEqual from 'fast-deep-equal';
-import { isPlainObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
-import type {
-  IntegrationCallbacks,
-  LensInternalApi,
-  LensRuntimeState,
-  LensSerializedState,
-} from '@kbn/lens-common';
-import type { LensWireAPIConfig } from '@kbn/lens-common-2';
-import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transforms/utils';
+import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState } from '@kbn/lens-common';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
@@ -34,28 +24,10 @@ export interface StateManagementConfig {
     PublishesRendered &
     PublishesBlockingError;
   anyStateChange$: Observable<void>;
-  getComparators: () => StateComparators<Pick<LensSerializedState, 'attributes' | 'ref_id'>>;
   reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => void;
   getLatestState: () => Pick<LensRuntimeState, 'attributes' | 'ref_id'>;
   cleanup: () => void;
 }
-
-/**
- * Drops object keys holding `undefined`, which are lost once state is persisted as JSON.
- */
-const omitUndefinedKeys = (value: unknown): unknown => {
-  if (Array.isArray(value)) {
-    return value.map(omitUndefinedKeys);
-  }
-  if (isPlainObject(value)) {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>)
-        .filter(([, entryValue]) => entryValue !== undefined)
-        .map(([key, entryValue]) => [key, omitUndefinedKeys(entryValue)])
-    );
-  }
-  return value;
-};
 
 /**
  * Due to inline editing we need something advanced to handle the state
@@ -67,20 +39,6 @@ export function initializeStateManagement(
 ): StateManagementConfig {
   // savedObjectId$ exposed for PublishesSavedObjectId compatibility, sourced from ref_id in state
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.ref_id);
-
-  const resolveAttributes = (
-    value: LensSerializedState['attributes'] | undefined,
-    state?: LensWireAPIConfig
-  ) => {
-    if (value !== undefined) return value;
-    if (state && 'attributes' in state && state.attributes) {
-      return state.attributes;
-    }
-    if (state && isFlattenedAPIConfig(state)) {
-      return unflattenAPIConfig(state).attributes;
-    }
-    return value;
-  };
 
   const publicRenderCount$ = new BehaviorSubject(internalApi.renderCount$.getValue() + 1);
   const renderCountSubscription = internalApi.renderCount$.subscribe((count) =>
@@ -104,22 +62,6 @@ export function initializeStateManagement(
         map(() => undefined)
       )
     ),
-    getComparators: () => {
-      return {
-        attributes:
-          initialState.ref_id === undefined
-            ? (lastValue, currentValue, lastState, currentState) => {
-                const lastAttributes = resolveAttributes(lastValue, lastState);
-                const currentAttributes = resolveAttributes(currentValue, currentState);
-                return deepEqual(
-                  omitUndefinedKeys(lastAttributes),
-                  omitUndefinedKeys(currentAttributes)
-                );
-              }
-            : 'skip',
-        ref_id: 'skip',
-      };
-    },
     getLatestState: () => {
       return {
         attributes: internalApi.attributes$.getValue(),

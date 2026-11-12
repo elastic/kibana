@@ -9,6 +9,7 @@
 
 import type { ZodObjectType } from '@kbn/zod';
 import type { Reference } from '@kbn/content-management-utils';
+import type { SerializedStateComparison } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '../../common';
 import type { GetDrilldownsSchemaFnType } from '../drilldowns/types';
 
@@ -79,4 +80,10 @@ export type EmbeddableServerDefinition<
    * Throws error when panel config is not supported.
    */
   throwOnUnmappedPanel?: (config: EmbeddableState) => void;
+
+  /**
+   * Stateless rules for comparing two EmbeddableStates, used by containers to compare panels.
+   * Define them in common and register the same rules on the public definition.
+   */
+  stateComparison?: SerializedStateComparison<EmbeddableState>;
 };

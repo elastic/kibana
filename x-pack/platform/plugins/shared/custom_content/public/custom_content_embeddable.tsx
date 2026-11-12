@@ -22,9 +22,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
-  titleComparators,
   initializeTimeRangeManager,
-  timeRangeComparators,
   initializeStateApi,
   useBatchedPublishingSubjects,
   apiPublishesReload,
@@ -75,6 +73,7 @@ import { getServices } from './services';
 import { readContextQueries } from '../common/panel_context_queries';
 import { getTelemetry } from './telemetry';
 import { MAX_PREVIEW_HEIGHT } from '../common/panel_context_attachment';
+import { customContentStateComparison } from '../common/state_comparison';
 import {
   CUSTOM_CONTENT_UPDATED_UI_EVENT,
   type CustomContentUpdatedUiEventData,
@@ -124,6 +123,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentApi
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  stateComparison: customContentStateComparison,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const { core, search, dataViews, agentBuilder } = getServices();
     const rendererServices: CustomContentRendererServices = {
@@ -245,12 +245,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           map(() => undefined)
         )
       ),
-      getComparators: () => ({
-        ...titleComparators,
-        ...timeRangeComparators,
-        esql_query: 'deepEquality',
-        template: 'referenceEquality',
-      }),
+      getComparators: () => customContentStateComparison.comparators,
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved ?? {});

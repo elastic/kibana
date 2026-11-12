@@ -21,8 +21,6 @@ import {
   initializeTimeRangeManager,
   initializeTitleManager,
   initializeStateApi,
-  timeRangeComparators,
-  titleComparators,
   useBatchedPublishingSubjects,
   apiHasDisableTriggers,
   getViewModeSubject,
@@ -35,7 +33,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PresentationPanelError } from '@kbn/embeddable-plugin/public';
-import { getDiscoverSessionEmbeddableComparators } from './utils/get_search_embeddable_comparators';
+import { discoverSessionEmbeddableStateComparison } from '../../common/embeddable/state_comparison';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -71,6 +69,7 @@ export const getSearchEmbeddableFactory = ({
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
+    stateComparison: discoverSessionEmbeddableStateComparison,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
       initialState,
@@ -107,7 +106,11 @@ export const getSearchEmbeddableFactory = ({
 
       const tabs = runtimeState.tabs ?? [];
 
-      const defaultState = { selected_tab_id: tabs[0]?.id };
+      let isSelectedTabImplicit = Boolean(runtimeState.isSelectedTabImplicit);
+      // Any committed tab selection pins the tab, even when it is the default one.
+      const selectedTabSubscription = selectedTabId$.pipe(skip(1)).subscribe(() => {
+        isSelectedTabImplicit = false;
+      });
 
       /** All other state */
       const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -138,6 +141,7 @@ export const getSearchEmbeddableFactory = ({
           serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
           selectedTabId: selectedTabId$.getValue(),
+          isSelectedTabImplicit,
         });
 
       const inlineEditingApi = initializeInlineEditingApi({
@@ -163,7 +167,6 @@ export const getSearchEmbeddableFactory = ({
       const stateApi = initializeStateApi<SearchEmbeddablePanelApiState>({
         uuid,
         parentApi,
-        defaultState,
         serializeState: () => serialize(savedObjectId$.getValue()),
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
@@ -177,15 +180,15 @@ export const getSearchEmbeddableFactory = ({
           inlineEditingApi.anyStateChange$
         ),
         getComparators: () => {
-          const isByValue = !savedObjectId$.getValue();
-          const shouldSkipTabComparators =
+          // While the selected tab is missing or inline editing is in progress, skip it so
+          // unsaved-changes badges don't appear until the user explicitly applies a tab change.
+          const shouldSkipSelectedTab =
             isTabDeleted(selectedTabId$.getValue(), tabs) || inlineEditingApi.isEditing();
 
           return {
-            ...drilldownsManager.comparators,
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators),
+            ...discoverSessionEmbeddableStateComparison.comparators,
+            ref_id: 'skip',
+            ...(shouldSkipSelectedTab ? { selected_tab_id: 'skip' } : {}),
             nonPersistedDisplayOptions: 'skip',
           };
         },
@@ -200,6 +203,7 @@ export const getSearchEmbeddableFactory = ({
           });
 
           selectedTabId$.next(nextRuntimeState.selectedTabId);
+          isSelectedTabImplicit = Boolean(nextRuntimeState.isSelectedTabImplicit);
           await searchEmbeddable.reinitializeState(nextRuntimeState);
           inlineEditingApi.stopInlineEditing();
         },
@@ -414,6 +418,7 @@ export const getSearchEmbeddableFactory = ({
               searchEmbeddable.cleanup();
               cleanupFetch();
               blockingErrorSubscription.unsubscribe();
+              selectedTabSubscription.unsubscribe();
             };
           }, []);
 

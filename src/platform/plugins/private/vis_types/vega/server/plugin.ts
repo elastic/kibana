@@ -16,6 +16,7 @@ import type {
   VisTypeVegaPluginStart,
 } from './types';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import { vegaStateComparison } from '../common/state_comparison';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
 import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
@@ -47,6 +48,7 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
           getTransforms: (drilldownTransforms) => getTransforms(drilldownTransforms, this.logger),
           getSchema: (getDrilldownsSchema) =>
             standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
+          stateComparison: vegaStateComparison,
         });
       })
       .catch((error) => {

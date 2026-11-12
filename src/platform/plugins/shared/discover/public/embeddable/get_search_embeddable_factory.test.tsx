@@ -8,14 +8,18 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { omit } from 'lodash';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import type { PresentationContainer } from '@kbn/presentation-publishing';
+import {
+  apiPublishesUnsavedChanges,
+  type PresentationContainer,
+} from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
@@ -48,6 +52,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 jest.mock('./utils/serialization_utils', () => ({
+  ...jest.requireActual('./utils/serialization_utils'),
   deserializeState: jest.fn(),
 }));
 
@@ -681,6 +686,76 @@ describe('saved search embeddable', () => {
         });
         embeddableApi.setTitle('cute puppies');
       });
+    });
+  });
+
+  describe('implicit selected tab', () => {
+    const tabs = [{ id: 'tab-1' }, { id: 'tab-2' }] as SearchEmbeddableRuntimeState['tabs'];
+
+    const getByRefRuntimeState = (partialState: Partial<SearchEmbeddableRuntimeState>) =>
+      getInitialRuntimeState({
+        searchMock: createSearchFnMock(0).search,
+        partialState: { savedObjectId: 'id', tabs, ...partialState },
+      });
+
+    const buildByRefApi = async (parentApi: PresentationContainer = mockedDashboardApi) => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: (apiRegistration) => ({
+          ...finalizeApiMock(apiRegistration),
+          applySerializedState: apiRegistration.applySerializedState,
+        }),
+        uuid,
+        parentApi,
+      });
+      await waitOneTick();
+      return api;
+    };
+
+    it('does not serialize the default tab when the panel has no selected tab', async () => {
+      runtimeState = getByRefRuntimeState({ selectedTabId: 'tab-1', isSelectedTabImplicit: true });
+      const api = await buildByRefApi();
+
+      expect(api.serializeState()).toMatchObject({ selected_tab_id: undefined });
+    });
+
+    it('serializes the default tab when it was selected explicitly', async () => {
+      runtimeState = getByRefRuntimeState({ selectedTabId: 'tab-1', isSelectedTabImplicit: false });
+      const api = await buildByRefApi();
+
+      expect(api.serializeState()).toMatchObject({ selected_tab_id: 'tab-1' });
+    });
+
+    it('follows the applied state', async () => {
+      runtimeState = getByRefRuntimeState({ selectedTabId: 'tab-1', isSelectedTabImplicit: true });
+      const api = await buildByRefApi();
+
+      runtimeState = getByRefRuntimeState({ selectedTabId: 'tab-1', isSelectedTabImplicit: false });
+      await api.applySerializedState({ ref_id: 'id', selected_tab_id: 'tab-1', overrides: {} });
+      expect(api.serializeState()).toMatchObject({ selected_tab_id: 'tab-1' });
+
+      runtimeState = getByRefRuntimeState({ selectedTabId: 'tab-1', isSelectedTabImplicit: true });
+      await api.applySerializedState({ ref_id: 'id', overrides: {} });
+      expect(api.serializeState()).toMatchObject({ selected_tab_id: undefined });
+    });
+
+    it.each([
+      ['does not report an implicit default tab', true, false],
+      ['reports pinning the default tab', false, true],
+    ])('%s as an unsaved change', async (_, isSelectedTabImplicit, expected) => {
+      const lastSavedState$ = new BehaviorSubject<object>({ ref_id: 'id' });
+      const parentApi = {
+        ...mockedDashboardApi,
+        lastSavedStateForChild$: () => lastSavedState$,
+        getLastSavedStateForChild: () => lastSavedState$.getValue(),
+      } as PresentationContainer;
+      runtimeState = getByRefRuntimeState({ selectedTabId: 'tab-1', isSelectedTabImplicit });
+      const api = await buildByRefApi(parentApi);
+      lastSavedState$.next(omit(api.serializeState(), 'selected_tab_id'));
+
+      if (!apiPublishesUnsavedChanges(api)) throw new Error('Expected unsaved changes API');
+      expect(await firstValueFrom(api.hasUnsavedChanges$)).toBe(expected);
     });
   });
 
