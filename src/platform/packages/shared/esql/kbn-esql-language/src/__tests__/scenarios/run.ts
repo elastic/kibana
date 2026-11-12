@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { groupBy, uniq } from 'lodash';
+import { countBy, groupBy, uniq } from 'lodash';
 // The package entry point, as the editor imports it. Loading it first also keeps the module
 // order of the package: its index has to be evaluated before the modules that import from it.
 import { suggest } from '../../..';
+import { setTestFunctions } from '../../commands/definitions/utils/test_functions';
 import type { ISuggestionItem } from '../../commands/registry/types';
 import type {
   ExpectedSuggestion,
@@ -52,9 +53,10 @@ const assertItemProperties = (
 
 const assertExpectation = (
   suggestions: ISuggestionItem[],
-  { exact, contains, excludes }: ScenarioExpectation
+  { exact, contains, excludes, containsLabels, excludesLabels, uniqueLabels }: ScenarioExpectation
 ): void => {
   const texts = suggestions.map(({ text }) => text);
+  const labels = suggestions.map(({ label }) => label);
 
   for (const { text, asSnippet } of suggestions) {
     if (SNIPPET_PLACEHOLDER.test(text) && !asSnippet) {
@@ -75,13 +77,35 @@ const assertExpectation = (
   if (excludes) {
     expect(texts.filter((text) => excludes.includes(text))).toEqual([]);
   }
+
+  if (containsLabels) {
+    expect(labels).toEqual(expect.arrayContaining([...containsLabels]));
+  }
+
+  if (excludesLabels) {
+    expect(labels.filter((label) => excludesLabels.includes(label))).toEqual([]);
+  }
+
+  if (uniqueLabels) {
+    const counts = countBy(labels);
+
+    expect(Object.keys(counts).filter((label) => counts[label] > 1)).toEqual([]);
+  }
 };
 
 /** Runs one scenario through a flow's `suggest` and returns the suggestions. */
 export const runScenario = async (
-  { query, after = '', world }: Scenario,
+  { query, after = '', world, testFunctions = [] }: Scenario,
   flow: SuggestFlow
-): Promise<ISuggestionItem[]> => flow.suggest(query + after, query.length, createCallbacks(world));
+): Promise<ISuggestionItem[]> => {
+  setTestFunctions([...testFunctions]);
+
+  try {
+    return await flow.suggest(query + after, query.length, createCallbacks(world));
+  } finally {
+    setTestFunctions([]);
+  }
+};
 
 /** Declares one test per scenario and flow. */
 export const describeScenarios = (
