@@ -1,5 +1,5 @@
 schemaVersion: 1
-id: .declarative-okta
+id: .okta
 version: 1.0.0
 metadata:
   displayName: Okta (Declarative PoC)
