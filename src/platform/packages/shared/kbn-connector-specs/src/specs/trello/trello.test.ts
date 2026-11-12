@@ -48,6 +48,12 @@ describe('Trello', () => {
     );
   });
 
+  it('retries on rate-limit status codes', () => {
+    expect(Trello.policies?.retry).toEqual(
+      expect.objectContaining({ retryOnStatusCodes: expect.arrayContaining([429, 503]) })
+    );
+  });
+
   it('exposes every action as a tool', () => {
     Object.values(Trello.actions).forEach((action) => {
       expect(action.isTool).toBe(true);

@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { RETRY_RATE_LIMIT } from '../../connector_spec';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import {
   EmptyInputSchema,
@@ -77,6 +78,14 @@ export const Trello: ConnectorSpec = {
         },
       },
     ],
+  },
+
+  policies: {
+    retry: {
+      retryOnStatusCodes: [...RETRY_RATE_LIMIT],
+      maxRetries: 3,
+      backoffStrategy: 'exponential',
+    },
   },
 
   actions: {
