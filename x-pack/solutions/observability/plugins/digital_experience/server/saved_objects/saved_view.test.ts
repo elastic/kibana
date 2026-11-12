@@ -28,10 +28,11 @@ const createSchema = (): Schema => modelVersions[1].schemas.create;
 const forwardSchema = (): Schema => modelVersions[1].schemas.forwardCompatibility;
 
 describe('the saved view saved object type', () => {
-  it('is registered under its name, in the space it is saved in', () => {
+  it('is registered under its name, in the space it is saved in, and able to be shared later', () => {
+    // A shipped single-space type can never become shareable, a multiple-isolated one can.
     expect(savedViewSavedObjectType).toMatchObject({
       name: SAVED_VIEW_TYPE,
-      namespaceType: 'single',
+      namespaceType: 'multiple-isolated',
       hidden: false,
     });
   });

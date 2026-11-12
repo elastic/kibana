@@ -192,6 +192,8 @@ describe('the id of a view', () => {
 
     expect(path.safeParse({ id: 'a' }).success).toBe(true);
     expect(path.safeParse({ id: '' }).success).toBe(false);
-    expect(path.safeParse({ id: 'x'.repeat(257) }).success).toBe(false);
+    // The bound of a saved object id, not the longest name.
+    expect(path.safeParse({ id: 'x'.repeat(512) }).success).toBe(true);
+    expect(path.safeParse({ id: 'x'.repeat(513) }).success).toBe(false);
   });
 });

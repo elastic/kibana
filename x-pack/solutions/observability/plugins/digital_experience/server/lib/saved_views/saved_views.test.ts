@@ -26,6 +26,7 @@ const savedObject = (
   attributes,
   references: [],
   updated_at: UPDATED_AT,
+  version: `version-of-${id}`,
 });
 
 const client = savedObjectsClientMock.create();
@@ -68,7 +69,81 @@ describe('listSavedViews', () => {
         updatedAt: UPDATED_AT,
       },
     ]);
-    expect(client.find).toHaveBeenCalledWith({ type: SAVED_VIEW_TYPE, perPage: SAVED_VIEWS_MAX });
+    expect(client.find).toHaveBeenCalledWith({
+      type: SAVED_VIEW_TYPE,
+      perPage: SAVED_VIEWS_MAX,
+      page: 1,
+    });
+  });
+
+  it('reads every page, as an import can bring a space past the most it holds', async () => {
+    const page = (ids: string[], total: number, number: number) => ({
+      saved_objects: ids.map((id) => ({ ...savedObject(id, { name: `view ${id}` }), score: 0 })),
+      total,
+      per_page: SAVED_VIEWS_MAX,
+      page: number,
+    });
+    const firstPage = Array.from({ length: SAVED_VIEWS_MAX }, (_, index) => `a${index}`);
+    client.find
+      .mockResolvedValueOnce(page(firstPage, SAVED_VIEWS_MAX + 2, 1))
+      .mockResolvedValueOnce(page(['b0', 'b1'], SAVED_VIEWS_MAX + 2, 2));
+
+    const views = await listSavedViews(client);
+
+    expect(views).toHaveLength(SAVED_VIEWS_MAX + 2);
+    expect(client.find).toHaveBeenCalledTimes(2);
+    expect(client.find).toHaveBeenLastCalledWith({
+      type: SAVED_VIEW_TYPE,
+      perPage: SAVED_VIEWS_MAX,
+      page: 2,
+    });
+  });
+
+  it('leaves out a view that holds what no route would save, rather than failing the list', async () => {
+    // The generic saved objects API does not check an update against the type.
+    client.find.mockResolvedValue({
+      saved_objects: [
+        { ...savedObject('ok', { name: 'checkout' }), score: 0 },
+        { ...savedObject('object-name', { name: {} } as unknown as SavedViewAttributes), score: 0 },
+        { ...savedObject('no-name', {} as unknown as SavedViewAttributes), score: 0 },
+        {
+          ...savedObject('bad-percentile', {
+            name: 'p',
+            percentile: '1',
+          } as unknown as SavedViewAttributes),
+          score: 0,
+        },
+      ],
+      total: 4,
+      per_page: SAVED_VIEWS_MAX,
+      page: 1,
+    });
+
+    await expect(listSavedViews(client)).resolves.toEqual([
+      { id: 'ok', name: 'checkout', updatedAt: UPDATED_AT },
+    ]);
+  });
+
+  it('keeps what it knows of a view and ignores what it does not', async () => {
+    client.find.mockResolvedValue({
+      saved_objects: [
+        {
+          ...savedObject('a', {
+            name: 'checkout',
+            percentile: '99',
+            somethingNew: 1,
+          } as SavedViewAttributes),
+          score: 0,
+        },
+      ],
+      total: 1,
+      per_page: SAVED_VIEWS_MAX,
+      page: 1,
+    });
+
+    await expect(listSavedViews(client)).resolves.toEqual([
+      { id: 'a', name: 'checkout', percentile: '99', updatedAt: UPDATED_AT },
+    ]);
   });
 });
 
@@ -121,8 +196,27 @@ describe('updateSavedView', () => {
     expect(client.create).toHaveBeenCalledWith(
       SAVED_VIEW_TYPE,
       { name: 'checkout', kuery: 'a: b' },
-      { id: 'a', overwrite: true }
+      { id: 'a', overwrite: true, version: 'version-of-a' }
     );
+  });
+
+  it('answers a view that someone changed or deleted meanwhile with a 409, not by saving it over or back', async () => {
+    existing(['a', 'checkout']);
+    client.create.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError(SAVED_VIEW_TYPE, 'a')
+    );
+
+    await expect(updateSavedView(client, 'a', { name: 'checkout' })).rejects.toMatchObject({
+      isBoom: true,
+      output: { statusCode: 409 },
+    });
+  });
+
+  it('does not hide another failure of the write', async () => {
+    existing(['a', 'checkout']);
+    client.create.mockRejectedValue(new Error('boom'));
+
+    await expect(updateSavedView(client, 'a', { name: 'checkout' })).rejects.toThrow('boom');
   });
 
   it('keeps its own name, and refuses another view’s', async () => {
