@@ -26,6 +26,10 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type {
@@ -41,6 +45,7 @@ import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-
 import type { EvalsPluginSetup, EvalsPluginStart } from '@kbn/evals-plugin/server';
 import type { NightshiftSourcesServerStart } from '@kbn/nightshift-sources-plugin/server';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { DetectionSnapshotContributor } from './telemetry';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
@@ -70,6 +75,8 @@ export interface AutomationBudget {
 
 export interface NightshiftInvestigationsServerSetup {
   registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;
+  /** Adds the counts only the registering plugin can read to the daily detection snapshot. */
+  registerDetectionSnapshotContributor: (contributor: DetectionSnapshotContributor) => void;
 }
 
 export interface NightshiftInvestigationsServerStart {
@@ -81,6 +88,7 @@ export interface NightshiftInvestigationsServerStart {
 
 export interface NightshiftInvestigationsSetupDeps {
   share: SharePluginSetup;
+  taskManager: TaskManagerSetupContract;
   actions?: ActionsPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   alerting?: AlertingServerSetup;
@@ -103,6 +111,7 @@ export interface NightshiftInvestigationsSetupDeps {
 
 export interface NightshiftInvestigationsStartDeps {
   isomer: IsomerPluginStart;
+  taskManager: TaskManagerStartContract;
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
