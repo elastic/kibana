@@ -25,7 +25,7 @@ const HYPOTHESES = `- hypotheses: every candidate cause the agent considered, as
   - status is investigating while open, dismissed once ruled out, confirmed for the root cause.
   - confidence is 0 to 1 and reflects how strongly the evidence points to it.
   - reason is the opened card: exactly two Markdown lines, each one sentence, no bullets. The ids, thresholds, counts and time windows belong here. Write '**Tested:** the claim as you checked it, and against which signal and time window.' then '**Result:** what the data showed and what it decided, ending with the word Confirmed, Dismissed or Unresolved.' While the hypothesis is still investigating, write the same two lines with what you have so far, ending in Unresolved.
-  - Confirmed means it caused the triggering symptom, not that a signal is present in the data. A downstream effect of a confirmed cause is dismissed with a reason that names it as one. Mark a hypothesis confirmed only when the agent's own text asserts it or its evidence clearly establishes it.`;
+  - Confirmed means it caused the triggering symptom, not that a signal is present in the data. Never mark a hypothesis confirmed when it only restates that the alert fired, flapped or repeated without naming what caused the underlying failures. A downstream effect of a confirmed cause is dismissed with a reason that names it as one. Mark a hypothesis confirmed only when the agent's own text asserts it or its evidence clearly establishes it.`;
 
 const SUMMARY = `- summary: what did we see, and since when? At most 60 words of Markdown: one lead sentence of at most 25 words naming the symptom, where it showed up and when it started, then at most three bullets of at most 20 words for the scale, how it developed and the current state. It does not state a cause or a conclusion. Example:
 
@@ -36,7 +36,7 @@ Checkout requests on the orders service started failing at 14:02Z in all regions
 
 const UPDATING = `## Updating
 
-Your earlier answers in this conversation are the current record. Keep what is still right, correct what the new evidence changed, and add what is new. Do not drop a hypothesis the agent has not ruled out.`;
+Your earlier answers in this conversation are the current record. Keep what is still right, correct what the new evidence changed, and add what is new. Do not drop a hypothesis the agent has not ruled out. Keep each existing hypothesis's candidate wording character-for-character when updating or dismissing it, so earlier and later passes match on the same candidate; only write a new candidate string for a genuinely new hypothesis.`;
 
 /** Asked while the agent is still working: the summary and the hypotheses, nothing else. */
 const LIVE_SYSTEM_PROMPT = `${ROLE}
