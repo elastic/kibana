@@ -6,6 +6,7 @@
  */
 import type { ObservablePost } from '../types/api';
 import { DEFAULT_OBSERVABLE_TYPES } from './default_observable_types';
+import { getObservableDedupeKey } from './get_observable_dedupe_key';
 import {
   getIPType,
   getObservablesFromEcs,
@@ -30,7 +31,7 @@ describe('processObservable', () => {
   it('should add an observable to the map', () => {
     const observablesMap = new Map<string, ObservablePost>();
     processObservable(observablesMap, 'value', 'key', 'Description');
-    expect(observablesMap.get('key-value')).toEqual({
+    expect(observablesMap.get(getObservableDedupeKey('key', 'value'))).toEqual({
       typeKey: 'key',
       value: 'value',
       description: 'Description',
@@ -55,11 +56,21 @@ describe('processObservable', () => {
     ]);
   });
 
+  it('should keep both observables when a hyphen moves between the type key and the value', () => {
+    const observablesMap = new Map<string, ObservablePost>();
+    processObservable(observablesMap, 'bar-1', 'foo', 'Description');
+    processObservable(observablesMap, '1', 'foo-bar', 'Description');
+    expect(Array.from(observablesMap.values())).toEqual([
+      { typeKey: 'foo', value: 'bar-1', description: 'Description' },
+      { typeKey: 'foo-bar', value: '1', description: 'Description' },
+    ]);
+  });
+
   it('should preserve the initial value if a duplicate is added with a different description', () => {
     const observablesMap = new Map<string, ObservablePost>();
     processObservable(observablesMap, 'value', 'key', 'Description');
     processObservable(observablesMap, 'value', 'key', 'Another Description');
-    expect(observablesMap.get('key-value')).toEqual({
+    expect(observablesMap.get(getObservableDedupeKey('key', 'value'))).toEqual({
       typeKey: 'key',
       value: 'value',
       description: 'Description',
