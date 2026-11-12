@@ -560,7 +560,10 @@ describe('bootstrapNonPriorityTask', () => {
 });
 
 describe('registerExtractEntityTasks — execution context wrap', () => {
-  const runRegisteredTask = async (entityType: EntityType) => {
+  const runRegisteredTask = async (
+    entityType: EntityType,
+    taskTypePrefix = 'entity_store:v2:extract_entity_task'
+  ) => {
     const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
       typeof isDualProcessEnabled
     >;
@@ -584,8 +587,11 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
           { featureFlags: {}, executionContext: { withContext: withContextSpy } },
         ]),
     } as unknown as EntityStoreCoreSetup;
-    const registerTaskDefinitions = jest.fn();
-    const taskManager = { registerTaskDefinitions } as unknown as TaskManagerSetupContract;
+    const definitions: Record<string, { createTaskRunner: Function }> = {};
+    const taskManager = {
+      registerTaskDefinitions: (defs: Record<string, { createTaskRunner: Function }>) =>
+        Object.assign(definitions, defs),
+    } as unknown as TaskManagerSetupContract;
     const logger = loggerMock.create();
     (logger.get as jest.Mock) = jest.fn().mockReturnValue(logger);
 
@@ -597,10 +603,7 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
       isServerless: false,
     });
 
-    // The first registration is the shared single/priority task for the type.
-    const [defs] = registerTaskDefinitions.mock.calls[0];
-    const [taskType] = Object.keys(defs);
-    const runner = defs[taskType].createTaskRunner({
+    const runner = definitions[`${taskTypePrefix}:${entityType}`].createTaskRunner({
       taskInstance: { id: 'task-1', state: { namespace: 'default' } },
       fakeRequest: {},
       signal: new AbortController().signal,
@@ -630,4 +633,22 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
       );
     }
   );
+
+  /** The non-priority task scans a different set of documents from the shared task for the same
+   * entity type, so the two must not share a name. */
+  it('names the non-priority task after its entity type and its mode', async () => {
+    const withContextSpy = await runRegisteredTask(
+      'user',
+      'entity_store:v2:extract_entity_non_priority_task'
+    );
+
+    expect(withContextSpy).toHaveBeenCalledWith(
+      {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_store_extract_task:user:non_priority',
+        id: 'task-1',
+      },
+      expect.any(Function)
+    );
+  });
 });
