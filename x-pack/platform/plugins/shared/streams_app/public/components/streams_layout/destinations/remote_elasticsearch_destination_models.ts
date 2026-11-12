@@ -38,8 +38,8 @@ export const getRemoteIndexBySignal = (
 };
 
 /**
- * One node per remote cluster. Fixed saves one unscoped `index` when all filled signals share a
- * name, otherwise one telemetry-scoped `index` per signal.
+ * One node per remote cluster. Fixed saves one telemetry-scoped `index` per filled signal, as the
+ * OTel data stream name differs per signal.
  */
 export const createRemoteElasticsearchUnitDestination = ({
   id,
@@ -61,10 +61,11 @@ export const createRemoteElasticsearchUnitDestination = ({
     const value = indexBySignal[signal];
     return value ? [{ signal, value }] : [];
   });
-  const indexEntries =
-    new Set(indexed.map(({ value }) => value)).size === 1
-      ? [{ name: 'index', value: indexed[0].value }]
-      : indexed.map(({ signal, value }) => ({ name: 'index', value, telemetry: [signal] }));
+  const indexEntries = indexed.map(({ signal, value }) => ({
+    name: 'index',
+    value,
+    telemetry: [signal],
+  }));
 
   const trimmedDescription = description?.trim();
   return {

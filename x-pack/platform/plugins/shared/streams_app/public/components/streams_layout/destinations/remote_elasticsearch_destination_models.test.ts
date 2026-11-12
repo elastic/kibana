@@ -63,35 +63,35 @@ describe('createRemoteElasticsearchUnitDestination', () => {
     });
   });
 
-  it('fixed, same raw name on every filled signal: one unscoped index', () => {
+  it('fixed, one signal: a telemetry-scoped index', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: false,
-      logsIndex: 'shared-idx',
-      metricsIndex: 'shared-idx',
+      logsIndex: 'logs-billing.otel-default',
+      metricsIndex: '',
       tracesIndex: '',
     });
-    expect(node.supported_telemetry).toEqual(['logs', 'metrics']);
+    expect(node.supported_telemetry).toEqual(['logs']);
     expect(node.config).toEqual([
       endpointEntry,
-      { name: 'index', value: 'shared-idx' },
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
       credentialEntry,
     ]);
   });
 
-  it('fixed, different names: one scoped index per filled signal', () => {
+  it('fixed: one telemetry-scoped index per filled signal', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: false,
-      logsIndex: 'a',
+      logsIndex: 'logs-billing.otel-default',
       metricsIndex: '',
-      tracesIndex: 'b',
+      tracesIndex: 'traces-billing.otel-prod',
     });
     expect(node.supported_telemetry).toEqual(['logs', 'traces']);
     expect(node.config).toEqual([
       endpointEntry,
-      { name: 'index', value: 'a', telemetry: ['logs'] },
-      { name: 'index', value: 'b', telemetry: ['traces'] },
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
+      { name: 'index', value: 'traces-billing.otel-prod', telemetry: ['traces'] },
       credentialEntry,
     ]);
   });
@@ -220,14 +220,14 @@ describe('remote Elasticsearch view model', () => {
   it.each([
     ['auto', { auto: true, logsIndex: '', metricsIndex: '', tracesIndex: '' }, {}],
     [
-      'one name',
-      { auto: false, logsIndex: 'shared-idx', metricsIndex: 'shared-idx', tracesIndex: '' },
-      { logs: 'shared-idx', metrics: 'shared-idx' },
+      'one signal',
+      { auto: false, logsIndex: 'logs-a.otel-b', metricsIndex: '', tracesIndex: '' },
+      { logs: 'logs-a.otel-b' },
     ],
     [
-      'different names',
-      { auto: false, logsIndex: 'logs-a-b', metricsIndex: '', tracesIndex: 'traces-a-b' },
-      { logs: 'logs-a-b', traces: 'traces-a-b' },
+      'two signals',
+      { auto: false, logsIndex: 'logs-a.otel-b', metricsIndex: '', tracesIndex: 'traces-a.otel-b' },
+      { logs: 'logs-a.otel-b', traces: 'traces-a.otel-b' },
     ],
   ])('reads back what the builder saved (%s)', (_, form, indexBySignal) => {
     const viewModel = toDestinationViewModel(

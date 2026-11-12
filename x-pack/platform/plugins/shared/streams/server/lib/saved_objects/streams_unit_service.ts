@@ -31,6 +31,10 @@ import type {
   UnitValidationResult,
   ValidateUnitConfig,
 } from '../unit_config/types';
+import {
+  describeInvalidFixedIndex,
+  findInvalidFixedIndices,
+} from '../unit_config/fixed_index_names';
 import { invalidateUnitApiKeys } from '../unit_config/unit_api_keys';
 import type { InvalidateApiKeysAsInternalUser, UnitApiKey } from '../unit_config/unit_api_keys';
 
@@ -314,6 +318,14 @@ export class StreamsUnitService {
         `Streams unit references credentials that have no secret: ${unresolvedNames.join(', ')}`,
         400
       );
+    }
+
+    const invalidFixedIndices = findInvalidFixedIndices({
+      unit,
+      previousUnit: existingConfiguration?.attributes.unit,
+    });
+    if (invalidFixedIndices.length > 0) {
+      throw new StatusError(invalidFixedIndices.map(describeInvalidFixedIndex).join(' '), 400);
     }
 
     const { credentials, sealed } = await this.prepareUnitCredentials({

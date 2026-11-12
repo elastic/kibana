@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RemoteElasticsearchRoutingFields } from './remote_elasticsearch_routing_fields';
 import {
   EMPTY_DESTINATION_CREATION_FORM,
+  EMPTY_STATIC_NAMES,
   type DestinationCreationFormData,
   type DestinationCreationFormErrors,
   type RemoteElasticsearchDestinationFormData,
@@ -61,21 +62,32 @@ describe('RemoteElasticsearchRoutingFields', () => {
 
     expect(screen.getByRole('radio', { name: 'Automatic' })).toBeChecked();
     expect(screen.queryByTestId('streamsCreateDestinationCustomWritePatterns')).toBeNull();
-    expect(screen.queryByTestId('streamsCreateDestinationIndex')).toBeNull();
+    expect(screen.queryByTestId('streamsCreateDestinationIndexDataset')).toBeNull();
   });
 
-  it('writes one full index name to every signal, without a signal prefix', () => {
+  it('writes the shared dataset and namespace to every signal as otel names', () => {
     const { getValues } = renderRouting();
 
     click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
-    setFieldValue('streamsCreateDestinationIndex', 'shared-idx');
+    setFieldValue('streamsCreateDestinationIndexDataset', 'billing');
+    setFieldValue('streamsCreateDestinationIndexNamespace', 'prod');
 
     expect(getValues().remoteElasticsearch).toMatchObject({
       auto: false,
-      logsIndex: 'shared-idx',
-      metricsIndex: 'shared-idx',
-      tracesIndex: 'shared-idx',
+      staticNames: {
+        logs: { dataset: 'billing', namespace: 'prod' },
+        metrics: { dataset: 'billing', namespace: 'prod' },
+        traces: { dataset: 'billing', namespace: 'prod' },
+      },
+      logsIndex: 'logs-billing.otel-prod',
+      metricsIndex: 'metrics-billing.otel-prod',
+      tracesIndex: 'traces-billing.otel-prod',
     });
+    expect(
+      screen.getByText(
+        'Saved as logs-billing.otel-prod, metrics-billing.otel-prod and traces-billing.otel-prod.'
+      )
+    ).toBeInTheDocument();
     expect(getValues().elasticsearch).toEqual(EMPTY_DESTINATION_CREATION_FORM.elasticsearch);
   });
 
@@ -83,54 +95,54 @@ describe('RemoteElasticsearchRoutingFields', () => {
     const { getValues } = renderRouting({ initial: { auto: false } });
 
     click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
-    setFieldValue('streamsCreateDestination-traces-index', 'my-traces');
+    setFieldValue('streamsCreateDestination-traces-indexDataset', 'app');
 
     expect(getValues().remoteElasticsearch).toMatchObject({
       logsIndex: '',
       metricsIndex: '',
-      tracesIndex: 'my-traces',
+      tracesIndex: 'traces-app.otel-default',
     });
+    expect(screen.getByText('Saved as traces-app.otel-default.')).toBeInTheDocument();
 
     click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
 
-    expect(screen.getByTestId('streamsCreateDestinationIndex')).toHaveValue('my-traces');
+    expect(screen.getByTestId('streamsCreateDestinationIndexDataset')).toHaveValue('app');
     expect(getValues().remoteElasticsearch).toMatchObject({
-      logsIndex: 'my-traces',
-      metricsIndex: 'my-traces',
-      tracesIndex: 'my-traces',
+      logsIndex: 'logs-app.otel-default',
+      metricsIndex: 'metrics-app.otel-default',
+      tracesIndex: 'traces-app.otel-default',
     });
   });
 
-  it('clears the indices and naming when switching back to auto', () => {
+  it('clears the names and naming when switching back to auto', () => {
     const { getValues } = renderRouting();
 
     click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
     click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
-    setFieldValue('streamsCreateDestination-logs-index', 'a');
+    setFieldValue('streamsCreateDestination-logs-indexDataset', 'a');
+    setFieldValue('streamsCreateDestination-logs-indexNamespace', 'prod');
     click(screen.getByRole('radio', { name: 'Automatic' }));
 
     expect(getValues().remoteElasticsearch).toMatchObject({
       auto: true,
       staticNaming: 'shared',
+      staticNames: EMPTY_STATIC_NAMES,
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
     });
   });
 
-  it('shows remote error text without signal patterns', () => {
+  it('shows the dataset and namespace error text', () => {
     renderRouting({
       initial: { auto: false, staticNaming: 'perSignal' },
       errors: { logsIndex: 'invalidCharacter', tracesIndex: 'invalidName' },
     });
 
     expect(
-      screen.getByText(
-        'Index names cannot contain \\ / * ? " < > | , # :, whitespace, or control characters.'
-      )
+      screen.getByText('Dataset and namespace cannot contain \\ / * ? " < > | , # : or spaces.')
     ).toBeInTheDocument();
-    expect(screen.getByText('Enter a valid index name.')).toBeInTheDocument();
-    expect(screen.queryByText(/<dataset>-<namespace>/)).toBeNull();
+    expect(screen.getByText('Dataset and namespace cannot be "." or "..".')).toBeInTheDocument();
   });
 
   it('shows the required error in place of the per-signal help', () => {
@@ -147,12 +159,13 @@ describe('RemoteElasticsearchRoutingFields', () => {
     const { getValues } = renderRouting({ initial: { auto: false } });
 
     click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
-    setFieldValue('streamsCreateDestination-logs-index', 'a');
-    setFieldValue('streamsCreateDestination-metrics-index', 'b');
+    setFieldValue('streamsCreateDestination-logs-indexDataset', 'a');
+    setFieldValue('streamsCreateDestination-metrics-indexDataset', 'b');
     click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
 
-    expect(screen.getByTestId('streamsCreateDestinationIndex')).toHaveValue('');
+    expect(screen.getByTestId('streamsCreateDestinationIndexDataset')).toHaveValue('');
     expect(getValues().remoteElasticsearch).toMatchObject({
+      staticNames: EMPTY_STATIC_NAMES,
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',

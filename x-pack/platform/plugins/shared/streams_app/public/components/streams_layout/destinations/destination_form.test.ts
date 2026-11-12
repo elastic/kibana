@@ -12,14 +12,16 @@ import {
   getVisibleDestinationFormErrors,
   validateRemoteEndpoint,
 } from './destination_form';
-import { validateFreeFormIndexName, validateStaticSignalIndex } from './destination_models';
+import { composeOtelIndex, validateFreeFormIndexName } from './destination_models';
 import {
   EMPTY_ELASTICSEARCH_DESTINATION_FORM,
   EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
   EMPTY_S3_DESTINATION_FORM,
+  EMPTY_STATIC_NAMES,
   REMOTE_ELASTICSEARCH_TYPE,
   type DestinationCreationFormData,
   type RemoteElasticsearchDestinationFormData,
+  type StaticNames,
 } from './types';
 
 const unitDefinition: StreamsUnit.GetResponse = {
@@ -30,6 +32,19 @@ const unitDefinition: StreamsUnit.GetResponse = {
   },
   ui_metadata: {},
 };
+
+/** Fixed name parts and the indices the form composes from them. */
+const fixedNames = (names: Partial<StaticNames>) => {
+  const staticNames = { ...EMPTY_STATIC_NAMES, ...names };
+  return {
+    staticNames,
+    logsIndex: composeOtelIndex('logs', staticNames.logs),
+    metricsIndex: composeOtelIndex('metrics', staticNames.metrics),
+    tracesIndex: composeOtelIndex('traces', staticNames.traces),
+  };
+};
+
+const app = { dataset: 'app', namespace: 'default' };
 
 const elasticsearchForm = (
   elasticsearch: Partial<typeof EMPTY_ELASTICSEARCH_DESTINATION_FORM>
@@ -85,7 +100,7 @@ describe('destination form', () => {
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
-        logsIndex: 'logs-{{data_stream.dataset}}-{{data_stream.namespace}}',
+        ...fixedNames({ logs: { dataset: '{{data_stream.dataset}}', namespace: 'default' } }),
       },
     };
 
@@ -95,24 +110,34 @@ describe('destination form', () => {
     expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
   });
 
-  it('rejects a logs index that does not match logs-*', () => {
+  it('rejects a dataset with a hyphen', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
-      destinationName: 'Metrics as logs',
+      destinationName: 'My app',
       description: '',
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
-        logsIndex: 'metrics-app-default',
+        ...fixedNames({ logs: { dataset: 'my-app', namespace: 'default' } }),
       },
     };
 
-    expect(getDestinationCreationFormErrors({ formData, unitDefinition }).logsIndex).toBe(
-      'signalPattern'
-    );
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition }).logsIndex).toBe('hyphen');
     expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+  });
+
+  it('requires at least one dataset when only namespaces are filled', () => {
+    const formData = elasticsearchForm({
+      auto: false,
+      ...fixedNames({ logs: { dataset: ' ', namespace: 'prod' } }),
+    });
+
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
+      destinationName: undefined,
+      staticIndexes: 'required',
+    });
   });
 
   it('allows All-composed static indexes', () => {
@@ -125,9 +150,7 @@ describe('destination form', () => {
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
-        logsIndex: 'logs-app-default',
-        metricsIndex: 'metrics-app-default',
-        tracesIndex: 'traces-app-default',
+        ...fixedNames({ logs: app, metrics: app, traces: app }),
       },
     };
 
@@ -147,7 +170,7 @@ describe('destination form', () => {
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
-        logsIndex: 'logs-app-default',
+        ...fixedNames({ logs: app }),
       },
     };
 
@@ -183,8 +206,7 @@ describe('destination form', () => {
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
-        logsIndex: 'logs-app-default',
-        metricsIndex: 'metrics-app-default',
+        ...fixedNames({ logs: app, metrics: app }),
       },
     };
 
@@ -195,7 +217,7 @@ describe('destination form', () => {
       getDestinationCreationFormErrors({
         formData: {
           ...formData,
-          elasticsearch: { ...formData.elasticsearch, logsIndex: '' },
+          elasticsearch: { ...formData.elasticsearch, ...fixedNames({ metrics: app }) },
         },
         unitDefinition: existingUnit,
       }).destinationName
@@ -556,9 +578,8 @@ describe('validateRemoteEndpoint', () => {
   });
 });
 
-describe('remote index validation', () => {
-  it('accepts a name local rejects', () => {
-    expect(validateStaticSignalIndex('logs', 'my-index')).toBe('signalPattern');
+describe('free-form index validation', () => {
+  it('accepts a full name without a signal prefix', () => {
     expect(validateFreeFormIndexName('my-index')).toBeUndefined();
   });
 
@@ -641,20 +662,22 @@ describe('remote Elasticsearch', () => {
     expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
   });
 
-  it('accepts full index names without a signal prefix in fixed', () => {
-    const formData = remoteForm({ auto: false, logsIndex: 'my-index', tracesIndex: 'my-traces' });
+  it('accepts otel names in fixed', () => {
+    const formData = remoteForm({ auto: false, ...fixedNames({ logs: app, traces: app }) });
     expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
       destinationName: undefined,
     });
     expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
   });
 
-  it('validates each fixed index with the remote rules', () => {
+  it('validates each fixed dataset and namespace', () => {
     const formData = remoteForm({
       auto: false,
-      logsIndex: 'logs-${foo}-default',
-      metricsIndex: 'a\tb',
-      tracesIndex: 'MyIndex',
+      ...fixedNames({
+        logs: { dataset: '${foo}', namespace: 'default' },
+        metrics: { dataset: 'app', namespace: 'a\tb' },
+        traces: { dataset: 'MyIndex', namespace: 'default' },
+      }),
     });
     expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toMatchObject({
       logsIndex: 'template',
@@ -739,13 +762,13 @@ describe('remote Elasticsearch', () => {
     it('checks only the filled signals in fixed', () => {
       expect(
         getDestinationCreationFormErrors({
-          formData: remoteForm({ auto: false, logsIndex: 'my-index' }),
+          formData: remoteForm({ auto: false, ...fixedNames({ logs: app }) }),
           unitDefinition: unit,
         }).destinationName
       ).toBeUndefined();
       expect(
         getDestinationCreationFormErrors({
-          formData: remoteForm({ auto: false, tracesIndex: 'my-index' }),
+          formData: remoteForm({ auto: false, ...fixedNames({ traces: app }) }),
           unitDefinition: unit,
         }).destinationName
       ).toBe('duplicate');
@@ -754,7 +777,12 @@ describe('remote Elasticsearch', () => {
 
   it('reveals remote errors from the remote inputs', () => {
     const errors = getDestinationCreationFormErrors({
-      formData: remoteForm({ endpoint: '', apiKey: '', auto: false, logsIndex: 'MyIndex' }),
+      formData: remoteForm({
+        endpoint: '',
+        apiKey: '',
+        auto: false,
+        ...fixedNames({ logs: { dataset: 'MyApp', namespace: 'default' } }),
+      }),
       unitDefinition,
     });
     expect(

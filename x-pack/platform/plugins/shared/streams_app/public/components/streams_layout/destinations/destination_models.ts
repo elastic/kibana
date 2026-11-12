@@ -10,11 +10,13 @@ import {
   INVALID_STREAM_NAME_PREFIXES,
   RESERVED_STREAM_NAMES,
   UNIT_DESTINATION_SIGNALS,
+  composeOtelDataStreamName,
   getUnitDestinationSignalTargets,
   readUnitDestinationConfigValue,
   readUnitDestinationSignals,
+  validateOtelDataStreamName,
 } from '@kbn/streams-schema';
-import type { UnitDestination } from '@kbn/streams-schema';
+import type { OtelDataStreamName, UnitDestination } from '@kbn/streams-schema';
 import type { Unit } from '../../../services/unit_repository';
 import {
   REMOTE_ELASTICSEARCH_TYPE,
@@ -25,10 +27,10 @@ import {
   type DocsWritePatternValidationError,
   type ElasticsearchDestinationFormData,
   type FreeFormIndexValidationError,
+  type OtelNameValidationError,
   type PrefixedDestinationSignal,
   type RemoteElasticsearchDestinationViewModel,
   type S3DestinationViewModel,
-  type StaticIndexValidationError,
 } from './types';
 
 /** An index containing `{{` or `${` is a template, which the transpiler rejects (E035). */
@@ -64,32 +66,25 @@ export const SIGNAL_INDEX_FIELDS: Record<
   traces: 'tracesIndex',
 };
 
-export const getStaticIndexRemainder = (
+/** The fixed index for a signal, or '' when the dataset is empty and the signal is not sent. */
+export const composeOtelIndex = (
   signal: PrefixedDestinationSignal,
-  index: string
-): string => {
-  const prefix = `${signal}-`;
-  return index.startsWith(prefix) ? index.slice(prefix.length) : index;
-};
+  name: OtelDataStreamName
+): string => (name.dataset.trim() ? composeOtelDataStreamName(signal, name) : '');
 
-export const composeStaticIndex = (
+export const validateOtelName = (
   signal: PrefixedDestinationSignal,
-  remainder: string
-): string => {
-  const value = remainder.trim();
-  if (!value) {
-    return '';
+  { dataset, namespace }: OtelDataStreamName
+): OtelNameValidationError | undefined => {
+  if (!dataset.trim()) {
+    return undefined;
   }
-  return value.startsWith(`${signal}-`) ? value : `${signal}-${value}`;
+  const error = validateOtelDataStreamName(signal, {
+    dataset: dataset.trim(),
+    namespace: namespace.trim(),
+  });
+  return error === 'datasetRequired' ? undefined : error;
 };
-
-export const composeStaticIndexesForAll = (
-  remainder: string
-): Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'> => ({
-  logsIndex: composeStaticIndex('logs', remainder),
-  metricsIndex: composeStaticIndex('metrics', remainder),
-  tracesIndex: composeStaticIndex('traces', remainder),
-});
 
 export const getUnitDestinations = (unit: Unit): UnitDestination[] => unit.unit.destinations ?? [];
 
@@ -348,20 +343,6 @@ export const validateFreeFormIndexName = (
     return 'invalidName';
   }
   return undefined;
-};
-
-export const validateStaticSignalIndex = (
-  signal: PrefixedDestinationSignal,
-  index: string
-): StaticIndexValidationError | undefined => {
-  const value = index.trim();
-  if (!value) {
-    return undefined;
-  }
-  return (
-    validateFreeFormIndexName(value) ??
-    (hasSignalDataStreamShape(signal, value) ? undefined : 'signalPattern')
-  );
 };
 
 export const validateDocsWritePattern = (

@@ -17,7 +17,7 @@ import {
   validateAutoWritePattern,
   validateDocsWritePattern,
   validateFreeFormIndexName,
-  validateStaticSignalIndex,
+  validateOtelName,
 } from './destination_models';
 import { getDestinationTypeDefinition } from './destination_type_registry';
 import {
@@ -171,10 +171,9 @@ const getRemoteElasticsearchErrors = (
     errors.staticIndexes = 'required';
   }
   for (const signal of PREFIXED_DESTINATION_SIGNALS) {
-    const field = SIGNAL_INDEX_FIELDS[signal];
-    const error = validateFreeFormIndexName(remoteElasticsearch[field]);
+    const error = validateOtelName(signal, remoteElasticsearch.staticNames[signal]);
     if (error) {
-      errors[field] = error;
+      errors[SIGNAL_INDEX_FIELDS[signal]] = error;
     }
   }
   return errors;
@@ -242,10 +241,9 @@ const getLocalElasticsearchErrors = (
     errors.staticIndexes = 'required';
   }
   for (const signal of PREFIXED_DESTINATION_SIGNALS) {
-    const field = SIGNAL_INDEX_FIELDS[signal];
-    const error = validateStaticSignalIndex(signal, elasticsearch[field]);
+    const error = validateOtelName(signal, elasticsearch.staticNames[signal]);
     if (error) {
-      errors[field] = error;
+      errors[SIGNAL_INDEX_FIELDS[signal]] = error;
     }
   }
   const docsIndexError = validateFreeFormIndexName(elasticsearch.docsIndex);

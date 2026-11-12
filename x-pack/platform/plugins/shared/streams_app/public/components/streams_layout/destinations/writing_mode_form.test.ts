@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  getFilledCustomSignals,
-  getSharedIndexInput,
-  getSharedRemainderOnSwitch,
-  getSharedRemoteIndexOnSwitch,
-} from './writing_mode_form';
+import { getFilledCustomSignals, getSharedOtelNameOnSwitch } from './writing_mode_form';
 
 describe('getFilledCustomSignals', () => {
   it('returns filled signals in signal order and ignores blank fields', () => {
@@ -25,86 +20,33 @@ describe('getFilledCustomSignals', () => {
   });
 });
 
-describe('getSharedRemainderOnSwitch', () => {
-  it('keeps a remainder all filled fields share', () => {
+describe('getSharedOtelNameOnSwitch', () => {
+  it('keeps the trimmed pair every signal with a dataset shares', () => {
     expect(
-      getSharedRemainderOnSwitch({
-        logsIndex: 'logs-a-b',
-        metricsIndex: '',
-        tracesIndex: 'traces-a-b',
+      getSharedOtelNameOnSwitch({
+        logs: { dataset: ' a ', namespace: 'prod' },
+        metrics: { dataset: '', namespace: 'other' },
+        traces: { dataset: 'a', namespace: ' prod ' },
       })
-    ).toBe('a-b');
+    ).toEqual({ dataset: 'a', namespace: 'prod' });
   });
 
-  it('drops remainders that disagree', () => {
+  it.each([
+    ['datasets', { dataset: 'a', namespace: 'default' }, { dataset: 'c', namespace: 'default' }],
+    ['namespaces', { dataset: 'a', namespace: 'default' }, { dataset: 'a', namespace: 'prod' }],
+  ])('drops pairs whose %s differ', (_, logs, metrics) => {
     expect(
-      getSharedRemainderOnSwitch({
-        logsIndex: 'logs-a-b',
-        metricsIndex: 'metrics-c-d',
-        tracesIndex: '',
+      getSharedOtelNameOnSwitch({ logs, metrics, traces: { dataset: '', namespace: 'default' } })
+    ).toBeUndefined();
+  });
+
+  it('keeps nothing when no signal has a dataset', () => {
+    expect(
+      getSharedOtelNameOnSwitch({
+        logs: { dataset: '', namespace: 'prod' },
+        metrics: { dataset: ' ', namespace: 'default' },
+        traces: { dataset: '', namespace: 'default' },
       })
-    ).toBe('');
-  });
-
-  it('drops a value without its own signal prefix', () => {
-    expect(
-      getSharedRemainderOnSwitch({ logsIndex: 'metrics-a-b', metricsIndex: '', tracesIndex: '' })
-    ).toBe('');
-  });
-
-  it('drops a remainder that does not compose back to the typed values', () => {
-    expect(
-      getSharedRemainderOnSwitch({
-        logsIndex: 'logs-logs-default',
-        metricsIndex: 'metrics-logs-default',
-        tracesIndex: 'traces-logs-default',
-      })
-    ).toBe('');
-  });
-
-  it('drops a remainder that would give a blank signal an invalid name', () => {
-    expect(
-      getSharedRemainderOnSwitch({
-        logsIndex: '',
-        metricsIndex: 'metrics-logs-default',
-        tracesIndex: '',
-      })
-    ).toBe('');
-  });
-});
-
-describe('getSharedIndexInput', () => {
-  it('returns the remainder for names composed from it', () => {
-    expect(
-      getSharedIndexInput({
-        logsIndex: 'logs-billing-default',
-        metricsIndex: 'metrics-billing-default',
-        tracesIndex: 'traces-billing-default',
-      })
-    ).toBe('billing-default');
-  });
-
-  it('keeps a signal prefix the shared name was typed with', () => {
-    expect(
-      getSharedIndexInput({
-        logsIndex: 'logs-billing-default',
-        metricsIndex: 'metrics-logs-billing-default',
-        tracesIndex: 'traces-logs-billing-default',
-      })
-    ).toBe('logs-billing-default');
-  });
-});
-
-describe('getSharedRemoteIndexOnSwitch', () => {
-  it('keeps one name used by all filled fields', () => {
-    expect(
-      getSharedRemoteIndexOnSwitch({ logsIndex: '', metricsIndex: '', tracesIndex: 'my-traces' })
-    ).toBe('my-traces');
-  });
-
-  it('drops names that disagree', () => {
-    expect(
-      getSharedRemoteIndexOnSwitch({ logsIndex: 'a', metricsIndex: 'b', tracesIndex: '' })
-    ).toBe('');
+    ).toBeUndefined();
   });
 });

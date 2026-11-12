@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   useController,
   useFormContext,
@@ -14,35 +14,33 @@ import {
 } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  PREFIXED_DESTINATION_SIGNALS,
-  composeStaticIndexesForAll,
-  SIGNAL_INDEX_FIELDS,
-} from './destination_models';
+import type { OtelDataStreamName } from '@kbn/streams-schema';
+import { PREFIXED_DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import { DocsIndexField, DocsWritePatternsField } from './docs_target_fields';
+import { OtelNameFields, getSavedAsName, useSetOtelName } from './otel_name_fields';
 import {
   EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_STATIC_NAMES,
   type DestinationCreationFormData,
   type DestinationCreationFormErrors,
   type ElasticsearchDestinationFormData,
   type PrefixedDestinationSignal,
   type StaticIndexNaming,
 } from './types';
+import { getFilledCustomSignals, getSharedOtelNameOnSwitch } from './writing_mode_form';
 import {
-  getFilledCustomSignals,
-  getSharedIndexInput,
-  getSharedRemainderOnSwitch,
-} from './writing_mode_form';
-import {
-  INDEX_NAME_PREPEND,
   NamingButtonGroup,
   SignalFieldsBox,
   SignalPrepend,
   UNNAMED_SIGNALS_HELP,
   WritingModePanel,
 } from './writing_mode_panel';
-import { writeTargetErrorText, type WriteTargetError } from './write_target_error_text';
+import {
+  otelNameErrorText,
+  writeTargetErrorText,
+  type WriteTargetError,
+} from './write_target_error_text';
 
 interface LocalElasticsearchFieldsProps {
   errors: DestinationCreationFormErrors;
@@ -77,11 +75,10 @@ interface WriteTargetFieldsProps extends LocalElasticsearchFieldsProps {
 
 const DOCS_PREPEND = <SignalPrepend label={DESTINATION_SIGNAL_LABELS.docs} />;
 
-const SignalIndexField = ({
+const SignalWritePatternField = ({
   signal,
   value,
   error,
-  allowWildcard,
   disabled,
   onChange,
   onBlur,
@@ -89,12 +86,11 @@ const SignalIndexField = ({
   signal: PrefixedDestinationSignal;
   value: string;
   error: WriteTargetError;
-  allowWildcard: boolean;
   disabled: boolean;
   onChange: (index: string) => void;
   onBlur: () => void;
 }) => {
-  const errorText = writeTargetErrorText(signal, error, allowWildcard);
+  const errorText = writeTargetErrorText(signal, error, true);
   return (
     <EuiFormRow fullWidth isInvalid={Boolean(errorText)} error={errorText}>
       <EuiFieldText
@@ -105,28 +101,14 @@ const SignalIndexField = ({
         prepend={<SignalPrepend label={DESTINATION_SIGNAL_LABELS[signal]} />}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
-        placeholder={
-          allowWildcard
-            ? i18n.translate('xpack.streams.destinations.signalWritePatternPlaceholder', {
-                defaultMessage: 'e.g. {signal}-billing-*',
-                values: { signal },
-              })
-            : i18n.translate('xpack.streams.destinations.perSignalIndexPlaceholder', {
-                defaultMessage: 'e.g. {signal}-billing-default',
-                values: { signal },
-              })
-        }
-        aria-label={
-          allowWildcard
-            ? i18n.translate('xpack.streams.destinations.signalWritePatternAriaLabel', {
-                defaultMessage: '{signal} write pattern',
-                values: { signal: DESTINATION_SIGNAL_LABELS[signal] },
-              })
-            : i18n.translate('xpack.streams.destinations.signalIndexAriaLabel', {
-                defaultMessage: '{signal} index name',
-                values: { signal: DESTINATION_SIGNAL_LABELS[signal] },
-              })
-        }
+        placeholder={i18n.translate('xpack.streams.destinations.signalWritePatternPlaceholder', {
+          defaultMessage: 'e.g. {signal}-billing-*',
+          values: { signal },
+        })}
+        aria-label={i18n.translate('xpack.streams.destinations.signalWritePatternAriaLabel', {
+          defaultMessage: '{signal} write pattern',
+          values: { signal: DESTINATION_SIGNAL_LABELS[signal] },
+        })}
         data-test-subj={`streamsCreateDestination-${signal}-index`}
       />
     </EuiFormRow>
@@ -186,11 +168,10 @@ const AutoFields = ({
           <SignalFieldsBox help={UNNAMED_SIGNALS_HELP}>
             {PREFIXED_DESTINATION_SIGNALS.map((signal) => (
               <React.Fragment key={signal}>
-                <SignalIndexField
+                <SignalWritePatternField
                   signal={signal}
                   value={elasticsearch[SIGNAL_INDEX_FIELDS[signal]]}
                   error={errors[SIGNAL_INDEX_FIELDS[signal]]}
-                  allowWildcard
                   disabled={disabled}
                   onChange={(value) => {
                     indexFields[signal].onChange(value);
@@ -243,7 +224,8 @@ const StaticFields = ({
   docsIndexField,
 }: WriteTargetFieldsProps) => {
   const { setValue, resetField } = useFormContext<DestinationCreationFormData>();
-  const { staticNaming, logsIndex, metricsIndex, tracesIndex } = elasticsearch;
+  const setOtelName = useSetOtelName('elasticsearch');
+  const { staticNaming, staticNames } = elasticsearch;
   const requiredError =
     errors.staticIndexes === 'required'
       ? i18n.translate('xpack.streams.destinations.staticIndexRequiredErrorMessage', {
@@ -251,24 +233,9 @@ const StaticFields = ({
         })
       : undefined;
 
-  // Composition keeps a prefix the user typed, so the remainder alone would hide part of the input.
-  const [typedSharedIndex, setTypedSharedIndex] = useState('');
-  const composedTyped = composeStaticIndexesForAll(typedSharedIndex);
-  const sharedIndexValue =
-    composedTyped.logsIndex === logsIndex &&
-    composedTyped.metricsIndex === metricsIndex &&
-    composedTyped.tracesIndex === tracesIndex
-      ? typedSharedIndex
-      : getSharedIndexInput(elasticsearch);
-  const hasSignalPrefix = PREFIXED_DESTINATION_SIGNALS.some((signal) =>
-    sharedIndexValue.trim().startsWith(`${signal}-`)
-  );
-
-  const setSharedIndex = (remainder: string) => {
-    setTypedSharedIndex(remainder);
-    const indexes = composeStaticIndexesForAll(remainder);
+  const setSharedName = (name: OtelDataStreamName) => {
     for (const signal of PREFIXED_DESTINATION_SIGNALS) {
-      indexFields[signal].onChange(indexes[SIGNAL_INDEX_FIELDS[signal]]);
+      setOtelName(signal, name);
     }
   };
 
@@ -277,31 +244,22 @@ const StaticFields = ({
     if (naming !== 'shared') {
       return;
     }
-    const remainder = getSharedRemainderOnSwitch(elasticsearch);
-    if (remainder) {
-      setSharedIndex(remainder);
+    const name = getSharedOtelNameOnSwitch(staticNames);
+    if (name) {
+      setSharedName(name);
       return;
     }
+    setValue('elasticsearch.staticNames', EMPTY_STATIC_NAMES);
     for (const signal of PREFIXED_DESTINATION_SIGNALS) {
       resetField(getIndexFieldPath(signal));
     }
   };
 
-  const signalPrefixError =
-    hasSignalPrefix && (errors.logsIndex || errors.metricsIndex || errors.tracesIndex)
-      ? i18n.translate('xpack.streams.destinations.sharedIndexSignalPrefixErrorMessage', {
-          defaultMessage: 'Enter the name without the logs-, metrics- or traces- prefix.',
-        })
-      : undefined;
-
   const sharedError =
-    signalPrefixError ??
-    writeTargetErrorText('logs', errors.logsIndex, false) ??
-    writeTargetErrorText('metrics', errors.metricsIndex, false) ??
-    writeTargetErrorText('traces', errors.tracesIndex, false) ??
+    otelNameErrorText(errors.logsIndex) ??
+    otelNameErrorText(errors.metricsIndex) ??
+    otelNameErrorText(errors.tracesIndex) ??
     requiredError;
-
-  const hasSharedIndex = Boolean(logsIndex);
 
   const docsIndexRow = (
     <DocsIndexField
@@ -320,44 +278,26 @@ const StaticFields = ({
       <EuiSpacer size="m" />
       {staticNaming === 'shared' ? (
         <SignalFieldsBox>
-          <EuiFormRow
-            fullWidth
-            helpText={
-              sharedError
-                ? undefined
-                : i18n.translate('xpack.streams.destinations.sharedIndexSavedAsHelp', {
-                    defaultMessage: 'Saved as {logs}, {metrics} and {traces}.',
-                    values: {
-                      logs: hasSharedIndex ? logsIndex : 'logs-<name>',
-                      metrics: hasSharedIndex ? metricsIndex : 'metrics-<name>',
-                      traces: hasSharedIndex ? tracesIndex : 'traces-<name>',
-                    },
-                  })
-            }
-            isInvalid={Boolean(sharedError)}
-            error={sharedError}
-          >
-            <EuiFieldText
-              fullWidth
-              value={sharedIndexValue}
-              disabled={disabled}
-              isInvalid={Boolean(sharedError)}
-              prepend={<SignalPrepend label={INDEX_NAME_PREPEND} />}
-              onChange={(event) => setSharedIndex(event.target.value)}
-              onBlur={() => {
-                for (const signal of PREFIXED_DESTINATION_SIGNALS) {
-                  indexFields[signal].onBlur();
-                }
-              }}
-              placeholder={i18n.translate('xpack.streams.destinations.sharedIndexPlaceholder', {
-                defaultMessage: 'e.g. billing-default',
-              })}
-              aria-label={i18n.translate('xpack.streams.destinations.sharedIndexAriaLabel', {
-                defaultMessage: 'Index name for all OTel signals',
-              })}
-              data-test-subj="streamsCreateDestinationIndex"
-            />
-          </EuiFormRow>
+          <OtelNameFields
+            value={staticNames.logs}
+            errorText={sharedError}
+            helpText={i18n.translate('xpack.streams.destinations.sharedIndexSavedAsHelp', {
+              defaultMessage: 'Saved as {logs}, {metrics} and {traces}.',
+              values: {
+                logs: getSavedAsName('logs', staticNames.logs),
+                metrics: getSavedAsName('metrics', staticNames.logs),
+                traces: getSavedAsName('traces', staticNames.logs),
+              },
+            })}
+            disabled={disabled}
+            testSubjPrefix="streamsCreateDestinationIndex"
+            onChange={setSharedName}
+            onBlur={() => {
+              for (const signal of PREFIXED_DESTINATION_SIGNALS) {
+                indexFields[signal].onBlur();
+              }
+            }}
+          />
           <EuiSpacer size="s" />
           {docsIndexRow}
         </SignalFieldsBox>
@@ -366,20 +306,31 @@ const StaticFields = ({
           help={requiredError ?? UNNAMED_SIGNALS_HELP}
           isHelpError={Boolean(requiredError)}
         >
-          {PREFIXED_DESTINATION_SIGNALS.map((signal) => (
-            <React.Fragment key={signal}>
-              <SignalIndexField
-                signal={signal}
-                value={elasticsearch[SIGNAL_INDEX_FIELDS[signal]]}
-                error={errors[SIGNAL_INDEX_FIELDS[signal]]}
-                allowWildcard={false}
-                disabled={disabled}
-                onChange={indexFields[signal].onChange}
-                onBlur={indexFields[signal].onBlur}
-              />
-              <EuiSpacer size="s" />
-            </React.Fragment>
-          ))}
+          {PREFIXED_DESTINATION_SIGNALS.map((signal) => {
+            const index = elasticsearch[SIGNAL_INDEX_FIELDS[signal]];
+            return (
+              <React.Fragment key={signal}>
+                <OtelNameFields
+                  signal={signal}
+                  value={staticNames[signal]}
+                  errorText={otelNameErrorText(errors[SIGNAL_INDEX_FIELDS[signal]])}
+                  helpText={
+                    index
+                      ? i18n.translate('xpack.streams.destinations.signalIndexSavedAsHelp', {
+                          defaultMessage: 'Saved as {index}.',
+                          values: { index },
+                        })
+                      : undefined
+                  }
+                  disabled={disabled}
+                  testSubjPrefix={`streamsCreateDestination-${signal}-index`}
+                  onChange={(name) => setOtelName(signal, name)}
+                  onBlur={indexFields[signal].onBlur}
+                />
+                <EuiSpacer size="s" />
+              </React.Fragment>
+            );
+          })}
           {docsIndexRow}
         </SignalFieldsBox>
       )}
@@ -415,6 +366,8 @@ export const LocalElasticsearchFields = (props: LocalElasticsearchFieldsProps) =
     }
     resetField('elasticsearch.docsIndex');
     resetField('elasticsearch.docsWritePatterns');
+    // No input registers the name parts, so `resetField` would skip them.
+    setValue('elasticsearch.staticNames', EMPTY_STATIC_NAMES);
   };
 
   const onModeChange = (auto: boolean) => {

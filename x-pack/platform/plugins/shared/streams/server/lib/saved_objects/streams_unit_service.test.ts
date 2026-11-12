@@ -710,6 +710,88 @@ describe('StreamsUnitService', () => {
     ).resolves.toEqual({ compiled_config: 'receivers: {}' });
   });
 
+  describe('fixed index check', () => {
+    const localUnit = (logsIndex: string): StreamsUnit.Configuration => ({
+      ...unit,
+      destinations: [
+        {
+          id: 'es-local',
+          type: 'elasticsearch',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'api_key', value: { credential: 'es-local-api-key' } },
+            { name: 'index', value: logsIndex },
+          ],
+        },
+      ],
+    });
+    const localSecrets: StreamsUnit.Secrets = { 'es-local-api-key': 'local-key' };
+
+    const soClientWith = (storedUnit?: StreamsUnit.Configuration) => {
+      const soClient = createSoClient();
+      soClient.get.mockImplementation(async (type: string) => {
+        if (type === 'streams-configuration' && storedUnit) {
+          return asSavedObject<StreamsConfigurationSavedObjectAttributes>(type, {
+            unit_id: 'default',
+            unit: storedUnit,
+            secrets: localSecrets,
+          });
+        }
+        throw notFoundError;
+      });
+      soClient.create.mockImplementation(async (type: string, attributes) =>
+        asSavedObject(type, attributes)
+      );
+      return soClient;
+    };
+
+    it('rejects a fixed index that is not an otel data stream name and stores nothing', async () => {
+      const soClient = soClientWith();
+      const validateUnit = jest.fn().mockResolvedValue({});
+      const service = createService({ soClient, validateUnit });
+
+      await expect(
+        service.upsertUnit({
+          unitId: 'default',
+          unit: localUnit('logs-billing-default'),
+          secrets: localSecrets,
+        })
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message:
+          'Destination [es-local] writes logs to [logs-billing-default], which is not shaped logs-<dataset>.otel-<namespace> (for example logs-billing.otel-default). Only those data streams have the OpenTelemetry index templates.',
+      });
+      expect(validateUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('saves an otel data stream name', async () => {
+      const soClient = soClientWith();
+      const service = createService({ soClient });
+
+      await service.upsertUnit({
+        unitId: 'default',
+        unit: localUnit('logs-billing.otel-default'),
+        secrets: localSecrets,
+      });
+
+      expect(soClient.create).toHaveBeenCalled();
+    });
+
+    it('keeps saving a stored unit whose fixed index did not change', async () => {
+      const soClient = soClientWith(localUnit('logs-billing-default'));
+      const service = createService({ soClient });
+
+      await service.upsertUnit({
+        unitId: 'default',
+        unit: localUnit('logs-billing-default'),
+        secrets: {},
+      });
+
+      expect(soClient.create).toHaveBeenCalled();
+    });
+  });
+
   describe('sealed credential cache', () => {
     const storedWithCache = (
       sealedCredentials: StoredUnitCredential[],

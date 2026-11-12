@@ -10,11 +10,34 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { I18nProvider } from '@kbn/i18n-react';
 import { createDefaultUnit } from '../../../services/unit_repository';
 import { CreateDestinationModal } from './create_destination_modal';
-import { getDestinationCreateSpec } from './destination_models';
-import { EMPTY_ELASTICSEARCH_DESTINATION_FORM } from './types';
+import { createUnitDestination, getDestinationCreateSpec } from './destination_models';
+import { createRemoteElasticsearchUnitDestination } from './remote_elasticsearch_destination_models';
+import {
+  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  type ElasticsearchDestinationFormData,
+  type PrefixedDestinationSignal,
+} from './types';
 
 const NAME_REQUIRED = 'Enter a destination name.';
 const SIGNAL_NAME_REQUIRED = 'Name at least one signal.';
+const HYPHEN_ERROR = 'Dataset and namespace cannot contain "-".';
+const UPPERCASE_ERROR = 'Dataset and namespace must be lowercase.';
+const SAVED_AS_BILLING =
+  'Saved as logs-billing.otel-default, metrics-billing.otel-default and traces-billing.otel-default.';
+const SHARED_DATASET = 'streamsCreateDestinationIndexDataset';
+const SHARED_NAMESPACE = 'streamsCreateDestinationIndexNamespace';
+const signalDataset = (signal: PrefixedDestinationSignal) =>
+  `streamsCreateDestination-${signal}-indexDataset`;
+const signalNamespace = (signal: PrefixedDestinationSignal) =>
+  `streamsCreateDestination-${signal}-indexNamespace`;
+
+/** The config entries the local node is saved with. */
+const savedConfig = (elasticsearch: ElasticsearchDestinationFormData) =>
+  createUnitDestination({
+    id: 'billing',
+    name: 'Billing',
+    ...getDestinationCreateSpec(elasticsearch),
+  }).config;
 
 const renderModal = () => {
   const createDestination = jest.fn();
@@ -145,15 +168,11 @@ describe('CreateDestinationModal', () => {
       });
     });
 
-    it('submits Fixed shared as three composed indices and shows them in the help line', async () => {
+    it('saves otel data stream names for a shared Fixed name', async () => {
       const { createDestination } = renderModal();
       chooseFixed();
-      setFieldValue('streamsCreateDestinationIndex', 'billing-default');
-      expect(
-        screen.getByText(
-          'Saved as logs-billing-default, metrics-billing-default and traces-billing-default.'
-        )
-      ).toBeInTheDocument();
+      setFieldValue(SHARED_DATASET, 'billing');
+      expect(screen.getByText(SAVED_AS_BILLING)).toBeInTheDocument();
       setFieldValue('streamsCreateDestinationName', 'Billing');
       click('streamsCreateDestinationSubmit');
 
@@ -162,118 +181,202 @@ describe('CreateDestinationModal', () => {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
         staticNaming: 'shared',
-        logsIndex: 'logs-billing-default',
-        metricsIndex: 'metrics-billing-default',
-        tracesIndex: 'traces-billing-default',
-      });
-      expect(getDestinationCreateSpec(elasticsearch)).toEqual({
-        signals: ['logs', 'metrics', 'traces'],
-        indexBySignal: {
-          logs: 'logs-billing-default',
-          metrics: 'metrics-billing-default',
-          traces: 'traces-billing-default',
+        staticNames: {
+          logs: { dataset: 'billing', namespace: 'default' },
+          metrics: { dataset: 'billing', namespace: 'default' },
+          traces: { dataset: 'billing', namespace: 'default' },
         },
-        writePatternsBySignal: {},
+        logsIndex: 'logs-billing.otel-default',
+        metricsIndex: 'metrics-billing.otel-default',
+        tracesIndex: 'traces-billing.otel-default',
       });
+      expect(savedConfig(elasticsearch)).toEqual([
+        { name: 'index', telemetry: ['logs'], value: 'logs-billing.otel-default' },
+        { name: 'index', telemetry: ['metrics'], value: 'metrics-billing.otel-default' },
+        { name: 'index', telemetry: ['traces'], value: 'traces-billing.otel-default' },
+      ]);
     });
 
-    it('shows the generic help line when the shared field is empty and only the error when invalid', () => {
+    it('shows the generic help line when the shared dataset is empty and only the error when invalid', () => {
       renderModal();
       chooseFixed();
       expect(
-        screen.getByText('Saved as logs-<name>, metrics-<name> and traces-<name>.')
+        screen.getByText(
+          'Saved as logs-<dataset>.otel-default, metrics-<dataset>.otel-default and traces-<dataset>.otel-default.'
+        )
       ).toBeInTheDocument();
 
-      setFieldValue('streamsCreateDestinationIndex', 'Billing');
-      fireEvent.blur(screen.getByTestId('streamsCreateDestinationIndex'));
+      setFieldValue(SHARED_DATASET, 'Billing');
+      fireEvent.blur(screen.getByTestId(SHARED_DATASET));
 
-      expect(screen.getByText('Index names must be lowercase.')).toBeInTheDocument();
+      expect(screen.getByText(UPPERCASE_ERROR)).toBeInTheDocument();
       expect(screen.queryByText('Saved as', { exact: false })).not.toBeInTheDocument();
     });
 
-    it('keeps a shared name typed with a signal prefix as typed and asks to drop the prefix', () => {
+    it('keeps a shared dataset as typed and rejects a hyphen in it', () => {
       renderModal();
       chooseFixed();
-      setFieldValue('streamsCreateDestinationIndex', 'logs-');
-      expect(fieldValue('streamsCreateDestinationIndex')).toBe('logs-');
-
-      setFieldValue('streamsCreateDestinationIndex', 'logs-billing-default');
-      fireEvent.blur(screen.getByTestId('streamsCreateDestinationIndex'));
+      setFieldValue(SHARED_DATASET, 'logs-billing');
+      fireEvent.blur(screen.getByTestId(SHARED_DATASET));
       setFieldValue('streamsCreateDestinationName', 'Billing');
 
-      expect(fieldValue('streamsCreateDestinationIndex')).toBe('logs-billing-default');
-      expect(
-        screen.getByText('Enter the name without the logs-, metrics- or traces- prefix.')
-      ).toBeInTheDocument();
+      expect(fieldValue(SHARED_DATASET)).toBe('logs-billing');
+      expect(screen.getByText('Dataset and namespace cannot contain "-".')).toBeInTheDocument();
       expect(screen.getByTestId('streamsCreateDestinationSubmit')).toBeDisabled();
     });
 
-    it('keeps a shared name typed with a signal prefix after switching storage away and back', () => {
+    it('keeps the shared dataset and namespace after switching storage away and back', () => {
       renderModal();
       chooseFixed();
-      setFieldValue('streamsCreateDestinationIndex', 'logs-billing-default');
+      setFieldValue(SHARED_DATASET, 'billing');
+      setFieldValue(SHARED_NAMESPACE, 'prod');
 
       click('streamsCreateDestinationRemoteElasticsearch');
       click('streamsCreateDestinationLocalElasticsearch');
 
-      expect(fieldValue('streamsCreateDestinationIndex')).toBe('logs-billing-default');
+      expect(fieldValue(SHARED_DATASET)).toBe('billing');
+      expect(fieldValue(SHARED_NAMESPACE)).toBe('prod');
     });
 
-    it('submits Fixed per signal with full names as typed', async () => {
+    it('sends only the signals with a dataset', async () => {
       const { createDestination } = renderModal();
       chooseFixed();
       click('streamsCreateDestinationIndexNaming-perSignal');
-      setFieldValue('streamsCreateDestination-logs-index', 'logs-billing-default');
-      setFieldValue('streamsCreateDestination-traces-index', 'traces-billing-default');
+      setFieldValue(signalNamespace('logs'), 'prod');
+      setFieldValue(signalDataset('metrics'), 'app');
+      setFieldValue(signalNamespace('metrics'), 'prod');
+      expect(screen.getByText('Saved as metrics-app.otel-prod.')).toBeInTheDocument();
       setFieldValue('streamsCreateDestinationName', 'Billing');
       click('streamsCreateDestinationSubmit');
 
       const elasticsearch = await submittedElasticsearch(createDestination);
-      expect(elasticsearch).toEqual({
-        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
-        auto: false,
-        staticNaming: 'perSignal',
-        logsIndex: 'logs-billing-default',
-        tracesIndex: 'traces-billing-default',
-      });
       expect(getDestinationCreateSpec(elasticsearch)).toEqual({
-        signals: ['logs', 'traces'],
-        indexBySignal: { logs: 'logs-billing-default', traces: 'traces-billing-default' },
+        signals: ['metrics'],
+        indexBySignal: { metrics: 'metrics-app.otel-prod' },
         writePatternsBySignal: {},
       });
+      expect(savedConfig(elasticsearch)).toEqual([
+        { name: 'index', telemetry: ['metrics'], value: 'metrics-app.otel-prod' },
+      ]);
+    });
+
+    it('keeps the namespace when the dataset is cleared and typed again', async () => {
+      const { createDestination } = renderModal();
+      chooseFixed();
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      setFieldValue(signalNamespace('logs'), 'prod');
+      setFieldValue(signalDataset('logs'), 'x');
+      setFieldValue(signalDataset('logs'), '');
+
+      expect(fieldValue(signalNamespace('logs'))).toBe('prod');
+      expect(screen.queryByText('Saved as', { exact: false })).not.toBeInTheDocument();
+
+      setFieldValue(signalDataset('logs'), 'y');
+      setFieldValue('streamsCreateDestinationName', 'Billing');
+      click('streamsCreateDestinationSubmit');
+
+      const elasticsearch = await submittedElasticsearch(createDestination);
+      expect(getDestinationCreateSpec(elasticsearch).indexBySignal).toEqual({
+        logs: 'logs-y.otel-prod',
+      });
+    });
+
+    it('shows a name error on blur, only on the row it belongs to', () => {
+      renderModal();
+      chooseFixed();
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      setFieldValue(signalDataset('logs'), 'my-app');
+      setFieldValue(signalDataset('metrics'), 'app');
+
+      expect(screen.queryByText(HYPHEN_ERROR)).not.toBeInTheDocument();
+
+      fireEvent.blur(screen.getByTestId(signalDataset('logs')));
+
+      expect(screen.getAllByText(HYPHEN_ERROR)).toHaveLength(1);
+      expect(screen.getByText('Saved as metrics-app.otel-default.')).toBeInTheDocument();
+    });
+
+    it('names each dataset and namespace input for its signal', () => {
+      renderModal();
+      chooseFixed();
+      expect(screen.getByRole('textbox', { name: 'Dataset for all OTel signals' })).toBe(
+        screen.getByTestId(SHARED_DATASET)
+      );
+      expect(screen.getByRole('textbox', { name: 'Namespace for all OTel signals' })).toBe(
+        screen.getByTestId(SHARED_NAMESPACE)
+      );
+
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      expect(screen.getByRole('textbox', { name: 'Traces dataset' })).toBe(
+        screen.getByTestId(signalDataset('traces'))
+      );
+      expect(screen.getByRole('textbox', { name: 'Traces namespace' })).toBe(
+        screen.getByTestId(signalNamespace('traces'))
+      );
     });
 
     it('resets the signal fields when per-signal names disagree', () => {
       renderModal();
       chooseFixed();
-      setFieldValue('streamsCreateDestinationIndex', 'a-b');
+      setFieldValue(SHARED_DATASET, 'a');
       click('streamsCreateDestinationIndexNaming-perSignal');
-      setFieldValue('streamsCreateDestination-metrics-index', 'metrics-c-d');
+      setFieldValue(signalDataset('metrics'), 'c');
       click('streamsCreateDestinationIndexNaming-shared');
 
-      expect(fieldValue('streamsCreateDestinationIndex')).toBe('');
+      expect(fieldValue(SHARED_DATASET)).toBe('');
+      expect(fieldValue(SHARED_NAMESPACE)).toBe('default');
 
       click('streamsCreateDestinationIndexNaming-perSignal');
-      expect(fieldValue('streamsCreateDestination-logs-index')).toBe('');
-      expect(fieldValue('streamsCreateDestination-metrics-index')).toBe('');
-      expect(fieldValue('streamsCreateDestination-traces-index')).toBe('');
+      expect(fieldValue(signalDataset('logs'))).toBe('');
+      expect(fieldValue(signalDataset('metrics'))).toBe('');
+      expect(fieldValue(signalDataset('traces'))).toBe('');
     });
 
-    it('composes all three indices when one per-signal name moves to shared', () => {
+    it('resets the signal fields when per-signal namespaces disagree', () => {
       renderModal();
       chooseFixed();
       click('streamsCreateDestinationIndexNaming-perSignal');
-      setFieldValue('streamsCreateDestination-logs-index', 'logs-a-b');
+      setFieldValue(signalDataset('logs'), 'a');
+      setFieldValue(signalDataset('traces'), 'a');
+      setFieldValue(signalNamespace('traces'), 'prod');
       click('streamsCreateDestinationIndexNaming-shared');
 
-      expect(fieldValue('streamsCreateDestinationIndex')).toBe('a-b');
+      expect(fieldValue(SHARED_DATASET)).toBe('');
+      expect(fieldValue(SHARED_NAMESPACE)).toBe('default');
+    });
+
+    it('names all three signals when one per-signal name moves to shared', () => {
+      renderModal();
+      chooseFixed();
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      setFieldValue(signalDataset('logs'), 'a');
+      setFieldValue(signalNamespace('logs'), 'prod');
+      click('streamsCreateDestinationIndexNaming-shared');
+
+      expect(fieldValue(SHARED_DATASET)).toBe('a');
+      expect(fieldValue(SHARED_NAMESPACE)).toBe('prod');
       expect(
-        screen.getByText('Saved as logs-a-b, metrics-a-b and traces-a-b.')
+        screen.getByText('Saved as logs-a.otel-prod, metrics-a.otel-prod and traces-a.otel-prod.')
       ).toBeInTheDocument();
 
       click('streamsCreateDestinationIndexNaming-perSignal');
-      expect(fieldValue('streamsCreateDestination-metrics-index')).toBe('metrics-a-b');
-      expect(fieldValue('streamsCreateDestination-traces-index')).toBe('traces-a-b');
+      expect(fieldValue(signalDataset('metrics'))).toBe('a');
+      expect(fieldValue(signalNamespace('traces'))).toBe('prod');
+    });
+
+    it('resets the Fixed names when the mode changes and back', () => {
+      renderModal();
+      chooseFixed();
+      setFieldValue(SHARED_DATASET, 'billing');
+      setFieldValue(SHARED_NAMESPACE, 'prod');
+      chooseAutomatic();
+      useCustomIndexNames();
+
+      expect(fieldValue('streamsCreateDestination-logs-index')).toBe('');
+
+      chooseFixed();
+      expect(fieldValue(SHARED_DATASET)).toBe('');
+      expect(fieldValue(SHARED_NAMESPACE)).toBe('default');
     });
 
     it('resets the custom switch and naming when the mode changes', () => {
@@ -293,7 +396,7 @@ describe('CreateDestinationModal', () => {
       expect(fieldValue('streamsCreateDestination-logs-index')).toBe('');
 
       chooseFixed();
-      expect(screen.getByTestId('streamsCreateDestinationIndex')).toBeInTheDocument();
+      expect(screen.getByTestId(SHARED_DATASET)).toBeInTheDocument();
     });
   });
 
@@ -343,7 +446,7 @@ describe('CreateDestinationModal', () => {
       fireEvent.click(screen.getByLabelText('Fixed index per signal'));
       expect(screen.getByText('One name for all signals')).toBeInTheDocument();
       setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
-      setFieldValue('streamsCreateDestinationIndex', 'billing-default');
+      setFieldValue(SHARED_DATASET, 'billing');
       click('streamsCreateDestinationIndexNaming-perSignal');
       click('streamsCreateDestinationIndexNaming-shared');
       setFieldValue('streamsCreateDestinationName', 'Central');
@@ -353,7 +456,7 @@ describe('CreateDestinationModal', () => {
         expect(createDestination).toHaveBeenCalledWith(
           expect.objectContaining({
             elasticsearch: expect.objectContaining({
-              logsIndex: 'logs-billing-default',
+              logsIndex: 'logs-billing.otel-default',
               docsIndex: 'accounting-2026',
             }),
           }),
@@ -437,41 +540,69 @@ describe('CreateDestinationModal', () => {
       expect(screen.queryByText(API_KEY_REQUIRED)).not.toBeInTheDocument();
     });
 
-    it('submits the remote form values', async () => {
-      const { createDestination } = renderModal();
+    const chooseRemoteFixed = () => {
       click('streamsCreateDestinationRemoteElasticsearch');
       fireEvent.click(
         within(screen.getByTestId('streamsCreateDestinationFixedIndex')).getByRole('radio')
       );
-      setFieldValue('streamsCreateDestinationIndex', 'shared-idx');
       setFieldValue(
         'streamsCreateDestinationRemoteElasticsearchEndpoint',
         'https://es.example.com:443'
       );
       setFieldValue('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
+      setFieldValue('streamsCreateDestinationName', 'Central');
+    };
+
+    it('saves one telemetry-scoped otel index per signal for a shared Fixed name', async () => {
+      const { createDestination } = renderModal();
+      chooseRemoteFixed();
+      setFieldValue(SHARED_DATASET, 'billing');
+      expect(screen.getByText(SAVED_AS_BILLING)).toBeInTheDocument();
       expect(
         screen.getByTestId('streamsCreateDestinationRemoteElasticsearchApiKey')
       ).toHaveAttribute('type', 'password');
-      setFieldValue('streamsCreateDestinationName', 'Central');
       click('streamsCreateDestinationSubmit');
 
-      await waitFor(() =>
-        expect(createDestination).toHaveBeenCalledWith(
-          expect.objectContaining({
-            storageKind: 'remote_elasticsearch',
-            destinationName: 'Central',
-            remoteElasticsearch: expect.objectContaining({
-              auto: false,
-              logsIndex: 'shared-idx',
-              metricsIndex: 'shared-idx',
-              tracesIndex: 'shared-idx',
-              endpoint: 'https://es.example.com:443',
-              apiKey: 'remote-key',
-            }),
-          }),
-          expect.anything()
-        )
-      );
+      await waitFor(() => expect(createDestination).toHaveBeenCalled());
+      const formData = createDestination.mock.calls[0][0];
+      expect(formData).toMatchObject({
+        storageKind: 'remote_elasticsearch',
+        destinationName: 'Central',
+        remoteElasticsearch: {
+          auto: false,
+          logsIndex: 'logs-billing.otel-default',
+          metricsIndex: 'metrics-billing.otel-default',
+          tracesIndex: 'traces-billing.otel-default',
+          endpoint: 'https://es.example.com:443',
+          apiKey: 'remote-key',
+        },
+      });
+      const node = createRemoteElasticsearchUnitDestination({
+        id: 'central',
+        name: 'Central',
+        ...formData.remoteElasticsearch,
+      });
+      expect(node.config?.filter(({ name }) => name === 'index')).toEqual([
+        { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
+        { name: 'index', value: 'metrics-billing.otel-default', telemetry: ['metrics'] },
+        { name: 'index', value: 'traces-billing.otel-default', telemetry: ['traces'] },
+      ]);
+    });
+
+    it('shows a remote name error on blur and does not save', async () => {
+      const { createDestination } = renderModal();
+      chooseRemoteFixed();
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      setFieldValue(signalDataset('traces'), 'Bad');
+
+      expect(screen.queryByText(UPPERCASE_ERROR)).not.toBeInTheDocument();
+
+      fireEvent.blur(screen.getByTestId(signalDataset('traces')));
+
+      expect(screen.getByText(UPPERCASE_ERROR)).toBeInTheDocument();
+      click('streamsCreateDestinationSubmit');
+      await waitFor(() => expect(screen.getByText(UPPERCASE_ERROR)).toBeInTheDocument());
+      expect(createDestination).not.toHaveBeenCalled();
     });
   });
 
