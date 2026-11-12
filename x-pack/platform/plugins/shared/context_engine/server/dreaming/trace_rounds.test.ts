@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { AiIndexTraceWithQuery } from '../../common/http_api/ai_indices';
+import { estimateTokens } from './trace_batches';
 import {
   findTraceRounds,
   readTraceTranscripts,
@@ -252,6 +253,36 @@ describe('readTraceTranscripts', () => {
     expect(output.memories.map(({ id }) => id)).toEqual(['trace:trace-a', 'trace:trace-b']);
     expect(output.resume_from).toBe('2026-11-11T12:20:00.000Z');
     expect(output.resume_after).toBe('trace-b');
+  });
+
+  it('stops before the transcripts exceed max_tokens, and continues after the last round read', async () => {
+    esClient.esql.query.mockResolvedValue(
+      roundsResponse([
+        ['2026-11-11T12:10:00.000Z', 'trace-a'],
+        ['2026-11-11T12:20:00.000Z', 'trace-b'],
+        ['2026-11-11T12:30:00.000Z', 'trace-c'],
+      ]) as never
+    );
+    const read = (maxTokens: number) =>
+      readTraceTranscripts({
+        esClient,
+        traces: [agentTrace],
+        spaceId: 'default',
+        size: 50,
+        maxTokens,
+        ...window,
+      });
+    const tokensOfOne = estimateTokens((await read(Infinity)).memories[0]);
+
+    const capped = await read(tokensOfOne * 2);
+    expect(capped.memories.map(({ id }) => id)).toEqual(['trace:trace-a', 'trace:trace-b']);
+    expect(capped.resume_from).toBe('2026-11-11T12:20:00.000Z');
+    expect(capped.resume_after).toBe('trace-b');
+
+    // A round larger than the budget is still read, so the cursor moves on.
+    const tiny = await read(1);
+    expect(tiny.memories.map(({ id }) => id)).toEqual(['trace:trace-a']);
+    expect(tiny.resume_after).toBe('trace-a');
   });
 
   it('reports a source that fails, reads the others, and skips rounds with nothing to read', async () => {

@@ -14,6 +14,7 @@ import type {
 } from '../../common/step_types/read_trace_transcripts';
 import { formatErrorMessage } from '../utils/format_es_error';
 import { TRACE_ROUND_ID_PREFIX } from './ids';
+import { estimateTokens } from './trace_batches';
 import { buildRoundTranscript } from './trace_transcripts';
 
 /** The memory type of a round read from traces, as the dreaming model and the apply step see it. */
@@ -266,6 +267,7 @@ export const readTraceTranscripts = async ({
   after = '',
   until,
   size,
+  maxTokens = Infinity,
 }: {
   /** Scoped to the workflow user: traces are read with their Elasticsearch privileges. */
   esClient: ElasticsearchClient;
@@ -275,7 +277,9 @@ export const readTraceTranscripts = async ({
   after?: string;
   until: string;
   size: number;
-}): Promise<ReadTraceTranscriptsOutput> => {
+  /** The read stops before its transcripts exceed this many estimated tokens. */
+  maxTokens?: number;
+}): Promise<Omit<ReadTraceTranscriptsOutput, 'batches'>> => {
   if (Date.parse(until) <= Date.parse(since)) {
     return {
       memories: [],
@@ -309,8 +313,6 @@ export const readTraceTranscripts = async ({
     .filter(({ traceId }) => !seen.has(traceId) && !!seen.add(traceId))
     .filter((round) => !boundary || compareRounds(round, boundary) <= 0);
   const taken = eligible.slice(0, size);
-  const capped = boundary !== undefined || eligible.length > size;
-  const last = taken[taken.length - 1];
 
   const byTarget = new Map<string, TraceRound[]>();
   for (const round of taken) {
@@ -327,17 +329,31 @@ export const readTraceTranscripts = async ({
   }
 
   let skipped = 0;
-  const memories = taken.flatMap((round) => {
+  let tokens = 0;
+  let read = 0;
+  const memories: TraceTranscriptMemory[] = [];
+  for (const round of taken) {
     const spans = loaded.get(round.traceId) ?? {};
     const transcript = buildRoundTranscript({
       lastChat: { inputMessages: spans.inputMessages, outputMessages: spans.outputMessages },
     });
     if (transcript === undefined) {
       skipped++;
-      return [];
+      read++;
+      continue;
     }
-    return [toMemory(round, spans, transcript, spaceId)];
-  });
+    const memory = toMemory(round, spans, transcript, spaceId);
+    const memoryTokens = estimateTokens(memory);
+    // The first round is always read, so a round larger than the budget does not stall the cursor.
+    if (memories.length > 0 && tokens + memoryTokens > maxTokens) {
+      break;
+    }
+    memories.push(memory);
+    tokens += memoryTokens;
+    read++;
+  }
+  const capped = boundary !== undefined || eligible.length > size || read < taken.length;
+  const last = taken[read - 1];
 
   return {
     memories,

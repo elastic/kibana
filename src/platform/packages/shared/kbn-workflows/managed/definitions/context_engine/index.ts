@@ -9,6 +9,7 @@
 
 import DREAMING_YAML from './dreaming.yaml';
 import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
+import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
@@ -118,15 +119,41 @@ export type ContextEngineTraceDreamingWorkflowTemplateValues =
 export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 2,
+  version: 3,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRACE_DREAMING_YAML, {
       __NAME__: `Trace dreaming: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
       __CONCURRENCY_KEY__: `context-engine-trace-dreaming-${values.instanceKey}`,
-      __MEMORIES_INDEX__: values.memoriesIndex,
       __INTERVAL_MINUTES__: values.intervalMinutes,
+      __BATCH_WORKFLOW_ID__: `${CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID}-${values.instanceKey}`,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID =
+  'system-context-engine-trace-dreaming-batch';
+
+/** The same config as dreaming: a batch is extracted with its types and instructions. */
+export type ContextEngineTraceDreamingBatchWorkflowTemplateValues =
+  ContextEngineDreamingWorkflowTemplateValues;
+
+/**
+ * Extracts long-term facts, entities and relationships from one batch of agent rounds. Trace
+ * dreaming runs a read's batches at once, each with this workflow, as a parallel step can only run
+ * straight-line steps.
+ */
+export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
+  id: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(TRACE_DREAMING_BATCH_YAML, {
+      __NAME__: `Trace dreaming batch: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __MEMORIES_INDEX__: values.memoriesIndex,
       __CONNECTOR_ID__: values.connectorId,
       __INSTRUCTIONS__: values.instructions,
       __FACT_TYPES__: values.factTypes,
@@ -134,4 +161,4 @@ export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
       __RELATIONSHIP_TYPES__: values.relationshipTypes,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingWorkflowTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingBatchWorkflowTemplateValues>;
