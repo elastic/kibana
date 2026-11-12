@@ -33,7 +33,7 @@ CONFIG_PATHS=(
 )
 # The connectors those suites run, by the emulator's name for them: the connector id without the
 # dot. Add a connector here when adding a suite for it.
-CONNECTORS="firecrawl"
+CONNECTORS="firecrawl,brave-search,shodan,censys,jina,figma"
 EMULATOR_SPEC="${CONNECTOR_EMULATOR_SPEC:-snapshot}"
 EMULATOR_LOG="target/connector_emulator.log"
 
