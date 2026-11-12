@@ -62,6 +62,8 @@ export interface WorkflowDocumentBulkWrite {
 export type WorkflowDocumentBulkWriteResult =
   | { status: 'written' }
   | { status: 'conflict' }
+  /** Elasticsearch was too busy (429) and did not write it, so it can be retried. */
+  | { status: 'rejected'; error: Error }
   | { status: 'failed'; error: Error };
 
 export interface ReadModifyWriteWorkflowDocumentParams {

@@ -179,7 +179,7 @@ Every write to the workflow index runs on Elasticsearch's small `system_write` t
 
 - reads the stored documents of the whole batch with one real-time multi-get, and skips unchanged workflows, so a restart with nothing to change costs that one read. When the workflow index was just created by another Kibana node or plugin and its shard is not ready yet, it reads again for up to about 3 seconds;
 - writes missing and changed workflows with `_bulk`, at most 50 documents or 2 MB per request, one request at a time, each with `refresh: true`. The workflows are readable as soon as the call resolves, and the pass never holds more than one `system_write` thread;
-- re-reads workflows that another Kibana node wrote at the same time, and skips them when they are already up to date.
+- re-reads workflows that another Kibana node wrote at the same time, and skips them when they are already up to date. Workflows Elasticsearch rejects as too busy (429) are read and written again after a wait of 1 s, then 2 s.
 
 It follows the same rules as `install` for what to write, keep or skip, and resolves with the items it could not install instead of throwing for them:
 

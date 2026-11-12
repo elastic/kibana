@@ -58,6 +58,8 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
+/** Wait before retrying writes Elasticsearch rejected as too busy, times the attempt number. */
+const MANAGED_INSTALL_REJECTED_RETRY_DELAY_MS = 1000;
 const ORPHAN_DELETE_CONCURRENCY = 10;
 const MAX_ORPHAN_DELETE_RETRIES = 2;
 
@@ -92,6 +94,13 @@ interface ManagedInstallTarget {
   values?: ManagedWorkflowTemplateValues;
 }
 
+/** A workflow to write again: it lost a concurrent write, or Elasticsearch rejected it as too busy. */
+interface ManagedInstallRetry {
+  target: ManagedInstallTarget;
+  /** Set when Elasticsearch rejected the write (429); unset after a conflict. */
+  rejection?: Error;
+}
+
 interface ManagedInstallWrite {
   target: ManagedInstallTarget;
   document: WorkflowProperties;
@@ -113,7 +122,7 @@ interface ManagedWorkflowsServiceDeps {
   logger: Logger;
   /** When true, abort before primary ES writes (plugin stop mid-install). */
   isStopping?: () => boolean;
-  /** Wait before a batch install retries the workflows that lost a concurrent write. */
+  /** Wait before a batch install retries, for conflicts and rejections alike. Tests set it to 0. */
   retryDelayMs?: number;
   audit?: Pick<
     WorkflowManagementAuditLog,
@@ -437,55 +446,55 @@ export class ManagedWorkflowsService {
     const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
     const now = new Date();
     const stats: ManagedInstallStats = { created: 0, updated: 0, skipped: 0, bulkRequests: 0 };
-    let pending = targets;
+    let pending: ManagedInstallRetry[] = targets.map((target) => ({ target }));
     for (let attempt = 0; pending.length > 0; attempt++) {
       if (attempt > 0) {
         if (attempt > MAX_MANAGED_INSTALL_RETRIES) {
-          for (const target of pending) {
-            failed.push(
-              this.toInstallFailure(
-                target,
-                new WorkflowConflictError(
-                  `Workflow with id '${
-                    target.workflowDocumentId
-                  }' kept conflicting with concurrent updates after ${
-                    MAX_MANAGED_INSTALL_RETRIES + 1
-                  } attempts.`,
-                  target.workflowDocumentId
-                )
-              )
-            );
-          }
+          failed.push(
+            ...pending.map(({ target, rejection }) =>
+              this.toInstallFailure(target, this.toRetriesExhaustedError(target, rejection))
+            )
+          );
           break;
         }
+        const rejected = pending.filter(({ rejection }) => rejection).length;
         this.logger.debug(
-          `Managed workflows: retrying install of ${pending.length} workflow(s) after concurrent update conflicts`
+          `Managed workflows: retrying install of ${pending.length} workflow(s) after ` +
+            `${
+              pending.length - rejected
+            } concurrent update conflict(s) and ${rejected} rejection(s) by Elasticsearch`
         );
-        await delayMs(this.deps.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS);
+        await delayMs(
+          this.deps.retryDelayMs ??
+            (rejected > 0
+              ? MANAGED_INSTALL_REJECTED_RETRY_DELAY_MS * attempt
+              : DEFAULT_RETRY_DELAY_MS)
+        );
       }
 
+      const pendingTargets = pending.map(({ target }) => target);
       let storedById: Map<string, VersionedWorkflowDocument>;
       try {
         storedById = await this.deps.crudService.getWorkflowDocumentsWithVersionByIds(
-          pending.map(({ workflowDocumentId }) => workflowDocumentId)
+          pendingTargets.map(({ workflowDocumentId }) => workflowDocumentId)
         );
       } catch (error) {
         if (attempt === 0) {
           throw error;
         }
-        failed.push(...pending.map((target) => this.toInstallFailure(target, error)));
+        failed.push(...pendingTargets.map((target) => this.toInstallFailure(target, error)));
         break;
       }
 
       const writes = await this.prepareManagedInstallWrites({
-        targets: pending,
+        targets: pendingTargets,
         storedById,
         isStartupWindow,
         now,
         failed,
         stats,
       });
-      const { conflicted, aborted } = await this.writeManagedInstallChunks({
+      const { retries, aborted } = await this.writeManagedInstallChunks({
         writes,
         registeredPluginId,
         now,
@@ -495,7 +504,7 @@ export class ManagedWorkflowsService {
       if (aborted) {
         break;
       }
-      pending = conflicted;
+      pending = retries;
     }
 
     this.logger.debug(
@@ -640,8 +649,8 @@ export class ManagedWorkflowsService {
   }
 
   /**
-   * Writes one chunk at a time. Returns the targets that lost a concurrent write, and whether
-   * Kibana started stopping before every chunk was written.
+   * Writes one chunk at a time. Returns the workflows to write again, and whether Kibana started
+   * stopping before every chunk was written.
    */
   private async writeManagedInstallChunks({
     writes,
@@ -655,13 +664,13 @@ export class ManagedWorkflowsService {
     now: Date;
     failed: ManagedWorkflowInstallFailure[];
     stats: ManagedInstallStats;
-  }): Promise<{ conflicted: ManagedInstallTarget[]; aborted: boolean }> {
+  }): Promise<{ retries: ManagedInstallRetry[]; aborted: boolean }> {
     const chunks = chunkByCountAndBytes(writes, {
       maxCount: MANAGED_INSTALL_BULK_MAX_DOCUMENTS,
       maxBytes: MANAGED_INSTALL_BULK_MAX_BYTES,
       getBytes: ({ document }) => Buffer.byteLength(JSON.stringify(document)),
     });
-    const conflicted: ManagedInstallTarget[] = [];
+    const retries: ManagedInstallRetry[] = [];
 
     for (const [chunkIndex, chunk] of chunks.entries()) {
       if (this.shouldAbortManagedWrite(`install of ${chunk.length} workflow(s)`)) {
@@ -673,13 +682,13 @@ export class ManagedWorkflowsService {
           }
         }
         this.markInstallIncomplete(registeredPluginId);
-        return { conflicted, aborted: true };
+        return { retries, aborted: true };
       }
 
-      await this.writeManagedInstallChunk({ chunk, now, failed, conflicted, stats });
+      await this.writeManagedInstallChunk({ chunk, now, failed, retries, stats });
     }
 
-    return { conflicted, aborted: false };
+    return { retries, aborted: false };
   }
 
   /** Writes one chunk with one `_bulk` request. A failed request fails only this chunk's workflows. */
@@ -687,13 +696,13 @@ export class ManagedWorkflowsService {
     chunk,
     now,
     failed,
-    conflicted,
+    retries,
     stats,
   }: {
     chunk: readonly ManagedInstallWrite[];
     now: Date;
     failed: ManagedWorkflowInstallFailure[];
-    conflicted: ManagedInstallTarget[];
+    retries: ManagedInstallRetry[];
     stats: ManagedInstallStats;
   }): Promise<void> {
     let results: WorkflowDocumentBulkWriteResult[];
@@ -722,7 +731,9 @@ export class ManagedWorkflowsService {
           stats.created++;
         }
       } else if (result.status === 'conflict') {
-        conflicted.push(write.target);
+        retries.push({ target: write.target });
+      } else if (result.status === 'rejected') {
+        retries.push({ target: write.target, rejection: result.error });
       } else {
         failed.push(this.toInstallFailure(write.target, result.error));
       }
@@ -782,6 +793,22 @@ export class ManagedWorkflowsService {
     error: unknown
   ): ManagedWorkflowInstallFailure {
     return { id, workflowId: workflowDocumentId, spaceId, error: toError(error) };
+  }
+
+  private toRetriesExhaustedError(
+    { workflowDocumentId }: ManagedInstallTarget,
+    rejection: Error | undefined
+  ): Error {
+    const attempts = MAX_MANAGED_INSTALL_RETRIES + 1;
+    if (rejection) {
+      return new Error(
+        `Elasticsearch rejected the write of workflow '${workflowDocumentId}' as too many requests after ${attempts} attempts: ${rejection.message}`
+      );
+    }
+    return new WorkflowConflictError(
+      `Workflow with id '${workflowDocumentId}' kept conflicting with concurrent updates after ${attempts} attempts.`,
+      workflowDocumentId
+    );
   }
 
   public async uninstallManagedWorkflow(

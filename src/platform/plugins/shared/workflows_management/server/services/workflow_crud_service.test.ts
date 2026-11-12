@@ -748,6 +748,67 @@ describe('WorkflowCrudService', () => {
       );
       expect(results.map(({ status }) => status)).toEqual(['failed', 'failed', 'written']);
     });
+
+    it('reports items Elasticsearch rejected as too busy as rejected, not failed', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: 'wf-written', status: 201 } },
+          {
+            create: {
+              _id: 'wf-rejected',
+              status: 429,
+              error: { type: 'es_rejected_execution_exception', reason: 'queue full' },
+            },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-written', document: makeSource() },
+        { id: 'wf-rejected', document: makeSource() },
+      ]);
+
+      expect(results).toEqual([
+        { status: 'written' },
+        { status: 'rejected', error: new Error('queue full') },
+      ]);
+    });
+
+    it('reports every item as rejected when Elasticsearch rejects the whole request as too busy', async () => {
+      const { deps, client } = makeDeps();
+      const tooManyRequests = new errors.ResponseError({
+        statusCode: 429,
+        body: { error: { type: 'es_rejected_execution_exception' } },
+        headers: {},
+        warnings: [],
+        meta: {} as any,
+      });
+      client.bulk.mockRejectedValue(tooManyRequests);
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-1', document: makeSource() },
+        { id: 'wf-2', document: makeSource() },
+      ]);
+
+      expect(results).toEqual([
+        { status: 'rejected', error: tooManyRequests },
+        { status: 'rejected', error: tooManyRequests },
+      ]);
+    });
+
+    it('throws when the whole request fails for another reason', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockRejectedValue(new Error('connection reset'));
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.bulkWriteWorkflowDocuments([{ id: 'wf-1', document: makeSource() }])
+      ).rejects.toThrow('connection reset');
+    });
   });
 
   describe('createWorkflow', () => {

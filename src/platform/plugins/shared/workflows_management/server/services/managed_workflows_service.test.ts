@@ -1662,6 +1662,44 @@ describe('ManagedWorkflowsService', () => {
       expect(failed[0].error.message).toContain('after 3 attempts');
     });
 
+    it('writes a workflow again after Elasticsearch rejected it as too busy', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.bulkWriteWorkflowDocuments.mockResolvedValueOnce([
+        { status: 'rejected', error: new Error('queue full') },
+      ]);
+
+      const result = await service.bulkInstallManagedWorkflows(
+        [{ id: WORKFLOW_ID, spaceId: SPACE_ID }],
+        PLUGIN_ID
+      );
+
+      expect(result).toEqual({ failed: [] });
+      expect(crudService.getWorkflowDocumentsWithVersionByIds).toHaveBeenCalledTimes(2);
+      expect(crudService.bulkWriteWorkflowDocuments).toHaveBeenCalledTimes(2);
+      expect(crudService.logWorkflowChangesAfterWrite).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a workflow still rejected as too busy after two retries', async () => {
+      const { crudService, service } = createService();
+      crudService.bulkWriteWorkflowDocuments.mockImplementation(async (writes) =>
+        writes.map(() => ({ status: 'rejected' as const, error: new Error('queue full') }))
+      );
+
+      const { failed } = await service.bulkInstallManagedWorkflows(
+        [{ id: WORKFLOW_ID, spaceId: SPACE_ID }],
+        PLUGIN_ID
+      );
+
+      expect(crudService.bulkWriteWorkflowDocuments).toHaveBeenCalledTimes(3);
+      expect(failed).toHaveLength(1);
+      expect(failed[0].error).not.toBeInstanceOf(WorkflowConflictError);
+      expect(failed[0].error.message).toBe(
+        `Elasticsearch rejected the write of workflow '${WORKFLOW_ID}' as too many requests after 3 attempts: queue full`
+      );
+    });
+
     it('rejects when the first read fails', async () => {
       const { crudService, service } = createService();
       crudService.getWorkflowDocumentsWithVersionByIds.mockRejectedValue(

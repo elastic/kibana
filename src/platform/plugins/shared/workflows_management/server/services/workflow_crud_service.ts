@@ -14,7 +14,7 @@ import pMap from 'p-map';
 import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
-import { isNotFoundError } from '@kbn/es-errors';
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import {
   DEFAULT_MAX_RETRIES,
   delayMs,
@@ -150,6 +150,7 @@ const SHARD_UNAVAILABLE_READ_ERROR_TYPES: ReadonlySet<string> = new Set([
 ]);
 /** Waits between reads while the shard is unavailable: about 3 seconds in all. */
 const SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS = [100, 200, 400, 800, 1600] as const;
+const TOO_MANY_REQUESTS_STATUS_CODE = 429;
 
 interface ApplyWorkflowUpdateResult {
   response: UpdatedWorkflowResponseDto;
@@ -372,10 +373,22 @@ export class WorkflowCrudService {
       return results;
     }
 
-    const { items } = await this.deps.workflowStorage.getClient().bulk({
-      operations,
-      refresh: true,
-    });
+    let items;
+    try {
+      ({ items } = await this.deps.workflowStorage.getClient().bulk({
+        operations,
+        refresh: true,
+      }));
+    } catch (error) {
+      // Elasticsearch rejected the whole request before writing any of it.
+      if (isResponseError(error) && error.statusCode === TOO_MANY_REQUESTS_STATUS_CODE) {
+        for (const writeIndex of operationWriteIndexes) {
+          results[writeIndex] = { status: 'rejected', error };
+        }
+        return results;
+      }
+      throw error;
+    }
 
     for (const [operationIndex, writeIndex] of operationWriteIndexes.entries()) {
       const item = items[operationIndex];
@@ -389,6 +402,12 @@ export class WorkflowCrudService {
         results[writeIndex] = { status: 'written' };
       } else if (operation.status === OCC_CONFLICT_STATUS_CODE) {
         results[writeIndex] = { status: 'conflict' };
+      } else if (operation.status === TOO_MANY_REQUESTS_STATUS_CODE) {
+        // A full write queue rejects items inside a successful response.
+        results[writeIndex] = {
+          status: 'rejected',
+          error: new Error(extractBulkItemError(operation.error)),
+        };
       } else {
         results[writeIndex] = {
           status: 'failed',
