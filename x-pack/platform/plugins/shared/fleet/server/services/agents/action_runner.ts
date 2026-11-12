@@ -194,8 +194,10 @@ export abstract class ActionRunner {
     // Recurring task that watches this action, so it is resumed after a Kibana crash or after a
     // runner dies mid-flight. Failing to schedule it must not stop the action from running.
     try {
-      this.checkTaskId = await this.ensureCheckResultTask();
+      await this.ensureCheckResultTask();
     } catch (error) {
+      // `this.checkTaskId` is set before the scheduling is awaited and deliberately kept here:
+      // the task may well exist despite this failure.
       logger.error(
         `Could not schedule the check task for action ${this.actionParams.actionId}, continuing without it: ${error.message}`,
         { error }
@@ -332,6 +334,15 @@ export abstract class ActionRunner {
       this.getTaskType()
     );
     const retryParams: RetryParams = getRetryParams(this.getTaskType(), this.retryParams);
+
+    // Held before the scheduling is awaited, because the id is deterministic and a failure here
+    // does not mean no task exists: `ensureScheduled` can persist the task and then time out on
+    // the way back. Dropping the id in that case leaves a live watchdog this runner neither
+    // heartbeats to nor removes, so it reads the action as dead and resumes it — a second run of
+    // an action that is still going, and for the types exempt from deduplication a second set of
+    // actions with it. Writing to a task that really was not created is the cheaper mistake:
+    // those writes are best effort and `removeIfExists` tolerates a missing task.
+    this.checkTaskId = taskId;
 
     return await this.bulkActionsResolver!.run(
       this.actionParams,
@@ -508,23 +519,49 @@ export abstract class ActionRunner {
 
   /**
    * The agents of a batch that no earlier run of this action has already dealt with.
+   *
+   * Dealt with covers two things, and an action document only proves the first. An agent a run
+   * actioned is named in the document it wrote; an agent it refused — unsupported, hosted,
+   * already in the requested state — is left out of that list and given an error result instead.
+   * Filtering on the documents alone hands those refused agents back to `processAgents`, which
+   * refuses them again and writes a second result for each. Nothing throws, so the recovery below
+   * never sees it, and `action_status` counts result documents: the duplicates inflate the
+   * failures and can carry the action past its total while agents it did action are still to
+   * acknowledge.
    */
   private async getUnhandledAgents(agents: Agent[]): Promise<Agent[]> {
     const actionedAgentIds = await this.getActionedAgentIds();
-    return actionedAgentIds.size ? agents.filter(({ id }) => !actionedAgentIds.has(id)) : agents;
+    const notActioned = actionedAgentIds.size
+      ? agents.filter(({ id }) => !actionedAgentIds.has(id))
+      : agents;
+    if (notActioned.length === 0) {
+      return notActioned;
+    }
+
+    const agentIdsWithoutResults = new Set(
+      await getAgentsWithoutActionResults(
+        this.esClient,
+        [this.actionParams.actionId!],
+        notActioned.map(({ id }) => id)
+      )
+    );
+    return notActioned.filter(({ id }) => agentIdsWithoutResults.has(id));
   }
 
   /**
    * Whether a batch has to be filtered against the agents earlier runs of this action already
    * actioned.
    *
-   * A first attempt has no earlier run to deduplicate against, and two action types are exempt
-   * whatever the attempt — see `DEDUPLICATION_EXEMPT_TASK_TYPES`.
+   * A first attempt has no earlier run to deduplicate against, and `runActionAsyncTask` schedules
+   * it with `retryCount: 1` — the count is of attempts, not of retries, so only a value above 1
+   * is one. A resume is a retry whatever its count says: the check task continues the attempt the
+   * stalled runner was on, and that runner may have actioned agents before it stopped.
+   *
+   * Two action types are exempt whatever the attempt — see `DEDUPLICATION_EXEMPT_TASK_TYPES`.
    */
   private shouldDeduplicate(): boolean {
-    return (
-      !!this.retryParams.retryCount && !DEDUPLICATION_EXEMPT_TASK_TYPES.includes(this.getTaskType())
-    );
+    const isRetry = (this.retryParams.retryCount ?? 0) > 1 || !!this.retryParams.isResumed;
+    return isRetry && !DEDUPLICATION_EXEMPT_TASK_TYPES.includes(this.getTaskType());
   }
 
   /**

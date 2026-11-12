@@ -116,7 +116,11 @@ describe('ReassignActionRunner', () => {
     mockedBulkUpdateAgents.mockResolvedValue(undefined as never);
     mockedCreateAgentAction.mockResolvedValue({} as never);
     mockActionedAgentIds([]);
-    mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
+    // it answers which of the agents it is given have no result yet, so this is "none of them
+    // has one", the normal case
+    mockedGetAgentsWithoutActionResults.mockImplementation(
+      async (_esClient, _actionIds, agentIds) => agentIds
+    );
   });
 
   const createRunner = (retryParams = {}) =>
@@ -130,7 +134,9 @@ describe('ReassignActionRunner', () => {
         total: AGENTS.length,
         newAgentPolicyId: TARGET_POLICY_ID,
       },
-      { retryCount: 1, taskId: RETRY_TASK_ID, pitId: 'stale-pit', ...retryParams }
+      // `isResumed` is what a watchdog restart sets, and is the plainest way to say "this is not
+      // the first run": `runActionAsyncTask` schedules that one with `retryCount: 1`
+      { retryCount: 1, isResumed: true, taskId: RETRY_TASK_ID, pitId: 'stale-pit', ...retryParams }
     );
 
   it('reassigns the eligible agents of a batch and rejects the rest', async () => {
@@ -198,12 +204,14 @@ describe('ReassignActionRunner', () => {
 
   it('does not write error results again for agents that already have one', async () => {
     mockActionedAgentIds(['agent-2', 'agent-3']);
-    // the usual case: the earlier run wrote both the document and the error results, and a second
+    // the usual case: the earlier run wrote both the document and the error results, so the two
+    // it refused are dropped with the two it actioned and the batch has nothing left. A second
     // result for one agent would be counted twice
     mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
 
     await createRunner().runActionAsyncWithRetry();
 
+    expect(mockedBulkUpdateAgents).not.toHaveBeenCalled();
     expect(createErrorActionResults).not.toHaveBeenCalled();
   });
 
@@ -296,7 +304,8 @@ describe('ReassignActionRunner', () => {
       perPage: 2,
     } as Awaited<ReturnType<typeof getAgentsByKuery>>);
 
-    await createRunner({ retryCount: undefined }).runActionAsyncWithRetry();
+    // what a first run really carries: scheduled by `runActionAsyncTask`, never resumed
+    await createRunner({ retryCount: 1, isResumed: false }).runActionAsyncWithRetry();
 
     expect(resolver.run).toHaveBeenCalledWith(
       expect.anything(),

@@ -64,7 +64,17 @@ export const MAX_CHECK_TASK_RUNS = (24 * 60) / CHECK_TASK_INTERVAL_MINUTES;
 export interface RetryParams {
   pitId?: string;
   searchAfter?: SortResults;
+  /**
+   * Which attempt this is, counting from 1: the first run of an action is scheduled with
+   * `retryCount: 1` by `runActionAsyncTask`, so only a value above 1 means a retry.
+   */
   retryCount?: number;
+  /**
+   * Set by the check task when it restarts a runner it found stalled. A resume can follow a run
+   * that actioned agents without recording the attempt, so it has to deduplicate whatever
+   * `retryCount` says.
+   */
+  isResumed?: boolean;
   taskId?: string;
   /** Agents processed by earlier runs of this action, so the count stays cumulative. */
   nbAgentsProcessed?: number;
@@ -111,13 +121,22 @@ export interface BulkActionCheckTaskState {
   runCount?: number;
 }
 
+/**
+ * Update tags retries from the beginning rather than from the cursor, under a fresh snapshot.
+ *
+ * The count is reset with the cursor, never on its own. `update_agent_tags` only narrows the
+ * kuery when a single tag is added or a single tag removed, so a rename or a multi-tag change
+ * re-pages every agent the action matched. Carrying the earlier count into that would take
+ * `nbAgentsProcessed` past `total` while the run is still going, and the check task reads that as
+ * a finished action and removes itself — leaving nothing to resume a runner that then dies.
+ */
 export function getRetryParams(taskType: string, retryParams: RetryParams): RetryParams {
-  // update tags will retry with tags filter
   return taskType === BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY
     ? {
         ...retryParams,
         pitId: undefined,
         searchAfter: undefined,
+        nbAgentsProcessed: 0,
       }
     : retryParams;
 }

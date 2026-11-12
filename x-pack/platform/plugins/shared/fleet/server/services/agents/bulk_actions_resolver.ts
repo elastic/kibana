@@ -575,7 +575,12 @@ const runCheckTask = async (
     }
     await resolver.run(
       actionParams,
-      { ...retryParams, retryCount: checkpoint.retryCount ?? 1, taskId: retryTaskId },
+      {
+        ...retryParams,
+        retryCount: checkpoint.retryCount ?? 1,
+        isResumed: true,
+        taskId: retryTaskId,
+      },
       taskInstance.taskType,
       retryTaskId,
       // Scheduling must not retry on its own backoff here. This task is itself the retry loop, so

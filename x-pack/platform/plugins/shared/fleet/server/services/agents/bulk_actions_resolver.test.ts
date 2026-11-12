@@ -574,15 +574,22 @@ describe('createRetryTask', () => {
       await createRetryTask(
         createTaskInstance({
           taskType: BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY,
-          state: { searchAfter: ['lastAgent'] },
+          state: { searchAfter: ['lastAgent'], nbAgentsProcessed: 7 },
         }),
         getDeps,
         jest.fn()
       ).run();
 
+      // the count goes with the cursor. `update_agent_tags` only narrows the kuery for a single
+      // tag added or removed, so a rename re-pages every agent: keeping the old count would take
+      // `nbAgentsProcessed` past `total` mid-run, which the check task reads as finished
       expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ searchAfter: undefined, pitId: undefined }),
+        expect.objectContaining({
+          searchAfter: undefined,
+          pitId: undefined,
+          nbAgentsProcessed: 0,
+        }),
         expect.anything(),
         expect.anything(),
         expect.anything()
