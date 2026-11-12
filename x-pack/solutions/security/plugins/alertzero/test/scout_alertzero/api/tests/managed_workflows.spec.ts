@@ -196,10 +196,10 @@ const cancelNewExecutions = async (
 };
 
 /**
- * Boots on the `alertzero` server config set, the set that turns on
- * `xpack.alertzero.enabled` (and `agenticInvestigations`, which AlertZero
- * requires). AlertZero is off by default, so under plain `test/scout/` neither
- * document below is ever installed.
+ * Boots on the `alertzero` server config set, the set that carries the flags AlertZero's
+ * managed workflows need (`serviceAccounts`, the Attack Discovery workflows feature flag).
+ * `alertzero` and `agenticInvestigations` are on by default in stateful, so under plain
+ * `test/scout/` both documents below are installed there too.
  *
  * Enabling a worker requires an AI model in the space (Kibana answers 400
  * otherwise), so the dynamic-worker half of this suite skips with an explicit

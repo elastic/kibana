@@ -48,7 +48,6 @@ const INPUT = {
   graded_report: 'first_round',
   evaluator_set: 'reference_free',
   evaluators: [{ name: 'conclusion_quality' }, { name: 'rca_reward', version: '1.0.0' }],
-  judge_connector_id: 'judge-connector',
   investigation_started_at: '2026-10-29T09:59:58.000Z',
   investigation_ended_at: '2026-10-29T10:02:00.000Z',
   investigation_execution_id: 'investigation-exec-1',
@@ -79,12 +78,14 @@ const setup = ({
     workflow: { spaceId: 'ops' },
     execution: { id: 'scoring-exec-1' },
   });
+  const resolveJudgeConnectorId = jest.fn().mockResolvedValue('judge-connector');
   const definition = scoreOnlineEvalsRoundStepDefinition({
     getAgentBuilder: () =>
       agentBuilderAvailable
         ? ({ conversations: { getScopedClient } } as unknown as AgentBuilderPluginStart)
         : undefined,
     getEvaluate: () => (evalsAvailable ? evaluate : undefined),
+    resolveJudgeConnectorId,
     isPaused: () => paused,
     shouldIncludeExplanations: () => includeExplanations,
     telemetry: {
@@ -108,6 +109,7 @@ const setup = ({
     get,
     getScopedClient,
     getContext,
+    resolveJudgeConnectorId,
     reportOnlineEvalScore,
     reportOnlineEvalsStepFailed,
     logger,
@@ -242,6 +244,18 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
         );
       }
     );
+
+    it('never grades a recovery that is the first round against itself', async () => {
+      const { run, evaluate, reportOnlineEvalsStepFailed } = setup({ rounds: [RECOVERY] });
+
+      await expect(run({ ...RECOVERY_INPUT, graded_report: 'first_round' })).resolves.toEqual({
+        output: { scored: false, skip_reason: 'scoring_failed' },
+      });
+      expect(evaluate).not.toHaveBeenCalled();
+      expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'score', code: 'invalid_input' })
+      );
+    });
   });
 
   it('passes no ground truth for an initial round', async () => {
@@ -323,6 +337,29 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     expect(reportOnlineEvalScore).not.toHaveBeenCalled();
     expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
       expect.objectContaining({ step: 'score', code, investigation_id: 'inv-1' })
+    );
+  });
+
+  it('reports a judge model it cannot resolve as a step failure, without running the judges', async () => {
+    const {
+      run,
+      evaluate,
+      resolveJudgeConnectorId,
+      reportOnlineEvalScore,
+      reportOnlineEvalsStepFailed,
+    } = setup();
+    resolveJudgeConnectorId.mockRejectedValue(
+      new Error('Model ".openai-gpt-6-sol-chat_completion" is blocked')
+    );
+
+    await expect(run()).resolves.toEqual({
+      output: { scored: false, skip_reason: 'scoring_failed' },
+    });
+    expect(resolveJudgeConnectorId).toHaveBeenCalledWith(request);
+    expect(evaluate).not.toHaveBeenCalled();
+    expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'score', code: 'judge_model_unavailable' })
     );
   });
 

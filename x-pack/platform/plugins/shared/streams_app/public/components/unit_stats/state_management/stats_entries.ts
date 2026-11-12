@@ -26,12 +26,14 @@ const LOADING_ENTRY: StatsEntry<never> = { status: 'loading' };
 interface IdsByKind {
   destination: string[];
   processor: string[];
+  source: string[];
 }
 
 /** Buckets the ids of a request by kind in one pass. A kind this UI does not know is dropped. */
 const groupIdsByKind = (components: StreamsUnit.StatsComponentRef[]): IdsByKind => {
   const destination: string[] = [];
   const processor: string[] = [];
+  const source: string[] = [];
 
   for (const { kind, id } of components) {
     switch (kind) {
@@ -41,12 +43,15 @@ const groupIdsByKind = (components: StreamsUnit.StatsComponentRef[]): IdsByKind 
       case 'processor':
         processor.push(id);
         break;
+      case 'source':
+        source.push(id);
+        break;
       default:
         break;
     }
   }
 
-  return { destination, processor };
+  return { destination, processor, source };
 };
 
 const markLoadingKind = <TStats>(
@@ -76,6 +81,7 @@ export const markBatchLoading = (
   return {
     destination: markLoadingKind(components.destination, ids.destination),
     processor: markLoadingKind(components.processor, ids.processor),
+    source: markLoadingKind(components.source, ids.source),
   };
 };
 
@@ -133,6 +139,7 @@ export const mergeFetchedStats = (
       now
     ),
     processor: mergeResultsKind(components.processor, ids.processor, response.processors, now),
+    source: mergeResultsKind(components.source, ids.source, response.sources, now),
   };
 };
 
@@ -188,6 +195,7 @@ export const markBatchFailed = (
   return {
     destination: markFailedKind(components.destination, ids.destination, reason),
     processor: markFailedKind(components.processor, ids.processor, reason),
+    source: markFailedKind(components.source, ids.source, reason),
   };
 };
 
@@ -207,6 +215,7 @@ export const dropRemovedComponents = (
   pruneUnusedComponents({
     destination: keepIdsKind(components.destination, componentIds),
     processor: keepIdsKind(components.processor, componentIds),
+    source: keepIdsKind(components.source, componentIds),
   });
 
 /** Keeps who shows the component and drops its value, so it is requested again. */
@@ -221,4 +230,5 @@ const clearValuesKind = <TStats>(record: ComponentRecord<TStats>): ComponentReco
 export const clearValues = (components: StatsComponents): StatsComponents => ({
   destination: clearValuesKind(components.destination),
   processor: clearValuesKind(components.processor),
+  source: clearValuesKind(components.source),
 });

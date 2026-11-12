@@ -28,7 +28,6 @@ export {
   getVitalRating,
 } from './core_web_vitals';
 export type { CoreWebVital, VitalRating, VitalThresholds } from './core_web_vitals';
-export { ElapsedTimestampTooltip } from './components/elapsed_timestamp_tooltip';
 
 export {
   enableInspectEsQueries,

@@ -15,6 +15,7 @@ import type { Option } from '../../../helpers/create_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import { useFormValues } from '../../../hooks/use_form_values';
 import type { CreateSLOForm } from '../../../types';
+import { HISTOGRAM_FIELD_TYPES } from '../../../constants';
 
 const fieldLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.fieldLabel', {
   defaultMessage: 'Field',
@@ -34,7 +35,7 @@ const fieldTooltip = (
   />
 );
 
-const NUMERIC_FIELD_TYPES = ['number', 'histogram'];
+const NUMERIC_FIELD_TYPES = ['number', ...HISTOGRAM_FIELD_TYPES];
 const CARDINALITY_FIELD_TYPES = ['number', 'string'];
 
 interface MetricInputProps {

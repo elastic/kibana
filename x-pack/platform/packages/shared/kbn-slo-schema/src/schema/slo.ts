@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
@@ -31,23 +31,32 @@ const budgetingMethodSchema = z
     description: 'The budgeting method to use when computing the rollup data.',
   });
 
-const targetSchema = z.object({
-  target: z.number().describe('the target objective between 0 and 1 excluded'),
-});
-
-const objectiveSchema = targetSchema
-  .extend({
-    timesliceTarget: z
+const targetSchema = lazySchema(() =>
+  z.object({
+    target: z
       .number()
-      .describe('the target objective for each slice when using a timeslices budgeting method')
-      .optional(),
-    timesliceWindow: durationType
-      .describe(
-        'the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}'
-      )
-      .optional(),
+      .describe('the target objective between 0 and 1 excluded')
+      // Documentation only: the bounds are enforced by the SLO domain validation
+      .meta({ minimum: 0, maximum: 1, exclusiveMinimum: true, exclusiveMaximum: true }),
   })
-  .meta({ id: 'SLOObjective', description: 'Defines properties for the SLO objective' });
+);
+
+const objectiveSchema = lazySchema(() =>
+  targetSchema
+    .extend({
+      timesliceTarget: z
+        .number()
+        .describe('the target objective for each slice when using a timeslices budgeting method')
+        .meta({ minimum: 0, maximum: 1 })
+        .optional(),
+      timesliceWindow: durationType
+        .describe(
+          'the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}'
+        )
+        .optional(),
+    })
+    .meta({ id: 'SLOObjective', description: 'Defines properties for the SLO objective' })
+);
 
 const boundedProjectRoutingSchema = z
   .string()
@@ -59,42 +68,45 @@ const boundedProjectRoutingSchema = z
       '`_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.'
   );
 
-const settingsSchema = z
-  .object({
-    syncDelay: durationType.describe(
-      'The time delay in minutes between the current time and the latest source data time. ' +
-        'Increasing the value will delay any alerting. The default value is 1 minute. ' +
-        'The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.'
-    ),
-    frequency: durationType.describe(
-      'The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.'
-    ),
-    preventInitialBackfill: z
-      .boolean()
-      .describe(
-        'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.'
+const settingsSchema = lazySchema(() =>
+  z
+    .object({
+      syncDelay: durationType.describe(
+        'The time delay in minutes between the current time and the latest source data time. ' +
+          'Increasing the value will delay any alerting. The default value is 1 minute. ' +
+          'The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.'
       ),
-    syncField: z
-      .string()
-      .describe(
-        'The date field that is used to identify new documents in the source. ' +
-          'It is strongly recommended to use a field that contains the ingest timestamp. ' +
-          'If you use a different field, you might need to set the delay such that it accounts for data transmission delays. ' +
-          'When unspecified, we use the indicator timestamp field.'
-      )
-      .nullable()
-      .optional(),
-    /** @deprecated use projectRoutings */
-    preventCrossProjectSearch: z
-      .boolean()
-      .describe(
-        'Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. ' +
-          'Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.'
-      )
-      .optional(),
-    projectRoutings: boundedProjectRoutingSchema.nullable().optional(),
-  })
-  .meta({ id: 'SLOSettings', description: 'Defines properties for SLO settings.' });
+      frequency: durationType.describe(
+        'The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.'
+      ),
+      preventInitialBackfill: z
+        .boolean()
+        .describe(
+          'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.'
+        ),
+      syncField: z
+        .string()
+        .describe(
+          'The date field that is used to identify new documents in the source. ' +
+            'It is strongly recommended to use a field that contains the ingest timestamp. ' +
+            'If you use a different field, you might need to set the delay such that it accounts for data transmission delays. ' +
+            'When unspecified, we use the indicator timestamp field.'
+        )
+        .nullable()
+        .optional(),
+      /** @deprecated use projectRoutings */
+      preventCrossProjectSearch: z
+        .boolean()
+        .describe(
+          'Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. ' +
+            'Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.'
+        )
+        .meta({ deprecated: true })
+        .optional(),
+      projectRoutings: boundedProjectRoutingSchema.nullable().optional(),
+    })
+    .meta({ id: 'SLOSettings', description: 'Defines properties for SLO settings.' })
+);
 
 const groupBySchema = allOrAnyStringOrArray.meta({
   id: 'SLOGroupBy',
@@ -151,9 +163,11 @@ const artifactsWithIdSchema = dashboardsWithIdSchema.meta({
   description: 'Links to related assets for the SLO',
 });
 
-const sloDefinitionSchema = baseSloSchema
-  .extend({ artifacts: artifactsWithIdSchema.optional() })
-  .meta({ id: 'SLODefinition', description: 'The SLO definition' });
+const sloDefinitionSchema = lazySchema(() =>
+  baseSloSchema
+    .extend({ artifacts: artifactsWithIdSchema.optional() })
+    .meta({ id: 'SLODefinition', description: 'The SLO definition', additionalProperties: true })
+);
 const storedSloDefinitionSchema = baseSloSchema.extend({
   artifacts: dashboardsWithRefIdSchema.optional(),
 });

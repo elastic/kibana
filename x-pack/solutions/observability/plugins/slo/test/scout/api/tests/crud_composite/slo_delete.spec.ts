@@ -21,9 +21,6 @@ apiTest.describe(
     let headers: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { 'slo.compositeSloEnabled': true },
-      });
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
       await apiServices.compositeSlo.deleteAll();
@@ -33,182 +30,89 @@ apiTest.describe(
       await apiServices.compositeSlo.deleteAll();
     });
 
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { 'slo.compositeSloEnabled': false },
-      });
-    });
+    apiTest(
+      'deletes only the targeted composite SLO and removes it from find results',
+      async ({ apiClient, apiServices }) => {
+        const toDelete = await apiServices.compositeSlo.create({
+          ...DEFAULT_COMPOSITE_SLO,
+          name: 'To Delete',
+          tags: ['delete-test'],
+        });
+        const toKeep = await apiServices.compositeSlo.create({
+          ...DEFAULT_COMPOSITE_SLO,
+          name: 'To Keep',
+          tags: ['delete-test'],
+        });
+        const deletedId = (toDelete.body as { id: string }).id;
+        const keptId = (toKeep.body as { id: string }).id;
 
-    apiTest('deletes a composite SLO', async ({ apiClient }) => {
-      const createRes = await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: DEFAULT_COMPOSITE_SLO,
-        responseType: 'json',
-      });
-      expect(createRes).toHaveStatusCode(200);
-      const createdId = (createRes.body as Record<string, unknown>).id as string;
+        const deleteRes = await apiClient.delete(`api/observability/slo_composites/${deletedId}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(deleteRes).toHaveStatusCode(204);
 
-      const deleteRes = await apiClient.delete(`api/observability/slo_composites/${createdId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(deleteRes).toHaveStatusCode(204);
+        const getDeleted = await apiClient.get(`api/observability/slo_composites/${deletedId}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(getDeleted).toHaveStatusCode(404);
 
-      const getRes = await apiClient.get(`api/observability/slo_composites/${createdId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(getRes).toHaveStatusCode(404);
-    });
-
-    apiTest('returns 404 when deleting a non-existent composite SLO', async ({ apiClient }) => {
-      const response = await apiClient.delete('api/observability/slo_composites/non-existent-id', {
-        headers,
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(404);
-    });
-
-    apiTest('only deletes the targeted composite SLO', async ({ apiClient }) => {
-      const first = await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'First Composite' },
-        responseType: 'json',
-      });
-      expect(first).toHaveStatusCode(200);
-      const firstId = (first.body as Record<string, unknown>).id as string;
-
-      const second = await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'Second Composite' },
-        responseType: 'json',
-      });
-      expect(second).toHaveStatusCode(200);
-      const secondId = (second.body as Record<string, unknown>).id as string;
-
-      const deleteRes = await apiClient.delete(`api/observability/slo_composites/${firstId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(deleteRes).toHaveStatusCode(204);
-
-      const getDeleted = await apiClient.get(`api/observability/slo_composites/${firstId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(getDeleted).toHaveStatusCode(404);
-
-      const getRemaining = await apiClient.get(`api/observability/slo_composites/${secondId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(getRemaining).toHaveStatusCode(200);
-      expect((getRemaining.body as Record<string, unknown>).id).toBe(secondId);
-      expect((getRemaining.body as Record<string, unknown>).name).toBe('Second Composite');
-    });
-
-    apiTest('returns 404 on double-delete of the same composite SLO', async ({ apiClient }) => {
-      const createRes = await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: DEFAULT_COMPOSITE_SLO,
-        responseType: 'json',
-      });
-      expect(createRes).toHaveStatusCode(200);
-      const createdId = (createRes.body as Record<string, unknown>).id as string;
-
-      const firstDelete = await apiClient.delete(`api/observability/slo_composites/${createdId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(firstDelete).toHaveStatusCode(204);
-
-      const secondDelete = await apiClient.delete(`api/observability/slo_composites/${createdId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(secondDelete).toHaveStatusCode(404);
-    });
-
-    apiTest('decreases total count after deletion', async ({ apiClient }) => {
-      await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'Count A' },
-        responseType: 'json',
-      });
-      const secondRes = await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'Count B' },
-        responseType: 'json',
-      });
-      expect(secondRes).toHaveStatusCode(200);
-      const secondId = (secondRes.body as Record<string, unknown>).id as string;
-      await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'Count C' },
-        responseType: 'json',
-      });
-
-      const beforeDelete = await apiClient.get('api/observability/slo_composites', {
-        headers,
-        responseType: 'json',
-      });
-      expect((beforeDelete.body as Record<string, unknown>).total).toBe(3);
-
-      await apiClient.delete(`api/observability/slo_composites/${secondId}`, {
-        headers,
-        responseType: 'json',
-      });
-
-      const afterDelete = await apiClient.get('api/observability/slo_composites', {
-        headers,
-        responseType: 'json',
-      });
-      expect((afterDelete.body as Record<string, unknown>).total).toBe(2);
-    });
-
-    apiTest('deleted composite SLO no longer appears in search results', async ({ apiClient }) => {
-      const createRes = await apiClient.post('api/observability/slo_composites', {
-        headers,
-        body: { ...DEFAULT_COMPOSITE_SLO, name: 'Searchable Then Gone', tags: ['ephemeral'] },
-        responseType: 'json',
-      });
-      expect(createRes).toHaveStatusCode(200);
-      const createdId = (createRes.body as Record<string, unknown>).id as string;
-
-      const searchBefore = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { tags: 'ephemeral' }),
-        { headers, responseType: 'json' }
-      );
-      expect((searchBefore.body as Record<string, unknown>).total).toBe(1);
-
-      await apiClient.delete(`api/observability/slo_composites/${createdId}`, {
-        headers,
-        responseType: 'json',
-      });
-
-      const searchAfter = await apiClient.get(
-        sloApiPathWithQuery('api/observability/slo_composites', { tags: 'ephemeral' }),
-        { headers, responseType: 'json' }
-      );
-      expect((searchAfter.body as Record<string, unknown>).total).toBe(0);
-    });
+        const findRes = await apiClient.get(
+          sloApiPathWithQuery('api/observability/slo_composites', { tags: 'delete-test' }),
+          { headers, responseType: 'json' }
+        );
+        expect(findRes).toHaveStatusCode(200);
+        const { total, results } = findRes.body as {
+          total: number;
+          results: Array<{ id: string }>;
+        };
+        expect(total).toBe(1);
+        expect(results[0].id).toBe(keptId);
+      }
+    );
 
     apiTest(
-      'can recreate a composite SLO with the same custom id after deletion',
-      async ({ apiClient }) => {
+      'returns 404 for a non-existent composite SLO and on double delete',
+      async ({ apiClient, apiServices }) => {
+        const missing = await apiClient.delete('api/observability/slo_composites/non-existent-id', {
+          headers,
+          responseType: 'json',
+        });
+        expect(missing).toHaveStatusCode(404);
+
+        const created = await apiServices.compositeSlo.create(DEFAULT_COMPOSITE_SLO);
+        const createdId = (created.body as { id: string }).id;
+
+        const firstDelete = await apiClient.delete(
+          `api/observability/slo_composites/${createdId}`,
+          { headers, responseType: 'json' }
+        );
+        expect(firstDelete).toHaveStatusCode(204);
+
+        const secondDelete = await apiClient.delete(
+          `api/observability/slo_composites/${createdId}`,
+          { headers, responseType: 'json' }
+        );
+        expect(secondDelete).toHaveStatusCode(404);
+      }
+    );
+
+    apiTest(
+      'can recreate a composite SLO with the same id after deletion',
+      async ({ apiClient, apiServices }) => {
         const customId = 'reusable-composite-id';
-
-        const createRes = await apiClient.post('api/observability/slo_composites', {
-          headers,
-          body: { ...DEFAULT_COMPOSITE_SLO, id: customId, name: 'Original' },
-          responseType: 'json',
+        await apiServices.compositeSlo.create({
+          ...DEFAULT_COMPOSITE_SLO,
+          id: customId,
+          name: 'Original',
         });
-        expect(createRes).toHaveStatusCode(200);
 
-        await apiClient.delete(`api/observability/slo_composites/${customId}`, {
+        const deleteRes = await apiClient.delete(`api/observability/slo_composites/${customId}`, {
           headers,
           responseType: 'json',
         });
+        expect(deleteRes).toHaveStatusCode(204);
 
         const recreateRes = await apiClient.post('api/observability/slo_composites', {
           headers,
@@ -216,8 +120,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(recreateRes).toHaveStatusCode(200);
-        expect((recreateRes.body as Record<string, unknown>).id).toBe(customId);
-        expect((recreateRes.body as Record<string, unknown>).name).toBe('Recreated');
+        expect(recreateRes.body).toMatchObject({ id: customId, name: 'Recreated' });
       }
     );
   }

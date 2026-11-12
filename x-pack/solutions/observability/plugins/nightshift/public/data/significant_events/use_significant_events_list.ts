@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import type {
   SignificantEventsSortField,
   SignificantEventsSortOrder,
@@ -13,10 +13,8 @@ import type {
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
 import { useKibana } from '../../hooks/use_kibana';
 import { significantEventsListQueryKey } from '../query_keys';
-import { hasInvestigationsToPoll } from './investigation_state';
+import { getInvestigationsRefetchInterval } from './investigation_state';
 import { toEventsFilterQuery, type SignificantEventsFilters } from './events_filter_query';
-
-const RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
 
 export interface SignificantEventsListParams extends SignificantEventsFilters {
   page: number;
@@ -29,6 +27,8 @@ export const useSignificantEventsList = (params: SignificantEventsListParams) =>
   const { significantEventsRepositoryClient } = useKibana().services.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
   const { page, perPage, sortField, sortOrder, ...filters } = params;
+
+  const queryClient = useQueryClient();
 
   return useQuery({
     queryKey: significantEventsListQueryKey(params),
@@ -48,9 +48,7 @@ export const useSignificantEventsList = (params: SignificantEventsListParams) =>
     },
     keepPreviousData: true,
     refetchInterval: (data) =>
-      data?.hits && hasInvestigationsToPoll(data.hits)
-        ? RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS
-        : false,
+      data?.hits ? getInvestigationsRefetchInterval(data.hits, queryClient) : false,
     onError: showFetchErrorToast,
   });
 };

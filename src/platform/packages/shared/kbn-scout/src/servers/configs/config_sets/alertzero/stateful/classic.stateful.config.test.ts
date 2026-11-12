@@ -53,7 +53,9 @@ describe('alertzero stateful classic server config', () => {
     const { servers } = jest.requireActual('./classic.stateful.config');
     const args: string[] = servers.kbnTestServer.serverArgs;
 
-    expect(args).toContain('--xpack.alertzero.enabled=true');
+    // `alertzero` and its prerequisites are on by default in stateful, so they are not passed
+    // as server args (see "keeps the plugin defaults…").
+    expect(args).not.toContain('--xpack.alertzero.enabled=false');
     // The per-space gate must stay writable: an `uiSettings.overrides` pin would make
     // `securitySolution:enableAlertZero` read-only, and the hunt suites' baseline writes
     // through `internal/kibana/settings` would then fail even when the value is unchanged.
@@ -95,8 +97,10 @@ describe('alertzero stateful classic server config', () => {
     expect(
       JSON.parse((preconfigured ?? '').slice('--xpack.actions.preconfigured='.length))
     ).toMatchObject(connectors);
-    // The AlertZero args are layered on top of the EIS base, not replaced by it.
-    expect(kbnArgs).toContain('--xpack.alertzero.enabled=true');
+    // The AlertZero pins are layered on top of the EIS base, not replaced by it.
+    expect(kbnArgs).toContain(
+      '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true'
+    );
   });
 
   it('boots without EIS or preconfigured connectors when no connector source exists', () => {
@@ -114,24 +118,27 @@ describe('alertzero stateful classic server config', () => {
     );
     expect(esArgs.filter((arg) => arg.startsWith('xpack.inference.'))).toEqual([]);
     expect(kbnArgs.find((arg) => arg.startsWith('--xpack.actions.preconfigured='))).toBeUndefined();
-    // The AlertZero args are layered on the plain base, not lost by the fallback.
-    expect(kbnArgs).toContain('--xpack.alertzero.enabled=true');
+    // The AlertZero pins are layered on the plain base, not lost by the fallback.
+    expect(kbnArgs).toContain('--xpack.security.serviceAccounts.enabled=true');
   });
 
-  it('keeps the server-driver args', () => {
+  it('keeps the plugin defaults and pins only the flags the e2e flows need', () => {
     delete process.env.KIBANA_TESTING_AI_CONNECTORS;
     const { servers } = jest.requireActual('./classic.stateful.config');
     const args: string[] = servers.kbnTestServer.serverArgs;
 
+    // `alertzero`, `agenticInvestigations` and `proposals` are on by default in stateful, so
+    // the config no longer passes their plugin flags — only the pins the managed workflows and
+    // the e2e flows need.
     expect(args).toEqual(
       expect.arrayContaining([
-        '--xpack.alertzero.enabled=true',
-        '--xpack.agenticInvestigations.enabled=true',
-        '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
         '--xpack.security.serviceAccounts.enabled=true',
         '--server.restrictInternalApis=true',
       ])
     );
+    expect(args).not.toContain('--xpack.alertzero.enabled=true');
+    expect(args).not.toContain('--xpack.agenticInvestigations.enabled=true');
+    expect(args).not.toContain('--xpack.proposals.enabled=true');
   });
 });

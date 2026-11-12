@@ -41,6 +41,7 @@ plugins:
     - discoverCustomizationExamples
     - discoveries
     - embeddable_alerts_table
+    - entity_inventory
     - entity_store
     - error_boundary_example
     - esql_views
@@ -105,6 +106,7 @@ plugins:
     - snapshot_restore
     - spaces
     - stack_connectors
+    - stateContainersExamples
     - streams
     - streams_app
     - subscription_status

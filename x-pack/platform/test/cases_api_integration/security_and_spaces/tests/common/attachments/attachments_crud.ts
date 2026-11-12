@@ -7,8 +7,14 @@
 
 import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
-import { AttachmentType, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
+  AttachmentType,
+  CaseStatuses,
+  UserActionTypes,
+} from '@kbn/cases-plugin/common/types/domain';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_ALERTS_PER_CASE,
   MAX_ATTACHMENT_JSON_LENGTH,
   SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
@@ -29,8 +35,11 @@ import {
   addAttachmentV2,
   findCaseUserActions,
   getAttachmentV2,
+  getCase,
+  getSOFromKibanaIndex,
   seedLegacyCommentAttachment,
   updateAttachmentV2,
+  updateCaseStatus,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
 import {
@@ -60,6 +69,9 @@ const linkedAlertReq = buildUnifiedAlertReq('securitySolutionFixture', {
   index: linkedAlertIndex,
 });
 const linkedAlertMessage = `Cannot attach an alert from a linked project or remote cluster index: ${linkedAlertIndex}`;
+
+const alertReq = (alertId: string | string[]) =>
+  buildUnifiedAlertReq('securitySolutionFixture', { alertId, index: 'test-index' });
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -241,6 +253,146 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const fetched = await getAttachmentV2({ supertest, caseId: postedCase.id, attachmentId });
       expect(fetched.data?.content).to.eql('updated');
+    });
+
+    describe('replace parity with create', () => {
+      const createClosedCaseWithAlert = async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ settings: { ...postCaseReq.settings, syncAlerts: false } })
+        );
+        const created = await addAttachmentV2({
+          supertest,
+          caseId: postedCase.id,
+          params: alertReq('alert-1'),
+        });
+        const { version } = await getCase({ supertest, caseId: postedCase.id });
+        await updateCaseStatus({
+          supertest,
+          caseId: postedCase.id,
+          version,
+          status: CaseStatuses.closed,
+          expectedHttpCode: 200,
+        });
+
+        return { caseId: postedCase.id, created };
+      };
+
+      const createCaseAtAlertLimit = async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await addAttachmentV2({
+          supertest,
+          caseId: postedCase.id,
+          params: alertReq(
+            Array.from({ length: MAX_ALERTS_PER_CASE - 1 }, (_, index) => `alert-${index}`)
+          ),
+        });
+        const created = await addAttachmentV2({
+          supertest,
+          caseId: postedCase.id,
+          params: alertReq('last-alert'),
+        });
+
+        return { caseId: postedCase.id, created };
+      };
+
+      it('should reject a replace that adds an alert to a closed case', async () => {
+        const { caseId, created } = await createClosedCaseWithAlert();
+
+        const response = (await updateAttachmentV2({
+          supertest,
+          caseId,
+          attachmentId: created.id,
+          req: { ...alertReq(['alert-1', 'alert-2']), version: created.version },
+          expectedHttpCode: 400,
+        })) as unknown as { message: string };
+
+        expect(response.message).to.contain('Alert cannot be attached to a closed case');
+      });
+
+      it('should replace an alert on a closed case when no alert is added', async () => {
+        const { caseId, created } = await createClosedCaseWithAlert();
+
+        await updateAttachmentV2({
+          supertest,
+          caseId,
+          attachmentId: created.id,
+          req: { ...alertReq('alert-1'), version: created.version },
+        });
+      });
+
+      it('should reject a replace that pushes the case over the alert limit', async () => {
+        const { caseId, created } = await createCaseAtAlertLimit();
+
+        const response = (await updateAttachmentV2({
+          supertest,
+          caseId,
+          attachmentId: created.id,
+          req: { ...alertReq(['last-alert', 'extra-alert']), version: created.version },
+          expectedHttpCode: 400,
+        })) as unknown as { message: string };
+
+        expect(response.message).to.contain(
+          `Case has reached the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts.`
+        );
+      });
+
+      it('should replace an alert at the alert limit when the count does not grow', async () => {
+        const { caseId, created } = await createCaseAtAlertLimit();
+
+        await updateAttachmentV2({
+          supertest,
+          caseId,
+          attachmentId: created.id,
+          req: { ...alertReq('swapped-alert'), version: created.version },
+        });
+      });
+
+      it('should store the updated alert total on the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const created = await addAttachmentV2({
+          supertest,
+          caseId: postedCase.id,
+          params: alertReq('alert-1'),
+        });
+
+        await updateAttachmentV2({
+          supertest,
+          caseId: postedCase.id,
+          attachmentId: created.id,
+          req: { ...alertReq(['alert-1', 'alert-2']), version: created.version },
+        });
+
+        const { body } = await getSOFromKibanaIndex({
+          es,
+          soType: CASE_SAVED_OBJECT,
+          soId: postedCase.id,
+        });
+        expect(body._source?.cases.total_alerts).to.be(2);
+      });
+
+      it('should replace an alert with one that has no rule name', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const created = await addAttachmentV2({
+          supertest,
+          caseId: postedCase.id,
+          params: alertReq('alert-1'),
+        });
+
+        await updateAttachmentV2({
+          supertest,
+          caseId: postedCase.id,
+          attachmentId: created.id,
+          req: {
+            ...buildUnifiedAlertReq('securitySolutionFixture', {
+              alertId: 'alert-1',
+              index: 'test-index',
+              rule: { id: null, name: null },
+            }),
+            version: created.version,
+          },
+        });
+      });
     });
 
     describe('action source', () => {

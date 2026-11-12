@@ -36,6 +36,7 @@
     "@kbn/alertzero-common",
     "@kbn/proposals-common",
     "@kbn/evals-suite-attack-discovery-agent-builder",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/deeplinks-security"
   ]
 }

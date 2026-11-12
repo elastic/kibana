@@ -14,6 +14,19 @@ export const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 export const ONBOARDING_APP_ID = 'onboarding';
 export const ONBOARDING_AWS_PATH = '/aws';
 
+/** Shown in place of a link to the onboarding flow while it is turned off. */
+export const ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE = i18n.translate(
+  'xpack.fleet.onboardingOverride.onboardingDisabledManagedPolicyMessage',
+  {
+    defaultMessage:
+      "AWS onboarding is turned off, so you can't edit or delete this integration policy. You can edit it again when AWS onboarding is turned back on.",
+  }
+);
+
+/** Path in the onboarding app that resumes the given onboarding instance. */
+export const getOnboardingInstancePath = (deploymentId: string) =>
+  `${ONBOARDING_AWS_PATH}?deploymentId=${encodeURIComponent(deploymentId)}`;
+
 export const AWS_TITLE = i18n.translate('xpack.fleet.onboardingOverride.awsTitle', {
   defaultMessage: 'Amazon Web Services',
 });

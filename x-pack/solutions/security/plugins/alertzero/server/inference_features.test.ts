@@ -18,6 +18,9 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 
 const OPUS_5 = '.anthropic-claude-5-opus-chat_completion';
 const SONNET_5 = '.anthropic-claude-5-sonnet-chat_completion';
+const SONNET_5_5 = '.anthropic-claude-5.5-sonnet-chat_completion';
+const GPT_6_SOL = '.openai-gpt-6-sol-chat_completion';
+const GPT_5_6_SOL = '.openai-gpt-5.6-sol-chat_completion';
 
 const createSetupMock = (result: { ok: boolean; error?: string } = { ok: true }) => {
   const register = jest.fn().mockReturnValue(result);
@@ -85,9 +88,9 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureDescription:
         'Quick, lightweight judgment on calls that run often, such as checking detection coverage. Choose a small, low-cost model.',
       recommendedEndpoints: [
-        '.anthropic-claude-4.5-haiku-chat_completion',
+        '.openai-gpt-6-luna-chat_completion',
         '.google-gemini-3.5-flash-lite-chat_completion',
-        '.openai-gpt-5.6-luna-chat_completion',
+        '.anthropic-claude-4.5-haiku-chat_completion',
       ],
     });
   });
@@ -108,7 +111,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureDescription:
         'Calls where accuracy matters but that run often or use tools over many steps, such as triaging alerts or diagnosing a noisy rule. Choose a strong mid-size model.',
       recommendedEndpoints: [
-        SONNET_5,
+        SONNET_5_5,
         '.openai-gpt-5.6-terra-chat_completion',
         '.google-gemini-3.6-flash-chat_completion',
       ],
@@ -129,8 +132,50 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureName: 'Frontier models',
       featureDescription:
         'Complex, single-pass work where output quality matters most, such as generating attack discoveries or drafting a detection rule. Choose your most capable model.',
-      recommendedEndpoints: [OPUS_5, '.openai-gpt-5.6-sol-chat_completion', SONNET_5],
+      recommendedEndpoints: [GPT_6_SOL, GPT_5_6_SOL, OPUS_5],
     });
+  });
+
+  // Every tier lists at least two vendors, so losing one vendor still leaves a model on the same
+  // rung instead of falling through to the parent.
+  it('spans at least two vendors in every tier', () => {
+    const { setup, register } = createSetupMock();
+
+    registerAlertZeroInferenceFeatures(setup, logger);
+
+    const tierIds = [
+      ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+    ];
+    for (const tierId of tierIds) {
+      const { recommendedEndpoints } = registeredTier(register, tierId);
+      const vendors = new Set(
+        recommendedEndpoints.map((endpoint: string) => endpoint.split('-')[0])
+      );
+      expect(vendors.size).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  // A mid-size model in the frontier chain would silently downgrade Attack Discovery and rule
+  // creation whenever the frontier models above it are unavailable.
+  it('keeps mid-size models out of the frontier tier', () => {
+    const { setup, register } = createSetupMock();
+
+    registerAlertZeroInferenceFeatures(setup, logger);
+
+    const { recommendedEndpoints } = registeredTier(
+      register,
+      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
+    );
+    const { recommendedEndpoints: balancedEndpoints } = registeredTier(
+      register,
+      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
+    );
+    expect(recommendedEndpoints).not.toContain(SONNET_5);
+    for (const endpoint of balancedEndpoints) {
+      expect(recommendedEndpoints).not.toContain(endpoint);
+    }
   });
 
   it('registers the prompt-template row with no recommended model', () => {
@@ -180,6 +225,9 @@ describe('registerAlertZeroInferenceFeatures', () => {
     );
     expect(recommendedEndpoints).not.toContain(OPUS_5);
     expect(recommendedEndpoints).not.toContain(SONNET_5);
+    expect(recommendedEndpoints).not.toContain(SONNET_5_5);
+    expect(recommendedEndpoints).not.toContain(GPT_6_SOL);
+    expect(recommendedEndpoints).not.toContain(GPT_5_6_SOL);
   });
 
   it('is a no-op when the optional plugin is unavailable', () => {
