@@ -33,8 +33,12 @@ const CONTENT_LIST_ITEM_LINK = CONTENT_LIST_TEST_SUBJECTS.itemLink;
 const CONTENT_LIST_INSPECT_ACTION = CONTENT_LIST_TEST_SUBJECTS.actionInspect;
 const CONTENT_LIST_EDIT_ACTION = CONTENT_LIST_TEST_SUBJECTS.actionEdit;
 const TABLE_LOADING_SELECTOR = [
+  // Legacy: swaps its own subject while fetching.
   '[data-test-subj~="listingTable-isLoading"]',
+  // Content List: skeleton on first load, `aria-busy` on subsequent refetches.
   `[data-test-subj~="${CONTENT_LIST_TABLE_SKELETON}"]`,
+  `[data-test-subj~="${CONTENT_LIST_TABLE}"][aria-busy="true"]`,
+  // Fallback for listings that render a bare EuiBasicTable with no own signal.
   '.euiBasicTable-loading',
 ].join(', ');
 const CONTENT_LIST_SEARCH_BOX = TOOLBAR_SUBJECTS.searchBox;
