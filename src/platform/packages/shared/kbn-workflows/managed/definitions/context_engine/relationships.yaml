@@ -287,7 +287,7 @@ steps:
                 [{%- assign separator = "" -%}
                 {%- for item in foreach.item -%}
                 {%- assign kind = item.type | split: "." | first -%}
-                {%- if kind == 'entity' and item.type != 'entity.user' -%}
+                {%- if kind == 'entity' and item.type != 'entity.user' and item.title != blank -%}
                 {{ separator }}{"match_phrase":{"title":{{ item.title | json }}}},{"match_phrase":{"content":{{ item.title | json }}}}
                 {%- assign separator = "," -%}
                 {%- endif -%}
@@ -342,6 +342,9 @@ steps:
                                         permissions.kibana.privileges.space: '*'
                                   minimum_should_match: 1
                         minimum_should_match: 1
+                  must_not:
+                    - terms:
+                        id: '${{ foreach.item | map: "id" }}'
                   should: '${{ variables.mention_clauses | json_parse }}'
                   minimum_should_match: 1
 
@@ -360,12 +363,12 @@ steps:
                 You are given ITEMS (facts and entities that are new or changed since they were last linked), EXISTING entities they could link to, EXISTING facts that mention an entity in ITEMS, and the EXISTING relationships of the ITEMS.
 
                 Return only changes. Each relationship has from and to, each an id from ITEMS, EXISTING ENTITIES or EXISTING FACTS, and relation, one of the RELATIONSHIP TYPES. Read it as "from relation to": "Priya manages Alex" has from Priya, relation manages, to Alex.
-                - Create a relationship with a description: one sentence on why it holds, from what the ITEMS say.
+                - Create a relationship with a description: one sentence on why it holds, from what the ITEMS and EXISTING FACTS say.
                 - Update one by repeating its from, relation and to with a new description.
                 - Delete one with delete: true when the ITEMS show it no longer holds.
 
                 Rules:
-                - Link only what the ITEMS state or clearly imply. Every relationship has at least one end in ITEMS.
+                - Link only what the ITEMS or EXISTING FACTS state or clearly imply. Every relationship has at least one end in ITEMS.
                 - from and to are different items.
                 - Link a fact only to the entities it is about, with relation about: from is the fact, to is the entity. Never use another type from or to a fact.
                 - Link an EXISTING FACT only to an entity in ITEMS that it is about. A fact that only mentions an entity's name in passing is not about it.
@@ -432,7 +435,7 @@ steps:
                           description: One of the relationship types; about for a fact.
                         to:
                           type: string
-                          description: The id of the item the relationship goes to, from ITEMS, EXISTING ENTITIES or EXISTING FACTS.
+                          description: The id of the entity the relationship goes to, from ITEMS or EXISTING ENTITIES.
                         description:
                           type: string
                           description: One sentence on why the relationship holds. Required to create one.

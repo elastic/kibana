@@ -256,7 +256,16 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
 
     expect(output).toEqual({ created: 1, updated: 0, deleted: 0, rejected: [] });
     expect(stored[relationshipId(relationshipKey(olderFact.id, 'about', customer.id))]).toEqual(
-      expect.objectContaining({ type: 'memory.relationship', permissions: team })
+      expect.objectContaining({
+        type: 'memory.relationship',
+        permissions: team,
+        references: [
+          { uri: `ki://${olderFact.id}`, relation: 'relates_to', description: 'from' },
+          { uri: `ki://${customer.id}`, relation: 'relates_to', description: 'to' },
+          { uri: 'ki://mem-2', relation: 'derived_from' },
+          { uri: 'ki://mem-1', relation: 'derived_from' },
+        ],
+      })
     );
   });
 

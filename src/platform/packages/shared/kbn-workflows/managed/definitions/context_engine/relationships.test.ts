@@ -368,6 +368,14 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     ]);
     expect(mentionsOf([fact])).toEqual([{ match_none: {} }]);
     expect(mentionsOf([user, fact])).toEqual([{ match_none: {} }]);
+    expect(
+      mentionsOf([
+        { ...paris, title: undefined },
+        { ...paris, title: null },
+        { ...paris, title: '' },
+        { ...paris, title: '  ' },
+      ])
+    ).toEqual([{ match_none: {} }]);
 
     const bool = findStep(batchSteps(), 'read_facts').with?.query?.bool ?? {};
     expect(
@@ -386,6 +394,11 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     expect(read?.query?.bool?.filter).toEqual(
       expect.arrayContaining([{ prefix: { type: 'fact.' } }])
     );
+    expect(
+      evaluate((read?.query?.bool?.must_not as Array<{ terms: { id: string } }>)[0].terms.id, {
+        foreach: { item: [bob, fact] },
+      })
+    ).toEqual([bob.id, fact.id]);
     expect(read?.collapse).toEqual(
       expect.objectContaining({
         field: 'id',
