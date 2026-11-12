@@ -50,10 +50,8 @@ const renderTemplate = (template: string, values: Record<string, string | number
 export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   id: AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Version 4 matches traces by the skill's name as well as its id, and
-  // reports traces_graded as the traces actually graded. yamlTemplate
-  // hashing does not see the imported YAML, so installed instances only
-  // re-render on a version bump.
+  // Bump on every YAML edit: yamlTemplate hashing does not see the imported
+  // YAML, so installed instances only re-render on a version bump.
   version: 4,
   billable: false,
   yamlTemplate: ({ skillId, skillName, intervalMinutes, lookbackMinutes }) =>

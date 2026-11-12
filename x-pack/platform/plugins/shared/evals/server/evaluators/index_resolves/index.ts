@@ -66,8 +66,7 @@ const looksLikeIndexPattern = (candidate: string): boolean => {
   if (!candidate) return false;
   const lower = candidate.toLowerCase();
   if (NON_INDEX_KEYWORDS.has(lower)) return false;
-  // Must contain a `-`, `*`, or `.`; a bare identifier like "foo" is almost
-  // always not an index.
+  // A bare identifier like "foo" is almost never an index.
   if (!/[-.*]/.test(candidate)) return false;
   // Version strings like "8.11.0" — skip.
   if (/^\d[\d.]*$/.test(candidate)) return false;
