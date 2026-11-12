@@ -47304,7 +47304,6 @@
     "xpack.nightshift.investigations.cardCopyLinkLabel": "Copier le lien",
     "xpack.nightshift.investigations.cardOpenInChatLabel": "Ouvrir dans le chat",
     "xpack.nightshift.investigations.cardOpenMenuLabel": "Ouvrir le menu d'actions",
-    "xpack.nightshift.investigations.emptyDescription": "Aucune investigation trouvée",
     "xpack.nightshift.investigations.inProgressSectionTitle": "En cours",
     "xpack.nightshift.investigations.loadingErrorTitle": "Impossible de charger les investigations",
     "xpack.nightshift.investigations.notRatedSectionTitle": "Non évalué",
