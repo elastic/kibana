@@ -85,8 +85,33 @@ export interface TimelinePage {
   events: TimelineEvent[];
   page: number;
   nextPage: number | null;
+  /** The page that holds the most recent events, or `null` when GitHub does not report it. */
+  lastPage: number | null;
   hasMore: boolean;
 }
+
+const LINK_PATTERN = /<([^>]+)>;\s*rel="([^"]+)"/g;
+
+/**
+ * Reads the page number of one relation of a `Link` header, e.g. `rel="last"`. Only the number
+ * is used: the URL itself is never requested.
+ */
+const pageOfLink = (link: unknown, rel: string): number | undefined => {
+  if (typeof link !== 'string') {
+    return undefined;
+  }
+  for (const [, url, name] of link.matchAll(LINK_PATTERN)) {
+    if (name === rel) {
+      try {
+        const page = Number(new URL(url, 'https://api.github.com').searchParams.get('page'));
+        return Number.isInteger(page) && page >= 1 ? page : undefined;
+      } catch {
+        return undefined;
+      }
+    }
+  }
+  return undefined;
+};
 
 const withoutUndefined = <T extends object>(value: T): T =>
   Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined)) as T;
@@ -169,5 +194,8 @@ export const toTimelinePage = (
     return event && (!eventTypes || eventTypes.includes(event.event)) ? [event] : [];
   });
   const hasMore = typeof headers.link === 'string' && headers.link.includes('rel="next"');
-  return { events, page, nextPage: hasMore ? page + 1 : null, hasMore };
+  // GitHub leaves rel="last" out on the last page itself, so a page with events and no next page
+  // is the last one.
+  const lastPage = pageOfLink(headers.link, 'last') ?? (!hasMore && data.length > 0 ? page : null);
+  return { events, page, nextPage: hasMore ? page + 1 : null, lastPage, hasMore };
 };

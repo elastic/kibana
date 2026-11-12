@@ -547,6 +547,7 @@ describe('GithubConnector', () => {
         ],
         page: 1,
         nextPage: 2,
+        lastPage: null,
         hasMore: true,
       });
     });
@@ -568,8 +569,28 @@ describe('GithubConnector', () => {
         events: [expect.objectContaining({ id: 2, event: 'labeled' })],
         page: 1,
         nextPage: null,
+        lastPage: 1,
         hasMore: false,
       });
+    });
+
+    it.each([
+      ['a perPage above 100', { perPage: 101 }, /perPage/],
+      ['a perPage below 1', { perPage: 0 }, /perPage/],
+      ['a fractional perPage', { perPage: 10.5 }, /perPage/],
+      ['a page below 1', { page: 0 }, /page/],
+      ['a fractional page', { page: 1.5 }, /page/],
+      ['an issue number below 1', { issueNumber: 0 }, /issueNumber/],
+      ['a fractional issue number', { issueNumber: 10.5 }, /issueNumber/],
+    ])('rejects %s', (_name, override, message) => {
+      expect(() =>
+        parse('getIssueTimeline', {
+          owner: 'elastic',
+          repo: 'kibana',
+          issueNumber: 10,
+          ...override,
+        })
+      ).toThrow(message);
     });
 
     it('asks GitHub to leave out the excluded event types', async () => {

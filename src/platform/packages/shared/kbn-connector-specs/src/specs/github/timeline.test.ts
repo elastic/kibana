@@ -419,7 +419,48 @@ describe('toTimelinePage', () => {
       { page: 1, eventTypes: ['reviewed'] }
     );
 
-    expect(page).toStrictEqual({ events: [], page: 1, nextPage: 2, hasMore: true });
+    expect(page).toStrictEqual({ events: [], page: 1, nextPage: 2, lastPage: 3, hasMore: true });
+  });
+
+  describe('lastPage', () => {
+    it('is the page of rel="last" in the Link header', () => {
+      const page = toTimelinePage({ data: events, headers: { link: NEXT_LINK } }, { page: 1 });
+
+      expect(page.lastPage).toBe(3);
+    });
+
+    it('is the current page when it has events and no next page', () => {
+      const withPrev = toTimelinePage({ data: events, headers: { link: PREV_LINK } }, { page: 3 });
+      const single = toTimelinePage({ data: events, headers: {} }, { page: 1 });
+
+      expect(withPrev.lastPage).toBe(3);
+      expect(single.lastPage).toBe(1);
+    });
+
+    it('is null for an empty page past the end', () => {
+      const page = toTimelinePage({ data: [], headers: { link: PREV_LINK } }, { page: 9 });
+
+      expect(page.lastPage).toBeNull();
+    });
+
+    it('is null when more pages remain and GitHub sends no rel="last"', () => {
+      const link = '<https://api.github.com/repositories/1/issues/10/timeline?page=2>; rel="next"';
+      const page = toTimelinePage({ data: events, headers: { link } }, { page: 1 });
+
+      expect(page).toMatchObject({ hasMore: true, lastPage: null });
+    });
+
+    it.each([
+      '<https://api.github.com/repositories/1/issues/10/timeline>; rel="last"',
+      '<https://api.github.com/repositories/1/issues/10/timeline?page=abc>; rel="last"',
+      '<https://api.github.com/repositories/1/issues/10/timeline?page=0>; rel="last"',
+      '<http://[>; rel="last"',
+    ])('ignores a rel="last" link without a usable page number: %s', (last) => {
+      const link = `<https://api.github.com/repositories/1/issues/10/timeline?page=2>; rel="next", ${last}`;
+      const page = toTimelinePage({ data: events, headers: { link } }, { page: 1 });
+
+      expect(page.lastPage).toBeNull();
+    });
   });
 
   it('reports the next page when the Link header has rel="next"', () => {
