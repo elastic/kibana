@@ -9,7 +9,8 @@
 
 export { describeScenarios, runScenario, SUGGEST_FLOWS } from './run';
 export { createCallbacks, DEFAULT_WORLD } from './world';
-export { columns, functions, operators } from './expected';
+export { columns, dateDiffUnits, dateLiterals, functions, operators, timeUnits } from './expected';
+export type { OperatorGroup } from './expected';
 export type {
   ExpectedSuggestion,
   Scenario,

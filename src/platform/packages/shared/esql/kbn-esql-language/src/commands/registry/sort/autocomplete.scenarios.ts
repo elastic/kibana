@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  inOperators,
-  nullCheckOperators,
-  patternMatchOperators,
-} from '../../definitions/all_operators';
 import { columns, functions, operators } from '../../../__tests__/scenarios';
 import type { Scenario, ScenarioTable } from '../../../__tests__/scenarios';
 
@@ -30,7 +25,7 @@ const expressionAfterKeywordField = [
 ];
 
 // Text and keyword fields take the string operators, not the comparison ones.
-const stringOperators = operators(patternMatchOperators, inOperators, nullCheckOperators);
+const stringOperators = operators('patternMatch', 'in', 'nullCheck');
 
 const afterColumn = [
   '\n',

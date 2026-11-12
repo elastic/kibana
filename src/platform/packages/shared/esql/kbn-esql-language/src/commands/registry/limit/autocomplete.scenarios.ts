@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { arithmeticOperators, comparisonFunctions } from '../../definitions/all_operators';
 import { columns, functions, operators } from '../../../__tests__/scenarios';
 import type { ScenarioTable } from '../../../__tests__/scenarios';
 
@@ -23,7 +22,7 @@ const afterGroupingColumn = [
   '| ',
   ', ',
   '\n',
-  ...operators(comparisonFunctions, arithmeticOperators).filter((operator) => operator !== '-'),
+  ...operators('comparison', 'arithmetic').filter((operator) => operator !== '-'),
 ];
 
 export const limitScenarios: ScenarioTable = {

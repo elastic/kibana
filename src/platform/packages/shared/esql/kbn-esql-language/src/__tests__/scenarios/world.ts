@@ -39,6 +39,8 @@ export const DEFAULT_WORLD: ScenarioWorld = {
   license: 'platinum',
   activeProduct: mockContext.activeProduct,
   isServerless: false,
+  supportsControls: false,
+  variables: [],
 };
 
 /** Builds the editor callbacks that answer from a scenario world. */
@@ -66,5 +68,8 @@ export const createCallbacks = (overrides: Partial<ScenarioWorld> = {}): ESQLCal
     }),
     getActiveProduct: () => world.activeProduct,
     isServerless: world.isServerless,
+    canSuggestVariables: () => world.supportsControls,
+    getVariables: () => [...world.variables],
+    getKqlSuggestions: world.getKqlSuggestions,
   };
 };
