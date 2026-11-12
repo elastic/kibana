@@ -1,0 +1,29 @@
+---
+id: kbn-management/settings/Hooks
+slug: /kbn-management/settings/hooks/
+title: Settings Hooks
+description: React hooks for editing UI settings outside of Advanced Settings.
+tags: ['management', 'settings']
+date: 2026-11-03
+---
+
+## `useEditableSettings`
+
+Manages the state for a page that edits a fixed list of UI settings: the `FieldDefinition` for each setting, the unsaved changes, and saving them.
+
+```tsx
+import { useEditableSettings } from '@kbn/management-settings-hooks';
+
+const { fields, unsavedChanges, handleFieldChange, cleanUnsavedChanges, saveAll, isSaving } =
+  useEditableSettings({ settingsKeys: [mySettingId], settingsClient: settings.client });
+
+const onSave = async () => {
+  const { requiresReload } = await saveAll();
+  if (requiresReload) {
+    window.location.reload();
+  }
+};
+```
+
+- `fields` contains only the requested settings that are registered, keyed by setting ID, and refreshes when one of them changes.
+- `saveAll` rejects with the combined error messages when any update fails. Showing toasts is up to the caller.

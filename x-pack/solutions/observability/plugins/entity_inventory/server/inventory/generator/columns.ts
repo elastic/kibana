@@ -34,7 +34,7 @@ const RESERVED_COLUMNS: ReadonlySet<string> = new Set([ENTITY_ID_COLUMN, LAST_SE
  */
 export const buildColumns = (
   definition: EntityDefinitionWithoutId,
-  plans: QueryPlan[],
+  plans: ReadonlyArray<Pick<QueryPlan, 'index' | 'attributes'>>,
   { groupingFields, helperColumns }: IdentityPlan
 ): OutputColumn[] => {
   getDynamicBlock(definition);

@@ -9,8 +9,9 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
+import { getConcurrencyGroupLock, withConcurrencyGroupLock } from './concurrency_group_lock';
 import { getQueueWaitDeadlineMs, resolveQueueTtlSetting } from './queue_concurrency_utils';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -37,6 +38,33 @@ export async function handleQueuedWorkflowRunAtTaskStart({
     return false;
   }
 
+  return withConcurrencyGroupLock(
+    getConcurrencyGroupLock(),
+    execution.spaceId ?? 'default',
+    execution.concurrencyGroupKey,
+    async () => {
+      const current = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowRunId,
+        execution.spaceId ?? 'default'
+      );
+      if (!current) {
+        return true;
+      }
+      if (current.status !== ExecutionStatus.QUEUED) {
+        return isTerminalStatus(current.status);
+      }
+
+      return expireOrFailQueuedRun(current, workflowRunId, workflowExecutionRepository, logger);
+    }
+  );
+}
+
+const expireOrFailQueuedRun = async (
+  execution: EsWorkflowExecution,
+  workflowRunId: string,
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  logger: Logger
+): Promise<boolean> => {
   const concurrency = execution.workflowDefinition?.settings?.concurrency;
   const ttlSetting = resolveQueueTtlSetting(concurrency);
   const deadlineMs = getQueueWaitDeadlineMs(execution, concurrency);
@@ -72,4 +100,4 @@ export async function handleQueuedWorkflowRunAtTaskStart({
   });
   logger.error(`Workflow execution ${workflowRunId} failed: ${message}`);
   return true;
-}
+};

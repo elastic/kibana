@@ -17,13 +17,19 @@ jest.mock('../../../../unit_stats/state_management/use_stats_manager', () => ({
   useDestinationStats: (id: string | undefined) => mockUseDestinationStats(id),
 }));
 
-const statsWithRate = (eventsRate: number | null): DestinationStatsView => ({
+const statsWith = ({
+  eventsRate = null,
+  latencyAverage = null,
+}: Partial<Pick<DestinationStatsView, 'eventsRate' | 'latencyAverage'>>): DestinationStatsView => ({
   eventsRate,
   eventsTotal: null,
   failedRate: null,
-  latencyAverage: null,
+  latencyAverage,
   series: { bucketMs: 300000, points: [] },
 });
+
+const statsWithRate = (eventsRate: number | null): DestinationStatsView =>
+  statsWith({ eventsRate });
 
 const renderFooter = (
   entry: StatsEntry<DestinationStatsView> | undefined,
@@ -48,39 +54,84 @@ describe('DestinationNodeStats', () => {
   });
 
   describe('a destination with data', () => {
-    it('shows Live and the rate', () => {
-      renderFooter({ status: 'ready', stats: statsWithRate(3700) });
+    it('shows the rate and the latency', () => {
+      renderFooter({
+        status: 'ready',
+        stats: statsWith({ eventsRate: 3700, latencyAverage: 0.012 }),
+      });
 
-      expect(text('streamsCanvasDestinationLive')).toBe('Live');
-      expect(text('streamsCanvasDestinationRate')).toBe('3.7k eps');
-      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
+      expect(text('streamsCanvasDestinationRate')).toBe('3.7k/s');
+      expect(text('streamsCanvasDestinationLatency')).toBe('12ms');
     });
 
-    it('keeps showing Live while a refresh has failed, and marks the value as stale', () => {
-      renderFooter({ status: 'stale', stats: statsWithRate(3700) });
+    it('keeps showing the values while a refresh has failed, and marks them as stale', () => {
+      renderFooter({
+        status: 'stale',
+        stats: statsWith({ eventsRate: 3700, latencyAverage: 0.012 }),
+      });
 
-      expect(text('streamsCanvasDestinationLive')).toBe('Live');
-      expect(text('streamsCanvasDestinationRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasDestinationRate')).toBe('3.7k/s');
+      expect(text('streamsCanvasDestinationLatency')).toBe('12ms');
       expect(isShown('streamsCanvasDestinationStale')).toBe(true);
     });
 
-    it('shows no stale mark for a value that is current', () => {
+    it('shows no stale mark for values that are current', () => {
       renderFooter({ status: 'ready', stats: statsWithRate(3700) });
 
       expect(isShown('streamsCanvasDestinationStale')).toBe(false);
     });
   });
 
-  describe('a destination without data', () => {
+  describe('a destination with no rate and no latency', () => {
     it.each<[string, StatsEntry<DestinationStatsView>]>([
-      ['a result with no data', { status: 'noData', stats: statsWithRate(null) }],
-      ['a rate of exactly 0', { status: 'ready', stats: statsWithRate(0) }],
-    ])('shows Data not flowing in, and no rate, for %s', (_description, entry) => {
+      ['a result with no data', { status: 'noData', stats: statsWith({}) }],
+      ['a value that went stale', { status: 'stale', stats: statsWith({}) }],
+    ])('shows Data not flowing in, and no numbers, for %s', (_description, entry) => {
       renderFooter(entry);
 
       expect(text('streamsCanvasDestinationNotFlowing')).toBe('Data not flowing in');
-      expect(isShown('streamsCanvasDestinationLive')).toBe(false);
       expect(isShown('streamsCanvasDestinationRate')).toBe(false);
+      expect(isShown('streamsCanvasDestinationLatency')).toBe(false);
+    });
+
+    it('marks a stale no-data value as stale, like any other value', () => {
+      renderFooter({ status: 'stale', stats: statsWith({}) });
+
+      expect(isShown('streamsCanvasDestinationStale')).toBe(true);
+    });
+
+    it('shows no not-flowing message once there is a value to show', () => {
+      renderFooter({ status: 'ready', stats: statsWith({ eventsRate: 3700 }) });
+
+      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
+    });
+  });
+
+  describe('a destination with missing values', () => {
+    it.each<[string, StatsEntry<DestinationStatsView>, string, string]>([
+      [
+        'a rate of exactly 0, which is data',
+        { status: 'ready', stats: statsWith({ eventsRate: 0, latencyAverage: 0.012 }) },
+        '0/s',
+        '12ms',
+      ],
+      [
+        'a rate and no latency',
+        { status: 'ready', stats: statsWith({ eventsRate: 3700 }) },
+        '3.7k/s',
+        '-',
+      ],
+      [
+        'a latency and no rate',
+        { status: 'ready', stats: statsWith({ latencyAverage: 0.012 }) },
+        '-',
+        '12ms',
+      ],
+    ])('shows %s as a dash for what is missing', (_description, entry, rate, latency) => {
+      renderFooter(entry);
+
+      expect(text('streamsCanvasDestinationRate')).toBe(rate);
+      expect(text('streamsCanvasDestinationLatency')).toBe(latency);
     });
   });
 
@@ -88,13 +139,13 @@ describe('DestinationNodeStats', () => {
     it.each<[string, StatsEntry<DestinationStatsView> | undefined]>([
       ['no entry yet', undefined],
       ['a request in flight', { status: 'loading' }],
-    ])('shows no status and no rate for %s, and keeps its row', (_description, entry) => {
+    ])('shows no numbers for %s, and keeps its row', (_description, entry) => {
       renderFooter(entry);
 
       expect(isShown('streamsCanvasDestinationStats')).toBe(true);
-      expect(isShown('streamsCanvasDestinationLive')).toBe(false);
       expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
       expect(isShown('streamsCanvasDestinationRate')).toBe(false);
+      expect(isShown('streamsCanvasDestinationLatency')).toBe(false);
       expect(isShown('streamsCanvasDestinationError')).toBe(false);
     });
   });
@@ -105,14 +156,14 @@ describe('DestinationNodeStats', () => {
       error: { code: 'unavailable', reason: 'Elasticsearch is unavailable' },
     };
 
-    it('marks the node with a warning, and shows no status and no rate', () => {
+    it('marks the node with a warning, and shows no numbers', () => {
       renderFooter(FAILED);
 
       expect(isShown('streamsCanvasDestinationStats')).toBe(true);
       expect(isShown('streamsCanvasDestinationError')).toBe(true);
-      expect(isShown('streamsCanvasDestinationLive')).toBe(false);
       expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
       expect(isShown('streamsCanvasDestinationRate')).toBe(false);
+      expect(isShown('streamsCanvasDestinationLatency')).toBe(false);
     });
 
     it('explains why in the tooltip of the warning', async () => {
@@ -136,11 +187,11 @@ describe('DestinationNodeStats', () => {
     });
 
     it.each<[string, StatsEntry<DestinationStatsView> | undefined]>([
-      ['live', { status: 'ready', stats: statsWithRate(3700) }],
-      ['not flowing', { status: 'noData', stats: statsWithRate(null) }],
+      ['ready', { status: 'ready', stats: statsWithRate(3700) }],
+      ['no data', { status: 'noData', stats: statsWithRate(null) }],
       ['loading', { status: 'loading' }],
-      ['unknown', undefined],
-    ])('shows it when the status is %s', (_status, entry) => {
+      ['missing', undefined],
+    ])('shows it when the entry is %s', (_status, entry) => {
       renderFooter(entry, { indexCount: 2 });
 
       expect(text('streamsCanvasDestinationIndexCount')).toBe('2 indices');

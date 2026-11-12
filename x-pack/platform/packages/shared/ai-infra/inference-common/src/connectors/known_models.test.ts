@@ -28,9 +28,19 @@ describe('getModelDefinition', () => {
       expect(getModelDefinition('gpt-5.6-luna')!.id).toBe('gpt-5.6-luna');
     });
 
+    it('resolves GPT-6 family ids, including the pro variants', () => {
+      expect(getModelDefinition('gpt-6-sol')!.id).toBe('gpt-6-sol');
+      expect(getModelDefinition('gpt-6-sol-pro')!.id).toBe('gpt-6-sol');
+      expect(getModelDefinition('gpt-6-luna')!.id).toBe('gpt-6-luna');
+      expect(getModelDefinition('gpt-6-luna-pro')!.id).toBe('gpt-6-luna');
+      expect(getModelDefinition('gpt-6-astra')!.id).toBe('gpt-6-astra');
+    });
+
     it('resolves the EIS-prefixed GPT ids', () => {
       expect(getModelDefinition('openai-gpt-5.4-mini')!.id).toBe('gpt-5.4-mini');
       expect(getModelDefinition('.openai-gpt-5.6-luna-chat_completion')!.id).toBe('gpt-5.6-luna');
+      expect(getModelDefinition('openai-gpt-6-sol')!.id).toBe('gpt-6-sol');
+      expect(getModelDefinition('.openai-gpt-6-luna-pro-chat_completion')!.id).toBe('gpt-6-luna');
       expect(getModelDefinition('openai-gpt-oss-120b')!.id).toBe('gpt-oss-120b');
     });
   });
@@ -48,6 +58,11 @@ describe('getModelDefinition', () => {
       expect(getModelDefinition('anthropic-claude-4.7-opus')!.id).toBe('claude-opus-4-7');
       expect(getModelDefinition('anthropic-claude-4.8-opus')!.id).toBe('claude-opus-4-8');
       expect(getModelDefinition('anthropic-claude-5.1-fable')!.id).toBe('claude-fable-5-1');
+      expect(getModelDefinition('anthropic-claude-5.5-opus')!.id).toBe('claude-opus-5-5');
+      expect(getModelDefinition('anthropic-claude-5.5-sonnet')!.id).toBe('claude-sonnet-5-5');
+      expect(getModelDefinition('.anthropic-claude-5.5-sonnet-chat_completion')!.id).toBe(
+        'claude-sonnet-5-5'
+      );
     });
 
     it('resolves older Claude-3 API ids via dash-replacement', () => {
@@ -105,6 +120,9 @@ describe('getModelDefinition', () => {
       expect(getModelDefinition('claude-opus-4-8')!.id).toBe('claude-opus-4-8');
       expect(getModelDefinition('claude-sonnet-4-5-20250929')!.id).toBe('claude-sonnet-4-5');
       expect(getModelDefinition('claude-sonnet-4-6')!.id).toBe('claude-sonnet-4-6');
+      expect(getModelDefinition('anthropic.claude-opus-5-5')!.id).toBe('claude-opus-5-5');
+      expect(getModelDefinition('anthropic.claude-sonnet-5-5')!.id).toBe('claude-sonnet-5-5');
+      expect(getModelDefinition('anthropic.claude-opus-5')!.id).toBe('claude-opus-5');
     });
   });
 

@@ -12,7 +12,8 @@ import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
-import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
+import { FLYOUT_LINK_TEST_ID } from '../../../flyout/shared/components/test_ids';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -62,8 +63,7 @@ interface HostSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   jobNameById: Record<string, string | undefined>;
-  isFlyoutOpen?: boolean;
-  /** When provided, replaces FlyoutLink for IP addresses (v2 system-flyout context). */
+  /** When provided, replaces OpenFlyoutLink for IP addresses. */
   linkRenderer?: EntityTableLinkRenderer;
   /** When using Entity Store v2: pre-fetched risk state from entity store. */
   riskScoreState?: RiskScoreState<EntityType.host>;
@@ -74,9 +74,8 @@ interface HostSummaryProps {
   /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
   showInspectButtonAlways?: boolean;
   /**
-   * Optional renderer for the host.ip value. Defaults to the expandable-flyout `FlyoutLink`.
-   * Callers rendering this overview outside the expandable-flyout system (e.g. the attack
-   * Entities tool) can supply a link that opens the network flyout via the new flyout system.
+   * Optional renderer for the host.ip value. Defaults to `OpenFlyoutLink`. Callers (e.g. the
+   * attack Entities tool) can supply their own link to control how the network flyout opens.
    */
   renderIpLink?: (ip: string) => React.ReactNode;
 }
@@ -110,7 +109,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
     startDate,
     hostName,
     jobNameById,
-    isFlyoutOpen = false,
     linkRenderer: LinkRenderer,
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
@@ -218,12 +216,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host ? (
-              <HostIdRenderer
-                host={data.host}
-                noLink={true}
-                scopeId={scopeId}
-                isFlyoutOpen={isFlyoutOpen}
-              />
+              <HostIdRenderer host={data.host} noLink={true} scopeId={scopeId} />
             ) : (
               getEmptyTagValue()
             ),
@@ -261,15 +254,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             ),
         },
       ],
-      [
-        data,
-        scopeId,
-        indexNames,
-        isFlyoutOpen,
-        hostName,
-        firstSeenFromEntityStore,
-        lastSeenFromEntityStore,
-      ]
+      [data, scopeId, indexNames, hostName, firstSeenFromEntityStore, lastSeenFromEntityStore]
     );
     const firstColumn = useMemo(
       () =>
@@ -327,11 +312,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
                       {ip}
                     </LinkRenderer>
                   ) : (
-                    <FlyoutLink
-                      field={'host.ip'}
+                    <OpenFlyoutLink
+                      field="host.ip"
                       value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
+                      data-test-subj={FLYOUT_LINK_TEST_ID}
                     />
                   );
                 }}
@@ -369,16 +353,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [
-        contextID,
-        scopeId,
-        data,
-        firstColumn,
-        getDefaultRenderer,
-        isFlyoutOpen,
-        renderIpLink,
-        LinkRenderer,
-      ]
+      [contextID, scopeId, data, firstColumn, getDefaultRenderer, renderIpLink, LinkRenderer]
     );
     return (
       <>

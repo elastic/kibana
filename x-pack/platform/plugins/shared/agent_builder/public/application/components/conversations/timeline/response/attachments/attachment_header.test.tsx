@@ -129,4 +129,10 @@ describe('AttachmentHeader', () => {
 
     expect(container.querySelector('.euiSplitPanel__inner')).not.toBeInTheDocument();
   });
+
+  it('shows the previewing badge without actions or a close handler', () => {
+    renderHeader({ actionButtons: [], previewBadgeState: 'previewing' });
+
+    expect(screen.getByText("You're previewing this")).toBeInTheDocument();
+  });
 });

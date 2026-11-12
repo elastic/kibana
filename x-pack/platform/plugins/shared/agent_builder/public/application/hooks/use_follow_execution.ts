@@ -78,6 +78,7 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
                 params: event.data.params,
                 results: [],
                 tool_call_group_id: event.data.tool_call_group_id,
+                intent: event.data.intent,
               } as ToolCallStep,
             ]);
           } else if (isToolResultEvent(event)) {

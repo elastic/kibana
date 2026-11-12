@@ -10,7 +10,7 @@ import type {
   GroupingMode,
   ThrottleStrategy,
 } from '@kbn/alerting-v2-schemas';
-import type { ActionPolicyEventAction } from '../dispatcher/steps/constants';
+import type { ActionPolicyEventAction } from '../services/event_log_service/constants';
 
 export interface NameValuePair {
   name: string;
@@ -125,6 +125,18 @@ export interface AlertingV2Usage {
     license_not_supported?: number;
   };
 
+  dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr?: {
+    per_alert?: Distribution;
+    per_field?: Distribution;
+    all?: Distribution;
+  };
+  dispatcher_action_groups_throttled_count_by_strategy_24hr?: {
+    on_status_change?: number;
+    per_status_interval?: number;
+    time_interval?: number;
+    every_time?: number;
+  };
+
   // alert event stats
   alerts_count?: number;
   alerts_count_by_kind?: { breached?: number; recovered?: number; no_data?: number };
@@ -174,4 +186,14 @@ export type PolicyActivityKeysCheck = AssertCovered<
 export type DispatchFailureReasonKeysCheck = AssertCovered<
   DispatchFailureReason,
   keyof NonNullable<AlertingV2Usage['dispatcher_dispatch_failures_count_by_reason_24hr']>
+>;
+export type DispatchedByGroupingModeKeysCheck = AssertCovered<
+  GroupingMode,
+  keyof NonNullable<
+    AlertingV2Usage['dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr']
+  >
+>;
+export type ThrottledByStrategyKeysCheck = AssertCovered<
+  ThrottleStrategy,
+  keyof NonNullable<AlertingV2Usage['dispatcher_action_groups_throttled_count_by_strategy_24hr']>
 >;

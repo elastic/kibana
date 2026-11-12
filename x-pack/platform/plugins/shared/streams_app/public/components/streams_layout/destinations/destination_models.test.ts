@@ -18,6 +18,8 @@ import {
   getStaticIndexRemainder,
   toS3DestinationViewModel,
   validateAutoWritePattern,
+  validateDocsWritePattern,
+  validateFreeFormIndexName,
   validateStaticSignalIndex,
   withUnitDestinations,
 } from './destination_models';
@@ -106,7 +108,7 @@ describe('destination models', () => {
     ).toBeUndefined();
   });
 
-  it('stores a telemetry-scoped index per signal, a description, and a plaintext api_key', () => {
+  it('stores a telemetry-scoped index per signal, a description, and an API key reference', () => {
     expect(
       createUnitDestination({
         id: 'es-app',
@@ -115,7 +117,7 @@ describe('destination models', () => {
         signals: ['logs', 'traces'],
         indexBySignal: { logs: 'logs-app-default', traces: 'traces-app-default' },
         writePatternsBySignal: {},
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-app-api-key',
       })
     ).toEqual({
       id: 'es-app',
@@ -126,7 +128,7 @@ describe('destination models', () => {
       config: [
         { name: 'index', telemetry: ['logs'], value: 'logs-app-default' },
         { name: 'index', telemetry: ['traces'], value: 'traces-app-default' },
-        { name: 'api_key', value: 'encoded-key' },
+        { name: 'api_key', value: { credential: 'es-app-api-key' } },
       ],
     });
   });
@@ -140,14 +142,14 @@ describe('destination models', () => {
         signals: ['logs', 'metrics', 'traces'],
         indexBySignal: {},
         writePatternsBySignal: {},
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-auto-api-key',
       })
     ).toEqual({
       id: 'es-auto',
       name: 'Auto',
       type: 'elasticsearch',
       supported_telemetry: ['logs', 'metrics', 'traces'],
-      config: [{ name: 'api_key', value: 'encoded-key' }],
+      config: [{ name: 'api_key', value: { credential: 'es-auto-api-key' } }],
     });
   });
 
@@ -159,7 +161,7 @@ describe('destination models', () => {
         signals: ['logs', 'metrics'],
         indexBySignal: {},
         writePatternsBySignal: { logs: ['logs-billing-*'], metrics: ['metrics-billing-*'] },
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-billing-api-key',
       })
     ).toEqual({
       id: 'es-billing',
@@ -169,14 +171,14 @@ describe('destination models', () => {
       config: [
         { name: 'write_patterns', telemetry: ['logs'], value: ['logs-billing-*'] },
         { name: 'write_patterns', telemetry: ['metrics'], value: ['metrics-billing-*'] },
-        { name: 'api_key', value: 'encoded-key' },
+        { name: 'api_key', value: { credential: 'es-billing-api-key' } },
       ],
     });
   });
 
   it('builds one destination spec from the form', () => {
     expect(getDestinationCreateSpec(EMPTY_ELASTICSEARCH_DESTINATION_FORM)).toEqual({
-      signals: ['logs', 'metrics', 'traces'],
+      signals: ['logs', 'metrics', 'traces', 'docs'],
       indexBySignal: {},
       writePatternsBySignal: {},
     });
@@ -204,6 +206,53 @@ describe('destination models', () => {
     ).toEqual({
       signals: ['logs', 'traces'],
       indexBySignal: { logs: 'logs-app-default', traces: 'traces-app-default' },
+      writePatternsBySignal: {},
+    });
+  });
+
+  it('builds docs targets from the form', () => {
+    expect(
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: ['logs-orders-*', 'metrics-orders-*'],
+      })
+    ).toEqual({
+      signals: ['logs', 'docs'],
+      indexBySignal: {},
+      writePatternsBySignal: {
+        logs: ['logs-billing-*'],
+        docs: ['logs-orders-*', 'metrics-orders-*'],
+      },
+    });
+    expect(
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        auto: false,
+        ...composeStaticIndexesForAll('billing-default'),
+        docsIndex: 'accounting-2026',
+      })
+    ).toEqual({
+      signals: ['logs', 'metrics', 'traces', 'docs'],
+      indexBySignal: {
+        logs: 'logs-billing-default',
+        metrics: 'metrics-billing-default',
+        traces: 'traces-billing-default',
+        docs: 'accounting-2026',
+      },
+      writePatternsBySignal: {},
+    });
+    expect(
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        auto: false,
+        docsIndex: 'accounting-2026',
+      })
+    ).toEqual({
+      signals: ['docs'],
+      indexBySignal: { docs: 'accounting-2026' },
       writePatternsBySignal: {},
     });
   });
@@ -376,6 +425,59 @@ describe('destination models', () => {
     expect(validateAutoWritePattern('logs', 'Logs-billing-*')).toBe('uppercase');
     expect(validateAutoWritePattern('logs', 'logs-billing,prod-*')).toBe('invalidCharacter');
   });
+
+  it('rejects an auto write pattern over 255 UTF-8 bytes', () => {
+    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(248)}-*`)).toBeUndefined();
+    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(249)}-*`)).toBe('tooLong');
+    expect(validateAutoWritePattern('logs', `logs-${'é'.repeat(124)}-*`)).toBeUndefined();
+    expect(validateAutoWritePattern('logs', `logs-${'é'.repeat(124)}a-*`)).toBe('tooLong');
+  });
+});
+
+describe('docs targets', () => {
+  it('accepts any valid static name as a docs index', () => {
+    expect(validateFreeFormIndexName('accounting-2026')).toBeUndefined();
+    expect(validateFreeFormIndexName('logs-orders')).toBeUndefined();
+    expect(validateFreeFormIndexName('  ')).toBeUndefined();
+  });
+
+  it('rejects docs index names the transpiler rejects', () => {
+    expect(validateFreeFormIndexName('acc-{{x}}')).toBe('template');
+    expect(validateFreeFormIndexName('acc-${x}')).toBe('template');
+    expect(validateFreeFormIndexName('acc*')).toBe('invalidCharacter');
+    expect(validateFreeFormIndexName('acc\tx')).toBe('invalidCharacter');
+    expect(validateFreeFormIndexName('acc\u0007x')).toBe('invalidCharacter');
+    expect(validateFreeFormIndexName('Accounting')).toBe('uppercase');
+    expect(validateFreeFormIndexName('_acc')).toBe('invalidName');
+    expect(validateFreeFormIndexName('..')).toBe('invalidName');
+    expect(validateFreeFormIndexName('a'.repeat(256))).toBe('invalidName');
+  });
+
+  it('rejects a docs index that starts with a dot', () => {
+    expect(validateFreeFormIndexName('.accounting')).toBe('invalidName');
+  });
+
+  it('accepts docs write patterns under the three prefixes', () => {
+    expect(validateDocsWritePattern('logs-orders-*')).toBeUndefined();
+    expect(validateDocsWritePattern('metrics-*')).toBeUndefined();
+    expect(validateDocsWritePattern(' traces-x ')).toBeUndefined();
+  });
+
+  it('rejects docs write patterns outside the prefixes or with invalid input', () => {
+    expect(validateDocsWritePattern('accounting-*')).toBe('docsPrefix');
+    expect(validateDocsWritePattern('logs*')).toBe('docsPrefix');
+    expect(validateDocsWritePattern('Logs-orders-*')).toBe('uppercase');
+    expect(validateDocsWritePattern('logs-a b')).toBe('invalidCharacter');
+    expect(validateDocsWritePattern('logs-a\u0007')).toBe('invalidCharacter');
+    expect(validateDocsWritePattern('logs-{{x}}')).toBe('template');
+  });
+
+  it('rejects a docs write pattern over 255 UTF-8 bytes', () => {
+    expect(validateDocsWritePattern(`logs-${'a'.repeat(250)}`)).toBeUndefined();
+    expect(validateDocsWritePattern(`logs-${'a'.repeat(251)}`)).toBe('tooLong');
+    expect(validateDocsWritePattern(`logs-${'é'.repeat(124)}a*`)).toBeUndefined();
+    expect(validateDocsWritePattern(`logs-${'é'.repeat(125)}*`)).toBe('tooLong');
+  });
 });
 
 describe('S3', () => {
@@ -392,7 +494,7 @@ describe('S3', () => {
       id: 's3-archive',
       name: 'S3 archive',
       type: 's3',
-      supported_telemetry: ['logs', 'metrics', 'traces'],
+      supported_telemetry: ['logs', 'metrics', 'traces', 'docs'],
       config: [
         { name: 'bucket', value: 'demo-bucket' },
         { name: 'region', value: 'eu-west-1' },

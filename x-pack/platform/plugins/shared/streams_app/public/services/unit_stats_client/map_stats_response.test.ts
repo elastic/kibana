@@ -13,6 +13,7 @@ import { mapStatsResponse } from './map_stats_response';
 
 const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
 const processor = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'processor', id });
+const source = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'source', id });
 
 const map = (scenario: StatsFixtureScenario, requested: StreamsUnit.StatsComponentRef[]) =>
   mapStatsResponse(STATS_FIXTURE_RESPONSES[scenario], requested);
@@ -57,6 +58,25 @@ describe('mapStatsResponse', () => {
     expect(result.destinations['es-dev']).toMatchObject({
       status: 'ready',
       stats: { eventsRate: 0, eventsTotal: 0 },
+    });
+  });
+
+  it('maps the accepted rate of a source, and treats zero as data', () => {
+    const result = map('data', [source('otlp-input'), source('idle-input')]);
+
+    expect(result.sources['otlp-input']).toEqual({
+      status: 'ready',
+      stats: { acceptedRate: 3700 },
+    });
+    expect(result.sources['idle-input']).toEqual({ status: 'ready', stats: { acceptedRate: 0 } });
+  });
+
+  it('classifies a source with a null rate as no data', () => {
+    const result = map('noData', [source('otlp-input')]);
+
+    expect(result.sources['otlp-input']).toEqual({
+      status: 'noData',
+      stats: { acceptedRate: null },
     });
   });
 
@@ -132,6 +152,18 @@ describe('mapStatsResponse', () => {
     expect(result.processors['uppercase-message'].status).toBe('ready');
   });
 
+  it('sets the error of a source, and shows one that is not in the unit as no data', () => {
+    expect(map('kindError', [source('otlp-input')]).sources['otlp-input']).toMatchObject({
+      status: 'error',
+      error: { code: 'unavailable' },
+    });
+
+    const notFound = map('notFound', [source('otlp-staged')]).sources['otlp-staged'];
+
+    expect(notFound.status).toBe('noData');
+    expect(notFound.error).toBeUndefined();
+  });
+
   it('shows a destination type that reports no metrics as no data, not as an error', () => {
     const result = map('unsupportedDestination', [destination('s3-archive')]);
 
@@ -147,7 +179,11 @@ describe('mapStatsResponse', () => {
   });
 
   it('shows a requested component that the response leaves out as no data', () => {
-    const result = map('data', [destination('es-missing'), processor('missing-processor')]);
+    const result = map('data', [
+      destination('es-missing'),
+      processor('missing-processor'),
+      source('missing-source'),
+    ]);
 
     expect(result.destinations['es-missing']).toMatchObject({
       status: 'noData',
@@ -157,6 +193,10 @@ describe('mapStatsResponse', () => {
       status: 'noData',
       stats: { instances: [] },
     });
+    expect(result.sources['missing-source']).toEqual({
+      status: 'noData',
+      stats: { acceptedRate: null },
+    });
   });
 
   it('maps only the requested components', () => {
@@ -164,6 +204,7 @@ describe('mapStatsResponse', () => {
 
     expect(Object.keys(result.destinations)).toEqual(['es-prod']);
     expect(result.processors).toEqual({});
+    expect(result.sources).toEqual({});
   });
 
   it('drops a component kind it does not know', () => {

@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   DEFAULT_RUN_QUOTA_SETTINGS,
+  isInvestigationRunQuotaGroup,
   RUN_QUOTA_GROUPS,
   type RunQuotaGroup,
   type RunQuotaSettingsPatch,
@@ -41,6 +42,7 @@ export type { RunQuotaSettingsPatch };
 
 export const createDefaultRunQuotaSettingsAttributes = (): RunQuotaSettingsAttributes => ({
   enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
+  investigationLimitsEnabled: DEFAULT_RUN_QUOTA_SETTINGS.investigationLimitsEnabled,
   limits: { ...DEFAULT_RUN_QUOTA_SETTINGS.limits },
 });
 
@@ -64,7 +66,10 @@ const applySettingsPatch = (
   const normalizedLegacyLimits =
     activateLimits && !current.enabled
       ? Object.fromEntries(
-          RUN_QUOTA_GROUPS.filter((group) => group !== 'investigation').map((group) => [group, 0])
+          RUN_QUOTA_GROUPS.filter((group) => !isInvestigationRunQuotaGroup(group)).map((group) => [
+            group,
+            0,
+          ])
         )
       : {};
 
@@ -131,6 +136,7 @@ export const patchRunQuotaSettings = async (
             RUN_QUOTA_SETTINGS_SO_ID,
             {
               enabled: next.enabled,
+              investigationLimitsEnabled: next.investigationLimitsEnabled,
               limits: next.limits,
             },
             { version: currentSavedObject.version }
