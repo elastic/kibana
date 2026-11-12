@@ -12,6 +12,7 @@ import { ConversationContext } from '../context/conversation/conversation_contex
 import type { ConversationActions } from '../context/conversation/use_conversation_actions';
 import { upsertAttachmentsIntoList } from '../context/conversation/upsert_attachments_into_list';
 import { removeAttachmentFromList } from '../context/conversation/remove_attachment_from_list';
+import { removeMatchingAttachments } from '../context/conversation/remove_matching_attachments';
 
 interface FakeConversationProviderProps {
   children: React.ReactNode;
@@ -40,6 +41,10 @@ export const FakeConversationProvider: React.FC<FakeConversationProviderProps> =
     setAttachments((prev) => removeAttachmentFromList(prev, index));
   }, []);
 
+  const removeAttachments = useCallback((toRemove: readonly ConversationAttachment[]) => {
+    setAttachments((prev) => removeMatchingAttachments(prev, toRemove));
+  }, []);
+
   const resetAttachments = useCallback(() => {
     setAttachments([]);
   }, []);
@@ -54,6 +59,7 @@ export const FakeConversationProvider: React.FC<FakeConversationProviderProps> =
         attachments,
         upsertAttachments,
         removeAttachment,
+        removeAttachments,
         resetAttachments,
       }}
     >

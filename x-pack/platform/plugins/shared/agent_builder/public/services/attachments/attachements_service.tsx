@@ -6,10 +6,12 @@
  */
 
 import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
-import type {
-  UnknownAttachment,
-  UpdateOriginResponse,
-  VersionedAttachment,
+import {
+  isSupportedBinaryMimeType,
+  type SupportedBinaryMimeType,
+  type UnknownAttachment,
+  type UpdateOriginResponse,
+  type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentUIDefinition,
@@ -20,7 +22,7 @@ import type {
   ListAttachmentsResult,
   UpdateAttachmentArgs,
 } from '@kbn/agent-builder-browser';
-import { publicApiPath } from '../../../common/constants';
+import { binarySupportedTypesPath, publicApiPath } from '../../../common/constants';
 import type {
   CheckStaleAttachmentsResponse,
   CreateAttachmentResponse,
@@ -137,14 +139,25 @@ export class AttachmentsService {
     return attachment;
   }
 
-  async create({ conversationId, ...body }: CreateAttachmentArgs): Promise<VersionedAttachment> {
+  async create({
+    conversationId,
+    signal,
+    ...body
+  }: CreateAttachmentArgs): Promise<VersionedAttachment> {
     const { attachment } = await this.http.post<CreateAttachmentResponse>(
       buildPath(`${publicApiPath}/conversations/{conversationId}/attachments`, {
         conversationId,
       }),
-      { body: JSON.stringify(body) }
+      { body: JSON.stringify(body), signal }
     );
     return attachment;
+  }
+
+  async getSupportedBinaryMimeTypes(): Promise<SupportedBinaryMimeType[]> {
+    const { mime_types: mimeTypes } = await this.http.get<{ mime_types: string[] }>(
+      binarySupportedTypesPath
+    );
+    return mimeTypes.filter(isSupportedBinaryMimeType);
   }
 
   async update({

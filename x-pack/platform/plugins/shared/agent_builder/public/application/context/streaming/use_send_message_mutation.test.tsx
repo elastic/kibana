@@ -128,9 +128,9 @@ describe('useSendMessageMutation', () => {
 
   it('skips the release when the connection is closed locally: no refetch, composer and pending message untouched', async () => {
     const { bindings, source, result } = setup();
-    const resetAttachments = jest.fn();
+    const removeAttachments = jest.fn();
 
-    act(() => result.current.mutate({ ...vars, resetAttachments }));
+    act(() => result.current.mutate({ ...vars, removeAttachments }));
     await waitFor(() => expect(mockChat).toHaveBeenCalled());
     act(() => source.next(started as ChatEvent));
     act(() => {
@@ -141,7 +141,7 @@ describe('useSendMessageMutation', () => {
 
     await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
     expect(mockGet).not.toHaveBeenCalled();
-    expect(resetAttachments).not.toHaveBeenCalled();
+    expect(removeAttachments).not.toHaveBeenCalled();
     expect(bindings.clearPendingMessage).not.toHaveBeenCalled();
     expect(mockAbort).not.toHaveBeenCalled();
   });
@@ -189,6 +189,20 @@ describe('useSendMessageMutation', () => {
         .getSnapshot(conversationId)
         .some((event) => event.type === TimelineEventType.executionTerminated)
     ).toBe(true);
+  });
+
+  it('removes only the sent attachments from the composer when the run ends', async () => {
+    const { bindings, source, result } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
+    const removeAttachments = jest.fn();
+    const sent = [{ id: 'a-1', type: 'text', data: { content: 'hello' } }];
+
+    act(() => result.current.mutate({ ...vars, attachments: sent, removeAttachments }));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    act(() => streamToCompletion(source));
+
+    await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
+    expect(removeAttachments).toHaveBeenCalledWith(sent);
   });
 
   it('clears the pending message when the refetch fails', async () => {

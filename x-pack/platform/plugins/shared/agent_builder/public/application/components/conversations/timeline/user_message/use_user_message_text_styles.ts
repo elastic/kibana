@@ -17,8 +17,8 @@ export interface UserMessageTextStyles {
   badge: SerializedStyles;
   commandBadgeWrapper: SerializedStyles;
   commandBadgeInner: SerializedStyles;
-  imageBadgeWrapper: SerializedStyles;
-  imageBadgeInner: SerializedStyles;
+  attachmentBadgeWrapper: SerializedStyles;
+  attachmentBadgeInner: SerializedStyles;
 }
 
 export const useUserMessageTextStyles = (): UserMessageTextStyles => {
@@ -68,7 +68,7 @@ export const useUserMessageTextStyles = (): UserMessageTextStyles => {
         min-width: 0;
         ${euiTextTruncate('100%')}
       `,
-      imageBadgeWrapper: css`
+      attachmentBadgeWrapper: css`
         display: inline-flex;
         align-items: center;
         gap: ${euiTheme.size.xs};
@@ -84,7 +84,7 @@ export const useUserMessageTextStyles = (): UserMessageTextStyles => {
           background: ${euiTheme.colors.textPrimary};
         }
       `,
-      imageBadgeInner: css`
+      attachmentBadgeInner: css`
         min-width: 0;
         ${euiTextTruncate('100%')}
       `,

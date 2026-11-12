@@ -303,3 +303,42 @@ describe('EmbeddableConversationsProvider list refresh', () => {
     expect(mockUnsubscribeListRefresh).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('EmbeddableConversationsProvider removeAttachments', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: true,
+    });
+  });
+
+  it('removes the sent attachments and keeps the ones added after the send', async () => {
+    const sent = { id: 'a-1', type: 'text', data: { content: 'sent' } };
+    const addedLater = { type: 'text', data: { content: 'added later' } };
+    const AttachmentsSpy = () => {
+      const { attachments, upsertAttachments, removeAttachments } = useConversationContext();
+      return (
+        <>
+          <div>{`attachments:${(attachments ?? []).map(({ id }) => id ?? 'new').join(',')}`}</div>
+          <button type="button" onClick={() => upsertAttachments?.([sent, addedLater])}>
+            add
+          </button>
+          <button type="button" onClick={() => removeAttachments?.([{ ...sent }])}>
+            remove-sent
+          </button>
+        </>
+      );
+    };
+
+    renderEmbeddableProvider({ children: <AttachmentsSpy /> });
+    fireEvent.click(await screen.findByText('add'));
+    expect(screen.getByText('attachments:a-1,new')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('remove-sent'));
+
+    expect(screen.getByText('attachments:new')).toBeInTheDocument();
+  });
+});

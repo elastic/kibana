@@ -33,6 +33,7 @@ import { labels } from '../../../utils/i18n';
 import { useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useCreateConversation } from '../../../hooks/use_create_conversation';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -54,7 +55,7 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
-import { useImageUpload } from './use_image_upload';
+import { useAttachmentUploads } from './use_attachment_uploads';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -238,7 +239,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onEditorFocus,
   onSubmitOverride,
 }) => {
-  const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
+  const [hoveredAttachmentName, setHoveredAttachmentName] = useState<string | null>(null);
 
   const { isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
@@ -321,13 +322,29 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
+  // Its own call, so a PDF paste in a new chat does not lock the editor.
+  const { createConversation: createUploadConversation } = useCreateConversation();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
-  const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
-    useImageUpload({
-      addErrorToast,
-      messageEditorController,
-    });
+  const {
+    uploadingNames,
+    loadingFiles,
+    uploadingChipNames,
+    isUploading,
+    acceptedFileMimeTypes,
+    pendingConversationId,
+    handlePasteFile,
+    handleUnsupportedFile,
+    handleAfterInput,
+    handleRemoveAttachment,
+    handleRemoveLoadingFile,
+    handleSubmitted: handleUploadsSubmitted,
+  } = useAttachmentUploads({
+    addErrorToast,
+    messageEditorController,
+    createConversation: createUploadConversation,
+    isBinaryUploadEnabled: !onSubmitOverride,
+  });
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -362,7 +379,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     isBoundAgentForbidden ||
     isAgentModelLoading ||
     isAwaitingPrompt ||
-    uploadingNames.size > 0;
+    isUploading;
 
   const placeholder = isAgentDeleted
     ? disabledPlaceholder(agentId)
@@ -499,6 +516,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       sendUserMessage(content)
         .then(() => {
           lastEditorContentRef.current = '';
+          handleUploadsSubmitted();
           clearDraft();
           messageEditorController.clear();
           markSent();
@@ -511,10 +529,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       return;
     }
     lastEditorContentRef.current = '';
+    handleUploadsSubmitted();
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      submitMessage(content);
+      submitMessage(content, { conversationId: pendingConversationId });
     }
     clearDraft();
     messageEditorController.clear();
@@ -532,14 +551,16 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       isCollapsed={shouldCollapseInput}
       triggerMode={triggerMode}
     >
-      {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
+      {(visibleAttachments.length > 0 || isUploading) && (
         <EuiFlexItem grow={false}>
           <AttachmentPillsRow
             attachments={visibleAttachments}
             uploadingNames={uploadingNames}
+            loadingFiles={loadingFiles}
+            onRemoveLoadingFile={handleRemoveLoadingFile}
             removable
             onRemoveAttachment={handleRemoveAttachment}
-            hoveredImageName={hoveredImageName}
+            hoveredAttachmentName={hoveredAttachmentName}
           />
         </EuiFlexItem>
       )}
@@ -563,9 +584,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
           onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onUnsupportedFile={upsertAttachments ? handleUnsupportedFile : undefined}
+          acceptedFileMimeTypes={acceptedFileMimeTypes}
           onAfterInput={handleAfterInput}
-          onHoveredPlaceholderChange={setHoveredImageName}
-          uploadingNames={uploadingNames}
+          onHoveredPlaceholderChange={setHoveredAttachmentName}
+          uploadingNames={uploadingChipNames}
         />
       </EuiFlexItem>
       {isMessageTooLong && (

@@ -24,6 +24,7 @@ interface ConversationContextValue {
   upsertAttachments?: (attachments: ConversationAttachment[]) => void;
   resetAttachments?: () => void;
   removeAttachment?: (attachmentIndex: number) => void;
+  removeAttachments?: (attachments: readonly ConversationAttachment[]) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   setAgentId?: (agentId: string) => void;

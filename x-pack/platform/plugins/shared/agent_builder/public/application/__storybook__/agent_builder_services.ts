@@ -13,7 +13,11 @@ import {
   AttachmentType,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
 } from '@kbn/agent-builder-common/attachments';
-import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  ImageAttachmentData,
+  BinaryAttachmentData,
+  UnknownAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentUIDefinition,
   ConversationEventUIDefinition,
@@ -85,6 +89,16 @@ const storybookImageAttachmentDefinition: AttachmentUIDefinition<StorybookImageA
 storybookAttachmentsService.addAttachmentType(
   AttachmentType.image,
   storybookImageAttachmentDefinition
+);
+
+type StorybookBinaryAttachment = UnknownAttachment & { data?: Partial<BinaryAttachmentData> };
+const storybookBinaryAttachmentDefinition: AttachmentUIDefinition<StorybookBinaryAttachment> = {
+  getLabel: ({ data, description }) => data?.name ?? description ?? 'File',
+  getIcon: () => 'document',
+};
+storybookAttachmentsService.addAttachmentType(
+  AttachmentType.binary,
+  storybookBinaryAttachmentDefinition
 );
 
 /**
@@ -177,6 +191,7 @@ storybookConversationEventsService.register(storyNoteWithHeaderEventDefinition);
 
 const defaultServices: AgentBuilderInternalService = {
   filesClient: storybookFilesClient,
+  binaryFilesClient: storybookFilesClient,
   agentService: {
     list: () =>
       Promise.resolve([

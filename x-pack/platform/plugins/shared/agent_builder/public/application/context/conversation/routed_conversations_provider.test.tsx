@@ -57,12 +57,14 @@ const createMockAttachment = (): ConversationAttachment => ({
 interface ContextCapture {
   attachments: ConversationAttachment[] | undefined;
   upsertAttachments: ((a: ConversationAttachment[]) => void) | undefined;
+  removeAttachments?: (a: readonly ConversationAttachment[]) => void;
 }
 
 const ContextReader: React.FC<{ capture: ContextCapture }> = ({ capture }) => {
   const ctx = useConversationContext();
   capture.attachments = ctx.attachments;
   capture.upsertAttachments = ctx.upsertAttachments;
+  capture.removeAttachments = ctx.removeAttachments;
   return null;
 };
 
@@ -150,5 +152,33 @@ describe('RoutedConversationsProvider — attachment lifecycle', () => {
     );
 
     expect(capture.attachments).toEqual(restored);
+  });
+});
+
+describe('RoutedConversationsProvider - removeAttachments', () => {
+  beforeEach(() => {
+    mockUseParams.mockReturnValue({ conversationId: 'conv-1', agentId: 'agent-1' });
+    mockUseLocation.mockReturnValue({ state: {} });
+  });
+
+  it('removes the sent attachments and keeps the ones added after the send', async () => {
+    const capture: ContextCapture = { attachments: undefined, upsertAttachments: undefined };
+    render(
+      <RoutedConversationsProvider>
+        <ContextReader capture={capture} />
+      </RoutedConversationsProvider>
+    );
+    await act(async () => {});
+    const sentWithoutId = createMockAttachment();
+    const sentWithId: ConversationAttachment = { id: 'a-1', type: 'text', data: {} };
+    act(() => capture.upsertAttachments?.([sentWithoutId, sentWithId]));
+    const sent = capture.attachments ?? [];
+    const addedLater = createMockAttachment();
+    act(() => capture.upsertAttachments?.([addedLater]));
+
+    act(() => capture.removeAttachments?.([...sent, { id: 'a-1', type: 'text', data: {} }]));
+
+    expect(capture.attachments).toEqual([addedLater]);
+    expect(capture.attachments?.[0]).toBe(addedLater);
   });
 });

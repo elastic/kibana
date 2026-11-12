@@ -64,8 +64,8 @@ export const useImageUpload = ({
             : []
         )
       );
-      // Also include in-flight names so two simultaneous pastes don't collide
-      for (const n of uploadingNames) existingImageNames.add(n);
+      // The refs show earlier images of the same paste, before the state updates.
+      for (const n of uploadControllers.current.keys()) existingImageNames.add(n);
 
       if (
         rejectIfTooManyImages({
@@ -108,14 +108,7 @@ export const useImageUpload = ({
         });
       return name;
     },
-    [
-      upsertAttachments,
-      filesClient,
-      addErrorToast,
-      services.analytics,
-      uploadingNames,
-      messageEditorController,
-    ]
+    [upsertAttachments, filesClient, addErrorToast, services.analytics, messageEditorController]
   );
 
   const handleAfterInput = useCallback(() => {

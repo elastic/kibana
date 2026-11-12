@@ -9,7 +9,11 @@ import type { CommandBadgeData } from './types';
 import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
-import { IMAGE_ATTACHMENT_SCHEME } from '../image_placeholder';
+import {
+  ATTACHMENT_ID_PARAM,
+  isPlaceholderKind,
+  type PlaceholderKind,
+} from '../attachment_placeholder';
 
 interface TextSegment {
   type: 'text';
@@ -19,11 +23,13 @@ interface BadgeSegment {
   type: 'badge';
   data: CommandBadgeData;
 }
-interface ImageSegment {
-  type: 'image';
+interface AttachmentSegment {
+  type: 'attachment';
+  kind: PlaceholderKind;
   name: string;
+  attachmentId?: string;
 }
-export type ContentSegment = TextSegment | BadgeSegment | ImageSegment;
+export type ContentSegment = TextSegment | BadgeSegment | AttachmentSegment;
 
 export class CommandBadgeSerializationError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -98,8 +104,8 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
 const BADGE_PATTERN = /\[((?:\\.|[^\]\\])+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
 
 /**
- * Parses text containing serialized badge and image markdown-links into segments.
- * Used to restore badges and image chips from serialized content.
+ * Parses text containing serialized badge, image, binary and text file markdown-links into segments.
+ * Used to restore badges and attachment chips from serialized content.
  */
 export const deserializeInputSegments = (text: string): ContentSegment[] => {
   const segments: ContentSegment[] = [];
@@ -116,9 +122,13 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
     const [_, escapedDisplayText, scheme, path, queryString] = match;
     const displayText = unescapeLinkText(escapedDisplayText);
 
-    if (scheme === IMAGE_ATTACHMENT_SCHEME) {
+    if (isPlaceholderKind(scheme)) {
       try {
-        segments.push({ type: 'image', name: decodeURIComponent(path) });
+        const name = decodeURIComponent(path);
+        const attachmentId = queryString
+          ? new URLSearchParams(queryString).get(ATTACHMENT_ID_PARAM) ?? undefined
+          : undefined;
+        segments.push({ type: 'attachment', kind: scheme, name, attachmentId });
       } catch {
         // Malformed percent-encoding, preserve as text
         segments.push({ type: 'text', value: match[0] });

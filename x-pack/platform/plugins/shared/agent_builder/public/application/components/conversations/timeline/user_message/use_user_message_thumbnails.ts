@@ -34,7 +34,14 @@ export interface UserMessageThumbnail {
   label: string;
   /** The `data.name` of the image, used to match it with its badge in the message text. */
   name?: string;
+  /** The place of the attachment among the attachments of the message. */
+  order: number;
 }
+
+const isImageRef = (
+  ref: ResolvedReference
+): ref is ResolvedReference & { attachment: VersionedAttachment<AttachmentType.image> } =>
+  isVersionedAttachmentOfType(ref.attachment, AttachmentType.image);
 
 /** Resolves the image attachments of a user message that have a thumbnail to show. */
 export const useUserMessageThumbnails = ({
@@ -52,15 +59,10 @@ export const useUserMessageThumbnails = ({
     actorFilter,
   });
 
-  const imageRefs = allResolved.filter(
-    (
-      ref
-    ): ref is ResolvedReference & {
-      attachment: VersionedAttachment<AttachmentType.image>;
-    } => isVersionedAttachmentOfType(ref.attachment, AttachmentType.image)
-  );
-
-  return imageRefs.reduce<UserMessageThumbnail[]>((acc, ref) => {
+  return allResolved.reduce<UserMessageThumbnail[]>((acc, ref, order) => {
+    if (!isImageRef(ref)) {
+      return acc;
+    }
     const versionData = getVersion(ref.attachment, ref.version);
     if (!versionData) {
       return acc;
@@ -90,6 +92,7 @@ export const useUserMessageThumbnails = ({
       thumbnailUrl,
       label,
       name: versionData.data.name,
+      order,
     });
     return acc;
   }, []);
