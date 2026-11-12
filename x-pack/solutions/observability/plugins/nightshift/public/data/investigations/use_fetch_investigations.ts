@@ -48,7 +48,13 @@ export interface FetchInvestigationsParams {
 
 export interface FetchInvestigationsResult {
   investigations: InvestigationSummary[];
+  /**
+   * Count the section UI should show: loaded rows for the capped in-progress page,
+   * otherwise the API pagination total.
+   */
   total: number;
+  /** API pagination total — for in-progress this can exceed the loaded page. */
+  matchTotal: number;
   hasMore: boolean;
   isInitialLoading: boolean;
   isFetchingNextPage: boolean;
@@ -124,8 +130,10 @@ export const useFetchInvestigations = ({
           sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: inProgress,
+          // Home sections and tiles are open-only; closed finished work is out of scope here.
+          status: 'open',
           ...(inProgress
-            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES, status: 'open' }
+            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES }
             : {
                 page: typeof pageParam === 'number' ? pageParam : 1,
                 per_page: INVESTIGATIONS_PAGE_SIZE,
@@ -151,9 +159,9 @@ export const useFetchInvestigations = ({
   // The API applies `in_progress`, so every section holds only what belongs in it.
   const investigations = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
 
-  const listedTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
-  // The in-progress section loads one capped page, so it reports what it can show.
-  const total = inProgress ? investigations.length : listedTotal;
+  const matchTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  // The in-progress section loads one capped page, so its display total is what it can show.
+  const total = inProgress ? investigations.length : matchTotal;
 
   const handleFetchNextPage = useCallback(() => {
     void fetchNextPage();
@@ -167,6 +175,7 @@ export const useFetchInvestigations = ({
     () => ({
       investigations,
       total,
+      matchTotal,
       hasMore: hasNextPage ?? false,
       isInitialLoading,
       isFetchingNextPage,
@@ -179,6 +188,7 @@ export const useFetchInvestigations = ({
     [
       investigations,
       total,
+      matchTotal,
       hasNextPage,
       isInitialLoading,
       isFetchingNextPage,

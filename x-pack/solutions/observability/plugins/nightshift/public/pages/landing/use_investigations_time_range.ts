@@ -13,8 +13,8 @@ import {
   RANGE_TO_QUERY_PARAM,
 } from '../detection/use_detection_time_range';
 
-/** The homepage lists investigations modified in the last 3 days unless told otherwise. */
-export const DEFAULT_INVESTIGATIONS_TIME_RANGE = { from: 'now-3d', to: 'now' } as const;
+/** The homepage lists investigations modified in the last 48 hours unless told otherwise, same as Automations. */
+export const DEFAULT_INVESTIGATIONS_TIME_RANGE = { from: 'now-48h', to: 'now' } as const;
 
 export interface InvestigationsTimeRange {
   from: string;

@@ -19,7 +19,7 @@ export const SettingsNoPermissionCallout = () => (
       })}
       text={i18n.translate('xpack.nightshift.settings.noPermissionCalloutDescription', {
         defaultMessage:
-          'Editing these settings requires the Nightshift "Manage engines" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+          'Editing these settings requires the nightshift "Manage engines" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
       })}
       data-test-subj="streams-settings-no-permission-callout"
       announceOnMount={false}

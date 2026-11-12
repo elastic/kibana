@@ -18,9 +18,9 @@ import {
 const NOW = new Date('2026-11-09T12:00:30.000Z');
 
 describe('getInvestigationsTimeRange', () => {
-  it('defaults to the last 3 days', () => {
-    expect(getInvestigationsTimeRange('')).toEqual({ from: 'now-3d', to: 'now' });
-    expect(DEFAULT_INVESTIGATIONS_TIME_RANGE).toEqual({ from: 'now-3d', to: 'now' });
+  it('defaults to the last 48 hours', () => {
+    expect(getInvestigationsTimeRange('')).toEqual({ from: 'now-48h', to: 'now' });
+    expect(DEFAULT_INVESTIGATIONS_TIME_RANGE).toEqual({ from: 'now-48h', to: 'now' });
   });
 
   it('reads the range from the URL', () => {
@@ -69,7 +69,7 @@ describe('useInvestigationsTimeRange', () => {
       () => ({ range: useInvestigationsTimeRange(), location: useLocation() }),
       { wrapper }
     );
-    expect(result.current.range.timeRange).toEqual({ from: 'now-3d', to: 'now' });
+    expect(result.current.range.timeRange).toEqual({ from: 'now-48h', to: 'now' });
 
     act(() => result.current.range.setTimeRange({ from: 'now-7d', to: 'now' }));
 
@@ -81,7 +81,7 @@ describe('useInvestigationsTimeRange', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-11-09T12:00:30.000Z'));
     try {
       const { result } = renderHook(() => useInvestigationsTimeRange(), { wrapper });
-      expect(result.current.updatedWindow.updatedAfter).toBe('2026-11-06T12:00:30.000Z');
+      expect(result.current.updatedWindow.updatedAfter).toBe('2026-11-07T12:00:30.000Z');
 
       jest.setSystemTime(new Date('2026-11-09T12:05:30.000Z'));
       let moved = false;
@@ -90,7 +90,7 @@ describe('useInvestigationsTimeRange', () => {
       });
 
       expect(moved).toBe(true);
-      expect(result.current.updatedWindow.updatedAfter).toBe('2026-11-06T12:05:30.000Z');
+      expect(result.current.updatedWindow.updatedAfter).toBe('2026-11-07T12:05:30.000Z');
     } finally {
       jest.useRealTimers();
     }

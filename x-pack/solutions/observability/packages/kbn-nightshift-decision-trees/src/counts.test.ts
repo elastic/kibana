@@ -8,6 +8,7 @@
 import {
   carryCounts,
   countsForTree,
+  edgesFromWalk,
   penalizePath,
   recordVisit,
   reinforcePath,
@@ -87,6 +88,16 @@ describe('countsForTree', () => {
       S1 --> X1`);
 
     expect(countsForTree(tree).edges).toHaveLength(1);
+  });
+});
+
+describe('edgesFromWalk', () => {
+  it('turns consecutive node ids into edges and keeps a condition on the arrival', () => {
+    expect(edgesFromWalk(['S1', 'E1', 'D1', { id: 'E2', condition: 'yes' }])).toEqual([
+      { source_node_id: 'S1', target_node_id: 'E1' },
+      { source_node_id: 'E1', target_node_id: 'D1' },
+      { source_node_id: 'D1', target_node_id: 'E2', condition: 'yes' },
+    ]);
   });
 });
 

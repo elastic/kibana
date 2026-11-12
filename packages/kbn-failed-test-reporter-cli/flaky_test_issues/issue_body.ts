@@ -12,6 +12,7 @@ import type { FlakyTestReport, TestFramework } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
+  buildkiteJobUrl,
   CATEGORY_LABELS,
   codeBlock,
   collapsed,
@@ -69,6 +70,8 @@ export interface FlakySuiteIssueCommentContext {
   report: FlakyTestReport;
   /** The issue is being reopened: the suite failed again after it was closed. */
   reopened: boolean;
+  /** Metadata of the issue before this refresh, for the flaky tests it has not shown yet. */
+  previous?: RecordedFlakySuiteIssueMetadata;
 }
 
 /** One report's numbers for the suite's worst test, kept in the body so the history survives. */
@@ -106,6 +109,12 @@ export interface FlakySuiteIssueMetadata {
    * it.
    */
   'report.commentedAt'?: string;
+  /**
+   * Tests the owners have seen flaky on the issue: those of the body as filed and of every comment
+   * since. The next comment names the flaky tests missing from it; absent on issues filed before
+   * it was recorded, until their next comment.
+   */
+  'report.shownTestIds'?: string[];
 }
 
 /** What an issue body records; older issues lack some of it. */
@@ -155,6 +164,7 @@ export const readFlakySuiteIssueMetadata = (
     'report.count': typeof count === 'number' ? count : undefined,
     'report.history': Array.isArray(history) ? history.filter(isSnapshot) : [],
     'report.commentedAt': typeof commentedAt === 'string' ? commentedAt : undefined,
+    'report.shownTestIds': stringsOf(metadataValue(body, 'report.shownTestIds')),
   };
 };
 
@@ -222,14 +232,16 @@ export const flakySuiteIssueMetadata = (
   const pipelines = failedPipelines(suite, report);
   const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
   const commentedAt = comment ? report.generatedAt.toISOString() : previous?.['report.commentedAt'];
+  const testIds = suite.tests.map((test) => test.testId);
+  const shownTestIds =
+    !previous || comment
+      ? union(testIds, previous?.['report.shownTestIds'])
+      : previous['report.shownTestIds'];
   return {
     'suite.filePath': suite.filePath,
     ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
     'suite.framework': suite.framework,
-    'suite.testIds': union(
-      suite.tests.map((test) => test.testId),
-      previous?.['suite.testIds']
-    ),
+    'suite.testIds': union(testIds, previous?.['suite.testIds']),
     'suite.branches': union(failedBranches(suite), previous?.['suite.branches']),
     'suite.pipelines': [
       ...(previous?.['suite.pipelines'] ?? []).filter((pipeline) => !pipelines.includes(pipeline)),
@@ -242,6 +254,7 @@ export const flakySuiteIssueMetadata = (
       : 1,
     'report.history': history.slice(-MAX_REPORT_HISTORY),
     ...(commentedAt ? { 'report.commentedAt': commentedAt } : {}),
+    ...(shownTestIds ? { 'report.shownTestIds': shownTestIds } : {}),
   };
 };
 
@@ -780,6 +793,11 @@ const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<stri
 const joinSections = (sections: ReadonlyArray<string | undefined>): string =>
   sections.filter((section) => section !== undefined).join('\n\n');
 
+export const SKIP_TIP =
+  '> [!TIP]\n' +
+  "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
+  'to `/skip` it, or skip the test case manually.';
+
 /** Full issue body for a new suite issue, including the hidden metadata. */
 export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string =>
   updateIssueMetadata(
@@ -790,6 +808,7 @@ export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssu
       suiteDetails(suite),
       '### Failures',
       ...failureSections(suite, ctx.report),
+      SKIP_TIP,
       supersededIssues(ctx),
       relatedIssues(ctx),
     ]),
@@ -814,27 +833,98 @@ export const refreshFlakySuiteIssueMetadata = (
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
 
-export const SKIP_TIP =
-  '> [!TIP]\n' +
-  "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
-  'to `/skip` it, or skip the test case manually.';
+/** `[6 Nov](…#job)`, the day of the newest failure linked to its job when the build is known. */
+const lastFailedLink = ({
+  lastFailedAt,
+  lastFailedBuildUrl,
+  lastFailedJobId,
+}: BuildCounts): string | undefined => {
+  if (!lastFailedAt) {
+    return undefined;
+  }
+  const day = formatDay(lastFailedAt);
+  return lastFailedBuildUrl
+    ? `[${day}](${buildkiteJobUrl(lastFailedBuildUrl, lastFailedJobId)})`
+    : day;
+};
 
 /**
- * The comment of a refresh that found new failures: this report's numbers for the suite, as the
- * body keeps the ones it was filed with, then how to skip it.
+ * `Newly flaky:` and a bullet per flaky test the issue has not shown, as many as the body's tests
+ * table, when it records the ones it has.
  */
-export const renderFlakySuiteIssueComment = (
+const newlyFlakyList = (
+  suite: FlakySuite,
+  previous: RecordedFlakySuiteIssueMetadata | undefined
+): string | undefined => {
+  const shown = previous?.['report.shownTestIds'];
+  if (!shown) {
+    return undefined;
+  }
+  const newTests = suite.tests.filter(({ testId }) => !shown.includes(testId));
+  if (newTests.length === 0) {
+    return undefined;
+  }
+  const rest = newTests.length - MAX_TEST_ROWS;
+  return [
+    'Newly flaky:',
+    '',
+    ...newTests.slice(0, MAX_TEST_ROWS).map(({ title }) => `- ${title}`),
+    ...(rest > 0 ? ['', `and ${plural(rest, 'more test')}.`] : []),
+  ].join('\n');
+};
+
+/** Where the suite is still flaky, with the worst test's numbers on each branch. */
+const whereStillFlaky = (
   suite: FlakySuite,
   { report, reopened }: FlakySuiteIssueCommentContext
 ): string => {
-  const lead = reopened
-    ? 'This test suite appears to be flaky again after this issue was closed'
-    : 'This test suite still appears to be flaky';
-  return joinSections([
-    `${lead}, with ${plural(suite.tests.length, 'flaky test')} over ` +
-      `${formatDateRange(report.window.from, report.window.to)}:`,
-    ...reportSections(suite, report),
-    ...failureSections(suite, report),
-    SKIP_TIP,
-  ]);
+  const state = reopened ? 'flaky again after this issue was closed' : 'still flaky';
+  const lead =
+    suite.tests.length > 1
+      ? `${plural(suite.tests.length, 'test')} ${state}`
+      : `${state[0].toUpperCase()}${state.slice(1)}`;
+  const flaky = flakyBranches(suite, report.thresholds);
+  const skipped = branchSkips(suite);
+  const branches = worstPerKey(
+    suite,
+    (test) => test.byBranch,
+    (stats) => stats.branch
+  )
+    .filter(({ worst }) => flaky.has(worst.branch) && !skipped.has(worst.branch))
+    .map(({ worst, latest }) => {
+      const lastFailed = latest ? lastFailedLink(latest) : undefined;
+      return {
+        branch: inlineCode(worst.branch),
+        numbers:
+          `${formatPercent(worst.buildFailRate)} of builds ` +
+          `(${worst.failedBuilds} / ${worst.builds})${
+            lastFailed ? `, last failed ${lastFailed}` : ''
+          }`,
+      };
+    });
+  if (branches.length === 0) {
+    return `${lead}.`;
+  }
+  if (branches.length === 1) {
+    const [{ branch, numbers }] = branches;
+    return `${lead}${reopened ? ',' : ''} on ${branch}: ${numbers}.`;
+  }
+  return `${lead}:\n\n${branches
+    .map(({ branch, numbers }) => `- ${branch}: ${numbers}`)
+    .join('\n')}`;
+};
+
+/**
+ * The comment of a refresh that found new failures: where the suite is flaky and not skipped, with
+ * the worst test's numbers and its newest failure on each branch, in one sentence for a single
+ * branch and one line per branch otherwise, then a bullet per flaky test the issue has not shown
+ * yet. The body keeps the full tables.
+ */
+export const renderFlakySuiteIssueComment = (
+  suite: FlakySuite,
+  context: FlakySuiteIssueCommentContext
+): string => {
+  const where = whereStillFlaky(suite, context);
+  const newlyFlaky = newlyFlakyList(suite, context.previous);
+  return newlyFlaky ? `${where}\n\n${newlyFlaky}` : where;
 };

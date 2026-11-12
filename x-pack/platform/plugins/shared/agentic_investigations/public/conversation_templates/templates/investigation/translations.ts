@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export const RUNNING_LABEL = i18n.translate(
   'xpack.agenticInvestigations.investigations.runningLabel',
-  { defaultMessage: 'Investigating…' }
+  { defaultMessage: 'Investigating' }
 );
 
 /** List-card status next to the age while a worker is running. */

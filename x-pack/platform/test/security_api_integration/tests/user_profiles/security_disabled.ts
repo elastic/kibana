@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -14,12 +16,16 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipFIPS');
 
     it('returns 404 for unauthenticated requests', async () => {
-      await supertestWithoutAuth.get('/internal/security/user_profile').expect(404);
+      await supertestWithoutAuth
+        .get('/internal/security/user_profile')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(404);
     });
 
     it('returns 404 for basic auth requests', async () => {
       await supertestWithoutAuth
         .get('/internal/security/user_profile')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('Authorization', `Basic ${Buffer.from('elastic:changeme').toString('base64')}`)
         .expect(404);
     });

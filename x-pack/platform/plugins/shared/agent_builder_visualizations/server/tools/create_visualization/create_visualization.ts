@@ -331,13 +331,16 @@ Ground first: make sure the target index exists and every field you reference is
           }
 
           const existingTemplate = getExistingTemplate(existingData);
-          const { esqlQuery, template, height } = await buildCustomContentConfig({
+          const { esqlQueries, template, height } = await buildCustomContentConfig({
             nlQuery,
             index,
             esql,
             hasData,
             regenerateESQL: regenerateEsql,
-            existing: existingData && { esqlQuery: existingData.esql, template: existingTemplate },
+            existing: existingData && {
+              esqlQueries: existingData.esql ? [existingData.esql] : [],
+              template: existingTemplate,
+            },
             timeRange: requestedTimeRange,
             modelProvider,
             logger,
@@ -349,7 +352,7 @@ Ground first: make sure the target index exists and every field you reference is
             renderer: 'custom_content',
             query: nlQuery,
             visualization: { template, height },
-            ...(esqlQuery ? { esql: esqlQuery } : {}),
+            ...(esqlQueries[0] ? { esql: esqlQueries[0] } : {}),
           };
         } else if (renderer === 'vega') {
           const existingSpec = getExistingVegaSpec(existingData);

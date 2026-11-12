@@ -46,6 +46,7 @@ import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/
 import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -184,6 +185,7 @@ export interface DiscoverStartPlugins {
   apmSourcesAccess?: ApmSourceAccessPluginStart;
   fileUpload?: FileUploadPluginStart;
   cps?: CPSPluginStart;
+  licensing?: LicensingPluginStart;
   feedback?: {
     setContext: (
       appId: string,

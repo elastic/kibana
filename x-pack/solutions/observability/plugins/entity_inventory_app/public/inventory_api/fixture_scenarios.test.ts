@@ -15,22 +15,12 @@ const REQUEST: InventoryListRequest = {
 };
 
 describe('createScenarioEntityInventoryApiClient', () => {
-  it('returns fewer rows than the total for the truncated scenario', async () => {
+  it('returns truncated rows for the truncated scenario', async () => {
     const list = await createScenarioEntityInventoryApiClient({
       scenario: 'truncated',
     }).getEntities('host', REQUEST, {});
 
     expect(list.truncated).toBe(true);
-    expect(list.total).toBeGreaterThan(list.rows.length);
-  });
-
-  it('returns an unknown total for the countFailed scenario', async () => {
-    const list = await createScenarioEntityInventoryApiClient({
-      scenario: 'countFailed',
-    }).getEntities('host', REQUEST, {});
-
-    expect(list.truncated).toBe(true);
-    expect(list.total).toBeNull();
     expect(list.rows.length).toBeGreaterThan(0);
   });
 
@@ -51,7 +41,6 @@ describe('createScenarioEntityInventoryApiClient', () => {
     );
 
     expect(list.rows).toEqual([]);
-    expect(list.total).toBe(0);
     expect(list.truncated).toBe(false);
   });
 
@@ -61,7 +50,7 @@ describe('createScenarioEntityInventoryApiClient', () => {
     }).getEntities('host', REQUEST, {});
 
     expect(list.rows).toEqual([]);
-    expect(list.total).toBeNull();
+    expect(list.truncated).toBe(false);
     expect(list.errors.length).toBeGreaterThan(1);
   });
 

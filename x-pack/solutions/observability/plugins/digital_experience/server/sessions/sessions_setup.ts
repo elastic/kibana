@@ -280,38 +280,48 @@ export const buildSessionsTransforms = ({ frequency, partitions }: SessionsSetti
   );
 
 /**
- * Installs or refreshes the sessions transforms, their dest pipeline, and the dest index
- * template as the requesting user (secondary auth), so the transforms only read what that
- * user can read. Safe to call repeatedly; also applies a changed frequency or partition count.
+ * Throws unless the user can set sessions up: the privileges the setup and the transforms need,
+ * and unrestricted reads of the source data. Runs as the user, as an API key with role
+ * descriptors can't answer the read check.
  */
-export const enableSessions = async ({
-  esClient,
-  logger,
-  settings,
-  enabledBy,
-  isServerless,
-  now = new Date(),
-}: {
-  esClient: IScopedClusterClient;
-  logger: Logger;
-  settings: SessionsSettings;
-  /** Username recorded on the transforms, so status can show whose access they run with. */
-  enabledBy: string | null;
-  isServerless: boolean;
-  now?: Date;
-}): Promise<void> => {
-  const missingPrivileges = await getMissingSessionsPrivileges(esClient.asCurrentUser, {
-    isServerless,
-  });
+export const checkSessionsPrivileges = async (
+  client: ElasticsearchClient,
+  { isServerless }: { isServerless: boolean }
+): Promise<void> => {
+  const missingPrivileges = await getMissingSessionsPrivileges(client, { isServerless });
   if (missingPrivileges.length > 0) {
     throw new SessionsPrivilegesError(missingPrivileges);
   }
   // `has_privileges` doesn't see document- or field-level security, so check it separately.
-  const restricted = await getRestrictedSourceIndices(esClient.asCurrentUser);
+  const restricted = await getRestrictedSourceIndices(client);
   if (restricted.indices.length > 0) {
     throw new SessionsRestrictedReadError(restricted.indices, restricted.reason);
   }
+};
 
+/** Who enabled sessions, as recorded on the transforms. */
+export interface SessionsEnabledMeta {
+  enabledBy: string | null;
+  enabledAt: string;
+}
+
+/**
+ * Installs or refreshes the sessions transforms, their dest pipeline, and the dest index
+ * template, with `esClient`'s credentials as the transforms' secondary authorization: they only
+ * read what those credentials can read. Doesn't check privileges; see `checkSessionsPrivileges`.
+ * Safe to call repeatedly; also applies a changed frequency or partition count.
+ */
+export const installSessions = async ({
+  esClient,
+  logger,
+  settings,
+  enabled,
+}: {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  settings: SessionsSettings;
+  enabled: SessionsEnabledMeta;
+}): Promise<void> => {
   const client = esClient.asSecondaryAuthUser;
   const installed = await managedTransforms(client);
   // Never downgrade: that would delete the newer transforms and their summaries.
@@ -323,15 +333,39 @@ export const enableSessions = async ({
   await client.ingest.putPipeline(sessionsDestPipeline);
   await client.indices.putIndexTemplate(sessionsIndexTemplate);
 
-  const enabledMeta = { enabled_by: enabledBy, enabled_at: now.toISOString() };
+  const enabledMeta = { enabled_by: enabled.enabledBy, enabled_at: enabled.enabledAt };
   const desired = buildSessionsTransforms(settings).map((transform) => ({
     ...transform,
     _meta: { ...transform._meta, ...enabledMeta },
   }));
   const desiredIds = new Set(desired.map(({ transform_id: id }) => id));
 
-  // Same-version transforms share the dest index and write the same document ids, so a
-  // repartition keeps the index; an older version's dest index is dropped once.
+  for (const transform of desired) {
+    const transformId = transform.transform_id;
+    if (!installed.some(({ id }) => id === transformId)) {
+      await client.transform.putTransform(transform);
+      continue;
+    }
+    // Sends everything `_update` accepts (all but the pivot, which a version bump replaces), so
+    // spec changes reach existing installs. Updating also replaces the transform's stored
+    // credentials with the secondary ones.
+    const { pivot, defer_validation: deferValidation, ...updatable } = transform;
+    await client.transform.updateTransform(updatable);
+    const { transforms } = await client.transform.getTransformStats({ transform_id: transformId });
+    if (transforms[0]?.state === 'failed') {
+      // Wait, or the start below can hit the stopping task and its 409 would be ignored.
+      await client.transform.stopTransform({
+        transform_id: transformId,
+        force: true,
+        wait_for_completion: true,
+      });
+    }
+  }
+
+  // Removed only once their replacements exist, so a failure before this point leaves the old
+  // transforms running and the update pending, for the next attempt. Same-version transforms
+  // share the dest index and write the same document ids, so a repartition keeps the index; an
+  // older version's dest index is dropped once.
   const droppedDestIndices = new Set<string>();
   for (const stale of installed.filter(({ id }) => !desiredIds.has(id))) {
     const destIndex = stale.dest.index;
@@ -352,32 +386,11 @@ export const enableSessions = async ({
     }
   }
 
-  for (const transform of desired) {
-    const transformId = transform.transform_id;
-    if (!installed.some(({ id }) => id === transformId)) {
-      await client.transform.putTransform(transform);
-      continue;
-    }
-    // Sends everything `_update` accepts (all but the pivot, which a version bump replaces), so
-    // spec changes reach existing installs. Updating also refreshes the stored credentials to the
-    // enabling user.
-    const { pivot, defer_validation: deferValidation, ...updatable } = transform;
-    await client.transform.updateTransform(updatable);
-    const { transforms } = await client.transform.getTransformStats({ transform_id: transformId });
-    if (transforms[0]?.state === 'failed') {
-      // Wait, or the start below can hit the stopping task and its 409 would be ignored.
-      await client.transform.stopTransform({
-        transform_id: transformId,
-        force: true,
-        wait_for_completion: true,
-      });
-    }
-  }
-
   // Created here rather than by the transform once it starts, so the index exists when enabling
-  // returns and the list can read it; the index template gives it its mappings. As the current
-  // user, checked above for `create_index`: Elasticsearch ignores secondary authorization here.
-  // Created without checking first, as `indices.exists` needs `view_index_metadata`.
+  // returns and the list can read it; the index template gives it its mappings. With the same
+  // credentials as the transforms, which have `create_index`, but as the primary ones:
+  // Elasticsearch ignores secondary authorization here. Created without checking first, as
+  // `indices.exists` needs `view_index_metadata`.
   const user = esClient.asCurrentUser;
   await createUnlessExists(user, SESSIONS_INDEX);
 
@@ -461,6 +474,7 @@ const authorizationOf = ({
   authorization
     ? {
         roles: authorization.roles ?? null,
+        apiKeyId: authorization.api_key?.id ?? null,
         apiKeyName: authorization.api_key?.name ?? null,
         serviceAccount: authorization.service_account ?? null,
       }
@@ -547,6 +561,9 @@ export const getSessionsStatus = async (
       state: null,
       installedVersion: null,
       needsUpdate: false,
+      autoUpdate: false,
+      apiKeyInvalid: false,
+      rebuilding: false,
       reason: null,
       lagSeconds: null,
       installedPartitions: 0,
@@ -579,6 +596,10 @@ export const getSessionsStatus = async (
     .map(({ lagSeconds }) => lagSeconds)
     .filter((lag): lag is number => lag != null);
 
+  const completedCheckpoint = (id: string) =>
+    (allStats.find((stats) => stats.id === id)?.checkpointing?.last?.checkpoint ?? 0) > 0;
+  const rebuilding = current.length > 0 && !current.some(({ id }) => completedCheckpoint(id));
+
   const outdated = current.length !== statuses.length;
   const configDrift =
     current.length !== settings.partitions ||
@@ -599,6 +620,9 @@ export const getSessionsStatus = async (
     state: worst.state,
     installedVersion,
     needsUpdate,
+    autoUpdate: false,
+    apiKeyInvalid: false,
+    rebuilding,
     reason:
       worst.health === 'degraded' || worst.health === 'lagging'
         ? worst.reason

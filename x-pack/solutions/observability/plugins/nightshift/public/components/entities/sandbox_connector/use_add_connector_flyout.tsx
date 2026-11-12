@@ -35,6 +35,7 @@ export function useAddConnectorFlyout({
     return triggersActionsUi.getAddConnectorFlyout({
       initialConnector: getInitialSandboxConnector(addingType),
       onClose: () => setAddingType(undefined),
+      hideSuccessToast: true,
       onConnectorCreated: (connector) => {
         assign(connector);
         refresh();

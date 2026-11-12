@@ -12,7 +12,7 @@ import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../c
 import { getApplications } from './get_applications';
 import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
-import { getOtelApplications } from './otel/get_otel_applications';
+import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import { timeRangeQuery } from '../params';
 
@@ -33,6 +33,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     plugins,
     isServerless,
     isUxEnabled,
+    sessionsSettings,
     logger,
   }): Promise<ApplicationsResponse> => {
     const { environment } = params.query;
@@ -65,7 +66,17 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
             });
 
     return getApplications({
-      getOtelApplications: () => getOtelApplications({ esClient, start, end, environment, signal }),
+      getOtelApplications: () =>
+        getOtelApplicationsFromBestSource({
+          esClient,
+          internalEsClient: elasticsearch.client.asInternalUser,
+          sessionsSettings,
+          start,
+          end,
+          environment,
+          signal,
+          logger,
+        }),
       getClassicApplications: getClassic,
       logger,
     });
