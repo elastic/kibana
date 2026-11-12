@@ -21,6 +21,8 @@ export interface WorkflowsMap {
     inputsSchema?: JsonModelSchemaType;
     /** Names of the outputs the workflow declares; undefined when it declares none. */
     outputNames?: string[];
+    /** Names the workflow's `workflow.output` steps set; undefined when any field may come back. */
+    returnedOutputNames?: string[];
   };
 }
 

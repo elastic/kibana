@@ -50,9 +50,11 @@ function validateStepOutputReferences(
 
   const childWorkflow = workflows.workflows[workflowId];
   const outputNames = childWorkflow?.outputNames;
-  if (!childWorkflow || !outputNames) return [];
+  const returnedOutputNames = childWorkflow?.returnedOutputNames;
+  if (!childWorkflow || !outputNames || !returnedOutputNames) return [];
 
-  const available = new Set(outputNames);
+  // The run passes on undeclared values a `workflow.output` step sets, so only flag fields it can't get.
+  const available = new Set([...outputNames, ...returnedOutputNames]);
   const results: YamlValidationResult[] = [];
   for (const match of yamlString.matchAll(createStepOutputPattern(step.stepId))) {
     const field = match[1] ?? match[2];
@@ -79,7 +81,7 @@ function validateStepOutputReferences(
 
 /**
  * Flags `steps.<step>.output.<field>` references to a `workflow.execute` step when the child
- * workflow declares its outputs and `<field>` is not one of them.
+ * workflow declares its outputs and neither declares nor returns `<field>`.
  */
 export function validateWorkflowOutputReferences(
   workflowLookup: WorkflowLookup,

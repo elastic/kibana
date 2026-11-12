@@ -13,14 +13,20 @@ import type { WorkflowsResponse } from '../../../entities/workflows/model/types'
 import { buildWorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 const workflows: WorkflowsResponse = {
-  totalWorkflows: 2,
+  totalWorkflows: 4,
   workflows: {
     'alert-context': {
       id: 'alert-context',
       name: 'Alert context',
       outputNames: ['severity', 'risk_score'],
+      returnedOutputNames: ['severity', 'risk_score', 'legacy_score'],
     },
-    'no-declared-outputs': { id: 'no-declared-outputs', name: 'Free form' },
+    'no-declared-outputs': {
+      id: 'no-declared-outputs',
+      name: 'Free form',
+      returnedOutputNames: ['anything'],
+    },
+    'no-output-step': { id: 'no-output-step', name: 'Last step', outputNames: ['severity'] },
   },
 };
 
@@ -66,6 +72,17 @@ describe('validateWorkflowOutputReferences', () => {
     const results = validate(parentYaml('alert-context', "{{ steps['ctx'].output['nope'] }}"));
 
     expect(results.map(({ message }) => message)).toEqual([expect.stringContaining('"nope"')]);
+  });
+
+  it('accepts outputs the called workflow still returns without declaring them', () => {
+    expect(validate(parentYaml('alert-context', '{{ steps.ctx.output.legacy_score }}'))).toEqual(
+      []
+    );
+  });
+
+  it('skips workflows whose callers may get any field', () => {
+    // Without a workflow.output step, callers get the output of its last step.
+    expect(validate(parentYaml('no-output-step', '{{ steps.ctx.output.hits }}'))).toEqual([]);
   });
 
   it('skips workflows without declared outputs and async calls', () => {

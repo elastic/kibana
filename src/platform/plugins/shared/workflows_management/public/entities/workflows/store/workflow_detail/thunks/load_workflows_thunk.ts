@@ -17,6 +17,7 @@ import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
 import type { RootState } from '../../types';
 import { initialWorkflowsState, setWorkflows } from '../slice';
+import { getReturnedOutputNames } from '../utils/get_returned_output_names';
 
 /**
  * Maximum number of workflows to fetch for autocomplete/lookup.
@@ -57,6 +58,7 @@ export const loadWorkflowsThunk = createAsyncThunk<
           outputNames: outputsSchema?.properties
             ? Object.keys(outputsSchema.properties)
             : undefined,
+          returnedOutputNames: getReturnedOutputNames(workflow.definition),
         };
       });
 
