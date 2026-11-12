@@ -1,5 +1,5 @@
 {
-  "sha1": "c3eef27a606db3efead8d9f43700c88a4c4323f4",
+  "sha1": "bc74efa843a70bb7bf2899117bd938609af2475c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -254,6 +254,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns.spec.ts",
         "line": 71,
         "column": 81
+      }
+    },
+    {
+      "id": "e7cbb386f3174f3-2245c9e81b5e95d",
+      "title": "Discover ES|QL controls - by-reference panel editing should add a control created in the Discover editor to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_by_reference_panel_edit.spec.ts",
+        "line": 30,
+        "column": 7
       }
     },
     {
@@ -823,7 +836,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_table_filtering.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 70
       }
     },
@@ -843,8 +856,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_table_filtering.spec.ts",
-        "line": 51,
-        "column": 31
+        "line": 55,
+        "column": 24
       }
     },
     {

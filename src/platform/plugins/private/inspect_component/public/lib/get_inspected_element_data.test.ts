@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import type { ElementFiber } from '@kbn/react-fiber';
 import { getInspectedElementData } from './get_inspected_element_data';
 import { fetchComponentData } from '../api/fetch_component_data';
 import { getIconType } from './dom/get_icon_type';
-import { httpServiceMock } from '@kbn/core/public/mocks';
-import { findFirstEuiComponent } from './fiber/find_first_eui_component';
 
 jest.mock('../api/fetch_component_data');
 jest.mock('./dom/get_icon_type');
-jest.mock('./fiber/find_first_eui_component');
 
 describe('getInspectedElementData', () => {
   const mockHttpService = httpServiceMock.createStartContract();
@@ -25,17 +24,19 @@ describe('getInspectedElementData', () => {
     element: document.createElement('button'),
   };
 
-  const mockTarget = document.createElement('p');
+  const mockElement = document.createElement('p');
 
-  const mockTargetFiberNode = {
-    type: 'p',
-    element: mockTarget,
-    _debugSource: {
+  const mockTarget: ElementFiber = {
+    element: mockElement,
+    fiber: {
+      type: 'p',
+      _debugOwner: { type: { displayName: 'EuiButton' } },
+    },
+    source: {
       fileName: '/path/to/capybara.tsx',
       lineNumber: 42,
       columnNumber: 10,
     },
-    _debugOwner: null,
   };
 
   const mockResponse = {
@@ -54,11 +55,11 @@ describe('getInspectedElementData', () => {
     jest.clearAllMocks();
   });
 
-  it('should return null if targetFiberNodeWithHtmlElement is null', async () => {
+  it('should return null if target is null', async () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       sourceComponent: mockSourceComponent,
-      targetFiberNode: null,
+      target: null,
     });
 
     expect(result).toBeNull();
@@ -68,7 +69,7 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       sourceComponent: null,
-      targetFiberNode: mockTargetFiberNode,
+      target: mockTarget,
     });
 
     expect(result).toBeNull();
@@ -80,12 +81,12 @@ describe('getInspectedElementData', () => {
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       sourceComponent: mockSourceComponent,
-      targetFiberNode: mockTargetFiberNode,
+      target: mockTarget,
     });
 
     expect(fetchComponentData).toHaveBeenCalledWith({
       httpService: mockHttpService,
-      fileName: mockTargetFiberNode?._debugSource.fileName,
+      fileName: mockTarget.source.fileName,
     });
 
     expect(result).toBeNull();
@@ -94,23 +95,18 @@ describe('getInspectedElementData', () => {
   it('should return component data', async () => {
     (fetchComponentData as jest.Mock).mockResolvedValue(mockResponse);
     (getIconType as jest.Mock).mockReturnValue('copy');
-    (findFirstEuiComponent as jest.Mock).mockReturnValue('EuiButton');
 
     const result = await getInspectedElementData({
       httpService: mockHttpService,
       sourceComponent: mockSourceComponent,
-      targetFiberNode: mockTargetFiberNode,
+      target: mockTarget,
     });
 
-    expect(fetchComponentData).toHaveBeenCalledWith({
-      httpService: mockHttpService,
-      fileName: mockTargetFiberNode._debugSource.fileName,
-    });
-    expect(getIconType).toHaveBeenCalledWith(mockTarget);
+    expect(getIconType).toHaveBeenCalledWith(mockElement);
 
     expect(result).toEqual({
       fileData: {
-        ...mockTargetFiberNode._debugSource,
+        ...mockTarget.source,
         ...mockResponse,
       },
       euiData: mockEuiDocs,

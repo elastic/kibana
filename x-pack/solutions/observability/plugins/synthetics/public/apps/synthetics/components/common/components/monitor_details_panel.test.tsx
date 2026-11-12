@@ -200,4 +200,22 @@ describe('getScheduleFromTimespan', () => {
       getScheduleFromTimespan({ gte: '2026-01-01T00:00:00Z', lt: '2026-01-02T00:00:00Z' })
     ).toEqual({ number: '1', unit: 'd' });
   });
+
+  it('derives the same schedule when synthetic _source returns lte instead of lt', () => {
+    expect(
+      getScheduleFromTimespan({ gte: '2026-01-01T00:00:00.000Z', lte: '2026-01-01T00:00:29.999Z' })
+    ).toEqual({ number: '30', unit: 's' });
+    expect(
+      getScheduleFromTimespan({ gte: '2026-01-01T00:00:00.000Z', lte: '2026-01-01T00:03:59.999Z' })
+    ).toEqual({ number: '4', unit: 'm' });
+    expect(
+      getScheduleFromTimespan({ gte: '2026-01-01T00:00:00.000Z', lte: '2026-01-01T00:59:59.999Z' })
+    ).toEqual({ number: '1', unit: 'h' });
+  });
+
+  it('returns undefined for an empty span when lte is 1ms before gte', () => {
+    expect(
+      getScheduleFromTimespan({ gte: '2026-01-01T00:00:00.000Z', lte: '2025-12-31T23:59:59.999Z' })
+    ).toBeUndefined();
+  });
 });

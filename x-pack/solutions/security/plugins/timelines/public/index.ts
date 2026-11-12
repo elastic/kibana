@@ -18,7 +18,7 @@ import type { CoreStart } from '@kbn/core/public';
 
 import { TimelinesPlugin } from './plugin';
 
-export type { TimelinesUIStart } from './types';
+export type { TimelinesUIStart } from './plugin';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 
 export {

@@ -146,6 +146,23 @@ describe('getEcsResponseLog', () => {
       `);
     });
 
+    test('redacts the x-elastic-callback-token header by default', () => {
+      const event = createResponseEvent({
+        requestParams: {
+          headers: { 'x-elastic-callback-token': 'ae3fda37-xxx', 'user-agent': 'world' },
+        },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const log = getEcsResponseLog(event);
+      // @ts-expect-error ECS custom field
+      expect(log.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "user-agent": "world",
+          "x-elastic-callback-token": "[REDACTED]",
+        }
+      `);
+    });
+
     test('does not mutate original headers', () => {
       const reqHeaders = { a: 'foo', b: ['hello', 'world'] };
       const resHeaders = { c: 'bar' };

@@ -9,6 +9,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
+import { createHash } from 'crypto';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
 import {
@@ -192,10 +193,22 @@ export class ElasticsearchService {
         `Trying to enroll with "${host}" host using "${caFingerprint}" CA fingerprint.`
       );
 
+      let pinnedCaCert: string;
+      try {
+        pinnedCaCert = await ElasticsearchService.fetchPinnedCaCertificate(host, caFingerprint);
+      } catch (err) {
+        this.logger.error(
+          `Unable to connect to host "${host}", will proceed to the next host if available: ${getDetailedErrorMessage(
+            err
+          )}`
+        );
+        continue;
+      }
+
       const enrollClient = elasticsearch.createClient('enroll', {
         hosts: [host],
         caFingerprint,
-        ssl: { verificationMode: 'none' },
+        ssl: { certificateAuthorities: [pinnedCaCert] },
       });
 
       let enrollmentResponse: TransportResult<EnrollKibanaResponse>;
@@ -225,6 +238,18 @@ export class ElasticsearchService {
         throw err;
       } finally {
         await enrollClient.close();
+      }
+
+      const responseCaFingerprint = createHash('sha256')
+        .update(Buffer.from(enrollmentResponse.body.http_ca, 'base64'))
+        .digest('hex');
+      if (responseCaFingerprint !== ElasticsearchService.normalizeFingerprint(caFingerprint)) {
+        this.logger.error(
+          `Failed to enroll with host "${host}": the CA certificate returned by Elasticsearch does not match the enrollment token.`
+        );
+        throw new Error(
+          'The CA certificate returned by Elasticsearch does not match the enrollment token.'
+        );
       }
 
       this.logger.debug(
@@ -397,9 +422,15 @@ export class ElasticsearchService {
     });
   }
 
-  private static fetchPeerCertificate(host: string, port: string | number) {
+  private static fetchPeerCertificate(host: string, port: string | number, timeoutMs?: number) {
     return new Promise<tls.DetailedPeerCertificate>((resolve, reject) => {
       const socket = tls.connect({ host, port: Number(port), rejectUnauthorized: false });
+      if (timeoutMs !== undefined) {
+        socket.setTimeout(timeoutMs);
+        socket.once('timeout', () =>
+          socket.destroy(new Error('Timed out fetching the peer certificate.'))
+        );
+      }
       socket.once('secureConnect', () => {
         const cert = socket.getPeerCertificate(true);
         socket.destroy();
@@ -407,6 +438,38 @@ export class ElasticsearchService {
       });
       socket.once('error', reject);
     });
+  }
+
+  private static async fetchPinnedCaCertificate(host: string, caFingerprint: string) {
+    const { hostname, port } = new URL(host);
+    const peerCertificate = await ElasticsearchService.fetchPeerCertificate(
+      hostname.replace(/^\[(.*)\]$/, '$1'),
+      port || 443,
+      30_000
+    );
+
+    const chain = ElasticsearchService.flattenCertificateChain(peerCertificate);
+    const root = chain[chain.length - 1];
+    if (root.issuerCertificate?.fingerprint256 !== root.fingerprint256) {
+      throw new Error(
+        'The certificate chain presented by the host does not end with a self-signed CA certificate.'
+      );
+    }
+
+    if (
+      ElasticsearchService.normalizeFingerprint(root.fingerprint256) !==
+      ElasticsearchService.normalizeFingerprint(caFingerprint)
+    ) {
+      throw new Error(
+        'The CA certificate presented by the host does not match the enrollment token.'
+      );
+    }
+
+    return ElasticsearchService.createPemCertificate(root.raw.toString('base64'));
+  }
+
+  private static normalizeFingerprint(value: string) {
+    return value.toLowerCase().replace(/:/g, '');
   }
 
   private static flattenCertificateChain(

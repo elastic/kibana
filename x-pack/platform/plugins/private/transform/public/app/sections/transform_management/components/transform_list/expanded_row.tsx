@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -17,14 +17,15 @@ import type { TransformHealthAlertRule } from '../../../../../../common/types/al
 
 import type { TransformListRow } from '../../../../common';
 
-const styles = {
-  tabbedContent: css`
-    width: 100%;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
 
-    .euiTable {
-      background-color: transparent;
-    }
-  `,
+  return {
+    tabbedContent: css`
+      width: 100%;
+      padding: ${euiTheme.size.base} ${euiTheme.size.xxl};
+    `,
+  };
 };
 
 import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
@@ -41,6 +42,7 @@ interface Props {
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const tabId = stringHash(item.id);
+  const styles = useStyles();
 
   const tabs = [
     {
@@ -60,7 +62,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
         {
-          defaultMessage: 'Stats',
+          defaultMessage: 'Statistics',
         }
       ),
       content: <ExpandedRowStatsPane item={item} />,
@@ -116,7 +118,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   // even if the tab content wouldn't extend to the full width.
   return (
     <EuiTabbedContent
-      size="s"
+      size="m"
       tabs={tabs}
       initialSelectedTab={tabs[0]}
       onTabClick={() => {}}

@@ -6,7 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
-import type { AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -18,16 +18,16 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
-import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
+import { NewExperienceCallout } from './new_experience_callout';
 import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
 
-export function StreamListView() {
+export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
   const context = useKibana();
   const {
     dependencies: {
@@ -97,17 +97,6 @@ export function StreamListView() {
     refreshWiredStatus();
   }, [refreshWiredStatus]);
 
-  const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
-    const allStreams = streamsListFetch.value?.streams ?? [];
-    const classicStreams = allStreams.filter(
-      (item) => item.stream && Streams.ClassicStream.Definition.is(item.stream)
-    );
-    return {
-      hasClassicStreams: classicStreams.length > 0,
-      firstClassicStreamName: classicStreams[0]?.stream?.name,
-    };
-  }, [streamsListFetch.value?.streams]);
-
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
@@ -161,6 +150,7 @@ export function StreamListView() {
   );
 
   const showQueryStreams = Boolean(queryStreams?.enabled);
+  const mapHref = tabs?.find(({ id }) => id === 'map')?.href;
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
 
   const menu = useMemo<AppHeaderMenu>(() => {
@@ -228,8 +218,9 @@ export function StreamListView() {
 
   return (
     <>
-      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} />
+      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} tabs={tabs} />
       <StreamsAppPageTemplate.Body grow paddingSize="m">
+        {mapHref && <NewExperienceCallout mapHref={mapHref} />}
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
             icon={<EuiLoadingElastic size="xl" />}
@@ -245,10 +236,6 @@ export function StreamListView() {
           <StreamsListEmptyPrompt />
         ) : (
           <>
-            <WelcomeTourCallout
-              hasClassicStreams={hasClassicStreams}
-              firstClassicStreamName={firstClassicStreamName}
-            />
             <LegacyLogsDeprecationCallout
               streamsStatus={wiredStreamsStatus}
               openFlyout={() => setIsSettingsFlyoutOpen(true)}

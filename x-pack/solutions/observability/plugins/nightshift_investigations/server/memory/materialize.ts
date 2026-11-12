@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import { formatHydrateNotification } from '../lib/hydrate_notification';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { formatPageRefs, previewText } from './log_format';
@@ -111,7 +111,7 @@ export const parseMemoryCatalog = (raw: string): MemoryCatalogEntry[] => {
   }
 };
 
-const readMemoryCatalog = async (session: SandboxSession): Promise<MemoryCatalogEntry[]> => {
+const readMemoryCatalog = async (session: AuditedSandboxSession): Promise<MemoryCatalogEntry[]> => {
   const [metadata] = await session.statFiles([MEMORY_INDEX_PATH]);
   if (!metadata?.exists) {
     return [];
@@ -151,7 +151,7 @@ const readMemoryCatalog = async (session: SandboxSession): Promise<MemoryCatalog
 };
 
 const existingFilePaths = async (
-  session: SandboxSession,
+  session: AuditedSandboxSession,
   paths: string[]
 ): Promise<Set<string>> => {
   if (paths.length === 0) {
@@ -190,7 +190,7 @@ export const materializeMemory = async ({
   now = () => Date.now() / 1000,
   keepCount = MEMORY_KEEP_COUNT,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   store: MemoryPageStore;
   logger: Logger;
   query?: string;

@@ -76,7 +76,9 @@ export function GlobalRegionField({
       }
     >
       {isDisabled ? (
+        // display="block": the default inline-block anchor shrinks the full-width field to its text.
         <EuiToolTip
+          display="block"
           content={i18n.translate(
             'xpack.ingestHub.serviceSettingsStep.globalRegion.disabledTooltip',
             {

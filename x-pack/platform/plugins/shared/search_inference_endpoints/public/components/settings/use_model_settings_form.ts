@@ -9,9 +9,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
-import type { InferenceFeatureResponse } from '../../../common/types';
+import type { InferenceEndpointSetting, InferenceFeatureResponse } from '../../../common/types';
 
 type Assignments = Record<string, string[]>;
+type SavedEndpoints = Map<string, InferenceEndpointSetting[]>;
 
 export interface FeatureSection extends InferenceFeatureResponse {
   children: InferenceFeatureResponse[];
@@ -29,6 +30,7 @@ export interface ModelSettingsForm {
   dirtyFeatureIds: ReadonlySet<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
   save: () => Promise<void>;
+  reset: () => void;
 }
 
 const getEffectiveEndpoints = (
@@ -56,21 +58,29 @@ const getEffectiveEndpoints = (
   return [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION];
 };
 
-const toApiFormat = (assignments: Assignments) =>
-  Object.entries(assignments).map(([featureId, ids]) => ({
-    feature_id: featureId,
-    endpoints: ids.map((id) => ({ id })),
-  }));
+const toApiFormat = (assignments: Assignments, savedEndpoints: SavedEndpoints) =>
+  Object.entries(assignments).map(([featureId, ids]) => {
+    const savedById = new Map((savedEndpoints.get(featureId) ?? []).map((e) => [e.id, e]));
+    return {
+      feature_id: featureId,
+      endpoints: ids.map((id) => savedById.get(id) ?? { id }),
+    };
+  });
 
 const arraysEqual = (a: string[], b: string[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
+
+const hasSavedParameters = (ids: string[], endpoints: InferenceEndpointSetting[] = []) =>
+  endpoints.some((e) => e.parameters !== undefined && ids.includes(e.id));
 
 // Returns only the assignments that differ from recommended, so the server-side fallback
 // chain (recommendedEndpoints → parent) stays in effect for unchanged features.
 const getChangedAssignments = (
   assignments: Assignments,
   registeredFeatures: InferenceFeatureResponse[],
-  recommendedEndpointsById: Map<string, string[]>
+  recommendedEndpointsById: Map<string, string[]>,
+  savedEndpoints: SavedEndpoints,
+  dirtyFeatureIds: ReadonlySet<string>
 ): Assignments => {
   const featureById = new Map(registeredFeatures.map((f) => [f.featureId, f]));
   return Object.fromEntries(
@@ -78,7 +88,10 @@ const getChangedAssignments = (
       const feature = featureById.get(featureId);
       if (!feature) return true;
       const defaults = getEffectiveEndpoints(feature, recommendedEndpointsById);
-      return !arraysEqual(ids, defaults);
+      if (!arraysEqual(ids, defaults)) return true;
+      return (
+        !dirtyFeatureIds.has(featureId) && hasSavedParameters(ids, savedEndpoints.get(featureId))
+      );
     })
   );
 };
@@ -134,14 +147,28 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [sections, recommendedEndpointsById]
   );
 
+  const savedEndpoints = useMemo<SavedEndpoints>(
+    () =>
+      new Map(
+        (settingsData?.data?.features ?? []).map((f): [string, InferenceEndpointSetting[]] => [
+          f.feature_id,
+          f.endpoints ?? [],
+        ])
+      ),
+    [settingsData]
+  );
+
   const savedMap = useMemo(
     () =>
       new Map<string, string[]>(
-        (settingsData?.data?.features ?? [])
-          .map((f): [string, string[]] => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
+        [...savedEndpoints]
+          .map(([featureId, endpoints]): [string, string[]] => [
+            featureId,
+            endpoints.map((e) => e.id),
+          ])
           .filter(([, ids]) => ids.length > 0)
       ),
-    [settingsData]
+    [savedEndpoints]
   );
 
   const hasSavedObject = useMemo(
@@ -193,14 +220,27 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     setAssignments((prev) => ({ ...prev, [featureId]: endpointIds }));
   }, []);
 
+  const reset = useCallback(() => {
+    setAssignments(defaultAssignments);
+  }, [defaultAssignments]);
+
   const save = useCallback(async () => {
     const changed = getChangedAssignments(
       assignments,
       registeredFeatures,
-      recommendedEndpointsById
+      recommendedEndpointsById,
+      savedEndpoints,
+      dirtyFeatureIds
     );
-    await saveSettings({ features: toApiFormat(changed) });
-  }, [saveSettings, assignments, registeredFeatures, recommendedEndpointsById]);
+    await saveSettings({ features: toApiFormat(changed, savedEndpoints) });
+  }, [
+    saveSettings,
+    assignments,
+    registeredFeatures,
+    recommendedEndpointsById,
+    savedEndpoints,
+    dirtyFeatureIds,
+  ]);
 
   return {
     isLoading,
@@ -214,5 +254,6 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     dirtyFeatureIds,
     updateEndpoints,
     save,
+    reset,
   };
 };

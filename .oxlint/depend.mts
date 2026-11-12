@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DummyRuleMap } from 'oxlint';
+import type { DummyRuleMap, OxlintOverride } from 'oxlint';
 
 export const dependRules: DummyRuleMap = {
   // Suggests better replacements for packages: https://github.com/es-tooling/module-replacements/tree/main/docs/modules
@@ -23,3 +23,13 @@ export const dependRules: DummyRuleMap = {
     },
   ],
 };
+
+export const dependOverrides: OxlintOverride[] = [
+  {
+    // Re-exports the rules of the ESLint plugins Kibana already lints with, so it has to load them.
+    files: ['packages/kbn-eslint-plugin-compat/**'],
+    rules: {
+      'depend/ban-dependencies': 'off',
+    },
+  },
+];

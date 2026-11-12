@@ -100,8 +100,25 @@ export const getShape = (model: SmithyModel, id: string): Shape | undefined => {
   return type ? { type, ...(type === 'structure' ? { members: {} } : {}) } : undefined;
 };
 
+// Members by name, later layers over earlier ones. A member that overrides one adds its traits
+// to those it inherits (https://smithy.io/2.0/spec/mixins.html#mixin-member-traits).
+const mergeMembers = (
+  layers: ReadonlyArray<Record<string, MemberShape> | undefined>
+): Record<string, MemberShape> => {
+  const merged: Record<string, MemberShape> = {};
+  for (const members of layers) {
+    for (const [name, member] of Object.entries(members ?? {})) {
+      const inherited = merged[name];
+      merged[name] = inherited
+        ? { ...member, traits: { ...inherited.traits, ...member.traits } }
+        : member;
+    }
+  }
+  return merged;
+};
+
 // A shape with the members and traits of its mixins, which the JSON AST lists only on the
-// mixins (https://smithy.io/2.0/spec/mixins.html); the shape's own come last and win.
+// mixins; the shape's own come last and win.
 const withMixins = (model: SmithyModel, shape: Shape): Shape => {
   const mixins = (shape.mixins ?? []).flatMap(({ target }) => getShape(model, target) ?? []);
   const traits = Object.assign(
@@ -116,7 +133,7 @@ const withMixins = (model: SmithyModel, shape: Shape): Shape => {
     ...shape,
     traits,
     ...(shape.members || mixins.some(({ members }) => members)
-      ? { members: Object.assign({}, ...mixins.map(({ members }) => members), shape.members) }
+      ? { members: mergeMembers([...mixins.map(({ members }) => members), shape.members]) }
       : {}),
   };
 };

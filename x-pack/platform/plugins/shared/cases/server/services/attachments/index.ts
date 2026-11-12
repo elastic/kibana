@@ -22,10 +22,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, isNonLocalIndexName } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
-import {
-  UNIFIED_ALERT_TYPES_ARRAY,
-  isAlertAttachmentType,
-} from '../../../common/utils/attachments';
+import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 import type { AttachmentPatchAttributesV2 } from '../../../common/types/domain/attachment/v2';
 import {
   AttachmentAttributesSchemaV2,
@@ -51,7 +48,6 @@ import {
 } from '../../common/attachments';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField, getIDsAndIndicesAsArrays } from '../../common/utils';
-import type { AggregationResponse } from '../../client/metrics/types';
 import {
   extractAttachmentSORefsFromAttributes,
   injectAttachmentSOAttributesFromRefs,
@@ -60,7 +56,6 @@ import {
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type {
   AlertsAttachedToCaseArgs,
-  AttachmentsAttachedToCaseArgs,
   BulkCreateAttachments,
   BulkUpdateAttachmentArgs,
   CreateAttachmentArgs,
@@ -94,34 +89,6 @@ import {
 } from './operations/utils';
 
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
-
-/**
- * Ensures alert attachments include a rule name
- */
-function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): void {
-  const type = attributes?.type;
-  if (!isAlertAttachmentType(type as string)) {
-    return;
-  }
-
-  if (type === AttachmentType.alert || type === 'alert') {
-    const rule = attributes.rule as { name?: unknown } | null | undefined;
-    if (rule == null || rule.name == null) {
-      throw Boom.badRequest(
-        'Invalid attributes: expected attributes.rule.name for alert attachments'
-      );
-    }
-    return;
-  }
-
-  const metadata = attributes.metadata as { rule?: { name?: unknown } } | null | undefined;
-  const rule = metadata?.rule;
-  if (rule == null || rule.name == null) {
-    throw Boom.badRequest(
-      'Invalid attributes: expected attributes.metadata.rule.name for unified alert attachments'
-    );
-  }
-}
 
 /**
  * Unified attachment shape fields that must NOT appear on the legacy
@@ -272,43 +239,6 @@ export class AttachmentService {
     const unifiedCount = response.aggregations?.unifiedAlerts?.value ?? 0;
 
     return legacyCount + unifiedCount;
-  }
-
-  /**
-   * Executes the aggregations against a type of attachment attached to a case.
-   */
-  public async executeCaseAggregations<Agg extends AggregationResponse = AggregationResponse>({
-    caseId,
-    filter,
-    aggregations,
-    attachmentType,
-  }: AttachmentsAttachedToCaseArgs): Promise<Agg | undefined> {
-    try {
-      this.context.log.debug(`Attempting to aggregate for case id ${caseId}`);
-      const attachmentFilter = buildFilter({
-        filters: attachmentType,
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
-
-      const combinedFilter = combineFilters([attachmentFilter, filter]);
-
-      const response = await this.context.unsecuredSavedObjectsClient.find<unknown, Agg>({
-        type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        aggs: aggregations,
-        filter: combinedFilter,
-      });
-
-      return response.aggregations;
-    } catch (error) {
-      this.context.log.error(`Error while executing aggregation for case id ${caseId}: ${error}`);
-      throw error;
-    }
   }
 
   /**
@@ -688,14 +618,18 @@ export class AttachmentService {
     savedObjectId,
     updatedAttributes,
     options,
+    savedObjectType,
   }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(`Attempting to UPDATE attachment ${savedObjectId}`);
 
-      const [soType] = await resolveAttachmentSavedObjectTypes(
-        this.context.unsecuredSavedObjectsClient,
-        [savedObjectId]
-      );
+      const soType =
+        savedObjectType ??
+        (
+          await resolveAttachmentSavedObjectTypes(this.context.unsecuredSavedObjectsClient, [
+            savedObjectId,
+          ])
+        )[0];
       if (soType === null) {
         throw Boom.notFound(`Attachment ${savedObjectId} not found`);
       }
@@ -703,7 +637,6 @@ export class AttachmentService {
       const decodedAttributes = decodeOrThrowZod(AttachmentPatchAttributesSchemaV2)(
         updatedAttributes
       ) as AttachmentPatchAttributesV2;
-      assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
       const transformer = getAttachmentTypeTransformers(
         getAttachmentTypeFromAttributes(decodedAttributes),
         decodedAttributes.owner ?? ''
@@ -774,7 +707,6 @@ export class AttachmentService {
         res
       );
 
-      assertAlertAttachmentHasRuleName(transformedAttachment.attributes as Record<string, unknown>);
       const validatedAttributes = decodeOrThrowZod(AttachmentPartialAttributesSchema)(
         transformedAttachment.attributes
       );
@@ -842,7 +774,6 @@ export class AttachmentService {
             },
           });
         } else {
-          assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
           // Skip when `requestWithoutType` is set: the patch carries no `type`
           // to resolve, and only the typed path can introduce a unified-only type.
           if (!requestWithoutType) {
@@ -998,9 +929,6 @@ export class AttachmentService {
           attachment
         );
 
-        assertAlertAttachmentHasRuleName(
-          transformedAttachment.attributes as Record<string, unknown>
-        );
         const validatedAttributes = decodeOrThrowZod(AttachmentPartialAttributesSchema)(
           transformedAttachment.attributes
         );

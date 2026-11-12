@@ -13,6 +13,8 @@ import {
   MAX_TEXT_LENGTH,
   baseFeatureSchema,
   featureUpsertSchema,
+  groupFeaturesAcrossSources,
+  type AggregatedFeature,
   type Feature,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
@@ -30,6 +32,15 @@ import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 const MAX_INPUT_STRING_LENGTH = 255;
 // Each source write can wait for its lease, so sources run in parallel to keep the request short.
 const BULK_SOURCE_CONCURRENCY = 3;
+
+const durabilityOperationSchema = lazySchema(() =>
+  z.object({
+    durability: z.object({
+      id: z.string().max(MAX_INPUT_STRING_LENGTH),
+      durable: z.boolean(),
+    }),
+  })
+);
 
 const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/features',
@@ -221,7 +232,7 @@ export const listAllFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<{ features: Feature[] }> => {
+  }): Promise<{ features: AggregatedFeature[] }> => {
     const scopedClients = await getScopedClients({
       request,
     });
@@ -247,7 +258,7 @@ export const listAllFeaturesRoute = createServerRoute({
       ? await kiClient.findFeatures(sourceIds, query, { searchMode, includeExcluded })
       : await kiClient.getFeatures(sourceIds, { includeExcluded });
 
-    return { features };
+    return { features: groupFeaturesAcrossSources(features) };
   },
 });
 
@@ -263,35 +274,38 @@ const bulkFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({
-      operations: z.array(
-        z.union([
-          z.object({
-            index: z.object({
-              feature: featureUpsertSchema,
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
+        operations: z.array(
+          z.union([
+            z.object({
+              index: z.object({
+                feature: featureUpsertSchema,
+              }),
             }),
-          }),
-          z.object({
-            delete: z.object({
-              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            z.object({
+              delete: z.object({
+                id: z.string().max(MAX_INPUT_STRING_LENGTH),
+              }),
             }),
-          }),
-          z.object({
-            exclude: z.object({
-              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            z.object({
+              exclude: z.object({
+                id: z.string().max(MAX_INPUT_STRING_LENGTH),
+              }),
             }),
-          }),
-          z.object({
-            restore: z.object({
-              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            z.object({
+              restore: z.object({
+                id: z.string().max(MAX_INPUT_STRING_LENGTH),
+              }),
             }),
-          }),
-        ])
-      ),
-    }),
-  }),
+            durabilityOperationSchema,
+          ])
+        ),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -342,33 +356,44 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'Bulk feature operations across sources',
     description:
-      'Performs bulk delete / exclude / restore operations on features across multiple sources in a single request. Client sends flat operations keyed by feature UUID; the server resolves which source owns each feature and applies the operations per source.',
+      'Performs bulk delete / exclude / restore / durability operations on features across multiple sources in a single request. Client sends flat operations keyed by feature UUID; the server resolves which source owns each feature and applies the operations per source.',
   },
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      operations: z
-        .array(
-          z.union([
-            z.object({ delete: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
-            z.object({ exclude: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
-            z.object({ restore: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
-          ])
-        )
-        .min(1),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        operations: z
+          .array(
+            z.union([
+              z.object({ delete: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+              z.object({ exclude: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+              z.object({ restore: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+              durabilityOperationSchema,
+            ])
+          )
+          .min(1),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
     getScopedClients,
     server,
     logger,
-  }): Promise<{ succeeded: number; failed: number; conflicts: number; skipped: number }> => {
+  }): Promise<{
+    succeeded: number;
+    failed: number;
+    conflicts: number;
+    skipped: number;
+    failedIds: string[];
+    /** Retryable: the owning source was busy. */
+    conflictIds: string[];
+  }> => {
     const scopedClients = await getScopedClients({
       request,
     });
@@ -383,7 +408,14 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     // pattern, which uses getQueryLinks for the same purpose).
     const opsByUuid = new Map<string, KIBulkOperation>();
     for (const op of params.body.operations) {
-      const id = 'delete' in op ? op.delete.id : 'exclude' in op ? op.exclude.id : op.restore.id;
+      const id =
+        'delete' in op
+          ? op.delete.id
+          : 'exclude' in op
+          ? op.exclude.id
+          : 'restore' in op
+          ? op.restore.id
+          : op.durability.id;
       const kiOp: KIBulkOperation =
         'delete' in op ? { delete: { type: 'feature', id: op.delete.id } } : op;
       opsByUuid.set(id, kiOp);
@@ -392,8 +424,8 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const resolved = await kiClient.findFeaturesByIds(requestedUuids);
     const skippedFromLookup = requestedUuids.length - resolved.length;
 
-    // Group resolved ops by source.
-    const bySource = resolved.reduce<Record<string, KIBulkOperation[]>>(
+    // Group resolved ops by source; the uuid rides along so a thrown batch can be reported per id.
+    const bySource = resolved.reduce<Record<string, Array<{ uuid: string; op: KIBulkOperation }>>>(
       (acc, { id: featureId, source_id: sourceId }) => {
         const op = opsByUuid.get(featureId);
         if (!op) {
@@ -402,7 +434,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
         if (!acc[sourceId]) {
           acc[sourceId] = [];
         }
-        acc[sourceId].push(op);
+        acc[sourceId].push({ uuid: featureId, op });
         return acc;
       },
       {}
@@ -413,16 +445,17 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     // and the bulk call). Both classes show up as additional `skipped` count.
     // Only thrown batches count as `failed`, or as `conflicts` when the source was busy.
     let succeeded = 0;
-    let failed = 0;
-    let conflicts = 0;
     let skipped = skippedFromLookup;
+    const failedIds: string[] = [];
+    const conflictIds: string[] = [];
 
     const sourcesWithShrinkingOps = new Set<string>();
 
     const limiter = pLimit(BULK_SOURCE_CONCURRENCY);
     await Promise.all(
-      Object.entries(bySource).map(([sourceId, ops]) =>
+      Object.entries(bySource).map(([sourceId, entries]) =>
         limiter(async () => {
+          const ops = entries.map(({ op }) => op);
           try {
             const { applied, skipped: sourceSkipped } = await kiClient.bulk(sourceId, ops);
             succeeded += applied;
@@ -436,11 +469,10 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
                 error instanceof Error ? error.message : String(error)
               }`
             );
-            if (getSourceWriteConflictMetadata(error)?.retryable) {
-              conflicts += ops.length;
-            } else {
-              failed += ops.length;
-            }
+            const target = getSourceWriteConflictMetadata(error)?.retryable
+              ? conflictIds
+              : failedIds;
+            target.push(...entries.map(({ uuid }) => uuid));
           }
         })
       )
@@ -459,7 +491,14 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       }
     }
 
-    return { succeeded, failed, conflicts, skipped };
+    return {
+      succeeded,
+      failed: failedIds.length,
+      conflicts: conflictIds.length,
+      skipped,
+      failedIds,
+      conflictIds,
+    };
   },
 });
 

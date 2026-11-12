@@ -189,13 +189,18 @@ describe('OAS conversion × z.codec', () => {
       }),
     });
 
+    // Named variants let renderers resolve the discriminator to each time window shape.
+    expect(components.SLOTimeWindow.discriminator).toEqual({
+      propertyName: 'type',
+      mapping: {
+        rolling: '#/components/schemas/SLOTimeWindowRolling',
+        calendarAligned: '#/components/schemas/SLOTimeWindowCalendarAligned',
+      },
+    });
+
     // The duration codec is documented from its INPUT side: a bounded string,
     // not an unrepresentable Duration class.
-    const timeWindowComponent = components.SLOTimeWindow;
-    const rollingVariant = (timeWindowComponent.oneOf ??
-      timeWindowComponent.anyOf) as OpenAPIV3.SchemaObject[];
-    expect(rollingVariant).toBeDefined();
-    const duration = rollingVariant[0].properties?.duration as OpenAPIV3.SchemaObject;
+    const duration = components.SLOTimeWindowRolling.properties?.duration as OpenAPIV3.SchemaObject;
     expect(duration.type).toBe('string');
     expect(duration.maxLength).toBe(16);
     expect(duration.description).toContain('duration');

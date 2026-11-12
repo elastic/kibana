@@ -33,6 +33,24 @@ export interface ScoreVital {
   ratings: VitalRatings | null;
 }
 
+/** The Core Web Vitals of an application, CLS as a score and the others in milliseconds. */
+export interface WebVitals {
+  lcp: DurationVital;
+  inp: DurationVital;
+  cls: ScoreVital;
+  fcp: DurationVital;
+  ttfb: DurationVital;
+}
+
+/** The HTTP requests the browser made. */
+export interface HttpRequests {
+  /** Requests with a known outcome. */
+  count: number;
+  failedCount: number;
+  /** `failedCount / count` between 0 and 1, `null` without requests. */
+  failedRatio: number | null;
+}
+
 /** One application of one source, over the requested time range and environment. */
 export interface ApplicationSummary {
   serviceName: string;
@@ -40,25 +58,18 @@ export interface ApplicationSummary {
   /** Environments the application reported in the time range, up to 10; empty when none is set. */
   environments: string[];
   pageLoads: { count: number };
-  webVitals: {
-    lcp: DurationVital;
-    inp: DurationVital;
-    cls: ScoreVital;
-    fcp: DurationVital;
-    ttfb: DurationVital;
-  };
+  /**
+   * Sessions that overlap the time range, `null` when the source doesn't count them. Only the
+   * sessions index does: the raw events and Classic RUM don't.
+   */
+  sessions: { count: number } | null;
+  webVitals: WebVitals;
   jsErrors: {
     count: number;
     /** Errors per page load, `null` without page loads. */
     perPageLoad: number | null;
   };
-  httpRequests: {
-    /** Requests with a known outcome. */
-    count: number;
-    failedCount: number;
-    /** `failedCount / count` between 0 and 1, `null` without requests. */
-    failedRatio: number | null;
-  };
+  httpRequests: HttpRequests;
   /** Time of the latest document in the range (ISO 8601), `null` when unknown. */
   lastSeen: string | null;
 }
@@ -73,6 +84,12 @@ export interface ApplicationsResponse {
   environments: string[];
   /** Page loads over the time range in the selected environment, per source. */
   pageLoadsOverTime: PageLoadsOverTime;
+  /**
+   * The EDOT Browser sessions that started in each bucket of the time range in the selected
+   * environment, in the same buckets as `pageLoadsOverTime`. `null` when the sessions index did not
+   * answer, as the raw events and Classic RUM don't count sessions.
+   */
+  sessionsOverTime: TimeSeriesPoint[] | null;
   /**
    * Sources whose search failed while others loaded, so their rows are missing; empty when none.
    * Indices the user can't read are left out of the search rather than failing it, so partial

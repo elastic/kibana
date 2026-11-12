@@ -8,6 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
 
 import {
   UtilityBar,
@@ -17,7 +18,6 @@ import {
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
 import * as i18n from '../../../common/translations';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 import type { PaginationOptions } from '../../../rule_management/logic/types';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -40,7 +40,6 @@ export interface RulesTableUtilityBarProps {
 
 export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
   ({ canBulkEdit, onGetBulkItemsPopoverContent, onToggleSelectAll, isBulkActionInProgress }) => {
-    const { timelines } = useKibana().services;
     const { startTransaction } = useStartTransaction();
     const rulesTableContext = useRulesTableContext();
     const { pagination, selectedRuleIds, isRefreshOn, isAllSelected, loadingRulesAction } =
@@ -134,7 +133,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
           </>
         </UtilityBarSection>
         <UtilityBarSection dataTestSubj="refreshRulesStatus">
-          {timelines.getLastUpdated({
+          {getLastUpdated({
             showUpdating: rulesTableContext.state.isFetching,
             updatedAt: rulesTableContext.state.lastUpdated,
           })}

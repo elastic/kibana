@@ -199,6 +199,28 @@ export function ServiceSettingsFlyout({
               });
             })
           }
+          onVarGroupSelectionChange={(dsId, input, groupName, optionName) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const existing = prev[dsId] ?? {
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
+                varsByInput: {},
+              };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  varGroupSelectionsByInput: {
+                    ...(existing.varGroupSelectionsByInput ?? {}),
+                    [input]: {
+                      ...(existing.varGroupSelectionsByInput?.[input] ?? {}),
+                      [groupName]: optionName,
+                    },
+                  },
+                },
+              };
+            })
+          }
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];

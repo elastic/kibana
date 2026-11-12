@@ -15,8 +15,11 @@ export interface SourceTypeConfig {
   codeTabs: Array<{
     id: string;
     label: string;
+    /** Code block language, `yaml` when not set. */
+    language?: string;
     getSnippet: (endpoint: string, apiKey: string) => string;
   }>;
+  setupNotes?: readonly string[];
 }
 
 const SOURCE_TYPE_CONFIG_ORDER: Record<SourceType, number> = {
@@ -64,22 +67,39 @@ export const SOURCE_TYPE_CONFIGS: SourceTypeConfig[] = (
       shortLabel: i18n.translate('xpack.streams.sources.sourceType.asyncBulkShortLabel', {
         defaultMessage: 'Managed _bulk',
       }),
+      // No Logstash tab: its health check hangs, the ingress has no GET routes for the source.
       codeTabs: [
         {
-          id: 'logstash',
-          label: i18n.translate('xpack.streams.sources.codeTab.logstashManagedLabel', {
-            defaultMessage: 'Logstash',
+          id: 'curl',
+          label: i18n.translate('xpack.streams.sources.codeTab.curlLabel', {
+            defaultMessage: 'cURL',
           }),
-          getSnippet: (endpoint, apiKey) => `output {
-  elasticsearch {
-    hosts => ["${endpoint}"]
-    custom_headers => {
-      "Authorization" => "ApiKey ${apiKey}"
-    }
-    action => "create"
-  }
-}`,
+          language: 'bash',
+          getSnippet: (endpoint, apiKey) => `curl -X POST "${endpoint}" \\
+  -H "Authorization: ApiKey ${apiKey}" \\
+  -H "Content-Type: application/x-ndjson" \\
+  --data-binary @- <<EOF
+{"create":{"_index":"logs-myapp-default"}}
+{"@timestamp":"$(date -u +%Y-%m-%dT%H:%M:%SZ)","message":"hello from _bulk"}
+EOF`,
         },
+      ],
+      setupNotes: [
+        i18n.translate('xpack.streams.sources.asyncBulk.createOnlyNote', {
+          defaultMessage: 'Send create actions only.',
+        }),
+        i18n.translate('xpack.streams.sources.asyncBulk.indexPrefixNote', {
+          defaultMessage:
+            'Each document needs an _index, or the {target} in the path, that starts with logs-, metrics- or traces-. Other names are rejected with a 403 for that document.',
+          values: { target: '<target>' },
+        }),
+        i18n.translate('xpack.streams.sources.asyncBulk.queuedNote', {
+          defaultMessage:
+            'A 201 means the document was queued, not indexed. The 201 response echoes the requested _index, even when a fixed index destination writes the document somewhere else.',
+        }),
+        i18n.translate('xpack.streams.sources.asyncBulk.droppedNote', {
+          defaultMessage: 'Documents that match no route on the map are dropped.',
+        }),
       ],
     },
     {

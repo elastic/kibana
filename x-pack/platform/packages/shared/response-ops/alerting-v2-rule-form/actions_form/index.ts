@@ -11,7 +11,6 @@ export {
   InvalidInlineWorkflowError,
 } from './helpers/build_inline_workflow_yaml';
 export {
-  DISPATCH_PAYLOAD_VARIABLES,
   INLINE_ACTION_STEP_DEFINITIONS,
   getDefaultInlineActionStepDefinition,
   getInlineActionStepDefinition,
