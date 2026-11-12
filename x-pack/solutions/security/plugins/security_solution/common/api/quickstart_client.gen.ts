@@ -753,7 +753,7 @@ If asset criticality records already exist for the specified entities, those rec
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'PATCH',
+        method: 'PUT',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
