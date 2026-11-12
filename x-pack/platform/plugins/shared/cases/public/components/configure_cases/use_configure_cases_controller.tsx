@@ -351,10 +351,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         updatedObservableTypes = [...structuredClone(observableTypes), data];
       } else {
         updatedObservableTypes = structuredClone(observableTypes);
-        updatedObservableTypes[existingObservableIndex] = {
-          ...updatedObservableTypes[existingObservableIndex],
-          ...data,
-        };
+        updatedObservableTypes[existingObservableIndex] = data;
       }
 
       persistCaseConfigure({

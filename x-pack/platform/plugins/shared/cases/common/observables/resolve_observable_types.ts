@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../constants/observables';
+import type {
+  ObservableTypeConfiguration,
+  ObservableTypeSettingConfiguration,
+} from '../types/domain';
 import type { DefaultObservableType, ObservableTypePath } from './default_observable_types';
-
-export interface StoredObservableType {
-  key: string;
-  label?: string;
-  paths?: ObservableTypePath[];
-  valuePattern?: string;
-}
 
 const mergePaths = (
   defaultPaths: readonly ObservableTypePath[],
@@ -29,45 +25,37 @@ const mergePaths = (
 };
 
 /**
- * Merges the built-in types with the stored observable types into the types that extraction uses.
+ * Merges the built-in types, the custom types, and the settings of both into the types that extraction uses.
  */
 export const resolveObservableTypes = (
   defaultTypes: Readonly<Record<string, DefaultObservableType>>,
-  storedTypes: readonly StoredObservableType[]
+  customTypes: readonly ObservableTypeConfiguration[],
+  settings: readonly ObservableTypeSettingConfiguration[]
 ): Record<string, DefaultObservableType> => {
   // Keys of custom types are free text. Without a prototype, a key such as `__proto__` is an ordinary key.
   const resolvedTypes: Record<string, DefaultObservableType> = Object.assign(
     Object.create(null),
     defaultTypes
   );
+  const isBuiltinKey = (key: string) => Object.hasOwn(defaultTypes, key);
 
-  for (const { key, label, paths = [], valuePattern } of storedTypes) {
-    const defaultType = Object.hasOwn(defaultTypes, key) ? defaultTypes[key] : undefined;
+  for (const { key, label } of customTypes) {
+    if (!isBuiltinKey(key)) {
+      resolvedTypes[key] = { key, label, paths: [] };
+    }
+  }
 
-    resolvedTypes[key] = defaultType
-      ? { ...defaultType, paths: mergePaths(defaultType.paths, paths) }
-      : { key, label: label ?? key, paths, valuePattern };
+  // A settings entry without a built-in or custom type is left over from a deleted custom type. It is ignored.
+  for (const { key, paths = [], valuePattern } of settings) {
+    if (isBuiltinKey(key)) {
+      resolvedTypes[key] = {
+        ...defaultTypes[key],
+        paths: mergePaths(defaultTypes[key].paths, paths),
+      };
+    } else if (Object.hasOwn(resolvedTypes, key)) {
+      resolvedTypes[key] = { ...resolvedTypes[key], paths, valuePattern };
+    }
   }
 
   return resolvedTypes;
 };
-
-const isBuiltinObservableTypeKey = (key: string): boolean =>
-  OBSERVABLE_TYPES_BUILTIN_KEYS.includes(key);
-
-/**
- * Returns the observable types that are not built in, without the overrides of built-in types.
- */
-export const getCustomObservableTypes = <T extends StoredObservableType>(
-  observableTypes: readonly T[]
-): T[] => observableTypes.filter(({ key }) => !isBuiltinObservableTypeKey(key));
-
-/**
- * Removes the label that the read path fills on the overrides of built-in types.
- */
-export const toStoredObservableTypes = (
-  observableTypes: readonly StoredObservableType[]
-): StoredObservableType[] =>
-  observableTypes.map(({ label, ...observableType }) =>
-    isBuiltinObservableTypeKey(observableType.key) ? observableType : { ...observableType, label }
-  );

@@ -6,32 +6,21 @@
  */
 
 import { DEFAULT_OBSERVABLE_TYPES } from './default_observable_types';
-import {
-  getCustomObservableTypes,
-  resolveObservableTypes,
-  toStoredObservableTypes,
-} from './resolve_observable_types';
-
-const builtinOverride = {
-  key: 'observable-type-agent-id',
-  label: 'Agent id',
-  paths: [{ path: 'agent.id', enabled: false }],
-};
-const customType = {
-  key: 'employee-id',
-  label: 'Employee ID',
-  paths: [{ path: 'user.employee_id', enabled: true }],
-};
+import { resolveObservableTypes } from './resolve_observable_types';
 
 describe('resolveObservableTypes', () => {
   it('returns the defaults when nothing is stored', () => {
-    expect(resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [])).toEqual(DEFAULT_OBSERVABLE_TYPES);
+    expect(resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [], [])).toEqual(
+      DEFAULT_OBSERVABLE_TYPES
+    );
   });
 
   it('turns off a default path', () => {
-    const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-      { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-    ]);
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [],
+      [{ key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] }]
+    );
 
     expect(resolved['observable-type-agent-id']).toEqual({
       key: 'observable-type-agent-id',
@@ -41,9 +30,11 @@ describe('resolveObservableTypes', () => {
   });
 
   it('adds a path to a default type after its default paths, and keeps its pattern', () => {
-    const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-      { key: 'observable-type-ipv4', paths: [{ path: 'zscaler.client_ip', enabled: true }] },
-    ]);
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [],
+      [{ key: 'observable-type-ipv4', paths: [{ path: 'zscaler.client_ip', enabled: true }] }]
+    );
 
     expect(resolved['observable-type-ipv4'].paths).toEqual([
       { path: 'source.ip', enabled: true },
@@ -56,12 +47,16 @@ describe('resolveObservableTypes', () => {
   });
 
   it('keeps the excluded values of a default path', () => {
-    const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-      {
-        key: 'observable-type-ipv4',
-        paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
-      },
-    ]);
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [],
+      [
+        {
+          key: 'observable-type-ipv4',
+          paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+        },
+      ]
+    );
 
     expect(resolved['observable-type-ipv4'].paths).toEqual([
       { path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] },
@@ -69,25 +64,42 @@ describe('resolveObservableTypes', () => {
     ]);
   });
 
-  it('ignores a stored label or pattern on a default type', () => {
-    const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-      { key: 'observable-type-hostname', label: 'Renamed', valuePattern: '.*' },
-    ]);
+  it('ignores a value pattern in the settings of a default type', () => {
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [],
+      [{ key: 'observable-type-hostname', valuePattern: '.*' }]
+    );
 
     expect(resolved['observable-type-hostname']).toEqual(
       DEFAULT_OBSERVABLE_TYPES['observable-type-hostname']
     );
   });
 
-  it('adds a custom type with its paths and pattern', () => {
-    const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-      {
-        key: 'employee-id',
-        label: 'Employee ID',
-        paths: [{ path: 'user.employee_id', enabled: true }],
-        valuePattern: '^E\\d{6}$',
-      },
-    ]);
+  it('ignores a custom type with the key of a default type', () => {
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [{ key: 'observable-type-hostname', label: 'Renamed' }],
+      []
+    );
+
+    expect(resolved['observable-type-hostname']).toEqual(
+      DEFAULT_OBSERVABLE_TYPES['observable-type-hostname']
+    );
+  });
+
+  it('adds a custom type with the paths and the pattern of its settings', () => {
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [{ key: 'employee-id', label: 'Employee ID' }],
+      [
+        {
+          key: 'employee-id',
+          paths: [{ path: 'user.employee_id', enabled: true }],
+          valuePattern: '^E\\d{6}$',
+        },
+      ]
+    );
 
     expect(resolved['employee-id']).toEqual({
       key: 'employee-id',
@@ -97,21 +109,37 @@ describe('resolveObservableTypes', () => {
     });
   });
 
-  it('adds a custom type without paths, which is manual only', () => {
-    const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-      { key: 'ticket-ref', label: 'Ticket ref' },
-    ]);
+  it('adds a custom type without settings, which is manual only', () => {
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [{ key: 'ticket-ref', label: 'Ticket ref' }],
+      []
+    );
 
-    expect(resolved['ticket-ref'].paths).toEqual([]);
+    expect(resolved['ticket-ref']).toEqual({ key: 'ticket-ref', label: 'Ticket ref', paths: [] });
+  });
+
+  it('ignores settings without a built-in or custom type', () => {
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [],
+      [{ key: 'deleted-type', paths: [{ path: 'user.name', enabled: true }] }]
+    );
+
+    expect(Object.hasOwn(resolved, 'deleted-type')).toBe(false);
   });
 
   it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])(
     'treats the custom key "%s" as a custom type',
     (key) => {
-      const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        { key, label: 'Custom', paths: [{ path: 'custom.field', enabled: true }] },
-        { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-      ]);
+      const resolved = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [{ key, label: 'Custom' }],
+        [
+          { key, paths: [{ path: 'custom.field', enabled: true }] },
+          { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+        ]
+      );
 
       expect(Object.getOwnPropertyDescriptor(resolved, key)?.value).toEqual({
         key,
@@ -124,23 +152,14 @@ describe('resolveObservableTypes', () => {
       ]);
     }
   );
-});
 
-describe('getCustomObservableTypes', () => {
-  it('removes the overrides of built-in types', () => {
-    expect(getCustomObservableTypes([builtinOverride, customType])).toEqual([customType]);
-  });
+  it('ignores the settings of an inherited key without a custom type', () => {
+    const resolved = resolveObservableTypes(
+      DEFAULT_OBSERVABLE_TYPES,
+      [],
+      [{ key: 'constructor', paths: [{ path: 'custom.field', enabled: true }] }]
+    );
 
-  it('returns an empty list when there are no types', () => {
-    expect(getCustomObservableTypes([])).toEqual([]);
-  });
-});
-
-describe('toStoredObservableTypes', () => {
-  it('removes the label from the overrides of built-in types only', () => {
-    expect(toStoredObservableTypes([builtinOverride, customType])).toEqual([
-      { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-      customType,
-    ]);
+    expect(Object.hasOwn(resolved, 'constructor')).toBe(false);
   });
 });

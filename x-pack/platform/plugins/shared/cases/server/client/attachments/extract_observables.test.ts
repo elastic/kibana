@@ -391,22 +391,15 @@ describe('extractAndAddObservables', () => {
       caseService.patchCase.mockResolvedValue(caseSO);
     });
 
-    it('extracts with the stored observable types of the case owner', async () => {
+    it('extracts with the stored observable types and settings of the case owner', async () => {
       jest.mocked(clientArgs.services.caseConfigureService.find).mockResolvedValue({
         saved_objects: [
           {
             attributes: {
-              observableTypes: [
-                {
-                  key: 'observable-type-agent-id',
-                  label: 'Agent id',
-                  paths: [{ path: 'agent.id', enabled: false }],
-                },
-                {
-                  key: 'employee-id',
-                  label: 'Employee ID',
-                  paths: [{ path: 'user.employee_id', enabled: true }],
-                },
+              observableTypes: [{ key: 'employee-id', label: 'Employee ID' }],
+              observableTypeSettings: [
+                { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+                { key: 'employee-id', paths: [{ path: 'user.employee_id', enabled: true }] },
               ],
             },
           },

@@ -81,9 +81,13 @@ const getObservableTypesForOwner = async (
       }),
     },
   });
-  const storedTypes = configurations.saved_objects[0]?.attributes.observableTypes ?? [];
+  const attributes = configurations.saved_objects[0]?.attributes;
 
-  return resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, storedTypes);
+  return resolveObservableTypes(
+    DEFAULT_OBSERVABLE_TYPES,
+    attributes?.observableTypes ?? [],
+    attributes?.observableTypeSettings ?? []
+  );
 };
 
 /**
