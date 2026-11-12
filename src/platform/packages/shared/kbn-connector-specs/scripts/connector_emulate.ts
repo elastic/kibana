@@ -19,6 +19,11 @@ import {
   createEmulatorFetch,
   createEmulatorProxy,
   emulatorCredential,
+  EMULATOR_CA_DIR_ENV,
+  EMULATOR_HOST_ENV,
+  EMULATOR_PORT_ENV,
+  isPort,
+  resolveEmulatorLocation,
 } from '@kbn/connector-emulate';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -34,8 +39,8 @@ import {
 } from '../src/test/vendor_api/load_responses';
 import { loadVendorSpecs, readOptional } from '../src/test/vendor_api/load_vendor_specs';
 
-const DEFAULT_PORT = 5690;
-const DEFAULT_CA_DIRECTORY = path.join(REPO_ROOT, 'data', 'connector_emulate');
+// Where the emulator listens and keeps its CA, which Scout's connector_emulator config asks for too.
+const DEFAULTS = resolveEmulatorLocation({ repoRoot: REPO_ROOT });
 
 const fetchText = async (url: string): Promise<string> => {
   const response = await fetch(url);
@@ -211,11 +216,11 @@ run(
     );
     const all = flagsReader.boolean('all');
     const spec = flagsReader.enum('spec', ['snapshot', 'latest']) ?? 'snapshot';
-    const port = flagsReader.number('port') ?? DEFAULT_PORT;
-    const host = flagsReader.string('host') ?? '127.0.0.1';
-    const caDirectory = flagsReader.path('ca-dir') ?? DEFAULT_CA_DIRECTORY;
+    const port = flagsReader.number('port') ?? DEFAULTS.port;
+    const host = flagsReader.string('host') ?? DEFAULTS.host;
+    const caDirectory = flagsReader.path('ca-dir') ?? DEFAULTS.caDirectory;
 
-    if (!Number.isInteger(port) || port < 0 || port > 65535) {
+    if (!isPort(port)) {
       throw createFlagError(`--port must be a port number, got ${port}`);
     }
 
@@ -417,9 +422,10 @@ run(
                       to serve several connectors
         --all         Serve every connector with a vendor_api/manifest.json
         --spec        snapshot (default) for the committed snapshots, or latest to fetch each source's current spec
-        --port        Port to listen on (default ${DEFAULT_PORT})
-        --host        Address to listen on (default 127.0.0.1)
-        --ca-dir      Where the CA's ca.crt and ca.key are kept, created on first use (default data/connector_emulate)
+        --port        Port to listen on (default ${DEFAULTS.port}, or the ${EMULATOR_PORT_ENV} environment variable)
+        --host        Address to listen on (default ${DEFAULTS.host}, or ${EMULATOR_HOST_ENV})
+        --ca-dir      Where the CA's ca.crt and ca.key are kept, created on first use (default data/connector_emulate, or
+                      ${EMULATOR_CA_DIR_ENV})
         --fixtures    JSON file of responses to serve for this run, as a list of { method, path, when, status, headers, body, source },
                       the format of the per-action responses in fixtures.json. when ({ path, query, headers, body }) limits a
                       response to the requests with those values. responses ([{ status, headers, body }]) in place of status,
