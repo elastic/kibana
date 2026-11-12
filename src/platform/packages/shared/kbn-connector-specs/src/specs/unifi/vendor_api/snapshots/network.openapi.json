@@ -208,10 +208,6 @@
       "Client access overview": {},
       "Client action request": {
         "discriminator": {
-          "mapping": {
-            "AUTHORIZE_GUEST_ACCESS": "#/components/schemas/Guest access authorization request",
-            "UNAUTHORIZE_GUEST_ACCESS": "#/components/schemas/Guest access unauthorization request"
-          },
           "propertyName": "action"
         },
         "properties": {
@@ -225,10 +221,6 @@
       },
       "Client action response": {
         "discriminator": {
-          "mapping": {
-            "AUTHORIZE_GUEST_ACCESS": "#/components/schemas/Guest access authorization response",
-            "UNAUTHORIZE_GUEST_ACCESS": "#/components/schemas/Guest access unauthorization response"
-          },
           "propertyName": "action"
         },
         "properties": {
@@ -242,12 +234,6 @@
       },
       "Client details": {
         "discriminator": {
-          "mapping": {
-            "TELEPORT": "#/components/schemas/Teleport client (connection) details",
-            "VPN": "#/components/schemas/VPN client (connection) details",
-            "WIRED": "#/components/schemas/Wired client details",
-            "WIRELESS": "#/components/schemas/Wireless client details"
-          },
           "propertyName": "type"
         },
         "properties": {
@@ -280,12 +266,6 @@
       },
       "Client overview": {
         "discriminator": {
-          "mapping": {
-            "TELEPORT": "#/components/schemas/Teleport client (connection) overview",
-            "VPN": "#/components/schemas/VPN client (connection) overview",
-            "WIRED": "#/components/schemas/Wired client overview",
-            "WIRELESS": "#/components/schemas/Wireless client overview"
-          },
           "propertyName": "type"
         },
         "properties": {
@@ -354,9 +334,6 @@
       },
       "Device action request": {
         "discriminator": {
-          "mapping": {
-            "RESTART": "#/components/schemas/Device restart request"
-          },
           "propertyName": "action"
         },
         "properties": {
@@ -411,9 +388,6 @@
       "Entity metadata": {
         "discriminator": {
           "mapping": {
-            "DERIVED": "#/components/schemas/Derived entity metadata",
-            "ORCHESTRATED": "#/components/schemas/Orchestrated entity metadata",
-            "SYSTEM_DEFINED": "#/components/schemas/System defined entity metadata",
             "USER_DEFINED": "#/components/schemas/User defined entity metadata"
           },
           "propertyName": "origin"
@@ -506,11 +480,6 @@
       },
       "Firewall policy IP protocol scope": {
         "discriminator": {
-          "mapping": {
-            "IPV4": "#/components/schemas/IntegrationFirewallPolicyIpv4ProtocolScopeDto",
-            "IPV4_AND_IPV6": "#/components/schemas/IntegrationFirewallPolicyIpv4AndIpv6ProtocolScopeDto",
-            "IPV6": "#/components/schemas/IntegrationFirewallPolicyIpv6ProtocolScopeDto"
-          },
           "propertyName": "ipVersion"
         },
         "properties": {
@@ -524,11 +493,6 @@
       },
       "Firewall policy action": {
         "discriminator": {
-          "mapping": {
-            "ALLOW": "#/components/schemas/IntegrationFirewallPolicyActionAllowDto",
-            "BLOCK": "#/components/schemas/IntegrationFirewallPolicyActionBlockDto",
-            "REJECT": "#/components/schemas/IntegrationFirewallPolicyActionRejectDto"
-          },
           "propertyName": "type"
         },
         "properties": {
@@ -557,18 +521,6 @@
       },
       "Firewall policy destination traffic filter": {
         "discriminator": {
-          "mapping": {
-            "APPLICATION": "#/components/schemas/IntegrationFirewallPolicyDestinationApplicationFilterDto",
-            "APPLICATION_CATEGORY": "#/components/schemas/IntegrationFirewallPolicyDestinationApplicationCategoryFilterDto",
-            "DOMAIN": "#/components/schemas/IntegrationFirewallPolicyDestinationDomainFilterDto",
-            "IPV6_IID": "#/components/schemas/IntegrationFirewallPolicyDestinationIpv6IidFilterDto",
-            "IP_ADDRESS": "#/components/schemas/IntegrationFirewallPolicyDestinationIpAddressFilterDto",
-            "NETWORK": "#/components/schemas/IntegrationFirewallPolicyDestinationNetworkFilterDto",
-            "PORT": "#/components/schemas/IntegrationFirewallPolicyDestinationPortFilterDto",
-            "REGION": "#/components/schemas/IntegrationFirewallPolicyDestinationRegionFilterDto",
-            "SITE_TO_SITE_VPN_TUNNEL": "#/components/schemas/IntegrationFirewallPolicyDestinationSiteToSiteVpnTunnelFilterDto",
-            "VPN_SERVER": "#/components/schemas/IntegrationFirewallPolicyDestinationVpnServerFilterDto"
-          },
           "propertyName": "type"
         },
         "properties": {
@@ -631,16 +583,6 @@
       },
       "Firewall policy source traffic filter": {
         "discriminator": {
-          "mapping": {
-            "IPV6_IID": "#/components/schemas/IntegrationFirewallPolicySourceIpv6IidFilterDto",
-            "IP_ADDRESS": "#/components/schemas/IntegrationFirewallPolicySourceIpAddressFilterDto",
-            "MAC_ADDRESS": "#/components/schemas/IntegrationFirewallPolicySourceMacAddressFilterDto",
-            "NETWORK": "#/components/schemas/IntegrationFirewallPolicySourceNetworkFilterDto",
-            "PORT": "#/components/schemas/IntegrationFirewallPolicySourcePortFilterDto",
-            "REGION": "#/components/schemas/IntegrationFirewallPolicySourceRegionFilterDto",
-            "SITE_TO_SITE_VPN_TUNNEL": "#/components/schemas/IntegrationFirewallPolicySourceSiteToSiteVpnTunnelFilterDto",
-            "VPN_SERVER": "#/components/schemas/IntegrationFirewallPolicySourceVpnServerFilterDto"
-          },
           "propertyName": "type"
         },
         "properties": {
@@ -654,12 +596,6 @@
       },
       "Firewall schedule": {
         "discriminator": {
-          "mapping": {
-            "CUSTOM": "#/components/schemas/IntegrationFirewallScheduleCustomDto",
-            "EVERY_DAY": "#/components/schemas/IntegrationFirewallScheduleEveryDayDto",
-            "EVERY_WEEK": "#/components/schemas/IntegrationFirewallScheduleEveryWeekDto",
-            "ONE_TIME_ONLY": "#/components/schemas/IntegrationFirewallScheduleOneTimeOnlyDto"
-          },
           "propertyName": "mode"
         },
         "properties": {
@@ -789,11 +725,6 @@
       },
       "Network overview": {
         "discriminator": {
-          "mapping": {
-            "GATEWAY": "#/components/schemas/Gateway managed network overview",
-            "SWITCH": "#/components/schemas/Switch managed network overview",
-            "UNMANAGED": "#/components/schemas/Unmanaged network overview"
-          },
           "propertyName": "management"
         },
         "properties": {
@@ -911,9 +842,6 @@
       },
       "Port action request": {
         "discriminator": {
-          "mapping": {
-            "POWER_CYCLE": "#/components/schemas/Port PoE power-cycle request"
-          },
           "propertyName": "action"
         },
         "properties": {
@@ -1027,7 +955,6 @@
       "Site-to-site VPN tunnel metadata": {
         "discriminator": {
           "mapping": {
-            "DERIVED": "#/components/schemas/IntegrationDerivedSiteToSiteTunnelMetadata",
             "USER_DEFINED": "#/components/schemas/User defined entity metadata"
           },
           "propertyName": "origin"
@@ -1083,7 +1010,6 @@
       "User defined or derived entity metadata": {
         "discriminator": {
           "mapping": {
-            "DERIVED": "#/components/schemas/Derived entity metadata",
             "USER_DEFINED": "#/components/schemas/User defined entity metadata"
           },
           "propertyName": "origin"
@@ -1100,8 +1026,6 @@
       "User or derived or orchestrated entity metadata": {
         "discriminator": {
           "mapping": {
-            "DERIVED": "#/components/schemas/Derived entity metadata",
-            "ORCHESTRATED": "#/components/schemas/Orchestrated entity metadata",
             "USER_DEFINED": "#/components/schemas/User defined entity metadata"
           },
           "propertyName": "origin"
@@ -1118,7 +1042,6 @@
       "User or orchestrated entity metadata": {
         "discriminator": {
           "mapping": {
-            "ORCHESTRATED": "#/components/schemas/Orchestrated entity metadata",
             "USER_DEFINED": "#/components/schemas/User defined entity metadata"
           },
           "propertyName": "origin"
@@ -1135,7 +1058,6 @@
       "User or system defined entity metadata": {
         "discriminator": {
           "mapping": {
-            "SYSTEM_DEFINED": "#/components/schemas/System defined entity metadata",
             "USER_DEFINED": "#/components/schemas/User defined entity metadata"
           },
           "propertyName": "origin"
@@ -1152,8 +1074,6 @@
       "User or system defined or derived entity metadata": {
         "discriminator": {
           "mapping": {
-            "DERIVED": "#/components/schemas/Derived entity metadata",
-            "SYSTEM_DEFINED": "#/components/schemas/System defined entity metadata",
             "USER_DEFINED": "#/components/schemas/User defined entity metadata"
           },
           "propertyName": "origin"
@@ -1170,8 +1090,6 @@
       "User or system defined or orchestrated entity metadata": {
         "discriminator": {
           "mapping": {
-            "ORCHESTRATED": "#/components/schemas/Orchestrated entity metadata",
-            "SYSTEM_DEFINED": "#/components/schemas/System defined entity metadata",
             "USER_DEFINED": "#/components/schemas/User defined entity metadata"
           },
           "propertyName": "origin"

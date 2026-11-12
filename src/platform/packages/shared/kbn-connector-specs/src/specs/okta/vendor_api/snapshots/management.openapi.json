@@ -1496,20 +1496,6 @@
       },
       "UserFactor": {
         "discriminator": {
-          "mapping": {
-            "call": "#/components/schemas/UserFactorCall",
-            "email": "#/components/schemas/UserFactorEmail",
-            "push": "#/components/schemas/UserFactorPush",
-            "question": "#/components/schemas/UserFactorSecurityQuestion",
-            "sms": "#/components/schemas/UserFactorSMS",
-            "token": "#/components/schemas/UserFactorToken",
-            "token:hardware": "#/components/schemas/UserFactorTokenHardware",
-            "token:hotp": "#/components/schemas/UserFactorTokenHOTP",
-            "token:software:totp": "#/components/schemas/UserFactorTokenSoftwareTOTP",
-            "u2f": "#/components/schemas/UserFactorU2F",
-            "web": "#/components/schemas/UserFactorWeb",
-            "webauthn": "#/components/schemas/UserFactorWebAuthn"
-          },
           "propertyName": "factorType"
         },
         "properties": {
