@@ -37,11 +37,7 @@ import {
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
-import {
-  InvalidYamlSchemaError,
-  parseYamlToJSONWithoutValidation,
-  WorkflowConflictError,
-} from '@kbn/workflows-yaml';
+import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
 import {
@@ -105,7 +101,6 @@ import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { WorkflowHistoryEventNotFoundError } from '../lib/workflow_history_event_not_found_error';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import { applyWorkflowVersion } from '../lib/workflow_version';
-import type { WorkflowPageTriggers } from '../pages/workflow_pages_system_client';
 import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
@@ -161,34 +156,6 @@ export interface BulkCreateWorkflowsResult {
 
 type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
   workflowData: WorkflowProperties;
-};
-
-/**
- * Reads the triggers of a workflow that failed validation, without the schema, so the page sync
- * can retire a page whose trigger was removed in the same save. Undefined when the triggers cannot
- * be read: a YAML syntax error, which the parser recovers from with a list that may be cut short,
- * or a missing or misspelled `triggers` key. A typo must not retire a shared link.
- */
-const parseLooseTriggers = (yaml: string): WorkflowPageTriggers | undefined => {
-  const parsed = parseYamlToJSONWithoutValidation(yaml);
-  if (
-    !parsed.success ||
-    parsed.document.errors.length > 0 ||
-    parsed.json == null ||
-    typeof parsed.json !== 'object'
-  ) {
-    return undefined;
-  }
-  const { triggers } = parsed.json as { triggers?: unknown };
-  if (!Array.isArray(triggers)) {
-    return undefined;
-  }
-  return {
-    triggers: triggers.map((trigger) => ({
-      type: typeof trigger?.type === 'string' ? trigger.type : undefined,
-      id: typeof trigger?.id === 'string' ? trigger.id : undefined,
-    })),
-  };
 };
 
 export class WorkflowCrudService {
@@ -768,7 +735,7 @@ export class WorkflowCrudService {
       logger: this.deps.logger,
     });
 
-    await this.syncWorkflowPages([{ id, document: workflowData }]);
+    await this.syncWorkflowPages([id], workflowData.spaceId);
 
     return transformStorageDocumentToWorkflowDto(id, workflowData);
   }
@@ -973,7 +940,8 @@ export class WorkflowCrudService {
     }
 
     await this.syncWorkflowPages(
-      successfullyWritten.map((vw) => ({ id: vw.id, document: vw.workflowData }))
+      successfullyWritten.map((vw) => vw.id),
+      spaceId
     );
 
     return { created, failed };
@@ -1093,7 +1061,7 @@ export class WorkflowCrudService {
       shouldUpdateScheduler,
     });
 
-    await this.syncWorkflowPages([{ id, document: finalData }]);
+    await this.syncWorkflowPages([id], finalData.spaceId);
 
     return {
       response: {
@@ -1362,23 +1330,29 @@ export class WorkflowCrudService {
    * shortcut: a save that lands between this read and the sync can still lose its page until its
    * next save; a version guard on the sync closes that if it shows up.
    */
-  private async syncWorkflowPages(
-    workflows: Array<{ id: string; document: WorkflowProperties }>
-  ): Promise<void> {
+  private async syncWorkflowPages(ids: string[], spaceId: string): Promise<void> {
     const { pagesSystemClient } = this.deps;
     if (!pagesSystemClient) return;
+    let workflows: WorkflowDetailDto[];
+    try {
+      // A workflow deleted or moved since the write is missing: the delete or the move handles it.
+      workflows = await this.getWorkflowsByIds(ids, spaceId);
+    } catch (error) {
+      this.deps.logger.error(`Failed to read workflows [${ids.join(', ')}] for the page sync`, {
+        error,
+      });
+      return;
+    }
     await pMap(
       workflows,
-      async ({ id, document: { spaceId } }) => {
+      async ({ id, createdAt, definition, valid }) => {
         try {
-          const current = await this.getWorkflowDocumentSource(id, spaceId);
-          if (!current) return;
           await pagesSystemClient.syncWorkflowPages({
             workflowId: id,
-            workflowCreatedAt: current.created_at,
+            workflowCreatedAt: createdAt,
             spaceId,
-            definition: current.valid ? current.definition : parseLooseTriggers(current.yaml),
-            valid: current.valid,
+            definition,
+            valid,
           });
         } catch (error) {
           this.deps.logger.error(`Failed to sync the pages of workflow [${id}]`, { error });
@@ -1825,8 +1799,7 @@ export class WorkflowCrudService {
     }
 
     // An import over a soft-deleted workflow keeps its created_at, so the sync would keep pages
-    // that a failed retire left behind, with their old secret and access. The import is a new
-    // workflow to its author, so it starts without them. Pages in another space go in the sync.
+    // that a failed retire left behind. The import starts without them.
     const revivedIds = new Set<string>();
     if (inSpaceUpdateEntries.length > 0) {
       for (const entry of inSpaceUpdateEntries) {

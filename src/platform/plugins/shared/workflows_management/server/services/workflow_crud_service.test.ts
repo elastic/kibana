@@ -4716,6 +4716,8 @@ describe('workflow page lifecycle', () => {
     client.search.mockImplementation(async ({ query }: { query: unknown }) => {
       const text = JSON.stringify(query);
       return {
+        timed_out: false,
+        _shards: { failed: 0 },
         hits: {
           hits: [...stored]
             .filter(([id]) => text.includes(`"${id}"`))
@@ -4786,50 +4788,52 @@ describe('workflow page lifecycle', () => {
     );
   });
 
-  it.each([
-    [
-      'the triggers of an invalid save, read without the schema',
-      ['name: Broken', 'triggers:', '  - type: manual', 'steps: 1'].join('\n'),
-      { triggers: [{ type: 'manual', id: undefined }] },
-    ],
-    [
-      'no definition for a YAML syntax error',
-      ['triggers:', '  - type: page', 'steps: [unclosed'].join('\n'),
-      undefined,
-    ],
-    [
-      'no definition for a misspelled triggers key',
-      ['trigers:', '  - type: page', 'steps: 1'].join('\n'),
-      undefined,
-    ],
-  ])('passes %s', async (_, yaml, definition) => {
-    const { service, client, pagesService, request } = setup();
-    const stored = storeWrites(client);
-    client.index.mockImplementation(async ({ id, document }) => {
-      // The stored state of an invalid save: no definition, and the YAML as written.
-      stored.set(id, { ...document, valid: false, definition: null, yaml });
-      return { result: 'created', _seq_no: 1, _primary_term: 1 };
+  it('skips the page sync when the workflow is gone by then', async () => {
+    const { service, client, deps, pagesService, request } = setup();
+    client.search.mockResolvedValue({
+      timed_out: false,
+      _shards: { failed: 0 },
+      hits: { hits: [] },
     });
 
     await service.createWorkflow({ yaml: pageYaml }, 'default', request);
 
-    expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
-      expect.objectContaining({ valid: false, definition })
-    );
+    expect(pagesService.syncWorkflowPages).not.toHaveBeenCalled();
+    expect(deps.logger.error).not.toHaveBeenCalled();
   });
 
-  it('skips the page sync when the workflow is gone by then', async () => {
+  it('reads the workflows of a bulk write in one search', async () => {
     const { service, client, pagesService, request } = setup();
-    client.search.mockResolvedValue({ hits: { hits: [] } });
+    client.bulk.mockResolvedValue({
+      items: [
+        { create: { _id: 'first', status: 201 } },
+        { create: { _id: 'second', status: 201 } },
+      ],
+    });
+    storeWrites(client);
 
-    await service.createWorkflow({ yaml: pageYaml }, 'default', request);
+    await service.bulkCreateWorkflows(
+      [
+        { id: 'first', yaml: pageYaml },
+        { id: 'second', yaml: pageYaml },
+      ],
+      'default',
+      request
+    );
+    const [written] = client.bulk.mock.invocationCallOrder;
+    const [firstSync] = pagesService.syncWorkflowPages.mock.invocationCallOrder;
 
-    expect(pagesService.syncWorkflowPages).not.toHaveBeenCalled();
+    expect(pagesService.syncWorkflowPages).toHaveBeenCalledTimes(2);
+    expect(
+      client.search.mock.invocationCallOrder.filter((order) => order > written && order < firstSync)
+    ).toHaveLength(1);
   });
 
   it('syncs the pages after an update, with the stored created_at', async () => {
     const { service, client, pagesService, request } = setup();
     client.search.mockResolvedValue({
+      timed_out: false,
+      _shards: { failed: 0 },
       hits: { hits: [occSearchHit('wf-1', { created_at: '2024-01-01T00:00:00.000Z' })] },
     });
 
