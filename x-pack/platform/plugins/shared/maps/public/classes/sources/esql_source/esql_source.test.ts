@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import { ESQLSource } from './esql_source';
 import { of } from 'rxjs';
 import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ESQLSource } from './esql_source';
 import type { DataRequest } from '../../util/data_request';
 
-const mockSearch = jest.fn();
+const mockEsql = jest.fn();
 const mockGetESQLQueryColumnsRaw = jest.fn();
 const mockGetLimitFromESQLQuery = jest.fn().mockReturnValue(10000);
 
 jest.mock('../../../kibana_services', () => ({
   getData: () => ({
-    search: { search: (...args: any[]) => mockSearch(...args) },
+    search: { esql: (...args: any[]) => mockEsql(...args) },
     query: {
       timefilter: {
         timefilter: { getAbsoluteTime: () => ({ from: 'now-15m', to: 'now' }) },
@@ -162,13 +163,13 @@ describe('getGeoJsonWithMeta', () => {
     });
 
   beforeEach(() => {
-    mockSearch.mockReset();
+    mockEsql.mockReset();
     mockGetLimitFromESQLQuery.mockReturnValue(10000);
     mockGetNamedParams.mockReset().mockReturnValue([]);
   });
 
   test('should return features and resultsCount from ES|QL response', async () => {
-    mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(5), requestParams: {} }));
+    mockEsql.mockResolvedValue({ rawResponse: makeEsqlResponse(5) });
 
     const { data, meta } = await createSource().getGeoJsonWithMeta(
       'test',
@@ -185,7 +186,7 @@ describe('getGeoJsonWithMeta', () => {
 
   test('should set areResultsTrimmed when resultsCount reaches the limit', async () => {
     mockGetLimitFromESQLQuery.mockReturnValue(3);
-    mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(3), requestParams: {} }));
+    mockEsql.mockResolvedValue({ rawResponse: makeEsqlResponse(3) });
 
     const { meta } = await createSource().getGeoJsonWithMeta(
       'test',
@@ -197,6 +198,38 @@ describe('getGeoJsonWithMeta', () => {
 
     expect(meta?.resultsCount).toBe(3);
     expect(meta?.areResultsTrimmed).toBe(true);
+  });
+
+  test('should pass query context and inspector request id to search.esql', async () => {
+    mockEsql.mockResolvedValue({ rawResponse: makeEsqlResponse(1) });
+    const source = new ESQLSource({
+      id: 'layer1',
+      esql: ESQL,
+      geoField: 'geo.coordinates',
+      dateField: '@timestamp',
+      narrowByGlobalSearch: false,
+      narrowByMapBounds: false,
+      narrowByGlobalTime: true,
+    });
+    const inspectorAdapters = makeInspectorAdapters();
+
+    await source.getGeoJsonWithMeta(
+      'test',
+      { ...requestMeta, applyGlobalTime: true } as any,
+      jest.fn(),
+      jest.fn(),
+      inspectorAdapters as any
+    );
+
+    const [params, options] = mockEsql.mock.calls[0];
+    expect(params.kibanaQueryContext).toMatchObject({
+      timeRange: requestMeta.timeFilters,
+      timeField: '@timestamp',
+    });
+    expect(options.inspector).toMatchObject({
+      adapter: inspectorAdapters.requests,
+      id: 'layer1',
+    });
   });
 
   test('should bind ?_geotile_precision to a precision derived from the map zoom', async () => {

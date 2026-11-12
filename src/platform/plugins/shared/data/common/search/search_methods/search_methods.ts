@@ -89,9 +89,7 @@ export class SearchMethodsService implements ISearchMethods {
       'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
     );
 
-    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
-      description: options.inspector.description,
-    });
+    const requestResponder = this.startInspectorRequest(options);
 
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
@@ -139,9 +137,7 @@ export class SearchMethodsService implements ISearchMethods {
     const request = this.buildDslRequest(dslParams, options);
     const searchOptions = this.mapDslOptions(options, params);
 
-    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
-      description: options.inspector.description,
-    });
+    const requestResponder = this.startInspectorRequest(options);
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
     if (options?.inspector?.getRequestStats) {
@@ -202,9 +198,7 @@ export class SearchMethodsService implements ISearchMethods {
     const request = this.buildEqlRequest(params, options);
     const searchOptions = this.mapEqlOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY);
 
-    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
-      description: options.inspector.description,
-    });
+    const requestResponder = this.startInspectorRequest(options);
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
     if (options?.inspector?.getRequestStats) {
@@ -237,9 +231,7 @@ export class SearchMethodsService implements ISearchMethods {
     const request = this.buildSqlRequest(params, options);
     const searchOptions = this.mapSqlOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY);
 
-    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
-      description: options.inspector.description,
-    });
+    const requestResponder = this.startInspectorRequest(options);
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
     if (options?.inspector?.getRequestStats) {
@@ -556,6 +548,14 @@ export class SearchMethodsService implements ISearchMethods {
   // ============================================================================
   // Common Helpers
   // ============================================================================
+
+  private startInspectorRequest(options?: IBaseSearchOptions) {
+    const { inspector } = options ?? {};
+    return inspector?.adapter.start(inspector.title, {
+      id: inspector.id,
+      description: inspector.description,
+    });
+  }
 
   private mapBaseOptions(options?: IBaseSearchOptions): Partial<ISearchOptions> {
     if (!options) {
