@@ -55,17 +55,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'over_escalation_is_fail',
-    text: 'Over-escalation is a FAIL. An event rated `high` without a stated failed outcome, or without a reach, a rate clearly above the operation’s own normal, or a dependent’s own operation stated failing because of a named dependency or component, scores 0 on this criterion. An error line, a share or count of log lines, partial results without a request-level share, or an unresolved completion rates `medium`, and the assessment note names the missing outcome or reach.',
-    score: 2,
-  },
-  {
-    id: 'error_line_is_not_impact',
-    text: 'An error line is evidence of a failure mode, not of impact. A WARN partial-result line whose log-line share has stayed at about the same level for days (for example 10%, 12% and 11% of a service’s log lines on three consecutive days) is the operation’s normal and volume, not reach: it rates `medium`, with the missing request-level reach named in the assessment note.',
-    score: 2,
-  },
-  {
-    id: 'total_failure_stays_high',
-    text: 'A clear, repeated, total failure of a critical operation stays `high`, or `critical` when its critical conditions are met, without a quoted share: descriptions that state all or nearly all of the attempts checked failed (the reach is the attempts checked), repeatedly and over time, support the tier.',
+    text: 'Over-escalation is a FAIL. An event rated `high` without a stated failed outcome, or without a reach, a rate clearly above the operation’s own normal, or a dependent’s own operation stated failing because of a named dependency or component, scores 0 on this criterion. An error line, a count or share of log lines, or an unresolved completion rates `medium`, and the assessment note names the missing outcome or reach.',
     score: 2,
   },
 ];

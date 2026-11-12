@@ -343,7 +343,7 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     Severity rates the situation the grounding evidence confirms.
 
     Decide in order and stop at the first match:
-    - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example three distinct operations together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
+    - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once; a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
     - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset, as the evidence measures it. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
     - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
@@ -359,10 +359,15 @@ export const SEVERITY_CONTRACT_RULE = dedent`
  * skill and the eval judge point to it.
  */
 export const CONFIDENCE_CONTRACT_RULE = dedent`
-    Confidence is how credibly the evidence supports two things together: the symptom the event reports, and the tier rated. Judge the weaker of the two.
-    - Symptom support: the failure is real, still happening, consistent across the signals, and its scope is established. A contradiction between signals, timing that is not aligned or not still happening, or a failing population the signals do not establish lowers it. The cause is stated in the hypothesis only as far as the evidence supports it, so a cause that is not established is not a deduction here.
-    - Tier support: whether the stated outcome, the measured reach and the strength of the signal back the tier actually rated. A missing requirement that already lowered the tier does not lower confidence a second time: confidence records only the doubt that remains about the tier rated.
-    With none of those elements present, confidence is at the top of the range this field allows. Each element that is present lowers it, and the assessment_note names it and says how far it lowers the value. The signal rows and the knowledge-base topology disagreeing is one such element; agreeing keeps the value where it is. Nothing else about the knowledge base changes it: an empty blast_radius means unknown, not none.
+    Confidence is how strongly the evidence you hold supports what this event states: the symptom it reports and the tier rated.
+    Check each of these in the confirming descriptions, and name in the assessment_note the ones they do not show:
+    - the rows show the failure itself (an error signature or a stated outcome), not only log-line volume;
+    - it is still happening in the latest hour the descriptions give;
+    - the signals agree with each other and with the knowledge-base topology where both speak;
+    - the descriptions say where it fails (a service, operation or scope);
+    - the evidence the rated tier needs is stated (for "medium", an observed failure with its reach unmeasured is what that tier means).
+    Every check the descriptions show keeps confidence high. Each one they do not show lowers it, and several that are not shown make it low.
+    These never lower confidence, whatever the tier: a reach, outcome or rate that was not measured and so set a lower tier; a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
     An event written without signals is rated on the evidence its author holds. Confidence reflects the evidence held, never how strong or unusual the detection was.
   `;
 
