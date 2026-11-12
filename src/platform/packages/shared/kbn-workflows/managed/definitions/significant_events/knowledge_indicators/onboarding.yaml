@@ -1,6 +1,7 @@
 # KI Onboarding Workflow
 #
 # Orchestrates the full KI onboarding pipeline for a source:
+#   0. Metrics entities identification (deterministic — skips LLM steps when handled)
 #   1. Features recency check (auto-skips identification if features are recent)
 #   2. Features identification (optional, skippable)
 #   3. Queries generation (conditional — skipped when no new features were found)
@@ -180,6 +181,10 @@ steps:
       metricsEntitiesSkipReason: ""
       cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
 
+  # -----------------------------------------------------------------------
+  # Metrics branch: deterministic entities from the source's own query.
+  # When it handles the source, the LLM steps below are skipped.
+  # -----------------------------------------------------------------------
   - name: run_metrics_source_onboarding
     type: if
     condition: '${{ inputs.sourceType == "metrics" }}'
@@ -217,12 +222,21 @@ steps:
               skipFeatures: true
               skipQueries: true
 
+  # -----------------------------------------------------------------------
+  # Logs path (steps 1 to 4): runs for logs sources, and for metrics sources
+  # the entity-key table can't read.
+  # -----------------------------------------------------------------------
   - name: run_source_onboarding
     type: if
     condition: >-
       ${{ inputs.sourceType != "metrics"
         or variables.metricsEntitiesHandled == false }}
     steps:
+      # -----------------------------------------------------------------------
+      # Step 1: Recency check — auto-skip features if recently identified.
+      #         When skipQueries=true we always want to identify features,
+      #         so the recency optimization is skipped in that case.
+      # -----------------------------------------------------------------------
       - name: check_should_identify
         type: if
         condition: "${{ variables.skipFeatures == false and inputs.skipQueries == false }}"
@@ -244,6 +258,9 @@ steps:
                 with:
                   skipFeatures: true
 
+      # -----------------------------------------------------------------------
+      # Step 2: Features identification (unless skipped or recent)
+      # -----------------------------------------------------------------------
       - name: run_features
         type: if
         condition: "${{ variables.skipFeatures == false }}"
@@ -277,6 +294,10 @@ steps:
               featuresTokensUsed: "${{ steps.identify_features.output.tokensUsed }}"
               featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
 
+      # -----------------------------------------------------------------------
+      # Step 3: Skip queries when no features were discovered this cycle.
+      #         inputs.skipFeatures == true (queries-only run) bypasses this gate.
+      # -----------------------------------------------------------------------
       - name: check_should_generate_queries
         type: if
         condition: "${{ inputs.skipFeatures == false and variables.discoveredFeatures.size == 0 }}"
@@ -286,6 +307,9 @@ steps:
             with:
               skipQueries: true
 
+      # -----------------------------------------------------------------------
+      # Step 4: Queries generation (unless skipped)
+      # -----------------------------------------------------------------------
       - name: run_queries
         type: if
         condition: "${{ variables.skipQueries == false }}"
