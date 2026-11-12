@@ -32,11 +32,6 @@ import { useSupportedBinaryTypes } from '../../../hooks/use_supported_binary_typ
 export interface UseAttachmentUploadsParams {
   addErrorToast: (input: ToastInput) => void;
   messageEditorController: MessageEditorController;
-  /**
-   * False turns off PDF paste. A PDF is stored in a conversation on paste, so an input whose
-   * host sends the message to its own chat (the embeddable input) would leave an extra conversation.
-   */
-  isBinaryUploadEnabled?: boolean;
 }
 
 export interface LoadingFile {
@@ -56,7 +51,6 @@ const getAddedFileNames = (attachments: readonly ConversationAttachment[] = []):
 export const useAttachmentUploads = ({
   addErrorToast,
   messageEditorController,
-  isBinaryUploadEnabled = true,
 }: UseAttachmentUploadsParams) => {
   const { attachments } = useConversationContext();
 
@@ -72,18 +66,16 @@ export const useAttachmentUploads = ({
 
   const supportedBinaryMimeTypes = useSupportedBinaryTypes();
   const acceptedFileMimeTypes = useMemo<readonly FileMimeType[]>(
-    () => [...TEXT_FILE_MIME_TYPES, ...(isBinaryUploadEnabled ? supportedBinaryMimeTypes : [])],
-    [supportedBinaryMimeTypes, isBinaryUploadEnabled]
+    () => [...TEXT_FILE_MIME_TYPES, ...supportedBinaryMimeTypes],
+    [supportedBinaryMimeTypes]
   );
 
   const {
     loadingBinaryNames,
-    handlePasteBinary: handlePasteBinaryFile,
+    handlePasteBinary,
     handleAfterInput: handleAfterBinaryInput,
     handleRemoveBinary,
   } = useBinaryUpload({ addErrorToast, messageEditorController });
-
-  const handlePasteBinary = isBinaryUploadEnabled ? handlePasteBinaryFile : undefined;
 
   const {
     loadingTextFileNames,

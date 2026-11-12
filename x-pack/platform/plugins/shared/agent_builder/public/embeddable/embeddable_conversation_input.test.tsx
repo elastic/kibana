@@ -61,6 +61,22 @@ describe('EmbeddableConversationInputInternal', () => {
     expect(mockNavigateToAgentBuilderUrl).not.toHaveBeenCalled();
   });
 
+  it('passes a pasted PDF to onSubmit as a file id, for the server to read on Send', () => {
+    const pdf = {
+      type: 'binary',
+      origin: 'file-1',
+      description: 'invoice.pdf',
+    } as ConversationAttachment;
+    mockAttachments.push(pdf);
+    const onSubmit = jest.fn();
+    renderInput(onSubmit);
+
+    fireEvent.click(screen.getByText('Submit'));
+
+    expect(onSubmit).toHaveBeenCalledWith('Build a workflow', expect.arrayContaining([pdf]));
+    mockAttachments.pop();
+  });
+
   it('navigates to Agent Builder with the attachments when onSubmit is not set', () => {
     renderInput();
 

@@ -55,7 +55,7 @@ const getNames = (attachments: ConversationAttachment[] = []): string[] =>
     return (attachment.data as { name?: string }).name ?? '';
   });
 
-const renderUploads = ({ isBinaryUploadEnabled }: { isBinaryUploadEnabled?: boolean } = {}) => {
+const renderUploads = () => {
   const queryClient = new QueryClient();
   const wrapper = ({ children }: PropsWithChildren) => (
     <QueryClientProvider client={queryClient}>
@@ -67,7 +67,6 @@ const renderUploads = ({ isBinaryUploadEnabled }: { isBinaryUploadEnabled?: bool
       uploads: useAttachmentUploads({
         addErrorToast,
         messageEditorController: messageEditorController as never,
-        isBinaryUploadEnabled,
       }),
       attachments: useConversationContext().attachments,
     }),
@@ -111,17 +110,15 @@ describe('useAttachmentUploads', () => {
     });
   });
 
-  describe('when PDF upload is turned off', () => {
-    it('does not accept or upload a PDF, but still reads a text file', async () => {
-      const { result } = renderUploads({ isBinaryUploadEnabled: false });
+  it('accepts PDFs and adds them next to text files, in paste order', async () => {
+    const { result } = renderUploads();
 
-      expect(result.current.uploads.acceptedFileMimeTypes).not.toContain('application/pdf');
-      paste(result, [createFile('a.pdf', 'application/pdf'), createFile('b.md')]);
-      await waitFor(() => expect(result.current.attachments).toHaveLength(1));
+    expect(result.current.uploads.acceptedFileMimeTypes).toContain('application/pdf');
+    paste(result, [createFile('a.pdf', 'application/pdf'), createFile('b.md')]);
+    await waitFor(() => expect(result.current.attachments).toHaveLength(2));
 
-      expect(uploadBinary).not.toHaveBeenCalled();
-      expect(getNames(result.current.attachments)).toEqual(['b.md']);
-    });
+    expect(uploadBinary).toHaveBeenCalledWith(expect.objectContaining({ name: 'a.pdf' }));
+    expect(getNames(result.current.attachments)).toEqual(['a.pdf', 'b.md']);
   });
 
   describe('deleting several chips in one input event', () => {
