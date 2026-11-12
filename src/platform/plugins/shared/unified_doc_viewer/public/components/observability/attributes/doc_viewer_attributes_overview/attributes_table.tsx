@@ -127,14 +127,14 @@ export const AttributesTable = ({
       })}
       columns={gridColumns}
       rowCount={rows.length}
-      renderCellValue={({ rowIndex, columnId, isDetails }) => {
+      renderCellValue={({ rowIndex, columnId }) => {
         const row = rows[rowIndex];
         return row ? (
           <TableCell
             searchTerm={searchTerm}
             row={row}
             columnId={columnId}
-            isDetails={isDetails}
+            isDetails={false}
             isESQLMode={isEsqlMode}
           />
         ) : null;
