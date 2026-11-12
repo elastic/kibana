@@ -9,7 +9,8 @@ import { k8sDeploymentFixture } from '../__fixtures__/definitions';
 import { buildColumns, resolveIdentityPlan } from '../generator';
 import type { OutputColumn, QueryPlan } from '../generator';
 import { mergeRows } from './merge';
-import type { InventoryRow, PlanResult } from './types';
+import type { InventoryRow } from '../../../common';
+import type { PlanResult } from './types';
 
 const columns: OutputColumn[] = [
   { name: 'entity.id', kind: 'id' },
