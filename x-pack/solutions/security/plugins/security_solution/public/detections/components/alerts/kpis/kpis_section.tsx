@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
