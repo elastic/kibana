@@ -6,8 +6,8 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { SearchInferenceEndpointsFixturePlugin } from './plugin';
 
 export const plugin = async (context: PluginInitializerContext<{}>) => {
+  const { SearchInferenceEndpointsFixturePlugin } = await import('./plugin');
   return new SearchInferenceEndpointsFixturePlugin(context);
 };
