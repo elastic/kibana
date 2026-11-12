@@ -47,6 +47,7 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import AESOP_DRIFT_MONITOR_YAML from './definitions/aesop_prototype/aesop_drift_monitor.yaml';
 import ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML from './definitions/alertzero/actions/action_close_attack_discovery_investigation.yaml';
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
@@ -62,7 +63,6 @@ import FORENSICS_CLOSE_INVESTIGATION_GATE_YAML from './definitions/alertzero/for
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import FORENSICS_PROPOSAL_GATE_YAML from './definitions/alertzero/forensics_proposal_gate.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
-import AESOP_DRIFT_MONITOR_YAML from './definitions/aesop_prototype/aesop_drift_monitor.yaml';
 import {
   ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
   ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
