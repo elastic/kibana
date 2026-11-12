@@ -69,14 +69,16 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     });
   });
 
-  it('names the instance after its AI index and keys its concurrency to it', () => {
+  it('names the instance after its AI index and queues on its memory concurrency key', () => {
     const workflow = render();
 
     expect(workflow.name).toBe('Dreaming: support-cases');
     expect(workflow.settings.concurrency).toEqual({
-      key: 'context-engine-dreaming-support-cases-0123456789abcdef',
-      strategy: 'drop',
+      key: 'context-engine-memory-support-cases-0123456789abcdef',
+      strategy: 'queue',
       max: 1,
+      'queue-size': 10,
+      'queue-ttl': '24h',
     });
   });
 
