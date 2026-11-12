@@ -145,7 +145,7 @@ export const createEndpointResponseActionsSkill = (
     id: ID,
     name: NAME,
     basePath: BASE_PATH,
-    description: `List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, and look up a previously dispatched response action by ID. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use ${troubleshootingSkillName}.`,
+    description: `List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, look up a previously dispatched response action by ID, and write the closing incident summary of a containment. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use ${troubleshootingSkillName}.`,
     content: getSystemInstructions(troubleshootingSkillName),
     referencedContent: [
       {
