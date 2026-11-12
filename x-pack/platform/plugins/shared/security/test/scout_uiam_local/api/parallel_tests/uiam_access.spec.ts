@@ -135,6 +135,9 @@ apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.server
           }
         );
         expect(invalidateResponse).toHaveStatusCode(200);
+        expect(invalidateResponse.body).toStrictEqual(
+          expect.objectContaining({ invalidated_api_keys: [apiKeyId], error_count: 0 })
+        );
       }
     }
   );
