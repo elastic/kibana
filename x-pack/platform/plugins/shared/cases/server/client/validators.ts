@@ -39,6 +39,18 @@ export const validateDuplicatedKeysInRequest = ({
   }
 };
 
+const BUILTIN_LABELS_BY_KEY = new Map<string, string>(
+  OBSERVABLE_TYPES_BUILTIN.map(({ key, label }) => [key, label])
+);
+
+/**
+ * An override of a built-in type has no label, or the label that a read fills in.
+ * A client can send the label of a read back. The write path removes it.
+ */
+const isBuiltinOverride = ({ key, label }: { key: string; label?: string }): boolean =>
+  BUILTIN_LABELS_BY_KEY.has(key) &&
+  (label === undefined || label === BUILTIN_LABELS_BY_KEY.get(key));
+
 /**
  * Throws an error if the request has observable types with duplicated labels.
  */
@@ -48,7 +60,8 @@ export const validateDuplicatedObservableTypesInRequest = ({
   requestFields?: Array<{ label?: string; key: string }>;
 }) => {
   const requestFields = allRequestFields.filter(
-    (item): item is { label: string; key: string } => item.label !== undefined
+    (item): item is { label: string; key: string } =>
+      item.label !== undefined && !isBuiltinOverride(item)
   );
   const extractLabelFromItem = (item: { label: string }) => item.label.toLowerCase();
   const extractKeyFromItem = (item: { key: string }) => item.key.toLowerCase();
@@ -109,7 +122,7 @@ export const validateObservableTypePathsInRequest = ({
     valuePattern?: string;
   }>;
 }) => {
-  const builtinKeys = new Set(OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key));
+  const builtinKeys = new Set(BUILTIN_LABELS_BY_KEY.keys());
   const overrideKeys = new Set<string>();
   const errors: string[] = [];
 
@@ -120,7 +133,7 @@ export const validateObservableTypePathsInRequest = ({
       errors.push(`custom observable type ${key} needs a label`);
     }
 
-    if (isBuiltin && label === undefined) {
+    if (isBuiltinOverride({ key, label })) {
       if (overrideKeys.has(key)) {
         errors.push(`built-in observable type ${key} has more than one entry`);
       }
@@ -141,7 +154,9 @@ export const validateObservableTypePathsInRequest = ({
     }
   });
 
-  const customTypesCount = requestFields.filter(({ label }) => label !== undefined).length;
+  const customTypesCount = requestFields.filter(
+    (entry) => entry.label !== undefined && !isBuiltinOverride(entry)
+  ).length;
   if (customTypesCount > MAX_CUSTOM_OBSERVABLE_TYPES) {
     errors.push(`the maximum of custom observable types is ${MAX_CUSTOM_OBSERVABLE_TYPES}`);
   }
