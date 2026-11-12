@@ -11,9 +11,12 @@ import {
   ChangeHistoryModal,
   ChangeHistoryProvider,
   type ChangeHistoryAdapter,
+  type ChangeHistoryCompareMode,
 } from '@kbn/change-history-ui';
 import { RULE_CHANGE_HISTORY_SCOPE } from './constants';
 import { renderRuleChangeHistoryJsonPreview } from './rule_change_history_json_preview';
+
+const DEFAULT_COMPARE_MODE: ChangeHistoryCompareMode = { type: 'vs_previous' };
 
 export interface RuleChangeHistoryProviderProps {
   ruleId: string;
@@ -45,6 +48,7 @@ export const RuleChangeHistoryProvider = ({
       renderPreview={renderRuleChangeHistoryJsonPreview}
       labels={{ previewTitle: ruleName }}
       scope={RULE_CHANGE_HISTORY_SCOPE}
+      defaultCompareMode={DEFAULT_COMPARE_MODE}
       features={{
         compare: true,
         restore: canRestore,
