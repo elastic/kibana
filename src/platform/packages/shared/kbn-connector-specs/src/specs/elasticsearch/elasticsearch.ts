@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec_ui';
-import { callEsApi, esApiKeyHeaderSchema } from './elasticsearch_api';
+import { callEsApi, EsApiError, esApiKeyHeaderSchema } from './elasticsearch_api';
 import {
   EsqlInputSchema,
   GetClusterInfoInputSchema,
@@ -237,16 +237,24 @@ export const Elasticsearch: ConnectorSpec = {
       defaultMessage: 'Verifies the connection by fetching cluster information',
     }),
     handler: async (ctx) => {
-      const info = await callEsApi<{
-        name?: string;
-        version?: { number?: string };
-        cluster_name?: string;
-      }>(ctx, 'GET', '/');
-      return {
-        message: `Successfully connected to Elasticsearch cluster "${
-          info.cluster_name ?? info.name
-        }" (version: ${info.version?.number ?? 'unknown'}).`,
-      };
+      try {
+        const info = await callEsApi<{
+          name?: string;
+          version?: { number?: string };
+          cluster_name?: string;
+        }>(ctx, 'GET', '/');
+        return {
+          message: `Successfully connected to Elasticsearch cluster "${
+            info.cluster_name ?? info.name
+          }" (version: ${info.version?.number ?? 'unknown'}).`,
+        };
+      } catch (error) {
+        if (!(error instanceof EsApiError) || error.statusCode !== 403) {
+          throw error;
+        }
+      }
+      await callEsApi(ctx, 'GET', '/_security/_authenticate');
+      return { message: 'Successfully authenticated to Elasticsearch.' };
     },
   },
 };

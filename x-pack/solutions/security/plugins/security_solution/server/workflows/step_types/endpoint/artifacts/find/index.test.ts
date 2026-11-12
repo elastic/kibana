@@ -62,6 +62,300 @@ describe('findEndpointArtifactsStepDefinition', () => {
     } as unknown as jest.Mocked<Context['contextManager']>;
   });
 
+  it('reads saved-object IDs in request order without paging or sorting', async () => {
+    const items = [
+      createMockItem({
+        id: 'id/b',
+        item_id: 'b',
+        list_id: 'endpoint_custom_yara_signatures',
+        updated_at: '2024-03-01T00:00:00.000Z',
+      }),
+      createMockItem({ id: 'id-a', item_id: 'a', list_id: 'endpoint_custom_yara_signatures' }),
+    ];
+    items.forEach((body) =>
+      mockContextManager.callKibanaApi.mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body,
+      })
+    );
+
+    mockContextManager.callKibanaApi.mockResolvedValueOnce({
+      status: 200,
+      headers: {},
+      body: { data: [items[1], { ...items[0], name: 'Confirmed name' }], total: 2 },
+    });
+
+    const { output } = await findEndpointArtifactsStepDefinition.handler({
+      input: {
+        list_id: 'endpoint_custom_yara_signatures',
+        saved_object_ids: ['id/b', 'id-a', 'id/b'],
+        offset: 100,
+        limit: 1,
+        fetch_cap: 1,
+        sort: 'updated_at_item_id',
+      },
+      contextManager: mockContextManager,
+    } as unknown as Context);
+
+    expect(mockContextManager.callKibanaApi.mock.calls.map(([request]) => request)).toEqual([
+      {
+        method: 'GET',
+        path: '/api/exception_lists/items?id=id%2Fb&namespace_type=agnostic',
+        headers: { 'elastic-api-version': '2023-10-31' },
+      },
+      {
+        method: 'GET',
+        path: '/api/exception_lists/items?id=id-a&namespace_type=agnostic',
+        headers: { 'elastic-api-version': '2023-10-31' },
+      },
+      {
+        method: 'GET',
+        path: `/api/exception_lists/items/_find?${new URLSearchParams({
+          namespace_type: 'agnostic',
+          list_id: 'endpoint_custom_yara_signatures',
+          page: '1',
+          per_page: '2',
+          filter: 'exception-list-agnostic.attributes.item_id:("b" OR "a")',
+        })}`,
+      },
+    ]);
+    expect(output?.items).toEqual([{ ...items[0], name: 'Confirmed name' }, items[1]]);
+    expect(output?.summaries.map(({ id, family }) => ({ id, family }))).toEqual([
+      { id: 'id/b', family: 'custom_yara_signatures' },
+      { id: 'id-a', family: 'custom_yara_signatures' },
+    ]);
+    expect(output?.not_found_ids).toEqual([]);
+    expect(output?.population).toEqual({
+      total: 2,
+      fetched: 2,
+      truncated: false,
+      fetch_unstable: false,
+      unauthorized: false,
+    });
+    expect(output).not.toHaveProperty('next_offset');
+    expect(findEndpointArtifactsOutputSchema.safeParse(output).success).toBe(true);
+  });
+
+  it('encodes commas in candidate item IDs for list confirmation', async () => {
+    const item = createMockItem({ item_id: 'item,1' });
+    mockContextManager.callKibanaApi
+      .mockResolvedValueOnce({ status: 200, headers: {}, body: item })
+      .mockResolvedValueOnce({ status: 200, headers: {}, body: { data: [item], total: 1 } });
+
+    const { output } = await findEndpointArtifactsStepDefinition.handler({
+      input: { list_id: 'endpoint_trusted_apps', saved_object_ids: [item.id] },
+      contextManager: mockContextManager,
+    } as unknown as Context);
+
+    const request = mockContextManager.callKibanaApi.mock.calls[1][0];
+    const filter = new URL(`http://localhost${request.path}`).searchParams.get('filter');
+    expect(filter).toBe('exception-list-agnostic.attributes.item_id:("item\\u002c1")');
+    expect(filter).not.toContain(',');
+    expect(output?.items).toEqual([item]);
+  });
+
+  it('rejects without partial output when a saved-object read returns 500', async () => {
+    mockContextManager.callKibanaApi
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body: createMockItem({ id: 'found' }),
+      })
+      .mockRejectedValueOnce(
+        new KibanaApiCallError({
+          status: 500,
+          message: 'Internal Server Error',
+          headers: {},
+          body: {},
+        })
+      );
+
+    await expect(
+      findEndpointArtifactsStepDefinition.handler({
+        input: { list_id: 'endpoint_trusted_apps', saved_object_ids: ['found', 'failed'] },
+        contextManager: mockContextManager,
+      } as unknown as Context)
+    ).rejects.toThrow(ExecutionError);
+    expect(mockContextManager.callKibanaApi).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports missing and other-list saved-object IDs without discarding found items', async () => {
+    const item = createMockItem({ id: 'found' });
+    mockContextManager.callKibanaApi
+      .mockRejectedValueOnce(
+        new KibanaApiCallError({ status: 404, message: 'Not Found', headers: {}, body: {} })
+      )
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body: createMockItem({ id: 'wrong-list', list_id: 'endpoint_event_filters' }),
+      })
+      .mockResolvedValueOnce({ status: 200, headers: {}, body: item })
+      .mockResolvedValueOnce({ status: 200, headers: {}, body: { data: [item], total: 1 } });
+
+    const { output } = await findEndpointArtifactsStepDefinition.handler({
+      input: {
+        list_id: 'endpoint_trusted_apps',
+        saved_object_ids: ['missing', 'wrong-list', 'found'],
+      },
+      contextManager: mockContextManager,
+    } as unknown as Context);
+
+    expect(output?.items).toEqual([item]);
+    expect(output?.not_found_ids).toEqual(['missing', 'wrong-list']);
+    expect(mockContextManager.callKibanaApi).toHaveBeenCalledTimes(4);
+    expect(mockContextManager.callKibanaApi).toHaveBeenLastCalledWith({
+      method: 'GET',
+      path: `/api/exception_lists/items/_find?${new URLSearchParams({
+        namespace_type: 'agnostic',
+        list_id: 'endpoint_trusted_apps',
+        page: '1',
+        per_page: '1',
+        filter: 'exception-list-agnostic.attributes.item_id:("item-1")',
+      })}`,
+    });
+    expect(output?.population).toEqual({
+      total: 1,
+      fetched: 1,
+      truncated: false,
+      fetch_unstable: false,
+      unauthorized: false,
+    });
+  });
+
+  it.each([403, 400])('confirms found items after a foreign read returns %i', async (status) => {
+    const item = createMockItem({ id: 'found' });
+    mockContextManager.callKibanaApi
+      .mockRejectedValueOnce(
+        new KibanaApiCallError({ status, message: 'Denied', headers: {}, body: {} })
+      )
+      .mockResolvedValueOnce({ status: 200, headers: {}, body: item })
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body: { data: [item, createMockItem({ id: 'foreign' })], total: 2 },
+      });
+
+    const { output } = await findEndpointArtifactsStepDefinition.handler({
+      input: { list_id: 'endpoint_trusted_apps', saved_object_ids: ['foreign', 'found'] },
+      contextManager: mockContextManager,
+    } as unknown as Context);
+
+    expect(mockContextManager.callKibanaApi).toHaveBeenCalledTimes(3);
+    expect(output?.items).toEqual([item]);
+    expect(output?.not_found_ids).toEqual(['foreign']);
+    expect(output?.unauthorized).toBe(false);
+  });
+
+  it.each([200, 403, 400, 404])(
+    'uses confirmation %i to resolve candidate visibility',
+    async (status) => {
+      mockContextManager.callKibanaApi.mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body: createMockItem({ id: 'id' }),
+      });
+      if (status === 200) {
+        mockContextManager.callKibanaApi.mockResolvedValueOnce({
+          status,
+          headers: {},
+          body: { data: [], total: 0 },
+        });
+      } else {
+        mockContextManager.callKibanaApi.mockRejectedValueOnce(
+          new KibanaApiCallError({ status, message: 'Confirmation failed', headers: {}, body: {} })
+        );
+      }
+
+      const result = findEndpointArtifactsStepDefinition.handler({
+        input: { list_id: 'endpoint_trusted_apps', saved_object_ids: ['id'] },
+        contextManager: mockContextManager,
+      } as unknown as Context);
+      if (status === 400) {
+        await expect(result).rejects.toThrow(ExecutionError);
+      } else {
+        const { output } = await result;
+        expect(output).toEqual({
+          items: [],
+          summaries: [],
+          not_found_ids: status === 403 ? [] : ['id'],
+          unauthorized: status === 403,
+          population: {
+            total: 0,
+            fetched: 0,
+            truncated: false,
+            fetch_unstable: false,
+            unauthorized: status === 403,
+          },
+        });
+      }
+      expect(mockContextManager.callKibanaApi).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it.each([{ policy_id: 'policy-1' }, { os: 'windows' }])(
+    'rejects saved-object lookup combined with %o before reading',
+    async (filter) => {
+      await expect(
+        findEndpointArtifactsStepDefinition.handler({
+          input: { list_id: 'endpoint_trusted_apps', saved_object_ids: ['id'], ...filter },
+          contextManager: mockContextManager,
+        } as unknown as Context)
+      ).rejects.toMatchObject({ type: 'ValidationError' });
+      expect(mockContextManager.callKibanaApi).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([{ item_ids: [] }, { search: '' }])(
+    'reads saved-object IDs with empty filter %o',
+    async (filter) => {
+      mockContextManager.callKibanaApi
+        .mockRejectedValueOnce(
+          new KibanaApiCallError({ status: 404, message: 'Not Found', headers: {}, body: {} })
+        )
+        .mockResolvedValueOnce({ status: 200, headers: {}, body: { data: [], total: 0 } });
+      const { output } = await findEndpointArtifactsStepDefinition.handler({
+        input: { list_id: 'endpoint_trusted_apps', saved_object_ids: ['id'], ...filter },
+        contextManager: mockContextManager,
+      } as unknown as Context);
+      expect(mockContextManager.callKibanaApi).toHaveBeenNthCalledWith(1, {
+        method: 'GET',
+        path: '/api/exception_lists/items?id=id&namespace_type=agnostic',
+        headers: { 'elastic-api-version': '2023-10-31' },
+      });
+      expect(mockContextManager.callKibanaApi).toHaveBeenLastCalledWith({
+        method: 'GET',
+        path: '/api/exception_lists/items/_find?namespace_type=agnostic&list_id=endpoint_trusted_apps&page=1&per_page=1',
+      });
+      expect(output?.not_found_ids).toEqual(['id']);
+    }
+  );
+
+  it.each([undefined, null, []])(
+    'uses find for saved_object_ids=%j with filters',
+    async (savedObjectIds) => {
+      mockContextManager.callKibanaApi.mockResolvedValue({
+        status: 200,
+        headers: {},
+        body: { data: [], total: 0 },
+      });
+      const { output } = await findEndpointArtifactsStepDefinition.handler({
+        input: {
+          list_id: 'endpoint_trusted_apps',
+          saved_object_ids: savedObjectIds,
+          search: 'app',
+          item_ids: ['item-1'],
+        },
+        contextManager: mockContextManager,
+      } as unknown as Context);
+      const request = mockContextManager.callKibanaApi.mock.calls[0][0];
+      expect(request.path).toContain('/api/exception_lists/items/_find?');
+      expect(new URL(`http://localhost${request.path}`).searchParams.get('search')).toBe('app');
+      expect(output?.not_found_ids).toEqual([]);
+    }
+  );
+
   it('queries exactly one list per call with default paging and agnostic namespace', async () => {
     const item1 = createMockItem({ item_id: 'item-1' });
     mockContextManager.callKibanaApi.mockResolvedValue({
@@ -527,6 +821,7 @@ describe('findEndpointArtifactsStepDefinition', () => {
         unauthorized: true,
       },
       next_offset: null,
+      not_found_ids: [],
       unauthorized: true,
     });
   });
@@ -561,6 +856,7 @@ describe('findEndpointArtifactsStepDefinition', () => {
         unauthorized: false,
       },
       next_offset: null,
+      not_found_ids: [],
       unauthorized: false,
     });
   });
@@ -692,7 +988,7 @@ describe('findEndpointArtifacts summary bounds', () => {
       createMockItem({ name: 'n'.repeat(300), description: 'd'.repeat(2000) }),
     ]);
 
-    expect(summary.name).toHaveLength(128);
+    expect(summary.name).toHaveLength(256);
     expect(summary.name_truncated).toBe(true);
     expect(summary.description).toHaveLength(256);
     expect(summary.description_truncated).toBe(true);
@@ -749,6 +1045,17 @@ describe('findEndpointArtifacts summary bounds', () => {
     expect(summary.tags_truncated).toBeUndefined();
     expect(summary.name_truncated).toBeUndefined();
     expect(summary.description_truncated).toBeUndefined();
+  });
+
+  it('computes disabled from full tags even when the marker is not in the summary', async () => {
+    const tags = ['one', 'two', 'three', 'four', 'five', 'disabled'];
+    const [disabled, enabled] = await runFindSummaries([
+      createMockItem({ item_id: 'disabled', tags }),
+      createMockItem({ item_id: 'enabled', tags: tags.slice(0, 5) }),
+    ]);
+    expect(disabled.disabled).toBe(true);
+    expect(disabled.tags).not.toContain('disabled');
+    expect(enabled.disabled).toBe(false);
   });
 
   it('computes kind all from the full tag set even when policy:all is past the fifth tag', async () => {

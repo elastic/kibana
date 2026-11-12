@@ -31,7 +31,7 @@ import type {
   GroupPanelRenderer,
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
