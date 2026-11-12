@@ -352,20 +352,22 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     );
   });
 
-  it('searches the facts that name an entity of the batch, and none for a batch without entities', () => {
+  it('searches the facts that name an entity of the batch, other than the user, and none for a batch without such entities', () => {
     const engine = createWorkflowLiquidEngine();
     const clauses = String(findStep(batchSteps(), 'mentions').with?.mention_clauses);
     const quoted = { ...lyon, title: 'Lyon "Presqu\'île"' };
+    const user = { id: 'entity-user--user', type: 'entity.user', title: 'User' };
     const mentionsOf = (items: Array<Record<string, unknown>>) =>
       JSON.parse(engine.parseAndRenderSync(clauses, { foreach: { item: items } }));
 
-    expect(mentionsOf([bob, fact, quoted])).toEqual([
+    expect(mentionsOf([user, bob, fact, quoted])).toEqual([
       { match_phrase: { title: 'Bob' } },
       { match_phrase: { content: 'Bob' } },
       { match_phrase: { title: quoted.title } },
       { match_phrase: { content: quoted.title } },
     ]);
     expect(mentionsOf([fact])).toEqual([{ match_none: {} }]);
+    expect(mentionsOf([user, fact])).toEqual([{ match_none: {} }]);
 
     const bool = findStep(batchSteps(), 'read_facts').with?.query?.bool ?? {};
     expect(
