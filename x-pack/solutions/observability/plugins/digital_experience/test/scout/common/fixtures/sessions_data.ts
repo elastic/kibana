@@ -277,6 +277,16 @@ export const removeSessionsTask = async (kbnClient: KbnClient) => {
   }
 };
 
+/** Goes back to the kibana.yml session summaries settings. */
+export const resetSessionsSettings = async (kbnClient: KbnClient) => {
+  await kbnClient.request({
+    method: 'PUT',
+    path: '/internal/digital_experience/sessions/settings',
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+    body: {},
+  });
+};
+
 const deleteSessionsIndices = async (esClient: EsClient) => {
   // Test clusters refuse wildcard deletes (`action.destructive_requires_name`), so by name.
   const indices = Object.keys(

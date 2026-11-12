@@ -62,7 +62,7 @@ jest.mock('../../services/sessions/enable_sessions', () => ({
 
 type Endpoint = keyof typeof sessionsRouteRepository;
 
-const settings = { frequency: '1m' };
+const settings = { frequency: '1m', concurrency: 2 };
 
 const browserStatus: SessionsStatus = {
   installed: true,
@@ -141,7 +141,7 @@ const runHandler = (
     context: { core: Promise.resolve(coreContext) },
     request,
     logger,
-    sessionsSettings: settings,
+    getSessionsSettings: async () => settings,
     getSessionsServices: async () => services,
     sessionsSetUpBackoff,
     isServerless: true,

@@ -36,6 +36,7 @@ import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { SessionsFilters } from './components/sessions_filters';
 import { SessionsKpis } from './components/sessions_kpis';
+import { SessionsSettingsButton } from './components/sessions_settings_button';
 import {
   EnableSessionsPrompt,
   SessionsFreshness,
@@ -171,12 +172,15 @@ function SessionsList({
   serviceName,
   source,
   status,
+  canManage,
   onRefreshStatus,
   headerAction,
 }: {
   serviceName: string;
   source: ApplicationSource;
   status: SessionsStatus;
+  /** Whether the user can set sessions up, and so change their settings. */
+  canManage: boolean;
   onRefreshStatus: () => void;
   /** Shown beside how fresh the sessions are. */
   headerAction?: ReactNode;
@@ -268,7 +272,17 @@ function SessionsList({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <TimeRangePicker onRefresh={refreshAll} />
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {canManage && (
+              <EuiFlexItem grow={false}>
+                {/* A changed frequency changes when sessions count as behind. */}
+                <SessionsSettingsButton onSaved={onRefreshStatus} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <TimeRangePicker onRefresh={refreshAll} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -381,6 +395,7 @@ export function SessionsTab({
         serviceName={serviceName}
         source={source}
         status={status}
+        canManage={canManage}
         onRefreshStatus={refresh}
         headerAction={
           canManage && !status.disabled ? (

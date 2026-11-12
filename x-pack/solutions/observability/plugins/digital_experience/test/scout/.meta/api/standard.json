@@ -1,5 +1,5 @@
 {
-  "sha1": "e2ca361c6543863e25a538706667f3ddbace2cd1",
+  "sha1": "5c3e97a34b3269b0e8a28f50a63bf3ebe1802489",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -296,7 +296,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 221,
+        "line": 227,
         "column": 32
       }
     },
@@ -310,7 +310,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 221,
+        "line": 227,
         "column": 32
       }
     },
@@ -324,7 +324,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 221,
+        "line": 227,
         "column": 32
       }
     },
@@ -338,7 +338,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 221,
+        "line": 227,
         "column": 32
       }
     },
@@ -352,7 +352,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 221,
+        "line": 227,
         "column": 32
       }
     },
@@ -366,7 +366,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 221,
+        "line": 227,
         "column": 32
       }
     },
@@ -867,6 +867,48 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_enable.spec.ts",
         "line": 119,
         "column": 14
+      }
+    },
+    {
+      "id": "174cbaee3887102-e3061db65ec42fc",
+      "title": "Digital Experience session summaries settings lets a user who manages sessions in every space read and save them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_settings.spec.ts",
+        "line": 30,
+        "column": 42
+      }
+    },
+    {
+      "id": "174cbaee3887102-7eb421cd45eed23",
+      "title": "Digital Experience session summaries settings refuses settings out of bounds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_settings.spec.ts",
+        "line": 58,
+        "column": 29
+      }
+    },
+    {
+      "id": "174cbaee3887102-83d989ad524eba6",
+      "title": "Digital Experience session summaries settings refuses a user who can only read Digital Experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_settings.spec.ts",
+        "line": 71,
+        "column": 40
       }
     },
     {

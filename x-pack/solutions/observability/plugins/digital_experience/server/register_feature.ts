@@ -17,6 +17,7 @@ import {
 } from '../common/feature';
 import { SAVED_VIEW_TYPE } from '../common/saved_views';
 import { ALL_SESSIONS_INDEX_PATTERN } from '../common/sessions';
+import { SESSIONS_SETTINGS_SO_TYPE } from './saved_objects';
 
 /** The saved object type of the share plugin's short URLs. */
 const SHORT_URL_TYPE = 'url';
@@ -55,7 +56,8 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
         name: i18n.translate('xpack.digitalExperience.featureRegistry.sessionsSubFeatureName', {
           defaultMessage: 'Sessions',
         }),
-        // The summaries task and index serve every space, so only grant this in all spaces.
+        // The summaries tasks, their settings and indices serve every space, so only grant this in
+        // all spaces.
         requireAllSpaces: true,
         privilegesTooltip: i18n.translate(
           'xpack.digitalExperience.featureRegistry.sessionsSubFeatureTooltip',
@@ -80,7 +82,8 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
                 includeIn: 'all',
                 api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
                 ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions],
-                savedObject: { all: [], read: [] },
+                // The settings routes read and write the summaries tasks' settings as the user.
+                savedObject: { all: [SESSIONS_SETTINGS_SO_TYPE], read: [] },
               },
             ],
           },

@@ -41,6 +41,16 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   DISABLE_SESSIONS: 'disableSessions',
   /** The user keeps sessions on after asking to turn them off. */
   CANCEL_DISABLE_SESSIONS: 'cancelDisableSessions',
+  /** The user opens the session summaries settings. */
+  OPEN_SESSIONS_SETTINGS: 'openSessionsSettings',
+  /** The user saves the session summaries settings. */
+  SAVE_SESSIONS_SETTINGS: 'saveSessionsSettings',
+  /** The user changes a session summaries setting before saving it. */
+  CHANGE_SESSIONS_SETTING: 'changeSessionsSetting',
+  /** The user picks the session summaries settings of kibana.yml. */
+  RESET_SESSIONS_SETTINGS: 'resetSessionsSettings',
+  /** The user closes the session summaries settings without saving. */
+  CANCEL_SESSIONS_SETTINGS: 'cancelSessionsSettings',
   /** The user opens the sessions list narrowed to what they clicked, e.g. a browser. */
   VIEW_SESSIONS: 'viewSessions',
   /** The user opens the full list behind a summary, e.g. every error from the Overview. */
@@ -183,4 +193,11 @@ export const SESSIONS_EBT_ELEMENTS = {
   RAIL_HIDE: 'sessionsRailHide',
   RAIL_EDIT_FILTERS: 'sessionsRailEditFilters',
   RAIL_PAGE: 'sessionsRailPage',
+  SETTINGS: 'sessionsSettings',
+  SETTINGS_SAVE: 'sessionsSettingsSave',
+  SETTINGS_CANCEL: 'sessionsSettingsCancel',
+  SETTINGS_DEFAULTS: 'sessionsSettingsDefaults',
+  SETTINGS_FREQUENCY: 'sessionsSettingsFrequency',
+  SETTINGS_CONCURRENCY: 'sessionsSettingsConcurrency',
+  SETTINGS_RETRY: 'sessionsSettingsRetry',
 } as const;

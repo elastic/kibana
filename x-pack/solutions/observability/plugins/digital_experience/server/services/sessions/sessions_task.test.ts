@@ -547,16 +547,11 @@ describe('registerSessionsTask', () => {
     const core = coreMock.createSetup();
     const logger = loggingSystemMock.createLogger();
     const taskManager = taskManagerMock.createSetup();
-    registerSessionsTask({
-      platform,
-      core,
-      logger,
-      taskManager,
-      settings: { frequency: '1m', concurrency: 3 },
-    });
+    const getSettings = jest.fn().mockResolvedValue({ frequency: '1m', concurrency: 2 });
+    registerSessionsTask({ platform, core, logger, taskManager, getSettings });
     const definitions: TaskDefinitionRegistry =
       taskManager.registerTaskDefinitions.mock.calls[0][0];
-    return { core, definition: definitions[platform.taskType] };
+    return { core, getSettings, definition: definitions[platform.taskType] };
   };
 
   beforeEach(() => {
@@ -571,7 +566,8 @@ describe('registerSessionsTask', () => {
   it('registers a task that a stuck query cannot hold for long', () => {
     const { definition } = setup();
 
-    // Registered with a concurrency of 3, about 150 MB of queries, so it claims an extra large share.
+    // Its settings run 2 queries at once, but the app can raise that to 4 without a restart, about
+    // 200 MB of queries, so it always claims an extra large share.
     expect(definition).toEqual(
       expect.objectContaining({ timeout: '5m', cost: TaskCost.ExtraLarge })
     );
@@ -641,11 +637,35 @@ describe('registerSessionsTask', () => {
       signal
     );
     expect(summarizeSessions).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: scopedClient, signal, concurrency: 3 })
+      expect.objectContaining({ esClient: scopedClient, signal, concurrency: 2 })
     );
     expect(result).toEqual({
       state: expect.objectContaining({ version: SESSIONS_VERSION, lastError: null }),
     });
+  });
+
+  it('reads its settings at the start of every run, so saved ones apply from the next', async () => {
+    const { definition, getSettings } = setup();
+    const runner = () =>
+      definition
+        .createTaskRunner(
+          taskManagerMock.createRunContext({
+            taskInstance: taskManagerMock.createTask({
+              state: caughtUpState,
+              schedule: { interval: '1m' },
+            }),
+            fakeRequest: httpServerMock.createKibanaRequest(),
+          })
+        )
+        .run();
+
+    expect(await runner()).not.toHaveProperty('schedule');
+    getSettings.mockResolvedValue({ frequency: '5m', concurrency: 4 });
+    const result = await runner();
+
+    expect(getSettings).toHaveBeenCalledTimes(2);
+    expect(summarizeSessions).toHaveBeenLastCalledWith(expect.objectContaining({ concurrency: 4 }));
+    expect(result).toEqual(expect.objectContaining({ schedule: { interval: '5m' } }));
   });
 
   it('reads nothing without an API key', async () => {
@@ -704,7 +724,7 @@ describe('scheduleSessionsTask', () => {
       platform: BROWSER_SESSIONS_PLATFORM,
       taskManager,
       request,
-      settings: { frequency: '5m' },
+      settings: { frequency: '5m', concurrency: 2 },
     });
 
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
@@ -726,7 +746,7 @@ describe('scheduleSessionsTask', () => {
       platform: MOBILE_SESSIONS_PLATFORM,
       taskManager,
       request: httpServerMock.createKibanaRequest(),
-      settings: { frequency: '1m' },
+      settings: { frequency: '1m', concurrency: 2 },
     });
 
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
@@ -744,7 +764,7 @@ describe('scheduleSessionsTask', () => {
         platform: BROWSER_SESSIONS_PLATFORM,
         taskManager,
         request: httpServerMock.createKibanaRequest(),
-        settings: { frequency: '1m' },
+        settings: { frequency: '1m', concurrency: 2 },
       })
     ).rejects.toThrow('unable to grant an API key');
   });

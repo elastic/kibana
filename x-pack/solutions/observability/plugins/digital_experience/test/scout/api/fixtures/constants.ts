@@ -89,3 +89,5 @@ export const withQuery = (
 
 /** The Overview route of `OTEL_APPS.shop`. */
 export const OVERVIEW_PATH = `${APPLICATIONS_PATH}/otel-shop/overview`;
+
+export const SESSIONS_SETTINGS_PATH = 'internal/digital_experience/sessions/settings';
