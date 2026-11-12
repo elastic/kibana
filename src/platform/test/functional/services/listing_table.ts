@@ -12,6 +12,7 @@ import {
   CONTENT_LIST_TEST_SUBJECTS,
   getContentListToolbarSubjects,
   getContentListSelectionBarSubjects,
+  getContentListUserOptionSubj,
 } from '@kbn/content-list-common';
 import { FtrService } from '../ftr_provider_context';
 
@@ -41,6 +42,13 @@ const TABLE_LOADING_SELECTOR = [
   // Fallback for listings that render a bare EuiBasicTable with no own signal.
   '.euiBasicTable-loading',
 ].join(', ');
+/**
+ * Pass to {@link ListingTableService.selectUsers} to toggle the "no creator"
+ * option. Each framework spells that option differently; this maps to both.
+ */
+export const NO_CREATOR = 'no-creator';
+const NO_CREATOR_SPELLING = { legacy: 'null', contentList: '__no_creator__' };
+
 const CONTENT_LIST_SEARCH_BOX = TOOLBAR_SUBJECTS.searchBox;
 const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
 const CONTENT_LIST_CREATED_BY_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.createdByFilter;
@@ -235,6 +243,9 @@ export class ListingTableService extends FtrService {
 
   /**
    * Toggles users in either the legacy or Content List Created by filter.
+   *
+   * Takes usernames, not display names, on both frameworks. Pass
+   * {@link NO_CREATOR} for the "no creator" option.
    */
   public async selectUsers(...userNames: string[]): Promise<void> {
     const isLegacy = await this.isLegacyVariant(
@@ -245,7 +256,8 @@ export class ListingTableService extends FtrService {
     if (isLegacy) {
       await this.userPopoverToggle.open();
       for (const userName of userNames) {
-        await this.testSubjects.click(`userProfileSelectableOption-${userName}`);
+        const key = userName === NO_CREATOR ? NO_CREATOR_SPELLING.legacy : userName;
+        await this.testSubjects.click(`userProfileSelectableOption-${key}`);
       }
       await this.userPopoverToggle.close();
       await this.waitUntilTableIsLoaded();
@@ -254,20 +266,8 @@ export class ListingTableService extends FtrService {
 
     await this.testSubjects.click(CONTENT_LIST_CREATED_BY_FILTER_BUTTON);
     for (const userName of userNames) {
-      await this.retry.try(async () => {
-        const list = await this.testSubjects.find(`${CONTENT_LIST_CREATED_BY_FILTER_BUTTON}-list`);
-        const options = await list.findAllByCssSelector('li[role="option"]', 0);
-        for (const option of options) {
-          // EUI sets the avatar's `aria-label` to the full name; the option's own text
-          // also carries the facet count, so it can't be compared directly.
-          const [avatar] = await option.findAllByCssSelector('[aria-label]', 0);
-          if (avatar && (await avatar.getAttribute('aria-label')) === userName) {
-            await option.click();
-            return;
-          }
-        }
-        throw new Error(`Created by option "${userName}" was not found.`);
-      });
+      const key = userName === NO_CREATOR ? NO_CREATOR_SPELLING.contentList : userName;
+      await this.testSubjects.click(getContentListUserOptionSubj('createdBy', key));
     }
     await this.testSubjects.click(CONTENT_LIST_CREATED_BY_FILTER_BUTTON);
     await this.waitUntilTableIsLoaded();

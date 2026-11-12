@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
+import { NO_CREATOR } from '@kbn/test-suites-src/functional/services/listing_table';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -109,19 +110,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('can filter by created_by', async () => {
       await listingTable.expectItemsCount('dashboard', 20);
-      await listingTable.selectUsers(USER_FULL_NAME_1);
+      await listingTable.selectUsers(USERNAME_1);
       await listingTable.expectItemsCount('dashboard', 1);
       expect(await listingTable.getAllItemsNames()).to.eql([DASHBOARD_NAME]);
 
       // Unselect the user, then select "No creator".
-      await listingTable.selectUsers(USER_FULL_NAME_1);
+      await listingTable.selectUsers(USERNAME_1);
       await listingTable.expectItemsCount('dashboard', 20);
-      await listingTable.selectUsers('No creator');
+      await listingTable.selectUsers(NO_CREATOR);
       expect(await listingTable.getAllItemsNames()).not.to.contain(DASHBOARD_NAME);
       // Unselect "No creator", then select the user.
-      await listingTable.selectUsers('No creator');
+      await listingTable.selectUsers(NO_CREATOR);
       await listingTable.expectItemsCount('dashboard', 20);
-      await listingTable.selectUsers(USER_FULL_NAME_1);
+      await listingTable.selectUsers(USERNAME_1);
       await listingTable.expectItemsCount('dashboard', 1);
     });
 
