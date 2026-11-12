@@ -11,6 +11,7 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { isByRefLensConfig } from '../common/transforms/utils';
 import { LENS_DASHBOARD_APP_TYPE } from '../common/constants';
+import { lensStateComparison } from '../common/state_comparison';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
@@ -30,6 +31,7 @@ export function registerLensEmbeddableTransformsForDashboardApp(
     getSchema: (getDrilldownsSchema) => {
       return builder.isEnabled ? getLensPanelSchema(getDrilldownsSchema) : undefined;
     },
+    stateComparison: lensStateComparison,
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
       if (isByRefLensConfig(config)) return;
 

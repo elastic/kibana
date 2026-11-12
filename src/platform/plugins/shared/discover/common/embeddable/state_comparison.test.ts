@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { runComparator } from '@kbn/presentation-publishing';
-import { getDiscoverSessionEmbeddableComparators } from './get_search_embeddable_comparators';
+import { areComparatorsEqual, runComparator } from '@kbn/presentation-publishing';
+import { discoverSessionEmbeddableStateComparison } from './state_comparison';
+import type { DiscoverSessionEmbeddableState } from './types';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
-describe('getDiscoverSessionEmbeddableComparators', () => {
+describe('discoverSessionEmbeddableStateComparison', () => {
   const language = 'kql' as const;
   const baseTab = {
     type: DiscoverTabType.Default as const,
@@ -29,46 +30,35 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
     view_mode: VIEW_MODE.DOCUMENT_LEVEL,
   };
 
-  it('returns by-reference comparators when not by-value', () => {
-    const c = getDiscoverSessionEmbeddableComparators(false, false);
-    expect('ref_id' in c && c.ref_id).toBe('skip');
-    expect('selected_tab_id' in c && c.selected_tab_id).toBe('referenceEquality');
-    expect('overrides' in c && typeof c.overrides).toBe('function');
+  const { comparators } = discoverSessionEmbeddableStateComparison;
+
+  it('compares by-reference keys by reference', () => {
+    expect(comparators.ref_id).toBe('referenceEquality');
+    expect(comparators.selected_tab_id).toBe('referenceEquality');
+    expect(typeof comparators.overrides).toBe('function');
   });
 
-  it('skips selected_tab_id when tab comparators should be skipped', () => {
-    const c = getDiscoverSessionEmbeddableComparators(false, true);
-    expect('ref_id' in c && c.ref_id).toBe('skip');
-    expect('selected_tab_id' in c && c.selected_tab_id).toBe('skip');
-    expect('overrides' in c && typeof c.overrides).toBe('function');
+  it('compares selected_tab_id by reference', () => {
+    expect(runComparator(comparators.selected_tab_id, undefined, undefined, 'x', 'x')).toBe(true);
+    expect(runComparator(comparators.selected_tab_id, undefined, undefined, 'x', 'y')).toBe(false);
   });
 
-  it('treats selected_tab_id as always equal when skipped', () => {
-    const c = getDiscoverSessionEmbeddableComparators(false, true);
-    expect(
-      'selected_tab_id' in c &&
-        runComparator(c.selected_tab_id, undefined, undefined, 'tab-a', 'tab-b')
-    ).toBe(true);
-  });
+  describe('mode changes', () => {
+    const byValue = { tabs: [baseTab] };
+    const byReference = { ref_id: 'session', overrides: {} };
 
-  it('compares selected_tab_id by reference when not skipped', () => {
-    const c = getDiscoverSessionEmbeddableComparators(false, false);
-    expect(
-      'selected_tab_id' in c && runComparator(c.selected_tab_id, undefined, undefined, 'x', 'x')
-    ).toBe(true);
-    expect(
-      'selected_tab_id' in c && runComparator(c.selected_tab_id, undefined, undefined, 'x', 'y')
-    ).toBe(false);
+    it.each([
+      { name: 'saving a by-value panel to the library', last: byValue, current: byReference },
+      { name: 'unlinking from the library', last: byReference, current: byValue },
+    ])('detects $name', ({ last, current }) => {
+      expect(areComparatorsEqual<DiscoverSessionEmbeddableState>(comparators, last, current)).toBe(
+        false
+      );
+    });
   });
 
   describe('tabs comparator', () => {
-    const getTabsComparator = () => {
-      const c = getDiscoverSessionEmbeddableComparators(true, false);
-      if (!('tabs' in c) || typeof c.tabs !== 'function') {
-        throw new Error('expected tabs function comparator');
-      }
-      return c.tabs;
-    };
+    const getTabsComparator = () => comparators.tabs;
 
     it('treats tab arrays as equal when each tab is deeply equal', () => {
       const cmp = getTabsComparator();
@@ -99,13 +89,7 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
   });
 
   describe('overrides comparator', () => {
-    const getOverridesComparator = () => {
-      const c = getDiscoverSessionEmbeddableComparators(false, false);
-      if (!('overrides' in c) || typeof c.overrides !== 'function') {
-        throw new Error('expected overrides function comparator');
-      }
-      return c.overrides;
-    };
+    const getOverridesComparator = () => comparators.overrides;
 
     it('treats {} and { sort: [] } as equal (default sort is empty)', () => {
       const cmp = getOverridesComparator();

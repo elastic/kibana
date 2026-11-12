@@ -232,6 +232,8 @@ describe('Serialization utils', () => {
       expect(Object.keys(deserializedState)).toContain('savedObjectId');
       expect(deserializedState.savedObjectId).toBe('savedSearch');
       expect(deserializedState.title).toEqual('test panel title');
+      expect(deserializedState.selectedTabId).toBe('tab-1');
+      expect(deserializedState.isSelectedTabImplicit).toBe(true);
     });
 
     test('by reference with panel overwrites', async () => {
@@ -291,6 +293,7 @@ describe('Serialization utils', () => {
       });
       expect(deserializedState.savedObjectId).toEqual('savedSearch');
       expect(deserializedState.selectedTabId).toEqual('tab-2');
+      expect(deserializedState.isSelectedTabImplicit).toBe(false);
       // Attributes should come from tab-2
       expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
@@ -637,6 +640,31 @@ describe('Serialization utils', () => {
           ref_id: 'test-id',
         });
       });
+
+      test.each([
+        { selectedTabId: 'tab-1', isSelectedTabImplicit: true, expected: undefined },
+        { selectedTabId: 'tab-1', isSelectedTabImplicit: false, expected: 'tab-1' },
+        { selectedTabId: 'tab-2', isSelectedTabImplicit: true, expected: 'tab-2' },
+      ])(
+        'serializes selected_tab_id as $expected for $selectedTabId when implicit is $isSelectedTabImplicit',
+        ({ selectedTabId, isSelectedTabImplicit, expected }) => {
+          const serializedState = serializeState({
+            uuid,
+            initialState: {
+              tabs: [mockTab('tab-1', 'Tab 1'), mockTab('tab-2', 'Tab 2')],
+            },
+            savedSearch: savedSearch as Parameters<typeof serializeState>[0]['savedSearch'],
+            serializeTitles: jest.fn(),
+            serializeTimeRange: jest.fn(),
+            serializeDynamicActions: jest.fn(),
+            savedObjectId: 'test-id',
+            selectedTabId,
+            isSelectedTabImplicit,
+          });
+
+          expect(serializedState).toMatchObject({ ref_id: 'test-id', selected_tab_id: expected });
+        }
+      );
     });
   });
 
@@ -662,5 +690,27 @@ describe('Serialization utils', () => {
         'legacy-session-id'
       );
     });
+
+    test.each([
+      { selectedTabId: undefined, isSelectedTabImplicit: true },
+      { selectedTabId: 'tab-1', isSelectedTabImplicit: false },
+    ])(
+      'deserialize by-ref with selectedTabId $selectedTabId is implicit: $isSelectedTabImplicit',
+      async ({ selectedTabId, isSelectedTabImplicit }) => {
+        discoverServiceMock.savedSearch.getDiscoverSession = jest
+          .fn()
+          .mockResolvedValue(
+            mockDiscoverSession([mockTab('tab-1', 'Tab 1'), mockTab('tab-2', 'Tab 2')])
+          );
+
+        const deserialized = await deserializeState({
+          serializedState: { savedObjectId: 'legacy-session-id', selectedTabId },
+          discoverServices: discoverServiceMock,
+        });
+
+        expect(deserialized.selectedTabId).toBe('tab-1');
+        expect(deserialized.isSelectedTabImplicit).toBe(isSelectedTabImplicit);
+      }
+    );
   });
 });

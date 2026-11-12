@@ -12,6 +12,12 @@ import { diffComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
+export const approximationComparators: StateComparators<
+  Pick<DashboardState, 'esql_approximation'>
+> = {
+  esql_approximation: (a, b) => Boolean(a) === Boolean(b),
+};
+
 export function initializeApproximationManager(initialState: DashboardState) {
   const isApproximate$ = new BehaviorSubject<boolean | undefined>(initialState.esql_approximation);
 
@@ -20,10 +26,6 @@ export function initializeApproximationManager(initialState: DashboardState) {
       isApproximate$.next(value);
     }
   }
-
-  const comparators: StateComparators<Pick<DashboardState, 'esql_approximation'>> = {
-    esql_approximation: (a, b) => Boolean(a) === Boolean(b),
-  };
 
   const getState = (): Pick<DashboardState, 'esql_approximation'> => ({
     esql_approximation: isApproximate$.value,
@@ -49,14 +51,14 @@ export function initializeApproximationManager(initialState: DashboardState) {
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) => {
             return diffComparators(
-              comparators,
+              approximationComparators,
               { esql_approximation: lastSavedState.esql_approximation ?? false },
               latestState
             );
           })
         );
       },
-      comparators,
+      comparators: approximationComparators,
       getState,
       reset: (lastSavedState: DashboardState) => {
         setEsqlApproximation(lastSavedState.esql_approximation ?? false);

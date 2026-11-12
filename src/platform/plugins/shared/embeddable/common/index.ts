@@ -8,6 +8,7 @@
  */
 
 export type { DrilldownTransforms } from './drilldowns/types';
+export { drilldownsComparators } from './drilldowns/drilldowns_comparators';
 
 export type { EmbeddableTransforms } from '../server';
 
