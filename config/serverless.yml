@@ -277,6 +277,8 @@ uiSettings:
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
+# TEMPORARY (benchmark deploy for https://github.com/elastic/kibana/pull/304613, revert before merge): adaptive capacity on every project
+xpack.task_manager.capacity: auto
 xpack.task_manager.metrics_reset_interval: 120000
 
 # Reporting feature
