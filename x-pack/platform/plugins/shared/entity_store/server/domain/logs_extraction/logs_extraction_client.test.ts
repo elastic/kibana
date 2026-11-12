@@ -2851,7 +2851,8 @@ describe('LogsExtractionClient sampling wiring', () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
     });
-    mockLowVolumeSequence({ samples: true });
+    // No base probe: an override is known up front, so the first slice is probed once.
+    mockLowVolumeSequence();
 
     const result = await client.extractLogs('user');
 
@@ -2863,7 +2864,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
     });
-    mockHighVolumeSequence({ samples: true }); // dynamic rate would be ~0.667
+    mockHighVolumeSequence(); // dynamic rate would be ~0.667
 
     const result = await client.extractLogs('user');
 
@@ -3069,7 +3070,6 @@ describe('LogsExtractionClient sampling wiring', () => {
     });
     mockExecuteEsqlQuery
       .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:55:00.000Z', 4))
-      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:55:00.000Z', 4))
       .mockResolvedValueOnce(extractionRow)
       .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
       .mockResolvedValueOnce({ columns: [], values: [] });
@@ -3222,6 +3222,85 @@ describe('LogsExtractionClient sampling wiring', () => {
     });
   });
 
+  describe('preconfigured sampling rate', () => {
+    const BASE_PROBE_LIMIT = REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE;
+
+    it('skips the base probe entirely, probing the first slice once at the scaled size', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionConfig: { samplingRate: 0.2 },
+      });
+      mockLowVolumeSequence();
+
+      await client.extractLogs('user');
+
+      // 50K / 0.2 = 250K raw, probe limit 250K x 0.1. The base probe exists only to discover a
+      // rate that the override already supplies, so it is never issued.
+      expect(probeLimits()[0]).toBe(25_000);
+      expect(probeLimits()).not.toContain(BASE_PROBE_LIMIT);
+    });
+
+    it('leaves an override of 1 unscaled and unsampled', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionConfig: { samplingRate: 1 },
+      });
+      mockHighVolumeSequence();
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      for (const limit of probeLimits()) {
+        expect(limit).toBe(BASE_PROBE_LIMIT);
+      }
+      for (const query of extractionQueries()) {
+        expect(query).not.toContain('SAMPLE');
+      }
+    });
+
+    it('keeps an interrupted slice on its persisted rate when the override has since changed', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
+        nonPriorityLogExtractionState: {
+          checkpointTimestamp: '2025-01-15T11:50:00.000Z',
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: null,
+          sliceEndTimestamp: '2025-01-15T11:54:30.000Z',
+          sliceSamplingRate: 0.2,
+        },
+      });
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      // The slice was paged under 0.2 and must finish under it: re-sampling the remainder at the
+      // new 0.5 would draw its later pages from a different population than its earlier ones.
+      expect(extractionQueries()[0]).toContain('| SAMPLE 0.2');
+      expect(probeLimits()[0]).toBe(25_000);
+    });
+
+    it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
+      '%s mode ignores the override and never scales',
+      async (mode) => {
+        const { client } = createSamplingContext(mode, {
+          nonPriorityLogExtractionConfig: { samplingRate: 0.2 },
+        });
+        mockHighVolumeSequence();
+
+        await client.extractLogs('user');
+
+        for (const limit of probeLimits()) {
+          expect(limit).toBe(BASE_PROBE_LIMIT);
+        }
+        for (const query of extractionQueries()) {
+          expect(query).not.toContain('SAMPLE');
+        }
+      }
+    );
+  });
+
   describe('force (manual window) runs', () => {
     const staleMidSliceState = {
       nonPriorityLogExtractionState: {
@@ -3340,7 +3419,7 @@ describe('LogsExtractionClient sampling wiring', () => {
         nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
       });
       const { probabilityRecord } = spySampleMetrics();
-      mockLowVolumeSequence({ samples: true });
+      mockLowVolumeSequence();
 
       await client.extractLogs('user');
 

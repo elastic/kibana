@@ -24,7 +24,7 @@ import {
   supportsNonPrioritySampling,
   type EntityDefinitionOptions,
 } from '../../../common/domain/definitions/registry';
-import { resolveSamplingRate } from './sampling';
+import { clampSamplingRateOverride, resolveSamplingRate } from './sampling';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
 import {
   buildLogPaginationCursorProbeEsql,
@@ -830,6 +830,23 @@ export class LogsExtractionClient {
         maxLogsPerWindow,
         resumeSamplingRate
       );
+    }
+
+    // An operator-supplied rate is known before any probe runs, so the base probe that exists only
+    // to discover the rate is skipped and every slice, the first included, is probed once at the
+    // scaled size. Seeded after the resume branch so a slice interrupted under an earlier rate
+    // keeps the one persisted with its bounds, and only later slices pick up a changed override.
+    if (samplingEligible && pinnedSamplingRate === undefined && samplingRateOverride != null) {
+      const overrideRate = clampSamplingRateOverride(samplingRateOverride);
+      // An override of 1 emits no SAMPLE stage, so it is left unpinned and nothing is scaled.
+      if (overrideRate < 1) {
+        pinnedSamplingRate = overrideRate;
+        scaledMaxLogsPerPage = scaleMaxLogsPerPageForRate(
+          maxLogsPerPage,
+          maxLogsPerWindow,
+          overrideRate
+        );
+      }
     }
 
     try {
