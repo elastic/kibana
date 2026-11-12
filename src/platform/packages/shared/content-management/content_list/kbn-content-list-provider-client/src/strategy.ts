@@ -317,6 +317,20 @@ export const filterItems = (
 };
 
 /**
+ * Parses a date string, returning `undefined` when it is absent or unparseable.
+ * An Invalid Date passes `?.` and `instanceof Date`, then throws `RangeError`
+ * the first time a consumer serialises it — `undefined` is already handled.
+ */
+const parseDate = (value?: string): Date | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+};
+
+/**
  * Transforms a `UserContentCommonSchema` item to `ContentListItem`.
  *
  * This is applied only to paginated results for performance.
@@ -354,7 +368,7 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
     title: item.attributes?.title ?? '',
     description: item.attributes?.description,
     type: item.type,
-    updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+    updatedAt: parseDate(item.updatedAt),
     tags: extractTagIds(item.references),
     createdAt: item.createdAt,
     createdBy: item.createdBy,

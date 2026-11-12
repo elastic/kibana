@@ -138,6 +138,17 @@ describe('createClientStrategy', () => {
       });
     });
 
+    it('normalises an unparseable updatedAt to undefined instead of an Invalid Date', async () => {
+      const mockFindItems = createMockFindItems([
+        { ...createMockItem('bad-date'), updatedAt: 'not-a-date' },
+      ]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      const result = await findItems(createParams());
+
+      expect(result.items[0].updatedAt).toBeUndefined();
+    });
+
     it('handles empty results', async () => {
       const mockFindItems = createMockFindItems([]);
       const { findItems } = createClientStrategy(mockFindItems);
