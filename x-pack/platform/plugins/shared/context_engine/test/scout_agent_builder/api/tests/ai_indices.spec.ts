@@ -214,6 +214,43 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
             expect(dreamingResponse.body).toStrictEqual({ dreaming });
           }
         );
+
+        await apiTest.step(
+          'stores a maintenance config, rejecting one out of bounds or with nothing to maintain',
+          async () => {
+            const withMaintenance = {
+              ...dreaming,
+              maintenance: { enabled: true, mode: 'apply', neighbors: 8 },
+            };
+            const putResponse = await apiClient.put(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+              body: withMaintenance,
+            });
+            expect(putResponse).toHaveStatusCode(200);
+            expect(putResponse.body).toStrictEqual({ dreaming: withMaintenance });
+
+            const outOfBounds = await apiClient.put(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+              body: { ...dreaming, maintenance: { enabled: true, neighbors: 50 } },
+            });
+            expect(outOfBounds).toHaveStatusCode(400);
+
+            const nothingToMaintain = await apiClient.put(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+              body: { enabled: false, maintenance: { enabled: true } },
+            });
+            expect(nothingToMaintain).toHaveStatusCode(400);
+
+            const getResponse = await apiClient.get(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+            });
+            expect(getResponse.body).toStrictEqual({ dreaming: withMaintenance });
+          }
+        );
       } finally {
         await apiClient.delete(path, { headers, responseType: 'json' });
         await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });

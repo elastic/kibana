@@ -87,6 +87,50 @@ export interface DreamingRelationshipType {
   description?: string;
 }
 
+export const DEFAULT_MAINTENANCE_INTERVAL = '24h';
+export const DEFAULT_MAINTENANCE_NEIGHBORS = 5;
+export const MAX_MAINTENANCE_NEIGHBORS = 20;
+export const DEFAULT_MAINTENANCE_SWEEP_SIZE = 200;
+export const MAX_MAINTENANCE_SWEEP_SIZE = 1000;
+export const DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE = 0.1;
+
+export const MAINTENANCE_MODES = ['report', 'apply'] as const;
+/** `report` lists the changes maintenance would make; `apply` makes them. */
+export type MaintenanceMode = (typeof MAINTENANCE_MODES)[number];
+
+/** How an AI index's memory is kept tidy: duplicates merged, contradictions and stale items fixed. */
+export interface DreamingMaintenanceConfig {
+  /** Whether maintenance runs on its schedule. */
+  enabled: boolean;
+  /** Defaults to `report`. */
+  mode?: MaintenanceMode;
+  /** How often maintenance runs. Defaults to {@link DEFAULT_MAINTENANCE_INTERVAL}. */
+  schedule?: { interval: string };
+  /** How many similar items each reviewed item is compared with. */
+  neighbors?: number;
+  /** How many unchanged items each run also reviews, so every item is reviewed in time. */
+  sweep_size?: number;
+  /** The largest share of reviewed items one run may tombstone; over it, the run writes nothing. */
+  max_tombstone_share?: number;
+}
+
+export type ResolvedMaintenanceConfig = Required<Omit<DreamingMaintenanceConfig, 'schedule'>> & {
+  schedule: { interval: string };
+};
+
+/** The maintenance config with its defaults filled in. */
+export const maintenanceConfigOf = (
+  maintenance: DreamingMaintenanceConfig | undefined
+): ResolvedMaintenanceConfig => ({
+  enabled: maintenance?.enabled ?? false,
+  mode: maintenance?.mode ?? 'report',
+  schedule: { interval: maintenance?.schedule?.interval ?? DEFAULT_MAINTENANCE_INTERVAL },
+  neighbors: maintenance?.neighbors ?? DEFAULT_MAINTENANCE_NEIGHBORS,
+  sweep_size: maintenance?.sweep_size ?? DEFAULT_MAINTENANCE_SWEEP_SIZE,
+  max_tombstone_share:
+    maintenance?.max_tombstone_share ?? DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE,
+});
+
 /**
  * What an AI index learns from its memories: facts, entities, and the relationships between them.
  * A kind with no types configured is not built.
@@ -109,6 +153,8 @@ export interface AiIndexDreamingConfig {
    * also link to the entities they are about, with the built-in `about` type.
    */
   relationships?: DreamingRelationshipType[] | null;
+  /** Missing: maintenance does not run. */
+  maintenance?: DreamingMaintenanceConfig;
 }
 
 /** The parts of a dreaming config that say what it builds. */
@@ -203,6 +249,20 @@ export const validateDreamingTypes = ({
   const duplicateRelationship = findDuplicate(relationshipTypes);
   if (duplicateRelationship !== undefined) {
     return `Relationship type '${duplicateRelationship}' is listed twice.`;
+  }
+  return undefined;
+};
+
+/** What is wrong with a config as a whole, or `undefined` when nothing is. */
+export const validateDreamingConfig = (
+  config: DreamingTypesConfig & Pick<AiIndexDreamingConfig, 'maintenance'>
+): string | undefined => {
+  const typesError = validateDreamingTypes(config);
+  if (typesError !== undefined) {
+    return typesError;
+  }
+  if (config.maintenance?.enabled && !dreamingBuildsAnything(config)) {
+    return 'Maintenance needs at least one fact or entity type to maintain.';
   }
   return undefined;
 };
