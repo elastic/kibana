@@ -10,7 +10,12 @@
 import type { EmulatorControl } from '@kbn/connector-emulate';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../../scout/ui/fixtures';
-import { PAUSE_SECONDS, runWorkflow } from '../fixtures/connector_workflow';
+import type { ConnectorStep } from '../fixtures/connector_workflow';
+import {
+  getConnectorWorkflowYaml,
+  PAUSE_SECONDS,
+  runWorkflow,
+} from '../fixtures/connector_workflow';
 import {
   connectToEmulator,
   crawlIdOf,
@@ -20,7 +25,21 @@ import {
   setFixtures,
   VENDOR,
 } from '../fixtures/emulator';
-import { FIRECRAWL_STEP_NAMES, getFirecrawlWorkflowYaml } from '../fixtures/firecrawl_workflow';
+
+const STEPS: readonly ConnectorStep[] = [
+  ['scrape', 'firecrawl.scrape', { url: 'https://example.com', onlyMainContent: true }],
+  ['search', 'firecrawl.search', { query: 'kibana', limit: 3 }],
+  ['map', 'firecrawl.map', { url: 'https://example.com', search: 'docs', limit: 5 }],
+  ['crawl', 'firecrawl.crawl', { url: 'https://example.com', limit: 2 }],
+  // The crawl's id goes from the crawl step to the one that asks for its status.
+  ['get_crawl_status', 'firecrawl.getCrawlStatus', { id: '{{ steps.crawl.output.id }}' }],
+  [
+    'crawl_and_wait',
+    'firecrawl.crawlAndWait',
+    { url: 'https://example.com', pollIntervalMs: 1000, maxWaitMs: 30000 },
+  ],
+];
+const STEP_NAMES = STEPS.map(([name]) => name);
 
 /**
  * Runs a workflow with a step per action of the Firecrawl connector from the Workflows app, with the
@@ -75,12 +94,17 @@ test.describe(
       const resultOf = await runWorkflow(
         { page, pageObjects },
         {
-          yaml: getFirecrawlWorkflowYaml(connectorId, { pauseSeconds: PAUSE_SECONDS }),
-          stepNames: FIRECRAWL_STEP_NAMES,
+          yaml: getConnectorWorkflowYaml({
+            title: 'Firecrawl',
+            connectorId,
+            steps: STEPS,
+            pauseSeconds: PAUSE_SECONDS,
+          }),
+          stepNames: STEP_NAMES,
         }
       );
 
-      for (const step of FIRECRAWL_STEP_NAMES) {
+      for (const step of STEP_NAMES) {
         await expect(await pageObjects.workflowExecution.getStep(step)).toHaveCount(1);
       }
 
