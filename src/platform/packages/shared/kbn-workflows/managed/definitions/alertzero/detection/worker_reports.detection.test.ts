@@ -118,7 +118,7 @@ describe('Rule Tuning and Rule Coverage metadata patches', () => {
 });
 
 describe('Rule Tuning outcome reports', () => {
-  describe('the sweep (rule_tuning_worker.yaml)', () => {
+  describe('the sweep (tuning_sweep.yaml)', () => {
     const steps = topLevelSteps(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.yaml);
     const report = stepNamed(steps, 'report_worker_run_completed');
 
@@ -369,7 +369,7 @@ describe('Rule Tuning outcome reports', () => {
     });
   });
 
-  describe('the review (rule_tuning_review.yaml)', () => {
+  describe('the review (tuning_review.yaml)', () => {
     const steps = topLevelSteps(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.yaml);
     // The manual entry gate ends the run in its `dismissed` and `expired` arms, so each arm
     // reports the review itself, right before the step that stops the run.
@@ -710,7 +710,7 @@ describe('Rule Tuning outcome reports', () => {
 });
 
 describe('Rule Coverage outcome reports', () => {
-  describe('the sweep (coverage_worker.yaml)', () => {
+  describe('the sweep (coverage_sweep.yaml)', () => {
     const steps = topLevelSteps(ALERTZERO_COVERAGE_WORKER_WORKFLOW.yaml);
     const report = stepNamed(steps, 'report_worker_run_completed');
 

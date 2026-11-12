@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DETECTION_RULE_COVERAGE_YAML from './detection_rule_coverage.yaml';
+import DETECTION_RULE_COVERAGE_YAML from './coverage.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from '../constants';
 import {

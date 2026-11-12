@@ -116,12 +116,12 @@ consts:
   # id. Remove once they carry one (elastic/security-team#20422).
   author_name: "Rule Tuning worker"
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
-  # consts in rule_tuning_worker.yaml.
+  # consts in tuning_sweep.yaml.
   analysis_window_days: 7
   preview_invocation_count: 2
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
-  # the same alerts into the same review; consts.reviewed_tag in rule_tuning_worker.yaml
+  # the same alerts into the same review; consts.reviewed_tag in tuning_sweep.yaml
   # must match this value.
   reviewed_tag: detection-watch:tuning-reviewed
   dismissed_tag: detection-watch:tuning-dismissed

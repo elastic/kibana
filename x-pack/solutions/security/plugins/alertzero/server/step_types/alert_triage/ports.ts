@@ -34,7 +34,7 @@ const SIGNALS_TAGS_PATH = '/api/detection_engine/signals/tags';
 
 const WORKFLOW_RUN_TASK_TYPE = 'workflow:run';
 
-/** Statuses in which a batch holds or waits for work, as `coverage_worker.yaml` lists them. */
+/** Statuses in which a batch holds or waits for work, as `coverage_sweep.yaml` lists them. */
 const LIVE_STATUSES = [
   'pending',
   'queued',

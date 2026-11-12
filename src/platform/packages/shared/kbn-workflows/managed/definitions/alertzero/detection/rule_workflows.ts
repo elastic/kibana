@@ -8,11 +8,11 @@
  */
 
 import COVERAGE_REVIEW_YAML from './coverage_review.yaml';
-import COVERAGE_WORKER_YAML from './coverage_worker.yaml';
-import RULE_CREATION_YAML from './rule_creation.yaml';
+import RULE_CREATION_YAML from './coverage_rule_creation.yaml';
+import COVERAGE_WORKER_YAML from './coverage_sweep.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
-import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
-import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
+import RULE_TUNING_REVIEW_YAML from './tuning_review.yaml';
+import RULE_TUNING_WORKER_YAML from './tuning_sweep.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
