@@ -56,7 +56,10 @@ const collapse = (
 export interface AveragedRepetitions {
   target: EvaluationScoreDocument[];
   baseline: EvaluationScoreDocument[];
-  /** Examples where one side had more usable repetitions and its extra ones were left out. */
+  /**
+   * Example/evaluator pairs where one side had more usable repetitions and its extra ones were
+   * left out. An example is counted once per evaluator.
+   */
   trimmedExamples: number;
 }
 

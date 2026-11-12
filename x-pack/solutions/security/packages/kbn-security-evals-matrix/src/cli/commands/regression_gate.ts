@@ -352,7 +352,7 @@ export const regressionGateCmd = {
     );
     if (averaged.trimmedExamples > 0) {
       log.warning(
-        `${averaged.trimmedExamples} example(s) had a different number of usable repetitions in the two runs; each was averaged over the count both runs have.`
+        `${averaged.trimmedExamples} example/evaluator score(s) had a different number of usable repetitions in the two runs; each was averaged over the count both runs have.`
       );
     }
 
