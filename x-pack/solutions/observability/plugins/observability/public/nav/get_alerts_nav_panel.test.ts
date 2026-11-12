@@ -353,7 +353,6 @@ describe('getAlertsNavPanel', () => {
 
     it.each([
       ['stack rules read', { stackAlerts: { show: true } }],
-      ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
       ['data set quality', { dataQuality: { show: true } }],
       ['the machine learning app privilege', { navLinks: { ml: true } }],
     ])('shows Alerts and a visible v1 Rules link for %s', (_label, features) => {
@@ -368,6 +367,15 @@ describe('getAlertsNavPanel', () => {
       expect(children).toEqual([{ link: 'observabilityAlerting:rules-v1', title: 'Rules' }]);
       // Its own path already prefix-matches the Classic pages, so it needs no custom active state.
       expect(children?.[0]).not.toHaveProperty('getIsActive');
+    });
+
+    it('hides Alerts and Rules from a security rules user', () => {
+      setCapabilities(core, {
+        securitySolutionRulesV4: { read_rules: true },
+        siem: { show: true },
+      });
+
+      expect(getAlertsNavPanel(core)).toEqual([]);
     });
 
     it('hides Rule Management when the user can open Stack Management Rules but cannot read rules', () => {

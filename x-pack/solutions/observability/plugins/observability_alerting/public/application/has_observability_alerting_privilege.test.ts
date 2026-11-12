@@ -72,7 +72,6 @@ describe('hasObservabilityAlertingCapabilities', () => {
     it.each([
       ['stack rules show', { stackAlerts: { show: true } }],
       ['data set quality show', { dataQuality: { show: true } }],
-      ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
       ['the machine learning app privilege', { navLinks: { ml: true } }],
     ])('returns v1: true for %s', (_label, features) => {
       expect(hasObservabilityAlertingCapabilities(capabilities(features), 'alerts')).toEqual({
@@ -89,6 +88,22 @@ describe('hasObservabilityAlertingCapabilities', () => {
         v2: false,
       });
       expect(hasObservabilityAlertingCapabilities(stackAlertsOnly, 'rules')).toEqual({
+        v1: false,
+        v2: false,
+      });
+    });
+
+    it('returns v1: false for security rules read', () => {
+      const securityRules = capabilities({
+        securitySolutionRulesV4: { read_rules: true },
+        siem: { show: true },
+      });
+
+      expect(hasObservabilityAlertingCapabilities(securityRules, 'alerts')).toEqual({
+        v1: false,
+        v2: false,
+      });
+      expect(hasObservabilityAlertingCapabilities(securityRules, 'rules')).toEqual({
         v1: false,
         v2: false,
       });

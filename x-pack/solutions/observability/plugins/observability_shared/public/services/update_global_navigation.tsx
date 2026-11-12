@@ -18,17 +18,14 @@ import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { OBSERVABILITY_SOLUTION_NAV_LINK_IDS } from '@kbn/rule-data-utils';
 import { casesFeatureId } from '../../common';
 
-/** Capability-based Observability access — pricing tiers do not affect this. */
+/** True when the user can open Observability; nav-link ids match classic rule visibility. */
 export function hasObservabilityCapabilities(capabilities: Capabilities): boolean {
-  const { navLinks } = capabilities;
-  const hasSolutionNavLink = OBSERVABILITY_SOLUTION_NAV_LINK_IDS.some((appId) => navLinks[appId]);
-  /* logs is a special case.
-   * It is not a nav link but still exists as a
-   * Kibana feature privilege with attached rule types */
-  const logs = capabilities.logs?.show;
-  const observabilityAlerts = capabilities.observabilityAlerts?.show;
+  const { navLinks, logs, observabilityAlerts } = capabilities;
+  const hasSolutionNavLink = OBSERVABILITY_SOLUTION_NAV_LINK_IDS.some(
+    (appId) => navLinks[appId] === true
+  );
 
-  return hasSolutionNavLink || Boolean(logs) || Boolean(observabilityAlerts);
+  return hasSolutionNavLink || logs?.show === true || observabilityAlerts?.show === true;
 }
 
 function hasAccessToCases(capabilities: Capabilities): boolean {

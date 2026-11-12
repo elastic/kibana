@@ -10,12 +10,7 @@
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
 export const STACK_ALERTS_ONLY_FEATURE_ID = 'stackAlertsOnly';
 
-/**
- * UI capability on the Stack Rules feature (`stackAlerts`).
- * `hasClassicRulesReadCapability` reads this key to tell Stack Rules apart from
- * Actions and Connectors and Classic Rules Settings, which also grant
- * `triggersActionsRules`.
- */
+/** UI capability `hasClassicRulesReadCapability` reads on the Stack Rules feature. */
 export const STACK_ALERTS_SHOW_UI_CAPABILITY = 'show';
 export const ES_QUERY_ID = '.es-query';
 export const INDEX_THRESHOLD_ID = '.index-threshold';

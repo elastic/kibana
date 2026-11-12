@@ -590,7 +590,7 @@ test.describe(
       );
     });
 
-    test('shows Alerts and classic Rules when the user has security rules read', async ({
+    test('hides Alerts and Rules when the user only has security rules read', async ({
       browserAuth,
       pageObjects,
       kbnClient,
@@ -606,7 +606,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ securitySolutionRulesV4: ['read'] }),
-        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+        []
       );
     });
 

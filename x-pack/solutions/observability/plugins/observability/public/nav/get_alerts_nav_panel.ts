@@ -22,6 +22,7 @@ import {
   hasClassicAlertsReadCapability,
   hasClassicRulesReadCapability,
 } from '@kbn/rule-data-utils';
+import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
 
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
@@ -58,11 +59,13 @@ const getRulesIsActive: NonNullable<PanelOpenerChildDefinition['getIsActive']> =
 const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean =>
   core.application.capabilities.management?.insightsAndAlerting?.[capabilityId] === true;
 
-/**
- * Same gate as the Alerts deep link and app guard (`hasClassicAlertsReadCapability`).
- */
+/** Gate for the Alerting panel Alerts link. */
 export const canReadV1Alerts = (core: CoreStart): boolean =>
   hasClassicAlertsReadCapability(core.application.capabilities);
+
+/** Gate for the observability-overview Alerts table link. */
+export const canListClassicAlertsTable = (core: CoreStart): boolean =>
+  hasObservabilityCapabilities(core.application.capabilities);
 
 /** Gate for the Classic rules link in the Alerting panel. */
 export const canReadV1Rules = (core: CoreStart): boolean =>
@@ -96,7 +99,11 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
     });
   }
 
-  if (isV2Enabled && canReadV1Alerts(core) && shouldShowV1ObservabilityAlertsTable(core)) {
+  if (
+    isV2Enabled &&
+    canListClassicAlertsTable(core) &&
+    shouldShowV1ObservabilityAlertsTable(core)
+  ) {
     alertsChildren.push({
       link: ALERTS_LINK,
       title: getObservabilityAlertsLinkTitle(isV2Enabled),

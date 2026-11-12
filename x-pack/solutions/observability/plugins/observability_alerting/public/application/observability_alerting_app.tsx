@@ -26,7 +26,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import { closeAddToCaseModal, createAddToCaseAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { EuiPageSection } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageSection, EuiText } from '@elastic/eui';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { AlertingNavPromo } from '@kbn/observability-plugin/public';
@@ -123,6 +123,36 @@ const useObservabilityRulesTabs = (
 
     return tabs.length > 1 ? tabs : [];
   }, [prepend, selected, showV1, showV2, v2RulesTabNewBadge]);
+
+const ClassicRulesPrivilegesPrompt = () => (
+  <EuiEmptyPrompt
+    data-test-subj="classicRulesPrivilegesPrompt"
+    iconType="lock"
+    color="subdued"
+    title={
+      <h2>
+        {i18n.translate('xpack.observabilityAlerting.rulesPage.privilegesRequiredTitle', {
+          defaultMessage: 'Privileges required',
+        })}
+      </h2>
+    }
+    body={
+      <EuiText size="m">
+        <p>
+          {i18n.translate('xpack.observabilityAlerting.rulesPage.privilegesRequiredBody', {
+            defaultMessage:
+              'To view Rules, you need the following privilege. Contact your administrator to request access.',
+          })}
+        </p>
+        <p>
+          {i18n.translate('xpack.observabilityAlerting.rulesPage.privilegesRequiredPrivilege', {
+            defaultMessage: 'Rules: Read',
+          })}
+        </p>
+      </EuiText>
+    }
+  />
+);
 
 const ClassicRulesV1Route = ({
   coreStart,
@@ -253,14 +283,20 @@ export const ObservabilityAlertingApp = ({
         </Route>
         <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
           <EuiPageSection paddingSize="m">
-            <ClassicRulesV1Route
-              coreStart={coreStart}
-              getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
-              history={history}
-              setBreadcrumbs={setBreadcrumbs}
-              tabs={rulesV1Tabs}
-              showClassicBadge={hasV2Rules}
-            />
+            {rulesTabVisibility.showV1 ? (
+              <ClassicRulesV1Route
+                coreStart={coreStart}
+                getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
+                history={history}
+                setBreadcrumbs={setBreadcrumbs}
+                tabs={rulesV1Tabs}
+                showClassicBadge={hasV2Rules}
+              />
+            ) : rulesTabVisibility.showV2 ? (
+              <Redirect to={OBSERVABILITY_ALERTING_RULES_V2_PATH} />
+            ) : (
+              <ClassicRulesPrivilegesPrompt />
+            )}
           </EuiPageSection>
         </Route>
         <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>

@@ -59,8 +59,6 @@ describe('hasClassicRulesReadCapability', () => {
     ['stack rules show', { stackAlerts: { show: true } }],
     ['the machine learning app privilege', { navLinks: { ml: true } }],
     ['data set quality show', { dataQuality: { show: true } }],
-    ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
-    ['a legacy security rules feature', { securitySolutionRulesV1: { read_rules: true } }],
   ])('returns true for %s', (_label, features) => {
     expect(hasClassicRulesReadCapability(capabilities(features))).toBe(true);
   });
@@ -117,6 +115,18 @@ describe('hasClassicRulesReadCapability', () => {
     expect(hasClassicRulesReadCapability(capabilities({}))).toBe(false);
   });
 
+  it('returns false for security rules, which authorize the siem consumer', () => {
+    expect(
+      hasClassicRulesReadCapability(
+        capabilities({
+          securitySolutionRulesV4: { read_rules: true },
+          siem: { show: true },
+          siemV4: { show: true },
+        })
+      )
+    ).toBe(false);
+  });
+
   it('returns false for alert-only features', () => {
     expect(
       hasClassicRulesReadCapability(capabilities({ observabilityAlerts: { show: true } }))
@@ -142,7 +152,6 @@ describe('hasClassicAlertsReadCapability', () => {
     ['stack rules show', { stackAlerts: { show: true } }],
     ['the machine learning app privilege', { navLinks: { ml: true } }],
     ['data set quality show', { dataQuality: { show: true } }],
-    ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
     ['observability alerts show', { observabilityAlerts: { show: true } }],
     ['stack alerts only show', { stackAlertsOnly: { show: true } }],
   ])('returns true for %s', (_label, features) => {
@@ -163,6 +172,14 @@ describe('hasClassicAlertsReadCapability', () => {
             },
           },
         })
+      )
+    ).toBe(false);
+  });
+
+  it('returns false for security rules read', () => {
+    expect(
+      hasClassicAlertsReadCapability(
+        capabilities({ securitySolutionRulesV4: { read_rules: true }, siem: { show: true } })
       )
     ).toBe(false);
   });
