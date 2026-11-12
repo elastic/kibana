@@ -7,7 +7,7 @@
 
 import React, { Suspense, useState } from 'react';
 import { css, keyframes } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import type { HypothesisTreeInput } from './build_hypothesis_graph';
 import {
   OPEN_HYPOTHESIS_TREE_LABEL,
@@ -88,10 +88,29 @@ export const HypothesisTreeCard = ({
 
   return (
     <>
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="m"
+      <button
+        type="button"
+        css={css`
+          box-sizing: border-box;
+          inline-size: 100%;
+          margin: 0;
+          padding: ${euiTheme.size.m} ${euiTheme.size.base};
+          border: ${euiTheme.border.thin};
+          border-radius: ${euiTheme.size.m};
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          text-align: start;
+          cursor: pointer;
+          &:hover,
+          &:focus-visible {
+            background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+          }
+          &:focus-visible {
+            outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+            outline-offset: -${euiTheme.focus.width};
+          }
+        `}
         onClick={() => setIsOpen(true)}
         aria-label={openHypothesisTreeAriaLabel(description)}
         data-test-subj="investigationHypothesisTreeButton"
@@ -105,11 +124,16 @@ export const HypothesisTreeCard = ({
                 justify-content: center;
                 width: ${euiTheme.size.xl};
                 height: ${euiTheme.size.xl};
-                border-radius: ${euiTheme.border.radius.medium};
+                border-radius: 50%;
                 background: ${euiTheme.colors.backgroundBaseAssistance};
               `}
             >
-              <EuiIcon type="branch" color={euiTheme.colors.textAssistance} aria-hidden={true} />
+              <EuiIcon
+                type="branch"
+                size="m"
+                color={euiTheme.colors.textAssistance}
+                aria-hidden={true}
+              />
             </span>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -122,10 +146,10 @@ export const HypothesisTreeCard = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="chevronSingleRight" color="subdued" aria-hidden={true} />
+            <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </button>
       {isOpen && (
         <Suspense fallback={null}>
           <LazyHypothesisTreeFlyout input={input} onClose={() => setIsOpen(false)} />

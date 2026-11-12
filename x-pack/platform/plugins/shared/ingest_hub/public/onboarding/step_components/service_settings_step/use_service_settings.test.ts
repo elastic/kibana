@@ -1108,6 +1108,33 @@ describe('useServiceSettings — integration name and description', () => {
     expect(result.current.isReady).toBe(false);
   });
 
+  it('is not ready with an invalid condition in agent-based mode', async () => {
+    mockServices([policyService], 'agent_based');
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
+    expect(result.current.conditionErrors).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} == "linux"'));
+    expect(result.current.conditionErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('ignores a condition kept from agent-based mode under managed integration', async () => {
+    mockServices([policyService], 'managed_integration');
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
+
+    expect(result.current.conditionErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
   it('requires a name for ECF-only selections too', () => {
     mockServices([ecfOnlyService]);
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
@@ -1159,6 +1186,50 @@ describe('useServiceSettings — integration name and description', () => {
       expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
         integrationName: 'aws-1',
         description: null,
+      });
+    });
+
+    it('leaves the switch to the deploy, so it stays paired with the namespace', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setNamespace('prod'));
+      act(() => result.current.setDedicatedNamespaceTemplates(true));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment.mock.calls[0][1]).not.toHaveProperty(
+        'dedicatedNamespaceTemplates'
+      );
+    });
+
+    describe('turning the switch off', () => {
+      it('is saved at once on an existing deployment, so reopening it does not turn the switch back on', async () => {
+        withDeployment('dep-1');
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
+
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).toHaveBeenCalledTimes(1);
+        expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+          dedicatedNamespaceTemplates: false,
+        });
+      });
+
+      it('writes nothing before the first deploy has created the record', async () => {
+        withDeployment(undefined);
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
       });
     });
 

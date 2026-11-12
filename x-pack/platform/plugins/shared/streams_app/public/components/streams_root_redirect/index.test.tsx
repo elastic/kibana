@@ -11,24 +11,14 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { StreamsRootRedirect } from '.';
 
 jest.mock('../../hooks/use_streams_privileges');
-jest.mock('../redirect_to', () => ({
-  RedirectTo: ({
-    path,
-    params,
-  }: {
-    path: string;
-    params: { path: { unitId: string; tab: string } };
-  }) => (
-    <div data-test-subj="redirectTo">
-      {path.replace('{unitId}', params.path.unitId).replace('{tab}', params.path.tab)}
-    </div>
-  ),
-}));
 jest.mock('../stream_list_view', () => ({
   StreamListView: () => <div data-test-subj="streamListView" />,
 }));
 jest.mock('../streams_no_access_prompt', () => ({
   StreamsNoAccessPrompt: () => <div data-test-subj="streamsNoAccessPrompt" />,
+}));
+jest.mock('../streams_layout/redirect_to_default_layout_tab', () => ({
+  RedirectToDefaultLayoutTab: () => <div data-test-subj="redirectToDefaultLayoutTab" />,
 }));
 
 const mockAccess = (access: { legacy: boolean; v2: boolean }) =>
@@ -41,7 +31,7 @@ describe('StreamsRootRedirect', () => {
     mockAccess({ legacy: true, v2: true });
     render(<StreamsRootRedirect />);
 
-    expect(screen.getByTestId('redirectTo')).toHaveTextContent('/v2/unit/default/map');
+    expect(screen.getByTestId('redirectToDefaultLayoutTab')).toBeInTheDocument();
   });
 
   it('shows the stream list for a legacy-only user', () => {
