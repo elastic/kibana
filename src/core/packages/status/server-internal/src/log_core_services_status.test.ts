@@ -27,6 +27,11 @@ describe('logCoreStatusChanges', () => {
     summary: 'Avail!',
   };
 
+  const coreStatus = (status: Omit<CoreStatus, 'server'>): CoreStatus => ({
+    ...status,
+    server: serviceAvailable,
+  });
+
   let core$: Subject<CoreStatus>;
   let stop$: Subject<void>;
   let loggerFactory: jest.Mocked<ILoggingSystem>;
@@ -55,22 +60,24 @@ describe('logCoreStatusChanges', () => {
       stop$,
     });
 
-    core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceUnavailable });
-    core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable });
-    core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable });
+    core$.next(coreStatus({ elasticsearch: serviceAvailable, savedObjects: serviceUnavailable }));
+    core$.next(coreStatus({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable }));
+    core$.next(coreStatus({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable }));
 
     await jestDelay();
 
-    expect(l.get).toHaveBeenCalledTimes(3);
+    expect(l.get).toHaveBeenCalledTimes(4);
     expect(l.get).toHaveBeenNthCalledWith(1, 'elasticsearch');
     expect(l.get).toHaveBeenNthCalledWith(2, 'savedObjects');
-    expect(l.get).toHaveBeenNthCalledWith(3, 'savedObjects');
+    expect(l.get).toHaveBeenNthCalledWith(3, 'server');
+    expect(l.get).toHaveBeenNthCalledWith(4, 'savedObjects');
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.error).toHaveBeenCalledTimes(1);
-    expect(l.info).toHaveBeenCalledTimes(2);
+    expect(l.info).toHaveBeenCalledTimes(3);
     expect(l.info).toHaveBeenNthCalledWith(1, 'elasticsearch service is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
-    expect(l.info).toHaveBeenNthCalledWith(2, 'savedObjects service is now available: Avail!');
+    expect(l.info).toHaveBeenNthCalledWith(2, 'server service is now available: Avail!');
+    expect(l.info).toHaveBeenNthCalledWith(3, 'savedObjects service is now available: Avail!');
   });
 
   it('stops logging when the stop$ observable has emitted', async () => {
@@ -80,21 +87,23 @@ describe('logCoreStatusChanges', () => {
       stop$,
     });
 
-    core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceUnavailable });
+    core$.next(coreStatus({ elasticsearch: serviceAvailable, savedObjects: serviceUnavailable }));
     stop$.next();
-    core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable });
-    core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable });
+    core$.next(coreStatus({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable }));
+    core$.next(coreStatus({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable }));
 
     await jestDelay();
 
-    expect(l.get).toHaveBeenCalledTimes(2);
+    expect(l.get).toHaveBeenCalledTimes(3);
     expect(l.get).toHaveBeenNthCalledWith(1, 'elasticsearch');
     expect(l.get).toHaveBeenNthCalledWith(2, 'savedObjects');
+    expect(l.get).toHaveBeenNthCalledWith(3, 'server');
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.error).toHaveBeenCalledTimes(1);
-    expect(l.info).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(2);
     expect(l.info).toHaveBeenNthCalledWith(1, 'elasticsearch service is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
+    expect(l.info).toHaveBeenNthCalledWith(2, 'server service is now available: Avail!');
   });
 
   it('throttles and aggregates messages of plugins that emit too often', async () => {
@@ -106,54 +115,56 @@ describe('logCoreStatusChanges', () => {
     });
 
     // savedObjects remains unavailable, elasticsearch is switching repeatedly
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable });
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceUnavailable, elasticsearch: serviceUnavailable }));
 
     // savedObjects becomes available, elasticsearch keeps switching
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable });
-    core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable });
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceUnavailable }));
+    core$.next(coreStatus({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable }));
 
     // give the 'bufferTime' operator enough time to emit and log
     await jestDelay(1_000);
 
     expect(l.get).toHaveBeenCalledWith('elasticsearch');
     expect(l.get).toHaveBeenCalledWith('savedObjects');
+    expect(l.get).toHaveBeenCalledWith('server');
     expect(l.warn).not.toHaveBeenCalled();
-    expect(l.info).toHaveBeenCalledTimes(4);
+    expect(l.info).toHaveBeenCalledTimes(5);
     expect(l.error).toHaveBeenCalledTimes(3);
     expect(l.error).toHaveBeenNthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
     expect(l.info).toHaveBeenNthCalledWith(1, 'elasticsearch service is now available: Avail!');
+    expect(l.info).toHaveBeenNthCalledWith(2, 'server service is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(
       2,
       'elasticsearch service is now unavailable: Unavail!'
     );
-    expect(l.info).toHaveBeenNthCalledWith(2, 'elasticsearch service is now available: Avail!');
-    expect(l.info).toHaveBeenNthCalledWith(3, 'savedObjects service is now available: Avail!');
+    expect(l.info).toHaveBeenNthCalledWith(3, 'elasticsearch service is now available: Avail!');
+    expect(l.info).toHaveBeenNthCalledWith(4, 'savedObjects service is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(
       3,
       'elasticsearch service is now unavailable: Unavail! (repeated 10 times)'
     );
     expect(l.info).toHaveBeenNthCalledWith(
-      4,
+      5,
       'elasticsearch service is now available: Avail! (repeated 10 times)'
     );
   });
@@ -169,96 +180,128 @@ describe('logCoreStatusChanges', () => {
 
     // elasticsearch service keeps changing status, with different messages each time
     let attempt = 0;
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
-    });
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
-    });
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
+      })
+    );
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceUnavailable, summary: `attempt #${++attempt}` },
+      })
+    );
 
     // give the 'bufferTime' operator enough time to emit and log
     await jestDelay(1_000);
 
     // emit a last message (some time after)
-    core$.next({
-      savedObjects: serviceUnavailable,
-      elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
-    });
+    core$.next(
+      coreStatus({
+        savedObjects: serviceUnavailable,
+        elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
+      })
+    );
 
     expect(l.get).toHaveBeenCalledWith('elasticsearch');
     expect(l.get).toHaveBeenCalledWith('savedObjects');
-    expect(l.info).toHaveBeenCalledTimes(5);
+    expect(l.get).toHaveBeenCalledWith('server');
+    expect(l.info).toHaveBeenCalledTimes(6);
     expect(l.error).toHaveBeenCalledTimes(4);
     expect(l.warn).toHaveBeenCalledTimes(1);
     // the first 3 messages are the max allowed per interval
     expect(l.info).toHaveBeenNthCalledWith(1, 'elasticsearch service is now available: attempt #1');
+    expect(l.info).toHaveBeenNthCalledWith(2, 'server service is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
     expect(l.error).toHaveBeenNthCalledWith(
       2,
       'elasticsearch service is now unavailable: attempt #2'
     );
-    expect(l.info).toHaveBeenNthCalledWith(2, 'elasticsearch service is now available: attempt #3');
+    expect(l.info).toHaveBeenNthCalledWith(3, 'elasticsearch service is now available: attempt #3');
     // the next 4 messages are throttled (emitted after 10ms)
     expect(l.error).toHaveBeenNthCalledWith(
       3,
       'elasticsearch service is now unavailable: attempt #4'
     );
-    expect(l.info).toHaveBeenNthCalledWith(3, 'elasticsearch service is now available: attempt #5');
+    expect(l.info).toHaveBeenNthCalledWith(4, 'elasticsearch service is now available: attempt #5');
     expect(l.error).toHaveBeenNthCalledWith(
       4,
       'elasticsearch service is now unavailable: attempt #6'
     );
-    expect(l.info).toHaveBeenNthCalledWith(4, 'elasticsearch service is now available: attempt #7');
+    expect(l.info).toHaveBeenNthCalledWith(5, 'elasticsearch service is now available: attempt #7');
 
     // these messages exceed the maxThrottledMessages quota, truncated + warning
     expect(l.warn).toHaveBeenNthCalledWith(
@@ -267,7 +310,7 @@ describe('logCoreStatusChanges', () => {
     );
     // and the last message, after the buffered / truncated ones
     expect(l.info).toHaveBeenNthCalledWith(
-      5,
+      6,
       'elasticsearch service is now available: attempt #15'
     );
   });

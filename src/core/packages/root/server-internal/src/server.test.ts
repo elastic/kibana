@@ -55,6 +55,7 @@ import {
 import { createCoreUiamService } from '@kbn/core-security-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import { CriticalError } from '@kbn/core-base-server-internal';
+import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-server';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
@@ -353,6 +354,9 @@ describe('earlyStartHttp', () => {
 
     expect(mockHttpService.start).toHaveBeenCalledTimes(1);
     expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
+    expect(mockElasticsearchService.start.mock.invocationCallOrder[0]).toBeLessThan(
+      mockSavedObjectsService.start.mock.invocationCallOrder[0]
+    );
     expect(mockSavedObjectsService.start.mock.invocationCallOrder[0]).toBeLessThan(
       mockHttpService.start.mock.invocationCallOrder[0]
     );
@@ -365,6 +369,9 @@ describe('earlyStartHttp', () => {
     expect(mockHttpService.start).toHaveBeenCalledTimes(2);
     expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
     expect(mockHttpService.start.mock.invocationCallOrder[0]).toBeLessThan(
+      mockElasticsearchService.start.mock.invocationCallOrder[0]
+    );
+    expect(mockElasticsearchService.start.mock.invocationCallOrder[0]).toBeLessThan(
       mockSavedObjectsService.start.mock.invocationCallOrder[0]
     );
     expect(mockSavedObjectsService.start.mock.invocationCallOrder[0]).toBeLessThan(
@@ -372,6 +379,56 @@ describe('earlyStartHttp', () => {
     );
     expect(logger.get('server').warn).toHaveBeenCalledWith(earlyStartWarning);
   });
+});
+
+test('reports server lifecycle status to the status service', async () => {
+  const nodeServiceContract: InternalNodeServicePreboot = {
+    roles: { migrator: false, ui: true, backgroundTasks: true },
+    roleNames: ['background_tasks', 'ui'],
+  };
+  mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
+  mockNodeService.start.mockReturnValue(nodeServiceContract);
+
+  const seen: ServiceStatus[] = [];
+  const originalSetup = mockStatusService.setup.getMockImplementation();
+  if (!originalSetup) {
+    throw new Error('Expected status service setup mock');
+  }
+  mockStatusService.setup.mockImplementationOnce((deps) => {
+    deps.serverStatus$.subscribe((status) => {
+      seen.push(status);
+    });
+    return originalSetup(deps);
+  });
+
+  const server = new Server(rawConfigService, env, logger);
+  await server.preboot();
+  await server.setup();
+
+  expect(seen).toEqual([
+    {
+      level: ServiceStatusLevels.unavailable,
+      summary: 'Server is initializing',
+      detail: 'Setup phase completed',
+    },
+  ]);
+
+  await server.start();
+
+  expect(seen).toEqual([
+    {
+      level: ServiceStatusLevels.unavailable,
+      summary: 'Server is initializing',
+      detail: 'Setup phase completed',
+    },
+    {
+      level: ServiceStatusLevels.available,
+      summary: 'Server is started',
+      detail: 'Start phase completed',
+    },
+  ]);
+
+  await server.stop();
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {

@@ -22,6 +22,7 @@ const available: ServiceStatus = {
 const availableCoreStatus: CoreStatus = {
   elasticsearch: available,
   savedObjects: available,
+  server: available,
 };
 
 const createSetupContractMock = () => {

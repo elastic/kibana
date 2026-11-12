@@ -40,6 +40,7 @@ const available = {
 const core: CoreStatus = {
   elasticsearch: available,
   savedObjects: available,
+  server: available,
 };
 
 const createHandler = ({

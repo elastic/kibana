@@ -54,7 +54,11 @@ describe('getSummaryStatus', () => {
   it('returns available when all status are available', () => {
     expect(
       getSummaryStatus({
-        serviceStatuses: { elasticsearch: availableService, savedObjects: availableService },
+        serviceStatuses: {
+          elasticsearch: availableService,
+          savedObjects: availableService,
+          server: availableService,
+        },
         pluginStatuses: { a: availablePluginA, b: availablePluginB },
       })
     ).toMatchInlineSnapshot(`
@@ -68,7 +72,11 @@ describe('getSummaryStatus', () => {
   it('returns degraded when the worst status is degraded', () => {
     expect(
       getSummaryStatus({
-        serviceStatuses: { elasticsearch: degradedService, savedObjects: availableService },
+        serviceStatuses: {
+          elasticsearch: degradedService,
+          savedObjects: availableService,
+          server: availableService,
+        },
         pluginStatuses: { a: availablePluginA, b: availablePluginB },
       })
     ).toMatchInlineSnapshot(`
@@ -90,7 +98,11 @@ describe('getSummaryStatus', () => {
   it('returns unavailable when the worst status is unavailable', () => {
     expect(
       getSummaryStatus({
-        serviceStatuses: { elasticsearch: degradedService, savedObjects: availableService },
+        serviceStatuses: {
+          elasticsearch: degradedService,
+          savedObjects: availableService,
+          server: availableService,
+        },
         pluginStatuses: { a: unavailablePluginA, b: unavailablePluginB, c: unavailablePluginC },
       })
     ).toMatchInlineSnapshot(`
@@ -115,7 +127,11 @@ describe('getSummaryStatus', () => {
   it('returns critical when the worst status is critical', () => {
     expect(
       getSummaryStatus({
-        serviceStatuses: { elasticsearch: degradedService, savedObjects: criticalService },
+        serviceStatuses: {
+          elasticsearch: degradedService,
+          savedObjects: criticalService,
+          server: availableService,
+        },
         pluginStatuses: { a: availablePluginA, b: unavailablePluginB },
       })
     ).toMatchInlineSnapshot(`

@@ -57,6 +57,7 @@ const statusInfoCoreStatus: () => Type<StatusInfoCoreStatus> = () =>
       elasticsearch: statusInfoServiceStatus(),
       http: schema.maybe(statusInfoServiceStatus()),
       savedObjects: statusInfoServiceStatus(),
+      server: statusInfoServiceStatus(),
     },
     { meta: { description: 'Statuses of core Kibana services.' } }
   );

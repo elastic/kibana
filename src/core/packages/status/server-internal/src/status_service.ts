@@ -64,6 +64,7 @@ export interface StatusServicePrebootDeps {
 export interface StatusServiceSetupDeps {
   analytics: AnalyticsServiceSetup;
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
+  serverStatus$: Observable<ServiceStatus>;
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
   http: InternalHttpServiceSetup;
@@ -103,6 +104,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     httpRateLimiter,
     metrics,
     savedObjects,
+    serverStatus$,
     environment,
     coreUsageData,
     loggingSystem,
@@ -112,6 +114,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       elasticsearch,
       httpRateLimiter,
       savedObjects,
+      serverStatus$,
     }));
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
@@ -216,22 +219,25 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     elasticsearch,
     httpRateLimiter,
     savedObjects,
+    serverStatus$,
   }: Pick<
     StatusServiceSetupDeps,
-    'elasticsearch' | 'httpRateLimiter' | 'savedObjects'
+    'elasticsearch' | 'httpRateLimiter' | 'savedObjects' | 'serverStatus$'
   >): Observable<CoreStatus> {
     return combineLatest([
       elasticsearch.status$,
       httpRateLimiter.status$,
       savedObjects.status$,
+      serverStatus$,
     ]).pipe(
       map(
-        ([elasticsearchStatus, httpRateLimiterStatus, savedObjectsStatus]) =>
+        ([elasticsearchStatus, httpRateLimiterStatus, savedObjectsStatus, serverStatus]) =>
           omitBy(
             {
               elasticsearch: elasticsearchStatus,
               http: httpRateLimiterStatus,
               savedObjects: savedObjectsStatus,
+              server: serverStatus,
             } as CoreStatus,
             isNil
           ) as CoreStatus

@@ -286,6 +286,14 @@ describe('GET /api/status', () => {
           },
           {
             icon: 'success',
+            id: 'core:server@9.9.9',
+            message: 'Service is working',
+            since: expect.any(String),
+            state: 'green',
+            uiColor: 'success',
+          },
+          {
+            icon: 'success',
             id: 'plugin:a@9.9.9',
             message: 'a is available',
             since: expect.any(String),
@@ -348,6 +356,10 @@ describe('GET /api/status', () => {
             summary: 'Service is working',
           },
           savedObjects: {
+            level: 'available',
+            summary: 'Service is working',
+          },
+          server: {
             level: 'available',
             summary: 'Service is working',
           },

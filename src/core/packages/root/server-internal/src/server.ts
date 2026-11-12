@@ -8,7 +8,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
@@ -35,6 +35,7 @@ import { I18nService } from '@kbn/core-i18n-server-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
 import { UserActivityService } from '@kbn/core-user-activity-server-internal';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
+import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-server';
 import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
@@ -121,6 +122,7 @@ export class Server {
   private readonly dataStreams: DataStreamsService;
   private readonly pubsub: PubSubService;
   private readonly userStorage: UserStorageService;
+  private readonly serverStatus$ = new Subject<ServiceStatus>();
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -141,6 +143,11 @@ export class Server {
     private readonly loggingSystem: ILoggingSystem
   ) {
     const constructorStartUptime = performance.now();
+
+    this.serverStatus$.next({
+      level: ServiceStatusLevels.unavailable,
+      summary: 'Server is initializing',
+    });
 
     this.serviceVersion =
       env.packageInfo.buildFlavor === 'serverless'
@@ -316,6 +323,12 @@ export class Server {
 
       this.coreApp.preboot(corePreboot, uiPlugins);
     }
+
+    this.serverStatus$.next({
+      level: ServiceStatusLevels.unavailable,
+      summary: 'Server is initializing',
+      detail: 'Preboot phase completed',
+    });
     return corePreboot;
   }
 
@@ -433,6 +446,7 @@ export class Server {
     const statusSetup = await this.status.setup({
       analytics: analyticsSetup,
       elasticsearch: elasticsearchServiceSetup,
+      serverStatus$: this.serverStatus$,
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
       environment: environmentSetup,
@@ -523,6 +537,12 @@ export class Server {
     this.registerCoreContext(coreSetup);
     await this.coreApp.setup(coreSetup, uiPlugins);
 
+    this.serverStatus$.next({
+      level: ServiceStatusLevels.unavailable,
+      summary: 'Server is initializing',
+      detail: 'Setup phase completed',
+    });
+
     return coreSetup;
   }
 
@@ -570,17 +590,6 @@ export class Server {
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
 
-    const elasticsearchStart = await this.elasticsearch.start();
-    this.uptimePerStep.elasticsearch = {
-      waitTime: elasticsearchStart.metrics.elasticsearchWaitTime,
-    };
-
-    const dataStreamsStart = await this.dataStreams.start({
-      elasticsearch: elasticsearchStart,
-    });
-
-    const deprecationsStart = this.deprecations.start();
-
     const httpStart = this.http.getStartContract();
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
@@ -617,6 +626,17 @@ export class Server {
       );
       await this.http.start();
     }
+
+    const elasticsearchStart = await this.elasticsearch.start();
+    this.uptimePerStep.elasticsearch = {
+      waitTime: elasticsearchStart.metrics.elasticsearchWaitTime,
+    };
+
+    const dataStreamsStart = await this.dataStreams.start({
+      elasticsearch: elasticsearchStart,
+    });
+
+    const deprecationsStart = this.deprecations.start();
 
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
@@ -718,6 +738,12 @@ export class Server {
     await this.plugins.start(this.coreStart);
 
     await this.http.start();
+
+    this.serverStatus$.next({
+      level: ServiceStatusLevels.available,
+      summary: 'Server is started',
+      detail: 'Start phase completed',
+    });
 
     return this.coreStart;
   }

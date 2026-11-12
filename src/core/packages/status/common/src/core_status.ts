@@ -12,6 +12,7 @@ import type { ServiceStatus } from './service_status';
 interface CoreStatusBase {
   elasticsearch: ServiceStatus;
   savedObjects: ServiceStatus;
+  server: ServiceStatus;
 }
 
 interface CoreStatusWithHttp extends CoreStatusBase {

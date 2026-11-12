@@ -47,6 +47,10 @@ const mockedResponse: StatusResponse = {
         level: 'available',
         summary: 'SavedObjects service has completed migrations and is available',
       },
+      server: {
+        level: 'available',
+        summary: 'Server is started',
+      },
     },
     plugins: {
       plugin1: {
@@ -218,6 +222,16 @@ describe('response processing', () => {
           uiColor: 'success',
         },
         original: mockedResponse.status.core.savedObjects,
+      },
+      {
+        id: 'server',
+        state: {
+          id: 'available',
+          title: 'Green',
+          message: 'Server is started',
+          uiColor: 'success',
+        },
+        original: mockedResponse.status.core.server,
       },
     ]);
   });

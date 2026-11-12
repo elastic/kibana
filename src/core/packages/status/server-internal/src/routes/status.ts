@@ -126,6 +126,7 @@ export const registerStatusRoute = ({
       startWith<CoreStatus>({
         elasticsearch: SERVICE_UNAVAILABLE_NOT_REPORTED,
         savedObjects: SERVICE_UNAVAILABLE_NOT_REPORTED,
+        server: SERVICE_UNAVAILABLE_NOT_REPORTED,
       })
     ),
     status.plugins$.pipe(startWith({})),
@@ -152,7 +153,7 @@ export const registerStatusRoute = ({
         tags: ['api', 'security:acceptJWT', 'oas-tag:system'],
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
         summary: `Get Kibana's current status`,
-        description: `Returns Kibana's overall operational status and a per-service breakdown for Elasticsearch, Saved Objects, and registered plugins. The endpoint is intended for liveness and readiness checks (for example, by Kubernetes probes) and for operators monitoring a Kibana deployment. Unauthenticated callers receive a redacted response that exposes only the overall status level.`,
+        description: `Returns Kibana's overall operational status and a per-service breakdown for Elasticsearch, Saved Objects, the Kibana server, and registered plugins. The endpoint is intended for liveness and readiness checks (for example, by Kubernetes probes) and for operators monitoring a Kibana deployment. Unauthenticated callers receive a redacted response that exposes only the overall status level.`,
         excludeFromRateLimiter: true,
         oasOperationObject: () => path.resolve(__dirname, './status.examples.yaml'),
       },

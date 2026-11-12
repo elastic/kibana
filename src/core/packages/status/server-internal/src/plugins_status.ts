@@ -50,6 +50,7 @@ export class PluginsStatusService {
   private coreStatus: CoreStatus = {
     elasticsearch: { ...defaultStatus },
     savedObjects: { ...defaultStatus },
+    server: { ...defaultStatus },
   };
   private pluginData: PluginData;
   private rootPlugins: PluginName[]; // root plugins are those that do not have any dependencies

@@ -28,6 +28,9 @@ responses:
                   savedObjects:
                     level: available
                     summary: SavedObjects service has completed migrations and is available
+                  server:
+                    level: available
+                    summary: Server is started
                 plugins: {}
               metrics:
                 last_updated: '2026-04-30T12:00:05.000Z'
@@ -72,6 +75,9 @@ responses:
                   savedObjects:
                     level: unavailable
                     summary: SavedObjects service depends on Elasticsearch
+                  server:
+                    level: critical
+                    summary: Server is initializing
                 plugins: {}
               metrics:
                 last_updated: '2026-04-30T12:00:05.000Z'

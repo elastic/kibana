@@ -20,17 +20,24 @@ import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('PluginStatusService', () => {
+  const serverAvailable = {
+    level: ServiceStatusLevels.available,
+    summary: 'server avail',
+  };
   const coreAllAvailable$: Observable<CoreStatus> = of({
     elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
     savedObjects: { level: ServiceStatusLevels.available, summary: 'savedObjects avail' },
+    server: serverAvailable,
   });
   const coreOneDegraded$: Observable<CoreStatus> = of({
     elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
     savedObjects: { level: ServiceStatusLevels.degraded, summary: 'savedObjects degraded' },
+    server: serverAvailable,
   });
   const coreOneCriticalOneDegraded$: Observable<CoreStatus> = of({
     elasticsearch: { level: ServiceStatusLevels.critical, summary: 'elasticsearch critical' },
     savedObjects: { level: ServiceStatusLevels.degraded, summary: 'savedObjects degraded' },
+    server: serverAvailable,
   });
   const pluginDependencies: Map<PluginName, PluginName[]> = new Map([
     ['a', []],

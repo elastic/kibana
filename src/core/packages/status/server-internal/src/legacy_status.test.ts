@@ -50,6 +50,7 @@ describe('calculateLegacyStatus', () => {
       core: {
         elasticsearch: degraded,
         savedObjects: critical,
+        server: available,
       },
       plugins: {
         a: available,
@@ -75,6 +76,14 @@ describe('calculateLegacyStatus', () => {
         since: expect.any(String),
         state: 'red',
         uiColor: 'danger',
+      },
+      {
+        icon: 'success',
+        id: 'core:server@1.1.1',
+        message: 'Available',
+        since: expect.any(String),
+        state: 'green',
+        uiColor: 'success',
       },
       {
         icon: 'success',

@@ -74,6 +74,7 @@ describe('StatusService', () => {
       savedObjects: {
         status$: of(available),
       },
+      serverStatus$: of(available),
       pluginDependencies: new Map(),
       environment: environmentServiceMock.createSetupContract(),
       http: httpServiceMock.createInternalSetupContract(),
@@ -140,12 +141,14 @@ describe('StatusService', () => {
             savedObjects: {
               status$: of(degraded),
             },
+            serverStatus$: of(critical),
           })
         );
         expect(await setup.core$.pipe(first()).toPromise()).toEqual({
           elasticsearch: available,
           http: available,
           savedObjects: degraded,
+          server: critical,
         });
       });
 
@@ -170,16 +173,19 @@ describe('StatusService', () => {
           elasticsearch: available,
           http: available,
           savedObjects: degraded,
+          server: available,
         });
         expect(subResult2).toEqual({
           elasticsearch: available,
           http: available,
           savedObjects: degraded,
+          server: available,
         });
         expect(subResult3).toEqual({
           elasticsearch: available,
           http: available,
           savedObjects: degraded,
+          server: available,
         });
       });
 
@@ -222,6 +228,10 @@ describe('StatusService', () => {
                 "level": degraded,
                 "summary": "This is degraded!",
               },
+              "server": Object {
+                "level": available,
+                "summary": "Available",
+              },
             },
             Object {
               "elasticsearch": Object {
@@ -232,6 +242,10 @@ describe('StatusService', () => {
                 "level": degraded,
                 "summary": "This is degraded!",
               },
+              "server": Object {
+                "level": available,
+                "summary": "Available",
+              },
             },
             Object {
               "elasticsearch": Object {
@@ -239,6 +253,10 @@ describe('StatusService', () => {
                 "summary": "Wow another summary",
               },
               "savedObjects": Object {
+                "level": available,
+                "summary": "Available",
+              },
+              "server": Object {
                 "level": available,
                 "summary": "Available",
               },
@@ -436,6 +454,18 @@ describe('StatusService', () => {
         expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.critical,
           summary: '1 service(s) and 0 plugin(s) are critical: savedObjects',
+        });
+      });
+
+      it('includes the server status in the core summary', async () => {
+        const setup = await service.setup(
+          setupDeps({
+            serverStatus$: of(critical),
+          })
+        );
+        expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.critical,
+          summary: '1 service(s) and 0 plugin(s) are critical: server',
         });
       });
 

@@ -16,11 +16,11 @@ import { waitForManagedWorkflowInstallReadiness } from './wait_for_managed_workf
 
 const makeCoreStatus = (
   elasticsearchLevel: (typeof ServiceStatusLevels)[keyof typeof ServiceStatusLevels]
-): CoreStatus =>
-  ({
-    elasticsearch: { level: elasticsearchLevel, summary: 'test' },
-    savedObjects: { level: ServiceStatusLevels.available, summary: 'test' },
-  } as CoreStatus);
+): CoreStatus => ({
+  elasticsearch: { level: elasticsearchLevel, summary: 'test' },
+  savedObjects: { level: ServiceStatusLevels.available, summary: 'test' },
+  server: { level: ServiceStatusLevels.available, summary: 'test' },
+});
 
 describe('waitForManagedWorkflowInstallReadiness', () => {
   const logger = loggerMock.create();
