@@ -83,6 +83,7 @@ export function ConnectChannelModal({ onClose, onConnected }: ConnectChannelModa
   const { channels, isLoading: isLoadingChannels, isTruncated } = useAvailableChannels();
   const [selected, setSelected] = useState<EuiComboBoxOptionOption<string>>();
   const [searchValue, setSearchValue] = useState('');
+  const [hasMatchingOptions, setHasMatchingOptions] = useState(true);
   const titleId = useGeneratedHtmlId();
 
   const options = useMemo(
@@ -90,9 +91,12 @@ export function ConnectChannelModal({ onClose, onConnected }: ConnectChannelModa
       channels.map(({ channel, displayName }) => ({ label: `#${displayName}`, value: channel })),
     [channels]
   );
+  // A pending search replaces the selection, so Connect never binds a channel the field no longer shows.
+  const isSearching = searchValue.trim().length > 0;
   const typedChannelId = parseSlackChannelInput(searchValue);
-  const channelId = typedChannelId ?? selected?.value;
-  const hasUnparsableInput = searchValue.trim().length > 0 && typedChannelId === undefined;
+  const channelId = isSearching ? typedChannelId : selected?.value;
+  // Filtering the list by name is not an error: only text that matches no channel and is no ID is.
+  const hasUnparsableInput = isSearching && typedChannelId === undefined && !hasMatchingOptions;
   const canBind = !isLoading && channelId !== undefined;
 
   const onCreateOption = (input: string): boolean => {
@@ -162,7 +166,10 @@ export function ConnectChannelModal({ onClose, onConnected }: ConnectChannelModa
               setSelected(next[0]);
               clearFailure();
             }}
-            onSearchChange={setSearchValue}
+            onSearchChange={(value, hasMatches) => {
+              setSearchValue(value);
+              setHasMatchingOptions(hasMatches ?? true);
+            }}
             onCreateOption={onCreateOption}
             customOptionText={i18n.translate(
               'xpack.nightshift.settings.apps.slackChannelCustomOption',

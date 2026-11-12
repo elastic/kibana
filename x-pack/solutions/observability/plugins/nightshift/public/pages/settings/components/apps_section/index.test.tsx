@@ -356,6 +356,42 @@ describe('SlackChannelsSection', () => {
     expect(bindChannel).toHaveBeenCalledWith('C0456');
   });
 
+  it('does not bind the previous channel while a replacement is being typed', async () => {
+    mockUseAvailableChannels.mockReturnValue({
+      channels: [{ channel: 'C0456', displayName: 'alerts' }],
+      isLoading: false,
+      isError: false,
+      isTruncated: false,
+    });
+    setup();
+
+    const input = await openConnectChannel();
+    fireEvent.click(input);
+    fireEvent.click(await screen.findByRole('option', { name: '#alerts' }));
+    const bindBtn = screen.getByTestId('streamsSlackAppBindChannelButton');
+    expect(bindBtn).toBeEnabled();
+
+    fireEvent.change(input, { target: { value: '#nomatch' } });
+    expect(bindBtn).toBeDisabled();
+  });
+
+  it('does not flag a name search that matches an available channel', async () => {
+    mockUseAvailableChannels.mockReturnValue({
+      channels: [{ channel: 'C0456', displayName: 'alerts' }],
+      isLoading: false,
+      isError: false,
+      isTruncated: false,
+    });
+    setup();
+
+    const input = await openConnectChannel();
+    fireEvent.change(input, { target: { value: 'ale' } });
+
+    expect(screen.getByTestId('streamsSlackAppChannelInputHelp')).not.toHaveTextContent(
+      'Enter a channel ID such as'
+    );
+  });
+
   it('hints at entering an id when the available channels were cut short', async () => {
     mockUseAvailableChannels.mockReturnValue({
       channels: [],
