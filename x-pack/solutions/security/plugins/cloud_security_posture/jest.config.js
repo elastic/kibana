@@ -8,7 +8,7 @@
 /** @type {import('@jest/types').Config.InitialOptions} */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/cloud_security_posture'],
   // setupFilesAfterEnv is a list of scripts that are executed after JSDOM is initialized.

@@ -38,6 +38,8 @@ interface HarnessOptions {
   uiamEnabled?: boolean;
   isServerless?: boolean;
   serviceAccountsEnabled?: boolean;
+  /** Whether the Nightshift assistant agent is registered. */
+  assistantEnabled?: boolean;
 }
 
 function createHarness({
@@ -46,6 +48,7 @@ function createHarness({
   uiamEnabled = false,
   isServerless = false,
   serviceAccountsEnabled = false,
+  assistantEnabled = false,
 }: HarnessOptions = {}) {
   const soClient = {
     get: jest
@@ -105,6 +108,7 @@ function createHarness({
     logger,
     config: {},
     agentBuilder: { agents: { getRegistry } },
+    nightshiftInvestigations: { isAssistantEnabled: () => assistantEnabled },
     kibanaVersion: '9.2.0',
     isServerless,
     actions: { registerDynamicConnector, unregisterDynamicConnector, inMemoryConnectors },
@@ -185,8 +189,6 @@ describe('SlackAppService', () => {
         })
       );
 
-      // Read-only, least-privilege: direct ES read on observability signals only (queried as
-      // this key), everything else (Streams, Significant Events, connectors) via Kibana features.
       const { kibana_role_descriptors: descriptors } = grantAsInternalUser.mock.calls[0][1];
       expect(descriptors.nightshift_relay_agent_builder).toEqual({
         elasticsearch: {
@@ -196,6 +198,14 @@ describe('SlackAppService', () => {
               names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
               privileges: ['read', 'view_index_metadata'],
             },
+            {
+              names: [
+                'ai-index-idx-nightshift-wiki',
+                'ai-index-idx-nightshift-semantic-memory',
+                'ai-index-idx-nightshift-decision-trees',
+              ],
+              privileges: ['read', 'view_index_metadata', 'write', 'auto_configure'],
+            },
           ],
           run_as: [],
         },
@@ -204,8 +214,7 @@ describe('SlackAppService', () => {
             spaces: ['*'],
             feature: {
               nightshift: ['minimal_all'],
-              streams: ['read'],
-              agentBuilder: ['read'],
+              agentBuilder: ['minimal_all', 'invoke_bound_agents'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },
@@ -237,8 +246,8 @@ describe('SlackAppService', () => {
     });
 
     describe('agent_id', () => {
-      const connectWithKey = async () => {
-        const harness = createHarness();
+      const connectWithKey = async ({ assistantEnabled = true } = {}) => {
+        const harness = createHarness({ assistantEnabled });
         harness.grantAsInternalUser.mockResolvedValue({
           id: 'key-1',
           name: 'k',
@@ -249,8 +258,8 @@ describe('SlackAppService', () => {
         return harness;
       };
 
-      it('declares nightshift.investigation when the minted key sees it available in the default space', async () => {
-        getAgent.mockResolvedValue({ id: 'nightshift.investigation' });
+      it('declares nightshift.assistant when the minted key sees it available in the default space', async () => {
+        getAgent.mockResolvedValue({ id: 'nightshift.assistant' });
 
         await connectWithKey();
 
@@ -265,13 +274,52 @@ describe('SlackAppService', () => {
             spaceId: 'default',
           },
         });
-        expect(getAgent).toHaveBeenCalledWith('nightshift.investigation');
+        expect(getAgent).toHaveBeenCalledTimes(1);
+        expect(getAgent).toHaveBeenCalledWith('nightshift.assistant');
+        expect(startInstall).toHaveBeenCalledWith(
+          expect.objectContaining({ agent_id: 'nightshift.assistant' })
+        );
+      });
+
+      it.each([
+        ['not installed', createAgentNotFoundError({ agentId: 'nightshift.assistant' })],
+        ['unavailable', createAgentUnavailableError({ agentId: 'nightshift.assistant' })],
+      ])(
+        'falls back to nightshift.investigation when the assistant is %s',
+        async (_reason, assistantError) => {
+          getAgent.mockImplementation(async (agentId: string) => {
+            if (agentId === 'nightshift.assistant') {
+              throw assistantError;
+            }
+            return { id: agentId };
+          });
+
+          const { logger } = await connectWithKey();
+
+          expect(getAgent.mock.calls).toEqual([
+            ['nightshift.assistant'],
+            ['nightshift.investigation'],
+          ]);
+          expect(startInstall).toHaveBeenCalledWith(
+            expect.objectContaining({ agent_id: 'nightshift.investigation' })
+          );
+          expect(logger.warn).not.toHaveBeenCalled();
+        }
+      );
+
+      // A persisted assistant has no availability gate once the sandbox is disabled.
+      it('skips nightshift.assistant when it is disabled, even if a persisted copy exists', async () => {
+        getAgent.mockImplementation(async (agentId: string) => ({ id: agentId }));
+
+        await connectWithKey({ assistantEnabled: false });
+
+        expect(getAgent.mock.calls).toEqual([['nightshift.investigation']]);
         expect(startInstall).toHaveBeenCalledWith(
           expect.objectContaining({ agent_id: 'nightshift.investigation' })
         );
       });
 
-      it('omits agent_id when the agent is not installed in the default space', async () => {
+      it('omits agent_id when no Nightshift agent is installed in the default space', async () => {
         const { logger } = await connectWithKey();
 
         expect(startInstall.mock.calls[0][0]).not.toHaveProperty('agent_id');
@@ -280,7 +328,7 @@ describe('SlackAppService', () => {
 
       // Runs through `get` would be rejected by the agent's availability gate (e.g. Nightshift
       // disabled or its inference endpoint missing), so Relay turns would fail the same way.
-      it('omits agent_id when the agent exists but is unavailable', async () => {
+      it('omits agent_id when the agents exist but are unavailable', async () => {
         getAgent.mockRejectedValue(
           createAgentUnavailableError({ agentId: 'nightshift.investigation' })
         );
@@ -448,6 +496,24 @@ describe('SlackAppService', () => {
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ authorizeUrl: 'https://slack/oauth' });
+    });
+
+    it('declares nightshift.assistant with Relay UIAM when the assistant is enabled', async () => {
+      const { server, createServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+        assistantEnabled: true,
+      });
+      createServiceAccount.mockResolvedValue({ id: 'sa-1', token: 'essu_token' });
+      startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'c' });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(startInstall).toHaveBeenCalledWith(
+        expect.objectContaining({ agent_id: 'nightshift.assistant' })
+      );
+      expect(getRegistry).not.toHaveBeenCalled();
     });
 
     it('creates a new service account and revokes the previous one after install succeeds', async () => {
@@ -629,7 +695,9 @@ describe('SlackAppService', () => {
   describe('getStatus', () => {
     it('reports unavailable when the relay client is not configured', async () => {
       const { server } = createHarness({ hasRelayClient: false });
-      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+      await expect(
+        new SlackAppService(server).getStatus(request, { canAdvanceInstall: true })
+      ).resolves.toEqual({
         available: false,
         status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
@@ -637,7 +705,9 @@ describe('SlackAppService', () => {
 
     it('reports unavailable when the feature flag is disabled', async () => {
       const { server, getBooleanValue$ } = createHarness({ featureFlagEnabled: false });
-      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+      await expect(
+        new SlackAppService(server).getStatus(request, { canAdvanceInstall: true })
+      ).resolves.toEqual({
         available: false,
         status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
@@ -646,7 +716,9 @@ describe('SlackAppService', () => {
 
     it('reports not_connected when no connection exists', async () => {
       const { server } = createHarness();
-      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+      await expect(
+        new SlackAppService(server).getStatus(request, { canAdvanceInstall: true })
+      ).resolves.toEqual({
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
@@ -662,13 +734,38 @@ describe('SlackAppService', () => {
         },
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(fetchClaim).not.toHaveBeenCalled();
       expect(result).toEqual({
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.connected,
         workspace: { tenantKey: 'tenant-A' },
+      });
+    });
+
+    it('returns who connected the workspace and when', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-A',
+          apiKeyId: 'key-1',
+          createdBy: 'alice',
+          createdAt: '2026-10-19T12:00:00.000Z',
+        },
+      });
+
+      await expect(
+        new SlackAppService(server).getStatus(request, { canAdvanceInstall: true })
+      ).resolves.toEqual({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.connected,
+        workspace: { tenantKey: 'tenant-A' },
+        createdBy: 'alice',
+        createdAt: '2026-10-19T12:00:00.000Z',
       });
     });
 
@@ -684,7 +781,9 @@ describe('SlackAppService', () => {
         },
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(fetchClaim).not.toHaveBeenCalled();
       expect(result).toEqual({
@@ -703,7 +802,9 @@ describe('SlackAppService', () => {
         },
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
       expect(result).toEqual({
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.error,
@@ -722,10 +823,37 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'pending' });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(fetchClaim).toHaveBeenCalledWith('claim-1');
       expect(soClient.create).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+      });
+    });
+
+    it('does not advance an in-progress install for callers who cannot manage the connection', async () => {
+      const { server, soClient, deleteServiceAccount, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          serviceAccountId: 'sa-1',
+          claimId: 'claim-1',
+        },
+      });
+
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: false,
+      });
+
+      expect(fetchClaim).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(deleteServiceAccount).not.toHaveBeenCalled();
       expect(result).toEqual({
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
@@ -741,7 +869,9 @@ describe('SlackAppService', () => {
         },
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(fetchClaim).not.toHaveBeenCalled();
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
@@ -779,7 +909,9 @@ describe('SlackAppService', () => {
         new RelayRequestError('/v1/slack/install/claim', 400, 'claim expired')
       );
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1', { force: true });
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
@@ -813,7 +945,9 @@ describe('SlackAppService', () => {
         new RelayRequestError('/v1/slack/install/claim', 400, 'claim expired')
       );
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(soClient.create).toHaveBeenCalledWith(
@@ -843,7 +977,9 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockRejectedValue(new RelayRequestError('/v1/slack/install/claim', 502));
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.create).not.toHaveBeenCalled();
@@ -857,6 +993,8 @@ describe('SlackAppService', () => {
           status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
+          createdBy: 'alice',
+          createdAt: '2026-10-19T12:00:00.000Z',
         },
       });
       fetchClaim.mockResolvedValue({
@@ -866,7 +1004,9 @@ describe('SlackAppService', () => {
         tenant_url: 'https://acme.slack.com/',
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
@@ -884,6 +1024,8 @@ describe('SlackAppService', () => {
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
         workspace: { tenantKey: 'T0123ABC', name: 'Acme', url: 'https://acme.slack.com/' },
+        createdBy: 'alice',
+        createdAt: '2026-10-19T12:00:00.000Z',
       });
     });
 
@@ -898,7 +1040,9 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'T0123ABC' });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(result).toEqual({
         available: true,
@@ -918,7 +1062,9 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: undefined });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(soClient.create).toHaveBeenCalledWith(
@@ -1311,14 +1457,21 @@ describe('SlackAppService', () => {
         bindings: [
           { scope_type: 'SUB', scope_id: 'C123', display_name: 'general', visibility: 'public' },
           { scope_type: 'SUB', scope_id: 'C456' }, // no persisted display snapshot
+          { scope_type: 'SUB', scope_id: 'G789', visibility: 'private' },
         ],
         nextCursor: 'cursor-2',
       });
 
       await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
         bindings: [
-          { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
+          {
+            channel: 'C123',
+            displayName: 'general',
+            visibility: 'public',
+            status: 'bound_to_self',
+          },
           { channel: 'C456', status: 'bound_to_self' },
+          { channel: 'G789', visibility: 'private', status: 'bound_to_self' },
         ],
         nextCursor: 'cursor-2',
       });
@@ -1476,7 +1629,7 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-A' });
 
-      await new SlackAppService(server).getStatus(request);
+      await new SlackAppService(server).getStatus(request, { canAdvanceInstall: true });
 
       expect(registerDynamicConnector).not.toHaveBeenCalled();
     });
@@ -1507,7 +1660,7 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'pending' });
 
-      await new SlackAppService(server).getStatus(request);
+      await new SlackAppService(server).getStatus(request, { canAdvanceInstall: true });
 
       expect(registerDynamicConnector).not.toHaveBeenCalled();
     });
@@ -1518,7 +1671,7 @@ describe('SlackAppService', () => {
         attributes: { status: RELAY_APP_CONNECTION_STATUS.oauthInProgress, apiKeyId: 'key-1' },
       });
 
-      await new SlackAppService(server).getStatus(request);
+      await new SlackAppService(server).getStatus(request, { canAdvanceInstall: true });
 
       expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
     });

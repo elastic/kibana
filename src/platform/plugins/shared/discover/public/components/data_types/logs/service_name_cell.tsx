@@ -17,8 +17,8 @@ import { css } from '@emotion/react';
 import {
   getFieldValue,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
-  formatFieldStringValueWithHighlights,
 } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils/components';
 import { extractTextFromReactNode } from '@kbn/discover-contextual-components/src/data_types/logs/components/utils';
 import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';

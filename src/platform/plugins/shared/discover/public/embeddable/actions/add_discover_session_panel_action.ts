@@ -21,12 +21,12 @@ import {
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_VISUALIZATION_GROUP, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { getAllEsqlControls } from '@kbn/esql-utils';
+import { getAllEsqlControls } from '@kbn/esql-controls-utils';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverAppLocator } from '../../../common';
 import { ACTION_ADD_DISCOVER_SESSION_PANEL } from '../constants';
-import type { DiscoverSessionByValueInput } from '../../plugin_imports/embeddable_editor_service';
+import type { DiscoverSessionEditorInput } from '../../plugin_imports/embeddable_editor_service';
 
 export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContext> {
   public id = ACTION_ADD_DISCOVER_SESSION_PANEL;
@@ -41,7 +41,7 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
   ) {}
 
   getIconType(): string | undefined {
-    return 'discoverApp';
+    return 'productDiscover';
   }
 
   getDisplayName(): string {
@@ -69,7 +69,7 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
       hideTable: false,
       serializedSearchSource: {},
     };
-    const valueInput: DiscoverSessionByValueInput = {
+    const valueInput: DiscoverSessionEditorInput = {
       discoverSessionTab,
       dashboardControlGroupState: apiIsPresentationContainer(embeddableApi)
         ? (getAllEsqlControls(embeddableApi) as ControlPanelsState<OptionsListESQLControlState>)

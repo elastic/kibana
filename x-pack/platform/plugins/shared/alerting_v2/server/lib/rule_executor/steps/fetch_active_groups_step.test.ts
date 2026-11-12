@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { FetchActiveGroupsStep } from './fetch_active_groups_step';
 import {
@@ -20,6 +19,7 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PluginConfig } from '../../../config';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 
 describe('FetchActiveGroupsStep', () => {
   function createStep(maxAlerts = 10000, maxGroupsPerExecution = 10000) {
@@ -29,7 +29,11 @@ describe('FetchActiveGroupsStep', () => {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
-      retention: { ruleEvents: { enabled: false, dataRetention: '90d' } },
+      retention: {
+        ruleEvents: { enabled: false, dataRetention: '90d' },
+        alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+      },
+      dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -40,13 +44,10 @@ describe('FetchActiveGroupsStep', () => {
         },
       },
     };
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-
     const step = new FetchActiveGroupsStep(
       logger.loggerService,
       internal.queryService,
-      pluginConfigAccessor
+      createConfigServiceMock(config)
     );
     return { step, internalEsClient: internal.mockEsClient, mockLogger: logger.mockLogger };
   }

@@ -77,8 +77,6 @@ export const deliverCallbackEvents = ({
     return Promise.resolve();
   }
 
-  const transport = callbackDeliveryService.createTransport(callbackUrl);
-
   const deliverEvent = (event: ChatEvent) => {
     const isTerminal = isRoundCompleteEvent(event);
     const delivery = callbackDeliveryService.makeCallbackRequest({
@@ -87,7 +85,7 @@ export const deliverCallbackEvents = ({
         event,
         ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
       },
-      transport,
+      callbackUrl,
       retry: isTerminal,
     });
 
@@ -139,6 +137,7 @@ export const deliverCallbackEvents = ({
             // The response message ready to post on the round's surface, such as Slack.
             const surfacePayload = surfacesService.renderPayload(completedEvent, {
               originType: execution.agentParams.origin?.type,
+              agentId: execution.agentId,
               request,
               spaceId: execution.spaceId,
             });
@@ -155,7 +154,7 @@ export const deliverCallbackEvents = ({
               error: serializeExecutionError(error),
               idempotency_key: execution.executionId,
             },
-            transport,
+            callbackUrl,
             retry: true,
           });
 

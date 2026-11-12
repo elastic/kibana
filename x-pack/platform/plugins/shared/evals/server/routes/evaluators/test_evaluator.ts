@@ -22,7 +22,8 @@ import {
 } from '../../evaluators/user_defined/validate_config';
 import type { RouteDependencies } from '../register_routes';
 import { builtInEvaluatorConflict } from './shared/handle_evaluator_error';
-import { EvaluationExecutionError, executeEvaluators } from './shared/execute_evaluators';
+import { EvaluationExecutionError } from '../../evaluation/evaluation_execution_error';
+import { executeEvaluators } from '../../evaluation/execute_evaluators';
 
 export const registerTestEvaluatorRoute = ({
   router,
@@ -82,7 +83,6 @@ export const registerTestEvaluatorRoute = ({
             [draft.judge.prompt, draft.judge.system_prompt],
             () =>
               executeEvaluators({
-                coreContext,
                 request,
                 subject,
                 evaluators: [{ definition: evaluator, connectorId }],

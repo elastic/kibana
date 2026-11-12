@@ -44,6 +44,15 @@ describe('collapseIndexName', () => {
       'logs-endpoint.events.e8c68216.2026.09.29*'
     );
   });
+
+  it('collapses a remote backing index to its remote stream, keeping the cluster', () => {
+    expect(
+      collapseIndexName('infosec_zocalo:.ds-logs-aws.cloudtrail-default-2026.10.26-000001')
+    ).toBe('infosec_zocalo:logs-aws.cloudtrail-default*');
+    expect(collapseIndexName('infosec_zocalo:logs-endpoint.events.e8c68216.2026.09.29')).toBe(
+      'infosec_zocalo:logs-endpoint.events.e8c68216.2026.09.29*'
+    );
+  });
 });
 
 describe('collapseToDataSourcePattern', () => {
@@ -69,6 +78,23 @@ describe('collapseToDataSourcePattern', () => {
       undefined,
     ],
     ['an unknown family', 'custom-index-2026.10.08', undefined],
+    [
+      'a remote data stream backing index',
+      'infosec_zocalo:.ds-logs-aws.cloudtrail-default-2026.10.26-000001',
+      'infosec_zocalo:logs-aws.cloudtrail-*',
+    ],
+    [
+      'a remote dataset pattern',
+      'infosec_redsector:logs-endpoint.events.process-*',
+      'infosec_redsector:logs-endpoint.events.process-*',
+    ],
+    [
+      'a dashed remote cluster',
+      'infosec-zocalo:logs-aws.cloudtrail-*',
+      'infosec-zocalo:logs-aws.cloudtrail-*',
+    ],
+    ['a remote beats index', 'remote:filebeat-8.17.0-2026.10.08', 'remote:filebeat-*'],
+    ['a remote security alerts index', 'remote:.alerts-security.alerts-default', undefined],
   ])('returns the expected pattern for %s', (_label, name, expected) => {
     expect(collapseToDataSourcePattern(name)).toBe(expected);
   });
@@ -111,6 +137,26 @@ describe('boundTargetPatterns', () => {
       collapsed: true,
       fits: true,
     });
+  });
+
+  it('keeps the cluster, including a dashed one, when collapsing remote patterns per dataset and per vendor', () => {
+    const perDataset = Array.from({ length: MAX_SCOPE_TARGETS / 2 }, (_, i) => [
+      `infosec-zocalo:logs-vendor${i}.stream-default*`,
+      `infosec-zocalo:logs-vendor${i}.stream-prod*`,
+      `infosec-zocalo:logs-vendor${i}.stream-staging*`,
+    ]).flat();
+    expect(boundTargetPatterns(perDataset).patterns).toContain(
+      'infosec-zocalo:logs-vendor0.stream-*'
+    );
+
+    const perVendor = Array.from(
+      { length: MAX_SCOPE_TARGETS + 1 },
+      (_, i) => `infosec-zocalo:logs-vendor0.stream${i}-default*`
+    );
+    expect(boundTargetPatterns(perVendor).patterns).toEqual([
+      'infosec-zocalo:logs-vendor0-*',
+      'infosec-zocalo:logs-vendor0.*',
+    ]);
   });
 
   it('reports that nothing fits when even the vendor wildcards overflow', () => {

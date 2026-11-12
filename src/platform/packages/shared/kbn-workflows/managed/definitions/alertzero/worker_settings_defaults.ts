@@ -45,6 +45,9 @@ export const ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS = {
       autoCloseConfidenceScoreMinThreshold: 0.85,
       budgetPerHour: 1300,
       lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
     },
   },
 } as const satisfies WorkerSettingsDefaults;

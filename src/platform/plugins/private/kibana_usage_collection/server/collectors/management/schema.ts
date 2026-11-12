@@ -148,10 +148,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableNewFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Allows users to enable/disable the new flyout system.' },
-  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -182,10 +178,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableAlertsAndAttacksAlignment': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAttackDiscoveryWorkflows': {
     type: 'boolean',
     _meta: { description: 'Enables Attack Discovery Workflows for this space.' },
@@ -193,6 +185,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:enableRuleChangesHistory': {
     type: 'boolean',
     _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
+  },
+  'securitySolution:enableAlertZero': {
+    type: 'boolean',
+    _meta: { description: 'Enables AlertZero for this space.' },
   },
   'search:includeFrozen': {
     type: 'boolean',
@@ -585,6 +581,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: {
       description:
         'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
+    },
+  },
+  'agentBuilder:includeFrozenByDefault': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether built-in Agent Builder tools include frozen tier data by default.',
     },
   },
   'agentBuilder:deductiveEnabled': {
@@ -1081,6 +1083,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable token usage tracking in Kibana',
+    },
+  },
+  'genAiSettings:inferenceStreaming': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables streaming of LLM interactions in Kibana. When disabled, forces Kibana to use non-streaming inference requests.',
     },
   },
   'alerting:v1:showV1ObservabilityAlertsTable': {

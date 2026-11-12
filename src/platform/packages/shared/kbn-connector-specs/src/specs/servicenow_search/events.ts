@@ -483,14 +483,11 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
   definitions: {
     [SERVICENOW_INCIDENT_CREATED_EVENT_KEY]: {
       eventId: SERVICENOW_INCIDENT_CREATED_EVENT_ID,
-      title: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.incidentCreated.title',
-        {
-          defaultMessage: 'Incident created',
-        }
-      ),
+      title: i18n.translate('connectorSpecs.servicenowSearch.events.incidentCreated.title', {
+        defaultMessage: 'Incident created',
+      }),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.incidentCreated.description',
+        'connectorSpecs.servicenowSearch.events.incidentCreated.description',
         {
           defaultMessage: 'An incident was created.',
         }
@@ -499,14 +496,11 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
     },
     [SERVICENOW_INCIDENT_UPDATED_EVENT_KEY]: {
       eventId: SERVICENOW_INCIDENT_UPDATED_EVENT_ID,
-      title: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.incidentUpdated.title',
-        {
-          defaultMessage: 'Incident updated',
-        }
-      ),
+      title: i18n.translate('connectorSpecs.servicenowSearch.events.incidentUpdated.title', {
+        defaultMessage: 'Incident updated',
+      }),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.incidentUpdated.description',
+        'connectorSpecs.servicenowSearch.events.incidentUpdated.description',
         {
           defaultMessage:
             'An incident record changed. Changed fields include previous and current values when ServiceNow sends them.',
@@ -516,14 +510,11 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
     },
     [SERVICENOW_INCIDENT_RESOLVED_EVENT_KEY]: {
       eventId: SERVICENOW_INCIDENT_RESOLVED_EVENT_ID,
-      title: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.incidentResolved.title',
-        {
-          defaultMessage: 'Incident resolved or closed',
-        }
-      ),
+      title: i18n.translate('connectorSpecs.servicenowSearch.events.incidentResolved.title', {
+        defaultMessage: 'Incident resolved or closed',
+      }),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.incidentResolved.description',
+        'connectorSpecs.servicenowSearch.events.incidentResolved.description',
         {
           defaultMessage:
             'An incident was resolved or closed. The resulting state is included, with resolution details when ServiceNow sends them.',
@@ -533,14 +524,11 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
     },
     [SERVICENOW_COMMENT_ADDED_EVENT_KEY]: {
       eventId: SERVICENOW_COMMENT_ADDED_EVENT_ID,
-      title: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.commentAdded.title',
-        {
-          defaultMessage: 'Comment added',
-        }
-      ),
+      title: i18n.translate('connectorSpecs.servicenowSearch.events.commentAdded.title', {
+        defaultMessage: 'Comment added',
+      }),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.commentAdded.description',
+        'connectorSpecs.servicenowSearch.events.commentAdded.description',
         {
           defaultMessage: 'A public comment was added to a record.',
         }
@@ -549,14 +537,11 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
     },
     [SERVICENOW_WORK_NOTE_ADDED_EVENT_KEY]: {
       eventId: SERVICENOW_WORK_NOTE_ADDED_EVENT_ID,
-      title: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.workNoteAdded.title',
-        {
-          defaultMessage: 'Work note added',
-        }
-      ),
+      title: i18n.translate('connectorSpecs.servicenowSearch.events.workNoteAdded.title', {
+        defaultMessage: 'Work note added',
+      }),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.workNoteAdded.description',
+        'connectorSpecs.servicenowSearch.events.workNoteAdded.description',
         {
           defaultMessage: 'An internal work note was added to a record.',
         }
@@ -566,13 +551,13 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
     [SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_KEY]: {
       eventId: SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_ID,
       title: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.changeApprovalStateChanged.title',
+        'connectorSpecs.servicenowSearch.events.changeApprovalStateChanged.title',
         {
           defaultMessage: 'Change approval state changed',
         }
       ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.servicenowSearch.events.changeApprovalStateChanged.description',
+        'connectorSpecs.servicenowSearch.events.changeApprovalStateChanged.description',
         {
           defaultMessage: 'The approval state of a change request changed.',
         }

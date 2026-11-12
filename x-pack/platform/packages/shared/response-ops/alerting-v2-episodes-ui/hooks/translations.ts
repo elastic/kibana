@@ -77,9 +77,13 @@ export const SOURCE_FIELD_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.sou
   defaultMessage: 'Source',
 });
 
-export const MAINTENANCE_WINDOWS_FIELD_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.maintenanceWindowsFieldLabel',
+export const SUPPRESSED_FIELD_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.suppressedFieldLabel',
   {
-    defaultMessage: 'Maintenance windows',
+    defaultMessage: 'Suppressed',
   }
 );
+
+export const REASON_FIELD_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.reasonFieldLabel', {
+  defaultMessage: 'Reason',
+});

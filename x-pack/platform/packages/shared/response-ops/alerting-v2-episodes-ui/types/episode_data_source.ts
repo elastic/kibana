@@ -6,7 +6,9 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type {
@@ -14,12 +16,27 @@ import type {
   EpisodesFilterState,
   EpisodesSortState,
 } from '../queries/episodes_query';
-import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import type { HistogramBucketCount, TimeBucket } from '../utils/histogram_utils';
 import type { EpisodeAction } from '../actions/types';
 import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
+import type { CanWriteEpisode } from '../utils/episode_write_privilege';
 
 export interface EpisodeDataSourceServices {
   http: HttpStart;
+}
+
+export interface EpisodeWriteAccessServices {
+  application: ApplicationStart;
+  http: HttpStart;
+  notifications: NotificationsStart;
+}
+
+export interface EpisodeSearchField {
+  name: string;
+  type: string;
+  esTypes: string[];
+  searchable: boolean;
+  aggregatable: boolean;
 }
 
 interface EpisodeDataSourceBaseParams {
@@ -43,6 +60,10 @@ export interface FetchSourceHistogramParams extends EpisodeDataSourceBaseParams 
   filterState?: EpisodesFilterState;
   timeRange?: TimeRange | null;
   breakdownField?: string;
+  /** Time buckets the counts must be keyed by (`bucketStart` = `TimeBucket.start`). */
+  buckets: TimeBucket[];
+  /** Open episodes count only in buckets that start before this instant (epoch ms). */
+  nowMs: number;
 }
 
 export interface FetchSourceTagOptionsParams extends EpisodeDataSourceBaseParams {
@@ -63,8 +84,13 @@ export interface EpisodeSourceKpis {
 }
 
 export interface EpisodeSourceHistogram {
-  rows: HistogramEpisodeRow[];
+  counts: HistogramBucketCount[];
   isCapHit: boolean;
+  /**
+   * Alerts per breakdown value across the time range, used to rank which values get their own
+   * series. Counts the source already folded carry the `HISTOGRAM_OTHER_BREAKDOWN` breakdown value.
+   */
+  breakdownTotals?: Record<string, number>;
 }
 
 export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';
@@ -94,7 +120,6 @@ export interface SeverityExtension {
   label: string;
   color: string;
   sortRank: number;
-  filterDotColor?: string;
 }
 
 export interface EpisodeDataSource {
@@ -102,13 +127,20 @@ export interface EpisodeDataSource {
   label: string;
   icon?: IconType;
   queryKeyPrefix: readonly unknown[];
+  ruleTypeIds?: string[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
   fetchKpis?: (params: FetchSourceKpisParams) => Promise<EpisodeSourceKpis>;
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  /**
+   * Resolves which of this source's alerts the user may modify. Called as a React hook, so it can
+   * fetch authorization that is not exposed as a UI capability.
+   */
+  useWriteAccess: (services: EpisodeWriteAccessServices) => CanWriteEpisode;
   severityExtensions?: SeverityExtension[];
   getRuleDetailsHref?: (ruleId: string) => string | null;
 }

@@ -19,6 +19,7 @@ import {
   isRoundCompleteEvent,
   internalTools,
   SELF_AGENT_ID,
+  ChatTriggerMode,
   SubagentExecutionMode,
   SubagentMode,
   toAutoApprovedApis,
@@ -46,6 +47,7 @@ import type { ResolvedSubagent } from '../../../agents/utils/resolve_allowed_sub
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
 import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
+import { triggerModeSchema } from '../utils/trigger_mode_schema';
 
 export const SubAgentToolName = internalTools.runSubagent;
 
@@ -204,6 +206,7 @@ const resolveSubagentApiGrant = async ({
   prompts,
   promptId,
   agentId,
+  discoveryEnabled,
 }: {
   requested: AutoApprovedApi[];
   interactivity: InteractivityConfig;
@@ -211,6 +214,7 @@ const resolveSubagentApiGrant = async ({
   prompts: ToolPromptManager;
   promptId: string;
   agentId: string;
+  discoveryEnabled: boolean;
 }): Promise<SubagentApiGrant> => {
   const unknownApis = findUnknownApis(requested);
   if (unknownApis.length > 0) {
@@ -218,7 +222,11 @@ const resolveSubagentApiGrant = async ({
       status: 'unknown_apis',
       message:
         `Unknown auto_approved_apis: ${formatUnknownApis(unknownApis)}. Each entry must name an ` +
-        `API that exists on its target. Use the ${internalTools.discoverApis} tool to find the identifier.`,
+        `API that exists on its target. ` +
+        (discoveryEnabled
+          ? `Use the ${internalTools.discoverApis} tool to find the identifier.`
+          : `Do not retry with another identifier unless a skill or the user gave it to you. ` +
+            `Otherwise, leave it out of auto_approved_apis.`),
     };
   }
 
@@ -310,6 +318,8 @@ export const createSubagentTool = ({
   subagentTracker,
   conversationExists,
   transientOnly = false,
+  discoveryEnabled = false,
+  backgroundWakeEnabled = false,
 }: {
   /** Id of the agent currently executing (the "owner") */
   ownerAgentId: string;
@@ -331,6 +341,10 @@ export const createSubagentTool = ({
    * background one reports through conversation state, neither of which that run keeps.
    */
   transientOnly?: boolean;
+  /** Whether the `discover_apis` tool is available, so errors can point the model at it. */
+  discoveryEnabled?: boolean;
+  /** Whether a finished background sub-agent wakes the parent, which `trigger_mode` steers. */
+  backgroundWakeEnabled?: boolean;
 }) => {
   const orderedAllowed = orderAllowedWithSelfFirst(allowedSubagents);
   const allowedIds = orderedAllowed.map((a) => a.id) as [string, ...string[]];
@@ -342,7 +356,7 @@ export const createSubagentTool = ({
     orderedAllowed.map((subagent) => [subagent.id, subagent.approvals])
   );
 
-  const schema = z.object({
+  const baseSchema = z.object({
     agent_id: z
       .enum(allowedIds)
       .describe(
@@ -392,6 +406,11 @@ export const createSubagentTool = ({
       ),
   });
 
+  const schema = backgroundWakeEnabled
+    ? baseSchema.extend({ trigger_mode: triggerModeSchema })
+    : baseSchema;
+  type SubagentToolParams = z.infer<typeof baseSchema> & { trigger_mode?: ChatTriggerMode };
+
   const tool: InternalBuiltinToolDefinition<typeof schema> = {
     id: SubAgentToolName,
     description: buildToolDescription(orderedAllowed, transientOnly),
@@ -404,11 +423,12 @@ export const createSubagentTool = ({
         description,
         prompt,
         run_in_background = false,
-        effort = 'medium',
+        trigger_mode,
+        effort = EffortLevels.medium,
         mode,
         name,
         auto_approved_apis: autoApprovedApisByTarget,
-      },
+      }: SubagentToolParams,
       { events, modelProvider, prompts, interactivity, callContext }
     ) => {
       // Defense-in-depth: reject an off-enum agent_id even though Zod should already have filtered it.
@@ -453,6 +473,7 @@ export const createSubagentTool = ({
           prompts,
           promptId: `${SubAgentToolName}.${callContext.toolCallId}.auto_approved_apis`,
           agentId: subagentLabel,
+          discoveryEnabled,
         });
 
         if (grant.status === 'unknown_apis') {
@@ -532,7 +553,15 @@ export const createSubagentTool = ({
             prompt: fullPrompt,
             connectorId: selectedConnectorId,
             ...(autoApprovedApis ? { autoApprovedApis } : {}),
-            ...(run_in_background ? {} : { abortSignal }),
+            ...(run_in_background
+              ? {
+                  background: {
+                    ...(backgroundWakeEnabled
+                      ? { parentTriggerMode: trigger_mode ?? ChatTriggerMode.Always }
+                      : {}),
+                  },
+                }
+              : { abortSignal }),
           });
 
           // Store the entry with the sentinel-shaped agent_id (not the
@@ -550,13 +579,16 @@ export const createSubagentTool = ({
           });
 
           if (run_in_background) {
-            backgroundExecutionService?.registerExecution(executionId);
+            backgroundExecutionService?.registerExecution(executionId, resolvedAgentId);
             return {
               results: [
                 createOtherResult({
                   agent_execution_id: executionId,
                   mode: SubagentExecutionMode.background,
                   status: 'queued',
+                  ...(backgroundWakeEnabled
+                    ? { trigger_mode: trigger_mode ?? ChatTriggerMode.Always }
+                    : {}),
                   ...grantReport,
                 }),
               ],
@@ -591,7 +623,15 @@ export const createSubagentTool = ({
           prompt: fullPrompt,
           ...(autoApprovedApis ? { autoApprovedApis } : {}),
           // background agents should continue running even if main execution completes
-          ...(run_in_background ? {} : { abortSignal }),
+          ...(run_in_background
+            ? {
+                background: {
+                  ...(backgroundWakeEnabled
+                    ? { parentTriggerMode: trigger_mode ?? ChatTriggerMode.Always }
+                    : {}),
+                },
+              }
+            : { abortSignal }),
         });
 
         events.reportProgress(`Sub-agent execution ${executionId} started`, {
@@ -602,7 +642,7 @@ export const createSubagentTool = ({
         });
 
         if (run_in_background) {
-          backgroundExecutionService?.registerExecution(executionId);
+          backgroundExecutionService?.registerExecution(executionId, resolvedAgentId);
 
           return {
             results: [
@@ -610,6 +650,9 @@ export const createSubagentTool = ({
                 agent_execution_id: executionId,
                 mode: SubagentExecutionMode.background,
                 status: 'queued',
+                ...(backgroundWakeEnabled
+                  ? { trigger_mode: trigger_mode ?? ChatTriggerMode.Always }
+                  : {}),
                 ...grantReport,
               }),
             ],

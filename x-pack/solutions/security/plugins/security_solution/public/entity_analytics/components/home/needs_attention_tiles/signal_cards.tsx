@@ -9,13 +9,29 @@ import React from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
+import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
+import type { SignalCardData, SignalCardId } from './data';
 import { SignalCard } from './signal_card';
+import { SIGNAL_CARDS_TOUR_ANCHOR_TEST_ID } from '../product_tour/constants';
+
+// Zero-size product tour anchor at the middle of the first card's right edge. The tour
+// popover moves the anchor into its own wrapper, so it must be out of flow.
+const tourAnchorCss = css`
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 0;
+  inline-size: 0;
+  block-size: 0;
+  line-height: 0;
+  pointer-events: none;
+`;
 
 export interface SignalCardsProps {
-  activeFilter: ActiveFilter | null;
+  activeTile: SignalCardId | null;
   /** Card values for the current page filters — see `getSignalCards`. */
   cards: SignalCardData[];
+  /** The selected range; each tile's change compares with the range just before it. */
+  timeRange: TimeRange;
   onFilterForCard: (cardId: SignalCardId) => void;
   /** Kept for MetricChartsPanel wiring; cards are whole-card toggles in v.5. */
   onFilterOutCard?: (cardId: SignalCardId) => void;
@@ -69,8 +85,9 @@ const layoutCappedGridCss = ({
  * Each card toggles an in-page table filter; selection stays on the card itself.
  */
 export const SignalCards: React.FC<SignalCardsProps> = ({
-  activeFilter,
+  activeTile,
   cards,
+  timeRange,
   onFilterForCard,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -93,8 +110,8 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
           gap: euiTheme.size.s,
         })}
       >
-        {cards.map((card) => {
-          const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
+        {cards.map((card, index) => {
+          const selected = activeTile === card.id;
 
           return (
             <div
@@ -113,8 +130,14 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
               <SignalCard
                 card={card}
                 selected={selected}
+                timeRange={timeRange}
                 onToggle={() => onFilterForCard(card.id)}
               />
+              {index === 0 && (
+                <div aria-hidden="true" css={tourAnchorCss}>
+                  <span data-test-subj={SIGNAL_CARDS_TOUR_ANCHOR_TEST_ID} />
+                </div>
+              )}
             </div>
           );
         })}

@@ -12,6 +12,7 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
 import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
+import type { FormProps } from './schema';
 import moment from 'moment';
 
 jest.mock('../utils/kibana_react');
@@ -286,19 +287,87 @@ describe('CreateMaintenanceWindowForm', () => {
 
   describe('confirmation modal for saving without filters', () => {
     const user = userEvent.setup({ delay: null });
+    const APPLY_TO_ALL_BODY =
+      'This maintenance window has no alert filters, so it will apply to all alerts.';
+    const SCOPED_BODY =
+      'One of the selected scopes has no alert filters, so it will apply to all of its alerts.';
+    const v1Filtered = { kql: 'kibana.alert.rule.name : "x"', filters: [], dsl: '{}' };
+    const v2Filtered = { enabled: true, kql: 'rule.id: "a"' };
 
-    const fillTitle = async () => {
-      const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
-      await user.click(titleInput);
-      await user.paste('My window');
+    const renderEditMode = (scope: NonNullable<FormProps['scope']>) =>
+      appMockRenderer.render(
+        <CreateMaintenanceWindowForm
+          {...formPropsForEditMode}
+          initialValue={{ ...formPropsForEditMode.initialValue!, scope }}
+        />
+      );
+
+    // Omitting `maintenanceWindowId` keeps the form in create mode while `initialValue` seeds it.
+    const renderCreateMode = (scope?: NonNullable<FormProps['scope']>) =>
+      appMockRenderer.render(
+        <CreateMaintenanceWindowForm
+          {...formProps}
+          initialValue={{
+            title: 'My window',
+            startDate: '2023-03-24',
+            endDate: '2023-03-26',
+            recurring: false,
+            scope,
+          }}
+        />
+      );
+
+    const confirmApplyToAllAlerts = async (expectedBody: string) => {
+      const modal = await screen.findByTestId('applyToAllAlertsConfirmModal');
+      expect(within(modal).getByText(expectedBody)).toBeInTheDocument();
+      await user.click(within(modal).getByRole('button', { name: 'Apply to all alerts' }));
     };
 
-    it('does not show the modal and creates with default scope when Alerts is on', async () => {
-      // Alerts defaults ON — submitting without touching toggles must skip the modal.
+    it('creates with the title entered by the user', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-      await fillTitle();
+      const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
+      await user.click(titleInput);
+      await user.paste('My entered title');
       await user.click(screen.getByTestId('create-submit'));
+
+      expect(createMutate).not.toHaveBeenCalled();
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({
+          title: 'My entered title',
+          scope: { alerting: { enabled: true } },
+        });
+      });
+    });
+
+    it('creates with only unfiltered Episodes after toggling Alerts off and Episodes on', async () => {
+      renderCreateMode();
+
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
+      await user.click(screen.getByTestId('alertingV2ScopedQuerySwitch'));
+      await user.click(screen.getByTestId('create-submit'));
+
+      expect(createMutate).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({ title: 'My window' });
+        expect(createMutate.mock.calls[0][0].scope).toEqual({
+          alertingV2: { enabled: true },
+        });
+      });
+    });
+
+    it('creates with the default scope when Alerts is on and no filters are set', async () => {
+      renderCreateMode();
+
+      await user.click(await screen.findByTestId('create-submit'));
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
@@ -307,19 +376,19 @@ describe('CreateMaintenanceWindowForm', () => {
           scope: { alerting: { enabled: true } },
         });
       });
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
     });
 
-    it('calls create when user toggles Alerts off then confirms save without filters modal', async () => {
-      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    it('calls create when user toggles Alerts off then confirms save without scopes modal', async () => {
+      renderCreateMode();
 
-      await fillTitle();
       // Turn v1 off so the "no scope" path is reached.
       await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
 
       await user.click(screen.getByTestId('create-submit'));
 
-      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
+      const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
       await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
 
       await waitFor(() => {
@@ -329,33 +398,93 @@ describe('CreateMaintenanceWindowForm', () => {
           scope: {},
         });
       });
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
     });
 
-    it('does not call create when user cancels save without filters modal', async () => {
-      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    it('does not call create when user cancels save without scopes modal', async () => {
+      renderCreateMode();
 
-      await fillTitle();
       // Turn v1 off first so the modal appears.
       await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
       await user.click(screen.getByTestId('create-submit'));
 
-      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
+      const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
       await user.click(within(modal).getByRole('button', { name: 'Cancel' }));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
       });
       expect(createMutate).not.toHaveBeenCalled();
     });
 
-    it('does not show confirmation modal when saving with filters (scoped query present)', async () => {
+    it('does not show confirmation modal when saving with scoped query present', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
       await user.click(await screen.findByTestId('create-submit'));
 
       await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+    });
+
+    it('shows the generic body when only Episodes is on with no filter', async () => {
+      renderCreateMode({ alertingV2: { enabled: true } });
+
+      // Alerts (v1) is force-selected in create mode, so it still has to be toggled off.
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
+      await user.click(screen.getByTestId('create-submit'));
+
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0].scope).toMatchObject({
+          alertingV2: { enabled: true },
+        });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      });
+    });
+
+    it('shows the scoped body when Alerts is filtered and Episodes is not', async () => {
+      renderEditMode({ alerting: v1Filtered, alertingV2: { enabled: true } });
+
+      await user.click(screen.getByTestId('create-submit'));
+      await confirmApplyToAllAlerts(SCOPED_BODY);
+
+      await waitFor(() => {
+        expect(updateMutate).toHaveBeenCalledTimes(1);
+        expect(updateMutate.mock.calls[0][0].updateParams.scope).toMatchObject({
+          alerting: { enabled: true, kql: v1Filtered.kql },
+          alertingV2: { enabled: true },
+        });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      });
+    });
+
+    it('shows the scoped body when Episodes is filtered and Alerts is not', async () => {
+      renderEditMode({ alerting: null, alertingV2: v2Filtered });
+
+      await user.click(screen.getByTestId('create-submit'));
+      await confirmApplyToAllAlerts(SCOPED_BODY);
+
+      await waitFor(() => {
+        expect(updateMutate).toHaveBeenCalledTimes(1);
+        expect(updateMutate.mock.calls[0][0].updateParams.scope).toEqual({
+          alerting: { enabled: true },
+          alertingV2: v2Filtered,
+        });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      });
+    });
+
+    it('does not show the modal when both scopes are filtered', async () => {
+      renderEditMode({ alerting: v1Filtered, alertingV2: v2Filtered });
+
+      await user.click(screen.getByTestId('create-submit'));
+
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
     });
   });
 
@@ -476,7 +605,7 @@ describe('CreateMaintenanceWindowForm', () => {
 
       await user.click(await screen.findByTestId('create-submit'));
 
-      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
+      const modal = await screen.findByTestId('saveWithoutScopesConfirmModal');
       await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
 
       await waitFor(() => {
@@ -496,7 +625,7 @@ describe('CreateMaintenanceWindowForm', () => {
           alertingV2: { enabled: true, kql: 'rule.id: "a"' },
         });
       });
-      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
     });
   });
 });

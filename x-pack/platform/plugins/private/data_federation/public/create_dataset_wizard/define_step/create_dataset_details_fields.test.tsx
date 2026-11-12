@@ -131,6 +131,31 @@ describe('CreateDatasetDetailsFields', () => {
     expect(await findByTestId('createDatasetDataSource-new-source')).toBeInTheDocument();
   });
 
+  it('shows the authentication callout only for data sources that existed before the wizard', async () => {
+    const add = jest.fn().mockResolvedValue(undefined);
+    const { getByTestId, findByTestId, queryByTestId } = render(
+      <I18nProvider>
+        <EuiProvider>
+          <Harness add={add} />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-connectNew'));
+    fireEvent.click(await findByTestId('mockSaveDataSource'));
+
+    await waitFor(() => {
+      expect(getByTestId('selectedDataSource')).toHaveTextContent('new-source');
+    });
+    expect(queryByTestId('createDatasetDataSourceAuthenticationCallout')).toBeNull();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+
+    expect(await findByTestId('createDatasetDataSourceAuthenticationCallout')).toBeInTheDocument();
+  });
+
   it('reports a refresh failure after saving a new data source distinctly from a save failure', async () => {
     const add = jest.fn().mockResolvedValue(undefined);
     const loadDataSources = jest.fn().mockRejectedValue(new Error('list unavailable'));

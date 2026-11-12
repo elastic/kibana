@@ -80,11 +80,12 @@ describe('resolveServerlessStatus', () => {
       title: 'Elasticsearch Serverless',
       subtitle: 'AWS (us-east-1)',
       description: "You're on an Elastic Cloud trial.",
-      primaryAction: { id: 'subscribe', label: 'Subscribe', href: BILLING_URL },
+      primaryAction: { id: 'subscribe', label: 'Subscribe', href: BILLING_URL, external: true },
       secondaryAction: {
         id: 'view_pricing',
         label: 'View pricing',
         href: `${PRICING_URL}?productType=serverless&solution=elasticsearch&provider=aws&region=us-east-1`,
+        external: true,
       },
       projectType: 'search',
     });

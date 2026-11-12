@@ -8,70 +8,80 @@
  */
 
 import { dirname } from 'path';
-import type { Rule } from 'eslint';
-import type { Node } from 'estree';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
-import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 import { formatSuggestions } from '../helpers/report';
-import { isImportableFrom } from '../helpers/groups';
+import type { ImportViolation } from '../helpers/groups';
+import { getImportViolation } from '../helpers/groups';
 
-export const NoGroupCrossingImportsRule: Rule.RuleModule = {
+const SUGGESTIONS: Record<ImportViolation, string> = {
+  ILLEGAL_IMPORT: formatSuggestions([
+    `Please review the dependencies in your module's manifest (kibana.jsonc).`,
+    `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
+    `Address the conflicting dependencies by refactoring the code`,
+  ]),
+  CORE_PRIVATE_IMPORT: formatSuggestions([
+    `Import the public Core package instead (@kbn/core-<domain>-server, @kbn/core-<domain>-browser, or @kbn/core-<domain>-common).`,
+    `If the public package does not expose what you need, ask @elastic/kibana-core for a public API.`,
+  ]),
+};
+
+export const NoGroupCrossingImportsRule: CreateOnceRule = {
   meta: {
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
     },
     messages: {
       ILLEGAL_IMPORT: `⚠ Illegal import statement: "{{importerPackage}}" ({{importerGroup}}) is importing "{{importedPackage}}" ({{importedGroup}}/{{importedVisibility}}). File: {{sourcePath}}\n{{suggestion}}\n`,
+      CORE_PRIVATE_IMPORT: `⚠ Illegal import statement: "{{importedPackage}}" is private to Core and can only be imported from src/core. File: {{sourcePath}}\n{{suggestion}}\n`,
     },
   },
-  create(context) {
-    const resolver = getImportResolver(context);
-    const classifier = getRepoSourceClassifier(resolver);
-    const sourcePath = getSourcePath(context);
-    const ownDirname = dirname(sourcePath);
-    const self = classifier.classify(sourcePath);
-    const relativePath = sourcePath.replace(REPO_ROOT, '').replace(/^\//, '');
+  createOnce(context) {
+    return visitAllImportStatements(() => {
+      const resolver = getImportResolver(context);
+      const classifier = getRepoSourceClassifier(resolver);
+      const sourcePath = context.physicalFilename;
+      const ownDirname = dirname(sourcePath);
+      const self = classifier.classify(sourcePath);
+      const relativePath = sourcePath.replace(REPO_ROOT, '').replace(/^\//, '');
 
-    return visitAllImportStatements((req, { node }) => {
-      if (
-        req === null ||
-        // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
-        req.endsWith('?raw')
-      ) {
-        return;
-      }
+      return (req, { node }) => {
+        if (
+          req === null ||
+          // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
+          req.endsWith('?raw')
+        ) {
+          return;
+        }
 
-      const result = resolver.resolve(req, ownDirname);
-      if (result?.type !== 'file' || result.nodeModule) {
-        return;
-      }
+        const result = resolver.resolve(req, ownDirname);
+        if (result?.type !== 'file' || result.nodeModule) {
+          return;
+        }
 
-      const imported = classifier.classify(result.absolute);
+        const imported = classifier.classify(result.absolute);
+        const violation = getImportViolation(self, imported);
 
-      if (!isImportableFrom(self, imported.group, imported.visibility)) {
-        context.report({
-          node: node as Node,
-          messageId: 'ILLEGAL_IMPORT',
-          data: {
-            importerPackage: self.pkgInfo?.pkgId ?? 'unknown',
-            importerGroup: self.group,
-            importedPackage: imported.pkgInfo?.pkgId ?? 'unknown',
-            importedGroup: imported.group,
-            importedVisibility: imported.visibility,
-            sourcePath: relativePath,
-            suggestion: formatSuggestions([
-              `Please review the dependencies in your module's manifest (kibana.jsonc).`,
-              `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
-              `Address the conflicting dependencies by refactoring the code`,
-            ]),
-          },
-        });
-        return;
-      }
+        if (violation) {
+          context.report({
+            node,
+            messageId: violation,
+            data: {
+              importerPackage: self.pkgInfo?.pkgId ?? 'unknown',
+              importerGroup: self.group,
+              importedPackage: imported.pkgInfo?.pkgId ?? 'unknown',
+              importedGroup: imported.group,
+              importedVisibility: imported.visibility,
+              sourcePath: relativePath,
+              suggestion: SUGGESTIONS[violation],
+            },
+          });
+        }
+      };
     });
   },
 };

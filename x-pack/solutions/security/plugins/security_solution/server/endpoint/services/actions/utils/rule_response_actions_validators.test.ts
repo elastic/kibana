@@ -62,7 +62,7 @@ describe('Rules Endpoint response actions validators', () => {
     rulePayload = { response_actions: [createRulePayloadResponseActionMock()] };
     existingRule = getRuleMock(getQueryRuleParams());
     // @ts-expect-error assignment to readonly is ok here
-    // eslint-disable-next-line require-atomic-updates
+    // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
     endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript = true;
   });
 
@@ -837,6 +837,39 @@ describe('Rules Endpoint response actions validators', () => {
 
       await validateRuleResponseActions(options);
 
+      expect(mockOsqueryAuthz).not.toHaveBeenCalled();
+    });
+
+    it('should reject an added pack action when the author cannot read packs', async () => {
+      const authzError: Error & { statusCode?: number } = new Error(
+        'User is not authorized to create/update osquery response action'
+      );
+      authzError.statusCode = 403;
+      mockOsqueryAuthz.mockRejectedValue(authzError);
+      options.rulePayload = {
+        response_actions: [{ action_type_id: '.osquery', params: { pack_id: 'admin-pack' } }],
+      } as typeof options.rulePayload;
+
+      await expect(validateRuleResponseActions(options)).rejects.toMatchObject({
+        statusCode: 403,
+      });
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith(
+        expect.objectContaining({ pack_id: 'admin-pack' })
+      );
+    });
+
+    it('should not re-authorize an unchanged pack action when another rule field is edited', async () => {
+      // An author who lost Packs read access must still be able to edit the rest of the rule.
+      mockOsqueryAuthz.mockRejectedValue(new Error('should not be called'));
+      options.rulePayload = {
+        response_actions: [{ action_type_id: '.osquery', params: { pack_id: 'admin-pack' } }],
+      } as typeof options.rulePayload;
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { packId: 'admin-pack' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
       expect(mockOsqueryAuthz).not.toHaveBeenCalled();
     });
 

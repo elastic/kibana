@@ -17,6 +17,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/logging",
     "@kbn/es-types",
     "@kbn/es-errors",
     "@kbn/core-test-helpers-kbn-server",

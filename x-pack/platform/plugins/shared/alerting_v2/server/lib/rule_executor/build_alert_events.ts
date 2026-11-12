@@ -7,7 +7,6 @@
 
 import { createHash } from 'crypto';
 
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertEventSeverity, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertEventDocument, AlertEventType } from '../../resources/datastreams/alert_events';
@@ -39,6 +38,13 @@ export const resolveAlertEventType = (rule: Pick<RuleResponse, 'kind'>): AlertEv
     }
   }
 };
+
+/**
+ * `source` of every alert event the rule executor writes. The
+ * `alerting.alertStatusChanged` trigger reports it as `event.source`, so the
+ * two must not drift apart.
+ */
+export const RULE_EXECUTION_SOURCE = 'internal';
 
 const SEVERITY_COLUMN = 'severity';
 const SUPPORTED_SEVERITIES = new Set<AlertEventSeverity>(
@@ -139,7 +145,7 @@ export function createAlertEventsBatchBuilder({
   maxGroupsPerExecution,
   activeGroupHashes = new Set<string>(),
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
-  const source = 'internal';
+  const source = RULE_EXECUTION_SOURCE;
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const hasGroupingFields = groupingFields.length > 0;
   const groupHashes = new Set<string>();
@@ -236,7 +242,7 @@ export function buildRecoveryAlertEvents({
         group_hash,
         data: {},
         status: 'recovered',
-        source: 'internal',
+        source: RULE_EXECUTION_SOURCE,
         type,
         space_id: spaceId,
       })
@@ -272,7 +278,7 @@ export function buildContinuedBreachAlertEvents({
     group_hash: groupHash,
     data: {},
     status: 'breached' as const,
-    source: 'internal',
+    source: RULE_EXECUTION_SOURCE,
     type,
     space_id: spaceId,
   }));
@@ -306,21 +312,10 @@ export function buildNoDataAlertEvents({
     group_hash: groupHash,
     data: {},
     status: 'no_data' as const,
-    source: 'internal',
+    source: RULE_EXECUTION_SOURCE,
     type,
     space_id: spaceId,
   }));
-}
-
-export function rowToDocument(
-  columns: EsqlQueryResponse['columns'],
-  row: unknown[]
-): Record<string, unknown> {
-  const doc: Record<string, unknown> = {};
-  for (let i = 0; i < columns.length; i++) {
-    doc[columns[i].name] = row[i];
-  }
-  return doc;
 }
 
 export interface BuildQueryRecoveryAlertEventsOpts {
@@ -330,7 +325,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   ruleAttributes: Pick<RuleResponse, 'grouping'>;
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: ReadonlySet<string>;
-  esqlResponse: EsqlQueryResponse;
+  rows: Array<Record<string, unknown>>;
   scheduledTimestamp: string;
   type: AlertEventType;
 }
@@ -350,14 +345,11 @@ export function buildQueryRecoveryAlertEvents({
   ruleAttributes,
   activeGroupHashes,
   breachedGroupHashes,
-  esqlResponse,
+  rows,
   scheduledTimestamp,
   type,
 }: BuildQueryRecoveryAlertEventsOpts): AlertEventDocument[] {
-  const columns = esqlResponse.columns ?? [];
-  const values = esqlResponse.values ?? [];
-
-  if (columns.length === 0 || values.length === 0) {
+  if (rows.length === 0) {
     return [];
   }
 
@@ -367,8 +359,7 @@ export function buildQueryRecoveryAlertEvents({
   // Keep the first matching row's data per group hash.
   const recoveredByGroupHash = new Map<string, Record<string, unknown>>();
 
-  for (let i = 0; i < values.length; i++) {
-    const rowDoc = rowToDocument(columns, values[i]);
+  for (const rowDoc of rows) {
     const groupHash = buildGroupHash({ rowDoc, groupKeyFields: groupingFields });
 
     if (
@@ -391,7 +382,7 @@ export function buildQueryRecoveryAlertEvents({
       group_hash: groupHash,
       data,
       status: 'recovered',
-      source: 'internal',
+      source: RULE_EXECUTION_SOURCE,
       type,
       space_id: spaceId,
     })

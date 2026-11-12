@@ -9,15 +9,23 @@ import type {
   ApplicationStart,
   CoreSetup,
   CoreStart,
+  IUiSettingsClient,
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { Observable } from 'rxjs';
 import { of, from } from 'rxjs';
 import { map, catchError } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
+import {
+  STREAMS_FEATURE_ID,
+  STREAMS_UI_PRIVILEGES,
+  STREAMS_V2_FEATURE_ID,
+  STREAMS_V2_UI_PRIVILEGES,
+} from '../common/constants';
 import type {
   ClassicStreamsStatus,
   StreamsNavigationStatus,
@@ -67,6 +75,7 @@ export class Plugin implements StreamsPluginClass {
       navigationStatus$: createStreamsNavigationStatusObservable(
         pluginsStart,
         core.application,
+        core.uiSettings,
         this.isServerless
       ),
       getWiredStatus: async () => {
@@ -118,9 +127,15 @@ const createStreamsNavigationStatusObservable = once(
   (
     deps: StreamsPluginStartDependencies,
     application: ApplicationStart,
+    uiSettings: IUiSettingsClient,
     isServerless: boolean
   ): Observable<StreamsNavigationStatus> => {
-    const hasCapabilities = application.capabilities?.streams?.show;
+    // Either experience is enough for the navigation entry; the app routes to the one granted.
+    // V2 also needs the per-space canvas setting, otherwise the app has nothing to show.
+    const hasCapabilities =
+      application.capabilities?.[STREAMS_FEATURE_ID]?.[STREAMS_UI_PRIVILEGES.show] ||
+      (application.capabilities?.[STREAMS_V2_FEATURE_ID]?.[STREAMS_V2_UI_PRIVILEGES.show] &&
+        uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_CANVAS, false));
     const isServerlessObservability = deps.cloud?.serverless.projectType === 'observability';
     const isServerlessSecurity = deps.cloud?.serverless.projectType === 'security';
 

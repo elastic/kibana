@@ -16,6 +16,9 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
+import type { AlertEpisode } from '../queries/episodes_query';
+import { isSourceEpisode } from '../queries/episodes_query';
+import { withEpisodeWritePrivilege, type CanWriteEpisode } from '../utils/episode_write_privilege';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
@@ -25,17 +28,8 @@ import { createResolveAction } from './resolve';
 import { createUnresolveAction } from './unresolve';
 import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
-import { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
-
-/**
- * Ids of episode actions that are safe to expose to users without write
- * privilege because they do not mutate any episode (e.g. navigation only).
- * Anything not listed here is treated as a write action and hidden from
- * read-only users, so new mutating actions are gated by default.
- */
-export const READ_SAFE_EPISODE_ACTION_IDS: ReadonlySet<string> = new Set([
-  OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
-]);
+import { createOpenInDiscoverAction } from './open_in_discover';
+import { createOpenAlertEventsHistoryAction } from './open_alert_events_history';
 
 export interface EpisodeActionsDeps {
   http: HttpStart;
@@ -55,14 +49,33 @@ export interface EpisodeActionsDeps {
     episodeIsoTimestamp: string;
     ruleId: string;
   }) => string | undefined | Promise<string | undefined>;
+  /** Resolver for the Discover URL containing all rule events for one episode. */
+  getAlertEventsHistoryHref?: (args: {
+    episodeId: string;
+    episodeStart: string;
+    spaceId: string;
+  }) => string | undefined | Promise<string | undefined>;
+  /**
+   * Whether Discover can open an episode's rule-events history. Required with
+   * `getAlertEventsHistoryHref`; omitted or false hides the action.
+   */
+  isAlertEventsHistoryAvailable?: () => boolean;
   additionalDataSource?: EpisodeDataSource;
+  canWriteNativeEpisodes?: boolean;
+  /**
+   * Whether the user may modify a given row owned by `additionalDataSource`, as resolved by that
+   * source's `useWriteAccess`.
+   */
+  canWriteSourceEpisode?: CanWriteEpisode;
 }
 
 export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] => {
-  const { additionalDataSource } = deps;
+  const { additionalDataSource, canWriteNativeEpisodes = false, canWriteSourceEpisode } = deps;
   const ext = (id: string) =>
     additionalDataSource?.actionExtensions?.find((e) => e.actionId === id);
   const actionDeps = { http: deps.http, notifications: deps.notifications };
+  const canWriteEpisode = (episode: AlertEpisode): boolean =>
+    isSourceEpisode(episode) ? canWriteSourceEpisode?.(episode) ?? false : canWriteNativeEpisodes;
 
   return [
     createAckAction(actionDeps, ext('ALERTING_V2_ACK_EPISODE')),
@@ -90,6 +103,17 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     ),
     createEditAssigneeAction(deps),
     createOpenInDiscoverAction(deps),
+    ...(deps.getAlertEventsHistoryHref
+      ? [
+          createOpenAlertEventsHistoryAction({
+            spaces: deps.spaces,
+            getAlertEventsHistoryHref: deps.getAlertEventsHistoryHref,
+            isAvailable: deps.isAlertEventsHistoryAvailable ?? (() => false),
+          }),
+        ]
+      : []),
     ...(additionalDataSource?.createActions?.(deps) ?? []),
-  ].sort((a, b) => a.order - b.order);
+  ]
+    .map((action) => withEpisodeWritePrivilege(action, canWriteEpisode))
+    .sort((a, b) => a.order - b.order);
 };

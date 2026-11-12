@@ -22,6 +22,7 @@ import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
 import { isTimeseriesSourceCommand } from '../commands/definitions/utils/timeseries_check';
+import type { NamedSubquery } from '../commands/definitions/utils/named_subqueries';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -172,7 +173,8 @@ export async function getCurrentQueryAvailableColumns(
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
   getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>,
   originalQueryText: string,
-  unmappedFieldsStrategy?: UnmappedFieldsStrategy
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy,
+  namedSubqueries?: readonly NamedSubquery[]
 ) {
   if (commands.length === 0) {
     return previousPipeFields;
@@ -191,6 +193,7 @@ export async function getCurrentQueryAvailableColumns(
     fromFrom: getFromFields,
     fromPromql: getPromqlFields,
     isTimeseriesSource: isTimeseriesSourceCommand(commands),
+    namedSubqueries,
   };
 
   const previousCommands = commands.slice(0, -1);

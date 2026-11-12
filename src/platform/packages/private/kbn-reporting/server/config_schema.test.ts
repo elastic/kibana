@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import { ConfigSchema } from './config_schema';
 
 describe('Reporting Config Schema', () => {
@@ -109,6 +110,15 @@ describe('Reporting Config Schema', () => {
           },
         }
       `);
+  });
+
+  it('gives serverless task runs room to wait for the page-render-service', () => {
+    expect(ConfigSchema.validate({}, { serverless: true }).queue.timeout).toEqual(
+      moment.duration({ minutes: 5 })
+    );
+    expect(ConfigSchema.validate({}, { serverless: false }).queue.timeout).toEqual(
+      moment.duration({ minutes: 4 })
+    );
   });
 
   it('it should allow image reporting for any non-serverless config', () => {
