@@ -1157,6 +1157,70 @@ describe('authorship and page content', () => {
       'service-archived'
     );
   });
+
+  // Customer 0 `6198c019` Round 2: space-separated service/alert names in the transcript missed
+  // hyphenated slugs, and pages Round 1 corroborated (`conversation_id` without `authored_by`) or
+  // service sub-pages (`enterprise-search-*`) were omitted from `pageBodies`.
+  it('loads corroborated pages, space-separated multi-word slugs, and related service sub-pages on a follow-up', async () => {
+    const servicePage = {
+      ...written('enterprise-search', ['other'], '## Overview\nRails search app.'),
+      title: 'Service: Enterprise Search',
+    };
+    const corroboratedAlert = {
+      id: 'wiki_alert_enterprise-search-failed-transaction-rate',
+      slug: 'enterprise-search-failed-transaction-rate',
+      title: 'Alert: Enterprise Search — Failed Transaction Rate Threshold > 5%',
+      entity_type: 'alert' as const,
+      status: 'established' as const,
+      corroborations: 14,
+      updated_at: '2026-11-06T07:22:00.000Z',
+      conversation_id: 'conversation-1',
+      authored_by: ['earlier-ep'],
+      content: '## Likely causes\n- ES circuit breaker.',
+    };
+    const serviceTopic = {
+      id: 'wiki_topic_enterprise-search-chronic-log-error-mix',
+      slug: 'enterprise-search-chronic-log-error-mix',
+      title: 'Topic: Enterprise Search — Chronic Log Error Mix',
+      entity_type: 'topic' as const,
+      status: 'established' as const,
+      corroborations: 5,
+      updated_at: '2026-11-09T11:47:00.000Z',
+      conversation_id: 'parallel-ep',
+      authored_by: ['parallel-ep'],
+      content: '## Overview\nLogs have no deployment key.',
+    };
+    const unrelated = written('autoops-indexer', ['other'], '## Overview\nAutoOps.');
+    const all = [servicePage, corroboratedAlert, serviceTopic, unrelated];
+    const store = createStore({
+      list: jest.fn().mockResolvedValue({
+        pages: all,
+        stats: { total: all.length, established: 2, total_corroborations: 19 },
+      }),
+      get: jest.fn().mockImplementation(async (id: string) => all.find((page) => page.id === id)),
+    });
+
+    const followUpInput = await optimizeWith({
+      store,
+      roundKind: 'follow_up',
+      userMessage: 'Alert for Enterprise Search recovered; deployment 1ffce804 had 0 500s.',
+    });
+    expect(followUpInput.pageBodies.map(({ slug }: { slug: string }) => slug)).toEqual([
+      'enterprise-search-failed-transaction-rate',
+      'enterprise-search',
+      'enterprise-search-chronic-log-error-mix',
+    ]);
+
+    // An initial round matches space-separated slugs (`Enterprise Search`), without pulling sub-pages.
+    const initialInput = await optimizeWith({
+      store,
+      roundKind: 'initial',
+      userMessage: 'Investigate Enterprise Search latency.',
+    });
+    expect(initialInput.pageBodies.map(({ slug }: { slug: string }) => slug)).toEqual([
+      'enterprise-search',
+    ]);
+  });
 });
 
 describe('applyWikiEdits empty sections', () => {
@@ -1555,6 +1619,28 @@ describe('createLlmProposeWikiEdits prompt', () => {
     );
     expect(input).toContain('slug=payments | service | tentative | payments (0x)\n');
     expect(input).not.toContain('payments (0x) [this investigation]');
+  });
+
+  it('includes a page description in the catalog line when present', async () => {
+    const { input } = await run({
+      messages: [],
+      roundKind: 'follow_up',
+      catalog: [
+        {
+          id: 'wiki_topic_enterprise-search-chronic-log-error-mix',
+          title: 'Topic: Chronic Log Error Mix',
+          description: 'Fleet-shared Rails errors with no deployment key.',
+          entity_type: 'topic',
+          status: 'established',
+          corroborations: 5,
+          updated_at: '2026-11-09T11:47:00.000Z',
+        },
+      ],
+    });
+
+    expect(input).toContain(
+      'slug=enterprise-search-chronic-log-error-mix | topic | established | Topic: Chronic Log Error Mix (5x) — Fleet-shared Rails errors with no deployment key.'
+    );
   });
 
   it('keeps the marker on a page another conversation only corroborated afterwards', async () => {
