@@ -9,13 +9,16 @@ import type { ServiceMapGrouping, ServiceMapGroup } from '../../../../common/ser
 
 /**
  * Local-only preview until the server returns `serviceGrouping` (#300584).
- * Enable with feature flag + URL `?serviceMapMockGrouping=1`.
+ * Enable with feature flag + URL `?serviceMapMockGrouping=1`. Remove in #305107.
  *
  * Groups current map service names by shared name prefix (text before the first
  * `-`, `_`, `.`, `:`, or `/`). Prefixes with one service stay groups of 1 (drawn
  * as ordinary service nodes).
+ *
+ * Filename must not start with `mock_` — that marks the file as tests/mocks and
+ * browser code cannot import it (`@kbn/imports/no_boundary_crossing`).
  */
-export function buildMockServiceGrouping(serviceNames: string[]): ServiceMapGrouping {
+export function buildNamePrefixServiceGrouping(serviceNames: string[]): ServiceMapGrouping {
   const services = [...new Set(serviceNames)].sort((a, b) => a.localeCompare(b));
   const membersByPrefix = new Map<string, string[]>();
 

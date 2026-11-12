@@ -16,7 +16,7 @@ import {
   type ServiceMapNode,
 } from '../../../../common/service_map';
 import { useServiceMapGroupingEnabled } from '../../../hooks/use_service_map_grouping_enabled';
-import { buildMockServiceGrouping } from './mock_service_grouping';
+import { buildNamePrefixServiceGrouping } from './build_name_prefix_grouping';
 import { formatServiceGroupingCountLine } from './format_service_grouping_count_line';
 
 export interface UseServiceMapClosedGroupsResult {
@@ -27,7 +27,7 @@ export interface UseServiceMapClosedGroupsResult {
 
 /**
  * After badge merge: collapse groups of 2+ using API `serviceGrouping`, or a local
- * name-prefix mock when the flag is on and the URL has `serviceMapMockGrouping=1`.
+ * name-prefix preview when the flag is on and the URL has `serviceMapMockGrouping=1`.
  */
 export function useServiceMapClosedGroups({
   nodes,
@@ -40,8 +40,8 @@ export function useServiceMapClosedGroups({
 }): UseServiceMapClosedGroupsResult {
   const isGroupingEnabled = useServiceMapGroupingEnabled();
   const { search } = useLocation();
-  // Local-only preview until #300584 returns serviceGrouping.
-  const mockFromUrl = new URLSearchParams(search).get('serviceMapMockGrouping') === '1';
+  // Local-only preview until #300584 returns serviceGrouping. Remove in #305107.
+  const previewFromUrl = new URLSearchParams(search).get('serviceMapMockGrouping') === '1';
 
   return useMemo(() => {
     if (!isGroupingEnabled) {
@@ -50,8 +50,8 @@ export function useServiceMapClosedGroups({
 
     const grouping =
       serviceGrouping ??
-      (mockFromUrl
-        ? buildMockServiceGrouping(
+      (previewFromUrl
+        ? buildNamePrefixServiceGrouping(
             nodes.filter((n) => isServiceNodeData(n.data)).map((n) => n.data.label)
           )
         : undefined);
@@ -67,5 +67,5 @@ export function useServiceMapClosedGroups({
       edges: grouped.edges,
       countLine: formatServiceGroupingCountLine(grouping, closedGroupCount),
     };
-  }, [nodes, edges, serviceGrouping, isGroupingEnabled, mockFromUrl]);
+  }, [nodes, edges, serviceGrouping, isGroupingEnabled, previewFromUrl]);
 }
