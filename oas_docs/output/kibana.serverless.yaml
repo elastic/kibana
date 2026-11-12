@@ -73036,7 +73036,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+        Stops risk scoring for the space. Removes the risk score data stream, the lookup index and its template, the risk engine configuration, and the risk score maintainer task, and clears risk fields stored on entity documents.
       operationId: CleanUpRiskEngine
       responses:
         '200':
@@ -73204,68 +73204,6 @@ paths:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse'
           description: Unexpected error
       summary: Configure the Risk Engine Saved Object
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/risk_score/engine/schedule_now:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/risk_score/engine/schedule_now</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
-      operationId: ScheduleRiskEngineNow
-      requestBody:
-        content:
-          application/json:
-            examples:
-              emptyRequest:
-                summary: No request body
-                value: {}
-            schema:
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                ScheduleRiskEngineNowResponse:
-                  summary: Successful schedule response
-                  value:
-                    success: true
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskEngineScheduleNowResponse'
-          description: Successful response
-        '400':
-          content:
-            application/json:
-              examples:
-                taskManagerUnavailable:
-                  summary: Task manager is unavailable
-                  value:
-                    message: Task Manager is unavailable, but is required by the risk engine. Please enable the taskManager plugin and try again.
-                    status_code: 400
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
-          description: Task manager is unavailable
-        default:
-          content:
-            application/json:
-              examples:
-                scheduleNowError:
-                  summary: Schedule now failed
-                  value:
-                    full_error: '{}'
-                    message: Internal server error
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse'
-          description: Unexpected error
-      summary: Run the risk scoring engine
       tags:
         - Security Entity Analytics API
       x-metaTags:
@@ -206360,21 +206298,6 @@ components:
         - uploaded
         - failedOperations
         - totalOperations
-    Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
-      type: object
-      properties:
-        full_error:
-          type: string
-        message:
-          type: string
-      required:
-        - message
-        - full_error
-    Security_Entity_Analytics_API_RiskEngineScheduleNowResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
     Security_Entity_Analytics_API_RiskScoreHistoryEntry:
       type: object
       properties:

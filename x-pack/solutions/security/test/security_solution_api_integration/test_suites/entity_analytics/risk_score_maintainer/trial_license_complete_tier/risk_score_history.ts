@@ -8,14 +8,20 @@
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { RISK_SCORE_HISTORY_URL } from '@kbn/security-solution-plugin/common/entity_analytics/risk_score/constants';
-import { deleteAllRiskScores, riskEngineRouteHelpersFactory } from '../../utils';
+import {
+  EntityStoreUtils,
+  cleanUpRiskScoreMaintainer,
+  deleteAllRiskScores,
+  entityMaintainerRouteHelpersFactory,
+} from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
+  const entityStoreUtils = EntityStoreUtils(getService);
+  const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
   const RISK_SCORE_TIME_SERIES_INDEX = 'risk-score.risk-score-default';
   const ENTITY_ID = 'host-test-entity-id';
@@ -98,7 +104,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless @skipInServerlessMKI Risk Score History API', () => {
     before(async () => {
-      await riskEngineRoutes.init();
+      // The history route reads the risk score data stream. There are no source
+      // logs to extract, so do not wait for entity store entities. Install stops
+      // the maintainer before setup, so one synchronous run creates the stream.
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        waitForEntities: false,
+      });
+      await maintainerRoutes.runMaintainerSync('risk-score');
       await seedRiskScoreDoc({
         timestamp: '2026-01-01T00:00:00.000Z',
         scoreNorm: 21,
@@ -141,7 +154,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
     after(async () => {
       await deleteAllRiskScores(log, es);
-      await riskEngineRoutes.cleanUp();
+      await cleanUpRiskScoreMaintainer({ supertest, log });
+      await entityStoreUtils.cleanEngines();
     });
 
     it('returns time-ordered entries for the requested entity only', async () => {
