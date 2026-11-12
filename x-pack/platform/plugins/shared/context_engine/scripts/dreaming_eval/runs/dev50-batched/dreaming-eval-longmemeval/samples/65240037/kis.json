@@ -1,0 +1,2403 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "sample": "65240037",
+  "dest": "ai-index-idx-dreaming-eval-longmemeval",
+  "dumpedAt": "2026-11-12T10:15:27.922Z",
+  "workflowRuns": [
+    {
+      "workflowId": "system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "904d759c-e259-44e8-8c78-1e9d077153c7",
+      "status": "completed",
+      "durationMs": 78,
+      "output": {
+        "relationships_updated": 0,
+        "deleted": 0,
+        "rejected": 0,
+        "resume_after_id": "",
+        "created": 0,
+        "memories": 0,
+        "resume_from": "",
+        "relationships_created": 0,
+        "relationships_rejected": 0,
+        "updated": 0,
+        "relationships_deleted": 0
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "d6640c86-0ea8-43f4-9749-b1e312e61439",
+      "status": "completed",
+      "durationMs": 174321,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 45,
+        "resume_from": "2026-11-12T10:07:24.043Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 243
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "e5e2b29d-84cb-43ab-86da-f287adb5da11",
+      "status": "completed",
+      "durationMs": 119,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 0,
+        "resume_from": "2026-11-12T10:10:24.130Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 0
+      }
+    }
+  ],
+  "counts": {
+    "entity.organization": 2,
+    "entity.place": 8,
+    "fact.plan": 11,
+    "fact.life_event": 15,
+    "fact.preference": 5,
+    "fact.routine": 4
+  },
+  "kis": [
+    {
+      "id": "entity-organization--book-lovers--28fb28525f1329c5",
+      "type": "entity.organization",
+      "title": "Book Lovers",
+      "description": "Facebook book discussion group the user belongs to",
+      "content": "Book Lovers is a Facebook group the user belongs to, where they posted a review of 'The Nightingale' by Kristin Hannah.",
+      "attributes": {
+        "kind": "club",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T04:57:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://4a0527abadf333457e7b9c8c6a066d10",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:39.332Z",
+      "updated_at": "2026-11-12T10:14:39.332Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-organization--foodie-frenzy--28fb28525f1329c5",
+      "type": "entity.organization",
+      "title": "Foodie Frenzy",
+      "description": "Facebook cooking group the user belongs to",
+      "content": "Foodie Frenzy is a Facebook recipe and cooking group the user belongs to, where their chicken parmesan recipe was featured on the group's page.",
+      "attributes": {
+        "kind": "club",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T04:55:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://5a6eefec03eed7a60cf1b07b2ff99b45",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:38.296Z",
+      "updated_at": "2026-11-12T10:14:38.296Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--bella-vita--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Bella Vita",
+      "description": "Italian restaurant the user ordered from",
+      "content": "Bella Vita is an Italian restaurant where the user ordered an amazing veggie lasagna.",
+      "attributes": {
+        "kind": "restaurant",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-21T12:53:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://72cb903ba27efd46d79710067511f232",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://81a978f413a132bd6aeb7ca03c7e5993",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:32.101Z",
+      "updated_at": "2026-11-12T10:14:32.101Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--chicago--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Chicago",
+      "description": "City the user plans to visit for a business meeting",
+      "content": "Chicago is a city the user plans to visit for a business meeting, flying from New York.",
+      "attributes": {
+        "kind": "city",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-21T02:17:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://63389a30efb79befced305e0b55b23b8",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:30.379Z",
+      "updated_at": "2026-11-12T10:14:30.379Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--children-s-museum--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Children's Museum",
+      "description": "Museum where the user volunteered",
+      "content": "The Children's Museum is where the user volunteered for the annual family day event on May 23, 2023.",
+      "attributes": {
+        "kind": "museum",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-23T17:00:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f7b4d2e39630e775301d5ec4e1c96c0d",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://11bd2b21572e75a16312236293208d37",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:33.144Z",
+      "updated_at": "2026-11-12T10:14:33.144Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--costa-rica--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Costa Rica",
+      "description": "Country the user is planning to visit for a family vacation",
+      "content": "Costa Rica is a country where the user's cousin got married in June 2022, and where the user is planning a family winter vacation in December.",
+      "attributes": {
+        "kind": "country",
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-24T01:04:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://cea60919912309638f03d3e4e1846351",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://327cfcacdfa8d26356c1cbf37a6179af",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b544d58d048edffb3a0143c40901122e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:31.085Z",
+      "updated_at": "2026-11-12T10:14:31.085Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--grand-canyon--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Grand Canyon",
+      "description": "National park the user plans to visit on a road trip",
+      "content": "Grand Canyon is a national park the user plans to visit on a road trip in spring 2024.",
+      "attributes": {
+        "kind": "national park",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T21:54:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://73fc9ad721e07332a2f3764b062bb6af",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:34.175Z",
+      "updated_at": "2026-11-12T10:14:34.175Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--pacific-northwest--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Pacific Northwest",
+      "description": "Region the user plans to visit",
+      "content": "The Pacific Northwest is a region the user plans to visit for hiking.",
+      "attributes": {
+        "kind": "region",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T04:47:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://61f643d93592101edd5217cd7382d916",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:37.265Z",
+      "updated_at": "2026-11-12T10:14:37.265Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--the-daily-grind--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "The Daily Grind",
+      "description": "Coffee shop the user frequents",
+      "content": "The Daily Grind is a coffee shop the user frequents and collects stamps on a loyalty card.",
+      "attributes": {
+        "kind": "coffee shop",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-30T05:12:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3229e250d16877c9ecf7e8f0ec48874c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:36.234Z",
+      "updated_at": "2026-11-12T10:14:36.234Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--yellowstone--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Yellowstone",
+      "description": "National park the user plans to visit on a road trip",
+      "content": "Yellowstone is a national park the user plans to visit on a road trip in spring 2024.",
+      "attributes": {
+        "kind": "national park",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T21:54:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://73fc9ad721e07332a2f3764b062bb6af",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:35.197Z",
+      "updated_at": "2026-11-12T10:14:35.197Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-0acd24e620ccc196",
+      "type": "fact.plan",
+      "title": "Planned business trip to Chicago",
+      "content": "The user is planning a trip to Chicago for a business meeting, flying from New York.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-21T02:17:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://63389a30efb79befced305e0b55b23b8",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:41.404Z",
+      "updated_at": "2026-11-12T10:14:41.404Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-15e6f70aaea0bf43",
+      "type": "fact.life_event",
+      "title": "Moved to new apartment",
+      "content": "The user moved into a new apartment around May 5, 2023, resulting in a shorter commute.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-26T21:52:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://b11683fa7616a50f5e937805397a9ecc",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://1fd1d01ac49f93d757ef97a2b553b2f5",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:57.978Z",
+      "updated_at": "2026-11-12T10:14:57.978Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-1c12fa5d8e1ae3a6",
+      "type": "fact.preference",
+      "title": "Favorite fashion store Madewell",
+      "content": "Madewell is one of the user's favorite fashion stores.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-25T16:34:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://17d30b3738a6d02577feed6fb52cbc48",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:51.786Z",
+      "updated_at": "2026-11-12T10:14:51.786Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-1ccae141a389749f",
+      "type": "fact.plan",
+      "title": "Plan to visit Pacific Northwest",
+      "content": "The user plans to take a trip to the Pacific Northwest for hiking.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T04:47:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://61f643d93592101edd5217cd7382d916",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:07.296Z",
+      "updated_at": "2026-11-12T10:15:07.296Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-2a8e080103996073",
+      "type": "fact.plan",
+      "title": "Plan for morning meditation routine",
+      "content": "The user plans to start a routine of 5-minute guided meditation sessions 3 times a week using the Headspace app.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-30T06:09:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://0198a32ebcb50c216ef47e8748ba4cbc",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:13.512Z",
+      "updated_at": "2026-11-12T10:15:13.512Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-35e6b4f146ccb8d0",
+      "type": "fact.life_event",
+      "title": "Started collecting vintage postcards",
+      "content": "The user started collecting vintage postcards around April 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-23T06:01:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f3e23e7a47a028fb9fe940bc3fe6b2d3",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:45.586Z",
+      "updated_at": "2026-11-12T10:14:45.586Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-398c13e98af10458",
+      "type": "fact.routine",
+      "title": "Skincare routine every other night",
+      "content": "The user applies face masks and moisturizes skin every other night as part of their self-care routine.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T06:04:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://aac0342a9709aa5cf404b8936d73309c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:55.905Z",
+      "updated_at": "2026-11-12T10:14:55.905Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-3f3d3bb2c3daa044",
+      "type": "fact.plan",
+      "title": "Birthday BBQ party plan",
+      "content": "The user's birthday is in June, and they plan to celebrate with a BBQ party serving smoked ribs.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-25T20:41:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://be3682de9d96056001f3c3b5d03404ea",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://716f978ce7c5dd88a38e91a080417872",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:52.814Z",
+      "updated_at": "2026-11-12T10:14:52.814Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-4369af0f82e96952",
+      "type": "fact.plan",
+      "title": "Planned vacation in August 2023",
+      "content": "The user is planning a vacation in August 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-25T16:26:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://cf05a8ff382643576b091acbb44f1136",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:50.750Z",
+      "updated_at": "2026-11-12T10:14:50.750Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-44fe5e51a480f6ce",
+      "type": "fact.life_event",
+      "title": "Attended May 1 pride parade",
+      "content": "The user attended a pride parade in their city on May 1, 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-29T21:15:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://ea830f87e916a205d6d25653c44a5a19",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f12e37d10af6ed6dfaba847ca1fbf738",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:10.390Z",
+      "updated_at": "2026-11-12T10:15:10.390Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-49064b75585f1ddc",
+      "type": "fact.life_event",
+      "title": "Won Gordon Ramsay cookbook giveaway",
+      "content": "The user won a giveaway for a Gordon Ramsay cookbook in May 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T04:53:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://c565e1149ee1c723837edcff98fbe957",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:08.321Z",
+      "updated_at": "2026-11-12T10:15:08.321Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-493df0d1b3a39b06",
+      "type": "fact.life_event",
+      "title": "Purchase of commuter backpack on January 15",
+      "content": "The user purchased a commuter backpack on January 15 at an outdoor gear store downtown.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-30T14:38:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://db2a0376115e92ffa4195caf8737a1a0",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:15.600Z",
+      "updated_at": "2026-11-12T10:15:15.600Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-4c6fa6ac6de19ecc",
+      "type": "fact.plan",
+      "title": "Plan to visit family for holidays",
+      "content": "The user plans to take a trip to visit family for the holidays.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-26T21:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://b11683fa7616a50f5e937805397a9ecc",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://c3e9a3c22b8a9daae6e604013ff71036",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:00.052Z",
+      "updated_at": "2026-11-12T10:15:00.052Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-4e6664ba808e6852",
+      "type": "fact.plan",
+      "title": "Plan to organize closet",
+      "content": "The user plans to organize their closet over the weekend of May 27-28, 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T20:26:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://dcaf5627458258758f78ede91574c989",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:56.943Z",
+      "updated_at": "2026-11-12T10:14:56.943Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-53ec4b7edb62c140",
+      "type": "fact.life_event",
+      "title": "Purchase of black leather purse in 2020",
+      "content": "The user bought a black leather purse on sale at the mall in 2020.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-30T14:40:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://43ef1c70c592e29687892cb70340e8e1",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://1896ab56b86b2c06750c07cb4d49605c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:14.560Z",
+      "updated_at": "2026-11-12T10:15:14.560Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-62071e879c033ae3",
+      "type": "fact.plan",
+      "title": "Plan for dinner party with homemade bread",
+      "content": "The user plans to host a dinner party on the weekend of June 3-4, 2023, and make homemade bread for the meal.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T02:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://4caf9b5de8190c313edeb5c54834dfaf",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:05.224Z",
+      "updated_at": "2026-11-12T10:15:05.224Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-62fc5fd299cfdee3",
+      "type": "fact.life_event",
+      "title": "Volunteering at Children's Museum family day",
+      "content": "The user volunteered at the Children's Museum for their annual family day event on May 23, 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-23T16:54:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f7b4d2e39630e775301d5ec4e1c96c0d",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:46.633Z",
+      "updated_at": "2026-11-12T10:14:46.633Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-6e021349b9f2cc8e",
+      "type": "fact.life_event",
+      "title": "Cousin's wedding in Costa Rica",
+      "content": "The user's cousin got married in Costa Rica in June 2022.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-24T00:56:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://cea60919912309638f03d3e4e1846351",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:47.663Z",
+      "updated_at": "2026-11-12T10:14:47.663Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-70d1eb3edcf304be",
+      "type": "fact.preference",
+      "title": "Appreciation for The Nightingale",
+      "content": "The user loved the historical fiction novel 'The Nightingale' by Kristin Hannah.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-28T04:57:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f0cb668ca52e3a7a17e41381d24362a4",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://4a0527abadf333457e7b9c8c6a066d10",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:53.853Z",
+      "updated_at": "2026-11-12T10:14:53.853Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-71c352cf7dbb16ad",
+      "type": "fact.life_event",
+      "title": "Rejoined old gym",
+      "content": "The user rejoined their old gym in April 2023 and established a regular exercise routine.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T21:50:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3d5e508dafd383d7efe7a50f654e4753",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:59.013Z",
+      "updated_at": "2026-11-12T10:14:59.013Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-7830ed3aaeea2a55",
+      "type": "fact.life_event",
+      "title": "Blogger social media challenge collaboration",
+      "content": "The user collaborated with a fellow blogger on a social media challenge in April 2023, gaining a 50% increase in followers and a brand partnership.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-27T23:13:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://015298257e1b23ac17311264bc6741f2",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:04.204Z",
+      "updated_at": "2026-11-12T10:15:04.204Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-8386da18916b5f61",
+      "type": "fact.routine",
+      "title": "Frequent Shipt grocery orders",
+      "content": "The user frequently orders groceries through Shipt, having placed approximately 8 orders between April and May 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T10:11:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://87b07af8666c4081dc989ad4a216d5bc",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:09.355Z",
+      "updated_at": "2026-11-12T10:15:09.355Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-8f8de48922949ef3",
+      "type": "fact.life_event",
+      "title": "Work flights between New York and Los Angeles",
+      "content": "The user flew from New York to Los Angeles two times for work between April 21 and May 21, 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-21T02:09:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://2a8a3dac9b4d2c40a4199d6cfca07e20",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:40.369Z",
+      "updated_at": "2026-11-12T10:14:40.369Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-99b3ca45898813fa",
+      "type": "fact.life_event",
+      "title": "Started farm fencing project",
+      "content": "The user started a fencing project on their farm in April 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-27T08:26:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://22d592d032c7ebc0c7ad9c494af9793e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:03.158Z",
+      "updated_at": "2026-11-12T10:15:03.158Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-a3e8c7383cfd5542",
+      "type": "fact.preference",
+      "title": "Preference for local mill bread flour",
+      "content": "The user prefers using bread flour from a local mill for baking bread.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T03:02:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://ee3893d52d116b7ffaef133586e62bcb",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:06.260Z",
+      "updated_at": "2026-11-12T10:15:06.260Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-bfc1c9b34456500d",
+      "type": "fact.plan",
+      "title": "Planning December family winter vacation",
+      "content": "The user is planning a family winter vacation in December, considering Costa Rica.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-05-24T01:04:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://db22c300be6126aab3294532d758dfad",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://cea60919912309638f03d3e4e1846351",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b9def58455576f52b64ca4ae97796a3f",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b544d58d048edffb3a0143c40901122e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:49.716Z",
+      "updated_at": "2026-11-12T10:14:49.716Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-d86e9a800a160577",
+      "type": "fact.routine",
+      "title": "Regular Target shopping and RedCard membership",
+      "content": "The user regularly shops at Target and is a member of the Target RedCard loyalty program.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-30T05:20:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://ea2a24fbacb96f20d34a04d6e0d4a156",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:12.478Z",
+      "updated_at": "2026-11-12T10:15:12.478Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-e0e37f32eac947dc",
+      "type": "fact.preference",
+      "title": "Use of reusable beeswax wraps",
+      "content": "The user uses reusable beeswax wraps instead of plastic wrap for storing food.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-22T03:09:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://cf4b31075e014ec476083c4096248bc1",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:43.474Z",
+      "updated_at": "2026-11-12T10:14:43.474Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-e61a8fb13790c701",
+      "type": "fact.plan",
+      "title": "Spring 2024 western national parks road trip plan",
+      "content": "The user plans to take a road trip in spring 2024 to visit national parks in the western US, including the Grand Canyon and Yellowstone.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T21:54:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://73fc9ad721e07332a2f3764b062bb6af",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:01.087Z",
+      "updated_at": "2026-11-12T10:15:01.087Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-e834ef0ba45ab04c",
+      "type": "fact.life_event",
+      "title": "Return to scale model building hobby",
+      "content": "The user returned to building scale models after a two-year break, inspired by a YouTube video of a USS Arizona model.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-23T03:16:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://82ce9bf739b381f076dc1168ed62656e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:44.523Z",
+      "updated_at": "2026-11-12T10:14:44.523Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-f88b3e5a7137b178",
+      "type": "fact.life_event",
+      "title": "Family reunion at aunt's house",
+      "content": "The user attended a family reunion in April 2023 at their aunt's house in the suburbs.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-24T01:04:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://cea60919912309638f03d3e4e1846351",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b544d58d048edffb3a0143c40901122e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:48.696Z",
+      "updated_at": "2026-11-12T10:14:48.696Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-fb363b7038a471d4",
+      "type": "fact.routine",
+      "title": "Nightly meditation and journaling routine",
+      "content": "The user meditates and journals around 10:30 PM right before bed as part of their nightly wind-down routine.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T06:00:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://0a7726215d95fa9e4849f7b9c30f3beb",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:54.890Z",
+      "updated_at": "2026-11-12T10:14:54.890Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-fc1350ecad79ba40",
+      "type": "fact.life_event",
+      "title": "Instagram shoutout from FitnessBliss",
+      "content": "The user received a shoutout from the official #FitnessBliss Instagram account in May 2023, gaining 5 followers.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-29T22:44:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e69b4e485c808545dcab6e3d9dc3f73c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:11.443Z",
+      "updated_at": "2026-11-12T10:15:11.443Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-fe88c1c76992a8ee",
+      "type": "fact.plan",
+      "title": "Horse vaccinations due in June 2023",
+      "content": "Vaccinations for all horses on the user's farm are due in June 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-27T08:22:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://1c5a4d6627fd4850f5b31a24f97c1789",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://c9c89491ced774c9afeb00938b30b0f7",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:15:02.113Z",
+      "updated_at": "2026-11-12T10:15:02.113Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-fec6b0257644c337",
+      "type": "fact.preference",
+      "title": "Preference for Bella Vita veggie lasagna",
+      "content": "The user loved the veggie lasagna from Bella Vita restaurant.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-21T12:53:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://72cb903ba27efd46d79710067511f232",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://81a978f413a132bd6aeb7ca03c7e5993",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:14:42.440Z",
+      "updated_at": "2026-11-12T10:14:42.440Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "9a7447c5-f5ca-4139-8672-fa28de500906",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    }
+  ],
+  "dreamedInRun": "dev50-rest"
+}

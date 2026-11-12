@@ -1,0 +1,1463 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "sample": "0ea62687",
+  "dest": "ai-index-idx-dreaming-eval-longmemeval",
+  "dumpedAt": "2026-11-12T10:37:46.259Z",
+  "workflowRuns": [
+    {
+      "workflowId": "system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "76731cfe-0147-48fd-b38f-716d34ac233f",
+      "status": "completed",
+      "durationMs": 71,
+      "output": {
+        "relationships_updated": 0,
+        "deleted": 0,
+        "rejected": 0,
+        "resume_after_id": "",
+        "created": 0,
+        "memories": 0,
+        "resume_from": "",
+        "relationships_created": 0,
+        "relationships_rejected": 0,
+        "updated": 0,
+        "relationships_deleted": 0
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "d9a6b2d7-530f-4bbf-933b-36c4e9bd697b",
+      "status": "completed",
+      "durationMs": 152171,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 25,
+        "resume_from": "2026-11-12T10:30:07.186Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 227
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "34b1a88a-51bf-41e2-9873-a21b44082f58",
+      "status": "completed",
+      "durationMs": 106,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 0,
+        "resume_from": "2026-11-12T10:32:42.200Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 0
+      }
+    }
+  ],
+  "counts": {
+    "entity.person": 7,
+    "entity.place": 5,
+    "fact.plan": 4,
+    "fact.life_event": 5,
+    "fact.preference": 1,
+    "fact.routine": 3
+  },
+  "kis": [
+    {
+      "id": "entity-person--alex--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Alex",
+      "description": "Friend and fishing buddy of the user.",
+      "content": "Alex is a friend of the user who went on a fishing trip to Lake Michigan with the user and Tom on August 15th.",
+      "attributes": {
+        "role": "friend",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-28T16:48:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e14265cf958bcdd7f3149c85922043dc",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://aa257147e6c6616da3484df97b55597e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:14.326Z",
+      "updated_at": "2026-11-12T10:37:14.326Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--david--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "David",
+      "description": "Freelancer friend met at a project management workshop.",
+      "content": "David is a freelancer and a friend of the user whom the user met at a 3-day Agile project management workshop at the Marriott hotel in April 2023.",
+      "attributes": {
+        "role": "friend",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-20T03:34:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://6a80648040dce38da62db44d503c666b",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:08.692Z",
+      "updated_at": "2026-11-12T10:37:08.692Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--ethan--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Ethan",
+      "description": "Fraternal twin son of the user's cousin Rachel.",
+      "content": "Ethan is one of the fraternal twin sons born to the user's cousin Rachel in April 2023, and the twin brother of Lucas.",
+      "attributes": {
+        "role": "cousin's son",
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-28T02:29:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://770693a1e999e44c64f08cba07cb7f68",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://06e5b048eccb7402cd71dcc25ae01376",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://289258fd13135ea8f75dea028348ea30",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:11.263Z",
+      "updated_at": "2026-11-12T10:37:11.263Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--lucas--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Lucas",
+      "description": "Fraternal twin son of the user's cousin Rachel.",
+      "content": "Lucas is one of the fraternal twin sons born to the user's cousin Rachel in April 2023, and the twin brother of Ethan.",
+      "attributes": {
+        "role": "cousin's son",
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-28T02:29:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://770693a1e999e44c64f08cba07cb7f68",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://06e5b048eccb7402cd71dcc25ae01376",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://289258fd13135ea8f75dea028348ea30",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:12.290Z",
+      "updated_at": "2026-11-12T10:37:12.290Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--rachel-colleague--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Rachel (Colleague)",
+      "description": "Colleague who celebrated her Ph.D. graduation.",
+      "content": "Rachel is a colleague of the user whose Ph.D. graduation was celebrated at the office on June 15, 2022.",
+      "attributes": {
+        "role": "colleague",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-30T08:28:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://005fcfaf01099715f194c367f854fec3",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://fac11e51ab31c86997c9b9cf2201f7ac",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:15.349Z",
+      "updated_at": "2026-11-12T10:37:15.349Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--rachel-cousin--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Rachel (Cousin)",
+      "description": "Cousin who gave birth to fraternal twin boys.",
+      "content": "Rachel is the user's cousin who gave birth to fraternal twin boys, Ethan and Lucas, in April 2023.",
+      "attributes": {
+        "role": "cousin",
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-05-28T02:29:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://9ededaa7bee562b0462e59a7e849d69d",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://770693a1e999e44c64f08cba07cb7f68",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://06e5b048eccb7402cd71dcc25ae01376",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://289258fd13135ea8f75dea028348ea30",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:10.215Z",
+      "updated_at": "2026-11-12T10:37:10.215Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--tom--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Tom",
+      "description": "Friend and fishing buddy of the user.",
+      "content": "Tom is a friend of the user who went on a fishing trip to Lake Michigan with the user and Alex on August 15th.",
+      "attributes": {
+        "role": "friend",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-28T16:48:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e14265cf958bcdd7f3149c85922043dc",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://aa257147e6c6616da3484df97b55597e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:13.307Z",
+      "updated_at": "2026-11-12T10:37:13.307Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--dolomites--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Dolomites",
+      "description": "Mountain range in Italy where the user plans to hike.",
+      "content": "The Dolomites is a mountainous region in Italy where the user plans to hike during their solo backpacking trip.",
+      "attributes": {
+        "kind": "mountain range",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T19:09:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://fb70f689e93274982296e645f41144ec",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:20.518Z",
+      "updated_at": "2026-11-12T10:37:20.518Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--italy--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Italy",
+      "description": "Country destination for the user's solo backpacking and hiking trip.",
+      "content": "Italy is a country the user plans to visit on a two-week solo backpacking and hiking trip across the Dolomites, Amalfi Coast, and Cinque Terre.",
+      "attributes": {
+        "kind": "country",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-26T19:11:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://4b3e04c266ce330d1cae97699b11ec60",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://922953ad23c061c9e052d66bf958df44",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:19.482Z",
+      "updated_at": "2026-11-12T10:37:19.482Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--lake-michigan--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Lake Michigan",
+      "description": "Lake in Wisconsin where the user fishes.",
+      "content": "Lake Michigan is a lake in Wisconsin where the user fished with friends Tom and Alex and plans to take another fishing trip.",
+      "attributes": {
+        "kind": "lake",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-28T16:48:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e14265cf958bcdd7f3149c85922043dc",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://aa257147e6c6616da3484df97b55597e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:18.466Z",
+      "updated_at": "2026-11-12T10:37:18.466Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--oakwood--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Oakwood",
+      "description": "Neighborhood where the user is purchasing a home.",
+      "content": "Oakwood is the neighborhood where the user is buying a home and researching homeowner's and flood insurance.",
+      "attributes": {
+        "kind": "neighborhood",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-29T03:36:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://512866e300c1f08c42864b5807d0e016",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://fef71296950ba241efa42927296576ed",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:16.383Z",
+      "updated_at": "2026-11-12T10:37:16.383Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--yellowstone-national-park--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Yellowstone National Park",
+      "description": "National park destination for the user's photography trip.",
+      "content": "Yellowstone National Park is the destination for an upcoming photography trip planned by the user to photograph scenic views and wildlife.",
+      "attributes": {
+        "kind": "national park",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-30T15:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://147ad9c26f0118ac3922720102d54c30",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f266d88df814f4e06460091067831ce0",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:17.420Z",
+      "updated_at": "2026-11-12T10:37:17.420Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-21e79bc34e05eb99",
+      "type": "fact.plan",
+      "title": "Plan to sell candles and ornaments at City Hall holiday market",
+      "content": "The user plans to sell products, including festive candles and ornaments with a discount on an entire festive candle set, at the upcoming holiday market at City Hall.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-05-23T22:56:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://d1257cc26ec2decf21f435429197437c",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b4da3ff89d2d21543da94c67d4c00f68",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://c73db0e416f760925b3185759bb7a193",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://52d439b329198153d3cbdf0d258e2a2b",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:26.651Z",
+      "updated_at": "2026-11-12T10:37:26.651Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-51ed107b93d3d6ea",
+      "type": "fact.plan",
+      "title": "Plan for solo backpacking trip to Europe and Italy",
+      "content": "The user is planning a two-week (fortnight) solo backpacking and hiking trip to Europe, specifically hiking in Italy across the Dolomites, Amalfi Coast, and Cinque Terre while staying in mountain huts (rifugi).",
+      "attributes": {
+        "memory.number_of_occurrences": 6,
+        "memory.last_seen_at": "2023-05-26T19:13:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a9924cd6aa01479edd9f0d877e2f0e02",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://986fdfe7b79e8e010044f2e1a8c3203d",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://4b3e04c266ce330d1cae97699b11ec60",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://fb70f689e93274982296e645f41144ec",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://922953ad23c061c9e052d66bf958df44",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://26780f5828c81a8e17999df6767b2e57",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:25.611Z",
+      "updated_at": "2026-11-12T10:37:25.611Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-844db62567348a02",
+      "type": "fact.plan",
+      "title": "Plan for fishing trip to Lake Michigan",
+      "content": "The user is planning a fishing trip to Lake Michigan in Wisconsin.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-28T16:44:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e14265cf958bcdd7f3149c85922043dc",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:28.719Z",
+      "updated_at": "2026-11-12T10:37:28.719Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-89e71d49daaa3d9b",
+      "type": "fact.life_event",
+      "title": "Fishing trip to Lake Michigan with Tom and Alex",
+      "content": "The user went on a fishing trip to Lake Michigan in Wisconsin with friends Tom and Alex on August 15th, catching 12 fish including bass and walleye.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-28T16:48:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e14265cf958bcdd7f3149c85922043dc",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://aa257147e6c6616da3484df97b55597e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:32.873Z",
+      "updated_at": "2026-11-12T10:37:32.873Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-912651f7a8f135a6",
+      "type": "fact.preference",
+      "title": "Lactose intolerance dietary preference",
+      "content": "The user is lactose intolerant and prefers foods and snacks that are low in dairy or lactose-free.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-29T12:45:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://61146c62c6296c283ba70b7922b8968c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:24.599Z",
+      "updated_at": "2026-11-12T10:37:24.599Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-b6f46bcbaba67bb9",
+      "type": "fact.life_event",
+      "title": "Home purchase in Oakwood neighborhood",
+      "content": "The user is in the process of buying a home in the Oakwood neighborhood and qualified for a $450,000, 30-year fixed mortgage at an interest rate of 3.75% in May 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-29T03:34:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://1f6baa199b7105e5a3bd6268b0fa453f",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://e50d964ba2b772d6ef2292196eac624e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://512866e300c1f08c42864b5807d0e016",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:30.791Z",
+      "updated_at": "2026-11-12T10:37:30.791Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-b70ea319c0875db2",
+      "type": "fact.life_event",
+      "title": "Birth of cousin Rachel's twin boys Ethan and Lucas",
+      "content": "The user's cousin Rachel gave birth to fraternal twin boys, Ethan and Lucas, in April 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-28T02:27:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://9ededaa7bee562b0462e59a7e849d69d",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://770693a1e999e44c64f08cba07cb7f68",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://06e5b048eccb7402cd71dcc25ae01376",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:29.757Z",
+      "updated_at": "2026-11-12T10:37:29.757Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-cc55eed1588197ea",
+      "type": "fact.life_event",
+      "title": "Attendance at Agile project management workshop",
+      "content": "The user attended a 3-day project management workshop on Agile methodology at the Marriott hotel in April 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-20T03:34:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://dbfe0d8730232437ddbd7448550ed34f",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://6a80648040dce38da62db44d503c666b",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:31.831Z",
+      "updated_at": "2026-11-12T10:37:31.831Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-d18986d5768f3f0e",
+      "type": "fact.routine",
+      "title": "Sunday morning basketball routine",
+      "content": "The user plays recreational basketball with friends and acquaintances every Sunday morning at 9:00 AM at the community center court.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-20T08:20:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://9bc479a4c76c21a89ed20dffed3c79de",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://bfce86a746779b7fc7cf26c04f9a1e02",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:21.548Z",
+      "updated_at": "2026-11-12T10:37:21.548Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-e2993f066c2bb2f2",
+      "type": "fact.routine",
+      "title": "Afternoon green tea break routine",
+      "content": "The user takes a green tea break every afternoon at 3:00 PM to clear their head and refocus.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-22T19:51:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://11ba37a479947cdf75305bc296e2fe97",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:23.587Z",
+      "updated_at": "2026-11-12T10:37:23.587Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-e882a44d902f0baf",
+      "type": "fact.plan",
+      "title": "Plan for photography trip to Yellowstone National Park",
+      "content": "The user is planning a photography trip to Yellowstone National Park to photograph scenic views and wildlife using a Nikon D500 camera and a 70-200mm f/2.8 lens.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-30T15:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://147ad9c26f0118ac3922720102d54c30",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f266d88df814f4e06460091067831ce0",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:27.689Z",
+      "updated_at": "2026-11-12T10:37:27.689Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-ef1f40ea4d3a4136",
+      "type": "fact.life_event",
+      "title": "Colleague Rachel's Ph.D. graduation celebration",
+      "content": "The user attended colleague Rachel's Ph.D. graduation celebration held at their office on June 15, 2022.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-30T08:24:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://005fcfaf01099715f194c367f854fec3",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:33.920Z",
+      "updated_at": "2026-11-12T10:37:33.920Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-facff40b882693e0",
+      "type": "fact.routine",
+      "title": "Morning coffee routine",
+      "content": "The user makes a cup of coffee every morning as soon as they wake up.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-22T19:43:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://672bc1a321b703533d1941935bff8449",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:37:22.570Z",
+      "updated_at": "2026-11-12T10:37:22.570Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "91131840-0a21-4436-897e-7f7b672dac81",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    }
+  ],
+  "dreamedInRun": "dev50-rest"
+}

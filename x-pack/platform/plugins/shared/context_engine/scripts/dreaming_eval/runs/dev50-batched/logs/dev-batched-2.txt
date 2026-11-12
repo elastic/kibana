@@ -1,0 +1,119 @@
+ info Stages extract, configure, run, evaluate, ask for dreaming-eval-longmemeval on longmemeval_s (config x-pack/platform/plugins/shared/context_engine/scripts/dreaming_eval/config/default.yaml, run dev-batched-2)
+ info ── extract
+ succ longmemeval_s: 10 samples (e47becba, 118b2229, 7161e7e2, 8a2466db, 0a995998, …), 466 conversations, 2444 rounds, 10 targets → data/context_engine_dreaming_eval/longmemeval_s
+ info ── configure
+ info Turned on contextEngine:enabled in space 'default' and contextEngine:memoryEnabled
+ succ Created AI index 'dreaming-eval-longmemeval' (ai-index-idx-dreaming-eval-longmemeval), dreaming over longmemeval_s; workflows: system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d, system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d
+ succ Updated agent 'dreaming-eval-longmemeval-answerer' with AI index 'dreaming-eval-longmemeval' and tools platform.context_engine.list_ai_indices, platform.context_engine.describe_ai_index, platform.context_engine.query_ai_indices
+ info ── run
+ info dreaming-eval-longmemeval sample e47becba (1/10): imported 273 rounds
+ info dreaming-eval-longmemeval sample e47becba (1/10): deleted 0 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample e47becba (1/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T02:20:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample e47becba (1/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T02:20:00.000Z
+ info   run 1: completed in 59s: rounds 273, created 29, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample e47becba: 29 KIs (entity.person 5, fact.preference 1, fact.life_event 13, fact.plan 2, fact.routine 8) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/e47becba/kis.json
+ info dreaming-eval-longmemeval sample 118b2229 (2/10): imported 241 rounds
+ info dreaming-eval-longmemeval sample 118b2229 (2/10): deleted 29 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample 118b2229 (2/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T03:28:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample 118b2229 (2/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T03:28:00.000Z
+ info   run 1: completed in 48s: rounds 241, created 22, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample 118b2229: 22 KIs (entity.organization 1, entity.person 1, entity.place 2, fact.plan 4, fact.routine 4, fact.life_event 6, fact.preference 4) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/118b2229/kis.json
+ info dreaming-eval-longmemeval sample 7161e7e2 (3/10): imported 273 rounds
+ info dreaming-eval-longmemeval sample 7161e7e2 (3/10): deleted 22 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample 7161e7e2 (3/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T01:29:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample 7161e7e2 (3/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T01:29:00.000Z
+ info   run 1: completed in 127s: rounds 273, created 28, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample 7161e7e2: 28 KIs (entity.person 1, entity.place 1, entity.user 1, fact.preference 4, fact.life_event 10, fact.routine 7, fact.plan 4) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/7161e7e2/kis.json
+ info dreaming-eval-longmemeval sample 8a2466db (4/10): imported 250 rounds
+ info dreaming-eval-longmemeval sample 8a2466db (4/10): deleted 28 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample 8a2466db (4/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T02:21:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample 8a2466db (4/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T02:21:00.000Z
+ info   run 1: completed in 186s: rounds 250, created 55, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample 8a2466db: 55 KIs (entity.person 1, entity.place 5, entity.user 1, fact.plan 12, fact.life_event 25, fact.preference 6, fact.routine 5) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/8a2466db/kis.json
+ info dreaming-eval-longmemeval sample 0a995998 (5/10): imported 242 rounds
+ info dreaming-eval-longmemeval sample 0a995998 (5/10): deleted 55 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample 0a995998 (5/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-02-15T01:40:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample 0a995998 (5/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-02-15T01:40:00.000Z
+ info   run 1: completed in 132s: rounds 242, created 30, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample 0a995998: 30 KIs (entity.organization 3, entity.person 1, entity.place 6, fact.preference 2, fact.life_event 7, fact.routine 5, fact.plan 6) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/0a995998/kis.json
+ info dreaming-eval-longmemeval sample 6d550036 (6/10): imported 249 rounds
+ info dreaming-eval-longmemeval sample 6d550036 (6/10): deleted 30 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample 6d550036 (6/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T05:53:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample 6d550036 (6/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-20T05:53:00.000Z
+ info   run 1: completed in 181s: rounds 249, created 46, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample 6d550036: 46 KIs (entity.person 8, entity.place 2, fact.life_event 21, fact.preference 5, fact.plan 7, fact.routine 3) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/6d550036/kis.json
+ info dreaming-eval-longmemeval sample gpt4_59149c77 (7/10): imported 240 rounds
+ info dreaming-eval-longmemeval sample gpt4_59149c77 (7/10): deleted 46 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample gpt4_59149c77 (7/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2022-12-19T12:03:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample gpt4_59149c77 (7/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2022-12-19T12:03:00.000Z
+ info   run 1: completed in 116s: rounds 240, created 27, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample gpt4_59149c77: 27 KIs (entity.place 4, entity.user 1, fact.preference 6, fact.life_event 11, fact.routine 3, fact.plan 2) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/gpt4_59149c77/kis.json
+ info dreaming-eval-longmemeval sample gpt4_f49edff3 (8/10): imported 248 rounds
+ info dreaming-eval-longmemeval sample gpt4_f49edff3 (8/10): deleted 27 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample gpt4_f49edff3 (8/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-01-07T14:57:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample gpt4_f49edff3 (8/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-01-07T14:57:00.000Z
+ info   run 1: completed in 113s: rounds 248, created 35, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample gpt4_f49edff3: 35 KIs (entity.person 2, entity.place 7, fact.plan 5, fact.life_event 15, fact.preference 3, fact.routine 3) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/gpt4_f49edff3/kis.json
+ info dreaming-eval-longmemeval sample 6a1eabeb (9/10): imported 205 rounds
+ info dreaming-eval-longmemeval sample 6a1eabeb (9/10): deleted 35 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample 6a1eabeb (9/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-04-23T08:56:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample 6a1eabeb (9/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-04-23T08:56:00.000Z
+ info   run 1: completed in 126s: rounds 205, created 36, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample 6a1eabeb: 36 KIs (entity.organization 2, entity.person 2, entity.place 5, fact.plan 7, fact.routine 9, fact.life_event 9, fact.preference 2) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/6a1eabeb/kis.json
+ info dreaming-eval-longmemeval sample 6aeb4375 (10/10): imported 232 rounds
+ info dreaming-eval-longmemeval sample 6aeb4375 (10/10): deleted 36 dreamed KIs from ai-index-idx-dreaming-eval-longmemeval
+ info dreaming-eval-longmemeval sample 6aeb4375 (10/10): running system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-23T21:23:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-longmemeval sample 6aeb4375 (10/10): running system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d since 2023-05-23T21:23:00.000Z
+ info   run 1: completed in 143s: rounds 232, created 28, updated 0, deleted 0, rejected 0
+ info   run 2: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-longmemeval sample 6aeb4375: 28 KIs (entity.place 5, entity.user 1, fact.plan 6, fact.preference 4, fact.life_event 10, fact.routine 2) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/samples/6aeb4375/kis.json
+ info ── evaluate
+ info dreaming-eval-longmemeval: judging 10 targets against 336 KIs of 10 samples with .anthropic-claude-4.6-sonnet-chat_completion
+ info   10/10 judged
+ succ dreaming-eval-longmemeval: KIs hold 55.0% (4 covered, 3 partial, 3 missing of 10) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/summary.md
+ info   knowledge-update: 50.0% (1 covered, 1 missing of 2)
+ info   multi-session: 25.0% (1 partial, 1 missing of 2)
+ info   single-session-assistant: 0.0% (1 missing of 1)
+ info   single-session-preference: 50.0% (1 partial of 1)
+ info   single-session-user: 100.0% (2 covered of 2)
+ info   temporal-reasoning: 75.0% (1 covered, 1 partial of 2)
+ info ── ask
+ info dreaming-eval-longmemeval: asking dreaming-eval-longmemeval-answerer 10 questions
+ info   restored the 30 KIs of sample 0a995998
+ info   restored the 22 KIs of sample 118b2229
+ info   restored the 36 KIs of sample 6a1eabeb
+ info   restored the 28 KIs of sample 6aeb4375
+ info   restored the 46 KIs of sample 6d550036
+ info   5/10 answered
+ info   restored the 28 KIs of sample 7161e7e2
+ info   restored the 55 KIs of sample 8a2466db
+ info   restored the 29 KIs of sample e47becba
+ info   restored the 27 KIs of sample gpt4_59149c77
+ info   restored the 35 KIs of sample gpt4_f49edff3
+ info   10/10 answered
+ succ dreaming-eval-longmemeval: dreaming-eval-longmemeval-answerer answered 60.0% (6 correct, 4 incorrect of 10) → data/context_engine_dreaming_eval/runs/dev-batched-2/dreaming-eval-longmemeval/answers.md
+ info   knowledge-update: 50.0% (1 correct, 1 incorrect of 2)
+ info   multi-session: 50.0% (1 correct, 1 incorrect of 2)
+ info   single-session-assistant: 0.0% (1 incorrect of 1)
+ info   single-session-preference: 100.0% (1 correct of 1)
+ info   single-session-user: 100.0% (2 correct of 2)
+ info   temporal-reasoning: 50.0% (1 correct, 1 incorrect of 2)

@@ -1,0 +1,1500 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "sample": "6ade9755",
+  "dest": "ai-index-idx-dreaming-eval-longmemeval",
+  "dumpedAt": "2026-11-12T09:51:00.612Z",
+  "workflowRuns": [
+    {
+      "workflowId": "system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "a5a4d0f9-fd72-487c-bd52-2dbfa0b31985",
+      "status": "completed",
+      "durationMs": 120,
+      "output": {
+        "relationships_updated": 0,
+        "deleted": 0,
+        "rejected": 0,
+        "resume_after_id": "",
+        "created": 0,
+        "memories": 0,
+        "resume_from": "",
+        "relationships_created": 0,
+        "relationships_rejected": 0,
+        "updated": 0,
+        "relationships_deleted": 0
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "b6960565-a6f3-4e15-a3ee-cfb65f5fae2f",
+      "status": "completed",
+      "durationMs": 110459,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 26,
+        "resume_from": "2026-11-12T09:44:03.650Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 252
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "5b31937e-4261-4d0b-9c58-f7817b05cc8f",
+      "status": "completed",
+      "durationMs": 97,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 0,
+        "resume_from": "2026-11-12T09:45:55.960Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 0
+      }
+    }
+  ],
+  "counts": {
+    "entity.organization": 3,
+    "entity.person": 3,
+    "entity.place": 3,
+    "entity.user": 1,
+    "fact.routine": 4,
+    "fact.life_event": 2,
+    "fact.plan": 7,
+    "fact.preference": 3
+  },
+  "kis": [
+    {
+      "id": "entity-organization--serenity-yoga--28fb28525f1329c5",
+      "type": "entity.organization",
+      "title": "Serenity Yoga",
+      "description": "Yoga studio attended by the user",
+      "content": "Serenity Yoga is a yoga studio where the user attends yoga sessions.",
+      "attributes": {
+        "kind": "yoga studio",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-30T15:34:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3cc30a06b389069137fa4064d8868613",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://de75f372ce6fcb60e8dba99e9b028ce4",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:32.105Z",
+      "updated_at": "2026-11-12T09:50:32.105Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-organization--vegan-vibes--28fb28525f1329c5",
+      "type": "entity.organization",
+      "title": "Vegan Vibes",
+      "description": "Vegan restaurant visited by the user",
+      "content": "Vegan Vibes is a restaurant where the user ate and enjoyed their vegan mac and cheese.",
+      "attributes": {
+        "kind": "restaurant",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-22T03:40:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a76aaa367a0237c86ec30bc3b541d668",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:33.161Z",
+      "updated_at": "2026-11-12T09:50:33.161Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-organization--xyz-corporation--28fb28525f1329c5",
+      "type": "entity.organization",
+      "title": "XYZ Corporation",
+      "description": "User's employer",
+      "content": "XYZ Corporation is the company where the user has been employed as a Marketing Specialist for 2 years and 3 months as of May 2023.",
+      "attributes": {
+        "kind": "employer",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-23T03:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://55a2b7902ec6545d37b2639a9523d85b",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:31.065Z",
+      "updated_at": "2026-11-12T09:50:31.065Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--emily--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Emily",
+      "description": "User's friend who is visited in Seattle",
+      "content": "Emily is a friend of the user whom the user visits in Seattle and has taken day trips with to Bainbridge Island.",
+      "attributes": {
+        "role": "friend",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-28T16:44:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://729c58707179fdf0d2ab65ae4608e5f2",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://da7fdb45b2002f637ae12cca01b95597",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:29.011Z",
+      "updated_at": "2026-11-12T09:50:29.011Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--rachel--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Rachel",
+      "description": "User's supervisor at XYZ Corporation",
+      "content": "Rachel is the user's supervisor at XYZ Corporation, to whom the user presents sales data and marketing performance insights.",
+      "attributes": {
+        "role": "supervisor",
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-23T03:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e1a0d1294a899677a13cb1f84d4a0b40",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://7a245f39062d351e71b526ad9a8638e0",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://55a2b7902ec6545d37b2639a9523d85b",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:27.987Z",
+      "updated_at": "2026-11-12T09:50:27.987Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--sarah--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Sarah",
+      "description": "User's best friend and yoga buddy",
+      "content": "Sarah is the user's best friend. The user convinced her to start practicing yoga, and the two have established a regular Sunday morning routine of practicing yoga and going out for brunch together.",
+      "attributes": {
+        "role": "best friend",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-30T15:40:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://2b2af43328ba19a14a57675a8d3512bd",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:30.044Z",
+      "updated_at": "2026-11-12T09:50:30.044Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--japan--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Japan",
+      "description": "Country planned to visit in October 2023",
+      "content": "Japan is a country the user plans to visit for a 7-day trip with 4 friends in mid-October 2023, covering Tokyo, Kyoto, and Osaka.",
+      "attributes": {
+        "kind": "country",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-25T21:05:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://30d8d9183029fc5d3fe8e0fb1db25336",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://1cf46b56fa684914e1c7ee2f6b1a3648",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:36.280Z",
+      "updated_at": "2026-11-12T09:50:36.280Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--paris--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Paris",
+      "description": "City planned to visit in June 2023",
+      "content": "Paris is a destination the user is visiting for their birthday in June 2023, having paid $1,200 upfront for a flight and hotel package.",
+      "attributes": {
+        "kind": "city",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-25T21:07:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://30d8d9183029fc5d3fe8e0fb1db25336",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://c1f852ee76d732ea8cfbc12c6c2fce0e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:35.240Z",
+      "updated_at": "2026-11-12T09:50:35.240Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--seattle--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Seattle",
+      "description": "City visited by the user",
+      "content": "Seattle is a city visited by the user, where the user previously stayed at the Westin Seattle for two nights and plans to visit again to see friend Emily.",
+      "attributes": {
+        "kind": "city",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-28T16:42:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a15f56e8b9503794dd462ecf074a3728",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://729c58707179fdf0d2ab65ae4608e5f2",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:34.195Z",
+      "updated_at": "2026-11-12T09:50:34.195Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-user--smith--28fb28525f1329c5",
+      "type": "entity.user",
+      "title": "Smith",
+      "description": "The user, a Marketing Specialist named Smith",
+      "content": "The user is a Marketing Specialist at XYZ Corporation (employed for 2 years and 3 months as of May 2023) and took the last name Smith after getting married in July 2022.",
+      "attributes": {
+        "name": "Smith",
+        "occupation": "Marketing Specialist",
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-27T02:30:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://55a2b7902ec6545d37b2639a9523d85b",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b83d4bc55701709028fc2abc31241ef2",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://08a46b767e5832d4f66bb01ec7fde5f5",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:26.629Z",
+      "updated_at": "2026-11-12T09:50:26.629Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-1043ca61a71dd493",
+      "type": "fact.routine",
+      "title": "Sunday pancake breakfast routine",
+      "content": "Every Sunday, the user makes pancakes prepared with almond milk and oat flour, topped with fresh berries and maple syrup.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-22T03:46:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://50b06b5bc3cfcf059d43a37ab567b473",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://0766a9590a4204f2b578f4d2f1823208",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:37.337Z",
+      "updated_at": "2026-11-12T09:50:37.337Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-2a127b874a532474",
+      "type": "fact.life_event",
+      "title": "Marriage and surname change in July 2022",
+      "content": "The user got married in July 2022 and changed their last name to Smith.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-27T02:30:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://b83d4bc55701709028fc2abc31241ef2",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://08a46b767e5832d4f66bb01ec7fde5f5",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:41.430Z",
+      "updated_at": "2026-11-12T09:50:41.430Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-2b783a879f605bd4",
+      "type": "fact.plan",
+      "title": "10-day European trip with fiancée in June 2023",
+      "content": "The user plans to go on a 10-day trip to Europe in June 2023 with their fiancée, visiting Rome, Prague, Florence, and Paris on a budget of around $2,000 per person.",
+      "attributes": {
+        "memory.number_of_occurrences": 5,
+        "memory.last_seen_at": "2023-05-26T23:19:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://77760ecc668da911769c41ad81cd7446",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://3a525c572591b6be4277788cf183f477",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://185e4fea093d421e7d6645d2d6d6a79c",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://a2003c359556da488622cb61f95d814b",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://657aced2f8603fcf506fadfab2ae6d45",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:44.496Z",
+      "updated_at": "2026-11-12T09:50:44.496Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-2ca398e18dfb2276",
+      "type": "fact.preference",
+      "title": "Fan of Kansas City Chiefs football team",
+      "content": "The user is a fan of the Kansas City Chiefs NFL football team.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-29T22:55:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://8551849ce938972470d2b755cdd6ae84",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://e67939d7775c2559a827087caba25469",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:49.666Z",
+      "updated_at": "2026-11-12T09:50:49.666Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-4b318ecaca3c025d",
+      "type": "fact.preference",
+      "title": "Preference for vinyasa flow yoga classes",
+      "content": "The user prefers vinyasa flow classes when practicing yoga due to the challenging sequences and internal heat.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-30T15:38:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://0cafac51fb09e00987134a0625d27484",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f265d3e8f6f281024d4a0fd33bc2271a",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:48.645Z",
+      "updated_at": "2026-11-12T09:50:48.645Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-4d891246d7d247ea",
+      "type": "fact.routine",
+      "title": "Daily overnight oats routine",
+      "content": "The user prepares and eats overnight oats made with soy milk and chia seeds as a staple daily routine.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-22T03:42:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f9de427c30208e0ad39e86098dbc5848",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:38.355Z",
+      "updated_at": "2026-11-12T09:50:38.355Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-52bc0bf402f0b7e7",
+      "type": "fact.plan",
+      "title": "Birthday trip to Paris in June 2023",
+      "content": "The user has planned a birthday trip to Paris in June 2023, having already paid $1,200 upfront for a flight and hotel package.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-25T21:07:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://30d8d9183029fc5d3fe8e0fb1db25336",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://c1f852ee76d732ea8cfbc12c6c2fce0e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:43.480Z",
+      "updated_at": "2026-11-12T09:50:43.480Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-aa390f2e6a7705c9",
+      "type": "fact.preference",
+      "title": "Appreciation for Westin Seattle room decor and shower",
+      "content": "The user enjoyed the modern room decor and rainfall showerhead during a two-night stay at the Westin in Seattle.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-28T16:44:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a15f56e8b9503794dd462ecf074a3728",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://da7fdb45b2002f637ae12cca01b95597",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:52.771Z",
+      "updated_at": "2026-11-12T09:50:52.771Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-b4771167181a8eb5",
+      "type": "fact.plan",
+      "title": "Planning an intimate garden and tented wedding",
+      "content": "The user is planning an intimate wedding for around 50 guests, featuring a garden ceremony followed by a tented reception.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-05-25T15:21:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3941bb518e99f5393a6b8689529401bb",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://ebf93681c8d9b3a6de7a874ed8678aea",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://ded622a840f0ec263ecf1d1c3be10e83",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://0a4da074a281afbdc5a3fad7d33007da",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:51.740Z",
+      "updated_at": "2026-11-12T09:50:51.740Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-cb265f45cc0ca84b",
+      "type": "fact.life_event",
+      "title": "User's birthday on March 12",
+      "content": "The user's birthday is on March 12th.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T23:11:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://77760ecc668da911769c41ad81cd7446",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:42.453Z",
+      "updated_at": "2026-11-12T09:50:42.453Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-cd808495ab1c7625",
+      "type": "fact.plan",
+      "title": "7-day trip to Japan with friends in October 2023",
+      "content": "The user is planning a 7-day trip to Japan in mid-October 2023 with 4 friends to visit Tokyo, Kyoto, and Osaka, with an estimated budget of about $2,500 per person excluding flights.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-25T21:05:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://30d8d9183029fc5d3fe8e0fb1db25336",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://1cf46b56fa684914e1c7ee2f6b1a3648",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:45.523Z",
+      "updated_at": "2026-11-12T09:50:45.523Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-d15072246607dc37",
+      "type": "fact.plan",
+      "title": "Exercise routine three times a week",
+      "content": "The user aims to maintain an exercise routine three times a week using an exercise bike and home strength training exercises.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-05-22T12:59:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a5eb3ae8b95b81e1eba6804e8a6200fb",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://bc5b84537a096f47e7162cce6863af16",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://93aac6eec2669e8181d9326b704adf8a",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://56aed5868d904dcfea774c39bc2de843",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:47.620Z",
+      "updated_at": "2026-11-12T09:50:47.620Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-d2a1cb55047ee53f",
+      "type": "fact.routine",
+      "title": "Sunday morning yoga and brunch routine with Sarah",
+      "content": "The user and best friend Sarah have a Sunday morning routine of doing yoga together and going out for brunch.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-30T15:40:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://2b2af43328ba19a14a57675a8d3512bd",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:40.415Z",
+      "updated_at": "2026-11-12T09:50:40.415Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-daaad168195daca8",
+      "type": "fact.plan",
+      "title": "Summer family trip to the beach house",
+      "content": "The user is planning a summer family trip to their beach house, which is approximately a two-hour drive away.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-23T20:43:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://cf0f0d9b7da35ac8f91a3a52b568c6ab",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://5ae14ef08424190f279a80322724bc9e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:50.705Z",
+      "updated_at": "2026-11-12T09:50:50.705Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-e7a956011e0f6769",
+      "type": "fact.routine",
+      "title": "Post-work email and to-do list routine",
+      "content": "After returning home from work, the user usually spends around 30 minutes responding to work emails or making a to-do list.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-27T07:52:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://210c13bafd3ef836c141dd7cf4ec564c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:39.394Z",
+      "updated_at": "2026-11-12T09:50:39.394Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-f782d3d09d9131e0",
+      "type": "fact.plan",
+      "title": "Plan to apply for data analytics certification",
+      "content": "The user plans to apply for a professional certification in data analytics.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-23T03:50:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://740b908afa4e4cb05cf942c7224ae8c1",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T09:50:46.569Z",
+      "updated_at": "2026-11-12T09:50:46.569Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "66876097-4cd5-4397-954e-052e2023d0ae",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    }
+  ],
+  "dreamedInRun": "dev50-rest"
+}

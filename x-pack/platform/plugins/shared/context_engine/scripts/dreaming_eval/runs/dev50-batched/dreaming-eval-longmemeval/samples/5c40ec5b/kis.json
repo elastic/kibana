@@ -1,0 +1,682 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "sample": "5c40ec5b",
+  "dest": "ai-index-idx-dreaming-eval-longmemeval",
+  "dumpedAt": "2026-11-12T11:35:38.539Z",
+  "workflowRuns": [
+    {
+      "workflowId": "system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "fa3cffac-5de1-4d75-a2fd-9c36de740a53",
+      "status": "completed",
+      "durationMs": 102,
+      "output": {
+        "relationships_updated": 0,
+        "deleted": 0,
+        "rejected": 0,
+        "resume_after_id": "",
+        "created": 0,
+        "memories": 0,
+        "resume_from": "",
+        "relationships_created": 0,
+        "relationships_rejected": 0,
+        "updated": 0,
+        "relationships_deleted": 0
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "a5aad627-78af-4ae1-b7d5-0e6b0ec49381",
+      "status": "completed",
+      "durationMs": 120202,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 11,
+        "resume_from": "2026-11-12T11:28:30.420Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 238
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "f668ddfe-3232-4b44-b038-86f13d9c4d61",
+      "status": "completed",
+      "durationMs": 112,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 0,
+        "resume_from": "2026-11-12T11:30:34.470Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 0
+      }
+    }
+  ],
+  "counts": {
+    "entity.person": 2,
+    "entity.place": 2,
+    "fact.life_event": 3,
+    "fact.preference": 2,
+    "fact.plan": 2
+  },
+  "kis": [
+    {
+      "id": "entity-person--alex--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Alex",
+      "description": "Friend from Germany met at a music festival",
+      "content": "Alex is a friend of the user from Germany whom the user met at a music festival. They bonded over a shared love of indie rock music, have met up twice as of September 2023, and plan to meet up again in Berlin.",
+      "attributes": {
+        "role": "Friend",
+        "memory.number_of_occurrences": 5,
+        "memory.last_seen_at": "2023-09-30T12:31:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a05f38348ee7f5fdc3b5fbd2fccafbd8",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://1b2429a9cb67c453feaeb017a4da02ea",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://aacf9ee991b42216c452bef1a95d0472",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f14aaf38672e4f41bb41b1b0dfebbb1e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d2e0ae0d053fcc83488a0d12b66b5361",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:17.268Z",
+      "updated_at": "2026-11-12T11:35:17.268Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--john--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "John",
+      "description": "Retired English teacher met at a book reading",
+      "content": "John is a retired English teacher whom the user met at a local author's book reading and discussed classic novel recommendations.",
+      "attributes": {
+        "role": "Retired English teacher / acquaintance",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-08-11T08:32:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://2b5eafce5017986f6a8c2916504e7624",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:18.001Z",
+      "updated_at": "2026-11-12T11:35:18.001Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--berlin--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Berlin",
+      "description": "Capital city of Germany the user plans to visit",
+      "content": "Berlin is a city in Germany that the user is planning to visit, with plans to explore indie rock venues, record stores, and cafes/bars in Kreuzberg, and meet up with Alex.",
+      "attributes": {
+        "kind": "city",
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-09-30T12:31:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f14aaf38672e4f41bb41b1b0dfebbb1e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://e1ce6c8ceaf6c54ed98ad7efe1aef566",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://181c555451f4426cdc3d387d87f6d62a",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d2e0ae0d053fcc83488a0d12b66b5361",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:19.027Z",
+      "updated_at": "2026-11-12T11:35:19.027Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--germany--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Germany",
+      "description": "Country in Europe the user plans to visit",
+      "content": "Germany is the country where the user's friend Alex is from and where the user is planning an upcoming trip.",
+      "attributes": {
+        "kind": "country",
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-09-30T12:31:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a05f38348ee7f5fdc3b5fbd2fccafbd8",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f14aaf38672e4f41bb41b1b0dfebbb1e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d2e0ae0d053fcc83488a0d12b66b5361",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:20.046Z",
+      "updated_at": "2026-11-12T11:35:20.046Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-06659ffdf837aa9d",
+      "type": "fact.life_event",
+      "title": "Has met up with Alex twice",
+      "content": "As of September 30, 2023, the user has met up with their friend Alex twice since meeting him at a music festival.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-09-30T12:31:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f14aaf38672e4f41bb41b1b0dfebbb1e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d2e0ae0d053fcc83488a0d12b66b5361",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:22.101Z",
+      "updated_at": "2026-11-12T11:35:22.101Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-8fd8d1cd44439728",
+      "type": "fact.preference",
+      "title": "Prefers indie rock, lo-fi, and garage rock music",
+      "content": "The user enjoys indie rock music, specifically the lo-fi and garage rock scene.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-09-30T12:25:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a05f38348ee7f5fdc3b5fbd2fccafbd8",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://e1ce6c8ceaf6c54ed98ad7efe1aef566",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:25.219Z",
+      "updated_at": "2026-11-12T11:35:25.219Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-a5aabdc3d98d931f",
+      "type": "fact.preference",
+      "title": "Prefers indie fiction and magical realism",
+      "content": "The user prefers indie fiction over classic novels and is particularly interested in magical realism.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-08-11T08:36:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://5b01e5c8c12eb726b287ea8049b51eba",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://a05f38348ee7f5fdc3b5fbd2fccafbd8",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:24.179Z",
+      "updated_at": "2026-11-12T11:35:24.179Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-a72e665ce055054d",
+      "type": "fact.plan",
+      "title": "Planning a trip to Germany and Berlin",
+      "content": "As of September 30, 2023, the user is planning an upcoming trip to Germany, visiting Berlin and live music venues in Kreuzberg.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-09-30T12:29:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f14aaf38672e4f41bb41b1b0dfebbb1e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://181c555451f4426cdc3d387d87f6d62a",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:26.256Z",
+      "updated_at": "2026-11-12T11:35:26.256Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-da3fda268ba7bd94",
+      "type": "fact.life_event",
+      "title": "Attended local book reading and met John",
+      "content": "The user attended a book reading by a local author prior to August 11, 2023, and had a conversation with a retired English teacher named John who recommended classic novels.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-08-11T08:32:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://2b5eafce5017986f6a8c2916504e7624",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:23.137Z",
+      "updated_at": "2026-11-12T11:35:23.137Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-fb32b2185236bc74",
+      "type": "fact.life_event",
+      "title": "Met friend Alex at a music festival",
+      "content": "The user met Alex from Germany at a music festival a few weeks prior to August 11, 2023, bonding over a shared love of indie rock music.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-09-30T12:23:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a05f38348ee7f5fdc3b5fbd2fccafbd8",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f14aaf38672e4f41bb41b1b0dfebbb1e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:21.070Z",
+      "updated_at": "2026-11-12T11:35:21.070Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-ff00122b24c7b468",
+      "type": "fact.plan",
+      "title": "Planning to meet Alex in Berlin",
+      "content": "The user plans to meet up with their friend Alex while visiting Berlin to grab a drink and chat at a cafe or bar in Kreuzberg.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-09-30T12:31:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://d2e0ae0d053fcc83488a0d12b66b5361",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:35:27.278Z",
+      "updated_at": "2026-11-12T11:35:27.278Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "f18178fd-f078-4302-b694-bf98f195c5eb",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    }
+  ],
+  "dreamedInRun": "dev50-rest"
+}

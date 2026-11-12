@@ -1,0 +1,1883 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "agentId": "dreaming-eval-longmemeval-answerer",
+  "judgeConnectorId": ".anthropic-claude-4.6-sonnet-chat_completion",
+  "askedAt": "2026-11-12T11:48:06.739Z",
+  "overall": {
+    "targets": 50,
+    "counts": {
+      "correct": 27,
+      "partial": 4,
+      "incorrect": 19,
+      "error": 0
+    },
+    "score": 0.58
+  },
+  "byDataset": {
+    "longmemeval_s": {
+      "targets": 50,
+      "counts": {
+        "correct": 27,
+        "partial": 4,
+        "incorrect": 19,
+        "error": 0
+      },
+      "score": 0.58
+    }
+  },
+  "byCategory": {
+    "knowledge-update": {
+      "targets": 8,
+      "counts": {
+        "correct": 3,
+        "partial": 1,
+        "incorrect": 4,
+        "error": 0
+      },
+      "score": 0.4375
+    },
+    "multi-session": {
+      "targets": 13,
+      "counts": {
+        "correct": 10,
+        "partial": 0,
+        "incorrect": 3,
+        "error": 0
+      },
+      "score": 0.7692307692307693
+    },
+    "single-session-assistant": {
+      "targets": 6,
+      "counts": {
+        "correct": 0,
+        "partial": 0,
+        "incorrect": 6,
+        "error": 0
+      },
+      "score": 0
+    },
+    "single-session-preference": {
+      "targets": 3,
+      "counts": {
+        "correct": 1,
+        "partial": 0,
+        "incorrect": 2,
+        "error": 0
+      },
+      "score": 0.3333333333333333
+    },
+    "single-session-user": {
+      "targets": 7,
+      "counts": {
+        "correct": 5,
+        "partial": 1,
+        "incorrect": 1,
+        "error": 0
+      },
+      "score": 0.7857142857142857
+    },
+    "temporal-reasoning": {
+      "targets": 13,
+      "counts": {
+        "correct": 8,
+        "partial": 2,
+        "incorrect": 3,
+        "error": 0
+      },
+      "score": 0.6923076923076923
+    }
+  },
+  "results": [
+    {
+      "target": {
+        "id": "0a995998",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many items of clothing do I need to pick up or return from a store?",
+        "answer": "3",
+        "askedAt": "2023-02-15T23:50:00.000Z",
+        "evidence": [
+          "answer_afa9873b_2",
+          "answer_afa9873b_3",
+          "answer_afa9873b_1"
+        ]
+      },
+      "answer": "I only have a record of **one** item: the pair of boots you bought from Zara on February 5, 2023 and exchanged for a larger size.\n\nI went through everything stored about you, and there's nothing about any other clothing you need to pick up or return, like dry cleaning, tailoring or other returns. If there are more items, I don't have them, so I can't give you a full total beyond that one.",
+      "conversationId": "cc79b1b2-0369-4d67-ba8f-50813710eec9",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"pick up return clothing store\" OR title:\"pick up return clothing store\" OR description:\"pick up return clothing store\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"clothing items to pick up or return at a store\" OR title.semantic:\"clothing items to pick up or return at a store\" OR description.semantic:\"clothing items to pick up or return at a store\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"boots blazer exchange dry cleaning tailor\" OR title:\"boots blazer exchange dry cleaning tailor\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"exchanged shoes or jacket, need to pick up new size; dry cleaning pickup\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"Zara\" OR content:\"blazer\" OR content:\"dry cleaning\" OR content:\"dry cleaner\" OR content:\"jacket\" OR content:\"shirt\" OR content:\"dress\" OR content:\"jeans\" OR content:\"sweater\" OR content:\"shoes\" OR content:\"pick up\" OR content:\"return\" OR content:\"clothes\" OR content:\"tailor\" OR content:\"size\"\n| KEEP title, content\n| LIMIT 50"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| KEEP title, content\n| LIMIT 200"
+        }
+      ],
+      "durationMs": 20549,
+      "verdict": "incorrect",
+      "reason": "The assistant answered 1 item, while the reference answer is 3.",
+      "sample": "0a995998"
+    },
+    {
+      "target": {
+        "id": "118b2229",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "How long is my daily commute to work?",
+        "answer": "45 minutes each way",
+        "askedAt": "2023-05-30T20:36:00.000Z",
+        "evidence": [
+          "answer_40a90d51"
+        ]
+      },
+      "answer": "Your daily commute to work takes **45 minutes each way**, so about 1.5 hours round trip. You've mentioned listening to audiobooks on Audible during the drive.",
+      "conversationId": "1fea9e65-f8c7-45d2-a712-f396675def8d",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"commute work\" OR title:\"commute\" OR description:\"commute\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"daily commute to work duration\" OR title.semantic:\"daily commute to work duration\" OR description.semantic:\"daily commute to work duration\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"minutes drive train bus office\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"how long it takes the user to get to the office by train or car\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content\n| LIMIT 6"
+        }
+      ],
+      "durationMs": 12619,
+      "verdict": "correct",
+      "reason": "The assistant correctly states the commute is 45 minutes each way, matching the reference answer exactly.",
+      "sample": "118b2229"
+    },
+    {
+      "target": {
+        "id": "6a1eabeb",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "What was my personal best time in the charity 5K run?",
+        "answer": "25 minutes and 50 seconds (or 25:50)",
+        "askedAt": "2023-06-25T13:22:00.000Z",
+        "evidence": [
+          "answer_a25d4a91_1",
+          "answer_a25d4a91_2"
+        ]
+      },
+      "answer": "Your personal best in the charity 5K run is **25:50**. That's the time recorded as of May 30, 2023, when you were training to beat it in an upcoming race. I didn't find a newer result.",
+      "conversationId": "853c282f-30dc-48c3-bbaf-46336d7ce36b",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"charity 5K run personal best time\" OR title:\"charity 5K run personal best time\" OR description:\"charity 5K run personal best time\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"charity 5K run personal best time\" OR title.semantic:\"charity 5K run personal best time\" OR description.semantic:\"charity 5K run personal best time\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"5K race new record finished\" OR title:\"5K race\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"beat my 5K time new personal record race result\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content\n| LIMIT 6"
+        }
+      ],
+      "durationMs": 12976,
+      "verdict": "correct",
+      "reason": "The assistant correctly states the personal best time as 25:50, which matches the reference answer of 25 minutes and 50 seconds.",
+      "sample": "6a1eabeb"
+    },
+    {
+      "target": {
+        "id": "6aeb4375",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "How many Korean restaurants have I tried in my city?",
+        "answer": "four",
+        "askedAt": "2023-10-22T15:38:00.000Z",
+        "evidence": [
+          "answer_3f9693b7_1",
+          "answer_3f9693b7_2"
+        ]
+      },
+      "answer": "I couldn't find this in your saved history, so I don't know how many Korean restaurants you've tried in your city.\n\nThe only Korean food that came up is a dinner party menu you were planning as of September 30, 2023. It included Korean BBQ beef, kimchi and bokkeumbap. The only restaurant visit on record is La Taqueria, a Mexican place you went to three times in June and July 2023.",
+      "conversationId": "f88f56ce-ccc0-4072-97b0-c135dc4066c3",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Korean restaurant\" OR title:\"Korean restaurant\" OR description:\"Korean restaurant\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Korean restaurants I have tried in my city\" OR title.semantic:\"Korean restaurants tried\" OR description.semantic:\"Korean restaurants tried\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"Korean\" OR title:\"Korean\" OR description:\"Korean\" OR content:\"kimchi\" OR content:\"bibimbap\" OR content:\"restaurants\"\n| SORT _score DESC\n| KEEP title, description, content\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content.semantic:\"user has tried several Korean restaurants in their city\" OR content.semantic:\"favorite Korean food spot, Korean BBQ restaurant\" OR content.semantic:\"user's preferences for Asian cuisine and dining out\"\n| SORT _score DESC\n| KEEP title, content\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"cuisine\" OR content:\"restaurant\" OR content:\"dining\" OR content:\"food\" OR content:\"Asian\" OR content:\"tried\"\n| SORT _score DESC\n| KEEP title, content\n| LIMIT 20"
+        }
+      ],
+      "durationMs": 20317,
+      "verdict": "incorrect",
+      "reason": "The assistant's answer does not mention 'four' Korean restaurants and instead claims it couldn't find the information, providing unrelated details.",
+      "sample": "6aeb4375"
+    },
+    {
+      "target": {
+        "id": "6d550036",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many projects have I led or am currently leading?",
+        "answer": "2",
+        "askedAt": "2023-05-30T23:32:00.000Z",
+        "evidence": [
+          "answer_ec904b3c_1",
+          "answer_ec904b3c_4",
+          "answer_ec904b3c_3",
+          "answer_ec904b3c_2"
+        ]
+      },
+      "answer": "**2 projects**, based on what's recorded:\n\n1. **Marketing Research class project.** You led the data analysis team for a market analysis of a new product launch.\n2. **High-priority software engineering project at work.** You finished it two months ahead of schedule, and it brought the company a big revenue increase. The record doesn't say outright that you led it. I counted it because you were promoted to senior software engineer in February 2023 and lead a team of five engineers.\n\nA few other things came up that I didn't count:\n- The **Data Mining class project** you're doing now is a solo project.\n- You're planning to **launch a new product feature in June 2023**, but the record doesn't say you're leading it. If you are, the total would be 3.\n- In the **consulting firm case competition**, you're recorded as taking part, not leading.",
+      "conversationId": "b9759b99-2b58-465f-a46d-4dd8296b1f28",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"led project leading\" OR title:\"project lead\" OR description:\"led project\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"projects the user has led or is currently leading\" OR title.semantic:\"project leadership\" OR description.semantic:\"user leads a project\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, attributes\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"project\" OR title:\"project\" | SORT _score DESC | LIMIT 30 )\n    ( WHERE content.semantic:\"user led the team on a software engineering project or product feature launch\" OR title.semantic:\"leading a project at work\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content, attributes\n| LIMIT 30"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"team lead feature launch ahead of schedule\" OR title:\"lead\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user is in charge of / heading an initiative, group project, or club\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content\n| LIMIT 15"
+        }
+      ],
+      "durationMs": 25778,
+      "verdict": "correct",
+      "reason": "The assistant's final answer is 2 projects, which matches the reference answer, even though it provides additional context and caveats.",
+      "sample": "6d550036"
+    },
+    {
+      "target": {
+        "id": "7161e7e2",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I'm checking our previous chat about the shift rotation sheet for GM social media agents. Can you remind me what was the rotation for Admon on a Sunday?",
+        "answer": "Admon was assigned to the 8 am - 4 pm (Day Shift) on Sundays.",
+        "askedAt": "2023-05-30T20:16:00.000Z",
+        "evidence": [
+          "answer_sharegpt_5Lzox6N_0"
+        ]
+      },
+      "answer": "I don't know. I checked your saved notes several ways, using \"Admon,\" \"shift rotation,\" \"GM social media agents,\" \"Sunday,\" \"schedule\" and \"roster,\" and none of them mention that rotation sheet or Admon's shifts. If you still have the sheet or can paste it here, I can look up Admon's Sunday shift for you.",
+      "conversationId": "93b05d43-4a33-4396-9e51-ac21741fb323",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Admon shift rotation Sunday\" OR title:\"Admon shift rotation\" OR description:\"Admon shift rotation\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Admon shift rotation sheet GM social media agents Sunday\" OR title.semantic:\"shift rotation sheet GM social media agents\" OR description.semantic:\"Admon Sunday shift\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type, tags\n| LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"Admon\" OR title:\"Admon\" OR description:\"Admon\" OR content:\"rotation\" OR content:\"shift\" OR content:\"GM\" OR content:\"agents\"\n| SORT _score DESC\n| KEEP title, description, content, type\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content.semantic:\"work schedule shifts for customer support team members\" OR title.semantic:\"shift schedule\" OR description.semantic:\"social media agents\"\n| SORT _score DESC\n| KEEP title, description, content, type\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"roster\" OR content:\"schedule\" OR content:\"Sunday\" OR content:\"spreadsheet\" OR content:\"social media\" OR content:\"weekly\"\n| SORT _score DESC\n| KEEP title, content, type\n| LIMIT 15"
+        }
+      ],
+      "durationMs": 18911,
+      "verdict": "incorrect",
+      "reason": "The assistant claims it does not have access to the information and cannot provide Admon's Sunday shift, rather than stating it was the 8 am - 4 pm Day Shift.",
+      "sample": "7161e7e2"
+    },
+    {
+      "target": {
+        "id": "8a2466db",
+        "dataset": "longmemeval_s",
+        "category": "single-session-preference",
+        "question": "Can you recommend some resources where I can learn more about video editing?",
+        "answer": "The user would prefer responses that suggest resources specifically tailored to Adobe Premiere Pro, especially those that delve into its advanced settings. They might not prefer general video editing resources or resources related to other video editing software.",
+        "askedAt": "2023-05-30T22:03:00.000Z",
+        "evidence": [
+          "answer_edb03329"
+        ]
+      },
+      "answer": "Your notes say you like using **Adobe Premiere Pro** for video editing, so these resources focus on it:\n\n- **Adobe's own Premiere Pro tutorials** (on Adobe's Help/Learn site): free lessons from the basics up to color, audio and effects.\n- **YouTube channels:** Justin Odisho, Premiere Gal and Cinecom.net all post short, practical Premiere Pro tips and techniques.\n- **Structured courses:** LinkedIn Learning (Premiere Pro Essential Training), Udemy and Skillshare have full Premiere Pro courses for different skill levels.\n- **Book:** *Adobe Premiere Pro Classroom in a Book*, a guided, project-based learning path.\n- **Communities:** r/premiere and r/VideoEditing on Reddit, plus the Adobe Community forums, for troubleshooting and feedback.\n- **Practice footage:** You also do photography, so editing your own clips is good practice. You could try your Yosemite trip footage (shot on your Nikon D750) to work on cutting, color grading and pacing.",
+      "conversationId": "5edee7be-6c13-4dee-9866-15c9218b5a78",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"video editing\" OR title:\"video editing\" OR description:\"video editing\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"video editing software learning\" OR title.semantic:\"video editing\" OR description.semantic:\"video editing\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type, tags\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Premiere OR Final Cut OR DaVinci OR iMovie OR editing\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user's video editing tools, camera, filmmaking, YouTube\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type, tags\n| LIMIT 8"
+        }
+      ],
+      "durationMs": 15947,
+      "verdict": "correct",
+      "reason": "The assistant's answer focuses specifically on Adobe Premiere Pro resources, including advanced settings and techniques, which aligns with the reference answer's preference for Premiere Pro-specific resources.",
+      "sample": "8a2466db"
+    },
+    {
+      "target": {
+        "id": "e47becba",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "What degree did I graduate with?",
+        "answer": "Business Administration",
+        "askedAt": "2023-05-30T23:40:00.000Z",
+        "evidence": [
+          "answer_280352e9"
+        ]
+      },
+      "answer": "You graduated with a **Business Administration** degree. Your saved notes say you hold this degree and recently started a new 9-to-5 job.",
+      "conversationId": "c95f59d4-2641-4790-8824-78fb249280f4",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"degree graduated\" OR title:\"degree graduated\" OR description:\"degree graduated\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"what degree did the user graduate with\" OR title.semantic:\"degree graduation\" OR description.semantic:\"user's university degree\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, tags\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 9601,
+      "verdict": "correct",
+      "reason": "The assistant's answer correctly identifies 'Business Administration' as the degree, matching the reference answer exactly.",
+      "sample": "e47becba"
+    },
+    {
+      "target": {
+        "id": "gpt4_59149c77",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many days passed between my visit to the Museum of Modern Art (MoMA) and the 'Ancient Civilizations' exhibit at the Metropolitan Museum of Art?",
+        "answer": "7 days. 8 days (including the last day) is also acceptable.",
+        "askedAt": "2023-02-01T10:20:00.000Z",
+        "evidence": [
+          "answer_d00ba6d0_1",
+          "answer_d00ba6d0_2"
+        ]
+      },
+      "answer": "**7 days** passed between the two visits:\n\n- **January 8, 2023:** You went on a guided tour at MoMA about 20th-century modern art movements.\n- **January 15, 2023:** You saw the 'Ancient Civilizations' exhibit at the Metropolitan Museum of Art.",
+      "conversationId": "947ac7a8-7ceb-48d3-94e8-078bb051aeed",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"MoMA Museum of Modern Art\" OR title:\"MoMA Museum of Modern Art\" OR description:\"MoMA Museum of Modern Art\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"visit to the Museum of Modern Art MoMA\" OR title.semantic:\"visit to MoMA\" OR description.semantic:\"visit to MoMA\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Ancient Civilizations Metropolitan\" OR title:\"Ancient Civilizations\" OR description:\"Ancient Civilizations\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Ancient Civilizations exhibit at the Metropolitan Museum of Art\" OR title.semantic:\"Ancient Civilizations exhibit Met\" OR description.semantic:\"Ancient Civilizations exhibit Met\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 6"
+        }
+      ],
+      "durationMs": 11609,
+      "verdict": "correct",
+      "reason": "The assistant correctly states 7 days passed between the two visits, matching the reference answer.",
+      "sample": "gpt4_59149c77"
+    },
+    {
+      "target": {
+        "id": "gpt4_f49edff3",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "Which three events happened in the order from first to last: the day I helped my friend prepare the nursery, the day I helped my cousin pick out stuff for her baby shower, and the day I ordered a customized phone case for my friend's birthday?",
+        "answer": "First, I helped my friend prepare the nursery, then I helped my cousin pick out stuff for her baby shower, and lastly, I ordered a customized phone case for my friend's birthday.",
+        "askedAt": "2023-03-22T21:49:00.000Z",
+        "evidence": [
+          "answer_3e9fce53_1",
+          "answer_3e9fce53_2",
+          "answer_3e9fce53_3"
+        ]
+      },
+      "answer": "I can't tell you the order of all three. I went through every entry in my memory, and only one of the events is there:\n\n- **Helping your friend prepare the nursery:** Sunday, February 5, 2023. You also shopped for baby supplies at Buy Buy Baby that day.\n\nI have nothing about helping your cousin pick out things for her baby shower, or about ordering a customized phone case for your friend's birthday. Without those dates I can't put the events in order. If you tell me roughly when those two happened, I can place them around February 5.",
+      "conversationId": "89688837-c866-42f2-af75-b6a614e708d0",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score | FORK ( WHERE content:\"nursery friend\" OR title:\"nursery\" OR description:\"nursery\" | SORT _score DESC | LIMIT 20 ) ( WHERE content.semantic:\"helped my friend prepare the nursery\" OR description.semantic:\"helped friend prepare nursery\" | SORT _score DESC | LIMIT 20 ) | FUSE | SORT _score DESC, _id ASC | KEEP title, description, content, @timestamp | LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score | FORK ( WHERE content:\"cousin baby shower\" OR title:\"baby shower\" OR description:\"baby shower\" | SORT _score DESC | LIMIT 20 ) ( WHERE content.semantic:\"helped my cousin pick out stuff for her baby shower\" OR description.semantic:\"cousin baby shower shopping\" | SORT _score DESC | LIMIT 20 ) | FUSE | SORT _score DESC, _id ASC | KEEP title, description, content, @timestamp | LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score | FORK ( WHERE content:\"phone case birthday\" OR title:\"phone case\" OR description:\"phone case\" | SORT _score DESC | LIMIT 20 ) ( WHERE content.semantic:\"ordered a customized phone case for my friend's birthday\" OR description.semantic:\"customized phone case gift\" | SORT _score DESC | LIMIT 20 ) | FUSE | SORT _score DESC, _id ASC | KEEP title, description, content, @timestamp | LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score | WHERE content:\"cousin\" OR title:\"cousin\" OR content:\"shower\" OR content:\"customized\" OR content:\"custom\" OR content:\"phone\" OR content:\"gift\" OR content:\"present\" | KEEP title, content | LIMIT 50"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score | STATS c = COUNT(*)"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval | KEEP title, content | LIMIT 50"
+        }
+      ],
+      "durationMs": 20849,
+      "verdict": "incorrect",
+      "reason": "The assistant claims it cannot determine the order of all three events and only identifies one event with a date, whereas the reference answer clearly states the correct chronological order of all three events.",
+      "sample": "gpt4_f49edff3"
+    },
+    {
+      "target": {
+        "id": "07b6f563",
+        "dataset": "longmemeval_s",
+        "category": "single-session-preference",
+        "question": "Can you suggest some useful accessories for my phone?",
+        "answer": "The user would prefer suggestions of accessories that are compatible with an iPhone 13 Pro, such as high-quality screen protectors, durable cases, portable power banks, or phone wallet cases. They may not prefer suggestions of accessories that are not compatible with Apple products or do not enhance the functionality or protection of their phone.",
+        "askedAt": "2023-05-30T21:46:00.000Z",
+        "evidence": [
+          "answer_d03098f9"
+        ]
+      },
+      "answer": "I couldn't find anything about your phone in what I know about you. I don't have a record of the model, its case, its charger or anything else, so I can't suggest accessories that fit it specifically.\n\nTwo things I do know are related, though: you wear a **Fitbit Charge 4** every day and use an **Omron EVOLV** blood pressure monitor about three times a week. Both sync with phone apps, so something like a **fast or multi-device charging station** could keep your phone and Fitbit charged in one place.\n\nIf you tell me which phone you have and how you mostly use it, I can suggest accessories that suit it.",
+      "conversationId": "2f214e62-b329-49ed-9271-a4c21033680e",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"phone accessories\" OR title:\"phone\" OR description:\"phone\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user's phone model and phone accessories\" OR title.semantic:\"phone\" OR description.semantic:\"phone accessories\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"iPhone Samsung Pixel smartphone case charger screen protector\" OR title:\"smartphone iPhone\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user bought a new smartphone, phone case, charger, screen protector\" OR description.semantic:\"mobile phone device\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"phone\" OR content:\"mobile\" OR content:\"cell\" OR content:\"wireless\" OR content:\"earbuds\" OR content:\"headphones\" OR content:\"gadget\" OR content:\"tech\" OR content:\"battery\"\n| KEEP title, content\n| LIMIT 30"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id\n| KEEP title, content\n| LIMIT 200"
+        }
+      ],
+      "durationMs": 22099,
+      "verdict": "incorrect",
+      "reason": "The assistant claims it doesn't know the user's phone model and fails to suggest iPhone 13 Pro-compatible accessories like screen protectors, cases, or power banks as the reference answer specifies.",
+      "sample": "07b6f563"
+    },
+    {
+      "target": {
+        "id": "099778bb",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "What percentage of leadership positions do women hold in the my company?",
+        "answer": "20%",
+        "askedAt": "2023-05-30T22:26:00.000Z",
+        "evidence": [
+          "answer_80d6d664_2",
+          "answer_80d6d664_1"
+        ]
+      },
+      "answer": "Women hold **20%** of leadership positions at your company. You mentioned earlier that it has 100 leadership positions in total, and 20 of them are held by women.",
+      "conversationId": "73e3a885-48d7-4541-9ec9-66910ad26a56",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"women leadership positions company\" OR title:\"women leadership\" OR description:\"women leadership\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"percentage of women in leadership positions at user's company\" OR title.semantic:\"women in leadership at company\" OR description.semantic:\"women in leadership at company\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"leadership\" OR content:\"women\" OR content:\"gender\"\n| SORT _score DESC\n| KEEP title, content, @timestamp\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 12542,
+      "verdict": "correct",
+      "reason": "The assistant clearly states that women hold 20% of leadership positions, which matches the reference answer exactly.",
+      "sample": "099778bb"
+    },
+    {
+      "target": {
+        "id": "0ea62687",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How much more miles per gallon was my car getting a few months ago compared to now?",
+        "answer": "2",
+        "askedAt": "2023-05-30T23:51:00.000Z",
+        "evidence": [
+          "answer_dc5e537d_1",
+          "answer_dc5e537d_2"
+        ]
+      },
+      "answer": "I don't know. I went through all 25 entries in your memory index, and none of them mention your car, its miles per gallon or its fuel use, either recently or a few months ago. That means I can't work out the difference.\n\nIf you give me the two figures (what it got then and what it gets now), I can do the math.",
+      "conversationId": "35b1de4e-9f28-476b-a907-3e6e5d56b167",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"miles per gallon fuel efficiency car\" OR title:\"miles per gallon\" OR description:\"mpg gas mileage\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"car miles per gallon fuel efficiency\" OR title.semantic:\"car gas mileage mpg\" OR description.semantic:\"car miles per gallon\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"car\" OR content:\"mpg\" OR content:\"gas\" OR content:\"vehicle\" OR content:\"fuel\" OR content:\"mileage\" OR content:\"gallon\"\n| KEEP title, content\n| LIMIT 50"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| STATS c = COUNT(*)"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id\n| KEEP title, content\n| LIMIT 30"
+        }
+      ],
+      "durationMs": 15898,
+      "verdict": "incorrect",
+      "reason": "The assistant says it doesn't know and cannot find the information, while the reference answer is 2 mpg.",
+      "sample": "0ea62687"
+    },
+    {
+      "target": {
+        "id": "21d02d0d",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many fun runs did I miss in March due to work commitments?",
+        "answer": "2",
+        "askedAt": "2023-04-26T23:58:00.000Z",
+        "evidence": [
+          "answer_2c637141_2",
+          "answer_2c637141_1"
+        ]
+      },
+      "answer": "You missed **2** fun runs in March because of work: the 5K fun runs on **March 5, 2023** and **March 26, 2023**.",
+      "conversationId": "bc886b03-cbef-447c-93c3-aa05114f4f2d",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"fun run missed work\" OR title:\"fun run\" OR description:\"fun run\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"missed fun runs in March due to work commitments\" OR title.semantic:\"fun run missed work\" OR description.semantic:\"missed fun runs in March\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"5K\" OR content:\"missed\" OR content:\"March\"\n| SORT _score DESC, _id ASC\n| KEEP title, content\n| LIMIT 20"
+        }
+      ],
+      "durationMs": 12849,
+      "verdict": "correct",
+      "reason": "The assistant correctly states 2 fun runs were missed in March due to work commitments, matching the reference answer.",
+      "sample": "21d02d0d"
+    },
+    {
+      "target": {
+        "id": "311778f1",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "How many hours did I spend watching documentaries on Netflix last month?",
+        "answer": "10",
+        "askedAt": "2023-05-30T15:40:00.000Z",
+        "evidence": [
+          "answer_e40b054e"
+        ]
+      },
+      "answer": "You spent about **10 hours** watching documentaries on Netflix last month (April 2023). Afterward, you set a goal to cut your daily screen time by 30 minutes.",
+      "conversationId": "20bd05cf-e8f6-4ff2-90ce-b7079f5530bb",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"documentaries Netflix hours\" OR title:\"documentaries Netflix\" OR description:\"documentaries Netflix\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"hours spent watching documentaries on Netflix\" OR title.semantic:\"Netflix documentaries\" OR description.semantic:\"watching documentaries on Netflix\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 12399,
+      "verdict": "correct",
+      "reason": "The assistant's answer correctly states 10 hours, matching the reference answer, though it adds fabricated details about goals and the specific month.",
+      "sample": "311778f1"
+    },
+    {
+      "target": {
+        "id": "4dfccbf7",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many days had passed since I started taking ukulele lessons when I decided to take my acoustic guitar to the guitar tech for servicing?",
+        "answer": "24 days. 25 days (including the last day) is also acceptable.",
+        "askedAt": "2023-04-01T00:42:00.000Z",
+        "evidence": [
+          "answer_4bebc782_1",
+          "answer_4bebc782_2"
+        ]
+      },
+      "answer": "**24 days.**\n\n- You started ukulele lessons with your friend Rachel on February 1, 2023.\n- You took your Taylor GS Mini acoustic guitar to Joe, the guitar tech at Guitar Central, on February 25, 2023, to have the action lowered and the guitar serviced.",
+      "conversationId": "bb18c72b-363f-4ef6-b11a-f4f151926354",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"ukulele lessons\" OR title:\"ukulele lessons\" OR description:\"ukulele lessons\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"started taking ukulele lessons\" OR title.semantic:\"ukulele lessons\" OR description.semantic:\"ukulele lessons start date\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"guitar tech\" OR title:\"guitar tech\" OR description:\"acoustic guitar servicing\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"take acoustic guitar to guitar tech for servicing\" OR title.semantic:\"acoustic guitar servicing\" OR description.semantic:\"guitar tech servicing\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        }
+      ],
+      "durationMs": 13158,
+      "verdict": "correct",
+      "reason": "The assistant correctly states 24 days, which matches the reference answer.",
+      "sample": "4dfccbf7"
+    },
+    {
+      "target": {
+        "id": "4fd1909e",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "Where did I attend the Imagine Dragons concert?",
+        "answer": "Xfinity Center",
+        "askedAt": "2023-05-30T18:25:00.000Z",
+        "evidence": [
+          "answer_2952aee4"
+        ]
+      },
+      "answer": "I don't know. I searched your saved memories several ways and none of them mention Imagine Dragons.\n\nThe closest match is that you volunteered at a music festival at the Harvard Athletic Complex in April 2023. Nothing in your memories says Imagine Dragons played there, so I can't tell you that's where you saw them.",
+      "conversationId": "7daa72a2-dde4-4779-a43c-20d937af88bc",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Imagine Dragons concert\" OR title:\"Imagine Dragons\" OR description:\"Imagine Dragons\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Imagine Dragons concert venue\" OR title.semantic:\"Imagine Dragons concert\" OR description.semantic:\"Imagine Dragons concert\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"concert\" OR content:\"Dragons\" OR title:\"concert\" OR content:\"live music\" OR content:\"arena\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user attended a rock band concert at a venue\" OR title.semantic:\"concerts attended\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"festival\" OR content:\"Harvard\" OR content:\"band\" OR content:\"Xfinity\" OR content:\"stadium\" OR content:\"performance\" OR content:\"show\"\n| SORT _score DESC\n| KEEP title, description, content, attributes\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"music\" OR content:\"volunteer\" OR content:\"volunteered\" OR content:\"tickets\" OR content:\"ticket\"\n| SORT _score DESC\n| KEEP title, content, type\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content.semantic:\"Imagine Dragons\" OR content:\"Imagine\" OR content:\"Boston\" OR content:\"Mansfield\"\n| SORT _score DESC\n| KEEP title, content, type\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 26937,
+      "verdict": "incorrect",
+      "reason": "The assistant said it did not know and could not find the answer, while the reference answer is 'Xfinity Center'.",
+      "sample": "4fd1909e"
+    },
+    {
+      "target": {
+        "id": "50635ada",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "What was my previous frequent flyer status on United Airlines before I got the current status?",
+        "answer": "Premier Silver",
+        "askedAt": "2023-06-29T04:09:00.000Z",
+        "evidence": [
+          "answer_dcd74827_1",
+          "answer_dcd74827_2"
+        ]
+      },
+      "answer": "Before your current United Airlines status, you were **Premier Silver**. You earned it in September 2022 after flying 20,000 miles with United, then moved up to Premier Gold in May 2023.",
+      "conversationId": "a19ce2b0-0460-4e2d-b664-92a6dcb02c6a",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"United Airlines frequent flyer status\" OR title:\"United Airlines status\" OR description:\"United MileagePlus status\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"United Airlines frequent flyer status level\" OR title.semantic:\"United Airlines frequent flyer status\" OR description.semantic:\"United Airlines elite status Premier\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 10818,
+      "verdict": "correct",
+      "reason": "The assistant correctly identifies Premier Silver as the previous frequent flyer status, matching the reference answer.",
+      "sample": "50635ada"
+    },
+    {
+      "target": {
+        "id": "51b23612",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I was going through our previous conversation about political propaganda and humor, and I was wondering if you could remind me of that Soviet cartoon you mentioned that mocked Western culture?",
+        "answer": "Nu, pogodi!",
+        "askedAt": "2023-05-30T20:38:00.000Z",
+        "evidence": [
+          "answer_ultrachat_427265"
+        ]
+      },
+      "answer": "I don't know. I searched your saved memory several ways and read through every entry in it, and none of them mention a past conversation about political propaganda and humor, or a Soviet cartoon that mocked Western culture. It mostly holds personal details and events, like your routines, trips, purchases and plans. I can't tell you the cartoon's name without guessing.",
+      "conversationId": "3f3d36b9-f10d-4dbc-88cc-12e31b9e6ea2",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Soviet cartoon Western culture propaganda humor\" OR title:\"Soviet cartoon\" OR description:\"Soviet cartoon\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Soviet cartoon mocking Western culture political propaganda humor\" OR title.semantic:\"Soviet cartoon mocking Western culture\" OR description.semantic:\"Soviet cartoon mocking Western culture\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type, tags\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"Soviet\" OR content:\"cartoon\" OR content:\"propaganda\" OR content:\"animation\" OR content:\"satire\" OR content:\"Cold War\" OR title:\"Soviet\" OR content:\"USSR\"\n| SORT _score DESC\n| KEEP title, description, content, type\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content.semantic:\"assistant mentioned an animated film satirizing American capitalism\" OR content.semantic:\"political humor and propaganda discussion\"\n| SORT _score DESC\n| KEEP title, description, content, type\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| STATS c = COUNT(*) BY type\n| SORT c DESC"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"Western\" OR content:\"Russia\" OR content:\"Russian\" OR content:\"humor\" OR content:\"comedy\" OR content:\"political\" OR content:\"film\"\n| KEEP title, content, type\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| KEEP title, content, type\n| LIMIT 50"
+        }
+      ],
+      "durationMs": 23978,
+      "verdict": "incorrect",
+      "reason": "The assistant claims it cannot find the answer and does not provide 'Nu, pogodi!' as the Soviet cartoon referenced.",
+      "sample": "51b23612"
+    },
+    {
+      "target": {
+        "id": "5c40ec5b",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "How many times have I met up with Alex from Germany?",
+        "answer": "We've met up twice.",
+        "askedAt": "2023-10-30T13:39:00.000Z",
+        "evidence": [
+          "answer_1cb52d0a_1",
+          "answer_1cb52d0a_2"
+        ]
+      },
+      "answer": "You've met up with Alex twice, as of September 30, 2023. That count is from after you first met at a music festival, a few weeks before August 11, 2023. My notes don't show any later meetups. You were also planning to see Alex again on your upcoming trip to Berlin.",
+      "conversationId": "15ead4c2-9bd8-4dc2-b15c-64ad0fa4e287",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Alex Germany\" OR title:\"Alex Germany\" OR description:\"Alex Germany\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"meeting up with Alex from Germany\" OR title.semantic:\"meeting up with Alex from Germany\" OR description.semantic:\"meeting up with Alex from Germany\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        }
+      ],
+      "durationMs": 10605,
+      "verdict": "correct",
+      "reason": "The assistant's answer confirms they met up twice, which matches the reference answer, despite including additional context.",
+      "sample": "5c40ec5b"
+    },
+    {
+      "target": {
+        "id": "5d3d2817",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "What was my previous occupation?",
+        "answer": "Marketing specialist at a small startup",
+        "askedAt": "2023-05-30T20:08:00.000Z",
+        "evidence": [
+          "answer_235eb6fb"
+        ]
+      },
+      "answer": "You used to be a marketing specialist at a small startup, where you managed interns. You've since moved into your current role as a senior marketing analyst.",
+      "conversationId": "15f378ac-3684-4fdd-a176-798d821b644d",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"previous job occupation career\" OR title:\"previous job occupation career\" OR description:\"previous job occupation career\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user's previous occupation, former job\" OR title.semantic:\"user's previous occupation, former job\" OR description.semantic:\"user's previous occupation, former job\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"worked as used to work\" OR title:\"worked as used to work\" OR description:\"worked as used to work\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user career change, new job role, used to work as\" OR description.semantic:\"user career change, new job role, used to work as\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 11888,
+      "verdict": "partial",
+      "reason": "The assistant correctly identifies the previous occupation as a marketing specialist at a small startup, but adds unverified details about managing interns and a current role as senior marketing analyst that are not in the reference answer.",
+      "sample": "5d3d2817"
+    },
+    {
+      "target": {
+        "id": "5e1b23de",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many months ago did I attend the photography workshop?",
+        "answer": "3",
+        "askedAt": "2024-02-01T18:06:00.000Z",
+        "evidence": [
+          "answer_c18d480b_1"
+        ]
+      },
+      "answer": "You went to the photography workshop **3 months ago**. It was a 3-day workshop in a nearby city that started on November 1, 2023, and today is February 1, 2024.",
+      "conversationId": "fe23d3ab-080d-4bc2-a0a7-71b833e1f9dd",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"photography workshop\" OR title:\"photography workshop\" OR description:\"photography workshop\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"attended photography workshop\" OR title.semantic:\"attended photography workshop\" OR description.semantic:\"attended photography workshop\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        }
+      ],
+      "durationMs": 9625,
+      "verdict": "correct",
+      "reason": "The assistant correctly states the workshop was 3 months ago, matching the reference answer.",
+      "sample": "5e1b23de"
+    },
+    {
+      "target": {
+        "id": "60472f9c",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many projects have I been working on simultaneously, excluding my thesis?",
+        "answer": "2",
+        "askedAt": "2023-05-30T23:41:00.000Z",
+        "evidence": [
+          "answer_e7fe8c8b_1",
+          "answer_e7fe8c8b_2",
+          "answer_e7fe8c8b_3"
+        ]
+      },
+      "answer": "Not counting your thesis, you've been working on **2** projects at the same time:\n\n1. **Data Mining course group project:** an analysis of the Bike Sharing dataset.\n2. **Database Systems project.**\n\nYou keep separate Trello boards for each of these and for your thesis.",
+      "conversationId": "a90ecf69-1f7a-4c66-8327-d7e5805514ea",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"projects working on simultaneously\" OR title:\"projects\" OR description:\"projects\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"how many projects is the user working on at the same time besides thesis\" OR description.semantic:\"user's current projects\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Database Systems project\" OR content:\"course project\" OR content:\"Trello\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user's course projects Database Systems Data Mining research project\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 14982,
+      "verdict": "correct",
+      "reason": "The assistant correctly identifies 2 projects (Data Mining course group project and Database Systems project) excluding the thesis, matching the reference answer.",
+      "sample": "60472f9c"
+    },
+    {
+      "target": {
+        "id": "618f13b2",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "How many times have I worn my new black Converse Chuck Taylor All Star sneakers?",
+        "answer": "six",
+        "askedAt": "2023-06-18T22:29:00.000Z",
+        "evidence": [
+          "answer_caf5b52e_1",
+          "answer_caf5b52e_2"
+        ]
+      },
+      "answer": "I don't know. I went through every entry saved about you (19 in total), and none of them mention black Converse Chuck Taylor All Star sneakers, or any shoes. So I have no record of how many times you've worn them.",
+      "conversationId": "b8048a29-a3c1-42cf-a387-b01256430ba5",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Converse Chuck Taylor sneakers worn\" OR title:\"Converse Chuck Taylor sneakers\" OR description:\"Converse sneakers\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"how many times worn new black Converse Chuck Taylor All Star sneakers\" OR title.semantic:\"Converse sneakers\" OR description.semantic:\"black Converse sneakers worn\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"shoes\" OR content:\"sneakers\" OR content:\"Converse\" OR content:\"footwear\" OR title:\"shoes\" OR title:\"sneakers\" OR content:\"wore\" OR content:\"worn\"\n| KEEP title, description, content, @timestamp\n| LIMIT 30"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| STATS c = COUNT(*)"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| KEEP title, content\n| LIMIT 19"
+        }
+      ],
+      "durationMs": 16698,
+      "verdict": "incorrect",
+      "reason": "The assistant says it has no record of the sneakers, while the reference answer is 'six'.",
+      "sample": "618f13b2"
+    },
+    {
+      "target": {
+        "id": "65240037",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I remember you told me to dilute tea tree oil with a carrier oil before applying it to my skin. Can you remind me what the recommended ratio is?",
+        "answer": "The recommended ratio is 1:10, meaning one part tea tree oil to ten parts carrier oil.",
+        "askedAt": "2023-05-30T23:54:00.000Z",
+        "evidence": [
+          "answer_ultrachat_403752"
+        ]
+      },
+      "answer": "I don't know. I searched your saved memories several ways (tea tree oil, carrier oil, diluting, ratio, essential oils, skin remedies), and none of them mention tea tree oil or a dilution ratio. The only related note is that you do face masks and moisturize every other night. I can't find a ratio I recommended before, so I won't guess one.",
+      "conversationId": "3f39f75a-cf99-456c-9cfc-76a1ea330f9c",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"tea tree oil carrier oil dilute ratio\" OR title:\"tea tree oil\" OR description:\"tea tree oil\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"tea tree oil dilution ratio with carrier oil\" OR title.semantic:\"tea tree oil dilution\" OR description.semantic:\"tea tree oil dilution ratio\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type, tags\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"tea tree\" OR content:\"essential oil\" OR content:\"carrier\" OR content:\"acne\" OR content:\"coconut oil\" OR content:\"jojoba\" OR title:\"oil\"\n| SORT _score DESC\n| KEEP title, description, content, type\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content.semantic:\"natural remedies for skin, essential oils, blemishes, pimples\" OR title.semantic:\"skin remedy essential oil\"\n| SORT _score DESC\n| KEEP title, description, content, type\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"dilute\" OR content:\"ratio\" OR content:\"drops\" OR content:\"skin\" OR content:\"oil\" OR description:\"oil\"\n| SORT _score DESC\n| KEEP title, description, content, type\n| LIMIT 20"
+        }
+      ],
+      "durationMs": 23141,
+      "verdict": "incorrect",
+      "reason": "The assistant claims it has no record of recommending a dilution ratio and refuses to provide one, rather than giving the 1:10 ratio stated in the reference answer.",
+      "sample": "65240037"
+    },
+    {
+      "target": {
+        "id": "69fee5aa",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "How many pre-1920 American coins do I have in my collection?",
+        "answer": "38",
+        "askedAt": "2023-06-09T11:14:00.000Z",
+        "evidence": [
+          "answer_d6028d6e_1",
+          "answer_d6028d6e_2"
+        ]
+      },
+      "answer": "I don't know how many you have. Your saved memories say you collect pre-1920 American coins, along with vintage cameras, vinyl records and books, but they never mention a number. I checked every entry in the index, and none of them gives a coin count.",
+      "conversationId": "dcd5ad13-a5e6-45a4-8374-b0bd3c083ce8",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"pre-1920 American coins\" OR title:\"coin collection\" OR description:\"coins\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"pre-1920 American coins in my coin collection\" OR title.semantic:\"coin collection\" OR description.semantic:\"pre-1920 American coins\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"coin\" OR content:\"coins\" OR content:\"numismatic\" OR content:\"penny\" OR content:\"dollar\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"number of coins in collection, acquired new coin\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id\n| KEEP title, content\n| LIMIT 200"
+        }
+      ],
+      "durationMs": 16749,
+      "verdict": "incorrect",
+      "reason": "The assistant says it doesn't know the count, while the reference answer is 38.",
+      "sample": "69fee5aa"
+    },
+    {
+      "target": {
+        "id": "6ade9755",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "Where do I take yoga classes?",
+        "answer": "Serenity Yoga",
+        "askedAt": "2023-05-30T21:04:00.000Z",
+        "evidence": [
+          "answer_9398da02"
+        ]
+      },
+      "answer": "You take your yoga classes at **Serenity Yoga**, a yoga studio you mentioned most recently on 2023-05-30.",
+      "conversationId": "7b9fe123-3871-42ad-9196-3c7a5f149b9e",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"yoga\" OR title:\"yoga\" OR description:\"yoga\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"where I take yoga classes studio\" OR title.semantic:\"yoga classes studio\" OR description.semantic:\"yoga classes\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"studio\" OR content:\"class\" OR content:\"gym\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"fitness studio gym where user attends classes\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content, attributes\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 13747,
+      "verdict": "correct",
+      "reason": "The assistant correctly identifies Serenity Yoga as the place where the user takes yoga classes, matching the reference answer.",
+      "sample": "6ade9755"
+    },
+    {
+      "target": {
+        "id": "6c49646a",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "What is the total distance I covered in my four road trips?",
+        "answer": "3,000 miles",
+        "askedAt": "2023-05-30T22:17:00.000Z",
+        "evidence": [
+          "answer_cc1ced21_2",
+          "answer_cc1ced21_1"
+        ]
+      },
+      "answer": "You covered **3,000 miles** across your four road trips:\n\n- Three earlier trips (solo to Durango, a weekend in Breckenridge, and a family trip to Santa Fe): 1,800 miles in total\n- Your family trip to Yellowstone in April 2023: 1,200 miles",
+      "conversationId": "71500c24-d92f-46ed-bbd5-331ea2d1aebb",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"road trip miles\" OR title:\"road trip\" OR description:\"road trip\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"road trip distance miles driven\" OR title.semantic:\"road trip\" OR description.semantic:\"road trip distance\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        }
+      ],
+      "durationMs": 12125,
+      "verdict": "correct",
+      "reason": "The assistant's answer correctly states the total distance of 3,000 miles, matching the reference answer.",
+      "sample": "6c49646a"
+    },
+    {
+      "target": {
+        "id": "71017277",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "I received a piece of jewelry last Saturday from whom?",
+        "answer": "my aunt",
+        "askedAt": "2023-03-09T15:47:00.000Z",
+        "evidence": [
+          "answer_0b4a8adc_1"
+        ]
+      },
+      "answer": "I couldn't find any record of you receiving jewelry last Saturday (March 4, 2023).\n\nWhat I do have from that day is that **your aunt gave you an antique crystal chandelier** that had belonged to your great-grandmother. It's a family heirloom, but it's a chandelier, not jewelry. You also bought a 1950s vintage armchair at an estate sale.",
+      "conversationId": "9a5ba1a2-08c5-4041-9b1d-d4b3054c1a92",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"jewelry gift received\" OR title:\"jewelry\" OR description:\"jewelry\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"received a piece of jewelry as a gift\" OR title.semantic:\"jewelry gift\" OR description.semantic:\"received jewelry from someone\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"necklace ring bracelet earrings pendant brooch\" OR title:\"necklace ring bracelet earrings pendant brooch\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user was given a necklace, ring, bracelet or earrings\" OR title.semantic:\"necklace bracelet earrings ring\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"gift heirloom aunt grandmother mother sister\" OR title:\"gift heirloom aunt\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"family heirloom gift given to the user\" OR description.semantic:\"gift from a family member\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"aunt\" OR title:\"aunt\" OR content:\"March 4\" OR content:\"Saturday\" OR content:\"jewel\"\n| KEEP title, description, content\n| LIMIT 20"
+        }
+      ],
+      "durationMs": 24313,
+      "verdict": "partial",
+      "reason": "The assistant mentions 'your aunt' but contradicts itself by saying it couldn't find a record of jewelry, and incorrectly states the item was a chandelier rather than jewelry.",
+      "sample": "71017277"
+    },
+    {
+      "target": {
+        "id": "81507db6",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many graduation ceremonies have I attended in the past three months?",
+        "answer": "3",
+        "askedAt": "2023-07-21T23:33:00.000Z",
+        "evidence": [
+          "answer_da3c1266_3",
+          "answer_da3c1266_4",
+          "answer_da3c1266_1",
+          "answer_da3c1266_5",
+          "answer_da3c1266_2"
+        ]
+      },
+      "answer": "You attended **3** graduation ceremonies in the past three months:\n\n1. Your cousin Emma's preschool graduation, around May 2023\n2. Your best friend Rachel's master's degree graduation, July 2023\n3. Your colleague Alex's graduation from a leadership program at work, July 2023\n\nI didn't count your nephew Jack's eighth grade graduation in June 2023, because you missed it.",
+      "conversationId": "d7030480-4fc4-4eee-8a30-702d9453549e",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"graduation ceremony\" OR title:\"graduation\" OR description:\"graduation\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"attended graduation ceremony\" OR title.semantic:\"graduation ceremony\" OR description.semantic:\"attended graduation\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        }
+      ],
+      "durationMs": 11749,
+      "verdict": "correct",
+      "reason": "The assistant's answer gives the correct number of 3 graduation ceremonies, matching the reference answer.",
+      "sample": "81507db6"
+    },
+    {
+      "target": {
+        "id": "86b68151",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "Where did I buy my new bookshelf from?",
+        "answer": "IKEA",
+        "askedAt": "2023-05-30T18:56:00.000Z",
+        "evidence": [
+          "answer_dc11c1eb"
+        ]
+      },
+      "answer": "You bought your new bookshelf from **IKEA**. You got it when you rearranged your living room furniture.",
+      "conversationId": "6dab23e5-fc7a-45c5-8434-67a3c5df1d0c",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"bookshelf\" OR title:\"bookshelf\" OR description:\"bookshelf\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"where did I buy my new bookshelf\" OR title.semantic:\"new bookshelf purchase store\" OR description.semantic:\"bought bookshelf from store\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        }
+      ],
+      "durationMs": 9627,
+      "verdict": "correct",
+      "reason": "The assistant correctly identified IKEA as the source of the bookshelf, matching the reference answer.",
+      "sample": "86b68151"
+    },
+    {
+      "target": {
+        "id": "9bbe84a2",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "What was my previous goal for my Apex Legends level before I updated my goal?",
+        "answer": "level 100",
+        "askedAt": "2023-10-08T15:29:00.000Z",
+        "evidence": [
+          "answer_c6a0c6c2_1",
+          "answer_c6a0c6c2_2"
+        ]
+      },
+      "answer": "I don't know. I searched your saved history for Apex Legends, gaming and level goals, and also looked through every entry stored there. None of them mention Apex Legends or a gaming level goal, so I can't tell you what your earlier goal was.",
+      "conversationId": "be259829-fe0a-4dea-ab98-6bea420baeb3",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Apex Legends level goal\" OR title:\"Apex Legends\" OR description:\"Apex Legends\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Apex Legends level goal\" OR title.semantic:\"Apex Legends level goal\" OR description.semantic:\"Apex Legends level goal\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Apex\" OR content:\"gaming\" OR content:\"video game\" OR content:\"level 100\" OR content:\"goal\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"video game rank level target updated goal\" OR title.semantic:\"gaming goal\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval\n| KEEP title, content\n| LIMIT 200"
+        }
+      ],
+      "durationMs": 17551,
+      "verdict": "incorrect",
+      "reason": "The assistant says it doesn't know and cannot find any information, rather than providing the reference answer of level 100.",
+      "sample": "9bbe84a2"
+    },
+    {
+      "target": {
+        "id": "a40e080f",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I was going through our previous conversation and I was wondering if you could remind me of the two companies you mentioned that prioritize employee safety and well-being like Triumvirate?",
+        "answer": "Patagonia and Southwest Airlines.",
+        "askedAt": "2023-05-30T19:28:00.000Z",
+        "evidence": [
+          "answer_ultrachat_269020"
+        ]
+      },
+      "answer": "I don't know. I searched your saved memory using several wordings (Triumvirate, employee safety, well-being, workplace culture, environmental services companies), and nothing in it mentions Triumvirate or the two companies I recommended. That conversation wasn't saved to memory, so I can't tell you which two companies they were.",
+      "conversationId": "9eaf67e7-eb72-48ef-bce2-55ef98d9c18c",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Triumvirate employee safety well-being companies\" OR title:\"Triumvirate\" OR description:\"Triumvirate\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"companies that prioritize employee safety and well-being like Triumvirate\" OR title.semantic:\"Triumvirate employee safety\" OR description.semantic:\"companies prioritizing employee safety\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type, tags\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"safety\" OR content:\"Triumvirate\" OR content:\"well-being\" OR content:\"employer\" OR content:\"company culture\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"workplace safety culture employer recommendation job search\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"chemical\" OR content:\"hazardous waste\" OR content:\"environmental services\" OR content:\"Clean Harbors\" OR content:\"Veolia\" OR content:\"Stericycle\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"assistant recommended companies Clean Harbors Veolia hazardous waste management\" OR title.semantic:\"companies recommended\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| STATS c = COUNT(*) BY type\n| SORT c DESC"
+        }
+      ],
+      "durationMs": 21602,
+      "verdict": "incorrect",
+      "reason": "The assistant claims it cannot recall the previous conversation and does not provide the reference answer of Patagonia and Southwest Airlines.",
+      "sample": "a40e080f"
+    },
+    {
+      "target": {
+        "id": "aae3761f",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many hours in total did I spend driving to my three road trip destinations combined?",
+        "answer": "15 hours for getting to the three destinations (or 30 hours for the round trip)",
+        "askedAt": "2023-05-30T19:37:00.000Z",
+        "evidence": [
+          "answer_526354c8_1",
+          "answer_526354c8_3",
+          "answer_526354c8_2"
+        ]
+      },
+      "answer": "You spent **15 hours** driving in total:\n\n- Washington, D.C.: 6 hours\n- Tennessee mountains (camping trip): 5 hours\n- Outer Banks, North Carolina: 4 hours",
+      "conversationId": "1102a140-64d9-45f0-98fc-34c518d6ccf3",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"road trip driving hours\" OR title:\"road trip\" OR description:\"road trip\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"hours spent driving to road trip destination\" OR title.semantic:\"road trip drive time\" OR description.semantic:\"road trip drive hours\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        }
+      ],
+      "durationMs": 10468,
+      "verdict": "correct",
+      "reason": "The assistant correctly identifies 15 hours total driving time to the three destinations, matching the reference answer, and provides a breakdown of each destination's driving time.",
+      "sample": "aae3761f"
+    },
+    {
+      "target": {
+        "id": "b29f3365",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How long had I been taking guitar lessons when I bought the new guitar amp?",
+        "answer": "Four weeks",
+        "askedAt": "2023-05-25T19:07:00.000Z",
+        "evidence": [
+          "answer_436d4309_2",
+          "answer_436d4309_1"
+        ]
+      },
+      "answer": "You'd been taking guitar lessons for about **4 weeks** when you bought the new amp.\n\n- By May 25, 2023, you'd had six weeks of weekly lessons with your instructor Alex, so you started around April 13.\n- You bought the new amp, replacing the old one you'd borrowed, around May 11, 2023. That's two weeks before May 25.\n- Six weeks minus two weeks leaves four weeks of lessons at the time of the purchase.",
+      "conversationId": "e327ab06-3e9e-4991-b212-c9ab47ffecf6",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"guitar amp\" OR title:\"guitar amp\" OR description:\"guitar amp\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"bought new guitar amp\" OR title.semantic:\"bought new guitar amp\" OR description.semantic:\"bought new guitar amp\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"guitar lessons\" OR title:\"guitar lessons\" OR description:\"guitar lessons\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"started taking guitar lessons\" OR title.semantic:\"started taking guitar lessons\" OR description.semantic:\"started taking guitar lessons\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        }
+      ],
+      "durationMs": 12706,
+      "verdict": "correct",
+      "reason": "The assistant's answer states four weeks, which matches the reference answer, even though the reasoning provided is convoluted and internally inconsistent.",
+      "sample": "b29f3365"
+    },
+    {
+      "target": {
+        "id": "ceb54acb",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
+        "answer": "I suggested 'sexual fixations', 'problematic sexual behaviors', 'sexual impulsivity', and 'compulsive sexuality'.",
+        "askedAt": "2023-05-30T22:56:00.000Z",
+        "evidence": [
+          "answer_sharegpt_cGdjmYo_0"
+        ]
+      },
+      "answer": "I don't know. I checked your memory index, including a full read of all 31 saved entries, and none of them mention that conversation. There's nothing about \"sexual compulsions\" or any other alternative terms I suggested, so I can't tell you what the other four options were.",
+      "conversationId": "65b577f5-6789-4ea3-a3be-a7b15da61344",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"sexual compulsions alternative terms\" OR title:\"sexual compulsions\" OR description:\"sexual compulsions\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"alternative terms for sexual compulsions behaviors\" OR title.semantic:\"alternative terms for sexual compulsions\" OR description.semantic:\"alternative terms for sexual compulsions\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content\n| LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"compulsions\" OR content:\"sexual\" OR content:\"addiction\" OR content:\"hypersexuality\" OR content:\"terminology\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"term instead of sex addiction, compulsive sexual behavior wording\" OR description.semantic:\"alternative wording for addiction behaviors\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"fetish\" OR content:\"paraphilia\" OR content:\"kink\" OR content:\"behaviors\" OR content:\"alternative\" OR content:\"terms\" OR content:\"suggested\" OR content:\"euphemism\"\n| KEEP title, content\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval | STATS c = COUNT(*)"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval | KEEP title, content | LIMIT 40"
+        }
+      ],
+      "durationMs": 23702,
+      "verdict": "incorrect",
+      "reason": "The assistant claims it has no memory of the conversation and cannot provide the other four terms, rather than giving the reference answer of 'sexual fixations', 'problematic sexual behaviors', 'sexual impulsivity', and 'compulsive sexuality'.",
+      "sample": "ceb54acb"
+    },
+    {
+      "target": {
+        "id": "d24813b1",
+        "dataset": "longmemeval_s",
+        "category": "single-session-preference",
+        "question": "I'm thinking of inviting my colleagues over for a small gathering. Any tips on what to bake?",
+        "answer": "The user would prefer baking suggestions that take into account their previous success with the lemon poppyseed cake, such as variations of that recipe or other desserts that share similar qualities. They might prefer suggestions that balance impressiveness with manageability, considering their previous experience. The user may not prefer overly complex or unfamiliar recipes, or suggestions that do not build upon their existing baking experience.",
+        "askedAt": "2023-05-30T17:57:00.000Z",
+        "evidence": [
+          "answer_7c0ade93"
+        ]
+      },
+      "answer": "I searched my notes on you several different ways and couldn't find anything about baking: no recipes you've tried, nothing you've baked before, and no food preferences or allergies for your colleagues. So I can't give you tips based on what you like.\n\nTwo things from my notes might help with planning:\n- **Your coworker Lisa is expecting a baby girl around July 2023.** You could make the gathering a small celebration for her too, with a cake or cupcakes.\n- **You meal prep on Sundays, often big batches of quinoa salad.** You already make food in quantity, so a quinoa salad could go on the table next to whatever you bake.\n\nIf you tell me what you've baked before or what your colleagues like, I can make some suggestions.",
+      "conversationId": "94633241-223a-40b1-bcd6-984269515b35",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"baking\" OR title:\"baking\" OR description:\"baking\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user baking experience, recipes baked, desserts\" OR title.semantic:\"baking\" OR description.semantic:\"baking recipes\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, attributes\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"colleagues cake cookies\" OR title:\"colleagues\" OR description:\"cake\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"baked something for colleagues or coworkers, success with a recipe\" OR description.semantic:\"coworkers gathering party\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, attributes\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"dessert\" OR content:\"recipe\" OR content:\"bake\" OR content:\"baked\" OR content:\"oven\" OR content:\"cookies\" OR content:\"bread\" OR content:\"cake\" OR content:\"pie\" OR content:\"cooking\" OR content:\"kitchen\" OR content:\"tart\" OR content:\"muffins\"\n| SORT _score DESC\n| KEEP title, content, attributes\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content.semantic:\"user tried a new dessert recipe that turned out well\" OR content.semantic:\"user's cooking hobby and kitchen appliances\"\n| SORT _score DESC\n| KEEP title, content, attributes\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"chocolate\" OR content:\"sweet\" OR content:\"lemon\" OR content:\"allergy\" OR content:\"vegan\" OR content:\"gluten\" OR content:\"food\" OR content:\"party\" OR content:\"hosting\" OR content:\"guests\" OR content:\"coworkers\" OR content:\"colleague\" OR content:\"work\"\n| SORT _score DESC\n| KEEP title, content, attributes\n| LIMIT 20"
+        }
+      ],
+      "durationMs": 22729,
+      "verdict": "incorrect",
+      "reason": "The assistant says it has no information about the user's baking history, while the reference answer assumes the assistant should know about the user's previous success with a lemon poppyseed cake and build suggestions upon that experience.",
+      "sample": "d24813b1"
+    },
+    {
+      "target": {
+        "id": "d6062bb9",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "What is the total number of views on my most popular videos on YouTube and TikTok?",
+        "answer": "1,998",
+        "askedAt": "2023-05-30T17:57:00.000Z",
+        "evidence": [
+          "answer_23f3a657_2",
+          "answer_23f3a657_1"
+        ]
+      },
+      "answer": "Together your two most popular videos have **1,998 views**:\n\n- **YouTube:** your tutorial on social media analytics has 542 views. My notes say this is your most popular video there.\n- **TikTok:** your video of Luna chasing a laser pointer has 1,456 views. It's the only TikTok video in my notes, so I'm assuming it's your most popular one there.",
+      "conversationId": "79bd5ca4-748c-40ae-a992-6f4f442cff74",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"YouTube views video\" OR title:\"YouTube views video\" OR description:\"YouTube views video\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"most popular YouTube video views\" OR title.semantic:\"most popular YouTube video views\" OR description.semantic:\"most popular YouTube video views\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"TikTok views\" OR title:\"TikTok views\" OR description:\"TikTok views\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"most popular TikTok video views\" OR title.semantic:\"most popular TikTok video views\" OR description.semantic:\"most popular TikTok video views\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        }
+      ],
+      "durationMs": 12376,
+      "verdict": "correct",
+      "reason": "The assistant's answer gives the total of 1,998 views, which matches the reference answer exactly.",
+      "sample": "d6062bb9"
+    },
+    {
+      "target": {
+        "id": "d905b33f",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "What percentage discount did I get on the book from my favorite author?",
+        "answer": "20%",
+        "askedAt": "2023-05-30T21:08:00.000Z",
+        "evidence": [
+          "answer_85a77c48_2",
+          "answer_85a77c48_1"
+        ]
+      },
+      "answer": "I don't know. I searched your saved memory with several wordings and then read every entry in it (19 in total). None of them mentions your favorite author, buying a book or getting a discount. The closest thing is a note that you like to shop in-store for personal gifts, and it says nothing about books or prices.",
+      "conversationId": "f1c7880c-ef8d-4116-9360-c2273ec776b0",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"book favorite author discount\" OR title:\"book favorite author discount\" OR description:\"book favorite author discount\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"discount on book by favorite author\" OR title.semantic:\"discount on book by favorite author\" OR description.semantic:\"discount on book by favorite author\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"favorite author\" OR title:\"favorite author\" OR description:\"favorite author\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user's favorite author new book purchase price\" OR description.semantic:\"user's favorite author new book purchase price\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id\n| KEEP title, description, content\n| LIMIT 200"
+        }
+      ],
+      "durationMs": 14301,
+      "verdict": "incorrect",
+      "reason": "The assistant says it does not know and cannot find any relevant information, rather than providing the reference answer of 20%.",
+      "sample": "d905b33f"
+    },
+    {
+      "target": {
+        "id": "e493bb7c",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "Where is the painting 'Ethereal Dreams' by Emma Taylor currently hanging?",
+        "answer": "in my bedroom",
+        "askedAt": "2023-11-18T19:24:00.000Z",
+        "evidence": [
+          "answer_1a374afa_1",
+          "answer_1a374afa_2"
+        ]
+      },
+      "answer": "It's hanging above your bed in the bedroom. You moved 'Ethereal Dreams' there in late October 2023. Before that, it hung above the living room sofa.",
+      "conversationId": "e16df9d4-50d9-41d2-9008-049127675854",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Ethereal Dreams Emma Taylor painting\" OR title:\"Ethereal Dreams Emma Taylor painting\" OR description:\"Ethereal Dreams Emma Taylor painting\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Where is the painting Ethereal Dreams by Emma Taylor hanging\" OR title.semantic:\"Ethereal Dreams painting Emma Taylor\" OR description.semantic:\"Ethereal Dreams painting location\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"painting moved hung wall\" OR title:\"painting\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user moved a painting to a new spot in the house\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content\n| LIMIT 6"
+        }
+      ],
+      "durationMs": 12573,
+      "verdict": "partial",
+      "reason": "The assistant mentions the bedroom, which matches the reference answer, but adds unverifiable fabricated details about the specific location within the bedroom and a history of the painting's placement.",
+      "sample": "e493bb7c"
+    },
+    {
+      "target": {
+        "id": "e831120c",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many weeks did it take me to watch all the Marvel Cinematic Universe movies and the main Star Wars films?",
+        "answer": "3.5 weeks",
+        "askedAt": "2023-05-30T18:41:00.000Z",
+        "evidence": [
+          "answer_86c505e7_1",
+          "answer_86c505e7_2"
+        ]
+      },
+      "answer": "It took you **3.5 weeks** in total:\n\n- **Marvel Cinematic Universe:** all 22 movies in 2 weeks.\n- **Main Star Wars films:** all of them in a week and a half, in May 2023.",
+      "conversationId": "21ce3647-9426-4946-a7da-d9f2f82674c6",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Marvel Star Wars movies watched weeks\" OR title:\"Marvel Star Wars\" OR description:\"Marvel Star Wars\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"how long it took to watch all Marvel Cinematic Universe and Star Wars movies\" OR title.semantic:\"MCU and Star Wars movie marathon\" OR description.semantic:\"watched all Marvel and Star Wars films\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 9344,
+      "verdict": "correct",
+      "reason": "The assistant's answer correctly states 3.5 weeks total, matching the reference answer.",
+      "sample": "e831120c"
+    },
+    {
+      "target": {
+        "id": "e9327a54",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I'm planning to revisit Orlando. I was wondering if you could remind me of that unique dessert shop with the giant milkshakes we talked about last time?",
+        "answer": "The Sugar Factory at Icon Park.",
+        "askedAt": "2023-05-30T19:46:00.000Z",
+        "evidence": [
+          "answer_ultrachat_480665"
+        ]
+      },
+      "answer": "I don't know which dessert shop that was. I searched your saved notes several ways and found nothing about Orlando, a dessert shop or giant milkshakes.\n\nThe trips in your notes are your Halloween Horror Nights visit to Universal Studios Hollywood (October 15, 2022) and your planned return there, plus a planned hiking trip to New Zealand. If you remember anything else about the shop, like part of its name or what else it sold, tell me and I'll search again.",
+      "conversationId": "6361b3dc-f61e-42c2-8bc0-0cb6d9e4457a",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Orlando dessert shop giant milkshakes\" OR title:\"Orlando dessert milkshake\" OR description:\"Orlando dessert milkshake\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"unique dessert shop in Orlando with giant milkshakes\" OR title.semantic:\"Orlando dessert shop milkshakes\" OR description.semantic:\"Orlando dessert shop milkshakes\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, type, tags\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"Orlando\" OR content:\"milkshake\" OR content:\"dessert\" OR content:\"Florida\" OR title:\"Orlando\" OR content:\"ice cream\"\n| SORT _score DESC\n| KEEP title, content, type\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content.semantic:\"sweets treats bakery travel food recommendations Florida trip\" OR title.semantic:\"Orlando trip\"\n| SORT _score DESC\n| KEEP title, content, type\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"shake\" OR content:\"Sugar\" OR content:\"candy\" OR content:\"Disney\" OR content:\"restaurant\" OR content:\"cafe\" OR content:\"sweet\"\n| SORT _score DESC\n| KEEP title, content, type\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE MATCH(content, \"Orlando milkshake dessert shop restaurant\")\n| SORT _score DESC\n| KEEP title, content, type\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval\n| WHERE TO_LOWER(content) LIKE \"*orlando*\" OR TO_LOWER(content) LIKE \"*milkshake*\" OR TO_LOWER(content) LIKE \"*dessert*\" OR TO_LOWER(title) LIKE \"*orlando*\" OR TO_LOWER(content) LIKE \"*shake*\"\n| KEEP title, content, type\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval\n| KEEP title, type\n| LIMIT 200"
+        }
+      ],
+      "durationMs": 28600,
+      "verdict": "incorrect",
+      "reason": "The assistant claims it cannot find the information and does not provide the reference answer 'The Sugar Factory at Icon Park.'",
+      "sample": "e9327a54"
+    },
+    {
+      "target": {
+        "id": "ef9cf60a",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How much did I spend on gifts for my sister?",
+        "answer": "$300",
+        "askedAt": "2023-05-30T22:48:00.000Z",
+        "evidence": [
+          "answer_87e3a1cb_1",
+          "answer_87e3a1cb_2"
+        ]
+      },
+      "answer": "You've spent about **$300** on gifts for your sister:\n\n- **$100** on a gift card to her favourite spa, for her birthday.\n- **About $200** on a silver necklace with a small pendant from Tiffany's, in May 2023.\n\nI didn't count the $100 spa day package, because that's a plan for her birthday next year, not something you've bought yet.",
+      "conversationId": "7d8dc0ce-cfba-493a-aed9-e69574821362",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"gift sister\" OR title:\"gift sister\" OR description:\"gift sister\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"gift for my sister cost spent\" OR title.semantic:\"gift for sister\" OR description.semantic:\"gift for sister spent\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"sister\" | SORT _score DESC | LIMIT 30 )\n    ( WHERE content.semantic:\"bought present for sister price\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content\n| LIMIT 25"
+        }
+      ],
+      "durationMs": 14371,
+      "verdict": "correct",
+      "reason": "The assistant's answer correctly states $300 total spent on gifts for the sister, matching the reference answer.",
+      "sample": "ef9cf60a"
+    },
+    {
+      "target": {
+        "id": "gpt4_2c50253f",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "What time do I wake up on Tuesdays and Thursdays?",
+        "answer": "6:45 AM",
+        "askedAt": "2023-05-27T19:21:00.000Z",
+        "evidence": [
+          "answer_9af4e346_1",
+          "answer_9af4e346_2"
+        ]
+      },
+      "answer": "On Tuesdays and Thursdays you wake up at **6:45 AM**.\n\nI worked this out from two notes in your memory. You moved your usual wake-up time from 8:30 AM to 7:00 AM. You also get up 15 minutes earlier on Tuesdays and Thursdays to meditate and do yoga. Neither note states 6:45 AM directly.",
+      "conversationId": "4de2eca9-2cd8-4ae1-9d02-6fb7acaccea9",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"wake up Tuesdays Thursdays\" OR title:\"wake up Tuesdays Thursdays\" OR description:\"wake up Tuesdays Thursdays\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"what time does the user wake up on Tuesdays and Thursdays\" OR title.semantic:\"wake-up time Tuesday Thursday\" OR description.semantic:\"wake-up time Tuesday Thursday\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"wake\" OR title:\"wake\" OR content:\"7:00 AM\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user's usual wake-up time in the morning\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content, attributes\n| LIMIT 8"
+        }
+      ],
+      "durationMs": 14171,
+      "verdict": "correct",
+      "reason": "The assistant's answer states 6:45 AM, which matches the reference answer exactly.",
+      "sample": "gpt4_2c50253f"
+    },
+    {
+      "target": {
+        "id": "gpt4_4929293b",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "What was the the life event of one of my relatives that I participated in a week ago?",
+        "answer": "my cousin's wedding",
+        "askedAt": "2023-06-22T18:33:00.000Z",
+        "evidence": [
+          "answer_add9b013_2",
+          "answer_add9b013_1"
+        ]
+      },
+      "answer": "It was your **cousin's wedding**, where you were a bridesmaid.\n\nYour saved notes mention this on June 15, 2023, exactly a week before today. The note only says the wedding happened \"prior to June 2023,\" so its exact date isn't recorded. No other event involving a relative is recorded near that week.",
+      "conversationId": "cd7a0561-f75d-4932-90be-9dc87b1a85d4",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"cousin wedding graduation relative\" OR title:\"cousin wedding graduation relative\" OR description:\"cousin wedding graduation relative\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"attended a relative's life event like a wedding, graduation, birth, or funeral\" OR title.semantic:\"relative's life event\" OR description.semantic:\"attended family member's wedding or graduation\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 15"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"bridesmaid niece kindergarten sister\" OR title:\"bridesmaid niece kindergarten sister\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"cousin's wedding bridesmaid date June 2023\" OR content.semantic:\"niece kindergarten graduation date\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, attributes\n| LIMIT 15"
+        }
+      ],
+      "durationMs": 15512,
+      "verdict": "partial",
+      "reason": "The assistant correctly identifies the cousin's wedding but adds unverified details (being a bridesmaid, specific dates) that are not part of the reference answer.",
+      "sample": "gpt4_4929293b"
+    },
+    {
+      "target": {
+        "id": "gpt4_68e94287",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "Which event happened first, my participation in the #PlankChallenge or my post about vegan chili recipe?",
+        "answer": "You posted a recipe for vegan chili on Instagram using the hashtag #FoodieAdventures first.",
+        "askedAt": "2023-04-12T12:00:00.000Z",
+        "evidence": [
+          "answer_9793daa3_2",
+          "answer_9793daa3_1"
+        ]
+      },
+      "answer": "I don't know. I searched the whole memory index and found no record of you joining the #PlankChallenge or posting a vegan chili recipe, so I can't tell which came first.\n\nThe closest thing in memory is about your eating habits: you like roasted vegetables and quinoa, and you want to eat less meat and more vegetarian protein. It doesn't mention chili or any posts.",
+      "conversationId": "ceeba810-1e7d-4d86-9e1e-6f7d792012a9",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"PlankChallenge plank challenge\" OR title:\"plank challenge\" OR description:\"plank challenge\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"participated in #PlankChallenge\" OR title.semantic:\"plank challenge\" OR description.semantic:\"plank challenge\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, attributes\n| LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"vegan chili recipe\" OR title:\"vegan chili\" OR description:\"vegan chili\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"posted vegan chili recipe\" OR title.semantic:\"vegan chili recipe\" OR description.semantic:\"vegan chili recipe\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, attributes\n| LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"plank OR challenge OR hashtag OR social media OR fitness\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"user joined a social media fitness challenge\" OR content.semantic:\"user posted a recipe on social media\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content, attributes\n| LIMIT 12"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"chili\" OR content:\"vegan\" OR content:\"plank\" OR content:\"recipe\" OR content:\"Instagram\" OR content:\"post\"\n| KEEP title, content, attributes\n| LIMIT 30"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval\n| KEEP title, content\n| LIMIT 200"
+        }
+      ],
+      "durationMs": 18426,
+      "verdict": "incorrect",
+      "reason": "The assistant says it cannot find any record of either event, while the reference answer states the vegan chili post came first.",
+      "sample": "gpt4_68e94287"
+    },
+    {
+      "target": {
+        "id": "gpt4_6dc9b45b",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many months ago did I attend the Seattle International Film Festival?",
+        "answer": "4 months ago",
+        "askedAt": "2021-10-02T03:56:00.000Z",
+        "evidence": [
+          "answer_c4df007f_1"
+        ]
+      },
+      "answer": "You attended the Seattle International Film Festival about **4 months ago**. My notes say you went for a week in late May 2021 and watched *Coda* there on June 1, 2021. That's roughly four months before today, October 2, 2021.",
+      "conversationId": "c8a00004-b0a8-4f4f-8a26-aa929d388eae",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Seattle International Film Festival\" OR title:\"Seattle International Film Festival\" OR description:\"Seattle International Film Festival\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"attended Seattle International Film Festival\" OR title.semantic:\"Seattle International Film Festival\" OR description.semantic:\"Seattle International Film Festival\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 8"
+        }
+      ],
+      "durationMs": 9337,
+      "verdict": "correct",
+      "reason": "The assistant's answer states '4 months ago,' which matches the reference answer exactly.",
+      "sample": "gpt4_6dc9b45b"
+    },
+    {
+      "target": {
+        "id": "gpt4_74aed68e",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many days passed between the day I replaced my spark plugs and the day I participated in the Turbocharged Tuesdays auto racking event?",
+        "answer": "29 days. 30 days (including the last day) is also acceptable.",
+        "askedAt": "2023-04-01T21:42:00.000Z",
+        "evidence": [
+          "answer_aed8cf17_1",
+          "answer_aed8cf17_2"
+        ]
+      },
+      "answer": "**29 days** passed between the two.\n\n- **February 14, 2023:** You replaced your car's spark plugs with new NGK plugs after noticing a slight engine misfire.\n- **March 15, 2023:** You drove in the Turbocharged Tuesdays event at Speed Demon Racing Track, completing 10 laps at an average of 85 mph.",
+      "conversationId": "decef182-18b5-42d5-a7de-5ab95646e6ce",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"spark plugs\" OR title:\"spark plugs\" OR description:\"spark plugs\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"replaced spark plugs\" OR title.semantic:\"replaced spark plugs\" OR description.semantic:\"replaced spark plugs\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 6"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Turbocharged Tuesdays\" OR title:\"Turbocharged Tuesdays\" OR description:\"Turbocharged Tuesdays\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Turbocharged Tuesdays auto racing event\" OR title.semantic:\"Turbocharged Tuesdays auto racing event\" OR description.semantic:\"Turbocharged Tuesdays auto racing event\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 6"
+        }
+      ],
+      "durationMs": 11131,
+      "verdict": "correct",
+      "reason": "The assistant correctly states 29 days passed between the two events, matching the reference answer.",
+      "sample": "gpt4_74aed68e"
+    },
+    {
+      "target": {
+        "id": "gpt4_b5700ca9",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many days ago did I attend the Maundy Thursday service at the Episcopal Church?",
+        "answer": "4 days.",
+        "askedAt": "2023-04-10T10:28:00.000Z",
+        "evidence": [
+          "answer_a17423e7_1"
+        ]
+      },
+      "answer": "**4 days ago.** You attended the Maundy Thursday service at the Episcopal Church on April 6, 2023, which is 4 days before today (April 10, 2023).",
+      "conversationId": "fe0c3461-c032-4adb-87fc-fda9bd7f1e83",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Maundy Thursday Episcopal Church\" OR title:\"Maundy Thursday Episcopal Church\" OR description:\"Maundy Thursday Episcopal Church\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"Maundy Thursday service at the Episcopal Church\" OR title.semantic:\"Maundy Thursday service at the Episcopal Church\" OR description.semantic:\"Maundy Thursday service at the Episcopal Church\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 6"
+        }
+      ],
+      "durationMs": 9391,
+      "verdict": "correct",
+      "reason": "The assistant correctly states 4 days ago, matching the reference answer, and provides accurate supporting details.",
+      "sample": "gpt4_b5700ca9"
+    },
+    {
+      "target": {
+        "id": "gpt4_f420262c",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "What is the order of airlines I flew with from earliest to latest before today?",
+        "answer": "JetBlue, Delta, United, American Airlines",
+        "askedAt": "2023-03-02T06:11:00.000Z",
+        "evidence": [
+          "answer_d8a1af6b_1",
+          "answer_d8a1af6b_2",
+          "answer_d8a1af6b_3",
+          "answer_d8a1af6b_4",
+          "answer_d8a1af6b_5"
+        ]
+      },
+      "answer": "From earliest to latest, these are the airlines you flew with before today:\n\n1. **Delta**: a round trip from Boston to Atlanta on January 15, 2023.\n2. **United Airlines**: Boston to Chicago on January 28, 2023, delayed by 1 hour.\n3. **American Airlines**: New York to Los Angeles on February 10, 2023, then a return from LAX to JFK on February 14, 2023, delayed by 2 hours.\n\nI left out one more trip because I can't tell when it happens. Around February 14, you booked a JetBlue flight from Boston to Fort Lauderdale, returning on Delta through Atlanta. It's recorded only as a booking, with no travel date, so I don't know if you've taken it yet.",
+      "conversationId": "157eb2b9-99ae-4890-956e-f9371d3f2a82",
+      "toolCalls": [
+        {
+          "tool": "load_skill"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"airline flight\" OR title:\"airline flight\" OR description:\"airline flight\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"airlines the user flew with\" OR title.semantic:\"airlines the user flew with\" OR description.semantic:\"airlines the user flew with\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, description, content, @timestamp\n| LIMIT 25"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| WHERE content:\"JetBlue\" OR content:\"Fort Lauderdale\" OR content:\"flight\" OR content:\"Southwest\" OR content:\"Alaska\" OR content:\"Spirit\"\n| KEEP title, content, attributes\n| LIMIT 20"
+        },
+        {
+          "tool": "platform.context_engine.query_ai_indices",
+          "query": "FROM ai-index-idx-dreaming-eval-longmemeval METADATA _id, _index, _score\n| FORK\n    ( WHERE content:\"Fort Lauderdale trip Florida\" OR title:\"Fort Lauderdale trip Florida\" | SORT _score DESC | LIMIT 20 )\n    ( WHERE content.semantic:\"trip to Fort Lauderdale Florida date\" OR title.semantic:\"trip to Fort Lauderdale Florida date\" | SORT _score DESC | LIMIT 20 )\n| FUSE\n| SORT _score DESC, _id ASC\n| KEEP title, content, attributes\n| LIMIT 10"
+        }
+      ],
+      "durationMs": 20047,
+      "verdict": "incorrect",
+      "reason": "The assistant's answer lists Delta, United, American Airlines (missing JetBlue entirely from the chronological order) and incorrectly places JetBlue as an unconfirmed future booking, whereas the reference answer has JetBlue as the first airline flown.",
+      "sample": "gpt4_f420262c"
+    }
+  ],
+  "mergedFrom": [
+    "dev-batched-2",
+    "dev50-rest"
+  ]
+}

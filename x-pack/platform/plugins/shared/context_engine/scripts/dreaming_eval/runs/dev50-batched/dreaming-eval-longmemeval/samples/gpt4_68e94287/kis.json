@@ -1,0 +1,1366 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "sample": "gpt4_68e94287",
+  "dest": "ai-index-idx-dreaming-eval-longmemeval",
+  "dumpedAt": "2026-11-12T11:09:38.742Z",
+  "workflowRuns": [
+    {
+      "workflowId": "system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "b0a415c4-d917-47bd-bba9-28cbb541323e",
+      "status": "completed",
+      "durationMs": 111,
+      "output": {
+        "relationships_updated": 0,
+        "deleted": 0,
+        "rejected": 0,
+        "resume_after_id": "",
+        "created": 0,
+        "memories": 0,
+        "resume_from": "",
+        "relationships_created": 0,
+        "relationships_rejected": 0,
+        "updated": 0,
+        "relationships_deleted": 0
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "4ef92601-28f3-4818-a961-cee387e71a36",
+      "status": "completed",
+      "durationMs": 126273,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 24,
+        "resume_from": "2026-11-12T11:02:24.780Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 243
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "320efde7-d8ff-4aa0-8eec-aee951ffd6fc",
+      "status": "completed",
+      "durationMs": 109,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 0,
+        "resume_from": "2026-11-12T11:04:34.917Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 0
+      }
+    }
+  ],
+  "counts": {
+    "entity.person": 2,
+    "entity.place": 5,
+    "entity.user": 1,
+    "fact.plan": 5,
+    "fact.life_event": 6,
+    "fact.routine": 3,
+    "fact.preference": 2
+  },
+  "kis": [
+    {
+      "id": "entity-person--ms-johnson--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Ms. Johnson",
+      "description": "A costume design instructor.",
+      "content": "Ms. Johnson is the instructor of a costume design seminar attended by the user, whom the user considered consulting for assistance with their guard costume for 'Hamlet'.",
+      "attributes": {
+        "role": "Costume design seminar instructor",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-02-22T13:06:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://9026adc5e055ff0a756d29314d64dabb",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:06.786Z",
+      "updated_at": "2026-11-12T11:09:06.786Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--rachel--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Rachel",
+      "description": "An actress and writer in the user's life.",
+      "content": "Rachel is an actress whom the user met at a theater workshop, and a fellow writer whom the user met at a writing workshop at the local library in February 2023. She has been a support and source of motivation for the user's writing.",
+      "attributes": {
+        "role": "Actress and fellow writer",
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-03-15T18:05:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3ef2601bbb7acdab7e522eab8b8071c4",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://968b449f9d0d48eff394d10b0946eb5d",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://08916028bacaf2c9efb7b010f4a140bc",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:05.746Z",
+      "updated_at": "2026-11-12T11:09:05.746Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--city-theater--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "City Theater",
+      "description": "A theater in the user's hometown.",
+      "content": "City Theater is a venue located in the user's hometown hosting a production of 'The Lion King' running from June 15 to July 3, 2023.",
+      "attributes": {
+        "kind": "theater",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-02-22T13:00:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f4e5a3ba2f014e322665c09dc1094fdd",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:08.863Z",
+      "updated_at": "2026-11-12T11:09:08.863Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--indianapolis--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Indianapolis",
+      "description": "Host city of the Midwest Auto Racking Festival.",
+      "content": "Indianapolis is the city hosting the Midwest Auto Racking Festival on June 12, 2023.",
+      "attributes": {
+        "kind": "city",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T22:21:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://2f8fc05ea2f9024b3780e9be397b64e6",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d6ade4abe337b0c0d5244f3f2bf99691",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:11.949Z",
+      "updated_at": "2026-11-12T11:09:11.949Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--london--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "London",
+      "description": "City the user plans to visit in summer 2023.",
+      "content": "London is the destination city for the user's planned trip to Europe in summer 2023, where they are considering staying in Covent Garden.",
+      "attributes": {
+        "kind": "city",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T21:56:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a5e91e435aa25cfbef1fd0f314327ac8",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b287f4b88d6bce788552fec493e44e64",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:10.916Z",
+      "updated_at": "2026-11-12T11:09:10.916Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--south-korea--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "South Korea",
+      "description": "Country the user plans to visit.",
+      "content": "South Korea is the country where the user's mother grew up, and a destination the user is planning to visit to see her hometown and explore their heritage.",
+      "attributes": {
+        "kind": "country",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T19:09:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://34cda8c866d537161985e74045d429d6",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://7da3b2150251b8edf8808da52b56204f",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:09.885Z",
+      "updated_at": "2026-11-12T11:09:09.885Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--springfield--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Springfield",
+      "description": "The user's home city.",
+      "content": "Springfield is the city where the user resides.",
+      "attributes": {
+        "kind": "city",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T07:27:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f1c8e834a40c6299797c53156fa42c2e",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:07.824Z",
+      "updated_at": "2026-11-12T11:09:07.824Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-user--user--28fb28525f1329c5",
+      "type": "entity.user",
+      "title": "User",
+      "description": "The user of the personal assistant.",
+      "content": "The user is a US citizen, born and raised, who lives in Springfield. They have Korean and Portuguese heritage (their mother is from South Korea, and their grandmother is a Portuguese citizen). Their interests and hobbies include theater acting, costume design, sculpting, bird watching, video games, literature, and cars.",
+      "attributes": {
+        "location": "Springfield",
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-03-15T22:17:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f1c8e834a40c6299797c53156fa42c2e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://34cda8c866d537161985e74045d429d6",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://3c9d2dc398c9693234474029e600e796",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d5e54c3f0e0597c2afe312ec618bdc58",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:04.998Z",
+      "updated_at": "2026-11-12T11:09:04.998Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-07128af97e329bab",
+      "type": "fact.plan",
+      "title": "Planning theater outing to see The Lion King in June 2023",
+      "content": "The user plans to organize a work colleagues' outing to attend 'The Lion King' musical at the City Theater in their hometown in June 2023 and is considering inviting Rachel.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-02-22T13:02:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://7c0a245c9e97972d831a965a3815314c",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f4e5a3ba2f014e322665c09dc1094fdd",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://3ef2601bbb7acdab7e522eab8b8071c4",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:12.994Z",
+      "updated_at": "2026-11-12T11:09:12.994Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-091834c98dfa7655",
+      "type": "fact.life_event",
+      "title": "Attended literary festival and met Celeste Ng and Lauren Groff",
+      "content": "On March 15, 2023, the user attended a literary festival in the city, attended a panel discussion on women in literature, and briefly met authors Celeste Ng and Lauren Groff.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T18:27:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://ecddd0ec21051764248da2abfcab15f0",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:27.332Z",
+      "updated_at": "2026-11-12T11:09:27.332Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-126dced86cd32d6d",
+      "type": "fact.plan",
+      "title": "Planning road trip from Chicago to Denver",
+      "content": "The user is planning a road trip driving from Chicago to Denver, with stops planned in Iowa City and Omaha.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T23:54:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://13a5738cc6fbfcf9fd8c478a8fbf7e64",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:26.314Z",
+      "updated_at": "2026-11-12T11:09:26.314Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-1a4e81bc3988bec1",
+      "type": "fact.life_event",
+      "title": "Built a new gaming PC with an RTX 3080",
+      "content": "The user built a new gaming PC equipped with an NVIDIA GeForce RTX 3080 graphics card as of March 2, 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-02T11:17:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f89fe3ae2d8e3422987c873ed9025e13",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:17.081Z",
+      "updated_at": "2026-11-12T11:09:17.081Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-23233080c3ff05cd",
+      "type": "fact.life_event",
+      "title": "Grandmother proposed applying for Portuguese citizenship",
+      "content": "In February 2023, the user's grandmother, a Portuguese citizen, visited and proposed that the user and their siblings apply for Portuguese citizenship and passports through descent.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T07:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3c9d2dc398c9693234474029e600e796",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:22.190Z",
+      "updated_at": "2026-11-12T11:09:22.190Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-3c369abd3acbf1ec",
+      "type": "fact.plan",
+      "title": "Planning trip to South Korea",
+      "content": "The user plans to travel to South Korea to visit their mother's hometown and explore their Korean cultural heritage.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T19:09:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://34cda8c866d537161985e74045d429d6",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://7da3b2150251b8edf8808da52b56204f",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:23.226Z",
+      "updated_at": "2026-11-12T11:09:23.226Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-3cbf5937f76a3359",
+      "type": "fact.plan",
+      "title": "Considering attending Midwest Auto Racking Festival in June 2023",
+      "content": "The user is considering attending the Midwest Auto Racking Festival on June 12, 2023, in Indianapolis.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T22:21:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://2f8fc05ea2f9024b3780e9be397b64e6",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d6ade4abe337b0c0d5244f3f2bf99691",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:25.293Z",
+      "updated_at": "2026-11-12T11:09:25.293Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-40b4943931edb29b",
+      "type": "fact.routine",
+      "title": "Roasts vegetables on Sundays for weekly meals",
+      "content": "The user regularly roasts a large batch of vegetables (such as Brussels sprouts, sweet potatoes, and red onions) on Sundays to eat throughout the week.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-05T14:41:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://bb18585717696c268f619f9582ec4f52",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:18.109Z",
+      "updated_at": "2026-11-12T11:09:18.109Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-4bc3413480eeb44a",
+      "type": "fact.life_event",
+      "title": "Completed The Last of Us Part II platinum trophy",
+      "content": "In February 2023, the user finished playing The Last of Us Part II on PS4, taking around 20 hours to finish the story mode and earn the platinum trophy.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T13:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://8775c6be87d191094d198983aa6fbdeb",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://5b82d89bf6060163826e9c5050072986",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:28.348Z",
+      "updated_at": "2026-11-12T11:09:28.348Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-94f8fc111f9372cc",
+      "type": "fact.routine",
+      "title": "Bird watching, journaling, and citizen science reporting",
+      "content": "The user started bird watching around December 2022 using binoculars given by their sister, keeps a birding journal with over 30 recorded species, and reports sightings to an online citizen science database.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-03-15T00:19:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://23130ab3b55da7cc3e05d1e2cd4d8119",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://4311f4df97064e771cb9c65b45a466f8",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://9f14e8bc023f5938a2a9a43aaa6c601a",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:20.157Z",
+      "updated_at": "2026-11-12T11:09:20.157Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-9b161f1db69e73f5",
+      "type": "fact.plan",
+      "title": "Planning summer 2023 trip to London",
+      "content": "The user plans to visit Europe in the summer of 2023, flying round-trip between JFK and London on British Airways for $450 and considering staying in Covent Garden.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T21:56:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a5e91e435aa25cfbef1fd0f314327ac8",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b287f4b88d6bce788552fec493e44e64",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:24.260Z",
+      "updated_at": "2026-11-12T11:09:24.260Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-9d2a42f246dd7577",
+      "type": "fact.preference",
+      "title": "Dietary preferences and cooking habits",
+      "content": "The user prefers roasted vegetables and quinoa, enjoys salad dressings made with apple cider vinegar and Dijon mustard, seasons chicken stir-fry with soy sauce, and aims to cut down on meat consumption in favor of vegetarian protein sources.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-03-05T14:43:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://4f2225b92d0d7cb47463191d3d0eba1e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://e759f4f68fb8e799d4c41cd543a9e6c2",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://7385fba586b24c43d8ef1a71cbbc53a7",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://f5d8399d65f492503c2337527e8bfa9f",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:19.132Z",
+      "updated_at": "2026-11-12T11:09:19.132Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-9ecf37fc7163f7b2",
+      "type": "fact.routine",
+      "title": "Saturday morning sculpting classes",
+      "content": "The user attends sculpting classes at a local art studio on Saturday mornings, which they started on February 10, 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T07:25:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://29ed4af2ac4eb733a032b8e36abd16cb",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:21.173Z",
+      "updated_at": "2026-11-12T11:09:21.173Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-b44f74bd6d5ef26c",
+      "type": "fact.life_event",
+      "title": "Attended costume design seminar and created costume piece",
+      "content": "Prior to February 22, 2023, the user attended a costume design seminar led by Ms. Johnson, where they created a simple costume piece.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-02-22T13:06:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f4e5a3ba2f014e322665c09dc1094fdd",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://9026adc5e055ff0a756d29314d64dabb",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:15.035Z",
+      "updated_at": "2026-11-12T11:09:15.035Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-eacca8fcfbacd3e8",
+      "type": "fact.life_event",
+      "title": "Cast as a guard in local production of Hamlet",
+      "content": "The user was cast as one of the guards in a local theater production of 'Hamlet' in February 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-02-22T13:04:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://95815a0a9328222d2a1aa910cc485279",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:14.017Z",
+      "updated_at": "2026-11-12T11:09:14.017Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-fa855e0e8ea18729",
+      "type": "fact.preference",
+      "title": "Fan of the Dark Souls video game series",
+      "content": "The user is a fan of FromSoftware's Dark Souls series and expressed excitement for Elden Ring.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-02T11:19:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://bd712137fb08f6ca70f9259f24037ec9",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:09:16.057Z",
+      "updated_at": "2026-11-12T11:09:16.057Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "5334841d-92cd-411d-afab-2e19fbebe740",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    }
+  ],
+  "dreamedInRun": "dev50-rest"
+}

@@ -1,0 +1,1679 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "connectorId": ".anthropic-claude-4.6-sonnet-chat_completion",
+  "ranker": "the .rerank-v1-elasticsearch reranker",
+  "evaluatedAt": "2026-11-12T11:36:46.516Z",
+  "kis": 1619,
+  "overall": {
+    "targets": 50,
+    "counts": {
+      "covered": 23,
+      "partial": 10,
+      "missing": 17,
+      "error": 0
+    },
+    "score": 0.56
+  },
+  "byDataset": {
+    "longmemeval_s": {
+      "targets": 50,
+      "counts": {
+        "covered": 23,
+        "partial": 10,
+        "missing": 17,
+        "error": 0
+      },
+      "score": 0.56
+    }
+  },
+  "byCategory": {
+    "knowledge-update": {
+      "targets": 8,
+      "counts": {
+        "covered": 4,
+        "partial": 0,
+        "missing": 4,
+        "error": 0
+      },
+      "score": 0.5
+    },
+    "multi-session": {
+      "targets": 13,
+      "counts": {
+        "covered": 7,
+        "partial": 3,
+        "missing": 3,
+        "error": 0
+      },
+      "score": 0.6538461538461539
+    },
+    "single-session-assistant": {
+      "targets": 6,
+      "counts": {
+        "covered": 0,
+        "partial": 0,
+        "missing": 6,
+        "error": 0
+      },
+      "score": 0
+    },
+    "single-session-preference": {
+      "targets": 3,
+      "counts": {
+        "covered": 0,
+        "partial": 1,
+        "missing": 2,
+        "error": 0
+      },
+      "score": 0.16666666666666666
+    },
+    "single-session-user": {
+      "targets": 7,
+      "counts": {
+        "covered": 5,
+        "partial": 1,
+        "missing": 1,
+        "error": 0
+      },
+      "score": 0.7857142857142857
+    },
+    "temporal-reasoning": {
+      "targets": 13,
+      "counts": {
+        "covered": 7,
+        "partial": 5,
+        "missing": 1,
+        "error": 0
+      },
+      "score": 0.7307692307692307
+    }
+  },
+  "results": [
+    {
+      "target": {
+        "id": "0a995998",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many items of clothing do I need to pick up or return from a store?",
+        "answer": "3",
+        "askedAt": "2023-02-15T23:50:00.000Z",
+        "evidence": [
+          "answer_afa9873b_2",
+          "answer_afa9873b_3",
+          "answer_afa9873b_1"
+        ]
+      },
+      "sample": "0a995998",
+      "candidateIds": [
+        "entity-organization--joe-s-tackle-shop--28fb28525f1329c5",
+        "fact-f89ac71b3673373b",
+        "fact-8e7db0ac1325fd83",
+        "fact-fc5571dd16b67617",
+        "fact-7c8b24f6e820b77d",
+        "fact-95de128712f4c14d",
+        "entity-place--san-francisco--28fb28525f1329c5",
+        "entity-place--colombia--28fb28525f1329c5",
+        "fact-d5b6ff058a05740e",
+        "entity-place--canada--28fb28525f1329c5"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "No stored items mention picking up or returning multiple items of clothing from a store; only a single boot exchange at Zara is noted."
+    },
+    {
+      "target": {
+        "id": "118b2229",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "How long is my daily commute to work?",
+        "answer": "45 minutes each way",
+        "askedAt": "2023-05-30T20:36:00.000Z",
+        "evidence": [
+          "answer_40a90d51"
+        ]
+      },
+      "sample": "118b2229",
+      "candidateIds": [
+        "fact-29e0b3c81a33346d",
+        "fact-bc79107951fb9322",
+        "fact-a706e1e9a5087256",
+        "fact-be792684bec775a4",
+        "fact-d2c2b79cef006cb2",
+        "fact-9ad4c829347d9d9b",
+        "fact-2fe63d6a04cb4469",
+        "fact-3f149bbef8a1c35f",
+        "fact-afec47b79a4e4868",
+        "fact-64a485868db56867"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-29e0b3c81a33346d"
+      ],
+      "reason": "The stored item explicitly states the user has a 45-minute daily commute each way."
+    },
+    {
+      "target": {
+        "id": "6a1eabeb",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "What was my personal best time in the charity 5K run?",
+        "answer": "25 minutes and 50 seconds (or 25:50)",
+        "askedAt": "2023-06-25T13:22:00.000Z",
+        "evidence": [
+          "answer_a25d4a91_1",
+          "answer_a25d4a91_2"
+        ]
+      },
+      "sample": "6a1eabeb",
+      "candidateIds": [
+        "fact-e8a2975837eec601",
+        "fact-aabfa35bed711077",
+        "fact-18f8e3363aeb5c2f",
+        "fact-613ff158a2157b38",
+        "fact-5a11b17dc6fa52e4",
+        "entity-person--mrs-patel--28fb28525f1329c5",
+        "entity-organization--austin-film-festival--28fb28525f1329c5",
+        "fact-27038f06d206e687",
+        "fact-087d996a2c4e93a8",
+        "fact-742774e68f24614d"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-e8a2975837eec601"
+      ],
+      "reason": "The stored item explicitly states the user's personal best time in a charity 5K run is 25:50."
+    },
+    {
+      "target": {
+        "id": "6aeb4375",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "How many Korean restaurants have I tried in my city?",
+        "answer": "four",
+        "askedAt": "2023-10-22T15:38:00.000Z",
+        "evidence": [
+          "answer_3f9693b7_1",
+          "answer_3f9693b7_2"
+        ]
+      },
+      "sample": "6aeb4375",
+      "candidateIds": [
+        "fact-7ed66e53a99ebdd0",
+        "entity-place--la-taqueria--28fb28525f1329c5",
+        "entity-place--city-art-museum--28fb28525f1329c5",
+        "entity-place--springfield--28fb28525f1329c5",
+        "fact-b0e5e1d19dd3a6da",
+        "fact-bceb4cc0ec61368d",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-725632d3d430bfbe",
+        "entity-place--hawaii--28fb28525f1329c5",
+        "fact-a2d072b42f431576"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items mention Korean restaurants visited by the user in their city."
+    },
+    {
+      "target": {
+        "id": "6d550036",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many projects have I led or am currently leading?",
+        "answer": "2",
+        "askedAt": "2023-05-30T23:32:00.000Z",
+        "evidence": [
+          "answer_ec904b3c_1",
+          "answer_ec904b3c_4",
+          "answer_ec904b3c_3",
+          "answer_ec904b3c_2"
+        ]
+      },
+      "sample": "6d550036",
+      "candidateIds": [
+        "fact-458a049496c00951",
+        "fact-8db40a7702ee4bdd",
+        "fact-e31911066af2db3f",
+        "fact-4e62e1a392a862f7",
+        "fact-aaab937d60566b59",
+        "fact-13bbcd07b2f990bd",
+        "entity-person--alex--28fb28525f1329c5",
+        "fact-00057ab65e642535",
+        "fact-f12c3266a72f0d39",
+        "entity-person--rachel--28fb28525f1329c5"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-458a049496c00951",
+        "fact-8db40a7702ee4bdd",
+        "fact-4e62e1a392a862f7"
+      ],
+      "reason": "The stored items show the user leading a team as senior software engineer and leading a Marketing Research class project, plus a solo Data Mining project, but it's unclear which two projects the expected answer of '2' refers to, and the items don't explicitly state a total count of projects led."
+    },
+    {
+      "target": {
+        "id": "7161e7e2",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I'm checking our previous chat about the shift rotation sheet for GM social media agents. Can you remind me what was the rotation for Admon on a Sunday?",
+        "answer": "Admon was assigned to the 8 am - 4 pm (Day Shift) on Sundays.",
+        "askedAt": "2023-05-30T20:16:00.000Z",
+        "evidence": [
+          "answer_sharegpt_5Lzox6N_0"
+        ]
+      },
+      "sample": "7161e7e2",
+      "candidateIds": [
+        "fact-4464f9223d43566f",
+        "fact-475ca032bfd68ee7",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-d0f64f7d4de54675",
+        "fact-23c14e80b4231d52",
+        "fact-d930413b9ab1b526",
+        "entity-place--kansas-city-missouri--28fb28525f1329c5",
+        "fact-6bf2532f0bd839a0",
+        "fact-fea091c50c7704ea",
+        "entity-person--rachel--28fb28525f1329c5"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about a shift rotation sheet for GM social media agents or Admon's Sunday schedule."
+    },
+    {
+      "target": {
+        "id": "8a2466db",
+        "dataset": "longmemeval_s",
+        "category": "single-session-preference",
+        "question": "Can you recommend some resources where I can learn more about video editing?",
+        "answer": "The user would prefer responses that suggest resources specifically tailored to Adobe Premiere Pro, especially those that delve into its advanced settings. They might not prefer general video editing resources or resources related to other video editing software.",
+        "askedAt": "2023-05-30T22:03:00.000Z",
+        "evidence": [
+          "answer_edb03329"
+        ]
+      },
+      "sample": "8a2466db",
+      "candidateIds": [
+        "fact-4ce8d32790e59481",
+        "fact-792730f0265258b1",
+        "entity-user--user--28fb28525f1329c5",
+        "entity-place--san-francisco--28fb28525f1329c5",
+        "fact-54fd59dcf6e7b8bb",
+        "entity-place--new-york-city--28fb28525f1329c5",
+        "fact-38d81436e96c90a4",
+        "fact-fd034d68972d0f37",
+        "fact-aaefd6dac2e4f10c",
+        "fact-417652b8fbbe6441"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-4ce8d32790e59481"
+      ],
+      "reason": "The stored items confirm the user enjoys Adobe Premiere Pro, which implies a preference for resources about it, but there is no stored information about their preference for advanced settings specifically or their disinterest in general/other software resources."
+    },
+    {
+      "target": {
+        "id": "e47becba",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "What degree did I graduate with?",
+        "answer": "Business Administration",
+        "askedAt": "2023-05-30T23:40:00.000Z",
+        "evidence": [
+          "answer_280352e9"
+        ]
+      },
+      "sample": "e47becba",
+      "candidateIds": [
+        "fact-ef997a76325cfb3e",
+        "fact-f0b9fe292dd9ec28",
+        "entity-person--rachel--28fb28525f1329c5",
+        "fact-770bb7ab255471da",
+        "fact-da41f309862dfa4d",
+        "fact-0502f978761ada81",
+        "entity-person--alex--28fb28525f1329c5",
+        "fact-10902d08cbafa1a2",
+        "entity-person--max--28fb28525f1329c5",
+        "entity-person--lucas--28fb28525f1329c5"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-ef997a76325cfb3e"
+      ],
+      "reason": "The stored item explicitly states that the user holds a degree in Business Administration."
+    },
+    {
+      "target": {
+        "id": "gpt4_59149c77",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many days passed between my visit to the Museum of Modern Art (MoMA) and the 'Ancient Civilizations' exhibit at the Metropolitan Museum of Art?",
+        "answer": "7 days. 8 days (including the last day) is also acceptable.",
+        "askedAt": "2023-02-01T10:20:00.000Z",
+        "evidence": [
+          "answer_d00ba6d0_1",
+          "answer_d00ba6d0_2"
+        ]
+      },
+      "sample": "gpt4_59149c77",
+      "candidateIds": [
+        "fact-5b466d04fcaa643c",
+        "entity-place--metropolitan-museum-of-art--28fb28525f1329c5",
+        "entity-place--museum-of-modern-art--28fb28525f1329c5",
+        "fact-c8c5963b1f675b4d",
+        "fact-81b92fffe042dc82",
+        "entity-place--new-york-city--28fb28525f1329c5",
+        "fact-3cd758b8a8a05ec9",
+        "fact-ff8a138eca50ec5e",
+        "entity-place--chicago--28fb28525f1329c5",
+        "fact-4bdd9bbc8018ec09"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-5b466d04fcaa643c",
+        "fact-c8c5963b1f675b4d"
+      ],
+      "reason": "The two dates (January 8, 2023 for MoMA and January 15, 2023 for the Metropolitan Museum) are stored, allowing the 7-day difference to be calculated."
+    },
+    {
+      "target": {
+        "id": "gpt4_f49edff3",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "Which three events happened in the order from first to last: the day I helped my friend prepare the nursery, the day I helped my cousin pick out stuff for her baby shower, and the day I ordered a customized phone case for my friend's birthday?",
+        "answer": "First, I helped my friend prepare the nursery, then I helped my cousin pick out stuff for her baby shower, and lastly, I ordered a customized phone case for my friend's birthday.",
+        "askedAt": "2023-03-22T21:49:00.000Z",
+        "evidence": [
+          "answer_3e9fce53_1",
+          "answer_3e9fce53_2",
+          "answer_3e9fce53_3"
+        ]
+      },
+      "sample": "gpt4_f49edff3",
+      "candidateIds": [
+        "fact-ccbe105e5bb35e86",
+        "fact-a109d56c10cb8011",
+        "fact-b12ea3943c36db50",
+        "fact-a058572d9b3c2856",
+        "fact-e77362fc18b6c580",
+        "fact-14eff0f0f59099d7",
+        "fact-3dc1acd066897314",
+        "fact-4d0bd057dfa9bf31",
+        "fact-ffe7093510486c09",
+        "fact-e13edea4e8678e6f"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-ccbe105e5bb35e86"
+      ],
+      "reason": "Only the first event (helping friend prepare nursery on February 5, 2023) is stored; the dates for helping cousin pick out baby shower items and ordering a customized phone case are not recorded."
+    },
+    {
+      "target": {
+        "id": "07b6f563",
+        "dataset": "longmemeval_s",
+        "category": "single-session-preference",
+        "question": "Can you suggest some useful accessories for my phone?",
+        "answer": "The user would prefer suggestions of accessories that are compatible with an iPhone 13 Pro, such as high-quality screen protectors, durable cases, portable power banks, or phone wallet cases. They may not prefer suggestions of accessories that are not compatible with Apple products or do not enhance the functionality or protection of their phone.",
+        "askedAt": "2023-05-30T21:46:00.000Z",
+        "evidence": [
+          "answer_d03098f9"
+        ]
+      },
+      "sample": "07b6f563",
+      "candidateIds": [
+        "fact-c9b322997cc69a32",
+        "fact-6a6fd620cf8fc5be",
+        "entity-person--rachel--28fb28525f1329c5",
+        "fact-3023a1173f9b995b",
+        "fact-db66d7b69a2c4873",
+        "fact-c6b37f82caaf07fb",
+        "fact-a58035ae4f667695",
+        "fact-f359908ae60c2315",
+        "fact-6b599a931b5549a9",
+        "entity-person--alex--28fb28525f1329c5"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items mention the user owning an iPhone 13 Pro or any Apple device, which is the key information needed to suggest compatible phone accessories."
+    },
+    {
+      "target": {
+        "id": "099778bb",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "What percentage of leadership positions do women hold in the my company?",
+        "answer": "20%",
+        "askedAt": "2023-05-30T22:26:00.000Z",
+        "evidence": [
+          "answer_80d6d664_2",
+          "answer_80d6d664_1"
+        ]
+      },
+      "sample": "099778bb",
+      "candidateIds": [
+        "fact-200bf705e7344b1b",
+        "fact-7228f0f6e4902e3e",
+        "fact-33d45d016e6d9011",
+        "fact-795f749bacc2c079",
+        "entity-organization--our-lady-of-lourdes-church--28fb28525f1329c5",
+        "fact-dd4f880c07fea17e",
+        "fact-aa683e0f88af0ddd",
+        "fact-9d4a423dbc91f0ff",
+        "fact-16e388b5587ecccc",
+        "fact-a4a75105f35532b5"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-200bf705e7344b1b"
+      ],
+      "reason": "The stored item states 20 out of 100 leadership positions are held by women, which directly yields the 20% answer."
+    },
+    {
+      "target": {
+        "id": "0ea62687",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How much more miles per gallon was my car getting a few months ago compared to now?",
+        "answer": "2",
+        "askedAt": "2023-05-30T23:51:00.000Z",
+        "evidence": [
+          "answer_dc5e537d_1",
+          "answer_dc5e537d_2"
+        ]
+      },
+      "sample": "0ea62687",
+      "candidateIds": [
+        "fact-844db62567348a02",
+        "entity-person--tom--28fb28525f1329c5",
+        "entity-person--alex--28fb28525f1329c5",
+        "fact-89e71d49daaa3d9b",
+        "fact-ef1f40ea4d3a4136",
+        "entity-place--lake-michigan--28fb28525f1329c5",
+        "fact-e2993f066c2bb2f2",
+        "entity-person--david--28fb28525f1329c5",
+        "fact-facff40b882693e0",
+        "fact-b6f46bcbaba67bb9"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about the user's car fuel efficiency or miles per gallon figures."
+    },
+    {
+      "target": {
+        "id": "21d02d0d",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many fun runs did I miss in March due to work commitments?",
+        "answer": "2",
+        "askedAt": "2023-04-26T23:58:00.000Z",
+        "evidence": [
+          "answer_2c637141_2",
+          "answer_2c637141_1"
+        ]
+      },
+      "sample": "21d02d0d",
+      "candidateIds": [
+        "fact-9c632e387c333fb1",
+        "fact-bdd1d0d9e81105ef",
+        "fact-4d056ed753f18a8e",
+        "fact-76d16d22be06139a",
+        "fact-8a76d11d386ea422",
+        "fact-c7d839c8cf8cf9c7",
+        "fact-7bf8fa54aa05cec1",
+        "fact-395d12950039259b",
+        "fact-1e770c0b58dc7901",
+        "entity-user--user--28fb28525f1329c5"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-9c632e387c333fb1",
+        "fact-bdd1d0d9e81105ef"
+      ],
+      "reason": "The two stored items together show the user missed fun runs on March 5 and March 26, 2023, both due to work commitments, which adds up to the expected answer of 2."
+    },
+    {
+      "target": {
+        "id": "311778f1",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "How many hours did I spend watching documentaries on Netflix last month?",
+        "answer": "10",
+        "askedAt": "2023-05-30T15:40:00.000Z",
+        "evidence": [
+          "answer_e40b054e"
+        ]
+      },
+      "sample": "311778f1",
+      "candidateIds": [
+        "fact-586686aeb1942d67",
+        "fact-b60f3c81c8a81d1f",
+        "fact-665b9c4b36cfdfc1",
+        "fact-ba09d9282deab61a",
+        "fact-a0a751e6c7083a60",
+        "fact-28cf1d5c7f9a1db4",
+        "fact-2919ed10ace02848",
+        "fact-2f10e40757ac4a9d",
+        "fact-1c0e5a6754e42777",
+        "fact-c59096821bdda635"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-586686aeb1942d67"
+      ],
+      "reason": "The stored item mentions 10 hours of Netflix documentary watching but specifies April 2023, while the question asked on 2023-05-30 refers to 'last month' which would be April 2023 — so the data matches, but the item doesn't explicitly frame it as 'last month' from the question's perspective, making it a close but indirect match; however, the 10-hour figure is present and the month aligns."
+    },
+    {
+      "target": {
+        "id": "4dfccbf7",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many days had passed since I started taking ukulele lessons when I decided to take my acoustic guitar to the guitar tech for servicing?",
+        "answer": "24 days. 25 days (including the last day) is also acceptable.",
+        "askedAt": "2023-04-01T00:42:00.000Z",
+        "evidence": [
+          "answer_4bebc782_1",
+          "answer_4bebc782_2"
+        ]
+      },
+      "sample": "4dfccbf7",
+      "candidateIds": [
+        "fact-504425543b07b6cf",
+        "entity-person--rachel--28fb28525f1329c5",
+        "fact-49e7f69f118adb28",
+        "entity-person--joe--28fb28525f1329c5",
+        "fact-cf45a277913e884a",
+        "entity-place--chicago--28fb28525f1329c5",
+        "fact-48d3ab68cadf4377",
+        "fact-b3b96f5b6b5eb647",
+        "fact-92d8238ec10980ce",
+        "fact-d2cdc48834411514"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-504425543b07b6cf",
+        "fact-49e7f69f118adb28"
+      ],
+      "reason": "The ukulele lessons started on February 1, 2023, and the guitar was taken for servicing on February 25, 2023, allowing the calculation of 24 days elapsed (February 1 to February 25)."
+    },
+    {
+      "target": {
+        "id": "4fd1909e",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "Where did I attend the Imagine Dragons concert?",
+        "answer": "Xfinity Center",
+        "askedAt": "2023-05-30T18:25:00.000Z",
+        "evidence": [
+          "answer_2952aee4"
+        ]
+      },
+      "sample": "4fd1909e",
+      "candidateIds": [
+        "fact-b45d296fa01be4b1",
+        "fact-efd4c46c147abafe",
+        "entity-place--bangkok--28fb28525f1329c5",
+        "fact-e75e3dc4b5e804f4",
+        "entity-place--yellowstone-national-park--28fb28525f1329c5",
+        "entity-organization--chattanooga-hockey--28fb28525f1329c5",
+        "entity-place--grand-canyon--28fb28525f1329c5",
+        "fact-f432f7e9aaf180da",
+        "fact-310d9c5776943e63",
+        "fact-e7dc81f3164c25cb"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items mention an Imagine Dragons concert or the Xfinity Center."
+    },
+    {
+      "target": {
+        "id": "50635ada",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "What was my previous frequent flyer status on United Airlines before I got the current status?",
+        "answer": "Premier Silver",
+        "askedAt": "2023-06-29T04:09:00.000Z",
+        "evidence": [
+          "answer_dcd74827_1",
+          "answer_dcd74827_2"
+        ]
+      },
+      "sample": "50635ada",
+      "candidateIds": [
+        "fact-e610f7cb5e1a5c57",
+        "entity-organization--united-airlines--28fb28525f1329c5",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-6240844096a281b6",
+        "fact-564fff5f0b40067b",
+        "entity-place--washington-d-c--28fb28525f1329c5",
+        "entity-place--los-angeles--28fb28525f1329c5",
+        "fact-a918e7e09df1e179",
+        "fact-70cfbe7e0d7eec3a",
+        "fact-ba87b64e4fc8c7f9"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "entity-organization--united-airlines--28fb28525f1329c5",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-e610f7cb5e1a5c57",
+        "fact-6240844096a281b6"
+      ],
+      "reason": "Multiple stored items clearly state that the user held Premier Silver status before advancing to Premier Gold status in May 2023, allowing the previous status to be identified as Premier Silver."
+    },
+    {
+      "target": {
+        "id": "51b23612",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I was going through our previous conversation about political propaganda and humor, and I was wondering if you could remind me of that Soviet cartoon you mentioned that mocked Western culture?",
+        "answer": "Nu, pogodi!",
+        "askedAt": "2023-05-30T20:38:00.000Z",
+        "evidence": [
+          "answer_ultrachat_427265"
+        ]
+      },
+      "sample": "51b23612",
+      "candidateIds": [
+        "entity-place--universal-studios-hollywood--28fb28525f1329c5",
+        "fact-95d3276c6ab66541",
+        "entity-person--maria--28fb28525f1329c5",
+        "entity-person--mrs-johnson--28fb28525f1329c5",
+        "fact-4b5950833f60e886",
+        "entity-place--melbourne--28fb28525f1329c5",
+        "fact-edafcee9c9b1ca03",
+        "entity-place--diss--28fb28525f1329c5",
+        "fact-8a240f4e1976f91f",
+        "fact-8dae876aedf62731"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about Soviet cartoons, political propaganda, humor, or 'Nu, pogodi!'."
+    },
+    {
+      "target": {
+        "id": "5c40ec5b",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "How many times have I met up with Alex from Germany?",
+        "answer": "We've met up twice.",
+        "askedAt": "2023-10-30T13:39:00.000Z",
+        "evidence": [
+          "answer_1cb52d0a_1",
+          "answer_1cb52d0a_2"
+        ]
+      },
+      "sample": "5c40ec5b",
+      "candidateIds": [
+        "entity-person--alex--28fb28525f1329c5",
+        "fact-06659ffdf837aa9d",
+        "fact-fb32b2185236bc74",
+        "fact-ff00122b24c7b468",
+        "entity-place--germany--28fb28525f1329c5",
+        "entity-place--berlin--28fb28525f1329c5",
+        "fact-a72e665ce055054d",
+        "entity-person--john--28fb28525f1329c5",
+        "fact-da3fda268ba7bd94",
+        "fact-8fd8d1cd44439728"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "entity-person--alex--28fb28525f1329c5",
+        "fact-06659ffdf837aa9d"
+      ],
+      "reason": "Both items explicitly state that the user has met up with Alex twice, directly answering the question."
+    },
+    {
+      "target": {
+        "id": "5d3d2817",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "What was my previous occupation?",
+        "answer": "Marketing specialist at a small startup",
+        "askedAt": "2023-05-30T20:08:00.000Z",
+        "evidence": [
+          "answer_235eb6fb"
+        ]
+      },
+      "sample": "5d3d2817",
+      "candidateIds": [
+        "fact-de4fb2661e3cb79d",
+        "entity-person--john--28fb28525f1329c5",
+        "entity-organization--startupabc--28fb28525f1329c5",
+        "entity-person--sarah--28fb28525f1329c5",
+        "fact-fc69f7054a46f868",
+        "entity-person--emily--28fb28525f1329c5",
+        "entity-organization--google--28fb28525f1329c5",
+        "fact-9eac6a9b1c765576",
+        "fact-9767375999cce18b",
+        "fact-4803dc54d48f3abf"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-de4fb2661e3cb79d"
+      ],
+      "reason": "The fact explicitly states the user previously worked as a marketing specialist at a small startup."
+    },
+    {
+      "target": {
+        "id": "5e1b23de",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many months ago did I attend the photography workshop?",
+        "answer": "3",
+        "askedAt": "2024-02-01T18:06:00.000Z",
+        "evidence": [
+          "answer_c18d480b_1"
+        ]
+      },
+      "sample": "5e1b23de",
+      "candidateIds": [
+        "fact-8f7dba1b897d302a",
+        "fact-7d169665fd14d36d",
+        "fact-17e88fc47e0fa74d",
+        "fact-861982798758b58e",
+        "fact-d968c2768827a859",
+        "fact-b0262700dd723068",
+        "fact-ad2d1b22e2d340c4",
+        "fact-b089e14958fb3488",
+        "fact-3c95b73562ad877c",
+        "fact-06b85e65fb654b58"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-8f7dba1b897d302a"
+      ],
+      "reason": "The stored item states the photography workshop was attended on November 1, 2023, and the question is asked on February 1, 2024, which is exactly 3 months later — calculable from the stored date."
+    },
+    {
+      "target": {
+        "id": "60472f9c",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many projects have I been working on simultaneously, excluding my thesis?",
+        "answer": "2",
+        "askedAt": "2023-05-30T23:41:00.000Z",
+        "evidence": [
+          "answer_e7fe8c8b_1",
+          "answer_e7fe8c8b_2",
+          "answer_e7fe8c8b_3"
+        ]
+      },
+      "sample": "60472f9c",
+      "candidateIds": [
+        "fact-e518643639ee4f35",
+        "fact-9a190f384875ce0b",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-6b2d2425f8950a3f",
+        "fact-95b97931646d23f0",
+        "fact-81aa895a4a19da2e",
+        "fact-7ee95456dbbce449",
+        "fact-604fb9e0c3fefd76",
+        "fact-8bd1edbfc1291c06",
+        "fact-0c10c0acb61c3b30"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-e518643639ee4f35",
+        "fact-9a190f384875ce0b"
+      ],
+      "reason": "The stored items show the user has two non-thesis projects: a Data Mining project and a Database Systems project, which can be counted to give the answer of 2."
+    },
+    {
+      "target": {
+        "id": "618f13b2",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "How many times have I worn my new black Converse Chuck Taylor All Star sneakers?",
+        "answer": "six",
+        "askedAt": "2023-06-18T22:29:00.000Z",
+        "evidence": [
+          "answer_caf5b52e_1",
+          "answer_caf5b52e_2"
+        ]
+      },
+      "sample": "618f13b2",
+      "candidateIds": [
+        "fact-c36dcb34cffed57d",
+        "fact-de4c3f1066645489",
+        "fact-b70b5ca086c50d39",
+        "entity-person--rachel--28fb28525f1329c5",
+        "fact-fc0b66b22c19406a",
+        "fact-08815763b3a443d9",
+        "fact-70ead3b817f42e44",
+        "fact-8798ff60d7dbd689",
+        "fact-c8b502c3db75aa22",
+        "fact-5db9446d3512c690"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about black Converse Chuck Taylor All Star sneakers or how many times the user has worn them."
+    },
+    {
+      "target": {
+        "id": "65240037",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I remember you told me to dilute tea tree oil with a carrier oil before applying it to my skin. Can you remind me what the recommended ratio is?",
+        "answer": "The recommended ratio is 1:10, meaning one part tea tree oil to ten parts carrier oil.",
+        "askedAt": "2023-05-30T23:54:00.000Z",
+        "evidence": [
+          "answer_ultrachat_403752"
+        ]
+      },
+      "sample": "65240037",
+      "candidateIds": [
+        "fact-398c13e98af10458",
+        "fact-4c6fa6ac6de19ecc",
+        "fact-4369af0f82e96952",
+        "fact-1ccae141a389749f",
+        "fact-0acd24e620ccc196",
+        "fact-bfc1c9b34456500d",
+        "fact-fec6b0257644c337",
+        "fact-fc1350ecad79ba40",
+        "fact-1c12fa5d8e1ae3a6",
+        "fact-49064b75585f1ddc"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about tea tree oil dilution ratios or skincare advice related to carrier oils."
+    },
+    {
+      "target": {
+        "id": "69fee5aa",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "How many pre-1920 American coins do I have in my collection?",
+        "answer": "38",
+        "askedAt": "2023-06-09T11:14:00.000Z",
+        "evidence": [
+          "answer_d6028d6e_1",
+          "answer_d6028d6e_2"
+        ]
+      },
+      "sample": "69fee5aa",
+      "candidateIds": [
+        "fact-6abfc8e8f7180cde",
+        "fact-cd8cfc68861512b4",
+        "fact-5bfed36cc4bf1243",
+        "fact-05ba83372d177344",
+        "fact-c73b7f8265c02c67",
+        "fact-0e624032c0a6c8ce",
+        "entity-place--arizona--28fb28525f1329c5",
+        "fact-736d52673cfbead7",
+        "entity-place--new-york-city--28fb28525f1329c5",
+        "fact-89991fa224e1a062"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "No stored item mentions the specific count of 38 pre-1920 American coins in the user's collection."
+    },
+    {
+      "target": {
+        "id": "6ade9755",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "Where do I take yoga classes?",
+        "answer": "Serenity Yoga",
+        "askedAt": "2023-05-30T21:04:00.000Z",
+        "evidence": [
+          "answer_9398da02"
+        ]
+      },
+      "sample": "6ade9755",
+      "candidateIds": [
+        "entity-organization--serenity-yoga--28fb28525f1329c5",
+        "fact-4b318ecaca3c025d",
+        "fact-d2a1cb55047ee53f",
+        "entity-person--sarah--28fb28525f1329c5",
+        "fact-aa390f2e6a7705c9",
+        "fact-d15072246607dc37",
+        "entity-place--seattle--28fb28525f1329c5",
+        "entity-organization--vegan-vibes--28fb28525f1329c5",
+        "entity-person--emily--28fb28525f1329c5",
+        "fact-daaad168195daca8"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "entity-organization--serenity-yoga--28fb28525f1329c5"
+      ],
+      "reason": "The stored item explicitly states that Serenity Yoga is a yoga studio where the user attends yoga sessions."
+    },
+    {
+      "target": {
+        "id": "6c49646a",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "What is the total distance I covered in my four road trips?",
+        "answer": "3,000 miles",
+        "askedAt": "2023-05-30T22:17:00.000Z",
+        "evidence": [
+          "answer_cc1ced21_2",
+          "answer_cc1ced21_1"
+        ]
+      },
+      "sample": "6c49646a",
+      "candidateIds": [
+        "fact-27b67d12fd74096d",
+        "fact-24312b60263776f1",
+        "fact-d504bfb4495b1012",
+        "fact-2fdfee6d44c555a3",
+        "fact-20e4e51e4ebe5bd6",
+        "fact-3ecc6d1c2da19cba",
+        "fact-7ec57524e04f8cc5",
+        "fact-3c28847805034c5b",
+        "fact-5ce89bedb740415f",
+        "fact-d0144aa0733eae09"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-27b67d12fd74096d",
+        "fact-24312b60263776f1"
+      ],
+      "reason": "The two facts together account for four road trips covering 1,800 + 1,200 = 3,000 miles total."
+    },
+    {
+      "target": {
+        "id": "71017277",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "I received a piece of jewelry last Saturday from whom?",
+        "answer": "my aunt",
+        "askedAt": "2023-03-09T15:47:00.000Z",
+        "evidence": [
+          "answer_0b4a8adc_1"
+        ]
+      },
+      "sample": "71017277",
+      "candidateIds": [
+        "fact-2d7f84121b42824a",
+        "entity-person--mike--28fb28525f1329c5",
+        "entity-person--oliver--28fb28525f1329c5",
+        "entity-person--carnage--28fb28525f1329c5",
+        "fact-8bc6ccbf0f10eb22",
+        "fact-3682fdbb5bbf041f",
+        "fact-2a87a8fede889e3e",
+        "fact-05bc42ed90b271da",
+        "fact-b32aa2cb06e72934",
+        "entity-place--new-york-city--28fb28525f1329c5"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-2d7f84121b42824a"
+      ],
+      "reason": "The stored fact mentions receiving an antique crystal chandelier from the user's aunt on March 4, 2023 (a Saturday), but the question asks about 'jewelry' — a chandelier is not jewelry, so while the giver (aunt) and date match, the item type does not align with the question."
+    },
+    {
+      "target": {
+        "id": "81507db6",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many graduation ceremonies have I attended in the past three months?",
+        "answer": "3",
+        "askedAt": "2023-07-21T23:33:00.000Z",
+        "evidence": [
+          "answer_da3c1266_3",
+          "answer_da3c1266_4",
+          "answer_da3c1266_1",
+          "answer_da3c1266_5",
+          "answer_da3c1266_2"
+        ]
+      },
+      "sample": "81507db6",
+      "candidateIds": [
+        "fact-d8652bc10ed3b07f",
+        "fact-fdda80492b6a4216",
+        "fact-2976a2c96b0a97f4",
+        "fact-0828518d805e8e0f",
+        "entity-person--rachel--28fb28525f1329c5",
+        "entity-person--emma--28fb28525f1329c5",
+        "entity-person--alex--28fb28525f1329c5",
+        "fact-a1137771c01332df",
+        "fact-8d27036d93787453",
+        "entity-person--dr-smith--28fb28525f1329c5"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-d8652bc10ed3b07f",
+        "fact-fdda80492b6a4216",
+        "fact-2976a2c96b0a97f4"
+      ],
+      "reason": "Three graduation ceremonies attended are stored: Rachel's master's degree graduation (July 2023), cousin Emma's preschool graduation (May 2023), and colleague Alex's leadership program graduation (July 2023), all within three months of the question date, allowing the count of 3 to be derived."
+    },
+    {
+      "target": {
+        "id": "86b68151",
+        "dataset": "longmemeval_s",
+        "category": "single-session-user",
+        "question": "Where did I buy my new bookshelf from?",
+        "answer": "IKEA",
+        "askedAt": "2023-05-30T18:56:00.000Z",
+        "evidence": [
+          "answer_dc11c1eb"
+        ]
+      },
+      "sample": "86b68151",
+      "candidateIds": [
+        "fact-6a8465d847880e4d",
+        "fact-dfd0da891394ca4a",
+        "fact-24d0a229da85fcd7",
+        "fact-949854bf79c1c29e",
+        "fact-58a3901829a97d83",
+        "fact-a63c13561104bc79",
+        "fact-646eadf117f85877",
+        "entity-person--mrs-johnson--28fb28525f1329c5",
+        "entity-place--india--28fb28525f1329c5",
+        "entity-place--buttonwillow-raceway-park--28fb28525f1329c5"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-6a8465d847880e4d"
+      ],
+      "reason": "The stored item explicitly states the user purchased a new IKEA bookshelf, directly answering the question."
+    },
+    {
+      "target": {
+        "id": "9bbe84a2",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "What was my previous goal for my Apex Legends level before I updated my goal?",
+        "answer": "level 100",
+        "askedAt": "2023-10-08T15:29:00.000Z",
+        "evidence": [
+          "answer_c6a0c6c2_1",
+          "answer_c6a0c6c2_2"
+        ]
+      },
+      "sample": "9bbe84a2",
+      "candidateIds": [
+        "entity-place--philadelphia--28fb28525f1329c5",
+        "entity-place--los-angeles--28fb28525f1329c5",
+        "entity-place--denver--28fb28525f1329c5",
+        "fact-33cf4f855cf731c8",
+        "fact-e39a4e88460d4929",
+        "fact-ac6fb625975bd512",
+        "entity-place--tokyo--28fb28525f1329c5",
+        "fact-de9711290aee6559",
+        "entity-place--montreal--28fb28525f1329c5",
+        "entity-place--the-hamptons--28fb28525f1329c5"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about Apex Legends or the user's level goals in that game."
+    },
+    {
+      "target": {
+        "id": "a40e080f",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I was going through our previous conversation and I was wondering if you could remind me of the two companies you mentioned that prioritize employee safety and well-being like Triumvirate?",
+        "answer": "Patagonia and Southwest Airlines.",
+        "askedAt": "2023-05-30T19:28:00.000Z",
+        "evidence": [
+          "answer_ultrachat_269020"
+        ]
+      },
+      "sample": "a40e080f",
+      "candidateIds": [
+        "fact-1e50abb102b3b840",
+        "fact-0762b954bdcf3879",
+        "fact-b98d179fc255cd89",
+        "entity-place--disneyland--28fb28525f1329c5",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-b440c4fd8f445fc9",
+        "entity-person--carlos--28fb28525f1329c5",
+        "entity-person--maria--28fb28525f1329c5",
+        "entity-person--emily--28fb28525f1329c5",
+        "fact-e5cdcb7852f9b88d"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items mention Triumvirate, Patagonia, or Southwest Airlines, or any discussion about companies prioritizing employee safety and well-being."
+    },
+    {
+      "target": {
+        "id": "aae3761f",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many hours in total did I spend driving to my three road trip destinations combined?",
+        "answer": "15 hours for getting to the three destinations (or 30 hours for the round trip)",
+        "askedAt": "2023-05-30T19:37:00.000Z",
+        "evidence": [
+          "answer_526354c8_1",
+          "answer_526354c8_3",
+          "answer_526354c8_2"
+        ]
+      },
+      "sample": "aae3761f",
+      "candidateIds": [
+        "fact-9adbf807a34c720c",
+        "fact-6c8a311ac2da0c49",
+        "fact-f1fc1ab4cd65fc5e",
+        "entity-place--outer-banks--28fb28525f1329c5",
+        "fact-d24f1a7cc0adad6a",
+        "fact-999346eb88470de5",
+        "entity-place--topsail-island--28fb28525f1329c5",
+        "entity-place--tybee-island--28fb28525f1329c5",
+        "fact-66873287421edcac",
+        "fact-2846df052df74a7f"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-9adbf807a34c720c",
+        "fact-6c8a311ac2da0c49",
+        "fact-d24f1a7cc0adad6a"
+      ],
+      "reason": "The three driving durations (6 hours to D.C., 4 hours to Outer Banks, 5 hours to Tennessee) are stored and sum to 15 hours, but the items don't explicitly identify these as 'three road trip destinations' in a unified context, requiring inference across separate facts."
+    },
+    {
+      "target": {
+        "id": "b29f3365",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How long had I been taking guitar lessons when I bought the new guitar amp?",
+        "answer": "Four weeks",
+        "askedAt": "2023-05-25T19:07:00.000Z",
+        "evidence": [
+          "answer_436d4309_2",
+          "answer_436d4309_1"
+        ]
+      },
+      "sample": "b29f3365",
+      "candidateIds": [
+        "fact-b1d417a245b4344e",
+        "fact-652109d037c2f101",
+        "entity-person--alex--28fb28525f1329c5",
+        "fact-03a1d28d8ff2b499",
+        "fact-a8f05a3ad92f9510",
+        "fact-7aca95dc1e91f32d",
+        "fact-657f07049d987f1a",
+        "fact-dd09224595b23d71",
+        "fact-d6026f4d7e63d996",
+        "fact-b228044ba2730001"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-b1d417a245b4344e",
+        "fact-652109d037c2f101"
+      ],
+      "reason": "The amp was purchased around May 11, 2023, and lessons had been ongoing for six weeks as of May 25, 2023, which allows working out approximately four weeks of lessons at the time of purchase, but the stored facts don't explicitly state the lesson start date or duration at time of purchase with enough precision to confirm exactly four weeks."
+    },
+    {
+      "target": {
+        "id": "ceb54acb",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
+        "answer": "I suggested 'sexual fixations', 'problematic sexual behaviors', 'sexual impulsivity', and 'compulsive sexuality'.",
+        "askedAt": "2023-05-30T22:56:00.000Z",
+        "evidence": [
+          "answer_sharegpt_cGdjmYo_0"
+        ]
+      },
+      "sample": "ceb54acb",
+      "candidateIds": [
+        "fact-b3ff2b747355e50b",
+        "fact-24328fef7106bd0d",
+        "entity-person--rachel--28fb28525f1329c5",
+        "fact-82af0a11657162e4",
+        "fact-5a11bec43d1382f3",
+        "fact-6072b8eb5fe4c15c",
+        "fact-582f6cf6502020cb",
+        "fact-ed034ca7212cec6b",
+        "fact-9ff5f329d10e3eb0",
+        "fact-f765f7f71082c534"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about alternative terms for sexual behaviors or the specific terms mentioned in the expected answer."
+    },
+    {
+      "target": {
+        "id": "d24813b1",
+        "dataset": "longmemeval_s",
+        "category": "single-session-preference",
+        "question": "I'm thinking of inviting my colleagues over for a small gathering. Any tips on what to bake?",
+        "answer": "The user would prefer baking suggestions that take into account their previous success with the lemon poppyseed cake, such as variations of that recipe or other desserts that share similar qualities. They might prefer suggestions that balance impressiveness with manageability, considering their previous experience. The user may not prefer overly complex or unfamiliar recipes, or suggestions that do not build upon their existing baking experience.",
+        "askedAt": "2023-05-30T17:57:00.000Z",
+        "evidence": [
+          "answer_7c0ade93"
+        ]
+      },
+      "sample": "d24813b1",
+      "candidateIds": [
+        "fact-3fe1b15b042a1d62",
+        "entity-user--user--28fb28525f1329c5",
+        "entity-person--lisa--28fb28525f1329c5",
+        "entity-person--mrs-johnson--28fb28525f1329c5",
+        "entity-person--emily--28fb28525f1329c5",
+        "entity-person--david--28fb28525f1329c5",
+        "entity-person--john--28fb28525f1329c5",
+        "entity-person--jackson--28fb28525f1329c5",
+        "entity-person--ethan--28fb28525f1329c5",
+        "fact-897040b4c4224aa6"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about the user's baking experience, specifically their previous success with a lemon poppyseed cake or any baking preferences."
+    },
+    {
+      "target": {
+        "id": "d6062bb9",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "What is the total number of views on my most popular videos on YouTube and TikTok?",
+        "answer": "1,998",
+        "askedAt": "2023-05-30T17:57:00.000Z",
+        "evidence": [
+          "answer_23f3a657_2",
+          "answer_23f3a657_1"
+        ]
+      },
+      "sample": "d6062bb9",
+      "candidateIds": [
+        "fact-a31e81d0fe03dfd6",
+        "fact-6af837084ee41d92",
+        "fact-493aeefd69b5e2b3",
+        "fact-70283b7c720c490e",
+        "fact-538471af535aa62c",
+        "fact-55a4a63fd4c42d32",
+        "fact-66a36ef8870c3859",
+        "fact-b587d84d92969272",
+        "fact-88e83dd622484227",
+        "fact-c761477e3feaded1"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-a31e81d0fe03dfd6",
+        "fact-6af837084ee41d92"
+      ],
+      "reason": "The two items provide the view counts for the most popular YouTube video (542) and the TikTok video (1,456), which sum to 1,998."
+    },
+    {
+      "target": {
+        "id": "d905b33f",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "What percentage discount did I get on the book from my favorite author?",
+        "answer": "20%",
+        "askedAt": "2023-05-30T21:08:00.000Z",
+        "evidence": [
+          "answer_85a77c48_2",
+          "answer_85a77c48_1"
+        ]
+      },
+      "sample": "d905b33f",
+      "candidateIds": [
+        "fact-c1ba0b3572ffecca",
+        "fact-b8e54bb123ec630f",
+        "entity-person--emily--28fb28525f1329c5",
+        "fact-a0a44e61a7509358",
+        "fact-06e3043c706ff416",
+        "fact-a0cb4d307098a006",
+        "fact-22ae0ffd73dcb01c",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-4fc005e77a466d00",
+        "entity-person--alex--28fb28525f1329c5"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about a book purchase, a favorite author, or a discount percentage."
+    },
+    {
+      "target": {
+        "id": "e493bb7c",
+        "dataset": "longmemeval_s",
+        "category": "knowledge-update",
+        "question": "Where is the painting 'Ethereal Dreams' by Emma Taylor currently hanging?",
+        "answer": "in my bedroom",
+        "askedAt": "2023-11-18T19:24:00.000Z",
+        "evidence": [
+          "answer_1a374afa_1",
+          "answer_1a374afa_2"
+        ]
+      },
+      "sample": "e493bb7c",
+      "candidateIds": [
+        "fact-0246d45d8e6867f3",
+        "fact-6a5fe3400cbafee0",
+        "fact-2e932a03d14bb6f6",
+        "fact-a9e20b98a5e8d385",
+        "fact-fefc9e66a9d9c3dc",
+        "fact-a9e6231b5b523020",
+        "entity-person--rachel--28fb28525f1329c5",
+        "fact-dcb7403eaee278ac",
+        "fact-20018d3d5029a01f",
+        "entity-person--alex--28fb28525f1329c5"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-0246d45d8e6867f3"
+      ],
+      "reason": "The stored item explicitly states that the 'Ethereal Dreams' painting by Emma Taylor was moved to above the user's bed, confirming it is in the bedroom."
+    },
+    {
+      "target": {
+        "id": "e831120c",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How many weeks did it take me to watch all the Marvel Cinematic Universe movies and the main Star Wars films?",
+        "answer": "3.5 weeks",
+        "askedAt": "2023-05-30T18:41:00.000Z",
+        "evidence": [
+          "answer_86c505e7_1",
+          "answer_86c505e7_2"
+        ]
+      },
+      "sample": "e831120c",
+      "candidateIds": [
+        "fact-27b36f5e36518024",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-c6ceb32f9c22307d",
+        "fact-6b411cb8d2171f9b",
+        "fact-770c0f8a61a47376",
+        "fact-7b22fe7082da8979",
+        "fact-65059bf8548f679b",
+        "fact-4d00a558b4dc4e3d",
+        "fact-273293566c71cdf6",
+        "fact-219e3740b9c34b17"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-27b36f5e36518024"
+      ],
+      "reason": "The stored fact states the MCU marathon took two weeks and the Star Wars marathon took a week and a half, which together total 3.5 weeks."
+    },
+    {
+      "target": {
+        "id": "e9327a54",
+        "dataset": "longmemeval_s",
+        "category": "single-session-assistant",
+        "question": "I'm planning to revisit Orlando. I was wondering if you could remind me of that unique dessert shop with the giant milkshakes we talked about last time?",
+        "answer": "The Sugar Factory at Icon Park.",
+        "askedAt": "2023-05-30T19:46:00.000Z",
+        "evidence": [
+          "answer_ultrachat_480665"
+        ]
+      },
+      "sample": "e9327a54",
+      "candidateIds": [
+        "entity-place--universal-studios-hollywood--28fb28525f1329c5",
+        "fact-18e3928dbf76bc95",
+        "fact-41a93d2766947a72",
+        "entity-place--mount-diablo-state-park--28fb28525f1329c5",
+        "entity-place--los-angeles-forum--28fb28525f1329c5",
+        "fact-18bcee63a864cd93",
+        "entity-place--new-zealand--28fb28525f1329c5",
+        "fact-a44590b092023241",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-99ce3ae2e35543c3"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items mention Orlando, the Sugar Factory, Icon Park, or giant milkshakes."
+    },
+    {
+      "target": {
+        "id": "ef9cf60a",
+        "dataset": "longmemeval_s",
+        "category": "multi-session",
+        "question": "How much did I spend on gifts for my sister?",
+        "answer": "$300",
+        "askedAt": "2023-05-30T22:48:00.000Z",
+        "evidence": [
+          "answer_87e3a1cb_1",
+          "answer_87e3a1cb_2"
+        ]
+      },
+      "sample": "ef9cf60a",
+      "candidateIds": [
+        "fact-45c648a23e97ef6d",
+        "fact-89932b3f986a5e67",
+        "fact-b85949fdadc5e471",
+        "fact-a66a64c484987f13",
+        "fact-ec783c13e7f1b5f0",
+        "fact-a63e9d9666d180b9",
+        "fact-94240f103522233a",
+        "fact-cc5c7a9ec433437a",
+        "fact-944bdda8aaf3c535",
+        "fact-65b38676cd6cf644"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-45c648a23e97ef6d",
+        "fact-b85949fdadc5e471"
+      ],
+      "reason": "The two items together account for $200 (Tiffany necklace) + $100 (spa gift card) = $300, but the question asks about spending on gifts for the sister without specifying a time frame, and it's unclear if both gifts are being referenced together as the basis for the $300 answer, since the spa gift card is described as a past gift and the necklace as a May 2023 purchase."
+    },
+    {
+      "target": {
+        "id": "gpt4_2c50253f",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "What time do I wake up on Tuesdays and Thursdays?",
+        "answer": "6:45 AM",
+        "askedAt": "2023-05-27T19:21:00.000Z",
+        "evidence": [
+          "answer_9af4e346_1",
+          "answer_9af4e346_2"
+        ]
+      },
+      "sample": "gpt4_2c50253f",
+      "candidateIds": [
+        "fact-fe3f525191990df1",
+        "fact-9a4409ebed00969a",
+        "fact-177071dce2b3184b",
+        "fact-30575874738ede22",
+        "fact-1780427ff29b70af",
+        "fact-5f8d0c311db69bab",
+        "fact-c155a79b08239205",
+        "fact-85324ddbb6624e34",
+        "fact-23459d2f16b3b410",
+        "fact-f5b49db19d0fbb08"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-9a4409ebed00969a",
+        "fact-fe3f525191990df1"
+      ],
+      "reason": "The two facts together allow the answer to be calculated: the user wakes up at 7:00 AM normally but 15 minutes earlier on Tuesdays and Thursdays, yielding 6:45 AM, though neither fact states 6:45 AM explicitly."
+    },
+    {
+      "target": {
+        "id": "gpt4_4929293b",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "What was the the life event of one of my relatives that I participated in a week ago?",
+        "answer": "my cousin's wedding",
+        "askedAt": "2023-06-22T18:33:00.000Z",
+        "evidence": [
+          "answer_add9b013_2",
+          "answer_add9b013_1"
+        ]
+      },
+      "sample": "gpt4_4929293b",
+      "candidateIds": [
+        "fact-a4a7de80b7fbbec9",
+        "fact-a9c3e45a3f04ee9a",
+        "fact-00f0261acc21fe48",
+        "fact-bb2fd53cfd293f3e",
+        "fact-29cf802bff82473c",
+        "fact-5066038a34b54e89",
+        "entity-person--rachel--28fb28525f1329c5",
+        "fact-d83ef0c3a3708afc",
+        "fact-772386c01cc63afb",
+        "fact-53da40c495b417f3"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-a4a7de80b7fbbec9"
+      ],
+      "reason": "The stored item states the user served as a bridesmaid at their cousin's wedding prior to June 2023, which combined with the question's date of June 22, 2023 confirms it was about a week ago and matches 'cousin's wedding'."
+    },
+    {
+      "target": {
+        "id": "gpt4_68e94287",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "Which event happened first, my participation in the #PlankChallenge or my post about vegan chili recipe?",
+        "answer": "You posted a recipe for vegan chili on Instagram using the hashtag #FoodieAdventures first.",
+        "askedAt": "2023-04-12T12:00:00.000Z",
+        "evidence": [
+          "answer_9793daa3_2",
+          "answer_9793daa3_1"
+        ]
+      },
+      "sample": "gpt4_68e94287",
+      "candidateIds": [
+        "fact-9d2a42f246dd7577",
+        "fact-091834c98dfa7655",
+        "fact-3cbf5937f76a3359",
+        "fact-eacca8fcfbacd3e8",
+        "fact-3c369abd3acbf1ec",
+        "fact-b44f74bd6d5ef26c",
+        "fact-40b4943931edb29b",
+        "fact-23233080c3ff05cd",
+        "fact-07128af97e329bab",
+        "entity-place--south-korea--28fb28525f1329c5"
+      ],
+      "verdict": "missing",
+      "kiIds": [],
+      "reason": "None of the stored items contain any information about the user's participation in a #PlankChallenge or posting a vegan chili recipe on Instagram with #FoodieAdventures."
+    },
+    {
+      "target": {
+        "id": "gpt4_6dc9b45b",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many months ago did I attend the Seattle International Film Festival?",
+        "answer": "4 months ago",
+        "askedAt": "2021-10-02T03:56:00.000Z",
+        "evidence": [
+          "answer_c4df007f_1"
+        ]
+      },
+      "sample": "gpt4_6dc9b45b",
+      "candidateIds": [
+        "fact-6b7568dde4350f9f",
+        "fact-cdb564e37d7bb6af",
+        "fact-6484ef7faf4b5f94",
+        "fact-e08a2665b5e2a1f7",
+        "fact-37bd5eb36b28e755",
+        "fact-076133b3815964b5",
+        "fact-84634c230af0c466",
+        "fact-2d64e3b1c2517569",
+        "fact-2db950b3d47d89ff",
+        "fact-ef56ccbc738ed916"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-6b7568dde4350f9f"
+      ],
+      "reason": "The stored item states the user attended SIFF around late May/June 1, 2021, and the question is asked on 2021-10-02, which allows working out that it was approximately 4 months ago."
+    },
+    {
+      "target": {
+        "id": "gpt4_74aed68e",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many days passed between the day I replaced my spark plugs and the day I participated in the Turbocharged Tuesdays auto racking event?",
+        "answer": "29 days. 30 days (including the last day) is also acceptable.",
+        "askedAt": "2023-04-01T21:42:00.000Z",
+        "evidence": [
+          "answer_aed8cf17_1",
+          "answer_aed8cf17_2"
+        ]
+      },
+      "sample": "gpt4_74aed68e",
+      "candidateIds": [
+        "fact-30ff7d0eb5c9898a",
+        "fact-71efad742e8643f4",
+        "entity-place--speed-demon-racing-track--28fb28525f1329c5",
+        "fact-55aecb8dfc627337",
+        "fact-aadf4bb2ddd68cf4",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-b21b4caec88398b4",
+        "fact-3fc9873541e848f0",
+        "entity-person--laura--28fb28525f1329c5",
+        "fact-99a7ac5a6a647cf8"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-30ff7d0eb5c9898a",
+        "fact-71efad742e8643f4"
+      ],
+      "reason": "The two facts provide the exact dates (February 14 and March 15, 2023) needed to calculate the 29-day difference between the spark plug replacement and the Turbocharged Tuesdays event."
+    },
+    {
+      "target": {
+        "id": "gpt4_b5700ca9",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "How many days ago did I attend the Maundy Thursday service at the Episcopal Church?",
+        "answer": "4 days.",
+        "askedAt": "2023-04-10T10:28:00.000Z",
+        "evidence": [
+          "answer_a17423e7_1"
+        ]
+      },
+      "sample": "gpt4_b5700ca9",
+      "candidateIds": [
+        "fact-c8e1a8985309cf56",
+        "fact-6f69bc309f489ccb",
+        "fact-cc1f18f5a4d8f27f",
+        "fact-90fa70341e888f72",
+        "fact-69533d74ce4f06c6",
+        "fact-50396b36adfbf49c",
+        "fact-09bf2ecfb827eaa2",
+        "fact-14bf09658dfcf685",
+        "fact-3f3709e87af99cf5",
+        "fact-44978c09fe55de89"
+      ],
+      "verdict": "covered",
+      "kiIds": [
+        "fact-c8e1a8985309cf56"
+      ],
+      "reason": "The stored item records the Maundy Thursday service date as April 6, 2023, which is exactly 4 days before the question date of April 10, 2023, allowing the answer to be calculated."
+    },
+    {
+      "target": {
+        "id": "gpt4_f420262c",
+        "dataset": "longmemeval_s",
+        "category": "temporal-reasoning",
+        "question": "What is the order of airlines I flew with from earliest to latest before today?",
+        "answer": "JetBlue, Delta, United, American Airlines",
+        "askedAt": "2023-03-02T06:11:00.000Z",
+        "evidence": [
+          "answer_d8a1af6b_1",
+          "answer_d8a1af6b_2",
+          "answer_d8a1af6b_3",
+          "answer_d8a1af6b_4",
+          "answer_d8a1af6b_5"
+        ]
+      },
+      "sample": "gpt4_f420262c",
+      "candidateIds": [
+        "fact-0870ae018d8ed3b8",
+        "fact-26bb321729a78a67",
+        "fact-96f2235ac8485932",
+        "fact-7b204ce959976f25",
+        "fact-c33d5baed3730994",
+        "fact-43dbaf48d4d29d79",
+        "fact-0d155575a39ad2ef",
+        "fact-7002822acc9bfb94",
+        "entity-user--user--28fb28525f1329c5",
+        "fact-7340cea8435b69fe"
+      ],
+      "verdict": "partial",
+      "kiIds": [
+        "fact-7b204ce959976f25",
+        "fact-26bb321729a78a67",
+        "fact-96f2235ac8485932",
+        "fact-0870ae018d8ed3b8"
+      ],
+      "reason": "Delta (Jan 15), United (Jan 28), and American Airlines (Feb 10) flights are stored with dates, but the JetBlue flight has no date recorded, making it impossible to confirm it was the earliest without that information."
+    }
+  ],
+  "mergedFrom": [
+    "dev-batched-2",
+    "dev50-rest"
+  ]
+}

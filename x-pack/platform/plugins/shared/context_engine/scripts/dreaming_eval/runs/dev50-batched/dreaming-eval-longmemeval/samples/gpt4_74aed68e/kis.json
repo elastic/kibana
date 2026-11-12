@@ -1,0 +1,1494 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "sample": "gpt4_74aed68e",
+  "dest": "ai-index-idx-dreaming-eval-longmemeval",
+  "dumpedAt": "2026-11-12T11:04:17.186Z",
+  "workflowRuns": [
+    {
+      "workflowId": "system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "276b3ba3-506c-4574-986a-18b5595d2f25",
+      "status": "completed",
+      "durationMs": 85,
+      "output": {
+        "relationships_updated": 0,
+        "deleted": 0,
+        "rejected": 0,
+        "resume_after_id": "",
+        "created": 0,
+        "memories": 0,
+        "resume_from": "",
+        "relationships_created": 0,
+        "relationships_rejected": 0,
+        "updated": 0,
+        "relationships_deleted": 0
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "e2aac42d-f1f0-4249-95be-ed8b87e58325",
+      "status": "completed",
+      "durationMs": 143248,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 26,
+        "resume_from": "2026-11-12T10:56:44.287Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 238
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "428a53e5-c000-4ace-8f44-a82b3b0e0cd5",
+      "status": "completed",
+      "durationMs": 100,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 0,
+        "resume_from": "2026-11-12T10:59:13.359Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 0
+      }
+    }
+  ],
+  "counts": {
+    "entity.person": 4,
+    "entity.place": 3,
+    "entity.user": 1,
+    "fact.plan": 4,
+    "fact.life_event": 7,
+    "fact.preference": 1,
+    "fact.routine": 6
+  },
+  "kis": [
+    {
+      "id": "entity-person--alex--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Alex",
+      "description": "Salsa dance instructor at a studio near user's work",
+      "content": "Alex is a salsa dance instructor at a studio near the user's workplace who taught a beginner salsa class the user attended on March 4, 2023.",
+      "attributes": {
+        "role": "Dance instructor",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-08T18:59:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://709b87a273bc57d174e6b30240d8fe71",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:38.243Z",
+      "updated_at": "2026-11-12T11:03:38.243Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--emily--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Emily",
+      "description": "Friend of the user who sells handmade jewelry",
+      "content": "Emily is a friend of the user who crafts and sells handmade jewelry. She and the user planned to share a stall and conduct joint marketing at the Summer Fest event in June 2023, and carpooled to an office party together.",
+      "attributes": {
+        "role": "Friend and fellow vendor",
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-03-10T11:41:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://cf95cf0d1fa815a817d5434f4f639e7c",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d952c378d50f598b1bce1f10e26db8d2",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://cf58869e04878a627b482028e55dc708",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://580d7828ad3ddb802a9bf483eeae3352",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:35.143Z",
+      "updated_at": "2026-11-12T11:03:35.143Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--laura--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Laura",
+      "description": "Colleague or friend of the user turning 30 in March 2023",
+      "content": "Laura is a colleague or friend of the user who celebrated her 30th birthday in mid-March 2023. The user sent her a birthday card and planned to get her a gift certificate to her favorite spa.",
+      "attributes": {
+        "role": "Colleague",
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-03-08T19:13:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://c271c49e0ceba86385bcd999256f5a85",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://cd3615adeee99e573bc0d091a2e315dd",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://cf95cf0d1fa815a817d5434f4f639e7c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:36.171Z",
+      "updated_at": "2026-11-12T11:03:36.171Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-person--rachel--28fb28525f1329c5",
+      "type": "entity.person",
+      "title": "Rachel",
+      "description": "Friend of the user living in Chicago",
+      "content": "Rachel is a friend or acquaintance of the user living in Chicago. The user stayed with Rachel and her family when visiting Chicago for a funeral.",
+      "attributes": {
+        "role": "Friend",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T01:31:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://74fc0200094f93b449824e7fc54990fd",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:37.196Z",
+      "updated_at": "2026-11-12T11:03:37.196Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--chicago--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Chicago",
+      "description": "City visited and planned for travel by the user",
+      "content": "Chicago is a city the user previously visited for a funeral and passed through as a United Airlines layover hub, and where they planned a return leisure trip in early 2023.",
+      "attributes": {
+        "kind": "City",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T01:31:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3d3734b44d08eb864a52176b74bd8f91",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://74fc0200094f93b449824e7fc54990fd",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:41.397Z",
+      "updated_at": "2026-11-12T11:03:41.397Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--napa-valley--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Napa Valley",
+      "description": "Anniversary vacation destination for the user and their partner",
+      "content": "Napa Valley is a California wine destination where the user planned a romantic anniversary getaway with their partner, including a stay at The Inn at St. Helena, dinner at Bistro Don Giovanni, a private wine tour at Opus One, and a tasting at Silver Oak Cellars.",
+      "attributes": {
+        "kind": "Travel destination",
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-02-11T08:34:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://bd534aefd8ddc66f75a2d9666787f456",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://a9591845baa11c593f14ead1e50e7320",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://5f990b935ff46c632ea57e52ed7ed24f",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://89869db0a41e118b6adc20c2b6a0347d",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:40.355Z",
+      "updated_at": "2026-11-12T11:03:40.355Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--speed-demon-racing-track--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Speed Demon Racing Track",
+      "description": "Auto racing track where the user drives",
+      "content": "Speed Demon Racing Track is an auto racing venue where the user completed 10 laps with an average speed of 85 mph during the Turbocharged Tuesdays event on March 15, 2023.",
+      "attributes": {
+        "kind": "Racetrack",
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T08:37:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://48abb13a16febbc512f732b74685c4ba",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:39.317Z",
+      "updated_at": "2026-11-12T11:03:39.317Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-user--user--28fb28525f1329c5",
+      "type": "entity.user",
+      "title": "User",
+      "description": "The primary user whose assistant this is",
+      "content": "The user is a Marketing Specialist with nearly four years of experience who is exploring a career transition to a Marketing Manager role in the tech industry. They create and sell handmade soaps and candles, practice cycling, dancing, and guitar, and participate in amateur auto racing events.",
+      "attributes": {
+        "occupation": "Marketing Specialist",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-02-25T23:44:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://467018311b09d0f13ff824407f4a164d",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://8d2c5e67adb54183db5c51874be2ba28",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:33.894Z",
+      "updated_at": "2026-11-12T11:03:33.894Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-00acf654e86b7ed7",
+      "type": "fact.plan",
+      "title": "Google Analytics certification and course plan",
+      "content": "The user plans to obtain a Google Analytics certification to advance their marketing career, and aims to complete two more courses by the end of 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-02-25T23:52:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e202aa5b4c1611155e98f71405dccc5f",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://925eef7e8e2cf7138b099f7c9b53b59d",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:58.848Z",
+      "updated_at": "2026-11-12T11:03:58.848Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-142c88f481db15de",
+      "type": "fact.life_event",
+      "title": "Progress in online guitar lessons",
+      "content": "As of February 2023, the user has been taking online acoustic guitar lessons from Guitar Tricks since mid-January 2023 and reached lesson 12 of the beginner's course.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-02-19T11:16:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://b8304ff14a08756708a5ab111f49586e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://79fffa0a104d2de6d48f9681e7b6f2d1",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:54.709Z",
+      "updated_at": "2026-11-12T11:03:54.709Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-277405be7ba8eafc",
+      "type": "fact.preference",
+      "title": "Living room decor style preference",
+      "content": "The user prefers modern decor with a neutral color scheme for their living room and selects neutral geometric pattern art that complements their mounted TV without dominating the space.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-01-29T05:02:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3fad12e2796d9e9f6a1e45509cadadf2",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://3c2c21f4e460c15859ddc7ffb742e3c0",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://bfd6265f93b423f58c1847e737228dc6",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:59.883Z",
+      "updated_at": "2026-11-12T11:03:59.883Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-30ff7d0eb5c9898a",
+      "type": "fact.life_event",
+      "title": "Replacement of car spark plugs with NGK plugs",
+      "content": "On February 14, 2023, the user replaced their car's spark plugs with new NGK spark plugs after experiencing a slight engine misfire during their daily commute.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-15T08:41:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://04c6e34ae8e374239e01e88f682e6de4",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://fcd5779b8dd64504a56c41e4e066e0d8",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:48.537Z",
+      "updated_at": "2026-11-12T11:03:48.537Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-3fc9873541e848f0",
+      "type": "fact.routine",
+      "title": "Evening yoga routine",
+      "content": "The user does a 30-minute yoga session every other evening.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-06T23:19:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://aed158801d124aecc62524bb12bb8f8d",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:45.476Z",
+      "updated_at": "2026-11-12T11:03:45.476Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-45464d32df92d1eb",
+      "type": "fact.routine",
+      "title": "Saturday dance class routine",
+      "content": "The user attends dance classes every Saturday, having started the routine on January 10, 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-12T20:38:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://7c1e42d596dac986e7e139df237fa0b4",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:46.496Z",
+      "updated_at": "2026-11-12T11:03:46.496Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-55aecb8dfc627337",
+      "type": "fact.life_event",
+      "title": "Car dyno test at Performance Garage",
+      "content": "The user had a dyno test performed on their car during the Tune-Up Saturday event at Performance Garage, which measured the car's output at 240 horsepower.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T08:43:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://f0e899d76bf60655611cd441cf788286",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:50.582Z",
+      "updated_at": "2026-11-12T11:03:50.582Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-58d784a98a5e315b",
+      "type": "fact.life_event",
+      "title": "Attendance at Thai cooking class",
+      "content": "On March 10, 2023, the user attended a Thai cooking class where they learned to make green curry from scratch and cook jasmine rice.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-10T06:59:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://d6b4f4f9fba6954363c9811afe86f7a6",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:53.677Z",
+      "updated_at": "2026-11-12T11:03:53.677Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-71efad742e8643f4",
+      "type": "fact.life_event",
+      "title": "Participation in Turbocharged Tuesdays racing event",
+      "content": "On March 15, 2023, the user completed 10 laps with an average speed of 85 mph at Speed Demon Racing Track during the Turbocharged Tuesdays event.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-15T08:37:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://48abb13a16febbc512f732b74685c4ba",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:49.560Z",
+      "updated_at": "2026-11-12T11:03:49.560Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-99848a002f6d1454",
+      "type": "fact.plan",
+      "title": "Anniversary getaway plan to Napa Valley",
+      "content": "The user is planning an anniversary trip to Napa Valley with their partner, booking The Inn at St. Helena, dinner at Bistro Don Giovanni, a private wine tour at Opus One, and a tasting at Silver Oak Cellars.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-02-11T08:34:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://bd534aefd8ddc66f75a2d9666787f456",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://a9591845baa11c593f14ead1e50e7320",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://5f990b935ff46c632ea57e52ed7ed24f",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://89869db0a41e118b6adc20c2b6a0347d",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:56.770Z",
+      "updated_at": "2026-11-12T11:03:56.770Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-99a7ac5a6a647cf8",
+      "type": "fact.plan",
+      "title": "Summer Fest stall and joint marketing with Emily",
+      "content": "In June 2023, the user plans to sell handmade soaps and candles at the Summer Fest event, sharing a stall and running a joint marketing campaign with Emily, who sells handmade jewelry.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-03-10T11:39:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://82ec104a43b9dbd41e2bf98347fc84b4",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://ecdb447d5232d7df968cbebdc4d238e5",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://d952c378d50f598b1bce1f10e26db8d2",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://cf58869e04878a627b482028e55dc708",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:55.743Z",
+      "updated_at": "2026-11-12T11:03:55.743Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-9f99eff33b8698d6",
+      "type": "fact.routine",
+      "title": "Daily commute routine by train",
+      "content": "The user commutes to downtown every weekday by taking the 7:15 AM train from their local suburban station, driving to the station and parking. The commute takes about 1 hour and 15 minutes door-to-door, and they must arrive at the office by 8:30 AM.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-03-13T11:43:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://ec356ac441d778beb3b0cd9a2a4fa514",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://aee6b52d2b8e4621824b4ca47fbafd8d",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:42.418Z",
+      "updated_at": "2026-11-12T11:03:42.418Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-aadf4bb2ddd68cf4",
+      "type": "fact.routine",
+      "title": "Weekly energy level patterns",
+      "content": "The user feels most energized on Mondays and Tuesdays, and regularly experiences an energy drop on Wednesdays due to a heavy schedule of meetings.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-02-24T12:00:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://4d3d46df66b17c441716dc70d92e1d43",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://bb61e1546745c8c1a4a9c0f4cba2e591",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://c9431fbfb52bff50d2a66fe25fe390e5",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:47.514Z",
+      "updated_at": "2026-11-12T11:03:47.514Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-b21b4caec88398b4",
+      "type": "fact.life_event",
+      "title": "Sales at Downtown Farmers' Market",
+      "content": "On Saturday, March 4, 2023, the user sold over 20 items and made $150 at the Downtown Farmers' Market.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-10T11:33:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://82ec104a43b9dbd41e2bf98347fc84b4",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:52.640Z",
+      "updated_at": "2026-11-12T11:03:52.640Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-b61114fd1b5deea9",
+      "type": "fact.life_event",
+      "title": "Purchase of Specialized Vice bike helmet",
+      "content": "On February 22, 2023, the user bought a Specialized Vice bike helmet in matte black at a discount from a local bike shop on Main Street.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-02-22T06:09:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://6213ed1a1a6e8bb63338268f4d5d1423",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://468210fbe884ac84807c41b9ce09ab57",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:51.600Z",
+      "updated_at": "2026-11-12T11:03:51.600Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-be5bc4311fdadbe2",
+      "type": "fact.plan",
+      "title": "Solo travel plan to Taiwan",
+      "content": "The user plans to take a solo trip to Taiwan, including a 2-day tour visiting Taroko National Park and Sun Moon Lake.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-03-01T11:45:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://23f3bebd6cc18ae05c66c5e260477c85",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://00183df02b9938418b67518b01f21c0c",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://3b26b17b5277c3e3395b72a1d70372d7",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:57.800Z",
+      "updated_at": "2026-11-12T11:03:57.800Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-fa8ba294829c58e8",
+      "type": "fact.routine",
+      "title": "Evening reading routine",
+      "content": "The user reads books in the evenings from 9:30 PM to 10:00 PM.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-06T23:15:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e4290fea91576f4dbc5a1101d6564054",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:43.434Z",
+      "updated_at": "2026-11-12T11:03:43.434Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-fdbe3af1e1c042b6",
+      "type": "fact.routine",
+      "title": "Bedtime meditation routine",
+      "content": "The user practices 10-minute guided meditation sessions before going to bed.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-03-06T23:17:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://212747ef63221527ad6e000111588a3c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T11:03:44.449Z",
+      "updated_at": "2026-11-12T11:03:44.449Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "401d0afb-d32c-49ba-bbe7-d983930d1295",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    }
+  ],
+  "dreamedInRun": "dev50-rest"
+}

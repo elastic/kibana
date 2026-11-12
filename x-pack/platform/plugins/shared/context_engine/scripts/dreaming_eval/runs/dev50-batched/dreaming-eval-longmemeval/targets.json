@@ -1,0 +1,594 @@
+[
+  {
+    "id": "e47becba",
+    "dataset": "longmemeval_s",
+    "category": "single-session-user",
+    "question": "What degree did I graduate with?",
+    "answer": "Business Administration",
+    "askedAt": "2023-05-30T23:40:00.000Z",
+    "evidence": [
+      "answer_280352e9"
+    ]
+  },
+  {
+    "id": "118b2229",
+    "dataset": "longmemeval_s",
+    "category": "single-session-user",
+    "question": "How long is my daily commute to work?",
+    "answer": "45 minutes each way",
+    "askedAt": "2023-05-30T20:36:00.000Z",
+    "evidence": [
+      "answer_40a90d51"
+    ]
+  },
+  {
+    "id": "7161e7e2",
+    "dataset": "longmemeval_s",
+    "category": "single-session-assistant",
+    "question": "I'm checking our previous chat about the shift rotation sheet for GM social media agents. Can you remind me what was the rotation for Admon on a Sunday?",
+    "answer": "Admon was assigned to the 8 am - 4 pm (Day Shift) on Sundays.",
+    "askedAt": "2023-05-30T20:16:00.000Z",
+    "evidence": [
+      "answer_sharegpt_5Lzox6N_0"
+    ]
+  },
+  {
+    "id": "8a2466db",
+    "dataset": "longmemeval_s",
+    "category": "single-session-preference",
+    "question": "Can you recommend some resources where I can learn more about video editing?",
+    "answer": "The user would prefer responses that suggest resources specifically tailored to Adobe Premiere Pro, especially those that delve into its advanced settings. They might not prefer general video editing resources or resources related to other video editing software.",
+    "askedAt": "2023-05-30T22:03:00.000Z",
+    "evidence": [
+      "answer_edb03329"
+    ]
+  },
+  {
+    "id": "0a995998",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How many items of clothing do I need to pick up or return from a store?",
+    "answer": "3",
+    "askedAt": "2023-02-15T23:50:00.000Z",
+    "evidence": [
+      "answer_afa9873b_2",
+      "answer_afa9873b_3",
+      "answer_afa9873b_1"
+    ]
+  },
+  {
+    "id": "6d550036",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How many projects have I led or am currently leading?",
+    "answer": "2",
+    "askedAt": "2023-05-30T23:32:00.000Z",
+    "evidence": [
+      "answer_ec904b3c_1",
+      "answer_ec904b3c_4",
+      "answer_ec904b3c_3",
+      "answer_ec904b3c_2"
+    ]
+  },
+  {
+    "id": "gpt4_59149c77",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "How many days passed between my visit to the Museum of Modern Art (MoMA) and the 'Ancient Civilizations' exhibit at the Metropolitan Museum of Art?",
+    "answer": "7 days. 8 days (including the last day) is also acceptable.",
+    "askedAt": "2023-02-01T10:20:00.000Z",
+    "evidence": [
+      "answer_d00ba6d0_1",
+      "answer_d00ba6d0_2"
+    ]
+  },
+  {
+    "id": "gpt4_f49edff3",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "Which three events happened in the order from first to last: the day I helped my friend prepare the nursery, the day I helped my cousin pick out stuff for her baby shower, and the day I ordered a customized phone case for my friend's birthday?",
+    "answer": "First, I helped my friend prepare the nursery, then I helped my cousin pick out stuff for her baby shower, and lastly, I ordered a customized phone case for my friend's birthday.",
+    "askedAt": "2023-03-22T21:49:00.000Z",
+    "evidence": [
+      "answer_3e9fce53_1",
+      "answer_3e9fce53_2",
+      "answer_3e9fce53_3"
+    ]
+  },
+  {
+    "id": "6a1eabeb",
+    "dataset": "longmemeval_s",
+    "category": "knowledge-update",
+    "question": "What was my personal best time in the charity 5K run?",
+    "answer": "25 minutes and 50 seconds (or 25:50)",
+    "askedAt": "2023-06-25T13:22:00.000Z",
+    "evidence": [
+      "answer_a25d4a91_1",
+      "answer_a25d4a91_2"
+    ]
+  },
+  {
+    "id": "6aeb4375",
+    "dataset": "longmemeval_s",
+    "category": "knowledge-update",
+    "question": "How many Korean restaurants have I tried in my city?",
+    "answer": "four",
+    "askedAt": "2023-10-22T15:38:00.000Z",
+    "evidence": [
+      "answer_3f9693b7_1",
+      "answer_3f9693b7_2"
+    ]
+  },
+  {
+    "id": "6ade9755",
+    "dataset": "longmemeval_s",
+    "category": "single-session-user",
+    "question": "Where do I take yoga classes?",
+    "answer": "Serenity Yoga",
+    "askedAt": "2023-05-30T21:04:00.000Z",
+    "evidence": [
+      "answer_9398da02"
+    ]
+  },
+  {
+    "id": "5d3d2817",
+    "dataset": "longmemeval_s",
+    "category": "single-session-user",
+    "question": "What was my previous occupation?",
+    "answer": "Marketing specialist at a small startup",
+    "askedAt": "2023-05-30T20:08:00.000Z",
+    "evidence": [
+      "answer_235eb6fb"
+    ]
+  },
+  {
+    "id": "86b68151",
+    "dataset": "longmemeval_s",
+    "category": "single-session-user",
+    "question": "Where did I buy my new bookshelf from?",
+    "answer": "IKEA",
+    "askedAt": "2023-05-30T18:56:00.000Z",
+    "evidence": [
+      "answer_dc11c1eb"
+    ]
+  },
+  {
+    "id": "4fd1909e",
+    "dataset": "longmemeval_s",
+    "category": "single-session-user",
+    "question": "Where did I attend the Imagine Dragons concert?",
+    "answer": "Xfinity Center",
+    "askedAt": "2023-05-30T18:25:00.000Z",
+    "evidence": [
+      "answer_2952aee4"
+    ]
+  },
+  {
+    "id": "311778f1",
+    "dataset": "longmemeval_s",
+    "category": "single-session-user",
+    "question": "How many hours did I spend watching documentaries on Netflix last month?",
+    "answer": "10",
+    "askedAt": "2023-05-30T15:40:00.000Z",
+    "evidence": [
+      "answer_e40b054e"
+    ]
+  },
+  {
+    "id": "e9327a54",
+    "dataset": "longmemeval_s",
+    "category": "single-session-assistant",
+    "question": "I'm planning to revisit Orlando. I was wondering if you could remind me of that unique dessert shop with the giant milkshakes we talked about last time?",
+    "answer": "The Sugar Factory at Icon Park.",
+    "askedAt": "2023-05-30T19:46:00.000Z",
+    "evidence": [
+      "answer_ultrachat_480665"
+    ]
+  },
+  {
+    "id": "ceb54acb",
+    "dataset": "longmemeval_s",
+    "category": "single-session-assistant",
+    "question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
+    "answer": "I suggested 'sexual fixations', 'problematic sexual behaviors', 'sexual impulsivity', and 'compulsive sexuality'.",
+    "askedAt": "2023-05-30T22:56:00.000Z",
+    "evidence": [
+      "answer_sharegpt_cGdjmYo_0"
+    ]
+  },
+  {
+    "id": "51b23612",
+    "dataset": "longmemeval_s",
+    "category": "single-session-assistant",
+    "question": "I was going through our previous conversation about political propaganda and humor, and I was wondering if you could remind me of that Soviet cartoon you mentioned that mocked Western culture?",
+    "answer": "Nu, pogodi!",
+    "askedAt": "2023-05-30T20:38:00.000Z",
+    "evidence": [
+      "answer_ultrachat_427265"
+    ]
+  },
+  {
+    "id": "a40e080f",
+    "dataset": "longmemeval_s",
+    "category": "single-session-assistant",
+    "question": "I was going through our previous conversation and I was wondering if you could remind me of the two companies you mentioned that prioritize employee safety and well-being like Triumvirate?",
+    "answer": "Patagonia and Southwest Airlines.",
+    "askedAt": "2023-05-30T19:28:00.000Z",
+    "evidence": [
+      "answer_ultrachat_269020"
+    ]
+  },
+  {
+    "id": "65240037",
+    "dataset": "longmemeval_s",
+    "category": "single-session-assistant",
+    "question": "I remember you told me to dilute tea tree oil with a carrier oil before applying it to my skin. Can you remind me what the recommended ratio is?",
+    "answer": "The recommended ratio is 1:10, meaning one part tea tree oil to ten parts carrier oil.",
+    "askedAt": "2023-05-30T23:54:00.000Z",
+    "evidence": [
+      "answer_ultrachat_403752"
+    ]
+  },
+  {
+    "id": "d24813b1",
+    "dataset": "longmemeval_s",
+    "category": "single-session-preference",
+    "question": "I'm thinking of inviting my colleagues over for a small gathering. Any tips on what to bake?",
+    "answer": "The user would prefer baking suggestions that take into account their previous success with the lemon poppyseed cake, such as variations of that recipe or other desserts that share similar qualities. They might prefer suggestions that balance impressiveness with manageability, considering their previous experience. The user may not prefer overly complex or unfamiliar recipes, or suggestions that do not build upon their existing baking experience.",
+    "askedAt": "2023-05-30T17:57:00.000Z",
+    "evidence": [
+      "answer_7c0ade93"
+    ]
+  },
+  {
+    "id": "07b6f563",
+    "dataset": "longmemeval_s",
+    "category": "single-session-preference",
+    "question": "Can you suggest some useful accessories for my phone?",
+    "answer": "The user would prefer suggestions of accessories that are compatible with an iPhone 13 Pro, such as high-quality screen protectors, durable cases, portable power banks, or phone wallet cases. They may not prefer suggestions of accessories that are not compatible with Apple products or do not enhance the functionality or protection of their phone.",
+    "askedAt": "2023-05-30T21:46:00.000Z",
+    "evidence": [
+      "answer_d03098f9"
+    ]
+  },
+  {
+    "id": "e831120c",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How many weeks did it take me to watch all the Marvel Cinematic Universe movies and the main Star Wars films?",
+    "answer": "3.5 weeks",
+    "askedAt": "2023-05-30T18:41:00.000Z",
+    "evidence": [
+      "answer_86c505e7_1",
+      "answer_86c505e7_2"
+    ]
+  },
+  {
+    "id": "aae3761f",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How many hours in total did I spend driving to my three road trip destinations combined?",
+    "answer": "15 hours for getting to the three destinations (or 30 hours for the round trip)",
+    "askedAt": "2023-05-30T19:37:00.000Z",
+    "evidence": [
+      "answer_526354c8_1",
+      "answer_526354c8_3",
+      "answer_526354c8_2"
+    ]
+  },
+  {
+    "id": "60472f9c",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How many projects have I been working on simultaneously, excluding my thesis?",
+    "answer": "2",
+    "askedAt": "2023-05-30T23:41:00.000Z",
+    "evidence": [
+      "answer_e7fe8c8b_1",
+      "answer_e7fe8c8b_2",
+      "answer_e7fe8c8b_3"
+    ]
+  },
+  {
+    "id": "81507db6",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How many graduation ceremonies have I attended in the past three months?",
+    "answer": "3",
+    "askedAt": "2023-07-21T23:33:00.000Z",
+    "evidence": [
+      "answer_da3c1266_3",
+      "answer_da3c1266_4",
+      "answer_da3c1266_1",
+      "answer_da3c1266_5",
+      "answer_da3c1266_2"
+    ]
+  },
+  {
+    "id": "d905b33f",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "What percentage discount did I get on the book from my favorite author?",
+    "answer": "20%",
+    "askedAt": "2023-05-30T21:08:00.000Z",
+    "evidence": [
+      "answer_85a77c48_2",
+      "answer_85a77c48_1"
+    ]
+  },
+  {
+    "id": "6c49646a",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "What is the total distance I covered in my four road trips?",
+    "answer": "3,000 miles",
+    "askedAt": "2023-05-30T22:17:00.000Z",
+    "evidence": [
+      "answer_cc1ced21_2",
+      "answer_cc1ced21_1"
+    ]
+  },
+  {
+    "id": "0ea62687",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How much more miles per gallon was my car getting a few months ago compared to now?",
+    "answer": "2",
+    "askedAt": "2023-05-30T23:51:00.000Z",
+    "evidence": [
+      "answer_dc5e537d_1",
+      "answer_dc5e537d_2"
+    ]
+  },
+  {
+    "id": "ef9cf60a",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How much did I spend on gifts for my sister?",
+    "answer": "$300",
+    "askedAt": "2023-05-30T22:48:00.000Z",
+    "evidence": [
+      "answer_87e3a1cb_1",
+      "answer_87e3a1cb_2"
+    ]
+  },
+  {
+    "id": "099778bb",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "What percentage of leadership positions do women hold in the my company?",
+    "answer": "20%",
+    "askedAt": "2023-05-30T22:26:00.000Z",
+    "evidence": [
+      "answer_80d6d664_2",
+      "answer_80d6d664_1"
+    ]
+  },
+  {
+    "id": "d6062bb9",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "What is the total number of views on my most popular videos on YouTube and TikTok?",
+    "answer": "1,998",
+    "askedAt": "2023-05-30T17:57:00.000Z",
+    "evidence": [
+      "answer_23f3a657_2",
+      "answer_23f3a657_1"
+    ]
+  },
+  {
+    "id": "21d02d0d",
+    "dataset": "longmemeval_s",
+    "category": "multi-session",
+    "question": "How many fun runs did I miss in March due to work commitments?",
+    "answer": "2",
+    "askedAt": "2023-04-26T23:58:00.000Z",
+    "evidence": [
+      "answer_2c637141_2",
+      "answer_2c637141_1"
+    ]
+  },
+  {
+    "id": "gpt4_b5700ca9",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "How many days ago did I attend the Maundy Thursday service at the Episcopal Church?",
+    "answer": "4 days.",
+    "askedAt": "2023-04-10T10:28:00.000Z",
+    "evidence": [
+      "answer_a17423e7_1"
+    ]
+  },
+  {
+    "id": "gpt4_6dc9b45b",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "How many months ago did I attend the Seattle International Film Festival?",
+    "answer": "4 months ago",
+    "askedAt": "2021-10-02T03:56:00.000Z",
+    "evidence": [
+      "answer_c4df007f_1"
+    ]
+  },
+  {
+    "id": "4dfccbf7",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "How many days had passed since I started taking ukulele lessons when I decided to take my acoustic guitar to the guitar tech for servicing?",
+    "answer": "24 days. 25 days (including the last day) is also acceptable.",
+    "askedAt": "2023-04-01T00:42:00.000Z",
+    "evidence": [
+      "answer_4bebc782_1",
+      "answer_4bebc782_2"
+    ]
+  },
+  {
+    "id": "gpt4_f420262c",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "What is the order of airlines I flew with from earliest to latest before today?",
+    "answer": "JetBlue, Delta, United, American Airlines",
+    "askedAt": "2023-03-02T06:11:00.000Z",
+    "evidence": [
+      "answer_d8a1af6b_1",
+      "answer_d8a1af6b_2",
+      "answer_d8a1af6b_3",
+      "answer_d8a1af6b_4",
+      "answer_d8a1af6b_5"
+    ]
+  },
+  {
+    "id": "gpt4_74aed68e",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "How many days passed between the day I replaced my spark plugs and the day I participated in the Turbocharged Tuesdays auto racking event?",
+    "answer": "29 days. 30 days (including the last day) is also acceptable.",
+    "askedAt": "2023-04-01T21:42:00.000Z",
+    "evidence": [
+      "answer_aed8cf17_1",
+      "answer_aed8cf17_2"
+    ]
+  },
+  {
+    "id": "5e1b23de",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "How many months ago did I attend the photography workshop?",
+    "answer": "3",
+    "askedAt": "2024-02-01T18:06:00.000Z",
+    "evidence": [
+      "answer_c18d480b_1"
+    ]
+  },
+  {
+    "id": "gpt4_68e94287",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "Which event happened first, my participation in the #PlankChallenge or my post about vegan chili recipe?",
+    "answer": "You posted a recipe for vegan chili on Instagram using the hashtag #FoodieAdventures first.",
+    "askedAt": "2023-04-12T12:00:00.000Z",
+    "evidence": [
+      "answer_9793daa3_2",
+      "answer_9793daa3_1"
+    ]
+  },
+  {
+    "id": "71017277",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "I received a piece of jewelry last Saturday from whom?",
+    "answer": "my aunt",
+    "askedAt": "2023-03-09T15:47:00.000Z",
+    "evidence": [
+      "answer_0b4a8adc_1"
+    ]
+  },
+  {
+    "id": "gpt4_4929293b",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "What was the the life event of one of my relatives that I participated in a week ago?",
+    "answer": "my cousin's wedding",
+    "askedAt": "2023-06-22T18:33:00.000Z",
+    "evidence": [
+      "answer_add9b013_2",
+      "answer_add9b013_1"
+    ]
+  },
+  {
+    "id": "gpt4_2c50253f",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "What time do I wake up on Tuesdays and Thursdays?",
+    "answer": "6:45 AM",
+    "askedAt": "2023-05-27T19:21:00.000Z",
+    "evidence": [
+      "answer_9af4e346_1",
+      "answer_9af4e346_2"
+    ]
+  },
+  {
+    "id": "b29f3365",
+    "dataset": "longmemeval_s",
+    "category": "temporal-reasoning",
+    "question": "How long had I been taking guitar lessons when I bought the new guitar amp?",
+    "answer": "Four weeks",
+    "askedAt": "2023-05-25T19:07:00.000Z",
+    "evidence": [
+      "answer_436d4309_2",
+      "answer_436d4309_1"
+    ]
+  },
+  {
+    "id": "e493bb7c",
+    "dataset": "longmemeval_s",
+    "category": "knowledge-update",
+    "question": "Where is the painting 'Ethereal Dreams' by Emma Taylor currently hanging?",
+    "answer": "in my bedroom",
+    "askedAt": "2023-11-18T19:24:00.000Z",
+    "evidence": [
+      "answer_1a374afa_1",
+      "answer_1a374afa_2"
+    ]
+  },
+  {
+    "id": "618f13b2",
+    "dataset": "longmemeval_s",
+    "category": "knowledge-update",
+    "question": "How many times have I worn my new black Converse Chuck Taylor All Star sneakers?",
+    "answer": "six",
+    "askedAt": "2023-06-18T22:29:00.000Z",
+    "evidence": [
+      "answer_caf5b52e_1",
+      "answer_caf5b52e_2"
+    ]
+  },
+  {
+    "id": "50635ada",
+    "dataset": "longmemeval_s",
+    "category": "knowledge-update",
+    "question": "What was my previous frequent flyer status on United Airlines before I got the current status?",
+    "answer": "Premier Silver",
+    "askedAt": "2023-06-29T04:09:00.000Z",
+    "evidence": [
+      "answer_dcd74827_1",
+      "answer_dcd74827_2"
+    ]
+  },
+  {
+    "id": "69fee5aa",
+    "dataset": "longmemeval_s",
+    "category": "knowledge-update",
+    "question": "How many pre-1920 American coins do I have in my collection?",
+    "answer": "38",
+    "askedAt": "2023-06-09T11:14:00.000Z",
+    "evidence": [
+      "answer_d6028d6e_1",
+      "answer_d6028d6e_2"
+    ]
+  },
+  {
+    "id": "9bbe84a2",
+    "dataset": "longmemeval_s",
+    "category": "knowledge-update",
+    "question": "What was my previous goal for my Apex Legends level before I updated my goal?",
+    "answer": "level 100",
+    "askedAt": "2023-10-08T15:29:00.000Z",
+    "evidence": [
+      "answer_c6a0c6c2_1",
+      "answer_c6a0c6c2_2"
+    ]
+  },
+  {
+    "id": "5c40ec5b",
+    "dataset": "longmemeval_s",
+    "category": "knowledge-update",
+    "question": "How many times have I met up with Alex from Germany?",
+    "answer": "We've met up twice.",
+    "askedAt": "2023-10-30T13:39:00.000Z",
+    "evidence": [
+      "answer_1cb52d0a_1",
+      "answer_1cb52d0a_2"
+    ]
+  }
+]

@@ -1,0 +1,1441 @@
+{
+  "runId": "dev50-batched",
+  "aiIndexId": "dreaming-eval-longmemeval",
+  "sample": "60472f9c",
+  "dest": "ai-index-idx-dreaming-eval-longmemeval",
+  "dumpedAt": "2026-11-12T10:28:22.062Z",
+  "workflowRuns": [
+    {
+      "workflowId": "system-context-engine-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "ef40fc0c-e828-441f-ac2b-ec4ffa7ef8a4",
+      "status": "completed",
+      "durationMs": 66,
+      "output": {
+        "relationships_updated": 0,
+        "deleted": 0,
+        "rejected": 0,
+        "resume_after_id": "",
+        "created": 0,
+        "memories": 0,
+        "resume_from": "",
+        "relationships_created": 0,
+        "relationships_rejected": 0,
+        "updated": 0,
+        "relationships_deleted": 0
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "c418c503-4c30-4e19-8581-9fcd3c9ff896",
+      "status": "completed",
+      "durationMs": 144149,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 25,
+        "resume_from": "2026-11-12T10:20:47.540Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 226
+      }
+    },
+    {
+      "workflowId": "system-context-engine-trace-dreaming-dreaming-eval-longmemeval-37a8eec1ce19687d",
+      "executionId": "cc75b976-ffc3-4c39-a407-e331ce9b700b",
+      "status": "completed",
+      "durationMs": 92,
+      "output": {
+        "deleted": 0,
+        "rejected": 0,
+        "created": 0,
+        "resume_from": "2026-11-12T10:23:18.054Z",
+        "resume_after": "",
+        "updated": 0,
+        "rounds": 0
+      }
+    }
+  ],
+  "counts": {
+    "entity.place": 2,
+    "entity.user": 1,
+    "fact.life_event": 11,
+    "fact.routine": 5,
+    "fact.plan": 3,
+    "fact.preference": 3
+  },
+  "kis": [
+    {
+      "id": "entity-place--ireland--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "Ireland",
+      "description": "Country in Europe the user plans to visit.",
+      "content": "A country in Europe where the user plans to spend about 5 days in June 2023 following a stay in the UK.",
+      "attributes": {
+        "kind": "country",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-26T02:17:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://625397cedfcef7896b2fe8e5f852e6ee",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://685be25cf5819cd2ceac64ee21e32c2f",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:47.531Z",
+      "updated_at": "2026-11-12T10:27:47.531Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-place--united-kingdom--28fb28525f1329c5",
+      "type": "entity.place",
+      "title": "United Kingdom",
+      "description": "Country in Europe the user plans to visit.",
+      "content": "A country in Europe where the user plans to spend about 5 days in June 2023 as part of a trip to Europe.",
+      "attributes": {
+        "kind": "country",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-26T02:17:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://625397cedfcef7896b2fe8e5f852e6ee",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://685be25cf5819cd2ceac64ee21e32c2f",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:46.503Z",
+      "updated_at": "2026-11-12T10:27:46.503Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "entity-user--user--28fb28525f1329c5",
+      "type": "entity.user",
+      "title": "User",
+      "description": "The primary user of the assistant.",
+      "content": "The user has the last name Johnson, which appeared on a new passport received on February 15, 2023. The user is a graduate student working on a Master's thesis in AI in healthcare and engages in gardening, crafting, and collecting.",
+      "attributes": {
+        "name": "Johnson",
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-26T02:13:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://65a36e8d66d92a2bfcb0fd14259c7cf3",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://3a5e8149ec9839ac8594dadb96bca070",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:45.189Z",
+      "updated_at": "2026-11-12T10:27:45.189Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-0c10c0acb61c3b30",
+      "type": "fact.life_event",
+      "title": "Gucci Designer Handbag Purchase",
+      "content": "The user splurged on a $500 designer handbag from Gucci.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-27T13:22:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://bb7afe7b882cb451ba4d377d2518ab60",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://bdfced4fe9f4d631a21ab6b94b14e1d1",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:05.237Z",
+      "updated_at": "2026-11-12T10:28:05.237Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-26c7ac9236038051",
+      "type": "fact.life_event",
+      "title": "New Passport Received with Last Name Johnson",
+      "content": "The user received a new passport on February 15, 2023, featuring their new last name, Johnson.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T02:13:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://65a36e8d66d92a2bfcb0fd14259c7cf3",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:00.060Z",
+      "updated_at": "2026-11-12T10:28:00.060Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-2afef6778e2e8fc1",
+      "type": "fact.routine",
+      "title": "Hair Washing Routine and Shampoo Use",
+      "content": "The user washes their hair every other day and has been using a new shampoo and matching conditioner for three weeks as of May 26, 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-26T20:50:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a31efe9920d9b6d7dc3d3c38cc7848cb",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://41c8ce84d8931dbdf69550dd3e960f75",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://9b5525617722578980097ac6a9361f9c",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:03.158Z",
+      "updated_at": "2026-11-12T10:28:03.158Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-5b418c861dd4f620",
+      "type": "fact.life_event",
+      "title": "Loyalty Point Redemption and Cashback Earnings",
+      "content": "In April 2023, the user redeemed 1,500 points for a $10 Amazon gift card. In the previous quarter, they earned around $50 in credit card cashback (from a card offering 3% cashback on grocery purchases) and used it to pay part of their credit card bill.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-22T17:36:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://7148576a52834e9b65da61de8823122e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b855a19a3fa25623c30f108489598257",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:52.709Z",
+      "updated_at": "2026-11-12T10:27:52.709Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-5ec25609156ee7ad",
+      "type": "fact.plan",
+      "title": "Plan to Volunteer with TNR Cat Program",
+      "content": "As of May 28, 2023, the user plans to volunteer with an animal shelter or rescue organization that specializes in Trap-Neuter-Return (TNR) programs for feral cats.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-28T17:09:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://06cddb21b29bda2abaf053ca0f9d8956",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://c5eac7cbc07c9b984ae1141df9cf39da",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://022bb81fc79579d1ea3502f649a5f9b5",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:07.308Z",
+      "updated_at": "2026-11-12T10:28:07.308Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-604fb9e0c3fefd76",
+      "type": "fact.life_event",
+      "title": "Re-watching Harry Potter Film Series",
+      "content": "On May 21, 2023, the user started re-watching the entire 'Harry Potter' film series.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-21T03:36:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://d0d9a0672876217ebd242726c97a0ea2",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:51.677Z",
+      "updated_at": "2026-11-12T10:27:51.677Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-68bc663561353c92",
+      "type": "fact.preference",
+      "title": "Favorite Attack on Titan Character and Figurine Display",
+      "content": "The user's favorite character from Attack on Titan is Levi Ackerman. The user collects Attack on Titan figurines and chose the Umbra Trigg Vase Display Case to store and display them.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-24T09:49:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://99a70f09fa2f16a46f295f3877a59e78",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://b68e1892709eccb5715722aae4f02087",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:55.925Z",
+      "updated_at": "2026-11-12T10:27:55.925Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-6b2d2425f8950a3f",
+      "type": "fact.routine",
+      "title": "Audiobook and Podcast Listening Habits",
+      "content": "The user recently finished listening to the audiobook 'The Seven Husbands of Evelyn Hugo' by Taylor Jenkins Reid, is currently listening to 'The Silent Patient' by Alex Michaelides, and previously listened to the fantasy podcast 'Sword and Star' up to around episode 20.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-05-30T09:33:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://4f08692368239aaa6d939f662aeae578",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://e400eecdc2de8818cd46eefcad56c6c5",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://3cdd6a13262263deba512a5900be1aef",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://7c21a9a976e0ed491305c4e93903b710",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:09.386Z",
+      "updated_at": "2026-11-12T10:28:09.386Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-6f98f7fa0355b7f7",
+      "type": "fact.plan",
+      "title": "Planned Trip to the UK and Ireland",
+      "content": "The user is planning a trip to Europe in June 2023, intending to stay in the United Kingdom for about 5 days and Ireland for about 5 days.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-26T02:17:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://97b5452d95000bf71157c869e9034938",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://625397cedfcef7896b2fe8e5f852e6ee",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://685be25cf5819cd2ceac64ee21e32c2f",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:01.093Z",
+      "updated_at": "2026-11-12T10:28:01.093Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-79e5c218e6460b53",
+      "type": "fact.life_event",
+      "title": "Made Homemade Vegan Lasagna",
+      "content": "On May 26, 2023, the user prepared homemade vegan lasagna to use fresh basil from their garden.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-26T17:42:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://3b98277941e5b0fc408ca3107daf7f08",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:02.129Z",
+      "updated_at": "2026-11-12T10:28:02.129Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-7ee95456dbbce449",
+      "type": "fact.life_event",
+      "title": "Soccer Match Against The Strikers",
+      "content": "The user recently got back into playing soccer and won a match 4-2 against 'The Strikers' on October 8th.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-20T09:57:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://02c48b5ca85b1a6554756dc03de99d21",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:48.580Z",
+      "updated_at": "2026-11-12T10:27:48.580Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-81aa895a4a19da2e",
+      "type": "fact.plan",
+      "title": "Raised Garden Bed and Planting Plan",
+      "content": "The user built a raised garden bed using repurposed wood and plans to plant tomatoes, peppers, cucumbers, and marigolds, using homemade compost for fertilization.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-05-30T12:30:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://25547439341e5df8737f37a2816b82d5",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://998b43c2c18b164ec839d92f1a432b66",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://03c4b1b9c6ca9c4a91b38eaf37c37ef1",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://6d59169a6402af6534252efa7d6fe224",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:10.421Z",
+      "updated_at": "2026-11-12T10:28:10.421Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-86e6682348e3cbe8",
+      "type": "fact.preference",
+      "title": "Cocktail Flavor Preferences and Homemade Bitters",
+      "content": "The user enjoys experimenting with spicy and fruity flavors in cocktails and uses a homemade bitters recipe that incorporates jalapeño and cilantro.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-23T10:36:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://1f2adfdd8ddaccf022041481ba222ddb",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://849c2edac213d326844896de3e2f927b",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:54.897Z",
+      "updated_at": "2026-11-12T10:27:54.897Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-8bd1edbfc1291c06",
+      "type": "fact.life_event",
+      "title": "Footwear Purchases and Ownership",
+      "content": "The user purchased a pair of Clarks boots for $120 (at a 20% discount) and has owned a pair of Birkenstocks for five years.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-27T19:22:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://b3d3edb979aebf9083fb3156be099d82",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://52d3221957bf7be3b0aac5200fc88818",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:06.270Z",
+      "updated_at": "2026-11-12T10:28:06.270Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-8d31f3612b80491e",
+      "type": "fact.life_event",
+      "title": "1950s Canon Rangefinder Camera Purchase",
+      "content": "The user bought a 1950s-era Canon rangefinder camera for $80 to shoot black-and-white photos.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-25T17:33:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://458b38bbeaec9edcfc40fdac2669a0e5",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://9ee317ea5cdb131972194b030713b044",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:59.025Z",
+      "updated_at": "2026-11-12T10:27:59.025Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-95b97931646d23f0",
+      "type": "fact.life_event",
+      "title": "Spring Fling Market Sales and Foodie Fest Plan",
+      "content": "The user participated in the Spring Fling Market, selling 25 jars of homemade jam and 12 handmade candles for a total profit of $230, and plans to sell their products (including garlic and rosemary sourdough bread) at the Foodie Fest at the stadium in June 2023.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-29T22:33:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://364f6055016107dcf8586f90d9006159",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://db424803ebe639ef22df0b8c0c4b6954",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://08f3fae4841be0a476049adc08f904fe",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:08.345Z",
+      "updated_at": "2026-11-12T10:28:08.345Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-9a190f384875ce0b",
+      "type": "fact.routine",
+      "title": "Data Mining Course Group Project on Bike Sharing Dataset",
+      "content": "In their Data Mining course, the user is working on a group project analyzing the Bike Sharing dataset.",
+      "attributes": {
+        "memory.number_of_occurrences": 2,
+        "memory.last_seen_at": "2023-05-26T15:07:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://e0ea35dded0743bdf99eadae6f27b1dd",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://ebca95924e619e03e8eaf01b87454de5",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:57.991Z",
+      "updated_at": "2026-11-12T10:27:57.991Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-bb31f6d82390f8cc",
+      "type": "fact.routine",
+      "title": "Daily Morning Routine",
+      "content": "The user wakes up around 7:30 AM every day and starts their morning routine with a glass of warm water and a banana.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-27T07:46:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://a2cf08ff276689fcc94f7e71052ec43a",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:28:04.192Z",
+      "updated_at": "2026-11-12T10:28:04.192Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-c051d56a4793d673",
+      "type": "fact.life_event",
+      "title": "Grocery Store Wine Purchase",
+      "content": "Around May 6, 2023 (two weeks prior to May 20, 2023), the user bought a bottle of wine at the grocery store for $8, which is their preferred price point.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-20T22:20:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://646fb3d4c968a74bab8ee6d10a6433fe",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:50.637Z",
+      "updated_at": "2026-11-12T10:27:50.637Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-c18582574249ce60",
+      "type": "fact.life_event",
+      "title": "Vintage Postcard Collection and 1960s Canon Rangefinder",
+      "content": "The user collects vintage postcards, having bought a batch at an antique store in a nearby town on the 22nd, and acquired a 1960s-era Canon rangefinder camera from a local thrift store.",
+      "attributes": {
+        "memory.number_of_occurrences": 3,
+        "memory.last_seen_at": "2023-05-20T15:24:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://46b60b4fb56ec886c78d699deafedf2e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://a33926ade398fe645eb2fdf7fcc5739e",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://582bfa306ec2df58f069d363400639b5",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:49.619Z",
+      "updated_at": "2026-11-12T10:27:49.619Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-cae4db3f57f4bd72",
+      "type": "fact.preference",
+      "title": "Preference for H&M Clothing Store",
+      "content": "H&M is the user's favorite clothing store, where they shop frequently.",
+      "attributes": {
+        "memory.number_of_occurrences": 1,
+        "memory.last_seen_at": "2023-05-22T17:40:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://9d6f364496783cf52308b6a204923a1a",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:53.744Z",
+      "updated_at": "2026-11-12T10:27:53.744Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    },
+    {
+      "id": "fact-e518643639ee4f35",
+      "type": "fact.routine",
+      "title": "Master's Thesis and Trello Project Management",
+      "content": "The user is working on a Master's thesis in AI in healthcare focused on medical diagnosis and image classification, using Mendeley for reference management and Trello to organize their work across separate boards for their thesis, Data Mining project, and Database Systems project.",
+      "attributes": {
+        "memory.number_of_occurrences": 4,
+        "memory.last_seen_at": "2023-05-28T03:58:20.000Z"
+      },
+      "references": [
+        {
+          "uri": "trace://fca16837ef1b69b657c43bf28cf273fe",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://6d9e1fffd3e7625e22f170de597a1be7",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://3a5e8149ec9839ac8594dadb96bca070",
+          "relation": "derived_from"
+        },
+        {
+          "uri": "trace://2ed4fac8e003c5b63b3d8e2389976221",
+          "relation": "derived_from"
+        }
+      ],
+      "permissions": {
+        "kibana": {
+          "privileges": [
+            {
+              "space": "default"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2026-11-12T10:27:56.958Z",
+      "updated_at": "2026-11-12T10:27:56.958Z",
+      "governance": {
+        "provenance": {
+          "created_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          },
+          "updated_by": {
+            "uri": "workflow://system-context-engine-trace-dreaming-batch-dreaming-eval-longmemeval-37a8eec1ce19687d",
+            "metadata": {
+              "version": 2,
+              "run_id": "8a5a8a8a-2a4b-4ff3-9266-d5918a76f207",
+              "space_id": "default"
+            }
+          }
+        },
+        "lifecycle": {
+          "status": "active"
+        }
+      }
+    }
+  ],
+  "dreamedInRun": "dev50-rest"
+}
