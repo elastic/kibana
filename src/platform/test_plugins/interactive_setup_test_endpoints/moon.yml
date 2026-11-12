@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/interactive-setup-test-endpoints-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  sourceRoot: src/platform/plugins/private/interactive_setup_test_endpoints
+  sourceRoot: src/platform/test_plugins/interactive_setup_test_endpoints
 dependsOn:
   - '@kbn/core'
 tags:
