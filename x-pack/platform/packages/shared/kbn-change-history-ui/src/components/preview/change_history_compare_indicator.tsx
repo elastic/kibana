@@ -103,8 +103,8 @@ const ChangeHistoryCompareSplitPaneLabels = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s" css={styles.label}>
-              {i18n.translate('xpack.changeHistoryUi.preview.previousVersionLabel', {
-                defaultMessage: 'Previous version:',
+              {i18n.translate('xpack.changeHistoryUi.preview.comparingWithLabel', {
+                defaultMessage: 'Comparing with:',
               })}
             </EuiText>
           </EuiFlexItem>

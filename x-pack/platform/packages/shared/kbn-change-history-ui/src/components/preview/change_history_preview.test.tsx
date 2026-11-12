@@ -313,7 +313,7 @@ describe('ChangeHistoryPreview', () => {
     fireEvent.click(screen.getByTestId('changeHistoryCompareSplit'));
 
     expect(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).toBeInTheDocument();
-    expect(screen.getByText('Previous version:')).toBeInTheDocument();
+    expect(screen.getByText('Comparing with:')).toBeInTheDocument();
     expect(screen.getByText('Selected version:')).toBeInTheDocument();
     expect(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).toHaveTextContent(
       'baseline-action'
