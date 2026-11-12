@@ -145,6 +145,7 @@ describe('synthetics_overview scenario', () => {
       const ids = getOverviewMonitors({
         monitors: 4,
         privateLocation: LOCATION,
+        spaceId: 'default',
       }).map(({ config }) => config.id);
 
       for (const document of documents) {

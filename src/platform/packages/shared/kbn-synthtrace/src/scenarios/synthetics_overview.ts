@@ -71,7 +71,11 @@ const scenario: Scenario<SyntheticsMonitorDocument> = async (initOptions) => {
   const opts = parseSyntheticsOverviewOpts(scenarioOpts);
   const { seed, spaceId } = opts;
   const privateLocation = opts.privateLocation ?? (await findPrivateLocation(initOptions, spaceId));
-  const monitors = getOverviewMonitors({ monitors: opts.monitors, privateLocation });
+  const monitors = getOverviewMonitors({
+    monitors: opts.monitors,
+    privateLocation,
+    spaceId,
+  });
 
   return {
     bootstrap: async (_clients, kibanaClient) => {

@@ -115,13 +115,19 @@ const getTarget = (type: SyntheticsMonitorConfigType, number: number): string | 
   }
 };
 
-/** The monitors of the scenario: types, patterns and ids are a function of their position. */
+/**
+ * The monitors of the scenario: types, patterns and ids are a function of their position.
+ * The id includes the space. Monitor saved objects are multi-namespace, so an id is unique
+ * across every space, and the same id in a second space cannot be created.
+ */
 export const getOverviewMonitors = ({
   monitors,
   privateLocation,
+  spaceId,
 }: {
   monitors: number;
   privateLocation: PrivateLocation;
+  spaceId: string;
 }): OverviewMonitor[] =>
   Array.from({ length: monitors }, (_, index) => {
     const type = MONITOR_TYPES[index % MONITOR_TYPES.length];
@@ -130,7 +136,7 @@ export const getOverviewMonitors = ({
     return {
       pattern: PATTERN_CYCLE[index % PATTERN_CYCLE.length],
       config: {
-        id: getMonitorConfigId(`${SYNTHETICS_OVERVIEW_TAG}:${number}`),
+        id: getMonitorConfigId(`${SYNTHETICS_OVERVIEW_TAG}:${spaceId}:${number}`),
         type,
         name: `Synthtrace ${type.toUpperCase()} ${number}`,
         target: getTarget(type, number),

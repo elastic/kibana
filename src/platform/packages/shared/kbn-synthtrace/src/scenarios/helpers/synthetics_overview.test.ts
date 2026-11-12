@@ -73,7 +73,11 @@ describe('parseSyntheticsOverviewOpts', () => {
 });
 
 describe('getOverviewMonitors', () => {
-  const monitors = getOverviewMonitors({ monitors: 8, privateLocation: LOCATION });
+  const monitors = getOverviewMonitors({
+    monitors: 8,
+    privateLocation: LOCATION,
+    spaceId: 'default',
+  });
 
   it('creates the requested number of monitors with distinct UUID ids', () => {
     const ids = monitors.map(({ config }) => config.id);
@@ -86,7 +90,21 @@ describe('getOverviewMonitors', () => {
   });
 
   it('is stable between calls', () => {
-    expect(getOverviewMonitors({ monitors: 8, privateLocation: LOCATION })).toEqual(monitors);
+    expect(
+      getOverviewMonitors({ monitors: 8, privateLocation: LOCATION, spaceId: 'default' })
+    ).toEqual(monitors);
+  });
+
+  it('gives each space its own monitor ids', () => {
+    const inTeam = getOverviewMonitors({
+      monitors: 8,
+      privateLocation: LOCATION,
+      spaceId: 'team-a',
+    });
+
+    expect(inTeam.map(({ config }) => config.id)).not.toEqual(
+      monitors.map(({ config }) => config.id)
+    );
   });
 
   it('cycles through the monitor types with a schedule and target per type', () => {
@@ -262,6 +280,7 @@ describe('buildCheck', () => {
   const [httpMonitor, tcpMonitor, , browserMonitor] = getOverviewMonitors({
     monitors: 4,
     privateLocation: LOCATION,
+    spaceId: 'default',
   });
   const timestamp = FROM + 5 * MINUTE;
 

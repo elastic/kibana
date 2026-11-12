@@ -1060,7 +1060,7 @@ curl -s -u elastic:changeme -H 'elastic-api-version: 2023-10-31' \
 - `privateLocationLabel` (string, optional): label of the private location.
 - `monitors` (number, default `8`): number of monitors. Types and outcome patterns cycle through the same sequence.
 - `seed` (string, default `synthtrace`): makes the data reproducible.
-- `spaceId` (string, default `default`): Kibana space to create the monitors in.
+- `spaceId` (string, default `default`): Kibana space to create the monitors in. Monitor ids include the space, so the same scenario in another space creates its own monitors.
 - `deleteMonitorsOnExit` (boolean, default `false`): delete the monitors when the run ends. Reliable for historical runs only; see [Cleaning up](#synthetics-scenarios).
 
 **Usage:**
