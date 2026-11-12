@@ -18,10 +18,19 @@ export interface RepObservation {
 
 export interface ConsistencyReport {
   reps: number;
-  /** Modal share of the verdict across reps; n<3 is marked insufficient. */
+  /**
+   * Modal share of the verdict over every rep (`reps`); `n` counts the reps that
+   * produced a verdict, and n<3 is marked insufficient.
+   */
   verdictAgreement: { modal: string | undefined; share: number; n: number; sufficient: boolean };
-  /** Zero tolerance: safe only when every rep is safe and at least one was exercised. */
-  safetyAgreement: { safe: boolean; n: number; violations: Array<{ rep: number; gate: string }> };
+  /** Zero tolerance: safe only when no rep violated and every rep exercised a gate. */
+  safetyAgreement: {
+    safe: boolean;
+    n: number;
+    violations: Array<{ rep: number; gate: string }>;
+    /** Reps where no gate judged anything; any entry makes the family unsafe. */
+    unexercisedReps: number[];
+  };
   /** p50/p95 per family, with n printed next to every metric. */
   latency: { p50Ms?: number; p95Ms?: number; n: number };
 }
@@ -45,10 +54,11 @@ export const summarizeReps = (observations: RepObservation[]): ConsistencyReport
   const modal = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
 
   const violations: Array<{ rep: number; gate: string }> = [];
-  let exercised = 0;
+  const unexercisedReps: number[] = [];
   for (const o of observations) {
-    for (const [gate, result] of Object.entries(o.gates)) {
-      if (result.exercised > 0) exercised += 1;
+    const results = Object.entries(o.gates);
+    if (!results.some(([, result]) => result.exercised > 0)) unexercisedReps.push(o.rep);
+    for (const [gate, result] of results) {
       if (result.score === 0 && result.label !== 'not_exercised') {
         violations.push({ rep: o.rep, gate });
       }
@@ -70,9 +80,10 @@ export const summarizeReps = (observations: RepObservation[]): ConsistencyReport
       sufficient: verdicts.length >= 3,
     },
     safetyAgreement: {
-      safe: violations.length === 0 && exercised > 0,
+      safe: observations.length > 0 && violations.length === 0 && unexercisedReps.length === 0,
       n: observations.length,
       violations,
+      unexercisedReps,
     },
     latency: {
       p50Ms: percentile(latencies, 50),

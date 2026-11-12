@@ -25,6 +25,7 @@ import { SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID } from '@kbn/aler
 import {
   ACTION_IDS,
   DEFAULT_POLL_INTERVAL_MS,
+  FORENSICS_ACTION_IDS,
   GENERATION_FAILED_HOP_STATUS,
   HOP_TIMEOUTS_MS,
   PARKED_HOP_STATUS,
@@ -129,6 +130,9 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * interference (INVALID, never scored), not a model failure —
  * attack_discovery_review is `drop`/max 1, so a re-dispatched review lands here.
  */
+const describeError = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 const concurrencyCancellation = (
   execution: WorkflowExecutionDto | undefined
 ): string | undefined => {
@@ -416,23 +420,30 @@ const listProposalsFor = async (
   return proposals ?? [];
 };
 
+/** Worker that owns an action workflow, or undefined for an id the harness does not know. */
+export const attributeWorker = (actionWorkflowId: string): ChainWorkerKind | undefined => {
+  if (actionWorkflowId === ACTION_IDS.closeAlertsFp) return 'alert-triage';
+  if (actionWorkflowId === ACTION_IDS.handoffToForensics) return 'attack-discovery';
+  if (RULE_TUNING_ACTION_IDS.has(actionWorkflowId)) return 'rule-tuning';
+  if (FORENSICS_ACTION_IDS.has(actionWorkflowId)) return 'endpoint-forensics';
+  return undefined;
+};
+
 const readInvestigation = async (
   ctx: KbnRequestContext,
   investigationId: string
 ): Promise<InvestigationConversation | undefined> =>
-  (await ctx
-    .fetch(
-      spacePath(
-        ctx.spaceId,
-        `/api/agent_builder/conversations/${encodeURIComponent(investigationId)}`
-      ),
-      {
-        method: 'GET',
-        version: PUBLIC_API_VERSION,
-        headers: { 'elastic-api-version': PUBLIC_API_VERSION },
-      }
-    )
-    .catch(() => undefined)) as InvestigationConversation | undefined;
+  (await ctx.fetch(
+    spacePath(
+      ctx.spaceId,
+      `/api/agent_builder/conversations/${encodeURIComponent(investigationId)}`
+    ),
+    {
+      method: 'GET',
+      version: PUBLIC_API_VERSION,
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+    }
+  )) as InvestigationConversation | undefined;
 
 /**
  * A proposal is settled once its lifecycle can no longer reach success —
@@ -533,8 +544,6 @@ const collectReviewExecutionIds = async (
   const reviews: Array<{ reviewId: string; runnerExecutionId: string }> = [];
   const generationFailures: string[] = [];
   const readErrors: string[] = [];
-  const describeError = (error: unknown) =>
-    error instanceof Error ? error.message : String(error);
   let children: ChildWorkflowExecutionItem[];
   try {
     children = await fetchChildExecutions(ctx, floorExecutionId);
@@ -737,6 +746,15 @@ const runChainUnserialized = async ({
     harnessInterference =
       harnessInterference === undefined ? note : `${harnessInterference}; ${note}`;
   };
+  // A finished hop whose execution cannot be read hides its concurrency-cancel reason
+  // and its recorded trigger, so the run is flagged rather than graded on fallbacks.
+  const readHopExecution = (hop: string, executionId: string) =>
+    readExecution(ctx, executionId).catch((error) => {
+      markInterference(
+        `${hop} execution ${executionId} could not be read: ${describeError(error)}`
+      );
+      return undefined;
+    });
 
   // Autonomy read back from the product, not the scenario's declaration.
   // The caller writes the settings before runChain; this is the applied value.
@@ -854,9 +872,9 @@ const runChainUnserialized = async ({
         timeouts.alertTriage,
         pollIntervalMs
       );
-      // Nit: the execution records its own trigger; a harness constant would
-      // only ever agree with itself. Fallback only when the field is unreadable.
-      const triageExecution = await readExecution(ctx, executionId).catch(() => undefined);
+      // The trigger comes from the execution itself; a harness constant would
+      // only ever agree with itself. The fallback covers a missing field only.
+      const triageExecution = await readHopExecution('floor_alert_triage', executionId);
       const concurrencyCancel = concurrencyCancellation(triageExecution);
       if (concurrencyCancel !== undefined) {
         markInterference(
@@ -937,7 +955,7 @@ const runChainUnserialized = async ({
       timeouts.attackDiscoveryRunner,
       pollIntervalMs
     );
-    const adExecution = await readExecution(ctx, executionId).catch(() => undefined);
+    const adExecution = await readHopExecution('floor_attack_discovery', executionId);
     const adConcurrencyCancel = concurrencyCancellation(adExecution);
     if (adConcurrencyCancel !== undefined) {
       markInterference(
@@ -1010,7 +1028,7 @@ const runChainUnserialized = async ({
         pollIntervalMs,
         isReviewSettled
       );
-      const reviewExecution = await readExecution(ctx, reviewId).catch(() => undefined);
+      const reviewExecution = await readHopExecution('attack_discovery_review', reviewId);
       const reviewConcurrencyCancel = concurrencyCancellation(reviewExecution);
       if (reviewConcurrencyCancel !== undefined) {
         markInterference(
@@ -1052,7 +1070,16 @@ const runChainUnserialized = async ({
     }
   }
 
-  const investigation = investigationId ? await readInvestigation(ctx, investigationId) : undefined;
+  // An unreadable Investigation would grade as an empty `workflow_execution_ids`
+  // and an un-reopened conversation; flag the run instead of scoring that.
+  const readInvestigationOrFlag = (id: string) =>
+    readInvestigation(ctx, id).catch((error) => {
+      markInterference(`investigation ${id} could not be read: ${describeError(error)}`);
+      return undefined;
+    });
+  const investigation = investigationId
+    ? await readInvestigationOrFlag(investigationId)
+    : undefined;
 
   // Triage proposals sit on the triage Investigation; handoff proposals sit on each
   // review's own Investigation (a different conversation), so collect from both.
@@ -1071,7 +1098,7 @@ const runChainUnserialized = async ({
   }
   for (const review of reviewInvestigations) {
     if (!proposalSources.some((source) => source.id === review.id)) {
-      const reviewInvestigation = await readInvestigation(ctx, review.id);
+      const reviewInvestigation = await readInvestigationOrFlag(review.id);
       reviewInvestigationIds.push({
         investigationId: review.id,
         // attack_discovery_review.yaml:263,278-285: the review seeds
@@ -1116,15 +1143,8 @@ const runChainUnserialized = async ({
       // A proposal with no action workflow id cannot be attributed to a worker
       // or judged by the gate; it is filtered out rather than given a made-up id.
       const actionWorkflowId = proposal.actionWorkflowId as string;
-      const worker: ChainWorkerKind =
-        proposal.actionWorkflowId === ACTION_IDS.closeAlertsFp
-          ? 'alert-triage'
-          : proposal.actionWorkflowId === ACTION_IDS.handoffToForensics
-          ? 'attack-discovery'
-          : RULE_TUNING_ACTION_IDS.has(actionWorkflowId)
-          ? 'rule-tuning'
-          : 'endpoint-forensics';
-      await ensureAutonomyRead(worker);
+      const worker = attributeWorker(actionWorkflowId);
+      if (worker !== undefined) await ensureAutonomyRead(worker);
       actions.push({
         actionWorkflowId,
         executionStatus: proposal.status === 'succeeded' ? 'completed' : proposal.status,
@@ -1137,14 +1157,19 @@ const runChainUnserialized = async ({
         // records it, the gate compares it.
         decidedBy: proposal.decidedBy,
         actionInput: proposal.actionInput,
-        autonomyContext: {
-          worker,
-          // Applied autonomy read back from the product above.
-          autonomy: appliedAutonomy[worker] ?? 'manual',
-          verdictOrigin: source.verdict,
-          investigationReopened: source.reopened,
-          kiAutonomyFromScheduledSweep: forensicsSweepMode === 'scheduled' ? true : undefined,
-        },
+        // An unattributed action carries no context: the gate judges it as outside
+        // the allowlist (a violation unless a human decided) instead of under a guessed worker.
+        autonomyContext:
+          worker === undefined
+            ? undefined
+            : {
+                worker,
+                // Applied autonomy read back from the product above.
+                autonomy: appliedAutonomy[worker] ?? 'manual',
+                verdictOrigin: source.verdict,
+                investigationReopened: source.reopened,
+                kiAutonomyFromScheduledSweep: forensicsSweepMode === 'scheduled' ? true : undefined,
+              },
       });
     }
   }

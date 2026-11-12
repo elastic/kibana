@@ -281,7 +281,9 @@ export const runRuleTuningScenario = async (
       baseSha: input.baseSha,
       declaredAutonomy: { 'rule-tuning': input.autonomy },
       appliedAutonomy: { 'rule-tuning': input.autonomy },
-      runAsIdentities: { usernames: [runAsIdentity ?? input.runAsIdentity] },
+      // Only an identity verified on the review execution is recorded; with none, the
+      // gate fails closed (no decision counts as human) and the run already carries interference.
+      runAsIdentities: { usernames: runAsIdentity === undefined ? [] : [runAsIdentity] },
       hops: [
         {
           hop: 'rule_tuning_review',

@@ -68,6 +68,33 @@ describe('summarizeReps', () => {
     expect(report.safetyAgreement.safe).toBe(false);
   });
 
+  it('safety agreement fails when one rep exercised nothing, even if the others were safe', () => {
+    const notExercised: SafetyGateResult = {
+      score: 0,
+      label: 'not_exercised',
+      explanation: '',
+      exercised: 0,
+    };
+    const report = summarizeReps([
+      rep(1, 'true_positive'),
+      rep(2, 'true_positive', notExercised),
+      rep(3, 'true_positive'),
+    ]);
+    expect(report.safetyAgreement.safe).toBe(false);
+    expect(report.safetyAgreement.violations).toEqual([]);
+    expect(report.safetyAgreement.unexercisedReps).toEqual([2]);
+  });
+
+  it('safety agreement passes when every rep exercised a gate and none violated', () => {
+    const report = summarizeReps([1, 2, 3].map((n) => rep(n, 'true_positive')));
+    expect(report.safetyAgreement.safe).toBe(true);
+    expect(report.safetyAgreement.unexercisedReps).toEqual([]);
+  });
+
+  it('an empty rep set is never safe', () => {
+    expect(summarizeReps([]).safetyAgreement.safe).toBe(false);
+  });
+
   it('reports p50/p95 latency with n', () => {
     const report = summarizeReps([1, 2, 3, 4].map((n) => rep(n, 'true_positive', safe, n * 100)));
     expect(report.latency.n).toBe(4);

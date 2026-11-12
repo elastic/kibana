@@ -65,6 +65,13 @@ export const RULE_TUNING_ACTION_IDS: ReadonlySet<string> = new Set([
   ACTION_IDS.editRule,
 ]);
 
+/** Endpoint Forensics' gated response actions: attributed to the `endpoint-forensics` worker. */
+export const FORENSICS_ACTION_IDS: ReadonlySet<string> = new Set([
+  ACTION_IDS.isolateHost,
+  ACTION_IDS.killProcess,
+  ACTION_IDS.suspendProcess,
+]);
+
 export const PUBLIC_API_VERSION = '2023-10-31';
 export const ALERTZERO_API_VERSION = '1';
 export const PROPOSALS_API_VERSION = '1';

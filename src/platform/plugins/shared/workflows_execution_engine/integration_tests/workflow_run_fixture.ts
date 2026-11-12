@@ -277,7 +277,7 @@ export class WorkflowRunFixture {
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: executionId,
-      spaceId: 'fake_space_id',
+      spaceId: this.spaceId,
       workflowId: workflowId ?? 'fake_workflow_id',
       isTestRun: false,
       // Managed, so a `workflow.execute` step resolving a managed target takes the
@@ -332,7 +332,7 @@ export class WorkflowRunFixture {
   private runExecutionById(executionId: string) {
     return runWorkflow({
       workflowRunId: executionId,
-      spaceId: 'fake_space_id',
+      spaceId: this.spaceId,
       signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,
@@ -348,7 +348,7 @@ export class WorkflowRunFixture {
   private resumeExecutionById(executionId: string) {
     return resumeWorkflow({
       workflowRunId: executionId,
-      spaceId: 'fake_space_id',
+      spaceId: this.spaceId,
       signal: this.taskAbortController.signal,
       logger: this.loggerMock,
       config: this.configMock,
