@@ -170421,7 +170421,7 @@ components:
         scripted_fields:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-scripted-field-schema'
-          description: Deprecated scripted fields, keyed by field name. This property is returned for backwards compatibility and is ignored when creating or updating a data view.
+          description: 'Deprecated scripted fields, keyed by field name. This property is read-only: it is only returned in responses, and sending it in a create or update request fails with a 400.'
           title: Scripted fields
           type: object
         time_field:
