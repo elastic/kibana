@@ -14,6 +14,8 @@ import { AlertTimelineStatusDot } from '../../alert_timeline/alert_timeline_stat
 export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
   children?: React.ReactNode;
+  /** Rendered inside the badge, right after the label. */
+  append?: React.ReactNode;
   'data-test-subj'?: string;
 }
 
@@ -59,13 +61,22 @@ export const getEpisodeStatusBadgeLabel = (status: AlertEpisodeStatus): string =
 export function AlertEpisodeStatusHealth({
   status,
   children,
-}: Pick<AlertEpisodeStatusBadgeProps, 'status' | 'children'>) {
+  append,
+}: Pick<AlertEpisodeStatusBadgeProps, 'status' | 'children' | 'append'>) {
   const { euiTheme } = useEuiTheme();
 
   return (
     <span css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}>
       <AlertTimelineStatusDot status={status} data-test-subj="alertEpisodeStatusDot" />
-      {children ?? getEpisodeStatusBadgeLabel(status)}
+      {append ? (
+        // Appended content belongs to the label, so it sits closer to it than the dot does.
+        <span css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+          {children ?? getEpisodeStatusBadgeLabel(status)}
+          {append}
+        </span>
+      ) : (
+        children ?? getEpisodeStatusBadgeLabel(status)
+      )}
     </span>
   );
 }
@@ -76,11 +87,14 @@ export function AlertEpisodeStatusHealth({
 export function AlertEpisodeStatusBadge({
   status,
   children,
+  append,
   'data-test-subj': dataTestSubj,
 }: AlertEpisodeStatusBadgeProps) {
   return (
     <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-      <AlertEpisodeStatusHealth status={status}>{children}</AlertEpisodeStatusHealth>
+      <AlertEpisodeStatusHealth status={status} append={append}>
+        {children}
+      </AlertEpisodeStatusHealth>
     </EuiBadge>
   );
 }

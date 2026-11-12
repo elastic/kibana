@@ -36,11 +36,14 @@ jest.mock('@kbn/alerting-v2-episodes-ui/actions/create_episode_actions', () => (
 }));
 
 jest.mock('../kibana_services', () => ({
-  // Every service is an empty stub, except the share URL service the links are built with.
+  // One stub stands in for every container service: the share URL service the links are
+  // built with, and the user capabilities that gate the write actions.
   untilPluginStartServicesReady: () =>
     Promise.resolve({
       expressions: { execute: jest.fn() },
-      container: { get: () => ({ url: { locators: { get: () => ({}) } } }) },
+      container: {
+        get: () => ({ url: { locators: { get: () => ({}) } }, canWrite: () => true }),
+      },
     }),
 }));
 
@@ -237,17 +240,23 @@ describe('createDiscoverProfile', () => {
         { id: 'doc_view_source', title: 'JSON', order: 20, render: () => <div /> },
       ]);
 
-    const getRegistry = (): DocViewsRegistry => {
+    const getExtension = (record = mockRecord) => {
       const provider = createDiscoverProfile();
-      const extension = provider.profile.getDocViewer!(
+      return provider.profile.getDocViewer!(
         mockPrev,
         {} as any
       )({
-        record: mockRecord,
+        record,
         actions: {} as any,
       });
-      return extension.docViewsRegistry(createMockRegistry());
     };
+
+    const getRegistry = (): DocViewsRegistry =>
+      getExtension().docViewsRegistry(createMockRegistry());
+
+    it('titles the flyout like the alerts page', () => {
+      expect(getExtension().title).toBe('Alert details');
+    });
 
     it('adds the episode tabs before the Discover ones', () => {
       const titles = getRegistry()
@@ -306,6 +315,15 @@ describe('createDiscoverProfile', () => {
       expect((controls as any[])[0].id).toBe('ALERTING_V2_ACK_EPISODE');
 
       expect((controls as any[])[1].id).toBe('ALERTING_V2_SNOOZE_EPISODE');
+    });
+
+    it('offers the write actions to users who can write alerts', async () => {
+      createDiscoverProfile();
+      await Promise.resolve();
+
+      expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+        expect.objectContaining({ canWriteNativeEpisodes: true })
+      );
     });
 
     it('respects isCompatible via isAvailable', async () => {

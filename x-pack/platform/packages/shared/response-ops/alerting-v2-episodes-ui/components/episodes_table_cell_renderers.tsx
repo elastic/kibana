@@ -118,7 +118,12 @@ export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
   );
 };
 
-export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
+export interface EpisodeStatusCellProps extends CellRendererProps {
+  /** Rendered inside the status badge, right after the label. */
+  statusAppend?: React.ReactNode;
+}
+
+export const EpisodeStatusCell = ({ row, columnId, statusAppend }: EpisodeStatusCellProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
   const isFlapping = row.flattened.is_flapping === true;
 
@@ -144,6 +149,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
       episodeAction={episodeAction}
       groupAction={groupAction}
       isFlapping={isFlapping}
+      statusAppend={statusAppend}
     />
   );
 };

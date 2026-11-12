@@ -27,6 +27,8 @@ export interface AlertEpisodeStatusBadgesProps {
   episodeAction?: EpisodeActionState;
   groupAction?: EpisodeStatusGroupAction;
   isFlapping?: boolean;
+  /** Rendered inside the status badge, right after the label. */
+  statusAppend?: React.ReactNode;
 }
 
 export function AlertEpisodeStatusBadges({
@@ -34,6 +36,7 @@ export function AlertEpisodeStatusBadges({
   episodeAction,
   groupAction,
   isFlapping = false,
+  statusAppend,
 }: AlertEpisodeStatusBadgesProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
@@ -47,7 +50,7 @@ export function AlertEpisodeStatusBadges({
       data-test-subj="alertEpisodeStatusCell"
     >
       <EuiFlexItem grow={false}>
-        <AlertEpisodeStatusBadge status={status} />
+        <AlertEpisodeStatusBadge status={status} append={statusAppend} />
       </EuiFlexItem>
       {isFlapping && status !== ALERT_EPISODE_STATUS.INACTIVE && (
         <EuiFlexItem grow={false}>

@@ -50,6 +50,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
 import {
+  FLYOUT_ARIA_LABEL,
   FLYOUT_TAB_OVERVIEW,
   FLYOUT_TAB_TIMELINE,
 } from '@kbn/alerting-v2-episodes-ui/components/details/translations';
@@ -57,6 +58,8 @@ import { OBSERVABILITY_ALERTING_HOST } from '../../common/locators';
 import { bindLocatorsToHost, getAlertingV2Locators } from '../application/bind_locators_to_host';
 import type { AlertingV2Locators } from '../application/locator_context';
 import { EpisodeOverviewDocView } from './episode_overview_doc_view';
+import { UserCapabilities } from '../services/user_capabilities';
+import { EpisodeStatusCellWithRangeHint } from './status_cell_with_range_hint';
 import {
   EpisodeRuleCellWithFetch,
   type EpisodeRuleCellWithFetchProps,
@@ -192,6 +195,20 @@ const RuleCellRenderer: React.FC<RuleCellRendererProps> = (props) => {
 };
 
 // Discover's ES|QL data view has no field formats, so the page's duration format is applied here.
+// Discover loads the table with the global time range, so the cell reads its end from there.
+const StatusCellRenderer: React.FC<React.ComponentProps<typeof EpisodeStatusCell>> = (props) => {
+  const services = useAlertingV2Services();
+  if (!services) return <EpisodeStatusCell {...props} />;
+  const { to } = services.data.query.timefilter.timefilter.getAbsoluteTime();
+  return (
+    <EpisodeStatusCellWithRangeHint
+      {...props}
+      rangeEnd={to}
+      dateFormat={services.uiSettings.get('dateFormat')}
+    />
+  );
+};
+
 const DurationCellRenderer: React.FC<React.ComponentProps<typeof EpisodeDurationCell>> = (
   props
 ) => {
@@ -236,6 +253,8 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
       expressions: services.expressions,
       spaces: services.spaces,
       queryClient,
+      // The view only returns native episodes, so the universal alerts privilege covers them all.
+      canWriteNativeEpisodes: services.container.get(UserCapabilities).canWrite('alerts'),
       // Rules are not loaded in Discover, so rule-dependent actions stay hidden.
       isRuleAvailable: () => false,
       getDiscoverHref: () => undefined,
@@ -315,7 +334,7 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
         return {
           ...prev(params),
 
-          'episode.status': (props: any) => <EpisodeStatusCell {...props} />,
+          'episode.status': (props: any) => <StatusCellRenderer {...props} />,
 
           severity: (props: any) => <EpisodeSeverityCell {...props} />,
 
@@ -374,7 +393,6 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
         (params: any) => {
           const episodeId = params.record.flattened['episode.id'] as string;
           const groupHash = params.record.flattened.group_hash as string | undefined;
-          const prevValue = prev(params);
 
           const onActionSuccess = () => {
             toolkit.actions.refreshData?.();
@@ -432,7 +450,8 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
           );
 
           return {
-            title: prevValue.title,
+            // Like the alerts page flyout menu. The rule name is the header title.
+            title: FLYOUT_ARIA_LABEL,
             renderHeader: () => <HeaderSection />,
 
             docViewsRegistry: (registry: DocViewsRegistry) => {

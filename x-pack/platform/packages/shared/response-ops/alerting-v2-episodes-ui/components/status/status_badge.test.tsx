@@ -38,6 +38,17 @@ describe('AlertEpisodeStatusBadge', () => {
     expect(screen.getByTestId('alertEpisodeStatusDot')).toBeInTheDocument();
   });
 
+  it('renders the appended content after the label', () => {
+    render(
+      <AlertEpisodeStatusBadge
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        append={<span data-test-subj="appendStub" />}
+      />
+    );
+
+    expect(screen.getByText('Active').lastChild).toBe(screen.getByTestId('appendStub'));
+  });
+
   it('renders an inactive badge', () => {
     render(<AlertEpisodeStatusBadge status={ALERT_EPISODE_STATUS.INACTIVE} />);
     const badge = screen.getByText('Inactive');
