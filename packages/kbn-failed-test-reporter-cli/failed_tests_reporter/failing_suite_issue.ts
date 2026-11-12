@@ -11,6 +11,7 @@ import Path from 'path';
 import type { BuildRun, TestFramework } from '@kbn/scout-reporting';
 import {
   FLAKY_TEST_SUITE_METADATA_PREFIX,
+  readFlakySuiteIssueMetadata,
   SKIP_TIP,
   suiteIssueTitle,
   type FlakySuiteIssueMetadata,
@@ -141,6 +142,34 @@ export const failingSuiteIssueMetadata = (
     ? { 'failing.postedAt': { [postedAtKey({ pipeline, branch })]: postedAt.toISOString() } }
     : {}),
 });
+
+/**
+ * The suite metadata of an issue a break is posted on, with the break's tests, branch and pipeline
+ * added to what it recorded: `/skip` skips the suite on every recorded branch, so a suite filed for
+ * `main` that breaks on `9.6` gets skipped there too. The pipeline moves last, as the failed-test
+ * alerts read the latest failure last.
+ */
+export const breakSuiteMetadata = (
+  body: string,
+  suite: FailingSuite,
+  { pipeline, branch }: Pick<FailingSuiteIssueContext, 'pipeline' | 'branch'>
+): Pick<FailingSuiteIssueMetadata, 'suite.testIds' | 'suite.branches' | 'suite.pipelines'> => {
+  const recorded = readFlakySuiteIssueMetadata(body);
+  const pipelines = recorded?.['suite.pipelines'] ?? [];
+  return {
+    'suite.testIds': [
+      ...new Set([
+        ...(recorded?.['suite.testIds'] ?? []),
+        ...suite.tests.map(({ testId }) => testId),
+      ]),
+    ],
+    'suite.branches': [...new Set([...(recorded?.['suite.branches'] ?? []), branch])],
+    'suite.pipelines': [
+      ...pipelines.filter((recordedPipeline) => recordedPipeline !== pipeline),
+      pipeline,
+    ],
+  };
+};
 
 const blobLink = (repoRelativePath: string): string =>
   `[${inlineCode(repoRelativePath)}](${KIBANA_BLOB_URL}/${repoRelativePath})`;

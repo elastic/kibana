@@ -30,6 +30,7 @@ import {
 import { FAILED_TEST_LABEL, issueLabels } from '../flaky_test_issues/reporter';
 import { getScoutTestId, getTestFilePath, isScoutFailure } from './failure_identity';
 import {
+  breakSuiteMetadata,
   failingPostedAt,
   failingSuiteIssueTitle,
   postedAtKey,
@@ -311,8 +312,8 @@ export const reportConsistentFailureIssues = async (
   /**
    * Posts the break on the issue already about the suite, at most once per `POST_INTERVAL_MS` for
    * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
-   * of the post goes in the issue's metadata first, read from GitHub as it is now: other jobs of
-   * the build find the same break.
+   * of the post, and the break's tests, branch and pipeline for `/skip`, go in the issue's metadata
+   * first, read from GitHub as it is now: other jobs of the build find the same break.
    */
   const postBreak = async (suite: FailingSuite, issue: GithubIssue) => {
     const ref = { filePath: suite.filePath, url: issue.html_url };
@@ -331,7 +332,10 @@ export const reportConsistentFailureIssues = async (
     }
     const newBody = updateIssueMetadata(
       body,
-      { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
+      {
+        ...breakSuiteMetadata(body, suite, build),
+        'failing.postedAt': { ...postedAt, [key]: now.toISOString() },
+      },
       FLAKY_TEST_SUITE_METADATA_PREFIX
     );
     await github.editIssue(issue.number, { body: newBody, ...(reopen ? { state: 'open' } : {}) });

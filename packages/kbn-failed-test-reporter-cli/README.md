@@ -12,7 +12,8 @@ the `--failing-suites-repo owner/name` given. A suite that already has an issue 
 or failing, gets a comment on it instead, with the builds the tests failed in and the commits
 since they last passed: at most once a day for each pipeline and branch while the break lasts
 (`failing.postedAt` in the issue's metadata), and right away when the issue is closed and was
-updated in the last 30 days, which reopens it.
+updated in the last 30 days, which reopens it. Each post also adds the break's tests, branch and
+pipeline to the issue's `flaky-test-suite` metadata, so `/skip` skips the suite on that branch too.
 
 `REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening per-test issues: a failure that
 an issue already tracks, per-test or flaky suite, still bumps it, and one that none tracks is
