@@ -61,6 +61,61 @@ export async function* streamRemoteLines(url: string): AsyncGenerator<string> {
   }
 }
 
+/**
+ * Reads the elements of a file's top-level JSON array one at a time, for files too large to parse
+ * whole: LongMemEval M is 2.7 GB, past the longest string Node can hold.
+ */
+export async function* streamJsonArray<T>(
+  chunks: AsyncIterable<string | Buffer>
+): AsyncGenerator<T> {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let parts: string[] = [];
+  for await (const raw of chunks) {
+    const chunk = typeof raw === 'string' ? raw : raw.toString('utf8');
+    let start = depth > 1 ? 0 : -1;
+    for (let i = 0; i < chunk.length; i++) {
+      const char = chunk[i];
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (char === '\\') {
+          escaped = true;
+        } else if (char === '"') {
+          inString = false;
+        }
+        continue;
+      }
+      if (char === '"') {
+        inString = true;
+      } else if (char === '{' || char === '[') {
+        depth++;
+        if (depth === 2) {
+          start = i;
+        }
+      } else if (char === '}' || char === ']') {
+        depth--;
+        if (depth === 1) {
+          parts.push(chunk.slice(start, i + 1));
+          yield JSON.parse(parts.join('')) as T;
+          parts = [];
+          start = -1;
+        }
+      }
+    }
+    if (depth > 1 && start !== -1) {
+      parts.push(chunk.slice(start));
+    }
+  }
+}
+
+const READ_CHUNK_BYTES = 1024 * 1024;
+
+/** The elements of a JSON array file, read as a stream. */
+export const streamJsonArrayFile = <T>(file: string): AsyncGenerator<T> =>
+  streamJsonArray<T>(fs.createReadStream(file, { encoding: 'utf8', highWaterMark: READ_CHUNK_BYTES }));
+
 export const readJson = <T>(file: string): T => JSON.parse(fs.readFileSync(file, 'utf8')) as T;
 
 export const writeJson = (file: string, value: unknown): void => {

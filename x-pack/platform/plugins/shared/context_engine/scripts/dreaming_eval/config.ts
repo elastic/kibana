@@ -15,6 +15,9 @@ import { AI_INDEX_INDEX_PREFIX } from '../../common/constants';
 export const DATASET_NAMES = ['longmemeval_s', 'longmemeval_v2_enterprise'] as const;
 export type DatasetName = (typeof DATASET_NAMES)[number];
 
+export const LONGMEMEVAL_VARIANTS = ['s', 'm', 'oracle'] as const;
+export type LongMemEvalVariant = (typeof LONGMEMEVAL_VARIANTS)[number];
+
 const agentSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -42,11 +45,13 @@ const sampleSelectionShape = (allSamples: boolean, perSample: boolean) => ({
 });
 
 const longMemEvalSSchema = z.object({
-  url: z
-    .string()
-    .default(
-      'https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json'
-    ),
+  /**
+   * The haystack size: s (about 50 sessions a question), m (about 500), or oracle (only the
+   * sessions that hold the answer). The questions are the same in each.
+   */
+  variant: z.enum(LONGMEMEVAL_VARIANTS).default('s'),
+  /** Where to download the variant from; defaults to the LongMemEval Hugging Face dataset. */
+  url: z.string().optional(),
   agent: agentSchema.default({ id: 'longmemeval-assistant', name: 'Personal assistant' }),
   /** Each question has its own haystack, so each sample learns from its own conversations. */
   ...sampleSelectionShape(false, true),

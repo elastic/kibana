@@ -19,6 +19,9 @@ datasets:
   # own haystack of about 50 sessions, about 250 rounds.
   longmemeval_s:
     agent: { id: longmemeval-assistant, name: Personal assistant }
+    # Haystack size, the same questions in each: s (about 50 sessions a question, 277 MB), m (about
+    # 500, 2.7 GB, read as a stream) or oracle (only the sessions that hold the answer). --variant.
+    variant: s
     samples: []
     # preset: dev
     presets:

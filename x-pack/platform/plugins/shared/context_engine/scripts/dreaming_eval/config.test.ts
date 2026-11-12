@@ -35,6 +35,7 @@ describe('dreaming eval config', () => {
     expect(config.run_datasets).toEqual(['longmemeval_s']);
     expect(config.datasets.longmemeval_s).toEqual(
       expect.objectContaining({
+        variant: 's',
         samples: [],
         sample_count: 1,
         all_samples: false,

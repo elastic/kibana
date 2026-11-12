@@ -10,9 +10,10 @@ import path from 'path';
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { getConnectionConfig } from './seed_ki_sample_data/lib/connection_config';
-import type { DatasetName, EvalConfig } from './dreaming_eval/config';
+import type { DatasetName, EvalConfig, LongMemEvalVariant } from './dreaming_eval/config';
 import {
   DATASET_NAMES,
+  LONGMEMEVAL_VARIANTS,
   DEFAULT_CONFIG_PATH,
   loadConfig,
   runDirOf,
@@ -114,7 +115,23 @@ run(
     if (sampleCount !== undefined && (!Number.isInteger(sampleCount) || sampleCount < 1)) {
       throw new Error('--sample-count must be a positive integer');
     }
-    const config = withSampleOverrides(loaded, usedDatasets, {
+    const variant = flags.variant ? String(flags.variant) : undefined;
+    if (variant && !LONGMEMEVAL_VARIANTS.includes(variant as LongMemEvalVariant)) {
+      throw new Error(`--variant must be one of ${LONGMEMEVAL_VARIANTS.join(', ')}`);
+    }
+    const withVariant: EvalConfig = variant
+      ? {
+          ...loaded,
+          datasets: {
+            ...loaded.datasets,
+            longmemeval_s: {
+              ...loaded.datasets.longmemeval_s,
+              variant: variant as LongMemEvalVariant,
+            },
+          },
+        }
+      : loaded;
+    const config = withSampleOverrides(withVariant, usedDatasets, {
       samples: listFlag(flags.samples),
       preset: flags.preset ? String(flags.preset) : undefined,
       sampleCount,
@@ -195,6 +212,7 @@ run(
         'samples',
         'preset',
         'sample-count',
+        'variant',
         'run-id',
         'judge-connector',
         'from',
@@ -217,6 +235,8 @@ run(
         )}; the stages work on the AI indices that dream on only these (default: run_datasets)
         --ai-index <ids>        Comma-separated AI indices of the config instead (default: by dataset)
         --samples <ids>         Samples (question ids) to evaluate, of the one dataset in use
+        --variant <s|m|oracle>  LongMemEval haystack size: s (about 50 sessions a question), m (about
+                                500), or oracle (only the answer sessions); default: from the config
         --preset <name>         Evaluate the samples of a preset of the one dataset in use, such as dev
         --sample-count <n>      Evaluate the first n samples
         --all-samples           Evaluate every sample

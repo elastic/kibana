@@ -11,12 +11,14 @@ import {
   parseLongMemEvalDate,
   selectConversations,
   selectQuestions,
+  selectQuestionsFromStream,
   sessionToRounds,
   targetsOf,
+  variantFileOf,
 } from './longmemeval_s';
 
 const options: LongMemEvalSConfig = {
-  url: 'https://example.com/longmemeval_s.json',
+  variant: 's',
   agent: { id: 'longmemeval-assistant', name: 'Personal assistant' },
   samples: [],
   presets: {},
@@ -91,6 +93,49 @@ describe('LongMemEval S', () => {
     expect(() => selectQuestions(records, { ...options, presets, preset: 'nope' })).toThrow(
       "longmemeval_s has no preset 'nope'; presets: dev"
     );
+  });
+
+  it('downloads the file of each variant, unless told where from', () => {
+    expect(variantFileOf({ variant: 's' })).toEqual({
+      name: 'longmemeval_s_cleaned.json',
+      url: 'https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json',
+    });
+    expect(variantFileOf({ variant: 'm' }).name).toBe('longmemeval_m_cleaned.json');
+    expect(variantFileOf({ variant: 'oracle', url: 'https://mirror/oracle.json' })).toEqual({
+      name: 'longmemeval_oracle.json',
+      url: 'https://mirror/oracle.json',
+    });
+  });
+
+  it('picks samples from a stream as it reads, and stops once it has them', async () => {
+    const records = [
+      record('a_abs', 'x', []),
+      record('a', 'x', []),
+      record('b', 'y', []),
+      record('c', 'z', []),
+    ];
+    let read = 0;
+    async function* stream() {
+      for (const item of records) {
+        read++;
+        yield item;
+      }
+    }
+    const ids = (selected: LongMemEvalRecord[]) => selected.map((q) => q.question_id);
+
+    expect(ids(await selectQuestionsFromStream(stream(), { ...options, sample_count: 2 }))).toEqual(
+      ['a', 'b']
+    );
+    expect(read).toBe(3);
+    expect(
+      ids(await selectQuestionsFromStream(stream(), { ...options, samples: ['c', 'a_abs'] }))
+    ).toEqual(['c', 'a_abs']);
+    expect(
+      ids(await selectQuestionsFromStream(stream(), { ...options, all_samples: true }))
+    ).toEqual(['a', 'b', 'c']);
+    await expect(
+      selectQuestionsFromStream(stream(), { ...options, samples: ['nope'] })
+    ).rejects.toThrow('longmemeval_s has no samples nope');
   });
 
   it('takes the listed samples, in their order, and fails on one it does not have', () => {

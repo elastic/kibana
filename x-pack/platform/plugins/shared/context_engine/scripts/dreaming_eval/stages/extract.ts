@@ -10,7 +10,13 @@ import path from 'path';
 import type { DatasetName } from '../config';
 import { datasetDirOf } from '../config';
 import type { StageContext } from '../context';
-import { downloadFile, readJson, streamRemoteLines, writeJson } from '../download';
+import {
+  downloadFile,
+  readJson,
+  streamJsonArrayFile,
+  streamRemoteLines,
+  writeJson,
+} from '../download';
 import type { LongMemEvalRecord } from '../datasets/longmemeval_s';
 import * as longMemEvalS from '../datasets/longmemeval_s';
 import type { LmeV2Haystack, LmeV2Question, LmeV2Trajectory } from '../datasets/longmemeval_v2';
@@ -24,14 +30,13 @@ const extractLongMemEvalS = async (context: StageContext): Promise<ExtractedData
   const { config, log, forceDownload } = context;
   const options = config.datasets.longmemeval_s;
   const dir = datasetDirOf(config, 'longmemeval_s');
-  const file = await downloadFile({
-    url: options.url,
-    dest: path.join(dir, 'longmemeval_s_cleaned.json'),
-    force: forceDownload,
-    log,
-  });
-  const records = readJson<LongMemEvalRecord[]>(file);
-  const questions = longMemEvalS.selectQuestions(records, options);
+  const { name, url } = longMemEvalS.variantFileOf(options);
+  const file = await downloadFile({ url, dest: path.join(dir, name), force: forceDownload, log });
+  log.info(`Reading the ${options.variant} variant of LongMemEval from ${name}`);
+  const questions = await longMemEvalS.selectQuestionsFromStream(
+    streamJsonArrayFile<LongMemEvalRecord>(file),
+    options
+  );
   const { conversations, sampleConversations } = longMemEvalS.selectConversations(
     questions,
     options

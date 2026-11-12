@@ -7,7 +7,7 @@
 
 import type { LongMemEvalSConfig } from '../config';
 import type { EvalConversation, EvalRound, EvalTarget } from '../types';
-import { pickSamples } from './samples';
+import { pickSamples, pickSamplesFromStream } from './samples';
 
 export const LONGMEMEVAL_S_DATASET = 'longmemeval_s';
 
@@ -53,6 +53,36 @@ export const selectQuestions = (
     options,
     LONGMEMEVAL_S_DATASET
   );
+
+/** The same, reading the records as a stream, keeping only the selected ones. */
+export const selectQuestionsFromStream = (
+  records: AsyncIterable<LongMemEvalRecord>,
+  options: LongMemEvalSConfig
+): Promise<LongMemEvalRecord[]> =>
+  pickSamplesFromStream(
+    records,
+    (record) => options.include_abstention || !isAbstention(record),
+    ({ question_id: id }) => id,
+    options,
+    LONGMEMEVAL_S_DATASET
+  );
+
+const VARIANT_FILES: Record<LongMemEvalSConfig['variant'], string> = {
+  s: 'longmemeval_s_cleaned.json',
+  m: 'longmemeval_m_cleaned.json',
+  oracle: 'longmemeval_oracle.json',
+};
+
+const DATA_URL = 'https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main';
+
+/** The file of a LongMemEval variant, and where it is downloaded from unless `url` says. */
+export const variantFileOf = ({
+  variant,
+  url,
+}: Pick<LongMemEvalSConfig, 'variant' | 'url'>): { name: string; url: string } => ({
+  name: VARIANT_FILES[variant],
+  url: url ?? `${DATA_URL}/${VARIANT_FILES[variant]}`,
+});
 
 /** Splits a session into rounds: each user message with the assistant messages that answer it. */
 export const sessionToRounds = (

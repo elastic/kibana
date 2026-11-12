@@ -16,6 +16,19 @@ export interface SampleSelection {
   sample_count: number;
 }
 
+/** The sample ids a selection lists, its own or its preset's; empty when it lists none. */
+const listedSampleIds = (
+  { samples, preset, presets }: Pick<SampleSelection, 'samples' | 'preset' | 'presets'>,
+  dataset: string
+): string[] => {
+  if (samples.length === 0 && preset && !presets[preset]) {
+    throw new Error(
+      `${dataset} has no preset '${preset}'; presets: ${Object.keys(presets).join(', ') || 'none'}`
+    );
+  }
+  return samples.length > 0 ? samples : preset ? presets[preset] : [];
+};
+
 /**
  * The samples a selection picks from `candidates`, the samples the dataset can evaluate. Listed
  * ids may also name samples outside `candidates`, such as abstention questions, from `all`.
@@ -27,12 +40,7 @@ export const pickSamples = <T>(
   { samples, preset, presets, all_samples: everything, sample_count: count }: SampleSelection,
   dataset: string
 ): T[] => {
-  if (samples.length === 0 && preset && !presets[preset]) {
-    throw new Error(
-      `${dataset} has no preset '${preset}'; presets: ${Object.keys(presets).join(', ') || 'none'}`
-    );
-  }
-  const ids = samples.length > 0 ? samples : preset ? presets[preset] : [];
+  const ids = listedSampleIds({ samples, preset, presets }, dataset);
   if (ids.length > 0) {
     const byId = new Map(all.map((sample) => [idOf(sample), sample]));
     const missing = ids.filter((id) => !byId.has(id));
@@ -42,4 +50,46 @@ export const pickSamples = <T>(
     return ids.flatMap((id) => byId.get(id) ?? []);
   }
   return everything ? candidates : candidates.slice(0, count);
+};
+
+/**
+ * The samples a selection picks from a stream of samples, keeping only those: for datasets too
+ * large to hold. It stops reading once it has every listed sample, or the first `sample_count`.
+ * `isCandidate` tells the samples the dataset can evaluate; listed ids may name any sample.
+ */
+export const pickSamplesFromStream = async <T>(
+  samples: AsyncIterable<T>,
+  isCandidate: (sample: T) => boolean,
+  idOf: (sample: T) => string,
+  selection: SampleSelection,
+  dataset: string
+): Promise<T[]> => {
+  const ids = listedSampleIds(selection, dataset);
+  if (ids.length > 0) {
+    const wanted = new Set(ids);
+    const found = new Map<string, T>();
+    for await (const sample of samples) {
+      if (wanted.has(idOf(sample))) {
+        found.set(idOf(sample), sample);
+        if (found.size === wanted.size) {
+          break;
+        }
+      }
+    }
+    const missing = ids.filter((id) => !found.has(id));
+    if (missing.length > 0) {
+      throw new Error(`${dataset} has no samples ${missing.join(', ')}`);
+    }
+    return ids.flatMap((id) => found.get(id) ?? []);
+  }
+  const picked: T[] = [];
+  for await (const sample of samples) {
+    if (isCandidate(sample)) {
+      picked.push(sample);
+      if (!selection.all_samples && picked.length >= selection.sample_count) {
+        break;
+      }
+    }
+  }
+  return picked;
 };

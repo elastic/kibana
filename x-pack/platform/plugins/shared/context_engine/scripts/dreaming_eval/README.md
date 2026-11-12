@@ -6,6 +6,7 @@ Measures what Context Engine dreaming learns from agent conversations. It import
 node scripts/context_engine_dreaming_eval.js                      # every stage, one LongMemEval S sample
 node scripts/context_engine_dreaming_eval.js --stage extract,import
 node scripts/context_engine_dreaming_eval.js --preset dev                 # the team's fixed 10 questions
+node scripts/context_engine_dreaming_eval.js --preset dev --variant m     # the same, with 500-session haystacks
 node scripts/context_engine_dreaming_eval.js --samples e47becba,0a995998
 node scripts/context_engine_dreaming_eval.js --sample-count 5
 node scripts/context_engine_dreaming_eval.js --dataset longmemeval_v2_enterprise
@@ -46,7 +47,7 @@ A dataset is a benchmark; a sample is one of its questions with the conversation
 
 **Retrieval without dreaming again.** The dumps hold the KIs' whole documents. `--stage ask --run-id <id>` (or `evaluate`) works on the KIs a run dumped: ask writes them back to the AI index first, so a change to the answer agent or retrieval can be measured on the same memories.
 
-- **`longmemeval_s`:** [LongMemEval](https://github.com/xiaowu0162/LongMemEval) S, a personal assistant's chats with its user. It downloads `longmemeval_s_cleaned.json` (277 MB) once. Each of its 500 questions has its own haystack of about 50 sessions, about 250 rounds; abstention questions are left out unless `include_abstention` is set. With `sessions: answers`, only the sessions that hold the answer and `distractor_sessions` more are imported, for a quicker run. Each user message and the assistant's answer is a round, at the session's date.
+- **`longmemeval_s`:** [LongMemEval](https://github.com/xiaowu0162/LongMemEval), a personal assistant's chats with its user. `variant` (or `--variant`) picks the haystack size, with the same 500 questions in each: `s` (`longmemeval_s_cleaned.json`, 277 MB, about 50 sessions or 250 rounds a question), `m` (`longmemeval_m_cleaned.json`, 2.7 GB, about 500 sessions a question), or `oracle` (only the sessions that hold the answer). It downloads the file once and reads it as a stream, keeping only the selected questions. Each of the 500 questions has its own haystack; abstention questions are left out unless `include_abstention` is set. With `sessions: answers`, only the sessions that hold the answer and `distractor_sessions` more are imported, for a quicker run. Each user message and the assistant's answer is a round, at the session's date.
 - **`longmemeval_v2_enterprise`:** [LongMemEval-V2](https://github.com/xiaowu0162/LongMemEval-V2), the enterprise domain: a web agent's runs in a ServiceNow portal (WorkArena). In the small tier every enterprise question shares one haystack of 100 trajectories, so it runs all samples by default. It streams `trajectories.jsonl` (1.2 GB) once and keeps only the samples' trajectories (up to `max_trajectories`). Each trajectory is one round: the goal is what the user sent, each action is a `browser` tool call whose result is the page it led to, and the answer is how the task ended. Pages are cut to `max_observation_chars`, without the elements on most of the trajectory's pages, such as the navigation bar.
 
 ## Config
