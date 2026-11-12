@@ -28,8 +28,13 @@ export const createPdfConverter = ({
     if (bytes.subarray(0, PDF_HEADER.length).toString('latin1') !== PDF_HEADER) {
       throw binaryErrors.invalidContent();
     }
+    const endpointId = extractionAvailability.getEndpointId();
+    if (!endpointId) {
+      throw binaryErrors.notAvailable();
+    }
     return extractDocument({
       esClient: await getEsClient(),
+      endpointId,
       pdf: bytes,
       fileId,
       signal,

@@ -13,7 +13,7 @@ import {
   withActiveInferenceSpan,
 } from '@kbn/inference-tracing';
 import type { Logger } from '@kbn/logging';
-import { DOCUMENT_EXTRACTION_ENDPOINT_ID, DOCUMENT_EXTRACTION_TIMEOUT_MS } from './constants';
+import { DOCUMENT_EXTRACTION_TASK_TYPE, DOCUMENT_EXTRACTION_TIMEOUT_MS } from './constants';
 import { binaryErrors } from '../errors';
 
 interface DocumentExtractionResponse {
@@ -34,12 +34,14 @@ const getErrorDetails = (error: unknown): string => {
  */
 export const extractDocument = ({
   esClient,
+  endpointId,
   pdf,
   fileId,
   signal,
   logger,
 }: {
   esClient: ElasticsearchClient;
+  endpointId: string;
   pdf: Buffer;
   fileId: string;
   signal?: AbortSignal;
@@ -50,7 +52,7 @@ export const extractDocument = ({
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        [GenAISemanticConventions.GenAIRequestModel]: DOCUMENT_EXTRACTION_ENDPOINT_ID,
+        [GenAISemanticConventions.GenAIRequestModel]: endpointId,
         'document.file_id': fileId,
         'document.size_bytes': pdf.length,
         'document.mime_type': 'application/pdf',
@@ -74,9 +76,7 @@ export const extractDocument = ({
         const response = await esClient.transport.request<DocumentExtractionResponse>(
           {
             method: 'POST',
-            path: `/_inference/document_extraction/${encodeURIComponent(
-              DOCUMENT_EXTRACTION_ENDPOINT_ID
-            )}`,
+            path: `/_inference/${DOCUMENT_EXTRACTION_TASK_TYPE}/${encodeURIComponent(endpointId)}`,
             querystring: { timeout: `${DOCUMENT_EXTRACTION_TIMEOUT_MS / 1000}s` },
             body: {
               input: [
