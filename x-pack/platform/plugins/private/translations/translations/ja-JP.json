@@ -47515,7 +47515,6 @@
     "xpack.nightshift.investigations.sectionLoadingErrorTitle": "調査を読み込めません",
     "xpack.nightshift.investigations.sectionRefreshWarningTitle": "最後に読み込まれた結果を表示しています；更新に失敗しました。",
     "xpack.nightshift.investigations.sectionRetryAriaLabel": "{sectionTitle}件の調査の読み込みを再試行",
-    "xpack.nightshift.investigations.severityTileCountAriaLabel": "{severityLabel}調査件数",
     "xpack.nightshift.investigations.unavailableTitle": "この導入では調査を利用できません",
     "xpack.nightshift.knowledge.decisionTrees.allTreesTitle": "すべてのツリー",
     "xpack.nightshift.knowledge.decisionTrees.changes.edgesAdded": "{count}件のエッジが追加されました",
