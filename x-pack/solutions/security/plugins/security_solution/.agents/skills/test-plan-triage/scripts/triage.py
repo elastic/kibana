@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
-"""Read an issue's hierarchy and add the `Needs Test Plan` label (test-plan-triage skill).
+"""Read an issue's hierarchy, add the `Needs Test Plan` label, or record a "No" (test-plan-triage skill).
 
 Commands (JSON on stdout; exit 0 ok, 1 failure, 2 the agent must ask the user):
   context --issue <ref>             Read-only. The issue, every ancestor up to the root, and
                                     the descendant tree.
   label --issue <ref> [--dry-run]   Add `Needs Test Plan` to one open issue. Never retried.
+  comment-no --issue <ref> --rule <N1-N5> --reason <text> [--suggested <ref>] [--dry-run]
+                                    Post one fixed-format comment saying the issue needs no
+                                    test plan. Never retried, never posted twice.
 
 <ref> is a GitHub issue URL or `owner/repo#N`. Only elastic/kibana and
 elastic/security-team are accepted.
 
 TEST_PLAN_TRIAGE_GH replaces `gh` with another command (the evals stub). While it is set,
-`label` never writes: it reports what it would write and, if TEST_PLAN_TRIAGE_WRITE_LOG
-names a file, appends the issue ref to it.
+`label` and `comment-no` never write: they report what they would write and, if
+TEST_PLAN_TRIAGE_WRITE_LOG names a file, append one line per write to it.
 """
 
 from __future__ import annotations
@@ -24,12 +27,16 @@ import shlex
 import subprocess
 import sys
 from dataclasses import dataclass
+from datetime import date, datetime, timezone
 from typing import Any, Optional
 
 ALLOWED_REPOS = ("elastic/kibana", "elastic/security-team")
 LABEL = "Needs Test Plan"
 # Written by test-plan-generator (scripts/publish_test_plan.sh); if you change it, change both skills.
 TEST_PLAN_MARKER = "<!-- test-plan-generated -->"
+NO_PLAN_MARKER = "<!-- test-plan-triage:no-plan -->"
+NO_RULES = ("N1", "N2", "N3", "N4", "N5")
+REASON_LIMIT = 200
 GH_ENV = "TEST_PLAN_TRIAGE_GH"
 WRITE_LOG_ENV = "TEST_PLAN_TRIAGE_WRITE_LOG"
 
@@ -107,7 +114,7 @@ def repo_from_issue(issue: dict) -> str:
 
 
 class Gh:
-    """Thin wrapper over `gh api`; only GET requests and one label POST."""
+    """Thin wrapper over `gh api`; only GET requests, one label POST and one comment POST."""
 
     def __init__(self, command: Optional[list[str]] = None) -> None:
         override = os.environ.get(GH_ENV)
@@ -157,6 +164,18 @@ class Gh:
             ]
         )
 
+    def add_comment(self, ref: IssueRef, body: str) -> dict:
+        return self._json(
+            [
+                "api",
+                "--method",
+                "POST",
+                f"repos/{ref.repo}/issues/{ref.number}/comments",
+                "-f",
+                f"body={body}",
+            ]
+        )
+
 
 def _excerpt(text: Optional[str], limit: int) -> tuple[str, bool]:
     body = text or ""
@@ -198,9 +217,16 @@ def _ref(issue: dict) -> IssueRef:
     return IssueRef(repo_from_issue(issue), int(issue["number"]))
 
 
+def _comments(gh: Gh, ref: IssueRef) -> list:
+    return gh.get_list(f"repos/{ref.repo}/issues/{ref.number}/comments?per_page=100")
+
+
+def _marked(comments: list, marker: str) -> list:
+    return [comment for comment in comments if (comment.get("body") or "").lstrip().startswith(marker)]
+
+
 def has_test_plan(gh: Gh, ref: IssueRef, comments: Optional[list] = None) -> bool:
-    items = comments if comments is not None else gh.get_list(f"repos/{ref.repo}/issues/{ref.number}/comments?per_page=100")
-    return any((comment.get("body") or "").lstrip().startswith(TEST_PLAN_MARKER) for comment in items)
+    return bool(_marked(comments if comments is not None else _comments(gh, ref), TEST_PLAN_MARKER))
 
 
 def sub_issues(gh: Gh, ref: IssueRef) -> list:
@@ -282,8 +308,10 @@ def context(gh: Gh, ref: IssueRef) -> dict:
     if target["is_pull_request"]:
         gates.append("pull_request")
         return {"ok": True, "target": target, "gates": gates, "ancestors": [], "descendants": []}
-    comments = gh.get_list(f"repos/{ref.repo}/issues/{ref.number}/comments?per_page=100")
+    comments = _comments(gh, ref)
     target["has_test_plan"] = has_test_plan(gh, ref, comments)
+    no_plan = _marked(comments, NO_PLAN_MARKER)
+    target["triaged_no_at"] = no_plan[-1].get("created_at") if no_plan else None
     target["comments"] = [
         {
             "author": (comment.get("user") or {}).get("login"),
@@ -299,6 +327,8 @@ def context(gh: Gh, ref: IssueRef) -> dict:
         gates.append("already_labeled")
     if target["has_test_plan"]:
         gates.append("test_plan_published")
+    if no_plan:
+        gates.append("already_triaged")
     ancestors = collect_ancestors(gh, issue)
     descendants, truncated = collect_descendants(gh, issue)
     return {
@@ -312,12 +342,28 @@ def context(gh: Gh, ref: IssueRef) -> dict:
     }
 
 
-def label(gh: Gh, ref: IssueRef, *, dry_run: bool) -> dict:
+def _log_simulated_write(line: str) -> None:
+    log_path = os.environ.get(WRITE_LOG_ENV)
+    if not log_path:
+        return
+    try:
+        with open(log_path, "a", encoding="utf-8") as log:
+            log.write(f"{line}\n")
+    except OSError as error:
+        raise TriageError(f"cannot write {WRITE_LOG_ENV} file '{log_path}': {error}") from error
+
+
+def _open_issue(gh: Gh, ref: IssueRef, action: str) -> dict:
     issue = fetch_issue(gh, ref)
     if issue.get("pull_request"):
-        raise TriageError(f"{ref} is a pull request; only issues get the label", gate="pull_request")
+        raise TriageError(f"{ref} is a pull request; only issues are {action}", gate="pull_request")
     if issue.get("state") != "open":
-        raise TriageError(f"{ref} is closed; closed issues are never labeled", gate="closed")
+        raise TriageError(f"{ref} is closed; closed issues are never {action}", gate="closed")
+    return issue
+
+
+def label(gh: Gh, ref: IssueRef, *, dry_run: bool) -> dict:
+    issue = _open_issue(gh, ref, "labeled")
     url = issue.get("html_url")
     if _has_label(issue):
         return {"ok": True, "action": "none", "reason": "already_labeled", "ref": str(ref), "url": url}
@@ -325,18 +371,64 @@ def label(gh: Gh, ref: IssueRef, *, dry_run: bool) -> dict:
         result = {"ok": True, "action": "would_label", "ref": str(ref), "url": url, "label": LABEL}
         if gh.eval_mode:
             result["simulated"] = True
-            log_path = os.environ.get(WRITE_LOG_ENV)
-            if log_path and not dry_run:
-                try:
-                    with open(log_path, "a", encoding="utf-8") as log:
-                        log.write(f"{ref}\n")
-                except OSError as error:
-                    raise TriageError(f"cannot write {WRITE_LOG_ENV} file '{log_path}': {error}") from error
+            if not dry_run:
+                _log_simulated_write(f"label {ref}")
         return result
     applied = gh.add_label(ref)
     if not any(_has_label({"labels": [item]}) for item in applied):
         raise TriageError(f"GitHub did not confirm the label on {ref}; not retried")
     return {"ok": True, "action": "labeled", "ref": str(ref), "url": url, "label": LABEL}
+
+
+def no_plan_body(rule: str, reason: str, suggested: Optional[IssueRef], today: date) -> str:
+    """The only text `comment-no` ever posts; the reason is checked by `_check_reason`."""
+    line = f"**Test plan triage:** no test plan needed ({rule}: {reason})."
+    if suggested:
+        line += f" Suggested level for a test plan: [{suggested}](https://github.com/{suggested.repo}/issues/{suggested.number})."
+    return f"{NO_PLAN_MARKER}\n{line}\n\n_Decided on {today.isoformat()} with the `test-plan-triage` skill._"
+
+
+def _check_reason(reason: str) -> str:
+    text = reason.strip().rstrip(".")
+    if not text:
+        raise TriageError("--reason is empty")
+    if len(text) > REASON_LIMIT:
+        raise TriageError(f"--reason is longer than {REASON_LIMIT} characters")
+    if any(char in text for char in "\r\n@<>"):
+        raise TriageError("--reason must be one line with no '@', '<' or '>'")
+    return text
+
+
+def comment_no(
+    gh: Gh, ref: IssueRef, *, rule: str, reason: str, suggested: Optional[IssueRef], dry_run: bool, today: Optional[date] = None
+) -> dict:
+    rule_id = rule.strip().upper()
+    if rule_id not in NO_RULES:
+        raise TriageError(f"--rule must be one of {', '.join(NO_RULES)}; '{rule}' is not a No rule")
+    text = _check_reason(reason)
+    if suggested == ref:
+        raise TriageError("--suggested must be an ancestor, not the issue itself")
+    issue = _open_issue(gh, ref, "commented on")
+    url = issue.get("html_url")
+    if _has_label(issue):
+        raise TriageError(f"{ref} has `{LABEL}`; a No comment would contradict it", exit_code=EXIT_ASK, gate="already_labeled")
+    comments = _comments(gh, ref)
+    if _marked(comments, TEST_PLAN_MARKER):
+        raise TriageError(f"{ref} already has a published test plan", exit_code=EXIT_ASK, gate="test_plan_published")
+    if _marked(comments, NO_PLAN_MARKER):
+        return {"ok": True, "action": "none", "reason": "already_triaged", "ref": str(ref), "url": url}
+    body = no_plan_body(rule_id, text, suggested, today or datetime.now(timezone.utc).date())
+    if dry_run or gh.eval_mode:
+        result = {"ok": True, "action": "would_comment", "ref": str(ref), "url": url, "body": body}
+        if gh.eval_mode:
+            result["simulated"] = True
+            if not dry_run:
+                _log_simulated_write(f"comment {ref} rule={rule_id} suggested={suggested or 'none'}")
+        return result
+    posted = gh.add_comment(ref, body)
+    if not posted.get("html_url"):
+        raise TriageError(f"GitHub did not confirm the comment on {ref}; not retried")
+    return {"ok": True, "action": "commented", "ref": str(ref), "url": posted["html_url"], "body": body}
 
 
 class _Parser(argparse.ArgumentParser):
@@ -352,6 +444,12 @@ def build_parser() -> argparse.ArgumentParser:
     label_parser = commands.add_parser("label", help=f"add `{LABEL}` to one open issue")
     label_parser.add_argument("--issue", required=True, help="issue URL or owner/repo#N")
     label_parser.add_argument("--dry-run", action="store_true", help="report what would be written, write nothing")
+    comment_parser = commands.add_parser("comment-no", help="record on one open issue that it needs no test plan")
+    comment_parser.add_argument("--issue", required=True, help="issue URL or owner/repo#N")
+    comment_parser.add_argument("--rule", required=True, help=f"the No rule that matched: {', '.join(NO_RULES)}")
+    comment_parser.add_argument("--reason", required=True, help=f"one line, at most {REASON_LIMIT} characters, no '@', '<' or '>'")
+    comment_parser.add_argument("--suggested", help="the suggested level for a test plan, if there is one")
+    comment_parser.add_argument("--dry-run", action="store_true", help="print the comment, post nothing")
     return parser
 
 
@@ -362,8 +460,11 @@ def main(argv: Optional[list[str]] = None, gh: Optional[Gh] = None) -> int:
         client = gh or Gh()
         if args.command == "context":
             result = context(client, ref)
-        else:
+        elif args.command == "label":
             result = label(client, ref, dry_run=args.dry_run)
+        else:
+            suggested = parse_ref(args.suggested) if args.suggested else None
+            result = comment_no(client, ref, rule=args.rule, reason=args.reason, suggested=suggested, dry_run=args.dry_run)
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return EXIT_OK
     except TriageError as error:

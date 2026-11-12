@@ -14,7 +14,7 @@ This guide walks you through setting up an AI agent in Cursor that automatically
 6. The agent posts the plan as a comment on the GitHub issue — using the `gh` CLI as the primary method, or the GitHub MCP as fallback if `gh` is not available
 7. If the issue changes later, run `/test-plan-generator update test plan for issue #1234` — the agent detects only what changed and updates the draft incrementally, without rewriting everything from scratch
 
-**Related:** to decide whether an issue needs a test plan and at which level of its hierarchy, use the separate `/test-plan-triage` skill. It adds the `Needs Test Plan` label only after you confirm.
+**Related:** to decide whether an issue needs a test plan and at which level of its hierarchy, use the separate `/test-plan-triage` skill. It adds the `Needs Test Plan` label only after you confirm, and when no test plan is needed it leaves a short comment on the issue saying so.
 
 ---
 

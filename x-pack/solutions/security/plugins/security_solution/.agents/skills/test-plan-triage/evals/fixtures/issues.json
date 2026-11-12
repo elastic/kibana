@@ -298,5 +298,17 @@
     "type": "Task",
     "labels": ["Team:Threat Hunting:Investigations"],
     "body": ""
+  },
+  "elastic/kibana#911501": {
+    "title": "Delete the unused `useLegacyNotesState` hook",
+    "type": "Task",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "body": "The hook has had no callers since notes moved to the new store. Delete it and its unit tests.",
+    "comments": [
+      {
+        "author": "qa-lead",
+        "body": "<!-- test-plan-triage:no-plan -->\n**Test plan triage:** no test plan needed (N2: deletes an unused hook and its tests).\n\n_Decided on 2026-10-01 with the `test-plan-triage` skill._"
+      }
+    ]
   }
 }

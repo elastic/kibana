@@ -153,6 +153,13 @@ class ContextTests(unittest.TestCase):
         result = triage.context(FakeGh(issues, comments=comments), triage.IssueRef("elastic/kibana", 1))
         self.assertEqual(result["gates"], ["closed", "already_labeled", "test_plan_published"])
 
+    def test_previous_no_comment_is_a_gate(self):
+        issues = {"elastic/kibana#1": api_issue("elastic/kibana", 1)}
+        comments = {"elastic/kibana#1": [{"body": f"{triage.NO_PLAN_MARKER}\nno", "created_at": "2026-09-15T08:00:00Z", "user": {"login": "qa"}}]}
+        result = triage.context(FakeGh(issues, comments=comments), triage.IssueRef("elastic/kibana", 1))
+        self.assertEqual(result["gates"], ["already_triaged"])
+        self.assertEqual(result["target"]["triaged_no_at"], "2026-09-15T08:00:00Z")
+
     def test_pull_request_stops_early(self):
         issues = {"elastic/kibana#1": api_issue("elastic/kibana", 1, pr=True)}
         gh = FakeGh(issues)
@@ -199,7 +206,7 @@ class LabelTests(unittest.TestCase):
             log = Path(tmp) / "writes.log"
             with mock.patch.dict(os.environ, {triage.WRITE_LOG_ENV: str(log)}):
                 result = triage.label(gh, self.ref, dry_run=False)
-            self.assertEqual(log.read_text(encoding="utf-8"), "elastic/kibana#1\n")
+            self.assertEqual(log.read_text(encoding="utf-8"), "label elastic/kibana#1\n")
         self.assertTrue(result["simulated"])
         self.assertEqual(gh.posts(), [])
 
@@ -222,6 +229,99 @@ class LabelTests(unittest.TestCase):
         with self.assertRaises(triage.TriageError):
             triage.label(gh, self.ref, dry_run=False)
         self.assertEqual(len(gh.posts()), 1)
+
+
+class CommentNoTests(unittest.TestCase):
+    TODAY = triage.date(2026, 11, 12)
+
+    def setUp(self):
+        self.ref = triage.IssueRef("elastic/kibana", 1)
+        self.parent = triage.IssueRef("elastic/kibana", 2)
+
+    def comment(self, gh, *, rule="N4", reason="one control of the editor.", suggested=None, dry_run=False):
+        return triage.comment_no(gh, self.ref, rule=rule, reason=reason, suggested=suggested, dry_run=dry_run, today=self.TODAY)
+
+    def test_body_is_the_fixed_template(self):
+        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)})
+        result = self.comment(gh, rule="n4", suggested=self.parent, dry_run=True)
+        self.assertEqual(
+            result["body"],
+            "<!-- test-plan-triage:no-plan -->\n"
+            "**Test plan triage:** no test plan needed (N4: one control of the editor). "
+            "Suggested level for a test plan: [elastic/kibana#2](https://github.com/elastic/kibana/issues/2).\n\n"
+            "_Decided on 2026-11-12 with the `test-plan-triage` skill._",
+        )
+        self.assertEqual(result["action"], "would_comment")
+        self.assertEqual(gh.posts(), [])
+
+    def test_posts_one_comment_once(self):
+        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)}, post_result={"html_url": "https://github.com/elastic/kibana/issues/1#issuecomment-9"})
+        result = self.comment(gh)
+        self.assertEqual(result["action"], "commented")
+        self.assertEqual(result["url"], "https://github.com/elastic/kibana/issues/1#issuecomment-9")
+        self.assertEqual(len(gh.posts()), 1)
+        self.assertEqual(gh.posts()[0][:4], ["api", "--method", "POST", "repos/elastic/kibana/issues/1/comments"])
+        self.assertEqual(gh.posts()[0][-1], f"body={result['body']}")
+
+    def test_failed_or_unconfirmed_comment_is_not_retried(self):
+        for post_result in (None, {}):
+            gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)}, post_result=post_result)
+            with self.assertRaises(triage.TriageError):
+                self.comment(gh)
+            self.assertEqual(len(gh.posts()), 1)
+
+    def test_eval_mode_logs_instead_of_writing(self):
+        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)}, eval_mode=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "writes.log"
+            with mock.patch.dict(os.environ, {triage.WRITE_LOG_ENV: str(log)}):
+                self.comment(gh, suggested=self.parent)
+                self.comment(gh, dry_run=True)
+            self.assertEqual(log.read_text(encoding="utf-8"), "comment elastic/kibana#1 rule=N4 suggested=elastic/kibana#2\n")
+        self.assertEqual(gh.posts(), [])
+
+    def test_only_no_rules_are_accepted(self):
+        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)})
+        for rule in ("S1", "A1", "A4", "closed"):
+            with self.assertRaises(triage.TriageError):
+                self.comment(gh, rule=rule)
+        self.assertEqual(gh.calls, [])
+
+    def test_reason_must_be_one_short_line_without_mentions_or_html(self):
+        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)})
+        for reason in ("", "two\nlines", "ping @someone", "<!-- hidden -->", "x" * (triage.REASON_LIMIT + 1)):
+            with self.assertRaises(triage.TriageError):
+                self.comment(gh, reason=reason)
+        self.assertEqual(gh.calls, [])
+
+    def test_suggested_level_cannot_be_the_issue(self):
+        with self.assertRaises(triage.TriageError):
+            self.comment(FakeGh({}), suggested=self.ref)
+
+    def test_closed_issues_and_pull_requests_get_no_comment(self):
+        for issue in (api_issue("elastic/kibana", 1, state="closed"), api_issue("elastic/kibana", 1, pr=True)):
+            gh = FakeGh({"elastic/kibana#1": issue}, post_result={"html_url": "x"})
+            with self.assertRaises(triage.TriageError):
+                self.comment(gh)
+            self.assertEqual(gh.posts(), [])
+
+    def test_labeled_issue_or_published_plan_asks(self):
+        cases = (
+            ({"elastic/kibana#1": api_issue("elastic/kibana", 1, labels=["Needs Test Plan"])}, {}, "already_labeled"),
+            ({"elastic/kibana#1": api_issue("elastic/kibana", 1)}, {"elastic/kibana#1": [{"body": "<!-- test-plan-generated -->\n# Plan"}]}, "test_plan_published"),
+        )
+        for issues, comments, gate in cases:
+            gh = FakeGh(issues, comments=comments, post_result={"html_url": "x"})
+            with self.assertRaises(triage.TriageError) as raised:
+                self.comment(gh)
+            self.assertEqual((raised.exception.exit_code, raised.exception.gate), (triage.EXIT_ASK, gate))
+            self.assertEqual(gh.posts(), [])
+
+    def test_second_no_comment_is_not_posted(self):
+        comments = {"elastic/kibana#1": [{"body": f"{triage.NO_PLAN_MARKER}\nearlier"}]}
+        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)}, comments=comments, post_result={"html_url": "x"})
+        self.assertEqual(self.comment(gh)["reason"], "already_triaged")
+        self.assertEqual(gh.posts(), [])
 
 
 class MainTests(unittest.TestCase):
@@ -269,7 +369,18 @@ class StubCliTests(unittest.TestCase):
             code, payload = self.run_cli("label", "--issue", "elastic/kibana#910101", extra_env={triage.WRITE_LOG_ENV: str(log)})
             self.assertEqual(code, 0, payload)
             self.assertTrue(payload["simulated"])
-            self.assertEqual(log.read_text(encoding="utf-8"), "elastic/kibana#910101\n")
+            self.assertEqual(log.read_text(encoding="utf-8"), "label elastic/kibana#910101\n")
+
+    def test_comment_no_never_writes_through_the_stub(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "writes.log"
+            code, payload = self.run_cli(
+                "comment-no", "--issue", "elastic/kibana#911401", "--rule", "N2", "--reason", "internal state refactor",
+                extra_env={triage.WRITE_LOG_ENV: str(log)},
+            )
+            self.assertEqual(code, 0, payload)
+            self.assertTrue(payload["simulated"])
+            self.assertEqual(log.read_text(encoding="utf-8"), "comment elastic/kibana#911401 rule=N2 suggested=none\n")
 
 
 if __name__ == "__main__":
