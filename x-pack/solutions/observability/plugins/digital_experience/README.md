@@ -21,6 +21,7 @@ which needs APM access. `/app/ux` stays reachable by URL.
 
 The flag doesn't hide what the plugin registers at setup: the "Digital experience" feature and its
 "Sessions" sub-feature are listed in Roles and in Spaces feature visibility, whatever the flag.
+Serverless Logs Essentials hides the feature (`xpack.features.overrides`), as that tier has no APM.
 
 - **Serverless and Elastic Cloud Hosted:** a LaunchDarkly rule on `digitalExperience.enabled`, per project or deployment.
 - **On-prem and local:** set `feature_flags.overrides: { digitalExperience.enabled: true }` in `kibana.yml`.
