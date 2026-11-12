@@ -18,7 +18,6 @@ import {
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
 import type {
-  InvestigationQuotaCallback,
   NightshiftInvestigationsSetupDeps,
   NightshiftInvestigationsStartDeps,
 } from './types';
@@ -111,24 +110,6 @@ describe('NightshiftInvestigationsPlugin setup', () => {
 
     flag$.next(false);
     expect(await isEnabled(request)).toBe(false);
-  });
-
-  it('accepts one investigation quota callback', () => {
-    const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
-    const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
-
-    expect(() => setup.registerInvestigationQuota(callback)).not.toThrow();
-  });
-
-  it('rejects a second investigation quota callback registration', () => {
-    const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
-    const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
-
-    setup.registerInvestigationQuota(callback);
-
-    expect(() => setup.registerInvestigationQuota(callback)).toThrow(
-      'Investigation quota callback is already registered'
-    );
   });
 
   it('registers the reference-free, alert-outcome and Wiki judges with the evals plugin', () => {

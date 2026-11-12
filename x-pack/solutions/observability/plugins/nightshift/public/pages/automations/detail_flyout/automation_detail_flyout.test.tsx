@@ -10,7 +10,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_run_quotas';
+import { useInvestigationQuotas } from '../../../data/run_quotas/use_investigation_quotas';
 import { AutomationDetailFlyout } from './automation_detail_flyout';
 import {
   useAutomationRunsInRange,
@@ -27,8 +27,8 @@ jest.mock('../../../data/automations/use_automations', () => ({
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
 }));
-jest.mock('../../../data/run_quotas/use_significant_events_run_quotas', () => ({
-  useRunQuotas: jest.fn(),
+jest.mock('../../../data/run_quotas/use_investigation_quotas', () => ({
+  useInvestigationQuotas: jest.fn(),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../hooks/use_global_limit', () => ({
@@ -70,7 +70,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
 
   beforeEach(() => {
     (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: false } });
-    (useRunQuotas as jest.Mock).mockReturnValue({ data: undefined });
+    (useInvestigationQuotas as jest.Mock).mockReturnValue({ data: undefined });
     onRun.mockClear();
     jest.clearAllMocks();
     mutate.mockReset();
@@ -181,12 +181,21 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   it.each(['manual_investigation', 'total_investigation'] as const)(
     'disables Run in Actions at the %s quota and shows its reset time',
     async (group) => {
-      (useRunQuotas as jest.Mock).mockReturnValue({
+      (useInvestigationQuotas as jest.Mock).mockReturnValue({
         data: {
           enabled: true,
-          investigationLimitsEnabled: true,
-          limits: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
-          counts: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
+          limits: {
+            automatic_investigation: null,
+            manual_investigation: null,
+            total_investigation: null,
+            [group]: 1,
+          },
+          counts: {
+            automatic_investigation: 0,
+            manual_investigation: 0,
+            total_investigation: 0,
+            [group]: 1,
+          },
           window: {
             start: '2040-01-01T00:00:00.000Z',
             resetsAt: '2040-01-02T00:00:00.000Z',
