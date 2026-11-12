@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { getValidatorForObservableType } from '../../common/observables/validators';
-import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
+import { MAX_CUSTOM_OBSERVABLE_TYPES, OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 import { type CasesClient } from './client';
 import { getAvailableObservableTypesMap } from './observable_types';
 
@@ -43,10 +43,13 @@ export const validateDuplicatedKeysInRequest = ({
  * Throws an error if the request has observable types with duplicated labels.
  */
 export const validateDuplicatedObservableTypesInRequest = ({
-  requestFields = [],
+  requestFields: allRequestFields = [],
 }: {
-  requestFields?: Array<{ label: string; key: string }>;
+  requestFields?: Array<{ label?: string; key: string }>;
 }) => {
+  const requestFields = allRequestFields.filter(
+    (item): item is { label: string; key: string } => item.label !== undefined
+  );
   const extractLabelFromItem = (item: { label: string }) => item.label.toLowerCase();
   const extractKeyFromItem = (item: { key: string }) => item.key.toLowerCase();
 
@@ -80,6 +83,71 @@ export const validateDuplicatedObservableTypesInRequest = ({
     throw Boom.badRequest(
       `Invalid duplicated observable types in request: ${Array.from(duplicatedLabels.values())}`
     );
+  }
+};
+
+const isValidPattern = (pattern: string): boolean => {
+  try {
+    RegExp(pattern);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Throws an error if an observable type entry has invalid paths, a value pattern on a built-in
+ * type, or no label on a type that is not built in.
+ */
+export const validateObservableTypePathsInRequest = ({
+  requestFields = [],
+}: {
+  requestFields?: Array<{
+    key: string;
+    label?: string;
+    paths?: Array<{ path: string }>;
+    valuePattern?: string;
+  }>;
+}) => {
+  const builtinKeys = new Set(OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key));
+  const overrideKeys = new Set<string>();
+  const errors: string[] = [];
+
+  requestFields.forEach(({ key, label, paths = [], valuePattern }) => {
+    const isBuiltin = builtinKeys.has(key);
+
+    if (!isBuiltin && label === undefined) {
+      errors.push(`custom observable type ${key} needs a label`);
+    }
+
+    if (isBuiltin && label === undefined) {
+      if (overrideKeys.has(key)) {
+        errors.push(`built-in observable type ${key} has more than one entry`);
+      }
+      overrideKeys.add(key);
+    }
+
+    if (isBuiltin && valuePattern !== undefined) {
+      errors.push(`built-in observable type ${key} cannot have a value pattern`);
+    }
+
+    if (valuePattern !== undefined && !isValidPattern(valuePattern)) {
+      errors.push(`observable type ${key} has an invalid value pattern`);
+    }
+
+    const pathNames = paths.map(({ path }) => path);
+    if (new Set(pathNames).size !== pathNames.length) {
+      errors.push(`observable type ${key} has duplicated paths`);
+    }
+  });
+
+  const customTypesCount = requestFields.filter(({ label }) => label !== undefined).length;
+  if (customTypesCount > MAX_CUSTOM_OBSERVABLE_TYPES) {
+    errors.push(`the maximum of custom observable types is ${MAX_CUSTOM_OBSERVABLE_TYPES}`);
+  }
+
+  if (errors.length > 0) {
+    throw Boom.badRequest(`Invalid observable types in request: ${errors.join(', ')}`);
   }
 };
 
