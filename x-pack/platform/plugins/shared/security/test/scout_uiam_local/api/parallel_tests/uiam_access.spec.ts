@@ -108,20 +108,34 @@ apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.server
         body: { name: 'access-plain-member' },
       });
       expect(grantResponse).toHaveStatusCode(200);
+      const { id: apiKeyId, api_key: apiKey } = grantResponse.body;
 
-      // A key granted through Kibana is internal: on a real request it only authenticates
-      // alongside Kibana's caller attestation, the way Kibana's own loopback callers send it.
-      const credential = new HTTPAuthorizationHeader('ApiKey', grantResponse.body.api_key);
-      const response = await accessWith(apiClient, {
-        Authorization: credential.toString(),
-        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-          MOCK_IDP_UIAM_SHARED_SECRET,
-          credential
-        ),
-      });
+      try {
+        // A key granted through Kibana is internal: on a real request it only authenticates
+        // alongside Kibana's caller attestation, the way Kibana's own loopback callers send it.
+        const credential = new HTTPAuthorizationHeader('ApiKey', apiKey);
+        const response = await accessWith(apiClient, {
+          Authorization: credential.toString(),
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            MOCK_IDP_UIAM_SHARED_SECRET,
+            credential
+          ),
+        });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(NO_ACCESS);
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual(NO_ACCESS);
+      } finally {
+        // Keys granted here are not tracked by any fixture, so revoke it to keep the UIAM store clean.
+        const invalidateResponse = await apiClient.post(
+          'test_endpoints/uiam/api_keys/_invalidate',
+          {
+            headers: { ...COMMON_UNSAFE_HEADERS },
+            responseType: 'json',
+            body: { id: apiKeyId, authcScheme: 'ApiKey', credential: apiKey },
+          }
+        );
+        expect(invalidateResponse).toHaveStatusCode(200);
+      }
     }
   );
 
