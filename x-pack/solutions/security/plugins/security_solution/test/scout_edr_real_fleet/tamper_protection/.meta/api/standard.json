@@ -1,0 +1,21 @@
+{
+  "sha1": "cf57531d97e90209d3118b025f217550f3a767f3",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "184603e1307e615-0dae27ea8cd3c99",
+      "title": "Uninstall an agent moved between two tamper protected policies rejects the previous policy uninstall token and accepts the new one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_changing_policy_from_enabled_to_enabled.spec.ts",
+        "line": 61,
+        "column": 24
+      }
+    }
+  ]
+}
