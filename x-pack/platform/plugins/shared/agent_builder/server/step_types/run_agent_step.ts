@@ -54,10 +54,10 @@ import {
 } from '../../common/step_types/run_agent_step';
 
 export const CONVERSATION_BUSY_RETRY_OPTIONS = {
-  retries: 150,
+  forever: true,
   minTimeout: 2000,
   maxTimeout: 10000,
-  maxRetryTime: 5 * 60 * 1000,
+  maxRetryTime: 10 * 60 * 1000,
 };
 
 const assertTemplateMatchesSchema = (value: unknown, schema: unknown): Record<string, unknown> => {
@@ -484,25 +484,35 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             useTaskManager: false,
           });
 
-        const { events$ } = await pRetry(
-          async (attempt) => {
-            if (attempt > 1 && context.abortSignal.aborted) {
-              throw new pRetry.AbortError(createRequestAbortedError());
-            }
-            return executeAgentOnce();
-          },
-          {
-            ...CONVERSATION_BUSY_RETRY_OPTIONS,
-            onFailedAttempt: (error) => {
-              if (context.abortSignal.aborted) {
-                throw createRequestAbortedError();
-              }
-              if (!isConversationBusyError(error)) {
-                throw error;
-              }
-            },
+        const abortedWhileWaiting = new Promise<never>((_, reject) => {
+          const rejectAborted = () =>
+            reject(createRequestAbortedError('ai.agent step aborted while waiting for the agent'));
+          if (context.abortSignal.aborted) {
+            rejectAborted();
+            return;
           }
-        );
+          context.abortSignal.addEventListener('abort', rejectAborted, { once: true });
+        });
+
+        const { events$ } = await Promise.race([
+          pRetry(
+            async (attempt) => {
+              if (attempt > 1 && context.abortSignal.aborted) {
+                throw new pRetry.AbortError(createRequestAbortedError('ai.agent step aborted'));
+              }
+              return executeAgentOnce();
+            },
+            {
+              ...CONVERSATION_BUSY_RETRY_OPTIONS,
+              onFailedAttempt: (error) => {
+                if (!isConversationBusyError(error)) {
+                  throw error;
+                }
+              },
+            }
+          ),
+          abortedWhileWaiting,
+        ]);
 
         const events = await firstValueFrom(
           events$.pipe(

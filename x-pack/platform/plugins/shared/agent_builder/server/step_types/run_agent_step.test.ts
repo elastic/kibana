@@ -25,6 +25,7 @@ import {
   ChatEventType,
   createConversationBusyError,
   createRequestAbortedError,
+  isRequestAbortedError,
 } from '@kbn/agent-builder-common';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
@@ -367,11 +368,10 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       );
       await jest.advanceTimersByTimeAsync(0);
       controller.abort();
-      await jest.advanceTimersByTimeAsync(CONVERSATION_BUSY_RETRY_OPTIONS.maxTimeout);
       const res = await resPromise;
 
       expect(execution.executeAgent).toHaveBeenCalledTimes(1);
-      expect(res.error?.message).toBe(createRequestAbortedError().message);
+      expect(isRequestAbortedError(res.error)).toBe(true);
     });
 
     it('reports the abort when the step is aborted during a call that returns busy', async () => {
@@ -389,7 +389,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       );
 
       expect(execution.executeAgent).toHaveBeenCalledTimes(1);
-      expect(res.error?.message).toBe(createRequestAbortedError().message);
+      expect(isRequestAbortedError(res.error)).toBe(true);
     });
 
     it('fails with the busy error once the retry budget is spent', async () => {
