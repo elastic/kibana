@@ -206,18 +206,18 @@ describe('NightshiftInvestigationsPlugin start', () => {
       })
     );
     plugin.setup(coreMock.createSetup(), { ...createSetupDeps(), sandbox: { isAvailable: true } });
-    const install = jest.fn().mockResolvedValue(undefined);
+    const installMany = jest.fn(async (_items: ReadonlyArray<{ id: string }>) => ({ failed: [] }));
     let ready = (): void => {};
     const installed = new Promise<void>((resolve) => {
       ready = resolve;
     });
     plugin.start(coreMock.createStart(), {
       workflowsExtensions: {
-        initManagedWorkflowsClient: () => Promise.resolve({ install, ready }),
+        initManagedWorkflowsClient: () => Promise.resolve({ installMany, ready }),
       },
     } as unknown as NightshiftInvestigationsStartDeps);
     await installed;
-    return install.mock.calls.map(([workflowId]) => workflowId);
+    return installMany.mock.calls.flatMap(([items]) => items.map(({ id }) => id));
   };
 
   const KNOWLEDGE_WORKFLOWS = [

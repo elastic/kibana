@@ -963,6 +963,7 @@ src/platform/test
 src/platform/test_plugins/data_search @elastic/kibana-discover
 src/platform/test_plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 src/platform/test_plugins/otel_metrics @elastic/obs-signals-metrics-team
+src/platform/test_plugins/user_storage @elastic/appex-sharedux
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 src/platform/test/common/plugins/newsfeed @elastic/kibana-core
@@ -999,7 +1000,6 @@ src/platform/test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-c
 src/platform/test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 src/platform/test/server_integration/plugins/status_plugin_a @elastic/kibana-core
 src/platform/test/server_integration/plugins/status_plugin_b @elastic/kibana-core
-src/platform/test/user_storage/plugins/user_storage_test @elastic/appex-sharedux
 src/setup_node_env @elastic/kibana-operations
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/examples/embedded_lens_example @elastic/kibana-dashboards

@@ -52,7 +52,11 @@ describe('executeDeclarativeRequest', () => {
   });
 
   it('sends reportIp as URLSearchParams and keeps JSON as the default body', async () => {
-    const { client } = createRecordingAxiosClient({});
+    const { client } = createRecordingAxiosClient({}, () => ({
+      data: { data: { ip: '1.2.3.4' } },
+      status: 200,
+      headers: {},
+    }));
     const requestSpy = jest.spyOn(client, 'request');
 
     await executeDeclarativeRequest({
@@ -376,5 +380,205 @@ describe('executeDeclarativeRequest', () => {
       })
     ).rejects.toThrow(TemplateRenderError);
     expect(requests).toHaveLength(0);
+  });
+
+  it('makes one request and preserves Retry-After response headers for Actions retry handling', async () => {
+    const { client, requests } = createRecordingAxiosClient({}, () => ({
+      data: { error: 'rate' },
+      status: 429,
+      headers: { 'retry-after': '2' },
+    }));
+
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', url: 'https://api.example/items' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toMatchObject({
+      response: { status: 429, headers: { 'retry-after': '2' }, data: { error: 'rate' } },
+    });
+    expect(requests).toHaveLength(1);
+  });
+
+  it('unwraps dataPath, wraps outputKey, and throws when the path is missing', async () => {
+    const unwrapped = createRecordingAxiosClient({}, () => ({
+      data: { data: { score: 1 }, extra: true },
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: unwrapped.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { dataPath: 'data' },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ score: 1 });
+
+    const wrapped = createRecordingAxiosClient({}, () => ({
+      data: 'ok',
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: wrapped.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { outputKey: 'result' },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ result: 'ok' });
+
+    const missing = createRecordingAxiosClient({}, () => ({
+      data: { other: true },
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: missing.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { dataPath: 'data' },
+        },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow('Response path "data" not found');
+  });
+
+  it('only resolves own properties in dataPath', async () => {
+    for (const { data, dataPath } of [
+      { data: {}, dataPath: 'toString' },
+      { data: { data: {} }, dataPath: 'data.toString' },
+    ]) {
+      const ordinary = createRecordingAxiosClient({}, () => ({
+        data,
+        status: 200,
+        headers: {},
+      }));
+      await expect(
+        executeDeclarativeRequest({
+          client: ordinary.client,
+          request: {
+            method: 'GET',
+            url: 'https://api.example/items',
+            response: { dataPath },
+          },
+          input: {},
+          config: {},
+        })
+      ).rejects.toThrow(`Response path "${dataPath}" not found`);
+    }
+
+    const inherited = createRecordingAxiosClient({}, () => ({
+      data: Object.create({ inherited: true }),
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: inherited.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { dataPath: 'inherited' },
+        },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow('Response path "inherited" not found');
+
+    const ownPrototypeKey = createRecordingAxiosClient({}, () => ({
+      data: JSON.parse('{"toString":"own value"}'),
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: ownPrototypeKey.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { dataPath: 'toString' },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ data: 'own value' });
+  });
+
+  it('maps data and raw Link headers without adding rate limit metadata', async () => {
+    const rawLink = '<https://api.example/items?page=2>; rel="next"';
+    const response = createRecordingAxiosClient({}, () => ({
+      data: { data: [{ id: 1 }] },
+      status: 200,
+      headers: {
+        Link: rawLink,
+        'x-ratelimit-remaining': '5',
+        'x-ratelimit-reset': '60',
+      },
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: response.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: {
+            dataPath: 'data',
+            outputKey: 'users',
+            linkHeader: { outputKey: 'link' },
+          },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ users: [{ id: 1 }], link: rawLink });
+    expect(response.requests).toHaveLength(1);
+
+    const noLink = createRecordingAxiosClient({}, () => ({ data: [], status: 200, headers: {} }));
+    await expect(
+      executeDeclarativeRequest({
+        client: noLink.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { outputKey: 'events', linkHeader: { outputKey: 'link' } },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ events: [], link: undefined });
+    expect(noLink.requests).toHaveLength(1);
+
+    const emptyLink = createRecordingAxiosClient({}, () => ({
+      data: [],
+      status: 200,
+      headers: { link: '' },
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: emptyLink.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { outputKey: 'events', linkHeader: { outputKey: 'link' } },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ events: [], link: undefined });
   });
 });
