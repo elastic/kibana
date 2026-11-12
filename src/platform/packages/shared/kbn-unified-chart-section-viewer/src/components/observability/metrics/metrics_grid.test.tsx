@@ -341,6 +341,37 @@ describe('MetricsGrid', () => {
     );
   });
 
+  it('forwards chart visibility into the exemplar fetch', () => {
+    renderMetricsGrid();
+
+    expect(useFetchExemplars).toHaveBeenCalledWith(
+      expect.objectContaining({ isChartVisible: false })
+    );
+    expect(Chart).toHaveBeenCalledWith(
+      expect.objectContaining({ onChartVisibleChange: expect.any(Function) }),
+      expect.anything()
+    );
+
+    const onChartVisibleChange = (jest.mocked(Chart).mock.calls[0][0] as ChartProps)
+      .onChartVisibleChange;
+
+    act(() => {
+      onChartVisibleChange?.(true);
+    });
+
+    expect(useFetchExemplars).toHaveBeenCalledWith(
+      expect.objectContaining({ isChartVisible: true })
+    );
+
+    act(() => {
+      onChartVisibleChange?.(false);
+    });
+
+    expect(useFetchExemplars).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isChartVisible: false })
+    );
+  });
+
   it('renders the chart while exemplars are still loading', () => {
     jest.mocked(useFetchExemplars).mockReturnValue({
       exemplars: undefined,
