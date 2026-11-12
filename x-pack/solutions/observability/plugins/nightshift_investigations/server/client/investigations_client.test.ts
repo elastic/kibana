@@ -2974,6 +2974,92 @@ describe('NightshiftInvestigationsClient.getLifecycleCorrelation()', () => {
   });
 });
 
+describe('NightshiftInvestigationsClient.reportRunEnded()', () => {
+  const telemetry = { reportInvestigationEnded: jest.fn() };
+  const usage = (inputTokens: number) => ({
+    connector_id: 'eis-claude',
+    model: 'claude-sonnet',
+    llm_calls: 3,
+    input_tokens: inputTokens,
+    output_tokens: 200,
+    cached_input_tokens: 50,
+    reasoning_tokens: 20,
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-12T10:05:00Z'));
+    telemetry.reportInvestigationEnded.mockReset();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('reports the run with its duration and the usage of the round it ran', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-2',
+      spaceId: SPACE_ID,
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      status: ExecutionStatus.RUNNING,
+      effectiveIdentity: INVESTIGATOR_IDENTITY,
+      startedAt: '2026-11-12T10:00:00Z',
+      context: {
+        inputs: {
+          investigation_id: 'inv-1',
+          context: {
+            is_follow_up: true,
+            trigger_type: 'automatic',
+            entry_point: 'automation',
+            nightshift_automation_id: 'automation-1',
+          },
+        },
+      },
+    });
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: BOUND_WORKFLOW_ID,
+      definition: BOUND_DEFINITION,
+    });
+    // The earlier round belongs to the previous run; the last is a chat message sent afterwards.
+    conversations.get.mockResolvedValueOnce({
+      rounds: [
+        { started_at: '2026-11-12T09:00:00Z', model_usage: usage(9_000) },
+        { started_at: '2026-11-12T10:00:02Z', model_usage: usage(1_000) },
+        { started_at: '2026-11-12T10:04:00Z', model_usage: usage(5_000) },
+      ],
+    });
+
+    await makeClient({ telemetry: telemetry as never }).reportRunEnded(
+      'inv-1',
+      'exec-2',
+      'completed'
+    );
+
+    expect(telemetry.reportInvestigationEnded).toHaveBeenCalledWith({
+      investigation_id: 'inv-1',
+      workflow_execution_id: 'exec-2',
+      outcome: 'completed',
+      duration_ms: 300_000,
+      trigger_type: 'automatic',
+      entry_point: 'automation',
+      is_follow_up: true,
+      automation_id: 'automation-1',
+      ...usage(1_000),
+    });
+  });
+
+  it('still reports the outcome when the run cannot be read', async () => {
+    mockManagement.getWorkflowExecution.mockRejectedValue(new Error('store unavailable'));
+
+    await makeClient({ telemetry: telemetry as never }).reportRunEnded('inv-1', 'exec-2', 'failed');
+
+    expect(telemetry.reportInvestigationEnded).toHaveBeenCalledWith({
+      investigation_id: 'inv-1',
+      workflow_execution_id: 'exec-2',
+      outcome: 'failed',
+    });
+  });
+});
+
 describe('NightshiftInvestigationsClient notification destinations', () => {
   const destination = {
     type: 'slack',

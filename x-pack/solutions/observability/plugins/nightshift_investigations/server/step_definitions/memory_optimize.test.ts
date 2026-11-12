@@ -41,6 +41,7 @@ describe('memoryOptimizeStepDefinition', () => {
   const telemetry = {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
+    reportBackgroundActivity: jest.fn(),
   };
 
   beforeEach(() => {
@@ -143,6 +144,7 @@ describe('memoryOptimizeStepDefinition', () => {
       requestedConnectorId: undefined,
       roundConnectorId: undefined,
       interactionId: 'workflow-exec-1',
+      modelUsage: expect.anything(),
     });
     expect(getScopedEsClient).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ output: { status: 'ok' } });

@@ -671,6 +671,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
+            telemetry,
             logger: this.logger.get('wiki'),
             isEnabled: () => this.wikiEnabled,
           })
@@ -705,6 +706,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
       }

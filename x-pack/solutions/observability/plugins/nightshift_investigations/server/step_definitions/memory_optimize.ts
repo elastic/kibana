@@ -20,7 +20,7 @@ import {
   withToolResults,
 } from '../investigation_round';
 import { isMemoryOptimizeSkipped, runMemoryOptimize } from '../memory/register_memory';
-import type { NightshiftTelemetryClient } from '../telemetry';
+import { trackBackgroundActivity, type NightshiftTelemetryClient } from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { withTimeout } from './with_timeout';
 
@@ -146,36 +146,47 @@ export const memoryOptimizeStepDefinition = ({
             },
           },
           async (span) => {
-            const res = await withTimeout(
-              async (signal) =>
-                runMemoryOptimize({
-                  request,
-                  agentId: context.input.agent_id,
-                  userMessage: context.input.prompt,
-                  assistantMessage: context.input.response,
-                  toolCalls: withToolResults(
-                    (context.input.tool_calls ?? []) as InvestigationToolCall[],
-                    context.input.tool_results ?? []
-                  ),
-                  conversationId: context.input.conversation_id,
-                  roundId: context.input.round_id,
-                  roundIndex: context.input.round_index,
-                  recalledIds: context.input.recalled_ids ?? [],
-                  esClient: context.contextManager.getScopedEsClient(),
-                  spaceId,
-                  signal,
-                  logger,
-                  getAgentBuilder,
-                  getInference,
-                  getSavedObjects,
-                  getUiSettings,
-                  requestedConnectorId: context.input.connector_id,
-                  roundConnectorId: context.input.round_connector_id,
-                  interactionId: workflowExecutionId,
-                }),
-              OPTIMIZE_TIMEOUT_MS,
-              `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`,
-              context.abortSignal
+            const res = await trackBackgroundActivity(
+              {
+                telemetry,
+                activity: 'memory_optimize',
+                workflowExecutionId,
+                conversationId: context.input.conversation_id,
+                roundId: context.input.round_id,
+              },
+              (modelUsage) =>
+                withTimeout(
+                  async (signal) =>
+                    runMemoryOptimize({
+                      request,
+                      agentId: context.input.agent_id,
+                      userMessage: context.input.prompt,
+                      assistantMessage: context.input.response,
+                      toolCalls: withToolResults(
+                        (context.input.tool_calls ?? []) as InvestigationToolCall[],
+                        context.input.tool_results ?? []
+                      ),
+                      conversationId: context.input.conversation_id,
+                      roundId: context.input.round_id,
+                      roundIndex: context.input.round_index,
+                      recalledIds: context.input.recalled_ids ?? [],
+                      esClient: context.contextManager.getScopedEsClient(),
+                      spaceId,
+                      signal,
+                      logger,
+                      getAgentBuilder,
+                      getInference,
+                      getSavedObjects,
+                      getUiSettings,
+                      requestedConnectorId: context.input.connector_id,
+                      roundConnectorId: context.input.round_connector_id,
+                      interactionId: workflowExecutionId,
+                      modelUsage,
+                    }),
+                  OPTIMIZE_TIMEOUT_MS,
+                  `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`,
+                  context.abortSignal
+                )
             );
             summary = res;
             if (isMemoryOptimizeSkipped(res)) {
