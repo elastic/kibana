@@ -37,6 +37,7 @@ const ki = (id: string, timestamp: string, extra: Record<string, unknown> = {}) 
 
 const kisPath = (query: string) =>
   `${AI_INDEX_INTERNAL_PATH}/${AI_INDEX_ID}/kis?query=${encodeURIComponent(query)}`;
+const kisSortedByTitlePath = `${AI_INDEX_INTERNAL_PATH}/${AI_INDEX_ID}/kis?sort=title`;
 
 apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
@@ -65,7 +66,7 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
       refresh: 'wait_for',
       operations: [
         { index: { _index: DEST, _id: 'title-match' } },
-        ki('title-match', '2026-09-01T00:00:00Z', {
+        ki('title-match', '2026-08-31T00:00:00Z', {
           title: 'Refund policy overview',
           description: 'How approvals work',
         }),
@@ -79,6 +80,13 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
           title: 'Shipping timelines',
           description: 'Delivery windows',
         }),
+        // Title sort edge cases: lowercase sorts with the rest, empty and missing titles sort last.
+        { index: { _index: DEST, _id: 'title-lower' } },
+        ki('title-lower', '2026-09-01T00:00:00Z', { title: 'apple pie' }),
+        { index: { _index: DEST, _id: 'empty-title' } },
+        ki('empty-title', '2026-09-01T00:00:00Z', { title: '' }),
+        { index: { _index: DEST, _id: 'no-title' } },
+        ki('no-title', '2026-09-01T00:00:00Z'),
         // Obsolete revision matches "refund" but is superseded by a newer revision that
         // doesn't; the latest-revision collapse must drop it before MATCH ever sees it.
         { index: { _index: DEST, _id: 'revised-old' } },
@@ -99,7 +107,7 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
   });
 
   apiTest(
-    'matches title and description, ranks the title match first, and excludes a superseded revision',
+    'matches title and description, lists the newest first, and excludes a superseded revision',
     async ({ apiClient }) => {
       const response = await apiClient.get(kisPath('refund'), {
         headers: adminHeaders,
@@ -107,11 +115,33 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
       });
 
       expect(response).toHaveStatusCode(200);
+      // Newest first, not by relevance: the description match has the newer timestamp.
       expect(response.body.kis.map((item: { id: string }) => item.id)).toStrictEqual([
-        'title-match',
         'desc-match',
+        'title-match',
       ]);
       expect(response.body.total).toBe(2);
+    }
+  );
+
+  apiTest(
+    'sorts by title ignoring case, with empty and missing titles last',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(kisSortedByTitlePath, {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.kis.map((item: { id: string }) => item.id)).toStrictEqual([
+        'title-lower', // apple pie
+        'desc-match', // Customer handbook
+        'revised-match', // Finalized escalation steps (latest revision)
+        'title-match', // Refund policy overview
+        'no-match', // Shipping timelines
+        'empty-title',
+        'no-title',
+      ]);
     }
   );
 

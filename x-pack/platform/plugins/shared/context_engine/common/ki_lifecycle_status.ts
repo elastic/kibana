@@ -8,6 +8,10 @@
 import type { KiDocument, KiJsonValue } from './http_api/knowledge_indicators';
 import { KI_LIFECYCLE_STATUSES, type KiLifecycleStatus } from './step_types/ki';
 
+/** Statuses a KI list can be filtered by: the stored ones plus `expired`, which is computed from `expires_at`. */
+export const KI_STATUSES = [...KI_LIFECYCLE_STATUSES, 'expired'] as const;
+export type KiStatus = (typeof KI_STATUSES)[number];
+
 export const isKiJsonRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 

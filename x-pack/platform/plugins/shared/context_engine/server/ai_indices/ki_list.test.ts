@@ -243,7 +243,7 @@ describe('ki_list', () => {
       ],
     });
 
-    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("deleted")');
+    expect(queryText(0)).toContain('WHERE ki_status IN ("deleted")');
   });
 
   it('includes deleted KIs when lifecycleStatuses lists active and deleted', async () => {
@@ -276,7 +276,7 @@ describe('ki_list', () => {
       ],
     });
 
-    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("active", "deleted")');
+    expect(queryText(0)).toContain('WHERE ki_status IN ("active", "deleted")');
   });
 
   it('returns no KIs when deleted is requested but the index has no lifecycle field', async () => {
@@ -296,7 +296,7 @@ describe('ki_list', () => {
     });
 
     expect(queryText(0)).toContain('EVAL lifecycle_status = "active"');
-    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("deleted")');
+    expect(queryText(0)).toContain('WHERE ki_status IN ("deleted")');
   });
 
   it('collapses revisions by id alone on a data stream', async () => {
@@ -528,6 +528,197 @@ describe('ki_list', () => {
     await expect(getKis(esClient, { dest: INDEX_DEST, size: 25 })).rejects.toBe(cause);
   });
 
+  describe('status filter', () => {
+    const emptyResponses = () =>
+      query
+        .mockResolvedValueOnce(rowsResponse([]))
+        .mockResolvedValueOnce(totalsResponse(0))
+        .mockResolvedValueOnce(bucketsResponse([]));
+
+    it('keeps the default filter free of the computed status', async () => {
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+      expect(queryText(0)).toContain('| WHERE lifecycle_status != "deleted"');
+      expect(queryText(0)).not.toContain('ki_status');
+      expect(queryText(0)).not.toContain('NOW()');
+    });
+
+    it('filters expired KIs on the computed status, only active KIs can expire', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: ['expired'] });
+
+      expect(queryText(0)).toContain(
+        [
+          'EVAL lifecycle_status = COALESCE(governance.lifecycle.status, "active")',
+          'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(expires_at <= NOW(), false), "expired", lifecycle_status)',
+          'WHERE ki_status IN ("expired")',
+        ].join('\n| ')
+      );
+      expect(queryText(1)).toContain('WHERE ki_status IN ("expired")');
+      expect(queryText(2)).toContain('WHERE ki_status IN ("expired")');
+    });
+
+    it('filters on active and expired together', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT));
+      emptyResponses();
+
+      await getKis(esClient, {
+        dest: INDEX_DEST,
+        size: 25,
+        lifecycleStatuses: ['active', 'expired'],
+      });
+
+      expect(queryText(0)).toContain('WHERE ki_status IN ("active", "expired")');
+    });
+
+    it('filters on all four statuses', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT));
+      emptyResponses();
+
+      await getKis(esClient, {
+        dest: INDEX_DEST,
+        size: 25,
+        lifecycleStatuses: ['active', 'deleted', 'verification_failed', 'expired'],
+      });
+
+      expect(queryText(0)).toContain(
+        'WHERE ki_status IN ("active", "deleted", "verification_failed", "expired")'
+      );
+    });
+
+    it('excludes expired KIs from active because the filter uses the computed status', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: ['active'] });
+
+      expect(queryText(0)).toContain('"expired", lifecycle_status)');
+      expect(queryText(0)).toContain('WHERE ki_status IN ("active")');
+      expect(queryText(0)).not.toContain('WHERE lifecycle_status IN');
+    });
+
+    it('never expires a KI when the index has no expires_at column', async () => {
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: ['expired'] });
+
+      expect(queryText(0)).toContain(
+        'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(false, false), "expired", lifecycle_status)'
+      );
+      expect(queryText(0)).not.toContain('NOW()');
+      expect(queryText(0).indexOf('EVAL ki_status')).toBeLessThan(
+        queryText(0).indexOf('EVAL expires_at = TO_STRING(NULL)')
+      );
+    });
+
+    it('keeps the stored lifecycle status in the response, not the computed one', async () => {
+      query.mockReset();
+      query
+        .mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT))
+        .mockResolvedValueOnce(
+          rowsResponseWithExpiresAt([
+            [BACKING_INDEX, 'ki-expired', 'faq', 'Old', null, '2020-01-01T00:00:00.000Z', 'active'],
+          ])
+        )
+        .mockResolvedValueOnce(totalsResponse(1))
+        .mockResolvedValueOnce(bucketsResponse([[1, 'faq']]));
+
+      const { kis } = await getKis(esClient, {
+        dest: INDEX_DEST,
+        size: 25,
+        lifecycleStatuses: ['expired'],
+      });
+
+      expect(kis).toEqual([expect.objectContaining({ lifecycle_status: 'active' })]);
+      expect(queryText(0)).toContain(
+        'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status'
+      );
+    });
+  });
+
+  describe('sort', () => {
+    const emptyResponses = () =>
+      query
+        .mockResolvedValueOnce(rowsResponse([]))
+        .mockResolvedValueOnce(totalsResponse(0))
+        .mockResolvedValueOnce(bucketsResponse([]));
+
+    it('sorts by lowercased title with missing titles last, after the type filter', async () => {
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, type: 'faq', sort: 'title' });
+
+      expect(queryText(0)).toContain(
+        [
+          'WHERE type == ?type',
+          'EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))',
+          'SORT title_sort ASC NULLS LAST, id ASC',
+          'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status',
+          'LIMIT 25',
+        ].join('\n| ')
+      );
+      expect(queryText(0)).not.toContain('revision_time DESC');
+      expect(queryText(1)).not.toContain('title_sort');
+      expect(queryText(2)).not.toContain('title_sort');
+    });
+
+    it('sorts by title when the index has no title column', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(['id', '@timestamp', 'type']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, sort: 'title' });
+
+      expect(queryText(0)).toContain(
+        [
+          'EVAL title = TO_STRING(NULL)',
+          'EVAL updated_at = TO_STRING(NULL)',
+          'EVAL expires_at = TO_STRING(NULL)',
+          'EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))',
+          'SORT title_sort ASC NULLS LAST, id ASC',
+        ].join('\n| ')
+      );
+    });
+
+    it('sorts newest first when sort is updated', async () => {
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, sort: 'updated' });
+
+      expect(queryText(0)).toContain('| SORT revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).not.toContain('title_sort');
+    });
+
+    it('sorts by id when the index has no timestamp column', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(['type', 'title']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+      expect(queryText(0)).toContain('| SORT id ASC\n| KEEP');
+    });
+
+    it('keeps the updated sort when a search query is set', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse([...ALL_FIELDS, 'description']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, query: 'refund' });
+
+      expect(queryText(0)).toContain('| SORT revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).not.toContain('_score');
+    });
+  });
+
   describe('probeColumns', () => {
     it('passes request options to the query', async () => {
       await expect(
@@ -568,22 +759,39 @@ describe('ki_list', () => {
 
     expect(query.mock.calls[1][0]).toEqual({
       query: expect.stringContaining(
-        'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+        'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO"}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
       ),
       params: [{ searchQuery: 'refund' }],
     });
-    expect(queryText(0)).toContain('METADATA _id, _index, _score');
-    expect(queryText(0)).toContain('SORT _score DESC, revision_time DESC, id ASC');
+    expect(queryText(0)).toContain('METADATA _id, _index\n');
+    expect(queryText(0)).not.toContain('_score');
+    expect(queryText(0)).toContain('SORT revision_time DESC, id ASC');
     expect(queryText(1)).toContain(
-      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO"}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
     );
     expect(queryText(2)).toContain(
-      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO"}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
     );
     expect(query.mock.calls[3][0]).toEqual({
       query: expect.stringContaining('| STATS count = COUNT(*) BY type'),
       params: [{ searchQuery: 'refund' }],
     });
+  });
+
+  it('sorts by title when a search query is set, never by relevance', async () => {
+    query.mockReset();
+    query
+      .mockResolvedValueOnce(probeResponse([...ALL_FIELDS, 'description']))
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await getKis(esClient, { dest: INDEX_DEST, size: 10, query: 'refund', sort: 'title' });
+
+    expect(queryText(0)).toContain(
+      '| EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))\n| SORT title_sort ASC NULLS LAST, id ASC\n| KEEP'
+    );
+    expect(queryText(0)).not.toContain('_score');
   });
 
   it('binds type and search params together on rows and totals', async () => {
