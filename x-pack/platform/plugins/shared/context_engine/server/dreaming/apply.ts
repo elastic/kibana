@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual, pick } from 'lodash';
 import pRetry from 'p-retry';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -29,7 +30,7 @@ import {
   type StoredKi,
 } from '../ai_indices/ki_revision';
 import { findLinkingRelationshipIds } from '../ai_indices/ki_relationships';
-import { softDeleteKi } from '../ai_indices/ki_write';
+import { isPersonEdited, softDeleteKi } from '../ai_indices/ki_write';
 import {
   accessPatternAttributes,
   accessPatternsOf,
@@ -68,7 +69,7 @@ export interface ApplyCounts {
 }
 
 export interface ApplyResult extends ApplyCounts {
-  /** Writes refused because the KI has different permissions than its memories. */
+  /** Writes refused: the KI has different permissions than its memories, or a person edited it. */
   rejected: Array<{ item: string; reason: string }>;
 }
 
@@ -142,6 +143,7 @@ const storedDocument = (
   writer: KiWriter
 ): StoredKi => {
   const now = new Date().toISOString();
+  const editedBy = current?.governance?.provenance?.edited_by;
   return {
     ...document,
     '@timestamp': now,
@@ -151,6 +153,7 @@ const storedDocument = (
       provenance: {
         created_by: current?.governance?.provenance?.created_by ?? writer,
         updated_by: writer,
+        ...(editedBy && { edited_by: editedBy }),
       },
       lifecycle: { status: 'active' },
     },
@@ -167,6 +170,21 @@ const batchPermissions = ({
   memoryPermissions,
 }: ApplyContext): KiPermissions | undefined =>
   derivedPermissions([...memoryPermissions.values()], spaceId);
+
+const SIGHTING_ATTRIBUTES = [OCCURRENCES_ATTRIBUTE, LAST_SEEN_AT_ATTRIBUTE];
+
+/** Keeps what a person-edited KI says, taking only the new sighting and references. */
+const keepPersonEdits = (
+  current: DreamedKi,
+  document: Omit<DreamedKi, 'governance'>
+): Omit<DreamedKi, 'governance'> | undefined => {
+  const attributes = { ...current.attributes, ...pick(document.attributes, SIGHTING_ATTRIBUTES) };
+  const { references } = document;
+  if (isEqual(attributes, current.attributes) && isEqual(references, current.references)) {
+    return undefined;
+  }
+  return { ...current, attributes, references };
+};
 
 const withDerivedPermissions =
   (
@@ -188,7 +206,9 @@ const withDerivedPermissions =
     if (current && !samePermissions(current.permissions, permissions)) {
       return 'rejected';
     }
-    const document = build(current);
+    const built = build(current);
+    const document =
+      built && current && isPersonEdited(current) ? keepPersonEdits(current, built) : built;
     return document && permissions ? { ...document, permissions } : document;
   };
 
@@ -407,7 +427,7 @@ const upsert = (context: ApplyContext, operation: UpsertOperation): Promise<Writ
   }
 };
 
-type DeleteResult = 'deleted' | 'skipped' | 'rejected';
+type DeleteResult = 'deleted' | 'skipped' | 'rejected' | 'person_edited';
 
 const deletable = async (
   context: ApplyContext,
@@ -425,8 +445,11 @@ const deletable = async (
   if (revision === undefined || hiddenFrom(context, revision)) {
     return 'skipped';
   }
-  const { permissions } = revision.source as DreamedKi;
-  return samePermissions(permissions, batchPermissions(context)) ? 'allowed' : 'rejected';
+  const source = revision.source as DreamedKi;
+  if (isPersonEdited(source)) {
+    return 'person_edited';
+  }
+  return samePermissions(source.permissions, batchPermissions(context)) ? 'allowed' : 'rejected';
 };
 
 const planDelete = async (
@@ -501,6 +524,8 @@ export const applyOperations = async (
           item: `delete ${operation.id}`,
           reason: "it has different permissions than this batch's memories",
         });
+      } else if (deleted === 'person_edited') {
+        result.rejected.push({ item: `delete ${operation.id}`, reason: 'a person edited it' });
       } else if (deleted === 'deleted') {
         result.deleted += 1;
       }

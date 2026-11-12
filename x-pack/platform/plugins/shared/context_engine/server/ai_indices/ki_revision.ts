@@ -22,7 +22,12 @@ export interface KiWriter {
 export interface StoredKi {
   id?: string;
   governance?: {
-    provenance?: { created_by?: KiWriter; updated_by?: KiWriter };
+    provenance?: {
+      created_by?: KiWriter;
+      updated_by?: KiWriter;
+      /** The person who last edited what the KI says, through the KI update API. */
+      edited_by?: KiWriter;
+    };
     lifecycle?: { status?: KiLifecycleStatus };
   };
   [key: string]: unknown;
@@ -41,7 +46,7 @@ export interface KiRevision {
 export interface KiRevisionChanges {
   updated_at: string;
   governance: {
-    provenance: { updated_by: KiWriter };
+    provenance: { updated_by: KiWriter; edited_by?: KiWriter };
     lifecycle?: { status: KiLifecycleStatus };
   };
   [key: string]: unknown;
