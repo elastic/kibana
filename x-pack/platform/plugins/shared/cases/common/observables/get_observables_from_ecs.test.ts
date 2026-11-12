@@ -282,15 +282,18 @@ describe('getObservablesFromEcsDataArray', () => {
     const description = 'Auto extracted observable';
 
     it('skips a field that is turned off, and reads a custom type with its pattern', () => {
-      const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-        {
-          key: 'employee-id',
-          label: 'Employee ID',
-          paths: [{ path: 'user.employee_id', enabled: true }],
-          valuePattern: '^E\\d{6}$',
-        },
-      ]);
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [{ key: 'employee-id', label: 'Employee ID' }],
+        [
+          { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+          {
+            key: 'employee-id',
+            paths: [{ path: 'user.employee_id', enabled: true }],
+            valuePattern: '^E\\d{6}$',
+          },
+        ]
+      );
 
       expect(
         getObservablesFromEcs(
@@ -310,12 +313,16 @@ describe('getObservablesFromEcsDataArray', () => {
     });
 
     it('skips an excluded value only on the field that excludes it', () => {
-      const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        {
-          key: 'observable-type-ipv4',
-          paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
-        },
-      ]);
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [],
+        [
+          {
+            key: 'observable-type-ipv4',
+            paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+          },
+        ]
+      );
 
       expect(
         getObservablesFromEcs(
@@ -334,12 +341,16 @@ describe('getObservablesFromEcsDataArray', () => {
     });
 
     it('compares excluded values exactly and with case', () => {
-      const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        {
-          key: 'observable-type-hostname',
-          paths: [{ path: 'host.name', enabled: true, excludedValues: ['localhost'] }],
-        },
-      ]);
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [],
+        [
+          {
+            key: 'observable-type-hostname',
+            paths: [{ path: 'host.name', enabled: true, excludedValues: ['localhost'] }],
+          },
+        ]
+      );
 
       expect(
         getObservablesFromEcs(
@@ -358,14 +369,11 @@ describe('getObservablesFromEcsDataArray', () => {
     });
 
     it('skips a value that is longer than the bound of the pattern', () => {
-      const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        {
-          key: 'any-id',
-          label: 'Any id',
-          paths: [{ path: 'user.id', enabled: true }],
-          valuePattern: '^a+$',
-        },
-      ]);
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [{ key: 'any-id', label: 'Any id' }],
+        [{ key: 'any-id', paths: [{ path: 'user.id', enabled: true }], valuePattern: '^a+$' }]
+      );
 
       expect(
         getObservablesFromEcs(
