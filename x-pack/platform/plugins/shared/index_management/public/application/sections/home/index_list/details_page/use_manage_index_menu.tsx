@@ -11,12 +11,15 @@ import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 
+import { EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Index } from '../../../../../../common';
 import {
   INDEX_OPEN,
+  LOOKUP_INDEX_MODE,
   MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX,
   MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX,
 } from '../../../../../../common/constants';
+import { resolveIndexMode } from '../../../../lib/index_mode_labels';
 import {
   clearCacheIndices as clearCacheIndicesRequest,
   closeIndices as closeIndicesRequest,
@@ -52,7 +55,7 @@ export function useManageIndexMenu({
 }: UseManageIndexMenuArgs): UseManageIndexMenuReturn {
   const {
     services: { extensionsService, notificationService },
-    plugins: { reindexService },
+    plugins: { reindexService, uiActions },
     core: { getUrlForApp },
     history,
     config: { enableIndexActions, isServerless },
@@ -201,6 +204,28 @@ export function useManageIndexMenu({
     }
   }, [navigateToIndicesList, indexNames, notificationService]);
 
+  const openLookupIndexEditor = useCallback(async () => {
+    if (!uiActions) {
+      return;
+    }
+
+    try {
+      await uiActions.executeTriggerActions(EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID, {
+        indexName: index.name,
+        doesIndexExist: true,
+        canEditIndex: true,
+        triggerSource: 'index_management_details',
+        onClose: async () => {
+          await reloadIndexDetails();
+        },
+      });
+    } catch (error) {
+      notificationService.showDangerToast(
+        error?.body?.message ?? error?.message ?? String(error)
+      );
+    }
+  }, [index.name, notificationService, reloadIndexDetails, uiActions]);
+
   const performExtensionAction = useCallback(
     async (
       requestMethod: (names: string[], http: HttpSetup) => Promise<void>,
@@ -222,8 +247,23 @@ export function useManageIndexMenu({
 
   const manageIndexItems = useMemo<AppMenuPopoverItem[]>(() => {
     const allOpen = index.status === INDEX_OPEN;
+    const isLookupIndex = resolveIndexMode(index.mode) === LOOKUP_INDEX_MODE;
     const items: AppMenuPopoverItem[] = [];
     let order = 0;
+
+    if (isLookupIndex && allOpen && uiActions) {
+      items.push({
+        id: 'editLookupIndex',
+        order: order++,
+        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.editLookupIndexLabel', {
+          defaultMessage: 'Edit lookup index',
+        }),
+        run: () => {
+          void openLookupIndexEditor();
+        },
+        testId: 'editLookupIndexMenuButton',
+      });
+    }
 
     if (allOpen && enableIndexActions) {
       items.push({
@@ -389,6 +429,8 @@ export function useManageIndexMenu({
     enableIndexActions,
     isServerless,
     reindexService,
+    uiActions,
+    openLookupIndexEditor,
     extensionsService.actions,
     reloadIndices,
     getUrlForApp,
