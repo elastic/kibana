@@ -22,14 +22,20 @@ export interface DestinationQueryRef extends DestinationRef {
 }
 
 /**
- * A component of the request that the unit has, ready to query. A processor or a source needs
- * nothing from the config yet, so its ref stays as the request sent it.
+ * A processor to query. Nothing from the config matters to it yet, so it is the ref of the
+ * request. It grows when it does, as `DestinationQueryRef` did with its type.
  */
-export type QueryRef = DestinationQueryRef | ProcessorRef | SourceRef;
+export type ProcessorQueryRef = ProcessorRef;
+
+/** A source to query. Like `ProcessorQueryRef`, it is the ref of the request for now. */
+export type SourceQueryRef = SourceRef;
+
+/** A component of the request that the unit has, ready to query. */
+export type QueryComponentRef = DestinationQueryRef | ProcessorQueryRef | SourceQueryRef;
 
 export interface ResolvedQueryRefs {
   /** The refs that the unit has, in the order of the request. */
-  queryable: QueryRef[];
+  queryable: QueryComponentRef[];
   /** The refs that the unit does not have, in the order of the request. */
   unqueryable: StreamsUnit.StatsComponentRef[];
 }
@@ -48,7 +54,7 @@ export const resolveQueryRefs = ({
   unit: StreamsUnit.Configuration;
 }): ResolvedQueryRefs => {
   /** The ref ready to query, or nothing when the unit does not have it. Only the lookup differs by kind. */
-  const resolveFromUnit = (ref: StreamsUnit.StatsComponentRef): QueryRef | undefined => {
+  const resolveFromUnit = (ref: StreamsUnit.StatsComponentRef): QueryComponentRef | undefined => {
     if (ref.kind === 'destination') {
       const destination = unit.destinations.find(({ id }) => id === ref.id);
       return destination && { ...ref, type: destination.type };
@@ -62,7 +68,7 @@ export const resolveQueryRefs = ({
     // A kind this API does not know has no query ref, and `defaultResults` gives it no result.
   };
 
-  const queryable: QueryRef[] = [];
+  const queryable: QueryComponentRef[] = [];
   const unqueryable: StreamsUnit.StatsComponentRef[] = [];
 
   for (const ref of refs) {
