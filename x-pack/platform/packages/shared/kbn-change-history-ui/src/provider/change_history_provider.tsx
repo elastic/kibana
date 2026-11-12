@@ -22,6 +22,7 @@ import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_previ
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { createChangeHistoryTelemetryReporter } from '../telemetry/create_change_history_telemetry_reporter';
 import type { ChangeHistoryScope } from '../types/change_history_scope';
+import type { ChangeHistoryCompareMode } from '../types/change_history_compare_mode';
 import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
 import { ChangeHistoryConfigContext } from './change_history_config_context';
 import { ChangeHistoryModalContext } from './change_history_modal_context';
@@ -36,6 +37,8 @@ export interface ChangeHistoryProviderProps {
   renderChanges?: ChangeHistoryChangesRenderFn;
   /** Called whenever the user selects a change in the timeline. */
   onSelectChange?: (item: ChangeHistoryListItem) => void;
+  /** Compare mode applied when a change is selected. Without it, no comparison is loaded until the user requests one. */
+  defaultCompareMode?: ChangeHistoryCompareMode;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
@@ -52,6 +55,7 @@ export const ChangeHistoryProvider = ({
   renderPreview,
   renderChanges,
   onSelectChange,
+  defaultCompareMode,
   renderChangesSummary,
   renderBadge,
   labels,
@@ -105,6 +109,7 @@ export const ChangeHistoryProvider = ({
       renderPreview,
       renderChanges,
       onSelectChange,
+      defaultCompareMode,
       renderChangesSummary,
       renderBadge,
       labels: {
@@ -118,6 +123,7 @@ export const ChangeHistoryProvider = ({
     }),
     [
       adapter,
+      defaultCompareMode,
       labels.previewBackLabel,
       labels.previewTitle,
       listPageSize,

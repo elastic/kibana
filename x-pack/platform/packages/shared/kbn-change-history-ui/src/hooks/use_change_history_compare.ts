@@ -21,7 +21,7 @@ export interface UseChangeHistoryCompareArgs {
   selectedChange?: ChangeHistoryDetail;
   selectedChangeId?: string;
   compareMode?: ChangeHistoryCompareMode;
-  /** When false, compare resolution and detail loads are skipped. Defaults to true. */
+  /** Compare resolution and detail loads are skipped until a compare mode is set. */
   enabled?: boolean;
 }
 
@@ -41,7 +41,7 @@ export const useChangeHistoryCompare = ({
 }: UseChangeHistoryCompareArgs): UseChangeHistoryCompareResult => {
   const endpoints = useMemo(
     () =>
-      enabled && selectedChangeId
+      enabled && selectedChangeId && compareMode
         ? resolveChangeHistoryCompareEndpoints(listItems, selectedChangeId, compareMode)
         : undefined,
     [compareMode, enabled, listItems, selectedChangeId]

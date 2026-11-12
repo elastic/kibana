@@ -40,10 +40,12 @@ const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
-  const { adapter, objectId, labels, supports, telemetry, onSelectChange } =
+  const { adapter, objectId, labels, supports, telemetry, onSelectChange, defaultCompareMode } =
     useChangeHistoryConfig();
   const { isOpen, closeModal } = useChangeHistoryModal();
   const modalTitleId = useGeneratedHtmlId();
+
+  const initialCompareMode = supports.compare ? defaultCompareMode : undefined;
 
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
   const [compareMode, setCompareMode] = useState<ChangeHistoryCompareMode | undefined>();
@@ -90,7 +92,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
     selectedChangeId,
     setSelectedChangeId,
     onAutoSelect: (item) => {
-      setCompareMode(undefined);
+      setCompareMode(initialCompareMode);
       reportChangeSelected(item, 'auto_latest');
     },
   });
@@ -98,22 +100,22 @@ export function ChangeHistoryModal(): JSX.Element | null {
   useEffect(() => {
     if (!isOpen) {
       setSelectedChangeId(undefined);
-      setCompareMode(undefined);
+      setCompareMode(initialCompareMode);
       setRestoreConfirmChangeId(undefined);
       lastReportedChangeIdBySourceRef.current = {};
       unlockSelectionDecision();
     }
-  }, [isOpen, unlockSelectionDecision]);
+  }, [initialCompareMode, isOpen, unlockSelectionDecision]);
 
   const handleSelectItem = useCallback(
     (item: ChangeHistoryListItem) => {
       lockSelectionDecision();
-      setCompareMode(undefined);
+      setCompareMode(initialCompareMode);
       setSelectedChangeId(item.id);
       reportChangeSelected(item, 'user_click');
       onSelectChange?.(item);
     },
-    [lockSelectionDecision, onSelectChange, reportChangeSelected]
+    [initialCompareMode, lockSelectionDecision, onSelectChange, reportChangeSelected]
   );
 
   const requestCompareToPrevious = useCallback(
