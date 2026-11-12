@@ -838,7 +838,7 @@ describe('refreshing a suite issue', () => {
       [
         'Still flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).',
         '',
-        'Newly flaky:',
+        'Newly flaky tests:',
         '',
         '- creates default alert, triggers on down status, and recovers',
       ].join('\n')
@@ -850,7 +850,7 @@ describe('refreshing a suite issue', () => {
         previous: shown(['a']),
       })
     ).toMatch(
-      /\n- `9\.2`: [^\n]+\n\nNewly flaky:\n\n- reverts breakdown, interval, and visibility on a saved session\n- persists hide\/show of the histogram on a saved session$/
+      /\n- `9\.2`: [^\n]+\n\nNewly flaky tests:\n\n- reverts breakdown, interval, and visibility on a saved session\n- persists hide\/show of the histogram on a saved session$/
     );
   });
 
@@ -894,7 +894,7 @@ describe('refreshing a suite issue', () => {
         [
           'Now flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).',
           '',
-          'Newly flaky:',
+          'Newly flaky tests:',
           '',
           '- creates default alert, triggers on down status, and recovers',
         ].join('\n')

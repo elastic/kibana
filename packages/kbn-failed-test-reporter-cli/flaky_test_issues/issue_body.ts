@@ -857,7 +857,7 @@ const neverFlaky = (previous: RecordedFlakySuiteIssueMetadata | undefined): bool
   previous !== undefined && previous['report.history'].length === 0;
 
 /**
- * `Newly flaky:` and a bullet per flaky test the issue has not shown, as many as the body's tests
+ * `Newly flaky tests:` and a bullet per flaky test the issue has not shown, as many as the body's tests
  * table, when it records the ones it has, or every flaky test when it has never been flaky.
  */
 const newlyFlakyList = (
@@ -874,7 +874,7 @@ const newlyFlakyList = (
   }
   const rest = newTests.length - MAX_TEST_ROWS;
   return [
-    'Newly flaky:',
+    'Newly flaky tests:',
     '',
     ...newTests.slice(0, MAX_TEST_ROWS).map(({ title }) => `- ${title}`),
     ...(rest > 0 ? ['', `and ${plural(rest, 'more test')}.`] : []),
