@@ -15,6 +15,7 @@ import type { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/a
 import {
   CASE_CONFIGURE_SAVED_OBJECT,
   MAX_LENGTH_PER_WORKFLOW_TAG,
+  OBSERVABLE_TYPE_AGENT_ID,
 } from '@kbn/cases-plugin/common/constants';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
@@ -348,6 +349,103 @@ export default ({ getService }: FtrProviderContext): void => {
         },
         400
       );
+    });
+
+    describe('observable type fields', () => {
+      const override = {
+        key: OBSERVABLE_TYPE_AGENT_ID.key,
+        paths: [{ path: 'agent.id', enabled: false, excludedValues: ['static-id'] }],
+      };
+      const customType = {
+        key: 'employee-id',
+        label: 'Employee ID',
+        valuePattern: '^E\\d{6}$',
+        paths: [{ path: 'user.employee_id', enabled: true }],
+      };
+
+      it('should patch a configuration with an override and a custom type with fields', async () => {
+        const configuration = await createConfiguration(supertest);
+
+        const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+          version: configuration.version,
+          observableTypes: [override, customType],
+        });
+
+        const expected = [{ ...override, label: OBSERVABLE_TYPE_AGENT_ID.label }, customType];
+        expect(updatedConfiguration.observableTypes).to.eql(expected);
+
+        const [persisted] = await getConfiguration({ supertest });
+        expect(persisted.observableTypes).to.eql(expected);
+      });
+
+      it('should keep the fields when another attribute is patched', async () => {
+        const configuration = await createConfiguration(
+          supertest,
+          getConfigurationRequest({ overrides: { observableTypes: [override, customType] } })
+        );
+
+        await updateConfiguration(supertest, configuration.id, {
+          version: configuration.version,
+          closure_type: 'close-by-pushing',
+        });
+
+        const [persisted] = await getConfiguration({ supertest });
+        expect(persisted.observableTypes).to.eql([
+          { ...override, label: OBSERVABLE_TYPE_AGENT_ID.label },
+          customType,
+        ]);
+      });
+
+      it('should remove the fields of an override when the request does not send it again', async () => {
+        const configuration = await createConfiguration(
+          supertest,
+          getConfigurationRequest({ overrides: { observableTypes: [override, customType] } })
+        );
+
+        const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+          version: configuration.version,
+          observableTypes: [customType],
+        });
+
+        expect(updatedConfiguration.observableTypes).to.eql([customType]);
+      });
+
+      const rejectedRequests: Array<[string, Record<string, unknown>[]]> = [
+        ['a custom type without a label', [{ key: 'employee-id' }]],
+        [
+          'a value pattern on a built-in type',
+          [{ key: OBSERVABLE_TYPE_AGENT_ID.key, valuePattern: '^a$' }],
+        ],
+        ['a value pattern that does not compile', [{ ...customType, valuePattern: '(' }]],
+        [
+          'duplicated fields in one entry',
+          [
+            {
+              ...customType,
+              paths: [
+                { path: 'user.employee_id', enabled: true },
+                { path: 'user.employee_id', enabled: false },
+              ],
+            },
+          ],
+        ],
+      ];
+
+      for (const [name, observableTypes] of rejectedRequests) {
+        it(`should not patch a configuration with ${name}`, async () => {
+          const configuration = await createConfiguration(supertest);
+
+          await updateConfiguration(
+            supertest,
+            configuration.id,
+            {
+              version: configuration.version,
+              observableTypes: observableTypes as ConfigurationPatchRequest['observableTypes'],
+            },
+            400
+          );
+        });
+      }
     });
 
     it('should patch a configuration with workflowTags', async () => {

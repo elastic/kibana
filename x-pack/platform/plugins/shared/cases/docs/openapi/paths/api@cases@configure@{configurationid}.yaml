@@ -21,6 +21,8 @@ patch:
         examples:
           updateCaseConfigurationRequest:
             $ref: '../components/examples/update_case_configuration_request.yaml'
+          updateCaseConfigurationObservableTypesRequest:
+            $ref: '../components/examples/update_case_configuration_observable_types_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.

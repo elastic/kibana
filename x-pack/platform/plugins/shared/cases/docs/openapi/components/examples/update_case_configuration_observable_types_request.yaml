@@ -1,0 +1,19 @@
+summary: Change the observable types that auto-extraction reads.
+description: >
+  The first entry turns off the `agent.id` field of the built-in agent ID type and skips one static value.
+  The second entry is a custom type with one field and a value pattern.
+value:
+  version: WzExOSw0XQ==
+  observableTypes:
+    - key: observable-type-agent-id
+      paths:
+        - path: agent.id
+          enabled: false
+          excludedValues:
+            - static-integration-id
+    - key: employee-id
+      label: Employee ID
+      valuePattern: ^E\d{6}$
+      paths:
+        - path: user.employee_id
+          enabled: true
