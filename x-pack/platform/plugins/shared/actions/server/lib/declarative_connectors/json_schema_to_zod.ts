@@ -30,9 +30,14 @@ const stripFieldMeta = (definition: DeclarativeJsonSchema): Record<string, unkno
   };
 };
 
-const applyFieldMeta = (schema: z.ZodType, ui: DeclarativeFieldMeta | undefined): z.ZodType => {
+const applyFieldMeta = (
+  schema: z.ZodType,
+  ui: DeclarativeFieldMeta | undefined,
+  description?: string
+): z.ZodType => {
+  let result = description === undefined ? schema : schema.describe(description);
   if (!ui) {
-    return schema;
+    return result;
   }
   const meta: BaseMetadata = {};
   if (ui.label !== undefined) {
@@ -50,23 +55,50 @@ const applyFieldMeta = (schema: z.ZodType, ui: DeclarativeFieldMeta | undefined)
   if (ui.validate?.allowedHosts !== undefined) {
     meta.validate = { allowedHosts: ui.validate.allowedHosts };
   }
-  return setMeta(schema, meta);
+  if (description !== undefined) {
+    meta.description = description;
+  }
+  result = setMeta(result, meta);
+  return result;
 };
 
 const applyIpv4Format = (schema: z.ZodString): z.ZodType =>
   schema.refine((value) => IPV4_PATTERN.test(value), 'Invalid IPv4 address');
 
 const convertLeaf = (definition: DeclarativeJsonSchema): z.ZodType => {
-  const converted = fromJSONSchema(stripFieldMeta(definition));
+  // fromJSONSchema handles enum before type-specific constraints, and its URI
+  // parser returns early before applying string length constraints. Convert
+  // the base type first, then add these constraints in this adapter.
+  const schemaDefinition = stripFieldMeta(definition);
+  const enumValues = definition.enum;
+  delete schemaDefinition.enum;
+  if (definition.type === 'string' && definition.format === 'uri') {
+    delete schemaDefinition.format;
+  }
+
+  const converted = fromJSONSchema(schemaDefinition);
   if (converted === undefined) {
     throw new DeclarativeConnectorSpecError(
       `Could not convert declarative JSON Schema of type "${definition.type}" to Zod.`
     );
   }
-  if (definition.type === 'string' && definition.format === 'ipv4') {
-    return applyIpv4Format(converted as z.ZodString);
+  let result = converted;
+  if (definition.type === 'string' && definition.format === 'uri') {
+    result = (result as z.ZodString).url();
   }
-  return converted;
+  if (definition.type === 'string' && definition.format === 'ipv4') {
+    result = applyIpv4Format(result as z.ZodString);
+  }
+  if (enumValues !== undefined) {
+    const enumSchema = fromJSONSchema({ type: definition.type, enum: enumValues });
+    if (enumSchema === undefined) {
+      throw new DeclarativeConnectorSpecError(
+        `Could not convert declarative JSON Schema enum of type "${definition.type}" to Zod.`
+      );
+    }
+    result = z.intersection(result, enumSchema);
+  }
+  return result;
 };
 
 /** Converts a declarative JSON Schema object into a Zod schema. */
@@ -82,15 +114,11 @@ export const declarativeJsonSchemaToZod = (definition: DeclarativeJsonSchema): z
       if (property.default !== undefined) {
         field = field.default(property.default);
       }
-      shape[key] = applyFieldMeta(field, property.meta);
+      shape[key] = applyFieldMeta(field, property.meta, property.description);
     }
     const objectSchema =
-      definition.additionalProperties === false
-        ? z.strictObject(shape)
-        : definition.additionalProperties === true
-        ? z.looseObject(shape)
-        : z.object(shape);
-    return applyFieldMeta(objectSchema, definition.meta);
+      definition.additionalProperties === false ? z.strictObject(shape) : z.looseObject(shape);
+    return applyFieldMeta(objectSchema, definition.meta, definition.description);
   }
 
   if (definition.type === 'array') {
@@ -99,8 +127,12 @@ export const declarativeJsonSchemaToZod = (definition: DeclarativeJsonSchema): z
         'Declarative array schemas require an items definition.'
       );
     }
-    return applyFieldMeta(z.array(declarativeJsonSchemaToZod(definition.items)), definition.meta);
+    return applyFieldMeta(
+      z.array(declarativeJsonSchemaToZod(definition.items)),
+      definition.meta,
+      definition.description
+    );
   }
 
-  return applyFieldMeta(convertLeaf(definition), definition.meta);
+  return applyFieldMeta(convertLeaf(definition), definition.meta, definition.description);
 };

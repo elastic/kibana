@@ -6,7 +6,7 @@
  */
 
 import { getMeta } from '@kbn/connector-specs';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import type { DeclarativeJsonSchema } from './types';
 import { loadFixture } from './__fixtures__/load_fixture';
 import { declarativeJsonSchemaToZod } from './json_schema_to_zod';
@@ -63,6 +63,101 @@ describe('declarativeJsonSchemaToZod', () => {
     expect(() => schema.parse({ mode: 'fast', name: 'a' })).toThrow();
   });
 
+  it('combines enum values with string and numeric constraints', () => {
+    const schema = declarativeJsonSchemaToZod({
+      type: 'object',
+      additionalProperties: false,
+      required: ['name', 'count'],
+      properties: {
+        name: { type: 'string', enum: ['a', 'abc'], minLength: 2, maxLength: 3 },
+        count: { type: 'integer', enum: [1, 5, 10], minimum: 2, maximum: 9 },
+      },
+    });
+
+    expect(schema.parse({ name: 'abc', count: 5 })).toEqual({ name: 'abc', count: 5 });
+    expect(() => schema.parse({ name: 'a', count: 5 })).toThrow();
+    expect(() => schema.parse({ name: 'abc', count: 1 })).toThrow();
+    expect(() => schema.parse({ name: 'toolong', count: 5 })).toThrow();
+    expect(JSON.stringify(z.toJSONSchema(schema))).toContain('"enum":["a","abc"]');
+  });
+
+  it('combines URI, IPv4, and date-time formats with supported constraints', () => {
+    const schema = declarativeJsonSchemaToZod({
+      type: 'object',
+      additionalProperties: false,
+      required: ['url', 'ip', 'timestamp'],
+      properties: {
+        url: { type: 'string', format: 'uri', minLength: 8, maxLength: 12 },
+        ip: { type: 'string', format: 'ipv4', enum: ['1.2.3.4', 'not-ip'] },
+        timestamp: {
+          type: 'string',
+          format: 'date-time',
+          enum: ['2024-01-01T00:00:00Z', 'not-a-date'],
+          minLength: 20,
+        },
+      },
+    });
+
+    expect(
+      schema.parse({ url: 'https://a.co', ip: '1.2.3.4', timestamp: '2024-01-01T00:00:00Z' })
+    ).toEqual({ url: 'https://a.co', ip: '1.2.3.4', timestamp: '2024-01-01T00:00:00Z' });
+    expect(
+      z.toJSONSchema(declarativeJsonSchemaToZod({ type: 'string', format: 'uri', maxLength: 12 }))
+    ).toMatchObject({ type: 'string', format: 'uri', maxLength: 12 });
+    expect(() =>
+      schema.parse({ url: 'https://a.co/long', ip: '1.2.3.4', timestamp: '2024-01-01T00:00:00Z' })
+    ).toThrow();
+    expect(() =>
+      schema.parse({ url: 'https://a.co', ip: 'not-ip', timestamp: '2024-01-01T00:00:00Z' })
+    ).toThrow();
+    expect(() =>
+      schema.parse({ url: 'https://a.co', ip: '1.2.3.4', timestamp: 'not-a-date' })
+    ).toThrow();
+  });
+
+  it('preserves descriptions after optional and default wrappers', () => {
+    const schema = declarativeJsonSchemaToZod({
+      type: 'object',
+      description: 'Root description',
+      properties: {
+        optional: { type: 'string', description: 'Optional field description' },
+        defaulted: {
+          type: 'string',
+          description: 'Default field description',
+          default: 'value',
+        },
+        nested: {
+          type: 'array',
+          description: 'Array description',
+          items: { type: 'object', description: 'Item description' },
+        },
+      },
+    }) as z.ZodObject;
+
+    expect(schema.description).toBe('Root description');
+    expect(schema.shape.optional.description).toBe('Optional field description');
+    expect(schema.shape.defaulted.description).toBe('Default field description');
+    expect(schema.shape.nested.description).toBe('Array description');
+    expect(
+      (((schema.shape.nested as z.ZodOptional).unwrap() as z.ZodArray).element as z.ZodObject)
+        .description
+    ).toBe('Item description');
+  });
+
+  it('preserves additional properties when additionalProperties is omitted', () => {
+    const schema = declarativeJsonSchemaToZod({
+      type: 'object',
+      properties: {
+        nested: { type: 'object', properties: { known: { type: 'boolean' } } },
+      },
+    });
+
+    expect(schema.parse({ extra: 'preserved', nested: { known: true, other: 42 } })).toEqual({
+      extra: 'preserved',
+      nested: { known: true, other: 42 },
+    });
+  });
+
   it('converts reportIp categories to an array of integers', () => {
     const schema = declarativeJsonSchemaToZod(connector.actions.reportIp.input);
 
@@ -91,6 +186,7 @@ describe('declarativeJsonSchemaToZod', () => {
         validate: { allowedHosts: true },
       })
     );
+    expect(schema.shape.baseUrl.description).toBe('AbuseIPDB API base URL');
   });
 
   it('rejects a non-IPv4 ipAddress and accepts a valid one', () => {
