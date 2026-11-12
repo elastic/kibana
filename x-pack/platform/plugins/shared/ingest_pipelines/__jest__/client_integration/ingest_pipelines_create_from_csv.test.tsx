@@ -97,7 +97,9 @@ describe('<PipelinesCreateFromCsv />', () => {
 
         expect(exists('errorCallout')).toBe(true);
         expect(find('errorCallout').text()).toContain('File too large');
-        expect(find('errorCallout').text()).toContain('File is greater than allowed size of 10 MB.');
+        expect(find('errorCallout').text()).toContain(
+          'File is greater than allowed size of 10 MB.'
+        );
         expect(readFile).not.toHaveBeenCalled();
         expect(httpSetup.post).toHaveBeenCalledTimes(postCallsBefore);
       });
