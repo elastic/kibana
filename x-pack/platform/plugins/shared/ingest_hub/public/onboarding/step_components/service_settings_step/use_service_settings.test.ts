@@ -1108,6 +1108,33 @@ describe('useServiceSettings — integration name and description', () => {
     expect(result.current.isReady).toBe(false);
   });
 
+  it('is not ready with an invalid condition in agent-based mode', async () => {
+    mockServices([policyService], 'agent_based');
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
+    expect(result.current.conditionErrors).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} == "linux"'));
+    expect(result.current.conditionErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('ignores a condition kept from agent-based mode under managed integration', async () => {
+    mockServices([policyService], 'managed_integration');
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
+
+    expect(result.current.conditionErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
   it('requires a name for ECF-only selections too', () => {
     mockServices([ecfOnlyService]);
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
@@ -1159,6 +1186,50 @@ describe('useServiceSettings — integration name and description', () => {
       expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
         integrationName: 'aws-1',
         description: null,
+      });
+    });
+
+    it('leaves the switch to the deploy, so it stays paired with the namespace', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setNamespace('prod'));
+      act(() => result.current.setDedicatedNamespaceTemplates(true));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment.mock.calls[0][1]).not.toHaveProperty(
+        'dedicatedNamespaceTemplates'
+      );
+    });
+
+    describe('turning the switch off', () => {
+      it('is saved at once on an existing deployment, so reopening it does not turn the switch back on', async () => {
+        withDeployment('dep-1');
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
+
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).toHaveBeenCalledTimes(1);
+        expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+          dedicatedNamespaceTemplates: false,
+        });
+      });
+
+      it('writes nothing before the first deploy has created the record', async () => {
+        withDeployment(undefined);
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
       });
     });
 
@@ -1280,5 +1351,81 @@ describe('useServiceSettings — proxy URL', () => {
 
     expect(result.current.proxyUrlError).toBeUndefined();
     expect(result.current.isReady).toBe(true);
+  });
+});
+
+describe('useServiceSettings — dedicated index template choice', () => {
+  const makeService = (id: string) =>
+    makeEntry(id, {
+      dataStreams: [id],
+      inputs: ['aws-s3'],
+      defaultEnabledInputs: ['aws-s3'],
+      varDefsByInput: {},
+      varDefsByDataStream: {
+        [id]: { inputs: ['aws-s3'], defaultEnabledInputs: ['aws-s3'], varDefsByInput: {} },
+      },
+    });
+  const fields = { svc_a: { enabledInputs: ['aws-s3'], varsByInput: {} } };
+
+  beforeEach(() => {
+    mockUseSessionStorage.mockImplementation((_key: string, initial: unknown) => useState(initial));
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svc_a', 'svc_b'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map([
+        ['svc_a', makeService('svc_a')],
+        ['svc_b', makeService('svc_b')],
+      ]),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+  });
+
+  it('writes the choice to every service of the policy in one update', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a', fields, ['svc_a'], undefined, undefined, {
+        instanceIds: ['svc_a', 'svc_b'],
+        enabled: false,
+      })
+    );
+
+    expect(result.current.getServiceVars('svc_a').createDatasetTemplates).toBe(false);
+    expect(result.current.getServiceVars('svc_b').createDatasetTemplates).toBe(false);
+  });
+
+  it('keeps the choice when the fields are saved again without changing it', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a', fields, ['svc_a'], undefined, undefined, {
+        instanceIds: ['svc_a'],
+        enabled: false,
+      })
+    );
+
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', fields, ['svc_a']));
+
+    expect(result.current.getServiceVars('svc_a').createDatasetTemplates).toBe(false);
+  });
+
+  it('leaves a service outside the policy alone', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a', fields, ['svc_a'], undefined, undefined, {
+        instanceIds: ['svc_a'],
+        enabled: false,
+      })
+    );
+
+    expect(result.current.getServiceVars('svc_b').createDatasetTemplates).toBeUndefined();
+  });
+
+  it('gives a duplicate its own choice', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], undefined, false));
+
+    expect(result.current.getServiceVars('svc_a__dup-1').createDatasetTemplates).toBe(false);
+    expect(result.current.getServiceVars('svc_a').createDatasetTemplates).toBeUndefined();
   });
 });

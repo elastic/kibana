@@ -26,7 +26,7 @@ import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range
 import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
 
 // Mock the usePerformanceContext hook
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
   }),

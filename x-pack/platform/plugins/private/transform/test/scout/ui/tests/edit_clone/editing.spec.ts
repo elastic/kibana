@@ -67,8 +67,8 @@ const assertUpdatedTransform = async (
   await assertTransformRow(transformManagement, config.transform_id, {
     description: UPDATED_DESCRIPTION,
     type,
-    status: 'stopped',
-    mode: 'batch',
+    status: 'Stopped',
+    execution: '100%',
     progress: 100,
     health: 'Healthy',
   });
@@ -113,7 +113,7 @@ test.describe('Edit transform', { tag: tags.deploymentAgnostic }, () => {
     });
 
     await test.step('saves the transform and shows the update', async () => {
-      await assertUpdatedTransform(transformManagement, pivotConfig, 'pivot');
+      await assertUpdatedTransform(transformManagement, pivotConfig, 'Pivot');
       await expect(transformManagement.getExpandedRowTabContent('Json')).not.toContainText(
         'retention_policy'
       );
@@ -129,7 +129,7 @@ test.describe('Edit transform', { tag: tags.deploymentAgnostic }, () => {
     });
 
     await test.step('saves the transform and keeps its retention policy', async () => {
-      await assertUpdatedTransform(transformManagement, latestConfig, 'latest');
+      await assertUpdatedTransform(transformManagement, latestConfig, 'Latest');
       await expect(transformManagement.getExpandedRowTabContent('Json')).toContainText(
         'retention_policy'
       );

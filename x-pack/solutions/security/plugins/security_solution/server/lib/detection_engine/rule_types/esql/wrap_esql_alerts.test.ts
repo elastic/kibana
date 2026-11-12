@@ -82,4 +82,36 @@ describe('wrapSuppressedEsqlAlerts', () => {
 
     expect(alerts).toHaveLength(3);
   });
+
+  describe('reserved metadata columns', () => {
+    const getEventWithIgnored = (ignored: string) => {
+      const doc = sampleDocNoSortIdWithTimestamp(docId);
+      return { ...doc, _source: { ...doc._source, _ignored: ignored } };
+    };
+
+    test('should not store reserved metadata fields in the alert', () => {
+      const alerts = wrapEsqlAlerts({
+        sharedParams,
+        events: [getEventWithIgnored('host.name')],
+        isRuleAggregating: false,
+        expandedFields: undefined,
+      });
+
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0]._source).not.toHaveProperty('_ignored');
+    });
+
+    test('should use the values of reserved metadata fields to generate the ids of expanded rows', () => {
+      const alerts = wrapEsqlAlerts({
+        sharedParams,
+        events: [getEventWithIgnored('host.name'), getEventWithIgnored('agent.name')],
+        isRuleAggregating: false,
+        expandedFields: ['_ignored'],
+      });
+
+      expect(alerts).toHaveLength(2);
+      expect(alerts[0]._id).not.toEqual(alerts[1]._id);
+      alerts.forEach((alert) => expect(alert._source).not.toHaveProperty('_ignored'));
+    });
+  });
 });

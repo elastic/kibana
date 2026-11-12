@@ -16,6 +16,7 @@ export const familyValues = [
   'host_isolation_exceptions',
   'trusted_devices',
   'endpoint_exceptions',
+  'custom_yara_signatures',
 ] as const;
 
 export const familySchema = lazySchema(() => z.enum(familyValues));
@@ -28,6 +29,7 @@ export const LIST_ID_BY_FAMILY = {
   host_isolation_exceptions: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
   trusted_devices: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
   endpoint_exceptions: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+  custom_yara_signatures: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
 } as const satisfies Record<Family, string>;
 
 export const FAMILY_BY_LIST_ID = {
@@ -37,6 +39,7 @@ export const FAMILY_BY_LIST_ID = {
   [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: 'host_isolation_exceptions',
   [ENDPOINT_ARTIFACT_LISTS.trustedDevices.id]: 'trusted_devices',
   [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: 'endpoint_exceptions',
+  [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: 'custom_yara_signatures',
 } as const;
 
 export const artifactListIdSchema = lazySchema(() => z.enum(LIST_ID_BY_FAMILY));

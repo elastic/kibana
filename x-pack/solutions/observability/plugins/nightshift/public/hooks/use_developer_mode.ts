@@ -38,14 +38,14 @@ export const useDeveloperMode = (): UseDeveloperModeResult => {
         if (!wasSaved) {
           throw new Error(
             i18n.translate('xpack.nightshift.settings.developerModeSaveFailedErrorMessage', {
-              defaultMessage: 'The Nightshift developer mode setting could not be saved.',
+              defaultMessage: 'The nightshift developer mode setting could not be saved.',
             })
           );
         }
       } catch (error) {
         notifications.toasts.addDanger({
           title: i18n.translate('xpack.nightshift.settings.developerModeSaveFailedTitle', {
-            defaultMessage: 'Unable to update Nightshift developer mode',
+            defaultMessage: 'Unable to update nightshift developer mode',
           }),
           text: getFormattedError(error).message,
         });
