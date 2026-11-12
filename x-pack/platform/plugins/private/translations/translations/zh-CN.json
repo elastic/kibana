@@ -18991,7 +18991,6 @@
     "xpack.alertingV2.signalOverview.statTotalFirings": "事件合计",
     "xpack.alertingV2.signalOverview.title": "规则事件",
     "xpack.alertingV2.sourceRuleSummaryFlyout.classicRulesBadge": "经典",
-    "xpack.alertingV2.sourceRuleSummaryFlyout.close": "关闭",
     "xpack.alertingV2.sourceRuleSummaryFlyout.closeButton": "关闭",
     "xpack.alertingV2.sourceRuleSummaryFlyout.createdBy": "创建者",
     "xpack.alertingV2.sourceRuleSummaryFlyout.createdDate": "创建日期",
