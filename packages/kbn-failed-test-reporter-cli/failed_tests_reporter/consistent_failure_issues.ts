@@ -37,6 +37,7 @@ import {
 import { FAILED_TEST_LABEL, issueLabels } from '../flaky_test_issues/reporter';
 import { getScoutTestId, getTestFilePath, isScoutFailure } from './failure_identity';
 import {
+  breakSuiteMetadata,
   failingPostedAt,
   failingSuiteIssueTitle,
   postedAtKey,
@@ -343,9 +344,10 @@ export const reportConsistentFailureIssues = async (
    * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
    * of the last post is read from GitHub as it is now, as other jobs of the build find the same
    * break, and recorded once the comment is posted: a comment that failed isn't taken as posted,
-   * and the next build posts it. The per-test issues `replacing` join the body's "Previously
-   * tracked in" line, and the post names them, even within `POST_INTERVAL_MS`: they are closed
-   * after it, so one still open was never named.
+   * and the next build posts it. The break's tests, branch and pipeline are recorded with it, for
+   * `/skip`. The per-test issues `replacing` join the body's "Previously tracked in" line, and the
+   * post names them, even within `POST_INTERVAL_MS`: they are closed after it, so one still open
+   * was never named.
    */
   const postBreak = async (
     suite: FailingSuite,
@@ -373,7 +375,10 @@ export const reportConsistentFailureIssues = async (
     }
     const newBody = updateIssueMetadata(
       listReplacedIssues(body, replacing),
-      { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
+      {
+        ...breakSuiteMetadata(body, suite, build),
+        'failing.postedAt': { ...postedAt, [key]: now.toISOString() },
+      },
       FLAKY_TEST_SUITE_METADATA_PREFIX
     );
     await github.addIssueComment(
