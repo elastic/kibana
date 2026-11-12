@@ -7,6 +7,7 @@
 
 jest.mock('../dreaming/trace_rounds');
 
+import { DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS } from '../../common/step_types/read_trace_transcripts';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import { readTraceTranscripts } from '../dreaming/trace_rounds';
@@ -56,7 +57,7 @@ describe('readTraceTranscripts step', () => {
       after: 'trace-1',
       until: '2026-11-11T13:15:00.000Z',
       size: 20,
-      maxTokens: 2_000_000,
+      maxTokens: DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
     });
   });
 

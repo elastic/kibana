@@ -18,10 +18,10 @@ export const MAX_TRACE_TRANSCRIPTS_READ_SIZE = 2000;
 export const DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE = 50;
 /** The most a read holds, in estimated tokens, across all its batches. */
 export const MAX_TRACE_TRANSCRIPTS_READ_TOKENS = 10_000_000;
-export const DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS = 2_000_000;
+export const DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS = 600_000;
 /** The most one batch holds, in estimated tokens: what one model call reads. */
 export const MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS = 1_000_000;
-export const DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS = 500_000;
+export const DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS = 100_000;
 /** Rounds that ended this recently are left for the next run: their spans may still be exporting. */
 export const DEFAULT_TRACE_SETTLE_MINUTES = 5;
 const MAX_TIMESTAMP_LENGTH = 64;

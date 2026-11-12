@@ -15,10 +15,18 @@ import {
 import type { AccessPattern, DreamChangeSet } from '../../common/step_types/apply_dream_changes';
 import { baseContent } from './access_patterns';
 import { citedMemoryIds, kindOf, type DreamedKi, type DreamedKiKind } from './dreamed_ki';
-import { batchKeyOf, entityId, factId } from './ids';
+import { batchKeyOf, entityId, factId, TRACE_ROUND_ID_PREFIX } from './ids';
 import { audienceKeyOf, type KiPermissions } from './permissions';
 
 const NEW_REF_PREFIX = 'new:';
+/** How fact ids start: a ref like it that names no existing fact is a made-up id, not a new key. */
+const FACT_ID_PREFIX = 'fact-';
+
+/** The id of a memory the model was shown: as cited, or a round cited without its `trace:` prefix. */
+const shownIdOf = (id: string, shown: ReadonlySet<string>): string =>
+  !shown.has(id) && shown.has(`${TRACE_ROUND_ID_PREFIX}${id}`)
+    ? `${TRACE_ROUND_ID_PREFIX}${id}`
+    : id;
 
 /** The fact and entity types the model may write. */
 export interface DreamingVocabulary {
@@ -122,7 +130,7 @@ export const resolveChangeSet = (
 
   const resolveSources = (ids: readonly string[] | undefined, current?: DreamedKi): string[] => {
     const allowed = new Set([...memories.keys(), ...(current ? citedMemoryIds(current) : [])]);
-    const sources = [...new Set(ids ?? [])];
+    const sources = [...new Set((ids ?? []).map((id) => shownIdOf(id, allowed)))];
     const unknown = sources.filter((id) => !allowed.has(id));
     if (unknown.length > 0) {
       reject(`cites memories it was not shown: ${unknown.join(', ')}`);
@@ -219,7 +227,7 @@ export const resolveChangeSet = (
         operations.push({ op: 'delete', id: fact.ref });
         return;
       }
-      if (!current && !fact.ref.startsWith(NEW_REF_PREFIX)) {
+      if (!current && !fact.ref.startsWith(NEW_REF_PREFIX) && fact.ref.startsWith(FACT_ID_PREFIX)) {
         reject(`'${fact.ref}' is neither an existing fact nor a new key`);
       }
       const type =
