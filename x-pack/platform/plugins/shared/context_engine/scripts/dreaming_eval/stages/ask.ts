@@ -8,7 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import pLimit from 'p-limit';
-import { answerAgentOf, runDirOf } from '../config';
+import { answerAgentOf, destOf, runDirOf } from '../config';
 import type { StageContext } from '../context';
 import { writeJson } from '../download';
 import type { AnswerJudgement } from '../judge';
@@ -22,7 +22,8 @@ import { askJudge, resolveJudgeConnectorId } from '../llm';
 import type { Scores } from '../report';
 import { describeScore, scoresOf, scoreTables, shortQuestion } from '../report';
 import type { EvalTarget } from '../types';
-import { targetsOf } from './evaluate';
+import { kiSetsOf, targetsOf } from './evaluate';
+import { restoreDreamedKis } from './run';
 
 const DYNAMIC_TOOL = /execute_dynamic_tool$/;
 
@@ -46,6 +47,8 @@ export interface ToolCallSummary {
 
 export interface AnswerResult extends AnswerJudgement {
   target: EvalTarget;
+  /** The sample whose KIs the agent had, when samples ran one at a time. */
+  sample?: string;
   answer: string;
   conversationId?: string;
   toolCalls: ToolCallSummary[];
@@ -113,9 +116,63 @@ export const answersMarkdown = (evaluation: AnswerEvaluation): string => {
   ].join('\n');
 };
 
+/** Puts a target's question to the agent, and judges its answer. */
+const askOne = async (
+  context: StageContext,
+  agentId: string,
+  judgeConnectorId: string,
+  target: EvalTarget
+): Promise<AnswerResult> => {
+  const { config, kibana } = context;
+  const started = Date.now();
+  let answer = '';
+  let conversationId: string | undefined;
+  let toolCalls: ToolCallSummary[] = [];
+  let judgement: AnswerJudgement;
+  try {
+    const { data } = await kibana<ConverseResponse>(
+      'POST',
+      '/api/agent_builder/converse',
+      {
+        agent_id: agentId,
+        input: questionFor(target),
+        ...(config.ask.connector_id && { connector_id: config.ask.connector_id }),
+      },
+      { timeoutMs: config.ask.timeout_minutes * 60_000 }
+    );
+    answer = data.response?.message ?? '';
+    conversationId = data.conversation_id;
+    toolCalls = toolCallsOf(data.steps);
+    const judged = await askJudge<AnswerJudgement>({
+      context,
+      connectorId: judgeConnectorId,
+      system: ANSWER_SYSTEM_PROMPT,
+      prompt: answerJudgePrompt(target, answer),
+      parse: (content) => {
+        const parsed = parseAnswerJudgement(content);
+        return parsed.verdict === 'error' ? { error: parsed.reason } : parsed;
+      },
+    });
+    judgement = 'error' in judged ? { verdict: 'error', reason: judged.error } : judged;
+  } catch (error) {
+    judgement = {
+      verdict: 'error',
+      reason: `The agent did not answer: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+  return {
+    target,
+    answer,
+    conversationId,
+    toolCalls,
+    durationMs: Date.now() - started,
+    ...judgement,
+  };
+};
+
 /** Puts each target's question to the AI index's answer agent, and judges the answers. */
 export const runAsk = async (context: StageContext): Promise<void> => {
-  const { config, kibana, log, runId } = context;
+  const { config, esClient, log, runId } = context;
   const judgeConnectorId = await resolveJudgeConnectorId(context);
   const limit = pLimit(config.ask.concurrency);
   for (const aiIndex of config.ai_indices.filter(({ id }) => context.aiIndexIds.includes(id))) {
@@ -124,65 +181,35 @@ export const runAsk = async (context: StageContext): Promise<void> => {
       continue;
     }
     const agent = answerAgentOf(aiIndex);
-    const targets = targetsOf(context, aiIndex);
-    log.info(`${aiIndex.id}: asking ${agent.id} ${targets.length} questions`);
+    const dir = runDirOf(config, runId, aiIndex.id);
+    const sets = kiSetsOf(dir, targetsOf(context, aiIndex));
+    const total = sets.reduce((sum, { targets }) => sum + targets.length, 0);
+    log.info(`${aiIndex.id}: asking ${agent.id} ${total} questions`);
     let done = 0;
-    const results = await Promise.all(
-      targets.map((target) =>
-        limit(async (): Promise<AnswerResult> => {
-          const started = Date.now();
-          let answer = '';
-          let conversationId: string | undefined;
-          let toolCalls: ToolCallSummary[] = [];
-          let judgement: AnswerJudgement;
-          try {
-            const { data } = await kibana<ConverseResponse>(
-              'POST',
-              '/api/agent_builder/converse',
-              {
-                agent_id: agent.id,
-                input: questionFor(target),
-                ...(config.ask.connector_id && { connector_id: config.ask.connector_id }),
-              },
-              { timeoutMs: config.ask.timeout_minutes * 60_000 }
-            );
-            answer = data.response?.message ?? '';
-            conversationId = data.conversation_id;
-            toolCalls = toolCallsOf(data.steps);
-            const judged = await askJudge<AnswerJudgement>({
-              context,
-              connectorId: judgeConnectorId,
-              system: ANSWER_SYSTEM_PROMPT,
-              prompt: answerJudgePrompt(target, answer),
-              parse: (content) => {
-                const parsed = parseAnswerJudgement(content);
-                return parsed.verdict === 'error' ? { error: parsed.reason } : parsed;
-              },
-            });
-            judgement = 'error' in judged ? { verdict: 'error', reason: judged.error } : judged;
-          } catch (error) {
-            judgement = {
-              verdict: 'error',
-              reason: `The agent did not answer: ${
-                error instanceof Error ? error.message : String(error)
-              }`,
-            };
-          }
-          done++;
-          if (done % 5 === 0 || done === targets.length) {
-            log.info(`  ${done}/${targets.length} answered`);
-          }
-          return {
-            target,
-            answer,
-            conversationId,
-            toolCalls,
-            durationMs: Date.now() - started,
-            ...judgement,
-          };
-        })
-      )
-    );
+    const results: AnswerResult[] = [];
+    for (const { sample, kis, targets } of sets) {
+      if (targets.length === 0) {
+        continue;
+      }
+      await restoreDreamedKis(esClient, destOf(aiIndex.id), kis);
+      log.info(
+        `  restored the ${kis.length} KIs of ${sample ? `sample ${sample}` : `run ${runId}`}`
+      );
+      results.push(
+        ...(await Promise.all(
+          targets.map((target) =>
+            limit(async (): Promise<AnswerResult> => {
+              const result = await askOne(context, agent.id, judgeConnectorId, target);
+              done++;
+              if (done % 5 === 0 || done === total) {
+                log.info(`  ${done}/${total} answered`);
+              }
+              return { ...result, ...(sample && { sample }) };
+            })
+          )
+        ))
+      );
+    }
 
     const evaluation: AnswerEvaluation = {
       runId,
@@ -193,7 +220,6 @@ export const runAsk = async (context: StageContext): Promise<void> => {
       ...scoresOf(results, ANSWER_SCORES),
       results,
     };
-    const dir = runDirOf(config, runId, aiIndex.id);
     writeJson(answersFileOf(dir), evaluation);
     const summaryFile = path.join(dir, 'answers.md');
     fs.writeFileSync(summaryFile, answersMarkdown(evaluation));

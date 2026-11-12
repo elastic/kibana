@@ -80,44 +80,72 @@ const bulkCreate = async (esClient: Client, index: string, spans: SpanDocument[]
   }
 };
 
-export const runImport = async (context: StageContext): Promise<void> => {
+export const readExtracted = (context: StageContext, dataset: DatasetName): ExtractedDataset => {
+  const file = extractedFileOf(datasetDirOf(context.config, dataset));
+  if (!fs.existsSync(file)) {
+    throw new Error(`${dataset} is not extracted yet: run the extract stage first`);
+  }
+  return readJson<ExtractedDataset>(file);
+};
+
+/**
+ * Replaces the spans of a dataset with those of its conversations, or of only `conversationIds`,
+ * and records what is imported.
+ */
+export const writeDatasetSpans = async (
+  context: StageContext,
+  extracted: ExtractedDataset,
+  conversationIds?: string[]
+): Promise<ImportManifest> => {
   const { config, esClient, log } = context;
   const index = config.tracesIndex;
+  const dataset = extracted.dataset as DatasetName;
+  const wanted = conversationIds && new Set(conversationIds);
+  const { spans, traceIds } = spansOf({
+    ...extracted,
+    conversations: extracted.conversations.filter(({ id }) => !wanted || wanted.has(id)),
+  });
+
+  const previous = readImportManifest(context, dataset);
+  const stale = [...new Set([...(previous?.traceIds ?? []), ...spansOf(extracted).traceIds])];
+  const deleted = await deleteTraces(esClient, previous?.index ?? index, stale);
+  log.debug(`${dataset}: deleted ${deleted} spans of an earlier import`);
+  await bulkCreate(esClient, index, spans);
+
+  const times = extracted.conversations
+    .filter(({ id }) => !wanted || wanted.has(id))
+    .flatMap(({ rounds }) => rounds.map(({ startedAt }) => startedAt))
+    .sort();
+  const manifest: ImportManifest = {
+    dataset,
+    index,
+    agentId: extracted.agent.id,
+    traceIds,
+    rounds: traceIds.length,
+    spans: spans.length,
+    earliest: times[0],
+    latest: times[times.length - 1],
+    importedAt: new Date().toISOString(),
+  };
+  writeJson(importManifestFileOf(datasetDirOf(config, dataset)), manifest);
+  return manifest;
+};
+
+/** Whether a dataset's samples run one at a time, each with only its own conversations. */
+export const isPerSample = (context: StageContext, dataset: DatasetName): boolean =>
+  context.config.datasets[dataset].per_sample;
+
+export const runImport = async (context: StageContext): Promise<void> => {
   for (const dataset of datasetsOf(context)) {
-    const dir = datasetDirOf(config, dataset);
-    const file = extractedFileOf(dir);
-    if (!fs.existsSync(file)) {
-      throw new Error(`${dataset} is not extracted yet: run the extract stage first`);
+    if (isPerSample(context, dataset)) {
+      context.log.info(
+        `${dataset}: samples run one at a time (per_sample), so the run stage imports each sample's conversations before it dreams on them`
+      );
+      continue;
     }
-    const extracted = readJson<ExtractedDataset>(file);
-    const { spans, traceIds } = spansOf(extracted);
-
-    const previous = readImportManifest(context, dataset);
-    const stale = [...new Set([...(previous?.traceIds ?? []), ...traceIds])];
-    const deleted = await deleteTraces(esClient, previous?.index ?? index, stale);
-    if (deleted > 0) {
-      log.info(`${dataset}: deleted ${deleted} spans of an earlier import`);
-    }
-    await bulkCreate(esClient, index, spans);
-
-    const times = extracted.conversations.flatMap(({ rounds }) =>
-      rounds.map(({ startedAt }) => startedAt)
-    );
-    times.sort();
-    const manifest: ImportManifest = {
-      dataset,
-      index,
-      agentId: extracted.agent.id,
-      traceIds,
-      rounds: traceIds.length,
-      spans: spans.length,
-      earliest: times[0],
-      latest: times[times.length - 1],
-      importedAt: new Date().toISOString(),
-    };
-    writeJson(importManifestFileOf(dir), manifest);
-    log.success(
-      `${dataset}: wrote ${spans.length} spans of ${traceIds.length} rounds to ${index} (${manifest.earliest} to ${manifest.latest})`
+    const manifest = await writeDatasetSpans(context, readExtracted(context, dataset));
+    context.log.success(
+      `${dataset}: wrote ${manifest.spans} spans of ${manifest.rounds} rounds to ${manifest.index} (${manifest.earliest} to ${manifest.latest})`
     );
   }
 };

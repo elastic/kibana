@@ -25,10 +25,20 @@ const agentSchema = z.object({
  * haystack. The listed `samples` win; else every sample with `all_samples`; else the first
  * `sample_count`.
  */
-const sampleSelectionShape = (allSamples: boolean) => ({
+const sampleSelectionShape = (allSamples: boolean, perSample: boolean) => ({
   samples: z.array(z.string()).default([]),
+  /** Picks the samples of one of `presets`, unless `samples` lists some. */
+  preset: z.string().optional(),
+  /** Named lists of sample ids, so runs across the team evaluate the same samples. */
+  presets: z.record(z.string(), z.array(z.string()).min(1)).default({}),
   sample_count: z.number().int().min(1).default(1),
   all_samples: z.boolean().default(allSamples),
+  /**
+   * Runs the samples one at a time, each with only its own conversations: the run stage imports
+   * a sample's conversations, dreams on them from a clean AI index, and dumps its KIs, then goes on
+   * to the next. The evaluate and ask stages then work per sample too.
+   */
+  per_sample: z.boolean().default(perSample),
 });
 
 const longMemEvalSSchema = z.object({
@@ -38,7 +48,8 @@ const longMemEvalSSchema = z.object({
       'https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json'
     ),
   agent: agentSchema.default({ id: 'longmemeval-assistant', name: 'Personal assistant' }),
-  ...sampleSelectionShape(false),
+  /** Each question has its own haystack, so each sample learns from its own conversations. */
+  ...sampleSelectionShape(false, true),
   include_abstention: z.boolean().default(false),
   /**
    * The sessions imported per sample: its whole haystack (about 50), or only those that hold the
@@ -54,7 +65,7 @@ const longMemEvalV2Schema = z.object({
     .default('https://huggingface.co/datasets/xiaowu0162/longmemeval-v2/resolve/main'),
   agent: agentSchema.default({ id: 'workarena-agent', name: 'ServiceNow agent' }),
   /** In the small tier every enterprise question shares one haystack, so all of them cost no more. */
-  ...sampleSelectionShape(true),
+  ...sampleSelectionShape(true, false),
   haystack: z.enum(['small', 'medium']).default('small'),
   /** Imports only the first trajectories of the samples' haystacks, for a quicker run. */
   max_trajectories: z.number().int().min(1).optional(),
@@ -259,29 +270,41 @@ export const selectAiIndexIds = (
 /** Sample overrides from the command line, applied to every dataset the run uses. */
 export interface SampleOverrides {
   samples?: string[];
+  preset?: string;
   sampleCount?: number;
   allSamples?: boolean;
+  perSample?: boolean;
 }
 
 export const withSampleOverrides = (
   config: EvalConfig,
   datasets: DatasetName[],
-  { samples, sampleCount, allSamples }: SampleOverrides
+  { samples, preset, sampleCount, allSamples, perSample }: SampleOverrides
 ): EvalConfig => {
-  if (samples && datasets.length > 1) {
+  if ((samples || preset) && datasets.length > 1) {
     throw new Error(
-      `Sample ids belong to one dataset: pick it with --dataset (the run uses ${datasets.join(
+      `Sample ids and presets belong to one dataset: pick it with --dataset (the run uses ${datasets.join(
         ', '
       )})`
     );
   }
-  const override = <T extends { samples: string[]; sample_count: number; all_samples: boolean }>(
+  const override = <
+    T extends {
+      samples: string[];
+      preset?: string;
+      sample_count: number;
+      all_samples: boolean;
+      per_sample: boolean;
+    }
+  >(
     selection: T
   ): T => ({
     ...selection,
     ...(samples && { samples }),
+    ...(preset && { preset, samples: [] }),
     ...(sampleCount !== undefined && { sample_count: sampleCount, all_samples: false }),
     ...(allSamples && { all_samples: true }),
+    ...(perSample && { per_sample: true }),
   });
   return {
     ...config,

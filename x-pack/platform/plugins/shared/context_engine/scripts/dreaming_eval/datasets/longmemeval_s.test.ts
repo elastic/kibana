@@ -19,8 +19,10 @@ const options: LongMemEvalSConfig = {
   url: 'https://example.com/longmemeval_s.json',
   agent: { id: 'longmemeval-assistant', name: 'Personal assistant' },
   samples: [],
+  presets: {},
   sample_count: 1,
   all_samples: false,
+  per_sample: true,
   include_abstention: false,
   sessions: 'haystack',
   distractor_sessions: 1,
@@ -74,6 +76,23 @@ describe('LongMemEval S', () => {
     ).toEqual(['a_abs', 'a', 'b', 'c']);
   });
 
+  it("takes a preset's samples, unless samples are listed, and fails on a preset it does not have", () => {
+    const records = [record('a', 'x', []), record('b', 'y', []), record('c', 'z', [])];
+    const ids = (selected: LongMemEvalRecord[]) => selected.map((q) => q.question_id);
+    const presets = { dev: ['c', 'a'] };
+
+    expect(ids(selectQuestions(records, { ...options, presets, preset: 'dev' }))).toEqual([
+      'c',
+      'a',
+    ]);
+    expect(
+      ids(selectQuestions(records, { ...options, presets, preset: 'dev', samples: ['b'] }))
+    ).toEqual(['b']);
+    expect(() => selectQuestions(records, { ...options, presets, preset: 'nope' })).toThrow(
+      "longmemeval_s has no preset 'nope'; presets: dev"
+    );
+  });
+
   it('takes the listed samples, in their order, and fails on one it does not have', () => {
     const records = [record('a', 'x', []), record('b_abs', 'y', [])];
 
@@ -119,18 +138,28 @@ describe('LongMemEval S', () => {
   ]);
 
   it("imports each sample's whole haystack, each session once and in time order", () => {
-    expect(selectConversations([first, second], options).map(({ id }) => id)).toEqual([
+    const { conversations, sampleConversations } = selectConversations([first, second], options);
+
+    expect(conversations.map(({ id }) => id)).toEqual([
       'answer-a',
       'noise-1',
       'noise-2',
       'answer-b',
     ]);
+    expect(sampleConversations).toEqual({
+      a: ['noise-1', 'noise-2', 'answer-a'],
+      b: ['noise-1', 'answer-b'],
+    });
   });
 
   it('imports only the sessions that hold answers and a distractor per sample, when asked', () => {
-    const conversations = selectConversations([first, second], { ...options, sessions: 'answers' });
+    const { conversations, sampleConversations } = selectConversations([first, second], {
+      ...options,
+      sessions: 'answers',
+    });
 
     expect(conversations.map(({ id }) => id)).toEqual(['answer-a', 'noise-1', 'answer-b']);
+    expect(sampleConversations).toEqual({ a: ['noise-1', 'answer-a'], b: ['noise-1', 'answer-b'] });
     expect(conversations[0]).toEqual({
       id: 'answer-a',
       title: 'Chat on 2023-05-01',

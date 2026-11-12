@@ -7,8 +7,11 @@
 
 /** Which samples of a dataset to evaluate: the listed ones, every one, or the first few. */
 export interface SampleSelection {
-  /** Sample ids; when set, `all_samples` and `sample_count` are ignored. */
+  /** Sample ids; when set, the preset, `all_samples` and `sample_count` are ignored. */
   samples: string[];
+  /** A named list of sample ids from `presets`, so runs across the team use the same ones. */
+  preset?: string;
+  presets: Record<string, string[]>;
   all_samples: boolean;
   sample_count: number;
 }
@@ -21,9 +24,15 @@ export const pickSamples = <T>(
   candidates: T[],
   all: T[],
   idOf: (sample: T) => string,
-  { samples: ids, all_samples: everything, sample_count: count }: SampleSelection,
+  { samples, preset, presets, all_samples: everything, sample_count: count }: SampleSelection,
   dataset: string
 ): T[] => {
+  if (samples.length === 0 && preset && !presets[preset]) {
+    throw new Error(
+      `${dataset} has no preset '${preset}'; presets: ${Object.keys(presets).join(', ') || 'none'}`
+    );
+  }
+  const ids = samples.length > 0 ? samples : preset ? presets[preset] : [];
   if (ids.length > 0) {
     const byId = new Map(all.map((sample) => [idOf(sample), sample]));
     const missing = ids.filter((id) => !byId.has(id));

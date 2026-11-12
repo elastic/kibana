@@ -143,7 +143,7 @@ ai_indices:
         withSampleOverrides(config, ['longmemeval_s', 'longmemeval_v2_enterprise'], {
           samples: ['e47becba'],
         })
-      ).toThrow('Sample ids belong to one dataset');
+      ).toThrow('Sample ids and presets belong to one dataset');
     });
   });
 

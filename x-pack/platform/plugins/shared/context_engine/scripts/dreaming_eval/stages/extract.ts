@@ -32,11 +32,16 @@ const extractLongMemEvalS = async (context: StageContext): Promise<ExtractedData
   });
   const records = readJson<LongMemEvalRecord[]>(file);
   const questions = longMemEvalS.selectQuestions(records, options);
+  const { conversations, sampleConversations } = longMemEvalS.selectConversations(
+    questions,
+    options
+  );
   return {
     dataset: longMemEvalS.LONGMEMEVAL_S_DATASET,
     samples: questions.map(({ question_id: id }) => id),
+    sampleConversations,
     agent: options.agent,
-    conversations: longMemEvalS.selectConversations(questions, options),
+    conversations,
     targets: longMemEvalS.targetsOf(questions),
   };
 };
@@ -117,6 +122,12 @@ const extractLongMemEvalV2 = async (context: StageContext): Promise<ExtractedDat
   return {
     dataset: longMemEvalV2.LONGMEMEVAL_V2_ENTERPRISE_DATASET,
     samples: selectedQuestions.map(({ id }) => id),
+    sampleConversations: Object.fromEntries(
+      selectedQuestions.map((question) => [
+        question.id,
+        (haystack[question.id] ?? []).filter((id) => ids.includes(id)),
+      ])
+    ),
     agent: options.agent,
     conversations: trajectories.map((trajectory, order) =>
       longMemEvalV2.trajectoryToConversation(trajectory, order, options)

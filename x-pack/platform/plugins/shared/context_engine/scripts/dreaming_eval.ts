@@ -26,7 +26,7 @@ import { runConfigure } from './dreaming_eval/stages/configure';
 import { runEvaluate } from './dreaming_eval/stages/evaluate';
 import { runExtract } from './dreaming_eval/stages/extract';
 import { runImport } from './dreaming_eval/stages/import';
-import { kiDumpFileOf, runRun } from './dreaming_eval/stages/run';
+import { hasKiDump, runRun } from './dreaming_eval/stages/run';
 
 const STAGES = {
   extract: runExtract,
@@ -79,9 +79,7 @@ const latestRunId = (config: EvalConfig, aiIndexIds: string[]): string | undefin
     .readdirSync(runsDir)
     .sort()
     .reverse()
-    .find((runId) =>
-      aiIndexIds.every((id) => fs.existsSync(kiDumpFileOf(runDirOf(config, runId, id))))
-    );
+    .find((runId) => aiIndexIds.every((id) => hasKiDump(runDirOf(config, runId, id))));
 };
 
 run(
@@ -116,8 +114,10 @@ run(
     }
     const config = withSampleOverrides(loaded, usedDatasets, {
       samples: listFlag(flags.samples),
+      preset: flags.preset ? String(flags.preset) : undefined,
       sampleCount,
       allSamples: flags['all-samples'] === true,
+      perSample: flags['per-sample'] === true,
     });
 
     const runId = flags['run-id']
@@ -181,6 +181,7 @@ run(
         'dataset',
         'ai-index',
         'samples',
+        'preset',
         'sample-count',
         'run-id',
         'judge-connector',
@@ -189,7 +190,7 @@ run(
         'es-password',
         'kibana-url',
       ],
-      boolean: ['force-download', 'all-samples'],
+      boolean: ['force-download', 'all-samples', 'per-sample'],
       help: `
         --stage <names>         Comma-separated stages to run: ${STAGE_NAMES.join(
           ', '
@@ -203,8 +204,11 @@ run(
         )}; the stages work on the AI indices that dream on only these (default: run_datasets)
         --ai-index <ids>        Comma-separated AI indices of the config instead (default: by dataset)
         --samples <ids>         Samples (question ids) to evaluate, of the one dataset in use
+        --preset <name>         Evaluate the samples of a preset of the one dataset in use, such as dev
         --sample-count <n>      Evaluate the first n samples
         --all-samples           Evaluate every sample
+        --per-sample            Run the samples one at a time, each with only its own conversations
+                                (the default for longmemeval_s), dumping each sample's KIs
         --run-id <id>           Run to write (run stage) or read (evaluate stage); default: a new
                                 run for the run stage, else the latest one
         --judge-connector <id>  AI connector that judges the KIs (default: evaluate.connector_id,

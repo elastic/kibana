@@ -27,10 +27,12 @@ import type { Scores } from '../report';
 import { describeScore, scoresOf, scoreTables, shortQuestion } from '../report';
 import type { DumpedKi, EvalTarget, KiDump } from '../types';
 import { generatedTargetsFileOf } from './extract';
-import { kiDumpFileOf } from './run';
+import { dumpedSamplesOf, kiDumpFileOf, sampleDirOf } from './run';
 
 export interface TargetResult extends Judgement {
   target: EvalTarget;
+  /** The sample whose KIs were judged, when samples ran one at a time. */
+  sample?: string;
   candidateIds: string[];
 }
 
@@ -45,6 +47,28 @@ export interface Evaluation extends Scores {
 }
 
 export const evaluationFileOf = (dir: string): string => path.join(dir, 'evaluation.json');
+
+export const sampleOfTarget = ({ sample, id }: EvalTarget): string => sample ?? id;
+
+/** The KIs a run dumped for an AI index: one set, or one per sample with that sample's targets. */
+export const kiSetsOf = (
+  runDir: string,
+  targets: EvalTarget[]
+): Array<{ sample?: string; kis: DumpedKi[]; targets: EvalTarget[] }> => {
+  const samples = dumpedSamplesOf(runDir);
+  if (samples.length === 0) {
+    const file = kiDumpFileOf(runDir);
+    if (!fs.existsSync(file)) {
+      throw new Error(`No KI dump at ${file}: run the run stage first`);
+    }
+    return [{ kis: readJson<KiDump>(file).kis, targets }];
+  }
+  return samples.map((sample) => ({
+    sample,
+    kis: readJson<KiDump>(kiDumpFileOf(sampleDirOf(runDir, sample))).kis,
+    targets: targets.filter((target) => sampleOfTarget(target) === sample),
+  }));
+};
 
 /** The targets of an AI index: its own target files, else those extracted for its datasets. */
 export const targetsOf = (context: StageContext, aiIndex: AiIndexEvalConfig): EvalTarget[] => {
@@ -88,15 +112,10 @@ export const runEvaluate = async (context: StageContext): Promise<void> => {
   const limit = pLimit(config.evaluate.concurrency);
   for (const aiIndex of config.ai_indices.filter(({ id }) => context.aiIndexIds.includes(id))) {
     const dir = runDirOf(config, runId, aiIndex.id);
-    const dumpFile = kiDumpFileOf(dir);
-    if (!fs.existsSync(dumpFile)) {
-      throw new Error(`${aiIndex.id}: no KI dump at ${dumpFile}: run the run stage first`);
-    }
-    const { kis } = readJson<KiDump>(dumpFile);
-    const targets = targetsOf(context, aiIndex);
+    const sets = kiSetsOf(dir, targetsOf(context, aiIndex));
 
     let useReranker = true;
-    const rank = async (target: EvalTarget): Promise<DumpedKi[]> => {
+    const rank = async (target: EvalTarget, kis: DumpedKi[]): Promise<DumpedKi[]> => {
       if (kis.length <= config.evaluate.candidates) {
         return kis;
       }
@@ -116,33 +135,39 @@ export const runEvaluate = async (context: StageContext): Promise<void> => {
       return rankByOverlap(query, kis);
     };
 
+    const total = sets.reduce((sum, { targets }) => sum + targets.length, 0);
+    const kiCount = sets.reduce((sum, { kis }) => sum + kis.length, 0);
     log.info(
-      `${aiIndex.id}: judging ${targets.length} targets against ${kis.length} KIs with ${connectorId}`
+      `${aiIndex.id}: judging ${total} targets against ${kiCount} KIs${
+        sets.length > 1 || sets[0]?.sample ? ` of ${sets.length} samples` : ''
+      } with ${connectorId}`
     );
     let done = 0;
     const results = await Promise.all(
-      targets.map((target) =>
-        limit(async (): Promise<TargetResult> => {
-          const candidates = (await rank(target)).slice(0, config.evaluate.candidates);
-          const candidateIds = candidates.map(({ id }) => id);
-          const judged = await askJudge<Judgement>({
-            context,
-            connectorId,
-            system: SYSTEM_PROMPT,
-            prompt: judgePrompt(target, candidates),
-            parse: (content) => {
-              const judgement = parseJudgement(content, candidateIds);
-              return judgement.verdict === 'error' ? { error: judgement.reason } : judgement;
-            },
-          });
-          done++;
-          if (done % 10 === 0 || done === targets.length) {
-            log.info(`  ${done}/${targets.length} judged`);
-          }
-          const judgement: Judgement =
-            'error' in judged ? { verdict: 'error', kiIds: [], reason: judged.error } : judged;
-          return { target, candidateIds, ...judgement };
-        })
+      sets.flatMap(({ sample, kis, targets }) =>
+        targets.map((target) =>
+          limit(async (): Promise<TargetResult> => {
+            const candidates = (await rank(target, kis)).slice(0, config.evaluate.candidates);
+            const candidateIds = candidates.map(({ id }) => id);
+            const judged = await askJudge<Judgement>({
+              context,
+              connectorId,
+              system: SYSTEM_PROMPT,
+              prompt: judgePrompt(target, candidates),
+              parse: (content) => {
+                const judgement = parseJudgement(content, candidateIds);
+                return judgement.verdict === 'error' ? { error: judgement.reason } : judgement;
+              },
+            });
+            done++;
+            if (done % 10 === 0 || done === total) {
+              log.info(`  ${done}/${total} judged`);
+            }
+            const judgement: Judgement =
+              'error' in judged ? { verdict: 'error', kiIds: [], reason: judged.error } : judged;
+            return { target, ...(sample && { sample }), candidateIds, ...judgement };
+          })
+        )
       )
     );
 
@@ -152,7 +177,7 @@ export const runEvaluate = async (context: StageContext): Promise<void> => {
       connectorId,
       ranker: useReranker ? `the ${config.evaluate.rerank_inference_id} reranker` : 'shared words',
       evaluatedAt: new Date().toISOString(),
-      kis: kis.length,
+      kis: kiCount,
       ...scoresOf(results, SCORES),
       results,
     };

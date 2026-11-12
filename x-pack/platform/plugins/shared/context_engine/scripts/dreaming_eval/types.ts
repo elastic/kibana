@@ -33,6 +33,8 @@ export interface EvalConversation {
 export interface EvalTarget {
   id: string;
   dataset: string;
+  /** The sample the target is learned from; defaults to `id`, as a benchmark question is one. */
+  sample?: string;
   /** The benchmark's question type, or a category of your own. */
   category: string;
   question: string;
@@ -50,6 +52,8 @@ export interface ExtractedDataset {
   dataset: string;
   /** Ids of the samples (questions) the conversations and targets are for. */
   samples: string[];
+  /** The conversations of each sample, by id, for running samples one at a time. */
+  sampleConversations: Record<string, string[]>;
   agent: { id: string; name: string };
   conversations: EvalConversation[];
   targets: EvalTarget[];
@@ -68,7 +72,7 @@ export interface ImportManifest {
   importedAt: string;
 }
 
-/** A KI as dumped from an AI index after a run. */
+/** A KI as dumped from an AI index after a run: its whole document, so it can be restored. */
 export interface DumpedKi {
   id: string;
   type: string;
@@ -78,6 +82,7 @@ export interface DumpedKi {
   attributes?: Record<string, unknown>;
   references?: Array<{ uri: string; relation?: string; description?: string }>;
   updated_at?: string;
+  [field: string]: unknown;
 }
 
 /** One workflow execution the run stage started. */
@@ -90,10 +95,12 @@ export interface WorkflowRunSummary {
   error?: string;
 }
 
-/** What the run stage writes for one AI index. */
+/** What the run stage writes for one AI index, or for one of its samples. */
 export interface KiDump {
   runId: string;
   aiIndexId: string;
+  /** Set when samples run one at a time: the sample this dump holds the KIs of. */
+  sample?: string;
   dest: string;
   dumpedAt: string;
   workflowRuns: WorkflowRunSummary[];

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
+import type { AiIndexHttpItem } from '../../../common/http_api/ai_indices';
+import type { AiIndexEvalConfig, DatasetName } from '../config';
 import { destOf, runDirOf } from '../config';
 import type { StageContext } from '../context';
 import { writeJson } from '../download';
-import type { DumpedKi, KiDump, WorkflowRunSummary } from '../types';
+import type { DumpedKi, ImportManifest, KiDump, WorkflowRunSummary } from '../types';
 import { runUntilDone } from '../workflow_runner';
 import { getAiIndex } from './configure';
-import { readImportManifest } from './import';
+import { isPerSample, readExtracted, readImportManifest, writeDatasetSpans } from './import';
 
 /** The KIs dreaming writes: facts, entities and the relationships between them. */
 export const DREAMED_KIS_QUERY: estypes.QueryDslQueryContainer = {
@@ -29,10 +32,30 @@ export const DREAMED_KIS_QUERY: estypes.QueryDslQueryContainer = {
 };
 
 const DUMP_PAGE = 1000;
+const RESTORE_BATCH = 200;
 
 const DREAMING_WORKFLOW = /^system-context-engine-(?:trace-|transcript-)?dreaming-/;
 
 export const kiDumpFileOf = (dir: string): string => path.join(dir, 'kis.json');
+
+/** Where the KIs of one sample of a run go, when samples run one at a time. */
+export const sampleDirOf = (runDir: string, sample: string): string =>
+  path.join(runDir, 'samples', sample);
+
+/** The samples of a run that have a KI dump, in order. */
+export const dumpedSamplesOf = (runDir: string): string[] => {
+  const dir = path.join(runDir, 'samples');
+  return fs.existsSync(dir)
+    ? fs
+        .readdirSync(dir)
+        .filter((sample) => fs.existsSync(kiDumpFileOf(sampleDirOf(runDir, sample))))
+        .sort()
+    : [];
+};
+
+/** Whether a run dumped KIs for an AI index, as a whole or per sample. */
+export const hasKiDump = (runDir: string): boolean =>
+  fs.existsSync(kiDumpFileOf(runDir)) || dumpedSamplesOf(runDir).length > 0;
 
 export const cleanDreamedKis = async (esClient: Client, dest: string): Promise<number> => {
   const response = await esClient.deleteByQuery(
@@ -49,7 +72,7 @@ export const cleanDreamedKis = async (esClient: Client, dest: string): Promise<n
   return response.deleted ?? 0;
 };
 
-/** Every dreamed KI that is not deleted, without its embeddings. */
+/** Every dreamed KI that is not deleted, its whole document, so it can be restored. */
 export const dumpDreamedKis = async (esClient: Client, dest: string): Promise<DumpedKi[]> => {
   const kis: DumpedKi[] = [];
   let searchAfter: estypes.SortResults | undefined;
@@ -66,16 +89,6 @@ export const dumpDreamedKis = async (esClient: Client, dest: string): Promise<Du
             must_not: [{ term: { 'governance.lifecycle.status': 'deleted' } }],
           },
         },
-        _source: [
-          'id',
-          'type',
-          'title',
-          'description',
-          'content',
-          'attributes',
-          'references',
-          'updated_at',
-        ],
         ignore_unavailable: true,
       },
       { ignore: [404] }
@@ -89,11 +102,36 @@ export const dumpDreamedKis = async (esClient: Client, dest: string): Promise<Du
   }
 };
 
+/** Replaces the dreamed KIs of an AI index with dumped ones, as dreaming left them. */
+export const restoreDreamedKis = async (
+  esClient: Client,
+  dest: string,
+  kis: DumpedKi[]
+): Promise<void> => {
+  await cleanDreamedKis(esClient, dest);
+  for (let start = 0; start < kis.length; start += RESTORE_BATCH) {
+    const batch = kis.slice(start, start + RESTORE_BATCH);
+    const response = await esClient.bulk({
+      refresh: start + RESTORE_BATCH >= kis.length ? 'wait_for' : false,
+      operations: batch.flatMap((ki) => [{ index: { _index: dest, _id: ki.id } }, ki]),
+    });
+    if (response.errors) {
+      const failed = response.items.find((item) => item.index?.error)?.index?.error;
+      throw new Error(`Restoring KIs to ${dest} failed: ${JSON.stringify(failed)}`);
+    }
+  }
+};
+
 const countByType = (kis: DumpedKi[]): Record<string, number> =>
   kis.reduce<Record<string, number>>((counts, { type }) => {
     counts[type] = (counts[type] ?? 0) + 1;
     return counts;
   }, {});
+
+const describeCounts = (counts: Record<string, number>): string =>
+  Object.entries(counts)
+    .map(([type, count]) => `${type} ${count}`)
+    .join(', ');
 
 const describeRun = ({ status, output, error, durationMs }: WorkflowRunSummary): string => {
   const counts = ['rounds', 'memories', 'created', 'updated', 'deleted', 'rejected']
@@ -107,64 +145,142 @@ const describeRun = ({ status, output, error, durationMs }: WorkflowRunSummary):
   }`;
 };
 
+/** A minute before the earliest imported round: where the first dreaming run reads from. */
+const sinceOf = (manifests: ImportManifest[]): string | undefined => {
+  const earliest = manifests
+    .map(({ earliest: at }) => at)
+    .filter(Boolean)
+    .sort()[0];
+  return earliest && new Date(Date.parse(earliest) - 60_000).toISOString();
+};
+
+/** Dreams from a clean AI index: deletes what dreaming wrote, then runs each of its workflows. */
+const dream = async (
+  context: StageContext,
+  aiIndex: AiIndexEvalConfig,
+  stored: AiIndexHttpItem,
+  since: string | undefined,
+  label: string
+): Promise<{ workflowRuns: WorkflowRunSummary[]; kis: DumpedKi[] }> => {
+  const { config, esClient, kibana, log } = context;
+  const dest = destOf(aiIndex.id);
+  const deleted = await cleanDreamedKis(esClient, dest);
+  log.info(`${label}: deleted ${deleted} dreamed KIs from ${dest}`);
+
+  const workflowRuns: WorkflowRunSummary[] = [];
+  for (const { value: workflowId } of stored.automations.filter(
+    ({ type }) => type === 'workflow'
+  )) {
+    const isDreaming = DREAMING_WORKFLOW.test(workflowId);
+    log.info(`${label}: running ${workflowId}${isDreaming && since ? ` since ${since}` : ''}`);
+    const runs = await runUntilDone({
+      kibana,
+      workflowId,
+      since: isDreaming ? since : undefined,
+      maxRuns: isDreaming ? config.run.max_runs_per_workflow : 1,
+      retries: isDreaming ? config.run.retries : 0,
+      timeoutMs: config.run.execution_timeout_minutes * 60_000,
+      onRun: (summary, run) => log.info(`  run ${run}: ${describeRun(summary)}`),
+    });
+    workflowRuns.push(...runs);
+  }
+  return { workflowRuns, kis: await dumpDreamedKis(esClient, dest) };
+};
+
+const writeDump = (
+  context: StageContext,
+  aiIndex: AiIndexEvalConfig,
+  dir: string,
+  { workflowRuns, kis }: { workflowRuns: WorkflowRunSummary[]; kis: DumpedKi[] },
+  sample?: string
+): KiDump => {
+  const dump: KiDump = {
+    runId: context.runId,
+    aiIndexId: aiIndex.id,
+    ...(sample && { sample }),
+    dest: destOf(aiIndex.id),
+    dumpedAt: new Date().toISOString(),
+    workflowRuns,
+    counts: countByType(kis),
+    kis,
+  };
+  const file = kiDumpFileOf(dir);
+  writeJson(file, dump);
+  context.log.success(
+    `${aiIndex.id}${sample ? ` sample ${sample}` : ''}: ${kis.length} KIs (${describeCounts(
+      dump.counts
+    )}) → ${path.relative(process.cwd(), file)}`
+  );
+  return dump;
+};
+
+/**
+ * Runs the samples of a dataset one at a time: imports a sample's conversations, dreams on them
+ * from a clean AI index, and dumps its KIs. A sample this run already dumped is skipped, so an
+ * interrupted run picks up where it stopped when started again with the same run id.
+ */
+const runPerSample = async (
+  context: StageContext,
+  aiIndex: AiIndexEvalConfig,
+  stored: AiIndexHttpItem,
+  dataset: DatasetName
+): Promise<void> => {
+  const runDir = runDirOf(context.config, context.runId, aiIndex.id);
+  const extracted = readExtracted(context, dataset);
+  for (const [position, sample] of extracted.samples.entries()) {
+    const dir = sampleDirOf(runDir, sample);
+    const label = `${aiIndex.id} sample ${sample} (${position + 1}/${extracted.samples.length})`;
+    if (fs.existsSync(kiDumpFileOf(dir))) {
+      context.log.info(`${label}: already dumped in this run; skipping`);
+      continue;
+    }
+    const manifest = await writeDatasetSpans(
+      context,
+      extracted,
+      extracted.sampleConversations[sample] ?? []
+    );
+    context.log.info(`${label}: imported ${manifest.rounds} rounds`);
+    writeDump(
+      context,
+      aiIndex,
+      dir,
+      await dream(context, aiIndex, stored, sinceOf([manifest]), label),
+      sample
+    );
+  }
+};
+
 export const runRun = async (context: StageContext): Promise<void> => {
-  const { config, esClient, kibana, log, runId } = context;
-  const timeoutMs = config.run.execution_timeout_minutes * 60_000;
+  const { config, runId } = context;
   for (const aiIndex of config.ai_indices.filter(({ id }) => context.aiIndexIds.includes(id))) {
     const stored = await getAiIndex(context, aiIndex.id);
     if (!stored) {
       throw new Error(`AI index '${aiIndex.id}' does not exist: run the configure stage first`);
     }
-    const dest = destOf(aiIndex.id);
-    const deleted = await cleanDreamedKis(esClient, dest);
-    log.info(`${aiIndex.id}: deleted ${deleted} dreamed KIs from ${dest}`);
+    const perSample = aiIndex.datasets.filter((dataset) => isPerSample(context, dataset));
+    if (perSample.length > 0) {
+      if (aiIndex.datasets.length > 1) {
+        throw new Error(
+          `${aiIndex.id}: ${perSample.join(
+            ', '
+          )} runs samples one at a time (per_sample), which needs an AI index that dreams on that dataset alone`
+        );
+      }
+      await runPerSample(context, aiIndex, stored, perSample[0]);
+      continue;
+    }
 
     const manifests = aiIndex.datasets.map((dataset) => readImportManifest(context, dataset));
     if (manifests.some((manifest) => !manifest)) {
       throw new Error(`${aiIndex.id}: a dataset is not imported yet: run the import stage first`);
     }
-    const earliest = manifests
-      .map((manifest) => manifest?.earliest ?? '')
-      .sort()
-      .find(Boolean);
-    const since = earliest && new Date(Date.parse(earliest) - 60_000).toISOString();
-
-    const workflowRuns: WorkflowRunSummary[] = [];
-    for (const { value: workflowId } of stored.automations.filter(
-      ({ type }) => type === 'workflow'
-    )) {
-      const isDreaming = DREAMING_WORKFLOW.test(workflowId);
-      log.info(
-        `${aiIndex.id}: running ${workflowId}${isDreaming && since ? ` since ${since}` : ''}`
-      );
-      const runs = await runUntilDone({
-        kibana,
-        workflowId,
-        since: isDreaming ? since : undefined,
-        maxRuns: isDreaming ? config.run.max_runs_per_workflow : 1,
-        retries: isDreaming ? config.run.retries : 0,
-        timeoutMs,
-        onRun: (summary, run) => log.info(`  run ${run}: ${describeRun(summary)}`),
-      });
-      workflowRuns.push(...runs);
-    }
-
-    const kis = await dumpDreamedKis(esClient, dest);
-    const dump: KiDump = {
-      runId,
-      aiIndexId: aiIndex.id,
-      dest,
-      dumpedAt: new Date().toISOString(),
-      workflowRuns,
-      counts: countByType(kis),
-      kis,
-    };
-    const file = kiDumpFileOf(runDirOf(config, runId, aiIndex.id));
-    writeJson(file, dump);
-    log.success(
-      `${aiIndex.id}: ${kis.length} KIs (${Object.entries(dump.counts)
-        .map(([type, count]) => `${type} ${count}`)
-        .join(', ')}) → ${path.relative(process.cwd(), file)}`
+    const dreamed = await dream(
+      context,
+      aiIndex,
+      stored,
+      sinceOf(manifests.flatMap((manifest) => (manifest ? [manifest] : []))),
+      aiIndex.id
     );
+    writeDump(context, aiIndex, runDirOf(config, runId, aiIndex.id), dreamed);
   }
 };

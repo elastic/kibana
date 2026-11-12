@@ -11,16 +11,33 @@ schedule_interval: 7d
 run_datasets: [longmemeval_s]
 
 # A sample is a question with the conversations it is asked over (its haystack). Per dataset, the
-# listed `samples` (question ids) run; else every sample with `all_samples: true`; else the first
-# `sample_count`. --samples, --sample-count and --all-samples override these.
+# listed `samples` (question ids) run; else those of the `preset`; else every sample with
+# `all_samples: true`; else the first `sample_count`. --samples, --preset, --sample-count and
+# --all-samples override these.
 datasets:
   # Personal assistant chats (https://github.com/xiaowu0162/LongMemEval). Each question has its
   # own haystack of about 50 sessions, about 250 rounds.
   longmemeval_s:
     agent: { id: longmemeval-assistant, name: Personal assistant }
     samples: []
+    # preset: dev
+    presets:
+      # Fixed questions across the 6 question types, so runs across the team compare.
+      dev:
+        - e47becba # single-session-user: What degree did I graduate with?
+        - 118b2229 # single-session-user: How long is my daily commute to work?
+        - 7161e7e2 # single-session-assistant: the shift rotation sheet for GM social media agents
+        - 8a2466db # single-session-preference: resources to learn more about video editing
+        - 0a995998 # multi-session: How many items of clothing do I need to pick up or return?
+        - 6d550036 # multi-session: How many projects have I led or am currently leading?
+        - gpt4_59149c77 # temporal-reasoning: days between my MoMA visit and the ancient civilizations exhibit
+        - gpt4_f49edff3 # temporal-reasoning: order of three events, first to last
+        - 6a1eabeb # knowledge-update: my personal best time in the charity 5K run
+        - 6aeb4375 # knowledge-update: How many Korean restaurants have I tried in my city?
     sample_count: 1
     all_samples: false
+    # Runs each sample on its own: its sessions, a clean AI index, and a KI dump per sample.
+    per_sample: true
     include_abstention: false
     # haystack: every session of each sample. answers: only those that hold the answer, and
     # distractor_sessions more per sample, for a quicker run.

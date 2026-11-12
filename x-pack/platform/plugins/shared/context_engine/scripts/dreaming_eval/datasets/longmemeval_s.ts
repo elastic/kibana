@@ -79,41 +79,62 @@ export const sessionToRounds = (
 };
 
 /**
- * The sessions of the selected samples, each once, in time order: their whole haystacks, or with
- * `sessions: answers` the sessions that hold an answer and `distractor_sessions` more per sample.
+ * The indexes in its haystack of the sessions a sample imports: every one, or with
+ * `sessions: answers` those that hold the answer and the first `distractor_sessions` others.
+ */
+const sessionIndexesOf = (
+  question: LongMemEvalRecord,
+  { sessions: mode, distractor_sessions: distractors }: LongMemEvalSConfig
+): number[] => {
+  const answers = new Set(question.answer_session_ids);
+  let addedDistractors = 0;
+  return question.haystack_session_ids.flatMap((sessionId, index) => {
+    if (answers.has(sessionId)) {
+      return [index];
+    }
+    if (mode === 'answers' && addedDistractors >= distractors) {
+      return [];
+    }
+    addedDistractors++;
+    return [index];
+  });
+};
+
+/**
+ * The sessions of the selected samples, each once and in time order, and the sessions of each
+ * sample. Sessions without a user message are left out.
  */
 export const selectConversations = (
   questions: LongMemEvalRecord[],
-  { sessions: mode, distractor_sessions: distractors }: LongMemEvalSConfig
-): EvalConversation[] => {
+  options: LongMemEvalSConfig
+): { conversations: EvalConversation[]; sampleConversations: Record<string, string[]> } => {
   const sessions = new Map<string, { startedAt: string; conversation: EvalConversation }>();
+  const sampleConversations: Record<string, string[]> = {};
   for (const question of questions) {
-    const answers = new Set(question.answer_session_ids);
-    let addedDistractors = 0;
-    question.haystack_session_ids.forEach((sessionId, index) => {
-      const isAnswer = answers.has(sessionId);
-      if (mode === 'answers' && !isAnswer && addedDistractors >= distractors) {
-        return;
-      }
-      if (!isAnswer) {
-        addedDistractors++;
-      }
-      if (sessions.has(sessionId)) {
-        return;
-      }
-      const startedAt = parseLongMemEvalDate(question.haystack_dates[index]);
-      const rounds = sessionToRounds(question.haystack_sessions[index], startedAt);
-      if (rounds.length > 0) {
+    const ids: string[] = [];
+    for (const index of sessionIndexesOf(question, options)) {
+      const sessionId = question.haystack_session_ids[index];
+      if (!sessions.has(sessionId)) {
+        const startedAt = parseLongMemEvalDate(question.haystack_dates[index]);
+        const rounds = sessionToRounds(question.haystack_sessions[index], startedAt);
+        if (rounds.length === 0) {
+          continue;
+        }
         sessions.set(sessionId, {
           startedAt,
           conversation: { id: sessionId, title: `Chat on ${startedAt.slice(0, 10)}`, rounds },
         });
       }
-    });
+      ids.push(sessionId);
+    }
+    sampleConversations[question.question_id] = ids;
   }
-  return [...sessions.values()]
-    .sort((a, b) => Date.parse(a.startedAt) - Date.parse(b.startedAt))
-    .map(({ conversation }) => conversation);
+  return {
+    conversations: [...sessions.values()]
+      .sort((a, b) => Date.parse(a.startedAt) - Date.parse(b.startedAt))
+      .map(({ conversation }) => conversation),
+    sampleConversations,
+  };
 };
 
 export const targetsOf = (questions: LongMemEvalRecord[]): EvalTarget[] =>
