@@ -13,6 +13,8 @@ import { pipeline } from 'stream/promises';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+const READ_CHUNK_BYTES = 1024 * 1024;
+
 const open = async (url: string): Promise<Readable> => {
   const response = await fetch(url, { redirect: 'follow' });
   if (!response.ok || !response.body) {
@@ -45,9 +47,9 @@ export const downloadFile = async ({
   return dest;
 };
 
-/** Streams the lines of a remote file without keeping it, for files too large to download. */
-export async function* streamRemoteLines(url: string): AsyncGenerator<string> {
-  const input = await open(url);
+/** The non-empty lines of a file, read as a stream: for files too large to read whole. */
+export async function* streamFileLines(file: string): AsyncGenerator<string> {
+  const input = fs.createReadStream(file, { encoding: 'utf8', highWaterMark: READ_CHUNK_BYTES });
   const lines = readline.createInterface({ input, crlfDelay: Infinity });
   try {
     for await (const line of lines) {
@@ -109,8 +111,6 @@ export async function* streamJsonArray<T>(
     }
   }
 }
-
-const READ_CHUNK_BYTES = 1024 * 1024;
 
 /** The elements of a JSON array file, read as a stream. */
 export const streamJsonArrayFile = <T>(file: string): AsyncGenerator<T> =>

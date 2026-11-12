@@ -50,6 +50,35 @@ describe('dreaming eval config', () => {
     expect(config.evaluate.rerank_inference_id).toBe('.rerank-v1-elasticsearch');
   });
 
+  it('runs every sample on one haystack in the small tier, and one sample on its own in the medium', () => {
+    const tiers = parseConfig(
+      `
+datasets:
+  longmemeval_v2_web: { haystack: medium }
+  longmemeval_v2_enterprise: { haystack: medium, all_samples: true, per_sample: false }
+${minimal}`,
+      '/repo/eval.yaml',
+      REPO_ROOT
+    );
+    const defaults = parseConfig(minimal, '/repo/eval.yaml', REPO_ROOT);
+
+    expect(defaults.datasets.longmemeval_v2_web).toEqual(
+      expect.objectContaining({
+        haystack: 'small',
+        all_samples: true,
+        per_sample: false,
+        environments: [],
+        agent: { id: 'webarena-agent', name: 'Web agent' },
+      })
+    );
+    expect(tiers.datasets.longmemeval_v2_web).toEqual(
+      expect.objectContaining({ haystack: 'medium', all_samples: false, per_sample: true })
+    );
+    expect(tiers.datasets.longmemeval_v2_enterprise).toEqual(
+      expect.objectContaining({ haystack: 'medium', all_samples: true, per_sample: false })
+    );
+  });
+
   it('writes traces to the space of the config', () => {
     expect(parseConfig(`space: team-a\n${minimal}`, '/repo/eval.yaml', REPO_ROOT).tracesIndex).toBe(
       'traces-agent_builder.otel-team-a'
@@ -154,6 +183,7 @@ ai_indices:
     expect(config.ai_indices.map(({ id }) => id)).toEqual([
       'dreaming-eval-longmemeval',
       'dreaming-eval-workarena',
+      'dreaming-eval-webarena',
     ]);
     for (const { dreaming } of config.ai_indices) {
       const resolved = resolveDreaming(dreaming, config.schedule_interval);

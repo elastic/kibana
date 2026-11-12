@@ -12,11 +12,25 @@ import { z } from '@kbn/zod/v4';
 import type { AiIndexDreamingConfig } from '../../common/dreaming';
 import { AI_INDEX_INDEX_PREFIX } from '../../common/constants';
 
-export const DATASET_NAMES = ['longmemeval_s', 'longmemeval_v2_enterprise'] as const;
+export const DATASET_NAMES = [
+  'longmemeval_s',
+  'longmemeval_v2_enterprise',
+  'longmemeval_v2_web',
+] as const;
 export type DatasetName = (typeof DATASET_NAMES)[number];
 
 export const LONGMEMEVAL_VARIANTS = ['s', 'm', 'oracle'] as const;
 export type LongMemEvalVariant = (typeof LONGMEMEVAL_VARIANTS)[number];
+
+/** The LongMemEval-V2 domains, each a dataset: ServiceNow (WorkArena) and WebArena sites. */
+export const LONGMEMEVAL_V2_DOMAINS = {
+  longmemeval_v2_enterprise: 'enterprise',
+  longmemeval_v2_web: 'web',
+} as const;
+export type LongMemEvalV2Dataset = keyof typeof LONGMEMEVAL_V2_DOMAINS;
+
+export const LONGMEMEVAL_V2_HAYSTACKS = ['small', 'medium'] as const;
+export type LongMemEvalV2Haystack = (typeof LONGMEMEVAL_V2_HAYSTACKS)[number];
 
 const agentSchema = z.object({
   id: z.string().min(1),
@@ -28,13 +42,17 @@ const agentSchema = z.object({
  * haystack. The listed `samples` win; else every sample with `all_samples`; else the first
  * `sample_count`.
  */
-const sampleSelectionShape = (allSamples: boolean, perSample: boolean) => ({
+const sampleListShape = {
   samples: z.array(z.string()).default([]),
   /** Picks the samples of one of `presets`, unless `samples` lists some. */
   preset: z.string().optional(),
   /** Named lists of sample ids, so runs across the team evaluate the same samples. */
   presets: z.record(z.string(), z.array(z.string()).min(1)).default({}),
   sample_count: z.number().int().min(1).default(1),
+};
+
+const sampleSelectionShape = (allSamples: boolean, perSample: boolean) => ({
+  ...sampleListShape,
   all_samples: z.boolean().default(allSamples),
   /**
    * Runs the samples one at a time, each with only its own conversations: the run stage imports
@@ -64,23 +82,46 @@ const longMemEvalSSchema = z.object({
   distractor_sessions: z.number().int().min(0).default(1),
 });
 
-const longMemEvalV2Schema = z.object({
-  base_url: z
-    .string()
-    .default('https://huggingface.co/datasets/xiaowu0162/longmemeval-v2/resolve/main'),
-  agent: agentSchema.default({ id: 'workarena-agent', name: 'ServiceNow agent' }),
-  /** In the small tier every enterprise question shares one haystack, so all of them cost no more. */
-  ...sampleSelectionShape(true, false),
-  haystack: z.enum(['small', 'medium']).default('small'),
-  /** Imports only the first trajectories of the samples' haystacks, for a quicker run. */
-  max_trajectories: z.number().int().min(1).optional(),
-  /** Characters kept of each page the agent saw. */
-  max_observation_chars: z.number().int().min(0).default(600),
-  include_abstention: z.boolean().default(false),
-  include_image_questions: z.boolean().default(false),
-  /** Trajectories carry no times; the first one starts here and each next one an hour later. */
-  start_time: z.string().default('2026-01-05T09:00:00.000Z'),
+/**
+ * A LongMemEval-V2 domain. In the small tier all questions of a domain share one haystack of 100
+ * trajectories, so by default every sample runs, on that one haystack. In the medium tier each
+ * question has its own haystack of about 500, so by default one sample runs, on its own haystack.
+ */
+const longMemEvalV2SchemaOf = (agent: z.infer<typeof agentSchema>) =>
+  z
+    .object({
+      base_url: z
+        .string()
+        .default('https://huggingface.co/datasets/xiaowu0162/longmemeval-v2/resolve/main'),
+      agent: agentSchema.default(agent),
+      ...sampleListShape,
+      /** Defaults to true in the small tier and false in the medium one. */
+      all_samples: z.boolean().optional(),
+      /** Defaults to false in the small tier and true in the medium one. */
+      per_sample: z.boolean().optional(),
+      haystack: z.enum(LONGMEMEVAL_V2_HAYSTACKS).default('small'),
+      /** Only the questions about these environments, such as webarena-reddit; all when empty. */
+      environments: z.array(z.string()).default([]),
+      /** Imports only the first trajectories of the samples' haystacks, for a quicker run. */
+      max_trajectories: z.number().int().min(1).optional(),
+      /** Characters kept of each page the agent saw. */
+      max_observation_chars: z.number().int().min(0).default(600),
+      include_abstention: z.boolean().default(false),
+      include_image_questions: z.boolean().default(false),
+      /** Trajectories carry no times; the first one starts here and each next one an hour later. */
+      start_time: z.string().default('2026-01-05T09:00:00.000Z'),
+    })
+    .transform(({ all_samples: allSamples, per_sample: perSample, ...rest }) => ({
+      ...rest,
+      all_samples: allSamples ?? rest.haystack === 'small',
+      per_sample: perSample ?? rest.haystack === 'medium',
+    }));
+
+const longMemEvalV2EnterpriseSchema = longMemEvalV2SchemaOf({
+  id: 'workarena-agent',
+  name: 'ServiceNow agent',
 });
+const longMemEvalV2WebSchema = longMemEvalV2SchemaOf({ id: 'webarena-agent', name: 'Web agent' });
 
 const dreamingSchema = z
   .object({
@@ -150,11 +191,15 @@ const configSchema = z.object({
   datasets: z
     .object({
       longmemeval_s: longMemEvalSSchema.default(longMemEvalSSchema.parse({})),
-      longmemeval_v2_enterprise: longMemEvalV2Schema.default(longMemEvalV2Schema.parse({})),
+      longmemeval_v2_enterprise: longMemEvalV2EnterpriseSchema.default(
+        longMemEvalV2EnterpriseSchema.parse({})
+      ),
+      longmemeval_v2_web: longMemEvalV2WebSchema.default(longMemEvalV2WebSchema.parse({})),
     })
     .default({
       longmemeval_s: longMemEvalSSchema.parse({}),
-      longmemeval_v2_enterprise: longMemEvalV2Schema.parse({}),
+      longmemeval_v2_enterprise: longMemEvalV2EnterpriseSchema.parse({}),
+      longmemeval_v2_web: longMemEvalV2WebSchema.parse({}),
     }),
   ai_indices: z.array(aiIndexSchema).min(1),
   run: z
@@ -191,7 +236,7 @@ const configSchema = z.object({
 export type EvalConfigFile = z.infer<typeof configSchema>;
 export type AiIndexEvalConfig = z.infer<typeof aiIndexSchema>;
 export type LongMemEvalSConfig = z.infer<typeof longMemEvalSSchema>;
-export type LongMemEvalV2Config = z.infer<typeof longMemEvalV2Schema>;
+export type LongMemEvalV2Config = z.output<typeof longMemEvalV2EnterpriseSchema>;
 
 export interface EvalConfig extends EvalConfigFile {
   /** Absolute paths. */
@@ -311,15 +356,14 @@ export const withSampleOverrides = (
     ...(allSamples && { all_samples: true }),
     ...(perSample && { per_sample: true }),
   });
+  const pick = <K extends DatasetName>(name: K): EvalConfig['datasets'][K] =>
+    datasets.includes(name) ? override(config.datasets[name]) : config.datasets[name];
   return {
     ...config,
     datasets: {
-      longmemeval_s: datasets.includes('longmemeval_s')
-        ? override(config.datasets.longmemeval_s)
-        : config.datasets.longmemeval_s,
-      longmemeval_v2_enterprise: datasets.includes('longmemeval_v2_enterprise')
-        ? override(config.datasets.longmemeval_v2_enterprise)
-        : config.datasets.longmemeval_v2_enterprise,
+      longmemeval_s: pick('longmemeval_s'),
+      longmemeval_v2_enterprise: pick('longmemeval_v2_enterprise'),
+      longmemeval_v2_web: pick('longmemeval_v2_web'),
     },
   };
 };
@@ -363,3 +407,7 @@ export const runDirOf = (config: EvalConfig, runId: string, aiIndexId: string): 
 
 export const datasetDirOf = (config: EvalConfig, dataset: DatasetName): string =>
   path.join(config.dataDir, dataset);
+
+/** Where the LongMemEval-V2 downloads go, shared by its domains. */
+export const longMemEvalV2DirOf = (config: EvalConfig): string =>
+  path.join(config.dataDir, 'longmemeval_v2');

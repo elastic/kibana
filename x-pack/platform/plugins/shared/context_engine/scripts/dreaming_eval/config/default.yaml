@@ -101,16 +101,37 @@ datasets:
     sessions: haystack
     distractor_sessions: 1
 
-  # ServiceNow agent trajectories (https://github.com/xiaowu0162/LongMemEval-V2, WorkArena). In the
-  # small tier all enterprise questions share one haystack of 100 trajectories, so every sample
-  # costs no more than one.
+  # LongMemEval-V2 (https://github.com/xiaowu0162/LongMemEval-V2): a web agent's task trajectories,
+  # one dataset per domain. haystack: small (all questions of a domain share one haystack of 100
+  # trajectories, so by default every sample runs, on that one) or medium (each question has its
+  # own haystack of about 500, so by default one sample runs, on its own; per_sample). The
+  # trajectories file (1.2 GB) is downloaded once, for both domains.
+  #
+  # ServiceNow (WorkArena): 211 questions.
   longmemeval_v2_enterprise:
     agent: { id: workarena-agent, name: ServiceNow agent }
     samples: []
     sample_count: 1
-    all_samples: true
+    # all_samples: true     # default: true for small, false for medium
+    # per_sample: false     # default: false for small, true for medium
     haystack: small
-    # max_trajectories: 20
+    # max_trajectories: 20  # per sample's haystack
+    max_observation_chars: 600
+    include_abstention: false
+    # Every errors-gotchas question has a screenshot, so the category runs only with this set; the
+    # answers are text, and the agent gets only the question text.
+    include_image_questions: false
+    start_time: '2026-01-05T09:00:00.000Z'
+
+  # WebArena sites: a Postmill forum (webarena-reddit, 91 questions), a Magento admin (webarena-cms,
+  # 83) and a Magento shop (webarena-onestopshop, 66). One haystack holds the trajectories of all
+  # three; environments picks the questions of some of them.
+  longmemeval_v2_web:
+    agent: { id: webarena-agent, name: Web agent }
+    samples: []
+    sample_count: 1
+    haystack: small
+    environments: []        # such as [webarena-reddit]
     max_observation_chars: 600
     include_abstention: false
     include_image_questions: false
@@ -174,3 +195,40 @@ ai_indices:
           description: A page is part of a module.
         - type: uses
           description: A protocol uses a module or page.
+
+  - id: dreaming-eval-webarena
+    description: How three websites work (a forum, a shop and its admin), from the runs of an agent working in them.
+    datasets: [longmemeval_v2_web]
+    dreaming:
+      instructions: |-
+        An agent works in three websites: a Postmill forum (like Reddit), a Magento online shop, and the shop's Magento admin. It posts, votes and moderates on the forum, finds and buys products in the shop, and looks up orders, customers, products and reports in the admin. Record what a colleague would need to know to do the same work: the steps that complete each recurring task, where things are on each site, the values the sites hold (forums and their users, products and their prices, orders, customers, report figures), and what goes wrong and how to avoid it. Keep exact site, page, menu, field, button, filter and option names, and exact names, prices and numbers.
+
+        Learn from failed runs as well as successful ones: a step that failed is a gotcha, and what worked instead is the procedure.
+
+        Skip:
+        - Ids and values that only matter to one task.
+        - Page layout details that are the same on every page, such as the navigation bar.
+      facts:
+        - type: procedure
+          description: The steps or pages that complete a recurring task, such as "find a customer's orders under Sales, then Orders, filtered by email".
+        - type: gotcha
+          description: Something that goes wrong on a site and how to avoid it, such as "the shop search needs the exact product name".
+        - type: ui_location
+          description: Where something is on a site, such as "the forum's Sort by menu holds Top, New and Hot".
+        - type: site_value
+          description: A value a site holds, such as "the Bluetooth speaker costs $24.99 in the shop".
+      entities:
+        nodes:
+          - type: site
+            description: One of the websites, such as the forum, the shop or the admin.
+          - type: page
+            description: A page or section of a site.
+            attributes: [site]
+          - type: forum
+            description: A forum (subreddit) of the Postmill site.
+          - type: product
+            description: A product the shop sells.
+            attributes: [price]
+      relationships:
+        - type: part_of
+          description: A page or forum is part of a site.

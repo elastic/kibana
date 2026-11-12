@@ -15,6 +15,7 @@ import {
   selectTrajectoryIds,
   targetsOf,
   trajectoryIdOfLine,
+  haystackFileOf,
   trajectoryToConversation,
 } from './longmemeval_v2';
 
@@ -27,12 +28,16 @@ const options: LongMemEvalV2Config = {
   all_samples: true,
   per_sample: false,
   haystack: 'small',
-  max_trajectories: 3,
+  environments: [],
+  max_trajectories: 2,
   max_observation_chars: 600,
   include_abstention: false,
   include_image_questions: false,
   start_time: '2026-01-05T09:00:00.000Z',
 };
+
+const ENTERPRISE = 'longmemeval_v2_enterprise';
+const WEB = 'longmemeval_v2_web';
 
 const question = (id: string, overrides: Partial<LmeV2Question> = {}): LmeV2Question => ({
   id,
@@ -55,8 +60,8 @@ const tree = (title: string, content: string[]) =>
     "\t[46] generic, live='assertive'",
   ].join('\n');
 
-describe('LongMemEval-V2 enterprise', () => {
-  it("imports the samples' haystacks, in order and once, up to max_trajectories", () => {
+describe('LongMemEval-V2', () => {
+  it("imports the samples' haystacks, in order and once, each up to max_trajectories", () => {
     const haystack = { a: ['t1', 't2'], b: ['t2', 't3', 't4'] };
     const samples = [question('a'), question('b')];
 
@@ -67,21 +72,51 @@ describe('LongMemEval-V2 enterprise', () => {
     expect(selectTrajectoryIds([question('a')], haystack, options)).toEqual(['t1', 't2']);
   });
 
-  it('picks the first samples, or the listed ones, among the enterprise questions', () => {
+  it('picks the first samples, or the listed ones, among the questions of its domain', () => {
     const questions = [question('a'), question('b'), question('w', { domain: 'web' })];
+    const ids = (selected: LmeV2Question[]) => selected.map(({ id }) => id);
 
-    expect(
-      selectQuestions(questions, { ...options, all_samples: false }).map(({ id }) => id)
-    ).toEqual(['a']);
-    expect(selectQuestions(questions, { ...options, samples: ['b'] }).map(({ id }) => id)).toEqual([
+    expect(ids(selectQuestions(questions, { ...options, all_samples: false }, ENTERPRISE))).toEqual(
+      ['a']
+    );
+    expect(ids(selectQuestions(questions, { ...options, samples: ['b'] }, ENTERPRISE))).toEqual([
       'b',
     ]);
-    expect(() => selectQuestions(questions, { ...options, samples: ['w'] })).toThrow(
+    expect(() => selectQuestions(questions, { ...options, samples: ['w'] }, ENTERPRISE)).toThrow(
       'longmemeval_v2_enterprise has no samples w'
     );
+    expect(ids(selectQuestions(questions, options, WEB))).toEqual(['w']);
   });
 
-  it('targets enterprise questions without images or abstention unless asked', () => {
+  it('takes only the questions about the listed environments', () => {
+    const questions = [
+      question('r', { domain: 'web', environment: 'webarena-reddit' }),
+      question('c', { domain: 'web', environment: 'webarena-cms' }),
+      question('s', { domain: 'web', environment: 'webarena-onestopshop' }),
+    ];
+    const ids = (selected: LmeV2Question[]) => selected.map(({ id }) => id);
+
+    expect(
+      ids(
+        selectQuestions(
+          questions,
+          { ...options, environments: ['webarena-reddit', 'webarena-onestopshop'] },
+          WEB
+        )
+      )
+    ).toEqual(['r', 's']);
+    expect(
+      ids(
+        selectQuestions(
+          questions,
+          { ...options, environments: ['webarena-cms'], samples: ['r'] },
+          WEB
+        )
+      )
+    ).toEqual(['r']);
+  });
+
+  it('targets questions without images or abstention unless asked', () => {
     const questions = [
       question('a'),
       question('abs', { question_type: 'procedure-abs' }),
@@ -89,15 +124,18 @@ describe('LongMemEval-V2 enterprise', () => {
       question('w', { domain: 'web' }),
     ];
 
-    expect(selectQuestions(questions, options).map(({ id }) => id)).toEqual(['a']);
+    expect(selectQuestions(questions, options, ENTERPRISE).map(({ id }) => id)).toEqual(['a']);
     expect(
-      selectQuestions(questions, {
-        ...options,
-        include_abstention: true,
-        include_image_questions: true,
-      }).map(({ id }) => id)
+      selectQuestions(
+        questions,
+        { ...options, include_abstention: true, include_image_questions: true },
+        ENTERPRISE
+      ).map(({ id }) => id)
     ).toEqual(['a', 'abs', 'img']);
-    expect(targetsOf([question('a')])).toEqual([
+    expect(targetsOf([question('w', { domain: 'web' })], WEB)[0].dataset).toBe(
+      'longmemeval_v2_web'
+    );
+    expect(targetsOf([question('a')], ENTERPRISE)).toEqual([
       {
         id: 'a',
         dataset: 'longmemeval_v2_enterprise',
@@ -106,6 +144,11 @@ describe('LongMemEval-V2 enterprise', () => {
         answer: 'Answer a',
       },
     ]);
+  });
+
+  it('reads the haystack file of each tier', () => {
+    expect(haystackFileOf('small')).toBe('lme_v2_small.json');
+    expect(haystackFileOf('medium')).toBe('lme_v2_medium.json');
   });
 
   it('reads the id at the start of a trajectories line', () => {

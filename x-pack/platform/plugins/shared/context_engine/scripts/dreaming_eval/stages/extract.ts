@@ -7,14 +7,14 @@
 
 import fs from 'fs';
 import path from 'path';
-import type { DatasetName } from '../config';
-import { datasetDirOf } from '../config';
+import type { DatasetName, LongMemEvalV2Config, LongMemEvalV2Dataset } from '../config';
+import { datasetDirOf, longMemEvalV2DirOf } from '../config';
 import type { StageContext } from '../context';
 import {
   downloadFile,
   readJson,
+  streamFileLines,
   streamJsonArrayFile,
-  streamRemoteLines,
   writeJson,
 } from '../download';
 import type { LongMemEvalRecord } from '../datasets/longmemeval_s';
@@ -22,7 +22,7 @@ import * as longMemEvalS from '../datasets/longmemeval_s';
 import type { LmeV2Haystack, LmeV2Question, LmeV2Trajectory } from '../datasets/longmemeval_v2';
 import * as longMemEvalV2 from '../datasets/longmemeval_v2';
 import { generatedTargetsFileOf } from '../targets';
-import type { ExtractedDataset } from '../types';
+import type { EvalConversation, ExtractedDataset } from '../types';
 
 export const extractedFileOf = (dir: string): string => path.join(dir, 'extracted.json');
 
@@ -51,30 +51,30 @@ const extractLongMemEvalS = async (context: StageContext): Promise<ExtractedData
   };
 };
 
-/** Reads the selected trajectories, streaming the large trajectories file once per selection. */
-const readTrajectories = async (
-  context: StageContext,
-  url: string,
+/**
+ * The selected trajectories as conversations, in the order of `ids`. Streams the trajectories
+ * file (1.2 GB) and converts each trajectory as it is read, so only the conversations are kept.
+ */
+const readConversations = async (
+  file: string,
   ids: string[],
-  cacheFile: string
-): Promise<LmeV2Trajectory[]> => {
-  const wanted = new Set(ids);
-  const cached = fs.existsSync(cacheFile) ? readJson<LmeV2Trajectory[]>(cacheFile) : [];
-  if (!context.forceDownload && ids.every((id) => cached.some((t) => t.id === id))) {
-    context.log.debug(`Using selected trajectories in ${cacheFile}`);
-    return ids.flatMap((id) => cached.find((t) => t.id === id) ?? []);
-  }
-  context.log.info(`Streaming ${url} for ${wanted.size} trajectories (1.2 GB, kept only in part)`);
-  const found = new Map<string, LmeV2Trajectory>();
-  for await (const line of streamRemoteLines(url)) {
+  options: LongMemEvalV2Config
+): Promise<EvalConversation[]> => {
+  const order = new Map(ids.map((id, index) => [id, index]));
+  const found = new Map<string, EvalConversation>();
+  for await (const line of streamFileLines(file)) {
     const id = longMemEvalV2.trajectoryIdOfLine(line);
-    if (id !== undefined && !wanted.has(id)) {
+    if (id !== undefined && !order.has(id)) {
       continue;
     }
     const trajectory = JSON.parse(line) as LmeV2Trajectory;
-    if (wanted.has(trajectory.id)) {
-      found.set(trajectory.id, trajectory);
-      if (found.size === wanted.size) {
+    const position = order.get(trajectory.id);
+    if (position !== undefined) {
+      found.set(
+        trajectory.id,
+        longMemEvalV2.trajectoryToConversation(trajectory, position, options)
+      );
+      if (found.size === order.size) {
         break;
       }
     }
@@ -83,15 +83,16 @@ const readTrajectories = async (
   if (missing.length > 0) {
     throw new Error(`trajectories.jsonl has no trajectories ${missing.slice(0, 5).join(', ')}…`);
   }
-  const selected = ids.flatMap((id) => found.get(id) ?? []);
-  writeJson(cacheFile, selected);
-  return selected;
+  return ids.flatMap((id) => found.get(id) ?? []);
 };
 
-const extractLongMemEvalV2 = async (context: StageContext): Promise<ExtractedDataset> => {
+const extractLongMemEvalV2 = async (
+  context: StageContext,
+  dataset: LongMemEvalV2Dataset
+): Promise<ExtractedDataset> => {
   const { config, log, forceDownload } = context;
-  const options = config.datasets.longmemeval_v2_enterprise;
-  const dir = datasetDirOf(config, 'longmemeval_v2_enterprise');
+  const options = config.datasets[dataset];
+  const dir = longMemEvalV2DirOf(config);
   const download = (name: string) =>
     downloadFile({
       url: `${options.base_url}/${name}`,
@@ -105,9 +106,9 @@ const extractLongMemEvalV2 = async (context: StageContext): Promise<ExtractedDat
     .filter((line) => line.trim())
     .map((line) => JSON.parse(line) as LmeV2Question);
   const haystack = readJson<LmeV2Haystack>(
-    await download(`haystacks/lme_v2_${options.haystack}.json`)
+    await download(`haystacks/${longMemEvalV2.haystackFileOf(options.haystack)}`)
   );
-  const selectedQuestions = longMemEvalV2.selectQuestions(questions, options);
+  const selectedQuestions = longMemEvalV2.selectQuestions(questions, options, dataset);
   const ids = longMemEvalV2.selectTrajectoryIds(selectedQuestions, haystack, options);
   const haystackSize = longMemEvalV2.selectTrajectoryIds(selectedQuestions, haystack, {
     ...options,
@@ -118,32 +119,32 @@ const extractLongMemEvalV2 = async (context: StageContext): Promise<ExtractedDat
       `Importing ${ids.length} of the ${haystackSize} trajectories the samples are asked over (max_trajectories): some targets may not be learnable.`
     );
   }
-  const trajectories = await readTrajectories(
-    context,
-    `${options.base_url}/trajectories.jsonl`,
-    ids,
-    path.join(dir, 'trajectories.selected.json')
+  log.info(
+    `Reading ${ids.length} trajectories of the ${options.haystack} haystack${
+      options.per_sample ? 's' : ''
+    } from trajectories.jsonl`
   );
+  const conversations = await readConversations(await download('trajectories.jsonl'), ids, options);
   return {
-    dataset: longMemEvalV2.LONGMEMEVAL_V2_ENTERPRISE_DATASET,
+    dataset,
     samples: selectedQuestions.map(({ id }) => id),
     sampleConversations: Object.fromEntries(
       selectedQuestions.map((question) => [
         question.id,
-        (haystack[question.id] ?? []).filter((id) => ids.includes(id)),
+        (haystack[question.id] ?? []).slice(0, options.max_trajectories),
       ])
     ),
     agent: options.agent,
-    conversations: trajectories.map((trajectory, order) =>
-      longMemEvalV2.trajectoryToConversation(trajectory, order, options)
-    ),
-    targets: longMemEvalV2.targetsOf(selectedQuestions),
+    conversations,
+    targets: longMemEvalV2.targetsOf(selectedQuestions, dataset),
   };
 };
 
 const EXTRACTORS: Record<DatasetName, (context: StageContext) => Promise<ExtractedDataset>> = {
   longmemeval_s: extractLongMemEvalS,
-  longmemeval_v2_enterprise: extractLongMemEvalV2,
+  longmemeval_v2_enterprise: (context) =>
+    extractLongMemEvalV2(context, 'longmemeval_v2_enterprise'),
+  longmemeval_v2_web: (context) => extractLongMemEvalV2(context, 'longmemeval_v2_web'),
 };
 
 /** The datasets the selected AI indices dream over. */

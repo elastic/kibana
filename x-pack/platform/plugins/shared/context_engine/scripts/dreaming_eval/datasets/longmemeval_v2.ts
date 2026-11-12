@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { LongMemEvalV2Config } from '../config';
+import type { LongMemEvalV2Config, LongMemEvalV2Dataset, LongMemEvalV2Haystack } from '../config';
+import { LONGMEMEVAL_V2_DOMAINS } from '../config';
 import type { EvalConversation, EvalStep, EvalTarget } from '../types';
 import { pickSamples } from './samples';
 
-export const LONGMEMEVAL_V2_ENTERPRISE_DATASET = 'longmemeval_v2_enterprise';
-
-const DOMAIN = 'enterprise';
+/** The file of a haystack tier, under `haystacks/`. */
+export const haystackFileOf = (tier: LongMemEvalV2Haystack): string => `lme_v2_${tier}.json`;
 
 /** A line of `questions.jsonl`. */
 export interface LmeV2Question {
@@ -52,7 +52,7 @@ const TOOL_NAME = 'browser';
 
 /**
  * The trajectories of the selected samples, in order and once: the union of their haystacks (in
- * the small tier every enterprise question shares one), cut to `max_trajectories` when set.
+ * the small tier all questions of a domain share one), each cut to `max_trajectories` when set.
  */
 export const selectTrajectoryIds = (
   questions: LmeV2Question[],
@@ -61,29 +61,34 @@ export const selectTrajectoryIds = (
 ): string[] => {
   const ids = new Set<string>();
   for (const question of questions) {
-    for (const id of haystack[question.id] ?? []) {
+    for (const id of (haystack[question.id] ?? []).slice(0, limit)) {
       ids.add(id);
     }
   }
-  return [...ids].slice(0, limit);
+  return [...ids];
 };
 
-/** The samples to evaluate: enterprise questions, each asked over its haystack of trajectories. */
+/**
+ * The samples to evaluate: the questions of the dataset's domain, each asked over its haystack of
+ * trajectories. Listed samples are taken whatever their type, environment or image.
+ */
 export const selectQuestions = (
   questions: LmeV2Question[],
-  options: LongMemEvalV2Config
+  options: LongMemEvalV2Config,
+  dataset: LongMemEvalV2Dataset
 ): LmeV2Question[] => {
-  const enterprise = questions.filter(({ domain }) => domain === DOMAIN);
+  const inDomain = questions.filter(({ domain }) => domain === LONGMEMEVAL_V2_DOMAINS[dataset]);
   return pickSamples(
-    enterprise.filter(
-      ({ question_type: type, image }) =>
+    inDomain.filter(
+      ({ question_type: type, image, environment }) =>
         (options.include_abstention || !type.endsWith('-abs')) &&
-        (options.include_image_questions || image === null)
+        (options.include_image_questions || image === null) &&
+        (options.environments.length === 0 || options.environments.includes(environment))
     ),
-    enterprise,
+    inDomain,
     ({ id }) => id,
     options,
-    LONGMEMEVAL_V2_ENTERPRISE_DATASET
+    dataset
   );
 };
 
@@ -179,10 +184,13 @@ export const trajectoryToConversation = (
   };
 };
 
-export const targetsOf = (questions: LmeV2Question[]): EvalTarget[] =>
+export const targetsOf = (
+  questions: LmeV2Question[],
+  dataset: LongMemEvalV2Dataset
+): EvalTarget[] =>
   questions.map((question) => ({
     id: question.id,
-    dataset: LONGMEMEVAL_V2_ENTERPRISE_DATASET,
+    dataset,
     category: question.question_type,
     question: question.question,
     answer: question.answer,

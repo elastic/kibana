@@ -191,10 +191,10 @@ run(
   },
   {
     description: `
-      Evaluates Context Engine dreaming on agent conversations. Extracts LongMemEval S chats and
-      LongMemEval-V2 enterprise (ServiceNow) trajectories, imports them as Agent Builder OTel
-      traces, configures AI indices that dream on them, runs their workflows from a clean slate,
-      dumps the KIs they write, and judges them against target knowledge.
+      Evaluates Context Engine dreaming on agent conversations. Extracts LongMemEval chats and
+      LongMemEval-V2 web agent trajectories (ServiceNow, and WebArena sites), imports them as
+      Agent Builder OTel traces, configures AI indices that dream on them, runs their workflows
+      from a clean slate, dumps the KIs they write, and judges them against target knowledge.
 
       Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run but load,
       ask and cleanup. Load writes KIs someone else dreamed (--from) to the AI index, to try
