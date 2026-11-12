@@ -11,6 +11,7 @@ import {
   getDreamingStatusStepCommonDefinition,
   type GetDreamingStatusOutput,
 } from '../../common/step_types/get_dreaming_status';
+import { dreamingTypesOf } from '../../common/dreaming';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { shouldDream } from '../dreaming/schedule';
 import type { DreamingStepDependencies } from './helpers';
@@ -49,6 +50,12 @@ export const getDreamingStatusStepDefinition = ({
         }
         if (source === 'traces' && aiIndex.traces.length === 0) {
           return skip(`AI index '${aiIndexId}' has no trace sources to dream on.`);
+        }
+        if (
+          source === 'relationships' &&
+          (!aiIndex.dreaming || dreamingTypesOf(aiIndex.dreaming).relationships.length === 0)
+        ) {
+          return skip(`AI index '${aiIndexId}' has no relationship types to link with.`);
         }
       } catch (error) {
         if (error instanceof AiIndexNotFoundError) {
