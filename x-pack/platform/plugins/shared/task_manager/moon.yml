@@ -73,9 +73,11 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - common/**/*
+    - scripts/**/*
     - test/scout/**/*
     - test/scout_service_accounts/**/*
     - test/scout_uiam_local/**/*
     - test/scout_task_manager_claim_nudge/**/*
+    - test/scout_task_manager_adaptive_capacity/**/*
     - '!target/**/*'
 tasks: {}

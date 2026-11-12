@@ -13,6 +13,7 @@ export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_CAPACITY = 10;
 export const MAX_CAPACITY = 50;
 export const MIN_CAPACITY = 5;
+export const AUTO_CAPACITY = 'auto';
 export const DEFAULT_MAX_WORKERS = 10;
 export const MGET_DEFAULT_POLL_INTERVAL = 500;
 export const LOW_UTILIZATION_POLL_INTERVAL = 3000;
@@ -102,8 +103,23 @@ export const configSchema = schema.object(
     }),
     /* Whether Task Manager should grant and persist UIAM API keys. Usage of granted UIAM keys is still governed by api_key_type. */
     grant_uiam_api_keys: schema.boolean({ defaultValue: false }),
-    /* The number of normal cost tasks that this Kibana instance will run simultaneously */
-    capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
+    /* The number of normal cost tasks that this Kibana instance will run simultaneously, or `auto` to size it from heap headroom */
+    capacity: schema.maybe(
+      schema.oneOf([
+        schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY }),
+        schema.literal(AUTO_CAPACITY),
+      ])
+    ),
+    /* Bounds for `capacity: auto`; ignored when capacity is a number. The rest of the controller's tuning is fixed, see `lib/adaptive_capacity/constants.ts` */
+    adaptive_capacity: schema.object({
+      /* Never below the cost of the largest task so one can always be claimed */
+      min_capacity: schema.number({
+        min: MIN_CAPACITY,
+        max: MAX_CAPACITY,
+        defaultValue: MIN_CAPACITY,
+      }),
+      max_capacity: schema.number({ min: 1, max: MAX_CAPACITY, defaultValue: MAX_CAPACITY }),
+    }),
     /* Lets `runSoon(..., { requestImmediateClaim: true })` request an extra claim cycle. */
     claim_nudge: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -234,6 +250,9 @@ export const configSchema = schema.object(
   },
   {
     validate: (config) => {
+      if (config.adaptive_capacity.min_capacity > config.adaptive_capacity.max_capacity) {
+        return `adaptive_capacity.min_capacity (${config.adaptive_capacity.min_capacity}) cannot exceed adaptive_capacity.max_capacity (${config.adaptive_capacity.max_capacity})`;
+      }
       if (
         config.monitored_stats_required_freshness &&
         config.poll_interval &&

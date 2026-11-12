@@ -406,6 +406,249 @@ describe('TaskClaiming', () => {
       expect(result).toMatchObject({});
     });
 
+    test('should limit claimed tasks by the heap budget when a memory gate is given', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }), // 60 MB, always admitted
+        mockInstance({ id: `id-2`, taskType: 'report' }), // 120 MB total, within the 150 MB budget
+        mockInstance({ id: `id-3`, taskType: 'report' }), // would exceed the budget, skipped
+        mockInstance({ id: `id-4`, taskType: 'report' }), // also skipped, capacity is still open
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      store.bulkGet.mockResolvedValueOnce([fetchedTasks[0], fetchedTasks[1]].map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1]].map(getPartialUpdateResult)
+      );
+
+      const MB = 1024 * 1024;
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        getMemoryGate: () => ({
+          budgetBytes: 150 * MB,
+          lightTaskBytes: 0,
+          reservedBytes: 0,
+          seed: () => false,
+          estimateBytes: () => 60 * MB,
+        }),
+        taskPartitioner,
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 0; capacity reached: 2; updateErrors: 0; getErrors: 0; malformed data errors: 0; heap budget: 150 MB, planned: 120 MB, reserved: 0 MB, heap limited: 2, seeded: 0',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+      expect(store.bulkPartialUpdate.mock.calls[0][0].map((task) => task.id)).toEqual([
+        'id-1',
+        'id-2',
+      ]);
+      expect(result.stats).toMatchObject({ tasksClaimed: 2, tasksLeftUnclaimed: 2 });
+    });
+
+    test('should admit light tasks against capacity only and skip heavy ones over budget', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `heavy-1`, taskType: 'report' }), // 120 MB, over the 100 MB budget: skipped
+        mockInstance({ id: `heavy-2`, taskType: 'report' }), // skipped as well
+        mockInstance({ id: `light-1`, taskType: 'report' }), // 1 MB, light: admitted
+        mockInstance({ id: `light-2`, taskType: 'report' }), // light: admitted
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      const admitted = [fetchedTasks[2], fetchedTasks[3]];
+      store.bulkGet.mockResolvedValueOnce(admitted.map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce(admitted.map(getPartialUpdateResult));
+
+      const MB = 1024 * 1024;
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        getMemoryGate: () => ({
+          budgetBytes: 100 * MB,
+          lightTaskBytes: 8 * MB,
+          reservedBytes: 0,
+          seed: () => false,
+          estimateBytes: (id) => (id.startsWith('heavy') ? 120 * MB : MB),
+        }),
+        taskPartitioner,
+      });
+
+      const result = unwrap(
+        await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+          claimOwnershipUntil: new Date(),
+        })
+      ) as ClaimOwnershipResult;
+
+      expect(store.bulkPartialUpdate.mock.calls[0][0].map((task) => task.id)).toEqual([
+        'light-1',
+        'light-2',
+      ]);
+      expect(result.stats).toMatchObject({ tasksClaimed: 2, tasksLeftUnclaimed: 2 });
+    });
+
+    test('should budget candidates from the estimate on their documents', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const MB = 1024 * 1024;
+      const updatedAt = '2026-11-05T00:00:00.000Z';
+      const fetchedTasks = [
+        mockInstance({
+          id: `heavy-1`,
+          taskType: 'report',
+          memoryEstimate: { bytes: 120 * MB, samples: 3, updatedAt },
+        }),
+        mockInstance({
+          id: `light-1`,
+          taskType: 'report',
+          memoryEstimate: { bytes: MB, samples: 3, updatedAt },
+        }),
+        mockInstance({ id: `unknown-1`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      const admitted = [fetchedTasks[1]];
+      store.bulkGet.mockResolvedValueOnce(admitted.map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce(admitted.map(getPartialUpdateResult));
+
+      const seeded = new Map<string, number>();
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        getMemoryGate: () => ({
+          budgetBytes: 100 * MB,
+          lightTaskBytes: 8 * MB,
+          reservedBytes: 0,
+          seed: (id, _type, _cost, estimate) => {
+            seeded.set(id, estimate.bytes);
+            return true;
+          },
+          // an instance without a seed is priced at the cold-start default
+          estimateBytes: (id) => seeded.get(id) ?? 128 * MB,
+        }),
+        taskPartitioner,
+      });
+
+      const result = unwrap(
+        await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+          claimOwnershipUntil: new Date(),
+        })
+      ) as ClaimOwnershipResult;
+
+      expect([...seeded.keys()]).toEqual(['heavy-1', 'light-1']);
+      expect(store.bulkPartialUpdate.mock.calls[0][0].map((task) => task.id)).toEqual(['light-1']);
+      expect(result.stats).toMatchObject({ tasksClaimed: 1, tasksLeftUnclaimed: 2 });
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('heap limited: 2, seeded: 2'),
+        expect.anything()
+      );
+    });
+
+    test('should admit no heavy task when the heap budget is exhausted', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [mockInstance({ id: `id-1`, taskType: 'report' })];
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      store.bulkGet.mockResolvedValueOnce([]);
+      store.bulkPartialUpdate.mockResolvedValueOnce([]);
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        getMemoryGate: () => ({
+          budgetBytes: 0,
+          lightTaskBytes: 0,
+          reservedBytes: 0,
+          seed: () => false,
+          estimateBytes: () => 500 * 1024 * 1024,
+        }),
+        taskPartitioner,
+      });
+
+      const result = unwrap(
+        await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+          claimOwnershipUntil: new Date(),
+        })
+      ) as ClaimOwnershipResult;
+      expect(result.stats).toMatchObject({ tasksClaimed: 0, tasksLeftUnclaimed: 1 });
+    });
+
+    test('should skip a heavy task that exceeds the remaining budget even when it is the first candidate', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [mockInstance({ id: `id-1`, taskType: 'report' })];
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      store.bulkGet.mockResolvedValueOnce([]);
+      store.bulkPartialUpdate.mockResolvedValueOnce([]);
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        getMemoryGate: () => ({
+          budgetBytes: 100 * 1024 * 1024,
+          lightTaskBytes: 0,
+          reservedBytes: 0,
+          seed: () => false,
+          estimateBytes: () => 500 * 1024 * 1024,
+        }),
+        taskPartitioner,
+      });
+
+      const result = unwrap(
+        await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+          claimOwnershipUntil: new Date(),
+        })
+      ) as ClaimOwnershipResult;
+      expect(result.stats).toMatchObject({ tasksClaimed: 0, tasksLeftUnclaimed: 1 });
+    });
+
     test('should limit claimed tasks based on task cost and available capacity', async () => {
       const store = taskStoreMock.create({ taskManagerId: 'test-test' });
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));

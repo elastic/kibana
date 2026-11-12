@@ -6,4 +6,5 @@
  */
 
 export { TaskPool, TaskPoolRunResult } from './task_pool';
+export type { RunningTaskSnapshot } from './task_pool';
 export { getCapacityInCost, getCapacityInWorkers } from './utils';

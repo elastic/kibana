@@ -184,6 +184,27 @@ describe('createTaskRunnerFactory', () => {
     expect(scope.unbindAllAsync).toHaveBeenCalledTimes(1);
   });
 
+  it('passes the Task Manager memory reporter through to the task runner', async () => {
+    const runner = new TestTaskRunner();
+    jest.spyOn(runner, 'run').mockResolvedValue({ state: {} });
+    const scope = createMockScope(runner);
+    const injectionPromise = Promise.resolve(createMockInjection(scope));
+    const memory = { reserve: jest.fn(), release: jest.fn(), report: jest.fn() };
+    const runContext = createRunContext({
+      fakeRequest: httpServerMock.createKibanaRequest(),
+      memory,
+    });
+
+    const createTaskRunner = createTaskRunnerFactory({ injectionPromise })({
+      taskRunnerClass: TestTaskRunner,
+      taskType: 'test',
+      requiresFakeRequest: true,
+    });
+    await createTaskRunner(runContext).run();
+
+    expect(runner.run).toHaveBeenCalledWith(expect.objectContaining({ memory }));
+  });
+
   it('binds the task runner in a transient scope when a fakeRequest is not required', async () => {
     const runner = new TestTaskRunner();
     const scope = createMockScope(runner);

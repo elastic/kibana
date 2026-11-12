@@ -164,3 +164,14 @@ export const taskSchemaV14 = taskSchemaV13.extends({
   ),
   encryptedCredential: schema.maybe(schema.string()),
 });
+
+export const taskSchemaV15 = taskSchemaV14.extends({
+  // Heap estimate from previous runs, written by Task Manager with adaptive capacity.
+  memoryEstimate: schema.maybe(
+    schema.object({
+      bytes: schema.number({ min: 0 }),
+      samples: schema.number({ min: 0 }),
+      updatedAt: schema.string(),
+    })
+  ),
+});

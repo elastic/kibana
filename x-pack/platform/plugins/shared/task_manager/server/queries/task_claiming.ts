@@ -22,7 +22,12 @@ import type { TaskClaim } from '../task_events';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import type { TaskStore } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
-import type { TaskClaimerOpts, TaskClaimerFn, ClaimOwnershipResult } from '../task_claimers';
+import type {
+  TaskClaimerOpts,
+  TaskClaimerFn,
+  ClaimOwnershipResult,
+  ClaimMemoryGate,
+} from '../task_claimers';
 import { getTaskClaimer } from '../task_claimers';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { createWrappedLogger } from '../lib/wrapped_logger';
@@ -38,6 +43,7 @@ export interface TaskClaimingOpts {
   maxAttempts: number;
   excludedTaskTypes: string[];
   getAvailableCapacity: (taskType?: string) => number;
+  getMemoryGate?: () => ClaimMemoryGate | undefined;
   taskPartitioner: TaskPartitioner;
   // Runtime task execution control (pause/resume). Defaults to unpaused.
   getExecutionControlState?: () => TaskExecutionControlState;
@@ -83,6 +89,7 @@ export class TaskClaiming {
   private events$: Subject<TaskClaim>;
   private taskStore: TaskStore;
   private getAvailableCapacity: (taskType?: string) => number;
+  private getMemoryGate?: () => ClaimMemoryGate | undefined;
   private logger: Logger;
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
@@ -102,6 +109,7 @@ export class TaskClaiming {
     this.maxAttempts = opts.maxAttempts;
     this.taskStore = opts.taskStore;
     this.getAvailableCapacity = opts.getAvailableCapacity;
+    this.getMemoryGate = opts.getMemoryGate;
     this.logger = createWrappedLogger({ logger: opts.logger, tags: ['taskClaiming'] });
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
@@ -180,6 +188,7 @@ export class TaskClaiming {
           taskStore: this.taskStore,
           events$: this.events$,
           getCapacity: this.getAvailableCapacity,
+          getMemoryGate: this.getMemoryGate,
           definitions: this.definitions,
           taskMaxAttempts: this.taskMaxAttempts,
           // Merge the statically-excluded task types (config) with the
