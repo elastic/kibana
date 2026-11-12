@@ -148,14 +148,23 @@ const badgeGroupStyles = () => ({
 });
 
 /** Overflow badge that reveals the collapsed badges in a popover. */
-const BadgeOverflow = ({ badges, isHidden }: { badges: ReactNode[]; isHidden: boolean }) => {
+const BadgeOverflow = ({
+  badges,
+  isForcedCollapsed,
+}: {
+  badges: ReactNode[];
+  isForcedCollapsed: boolean;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // The panel is portalled, so a collapse hides the anchor without touching it, leaving the badges
-  // floating over a control the user can no longer see or return focus to.
+  // The scroll guard keeps the header expanded while this popover is open, so only the
+  // `collapsed` prop can hide its trigger, and the portalled panel must not outlive it.
   useEffect(() => {
-    if (isHidden) setIsOpen(false);
-  }, [isHidden]);
+    if (isForcedCollapsed) {
+      setIsOpen(false);
+    }
+  }, [isForcedCollapsed]);
+
   const label = i18n.translate('sharedUXPackages.flyoutTemplate.header.badgeOverflowLabel', {
     defaultMessage: '+{count} more',
     values: { count: badges.length },
@@ -373,7 +382,7 @@ export const HeaderZone = ({
                   <EuiBadgeGroup gutterSize="s" css={badgeStyles.group}>
                     {visibleBadges}
                     {overflowBadges.length > 0 && (
-                      <BadgeOverflow badges={overflowBadges} isHidden={isCollapsed} />
+                      <BadgeOverflow badges={overflowBadges} isForcedCollapsed={collapsed} />
                     )}
                   </EuiBadgeGroup>
                 </>

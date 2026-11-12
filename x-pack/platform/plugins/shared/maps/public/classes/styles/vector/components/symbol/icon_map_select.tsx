@@ -69,7 +69,7 @@ export class IconMapSelect extends Component<Props, State> {
     isInvalid,
   }: {
     customStops: IconStop[];
-    isInvalid: boolean;
+    isInvalid?: boolean;
   }) => {
     // Manage invalid custom map in local state
     this.setState({ customIconStops: customStops });
@@ -83,9 +83,10 @@ export class IconMapSelect extends Component<Props, State> {
   };
 
   _renderCustomStopsInput() {
-    return !this.props.isCustomOnly && !this.props.useCustomIconMap ? null : (
+    const field = this.props.styleProperty.getField();
+    return (!this.props.isCustomOnly && !this.props.useCustomIconMap) || !field ? null : (
       <IconStops
-        field={this.props.styleProperty.getField()}
+        field={field}
         getValueSuggestions={this.props.styleProperty.getValueSuggestions}
         iconStops={this.state.customIconStops}
         onChange={this._onCustomMapChange}

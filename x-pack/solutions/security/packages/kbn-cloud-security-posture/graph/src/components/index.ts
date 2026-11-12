@@ -39,7 +39,12 @@ export type {
   GraphNodeType,
   GraphNodeAction,
   GraphToggleState,
+  GraphExpansionAction,
+  GraphEmptyStateReason,
+  GraphFetchErrorCategory,
+  GraphGroupedItemType,
 } from './graph_telemetry';
+export { isExpansionAction, getEmptyStateReason } from './graph_telemetry';
 export {
   isEntityNode,
   getNodeDocumentMode,

@@ -8,6 +8,7 @@
 import type { Writable } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { IVectorLayer } from '../vector_layer';
 import { GeoJsonVectorLayer } from '../geojson_vector_layer';
 import type { IVectorStyle } from '../../../styles/vector/vector_style';
@@ -17,7 +18,6 @@ import type { IDynamicStyleProperty } from '../../../styles/vector/properties/dy
 import type { IStyleProperty } from '../../../styles/vector/properties/style_property';
 import {
   COUNT_PROP_NAME,
-  GRID_RESOLUTION,
   LAYER_TYPE,
   AGG_TYPE,
   RENDER_AS,

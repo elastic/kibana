@@ -10,13 +10,28 @@ import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../common/base';
 
 export const EndpointActionGetFileSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
+  body: schema.object(
+    {
+      ...BaseActionRequestSchema,
 
-    parameters: schema.object({
-      path: schema.string({ minLength: 1, maxLength: 4096 }),
-    }),
-  }),
+      parameters: schema.object({
+        path: schema.string({ minLength: 1, maxLength: 4096 }),
+        // `force` applies only to the Elastic Defend Endpoint on Windows (validated below)
+        force: schema.maybe(schema.boolean()),
+      }),
+    },
+    {
+      validate(bodyContent) {
+        if (
+          'force' in bodyContent.parameters &&
+          bodyContent.agent_type &&
+          bodyContent.agent_type !== 'endpoint'
+        ) {
+          return `[parameters.force]: is not valid with agent type of ${bodyContent.agent_type}`;
+        }
+      },
+    }
+  ),
 };
 
 export type ResponseActionGetFileRequestBody = TypeOf<typeof EndpointActionGetFileSchema.body>;

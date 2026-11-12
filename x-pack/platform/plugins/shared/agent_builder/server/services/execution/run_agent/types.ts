@@ -27,4 +27,14 @@ export interface ResolvedConfiguration {
   aiIndices: string[];
   /** Rendered AI index catalog, in config order. Absent when the AI indices feature is off. */
   aiIndexCatalog?: AiIndexCatalogEntry[];
+  /** Built-in features this agent has on, with the "missing means on" default applied. */
+  capabilities: ResolvedCapabilities;
+}
+
+/**
+ * The resolved state of each `AgentCapabilities` key, as plain booleans.
+ */
+export interface ResolvedCapabilities {
+  /** The generic attachment tools and their system-prompt instructions. */
+  attachmentTools: boolean;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type {
   AggDescriptor,
   ColorDynamicOptions,
@@ -17,7 +18,6 @@ import {
   COLOR_MAP_TYPE,
   DEFAULT_PERCENTILE,
   FIELD_ORIGIN,
-  GRID_RESOLUTION,
   RENDER_AS,
   STYLE_TYPE,
   VECTOR_STYLES,
