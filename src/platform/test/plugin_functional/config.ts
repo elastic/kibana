@@ -65,6 +65,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud_integrations.full_story.org_id=a_string',
         ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
         `--plugin-path=${path.resolve(__dirname, '../../test_plugins/data_search')}`,
+        `--plugin-path=${path.resolve(
+          __dirname,
+          '../../test_plugins/kbn_tp_custom_visualizations'
+        )}`,
       ],
     },
   };

@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/kbn-tp-custom-visualizations-plugin
   channel: ''
   owner: '@elastic/kibana-dashboards'
-  sourceRoot: src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations
+  sourceRoot: src/platform/test_plugins/kbn_tp_custom_visualizations
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
