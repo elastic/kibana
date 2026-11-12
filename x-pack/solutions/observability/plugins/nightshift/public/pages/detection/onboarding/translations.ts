@@ -56,14 +56,14 @@ export const SELECT_SOURCES_TITLE = i18n.translate(
 );
 
 export const LOCKED_TITLE = i18n.translate('xpack.nightshift.detectionOnboarding.lockedTitle', {
-  defaultMessage: 'Detection setup requires manage access',
+  defaultMessage: 'Detection setup requires manage and configure access',
 });
 
 export const LOCKED_DESCRIPTION = i18n.translate(
   'xpack.nightshift.detectionOnboarding.lockedDescription',
   {
     defaultMessage:
-      'A user with Nightshift manage access has to set up detection for this space. Ask them to add a source.',
+      'A user with nightshift manage access and the Manage engines privilege has to set up detection for this space. Ask them to add a source.',
   }
 );
 

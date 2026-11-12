@@ -23,6 +23,8 @@ export interface ContractRequest {
   readonly body?: unknown;
   /** Why a body sent as JSON didn't parse; `body` is then its raw text. */
   readonly bodyError?: string;
+  /** Set once the request is routed to an OpenAPI operation, decoded. */
+  readonly pathParameters?: Readonly<Record<string, string>>;
 }
 
 export interface ContractResponse {
@@ -90,8 +92,10 @@ export interface ContractProtocolOptions {
 export interface ContractProtocol {
   /** The `origin` and `pathname` of each URL it answers, without a trailing slash. */
   readonly endpoints: readonly string[];
-  /** The names of the operations the spec declares, such as `query boards`. */
-  readonly operations: ReadonlySet<string>;
+  /** Every operation the spec declares, named as `ProtocolExchange.operations` names them. */
+  readonly operations: readonly NamedOperation[];
+  /** The operations a fixture or recording can answer, such as `query boards`, by name. */
+  readonly answerable: ReadonlySet<string>;
   /** Recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
   handle(request: ContractRequest): Promise<ProtocolExchange>;

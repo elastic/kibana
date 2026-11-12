@@ -347,7 +347,7 @@ describe('EndpointMetadataService', () => {
   });
 
   describe('#getAllEndpointPackagePolicies', () => {
-    it('gets all endpoint package policies', async () => {
+    it.each([false, true])('gets all endpoint package policies (aborted: %s)', async (aborted) => {
       const mockPolicy: PackagePolicy = {
         id: '1',
         policy_id: 'test-id-1',
@@ -360,9 +360,18 @@ describe('EndpointMetadataService', () => {
         page: 1,
       });
 
-      const endpointPackagePolicies = await metadataService.getAllEndpointPackagePolicies();
-      const expected: PackagePolicy[] = [mockPolicy];
-      expect(endpointPackagePolicies).toEqual(expected);
+      if (aborted) {
+        const controller = new AbortController();
+        controller.abort();
+        await expect(
+          metadataService.getAllEndpointPackagePolicies(controller.signal)
+        ).rejects.toThrow();
+        expect(mockPackagePolicyService.list).not.toHaveBeenCalled();
+      } else {
+        const endpointPackagePolicies = await metadataService.getAllEndpointPackagePolicies();
+        const expected: PackagePolicy[] = [mockPolicy];
+        expect(endpointPackagePolicies).toEqual(expected);
+      }
     });
   });
 

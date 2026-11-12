@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
@@ -18,7 +19,7 @@ export async function getElserModelId({
   logger: Logger;
 }) {
   const defaultModelId = '.elser_model_2';
-  const [_, pluginsStart] = await core.getStartServices();
+  const [coreStart, pluginsStart] = await core.getStartServices();
 
   // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
   const license = await firstValueFrom(pluginsStart.licensing.license$);
@@ -32,7 +33,7 @@ export async function getElserModelId({
       ml: {
         trainedModelsProvider: (
           request: {},
-          soClient: {}
+          soClient: SavedObjectsClientContract
         ) => { getELSER: () => Promise<{ model_id: string }> };
       };
     }>('ml');
@@ -41,8 +42,9 @@ export async function getElserModelId({
       throw new Error('Could not find ML plugin');
     }
 
+    // fake request => internal user; ML scopes a ui settings client to the saved objects client
     const elserModelDefinition = await ml.contract
-      .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
+      .trainedModelsProvider({}, coreStart.savedObjects.createInternalRepository())
       .getELSER();
 
     return elserModelDefinition.model_id;

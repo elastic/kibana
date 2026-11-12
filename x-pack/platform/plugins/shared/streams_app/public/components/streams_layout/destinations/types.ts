@@ -23,6 +23,8 @@ export const REMOTE_ELASTICSEARCH_TYPE = 'remote_elasticsearch' as const;
 export type DestinationType = 'elasticsearch' | typeof REMOTE_ELASTICSEARCH_TYPE | 's3';
 
 export type DestinationSignal = UnitDestinationSignal;
+/** Signals whose indices are named `<signal>-<dataset>-<namespace>`. */
+export type PrefixedDestinationSignal = Exclude<DestinationSignal, 'docs'>;
 /** How an Elasticsearch destination chooses its indices. */
 export type DestinationIndexMode = 'static' | 'auto';
 
@@ -33,8 +35,18 @@ export type StaticIndexValidationError =
   | 'invalidCharacter'
   | 'signalPattern';
 
+export type FreeFormIndexValidationError = Exclude<StaticIndexValidationError, 'signalPattern'>;
+
+export type DocsWritePatternValidationError =
+  | 'template'
+  | 'tooLong'
+  | 'uppercase'
+  | 'invalidCharacter'
+  | 'docsPrefix';
+
 export type AutoWritePatternValidationError =
   | 'required'
+  | 'tooLong'
   | 'uppercase'
   | 'invalidCharacter'
   | 'signalPattern';
@@ -93,6 +105,10 @@ export interface ElasticsearchDestinationFormData {
   logsIndex: string;
   metricsIndex: string;
   tracesIndex: string;
+  /** Fixed only. Never composed from the shared OTel name. */
+  docsIndex: string;
+  /** Auto custom only. */
+  docsWritePatterns: string[];
 }
 
 /** Remote indices are full names: no signal prefix and no write patterns. */
@@ -124,6 +140,11 @@ export interface DestinationCreationFormData {
 
 export type S3BucketValidationError = 'required' | 'invalid';
 
+export interface DocsWritePatternEntryError {
+  pattern: string;
+  error: DocsWritePatternValidationError;
+}
+
 export interface DestinationCreationFormErrors {
   destinationName?: DestinationNameValidationError;
   staticIndexes?: 'required';
@@ -131,6 +152,9 @@ export interface DestinationCreationFormErrors {
   logsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
   metricsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
   tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  docsIndex?: FreeFormIndexValidationError;
+  /** Undefined when no entry fails, never an empty list. */
+  docsWritePatterns?: 'required' | 'tooMany' | DocsWritePatternEntryError[];
   endpoint?: 'required' | 'invalid';
   apiKey?: 'required';
   region?: 'required';
@@ -159,6 +183,8 @@ export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormD
   logsIndex: '',
   metricsIndex: '',
   tracesIndex: '',
+  docsIndex: '',
+  docsWritePatterns: [],
 };
 
 export const EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM: RemoteElasticsearchDestinationFormData = {

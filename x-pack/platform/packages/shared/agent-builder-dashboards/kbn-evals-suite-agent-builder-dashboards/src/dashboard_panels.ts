@@ -10,6 +10,7 @@ import {
   type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import { parseVegaSpec } from '@kbn/dashboard-agent-authoring';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 export const GRID_COLUMNS = 48;
@@ -21,13 +22,16 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 /** Panels that share one coordinate space: the top level, or one section. */
 export interface PanelContainer {
   /** `undefined` for the top level. */
+  sectionId?: string;
+  /** `undefined` for the top level. */
   sectionTitle?: string;
   panels: AttachmentPanel[];
 }
 
 export const getPanelContainers = (dashboard: DashboardAttachmentData): PanelContainer[] => [
   { panels: dashboard.panels.filter((widget): widget is AttachmentPanel => !isSection(widget)) },
-  ...dashboard.panels.filter(isSection).map(({ title, panels }) => ({
+  ...dashboard.panels.filter(isSection).map(({ id, title, panels }) => ({
+    sectionId: id,
     sectionTitle: title,
     panels,
   })),
@@ -65,6 +69,47 @@ export const getPanelQueries = ({ config }: AttachmentPanel): string[] => {
     .filter((query): query is string => query !== undefined);
 };
 
+const ESQL_URL_TYPE = 'esql';
+
+/** The data a panel reads: ES|QL queries, and the `index` of Vega Elasticsearch queries. */
+export interface PanelDataSources {
+  queries: string[];
+  indices: string[];
+}
+
+const mergeSources = (sources: PanelDataSources[]): PanelDataSources => ({
+  queries: sources.flatMap(({ queries }) => queries),
+  indices: sources.flatMap(({ indices }) => indices),
+});
+
+/** Every Vega `data.url`: ES|QL ones (`%type%: esql`) by query, Elasticsearch ones by `index`. */
+const collectVegaDataSources = (value: unknown): PanelDataSources => {
+  if (Array.isArray(value)) {
+    return mergeSources(value.map(collectVegaDataSources));
+  }
+  if (!isRecord(value)) {
+    return { queries: [], indices: [] };
+  }
+  const { url } = value;
+  const own: PanelDataSources = { queries: [], indices: [] };
+  if (isRecord(url) && url['%type%'] === ESQL_URL_TYPE && typeof url.query === 'string') {
+    own.queries.push(url.query);
+  } else if (isRecord(url) && typeof url.index === 'string') {
+    own.indices.push(url.index);
+  }
+  return mergeSources([own, ...Object.values(value).map(collectVegaDataSources)]);
+};
+
+/** The data behind a Lens or Vega panel. */
+export const getPanelDataSources = (panel: AttachmentPanel): PanelDataSources =>
+  panel.type === 'vega'
+    ? collectVegaDataSources(parseVegaSpec(panel.config.spec))
+    : { queries: getPanelQueries(panel), indices: [] };
+
+/** The data sources of many panels, merged. */
+export const mergePanelDataSources = (panels: AttachmentPanel[]): PanelDataSources =>
+  mergeSources(panels.map(getPanelDataSources));
+
 export const normalizeQuery = (query: string): string => query.replace(/\s+/g, ' ').trim();
 
 /** One key per set of queries, so panels running the same ES|QL compare equal. */
@@ -72,6 +117,7 @@ export const getPanelQueryKey = (queries: readonly string[]): string =>
   queries.map(normalizeQuery).sort().join('\n');
 
 export const TIME_SLIDER_CONTROL = 'time_slider_control';
+export const RANGE_SLIDER_CONTROL = 'range_slider_control';
 
 const KEYWORD_SUFFIX = '.keyword';
 
@@ -102,6 +148,10 @@ export const getControlFields = (control: Record<string, unknown>): string[] => 
 /** Reading order inside a container: top to bottom, then left to right. */
 export const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
+
+/** `x,y wxh`, the grid as the evaluators print it. */
+export const formatGrid = ({ x, y, w, h }: AttachmentPanel['grid']): string =>
+  `${x},${y} ${w}x${h}`;
 
 const formatPanel = (panel: AttachmentPanel, indent: string): string => {
   const { id, config, grid } = panel;

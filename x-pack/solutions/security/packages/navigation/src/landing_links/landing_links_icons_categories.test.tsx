@@ -89,7 +89,7 @@ describe('LandingLinksIconsCategories', () => {
       <LandingLinksIconsCategories {...{ links, categories: testCategories }} />
     );
 
-    const renderedItems = queryAllByTestId('LandingItem');
+    const renderedItems = queryAllByTestId(/^LandingItem /);
 
     expect(renderedItems[0]).toHaveTextContent(HOSTS_ITEM_LABEL);
     expect(renderedItems[1]).toHaveTextContent(EXCEPTIONS_ITEM_LABEL);

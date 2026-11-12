@@ -77,15 +77,18 @@ const changeAt = (
     .sort((a, b) => a.at - b.at);
   const lastBefore = (time: number) => versions.filter(({ at }) => at < time).pop();
 
+  const startedAt = Date.parse(rounds[index].started_at);
   const nextRound = rounds[index + 1];
   const after = nextRound
     ? lastBefore(Date.parse(nextRound.started_at))
     : versions[versions.length - 1];
-  if (!after) {
+  // A version from before the round says nothing about it: the recorder may not have updated the
+  // hypotheses for this round, or not yet.
+  if (!after || after.at < startedAt) {
     return { outcome: 'unknown' };
   }
   const hasConfirmedCause = after.confirmed.size > 0;
-  const before = lastBefore(Date.parse(rounds[index].started_at))?.confirmed ?? new Set<string>();
+  const before = lastBefore(startedAt)?.confirmed ?? new Set<string>();
   if ([...before].some((candidate) => !after.all.has(candidate))) {
     return { outcome: 'unknown', hasConfirmedCause };
   }
@@ -112,7 +115,8 @@ const changeAt = (
  *   is never read.
  *
  * A round's "before" is the last hypotheses version written before it started, and its "after"
- * the last one written before the next round started. Returns `undefined` when there is no round.
+ * the last one written before the next round started. With no version written during the round,
+ * the outcome is `unknown`. Returns `undefined` when there is no round.
  */
 export const resolveRound = (
   { rounds, attachments = [] }: ResolvableConversation,

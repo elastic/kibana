@@ -267,12 +267,17 @@ export function buildHitlHttpConnectorInput({
  * Builds Actions params for a Slack v2 `sendMessage` call.
  * Unfurling is off so Slack does not GET the resume URL on preview.
  */
-export function buildSlack2SendMessageInput(channel: string, text: string) {
+export function buildSlack2SendMessageInput(
+  channel: string,
+  text: string,
+  blocks?: Array<Record<string, unknown>>
+) {
   return {
     subAction: 'sendMessage' as const,
     subActionParams: {
       channel,
       text,
+      ...(blocks?.length ? { blocks } : {}),
       unfurlLinks: false,
       unfurlMedia: false,
     },

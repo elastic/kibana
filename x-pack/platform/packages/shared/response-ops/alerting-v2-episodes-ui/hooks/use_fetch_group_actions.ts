@@ -37,11 +37,11 @@ const toGroupActionsMap = (rows: GroupActionRow[]) => {
     map.set(getGroupActionKey(row.rule_id, row.group_hash), {
       groupHash: row.group_hash,
       ruleId: row.rule_id ?? null,
-      lastDeactivateAction: row.last_deactivate_action ?? null,
+      lastDeactivateAction: row.last_lifecycle_action ?? null,
       lastSnoozeAction: row.last_snooze_action ?? null,
       snoozedUntil: row.snoozed_until ?? null,
       lastSnoozeActor: row.last_snooze_actor ?? null,
-      lastDeactivateActor: row.last_deactivate_actor ?? null,
+      lastDeactivateActor: row.last_lifecycle_actor ?? null,
     });
   }
   return map;

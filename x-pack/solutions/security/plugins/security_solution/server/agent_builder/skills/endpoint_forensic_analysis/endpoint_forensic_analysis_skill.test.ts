@@ -16,10 +16,13 @@ import {
   ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
   ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
   ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
-  endpointForensicAnalysisSkill,
+  createEndpointForensicAnalysisSkill,
 } from './endpoint_forensic_analysis_skill';
 
 describe('endpointForensicAnalysisSkill', () => {
+  const endpointForensicAnalysisSkill = createEndpointForensicAnalysisSkill({
+    automaticTroubleshootingUniversalSkill: false,
+  });
   it('uses an allow-listed built-in skill id', () => {
     expect(isAllowedBuiltinSkill(ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID)).toBe(true);
   });
@@ -52,7 +55,20 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(endpointForensicAnalysisSkill.content).toContain('Do not also render the indicators');
   });
 
-  it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
+  it.each([
+    [false, 'elastic-defend-configuration-troubleshooting'],
+    [true, 'security-elastic-defend-configuration-troubleshooting'],
+  ] as const)('routes configuration issues with universal flag %s', (enabled, name) => {
+    const skill = createEndpointForensicAnalysisSkill({
+      automaticTroubleshootingUniversalSkill: enabled,
+    });
+    expect(skill.description).toContain(`(use ${name}).`);
+    expect(skill.content.match(/→ \S*configuration-troubleshooting/g)).toEqual(
+      Array(5).fill(`→ ${name}`)
+    );
+  });
+
+  it('routes conflicting antivirus / configuration issues to troubleshooting', () => {
     expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
     expect(endpointForensicAnalysisSkill.description).toContain(
       'elastic-defend-configuration-troubleshooting'

@@ -41,6 +41,10 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 import { decodeOrThrowZod } from '../../common/runtime_types';
 import type {
@@ -110,10 +114,11 @@ import type {
   BulkCreateCasesArgs,
 } from './types';
 import { bulkDecodeSOAttributes } from '../utils';
+import type { AttachmentSearchField } from './utils';
 import {
-  DEFAULT_ATTACHMENT_SEARCH_FIELDS,
   constructSearchQuery,
   convertFindQueryParams,
+  isAttachmentSearchField,
   mergeSearchQuery,
 } from './utils';
 
@@ -169,23 +174,45 @@ const mergeCaseIdsByAlertIdResponses = (
   };
 };
 
+const UNIFIED_ATTACHMENT_TYPES_BY_SEARCH_FIELD: Record<AttachmentSearchField, string[]> = {
+  'cases-comments.comment': [COMMENT_ATTACHMENT_TYPE],
+  'cases-comments.alertId': UNIFIED_ALERT_TYPES_ARRAY,
+  'cases-comments.eventId': [SECURITY_EVENT_ATTACHMENT_TYPE],
+};
+
 /**
- * `cases-comments.comment` is a text-analyzed field: we use `match_phrase` so the user's
- * input has to appear as a contiguous sequence
+ * Returns the legacy `cases-comments` clause and its unified `cases-attachments` counterpart,
+ * which stores a comment in `data.content` and an alert or event id in `attachmentId`.
  *
- * `cases-comments.alertId` and `cases-comments.eventId` are keyword fields used
- * to look up an exact ID, so a regular `match` is the correct semantic
+ * Comments are text-analyzed, so `match_phrase` requires the input as a contiguous sequence;
+ * ids are keyword fields, so a regular `match` looks up the exact id.
  */
-const buildAttachmentSearchClause = (
-  field: string,
+const buildAttachmentSearchClauses = (
+  field: AttachmentSearchField,
   search: string
-): estypes.QueryDslQueryContainer => {
-  // TODO: add support for CASE_ATTACHMENT_SAVED_OBJECT
-  // https://github.com/elastic/security-team/issues/15066
-  if (field === `${CASE_COMMENT_SAVED_OBJECT}.comment`) {
-    return { match_phrase: { [field]: search } };
-  }
-  return { match: { [field]: search } };
+): estypes.QueryDslQueryContainer[] => {
+  const isComment = field === `${CASE_COMMENT_SAVED_OBJECT}.comment`;
+
+  return [
+    isComment ? { match_phrase: { [field]: search } } : { match: { [field]: search } },
+    {
+      bool: {
+        filter: [
+          {
+            terms: {
+              [`${CASE_ATTACHMENT_SAVED_OBJECT}.type`]:
+                UNIFIED_ATTACHMENT_TYPES_BY_SEARCH_FIELD[field],
+            },
+          },
+        ],
+        must: [
+          isComment
+            ? { match_phrase: { [`${CASE_ATTACHMENT_SAVED_OBJECT}.data.content`]: search } }
+            : { match: { [`${CASE_ATTACHMENT_SAVED_OBJECT}.attachmentId`]: search } },
+        ],
+      },
+    },
+  ];
 };
 
 export class CasesService {
@@ -359,30 +386,42 @@ export class CasesService {
     search?: string,
     searchFields?: string[]
   ): Promise<string[]> {
-    const attachmentSearchFields = searchFields?.filter((field) =>
-      DEFAULT_ATTACHMENT_SEARCH_FIELDS.includes(field)
-    );
+    const attachmentSearchFields = searchFields?.filter(isAttachmentSearchField);
     if (!search || !attachmentSearchFields?.length) {
       return [];
     }
 
+    // Both types are searched regardless of `attachments.enabled`: existing cases can hold either.
     const response = await this.searchCases({
-      type: [CASE_COMMENT_SAVED_OBJECT],
+      type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
       namespaces,
       query: {
         bool: {
-          should: attachmentSearchFields.map((field) => buildAttachmentSearchClause(field, search)),
+          should: attachmentSearchFields.flatMap((field) =>
+            buildAttachmentSearchClauses(field, search)
+          ),
+        },
+      },
+      // Aggregate the case ids: reading hits would only see the first page of matching attachments.
+      size: 0,
+      aggs: {
+        references: {
+          nested: { path: 'references' },
+          aggs: {
+            cases: {
+              filter: { term: { 'references.type': CASE_SAVED_OBJECT } },
+              aggs: { caseIds: { terms: { field: 'references.id', size: MAX_DOCS_PER_PAGE } } },
+            },
+          },
         },
       },
     });
 
-    const references = response?.hits?.hits?.map((hit) => hit?._source?.references).flat();
-    if (!references) {
-      return [];
-    }
-    return references
-      .filter((ref) => ref?.type === 'cases' && ref?.id !== undefined)
-      .map((ref) => ref?.id ?? '');
+    const aggregations = response.aggregations as
+      | { references?: { cases?: { caseIds?: { buckets: Array<{ key: string }> } } } }
+      | undefined;
+
+    return aggregations?.references?.cases?.caseIds?.buckets.map(({ key }) => key) ?? [];
   }
 
   /**

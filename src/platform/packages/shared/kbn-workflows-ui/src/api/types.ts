@@ -218,6 +218,8 @@ export interface LinkedRule {
 
 export interface GetLinkedRulesResponse {
   total: number;
+  /** Linked rules in the space that the user cannot read. */
+  hiddenTotal: number;
   rules: LinkedRule[];
 }
 

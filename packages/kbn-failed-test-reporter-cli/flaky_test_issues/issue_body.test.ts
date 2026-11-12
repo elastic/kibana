@@ -581,6 +581,14 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
   });
 
+  it('ends with how to skip the suite', () => {
+    const { suite, report } = singleTestReport();
+
+    expect(renderFlakySuiteIssueBody(suite, { report })).toMatch(
+      /\n\n> \[!TIP\]\n> Review the failures\. .*`\/skip` it, or skip the test case manually\.\n\n<!-- kibanaCiData/
+    );
+  });
+
   it('records the branches to skip the suite on and the pipelines it failed on', () => {
     const branch = (name: string, failedBuilds: number) => ({
       branch: name,
@@ -753,36 +761,45 @@ describe('refreshing a suite issue', () => {
     expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
   });
 
-  it("comments with the report's numbers for the suite, then how to skip it", () => {
+  it('says in one sentence where the suite is still flaky when it is a single branch', () => {
     const { suite, report } = singleTestReport();
 
-    const comment = renderFlakySuiteIssueComment(suite, { report, reopened: false });
-
-    expect(comment).toMatch(
-      /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \| Flaky branches \| Dashboard \|\n/
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toBe(
+      'Still flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).'
     );
-    for (const section of [
-      '#### Failures by Error Message',
-      '#### Status by Branch',
-      '#### Failures by Target',
-      '#### Failures by Pipeline',
-    ]) {
-      expect(comment).toContain(section);
-    }
-    // the suite's details and the metadata are the body's, which is left as filed
-    expect(comment).not.toContain('### Suite');
-    expect(comment).not.toContain('kibanaCiData');
-    expect(comment).toMatch(
-      /\n\n> \[!TIP\]\n> Review the failures\. .*`\/skip` it, or skip the test case manually\.$/
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toMatch(
+      /^Flaky again after this issue was closed, on `main`: 10% of builds/
     );
-    expect(comment).toMatchSnapshot();
   });
 
-  it('says why the issue is reopened and counts the tests', () => {
+  it('leaves out the branches every test of the suite is skipped on', () => {
+    const { suite, report } = multiTestReport();
+    const skippedOnMain = {
+      ...suite,
+      tests: suite.tests.map((test) => ({
+        ...test,
+        byBranch: test.byBranch.map((stats) =>
+          stats.branch === 'main' ? { ...stats, skipped: true } : stats
+        ),
+      })),
+    };
+
+    expect(renderFlakySuiteIssueComment(skippedOnMain, { report, reopened: false })).toBe(
+      '3 tests still flaky on `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200).'
+    );
+  });
+
+  it('lists the branches, counts the tests and says the suite is flaky again when the issue is reopened', () => {
     const { suite, report } = multiTestReport();
 
-    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toMatch(
-      /^This test suite appears to be flaky again after this issue was closed, with 3 flaky tests over 2–9 Sep 2026:\n\n\| Test \|/
+    // the worst test's numbers on each branch, as the body's branch table; the clean 9.1 left out
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toBe(
+      [
+        '3 tests flaky again after this issue was closed:',
+        '',
+        '- `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+        '- `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+      ].join('\n')
     );
   });
 });
