@@ -21,6 +21,7 @@ import {
 } from './dreaming_eval/config';
 import type { StageContext } from './dreaming_eval/context';
 import { createKibanaCall } from './dreaming_eval/context';
+import { runAsk } from './dreaming_eval/stages/ask';
 import { runConfigure } from './dreaming_eval/stages/configure';
 import { runEvaluate } from './dreaming_eval/stages/evaluate';
 import { runExtract } from './dreaming_eval/stages/extract';
@@ -33,14 +34,19 @@ const STAGES = {
   configure: runConfigure,
   run: runRun,
   evaluate: runEvaluate,
+  ask: runAsk,
 } as const;
 
 type Stage = keyof typeof STAGES;
 const STAGE_NAMES = Object.keys(STAGES) as Stage[];
+/** Stages that run only when named, or turned on in the config. */
+const OPTIONAL_STAGES: Stage[] = ['ask'];
 
-const parseStages = (value: unknown): Stage[] => {
+const parseStages = (value: unknown, optional: Stage[]): Stage[] => {
   if (value === undefined || value === '' || value === true) {
-    return STAGE_NAMES;
+    return STAGE_NAMES.filter(
+      (stage) => !OPTIONAL_STAGES.includes(stage) || optional.includes(stage)
+    );
   }
   const requested = String(value)
     .split(',')
@@ -80,9 +86,9 @@ const latestRunId = (config: EvalConfig, aiIndexIds: string[]): string | undefin
 
 run(
   async ({ log, flags }) => {
-    const stages = parseStages(flags.stage);
     const configPath = path.resolve(process.cwd(), String(flags.config || DEFAULT_CONFIG_PATH));
     const loaded = loadConfig(configPath, process.cwd());
+    const stages = parseStages(flags.stage, loaded.ask.enabled ? ['ask'] : []);
 
     const datasets = listFlag(flags.dataset);
     const unknownDatasets = (datasets ?? []).filter(
@@ -143,7 +149,9 @@ run(
       `Stages ${stages.join(', ')} for ${aiIndexIds.join(', ')} on ${usedDatasets.join(
         ', '
       )} (config ${path.relative(process.cwd(), configPath)}${
-        stages.includes('run') || stages.includes('evaluate') ? `, run ${context.runId}` : ''
+        ['run', 'evaluate', 'ask'].some((stage) => stages.includes(stage as Stage))
+          ? `, run ${context.runId}`
+          : ''
       })`
     );
     for (const stage of stages) {
@@ -158,7 +166,9 @@ run(
       traces, configures AI indices that dream on them, runs their workflows from a clean slate,
       dumps the KIs they write, and judges them against target knowledge.
 
-      Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run.
+      Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run but ask, which
+      runs when named or when ask.enabled is set in the config. Ask puts the targets' questions
+      to an agent that has only the AI index, and judges its answers.
 
       A sample is a benchmark question with the conversations it is asked over. By default one
       LongMemEval S sample runs; the config picks the datasets and samples, and the flags below
@@ -183,7 +193,7 @@ run(
       help: `
         --stage <names>         Comma-separated stages to run: ${STAGE_NAMES.join(
           ', '
-        )} (default: all)
+        )} (default: all but ask)
         --config <file>         Eval config (default: ${path.relative(
           process.cwd(),
           DEFAULT_CONFIG_PATH

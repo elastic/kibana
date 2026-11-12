@@ -42,6 +42,16 @@ datasets:
     include_image_questions: false
     start_time: '2026-01-05T09:00:00.000Z'
 
+# The ask stage puts each target's question to the AI index's answer agent and judges the answers.
+# It runs when named with --stage, or with the other stages when enabled here.
+ask:
+  enabled: false
+  # connector_id: .anthropic-claude-4.6-sonnet-chat_completion   # what the agents answer with
+  concurrency: 2
+
+# Each AI index also gets an answer agent (answer_agent), which the configure stage creates: it has
+# only this AI index, the AI index tools, and instructions to answer from it. Set
+# answer_agent: { enabled: false } to skip it, or give it an id, instructions or tools of its own.
 ai_indices:
   - id: dreaming-eval-longmemeval
     description: What a personal assistant learned about its user, from LongMemEval chats.

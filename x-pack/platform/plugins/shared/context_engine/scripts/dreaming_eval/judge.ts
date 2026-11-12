@@ -105,21 +105,28 @@ const judgementSchema = z.object({
   reason: z.string().default(''),
 });
 
-/** Reads the judge's answer: the first JSON object in it, whatever surrounds it. */
-export const parseJudgement = (content: string, candidateIds: string[]): Judgement => {
+/** The first JSON object in a judge's answer, whatever surrounds it, or why there is none. */
+const readJsonObject = (content: string): { value: unknown } | { error: string } => {
   const json = /\{[\s\S]*\}/.exec(content)?.[0];
   if (!json) {
-    return { verdict: 'error', kiIds: [], reason: `No JSON in the judge's answer: ${content}` };
+    return { error: `No JSON in the judge's answer: ${content}` };
   }
-  let value: unknown;
   try {
-    value = JSON.parse(json);
+    return { value: JSON.parse(json) };
   } catch {
-    return { verdict: 'error', kiIds: [], reason: `Invalid JSON from the judge: ${json}` };
+    return { error: `Invalid JSON from the judge: ${json}` };
   }
-  const parsed = judgementSchema.safeParse(value);
+};
+
+/** Reads the judge's verdict on the KIs, keeping only the ids of KIs it was shown. */
+export const parseJudgement = (content: string, candidateIds: string[]): Judgement => {
+  const read = readJsonObject(content);
+  if ('error' in read) {
+    return { verdict: 'error', kiIds: [], reason: read.error };
+  }
+  const parsed = judgementSchema.safeParse(read.value);
   if (!parsed.success) {
-    return { verdict: 'error', kiIds: [], reason: `Unexpected judge answer: ${json}` };
+    return { verdict: 'error', kiIds: [], reason: `Unexpected judge answer: ${content}` };
   }
   const known = new Set(candidateIds);
   return {
@@ -129,29 +136,80 @@ export const parseJudgement = (content: string, candidateIds: string[]): Judgeme
   };
 };
 
+export const ANSWER_VERDICTS = ['correct', 'partial', 'incorrect'] as const;
+export type AnswerVerdict = (typeof ANSWER_VERDICTS)[number] | 'error';
+
+export interface AnswerJudgement {
+  verdict: AnswerVerdict;
+  reason: string;
+}
+
+export const ANSWER_SYSTEM_PROMPT =
+  "You grade an assistant's answers against reference answers, and answer with JSON only.";
+
+export const answerJudgePrompt = (target: EvalTarget, answer: string): string =>
+  [
+    `Question: ${target.question}`,
+    `Reference answer: ${target.answer}`,
+    ...(target.askedAt ? [`Asked on: ${target.askedAt}`] : []),
+    '',
+    `Assistant's answer: ${answer || '(no answer)'}`,
+    '',
+    "Does the assistant's answer give the reference answer?",
+    '- correct: it does; a paraphrase or another format of the same answer counts.',
+    '- partial: it gives part of it, or hedges between it and something else.',
+    '- incorrect: it gives another answer, or says it does not know.',
+    'Reply with JSON only: {"verdict": "correct" | "partial" | "incorrect", "reason": "one sentence"}',
+  ].join('\n');
+
+const answerJudgementSchema = z.object({
+  verdict: z.enum(ANSWER_VERDICTS),
+  reason: z.string().default(''),
+});
+
+export const parseAnswerJudgement = (content: string): AnswerJudgement => {
+  const read = readJsonObject(content);
+  if ('error' in read) {
+    return { verdict: 'error', reason: read.error };
+  }
+  const parsed = answerJudgementSchema.safeParse(read.value);
+  return parsed.success
+    ? parsed.data
+    : { verdict: 'error', reason: `Unexpected judge answer: ${content}` };
+};
+
 export const SCORES: Record<Verdict, number> = { covered: 1, partial: 0.5, missing: 0, error: 0 };
+export const ANSWER_SCORES: Record<AnswerVerdict, number> = {
+  correct: 1,
+  partial: 0.5,
+  incorrect: 0,
+  error: 0,
+};
 
 export interface ScoreLine {
   targets: number;
-  covered: number;
-  partial: number;
-  missing: number;
-  errors: number;
-  /** Covered counts 1 and partial 0.5, over all targets. */
+  /** Targets per verdict. */
+  counts: Record<string, number>;
+  /** The mean of the verdicts' scores: 1 for full, 0.5 for partial, 0 otherwise. */
   score: number;
 }
 
-export const scoreLine = (verdicts: Verdict[]): ScoreLine => {
-  const count = (verdict: Verdict) => verdicts.filter((v) => v === verdict).length;
+export const scoreLine = <V extends string>(
+  verdicts: V[],
+  scores: Record<V, number>
+): ScoreLine => {
+  const counts: Record<string, number> = Object.fromEntries(
+    Object.keys(scores).map((verdict) => [verdict, 0])
+  );
+  for (const verdict of verdicts) {
+    counts[verdict] = (counts[verdict] ?? 0) + 1;
+  }
   return {
     targets: verdicts.length,
-    covered: count('covered'),
-    partial: count('partial'),
-    missing: count('missing'),
-    errors: count('error'),
+    counts,
     score:
       verdicts.length === 0
         ? 0
-        : verdicts.reduce((sum, verdict) => sum + SCORES[verdict], 0) / verdicts.length,
+        : verdicts.reduce((sum, verdict) => sum + scores[verdict], 0) / verdicts.length,
   };
 };

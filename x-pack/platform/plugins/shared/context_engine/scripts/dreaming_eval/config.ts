@@ -92,6 +92,25 @@ const dreamingSchema = z
     message: 'dreaming needs a template, facts or entities',
   });
 
+export const DEFAULT_ANSWER_AGENT_TOOLS = [
+  'platform.context_engine.list_ai_indices',
+  'platform.context_engine.describe_ai_index',
+  'platform.context_engine.query_ai_indices',
+];
+
+/** The Agent Builder agent the ask stage puts the targets' questions to, with only the AI index. */
+const answerAgentSchema = z.object({
+  enabled: z.boolean().default(true),
+  /** Defaults to `<AI index id>-answerer`. */
+  id: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9_-]*$/)
+    .optional(),
+  /** Defaults to instructions that send the agent to the AI index for everything it knows. */
+  instructions: z.string().optional(),
+  tools: z.array(z.string()).default(DEFAULT_ANSWER_AGENT_TOOLS),
+});
+
 const aiIndexSchema = z.object({
   id: z.string().regex(/^[a-z0-9][a-z0-9_-]*$/),
   description: z.string().optional(),
@@ -99,6 +118,7 @@ const aiIndexSchema = z.object({
   dreaming: dreamingSchema,
   /** Target files to evaluate against; when empty, the targets extracted for its datasets. */
   targets: z.array(z.string()).default([]),
+  answer_agent: answerAgentSchema.default(answerAgentSchema.parse({})),
 });
 
 const configSchema = z.object({
@@ -140,6 +160,16 @@ const configSchema = z.object({
       concurrency: z.number().int().min(1).default(4),
     })
     .default({ rerank_inference_id: '.rerank-v1-elasticsearch', candidates: 10, concurrency: 4 }),
+  ask: z
+    .object({
+      /** Runs the ask stage with the others when no --stage is given. */
+      enabled: z.boolean().default(false),
+      /** The connector the answer agents answer with; else Agent Builder's default. */
+      connector_id: z.string().optional(),
+      concurrency: z.number().int().min(1).default(2),
+      timeout_minutes: z.number().min(1).default(10),
+    })
+    .default({ enabled: false, concurrency: 2, timeout_minutes: 10 }),
 });
 
 export type EvalConfigFile = z.infer<typeof configSchema>;
@@ -267,6 +297,37 @@ export const withSampleOverrides = (
 };
 
 export const destOf = (aiIndexId: string): string => `${AI_INDEX_INDEX_PREFIX}${aiIndexId}`;
+
+export interface AnswerAgent {
+  id: string;
+  name: string;
+  description: string;
+  instructions: string;
+  tools: string[];
+}
+
+/** The answer agent of an AI index: told that what it knows is in the AI index, and given only it. */
+export const answerAgentOf = ({
+  id: aiIndexId,
+  description,
+  answer_agent: agent,
+}: AiIndexEvalConfig): AnswerAgent => ({
+  id: agent.id ?? `${aiIndexId}-answerer`,
+  name: `${aiIndexId} answerer`,
+  description: `Answers from what dreaming wrote to the AI Index ${aiIndexId}, for the dreaming eval.`,
+  tools: agent.tools,
+  instructions:
+    agent.instructions ??
+    [
+      `Everything you know from past conversations is stored in the AI Index \`${aiIndexId}\` (ES|QL target \`${destOf(
+        aiIndexId
+      )}\`)${description ? `: ${description}` : '.'}`,
+      '',
+      'The answer to every question you are asked is in that AI Index. Search it before you answer, every time, and answer from what you find there, not from general knowledge. Try more than one search: other wordings, the names and terms in the question, and the related facts and entities a first search turns up. When a question is about time, use the dates the facts carry.',
+      '',
+      'If the AI Index does not hold the answer after a thorough search, say that you do not know rather than guess. Keep the answer short and direct, and follow any answer format the question asks for.',
+    ].join('\n'),
+});
 
 /** Where an AI index's KI dumps and evaluations of one run go. */
 export const runDirOf = (config: EvalConfig, runId: string, aiIndexId: string): string =>

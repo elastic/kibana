@@ -10,6 +10,7 @@ node scripts/context_engine_dreaming_eval.js --sample-count 5
 node scripts/context_engine_dreaming_eval.js --dataset longmemeval_v2_enterprise
 node scripts/context_engine_dreaming_eval.js --dataset longmemeval_s --all-samples
 node scripts/context_engine_dreaming_eval.js --stage evaluate --run-id 2026-11-12T08-00-00-000
+node scripts/context_engine_dreaming_eval.js --stage ask              # answer agents, on the latest run
 ```
 
 It needs a local Elasticsearch and Kibana from this branch. It uses `elastic:changeme` and reads the Kibana URL from `config/kibana.dev.yml` unless you pass `--es-url`, `--kibana-url`, `--es-username` and `--es-password`.
@@ -22,9 +23,14 @@ Each stage reads what the previous one wrote, so you can rerun any of them on it
 | --- | --- |
 | `extract` | Downloads the datasets, picks the conversations the config asks for, and writes them with targets generated from the benchmark's questions. |
 | `import` | Writes each round as Agent Builder OTel spans to `traces-agent_builder.otel-<space>`. A re-import replaces the dataset's earlier spans. |
-| `configure` | Turns on Context Engine and memory, and creates or updates the AI indices of the config: an ES\|QL trace source over the datasets' agents, and their dreaming config. |
+| `configure` | Turns on Context Engine and memory, and creates or updates the AI indices of the config: an ES\|QL trace source over the datasets' agents, and their dreaming config. Creates or updates each AI index's answer agent too. |
 | `run` | Per AI index: deletes the facts, entities and relationships dreaming wrote, runs each of its workflows until they have read everything (the first run from the earliest imported round), and dumps the KIs they wrote. A run that fails is run again (`run.retries`), from where the last completed run stopped. |
 | `evaluate` | Per target: ranks the dumped KIs with a reranker, then asks an LLM whether the top ones hold the target knowledge. Writes scores by dataset and category. |
+| `ask` (optional) | Puts each target's question to the AI index's answer agent, and asks an LLM whether its answer gives the reference answer. Runs when named, or with the others when `ask.enabled` is set. |
+
+## Answer agents
+
+The configure stage gives each AI index an Agent Builder agent, `<AI index id>-answerer` unless `answer_agent.id` names another. It is assigned only that AI index (so Agent Builder grants it the `ki-retrieval` skill), has the AI index tools (`list_ai_indices`, `describe_ai_index`, `query_ai_indices`), and its instructions say that the answer to every question is in the AI index, to search it before answering, and to say it does not know rather than guess. `answer_agent.instructions` and `answer_agent.tools` replace those; `answer_agent.enabled: false` skips the agent. The ask stage tells the agent the date a question is asked on, for questions about time, and records each answer's tool calls and AI index queries with its conversation, which you can open in Agent Builder.
 
 ## Datasets and samples
 
@@ -48,6 +54,7 @@ Everything goes to `data/context_engine_dreaming_eval/` (`data_dir`), which git 
 - `<dataset>/import.json`: what was imported, and when the earliest round is.
 - `runs/<run id>/<AI index>/kis.json`: the KIs a run wrote, with the workflow runs and what each read and wrote.
 - `runs/<run id>/<AI index>/evaluation.json` and `summary.md`: each target's verdict, the KIs that hold it, and scores.
+- `runs/<run id>/<AI index>/answers.json` and `answers.md`: the answer agent's answer to each question, its tool calls and queries, the verdict, and scores.
 
 ## Targets
 

@@ -12,39 +12,35 @@ import type { AiIndexEvalConfig } from '../config';
 import { datasetDirOf, runDirOf } from '../config';
 import type { StageContext } from '../context';
 import { readJson, writeJson } from '../download';
-import type { Judgement, ScoreLine } from '../judge';
+import type { Judgement } from '../judge';
 import {
   judgePrompt,
   parseJudgement,
   rankByOverlap,
   rankWithReranker,
-  scoreLine,
+  SCORES,
   SYSTEM_PROMPT,
   targetQuery,
 } from '../judge';
+import { askJudge, resolveJudgeConnectorId } from '../llm';
+import type { Scores } from '../report';
+import { describeScore, scoresOf, scoreTables, shortQuestion } from '../report';
 import type { DumpedKi, EvalTarget, KiDump } from '../types';
 import { generatedTargetsFileOf } from './extract';
 import { kiDumpFileOf } from './run';
-
-const JUDGE_TIMEOUT_MS = 180_000;
-const JUDGE_ATTEMPTS = 2;
-const DEFAULT_CONNECTOR_SETTING = 'genAiSettings:defaultAIConnector';
 
 export interface TargetResult extends Judgement {
   target: EvalTarget;
   candidateIds: string[];
 }
 
-export interface Evaluation {
+export interface Evaluation extends Scores {
   runId: string;
   aiIndexId: string;
   connectorId: string;
   ranker: string;
   evaluatedAt: string;
   kis: number;
-  overall: ScoreLine;
-  byCategory: Record<string, ScoreLine>;
-  byDataset: Record<string, ScoreLine>;
   results: TargetResult[];
 }
 
@@ -66,107 +62,21 @@ export const targetsOf = (context: StageContext, aiIndex: AiIndexEvalConfig): Ev
   });
 };
 
-const resolveConnectorId = async (context: StageContext): Promise<string> => {
-  const configured = context.judgeConnectorId ?? context.config.evaluate.connector_id;
-  if (configured) {
-    return configured;
-  }
-  const { data: settings } = await context.kibana<{
-    settings: Record<string, { userValue?: unknown }>;
-  }>('GET', '/internal/kibana/settings');
-  const defaultConnector = settings.settings[DEFAULT_CONNECTOR_SETTING]?.userValue;
-  if (typeof defaultConnector === 'string' && defaultConnector) {
-    return defaultConnector;
-  }
-  const { data } = await context.kibana<{
-    connectors: Array<{ connectorId: string; type: string }>;
-  }>('GET', '/internal/inference/connectors');
-  const connector = data.connectors.find(({ type }) => type === '.inference') ?? data.connectors[0];
-  if (!connector) {
-    throw new Error('No AI connector to judge with: pass --judge-connector');
-  }
-  return connector.connectorId;
-};
-
-const judge = async (
-  context: StageContext,
-  connectorId: string,
-  target: EvalTarget,
-  candidates: DumpedKi[]
-): Promise<Judgement> => {
-  const ids = candidates.map(({ id }) => id);
-  let lastError = '';
-  for (let attempt = 1; attempt <= JUDGE_ATTEMPTS; attempt++) {
-    try {
-      const { data } = await context.kibana<{ content?: string }>(
-        'POST',
-        '/internal/inference/chat_complete',
-        {
-          connectorId,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: judgePrompt(target, candidates) }],
-          temperature: 0,
-        },
-        { timeoutMs: JUDGE_TIMEOUT_MS }
-      );
-      const judgement = parseJudgement(data.content ?? '', ids);
-      if (judgement.verdict !== 'error') {
-        return judgement;
-      }
-      lastError = judgement.reason;
-    } catch (error) {
-      lastError = error instanceof Error ? error.message : String(error);
-    }
-  }
-  return { verdict: 'error', kiIds: [], reason: lastError };
-};
-
-const groupScores = (
-  results: TargetResult[],
-  keyOf: (result: TargetResult) => string
-): Record<string, ScoreLine> => {
-  const groups = new Map<string, TargetResult[]>();
-  for (const result of results) {
-    groups.set(keyOf(result), [...(groups.get(keyOf(result)) ?? []), result]);
-  }
-  return Object.fromEntries(
-    [...groups.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, group]) => [key, scoreLine(group.map(({ verdict }) => verdict))])
-  );
-};
-
-const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
-
 export const summaryMarkdown = (evaluation: Evaluation): string => {
-  const row = (name: string, line: ScoreLine) =>
-    `| ${name} | ${line.targets} | ${line.covered} | ${line.partial} | ${line.missing} | ${
-      line.errors
-    } | ${percent(line.score)} |`;
-  const table = (title: string, lines: Record<string, ScoreLine>) => [
-    `## ${title}`,
-    '',
-    '| | Targets | Covered | Partial | Missing | Errors | Score |',
-    '| --- | --- | --- | --- | --- | --- | --- |',
-    ...Object.entries(lines).map(([name, line]) => row(name, line)),
-    '',
-  ];
   const missed = evaluation.results.filter(({ verdict }) => verdict !== 'covered');
   return [
     `# Dreaming eval: ${evaluation.aiIndexId}, run ${evaluation.runId}`,
     '',
-    `${evaluation.kis} KIs judged by \`${evaluation.connectorId}\`, candidates ranked by ${evaluation.ranker}. Covered counts 1 and partial 0.5.`,
+    `Whether the ${evaluation.kis} KIs hold each target, judged by \`${evaluation.connectorId}\` on the KIs ranked highest by ${evaluation.ranker}. Covered counts 1 and partial 0.5.`,
     '',
-    ...table('Overall', { all: evaluation.overall }),
-    ...table('By dataset', evaluation.byDataset),
-    ...table('By category', evaluation.byCategory),
+    ...scoreTables(evaluation),
     '## Not covered',
     '',
     ...missed.map(
       ({ target, verdict, reason }) =>
-        `- **${verdict}** \`${target.id}\` (${target.category}): ${target.question
-          .split('\n')[0]
-          .slice(0, 160)} → ${target.answer.slice(0, 120)}. ${reason}`
+        `- **${verdict}** \`${target.id}\` (${target.category}): ${shortQuestion(
+          target
+        )} → ${target.answer.slice(0, 120)}. ${reason}`
     ),
     '',
   ].join('\n');
@@ -174,7 +84,7 @@ export const summaryMarkdown = (evaluation: Evaluation): string => {
 
 export const runEvaluate = async (context: StageContext): Promise<void> => {
   const { config, esClient, log, runId } = context;
-  const connectorId = await resolveConnectorId(context);
+  const connectorId = await resolveJudgeConnectorId(context);
   const limit = pLimit(config.evaluate.concurrency);
   for (const aiIndex of config.ai_indices.filter(({ id }) => context.aiIndexIds.includes(id))) {
     const dir = runDirOf(config, runId, aiIndex.id);
@@ -214,12 +124,24 @@ export const runEvaluate = async (context: StageContext): Promise<void> => {
       targets.map((target) =>
         limit(async (): Promise<TargetResult> => {
           const candidates = (await rank(target)).slice(0, config.evaluate.candidates);
-          const judgement = await judge(context, connectorId, target, candidates);
+          const candidateIds = candidates.map(({ id }) => id);
+          const judged = await askJudge<Judgement>({
+            context,
+            connectorId,
+            system: SYSTEM_PROMPT,
+            prompt: judgePrompt(target, candidates),
+            parse: (content) => {
+              const judgement = parseJudgement(content, candidateIds);
+              return judgement.verdict === 'error' ? { error: judgement.reason } : judgement;
+            },
+          });
           done++;
           if (done % 10 === 0 || done === targets.length) {
             log.info(`  ${done}/${targets.length} judged`);
           }
-          return { target, candidateIds: candidates.map(({ id }) => id), ...judgement };
+          const judgement: Judgement =
+            'error' in judged ? { verdict: 'error', kiIds: [], reason: judged.error } : judged;
+          return { target, candidateIds, ...judgement };
         })
       )
     );
@@ -231,23 +153,20 @@ export const runEvaluate = async (context: StageContext): Promise<void> => {
       ranker: useReranker ? `the ${config.evaluate.rerank_inference_id} reranker` : 'shared words',
       evaluatedAt: new Date().toISOString(),
       kis: kis.length,
-      overall: scoreLine(results.map(({ verdict }) => verdict)),
-      byCategory: groupScores(results, ({ target }) => target.category),
-      byDataset: groupScores(results, ({ target }) => target.dataset),
+      ...scoresOf(results, SCORES),
       results,
     };
     writeJson(evaluationFileOf(dir), evaluation);
-    fs.writeFileSync(path.join(dir, 'summary.md'), summaryMarkdown(evaluation));
-    const { overall } = evaluation;
+    const summaryFile = path.join(dir, 'summary.md');
+    fs.writeFileSync(summaryFile, summaryMarkdown(evaluation));
     log.success(
-      `${aiIndex.id}: score ${percent(overall.score)} (${overall.covered} covered, ${
-        overall.partial
-      } partial, ${overall.missing} missing, ${overall.errors} errors of ${
-        overall.targets
-      }) → ${path.relative(process.cwd(), path.join(dir, 'summary.md'))}`
+      `${aiIndex.id}: KIs hold ${describeScore(evaluation.overall)} → ${path.relative(
+        process.cwd(),
+        summaryFile
+      )}`
     );
     for (const [category, line] of Object.entries(evaluation.byCategory)) {
-      log.info(`  ${category}: ${percent(line.score)} of ${line.targets}`);
+      log.info(`  ${category}: ${describeScore(line)}`);
     }
   }
 };

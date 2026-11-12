@@ -7,11 +7,15 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import {
+  ANSWER_SCORES,
+  answerJudgePrompt,
   judgePrompt,
   kiText,
+  parseAnswerJudgement,
   parseJudgement,
   rankByOverlap,
   rankWithReranker,
+  SCORES,
   scoreLine,
 } from './judge';
 import type { DumpedKi, EvalTarget } from './types';
@@ -66,16 +70,32 @@ describe('judge', () => {
     expect(parseJudgement('{"verdict": "maybe"}', []).verdict).toBe('error');
   });
 
-  it('scores covered as 1 and partial as 0.5', () => {
-    expect(scoreLine(['covered', 'partial', 'missing', 'error'])).toEqual({
-      targets: 4,
-      covered: 1,
-      partial: 1,
-      missing: 1,
-      errors: 1,
-      score: 0.375,
+  it('scores covered as 1 and partial as 0.5, counting every verdict', () => {
+    expect(scoreLine(['covered', 'partial', 'missing', 'error', 'covered'], SCORES)).toEqual({
+      targets: 5,
+      counts: { covered: 2, partial: 1, missing: 1, error: 1 },
+      score: 0.5,
     });
-    expect(scoreLine([]).score).toBe(0);
+    expect(scoreLine([], ANSWER_SCORES)).toEqual({
+      targets: 0,
+      counts: { correct: 0, partial: 0, incorrect: 0, error: 0 },
+      score: 0,
+    });
+  });
+
+  it("asks whether the agent's answer gives the reference answer, and reads the verdict", () => {
+    const prompt = answerJudgePrompt(target, 'You studied Business Administration.');
+
+    expect(prompt).toContain(
+      'Question: What degree did I graduate with?\nReference answer: Business Administration\nAsked on: 2023-05-30T23:40:00.000Z'
+    );
+    expect(prompt).toContain("Assistant's answer: You studied Business Administration.");
+    expect(answerJudgePrompt(target, '')).toContain("Assistant's answer: (no answer)");
+    expect(parseAnswerJudgement('{"verdict": "correct", "reason": "Same degree."}')).toEqual({
+      verdict: 'correct',
+      reason: 'Same degree.',
+    });
+    expect(parseAnswerJudgement('{"verdict": "covered"}').verdict).toBe('error');
   });
 
   it('ranks KIs by the reranker, or by the words they share with the target', async () => {

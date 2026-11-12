@@ -7,8 +7,8 @@
 
 import type { AiIndexHttpItem, CreateAiIndexRequest } from '../../../common/http_api/ai_indices';
 import { PUBLIC_API_PATH } from '../../../common/constants';
-import type { AiIndexEvalConfig, EvalConfig } from '../config';
-import { destOf, resolveDreaming } from '../config';
+import type { AiIndexEvalConfig, AnswerAgent, EvalConfig } from '../config';
+import { answerAgentOf, destOf, resolveDreaming } from '../config';
 import type { StageContext } from '../context';
 
 const CONTEXT_ENGINE_ENABLED = 'contextEngine:enabled';
@@ -74,5 +74,44 @@ export const runConfigure = async (context: StageContext): Promise<void> => {
         workflows.join(', ') || 'none'
       }`
     );
+
+    if (aiIndex.answer_agent.enabled) {
+      const agent = answerAgentOf(aiIndex);
+      const created = await upsertAnswerAgent(context, aiIndex.id, agent);
+      log.success(
+        `${created ? 'Created' : 'Updated'} agent '${agent.id}' with AI index '${
+          aiIndex.id
+        }' and tools ${agent.tools.join(', ')}`
+      );
+    }
   }
+};
+
+const AGENTS_PATH = '/api/agent_builder/agents';
+
+export const answerAgentBodyOf = (aiIndexId: string, agent: AnswerAgent) => ({
+  name: agent.name,
+  description: agent.description,
+  configuration: {
+    instructions: agent.instructions,
+    tools: [{ tool_ids: agent.tools }],
+    ai_indices: [aiIndexId],
+  },
+});
+
+/** Creates the answer agent, or updates it to the config; true when it was created. */
+const upsertAnswerAgent = async (
+  context: StageContext,
+  aiIndexId: string,
+  agent: AnswerAgent
+): Promise<boolean> => {
+  const path = `${AGENTS_PATH}/${encodeURIComponent(agent.id)}`;
+  const { status } = await context.kibana('GET', path, undefined, { allowStatuses: [404] });
+  const body = answerAgentBodyOf(aiIndexId, agent);
+  if (status === 404) {
+    await context.kibana('POST', AGENTS_PATH, { id: agent.id, ...body });
+    return true;
+  }
+  await context.kibana('PUT', path, body);
+  return false;
 };
