@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useEffect, useMemo, useState } from 'react';
+import React, { type FC, useMemo, useState } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -64,7 +64,8 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
   const durationMatch = durationPattern.exec(value);
   const durationValue = durationMatch?.[1] ?? '';
   const parsedUnit = durationMatch?.[2] as DurationUnit | undefined;
-  const [unit, setUnit] = useState<DurationUnit>(parsedUnit ?? defaultUnit);
+  const [pickedUnit, setPickedUnit] = useState<DurationUnit>();
+  const unit = parsedUnit ?? pickedUnit ?? defaultUnit;
   const upperCaseField = capitalizeFirstLetter(field);
   const unitOptions = useMemo(
     () =>
@@ -75,12 +76,6 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
     [units]
   );
 
-  useEffect(() => {
-    if (parsedUnit !== undefined) {
-      setUnit(parsedUnit);
-    }
-  }, [parsedUnit]);
-
   const setDurationValue = (nextValue: string) => {
     setFormField({
       field,
@@ -89,7 +84,7 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
   };
 
   const setDurationUnit = (nextUnit: DurationUnit) => {
-    setUnit(nextUnit);
+    setPickedUnit(nextUnit);
     if (durationValue !== '') {
       setFormField({ field, value: `${durationValue}${nextUnit}` });
     }
