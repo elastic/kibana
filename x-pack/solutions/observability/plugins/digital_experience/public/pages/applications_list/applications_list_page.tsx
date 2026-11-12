@@ -351,7 +351,7 @@ const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSou
     size="s"
     title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableSources', {
       defaultMessage:
-        "You can't read all of the {sources} data, so some applications may be missing.",
+        "You can't read all of the {sources} indices, so the applications, totals and chart may be incomplete. Ask an administrator for read access to them.",
       values: { sources: sources.map((source) => SOURCE_LABELS[source]).join(', ') },
     })}
   />

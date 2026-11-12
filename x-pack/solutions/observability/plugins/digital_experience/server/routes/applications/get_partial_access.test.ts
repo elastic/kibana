@@ -8,131 +8,157 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { hasPartialReadAccess } from './get_partial_access';
 
-type Privileges = Record<string, { read: boolean }>;
-
-const NOTHING = { indices: [], aliases: [], data_streams: [] };
-const SOME = { indices: [], aliases: [], data_streams: [{ name: 'x', backing_indices: [] }] };
-
 const setup = ({
-  existing,
-  privileges,
+  dataStreams = [],
+  indices = [],
+  aliases = [],
+  readable = [],
 }: {
-  /** Patterns that match something; every other pattern matches nothing. */
-  existing: string[];
-  privileges?: Privileges;
+  /** What the patterns resolve to. */
+  dataStreams?: string[];
+  indices?: string[];
+  aliases?: string[];
+  /** The names the user can read. */
+  readable?: string[];
 }) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
-  internalEsClient.indices.resolveIndex.mockImplementation((async ({ name }: { name: string }) =>
-    existing.includes(name) ? SOME : NOTHING) as never);
-  esClient.security.hasPrivileges.mockResolvedValue({
-    index: privileges ?? {},
-  } as never);
+  internalEsClient.indices.resolveIndex.mockResolvedValue({
+    indices: indices.map((name) => ({ name, attributes: ['open'] })),
+    aliases: aliases.map((name) => ({ name, indices: [] })),
+    data_streams: dataStreams.map((name) => ({ name, backing_indices: [], timestamp_field: '' })),
+  });
+  esClient.security.hasPrivileges.mockImplementation((async ({
+    index,
+  }: {
+    index: Array<{ names: string[] }>;
+  }) => ({
+    index: Object.fromEntries(
+      index[0].names.map((name) => [name, { read: readable.includes(name) }])
+    ),
+  })) as never);
   return { esClient, internalEsClient, logger };
 };
 
+const OTEL = ['logs-*.otel-*', 'traces-*.otel-*'];
+
 describe('hasPartialReadAccess', () => {
-  it('returns false when the user can read every pattern', async () => {
+  it('returns false when the user can read every index the patterns match', async () => {
     const params = setup({
-      existing: ['logs-*.otel-*', 'traces-*.otel-*'],
-      privileges: {
-        'logs-*.otel-*,-logs-agent_builder.otel-*': { read: true },
-        'traces-*.otel-*,-traces-agent_builder.otel-*': { read: true },
-      },
+      dataStreams: ['traces-generic.otel-production', 'logs-generic.otel-production'],
+      readable: ['traces-generic.otel-production', 'logs-generic.otel-production'],
     });
 
-    await expect(
-      hasPartialReadAccess({ ...params, indices: ['logs-*.otel-*', 'traces-*.otel-*'] })
-    ).resolves.toBe(false);
+    await expect(hasPartialReadAccess({ ...params, getIndices: async () => OTEL })).resolves.toBe(
+      false
+    );
   });
 
-  it('returns true when one pattern is denied', async () => {
+  it('returns true when one index is not readable', async () => {
     const params = setup({
-      existing: ['logs-*.otel-*', 'traces-*.otel-*'],
-      privileges: {
-        'logs-*.otel-*,-logs-agent_builder.otel-*': { read: true },
-        'traces-*.otel-*,-traces-agent_builder.otel-*': { read: false },
-      },
+      dataStreams: ['traces-generic.otel-production', 'logs-generic.otel-production'],
+      readable: ['traces-generic.otel-production'],
     });
 
-    await expect(
-      hasPartialReadAccess({ ...params, indices: ['logs-*.otel-*', 'traces-*.otel-*'] })
-    ).resolves.toBe(true);
+    await expect(hasPartialReadAccess({ ...params, getIndices: async () => OTEL })).resolves.toBe(
+      true
+    );
   });
 
-  it('leaves out a denied pattern that matches no index', async () => {
+  it('checks the concrete names, so a role narrower than the wildcard still reads them all', async () => {
     const params = setup({
-      existing: ['traces-apm*'],
-      privileges: { 'traces-apm*': { read: true } },
+      dataStreams: ['traces-generic.otel-production'],
+      indices: ['apm-7.17.0-transaction'],
+      aliases: ['apm-alias'],
+      readable: ['traces-generic.otel-production', 'apm-7.17.0-transaction', 'apm-alias'],
     });
 
-    await expect(
-      hasPartialReadAccess({ ...params, indices: ['apm-*', 'traces-apm*'] })
-    ).resolves.toBe(false);
-    expect(params.esClient.security.hasPrivileges).toHaveBeenCalledWith({
-      index: [{ names: ['traces-apm*'], privileges: ['read'] }],
-    });
-  });
-
-  it('skips the privilege check when no pattern matches an index', async () => {
-    const params = setup({ existing: [] });
-
-    await expect(hasPartialReadAccess({ ...params, indices: ['apm-*'] })).resolves.toBe(false);
-    expect(params.esClient.security.hasPrivileges).not.toHaveBeenCalled();
-  });
-
-  it('excludes the Agent Builder indices from the OTel wildcards', async () => {
-    const params = setup({ existing: ['traces-*.otel-*', 'logs-*.otel-*'] });
-
-    await hasPartialReadAccess({ ...params, indices: ['logs-*.otel-*', 'traces-*.otel-*'] });
-
-    expect(params.esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
+    await expect(hasPartialReadAccess({ ...params, getIndices: async () => OTEL })).resolves.toBe(
+      false
+    );
     expect(params.esClient.security.hasPrivileges).toHaveBeenCalledWith({
       index: [
         {
-          names: [
-            'logs-*.otel-*,-logs-agent_builder.otel-*',
-            'traces-*.otel-*,-traces-agent_builder.otel-*',
-          ],
+          names: ['apm-7.17.0-transaction', 'apm-alias', 'traces-generic.otel-production'],
           privileges: ['read'],
         },
       ],
     });
   });
 
-  it('splits comma-separated patterns, deduplicates them and ignores exclusions', async () => {
-    const params = setup({ existing: ['traces-apm*', 'logs-apm.error-*'] });
+  it('resolves every pattern once, open only, without the Agent Builder indices', async () => {
+    const params = setup({});
+
+    await hasPartialReadAccess({ ...params, getIndices: async () => OTEL });
+
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledTimes(1);
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledWith({
+      name: 'logs-*.otel-*,-logs-agent_builder.otel-*,traces-*.otel-*,-traces-agent_builder.otel-*',
+      expand_wildcards: 'open',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+  });
+
+  it('splits comma-separated patterns, deduplicates them and drops exclusions and ignored ones', async () => {
+    const params = setup({});
 
     await hasPartialReadAccess({
       ...params,
-      indices: ['traces-apm*,logs-apm.error-*', 'traces-apm*', '-traces-apm.rum*'],
+      getIndices: async () => [
+        'traces-apm*,apm-*,traces-*.otel-*',
+        'logs-apm*, apm-*',
+        '-traces-apm.rum*',
+      ],
+      ignoredPatterns: OTEL,
     });
 
-    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledTimes(2);
-    expect(params.esClient.security.hasPrivileges).toHaveBeenCalledWith({
-      index: [{ names: ['traces-apm*', 'logs-apm.error-*'], privileges: ['read'] }],
-    });
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'traces-apm*,apm-*,logs-apm*' })
+    );
+  });
+
+  it('skips the privilege check when the patterns match nothing', async () => {
+    const params = setup({});
+
+    await expect(
+      hasPartialReadAccess({ ...params, getIndices: async () => ['apm-*'] })
+    ).resolves.toBe(false);
+    expect(params.esClient.security.hasPrivileges).not.toHaveBeenCalled();
+  });
+
+  it('skips both calls when every pattern is ignored', async () => {
+    const params = setup({});
+
+    await expect(
+      hasPartialReadAccess({ ...params, getIndices: async () => OTEL, ignoredPatterns: OTEL })
+    ).resolves.toBe(false);
+    expect(params.internalEsClient.indices.resolveIndex).not.toHaveBeenCalled();
   });
 
   it('returns false when the privilege check throws, as with security disabled', async () => {
-    const params = setup({ existing: ['traces-apm*'] });
+    const params = setup({ dataStreams: ['traces-apm-default'] });
     params.esClient.security.hasPrivileges.mockRejectedValue(new Error('security disabled'));
 
-    await expect(hasPartialReadAccess({ ...params, indices: ['traces-apm*'] })).resolves.toBe(
-      false
-    );
+    await expect(
+      hasPartialReadAccess({ ...params, getIndices: async () => ['traces-apm*'] })
+    ).resolves.toBe(false);
     expect(params.logger.debug).toHaveBeenCalledWith(expect.stringContaining('security disabled'));
   });
 
-  it('returns false when resolving the patterns throws', async () => {
-    const params = setup({ existing: [] });
-    params.internalEsClient.indices.resolveIndex.mockRejectedValue(new Error('resolve failed'));
+  it('returns false when reading the indices fails', async () => {
+    const params = setup({});
 
-    await expect(hasPartialReadAccess({ ...params, indices: ['traces-apm*'] })).resolves.toBe(
-      false
-    );
-    expect(params.esClient.security.hasPrivileges).not.toHaveBeenCalled();
-    expect(params.logger.debug).toHaveBeenCalledWith(expect.stringContaining('resolve failed'));
+    await expect(
+      hasPartialReadAccess({
+        ...params,
+        getIndices: async () => {
+          throw new Error('no settings');
+        },
+      })
+    ).resolves.toBe(false);
+    expect(params.internalEsClient.indices.resolveIndex).not.toHaveBeenCalled();
+    expect(params.logger.debug).toHaveBeenCalledWith(expect.stringContaining('no settings'));
   });
 });

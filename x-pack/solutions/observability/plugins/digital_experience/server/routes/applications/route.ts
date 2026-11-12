@@ -77,20 +77,18 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
       : undefined;
 
     const hasPartialClassicAccess = getApmIndices
-      ? async () => {
-          try {
-            const { transaction, error, span } = await getApmIndices();
-            return await hasPartialReadAccess({
-              esClient,
-              internalEsClient,
-              indices: [transaction, error, span],
-              logger,
-            });
-          } catch (e) {
-            // The fetch reports the failure; the check never fails the request.
-            return false;
-          }
-        }
+      ? () =>
+          hasPartialReadAccess({
+            esClient,
+            internalEsClient,
+            getIndices: async () => {
+              const { transaction, error, span } = await getApmIndices();
+              return [transaction, error, span];
+            },
+            // The default APM indices include the EDOT ones, which hold no Classic RUM data.
+            ignoredPatterns: [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+            logger,
+          })
       : undefined;
 
     return getApplications({
@@ -109,7 +107,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
         hasPartialReadAccess({
           esClient,
           internalEsClient,
-          indices: [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+          getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
           logger,
         }),
       hasPartialClassicAccess,

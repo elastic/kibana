@@ -98,6 +98,16 @@ describe('getApplications', () => {
       expect(partiallyAvailableSources).toEqual(['classic']);
     });
 
+    it('ignores the OTel access when the sessions index answered', async () => {
+      const { partiallyAvailableSources } = await getApplications({
+        getOtelApplications: async () => result([], [], [], []),
+        hasPartialOtelAccess: async () => true,
+        logger,
+      });
+
+      expect(partiallyAvailableSources).toEqual([]);
+    });
+
     it('lists a failed source only in unavailableSources', async () => {
       const response = await getApplications({
         getOtelApplications: async () => {

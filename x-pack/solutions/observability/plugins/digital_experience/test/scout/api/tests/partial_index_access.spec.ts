@@ -26,6 +26,20 @@ const OTEL_ONLY_INDICES_ROLE = {
   },
 };
 
+/** Reads every Classic RUM index and the EDOT Browser traces, but not its logs. */
+const NO_OTEL_LOGS_ROLE = {
+  ...createRole({ digital_experience: ['read'], apm: ['read'] }),
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: ['traces-*.otel-*', 'traces-apm*', 'logs-apm*', 'apm-*'],
+        privileges: ['read'],
+      },
+    ],
+  },
+};
+
 apiTest.describe(
   'Digital Experience applications API with partial index access',
   { tag: DIGITAL_EXPERIENCE_WITH_UX_TAGS },
@@ -54,6 +68,24 @@ apiTest.describe(
         expect(findApplication(applications, SERVICE_NAME, 'otel')).toBeDefined();
         expect(unavailableSources).toStrictEqual([]);
         expect(partiallyAvailableSources).toStrictEqual(['classic']);
+      }
+    );
+
+    apiTest(
+      'reports EDOT Browser as partially available when its logs are not readable',
+      async ({ apiClient, requestAuth }) => {
+        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(NO_OTEL_LOGS_ROLE);
+
+        const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
+          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const { unavailableSources, partiallyAvailableSources } =
+          response.body as ApplicationsResponse;
+        expect(unavailableSources).toStrictEqual([]);
+        expect(partiallyAvailableSources).toStrictEqual(['otel']);
       }
     );
 

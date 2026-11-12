@@ -65,7 +65,10 @@ export const getApplications = async ({
   getOtelApplications: ApplicationsFetcher;
   /** Undefined when the Classic source is not available (serverless). */
   getClassicApplications?: ApplicationsFetcher;
-  /** Resolves to `true` when the user can't read every index of the source; never rejects. */
+  /**
+   * Resolves to `true` when the user can't read every index of the source; never rejects. Ignored
+   * when the source read the sessions index.
+   */
   hasPartialOtelAccess?: AccessCheck;
   hasPartialClassicAccess?: AccessCheck;
   logger: Logger;
@@ -108,7 +111,9 @@ export const getApplications = async ({
       if (source === APPLICATION_SOURCE.otel) {
         sessionsOverTime = result.value.sessionsOverTime;
       }
-      if (partialAccess[index]) {
+      // A transform with its own access fills the sessions index, so when it answered (the only
+      // source with sessions), the user's raw indices hide no rows.
+      if (partialAccess[index] && result.value.sessionsOverTime === null) {
         partiallyAvailableSources.push(source);
       }
     } else {

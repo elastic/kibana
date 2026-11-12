@@ -158,13 +158,17 @@ describe('GET /internal/digital_experience/applications', () => {
     const { result, getApmIndices } = runHandler({ isServerless: false });
     const response = await result;
 
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
+    const [[otelCheck], [classicCheck]] = mockedPartialAccess.mock.calls;
+    await expect(otelCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+    expect(otelCheck.ignoredPatterns).toBeUndefined();
+    await expect(classicCheck.getIndices()).resolves.toEqual([
+      'traces-apm*',
+      'logs-apm.error-*',
+      'traces-apm*',
+    ]);
+    expect(classicCheck.ignoredPatterns).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
     expect(getApmIndices).toHaveBeenCalledTimes(1);
-    expect(mockedPartialAccess).toHaveBeenCalledWith(
-      expect.objectContaining({ indices: ['logs-*.otel-*', 'traces-*.otel-*'] })
-    );
-    expect(mockedPartialAccess).toHaveBeenCalledWith(
-      expect.objectContaining({ indices: ['traces-apm*', 'logs-apm.error-*', 'traces-apm*'] })
-    );
     expect(response.partiallyAvailableSources).toEqual(['otel', 'classic']);
   });
 
