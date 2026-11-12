@@ -1068,7 +1068,6 @@ export const RulesList = ({
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
-            cps={cps}
             showClassicBadge={kibanaServices.showClassicBadge}
           />
         )}

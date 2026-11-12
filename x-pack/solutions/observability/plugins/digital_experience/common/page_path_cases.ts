@@ -6,8 +6,8 @@
  */
 
 /**
- * Page labels for raw URLs. The sessions dest pipeline (`pathOf` in Painless) labels the journey
- * and entry/exit pages, `toPagePath` the session timeline, and both must agree with these cases.
+ * Page labels for raw URLs: `toPagePath` must label them like this, as the session timeline and
+ * the journey of the sessions index have to agree on a page.
  */
 export const PAGE_PATH_CASES: ReadonlyArray<readonly [raw: string | null, page: string | null]> = [
   ['https://shop.example/', '/'],

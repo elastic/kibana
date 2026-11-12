@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { type ReadStream, createReadStream } from 'fs';
 import { access } from 'fs/promises';
 import { Readable } from 'stream';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
@@ -55,30 +54,30 @@ const assertArtifactResponse = (res: Response, fileUrl: string): void => {
   }
 };
 
+/**
+ * Makes an artifact available on disk and returns its path: a remote artifact is downloaded to
+ * `filePathAtVolume` in the artifacts folder, an artifact of a local (`file://`) repository is read in
+ * place, so e.g. the serverless bundle is never copied into the memory-backed data directory.
+ */
 export const downloadToDisk = async (
   fileUrl: string,
   filePathAtVolume: string,
   artifactRepositoryProxyUrl?: string
 ): Promise<string> => {
-  const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
-  let readStream: ReadStream;
-
   const parsedUrl = new URL(fileUrl);
-
   if (parsedUrl.protocol === 'file:') {
-    const path = resolveLocalArtifactsPath(parsedUrl);
-    readStream = createReadStream(path);
-  } else {
-    const fetchOptions = getFetchOptions(fileUrl, artifactRepositoryProxyUrl);
-    const res = await fetch(fileUrl, fetchOptions as RequestInit);
-    assertArtifactResponse(res, fileUrl);
-
-    if (!res.body) {
-      throw new Error('Response body is null');
-    }
-    readStream = Readable.fromWeb(res.body as WebReadableStream) as unknown as ReadStream;
+    return resolveLocalArtifactsPath(parsedUrl);
   }
 
+  const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
+  const fetchOptions = getFetchOptions(fileUrl, artifactRepositoryProxyUrl);
+  const res = await fetch(fileUrl, fetchOptions as RequestInit);
+  assertArtifactResponse(res, fileUrl);
+
+  if (!res.body) {
+    throw new Error('Response body is null');
+  }
+  const readStream = Readable.fromWeb(res.body as WebReadableStream);
   const writeStream = createWriteStream(filePathAtVolume);
   await pipeline(readStream, writeStream);
 
