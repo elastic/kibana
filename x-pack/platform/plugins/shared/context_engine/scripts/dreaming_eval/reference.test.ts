@@ -7,6 +7,7 @@
 
 import { parseConfig } from './config';
 import {
+  aiIndexConfigOf,
   ALL_SAMPLES,
   indexPrompt,
   referenceDirOf,
@@ -81,18 +82,19 @@ describe('reference memories', () => {
     );
   });
 
-  it('prompts for the configured types only, with the transcripts, the output file and the prefix', () => {
+  it('prompts with the whole AI index config, the transcripts, the output file and the prefix', () => {
+    const dreaming = {
+      enabled: true,
+      instructions: 'Record what the user says about themselves.',
+      facts: [{ type: 'preference', description: 'What the user likes.' }],
+      entities: {
+        nodes: [{ type: 'person', description: 'Someone.', attributes: ['relation'] }],
+      },
+      relationships: [{ type: 'knows', description: 'A person knows a person.' }],
+    };
     const prompt = referencePrompt({
       aiIndex,
-      dreaming: {
-        enabled: true,
-        instructions: 'Record what the user says about themselves.',
-        facts: [{ type: 'preference', description: 'What the user likes.' }],
-        entities: {
-          nodes: [{ type: 'person', description: 'Someone.', attributes: ['relation'] }],
-        },
-        relationships: [{ type: 'knows', description: 'A person knows a person.' }],
-      },
+      dreaming,
       unit: 'q1',
       transcripts: ['/data/references/eval-a/transcripts/c1.md'],
       rounds: 7,
@@ -106,11 +108,15 @@ describe('reference memories', () => {
       )
     ).toBe(true);
     expect(prompt).toContain('the 1 conversation below (7 rounds)');
-    expect(prompt).toContain('- `preference`: What the user likes.');
-    expect(prompt).toContain('- `person`: Someone. Attributes: `relation`.');
-    expect(prompt).toContain('- `about`: A fact is about an entity');
-    expect(prompt).toContain('- `knows`: A person knows a person.');
-    expect(prompt).toContain('Record what the user says about themselves.');
+    expect(aiIndexConfigOf(aiIndex, dreaming)).toEqual({
+      id: 'eval-a',
+      description: 'What the assistant learned about its user.',
+      dreaming,
+    });
+    expect(prompt).toContain(
+      ['```json', JSON.stringify(aiIndexConfigOf(aiIndex, dreaming), null, 2), '```'].join('\n')
+    );
+    expect(prompt).toContain('the built-in `about` links a fact to an entity');
     expect(prompt).toContain('- /data/references/eval-a/transcripts/c1.md');
     expect(prompt).toContain('Write one JSON file to /data/references/eval-a/samples/q1.json');
 
@@ -124,20 +130,24 @@ describe('reference memories', () => {
       prefix: [],
     });
     expect(factsOnly.startsWith('# Reference memories for AI index `eval-a`\n')).toBe(true);
-    expect(factsOnly).toContain('- none: write no entities.');
-    expect(factsOnly).toContain('- none: write no relationships.');
+    expect(factsOnly).toContain('It has no entity types: write no entities.');
+    expect(factsOnly).toContain('It has no relationship types: write no relationships.');
     expect(factsOnly).not.toContain('`about`');
   });
 
-  it('lists every unit prompt with its output in the index prompt', () => {
-    expect(
-      indexPrompt({
-        aiIndex,
-        units: [{ unit: 'q1', prompt: '/p/q1.md', output: '/o/q1.json' }],
-        prefix: ['/model big'],
-      })
-    ).toContain(
+  it('lists every unit prompt with its output in the index prompt, with the AI index config', () => {
+    const prompt = indexPrompt({
+      aiIndex,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
+      units: [{ unit: 'q1', prompt: '/p/q1.md', output: '/o/q1.json' }],
+      prefix: ['/model big'],
+    });
+
+    expect(prompt).toContain(
       '/model big\n\n# Reference memories for AI index `eval-a`\n\nWrite the reference memories of 1 unit.'
     );
+    expect(prompt).toContain('- q1: /p/q1.md → /o/q1.json');
+    expect(prompt).toContain('## AI index config');
+    expect(prompt).toContain('"type": "preference"');
   });
 });

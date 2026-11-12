@@ -139,7 +139,7 @@ export const runReference = async (context: StageContext): Promise<void> => {
     });
     fs.writeFileSync(
       indexPromptFileOf(dir),
-      indexPrompt({ aiIndex, units: manifestUnits, prefix })
+      indexPrompt({ aiIndex, dreaming, units: manifestUnits, prefix })
     );
     const manifest: ReferenceManifest = {
       aiIndexId: aiIndex.id,

@@ -152,15 +152,21 @@ export const renderTranscript = ({ id, title, rounds }: EvalConversation): strin
     ]),
   ].join('\n');
 
-const typeLines = (types: Array<{ type: string; description?: string; attributes?: string[] }>) =>
-  types.map(
-    ({ type, description, attributes }) =>
-      `- \`${type}\`${description ? `: ${description}` : ''}${
-        attributes && attributes.length > 0
-          ? ` Attributes: ${attributes.map((key) => `\`${key}\``).join(', ')}.`
-          : ''
-      }`
-  );
+/** The AI index as Context Engine stores it: its id, description and whole dreaming config. */
+export const aiIndexConfigOf = (
+  { id, description }: AiIndexEvalConfig,
+  dreaming: AiIndexDreamingConfig
+) => ({ id, ...(description && { description }), dreaming });
+
+const configSection = (aiIndex: AiIndexEvalConfig, dreaming: AiIndexDreamingConfig): string[] => [
+  '## AI index config',
+  '',
+  'The AI index as Context Engine stores it. `dreaming.instructions` is what the pipeline is told; `dreaming.facts`, `dreaming.entities.nodes` and `dreaming.relationships` are the types it builds, with what each is for.',
+  '',
+  '```json',
+  JSON.stringify(aiIndexConfigOf(aiIndex, dreaming), null, 2),
+  '```',
+];
 
 const OUTPUT_EXAMPLE = {
   entities: [
@@ -212,17 +218,6 @@ export const referencePrompt = ({
   prefix,
 }: ReferencePromptInput): string => {
   const { facts, entities, relationships } = dreamingTypesOf(dreaming);
-  const relationshipTypes =
-    relationships.length > 0
-      ? [
-          {
-            type: ABOUT_RELATIONSHIP_TYPE,
-            description:
-              'A fact is about an entity: from is the fact, to is the entity. The only type from a fact.',
-          },
-          ...relationships,
-        ]
-      : [];
   return [
     ...prefix,
     ...(prefix.length > 0 ? [''] : []),
@@ -258,26 +253,24 @@ export const referencePrompt = ({
         ]
       : []),
     '',
+    ...configSection(aiIndex, dreaming),
+    '',
     '## Types',
     '',
-    'Use only these types; a kind without types is not built, so write none of it.',
-    '',
-    'Fact types:',
-    ...(facts.length > 0 ? typeLines(facts) : ['- none: write no facts.']),
-    '',
-    'Entity types:',
-    ...(entities.length > 0 ? typeLines(entities) : ['- none: write no entities.']),
-    '',
-    'Relationship types (from and to are ids of your entities and facts; read it as "from type to"):',
-    ...(relationshipTypes.length > 0
-      ? [
-          ...typeLines(relationshipTypes),
-          '- Every type but `about` links two entities; use one only when its description fits both ends.',
-        ]
-      : ['- none: write no relationships.']),
-    ...(dreaming.instructions
-      ? ['', '## Instructions the pipeline is given', '', dreaming.instructions]
+    `- Use only the types of the config. ${
+      [
+        facts.length === 0 && 'It has no fact types: write no facts.',
+        entities.length === 0 && 'It has no entity types: write no entities.',
+      ]
+        .filter(Boolean)
+        .join(' ') || 'Give each memory one of them in `type`.'
+    }`,
+    ...(entities.length > 0
+      ? ["- An entity's `attributes` are the keys its type lists in `dreaming.entities.nodes`."]
       : []),
+    relationships.length > 0
+      ? `- Relationships read "from type to"; from and to are ids of your entities and facts. Besides the configured types, the built-in \`${ABOUT_RELATIONSHIP_TYPE}\` links a fact to an entity it is about (from the fact, to the entity), and is the only type from a fact. Every configured type links two entities: use one only when its description fits both ends.`
+      : '- It has no relationship types: write no relationships.',
     '',
     '## Conversations',
     '',
@@ -305,10 +298,12 @@ export const referencePrompt = ({
 /** The prompt that has a coding agent write the reference memories of every unit, one prompt each. */
 export const indexPrompt = ({
   aiIndex,
+  dreaming,
   units,
   prefix,
 }: {
   aiIndex: AiIndexEvalConfig;
+  dreaming: AiIndexDreamingConfig;
   units: Array<{ unit: string; prompt: string; output: string }>;
   prefix: string[];
 }): string =>
@@ -322,5 +317,7 @@ export const indexPrompt = ({
     }. Each has its own prompt with the conversations to read and the file to write. Do each prompt in full and on its own, one subagent per prompt where you can, several at a time; skip a unit whose output file already exists and parses. When all are done, list the units and how many entities, facts and relationships each has.`,
     '',
     ...units.map(({ unit, prompt, output }) => `- ${unit}: ${prompt} → ${output}`),
+    '',
+    ...configSection(aiIndex, dreaming),
     '',
   ].join('\n');
