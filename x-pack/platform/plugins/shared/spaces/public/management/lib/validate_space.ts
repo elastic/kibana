@@ -10,6 +10,7 @@ import { isValidHex } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { isValidSpaceIdentifier } from './space_identifier_utils';
+import { isValidSpaceInitials } from '../../../common';
 import { isReservedSpace } from '../../../common/is_reserved_space';
 import type { CustomizeSpaceFormValues } from '../types';
 
@@ -117,7 +118,7 @@ export class SpaceValidator {
           })
         );
       }
-      if (space.initials.length > 2) {
+      if (!isValidSpaceInitials(space.initials)) {
         return invalid(
           i18n.translate('xpack.spaces.management.validateSpace.maxLengthInitialsErrorMessage', {
             defaultMessage: 'Enter no more than 2 characters.',

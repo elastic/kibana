@@ -8,7 +8,7 @@
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 
 import type { SpaceAvatarTarget } from './types';
-import { MAX_SPACE_INITIALS } from '../../common';
+import { getGraphemes, MAX_SPACE_INITIALS } from '../../common';
 
 // code point for lowercase "a"
 const FALLBACK_CODE_POINT = 97;
@@ -52,7 +52,7 @@ export function getSpaceInitials(space: SpaceAvatarTarget = {}) {
 
   words.splice(numInitials, words.length);
 
-  return words.map((word) => word.substring(0, 1)).join('');
+  return words.map((word) => getGraphemes(word)[0] ?? '').join('');
 }
 
 /**
