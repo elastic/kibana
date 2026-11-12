@@ -418,7 +418,7 @@ export const answerAgentOf = ({
       '',
       'The answer to every question you are asked is in that AI Index. Search it before you answer, every time, and answer from what you find there, not from general knowledge. Try more than one search: other wordings, the names and terms in the question, and the related facts and entities a first search turns up. When a question is about time, use the dates the facts carry.',
       '',
-      'If the AI Index does not hold the answer after a thorough search, say that you do not know rather than guess. Keep the answer short and direct, and follow any answer format the question asks for.',
+      'If the AI Index does not hold the answer after a thorough search, say that you do not know rather than guess. When the question offers options, check each against what you found before you choose, and pick the one it supports. Keep the answer short and direct, and follow any answer format the question asks for.',
     ].join('\n'),
 });
 

@@ -102,7 +102,8 @@ export const trajectoryIdOfLine = (line: string): string | undefined =>
  */
 const ELEMENT = /^\s*(?:\[[A-Za-z]*\d+\]\s*)?([\w-]+) '([^']*)'(.*)$/;
 /** The properties that say what a field holds or allows, rather than how the page draws it. */
-const STATE_PROPERTIES = /\b(value='[^']*'|(?:selected|checked|disabled|required|readonly)=True)/g;
+const STATE_PROPERTIES =
+  /\b(value='[^']*'|(?:selected|checked|disabled|required|readonly)=True|checked=False)/g;
 
 /**
  * The labelled elements of an accessibility tree, as role and label with the properties that hold
@@ -115,7 +116,7 @@ export const pageElements = (tree: string | null | undefined): string[] =>
       return [];
     }
     const state = (match[3].match(STATE_PROPERTIES) ?? []).map((property) =>
-      property.replace(/=True$/, '')
+      property === 'checked=False' ? 'unchecked' : property.replace(/=True$/, '')
     );
     return [[`${match[1]} '${match[2].trim()}'`, ...state].join(' ')];
   });

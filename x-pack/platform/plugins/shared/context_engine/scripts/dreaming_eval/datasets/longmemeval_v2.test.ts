@@ -156,6 +156,8 @@ describe('LongMemEval-V2', () => {
           "\t[b211] textbox 'Quantity' value='1', disabled=True, required=True",
           "\t[b198] heading 'Order this Item', visible",
           "\t[b199] generic '', visible",
+          "\t[b200] checkbox 'Compact rows', clickable, visible, checked=False",
+          "\t[b201] checkbox 'Wrap column text', clickable, visible, checked=True",
         ].join('\n')
       )
     ).toEqual([
@@ -165,6 +167,8 @@ describe('LongMemEval-V2', () => {
       "option 'In stock'",
       "textbox 'Quantity' value='1' disabled required",
       "heading 'Order this Item'",
+      "checkbox 'Compact rows' unchecked",
+      "checkbox 'Wrap column text' checked",
     ]);
   });
 
