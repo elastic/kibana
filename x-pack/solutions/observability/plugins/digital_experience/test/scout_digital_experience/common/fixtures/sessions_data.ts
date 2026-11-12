@@ -183,6 +183,16 @@ export const removeSessionsTask = async (kbnClient: KbnClient) => {
   });
 };
 
+/** Goes back to the kibana.yml session summaries settings. */
+export const resetSessionsSettings = async (kbnClient: KbnClient) => {
+  await kbnClient.request({
+    method: 'PUT',
+    path: '/internal/digital_experience/sessions/settings',
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+    body: {},
+  });
+};
+
 /** Removes the sessions setup and the mock sessions, leaving the rest of the data streams. */
 export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
   await removeSessionsTask(kbnClient);

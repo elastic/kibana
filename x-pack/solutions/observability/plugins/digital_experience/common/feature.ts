@@ -14,10 +14,14 @@ export const DIGITAL_EXPERIENCE_API_PRIVILEGES = {
   manage: 'manage_digital_experience',
   /** Set up the session summaries; a separate grant, not part of `all`. */
   manageSessions: 'manage_digital_experience_sessions',
+  /** Change the session summaries settings; a separate grant, not part of `all` nor the above. */
+  configureSessions: 'configure_digital_experience_sessions',
 } as const;
 
 /** Sub-feature privilege that grants `manageSessions`. */
 export const MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID = 'manage_sessions';
+/** Sub-feature privilege that grants `configureSessions`. */
+export const CONFIGURE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID = 'configure_sessions';
 
 /** APM's API privilege, which the routes also require as the app reads its data through APM. */
 export const APM_API_PRIVILEGE = 'apm';
@@ -26,4 +30,5 @@ export const DIGITAL_EXPERIENCE_UI_PRIVILEGES = {
   show: 'show',
   save: 'save',
   manageSessions: 'manageSessions',
+  configureSessions: 'configureSessions',
 } as const;

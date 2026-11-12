@@ -28,7 +28,8 @@ const SESSIONS_STATUS_TTL_MS = 30_000;
 interface GetOtelApplicationsFromBestSourceParams extends GetOtelApplicationsParams {
   /** Reads the summaries task's status; `undefined` without Task Manager, so without sessions. */
   taskManager: TaskManagerStartContract | undefined;
-  sessionsSettings: SessionsSettings;
+  /** The settings the summaries task runs with, for its lag threshold. */
+  getSessionsSettings: () => Promise<SessionsSettings>;
   logger: Logger;
 }
 
@@ -57,7 +58,7 @@ export const clearSessionsStatusCache = (): void => {
  */
 const areSessionsReadable = ({
   taskManager,
-  sessionsSettings,
+  getSessionsSettings,
   logger,
 }: GetOtelApplicationsFromBestSourceParams): Promise<boolean> => {
   if (!taskManager) {
@@ -67,7 +68,8 @@ const areSessionsReadable = ({
   if (sessionsReadable && sessionsReadable.expiresAt > now) {
     return sessionsReadable.result;
   }
-  const result: Promise<boolean> = getSessionsStatus({ taskManager, settings: sessionsSettings })
+  const result: Promise<boolean> = getSessionsSettings()
+    .then((settings) => getSessionsStatus({ taskManager, settings }))
     .then(isReadable)
     .catch((error) => {
       logger.debug(`Could not read the sessions status: ${describeError(error)}`);
@@ -100,7 +102,7 @@ const sessionsCoverTimeRange = async (
 export const getOtelApplicationsFromBestSource = async (
   params: GetOtelApplicationsFromBestSourceParams
 ): Promise<SourceApplications> => {
-  const { taskManager, sessionsSettings, logger, ...searchParams } = params;
+  const { taskManager, getSessionsSettings, logger, ...searchParams } = params;
   const { esClient, signal, start, end, environment } = searchParams;
 
   if (await sessionsCoverTimeRange(params)) {

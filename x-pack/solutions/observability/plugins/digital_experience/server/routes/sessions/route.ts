@@ -141,7 +141,7 @@ const statusRoute = createDigitalExperienceServerRoute({
   },
   handler: async ({
     request,
-    sessionsSettings,
+    getSessionsSettings,
     getSessionsServices,
     logger,
   }): Promise<SessionsStatus> => {
@@ -152,7 +152,7 @@ const statusRoute = createDigitalExperienceServerRoute({
       // The task and its state only; no session data is read with the internal user.
       return await getSessionsStatus({
         taskManager,
-        settings: sessionsSettings,
+        settings: await getSessionsSettings(),
         withDetails: canManage,
       });
     } catch (error) {
@@ -171,7 +171,7 @@ const enableRoute = createDigitalExperienceServerRoute({
   handler: async ({
     context,
     request,
-    sessionsSettings,
+    getSessionsSettings,
     getSessionsServices,
     isServerless,
     logger,
@@ -181,6 +181,7 @@ const enableRoute = createDigitalExperienceServerRoute({
     if (!taskManager) {
       throw internal(NO_TASK_MANAGER_MESSAGE);
     }
+    const settings = await getSessionsSettings();
     const enabledBy = security.authc.getCurrentUser()?.username ?? null;
     const audit = (outcome: 'success' | 'failure', error?: Error) =>
       security.audit.logger.log({
@@ -203,7 +204,7 @@ const enableRoute = createDigitalExperienceServerRoute({
         request,
         taskManager,
         canEncrypt,
-        settings: sessionsSettings,
+        settings,
         isServerless,
         logger,
       });
@@ -217,7 +218,7 @@ const enableRoute = createDigitalExperienceServerRoute({
       // Only users who can set sessions up get here.
       return await getSessionsStatus({
         taskManager,
-        settings: sessionsSettings,
+        settings,
         withDetails: true,
       });
     } catch (error) {

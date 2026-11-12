@@ -1,5 +1,5 @@
 {
-  "sha1": "ce3b3b6904f5d0f17bbcc2c96cafee324b06347c",
+  "sha1": "ac750b6ac2e41fe965309bf39723c1e3c46c1e61",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -209,13 +209,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
-        "line": 48,
-        "column": 16
+        "line": 74,
+        "column": 7
       }
     },
     {
-      "id": "41f7c3765e55e50-cd60a217ea19385",
-      "title": "Digital Experience feature privileges resolves show and save, but not managing sessions, for the all privilege",
+      "id": "41f7c3765e55e50-bf4fb1e8bd80db3",
+      "title": "Digital Experience feature privileges resolves show and save, but no sessions privilege, for the all privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -223,8 +223,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
-        "line": 105,
-        "column": 25
+        "line": 179,
+        "column": 32
       }
     },
     {
@@ -237,8 +237,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
-        "line": 105,
-        "column": 25
+        "line": 179,
+        "column": 32
       }
     },
     {
@@ -251,8 +251,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
-        "line": 105,
-        "column": 25
+        "line": 179,
+        "column": 32
+      }
+    },
+    {
+      "id": "41f7c3765e55e50-d10a93e38a56ffa",
+      "title": "Digital Experience feature privileges resolves configuring sessions only with the configure_sessions sub-feature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
+        "line": 179,
+        "column": 32
       }
     },
     {
@@ -265,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
-        "line": 105,
-        "column": 25
+        "line": 179,
+        "column": 32
       }
     },
     {
@@ -351,6 +365,48 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_enable.spec.ts",
         "line": 74,
         "column": 37
+      }
+    },
+    {
+      "id": "5fe4b84f8bfc6ab-b1fbfc8f51592f8",
+      "title": "Digital Experience session summaries settings lets a user with the configure sessions privilege read and save them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_settings.spec.ts",
+        "line": 25,
+        "column": 47
+      }
+    },
+    {
+      "id": "5fe4b84f8bfc6ab-7eb421cd45eed23",
+      "title": "Digital Experience session summaries settings refuses settings out of bounds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_settings.spec.ts",
+        "line": 53,
+        "column": 35
+      }
+    },
+    {
+      "id": "5fe4b84f8bfc6ab-db4885cef60c317",
+      "title": "Digital Experience session summaries settings refuses a user who can set sessions up, but not configure them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_settings.spec.ts",
+        "line": 65,
+        "column": 26
       }
     },
     {

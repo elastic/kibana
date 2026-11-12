@@ -22,6 +22,8 @@ import type {
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
+import { sessionsSettingsSavedObjectType } from './saved_objects';
+import { createSessionsSettingsGetter } from './services/sessions/sessions_settings';
 import { registerSessionsTask } from './services/sessions/sessions_task';
 
 interface DigitalExperienceSetupDeps {
@@ -53,6 +55,7 @@ export class Plugin
 
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
+    core.savedObjects.registerType(sessionsSettingsSavedObjectType);
 
     const { taskManager, encryptedSavedObjects } = plugins;
     const canEncrypt = encryptedSavedObjects?.canEncrypt === true;
@@ -60,6 +63,13 @@ export class Plugin
       // Task Manager stores the summaries task's API key encrypted.
       taskManager.registerCanEncryptedSavedObjects(encryptedSavedObjects.canEncrypt);
     }
+
+    // kibana.yml's settings are the defaults; the ones saved in the app win.
+    const getSessionsSettings = createSessionsSettingsGetter({
+      core,
+      defaults: this.config.sessions,
+      logger: this.logger,
+    });
 
     const { buildFlavor } = this.initializerContext.env.packageInfo;
     registerRoutes({
@@ -70,7 +80,8 @@ export class Plugin
         plugins: { apmDataAccess: plugins.apmDataAccess },
         isServerless: buildFlavor === 'serverless',
         isUxEnabled: plugins.ux !== undefined,
-        sessionsSettings: this.config.sessions,
+        sessionsSettingsDefaults: this.config.sessions,
+        getSessionsSettings,
         getSessionsServices: async () => {
           const [, pluginsStart] = await core.getStartServices();
           return { taskManager: pluginsStart.taskManager, canEncrypt };
@@ -84,7 +95,7 @@ export class Plugin
         core,
         logger: this.logger,
         taskManager,
-        settings: this.config.sessions,
+        getSettings: getSessionsSettings,
       });
     }
   }

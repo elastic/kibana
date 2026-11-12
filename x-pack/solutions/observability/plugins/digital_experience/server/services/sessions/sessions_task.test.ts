@@ -382,15 +382,11 @@ describe('registerSessionsTask', () => {
     const core = coreMock.createSetup();
     const logger = loggingSystemMock.createLogger();
     const taskManager = taskManagerMock.createSetup();
-    registerSessionsTask({
-      core,
-      logger,
-      taskManager,
-      settings: { frequency: '1m', concurrency: 3 },
-    });
+    const getSettings = jest.fn().mockResolvedValue({ frequency: '1m', concurrency: 3 });
+    registerSessionsTask({ core, logger, taskManager, getSettings });
     const definitions: TaskDefinitionRegistry =
       taskManager.registerTaskDefinitions.mock.calls[0][0];
-    return { core, definition: definitions[SESSIONS_TASK_TYPE] };
+    return { core, getSettings, definition: definitions[SESSIONS_TASK_TYPE] };
   };
 
   beforeEach(() => {
@@ -447,6 +443,30 @@ describe('registerSessionsTask', () => {
     });
   });
 
+  it('reads its settings at the start of every run, so saved ones apply from the next', async () => {
+    const { definition, getSettings } = setup();
+    const runner = () =>
+      definition
+        .createTaskRunner(
+          taskManagerMock.createRunContext({
+            taskInstance: taskManagerMock.createTask({
+              state: caughtUpState,
+              schedule: { interval: '1m' },
+            }),
+            fakeRequest: httpServerMock.createKibanaRequest(),
+          })
+        )
+        .run();
+
+    expect(await runner()).not.toHaveProperty('schedule');
+    getSettings.mockResolvedValue({ frequency: '5m', concurrency: 6 });
+    const result = await runner();
+
+    expect(getSettings).toHaveBeenCalledTimes(2);
+    expect(summarizeSessions).toHaveBeenLastCalledWith(expect.objectContaining({ concurrency: 6 }));
+    expect(result).toEqual(expect.objectContaining({ schedule: { interval: '5m' } }));
+  });
+
   it('reads nothing without an API key', async () => {
     const { core, definition } = setup();
     const [coreStart] = await core.getStartServices();
@@ -499,7 +519,11 @@ describe('scheduleSessionsTask', () => {
     const taskManager = taskManagerMock.createStart();
     const request = httpServerMock.createKibanaRequest();
 
-    await scheduleSessionsTask({ taskManager, request, settings: { frequency: '5m' } });
+    await scheduleSessionsTask({
+      taskManager,
+      request,
+      settings: { frequency: '5m', concurrency: 2 },
+    });
 
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       {
@@ -521,7 +545,7 @@ describe('scheduleSessionsTask', () => {
       scheduleSessionsTask({
         taskManager,
         request: httpServerMock.createKibanaRequest(),
-        settings: { frequency: '1m' },
+        settings: { frequency: '1m', concurrency: 2 },
       })
     ).rejects.toThrow('unable to grant an API key');
   });

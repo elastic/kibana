@@ -36,3 +36,5 @@ export const applicationTabPath = (
 export const APPLICATIONS_IN_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${TIME_RANGE.rangeFrom}&end=${TIME_RANGE.rangeTo}`;
 
 export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable';
+
+export const SESSIONS_SETTINGS_PATH = 'internal/digital_experience/sessions/settings';

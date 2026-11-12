@@ -9,12 +9,14 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
+  CONFIGURE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
   DIGITAL_EXPERIENCE_API_PRIVILEGES,
   DIGITAL_EXPERIENCE_FEATURE_ID,
   DIGITAL_EXPERIENCE_UI_PRIVILEGES,
   MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
 } from '../common/feature';
 import { SESSIONS_INDEX_PATTERN } from '../common/sessions';
+import { SESSIONS_SETTINGS_SO_TYPE } from './saved_objects';
 
 export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup): void => {
   features.registerKibanaFeature({
@@ -48,13 +50,14 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
         name: i18n.translate('xpack.digitalExperience.featureRegistry.sessionsSubFeatureName', {
           defaultMessage: 'Sessions',
         }),
-        // The summaries task and index serve every space, so only grant this in all spaces.
+        // The summaries task, its settings and index serve every space, so only grant these in all
+        // spaces.
         requireAllSpaces: true,
         privilegesTooltip: i18n.translate(
           'xpack.digitalExperience.featureRegistry.sessionsSubFeatureTooltip',
           {
             defaultMessage:
-              'Requires "*" (All spaces). Users also need to read the OTel logs and traces in full, and to write the {sessionsIndex} indices.',
+              'Requires "*" (All spaces). Setting session summaries up also needs read on the OTel logs and traces in full, and write on the {sessionsIndex} indices.',
             values: { sessionsIndex: SESSIONS_INDEX_PATTERN },
           }
         ),
@@ -74,6 +77,19 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
                 api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
                 ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions],
                 savedObject: { all: [], read: [] },
+              },
+              {
+                id: CONFIGURE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
+                name: i18n.translate(
+                  'xpack.digitalExperience.featureRegistry.configureSessionsPrivilegeName',
+                  { defaultMessage: 'Configure session summaries' }
+                ),
+                // Never granted with `all` or with setting sessions up: how often the summaries
+                // are built, and how many queries at once, sets their cost for the whole cluster.
+                includeIn: 'none',
+                api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.configureSessions],
+                ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.configureSessions],
+                savedObject: { all: [SESSIONS_SETTINGS_SO_TYPE], read: [] },
               },
             ],
           },

@@ -25,7 +25,7 @@ import { useAbortableAsync } from '@kbn/react-hooks';
 import { getDateISORange } from '@kbn/timerange';
 import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/sessions';
 import type { ApplicationSource } from '../../../common/types/applications';
-import { canManageSessions } from '../../capabilities';
+import { canConfigureSessions, canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
@@ -41,6 +41,7 @@ import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { SessionsFilters } from './components/sessions_filters';
 import { SessionsKpis } from './components/sessions_kpis';
+import { SessionsSettingsButton } from './components/sessions_settings_button';
 import {
   EnableSessionsPrompt,
   SessionsFreshness,
@@ -177,11 +178,14 @@ function SessionsList({
   serviceName,
   source,
   status,
+  canConfigure,
   onRefreshStatus,
 }: {
   serviceName: string;
   source: ApplicationSource;
   status: SessionsStatus;
+  /** Whether the user can change the session summaries settings. */
+  canConfigure: boolean;
   onRefreshStatus: () => void;
 }) {
   const { rebuilding } = status;
@@ -312,7 +316,17 @@ function SessionsList({
           <SessionsFreshness status={status} formatters={formatters} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <TimeRangePicker onRefresh={refreshAll} />
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {canConfigure && (
+              <EuiFlexItem grow={false}>
+                {/* A changed frequency changes when sessions count as behind. */}
+                <SessionsSettingsButton onSaved={onRefreshStatus} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <TimeRangePicker onRefresh={refreshAll} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -375,6 +389,7 @@ export function SessionsTab({
 }) {
   const { application } = useKibanaServices();
   const canManage = canManageSessions(application.capabilities);
+  const canConfigure = canConfigureSessions(application.capabilities);
   const { status, error, refresh, enable, enabling, enableError } = useSessionsStatus();
   const enableProps = { canManage, onEnable: enable, enabling, enableError };
 
@@ -428,6 +443,7 @@ export function SessionsTab({
         serviceName={serviceName}
         source={source}
         status={status}
+        canConfigure={canConfigure}
         onRefreshStatus={refresh}
       />
     </>

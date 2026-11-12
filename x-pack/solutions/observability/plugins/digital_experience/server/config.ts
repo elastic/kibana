@@ -11,27 +11,21 @@ import { schema } from '@kbn/config-schema';
 import {
   SESSIONS_DEFAULT_CONCURRENCY,
   SESSIONS_DEFAULT_FREQUENCY,
+  SESSIONS_FREQUENCY_MAX_LENGTH,
   SESSIONS_MAX_CONCURRENCY,
-  timeValueSeconds,
+  validateSessionsConcurrency,
+  validateSessionsFrequency,
 } from '../common/sessions';
-
-/** The summaries task runs between every second and every hour. */
-export const validateFrequency = (value: string): string | undefined => {
-  const seconds = timeValueSeconds(value);
-  if (seconds == null) {
-    return 'must be a time value such as 30s, 1m or 5m';
-  }
-  return seconds <= 3600 ? undefined : 'must be between 1s and 1h';
-};
 
 const digitalExperienceConfig = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  // The defaults of the summaries task; settings saved in the app override them.
   sessions: schema.object({
     /** How often the summaries task looks for changed sessions. Longer is cheaper but staler. */
     frequency: schema.string({
       defaultValue: SESSIONS_DEFAULT_FREQUENCY,
-      maxLength: 8,
-      validate: validateFrequency,
+      maxLength: SESSIONS_FREQUENCY_MAX_LENGTH,
+      validate: validateSessionsFrequency,
     }),
     /**
      * How many summary queries of 5,000 sessions the task runs at once. More finishes busy windows
@@ -41,7 +35,7 @@ const digitalExperienceConfig = schema.object({
       defaultValue: SESSIONS_DEFAULT_CONCURRENCY,
       min: 1,
       max: SESSIONS_MAX_CONCURRENCY,
-      validate: (value) => (Number.isInteger(value) ? undefined : 'must be a whole number'),
+      validate: validateSessionsConcurrency,
     }),
   }),
 });

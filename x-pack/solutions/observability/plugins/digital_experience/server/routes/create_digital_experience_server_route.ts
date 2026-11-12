@@ -26,8 +26,10 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   isServerless: boolean;
   /** Whether the ux plugin is enabled; the Classic RUM source needs it, like the browser does. */
   isUxEnabled: boolean;
-  /** `xpack.digital_experience.sessions` config: how often the summaries task runs. */
-  sessionsSettings: SessionsSettings;
+  /** `xpack.digital_experience.sessions` of kibana.yml: the summaries task's default settings. */
+  sessionsSettingsDefaults: SessionsSettings;
+  /** The settings the summaries task runs with: the ones saved in the app over kibana.yml's. */
+  getSessionsSettings: () => Promise<SessionsSettings>;
   getSessionsServices: () => Promise<SessionsServices>;
 }
 

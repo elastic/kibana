@@ -179,6 +179,12 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
   run of the summaries task with its error, or summaries that are behind. A line next to the time
   picker says up to when events are in. While the sessions index is first built, an empty list says
   sessions are being built.
+- **Settings:** once sessions are set up, users with the **Configure session summaries** privilege
+  get a **Settings** button next to the time picker. Its flyout picks how often the summaries are
+  built (30 seconds to an hour, plus kibana.yml's and the saved value when they're others) and how
+  many summary queries run at once (1–8), marks kibana.yml's values as the defaults, can go back to
+  them, and checks the status again after saving, as a new frequency moves when sessions count as
+  behind (see [Session summaries settings](#session-summaries-settings)).
 - **KPIs:** sessions, sessions with JS errors, sessions with failed requests, median duration, page
   views per session and bounce rate, over the listed sessions, so they follow the search and filters.
 - **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **JS errors**,
@@ -324,7 +330,9 @@ Each run rebuilds every session that received new events from its whole history,
 active sessions × events per session. On the same data at about 3M sessions a day, a prototype of
 the same loop used 2 to 3 times less Elasticsearch CPU than the transform: about 23,000 changed
 sessions in 2.1 to 2.7 seconds a run against 7.2 to 9.6, and a 625,000 session backfill in 99 to
-126 seconds against 295. One setting trades cost for freshness, another speed for resources:
+126 seconds against 295. One setting trades cost for freshness, another speed for resources.
+kibana.yml sets their defaults, and settings saved in the app win over them (see
+[Session summaries settings](#session-summaries-settings)):
 
 ```yaml
 xpack.digital_experience.sessions:
@@ -336,11 +344,37 @@ xpack.digital_experience.sessions:
   `2m`–`5m` cuts the work roughly 2–5× for long sessions, and adds about the same time to the session
   list's lag. Session detail reads raw events up to the longest a session lasts, so its timeline
   stays current; its summary figures are as fresh as the last run. A changed `frequency` applies
-  after a restart, from the task's next run once it has caught up.
+  from the task's next run once it has caught up.
 - **`concurrency`**: a run rebuilds the changed sessions in queries of 5,000, this many at a time.
   At 75× the scale of the load tests each query took about 2 seconds, so one at a time needed more
   than the minute; each one more in flight costs Elasticsearch CPU and about 50 MB of Kibana memory
-  while a run is busy. It applies after a restart.
+  while a run is busy. At about 300,000 changed sessions a minute on two 32 vCPU nodes, 4 instead
+  of 2 cut a run from about 106 to 77 seconds, for an ES|QL request breaker peak of 352 MB and a
+  worst Kibana event loop delay of 223 ms. It applies from the task's next run.
+
+#### Session summaries settings
+
+The **Settings** button of the Sessions tab opens a flyout that changes both settings for every
+space. The task reads them at the start of every run, so they apply from its next run without a
+restart; saving a new frequency also runs the task right away, so it doesn't wait out the previous
+interval. A kibana.yml change still needs a restart.
+
+- `GET /internal/digital_experience/sessions/settings`: the settings the task runs with
+  (`settings`), and kibana.yml's (`defaults`).
+- `PUT /internal/digital_experience/sessions/settings`: saves `{ frequency?, concurrency? }`, with
+  the bounds of kibana.yml, and answers like `GET`. It replaces the saved settings, so each one left
+  out follows kibana.yml again; the flyout leaves out the ones that match kibana.yml. Each save writes
+  a `digital_experience_sessions_settings_update` audit event, successful or not.
+
+Both routes require the `configure_digital_experience_sessions` API privilege, which only the
+**Sessions → Configure session summaries** sub-feature privilege grants. Like **Set up session
+summaries**, it is not part of **All** and can only be granted in all spaces, and neither privilege
+grants the other: how often and how widely the summaries are built sets their cost for the whole
+cluster, while setting them up sets whose data access they're built with. The settings live in one
+hidden, space-agnostic saved object (`digital-experience-sessions-settings`). The privilege grants
+`all` on its type, so the routes read and write it as the user, and the saved objects audit events
+name them. The task and the status, which every reader of sessions checks, read it as the internal
+user; when it can't be read, they warn and use kibana.yml's settings.
 
 Status reports the summaries as lagging when their checkpoint is more than three runs plus the sync
 delay behind, and at least 5 minutes, once they have caught up; the task logs when a run starts
@@ -379,7 +413,8 @@ logged and answer 500 without Elasticsearch details:
   `classic/`); `server/routes/overview/` is the EDOT Browser Overview's route. Helpers shared across
   features are in `server/lib/` (`helpers/`, and `otel/` for the OTel queries).
 - `server/services/sessions/`: the session summaries: the task, its ES|QL queries, the index, status,
-  and enabling, with their routes and readers in `server/routes/sessions/`.
+  enabling and settings, with their routes and readers in `server/routes/sessions/`. The settings'
+  saved object type is in `server/saved_objects/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
   `session_detail/`) with its own components, hooks and utils; what several pages share is in
   `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.

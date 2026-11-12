@@ -28,7 +28,7 @@ const mockedSessions = jest.mocked(getSessionsApplications);
 
 const NOW = Date.parse('2021-01-18T12:00:00.000Z');
 const DAY_MS = 24 * 60 * 60 * 1000;
-const SETTINGS = { frequency: '1m' };
+const SETTINGS = { frequency: '1m', concurrency: 2 };
 
 const application = (serviceName: string) =>
   ({ serviceName, source: 'otel' } as SourceApplications['applications'][number]);
@@ -60,7 +60,7 @@ const setup = ({
   const result = getOtelApplicationsFromBestSource({
     esClient,
     taskManager,
-    sessionsSettings: SETTINGS,
+    getSessionsSettings: async () => SETTINGS,
     logger,
     start,
     end: NOW,

@@ -25,6 +25,9 @@ export const SESSIONS_TASK_ID = 'digital_experience:sessions-summaries';
 
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
+/** The longest frequency, in seconds, and the longest time value it is written as. */
+export const SESSIONS_MAX_FREQUENCY_SECONDS = 3600;
+export const SESSIONS_FREQUENCY_MAX_LENGTH = 8;
 /** Summary queries the task runs at once by default, and at most. */
 export const SESSIONS_DEFAULT_CONCURRENCY = 2;
 export const SESSIONS_MAX_CONCURRENCY = 8;
@@ -75,9 +78,20 @@ export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
 export type SessionsHealth = 'missing' | 'healthy' | 'lagging' | 'degraded';
 
+/** The settings the summaries task runs with. */
 export interface SessionsSettings {
   /** How often the summaries task runs, as a time value such as `1m`. */
   frequency: string;
+  /** How many summary queries of up to 5,000 sessions a run sends at once. */
+  concurrency: number;
+}
+
+/** The summaries task's settings, as the settings routes answer them. */
+export interface SessionsSettingsResponse {
+  /** What the task runs with: the settings saved in the app, and kibana.yml's for the rest. */
+  settings: SessionsSettings;
+  /** The `xpack.digital_experience.sessions` settings of kibana.yml. */
+  defaults: SessionsSettings;
 }
 
 export interface SessionsRunError {
@@ -124,6 +138,21 @@ export const timeValueSeconds = (value: string | null | undefined): number | nul
   const match = value ? TIME_VALUE.exec(value) : null;
   return match ? Number(match[1]) * SECONDS_PER_UNIT[match[2]] : null;
 };
+
+/** Why a summaries task frequency is invalid, or `undefined`: it runs every second to hour. */
+export const validateSessionsFrequency = (value: string): string | undefined => {
+  const seconds = timeValueSeconds(value);
+  if (seconds == null) {
+    return 'must be a time value such as 30s, 1m or 5m';
+  }
+  return seconds <= SESSIONS_MAX_FREQUENCY_SECONDS ? undefined : 'must be between 1s and 1h';
+};
+
+/** Why a summary query concurrency is invalid, or `undefined`: a whole number of queries. */
+export const validateSessionsConcurrency = (value: number): string | undefined =>
+  Number.isInteger(value) && value >= 1 && value <= SESSIONS_MAX_CONCURRENCY
+    ? undefined
+    : `must be a whole number between 1 and ${SESSIONS_MAX_CONCURRENCY}`;
 
 /**
  * Lag after which the summaries count as lagging: three missed runs plus the sync delay, and never

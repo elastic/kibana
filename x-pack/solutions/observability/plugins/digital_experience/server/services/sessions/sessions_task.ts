@@ -61,12 +61,6 @@ const stateSchemaV1 = schema.object({
 
 export type SessionsTaskState = TypeOf<typeof stateSchemaV1>;
 
-/** The sessions settings the task runs with. */
-export interface SessionsTaskSettings extends SessionsSettings {
-  /** Summary queries run at once. */
-  concurrency: number;
-}
-
 export interface RunSessionsTaskParams {
   state: SessionsTaskState;
   /** The task's API key, or `undefined` when it has none. */
@@ -210,18 +204,20 @@ export const withConfiguredInterval = (
 /**
  * Registers the task that builds the session summaries with ES|QL. It runs with the API key Task
  * Manager granted on behalf of the user who enabled sessions, never as the internal user, so it
- * only summarizes what that user can read. Only the index template is the internal user's.
+ * only summarizes what that user can read. Only the index template is the internal user's. It
+ * reads its settings at the start of every run, so settings saved in the app apply from the next.
  */
 export const registerSessionsTask = ({
   core,
   logger,
   taskManager,
-  settings,
+  getSettings,
 }: {
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
-  settings: SessionsTaskSettings;
+  /** The settings saved in the app over kibana.yml's; never fails. */
+  getSettings: () => Promise<SessionsSettings>;
 }): void => {
   taskManager.registerTaskDefinitions({
     [SESSIONS_TASK_TYPE]: {
@@ -235,6 +231,7 @@ export const registerSessionsTask = ({
       createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
+          const { frequency, concurrency } = await getSettings();
           const result = await runSessionsTask({
             state: taskInstance.state,
             esClient: fakeRequest
@@ -245,13 +242,9 @@ export const registerSessionsTask = ({
             signal,
             logger,
             now: Date.now(),
-            concurrency: settings.concurrency,
+            concurrency,
           });
-          return withConfiguredInterval(
-            result,
-            taskInstance.schedule?.interval,
-            settings.frequency
-          );
+          return withConfiguredInterval(result, taskInstance.schedule?.interval, frequency);
         },
       }),
     },

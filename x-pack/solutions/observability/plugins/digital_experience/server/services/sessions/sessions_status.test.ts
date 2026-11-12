@@ -20,7 +20,7 @@ import type { SessionsTaskState } from './sessions_task';
 type TaskUserScope = NonNullable<ConcreteTaskInstance['userScope']>;
 
 const NOW = Date.parse('2026-11-10T12:00:00.000Z');
-const settings = { frequency: '1m' };
+const settings = { frequency: '1m', concurrency: 2 };
 const secondsAgo = (seconds: number) => new Date(NOW - seconds * 1000).toISOString();
 
 const userScope: TaskUserScope = {
