@@ -60,13 +60,15 @@ export const getResizePreviewRect = ({
   maxRight: number;
 }) => {
   const panelRect = activePanel.panelDiv.getBoundingClientRect();
+  // use the left edge from the resize start; the live `left` can change if the panel reflows rows
+  const originLeft = activePanel.position.left;
   const { maxWidth, minHeight, maxHeight, ...widthOptions } = {
     ...getDefaultResizeOptions(),
     ...resizeOptions,
   };
   const minWidth = Math.max(widthOptions.minWidth, MIN_RESIZE_WIDTH);
   return {
-    left: panelRect.left,
+    left: originLeft,
     top: panelRect.top,
     bottom: Math.max(
       Math.min(
@@ -78,11 +80,11 @@ export const getResizePreviewRect = ({
     right: Math.max(
       Math.min(
         pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position
-        panelRect.left + maxWidth, // max width of panel
+        originLeft + maxWidth, // max width of panel
         // cannot extend width past the right edge of the grid layout
         maxRight
       ),
-      panelRect.left + minWidth // min width of panel
+      originLeft + minWidth // min width of panel
     ),
   };
 };

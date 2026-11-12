@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { GridLayoutProps } from './flex_layout';
@@ -399,6 +399,19 @@ describe('FlexLayout', () => {
         expect(getPanel('panel1')).not.toHaveClass('kbnFlexPanel--active');
       });
 
+      it('keeps focus on the drag handle after moving and after the drop', async () => {
+        renderFlexLayout();
+        const handle = getHandle('panel1', 'drag');
+        handle.focus();
+
+        await pressKey('[Enter]');
+        await pressKey('[ArrowRight]');
+        expect(getHandle('panel1', 'drag')).toHaveFocus();
+
+        await pressKey('[Enter]');
+        expect(getHandle('panel1', 'drag')).toHaveFocus();
+      });
+
       it('reorders panels and emits the new order once on commit', async () => {
         renderFlexLayout();
         onLayoutChange.mockClear();
@@ -543,5 +556,73 @@ describe('FlexLayout', () => {
         await pressKey('{Escape}');
       });
     });
+  });
+});
+
+describe('FlexLayout pointer resize with wrapping', () => {
+  const CONTAINER_WIDTH = 1200;
+  const GUTTER = 10;
+  const ROW_HEIGHT = 100;
+
+  /**
+   * A minimal flex-wrap layout engine: panels are laid out in `order`, using their inline `width`,
+   * and wrap onto a new row when they no longer fit. Unlike a fixed mock, a panel's `left` changes
+   * when another panel (or itself) changes width, which is what causes the resize origin to shift.
+   */
+  const mockWrappingLayout = () =>
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const rect = (left: number, top: number, width: number, height: number) =>
+          ({ left, top, width, height, right: left + width, bottom: top + height } as DOMRect);
+
+        if (this.classList.contains('kbnFlex')) return rect(0, 0, CONTAINER_WIDTH, 500);
+        const panel = this.classList.contains('kbnFlexPanel') ? this : null;
+        if (!panel) return rect(0, 0, 0, 0);
+
+        const panels = Array.from(
+          panel.parentElement?.querySelectorAll<HTMLElement>(':scope > .kbnFlexPanel') ?? []
+        ).sort((a, b) => parseInt(getComputedStyle(a).order, 10) - parseInt(getComputedStyle(b).order, 10));
+        let x = 0;
+        let y = 0;
+        for (const current of panels) {
+          const width = parseFloat(getComputedStyle(current).width);
+          if (x > 0 && x + width > CONTAINER_WIDTH) {
+            x = 0;
+            y += ROW_HEIGHT + GUTTER;
+          }
+          if (current === panel) return rect(x, y, width, ROW_HEIGHT);
+          x += width + GUTTER;
+        }
+        return rect(0, 0, 0, 0);
+      });
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('keeps the resize origin stable when shrinking the panel lets it reflow onto the previous row', () => {
+    mockWrappingLayout();
+    const medium = 500;
+    const large = 700; // 500 + 10 + 700 > 1200, so `large` wraps onto the second row
+    renderFlexLayout({
+      gridSettings: { ...gridSettings, gutterSize: GUTTER, rowHeight: ROW_HEIGHT },
+      layout: {
+        panel1: { type: 'panel', id: 'panel1', order: 0, grow: false, width: medium },
+        panel2: { type: 'panel', id: 'panel2', order: 1, grow: false, width: large },
+      },
+    });
+    expect(getPanel('panel2').getBoundingClientRect().left).toBe(0);
+
+    const handle = getHandle('panel2', 'resize');
+    const top = ROW_HEIGHT + GUTTER;
+    fireEvent.mouseDown(handle, { clientX: large, clientY: top + ROW_HEIGHT });
+    // dragging the edge left by 40px makes the panel narrow enough to fit beside `panel1`...
+    fireEvent.mouseMove(document, { clientX: large - 40, clientY: top + ROW_HEIGHT });
+    expect(getPanel('panel2').getBoundingClientRect().left).toBeGreaterThan(0);
+    // ...and a second move must still be measured from the original left edge
+    fireEvent.mouseMove(document, { clientX: large - 41, clientY: top + ROW_HEIGHT });
+    fireEvent.mouseUp(document);
+
+    expect(getLastLayout().panel2.width).toBe(large - 41);
+    expect(getLastLayout().panel1.width).toBe(medium);
   });
 });

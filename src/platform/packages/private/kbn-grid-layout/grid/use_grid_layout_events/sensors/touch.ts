@@ -22,7 +22,7 @@ export const getTouchSensorPosition = ({ touches }: UserTouchEvent) => ({
 
 /*
  * This function should be attached to `touchstart` event listener.
- * It follows the flow of `touchstart` -> `touchmove` -> `touchend` where the consumer is responsible for handling the interaction logic and defining what happens on each event.
+ * It follows the flow of `touchstart` -> `touchmove` -> `touchend` /`touchcancel` where the consumer is responsible for handling the the interaction logic and defining what happens on each event.
  */
 
 export const startTouchInteraction = ({
@@ -40,10 +40,13 @@ export const startTouchInteraction = ({
 
   const handleEnd = () => {
     e.target!.removeEventListener('touchmove', onMove);
+    e.target!.removeEventListener('touchend', handleEnd);
+    e.target!.removeEventListener('touchcancel', handleEnd);
     onEnd();
   };
 
   e.target!.addEventListener('touchmove', onMove);
-  e.target!.addEventListener('touchend', handleEnd, { once: true });
+  e.target!.addEventListener('touchend', handleEnd);
+  e.target!.addEventListener('touchcancel', handleEnd);
   onStart(e);
 };
