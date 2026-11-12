@@ -12,7 +12,7 @@ import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
 import { firstValueFrom } from 'rxjs';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
@@ -85,8 +85,8 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
+  keepEnabledUnlessDeclared,
   prepareWorkflowDocumentFromYaml,
-  workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
@@ -946,26 +946,13 @@ export class WorkflowCrudService {
     let shouldUpdateScheduler = false;
 
     const workflowYaml = workflow.yaml;
-    const zodSchema = workflowYaml
-      ? await this.deps.validationService.getWorkflowZodSchema({ loose: false }, spaceId, request)
+    const yamlUpdate = workflowYaml
+      ? await this.prepareYamlUpdate(workflowYaml, id, spaceId, request, {
+          logger: this.deps.logger,
+          warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
+        })
       : undefined;
-    const triggerDefinitions = workflowYaml
-      ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
-      : undefined;
-    const yamlResult =
-      workflowYaml && zodSchema && triggerDefinitions
-        ? {
-            workflowYaml,
-            ...(await applyYamlUpdate({
-              workflowYaml,
-              zodSchema,
-              triggerDefinitions,
-              logger: this.deps.logger,
-              warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
-              workflowId: id,
-            })),
-          }
-        : undefined;
+    const yamlResult = workflowYaml && yamlUpdate ? { workflowYaml, ...yamlUpdate } : undefined;
 
     let previousVersion: number | undefined;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
@@ -990,26 +977,15 @@ export class WorkflowCrudService {
           updatedData = {
             ...updatedData,
             yaml: yamlResult.workflowYaml,
-            ...yamlResult.updatedDataPatch,
+            ...keepEnabledUnlessDeclared(
+              yamlResult.workflowYaml,
+              yamlResult,
+              workflow.enabled ?? existingSource.enabled
+            ),
           };
           validationErrors.length = 0;
           validationErrors.push(...yamlResult.validationErrors);
           shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
-
-          if (
-            yamlResult.validationErrors.length === 0 &&
-            yamlResult.updatedDataPatch.valid &&
-            updatedData.definition &&
-            !workflowYamlDeclaresTopLevelEnabled(yamlResult.workflowYaml)
-          ) {
-            const resolvedEnabled =
-              workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
-            updatedData.enabled = resolvedEnabled;
-            const currentDefinition = updatedData.definition;
-            if (currentDefinition) {
-              updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
-            }
-          }
         } else if (!workflowYaml) {
           const fieldResult = applyFieldUpdates(workflow, existingSource);
           updatedData = { ...updatedData, ...fieldResult.patch };
@@ -1058,23 +1034,47 @@ export class WorkflowCrudService {
     };
   }
 
-  /** Returns the definition that saving `yaml` would store, or null when it would be stored invalid. */
-  async getDefinitionToStore(
-    yaml: string,
+  // Resolves to undefined when the schema to validate against is unavailable.
+  private async prepareYamlUpdate(
+    workflowYaml: string,
+    workflowId: string,
     spaceId: string,
-    request: KibanaRequest
-  ): Promise<EsWorkflow['definition'] | null> {
+    request: KibanaRequest,
+    logging: { logger?: Logger; warnIgnoredKibanaFetcher?: boolean } = {}
+  ): Promise<Awaited<ReturnType<typeof applyYamlUpdate>> | undefined> {
     const zodSchema = await this.deps.validationService.getWorkflowZodSchema(
       { loose: false },
       spaceId,
       request
     );
-    const { updatedDataPatch } = await applyYamlUpdate({
-      workflowYaml: yaml,
+    if (!zodSchema) {
+      return undefined;
+    }
+    return applyYamlUpdate({
+      workflowYaml,
       zodSchema,
       triggerDefinitions: this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [],
+      workflowId,
+      ...logging,
     });
-    return updatedDataPatch.valid ? updatedDataPatch.definition ?? null : null;
+  }
+
+  /**
+   * Returns the definition that saving `yaml` over the given workflow would store, or null when it
+   * would be stored invalid.
+   */
+  async getDefinitionToStore(
+    yaml: string,
+    { id, enabled }: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflow['definition'] | null> {
+    const yamlResult = await this.prepareYamlUpdate(yaml, id, spaceId, request);
+    if (!yamlResult) {
+      return null;
+    }
+    const { valid, definition } = keepEnabledUnlessDeclared(yaml, yamlResult, enabled);
+    return valid ? definition ?? null : null;
   }
 
   async updateWorkflow(

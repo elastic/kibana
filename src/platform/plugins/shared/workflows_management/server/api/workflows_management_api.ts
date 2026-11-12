@@ -690,7 +690,9 @@ export class WorkflowsManagementApi {
     if (!workflow) throw new WorkflowNotFoundError(id);
     const savedDefinition = withEnabledState(workflow);
     const draft =
-      yaml === undefined ? undefined : await this.getDraftDefinition(yaml, spaceId, request);
+      yaml === undefined
+        ? undefined
+        : await this.getDraftDefinition(yaml, workflow, spaceId, request);
     return analyzeWorkflowDependentsImpact({
       workflowId: id,
       savedDefinition,
@@ -704,11 +706,17 @@ export class WorkflowsManagementApi {
   // YAML stands in to describe the calls; syntax errors throw.
   private async getDraftDefinition(
     yaml: string,
+    workflow: { id: string; enabled: boolean },
     spaceId: string,
     request: KibanaRequest
   ): Promise<{ definition: unknown; isValid: boolean }> {
     const parsedDraft = parseDraftDefinition(yaml);
-    const storedDraft = await this.workflowsService.getDefinitionToStore(yaml, spaceId, request);
+    const storedDraft = await this.workflowsService.getDefinitionToStore(
+      yaml,
+      workflow,
+      spaceId,
+      request
+    );
     return { definition: storedDraft ?? parsedDraft, isValid: storedDraft !== null };
   }
 

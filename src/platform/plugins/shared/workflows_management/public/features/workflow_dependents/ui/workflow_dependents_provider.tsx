@@ -44,6 +44,8 @@ export const WorkflowDependentsProvider = ({ children }: { children: ReactNode }
           draftYaml={dependents.draftYaml}
           isLoading={dependents.isLoading}
           isError={dependents.isError}
+          isUpdating={dependents.isUpdating}
+          isRefreshError={dependents.isRefreshError}
           initialTab={linksTab}
           onRefresh={dependents.refetch}
           onClose={() => setLinksTab(null)}

@@ -33,7 +33,12 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
 import { getCalledCardContent, getCallerCardContent } from './card_content';
 import { DependentsMap } from './dependents_map';
 import { getStatusLabel } from './translations';
@@ -143,6 +148,19 @@ const ChangesSection = ({
         />
       );
     }
+    if (summary.unknown > 0) {
+      return (
+        <KbnInfoCallout
+          size="s"
+          title={i18n.translate('workflows.dependents.flyout.uncheckedTitle', {
+            defaultMessage:
+              'None of the workflows that could be checked break, but {count, plural, one {# workflow computes its} other {# workflows compute their}} inputs while running and can’t be checked',
+            values: { count: summary.unknown },
+          })}
+          data-test-subj="workflowDependentsUncheckedCallout"
+        />
+      );
+    }
     return (
       <KbnSuccessCallout
         size="s"
@@ -199,6 +217,10 @@ export interface WorkflowDependentsFlyoutProps {
   draftYaml?: string;
   isLoading: boolean;
   isError: boolean;
+  /** True while the results shown are for an earlier version of the draft. */
+  isUpdating?: boolean;
+  /** True when checking the latest draft failed, so the results shown are for an earlier one. */
+  isRefreshError?: boolean;
   initialTab: WorkflowLinksTab;
   onRefresh: () => void;
   onClose: () => void;
@@ -213,6 +235,8 @@ export const WorkflowDependentsFlyout = ({
   draftYaml,
   isLoading,
   isError,
+  isUpdating = false,
+  isRefreshError = false,
   initialTab,
   onRefresh,
   onClose,
@@ -431,6 +455,58 @@ export const WorkflowDependentsFlyout = ({
     );
   };
 
+  const renderFreshness = () => {
+    if (isRefreshError) {
+      return (
+        <>
+          <KbnWarningCallout
+            size="s"
+            title={i18n.translate('workflows.dependents.flyout.refreshError', {
+              defaultMessage:
+                'Couldn’t check your latest changes, so these results are for an earlier version of them',
+            })}
+            actionProps={{
+              primary: {
+                children: i18n.translate('workflows.dependents.flyout.retry', {
+                  defaultMessage: 'Retry',
+                }),
+                onClick: onRefresh,
+                'data-test-subj': 'workflowDependentsRetry',
+              },
+            }}
+            data-test-subj="workflowDependentsRefreshError"
+          />
+          <EuiSpacer size="m" />
+        </>
+      );
+    }
+    if (isUpdating) {
+      return (
+        <>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            data-test-subj="workflowDependentsUpdating"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('workflows.dependents.flyout.updating', {
+                  defaultMessage: 'Checking your latest changes…',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      );
+    }
+    return null;
+  };
+
   const renderBody = () => {
     if (isLoading) {
       return (
@@ -449,7 +525,12 @@ export const WorkflowDependentsFlyout = ({
         />
       );
     }
-    return tab === 'usedBy' ? renderUsedBy(analysis) : renderRuns();
+    return (
+      <>
+        {renderFreshness()}
+        {tab === 'usedBy' ? renderUsedBy(analysis) : renderRuns()}
+      </>
+    );
   };
 
   return (

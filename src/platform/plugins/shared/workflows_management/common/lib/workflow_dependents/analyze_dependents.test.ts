@@ -368,7 +368,13 @@ describe('analyzeDependents', () => {
     const analysis = analyze(makeChild());
 
     expect(analysis.contractChanges).toEqual([]);
-    expect(analysis.summary).toEqual({ direct: 4, breaking: 0, warning: 0, indirectBreaking: 0 });
+    expect(analysis.summary).toEqual({
+      direct: 4,
+      breaking: 0,
+      warning: 0,
+      unknown: 0,
+      indirectBreaking: 0,
+    });
     expect(analysis.dependents.every(({ upstream }) => upstream.length === 0)).toBe(true);
   });
 

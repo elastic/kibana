@@ -50,7 +50,7 @@ const impact = (
   analysis: {
     contractChanges: [],
     dependents,
-    summary: { direct: dependents.length, breaking: 0, warning: 0, indirectBreaking },
+    summary: { direct: dependents.length, breaking: 0, warning: 0, unknown: 0, indirectBreaking },
   },
   calledWorkflows: [],
 });

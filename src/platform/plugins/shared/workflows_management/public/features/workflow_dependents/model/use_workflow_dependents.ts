@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
 import { dependentsImpactQueryOptions } from './dependents_impact_query_options';
+import type { WorkflowDependentsImpactResponse } from '../../../../common/lib/workflow_dependents/api';
 import type {
   CalledWorkflowImpact,
   DependentsAnalysis,
@@ -34,7 +35,12 @@ export interface UseWorkflowDependentsResult {
   savedYaml?: string;
   draftYaml?: string;
   isLoading: boolean;
+  /** True when nothing could be loaded. */
   isError: boolean;
+  /** True while the results shown are for an earlier version of the draft. */
+  isUpdating: boolean;
+  /** True when checking the latest draft failed, so the results shown are for an earlier one. */
+  isRefreshError: boolean;
   refetch: () => void;
 }
 
@@ -49,7 +55,7 @@ export const useWorkflowDependents = (): UseWorkflowDependentsResult => {
     DRAFT_DEBOUNCE_MS
   );
 
-  const { data, isInitialLoading, isError, refetch } = useQuery({
+  const { data, isInitialLoading, isError, isFetching, isPreviousData, refetch } = useQuery({
     ...dependentsImpactQueryOptions(
       http,
       { id: workflow?.id ?? '', savedVersion: workflow?.lastUpdatedAt },
@@ -60,20 +66,45 @@ export const useWorkflowDependents = (): UseWorkflowDependentsResult => {
     keepPreviousData: true,
   });
 
+  // `keepPreviousData` drops the previous result once the newer query fails, so keep it here.
+  const lastResultRef = useRef<{ id: string; result: WorkflowDependentsImpactResponse }>();
+  if (data && workflow?.id) {
+    lastResultRef.current = { id: workflow.id, result: data };
+  }
+  const shown =
+    data ??
+    (lastResultRef.current?.id === workflow?.id ? lastResultRef.current?.result : undefined);
+
   const savedYaml = workflow?.yaml;
   const isLoading = isInitialLoading;
-  const hasError = isError && !data;
+  const hasError = isError && !shown;
+  const isRefreshError = isError && Boolean(shown);
+  const isDebouncing = debouncedDraftYaml !== (hasUnsavedChanges ? draftYaml : undefined);
+  const isUpdating =
+    Boolean(shown) && !isRefreshError && (isFetching || isPreviousData || isDebouncing);
   return useMemo(
     () => ({
-      analysis: data?.analysis,
-      calledWorkflows: data?.calledWorkflows,
+      analysis: shown?.analysis,
+      calledWorkflows: shown?.calledWorkflows,
       hasUnsavedChanges,
       savedYaml,
       draftYaml,
       isLoading,
       isError: hasError,
+      isUpdating,
+      isRefreshError,
       refetch,
     }),
-    [data, hasUnsavedChanges, savedYaml, draftYaml, isLoading, hasError, refetch]
+    [
+      shown,
+      hasUnsavedChanges,
+      savedYaml,
+      draftYaml,
+      isLoading,
+      hasError,
+      isUpdating,
+      isRefreshError,
+      refetch,
+    ]
   );
 };

@@ -205,6 +205,8 @@ export interface DependentsSummary {
   /** Enabled direct callers only: a disabled caller doesn't run, so saving can't break a run of it. */
   breaking: number;
   warning: number;
+  /** Enabled direct callers that compute their inputs while running, so they can't be checked. */
+  unknown: number;
   /** Distinct enabled indirect callers that fail or lose data because a direct caller breaks. */
   indirectBreaking: number;
 }

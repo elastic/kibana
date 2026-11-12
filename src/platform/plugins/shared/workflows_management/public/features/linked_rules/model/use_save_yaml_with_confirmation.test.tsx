@@ -116,6 +116,17 @@ describe('useSaveYamlWithConfirmation', () => {
     expect(mockSaveYaml).not.toHaveBeenCalled();
   });
 
+  it('asks only for the disable when the draft disables a workflow that others run', async () => {
+    confirmDisable.mockResolvedValue(true);
+    const confirmBreakingChange = jest.fn().mockResolvedValue(true);
+
+    await expect(renderSave([false], confirmBreakingChange)()).resolves.toBe(true);
+
+    expect(confirmDisable).toHaveBeenCalledTimes(1);
+    expect(confirmBreakingChange).not.toHaveBeenCalled();
+    expect(mockSaveYaml).toHaveBeenCalled();
+  });
+
   it('checks the draft again when it changes while the check is pending', async () => {
     const editedYaml = `${buildYaml(true)}\n`;
     const confirmBreakingChange = jest

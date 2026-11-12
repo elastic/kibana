@@ -20,7 +20,7 @@ import {
 import { useConfirmBreakingChange } from '../../workflow_dependents/model/workflow_dependents_context';
 
 /**
- * Saves the YAML after confirming any disable and any change that breaks workflows calling this
+ * Saves the YAML after confirming a disable, or else any change that breaks workflows calling this
  * one; resolves to false when the user cancels.
  */
 export const useSaveYamlWithConfirmation = (
@@ -36,16 +36,14 @@ export const useSaveYamlWithConfirmation = (
     let yamlString: string | undefined;
     do {
       yamlString = selectYamlString(store.getState());
-      if (confirmBreakingChange && !(await confirmBreakingChange(yamlString))) {
-        return false;
-      }
       const workflow = selectWorkflow(store.getState());
-      if (
-        workflow?.enabled &&
-        yamlString &&
-        parseDocument(yamlString).get('enabled') === false &&
-        !(await confirmDisable([workflow.id]))
-      ) {
+      const disables =
+        workflow?.enabled && yamlString && parseDocument(yamlString).get('enabled') === false;
+      // Disabling stops every caller, and the disable dialog already lists them.
+      const confirmed = disables
+        ? await confirmDisable([workflow.id])
+        : !confirmBreakingChange || (await confirmBreakingChange(yamlString));
+      if (!confirmed) {
         return false;
       }
     } while (selectYamlString(store.getState()) !== yamlString);

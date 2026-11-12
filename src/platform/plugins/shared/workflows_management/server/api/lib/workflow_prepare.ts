@@ -265,6 +265,27 @@ export const applyYamlUpdate = async (params: {
 };
 
 /**
+ * Gives a valid YAML update the workflow's current enabled state when the YAML doesn't set
+ * `enabled` itself, so saving YAML never turns a workflow on or off by omission.
+ */
+export const keepEnabledUnlessDeclared = (
+  workflowYaml: string,
+  { updatedDataPatch, validationErrors }: Awaited<ReturnType<typeof applyYamlUpdate>>,
+  enabled: boolean
+): Partial<WorkflowProperties> => {
+  const { definition } = updatedDataPatch;
+  if (
+    validationErrors.length > 0 ||
+    !updatedDataPatch.valid ||
+    !definition ||
+    workflowYamlDeclaresTopLevelEnabled(workflowYaml)
+  ) {
+    return updatedDataPatch;
+  }
+  return { ...updatedDataPatch, enabled, definition: { ...definition, enabled } };
+};
+
+/**
  * Builds the storage patch for field-only (non-YAML) updates.
  * Used by updateWorkflow when workflow.yaml is not provided.
  */

@@ -2598,6 +2598,39 @@ describe('WorkflowCrudService', () => {
       jest.restoreAllMocks();
     });
 
+    it('previews the same enabled state that saving YAML without top-level enabled stores', async () => {
+      const yamlWithoutTopLevelEnabled = 'name: Parsed Workflow\nsteps: []';
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
+        updatedDataPatch: {
+          definition: {
+            name: 'Parsed Workflow',
+            enabled: true,
+            version: '1' as const,
+            triggers: [],
+            steps: [],
+          },
+          name: 'Parsed Workflow',
+          enabled: true,
+          triggerTypes: [],
+          valid: true,
+          yaml: yamlWithoutTopLevelEnabled,
+        },
+        validationErrors: [],
+        shouldUpdateScheduler: true,
+      });
+
+      const service = new WorkflowCrudService(makeDeps().deps);
+      const definition = await service.getDefinitionToStore(
+        yamlWithoutTopLevelEnabled,
+        { id: 'wf-1', enabled: false },
+        'default',
+        request
+      );
+
+      expect(definition).toMatchObject({ name: 'Parsed Workflow', enabled: false });
+      jest.restoreAllMocks();
+    });
+
     it('field-only enabled toggle syncs definition.enabled in the persisted document', async () => {
       // Validates the fix for elastic/security-team#18145:
       // when enabled is toggled without a YAML edit, definition.enabled must

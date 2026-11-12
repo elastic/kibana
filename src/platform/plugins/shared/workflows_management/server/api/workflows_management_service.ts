@@ -357,11 +357,12 @@ export class WorkflowsService {
 
   public async getDefinitionToStore(
     yaml: string,
+    workflow: { id: string; enabled: boolean },
     spaceId: string,
     request: KibanaRequest
   ): Promise<EsWorkflow['definition'] | null> {
     await this.ensureInitialized();
-    return this.crudService.getDefinitionToStore(yaml, spaceId, request);
+    return this.crudService.getDefinitionToStore(yaml, workflow, spaceId, request);
   }
 
   public async getHistoryForWorkflow(

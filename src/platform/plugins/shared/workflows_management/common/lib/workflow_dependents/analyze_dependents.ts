@@ -765,6 +765,7 @@ export const analyzeDependents = ({
       direct: dependents.length,
       breaking: breakingDependents.length,
       warning: dependents.filter(({ status, enabled }) => enabled && status === 'warning').length,
+      unknown: dependents.filter(({ status, enabled }) => enabled && status === 'unknown').length,
       indirectBreaking: indirectBreakingIds.size,
     },
   };
