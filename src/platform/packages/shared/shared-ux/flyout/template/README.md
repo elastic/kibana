@@ -50,8 +50,9 @@ The root also takes the tab props: `tabs`, `tabBarProps`, `selectedTabId`, `defa
 ### Labeling and the flyout menu title
 
 - By default, the flyout is labeled by the header title: the title's generated id becomes `EuiFlyout`'s `aria-labelledby`. An explicit `aria-labelledby` replaces it, and an explicit `aria-label` turns it off.
-- A string header `title` also becomes the `title` of the flyout's history entry in EUI's flyout menu, merged into `flyoutMenuProps`. An explicit `flyoutMenuProps.title` overrides it. When the flyout is not labeled by the title id, the string title becomes the `aria-label` instead.
-- A non-string `title`, such as a link, is not used for the history entry or the `aria-label`. Pass the plain text as `flyoutMenuProps.title`. Otherwise, a managed flyout (the default `session`) shows EUI's default title in the history and warns in development.
+- In a standalone `FlyoutTemplate`, a string header `title` also becomes the `title` of the flyout's history entry in EUI's flyout menu, merged into `flyoutMenuProps`. An explicit `flyoutMenuProps.title` overrides it. When the flyout is not labeled by the title id, the string title becomes the `aria-label` instead.
+- In a standalone `FlyoutTemplate`, a non-string `title`, such as a link, is not used for the history entry or the `aria-label`. Pass the plain text as `flyoutMenuProps.title`. Otherwise, a managed flyout (the default `session`) shows EUI's default title in the history and warns in development.
+- A flyout opened with `openFlyoutTemplate`, or rendered inside a `Frame`, never takes its history title from the header title. Set `flyoutMenuProps.title` in the options. See [Opening a flyout imperatively](#opening-a-flyout-imperatively).
 
 ## Zones
 
