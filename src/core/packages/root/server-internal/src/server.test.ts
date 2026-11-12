@@ -325,6 +325,8 @@ describe('earlyStartHttp', () => {
   const earlyStartWarning =
     'Early start of the HTTP server configured. This should only be enabled in full zero-downtime deployments.';
 
+  let server: Server | undefined;
+
   beforeEach(() => {
     // An earlier test leaves the node service mocked as a migrator-only node, which aborts `start`.
     const nodeServiceContract: InternalNodeServicePreboot = {
@@ -336,6 +338,12 @@ describe('earlyStartHttp', () => {
     rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
   });
 
+  afterEach(async () => {
+    // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+    await server?.stop();
+    server = undefined;
+  });
+
   const startServer = async (earlyStartHttp: boolean) => {
     mockConfigService.atPath.mockReturnValue(
       new BehaviorSubject({
@@ -343,7 +351,7 @@ describe('earlyStartHttp', () => {
         earlyStartHttp,
       })
     );
-    const server = new Server(rawConfigService, env, logger);
+    server = new Server(rawConfigService, env, logger);
     await server.preboot();
     await server.setup();
     await server.start();
