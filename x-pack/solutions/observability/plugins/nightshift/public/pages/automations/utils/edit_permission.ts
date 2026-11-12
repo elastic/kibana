@@ -15,7 +15,7 @@ export const MANAGE_SECURITY_REQUIRED_REASON = i18n.translate(
   'xpack.nightshift.automations.manageSecurityRequiredReason',
   {
     defaultMessage:
-      'Requires the manage_security cluster privilege, because automations run as the Nightshift automations service account.',
+      'Requires the manage_security cluster privilege, because automations run as the nightshift automations service account.',
   }
 );
 
@@ -28,6 +28,6 @@ export const MANAGE_SECURITY_REQUIRED_BODY = i18n.translate(
   'xpack.nightshift.automations.manageSecurityRequiredBody',
   {
     defaultMessage:
-      'Automations run as the Nightshift automations service account, not as the person who created them. Creating, editing, pausing, or deleting them changes a workflow bound to that account, which requires the manage_security cluster privilege. Ask an administrator to make the change, or to grant you that privilege.',
+      'Automations run as the nightshift automations service account, not as the person who created them. Creating, editing, pausing, or deleting them changes a workflow bound to that account, which requires the manage_security cluster privilege. Ask an administrator to make the change, or to grant you that privilege.',
   }
 );

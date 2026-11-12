@@ -21,6 +21,7 @@ export {
   EXTERNAL_ALERT_SOURCE,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from './automation_limits';
+export { isScheduleOnlyAutomation } from './automation_run';
 export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
 export type { PresetSchedule } from './automation_schedule';
 
@@ -139,6 +140,8 @@ export interface StartInvestigationResponse {
    * after a first start the id may not resolve yet.
    */
   investigation_id: string;
+  /** The execution started for an automation, used to follow its investigation after dispatch. */
+  execution_id?: string;
 }
 
 export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
@@ -236,6 +239,7 @@ export {
 export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_TAG,
   DECISION_TREE_DOC_TYPES,
   type DecisionTreeDocType,
   type DecisionTreeStatus,

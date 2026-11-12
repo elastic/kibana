@@ -275,6 +275,19 @@ export class BuildkiteClient {
     return response.data as Build[];
   };
 
+  getInProgressBuilds = async (pipelineSlug: string): Promise<Build[]> => {
+    const params = new URLSearchParams({ per_page: '100', exclude_jobs: 'true' });
+    params.append('state[]', 'scheduled');
+    params.append('state[]', 'running');
+    params.append('state[]', 'failing');
+    const response = await this.http.get(
+      `v2/organizations/elastic/pipelines/${encodeURIComponent(
+        pipelineSlug
+      )}/builds?${params.toString()}`
+    );
+    return response.data as Build[];
+  };
+
   getCurrentBuild = (includeRetriedJobs = false) => {
     if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
       throw new Error(

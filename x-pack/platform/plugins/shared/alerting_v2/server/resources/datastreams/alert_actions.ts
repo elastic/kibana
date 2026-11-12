@@ -110,8 +110,4 @@ export const getAlertActionsResourceDefinition = (): ResourceDefinition => ({
   mappings,
   lifecycle: {},
   finalPipeline: getIngestTimestampPipeline(ALERT_ACTIONS_DATA_STREAM),
-  // Data streams created from v7 or below store the alert id and status as `episode_id` and
-  // `episode_status`, which v8 readers ignore, and those created from v6 or below map `actor` as a
-  // keyword, which cannot be turned into an object in place. Keep this at 7 when bumping the version.
-  forceReset: { version: 7 },
 });

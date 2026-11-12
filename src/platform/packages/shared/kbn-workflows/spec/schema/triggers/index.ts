@@ -7,25 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { AlertRuleTriggerSchema } from './alert_trigger_schema';
 import { ManualTriggerSchema } from './manual_trigger_schema';
+import { PageTriggerSchema } from './page_trigger_schema';
 import { ScheduledTriggerSchema } from './scheduled_trigger_schema';
 import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../../../common/constants';
 
 export { AlertRuleTriggerSchema } from './alert_trigger_schema';
 export { ManualTriggerSchema } from './manual_trigger_schema';
 export {
+  DEFAULT_PAGE_TRIGGER_ID,
+  isPageTrigger,
+  PageTriggerSchema,
+  validatePageTriggers,
+  type PageTrigger,
+} from './page_trigger_schema';
+export {
   ScheduledTriggerSchema,
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
 } from './scheduled_trigger_schema';
 
-export const TriggerSchema = z.discriminatedUnion('type', [
-  AlertRuleTriggerSchema,
-  ScheduledTriggerSchema,
-  ManualTriggerSchema,
-]);
+export const TriggerSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    AlertRuleTriggerSchema,
+    ScheduledTriggerSchema,
+    ManualTriggerSchema,
+    PageTriggerSchema,
+  ])
+);
 
 export type Trigger = z.infer<typeof TriggerSchema>;
 
@@ -128,9 +139,13 @@ export const getCustomTriggerZodSchema = ({
  * Custom triggers allow an `on.condition` clause for KQL filtering.
  * Pass `{ id, requiresConnectorId: true }` to require a non-empty `connector-id`;
  * a plain string id stays `{ type, on? }` (e.g. `getTriggerSchema(['cases.updated'])`).
+ * The `page` trigger is included only with `includePageTrigger`.
  */
-export function getTriggerSchema(customTriggers: CustomTriggerSchemaInput[] = []): z.ZodType {
-  if (customTriggers.length === 0) {
+export function getTriggerSchema(
+  customTriggers: CustomTriggerSchemaInput[] = [],
+  { includePageTrigger = false }: TriggerSchemaOptions = {}
+): z.ZodType {
+  if (customTriggers.length === 0 && includePageTrigger) {
     return TriggerSchema;
   }
   const customSchemas = dedupeCustomTriggerSchemaConfigs(
@@ -140,13 +155,20 @@ export function getTriggerSchema(customTriggers: CustomTriggerSchemaInput[] = []
     AlertRuleTriggerSchema,
     ScheduledTriggerSchema,
     ManualTriggerSchema,
+    ...(includePageTrigger ? [PageTriggerSchema] : []),
     ...customSchemas,
   ]);
+}
+
+export interface TriggerSchemaOptions {
+  /** Accept the `page` trigger. Mirrors `workflowsManagement.pages.enabled`. */
+  includePageTrigger?: boolean;
 }
 
 export const TriggerTypes = [
   AlertRuleTriggerSchema.shape.type.value,
   ScheduledTriggerSchema.shape.type.value,
   ManualTriggerSchema.shape.type.value,
+  PageTriggerSchema.shape.type.value,
 ];
 export type TriggerType = (typeof TriggerTypes)[number];

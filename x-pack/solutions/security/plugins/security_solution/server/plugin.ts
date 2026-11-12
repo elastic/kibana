@@ -992,6 +992,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
         threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
+        automaticTroubleshootingUniversalSkillEnabled:
+          config.experimentalFeatures.automaticTroubleshootingUniversalSkill,
         bootstrapReady: this.threatIntelRuntime.bootstrapReady,
         core,
       });

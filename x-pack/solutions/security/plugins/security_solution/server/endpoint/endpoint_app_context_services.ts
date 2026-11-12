@@ -244,10 +244,12 @@ export class EndpointAppContextService {
     }
   }
 
+  /**
+   * Keeps the start dependencies: core stops this plugin while Task Manager can still run its rules,
+   * and closes Elasticsearch and saved objects only after all plugins stop, so those rules keep working.
+   */
   public stop() {
     setYaraLogger(undefined);
-    this.startDependencies = null;
-    this.savedObjectsFactoryService = null;
   }
 
   private registerListsExtensions() {
