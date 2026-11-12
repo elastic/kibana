@@ -29,6 +29,10 @@ export const SUGGEST_FLOWS: readonly SuggestFlow[] = [
 
 const UNGROUPED = '';
 
+// Longer than the lifetime of the package's column cache.
+const CACHE_LIFETIME_MS = 10 * 60 * 1000;
+let scenarioClock = Date.now();
+
 // Matches the common Monaco placeholders: $0, $1 and ${1:placeholder}.
 const SNIPPET_PLACEHOLDER = /\$(\d+|\{\d+:[^}]*\})/;
 
@@ -99,10 +103,15 @@ export const runScenario = async (
   flow: SuggestFlow
 ): Promise<ISuggestionItem[]> => {
   setTestFunctions([...testFunctions]);
+  // The package caches the columns of a source by query text. Each scenario runs later than the
+  // cache lifetime of the one before it, so a scenario only sees the columns of its own world.
+  scenarioClock += CACHE_LIFETIME_MS;
+  const now = jest.spyOn(Date, 'now').mockReturnValue(scenarioClock);
 
   try {
     return await flow.suggest(query + after, query.length, createCallbacks(world));
   } finally {
+    now.mockRestore();
     setTestFunctions([]);
   }
 };
