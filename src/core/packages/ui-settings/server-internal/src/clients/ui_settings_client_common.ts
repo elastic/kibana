@@ -24,6 +24,15 @@ interface UserProvidedValue<T = unknown> {
 
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 
+interface SettingsRead {
+  values: Record<string, any>;
+  /**
+   * False when the read failed with a forbidden or Elasticsearch-unavailable error.
+   * The empty result is not stored, so a later caller reads again.
+   */
+  cacheable: boolean;
+}
+
 /**
  * Common logic for setting / removing keys in a {@link IUiSettingsClient} implementation
  */
@@ -51,20 +60,28 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
       // check for in-flight read request (deduplication)
       const inflightRead = this.sharedUserProvidedCache.getInflightRead(this.namespace);
       if (inflightRead) {
+        try {
+          this.log.debug(
+            `[UiSettings] getUserProvided using existing in-flight read for namespace=${this.namespace}`
+          );
+          return this.applyOverrides(await inflightRead);
+        } catch {
+          // The in-flight read belongs to another caller. A rejection is that caller's
+          // credential failing, so this caller reads with its own saved objects client.
+          this.log.debug(
+            `[UiSettings] getUserProvided in-flight read failed for namespace=${this.namespace}; reading with this caller`
+          );
+        }
+      } else {
+        const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
+        if (sharedCached) {
+          return this.applyOverrides(sharedCached);
+        }
+
         this.log.debug(
-          `[UiSettings] getUserProvided using existing in-flight read for namespace=${this.namespace}`
+          `[UiSettings] getUserProvided cache MISS - fetching from ES for namespace=${this.namespace}`
         );
-        return this.applyOverrides(await inflightRead);
       }
-
-      const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
-      if (sharedCached) {
-        return this.applyOverrides(sharedCached);
-      }
-
-      this.log.debug(
-        `[UiSettings] getUserProvided cache MISS - fetching from ES for namespace=${this.namespace}`
-      );
     }
 
     // Fetch from ES, process, and cache
@@ -91,9 +108,12 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   }
 
   private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
+    const { values, cacheable } = await this.read();
+    const userProvided: UserProvided<T> = this.onReadHook(values);
 
-    this.sharedUserProvidedCache?.set(this.namespace, userProvided);
+    if (cacheable) {
+      this.sharedUserProvidedCache?.set(this.namespace, userProvided);
+    }
 
     return userProvided;
   }
@@ -206,12 +226,12 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     }
   }
 
-  private async read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
-    Record<string, any>
-  > {
+  private async read({
+    autoCreateOrUpgradeIfMissing = true,
+  }: ReadOptions = {}): Promise<SettingsRead> {
     try {
-      const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
-      return resp.attributes;
+      const resp = await this.savedObjectsClient.get<Record<string, unknown>>(this.type, this.id);
+      return { values: resp.attributes, cacheable: true };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
@@ -227,11 +247,11 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
           return await this.read({ autoCreateOrUpgradeIfMissing: false });
         }
 
-        return failedUpgradeAttributes;
+        return { values: failedUpgradeAttributes, cacheable: true };
       }
 
       if (this.isIgnorableError(error)) {
-        return {};
+        return { values: {}, cacheable: false };
       }
 
       throw error;

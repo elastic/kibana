@@ -978,6 +978,85 @@ describe('ui settings', () => {
         expect(result1).toEqual(result2);
         expect(result2).toEqual(result3);
       });
+
+      it('reads again when another caller is waiting on a rejected in-flight read', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        const { uiSettings: clientA, savedObjectsClient: soClientA } = setupWithSharedCache({
+          sharedCache,
+        });
+        const { uiSettings: clientB, savedObjectsClient: soClientB } = setupWithSharedCache({
+          sharedCache,
+          esDocSource: { foo: 'from-b' },
+        });
+
+        const authError = SavedObjectsClient.errors.decorateNotAuthorizedError(
+          new Error('dead key')
+        );
+        let rejectReadA: (error: Error) => void = () => {};
+        soClientA.get.mockReturnValue(
+          new Promise((_resolve, reject) => {
+            rejectReadA = reject;
+          }) as any
+        );
+
+        const readA = clientA.getUserProvided();
+        expect(sharedCache.getInflightRead('default')).not.toBeNull();
+        const readB = clientB.getUserProvided();
+        rejectReadA(authError);
+
+        await expect(readA).rejects.toBe(authError);
+        await expect(readB).resolves.toEqual({ foo: { userValue: 'from-b' } });
+        expect(soClientA.get).toHaveBeenCalledTimes(1);
+        expect(soClientB.get).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('ignorable read errors', () => {
+      it('does not cache a forbidden read', async () => {
+        const { uiSettings, savedObjectsClient, sharedUserProvidedCache } = setupWithSharedCache();
+        savedObjectsClient.get.mockRejectedValueOnce(
+          SavedObjectsClient.errors.decorateForbiddenError(new Error())
+        );
+
+        await expect(uiSettings.getUserProvided()).resolves.toStrictEqual({});
+        expect(sharedUserProvidedCache.has('default')).toBe(false);
+
+        savedObjectsClient.get.mockResolvedValueOnce({ attributes: { foo: 'bar' } } as any);
+        await expect(uiSettings.getUserProvided()).resolves.toEqual({
+          foo: { userValue: 'bar' },
+        });
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not cache an Elasticsearch-unavailable read', async () => {
+        const { uiSettings, savedObjectsClient, sharedUserProvidedCache } = setupWithSharedCache();
+        savedObjectsClient.get.mockRejectedValueOnce(
+          SavedObjectsClient.errors.decorateEsUnavailableError(new Error())
+        );
+
+        await expect(uiSettings.getUserProvided()).resolves.toStrictEqual({});
+        expect(sharedUserProvidedCache.has('default')).toBe(false);
+
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('caches a successful read that stores no user values', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        const { uiSettings: client1, savedObjectsClient: soClient1 } = setupWithSharedCache({
+          sharedCache,
+          esDocSource: {},
+        });
+        const { uiSettings: client2, savedObjectsClient: soClient2 } = setupWithSharedCache({
+          sharedCache,
+          esDocSource: { foo: 'should-not-be-read' },
+        });
+
+        await expect(client1.getUserProvided()).resolves.toStrictEqual({});
+        await expect(client2.getUserProvided()).resolves.toStrictEqual({});
+        expect(soClient1.get).toHaveBeenCalledTimes(1);
+        expect(soClient2.get).toHaveBeenCalledTimes(0);
+      });
     });
 
     describe('cache invalidation', () => {
