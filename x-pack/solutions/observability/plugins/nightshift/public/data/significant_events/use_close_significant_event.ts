@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { SignificantEventCloseReason } from '@kbn/significant-events-schema';
+import { getFormattedError } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 import { invalidateSignificantEventQueries } from './invalidate_significant_event_queries';
 import {
@@ -31,8 +32,19 @@ const CLOSE_ERROR_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.erro
   defaultMessage: 'Failed to mark significant event inactive',
 });
 
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(String(error));
+const CLOSE_FORBIDDEN_MESSAGE = i18n.translate('xpack.nightshift.closeEvent.forbiddenMessage', {
+  defaultMessage:
+    'Marking a significant event inactive requires the Alerts "All" privilege. Contact your administrator if you need to make changes.',
+});
+
+const isForbiddenError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'body' in error &&
+  typeof error.body === 'object' &&
+  error.body !== null &&
+  'statusCode' in error.body &&
+  error.body.statusCode === 403;
 
 interface UseCloseSignificantEventResult {
   closeSignificantEvent: (
@@ -112,7 +124,10 @@ export const useCloseSignificantEvent = ({
       onClosed?.();
     },
     onError: (error: unknown) => {
-      notifications.toasts.addError(toError(error), { title: CLOSE_ERROR_TOAST_TITLE });
+      notifications.toasts.addError(
+        isForbiddenError(error) ? new Error(CLOSE_FORBIDDEN_MESSAGE) : getFormattedError(error),
+        { title: CLOSE_ERROR_TOAST_TITLE }
+      );
     },
     onSettled: async () => {
       setClosingEventId(undefined);
