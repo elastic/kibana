@@ -454,7 +454,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const state = await refineNode({
       ...initialGraphState,
       generationAttempts: 9,
-      generations: [],
+      refinements: [],
     });
 
     expect(state.insights).toEqual(initialGraphState.unrefinedResults);
