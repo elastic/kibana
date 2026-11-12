@@ -81,7 +81,7 @@ describe('fetchGraph', () => {
       isOriginAlert: false,
       uniqueEventsCount: 1,
       uniqueAlertsCount: 0,
-      labelNodeId: 'doc-1',
+      eventNodeId: 'doc-1',
     },
   ];
 

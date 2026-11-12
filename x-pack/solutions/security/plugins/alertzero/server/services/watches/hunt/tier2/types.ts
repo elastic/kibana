@@ -58,6 +58,16 @@ export interface HuntBehaviorParams {
    */
   allowed_indices?: string[];
   /**
+   * Cross-project search is on: an unqualified source fans out to every routed project, so the
+   * source gate checks that reach against the allowlist's project-qualified exclusions.
+   */
+  cross_project_search?: boolean;
+  /**
+   * Index patterns the hunt universe excludes by name without a project. Appended to every
+   * generated `FROM` as `-pattern` so the read itself drops them, local or linked.
+   */
+  excluded_indices?: string[];
+  /**
    * Technique ids an earlier run on this report already searched. Candidates with these ids are
    * dropped before the generation budget is spent, so a rerun covers what the earlier one did not
    * rather than the same highest-confidence techniques again. They take no slot and leave no gap.

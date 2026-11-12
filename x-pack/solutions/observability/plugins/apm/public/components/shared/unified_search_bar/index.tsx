@@ -13,7 +13,7 @@ import {
   toElasticsearchQuery,
 } from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import qs from 'query-string';
