@@ -18,6 +18,7 @@ import {
   type SavedObjectsFindResult,
   type SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { errorContent, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
@@ -67,7 +68,6 @@ import { isAuthorizedInAllSpaces } from './authorization_utils';
 import { SecurityAction } from './types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { savedObjectEvent } from '../audit';
-import { LEGACY_URL_ALIAS_TYPE } from '../spaces/secure_spaces_client_wrapper';
 
 interface Params {
   actions: Actions;

@@ -64,6 +64,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-custom-branding-browser-mocks'
   - '@kbn/core-custom-branding-common'

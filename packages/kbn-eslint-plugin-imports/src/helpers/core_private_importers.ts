@@ -74,6 +74,7 @@ export const CORE_PRIVATE_IMPORTERS: ReadonlySet<string> = new Set([
   'x-pack/platform/plugins/shared/global_search/test/scout/ui/fixtures/page_objects/global_search.ts',
   'x-pack/platform/plugins/shared/security/public/nav_control/user_menu_component.test.tsx',
   'x-pack/platform/plugins/shared/security/public/nav_control/user_menu_component.tsx',
+  'x-pack/platform/plugins/shared/security/server/saved_objects/saved_objects_security_extension.ts',
   'x-pack/platform/plugins/shared/serverless/public/plugin.tsx',
   'x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/page_objects/spaces.ts',
   'x-pack/platform/plugins/shared/task_manager/server/task_store.ts',
