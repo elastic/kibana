@@ -65,6 +65,29 @@ describe('EditTransformDurationInput', () => {
     expect(mockSetFormField).toHaveBeenCalledWith({ field: 'frequency', value: '10h' });
   });
 
+  it('uses a unit selected while the duration value is empty', () => {
+    const frequencyField = getDefaultState(getTransformConfigMock()).formFields.frequency;
+    jest.mocked(useFormField).mockReturnValue({ ...frequencyField, value: '' });
+
+    renderWithI18n(
+      <EditTransformDurationInput
+        defaultUnit="m"
+        field="frequency"
+        label="Frequency"
+        units={['s', 'm', 'h']}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('transformEditFlyoutFrequencyUnitSelect'), {
+      target: { value: 'h' },
+    });
+    fireEvent.change(screen.getByTestId('transformEditFlyoutFrequencyInput'), {
+      target: { value: '20' },
+    });
+
+    expect(mockSetFormField).toHaveBeenCalledWith({ field: 'frequency', value: '20h' });
+  });
+
   it('preserves the existing unit when the duration value is cleared and replaced', () => {
     const frequencyField = getDefaultState(getTransformConfigMock()).formFields.frequency;
     jest.mocked(useFormField).mockReturnValue({ ...frequencyField, value: '30s' });
