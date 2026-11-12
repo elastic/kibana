@@ -168,6 +168,7 @@ describe('EditCustomContentFlyout', () => {
     render(<EditCustomContentFlyout {...defaultProps} esqlQueries={['FROM logs']} />);
     expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Refine with chat' })).toBeDisabled();
   });
 
   it('hands the queries of the panel to the state, so a preview can fetch them all', () => {

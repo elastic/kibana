@@ -32,6 +32,12 @@ describe('findEmptyQueryPosition', () => {
 
   it('ignores blank queries at the end', () => {
     expect(findEmptyQueryPosition(drafts('FROM a', 'FROM b', '', ''))).toBeUndefined();
+  });
+
+  it('finds no gap when nothing is filled in, however many tabs there are', () => {
     expect(findEmptyQueryPosition(drafts(''))).toBeUndefined();
+    expect(findEmptyQueryPosition(drafts('', ''))).toBeUndefined();
+    expect(findEmptyQueryPosition(drafts('', ' ', ''))).toBeUndefined();
+    expect(getRunnableQueries(drafts('', ''))).toEqual([]);
   });
 });

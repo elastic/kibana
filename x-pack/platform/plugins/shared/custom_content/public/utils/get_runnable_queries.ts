@@ -27,6 +27,9 @@ export const getRunnableQueries = (queries: DraftText): string[] =>
 
 /** The 1-based position of the first blank query that a filled one follows, if any. */
 export const findEmptyQueryPosition = (queries: DraftText): number | undefined => {
-  const index = queries.slice(0, lastFilledIndex(queries)).findIndex(({ text }) => !text.trim());
+  const last = lastFilledIndex(queries);
+  // Nothing is filled in: static content, with no query that anything could shift.
+  if (last < 0) return undefined;
+  const index = queries.slice(0, last).findIndex(({ text }) => !text.trim());
   return index === -1 ? undefined : index + 1;
 };

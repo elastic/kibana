@@ -111,10 +111,11 @@ describe('EsqlDataSection', () => {
       );
     });
 
-    it('has no actions menu on the first query', () => {
+    // Removing a query would move the ones after it up, and the template reads them by position.
+    it('offers removal only on the last query', () => {
       renderSeveral();
       expect(screen.queryByTestId('customContentQueryActions-1')).not.toBeInTheDocument();
-      expect(screen.getByTestId('customContentQueryActions-2')).toBeInTheDocument();
+      expect(screen.queryByTestId('customContentQueryActions-2')).not.toBeInTheDocument();
       expect(screen.getByTestId('customContentQueryActions-3')).toBeInTheDocument();
     });
 
@@ -127,13 +128,13 @@ describe('EsqlDataSection', () => {
 
     it('does not show the actions tooltip over the open menu', async () => {
       renderSeveral();
-      const button = screen.getByTestId('customContentQueryActions-2');
+      const button = screen.getByTestId('customContentQueryActions-3');
 
       await userEvent.hover(button);
-      expect(await screen.findByRole('tooltip')).toHaveTextContent('Actions for query 2');
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Actions for query 3');
 
       await userEvent.click(button);
-      expect(screen.getByTestId('customContentRemoveQuery-2')).toBeInTheDocument();
+      expect(screen.getByTestId('customContentRemoveQuery-3')).toBeInTheDocument();
       expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     });
 

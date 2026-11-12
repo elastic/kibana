@@ -7,46 +7,80 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { VisualizationServices } from './services';
+import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 import { InlineVisualization } from './inline_visualization';
+import type { VisualizationServices } from './services';
 
+jest.mock('./visualize_lens', () => ({
+  VisualizeLens: () => <span data-test-subj="lens-renderer" />,
+}));
+jest.mock('./visualize_vega', () => ({
+  VisualizeVega: () => <span data-test-subj="vega-renderer" />,
+}));
 jest.mock('./visualize_custom_content', () => ({
-  VisualizeCustomContent: ({ esqlQueries }: { esqlQueries: readonly string[] }) => (
-    <div data-test-subj="customContent">{JSON.stringify(esqlQueries)}</div>
+  VisualizeCustomContent: ({ esqlQueries }: { esqlQueries?: readonly string[] }) => (
+    <span data-test-subj="custom-content-renderer">{JSON.stringify(esqlQueries)}</span>
   ),
 }));
-jest.mock('./visualize_lens', () => ({ VisualizeLens: () => <div data-test-subj="lens" /> }));
 
 const services = {} as VisualizationServices;
-const visualization = { template: '<div>board</div>' };
+
+/**
+ * Every renderer added so far was first matched as "not the previous one", which routes an
+ * unhandled renderer through Lens: a broken chart rather than an error. Each case is pinned,
+ * including `undefined`, which is how attachments predating the discriminator render.
+ */
+const cases: Array<[string, VisualizationRenderer | undefined, string]> = [
+  ['lens', 'lens', 'lens-renderer'],
+  ['vega', 'vega', 'vega-renderer'],
+  ['custom content', 'custom_content', 'custom-content-renderer'],
+  ['no renderer (legacy attachment)', undefined, 'lens-renderer'],
+];
+
+/** Distinct components — `lens-renderer` is the target of two cases. */
+const allTestSubjects = [...new Set(cases.map(([, , testSubj]) => testSubj))];
 
 describe('InlineVisualization', () => {
+  it.each(cases)('renders the %s renderer', async (_name, renderer, expectedTestSubj) => {
+    render(
+      <InlineVisualization services={services} renderer={renderer} visualization={{ type: 'x' }} />
+    );
+
+    expect(await screen.findByTestId(expectedTestSubj)).toBeTruthy();
+  });
+
+  it('routes each renderer to exactly one component', async () => {
+    for (const [, renderer, expectedTestSubj] of cases) {
+      const { unmount } = render(
+        <InlineVisualization services={services} renderer={renderer} visualization={{}} />
+      );
+
+      await screen.findByTestId(expectedTestSubj);
+      const rendered = allTestSubjects.filter(
+        (testSubj) => screen.queryByTestId(testSubj) !== null
+      );
+      expect(rendered).toEqual([expectedTestSubj]);
+
+      unmount();
+    }
+  });
+
   it.each([
     ['a list of queries', ['FROM a', 'FROM b'], ['FROM a', 'FROM b']],
     ['a single string, as saved before a panel could have several', 'FROM a', ['FROM a']],
     ['no queries', undefined, []],
-  ])('gives custom content its queries as a list from %s', async (_label, esql, expected) => {
+  ])('gives custom content its queries as a list from %s', async (_name, esql, expected) => {
     render(
       <InlineVisualization
         services={services}
         renderer="custom_content"
-        visualization={visualization}
+        visualization={{}}
         esql={esql}
       />
     );
 
-    expect((await screen.findByTestId('customContent')).textContent).toBe(JSON.stringify(expected));
-  });
-
-  it('renders a Lens chart whose esql is a string, as before', async () => {
-    render(
-      <InlineVisualization
-        services={services}
-        visualization={{}}
-        esql="FROM logs | STATS count()"
-      />
+    expect((await screen.findByTestId('custom-content-renderer')).textContent).toBe(
+      JSON.stringify(expected)
     );
-
-    expect(await screen.findByTestId('lens')).toBeTruthy();
   });
 });

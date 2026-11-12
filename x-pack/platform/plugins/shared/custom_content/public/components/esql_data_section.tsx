@@ -145,8 +145,9 @@ export const EsqlDataSection = ({
     esqlDataError: draft.esqlDataError,
     onTextChange: (text: string) => onQueryTextChange(draft.id, text),
     onFetchData: () => onFetchQueryData(draft.id),
-    // The first query is the one the template reads as `rows`, so it cannot be removed.
-    onRemove: index === 0 ? undefined : () => onRemoveQuery(draft.id),
+    // Removing a query moves the ones after it up, so `queries[n]` in the template would read the
+    // wrong data. Only the last one can go, and the first is `rows`.
+    onRemove: index === 0 || index < queries.length - 1 ? undefined : () => onRemoveQuery(draft.id),
   }));
   // The selected tab is gone once it was removed; fall back to the first query.
   const activeTab = tabs.find(({ key }) => key === selectedKey) ?? tabs[0];
