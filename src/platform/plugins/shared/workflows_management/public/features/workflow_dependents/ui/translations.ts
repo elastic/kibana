@@ -79,6 +79,12 @@ export const getIssueMessage = (
           '{childName} fails every time it runs: its step "{from}" runs {to}, which is broken',
         values: { childName, from, to },
       });
+    case 'callCycle':
+      return i18n.translate('workflows.dependents.issue.callCycle', {
+        defaultMessage:
+          'Running {childName} leads back to a workflow that is already running, so the runs keep nesting until they reach the depth limit and fail',
+        values: { childName },
+      });
     case 'selfCall':
       return i18n.translate('workflows.dependents.issue.selfCall', {
         defaultMessage: 'Runs itself, which isn’t allowed, so this step always fails',

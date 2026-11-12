@@ -187,6 +187,49 @@ describe('collectWorkflowCallSites', () => {
       contained({ settings: { 'on-failure': { continue: true } }, steps: [callStep('any', {})] })
     ).toEqual({ any: true });
   });
+
+  it('finds calls in the workflow-level fallback and knows which calls might not run', () => {
+    const callSites = collectWorkflowCallSites({
+      settings: { 'on-failure': { fallback: [callStep('on-workflow-failure', {})] } },
+      steps: [
+        callStep('always', {}),
+        { ...callStep('guarded', {}), if: 'inputs.run : true' },
+        {
+          name: 'branch',
+          type: 'if',
+          condition: 'true',
+          steps: [callStep('then', {})],
+          else: [callStep('otherwise', {})],
+        },
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: '{{ inputs.items }}',
+          steps: [callStep('each', {})],
+        },
+        {
+          name: 'fan',
+          type: 'parallel',
+          branches: [{ name: 'one', steps: [callStep('branch', {})] }],
+        },
+        { ...callStep('risky', {}), 'on-failure': { fallback: [callStep('recover', {})] } },
+      ],
+    });
+
+    expect(
+      Object.fromEntries(callSites.map(({ stepName, isConditional }) => [stepName, isConditional]))
+    ).toEqual({
+      always: false,
+      guarded: true,
+      then: true,
+      otherwise: true,
+      each: true,
+      branch: false,
+      risky: false,
+      recover: true,
+      'on-workflow-failure': true,
+    });
+  });
 });
 
 describe('findOutputUsages', () => {
@@ -234,6 +277,45 @@ describe('findOutputUsages', () => {
       { field: 'severity', hasFallback: false },
     ]);
   });
+
+  it('reads Liquid tags, KQL conditions and the workflow-level fallback, but not plain text', () => {
+    const usages = findOutputUsages(
+      {
+        settings: {
+          'on-failure': {
+            fallback: [
+              { name: 'f', type: 'console', with: { m: '{{ steps.ctx.output.recovery }}' } },
+            ],
+          },
+        },
+        steps: [
+          {
+            name: 'x',
+            type: 'console',
+            if: 'steps.ctx.output.enabled : true',
+            with: {
+              a: "{{ steps['ctx']['output']['bracketed'] }}",
+              b: '{% if steps.ctx.output.flag %}yes{% endif %}',
+              c: '{% for item in steps.ctx.output.items %}{{ item.name }}{% endfor %}',
+              d: 'See steps.ctx.output.documented in the docs',
+            },
+          },
+          { name: 'branch', type: 'if', condition: 'steps.ctx.output.level : "high"', steps: [] },
+        ],
+      },
+      'ctx'
+    );
+
+    expect(usages.map(({ field }) => field).sort()).toEqual([
+      'bracketed',
+      'enabled',
+      'flag',
+      'items',
+      'level',
+      'recovery',
+    ]);
+    expect(usages.every(({ hasFallback }) => !hasFallback)).toBe(true);
+  });
 });
 
 describe('findOutputsPassingThrough', () => {
@@ -265,6 +347,23 @@ describe('findOutputsPassingThrough', () => {
 });
 
 describe('analyzeDependents', () => {
+  it('finds callers that run the workflow only from their workflow-level fallback', () => {
+    const recovers = workflow('recovers', [{ name: 'noop', type: 'console', with: {} }], {
+      settings: { 'on-failure': { fallback: [callStep('ctx', { inputs: { alert_id: 'a' } })] } },
+    });
+    const draft = makeChild({
+      inputs: [
+        { name: 'alert_id', type: 'string', required: true },
+        { name: 'tenant', type: 'string', required: true },
+      ],
+    });
+
+    expect(statusById(analyzeWith([recovers], draft))).toEqual({ recovers: 'breaking' });
+    expect(analyzeRemovalImpact([CHILD_ID], [recovers]).callers).toEqual([
+      { id: 'recovers', name: 'recovers' },
+    ]);
+  });
+
   it('lists direct callers with no impact when nothing changed', () => {
     const analysis = analyze(makeChild());
 
@@ -655,6 +754,30 @@ describe('analyzeDependents', () => {
       expect(analysis.summary).toMatchObject({ breaking: 2, indirectBreaking: 1 });
     });
 
+    it('gives a workflow reached through several paths the worst effect, and follows it on', () => {
+      const lossy = workflow('lossy', [
+        { ...callStep('run-f', {}, undefined, 'f'), 'on-failure': { continue: true } },
+        { name: 'out', type: 'workflow.output', with: { result: '{{ steps.run-f.output.x }}' } },
+      ]);
+      // Reached first through `lossy`, which only loses `result`, then through `waits`, which fails.
+      const shared = workflow('shared', [
+        callStep('run-lossy', {}, undefined, 'lossy'),
+        { name: 'log', type: 'console', with: { m: '{{ steps.run-lossy.output.result }}' } },
+        callStep('run-waits', {}, undefined, 'waits'),
+      ]);
+      const analysis = analyzeWith(
+        [failsOnNewInput, lossy, runs('waits', 'f'), shared, runs('top', 'shared')],
+        withTenant
+      );
+
+      expect(upstreamOf(analysis, 'f')).toEqual([
+        'lossy:missingOutput',
+        'waits:fails',
+        'shared:fails',
+        'top:fails',
+      ]);
+    });
+
     it('leaves out callers that are turned off', () => {
       const offCaller = { ...failsOnNewInput, id: 'off', name: 'off', enabled: false };
       const offGrandparent = { ...runs('off-grandparent', 'f'), enabled: false };
@@ -781,6 +904,39 @@ describe('analyzeCalledWorkflows', () => {
       ['tolerant', []],
     ]);
     expect(called[0].issues[0]).toMatchObject({ stepName: 'm', from: 'ctx', to: 'Alert context' });
+  });
+});
+
+describe('analyzeCalledWorkflows cycles', () => {
+  it('flags calls that always lead back to a running workflow, but not loops that can stop', () => {
+    const loopsBack = workflow('loops-back', [callStep('back', {}, undefined, 'parent')]);
+    const viaMiddle = workflow('via-middle', [callStep('next', {}, undefined, 'loops-back')]);
+    const guarded = workflow('guarded', [
+      { ...callStep('back', {}, undefined, 'parent'), if: 'inputs.again : true' },
+    ]);
+    const background = workflow('background', [
+      callStep('back', {}, 'workflow.executeAsync', 'parent'),
+    ]);
+    const called = analyzeCalledWorkflows({
+      workflowId: 'parent',
+      definition: {
+        name: 'Parent',
+        steps: [
+          callStep('l', {}, undefined, 'loops-back'),
+          callStep('v', {}, undefined, 'via-middle'),
+          callStep('g', {}, undefined, 'guarded'),
+          callStep('b', {}, undefined, 'background'),
+        ],
+      },
+      workflows: [loopsBack, viaMiddle, guarded, background],
+    });
+
+    expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
+      ['loops-back', ['callCycle:breaking']],
+      ['via-middle', ['callCycle:breaking']],
+      ['background', []],
+      ['guarded', []],
+    ]);
   });
 });
 

@@ -25,6 +25,8 @@ export interface WorkflowCallSite {
    * keeps the caller running after this step fails.
    */
   continuesOnFailure: boolean;
+  /** True when the step might not run: it has an `if`, or sits in a branch, loop or fallback. */
+  isConditional: boolean;
 }
 
 export interface ContractField {
@@ -98,6 +100,8 @@ export type ImpactIssueKind =
   | 'childInvalid'
   /** The called workflow fails every run: its step `from` runs `to`, which is broken. */
   | 'childFails'
+  /** Every run fails: the called workflow always runs, and leads back to one already running. */
+  | 'callCycle'
   | 'selfCall'
   | 'missingRequiredInput'
   | 'unknownInput'

@@ -604,45 +604,68 @@ const getCallerEffect = (
   return { effect: toEffect(parent.definition, fails, reads), field: firstField };
 };
 
-/** Follows a broken direct caller up the chain to the enabled workflows that fail or lose data. */
+const mergeEffects = (first: WorkflowEffect, second: WorkflowEffect): WorkflowEffect => {
+  const fails = first.fails || second.fails;
+  return {
+    fails,
+    emptyOutputs: fails ? new Set() : new Set([...first.emptyOutputs, ...second.emptyOutputs]),
+  };
+};
+
+// Failing beats losing outputs, and losing more outputs beats losing fewer.
+const isWorseEffect = (effect: WorkflowEffect, than: WorkflowEffect): boolean =>
+  (effect.fails && !than.fails) ||
+  (!effect.fails && !than.fails && effect.emptyOutputs.size > than.emptyOutputs.size);
+
+/**
+ * Follows a broken direct caller up the chain to the enabled workflows that fail or lose data.
+ * A workflow reached through several paths gets the combined effect of all of them, and is
+ * followed again whenever a later path makes its effect worse.
+ */
 const propagateUpstream = (
   root: WorkflowLookupItem,
   rootEffect: WorkflowEffect,
   callerEdges: ReadonlyMap<string, readonly CallerEdge[]>,
   excludedIds: ReadonlySet<string>
 ): UpstreamImpact[] => {
-  const result: UpstreamImpact[] = [];
-  const visited = new Set<string>([...excludedIds, root.id]);
+  const impacts = new Map<string, UpstreamImpact>();
+  const effects = new Map<string, WorkflowEffect>();
   let frontier: Array<{ workflow: WorkflowLookupItem; effect: WorkflowEffect }> = [
     { workflow: root, effect: rootEffect },
   ];
   for (let depth = 2; depth <= MAX_INDIRECT_DEPTH && frontier.length > 0; depth++) {
-    const next: typeof frontier = [];
+    const next = new Map<string, { workflow: WorkflowLookupItem; effect: WorkflowEffect }>();
     for (const { workflow, effect } of frontier) {
-      const edges = (callerEdges.get(workflow.id) ?? []).filter(({ parent }) => parent.enabled);
+      const edges = (callerEdges.get(workflow.id) ?? []).filter(
+        ({ parent }) => parent.enabled && parent.id !== root.id && !excludedIds.has(parent.id)
+      );
       for (const edge of edges) {
-        // Checked per edge: a workflow reached twice in the same level is reported once.
-        const callerEffect = visited.has(edge.parent.id)
-          ? undefined
-          : getCallerEffect(edge, effect);
-        if (callerEffect) {
-          visited.add(edge.parent.id);
-          result.push({
+        const callerEffect = getCallerEffect(edge, effect);
+        const previous = effects.get(edge.parent.id);
+        const merged =
+          callerEffect && previous
+            ? mergeEffects(previous, callerEffect.effect)
+            : callerEffect?.effect;
+        if (callerEffect && merged && (!previous || isWorseEffect(merged, previous))) {
+          effects.set(edge.parent.id, merged);
+          const previousImpact = impacts.get(edge.parent.id);
+          const isNewCause = !previousImpact || (merged.fails && !previous?.fails);
+          impacts.set(edge.parent.id, {
             workflowId: edge.parent.id,
             workflowName: edge.parent.name,
-            effect: callerEffect.effect.fails ? 'fails' : 'missingOutput',
-            viaName: workflow.name,
-            field: callerEffect.field,
+            effect: merged.fails ? 'fails' : 'missingOutput',
+            viaName: isNewCause ? workflow.name : previousImpact.viaName,
+            field: isNewCause ? callerEffect.field : previousImpact.field,
           });
-          if (callerEffect.effect.fails || callerEffect.effect.emptyOutputs.size > 0) {
-            next.push({ workflow: edge.parent, effect: callerEffect.effect });
+          if (merged.fails || merged.emptyOutputs.size > 0) {
+            next.set(edge.parent.id, { workflow: edge.parent, effect: merged });
           }
         }
       }
     }
-    frontier = next;
+    frontier = [...next.values()];
   }
-  return result;
+  return [...impacts.values()];
 };
 
 export interface DependentsIndex {
@@ -768,11 +791,16 @@ interface RunFailure {
   issue: DraftIssue;
 }
 
+// A run that fails because it nests a loop of runs keeps reporting the loop further up.
 const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue => ({
-  ...stepIssue('childFails', stepName),
+  ...stepIssue(failure.issue.kind === 'callCycle' ? 'callCycle' : 'childFails', stepName),
   from: failure.stepName,
   to: failure.calledName,
 });
+
+// Returned while resolving a workflow whose own resolution is still in progress.
+const IN_PROGRESS = 'inProgress';
+type RunFailureResolution = RunFailure | typeof IN_PROGRESS | undefined;
 
 // The issue that makes `callSite` fail every time, if any. `called` is undefined when not found.
 const getCallFailure = (
@@ -780,7 +808,7 @@ const getCallFailure = (
   caller: WorkflowLookupItem,
   calledId: string,
   called: WorkflowLookupItem | undefined,
-  resolveFailure: (workflowId: string) => RunFailure | undefined
+  resolveFailure: (workflowId: string) => RunFailureResolution
 ): DraftIssue | undefined => {
   const { stepName } = callSite;
   if (calledId === caller.id) {
@@ -798,31 +826,43 @@ const getCallFailure = (
   }
   const downstream =
     callSite.stepType === 'workflow.execute' ? resolveFailure(calledId) : undefined;
+  if (downstream === IN_PROGRESS) {
+    // The called workflow is already running further up, so the runs nest until the depth limit.
+    return { ...stepIssue('callCycle', stepName), to: called.name };
+  }
   return downstream ? toChildFailsIssue(stepName, downstream) : undefined;
 };
 
 /**
  * Finds, for each of `workflows`, a step that makes every run of it fail: a waiting step that
- * runs a broken workflow, or one that runs a workflow that fails in turn.
+ * always runs and runs a broken workflow, one that fails in turn, or one that loops back to a
+ * workflow already running.
  */
 const findRunFailures = (
   workflows: ReadonlyMap<string, WorkflowLookupItem>
 ): Map<string, RunFailure | undefined> => {
   const failures = new Map<string, RunFailure | undefined>();
-  const resolve = (workflowId: string, depth: number): RunFailure | undefined => {
+  const inProgress = new Set<string>();
+  const resolve = (workflowId: string, depth: number): RunFailureResolution => {
+    if (inProgress.has(workflowId)) {
+      return IN_PROGRESS;
+    }
     if (failures.has(workflowId)) {
       return failures.get(workflowId);
     }
     const workflow = workflows.get(workflowId);
-    // Settle cycles and unknown workflows as "not failing" before descending.
-    failures.set(workflowId, undefined);
     if (!workflow || depth > MAX_INDIRECT_DEPTH) {
       return undefined;
     }
+    inProgress.add(workflowId);
     let failure: RunFailure | undefined;
     for (const [calledId, callSites] of groupCallSites(workflow.definition)) {
       const called = workflows.get(calledId);
-      for (const callSite of callSites.filter(({ continuesOnFailure }) => !continuesOnFailure)) {
+      // Only a step that runs every time, and stops the run when it fails, fails every run.
+      const alwaysFailingSites = callSites.filter(
+        ({ continuesOnFailure, isConditional }) => !continuesOnFailure && !isConditional
+      );
+      for (const callSite of alwaysFailingSites) {
         if (!failure) {
           const issue = getCallFailure(callSite, workflow, calledId, called, (id) =>
             resolve(id, depth + 1)
@@ -833,6 +873,7 @@ const findRunFailures = (
         }
       }
     }
+    inProgress.delete(workflowId);
     failures.set(workflowId, failure);
     return failure;
   };
@@ -893,12 +934,22 @@ export const analyzeCalledWorkflows = ({
   definition,
   workflows,
 }: AnalyzeCalledWorkflowsParams): CalledWorkflowImpact[] => {
-  const workflowsById = new Map(
-    workflows.filter(({ id }) => id !== selfId).map((workflow) => [workflow.id, workflow])
-  );
-  const runFailures = findRunFailures(workflowsById);
   const selfName =
     isRecord(definition) && typeof definition.name === 'string' ? definition.name : selfId;
+  // The draft stands in for the saved version, so calls that lead back to it are judged by it.
+  const self: WorkflowLookupItem = {
+    id: selfId,
+    name: selfName,
+    enabled: isRecord(definition) && definition.enabled !== false,
+    definition,
+  };
+  const workflowsById = new Map(
+    [...workflows.filter(({ id }) => id !== selfId), self].map((workflow) => [
+      workflow.id,
+      workflow,
+    ])
+  );
+  const runFailures = findRunFailures(workflowsById);
 
   return [...groupCallSites(definition).entries()]
     .map(([workflowId, callSites]): CalledWorkflowImpact => {
