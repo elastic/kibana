@@ -67,6 +67,8 @@ export const openVegaLibraryEditor = async ({
   const sharedFlyoutProps = {
     // A stray click would otherwise discard unsaved edits.
     outsideClickCloses: false,
+    // The flyout's close button would skip the editor's unsaved changes check, so Cancel closes it.
+    hideCloseButton: true,
     'data-test-subj': 'vegaLibraryEditorFlyout',
   } as const;
 
@@ -91,6 +93,7 @@ export const openVegaLibraryEditor = async ({
           // No `size`: the default width pairs with the size `m` preview flyout, while EUI doesn't
           // allow a parent and child flyout to both be `m`.
           title: vegaTitleInWizard,
+          flyoutMenuProps: { hideCloseButton: true },
           // The library page has no panel to push aside, so cover it like a dialog would.
           type: 'overlay',
           ownFocus: true,
