@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import YAML from 'yaml';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -199,8 +200,10 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
   const proposalsService = new ProposalsService({
     storage: proposalsStorageClient,
     logger: loggerMock.create(),
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     getWorkflowsApi: () => workflowsApi as never,
     getAttachmentsClient: async () => ({ create: jest.fn() } as never),
+    resolveUser: async () => ({ username: 'analyst', fullName: null, email: null }),
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -210,16 +213,19 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
   };
 
   const resolveUser = async () => undefined;
+  const resolveWorkerUser = async () => undefined;
 
   const proposalStepDefinitions = [
     getCreateProposalStepDefinition({
       getProposalsService: () => proposalsService,
       resolveUser,
+      resolveWorkerUser,
       privileges,
     }),
     getUpdateProposalStepDefinition({
       getProposalsService: () => proposalsService,
       resolveUser,
+      resolveWorkerUser,
       privileges,
     }),
     getCheckDecidePrivilegesStepDefinition({ privileges }),
@@ -331,6 +337,7 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
   });
 
   installKibanaRequestFake({
+    http: engine.dependencies.coreStart.http,
     getProposal: (id, spaceId) => proposalsService.get(id, spaceId, engine.fakeKibanaRequest),
     findAttackDiscoveries: (ids) =>
       ids.flatMap((id) => {

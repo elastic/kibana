@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 
 /**
  * `KibanaActionStepImpl` (the built-in `kibana.request` step) reads its
@@ -24,49 +24,54 @@ export const withFakeAuthorizationHeader = (request: KibanaRequest): KibanaReque
     },
   } as KibanaRequest);
 
+interface SelfClientFetchOptions {
+  method?: string;
+  query?: Record<string, unknown>;
+}
+
 /**
- * Mocks `global.fetch`, which is what `KibanaActionStepImpl` calls to reach a
- * `kibana.request` step's target — real HTTP is not available in this harness.
+ * Stubs Core's scoped self client (`coreStart.http.selfClient.asScoped().fetch`),
+ * which `callKibanaApi` uses as the `kibana.request` transport. Real HTTP is not
+ * available in this harness.
  *
- * Routes exactly the three paths the AlertZero worker chain's `kibana.request`
- * steps ever hit:
- *  - `GET /api/attack_discovery/_find?ids=…` — the review's `resolve_display_text`
- *    step, which reads the discovery's analyst-facing title and summary. Answered
- *    from the same seeded Attack Discovery document the FP/TP analysis loads. An
- *    unseeded id yields an empty `data` list, which the review treats as "fall
+ * Routes the paths the AlertZero worker chain's `kibana.*` steps hit (plus
+ * `POST .../detection_engine/signals/status`, `kibana.SetAlertsStatus`'s
+ * alert retirement, answered as a 200 no-op):
+ *  - `GET /api/attack_discovery/_find?ids=…` — the review's `resolve_display_text`.
+ *    An unseeded id yields an empty `data` list, which the review treats as "fall
  *    back to the persisted inputs".
- *  - `POST /s/:space/api/chat/converse` — the journal-note helper
- *    (`system-alertzero-journal-note`), which posts a `trigger_mode: never`
- *    user_message. Faked as a no-op 200: the chain's plumbing does not depend
- *    on the journal's own persistence, only on the note-append call not
- *    failing the caller (every call site sets `on-failure: continue` anyway).
- *  - `GET /internal/proposals/:id` — `read_proposal_decision` in the review,
- *    reading back `dismissReason`/`decidedBy`/`rationale`, which the escalation
- *    gate's own `workflow.output` does not carry. Answered from the SAME
- *    `ProposalsService` instance the gate's real step definitions write
- *    through, so the two paths cannot disagree about a proposal's state.
+ *  - `POST /s/:space/api/chat/converse` — the journal-note helper. A no-op 200:
+ *    every call site sets `on-failure: continue`, and the chain does not depend
+ *    on the journal's own persistence.
+ *  - `GET /internal/proposals/:id` — `read_proposal_decision`, answered from the
+ *    SAME `ProposalsService` the gate's real step definitions write through, so
+ *    the two paths cannot disagree about a proposal's state.
  */
 export const installKibanaRequestFake = ({
+  http,
   getProposal,
   findAttackDiscoveries,
 }: {
+  http: CoreStart['http'];
   getProposal: (id: string, spaceId: string) => Promise<unknown>;
   findAttackDiscoveries: (ids: string[]) => Array<Record<string, unknown>>;
 }): jest.Mock => {
-  const fetchMock = jest.fn(async (url: string | URL, init?: RequestInit) => {
-    const path = typeof url === 'string' ? url : url.toString();
-    const method = init?.method ?? 'GET';
-
+  const route = async (path: string, { method = 'GET', query }: SelfClientFetchOptions) => {
     const converseMatch = path.match(/\/s\/([^/]+)\/api\/chat\/converse$/);
     if (converseMatch && method === 'POST') {
       return jsonResponse(200, { conversation_id: 'journal', status: 'accepted' });
     }
 
     if (method === 'GET' && /\/api\/attack_discovery\/_find(\?|$)/.test(path)) {
-      const ids = (new URL(path, 'http://localhost').searchParams.get('ids') ?? '')
-        .split(',')
+      const rawIds = query?.ids ?? new URL(path, 'http://localhost').searchParams.get('ids') ?? '';
+      const ids = (Array.isArray(rawIds) ? rawIds.map(String) : String(rawIds).split(','))
+        .map((id) => id.trim())
         .filter(Boolean);
       return jsonResponse(200, { data: findAttackDiscoveries(ids) });
+    }
+
+    if (method === 'POST' && /\/api\/detection_engine\/signals\/status$/.test(path)) {
+      return jsonResponse(200, { updated: 1, total: 1, failures: [] });
     }
 
     const proposalMatch = path.match(/\/internal\/proposals\/([^/?]+)/);
@@ -84,9 +89,15 @@ export const installKibanaRequestFake = ({
     }
 
     throw new Error(`installKibanaRequestFake: unhandled fetch ${method} ${path}`);
-  });
+  };
 
-  (global as { fetch: typeof fetch }).fetch = fetchMock as unknown as typeof fetch;
+  const fetchMock = jest.fn(async (path: string, options: SelfClientFetchOptions = {}) => ({
+    request: { url: `http://localhost${path}` },
+    response: await route(path, options),
+  }));
+
+  jest.mocked(http.basePath.prepend).mockImplementation((path: string) => path);
+  jest.mocked(http.selfClient.asScoped).mockReturnValue({ fetch: fetchMock } as never);
   return fetchMock;
 };
 

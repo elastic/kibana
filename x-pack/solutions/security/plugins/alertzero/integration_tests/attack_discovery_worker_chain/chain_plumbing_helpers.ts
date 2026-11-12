@@ -21,6 +21,9 @@ export const CHAIN_WORKFLOW_IDS = {
   // Investigation and forwards to the shared gate (`gate`) with `origin: alertzero`.
   alertzeroProposal: 'system-create-alertzero-proposal',
   gate: 'system-create-proposal',
+  // The gate hands an answered decision to this child, which settles the proposal
+  // and runs the action workflow.
+  resolve: 'system-resolve-proposal',
   handoffAction: 'system-alertzero-action-handoff-to-forensics',
 } as const;
 

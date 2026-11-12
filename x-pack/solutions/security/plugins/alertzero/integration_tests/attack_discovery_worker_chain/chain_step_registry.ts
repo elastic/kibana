@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getConversationMetadataStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/get_conversation_metadata';
@@ -17,6 +17,61 @@ import { updateAttachmentStepCommonDefinition } from '@kbn/agent-builder-plugin/
 import { runAgentStepCommonDefinition } from '@kbn/agent-builder-plugin/common/step_types/run_agent_step';
 import { reopenInvestigationStepCommonDefinition } from '@kbn/agentic-investigations-plugin/common/investigations/step_types';
 import { createKiStepCommonDefinition } from '@kbn/context-engine-plugin/common/step_types/create_ki';
+import { addUserMessageStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/add_user_message';
+import { attachImpactStepCommonDefinition } from '@kbn/agentic-investigations-plugin/common/impact/step_types';
+import { appendWorkflowExecutionIdStepCommonDefinition } from '@kbn/agentic-investigations-plugin/common/workflow_execution/step_types';
+import { reportWorkerOutcomeStepCommonDefinition } from '../../common/step_types/report_worker_outcome_step';
+
+const alertIdSchema = lazySchema(() => z.string().min(1).max(512));
+
+/** Local mirror of `security.setAlertTags`'s contract; not imported for the same reason. */
+const setAlertTagsStepCommonDefinition = {
+  id: 'security.setAlertTags' as const,
+  category: StepCategory.KibanaSecurity,
+  label: 'Set Alert Tags',
+  description: 'Add or remove tags on one or multiple alerts.',
+  inputSchema: lazySchema(() =>
+    z.object({
+      alert_ids: z.union([alertIdSchema, z.array(alertIdSchema).min(1)]),
+      tags_to_add: z.array(z.string().max(1024)).max(100).default([]),
+      tags_to_remove: z.array(z.string().max(1024)).max(100).default([]),
+    })
+  ),
+  outputSchema: lazySchema(() =>
+    z.object({ success: z.boolean(), message: z.string().max(1000).optional() })
+  ),
+};
+
+/** Local mirror of `security.getAlertEntities`'s contract; not imported for the same reason. */
+const getAlertEntitiesStepCommonDefinition = {
+  id: 'security.getAlertEntities' as const,
+  category: StepCategory.KibanaSecurity,
+  label: 'Get Alert Entities',
+  description: 'Resolve the host, user, and service entities behind detection alerts.',
+  inputSchema: lazySchema(() =>
+    z.object({
+      alert_ids: z.array(alertIdSchema).min(1).max(1000),
+      entity_types: z
+        .array(z.enum(['host', 'user', 'service']))
+        .max(3)
+        .optional(),
+      max_entities: z.coerce.number().int().min(1).max(100).optional(),
+    })
+  ),
+  outputSchema: lazySchema(() =>
+    z.object({
+      entities: z.array(
+        z.object({
+          id: z.string().min(1).max(256),
+          type: z.enum(['host', 'user', 'service']),
+          name: z.string().min(1).max(512).optional(),
+        })
+      ),
+      total: z.number().int(),
+      truncated: z.boolean(),
+    })
+  ),
+};
 
 /**
  * Local mirror of `security.setAttackStatus`'s contract (id + input/output shape).
@@ -31,16 +86,20 @@ const setAttackStatusStepCommonDefinition = {
   category: StepCategory.KibanaSecurity,
   label: 'Set Attack Status',
   description: 'Change the status of one or multiple attacks to open, acknowledged, or closed.',
-  inputSchema: z.object({
-    ids: z.union([z.string().min(1).max(256), z.array(z.string().min(1).max(256)).min(1)]),
-    status: z.enum(['open', 'acknowledged', 'closed']),
-    reason: z.string().min(1).max(1024).optional(),
-    update_related_alerts: z.boolean().optional().default(false),
-  }),
-  outputSchema: z.object({
-    success: z.boolean(),
-    message: z.string().max(1000).optional(),
-  }),
+  inputSchema: lazySchema(() =>
+    z.object({
+      ids: z.union([z.string().min(1).max(256), z.array(z.string().min(1).max(256)).min(1)]),
+      status: z.enum(['open', 'acknowledged', 'closed']),
+      reason: z.string().min(1).max(1024).optional(),
+      update_related_alerts: z.boolean().optional().default(false),
+    })
+  ),
+  outputSchema: lazySchema(() =>
+    z.object({
+      success: z.boolean(),
+      message: z.string().max(1000).optional(),
+    })
+  ),
 };
 
 /**
@@ -64,6 +123,8 @@ export interface FakeAlertZeroBackend {
   conversations: Map<string, FakeConversation>;
   /** Every `security.setAttackStatus` call, in order, for assertions. */
   attackStatusCalls: Array<{ ids: string[]; status: string; reason?: string }>;
+  /** Every `security.setAlertTags` call, in order, for assertions. */
+  alertTagCalls: Array<{ alertIds: string[]; tagsToAdd: string[]; tagsToRemove: string[] }>;
   /** Every knowledge indicator `context-engine.createKi` wrote, keyed by ki_id. */
   knowledgeIndicators: Map<string, { ai_index_id: string; ki: unknown }>;
   /**
@@ -118,6 +179,7 @@ export const createFakeAlertZeroBackend = (): {
 } => {
   const conversations = new Map<string, FakeConversation>();
   const attackStatusCalls: Array<{ ids: string[]; status: string; reason?: string }> = [];
+  const alertTagCalls: FakeAlertZeroBackend['alertTagCalls'] = [];
   const knowledgeIndicators = new Map<string, { ai_index_id: string; ki: unknown }>();
   const agentVerdictQueue: Array<{
     verdict: 'false_positive' | 'true_positive' | 'inconclusive';
@@ -351,9 +413,73 @@ export const createFakeAlertZeroBackend = (): {
     },
   });
 
+  // Worker telemetry is a no-op here: only a managed run reports, and the chain's
+  // plumbing never reads `reported` back.
+  const reportWorkerOutcomeStep = createServerStepDefinition({
+    ...reportWorkerOutcomeStepCommonDefinition,
+    handler: async () => ({ output: { reported: false } }),
+  });
+
+  const addUserMessageStep = createServerStepDefinition({
+    ...addUserMessageStepCommonDefinition,
+    handler: async (context) => {
+      const { conversation_id: conversationId } = context.input as { conversation_id: string };
+      return { output: { conversation_id: conversationId } };
+    },
+  });
+
+  const getAlertEntitiesStep = createServerStepDefinition({
+    ...getAlertEntitiesStepCommonDefinition,
+    handler: async () => ({
+      output: {
+        entities: [{ id: 'host:fake-host', type: 'host' as const, name: 'fake-host' }],
+        total: 1,
+        truncated: false,
+      },
+    }),
+  });
+
+  const setAlertTagsStep = createServerStepDefinition({
+    ...setAlertTagsStepCommonDefinition,
+    handler: async (context) => {
+      const input = context.input as {
+        alert_ids: string | string[];
+        tags_to_add?: string[];
+        tags_to_remove?: string[];
+      };
+      const alertIds = Array.isArray(input.alert_ids) ? input.alert_ids : [input.alert_ids];
+      alertTagCalls.push({
+        alertIds,
+        tagsToAdd: input.tags_to_add ?? [],
+        tagsToRemove: input.tags_to_remove ?? [],
+      });
+      return { output: { success: true } };
+    },
+  });
+
+  const attachImpactStep = createServerStepDefinition({
+    ...attachImpactStepCommonDefinition,
+    handler: async (context) => {
+      const { conversationId, entities } = context.input as {
+        conversationId: string;
+        entities: Array<{ id: string }>;
+      };
+      return { output: { id: `impact-${conversationId}`, entities } };
+    },
+  });
+
+  const appendWorkflowExecutionIdStep = createServerStepDefinition({
+    ...appendWorkflowExecutionIdStepCommonDefinition,
+    handler: async (context) => {
+      const { workflowExecutionId } = context.input as { workflowExecutionId: string };
+      return { output: { workflowExecutionId } };
+    },
+  });
+
   const backend: FakeAlertZeroBackend = {
     conversations,
     attackStatusCalls,
+    alertTagCalls,
     knowledgeIndicators,
     seedInvestigation: ({ id, status, title }) => {
       conversations.set(id, {
@@ -381,6 +507,12 @@ export const createFakeAlertZeroBackend = (): {
       reopenInvestigationStep,
       createKiStep,
       runAgentStep,
+      reportWorkerOutcomeStep,
+      addUserMessageStep,
+      getAlertEntitiesStep,
+      setAlertTagsStep,
+      attachImpactStep,
+      appendWorkflowExecutionIdStep,
     ],
   };
 };
