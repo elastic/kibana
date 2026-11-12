@@ -1,5 +1,5 @@
 {
-  "sha1": "48fa9b42fdc13c3694765a6f672914cf47dd625e",
+  "sha1": "555c409396afb9ca3786c81a45942be25d3fb37e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -402,8 +402,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 77,
+        "line": 79,
         "column": 23
+      }
+    },
+    {
+      "id": "63a66063df79f9e-c21e28721b65d40",
+      "title": "Scheduled Nightshift automations runs an enabled scheduled automation manually without changing its configuration or schedule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
+        "line": 220,
+        "column": 15
       }
     },
     {
@@ -416,8 +430,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 222,
-        "column": 20
+        "line": 379,
+        "column": 66
       }
     },
     {

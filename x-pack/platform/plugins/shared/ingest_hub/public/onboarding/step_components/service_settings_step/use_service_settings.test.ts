@@ -1108,6 +1108,33 @@ describe('useServiceSettings — integration name and description', () => {
     expect(result.current.isReady).toBe(false);
   });
 
+  it('is not ready with an invalid condition in agent-based mode', async () => {
+    mockServices([policyService], 'agent_based');
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
+    expect(result.current.conditionErrors).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} == "linux"'));
+    expect(result.current.conditionErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('ignores a condition kept from agent-based mode under managed integration', async () => {
+    mockServices([policyService], 'managed_integration');
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
+
+    expect(result.current.conditionErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
   it('requires a name for ECF-only selections too', () => {
     mockServices([ecfOnlyService]);
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));

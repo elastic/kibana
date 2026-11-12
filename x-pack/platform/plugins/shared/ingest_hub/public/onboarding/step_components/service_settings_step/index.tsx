@@ -69,6 +69,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     isProxyUrlSupported,
     proxyUrlError,
     setPolicySetting,
+    conditionErrors,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -152,6 +153,10 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     (outputId: string) => setPolicySetting('output_id', outputId),
     [setPolicySetting]
   );
+  const setCondition = useCallback(
+    (condition: string) => setPolicySetting('condition', condition),
+    [setPolicySetting]
+  );
 
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
@@ -217,7 +222,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
-    if (integrationNameError || descriptionError || namespaceError || proxyUrlError) {
+    if (
+      integrationNameError ||
+      descriptionError ||
+      namespaceError ||
+      proxyUrlError ||
+      conditionErrors
+    ) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
           defaultMessage: 'Fix the integration settings',
@@ -243,6 +254,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     descriptionError,
     namespaceError,
     proxyUrlError,
+    conditionErrors,
     incompleteInstances,
   ]);
 
@@ -524,6 +536,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                 value: policySettings.proxy_url ?? '',
                 onChange: setProxyUrl,
                 error: proxyUrlError,
+              }
+            : undefined
+        }
+        condition={
+          supportsPolicySetting('condition', deploymentMethod)
+            ? {
+                value: policySettings.condition ?? '',
+                onChange: setCondition,
+                errors: conditionErrors,
               }
             : undefined
         }

@@ -16,6 +16,7 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { initUiSettings } from './ui_settings';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
+  DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING,
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
 } from '../common/constants';
@@ -99,6 +100,39 @@ describe('initUiSettings', () => {
         sensitive: true,
         technicalPreview: true,
       })
+    );
+  });
+
+  it('registers the universal troubleshooting skill setting as readonly in the UI when enabled', () => {
+    initUiSettings(
+      mockUiSettings,
+      { ...mockExperimentalFeatures, automaticTroubleshootingUniversalSkill: true },
+      false
+    );
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(
+      registeredSettings[DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING]
+    ).toEqual(
+      expect.objectContaining({
+        value: true,
+        type: 'boolean',
+        readonly: true,
+        readonlyMode: 'ui',
+      })
+    );
+  });
+
+  it('does not register the universal troubleshooting skill setting when disabled', () => {
+    initUiSettings(
+      mockUiSettings,
+      { ...mockExperimentalFeatures, automaticTroubleshootingUniversalSkill: false },
+      false
+    );
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(registeredSettings).not.toHaveProperty(
+      DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING
     );
   });
 });

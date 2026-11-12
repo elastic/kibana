@@ -105,6 +105,10 @@ export const groupTimelineEvents = (
         break;
       }
 
+      case TimelineEventType.agentMessage:
+        ordered.push({ kind: 'agentMessage', key: event.id, event });
+        break;
+
       case TimelineEventType.promptResponse:
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
         break;

@@ -198,7 +198,7 @@ export const RunLimitsSection = ({
                   })}
                   text={i18n.translate('xpack.nightshift.settings.runLimits.readOnlyDescription', {
                     defaultMessage:
-                      'Changing daily limits requires the Nightshift Manage and Configure privileges in all spaces.',
+                      'Changing daily limits requires the nightshift Manage and Configure privileges in all spaces.',
                   })}
                 />
               </>

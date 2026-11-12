@@ -35,6 +35,7 @@ const INDEX_TEMPLATE = {
             thinking_tokens: { type: 'long' as const },
             total_tokens: { type: 'long' as const },
             cached_tokens: { type: 'long' as const },
+            cache_write_tokens: { type: 'long' as const },
           },
         },
         model: {

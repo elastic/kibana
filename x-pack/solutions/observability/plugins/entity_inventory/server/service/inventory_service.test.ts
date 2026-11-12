@@ -357,10 +357,10 @@ describe('InventoryService.list', () => {
       { indexPattern: STATE_PATTERN, status: 503, reason: 'timeout_exception: timed out' },
     ]);
     expect(response.rows).toHaveLength(1);
-    expect(response).toMatchObject({ total: null, truncated: false });
+    expect(response).toMatchObject({ truncated: false });
   });
 
-  it('merges rows across sources, newest last_seen first, with exact total and every column on every row', async () => {
+  it('merges rows across sources, newest last_seen first, with every column on every row', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
@@ -386,13 +386,31 @@ describe('InventoryService.list', () => {
     expect(response.rows[1]).toMatchObject({ resource_id: null, 'k8s.cluster.name': null });
     expect(response.columns.map(({ name }) => name)).toEqual(ALL_COLUMNS);
     expect(response).toMatchObject({
-      total: 2,
       truncated: false,
       errors: [],
       unavailableColumns: [],
     });
     expect(response).not.toHaveProperty('unsupportedMetrics');
     expect(response).not.toHaveProperty('documentFilterWarnings');
+  });
+
+  it('returns the same columns as listTypes for the type', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { timeSeries: [OTEL_PATTERN] }
+    );
+
+    const { columns } = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    expect(columns).toEqual(type.columns);
   });
 
   it.each([
@@ -414,7 +432,7 @@ describe('InventoryService.list', () => {
     expect(response.rows.map((row) => row['entity.id'])).toEqual([
       'k8s.deployment:scout-cluster/checkout/cart-api',
     ]);
-    expect(response).toMatchObject({ total: 1, errors: [] });
+    expect(response).toMatchObject({ errors: [] });
   });
 
   it('starts every list query before any resolves', async () => {
@@ -434,7 +452,7 @@ describe('InventoryService.list', () => {
 
     expect(pending).toHaveLength(2);
     pending.forEach((resolve) => resolve());
-    await expect(listing).resolves.toMatchObject({ rows: [], total: 0 });
+    await expect(listing).resolves.toMatchObject({ rows: [] });
   });
 
   it('reports a failed query in errors with its status and reason and returns the other source', async () => {
@@ -455,7 +473,7 @@ describe('InventoryService.list', () => {
       },
     ]);
     expect(JSON.stringify(response.errors)).not.toContain('at ');
-    expect(response).toMatchObject({ total: null, truncated: false });
+    expect(response).toMatchObject({ truncated: false });
   });
 
   it('drops a plan whose pattern maps no @timestamp and one whose identity is unmapped', async () => {
@@ -480,11 +498,10 @@ describe('InventoryService.list', () => {
         reason: expect.stringContaining(`no index behind "${OTEL_PATTERN}" maps every field`),
       },
     ]);
-    // Neither query failed: the patterns read nothing usable, so the count of zero is exact.
-    expect(response).toMatchObject({ total: 0, truncated: false });
+    expect(response).toMatchObject({ truncated: false });
   });
 
-  it('returns no rows and an exact zero total when no source has data in the window', async () => {
+  it('returns no rows when no source has data in the window', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
@@ -493,7 +510,7 @@ describe('InventoryService.list', () => {
 
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
-    expect(response).toMatchObject({ rows: [], total: 0, truncated: false, errors: [] });
+    expect(response).toMatchObject({ rows: [], truncated: false, errors: [] });
     expect(response.columns).toHaveLength(13);
   });
 
@@ -508,7 +525,6 @@ describe('InventoryService.list', () => {
 
     expect(response).toMatchObject({
       rows: [],
-      total: null,
       truncated: false,
       errors: [
         { indexPattern: STATE_PATTERN, status: 403, reason: 'security_exception: unauthorized' },
@@ -534,10 +550,13 @@ describe('InventoryService.list', () => {
     expect(response.unavailableColumns).toEqual([
       { column: 'resource_id', indexPattern: OTEL_PATTERN, field: 'k8s.deployment.uid' },
     ]);
-    expect(response.columns.find(({ name }) => name === 'resource_id')?.type).toBeNull();
+    expect(response.columns.find(({ name }) => name === 'resource_id')).toEqual({
+      name: 'resource_id',
+      kind: 'attribute',
+    });
   });
 
-  it('returns limit rows with an exact total when no plan is cut', async () => {
+  it('returns limit rows and reports truncated when the merge holds more rows than requested', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
@@ -551,10 +570,10 @@ describe('InventoryService.list', () => {
     expect(response.rows.map((row) => row['entity.id'])).toEqual([
       'k8s.deployment:scout-cluster/checkout/cart-api',
     ]);
-    expect(response).toMatchObject({ total: 2, truncated: true });
+    expect(response).toMatchObject({ truncated: true });
   });
 
-  it('reports total null and truncated when a plan returns more rows than requested', async () => {
+  it('reports truncated when a plan returns more rows than requested', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [
@@ -567,10 +586,10 @@ describe('InventoryService.list', () => {
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 1 });
 
     expect(response.rows).toHaveLength(1);
-    expect(response).toMatchObject({ total: null, truncated: true });
+    expect(response).toMatchObject({ truncated: true });
   });
 
-  it('reports a partial result in errors with total null, keeping its rows and not truncating', async () => {
+  it('reports a partial result in errors, keeping its rows and not truncating', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(
@@ -587,7 +606,6 @@ describe('InventoryService.list', () => {
 
     expect(response.rows).toHaveLength(2);
     expect(response).toMatchObject({
-      total: null,
       truncated: false,
       errors: [
         {

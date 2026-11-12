@@ -12,6 +12,10 @@ import {
 } from '@kbn/significant-events-schema';
 import { forbidden } from '@hapi/boom';
 import { DeepStrict } from '@kbn/zod-helpers';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+} from '@kbn/workflows-extensions/server';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
 import { internalKIQueriesRoutes } from './route';
@@ -584,13 +588,27 @@ describe('generateQueriesRoute', () => {
   const makeHandlerParams = ({
     agentBuilder,
     body = { connectorId: 'test-connector' },
+    workflowExecutionId,
+    isInternalApiRequest = workflowExecutionId !== undefined,
   }: {
     agentBuilder: unknown;
     body?: Record<string, unknown>;
+    workflowExecutionId?: string;
+    isInternalApiRequest?: boolean;
   }) =>
     ({
       params: { path: { sourceId: 'logs.test' }, body },
-      request: { spaceId: 'default', events: { aborted$: { subscribe: jest.fn() } } },
+      request: {
+        spaceId: 'default',
+        events: { aborted$: { subscribe: jest.fn() } },
+        isInternalApiRequest,
+        headers: workflowExecutionId
+          ? {
+              [EVENT_CHAIN_DEPTH_HEADER]: '0',
+              [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: workflowExecutionId,
+            }
+          : {},
+      },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           get: jest.fn().mockResolvedValue({
@@ -674,8 +692,10 @@ describe('generateQueriesRoute', () => {
         body: {
           connectorId: 'test-connector',
           runId: 'run-1',
+          parentWorkflowExecutionId: 'onboarding-run-1',
           maxExistingQueriesForContext: 10,
         },
+        workflowExecutionId: 'workflow-run-1',
       })
     );
 
@@ -684,6 +704,8 @@ describe('generateQueriesRoute', () => {
         source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
         connectorId: 'test-connector',
         runId: 'run-1',
+        workflowExecutionId: 'workflow-run-1',
+        parentWorkflowExecutionId: 'onboarding-run-1',
         maxExistingQueriesForContext: 10,
       }),
       expect.any(Object)
@@ -693,6 +715,21 @@ describe('generateQueriesRoute', () => {
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
       connectorId: 'test-connector',
     });
+  });
+
+  it('does not accept a workflow execution header from a non-internal request', async () => {
+    await generateRoute.handler(
+      makeHandlerParams({
+        agentBuilder: makeAgentBuilder(),
+        workflowExecutionId: 'caller-chosen-run',
+        isInternalApiRequest: false,
+      })
+    );
+
+    expect(mockGenerateKIQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: undefined }),
+      expect.any(Object)
+    );
   });
 
   it('installs the KI query generation agent in the request space before generating', async () => {
