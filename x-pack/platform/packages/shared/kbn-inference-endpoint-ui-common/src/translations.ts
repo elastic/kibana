@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { EisTaskType } from './types/types';
 
 export const getRequiredMessage = (field: string) => {
   return i18n.translate('xpack.inferenceEndpointUICommon.components.requiredGenericTextField', {
@@ -157,7 +157,7 @@ export const EDIT_ENDPOINT_TITLE = i18n.translate(
   }
 );
 
-export const TASK_TYPE_DESCRIPTIONS: Partial<Record<InferenceTaskType, string>> = {
+export const TASK_TYPE_DESCRIPTIONS: Partial<Record<EisTaskType, string>> = {
   text_embedding: i18n.translate(
     'xpack.inferenceEndpointUICommon.components.taskType.textEmbeddingDescription',
     {
@@ -183,6 +183,12 @@ export const TASK_TYPE_DESCRIPTIONS: Partial<Record<InferenceTaskType, string>> 
     'xpack.inferenceEndpointUICommon.components.taskType.chatCompletionDescription',
     {
       defaultMessage: 'Generates conversational responses from a chat input',
+    }
+  ),
+  decision: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.decisionDescription',
+    {
+      defaultMessage: 'Answers questions about an input and returns a decision with probabilities',
     }
   ),
 };

@@ -15,12 +15,14 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { SubFeatureCard } from './sub_feature_card';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
+import { useSupportedEffortLevels } from '../../hooks/use_supported_effort_levels';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
-import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
+import { EisModelStatus, type EndpointDeprecationInfo, type EndpointEfforts } from '../../types';
 
 jest.mock('../../hooks/use_connectors');
 jest.mock('../../hooks/use_registered_features');
+jest.mock('../../hooks/use_supported_effort_levels');
 jest.mock(
   '../all_inference_endpoints/render_table_columns/render_actions/actions/test_endpoint/test_endpoint_modal',
   () => ({
@@ -79,6 +81,7 @@ jest.mock('@elastic/eui', () => {
 
 const mockUseConnectors = useConnectors as jest.Mock;
 const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
+const mockUseSupportedEffortLevels = useSupportedEffortLevels as jest.Mock;
 
 const mockConnectors: InferenceConnector[] = [
   {
@@ -172,6 +175,7 @@ describe('SubFeatureCard', () => {
     jest.clearAllMocks();
     mockUseConnectors.mockReturnValue({ data: mockConnectors });
     mockUseRegisteredFeatures.mockReturnValue({ features: [], isLoading: false });
+    mockUseSupportedEffortLevels.mockReturnValue(new Map());
   });
 
   // Default: customized list (toggle OFF) — covers the editable-mode tests below.
@@ -195,6 +199,9 @@ describe('SubFeatureCard', () => {
           endpointIds={endpointIds}
           effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
           onEndpointsChange={onEndpointsChange}
+          efforts={{}}
+          effectiveRecommendedEfforts={{}}
+          onEffortsChange={jest.fn()}
           invalidEndpointIds={invalidEndpointIds}
           deprecatedEndpointsMap={deprecatedEndpointsMap}
           {...defaultGlobalRowProps}
@@ -219,6 +226,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-1', 'ep-2']}
             effectiveRecommendedEndpoints={['__different__']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -317,6 +327,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-1']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -376,6 +389,22 @@ describe('SubFeatureCard', () => {
     expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeInTheDocument();
   });
 
+  it('marks the feature title as unsaved when the feature is dirty', () => {
+    renderCard(['ep-1'], undefined, undefined, undefined, { isFeatureDirty: true });
+
+    expect(
+      screen.getByTestId(`subFeatureCardTitle-${feature.featureId}-unsaved`)
+    ).toBeInTheDocument();
+  });
+
+  it('does not mark the feature title as unsaved when the feature is clean', () => {
+    renderCard(['ep-1']);
+
+    expect(
+      screen.queryByTestId(`subFeatureCardTitle-${feature.featureId}-unsaved`)
+    ).not.toBeInTheDocument();
+  });
+
   describe('feature status badges', () => {
     it.each([
       {
@@ -410,6 +439,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-1']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -443,6 +475,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-1']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -464,6 +499,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-1']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -481,6 +519,40 @@ describe('SubFeatureCard', () => {
       expect(screen.getByTestId('add-model-button')).toBeInTheDocument();
     });
 
+    it('leaves custom mode when the page discards unsaved changes', () => {
+      const cardProps = {
+        featureId: feature.featureId,
+        feature,
+        endpointIds: ['ep-1'],
+        effectiveRecommendedEndpoints: ['ep-1'],
+        onEndpointsChange,
+        efforts: {},
+        effectiveRecommendedEfforts: {},
+        onEffortsChange: jest.fn(),
+        invalidEndpointIds: new Set<string>(),
+        deprecatedEndpointsMap: new Map(),
+        ...defaultGlobalRowProps,
+      };
+      const { rerender } = render(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} discardVersion={0} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('useRecommendedDefaultsToggle-test_feature'));
+      fireEvent.click(screen.getByText('Turn off recommended defaults'));
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).not.toBeChecked();
+
+      rerender(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} discardVersion={1} />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeChecked();
+      expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
+    });
+
     it('opens the reset modal when toggling OFF to ON', () => {
       render(
         <Wrapper>
@@ -490,6 +562,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-2', 'ep-3']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -511,6 +586,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-2', 'ep-3']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -533,6 +611,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-1']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set(['ep-1'])}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -580,6 +661,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-1']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             {...defaultGlobalRowProps}
@@ -634,6 +718,9 @@ describe('SubFeatureCard', () => {
             endpointIds={['ep-1']}
             effectiveRecommendedEndpoints={['ep-1']}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             hasSavedObject={false}
@@ -842,6 +929,9 @@ describe('SubFeatureCard', () => {
             endpointIds={recommendedEndpointIds}
             effectiveRecommendedEndpoints={recommendedEndpointIds}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             hasSavedObject={false}
@@ -969,6 +1059,9 @@ describe('SubFeatureCard', () => {
             endpointIds={deniedRecommendedEndpointIds}
             effectiveRecommendedEndpoints={deniedRecommendedEndpointIds}
             onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
             invalidEndpointIds={new Set()}
             deprecatedEndpointsMap={new Map()}
             hasSavedObject={false}
@@ -988,6 +1081,152 @@ describe('SubFeatureCard', () => {
       );
       expect(screen.queryByTestId('endpoint-row-ep-2')).not.toBeInTheDocument();
       expect(screen.queryByTestId('endpoint-row-ep-3')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('reasoning effort', () => {
+    const onEffortsChange = jest.fn();
+
+    const renderEffortCard = ({
+      endpointIds = ['ep-1', 'ep-2'],
+      effectiveRecommendedEndpoints = ['__different__'],
+      efforts = {},
+      effectiveRecommendedEfforts = {},
+      canManage = true,
+    }: Partial<{
+      endpointIds: string[];
+      effectiveRecommendedEndpoints: string[];
+      efforts: EndpointEfforts;
+      effectiveRecommendedEfforts: EndpointEfforts;
+      canManage: boolean;
+    }> = {}) =>
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={endpointIds}
+            effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
+            onEndpointsChange={onEndpointsChange}
+            efforts={efforts}
+            effectiveRecommendedEfforts={effectiveRecommendedEfforts}
+            onEffortsChange={onEffortsChange}
+            invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
+            canManage={canManage}
+            {...defaultGlobalRowProps}
+          />
+        </Wrapper>
+      );
+
+    beforeEach(() => {
+      mockUseSupportedEffortLevels.mockReturnValue(new Map([['ep-1', ['low', 'medium', 'high']]]));
+    });
+
+    it('shows the effort control only for models with supported effort levels', () => {
+      renderEffortCard();
+
+      expect(screen.getByTestId('add-effort-ep-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-effort-ep-2')).not.toBeInTheDocument();
+    });
+
+    it('shows a saved effort with its remove action when the model lists no effort levels', () => {
+      renderEffortCard({ efforts: { 'ep-2': 'low' } });
+
+      fireEvent.click(screen.getByTestId('effort-badge-ep-2'));
+
+      expect(screen.queryByTestId('reasoningEffortButtonGroup')).not.toBeInTheDocument();
+      expect(screen.getByTestId('remove-effort-customization')).toBeInTheDocument();
+    });
+
+    it('shows the customized effort as a pill', () => {
+      renderEffortCard({ efforts: { 'ep-1': 'high' } });
+
+      expect(screen.getByTestId('effort-badge-ep-1')).toHaveTextContent('high');
+      expect(screen.queryByTestId('add-effort-ep-1')).not.toBeInTheDocument();
+    });
+
+    it('sets an effort for the model', () => {
+      renderEffortCard({ efforts: { 'ep-2': 'low' } });
+
+      fireEvent.click(screen.getByTestId('add-effort-ep-1'));
+      fireEvent.click(screen.getByTestId('reasoningEffort-medium'));
+
+      expect(onEffortsChange).toHaveBeenCalledWith('test_feature', {
+        'ep-1': 'medium',
+        'ep-2': 'low',
+      });
+    });
+
+    it('removes the effort customization for the model', () => {
+      renderEffortCard({ efforts: { 'ep-1': 'high', 'ep-2': 'low' } });
+
+      fireEvent.click(screen.getByTestId('effort-badge-ep-1'));
+      fireEvent.click(screen.getByTestId('remove-effort-customization'));
+
+      expect(onEffortsChange).toHaveBeenCalledWith('test_feature', { 'ep-2': 'low' });
+    });
+
+    it('shows a read-only pill and no add control without manage permission', () => {
+      renderEffortCard({ efforts: { 'ep-1': 'high' }, endpointIds: ['ep-1'], canManage: false });
+
+      fireEvent.click(screen.getByTestId('effort-badge-ep-1'));
+
+      expect(screen.queryByTestId('effort-popover-ep-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('remove-effort-customization')).not.toBeInTheDocument();
+    });
+
+    it('shows the recommended effort as read-only when using recommended defaults', () => {
+      renderEffortCard({
+        endpointIds: ['ep-1'],
+        effectiveRecommendedEndpoints: ['ep-1'],
+        efforts: { 'ep-1': 'low' },
+        effectiveRecommendedEfforts: { 'ep-1': 'low' },
+      });
+
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeChecked();
+      expect(screen.getByTestId('effort-badge-ep-1')).toHaveTextContent('low');
+      expect(screen.queryByTestId('add-effort-ep-1')).not.toBeInTheDocument();
+    });
+
+    it('turns the recommended defaults toggle off when the effort differs from the recommended one', () => {
+      renderEffortCard({
+        endpointIds: ['ep-1'],
+        effectiveRecommendedEndpoints: ['ep-1'],
+        efforts: { 'ep-1': 'high' },
+        effectiveRecommendedEfforts: { 'ep-1': 'low' },
+      });
+
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).not.toBeChecked();
+    });
+
+    it('resets efforts to the recommended ones with the recommended endpoints', () => {
+      renderEffortCard({
+        endpointIds: ['ep-1'],
+        effectiveRecommendedEndpoints: ['ep-1'],
+        efforts: { 'ep-1': 'high' },
+        effectiveRecommendedEfforts: { 'ep-1': 'low' },
+      });
+
+      fireEvent.click(screen.getByTestId('useRecommendedDefaultsToggle-test_feature'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1']);
+      expect(onEffortsChange).toHaveBeenCalledWith('test_feature', { 'ep-1': 'low' });
+    });
+
+    it('copies efforts with the models to other features', () => {
+      mockUseRegisteredFeatures.mockReturnValue({
+        features: [feature, { ...feature, featureId: 'sibling', featureName: 'Sibling' }],
+        isLoading: false,
+      });
+      renderEffortCard({ efforts: { 'ep-1': 'high' } });
+
+      fireEvent.click(screen.getByTestId('copy-to-test_feature'));
+      fireEvent.click(screen.getByTestId('copy-to-apply'));
+
+      expect(onEndpointsChange).toHaveBeenCalledWith('sibling', ['ep-1', 'ep-2']);
+      expect(onEffortsChange).toHaveBeenCalledWith('sibling', { 'ep-1': 'high' });
     });
   });
 });

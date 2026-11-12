@@ -3232,6 +3232,23 @@ describe('The custom threshold alert type', () => {
         });
       });
 
+      describe('rule schedule', () => {
+        test('passes the rule schedule interval in milliseconds to the rule evaluation', async () => {
+          setEvaluationResults([{}]);
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              criteria: [customThresholdNonCountCriterion],
+            },
+          });
+          expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][13]).toEqual(
+            3600000
+          );
+        });
+      });
+
       describe("noDataBehavior: 'alertOnNoData' with groupBy", () => {
         const instanceIdA = 'a';
         const instanceIdB = 'b';

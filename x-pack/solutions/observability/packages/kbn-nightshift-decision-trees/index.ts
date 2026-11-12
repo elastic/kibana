@@ -33,6 +33,29 @@ export {
   serializeEvidenceMetadata,
 } from './src/mermaid';
 
+export { decisionEdgeKey } from './src/edge_key';
+export { REPLAY_CONVERSATION_ID_PREFIX } from './src/replay';
+export {
+  carryCounts,
+  countsForTree,
+  penalizePath,
+  recordVisit,
+  reinforcePath,
+  edgesFromWalk,
+  resolveEdgeRefs,
+} from './src/counts';
+export type {
+  DecisionEdgeCounts,
+  DecisionEdgeRef,
+  DecisionPathStep,
+  DecisionElementCounts,
+  DecisionNodeCounts,
+  DecisionNodeMerge,
+  DecisionPathUpdate,
+  DecisionTreeCounts,
+  DecisionWeightedPathUpdate,
+} from './src/counts';
+
 export { diffDecisionTrees } from './src/diff';
 export type {
   DecisionEdgeChange,

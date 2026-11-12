@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 describe('TelemetryPlugin', () => {
   describe('setup', () => {
     describe('when initial config does not allow changing opt in status', () => {
-      it('calls analytics optIn', () => {
+      it('does not opt in at setup when telemetry.optIn is true, because the feature flag can disable it', () => {
         const initializerContext = coreMock.createPluginInitializerContext({
           optIn: true,
           allowChangingOptInStatus: false,
@@ -32,9 +32,24 @@ describe('TelemetryPlugin', () => {
           telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
         });
 
+        expect(coreSetupMock.analytics.optIn).not.toHaveBeenCalled();
+      });
+
+      it('opts out at setup when telemetry.optIn is false', () => {
+        const initializerContext = coreMock.createPluginInitializerContext({
+          optIn: false,
+          allowChangingOptInStatus: false,
+        });
+        const coreSetupMock = coreMock.createSetup();
+
+        new TelemetryPlugin(initializerContext).setup(coreSetupMock, {
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
+        });
+
         expect(coreSetupMock.analytics.optIn).toHaveBeenCalledTimes(1);
         expect(coreSetupMock.analytics.optIn).toHaveBeenCalledWith({
-          global: { enabled: true },
+          global: { enabled: false },
         });
       });
     });

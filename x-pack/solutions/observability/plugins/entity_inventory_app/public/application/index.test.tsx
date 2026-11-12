@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { createMemoryHistory } from 'history';
 import type { History } from 'history';
@@ -17,7 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { createCoreStartMock, createStartDependenciesMock } from '../mocks';
+import { createAppServicesMock, createCoreStartMock, createStartDependenciesMock } from '../mocks';
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
 import { ENTITY_LIST_PLACEHOLDER } from './translations';
@@ -34,9 +34,7 @@ const renderShell = (history: History) => {
     <I18nProvider>
       <EuiProvider>
         <MockAppHeaderProvider>
-          <KibanaContextProvider
-            services={{ ...createCoreStartMock(), ...createStartDependenciesMock() }}
-          >
+          <KibanaContextProvider services={createAppServicesMock()}>
             <RouterProvider history={history} router={entityInventoryRouter}>
               <EntityInventoryShell PageTemplate={PageTemplate} />
             </RouterProvider>
@@ -57,7 +55,7 @@ const renderShellAt = (path: string) => {
 describe('EntityInventoryShell', () => {
   it.each(ENTITY_INVENTORY_PAGES)(
     'renders the page shell and title for the entity category of $path',
-    ({ entityCategory, path, title }) => {
+    async ({ entityCategory, path, title }) => {
       renderShellAt(path);
 
       expect(screen.getByTestId('entityInventoryPageShell')).toHaveAttribute(
@@ -66,11 +64,55 @@ describe('EntityInventoryShell', () => {
       );
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
       expect(screen.getByTestId('mockSearchBar')).toBeInTheDocument();
-      expect(screen.getByTestId('entityInventoryPlaceholder')).toHaveTextContent(
-        ENTITY_LIST_PLACEHOLDER
-      );
+      await waitFor(() => expect(screen.queryByTestId('entityInventoryTableLoading')).toBeNull());
     }
   );
+
+  it('keeps the placeholder on the all resources page until grouping lands', () => {
+    renderShellAt('/all-resources');
+
+    expect(screen.getByTestId('entityInventoryPlaceholder')).toHaveTextContent(
+      ENTITY_LIST_PLACEHOLDER
+    );
+  });
+
+  it.each([
+    ['/hosts', 'host'],
+    ['/kubernetes', 'k8s.deployment'],
+  ])('renders the results table of the page %s for the type %s', async (path, entityType) => {
+    renderShellAt(path);
+
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      entityType
+    );
+    expect(screen.queryByTestId('entityInventoryPlaceholder')).not.toBeInTheDocument();
+  });
+
+  it('keeps the column choices of a type while another page is open', async () => {
+    const { history } = renderShellAt('/hosts');
+    expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-cloud.account.id'));
+    const hideColumn = within(screen.getByTestId('dataGridHeaderCellActionGroup-cloud.account.id'))
+      .getAllByRole('button')
+      .find((button) => button.textContent === 'Hide column');
+    if (!hideColumn) {
+      throw new Error('No hide action');
+    }
+    fireEvent.click(hideColumn);
+    await waitFor(() =>
+      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
+    );
+
+    act(() => history.push('/all-resources'));
+    expect(await screen.findByTestId('entityInventoryPlaceholder')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+    act(() => history.push('/hosts'));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridHeaderCell-entityInventory.name')).toBeInTheDocument();
+    expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
+  });
 
   it.each(['/', '/unknown'])('redirects the path %s to all resources', (path) => {
     const { history } = renderShellAt(path);

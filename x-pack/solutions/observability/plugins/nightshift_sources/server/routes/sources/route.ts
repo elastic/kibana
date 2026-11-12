@@ -9,6 +9,7 @@ import { isBoom } from '@hapi/boom';
 import { lazySchema, z } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
   createSourceRequestSchema,
   listSourcesQuerySchema,
   updateSourceRequestSchema,
@@ -31,7 +32,7 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
   endpoint: 'GET /internal/nightshift/sources',
   options: {
     access: 'internal',
-    summary: 'List Nightshift sources',
+    summary: 'List nightshift sources',
     description: 'Returns the sources defined in the current space, sorted by title.',
   },
   security: {
@@ -53,7 +54,7 @@ const listRecommendedSourcesRoute = createNightshiftSourcesServerRoute({
   endpoint: 'GET /internal/nightshift/sources/_recommendations',
   options: {
     access: 'internal',
-    summary: 'List recommended Nightshift sources',
+    summary: 'List recommended nightshift sources',
     description: 'Returns the preset sources the current space does not have yet.',
   },
   security: {
@@ -71,13 +72,13 @@ const createSourceRoute = createNightshiftSourcesServerRoute({
   endpoint: 'POST /internal/nightshift/sources',
   options: {
     access: 'internal',
-    summary: 'Create a Nightshift source',
+    summary: 'Create a nightshift source',
     description:
       'Validates the ES|QL query (FROM or TS, optionally narrowed by WHERE, targeting one kind of data), stores the source and creates its ES|QL view.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -94,13 +95,13 @@ const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
   endpoint: 'POST /internal/nightshift/sources/_validate',
   options: {
     access: 'internal',
-    summary: 'Validate a Nightshift source query',
+    summary: 'Validate a nightshift source query',
     description:
-      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A query create would reject comes back with `valid: false` and the reason.',
+      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A structurally invalid query comes back with `valid: false` and the reason.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: lazySchema(() =>
@@ -114,6 +115,7 @@ const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
       const { type, indexExists } = await client.validateQuery(params.body);
       return { valid: true, type, index_exists: indexExists };
     } catch (error) {
+      // 403 and 503 are about the caller or Elasticsearch, not the query, so they propagate.
       if (isBoom(error) && error.output.statusCode === 400) {
         return { valid: false, error: error.message };
       }
@@ -126,7 +128,7 @@ const getSourceRoute = createNightshiftSourcesServerRoute({
   endpoint: 'GET /internal/nightshift/sources/{sourceId}',
   options: {
     access: 'internal',
-    summary: 'Get a Nightshift source',
+    summary: 'Get a nightshift source',
     description:
       'Returns one source with the health of its ES|QL view, including whether the view still resolves.',
   },
@@ -148,13 +150,13 @@ const updateSourceRoute = createNightshiftSourcesServerRoute({
   endpoint: 'PUT /internal/nightshift/sources/{sourceId}',
   options: {
     access: 'internal',
-    summary: 'Update a Nightshift source',
+    summary: 'Update a nightshift source',
     description:
       'Replaces title, description, tags and ES|QL, re-validates the query (including that it targets one kind of data) and re-creates the ES|QL view. Sending the current values repairs a missing or drifted view.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -172,13 +174,13 @@ const deleteSourceRoute = createNightshiftSourcesServerRoute({
   endpoint: 'DELETE /internal/nightshift/sources/{sourceId}',
   options: {
     access: 'internal',
-    summary: 'Delete a Nightshift source',
+    summary: 'Delete a nightshift source',
     description:
       'Deletes the ES|QL view (a missing view is ignored), then the source so a failed view delete stays retryable.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -195,12 +197,12 @@ const enableSourceRoute = createNightshiftSourcesServerRoute({
   endpoint: 'POST /internal/nightshift/sources/{sourceId}/_enable',
   options: {
     access: 'internal',
-    summary: 'Enable a Nightshift source',
+    summary: 'Enable a nightshift source',
     description: 'Marks the source as enabled. Engines pick the flag up on their next reconcile.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({
@@ -217,12 +219,12 @@ const disableSourceRoute = createNightshiftSourcesServerRoute({
   endpoint: 'POST /internal/nightshift/sources/{sourceId}/_disable',
   options: {
     access: 'internal',
-    summary: 'Disable a Nightshift source',
+    summary: 'Disable a nightshift source',
     description: 'Marks the source as disabled. Engines pick the flag up on their next reconcile.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({

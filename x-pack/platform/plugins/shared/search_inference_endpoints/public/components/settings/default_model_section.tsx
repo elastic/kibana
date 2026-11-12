@@ -15,7 +15,6 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSwitch,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +30,7 @@ import {
   getGlobalModelComboOptions,
   getGlobalModelSelectedOptions,
 } from './default_model_section_combo';
+import { SettingTitle } from './setting_title';
 
 interface Props {
   defaultModelSettings: UseDefaultModelSettingsReturn;
@@ -50,7 +50,8 @@ export const DefaultModelSection: React.FC<Props> = ({
   validation,
   disabled = false,
 }) => {
-  const { state, setEnableAi, setDefaultModelId, setFeatureSpecificModels } = defaultModelSettings;
+  const { state, dirtyFields, setEnableAi, setDefaultModelId, setFeatureSpecificModels } =
+    defaultModelSettings;
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const usageTracker = useUsageTracker();
 
@@ -80,13 +81,13 @@ export const DefaultModelSection: React.FC<Props> = ({
         fullWidth
         gutterSize="xl"
         title={
-          <EuiTitle size="xs">
-            <h3 data-test-subj="aiCapabilitiesTitle">
-              {i18n.translate('xpack.searchInferenceEndpoints.settings.aiCapabilities.title', {
-                defaultMessage: 'AI capabilities',
-              })}
-            </h3>
-          </EuiTitle>
+          <SettingTitle
+            data-test-subj="aiCapabilitiesTitle"
+            isUnsaved={dirtyFields.has('enableAi')}
+            title={i18n.translate('xpack.searchInferenceEndpoints.settings.aiCapabilities.title', {
+              defaultMessage: 'AI capabilities',
+            })}
+          />
         }
         description={
           <p>
@@ -123,13 +124,13 @@ export const DefaultModelSection: React.FC<Props> = ({
             fullWidth
             gutterSize="xl"
             title={
-              <EuiTitle size="xs">
-                <h3 data-test-subj="globalModelTitle">
-                  {i18n.translate('xpack.searchInferenceEndpoints.settings.globalModel.title', {
-                    defaultMessage: 'Global model',
-                  })}
-                </h3>
-              </EuiTitle>
+              <SettingTitle
+                data-test-subj="globalModelTitle"
+                isUnsaved={dirtyFields.has('defaultModelId')}
+                title={i18n.translate('xpack.searchInferenceEndpoints.settings.globalModel.title', {
+                  defaultMessage: 'Global model',
+                })}
+              />
             }
             description={
               <p>
@@ -194,16 +195,16 @@ export const DefaultModelSection: React.FC<Props> = ({
             fullWidth
             gutterSize="xl"
             title={
-              <EuiTitle size="xs">
-                <h3 data-test-subj="featureSpecificModelsTitle">
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.featureSpecificModels.title',
-                    {
-                      defaultMessage: 'Feature specific models',
-                    }
-                  )}
-                </h3>
-              </EuiTitle>
+              <SettingTitle
+                data-test-subj="featureSpecificModelsTitle"
+                isUnsaved={dirtyFields.has('featureSpecificModels')}
+                title={i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.featureSpecificModels.title',
+                  {
+                    defaultMessage: 'Feature specific models',
+                  }
+                )}
+              />
             }
             description={
               <p>

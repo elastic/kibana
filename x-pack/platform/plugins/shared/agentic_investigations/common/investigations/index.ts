@@ -13,6 +13,7 @@ export * from './investigation';
 export * from './title';
 export {
   INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
   MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
   investigationRunFailedEventSchema,
 } from './run_failure';

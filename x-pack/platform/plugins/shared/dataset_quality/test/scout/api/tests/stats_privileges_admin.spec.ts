@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import type { DataStreamStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   buildDataStreamName,
@@ -54,17 +55,21 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.datasetUserPrivileges).toStrictEqual({
-        datasetsPrivilages: {
-          'logs-*-*': {
-            canRead: true,
-            canMonitor: true,
-            canReadFailureStore: true,
-            canManageFailureStore: true,
-          },
-        },
-        canViewIntegrations: true,
-      });
+      expect(response.body.canViewIntegrations).toBe(true);
+      expect(response.body.dataStreamsStats as DataStreamStat[]).toStrictEqual(
+        expect.arrayContaining(
+          DATA_STREAMS.map((name) =>
+            expect.objectContaining({
+              name,
+              userPrivileges: {
+                canMonitor: true,
+                canReadFailureStore: true,
+                canManageFailureStore: true,
+              },
+            })
+          )
+        )
+      );
     });
   }
 );

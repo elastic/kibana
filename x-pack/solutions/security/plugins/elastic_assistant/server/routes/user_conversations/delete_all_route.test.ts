@@ -37,6 +37,33 @@ describe('Delete all conversations route', () => {
       );
 
       expect(response.status).toEqual(200);
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.deleteAllConversations
+      ).toHaveBeenCalledWith({
+        authenticatedUser: mockUser1,
+        excludedIds: ['conversation-1'],
+      });
+    });
+
+    test('returns 200 when no conversations are deleted', async () => {
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.deleteAllConversations.mockResolvedValue(
+        {
+          total: 0,
+          deleted: 0,
+        }
+      );
+
+      const response = await server.inject(
+        getDeleteAllConversationsRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        success: true,
+        totalDeleted: 0,
+        failures: null,
+      });
     });
 
     test('returns failure if exists', async () => {

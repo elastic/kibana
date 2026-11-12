@@ -81,9 +81,11 @@ export interface IacKeyOutcomeOptions {
  *   input that no longer exists, or IaCP could not be reached. Callers fail open: the daily task
  *   keeps the stored status, and the flyout and onboarding do not block.
  * - `no_key`: the connector has no `iac_key`, so the static template is deployed and an upgrade to
- *   the generated one is available. IaCP is not asked. This is only reported after the saved
- *   integrations have resolved, because the Update button the callout then shows renders that same
- *   set through the strict render route, which would reject a stale one.
+ *   the generated one is available. This is only reported after the saved integrations have
+ *   resolved, because the Update button the callout then shows renders that same set through the
+ *   strict render route, which would reject a stale one, and after IaCP has rendered that set
+ *   (without a key to compare), so a provisioner that is not deployed in the region yields
+ *   `key_unavailable` instead of an upgrade nobody can run.
  * - `key_mismatch`: IaCP says the template has changed since the stored key.
  * - `matches`: the deployed template is current.
  *
@@ -169,25 +171,25 @@ export const getIacKeyOutcome = async (
   // Non-empty selections either all resolve or fail above, so `integrations` is never empty here.
   const { integrations } = built;
 
-  if (!storedKey?.trim()) {
-    logger.debug(`No stored IaC key for ${contextForLog}; static template deployed`);
-    return 'no_key';
-  }
-  const storedSha = storedKey.trim();
+  const storedSha = storedKey?.trim() || undefined;
   logger.debug(
-    `Comparing stored key ${storedSha} for ${contextForLog} against ${
-      selections.length
-    } packages (${selections.map(({ name }) => name).join(', ')})`
+    storedSha
+      ? `Comparing stored key ${storedSha} for ${contextForLog} against ${
+          selections.length
+        } packages (${selections.map(({ name }) => name).join(', ')})`
+      : `No stored IaC key for ${contextForLog}; static template deployed, checking that IaCP can render`
   );
   try {
     reportIacProvisionerRenderRequested({ flow, integrationCount: integrations.length });
     // The client rejects a body without render/templateSha (IacProvisionerUnavailableError),
-    // so a resolved response always carries the verdict.
+    // so a resolved response always carries the verdict. A keyless connector is sent without a
+    // key only to learn that IaCP can render: the Update the callout offers needs it, and an
+    // unreachable provisioner (not deployed in the region) must not raise an upgrade callout.
     const { render, templateSha } = await iacProvisionerService.renderTemplate({
       provider: cloudProvider,
       workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
       integrations,
-      templateSha: storedSha,
+      ...(storedSha ? { templateSha: storedSha } : {}),
     });
     reportIacProvisionerRenderCompleted({
       flow,
@@ -196,6 +198,9 @@ export const getIacKeyOutcome = async (
       errorCodes: [],
       latencyMs: Date.now() - startTime,
     });
+    if (!storedSha) {
+      return 'no_key';
+    }
     logger.debug(
       `Provider compared ${contextForLog}: stored ${storedSha}, current ${templateSha}, render=${render}`
     );

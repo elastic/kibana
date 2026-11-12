@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyServices: string;
     readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
@@ -93,13 +94,6 @@ export interface DocLinks {
     readonly base: string;
     readonly auditdModule: string;
     readonly systemModule: string;
-  };
-  readonly searchHomepage: {
-    readonly visitSearchLabs: string;
-    readonly notebooksExamples: string;
-    readonly customerEngineerRequestForm: string;
-    readonly elasticCommunity: string;
-    readonly elasticCloud: string;
   };
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
@@ -339,6 +333,7 @@ export interface DocLinks {
     readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
+    readonly valueReport: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -362,15 +357,20 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
+    readonly endpoints: string;
     readonly endpointExceptions: string;
     readonly trustedApps: string;
     readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
     readonly eventFilters: string;
+    readonly kubernetesDashboard: string;
     readonly eventMerging: string;
     readonly blocklist: string;
+    readonly hostIsolationExceptions: string;
     readonly endpointArtifacts: string;
     readonly endpointArtifactsNoEscaping: string;
+    readonly policies: string;
+    readonly responseActionsHistory: string;
     readonly scriptLibrary: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
@@ -412,6 +412,14 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
+    readonly alertZero: {
+      readonly overview: string;
+      readonly setUp: string;
+      readonly proposedActions: string;
+      readonly escalations: string;
+      readonly watches: string;
+      readonly continuousThreatHunt: string;
+    };
   };
   readonly query: {
     readonly eql: string;
