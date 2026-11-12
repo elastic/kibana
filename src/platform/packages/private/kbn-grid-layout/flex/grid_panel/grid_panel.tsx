@@ -102,8 +102,11 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             ref.style.flexGrow = '0';
             ref.style.flexShrink = '0';
             ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
+          } else if (activePanel.sensorType === 'keyboard') {
+            // keyboard "drags" move the panel by changing its order, so it stays in the flow
+            ref.style.order = `${currentPanel.order + 1}`;
           } else {
-            // if the current panel is being dragged, render it with a fixed position + size
+            // if the current panel is being dragged via mouse, render it with a fixed position + size
             ref.style.position = 'fixed';
 
             ref.style.left = `${draggingPosition.left}px`;

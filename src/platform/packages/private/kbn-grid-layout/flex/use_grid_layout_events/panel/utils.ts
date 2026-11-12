@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
-import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-utils';
-
 import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
 import type { FlexLayoutStateManager, GridSettings } from '../../types';
-import { updateClientY } from '../../../grid/use_grid_layout_events/keyboard_utils';
 import {
   getSensorPosition,
   isKeyboardEvent,
@@ -28,8 +24,11 @@ import type {
   UserInteractionEvent,
 } from '../../../grid/use_grid_layout_events/types';
 
+// A panel can never be resized narrower than this, regardless of `resizeOptions.minWidth`
+export const MIN_RESIZE_WIDTH = 50;
+
 export const getDefaultResizeOptions = () => ({
-  minWidth: 1,
+  minWidth: MIN_RESIZE_WIDTH,
   maxWidth: Number.MAX_VALUE,
   minHeight: 1,
   maxHeight: Number.MAX_VALUE,
@@ -61,10 +60,11 @@ export const getResizePreviewRect = ({
   maxRight: number;
 }) => {
   const panelRect = activePanel.panelDiv.getBoundingClientRect();
-  const { minWidth, maxWidth, minHeight, maxHeight } = {
+  const { maxWidth, minHeight, maxHeight, ...widthOptions } = {
     ...getDefaultResizeOptions(),
     ...resizeOptions,
   };
+  const minWidth = Math.max(widthOptions.minWidth, MIN_RESIZE_WIDTH);
   return {
     left: panelRect.left,
     top: panelRect.top,
@@ -118,83 +118,86 @@ export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bo
   };
 }
 
-const KEYBOARD_DRAG_BOTTOM_LIMIT = parseInt(euiThemeVars.euiSizeS, 10);
+type PanelRect = Pick<DOMRect, 'top' | 'left' | 'right'>;
 
-export const getNextKeyboardPositionForPanel = (
+// Calculates the updated index of a keyboard-dragged panel or its current index if it can't
+export const getKeyboardDragPosition = ({
+  code,
+  ids,
+  activeId,
+  getRect,
+  rowHeight,
+}: {
+  code: string;
+  ids: string[];
+  activeId: string;
+  getRect: (id: string) => PanelRect | undefined;
+  rowHeight: number;
+}): number => {
+  const activeIndex = ids.indexOf(activeId);
+  if (activeIndex === -1) return activeIndex;
+
+  switch (code) {
+    case KeyboardCode.Left:
+      return Math.max(activeIndex - 1, 0);
+    case KeyboardCode.Right:
+      return Math.min(activeIndex + 1, ids.length - 1);
+    case KeyboardCode.Up:
+    case KeyboardCode.Down: {
+      const isUp = code === KeyboardCode.Up;
+      const activeRect = getRect(activeId);
+      if (!activeRect) return activeIndex;
+
+      const tolerance = rowHeight / 2;
+      const candidates = ids.flatMap((id) => {
+        const rect = id === activeId ? undefined : getRect(id);
+        if (!rect) return [];
+        const isInDirection = isUp
+          ? rect.top < activeRect.top - tolerance
+          : rect.top > activeRect.top + tolerance;
+        return isInDirection ? [{ id, rect }] : [];
+      });
+      if (!candidates.length) return activeIndex;
+
+      // only consider the nearest row in that direction...
+      const tops = candidates.map(({ rect }) => rect.top);
+      const nearestTop = isUp ? Math.max(...tops) : Math.min(...tops);
+      const centerX = (activeRect.left + activeRect.right) / 2;
+      const distance = ({ rect }: { rect: PanelRect }) =>
+        Math.abs((rect.left + rect.right) / 2 - centerX);
+      // ...and within it, the panel closest horizontally
+      const [target] = candidates
+        .filter(({ rect }) => Math.abs(rect.top - nearestTop) < tolerance)
+        .sort((a, b) => distance(a) - distance(b));
+      return ids.indexOf(target.id);
+    }
+    default:
+      return activeIndex;
+  }
+};
+
+// Moves the resize handle horizontally via keyboard by a fixed step
+export const getNextKeyboardResizePosition = (
   ev: UserKeyboardEvent,
   gridLayoutStateManager: FlexLayoutStateManager,
   handlePosition: { clientX: number; clientY: number }
 ) => {
   const {
-    gridLayout$,
-    panelRefs: { current: panelElements },
-    activePanelEvent$: { value: activePanel },
     gridSettings$: {
       value: { rowHeight, gutterSize },
     },
   } = gridLayoutStateManager;
 
-  const { type } = activePanel ?? {};
-  const panelPosition = activePanel?.position ?? activePanel?.panelDiv.getBoundingClientRect();
-
-  if (!activePanel || !panelPosition) return handlePosition;
-
-  const layout = gridLayout$.getValue();
   const gridPosition = gridLayoutStateManager.layoutRef.current?.getBoundingClientRect();
-
-  const stepY = rowHeight + gutterSize;
-  // skip past the neighbouring panel (by order) in the given direction
-  const getStepX = (direction: 'left' | 'right'): number => {
-    const { order } = layout[activePanel.id];
-    const neighbourOrder = direction === 'left' ? order - 1 : order + 1;
-
-    const neighbourId = Object.keys(layout).find(
-      (id) => id !== activePanel.id && layout[id].order === neighbourOrder
-    );
-    const neighbourWidth = neighbourId
-      ? panelElements[neighbourId]?.getBoundingClientRect().width
-      : undefined;
-
-    return (neighbourWidth ?? panelPosition.right - panelPosition.left) + gutterSize;
-  };
+  const gridLeft = (gridPosition?.left || 0) + gutterSize;
+  const gridRight = (gridPosition?.right || window.innerWidth) - gutterSize;
+  const stepX = rowHeight + gutterSize; // this acts as a decent guess for how much to resize by
 
   switch (ev.code) {
-    case KeyboardCode.Right: {
-      // The distance between the handle and the right edge of the panel to ensure the panel stays within the grid boundaries
-      const panelHandleDiff = panelPosition.right - handlePosition.clientX;
-      const gridPositionRight = (gridPosition?.right || window.innerWidth) - gutterSize;
-      const maxRight = type === 'drag' ? gridPositionRight - panelHandleDiff : gridPositionRight;
-
-      return {
-        ...handlePosition,
-        clientX: Math.min(handlePosition.clientX + getStepX('right'), maxRight),
-      };
-    }
+    case KeyboardCode.Right:
+      return { ...handlePosition, clientX: Math.min(handlePosition.clientX + stepX, gridRight) };
     case KeyboardCode.Left:
-      const panelHandleDiff = panelPosition.left - handlePosition.clientX;
-      const gridPositionLeft = (gridPosition?.left || 0) + gutterSize;
-      const maxLeft = type === 'drag' ? gridPositionLeft - panelHandleDiff : gridPositionLeft;
-
-      return {
-        ...handlePosition,
-        clientX: Math.max(handlePosition.clientX - getStepX('left'), maxLeft),
-      };
-
-    case KeyboardCode.Down: {
-      const isCloseToBottom =
-        panelPosition.bottom + stepY > (gridPosition?.bottom ?? Infinity) - gutterSize;
-      return {
-        ...handlePosition,
-        clientY: isCloseToBottom ? handlePosition.clientY : handlePosition.clientY + stepY,
-      };
-    }
-    case KeyboardCode.Up: {
-      const isCloseToTop = panelPosition.top - stepY < (gridPosition?.top ?? Infinity) - gutterSize;
-      return {
-        ...handlePosition,
-        clientY: isCloseToTop ? handlePosition.clientY : handlePosition.clientY - stepY,
-      };
-    }
+      return { ...handlePosition, clientX: Math.max(handlePosition.clientX - stepX, gridLeft) };
     default:
       return handlePosition;
   }

@@ -15,6 +15,7 @@ import userEvent from '@testing-library/user-event';
 import type { GridLayoutProps } from './flex_layout';
 import { FlexLayout } from './flex_layout';
 import type { FlexLayoutData, GridSettings } from './types';
+import { MIN_RESIZE_WIDTH } from './use_grid_layout_events/panel/utils';
 
 const PANEL_WIDTH = 200;
 
@@ -93,16 +94,16 @@ const mockRects = () =>
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(function (this: HTMLElement) {
-      const rect = (left: number, width: number, height: number) =>
+      const rect = (left: number, width: number, height: number, top = 0) =>
         ({
           left,
           right: left + width,
-          top: 0,
-          bottom: height,
+          top,
+          bottom: top + height,
           width,
           height,
           x: left,
-          y: 0,
+          y: top,
         } as DOMRect);
 
       if (this.classList.contains('kbnFlex')) return rect(0, 1000, 500);
@@ -118,7 +119,10 @@ const mockRects = () =>
           panel.style.position === 'fixed'
             ? parseFloat(panel.style.left)
             : order * (PANEL_WIDTH + 100);
-        return panel === this ? rect(left, PANEL_WIDTH, gridSettings.rowHeight) : rect(left, 0, 0);
+        const top = panel.style.position === 'fixed' ? parseFloat(panel.style.top) || 0 : 0;
+        return panel === this
+          ? rect(left, PANEL_WIDTH, gridSettings.rowHeight, top)
+          : rect(left, 0, 0, top);
       }
       return rect(0, 0, 0);
     });
@@ -301,6 +305,18 @@ describe('FlexLayout', () => {
         expect(getLastLayout().panel1.width).toBe(160);
       });
 
+      it('never resizes a panel to nothing', async () => {
+        renderFlexLayout();
+        onLayoutChange.mockClear();
+        getHandle('panel1', 'resize').focus();
+
+        await pressKey('[Enter]');
+        for (let i = 0; i < 3; i++) await pressKey('[ArrowLeft]');
+        await pressKey('[Enter]');
+
+        expect(getLastLayout().panel1.width).toBeGreaterThanOrEqual(MIN_RESIZE_WIDTH);
+      });
+
       it('respects `resizeOptions.minWidth`', async () => {
         renderFlexLayout({
           layout: getLayout({ panel1: { resizeOptions: { minWidth: 180 } } }),
@@ -376,11 +392,11 @@ describe('FlexLayout', () => {
         await pressKey('[Enter]');
         await pressKey('[ArrowRight]');
         expect(getPanel('panel1')).toHaveClass('kbnFlexPanel--active');
-        expect(getPanel('panel1')).toHaveStyle({ position: 'fixed' });
+        // keyboard drags stay in the flow instead of floating
+        expect(getPanel('panel1').style.position).toBe('');
 
         await pressKey('[Enter]');
         expect(getPanel('panel1')).not.toHaveClass('kbnFlexPanel--active');
-        expect(getPanel('panel1').style.position).toBe('');
       });
 
       it('reorders panels and emits the new order once on commit', async () => {
@@ -389,9 +405,7 @@ describe('FlexLayout', () => {
         getHandle('panel1', 'drag').focus();
 
         await pressKey('[Enter]');
-        // each press moves 150px: 450px sits between panel2 (left 300) and panel3 (left 600)
-        await pressKey('[ArrowRight]');
-        await pressKey('[ArrowRight]');
+        // each press moves the panel one place along
         await pressKey('[ArrowRight]');
         expect(onLayoutChange).not.toHaveBeenCalled(); // no draft emits
 
@@ -403,20 +417,23 @@ describe('FlexLayout', () => {
         expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel1', 'panel3']);
       });
 
-      it('passes a panel it lands exactly on, in the direction of travel', async () => {
+      it('moves one place per arrow press and stops at either end', async () => {
         renderFlexLayout();
         getHandle('panel1', 'drag').focus();
 
         await pressKey('[Enter]');
-        // the second press lands on panel2's left (300) and the fourth on panel3's left (600)
-        for (let i = 0; i < 2; i++) await pressKey('[ArrowRight]');
+        await pressKey('[ArrowLeft]'); // already first
+        expect(getPanelIdsInOrder()).toEqual(['panel1', 'panel2', 'panel3']);
+        await pressKey('[ArrowRight]');
         expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel1', 'panel3']);
-        for (let i = 0; i < 2; i++) await pressKey('[ArrowRight]');
+        await pressKey('[ArrowRight]');
+        expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel3', 'panel1']);
+        await pressKey('[ArrowRight]'); // already last
         expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel3', 'panel1']);
 
-        // and back the other way
-        for (let i = 0; i < 2; i++) await pressKey('[ArrowLeft]');
+        await pressKey('[ArrowLeft]');
         expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel1', 'panel3']);
+        await pressKey('[Enter]'); // end the interaction so it doesn't leak into the next test
       });
 
       it('restores the original order when cancelled with Escape', async () => {
@@ -453,7 +470,7 @@ describe('FlexLayout', () => {
             /Panel picked up, position 1 of 3.*Escape to cancel/
           );
 
-          for (let i = 0; i < 2; i++) await pressKey('[ArrowRight]');
+          await pressKey('[ArrowRight]');
           expect(getAnnouncement()).toHaveTextContent(/Panel moved to position 2 of 3/);
 
           await pressKey('[Enter]');
@@ -492,6 +509,7 @@ describe('FlexLayout', () => {
 
         await pressKey('[Enter]');
         await pressKey('[ArrowRight]');
+        await pressKey('[ArrowLeft]');
         await pressKey('[Enter]');
 
         expect(onLayoutChange).not.toHaveBeenCalled();

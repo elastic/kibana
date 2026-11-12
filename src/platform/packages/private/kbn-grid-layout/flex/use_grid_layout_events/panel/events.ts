@@ -26,8 +26,14 @@ import {
 } from '../state_manager_selectors';
 import type { UserInteractionEvent } from '../../../grid/use_grid_layout_events/types';
 import type { FlexKeyboardInteraction } from '../../types';
-import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
-import { getNextKeyboardPositionForPanel } from './utils';
+import {
+  cancelAction,
+  commitAction,
+  moveAction,
+  moveKeyboardDragAction,
+  startAction,
+} from './state_manager_actions';
+import { getNextKeyboardResizePosition } from './utils';
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
  * It initializes event handlers to start, move, and commit the interaction,
@@ -97,13 +103,17 @@ export const useGridLayoutPanelEvents = ({
         isKeyboardEvent(ev) &&
         hasPanelInteractionStartedWithKeyboard(gridLayoutStateManager)
       ) {
-        const pointerPixel = getNextKeyboardPositionForPanel(
+        if (interactionType === 'drag') {
+          moveKeyboardDragAction(ev, gridLayoutStateManager);
+          announce('move');
+          return;
+        }
+        const pointerPixel = getNextKeyboardResizePosition(
           ev,
           gridLayoutStateManager,
           getSensorPosition(ev)
         );
         moveAction(ev, gridLayoutStateManager, pointerPixel, lastRequestedPanelPosition);
-        if (interactionType === 'drag') announce('move');
       }
     },
     [gridLayoutStateManager, interactionType, announce]

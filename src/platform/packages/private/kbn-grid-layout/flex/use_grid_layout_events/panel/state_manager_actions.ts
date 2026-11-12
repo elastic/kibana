@@ -18,9 +18,12 @@ import type {
   PointerPosition,
   UserInteractionEvent,
 } from '../../../grid/use_grid_layout_events/types';
+import { getPanelKeysInOrder } from '../../utils/resolve_grid_section';
+import type { UserKeyboardEvent } from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
 import {
   getDefaultResizeOptions,
   getDragPreviewRect,
+  getKeyboardDragPosition,
   getResizePreviewRect,
   getSensorOffsets,
 } from './utils';
@@ -56,6 +59,38 @@ export const startAction = (
     sensorOffsets: getSensorOffsets(e, panelRect),
     panelWidths,
   });
+};
+
+/** Moves the keyboard-dragged panel by changing its `order` directly, so it stays in the flow. */
+export const moveKeyboardDragAction = (
+  ev: UserKeyboardEvent,
+  { gridLayout$, gridSettings$, panelRefs, activePanelEvent$ }: FlexLayoutStateManager
+) => {
+  const activePanel = activePanelEvent$.value;
+  const layout = gridLayout$.value;
+  if (!activePanel || !layout?.[activePanel.id]) return;
+
+  const ids = getPanelKeysInOrder(layout);
+  const from = ids.indexOf(activePanel.id);
+  const to = getKeyboardDragPosition({
+    code: ev.code,
+    ids,
+    activeId: activePanel.id,
+    getRect: (id) => panelRefs.current[id]?.getBoundingClientRect(),
+    rowHeight: gridSettings$.value.rowHeight,
+  });
+  if (to === from) return;
+
+  ids.splice(to, 0, ...ids.splice(from, 1));
+  const nextLayout: FlexLayoutData = {};
+  ids.forEach((id, order) => {
+    nextLayout[id] = { ...layout[id], order };
+  });
+  gridLayout$.next(nextLayout);
+  // the first move is what makes the panel visibly active (see `grid_panel.tsx`)
+  activePanelEvent$.next({ ...activePanel });
+
+  panelRefs.current[activePanel.id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 };
 
 export const moveAction = (

@@ -33,7 +33,8 @@ export const GridPanelDragPreview = React.memo(() => {
           if (activePanel?.type === 'resize' || !dragPreviewRef.current) return;
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
           const panel = activePanel ? gridLayout[activePanel.id] : undefined;
-          if (!panel) {
+          // a keyboard-dragged panel stays in the flow, so there is nothing to preview
+          if (!panel || activePanel?.sensorType === 'keyboard') {
             dragPreviewRef.current.style.display = 'none';
           } else {
             dragPreviewRef.current.style.display = 'block';
