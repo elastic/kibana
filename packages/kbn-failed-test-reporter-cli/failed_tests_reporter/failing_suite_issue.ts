@@ -149,19 +149,18 @@ const buildLink = ({ build, buildUrl }: BuildRun): string =>
   buildUrl ? `[#${build}](${buildUrl})` : `#${build}`;
 
 /**
- * `` `kibana-on-merge` builds [#123](…) and [#124](…) on `main` ``, or, for a longer streak,
- * `` the last 4 `kibana-on-merge` builds on `main`, [#121](…) to [#124](…) ``.
+ * `` `kibana-on-merge` builds [#123](…) and [#124](…) ``, or, for a longer streak,
+ * `` the last 4 `kibana-on-merge` builds ([#121](…) to [#124](…)) ``.
  */
 const describeBuilds = (
   builds: readonly BuildRun[],
-  { pipeline, branch }: FailingSuiteIssueContext
+  { pipeline }: FailingSuiteIssueContext
 ): string => {
   const first = buildLink(builds[0]);
   const last = buildLink(builds[builds.length - 1]);
   return builds.length > 2
-    ? `the last ${builds.length} ${inlineCode(pipeline)} builds on ${inlineCode(branch)}, ` +
-        `${first} to ${last}`
-    : `${inlineCode(pipeline)} builds ${first} and ${last} on ${inlineCode(branch)}`;
+    ? `the last ${builds.length} ${inlineCode(pipeline)} builds (${first} to ${last})`
+    : `${inlineCode(pipeline)} builds ${first} and ${last}`;
 };
 
 /** `[abc1234...def5678](…/compare/abc1234…...def5678…)`, when both commits are known. */
@@ -171,14 +170,17 @@ const compareLink = (from: BuildRun, to: BuildRun): string | undefined =>
       `(${KIBANA_COMPARE_URL}/${from.commit}...${to.commit})`
     : undefined;
 
-/** In which builds the tests failed, the last one they passed in and the commits in between. */
+/**
+ * Where the tests are consistently failing (`` on `main`, in `kibana-on-merge` builds … ``), the
+ * last build they passed in and the commits in between.
+ */
 const breakDetails = (suite: FailingSuite, ctx: FailingSuiteIssueContext) => {
   const { failingBuilds, lastPassingBuild } = suite;
   return {
-    where: describeBuilds(failingBuilds, ctx),
+    where: `on ${inlineCode(ctx.branch)}, in ${describeBuilds(failingBuilds, ctx)}`,
     before: lastPassingBuild
       ? `after passing in ${buildLink(lastPassingBuild)}`
-      : `with no earlier passing run on ${inlineCode(ctx.branch)} on record`,
+      : 'with no earlier passing run on record',
     compare: lastPassingBuild ? compareLink(lastPassingBuild, failingBuilds[0]) : undefined,
   };
 };
@@ -195,16 +197,17 @@ const opening = (suite: FailingSuite, ctx: FailingSuiteIssueContext): string => 
   const cause = compare
     ? `; the changes between the last passing and the first failing build are ${compare}.`
     : '.';
+  const count = suite.tests.length;
   return (
     '> [!IMPORTANT]\n' +
-    `> ${plural(suite.tests.length, 'test')} in ${file} failed every attempt of ${where}, ` +
-    `${before}. This looks like a break rather than a flaky test${cause}`
+    `> ${plural(count, 'test')} in ${file} ${count === 1 ? 'is' : 'are'} consistently failing ` +
+    `${where}, ${before}. This looks like a break rather than a flaky test${cause}`
   );
 };
 
 const testsList = (suite: FailingSuite): string =>
   [
-    'Tests that failed every attempt:',
+    'Consistently failing tests:',
     ...suite.tests.map(
       (test) => `- ${inlineCode(test.title)} · [history](${testDashboardUrl(test.testId)})`
     ),
@@ -262,8 +265,8 @@ export const renderFailingSuiteComment = (
   const tests = suite.tests.map((test) => inlineCode(test.title));
   const lead =
     tests.length === 1
-      ? `${tests[0]} failed every attempt of ${where}, ${before}`
-      : `${plural(tests.length, 'test')} failed every attempt of ${where}, ${before}: ${listOf(
+      ? `${tests[0]} is consistently failing ${where}, ${before}`
+      : `${plural(tests.length, 'test')} are consistently failing ${where}, ${before}: ${listOf(
           tests
         )}`;
   return `🔴 ${lead}.${compare ? ` Changes in between: ${compare}.` : ''}`;
