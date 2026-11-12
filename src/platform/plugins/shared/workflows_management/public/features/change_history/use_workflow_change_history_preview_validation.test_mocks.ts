@@ -22,6 +22,7 @@ jest.mock('../../trigger_schemas', () => ({
   triggerSchemas: {
     getRegisteredIds: jest.fn(() => []),
     getRegisteredTriggersForSchema: jest.fn(() => []),
+    getTriggerSchemaOptions: jest.fn(() => ({})),
   },
 }));
 

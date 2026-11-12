@@ -9,9 +9,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
-import type { Investigation } from '../../../../../common';
+import type { Investigation, InvestigationProposalSummary } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { InvestigationOverview } from './overview_tab';
 
@@ -57,17 +59,33 @@ const investigation: Investigation = {
   proposals: [],
 };
 
-const renderOverview = () =>
-  render(
-    <EuiProvider>
-      <I18nProvider>
+/** An investigation an agent has just started on: nothing written yet. */
+const emptyInvestigation: Investigation = {
+  ...investigation,
+  metadata: { status: 'open' },
+  in_progress: true,
+  subjects: [],
+  impact: undefined,
+  hypotheses: undefined,
+};
+
+const overviewElement = (overviewConversation: Conversation, queryClient: QueryClient) => (
+  <EuiProvider>
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>
         <InvestigationOverview
-          conversation={conversation}
+          conversation={overviewConversation}
           groupedAttachments={groupedAttachments}
         />
-      </I18nProvider>
-    </EuiProvider>
-  );
+      </QueryClientProvider>
+    </I18nProvider>
+  </EuiProvider>
+);
+
+const renderOverview = (
+  overviewConversation: Conversation = conversation,
+  queryClient: QueryClient = new QueryClient()
+) => render(overviewElement(overviewConversation, queryClient));
 
 describe('InvestigationOverview', () => {
   it('renders the subjects, what happened, impact, conclusion, and hypothesis tree from the query API', () => {
@@ -104,12 +122,43 @@ describe('InvestigationOverview', () => {
     expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
   });
 
-  it('ends in a loading skeleton while an agent still works on the investigation', () => {
+  it('shows a loading skeleton while an agent works on an investigation with nothing to show yet', () => {
+    mockUseInvestigation.mockReturnValue({ data: emptyInvestigation });
+
+    renderOverview({ ...conversation, metadata: { status: 'open' } });
+
+    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton while an agent works on an investigation that has findings', () => {
     mockUseInvestigation.mockReturnValue({ data: { ...investigation, in_progress: true } });
 
     renderOverview();
 
-    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton when an agent resumes after a proposed action is decided', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        ...emptyInvestigation,
+        proposals: [
+          {
+            id: 'proposal-1',
+            title: 'Roll back the deploy',
+            comment: 'The deploy matches the start of the spike.',
+            status: 'succeeded',
+            impact: 'medium',
+            confidence: 'high',
+            created_at: 'x',
+          },
+        ],
+      },
+    });
+
+    renderOverview({ ...conversation, metadata: { status: 'open' } });
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
   });
 
   it('renders no loading skeleton once the investigation is no longer in progress', () => {
@@ -118,5 +167,69 @@ describe('InvestigationOverview', () => {
     renderOverview();
 
     expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+  });
+
+  describe('proposed actions refresh', () => {
+    const proposal: InvestigationProposalSummary = {
+      id: 'proposal-1',
+      title: 'Review the rule by hand',
+      comment: 'No safe exception was found.',
+      status: 'pending',
+      impact: 'low',
+      confidence: 'high',
+      created_at: 'x',
+    };
+
+    const withProposals = (proposals?: InvestigationProposalSummary[]) => ({
+      data: proposals && { ...investigation, hypotheses: undefined, proposals },
+    });
+
+    const renderAndPoll = (initial?: InvestigationProposalSummary[]) => {
+      const queryClient = new QueryClient();
+      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      mockUseInvestigation.mockReturnValue(withProposals(initial));
+      const { rerender } = renderOverview(conversation, queryClient);
+      const poll = (next?: InvestigationProposalSummary[]) => {
+        mockUseInvestigation.mockReturnValue(withProposals(next));
+        rerender(overviewElement(conversation, queryClient));
+      };
+      return { invalidateQueries, poll };
+    };
+
+    it('should refetch the proposed actions list when the investigation shows a new proposal', () => {
+      const { invalidateQueries, poll } = renderAndPoll([]);
+
+      poll([proposal]);
+
+      expect(invalidateQueries).toHaveBeenCalledTimes(1);
+      expect(invalidateQueries).toHaveBeenCalledWith(
+        { queryKey: platformQueryKeys.proposals.forConversation('conv-1') },
+        { cancelRefetch: false }
+      );
+    });
+
+    it('should refetch the proposed actions list when a proposal changes status', () => {
+      const { invalidateQueries, poll } = renderAndPoll([proposal]);
+
+      poll([{ ...proposal, status: 'no_action' }]);
+
+      expect(invalidateQueries).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not refetch the proposed actions list when the proposals are unchanged', () => {
+      const { invalidateQueries, poll } = renderAndPoll([proposal]);
+
+      poll([{ ...proposal }]);
+
+      expect(invalidateQueries).not.toHaveBeenCalled();
+    });
+
+    it('should not refetch the proposed actions list when the first investigation read arrives', () => {
+      const { invalidateQueries, poll } = renderAndPoll(undefined);
+
+      poll([proposal]);
+
+      expect(invalidateQueries).not.toHaveBeenCalled();
+    });
   });
 });

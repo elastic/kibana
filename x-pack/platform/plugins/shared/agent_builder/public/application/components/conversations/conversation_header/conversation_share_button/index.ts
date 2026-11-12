@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ConversationShareButton } from './conversation_share_button';
+export { ConversationShareFlyout } from './conversation_share_flyout';

@@ -9,9 +9,11 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
+import type { ComponentTemplateDeserialized } from '../../../../../../common';
 import { serializeAsESLifecycle } from '../../../../../../common/lib';
+import type { WizardContent } from './component_template_form';
 
-let mockWizardData: any;
+let mockWizardData: WizardContent | undefined;
 
 jest.mock('../../component_templates_context', () => ({
   useComponentTemplatesContext: () => ({
@@ -48,6 +50,31 @@ describe('<ComponentTemplateForm />', () => {
   beforeEach(() => {
     mockWizardData = undefined;
   });
+
+  const saveWizardData = (
+    wizardData: WizardContent,
+    defaultValue?: ComponentTemplateDeserialized
+  ) => {
+    const onSave = jest.fn();
+    mockWizardData = wizardData;
+
+    render(
+      <I18nProvider>
+        <ComponentTemplateForm
+          onSave={onSave}
+          clearSaveError={jest.fn()}
+          isSaving={false}
+          saveError={null}
+          defaultValue={defaultValue}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('mockSaveButton'));
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    return JSON.parse(JSON.stringify(onSave.mock.calls[0][0]));
+  };
 
   test('should build the correct payload when submitting the form', async () => {
     const onSave = jest.fn();
@@ -94,6 +121,85 @@ describe('<ComponentTemplateForm />', () => {
     expect(saved._meta).toBeUndefined();
     expect(saved.version).toBeUndefined();
     expect(clearSaveError).toHaveBeenCalled();
+  });
+
+  test.each([
+    ['undefined', undefined],
+    ['disabled', { enabled: false }],
+    ['hot-only', { enabled: true, infiniteDataRetention: true }],
+  ])('should omit %s lifecycle without an optional phase', (_description, lifecycle) => {
+    const saved = saveWizardData({
+      logistics: {
+        name: 'comp-1',
+        lifecycle,
+      },
+      settings: {
+        index: {
+          lifecycle: {
+            name: 'my-policy',
+            rollover_alias: 'my-alias',
+          },
+        },
+      },
+      mappings: undefined,
+      aliases: undefined,
+    });
+
+    expect(saved).toEqual({
+      name: 'comp-1',
+      template: {
+        settings: {
+          index: {
+            lifecycle: {
+              name: 'my-policy',
+              rollover_alias: 'my-alias',
+            },
+          },
+        },
+      },
+      _kbnMeta: { usedBy: [], isManaged: false },
+    });
+  });
+
+  test('should keep an existing lifecycle when its delete phase is removed', () => {
+    const saved = saveWizardData(
+      {
+        logistics: {
+          name: 'comp-1',
+          lifecycle: { enabled: false },
+        },
+        settings: undefined,
+        mappings: undefined,
+        aliases: undefined,
+      },
+      {
+        name: 'comp-1',
+        template: { lifecycle: { enabled: true, data_retention: '30d' } },
+        _kbnMeta: { usedBy: [], isManaged: false },
+      }
+    );
+
+    expect(saved.template.lifecycle).toEqual({ enabled: true });
+  });
+
+  test('should serialize a frozen phase without a delete phase', () => {
+    const saved = saveWizardData({
+      logistics: {
+        name: 'comp-1',
+        lifecycle: {
+          enabled: false,
+          frozen: { enabled: true, value: 30, unit: 'd' },
+        },
+      },
+      settings: undefined,
+      mappings: undefined,
+      aliases: undefined,
+    });
+
+    expect(saved.template.lifecycle).toEqual({
+      enabled: true,
+      frozen_after: '30d',
+    });
   });
 
   test('should surface API errors if the request is unsuccessful', async () => {

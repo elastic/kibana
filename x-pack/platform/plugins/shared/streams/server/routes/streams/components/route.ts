@@ -11,7 +11,7 @@ import {
   streamsComponentValidationRequestSchema,
 } from '@kbn/streams-schema';
 import { lazySchema, z } from '@kbn/zod/v4';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_V2_API_PRIVILEGES } from '../../../../common/constants';
 import { CATALOGUE_FRESH_FOR_MS } from '../../../lib/component_catalogue/component_catalogue_service';
 import { createServerRoute } from '../../create_server_route';
 import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
@@ -41,7 +41,7 @@ export const getComponentCatalogueRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.read],
     },
   },
   handler: async ({ request, response, getScopedClients, componentCatalogue }) => {
@@ -78,7 +78,7 @@ export const validateComponentRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: lazySchema(() =>

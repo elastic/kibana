@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   CreatePackagePolicyRequestBodySchema,
   DryRunPackagePolicySchema,
+  OnboardingDeploymentIdQuerySchema,
   PackagePolicyPackageSchema,
   PackagePolicyResponseSchema,
   PackagePolicyStatusResponseSchema,
@@ -149,10 +150,14 @@ export const UpdatePackagePolicyRequestSchema = {
         meta: { description: 'Format for the response: simplified or legacy' },
       })
     ),
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
   }),
 };
 
 export const DeletePackagePoliciesRequestSchema = {
+  query: schema.object({
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
+  }),
   body: schema.object(
     {
       packagePolicyIds: schema.arrayOf(
@@ -210,6 +215,7 @@ export const DeleteOnePackagePolicyRequestSchema = {
         meta: { description: 'When true, delete the package policy even if it is managed' },
       })
     ),
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
   }),
 };
 

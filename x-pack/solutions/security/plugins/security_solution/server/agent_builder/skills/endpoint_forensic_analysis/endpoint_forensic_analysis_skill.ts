@@ -8,6 +8,9 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { getConfigurationTroubleshootingSkillName } from '../configuration_troubleshooting_skill_name';
 import type { InvestigationIocCategory } from '../../attachments/investigation_iocs';
 import { MAX_IOCS_PER_CATEGORY } from '../../attachments/investigation_iocs';
 import { securityTool } from '../../tools/constants';
@@ -72,19 +75,23 @@ const extractIocsSchema = lazySchema(() =>
   )
 );
 
-export const endpointForensicAnalysisSkill = defineSkillType({
-  id: ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
-  name: ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
-  basePath: 'skills/security/endpoint',
-  description:
-    'Endpoint DFIR forensic reconstruction (read-only): patient zero identification across enrolled hosts, ' +
-    'host-scoped attack timelines, lateral movement chains between named hosts, and persistence enumeration. ' +
-    'Use for incident-scoped questions naming specific hosts or outbreaks — NOT fleet-wide proactive hunts (use threat-hunting). ' +
-    'NOT alert triage by alert ID (use alert-analysis). NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security — no dedicated Agent Builder skill yet). ' +
-    'NOT conflicting/incompatible antivirus or security software, policy or configuration failures, endpoint health or missed check-ins, ' +
-    'performance/resource troubleshooting, or output/integration failures — even when the question names a specific host ' +
-    '(use elastic-defend-configuration-troubleshooting).',
-  content: `# Endpoint Forensic Analysis
+export const createEndpointForensicAnalysisSkill = (
+  experimentalFeatures: Pick<ExperimentalFeatures, 'automaticTroubleshootingUniversalSkill'>
+): SkillDefinition<typeof ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID, 'skills/security/endpoint'> => {
+  const troubleshootingSkillName = getConfigurationTroubleshootingSkillName(experimentalFeatures);
+  return defineSkillType({
+    id: ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
+    name: ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
+    basePath: 'skills/security/endpoint',
+    description:
+      'Endpoint DFIR forensic reconstruction (read-only): patient zero identification across enrolled hosts, ' +
+      'host-scoped attack timelines, lateral movement chains between named hosts, and persistence enumeration. ' +
+      'Use for incident-scoped questions naming specific hosts or outbreaks — NOT fleet-wide proactive hunts (use threat-hunting). ' +
+      'NOT alert triage by alert ID (use alert-analysis). NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security — no dedicated Agent Builder skill yet). ' +
+      'NOT conflicting/incompatible antivirus or security software, policy or configuration failures, endpoint health or missed check-ins, ' +
+      'performance/resource troubleshooting, or output/integration failures — even when the question names a specific host ' +
+      `(use ${troubleshootingSkillName}).`,
+    content: `# Endpoint Forensic Analysis
 
 ## When to Use
 
@@ -100,11 +107,11 @@ Do **not** load for:
 - Fleet-wide proactive hunts → threat-hunting
 - Alert triage from alert id only → alert-analysis
 - Host isolation / kill process / file retrieve → tell the analyst to use **Endpoint response actions** in Security (Fleet / Endpoint details). Do not invoke response-action tools from this skill.
-- Conflicting or incompatible security software, including antivirus/AV software (e.g. "does host X have conflicting antivirus", third-party AV conflicts) → elastic-defend-configuration-troubleshooting. Naming a specific host does **not** make this a forensic question — antivirus/AV conflict detection is always configuration troubleshooting, never forensic reconstruction.
-- Policy/configuration failures → elastic-defend-configuration-troubleshooting
-- Endpoint health and missed check-ins → elastic-defend-configuration-troubleshooting
-- Performance/resource troubleshooting → elastic-defend-configuration-troubleshooting
-- Output or integration failures → elastic-defend-configuration-troubleshooting
+- Conflicting or incompatible security software, including antivirus/AV software (e.g. "does host X have conflicting antivirus", third-party AV conflicts) → ${troubleshootingSkillName}. Naming a specific host does **not** make this a forensic question — antivirus/AV conflict detection is always configuration troubleshooting, never forensic reconstruction.
+- Policy/configuration failures → ${troubleshootingSkillName}
+- Endpoint health and missed check-ins → ${troubleshootingSkillName}
+- Performance/resource troubleshooting → ${troubleshootingSkillName}
+- Output or integration failures → ${troubleshootingSkillName}
 
 ## Scope (read-only)
 
@@ -229,269 +236,274 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
 - Do **not** use \`platform.core.search\` or \`relevance_search\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
 `,
-  getRegistryTools: () => [
-    platformCoreTools.listIndices,
-    platformCoreTools.getIndexMapping,
-    platformCoreTools.generateEsql,
-    platformCoreTools.executeEsql,
-  ],
-  getInlineTools: () => [
-    {
-      id: ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
-      type: ToolType.builtin,
-      description:
-        'Resolve Defend telemetry index patterns, scoped hosts, and the exact time range for endpoint forensic ' +
-        'reconstruction. Pass the incident `start`/`end` when one is known; otherwise `time_window_hours` counts ' +
-        'back from now. Call this before generate_esql/execute_esql on patient-zero, timeline, lateral-movement, ' +
-        'or persistence tasks.',
-      schema: discoverTelemetrySchema,
-      handler: async (args, context) => {
-        const parsed = discoverTelemetrySchema.parse(args);
-        const { hosts } = parsed;
-        const searchedWindow = resolveSearchWindow(parsed);
+    getRegistryTools: () => [
+      platformCoreTools.listIndices,
+      platformCoreTools.getIndexMapping,
+      platformCoreTools.generateEsql,
+      platformCoreTools.executeEsql,
+    ],
+    getInlineTools: () => [
+      {
+        id: ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
+        type: ToolType.builtin,
+        description:
+          'Resolve Defend telemetry index patterns, scoped hosts, and the exact time range for endpoint forensic ' +
+          'reconstruction. Pass the incident `start`/`end` when one is known; otherwise `time_window_hours` counts ' +
+          'back from now. Call this before generate_esql/execute_esql on patient-zero, timeline, lateral-movement, ' +
+          'or persistence tasks.',
+        schema: discoverTelemetrySchema,
+        handler: async (args, context) => {
+          const parsed = discoverTelemetrySchema.parse(args);
+          const { hosts } = parsed;
+          const searchedWindow = resolveSearchWindow(parsed);
 
-        // `_resolve/index` needs only `view_index_metadata`, which the Forensics worker role holds;
-        // `_cat/indices` needs `monitor` and is denied to it.
-        let availableIndices: string[] = [];
-        let discoveryError: string | undefined;
-        try {
-          const resolved = await context.esClient.asCurrentUser.indices.resolveIndex({
-            name: [...ENDPOINT_TELEMETRY_INDEX_PATTERNS],
-            expand_wildcards: 'open',
-          });
-          availableIndices = [
-            ...resolved.data_streams.map(({ name }) => name),
-            ...resolved.indices.filter(({ data_stream: ds }) => !ds).map(({ name }) => name),
-            ...resolved.aliases.map(({ name }) => name),
-          ].sort();
-        } catch (error) {
-          discoveryError = error instanceof Error ? error.message : String(error);
-        }
-        const missingPatterns = discoveryError
-          ? []
-          : ENDPOINT_TELEMETRY_INDEX_PATTERNS.filter(
-              (pattern) => !availableIndices.some((name) => name.startsWith(pattern.slice(0, -1)))
-            );
+          // `_resolve/index` needs only `view_index_metadata`, which the Forensics worker role holds;
+          // `_cat/indices` needs `monitor` and is denied to it.
+          let availableIndices: string[] = [];
+          let discoveryError: string | undefined;
+          try {
+            const resolved = await context.esClient.asCurrentUser.indices.resolveIndex({
+              name: [...ENDPOINT_TELEMETRY_INDEX_PATTERNS],
+              expand_wildcards: 'open',
+            });
+            availableIndices = [
+              ...resolved.data_streams.map(({ name }) => name),
+              ...resolved.indices.filter(({ data_stream: ds }) => !ds).map(({ name }) => name),
+              ...resolved.aliases.map(({ name }) => name),
+            ].sort();
+          } catch (error) {
+            discoveryError = error instanceof Error ? error.message : String(error);
+          }
+          const missingPatterns = discoveryError
+            ? []
+            : ENDPOINT_TELEMETRY_INDEX_PATTERNS.filter(
+                (pattern) => !availableIndices.some((name) => name.startsWith(pattern.slice(0, -1)))
+              );
 
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                recommended_indices: [...ENDPOINT_TELEMETRY_INDEX_PATTERNS],
-                available_indices: availableIndices,
-                ...(missingPatterns.length ? { patterns_without_data: missingPatterns } : {}),
-                ...(discoveryError ? { index_discovery_error: discoveryError } : {}),
-                scoped_hosts: hosts ?? [],
-                searched_window: searchedWindow,
-                guidance:
-                  `Next: platform.core.generate_esql then platform.core.execute_esql scoped to host.name and ` +
-                  `this exact range: ${toEsqlTimestampClause(searchedWindow)}. ${
-                    searchedWindow.anchor === 'incident'
-                      ? 'The range is the incident window. Events outside it are history, not this incident.'
-                      : 'The range is a lookback from now, not anchored on an incident.'
-                  }`,
-              },
-            },
-          ],
-        };
-      },
-    },
-    {
-      id: ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
-      type: ToolType.builtin,
-      description:
-        'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s), within the ' +
-        'incident `start`/`end` when given or a `time_window_hours` lookback otherwise. ' +
-        'Returns indicators grouped by category — shas, ips, file_paths, malicious_commands, affected_hosts — ' +
-        `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category. ` +
-        'Call this after forensic reconstruction to produce the indicators for cross-environment hunts and ' +
-        'response actions. It only returns what telemetry fields can be typed mechanically — add ransom notes, ' +
-        'encryption markers, and compromised identities from your own analysis.',
-      schema: extractIocsSchema,
-      handler: async (args, context) => {
-        const parsed = extractIocsSchema.parse(args);
-        const { hosts } = parsed;
-        const searchedWindow = resolveSearchWindow(parsed);
-        if (hosts.length === 0) {
           return {
             results: [
               {
                 type: ToolResultType.other,
                 data: {
-                  scoped_hosts: hosts,
+                  recommended_indices: [...ENDPOINT_TELEMETRY_INDEX_PATTERNS],
+                  available_indices: availableIndices,
+                  ...(missingPatterns.length ? { patterns_without_data: missingPatterns } : {}),
+                  ...(discoveryError ? { index_discovery_error: discoveryError } : {}),
+                  scoped_hosts: hosts ?? [],
                   searched_window: searchedWindow,
-                  error: 'No hosts given.',
                   guidance:
-                    'Call this tool again with the host.name values of the hosts under investigation.',
+                    `Next: platform.core.generate_esql then platform.core.execute_esql scoped to host.name and ` +
+                    `this exact range: ${toEsqlTimestampClause(searchedWindow)}. ${
+                      searchedWindow.anchor === 'incident'
+                        ? 'The range is the incident window. Events outside it are history, not this incident.'
+                        : 'The range is a lookback from now, not anchored on an incident.'
+                    }`,
                 },
               },
             ],
           };
-        }
-        const hostFilter = hosts.map((h) => JSON.stringify(h)).join(', ');
-        // Each Defend stream maps only its own fields (registry.* exists only in the registry
-        // stream), and hosts without a stream are normal (no registry stream off Windows), so
-        // unmapped KEEP columns must resolve to null rather than fail verification.
-        // Sorting ascending before the limit keeps the truncated set anchored on the start of the
-        // attack, so the comment each indicator keeps describes its earliest occurrence.
-        const esqlQuery = [
-          `SET unmapped_fields="nullify";`,
-          `FROM ${ENDPOINT_TELEMETRY_INDEX_PATTERNS.join(', ')}`,
-          `| WHERE host.name IN (${hostFilter}) AND ${toEsqlTimestampClause(searchedWindow)}`,
-          `| KEEP process.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
-          `| SORT @timestamp ASC`,
-          `| LIMIT 500`,
-        ].join(' ');
-
-        // One map per category, keyed by value so a repeated indicator keeps the first comment it
-        // was given — which, because the query sorts ascending, is its earliest occurrence.
-        const byCategory = new Map<ExtractedIocCategory, Map<string, InvestigationIoc>>();
-
-        const addIndicator = (category: ExtractedIocCategory, value: unknown, comment?: string) => {
-          if (typeof value !== 'string' || value === '') {
-            return;
-          }
-          const existing = byCategory.get(category) ?? new Map<string, InvestigationIoc>();
-          byCategory.set(category, existing);
-          // The per-category cap keeps a host with thousands of distinct command lines from
-          // crowding out hashes and network destinations.
-          if (existing.has(value) || existing.size >= MAX_IOCS_PER_CATEGORY) {
-            return;
-          }
-          existing.set(value, { value, ...(comment ? { comment } : {}) });
-        };
-
-        let queryError: string | undefined;
-
-        try {
-          const { columns, values } = await context.esClient.asCurrentUser.esql.query({
-            query: esqlQuery,
-            drop_null_columns: true,
-          });
-          const colIndex = (name: string) => columns.findIndex((c) => c.name === name);
-
-          const hashIdx = colIndex('process.hash.sha256');
-          const exeIdx = colIndex('process.executable');
-          const processNameIdx = colIndex('process.name');
-          const cmdIdx = colIndex('process.command_line');
-          const parentNameIdx = colIndex('process.parent.name');
-          const parentCmdIdx = colIndex('process.parent.command_line');
-          const ipIdx = colIndex('destination.ip');
-          const domainIdx = colIndex('destination.domain');
-          const regIdx = colIndex('registry.path');
-          const regValueIdx = colIndex('registry.value');
-          const filePathIdx = colIndex('file.path');
-          const userIdx = colIndex('user.name');
-          const actionIdx = colIndex('event.action');
-          const hostIdx = colIndex('host.name');
-
-          for (const row of values) {
-            const v = row as unknown[];
-            const at = (index: number) => (index >= 0 ? v[index] : null);
-            const asText = (index: number) => {
-              const value = at(index);
-              return typeof value === 'string' && value !== '' ? value : undefined;
+        },
+      },
+      {
+        id: ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
+        type: ToolType.builtin,
+        description:
+          'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s), within the ' +
+          'incident `start`/`end` when given or a `time_window_hours` lookback otherwise. ' +
+          'Returns indicators grouped by category — shas, ips, file_paths, malicious_commands, affected_hosts — ' +
+          `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category. ` +
+          'Call this after forensic reconstruction to produce the indicators for cross-environment hunts and ' +
+          'response actions. It only returns what telemetry fields can be typed mechanically — add ransom notes, ' +
+          'encryption markers, and compromised identities from your own analysis.',
+        schema: extractIocsSchema,
+        handler: async (args, context) => {
+          const parsed = extractIocsSchema.parse(args);
+          const { hosts } = parsed;
+          const searchedWindow = resolveSearchWindow(parsed);
+          if (hosts.length === 0) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    scoped_hosts: hosts,
+                    searched_window: searchedWindow,
+                    error: 'No hosts given.',
+                    guidance:
+                      'Call this tool again with the host.name values of the hosts under investigation.',
+                  },
+                },
+              ],
             };
+          }
+          const hostFilter = hosts.map((h) => JSON.stringify(h)).join(', ');
+          // Each Defend stream maps only its own fields (registry.* exists only in the registry
+          // stream), and hosts without a stream are normal (no registry stream off Windows), so
+          // unmapped KEEP columns must resolve to null rather than fail verification.
+          // Sorting ascending before the limit keeps the truncated set anchored on the start of the
+          // attack, so the comment each indicator keeps describes its earliest occurrence.
+          const esqlQuery = [
+            `SET unmapped_fields="nullify";`,
+            `FROM ${ENDPOINT_TELEMETRY_INDEX_PATTERNS.join(', ')}`,
+            `| WHERE host.name IN (${hostFilter}) AND ${toEsqlTimestampClause(searchedWindow)}`,
+            `| KEEP process.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
+            `| SORT @timestamp ASC`,
+            `| LIMIT 500`,
+          ].join(' ');
 
-            const host = asText(hostIdx);
-            const exe = asText(exeIdx);
-            const processName = asText(processNameIdx) ?? exe;
-            const parentName = asText(parentNameIdx);
-            const user = asText(userIdx);
-            const action = asText(actionIdx);
-            const registryValue = asText(regValueIdx);
+          // One map per category, keyed by value so a repeated indicator keeps the first comment it
+          // was given — which, because the query sorts ascending, is its earliest occurrence.
+          const byCategory = new Map<ExtractedIocCategory, Map<string, InvestigationIoc>>();
 
-            const seenOn = host ? ` on ${host}` : '';
-            const actor = [
-              processName ? `by ${processName}` : undefined,
-              user ? `as ${user}` : undefined,
-            ]
-              .filter(Boolean)
-              .join(' ');
+          const addIndicator = (
+            category: ExtractedIocCategory,
+            value: unknown,
+            comment?: string
+          ) => {
+            if (typeof value !== 'string' || value === '') {
+              return;
+            }
+            const existing = byCategory.get(category) ?? new Map<string, InvestigationIoc>();
+            byCategory.set(category, existing);
+            // The per-category cap keeps a host with thousands of distinct command lines from
+            // crowding out hashes and network destinations.
+            if (existing.has(value) || existing.size >= MAX_IOCS_PER_CATEGORY) {
+              return;
+            }
+            existing.set(value, { value, ...(comment ? { comment } : {}) });
+          };
 
-            addIndicator(
-              'shas',
-              at(hashIdx),
-              exe ? `SHA256 of ${exe}${seenOn}` : `Observed${seenOn}`.trim()
-            );
-            addIndicator(
-              'ips',
-              at(ipIdx),
-              `Outbound destination contacted${seenOn}${actor ? ` ${actor}` : ''}`
-            );
-            addIndicator(
-              'ips',
-              at(domainIdx),
-              `Domain resolved and contacted${seenOn}${actor ? ` ${actor}` : ''}`
-            );
-            addIndicator(
-              'file_paths',
-              exe,
-              parentName ? `Executable launched by ${parentName}${seenOn}` : `Executable${seenOn}`
-            );
-            addIndicator(
-              'file_paths',
-              at(filePathIdx),
-              `${action ? `File ${action}` : 'File touched'}${seenOn}${actor ? ` ${actor}` : ''}`
-            );
-            addIndicator(
-              'file_paths',
-              at(regIdx),
-              [
-                `Registry key written${seenOn}`,
-                registryValue ? `set to ${registryValue}` : undefined,
+          let queryError: string | undefined;
+
+          try {
+            const { columns, values } = await context.esClient.asCurrentUser.esql.query({
+              query: esqlQuery,
+              drop_null_columns: true,
+            });
+            const colIndex = (name: string) => columns.findIndex((c) => c.name === name);
+
+            const hashIdx = colIndex('process.hash.sha256');
+            const exeIdx = colIndex('process.executable');
+            const processNameIdx = colIndex('process.name');
+            const cmdIdx = colIndex('process.command_line');
+            const parentNameIdx = colIndex('process.parent.name');
+            const parentCmdIdx = colIndex('process.parent.command_line');
+            const ipIdx = colIndex('destination.ip');
+            const domainIdx = colIndex('destination.domain');
+            const regIdx = colIndex('registry.path');
+            const regValueIdx = colIndex('registry.value');
+            const filePathIdx = colIndex('file.path');
+            const userIdx = colIndex('user.name');
+            const actionIdx = colIndex('event.action');
+            const hostIdx = colIndex('host.name');
+
+            for (const row of values) {
+              const v = row as unknown[];
+              const at = (index: number) => (index >= 0 ? v[index] : null);
+              const asText = (index: number) => {
+                const value = at(index);
+                return typeof value === 'string' && value !== '' ? value : undefined;
+              };
+
+              const host = asText(hostIdx);
+              const exe = asText(exeIdx);
+              const processName = asText(processNameIdx) ?? exe;
+              const parentName = asText(parentNameIdx);
+              const user = asText(userIdx);
+              const action = asText(actionIdx);
+              const registryValue = asText(regValueIdx);
+
+              const seenOn = host ? ` on ${host}` : '';
+              const actor = [
+                processName ? `by ${processName}` : undefined,
+                user ? `as ${user}` : undefined,
               ]
                 .filter(Boolean)
-                .join(', ')
-            );
-            addIndicator(
-              'malicious_commands',
-              at(cmdIdx),
-              parentName ? `Run by ${processName} under ${parentName}${seenOn}` : `Run${seenOn}`
-            );
-            addIndicator(
-              'malicious_commands',
-              at(parentCmdIdx),
-              processName
-                ? `Parent command line of ${processName}${seenOn}`
-                : `Parent command${seenOn}`
-            );
-            addIndicator('affected_hosts', host, 'Telemetry matched the investigation scope');
+                .join(' ');
+
+              addIndicator(
+                'shas',
+                at(hashIdx),
+                exe ? `SHA256 of ${exe}${seenOn}` : `Observed${seenOn}`.trim()
+              );
+              addIndicator(
+                'ips',
+                at(ipIdx),
+                `Outbound destination contacted${seenOn}${actor ? ` ${actor}` : ''}`
+              );
+              addIndicator(
+                'ips',
+                at(domainIdx),
+                `Domain resolved and contacted${seenOn}${actor ? ` ${actor}` : ''}`
+              );
+              addIndicator(
+                'file_paths',
+                exe,
+                parentName ? `Executable launched by ${parentName}${seenOn}` : `Executable${seenOn}`
+              );
+              addIndicator(
+                'file_paths',
+                at(filePathIdx),
+                `${action ? `File ${action}` : 'File touched'}${seenOn}${actor ? ` ${actor}` : ''}`
+              );
+              addIndicator(
+                'file_paths',
+                at(regIdx),
+                [
+                  `Registry key written${seenOn}`,
+                  registryValue ? `set to ${registryValue}` : undefined,
+                ]
+                  .filter(Boolean)
+                  .join(', ')
+              );
+              addIndicator(
+                'malicious_commands',
+                at(cmdIdx),
+                parentName ? `Run by ${processName} under ${parentName}${seenOn}` : `Run${seenOn}`
+              );
+              addIndicator(
+                'malicious_commands',
+                at(parentCmdIdx),
+                processName
+                  ? `Parent command line of ${processName}${seenOn}`
+                  : `Parent command${seenOn}`
+              );
+              addIndicator('affected_hosts', host, 'Telemetry matched the investigation scope');
+            }
+          } catch (error) {
+            // Surfaced rather than swallowed: an empty result caused by a missing index or a broken
+            // query must not be reported to the analyst as "these hosts had no indicators".
+            queryError = error instanceof Error ? error.message : String(error);
           }
-        } catch (error) {
-          // Surfaced rather than swallowed: an empty result caused by a missing index or a broken
-          // query must not be reported to the analyst as "these hosts had no indicators".
-          queryError = error instanceof Error ? error.message : String(error);
-        }
 
-        const iocs = Object.fromEntries(
-          [...byCategory.entries()]
-            .filter(([, values]) => values.size > 0)
-            .map(([category, values]) => [category, [...values.values()]])
-        );
+          const iocs = Object.fromEntries(
+            [...byCategory.entries()]
+              .filter(([, values]) => values.size > 0)
+              .map(([category, values]) => [category, [...values.values()]])
+          );
 
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                ...iocs,
-                scoped_hosts: hosts,
-                searched_window: searchedWindow,
-                ...(queryError ? { error: queryError } : {}),
-                guidance: queryError
-                  ? 'The extraction query failed, so no categories were returned for that reason and not ' +
-                    'because the hosts were clean. Fall back to the indicators you identified during reconstruction.'
-                  : 'These categories are deduplicated — echo the values verbatim rather than rewriting or ' +
-                    'merging them, and enrich each comment with what your reconstruction established. They are ' +
-                    'a floor, not the full set: this query can only type telemetry fields mechanically, so add ' +
-                    'the ransom_note, encryption_marker, and compromised_identities categories yourself.',
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  ...iocs,
+                  scoped_hosts: hosts,
+                  searched_window: searchedWindow,
+                  ...(queryError ? { error: queryError } : {}),
+                  guidance: queryError
+                    ? 'The extraction query failed, so no categories were returned for that reason and not ' +
+                      'because the hosts were clean. Fall back to the indicators you identified during reconstruction.'
+                    : 'These categories are deduplicated — echo the values verbatim rather than rewriting or ' +
+                      'merging them, and enrich each comment with what your reconstruction established. They are ' +
+                      'a floor, not the full set: this query can only type telemetry fields mechanically, so add ' +
+                      'the ransom_note, encryption_marker, and compromised_identities categories yourself.',
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
+        },
       },
-    },
-  ],
-});
+    ],
+  });
+};

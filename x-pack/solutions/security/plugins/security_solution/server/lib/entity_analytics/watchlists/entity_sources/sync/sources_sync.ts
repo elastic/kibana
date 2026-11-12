@@ -27,6 +27,11 @@ export type SourceProcessor = (
   pageRange?: { gt?: string; lte?: string }
 ) => Promise<void>;
 
+export interface SyncResult {
+  sourceId: string;
+  failed: boolean;
+}
+
 export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
   const syncBySourceIds = async ({
     sources,
@@ -34,12 +39,13 @@ export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
   }: {
     sources: SyncSourceEntry[];
     process: SourceProcessor;
-  }): Promise<void> => {
+  }): Promise<SyncResult[]> => {
     if (sources.length === 0) {
       logger.debug('[WatchlistSync] No entity sources linked to watchlist. Skipping sync.');
-      return;
+      return [];
     }
 
+    const results: SyncResult[] = [];
     for (const {
       source,
       entityStoreEntityIdsByType,
@@ -55,10 +61,13 @@ export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
           watchlistsByEuid,
           pageRange
         );
+        results.push({ sourceId: source.id, failed: false });
       } catch (error) {
         logger.warn(`[WatchlistSync] Source processing failed for ${source.id}: ${String(error)}`);
+        results.push({ sourceId: source.id, failed: true });
       }
     }
+    return results;
   };
 
   return { syncBySourceIds };

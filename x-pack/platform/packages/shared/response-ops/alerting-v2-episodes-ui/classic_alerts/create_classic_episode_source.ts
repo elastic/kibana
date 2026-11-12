@@ -28,8 +28,9 @@ import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
 import { ELASTIC_SOURCE_ICON, CLASSIC_SOURCE_LABEL } from '../source_labels';
 import { resolveClassicRules } from './apis/resolve_classic_rules';
 import { fetchClassicSearchFields } from './apis/fetch_classic_search_fields';
-import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
+import { CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
+import { useClassicWriteAccess } from './use_classic_write_access';
 
 export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
   {
@@ -96,18 +97,25 @@ export const createClassicEpisodeSource = ({
     };
   },
 
-  fetchHistogram: async ({ services, filterState, timeRange, breakdownField, abortSignal }) => {
-    const rows = await fetchClassicAlertsHistogram({
+  fetchHistogram: ({
+    services,
+    filterState,
+    timeRange,
+    breakdownField,
+    buckets,
+    nowMs,
+    abortSignal,
+  }) =>
+    fetchClassicAlertsHistogram({
       ruleTypeIds,
       services,
       filterState,
       timeRange,
       breakdownField,
+      buckets,
+      nowMs,
       abortSignal,
-    });
-
-    return { rows, isCapHit: rows.length >= CLASSIC_ALERTS_HISTOGRAM_LIMIT };
-  },
+    }),
 
   fetchTagOptions: ({ services, timeRange, abortSignal }) =>
     fetchClassicAlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
@@ -118,6 +126,8 @@ export const createClassicEpisodeSource = ({
     fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
 
   actionExtensions: classicActionExtensions,
+
+  useWriteAccess: useClassicWriteAccess,
 
   getRuleDetailsHref: (ruleId) =>
     `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,

@@ -6,10 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { isMissingIndexError } from '../../is_missing_index_error';
@@ -23,21 +22,6 @@ import {
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
-
-const esqlSearch = async (
-  searchService: ReturnType<typeof useKibana>['services']['data']['search'],
-  query: string,
-  signal: AbortSignal | undefined
-): Promise<ESQLSearchResponse> => {
-  const result = await lastValueFrom(
-    searchService.search(
-      { params: { query } },
-      { abortSignal: signal, strategy: 'esql_async', projectRouting: TILE_PROJECT_ROUTING }
-    )
-  );
-  return result.rawResponse as unknown as ESQLSearchResponse;
-};
 
 export const useEntitiesWithAnomaliesCount = ({
   spaceId,
@@ -92,7 +76,12 @@ export const useEntitiesWithAnomaliesCount = ({
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
       const raw = await runWithTileTimeout(signal, (tileSignal) =>
-        esqlSearch(data.search, query, tileSignal)
+        runEsqlQuery(
+          data.search,
+          query,
+          { id: 'needs_attention_tile_anomalies_count', meta: { timeRange } },
+          tileSignal
+        )
       );
       const row = raw.values?.[0];
       const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;

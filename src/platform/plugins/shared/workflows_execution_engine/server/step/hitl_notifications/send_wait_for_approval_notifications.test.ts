@@ -314,6 +314,31 @@ describe('send_wait_for_approval_notifications', () => {
       expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
     });
 
+    it('posts Block Kit approval controls instead of resume links when slack2 is interactive', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123'], interactive: true },
+        },
+        slackInteractiveResume: {
+          executionId: 'exec-1',
+          stepId: 'step-1',
+          token: 'token-1',
+          spaceId: 'default',
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      const params = execute.mock.calls[0][0].input.subActionParams;
+      expect(params.text).toBe('Approve change?');
+      expect(params.text).not.toContain('https://kibana.example');
+      expect(
+        params.blocks[1].elements.map((element: { action_id: string }) => element.action_id)
+      ).toEqual(['workflows.hitl.approve', 'workflows.hitl.reject']);
+    });
+
     it('posts a Teams channel message with approve and decline links', async () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 

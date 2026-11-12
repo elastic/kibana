@@ -66,6 +66,25 @@ describe('cloudExperiments config', () => {
 
     describe('in prod (non-dev mode)', () => {
       const ctx = { dev: false };
+      test('client_id is optional because the browser does not use it', () => {
+        expect(
+          config.schema.validate(
+            {
+              enabled: true,
+              launch_darkly: { sdk_key: 'sdk-1234' },
+            },
+            ctx
+          )
+        ).toEqual({
+          enabled: true,
+          launch_darkly: {
+            sdk_key: 'sdk-1234',
+            client_log_level: 'none',
+          },
+          metadata_refresh_interval: moment.duration(1, 'h'),
+        });
+      });
+
       test('it enforces `launch_darkly` config if not in dev-mode', () => {
         expect(() =>
           config.schema.validate({ enabled: true }, ctx)

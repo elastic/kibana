@@ -24,6 +24,9 @@ export class EntityAnalyticsManagementPage {
   public riskScoreTab: Locator;
   public assetCriticalityTab: Locator;
   public engineStatusTab: Locator;
+  /** Rendered only when the `entityAnalyticsWatchlistEnabled` experimental feature is on. */
+  public readonly watchlistsTab: Locator;
+  public readonly watchlistsTable: Locator;
 
   // Risk Score tab
   public riskPreviewError: Locator;
@@ -63,6 +66,8 @@ export class EntityAnalyticsManagementPage {
     this.riskScoreTab = this.page.testSubj.locator('riskScoreTab');
     this.assetCriticalityTab = this.page.testSubj.locator('assetCriticalityTab');
     this.engineStatusTab = this.page.testSubj.locator('engineStatusTab');
+    this.watchlistsTab = this.page.testSubj.locator('watchlistsTab');
+    this.watchlistsTable = this.page.testSubj.locator('watchlistsManagementTable');
 
     // Risk Score tab
     this.riskPreviewError = this.page.testSubj.locator('risk-preview-error');
@@ -123,6 +128,19 @@ export class EntityAnalyticsManagementPage {
 
   async navigateToEngineStatusTab() {
     await this.engineStatusTab.click();
+  }
+
+  async navigateToWatchlistsTab() {
+    await this.watchlistsTab.click();
+  }
+
+  /** Row of the watchlists table whose text contains the given watchlist name. */
+  watchlistRow(name: string): Locator {
+    return this.watchlistsTable.getByRole('row').filter({ hasText: name });
+  }
+
+  async openWatchlistEdit(name: string) {
+    await this.watchlistRow(name).getByRole('button', { name: 'Edit watchlist' }).click();
   }
 
   async toggleEntityAnalytics() {

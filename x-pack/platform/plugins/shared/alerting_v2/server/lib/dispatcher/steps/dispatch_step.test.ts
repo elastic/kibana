@@ -489,13 +489,19 @@ describe('DispatchStep', () => {
     ]);
     mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
 
-    const alert = createAlert({ rule_id: 'rule-1' });
+    const rules = {
+      'rule-1': { name: 'CPU spike monitor', grouping_fields: ['host.name'] },
+      'rule-2': { name: 'Disk full', grouping_fields: [] },
+    };
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      alerts: [alert],
-      rules: { 'rule-1': { name: 'CPU spike monitor' } },
+      alerts: [
+        createAlert({ rule_id: 'rule-1' }),
+        createAlert({ rule_id: 'rule-2', alert_id: 'alert-2' }),
+      ],
+      rules,
     });
     const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
 
@@ -511,7 +517,10 @@ describe('DispatchStep', () => {
         expect.objectContaining({
           inputs: expect.objectContaining({
             payload: expect.objectContaining({
-              rules: { 'rule-1': { name: 'CPU spike monitor' } },
+              rules: {
+                'rule-1': { name: 'CPU spike monitor', grouping_fields: ['host.name'] },
+                'rule-2': { name: 'Disk full', grouping_fields: [] },
+              },
             }),
           }),
         }),

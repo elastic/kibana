@@ -21,7 +21,7 @@ describe('findFiberWithDebugSource', () => {
     const element = document.createElement('div');
     attachFiber(element, { type: 'div', _debugOwner: owner });
 
-    expect(findFiberWithDebugSource(element)).toEqual({ element, fiber: owner });
+    expect(findFiberWithDebugSource(element)).toEqual({ element, fiber: owner, source });
   });
 
   it('should climb the DOM when the element and its fiber chain have no source', () => {
@@ -31,7 +31,11 @@ describe('findFiberWithDebugSource', () => {
     const element = parent.appendChild(document.createElement('div'));
     attachFiber(element, { type: 'div' });
 
-    expect(findFiberWithDebugSource(element)).toEqual({ element: parent, fiber: parentFiber });
+    expect(findFiberWithDebugSource(element)).toEqual({
+      element: parent,
+      fiber: parentFiber,
+      source,
+    });
   });
 
   it('should return null when nothing has source information', () => {

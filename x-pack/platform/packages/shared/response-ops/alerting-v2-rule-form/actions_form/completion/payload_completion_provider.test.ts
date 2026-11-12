@@ -124,7 +124,7 @@ describe('createPayloadCompletionProvider', () => {
     ['the rule id lookup used by the default templates', 'inputs.payload.rules[alert.rule_id].'],
     ['a literal rule id', 'inputs.payload.rules.rule1.'],
   ])('suggests rule fields under %s', (_, path) => {
-    expect(getSuggestionLabels(`message: "{{ ${path}`)).toEqual(['name']);
+    expect(getSuggestionLabels(`message: "{{ ${path}`)).toEqual(['name', 'grouping_fields']);
   });
 
   it('suggests children of the path before an @ trigger', () => {
