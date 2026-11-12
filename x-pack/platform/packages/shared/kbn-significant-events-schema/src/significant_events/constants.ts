@@ -64,7 +64,7 @@ export const ASSESSMENT_NOTE_ROLE_RULE = dedent`
   Reader: the operator deciding whether to trust the severity and confidence. This is judgement, not a recap. At most three short sentences.
   Sentence 1: what decided the tier: the operations or dependency paths it covers, by name, and the evidence that meets the tier's condition, with its scope (a share of log lines is not a share of requests). For an inactive or recovering event, give the recovery, false-alarm, or benign-change rationale instead.
   Sentence 2: what would move it: the evidence a higher tier needs that the descriptions do not state (none for "critical"); anything left unverified, including a service or call target the knowledge base does not cover (unknown, not none).
-  Sentence 3: the confidence as a percentage (the field times 100, with one decimal and a % sign: 0.45 is "45.0%"), the evidence behind it, and, in plain words, any support the evidence does not show. When the confidence is carried over from the stored event, say so instead.
+  Sentence 3: the confidence as a percentage (the field times 100, with one decimal and a % sign: 0.45 is "45.0%"), the evidence behind it, and, in plain words, any support the evidence does not show (a reach, outcome, rate or cause that was not measured or established is not one). When the confidence is carried over from the stored event, say so instead.
   ${NARRATIVE_AGREEMENT_RULE}
   Not here: the observed failure or impact (summary), the mechanism (symptom_hypothesis), signal descriptions, investigation steps, or detection metadata.
 `;

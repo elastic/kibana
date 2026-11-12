@@ -456,9 +456,7 @@ groups and the flow continues to Step 4.
    narrative but never overrides an accepted match or creates one.
 5. Finalize each component's **topology**: `causal_features` and `blast_radius` are the union of
    grounding's entries for the assigned detections, deduplicated by `feature_id`
-   (dependency edges by `source` and `target`); never discard, rename, or summarize them. Prefer a
-   dependency edge over a standalone node for the same hop, and omit an entity node whose
-   `feature_id` is already an edge `source` or `target`. Keep paths implied by bridges, shared
+   (dependency edges by `source` and `target`); never discard, rename, or summarize them. Keep paths implied by bridges, shared
    callers, or confirmed chains even when one detection's evidence alone does not name every hop.
    Close the topology: a grounded dependency path whose endpoint is already on the map belongs on
    the map. `causal_features` includes every service whose signal in this component is `confirms`.
