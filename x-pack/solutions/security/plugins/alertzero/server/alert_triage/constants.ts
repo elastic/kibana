@@ -106,6 +106,3 @@ export const GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY =
  * `GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY` can exceed that in one call.
  */
 export const GROUPED_PROPOSAL_LIST_HEADS_TERMS = 10_000;
-
-/** Feature flag that turns Alert Triage grouping off: every batch then mints its own proposal. */
-export const TRIAGE_GROUPING_FLAG = 'alertzero.triageGrouping';

@@ -18,13 +18,14 @@ import {
 export interface SummarizeInvestigationStepDependencies {
   getConversationClient: (request: KibanaRequest) => Promise<InvestigationConversationReader>;
   resolveChatModel: RunInvestigationSummaryDeps['resolveChatModel'];
-  getProposals?: RunInvestigationSummaryDeps['getProposals'];
+  readProposals?: RunInvestigationSummaryDeps['getProposals'];
   logger?: RunInvestigationSummaryDeps['logger'];
 }
 
-export const getSummarizeInvestigationStepDefinition = (
-  deps: SummarizeInvestigationStepDependencies
-) =>
+export const getSummarizeInvestigationStepDefinition = ({
+  readProposals,
+  ...deps
+}: SummarizeInvestigationStepDependencies) =>
   createServerStepDefinition({
     ...summarizeInvestigationStepCommonDefinition,
     handler: async (context) => {
@@ -43,7 +44,7 @@ export const getSummarizeInvestigationStepDefinition = (
           spaceId,
           conversationId: input.conversation_id,
           abortSignal: context.abortSignal,
-          deps,
+          deps: { ...deps, getProposals: readProposals },
         });
         return { output };
       } catch (error) {

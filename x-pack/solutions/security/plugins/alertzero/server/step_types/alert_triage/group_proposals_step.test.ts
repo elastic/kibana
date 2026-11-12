@@ -114,7 +114,7 @@ const setup = ({
   });
   const definition = (factory: typeof getTriageGroupFpCandidatesStepDefinition) =>
     factory({
-      getProposals: () =>
+      getProposalsPlugin: () =>
         ({
           getProposalsService: () => service,
           getProposalPrivileges: () => privileges,

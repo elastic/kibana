@@ -63,7 +63,7 @@ const readHistory = async (
 };
 
 export interface GroupProposalsStepDependencies {
-  getProposals: () => ProposalsPluginStart;
+  getProposalsPlugin: () => ProposalsPluginStart;
   getWorkflowsManagement: () => WorkflowExecutionReader | undefined;
   getConversations: () => AgentBuilderPluginStart['conversations'];
   /** The kill switch: false makes every batch mint its own proposal, as before grouping. */
@@ -131,7 +131,7 @@ const createRuntime = async (
       message: 'No request available in workflow context',
     });
   }
-  const { getProposalsService, getProposalPrivileges } = deps.getProposals();
+  const { getProposalsService, getProposalPrivileges } = deps.getProposalsPlugin();
   const service = getProposalsService();
   const privileges = getProposalPrivileges();
   await privileges.assertCanRead(request);
