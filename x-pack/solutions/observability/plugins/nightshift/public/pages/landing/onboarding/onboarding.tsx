@@ -27,7 +27,6 @@ import {
   setNightshiftInvestigationIdParam,
 } from '../../../common/url_params';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useCurrentUserName } from '../../../hooks/use_current_user_name';
 import { OnboardingIntroBanner } from './intro_banner';
 import {
   ONBOARDING_STEP_IDS,
@@ -120,7 +119,6 @@ export function NightshiftOnboarding({
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder } = useKibana().services;
-  const greetingName = useCurrentUserName();
   const history = useHistory();
   const { search } = useLocation();
   const { data, isInitialLoading } = useOnboarding();
@@ -353,7 +351,7 @@ export function NightshiftOnboarding({
         padding-bottom: calc(${euiTheme.size.xxl} * 1.5);
       `}
     >
-      <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline greetingName={greetingName} />
+      <NightshiftHeader title={HERO_TITLES[step]} />
       <EuiSpacer size="l" />
       {(step === 'enable' || step === 'addData' || step === 'connectSources') && (
         <>

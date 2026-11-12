@@ -19,9 +19,11 @@ import { addSpanLabels } from '@kbn/apm-utils';
 import { getFlattenedObject, withTimeout } from '@kbn/std';
 import {
   type Client,
+  type EvaluationDetails,
   OpenFeature,
   ServerProviderEvents,
   NOOP_PROVIDER,
+  StandardResolutionReasons,
 } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
 import {
@@ -56,7 +58,12 @@ import { schema } from '@kbn/config-schema';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
-import { incrementCounter } from './increment_counter';
+import {
+  type FeatureFlagEvaluationDetails,
+  type FeatureFlagOverrideSource,
+  incrementCounter,
+  isFallbackReason,
+} from './increment_counter';
 import { registerOfrepRoutes } from './ofrep_routes';
 import { registerOverrideRoutes } from './overrides_routes';
 import {
@@ -271,23 +278,23 @@ export class FeatureFlagsService {
     return {
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
       getBooleanValue: async (flagName, fallbackValue) =>
-        this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue),
+        this.evaluateFlag(this.featureFlagsClient.getBooleanDetails, flagName, fallbackValue),
       getStringValue: async <Value extends string>(flagName: string, fallbackValue: Value) =>
         await this.evaluateFlag<Value>(
-          this.featureFlagsClient.getStringValue,
+          this.featureFlagsClient.getStringDetails,
           flagName,
           fallbackValue
         ),
       getNumberValue: async <Value extends number>(flagName: string, fallbackValue: Value) =>
         await this.evaluateFlag<Value>(
-          this.featureFlagsClient.getNumberValue,
+          this.featureFlagsClient.getNumberDetails,
           flagName,
           fallbackValue
         ),
       getBooleanValue$: (flagName, fallbackValue) => {
         return observeFeatureFlag$(flagName).pipe(
           concatMap(() =>
-            this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
+            this.evaluateFlag(this.featureFlagsClient.getBooleanDetails, flagName, fallbackValue)
           )
         );
       },
@@ -295,7 +302,7 @@ export class FeatureFlagsService {
         return observeFeatureFlag$(flagName).pipe(
           concatMap(() =>
             this.evaluateFlag<Value>(
-              this.featureFlagsClient.getStringValue,
+              this.featureFlagsClient.getStringDetails,
               flagName,
               fallbackValue
             )
@@ -306,7 +313,7 @@ export class FeatureFlagsService {
         return observeFeatureFlag$(flagName).pipe(
           concatMap(() =>
             this.evaluateFlag<Value>(
-              this.featureFlagsClient.getNumberValue,
+              this.featureFlagsClient.getNumberDetails,
               flagName,
               fallbackValue
             )
@@ -342,31 +349,80 @@ export class FeatureFlagsService {
    * @internal
    */
   private async evaluateFlag<T extends string | boolean | number>(
-    evaluationFn: (flagName: string, fallbackValue: T) => Promise<T>,
+    evaluationFn: (flagName: string, fallbackValue: T) => Promise<EvaluationDetails<T>>,
     flagName: string,
     fallbackValue: T
   ): Promise<T> {
-    const override = get(this.overrides$.value, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
-
-    // Only wait for the context to be ready if there is no override.
-    if (typeof override === 'undefined') {
-      // DISCLAIMER: During evaluations, we're waiting for the context and the provider to be ready.
-      await Promise.all([this.waitForContextReady(), this.waitForProviderReady()]);
-    }
-
-    const value =
-      typeof override !== 'undefined'
-        ? overrideForEvaluation(override, fallbackValue)
-        : // We have to bind the evaluation or the client will lose its internal context
-          await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    const { value, ...details } = await this.resolveFlag(evaluationFn, flagName, fallbackValue);
 
     addSpanLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
     // Report the counter for the flag evaluation.
-    incrementCounter(flagName, value);
+    incrementCounter(flagName, value, details);
     this.rememberEvaluation(flagName, value);
 
     return value;
+  }
+
+  private async resolveFlag<T extends string | boolean | number>(
+    evaluationFn: (flagName: string, fallbackValue: T) => Promise<EvaluationDetails<T>>,
+    flagName: string,
+    fallbackValue: T
+  ): Promise<{ value: T } & FeatureFlagEvaluationDetails> {
+    const override = this.getOverride(flagName);
+    if (override) {
+      return {
+        value: overrideForEvaluation(override.value, fallbackValue),
+        source: override.source,
+        reason: StandardResolutionReasons.STATIC,
+      };
+    }
+
+    // DISCLAIMER: During evaluations, we're waiting for the context and the provider to be ready.
+    await Promise.all([this.waitForContextReady(), this.waitForProviderReady()]);
+
+    // We have to bind the evaluation or the client will lose its internal context
+    const { value, reason } = await evaluationFn.bind(this.featureFlagsClient)(
+      flagName,
+      fallbackValue
+    );
+    return { value, source: isFallbackReason(reason) ? 'fallback' : 'provider', reason };
+  }
+
+  /**
+   * The override that wins for the flag, if any. Runtime overrides win over config overrides.
+   * Using lodash get because flagName can come with dots and the config parser might structure it in objects.
+   */
+  private getOverride(
+    flagName: string
+  ): { source: FeatureFlagOverrideSource; value: unknown } | undefined {
+    const runtimeOverride = get(this.runtimeOverrides$.value, flagName);
+    if (typeof runtimeOverride !== 'undefined') {
+      return { source: 'runtime_override', value: runtimeOverride };
+    }
+    const configOverride = get(this.configOverrides$.value, flagName);
+    if (typeof configOverride !== 'undefined') {
+      return { source: 'config_override', value: configOverride };
+    }
+    return undefined;
+  }
+
+  /**
+   * Browser values come from the server snapshot, so the server works out which override
+   * produced them. The browser only knows whether it fell back.
+   */
+  private resolveBrowserEvaluation(
+    flagName: string,
+    reason: string | undefined
+  ): FeatureFlagEvaluationDetails {
+    if (isFallbackReason(reason)) {
+      return { source: 'fallback', reason };
+    }
+    const override = this.getOverride(flagName);
+    if (override) {
+      return { source: override.source, reason: StandardResolutionReasons.STATIC };
+    }
+    return { source: 'provider', reason };
   }
 
   /** Keeps the helper's flag list populated when the provider has no snapshot. */
@@ -439,6 +495,7 @@ export class FeatureFlagsService {
               schema.number(),
               schema.string({ maxLength: 5000 }),
             ]),
+            reason: schema.maybe(schema.string({ maxLength: 64 })),
           }),
         },
         security: {
@@ -456,8 +513,8 @@ export class FeatureFlagsService {
       },
       (context, request, response) => {
         const { flagName } = request.params;
-        const { value } = request.body;
-        incrementCounter(flagName, value);
+        const { value, reason } = request.body;
+        incrementCounter(flagName, value, this.resolveBrowserEvaluation(flagName, reason));
         return response.accepted();
       }
     );

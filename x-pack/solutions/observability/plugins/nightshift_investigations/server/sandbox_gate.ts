@@ -12,7 +12,7 @@ import type { NightshiftSandboxStart } from './sandbox_audit';
 import { createAuditedSandboxStart } from './sandbox_audit';
 
 export const SANDBOX_DISABLED_MESSAGE =
-  'The sandbox is not available because Nightshift is not enabled in this deployment.';
+  'The sandbox is not available because nightshift is not enabled in this deployment.';
 
 export const SANDBOX_AUDIT_UNAVAILABLE_MESSAGE =
   'The sandbox is not available because its calls cannot be audited: the audit service is not available.';

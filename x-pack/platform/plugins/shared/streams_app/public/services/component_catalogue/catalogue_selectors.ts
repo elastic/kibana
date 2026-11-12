@@ -8,6 +8,7 @@
 import type {
   CatalogueComponentDefinition,
   CatalogueComponentKind,
+  CatalogueComponentStatus,
   CatalogueComponentSummary,
   CatalogueEnumField,
   CatalogueEnumOption,
@@ -38,6 +39,18 @@ export const getDefinition = (
   type: string
 ): CatalogueComponentDefinition | undefined =>
   catalogue.definitions.find((definition) => definition.kind === kind && definition.type === type);
+
+/** The enum set the catalogue uses to label and describe component statuses. */
+export const COMPONENT_STATUSES_ENUM_SET = 'component.statuses';
+
+/** What the catalogue says a component status means; `undefined` until it describes statuses. */
+export const describeComponentStatus = (
+  metadata: CatalogueMetadata,
+  status: CatalogueComponentStatus
+): CatalogueEnumOption | undefined =>
+  metadata.enum_sets[COMPONENT_STATUSES_ENUM_SET]?.options.find(
+    (option) => option.value === status
+  );
 
 export const resolveEnumOptions = (
   field: CatalogueEnumField,

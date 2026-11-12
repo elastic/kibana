@@ -41,7 +41,7 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
     const [connectors, stepDefinitions, triggerDefinitions] = await Promise.all([
       prefetchConnectors({ api, spaceId, request }),
       prefetchStepDefinitions({ api, spaceId, request }),
-      prefetchTriggerDefinitions(),
+      prefetchTriggerDefinitions({ api }),
     ]);
 
     return { prefetched: { connectors, stepDefinitions, triggerDefinitions } };

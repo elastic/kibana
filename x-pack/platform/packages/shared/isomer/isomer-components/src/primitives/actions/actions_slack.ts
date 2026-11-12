@@ -9,11 +9,20 @@ import type { SlackActionsBlock, SlackBlock, SlackButtonElement } from '@elastic
 import { SLACK_LIMITS, clampSlackText, slackLinkUrl } from '@elastic/isomer-sdk/slack';
 import type { ActionsNode } from './actions';
 import { oneLine } from '../../lib';
+import { slackAppHref } from '../link/resolve_link';
 
 type ActionsButton = ActionsNode['buttons'][number];
 
-const slackButton = ({ label, url, primary }: ActionsButton): SlackButtonElement[] => {
-  const href = slackLinkUrl(url);
+const slackButtonHref = ({ url, app, path }: ActionsButton, baseUrl: string | undefined) => {
+  if (url !== undefined) {
+    return slackLinkUrl(url);
+  }
+  return app === undefined ? null : slackAppHref({ app, path }, baseUrl);
+};
+
+const slackButton = (button: ActionsButton, baseUrl: string | undefined): SlackButtonElement[] => {
+  const { label, primary } = button;
+  const href = slackButtonHref(button, baseUrl);
   if (!href) {
     return [];
   }
@@ -30,10 +39,11 @@ const slackButton = ({ label, url, primary }: ActionsButton): SlackButtonElement
     },
   ];
 };
-export const actionsSlackRenderer = ({
-  buttons,
-}: ActionsNode): SlackActionsBlock | readonly SlackBlock[] => {
-  const elements = buttons.flatMap(slackButton);
+export const actionsSlackRenderer = (
+  { buttons }: ActionsNode,
+  { baseUrl }: { baseUrl?: string }
+): SlackActionsBlock | readonly SlackBlock[] => {
+  const elements = buttons.flatMap((button) => slackButton(button, baseUrl));
   if (elements.length === 0) {
     return [];
   }
