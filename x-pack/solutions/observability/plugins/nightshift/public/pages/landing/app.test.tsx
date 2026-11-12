@@ -474,8 +474,13 @@ describe('NightshiftApp', () => {
       )
     );
 
+    // Leave totals at the filtered empty result so visibility cannot ride on totalCount.
     fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
       target: { value: '' },
+    });
+    // Wait past the 300 ms search debounce: without the unfiltered latch, search would unmount here.
+    await new Promise((resolve) => {
+      window.setTimeout(resolve, 350);
     });
     expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
   });

@@ -178,7 +178,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
             titleSize="xs"
             paddingSize="m"
             css={css`
-              padding-block: ${euiTheme.size.xl};
+              padding-block: ${euiTheme.size.l};
             `}
             icon={
               <EuiIllustration
