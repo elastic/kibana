@@ -8,12 +8,16 @@
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getClassicApplications } from './classic/get_classic_applications';
+import { hasPartialReadAccess } from './get_partial_access';
 import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
 import { APPLICATIONS_ENDPOINT, applicationsRouteRepository } from './route';
 
 jest.mock('./classic/get_classic_applications');
 jest.mock('./otel/get_otel_applications_source');
+jest.mock('./get_partial_access');
+jest.mock('./classic/create_apm_event_client');
 
+const mockedPartialAccess = jest.mocked(hasPartialReadAccess);
 const mockedClassic = jest.mocked(getClassicApplications);
 
 const START = '2021-01-18T12:00:00.000Z';
@@ -39,12 +43,17 @@ const runHandler = ({
       uiSettings: { client: { get: jest.fn().mockResolvedValue(false) } },
     }),
   };
-  const getApmIndices = jest.fn().mockResolvedValue({});
+  const getApmIndices = jest.fn().mockResolvedValue({
+    transaction: 'traces-apm*',
+    error: 'logs-apm.error-*',
+    span: 'traces-apm*',
+  });
   const handler = applicationsRouteRepository[APPLICATIONS_ENDPOINT].handler as unknown as (
     resources: unknown
   ) => Promise<{
     applications: unknown[];
     environments: string[];
+    partiallyAvailableSources: string[];
   }>;
   const result = handler({
     params: { query },
@@ -61,6 +70,7 @@ const runHandler = ({
 describe('GET /internal/digital_experience/applications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedPartialAccess.mockResolvedValue(false);
     mockedOtel.mockResolvedValue({
       applications: [],
       environments: ['production'],
@@ -140,6 +150,31 @@ describe('GET /internal/digital_experience/applications', () => {
     expect(mockedOtel).toHaveBeenCalledTimes(1);
     expect(mockedClassic).not.toHaveBeenCalled();
     expect(getApmIndices).not.toHaveBeenCalled();
+  });
+
+  it('reads the APM indices once and checks the access of both sources', async () => {
+    mockedPartialAccess.mockResolvedValue(true);
+
+    const { result, getApmIndices } = runHandler({ isServerless: false });
+    const response = await result;
+
+    expect(getApmIndices).toHaveBeenCalledTimes(1);
+    expect(mockedPartialAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: ['logs-*.otel-*', 'traces-*.otel-*'] })
+    );
+    expect(mockedPartialAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: ['traces-apm*', 'logs-apm.error-*', 'traces-apm*'] })
+    );
+    expect(response.partiallyAvailableSources).toEqual(['otel', 'classic']);
+  });
+
+  it('only checks the OTel access on serverless', async () => {
+    mockedPartialAccess.mockResolvedValue(false);
+
+    const response = await runHandler({ isServerless: true }).result;
+
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(1);
+    expect(response.partiallyAvailableSources).toEqual([]);
   });
 
   it('requires the Digital Experience and APM privileges, like the app', () => {

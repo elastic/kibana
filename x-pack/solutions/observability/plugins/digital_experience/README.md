@@ -44,7 +44,15 @@ privileges like the app.
   applications, which only the sessions index counts, so it shows a dash while they are read from
   the raw events (sessions not set up, a range past their lookback, no access to them) and for Classic
   RUM, which has no sessions.
-- **Partial data:** when one source fails to load, a warning above the summary names it.
+- **Partial data:** when one source fails to load, a warning above the summary names it (the
+  response lists it in `unavailableSources`). A source the user can only partly read is listed in
+  `partiallyAvailableSources` and gets its own warning, as Elasticsearch skips the indices of a
+  wildcard the user can't read instead of failing, so rows may be missing. The check resolves each
+  index pattern of the source and asks `security.hasPrivileges` for `read` on those that match an
+  existing index, alias or data stream, so unused defaults such as `apm-*` don't count. The Agent
+  Builder OTel indices are excluded from the OTel wildcards, as in APM Diagnostics. With security
+  disabled, or if the check fails, no warning is shown. It doesn't name the indices, and
+  document- or field-level security isn't reported.
 - **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
   is kept in local storage; drag over it to zoom into that range. The sessions are counted only
   while the applications are read from the sessions index, so the toggle disables **Sessions**, and

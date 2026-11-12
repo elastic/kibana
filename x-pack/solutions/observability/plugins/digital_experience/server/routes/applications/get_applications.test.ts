@@ -73,6 +73,86 @@ describe('getApplications', () => {
     expect(unavailableSources).toEqual([]);
   });
 
+  describe('partiallyAvailableSources', () => {
+    it('lists OTel when the user can read only some of its indices', async () => {
+      const { partiallyAvailableSources } = await getApplications({
+        getOtelApplications: async () => result([]),
+        getClassicApplications: async () => result([]),
+        hasPartialOtelAccess: async () => true,
+        hasPartialClassicAccess: async () => false,
+        logger,
+      });
+
+      expect(partiallyAvailableSources).toEqual(['otel']);
+    });
+
+    it('lists Classic when the user can read only some of its indices', async () => {
+      const { partiallyAvailableSources } = await getApplications({
+        getOtelApplications: async () => result([]),
+        getClassicApplications: async () => result([]),
+        hasPartialOtelAccess: async () => false,
+        hasPartialClassicAccess: async () => true,
+        logger,
+      });
+
+      expect(partiallyAvailableSources).toEqual(['classic']);
+    });
+
+    it('lists a failed source only in unavailableSources', async () => {
+      const response = await getApplications({
+        getOtelApplications: async () => {
+          throw new Error('otel down');
+        },
+        getClassicApplications: async () => result([]),
+        hasPartialOtelAccess: async () => true,
+        hasPartialClassicAccess: async () => true,
+        logger,
+      });
+
+      expect(response.unavailableSources).toEqual(['otel']);
+      expect(response.partiallyAvailableSources).toEqual(['classic']);
+    });
+
+    it('is empty without access checks', async () => {
+      const { partiallyAvailableSources } = await getApplications({
+        getOtelApplications: async () => result([]),
+        getClassicApplications: async () => result([]),
+        logger,
+      });
+
+      expect(partiallyAvailableSources).toEqual([]);
+    });
+
+    it('runs the access checks alongside the searches', async () => {
+      // Each one resolves only once the other has started, so running them one after the other
+      // would never settle and the test would time out.
+      let signalFetchStarted: () => void = () => {};
+      let signalCheckStarted: () => void = () => {};
+      const fetchStarted = new Promise<void>((resolve) => {
+        signalFetchStarted = resolve;
+      });
+      const checkStarted = new Promise<void>((resolve) => {
+        signalCheckStarted = resolve;
+      });
+
+      const response = await getApplications({
+        getOtelApplications: async () => {
+          signalFetchStarted();
+          await checkStarted;
+          return result([]);
+        },
+        hasPartialOtelAccess: async () => {
+          signalCheckStarted();
+          await fetchStarted;
+          return true;
+        },
+        logger,
+      });
+
+      expect(response.partiallyAvailableSources).toEqual(['otel']);
+    });
+  });
+
   it('merges the environments of every source, without duplicates, sorted', async () => {
     const { environments } = await getApplications({
       getOtelApplications: async () => result([], ['staging', 'production']),
