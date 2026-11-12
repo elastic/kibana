@@ -62,12 +62,11 @@ export const discoverRunInvestigations = async (
       );
       // Deleted between the list and the read: nothing to discover, and not an error. Any other
       // failure would hide a run-owned Investigation from teardown, so it throws.
-      if (detail.statusCode === 404) {
-        continue;
-      }
-      const body = ok(detail, `read investigation ${conversation.id}`);
-      if (entityNames.some((name) => JSON.stringify(body).includes(name))) {
-        ids.push(conversation.id);
+      if (detail.statusCode !== 404) {
+        const body = ok(detail, `read investigation ${conversation.id}`);
+        if (entityNames.some((name) => JSON.stringify(body).includes(name))) {
+          ids.push(conversation.id);
+        }
       }
     }
     const total = response.pagination?.total ?? 0;
