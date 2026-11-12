@@ -7,7 +7,12 @@
 
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { type Case, type Observable } from '../../../common/types/domain';
-import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_OBSERVABLES_PER_CASE,
+  OBSERVABLE_TYPE_IPV4,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
   COMMENT_ATTACHMENT_TYPE,
@@ -17,7 +22,7 @@ import {
 import { createCasesClientMockArgs } from '../mocks';
 import { createCaseServiceMock, createLicensingServiceMock } from '../../services/mocks';
 import { mockCases } from '../../mocks';
-import { extractAndAddObservables } from './extract_observables';
+import { extractAndAddObservables, extractObservablesFromAlerts } from './extract_observables';
 import type { AlertService } from '../../services';
 
 const caseSO = mockCases[0];
@@ -368,5 +373,249 @@ describe('extractAndAddObservables', () => {
         expect.stringContaining('No new observables added')
       );
     });
+  });
+});
+
+describe('extractObservablesFromAlerts', () => {
+  const alertInfo = [{ id: 'alert-id-1', index: 'alert-index-1' }];
+  const existingObservable: Observable = {
+    id: '5c431380-c6ef-459f-b0fe-1699e978517b',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    value: '1.2.3.4',
+    description: null,
+    createdAt: '2026-09-08T00:00:00.000Z',
+    updatedAt: '2026-09-08T00:00:00.000Z',
+  };
+
+  let clientArgs: ReturnType<typeof createCasesClientMockArgs>;
+  let caseService: ReturnType<typeof createCaseServiceMock>;
+  let alertsService: jest.Mocked<AlertService>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    clientArgs = createCasesClientMockArgs();
+    caseService = createCaseServiceMock();
+    alertsService = clientArgs.services.alertsService as jest.Mocked<AlertService>;
+    clientArgs.services.caseService = caseService;
+  });
+
+  it('reports alerts_not_found when getAlerts returns no docs', async () => {
+    alertsService.getAlerts.mockResolvedValue({ docs: [] });
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'alerts_not_found',
+      alertsRequested: 1,
+      alertsFound: 0,
+    });
+  });
+
+  it('reports alerts_not_found when no doc has a _source', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [{ found: false, _id: 'x', _index: 'y' }],
+    });
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'alerts_not_found',
+      alertsRequested: 1,
+      alertsFound: 0,
+    });
+    expect(caseService.patchCase).not.toHaveBeenCalled();
+  });
+
+  it('reports alerts_not_found when getAlerts has nothing to look up', async () => {
+    alertsService.getAlerts.mockResolvedValue(undefined);
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'alerts_not_found',
+      alertsRequested: 1,
+      alertsFound: 0,
+    });
+    expect(caseService.getCase).not.toHaveBeenCalled();
+  });
+
+  it('reports alerts_not_found when every doc comes back with an error', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [
+        {
+          _id: 'alert-id-1',
+          _index: 'alert-index-1',
+          error: { type: 'security_exception', reason: 'no read privilege on the index' },
+        },
+      ],
+    });
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'alerts_not_found',
+      alertsRequested: 1,
+      alertsFound: 0,
+    });
+    expect(caseService.patchCase).not.toHaveBeenCalled();
+  });
+
+  it('reports no_matching_fields when no ECS field produces an observable', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [makeEcsDoc({ 'unrelated.field': 'value' })],
+    });
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'no_matching_fields',
+      alertsRequested: 1,
+      alertsFound: 1,
+    });
+    expect(caseService.getCase).not.toHaveBeenCalled();
+  });
+
+  it('reports no_new_observables when the case already has every extracted observable', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
+    });
+    caseService.getCase.mockResolvedValue({
+      ...caseSO,
+      attributes: { ...caseSO.attributes, observables: [existingObservable] },
+    });
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'no_new_observables',
+      alertsRequested: 1,
+      alertsFound: 1,
+    });
+    expect(caseService.patchCase).not.toHaveBeenCalled();
+  });
+
+  it('reports cap_reached when the case is full and nothing can be added', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [makeEcsDoc({ 'source.ip': '5.6.7.8' })],
+    });
+    const fullObservables = Array.from({ length: MAX_OBSERVABLES_PER_CASE }, (_, index) => ({
+      ...existingObservable,
+      id: `observable-${index}`,
+      value: `10.0.0.${index}`,
+    }));
+    caseService.getCase.mockResolvedValue({
+      ...caseSO,
+      attributes: { ...caseSO.attributes, observables: fullObservables },
+    });
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'cap_reached',
+      alertsRequested: 1,
+      alertsFound: 1,
+    });
+    expect(caseService.patchCase).not.toHaveBeenCalled();
+  });
+
+  it('reports extracted with the new observables, the patched case, and the counts', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' }), { found: false, _id: 'x', _index: 'y' }],
+    });
+    caseService.getCase.mockResolvedValue(caseSO);
+    caseService.patchCase.mockImplementation(async ({ updatedAttributes }) => ({
+      id: caseSO.id,
+      type: caseSO.type,
+      version: 'patched-version',
+      attributes: updatedAttributes,
+      references: [],
+    }));
+
+    const outcome = await extractObservablesFromAlerts(
+      'case-1',
+      [...alertInfo, { id: 'alert-id-2', index: 'alert-index-1' }],
+      clientArgs
+    );
+
+    expect(outcome).toEqual(
+      expect.objectContaining({ status: 'extracted', alertsRequested: 2, alertsFound: 1 })
+    );
+    expect(outcome.status === 'extracted' && outcome.newlyAddedObservables).toEqual([
+      expect.objectContaining({ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '1.2.3.4' }),
+    ]);
+    expect(outcome.status === 'extracted' && outcome.caseWithPatch.version).toBe('patched-version');
+  });
+
+  it('does not emit the observables-added event itself', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
+    });
+    caseService.getCase.mockResolvedValue(caseSO);
+    caseService.patchCase.mockResolvedValue(caseSO);
+
+    await extractObservablesFromAlerts('case-1', alertInfo, clientArgs);
+
+    expect(clientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
+  });
+
+  it('throws when the alerts service fails', async () => {
+    alertsService.getAlerts.mockRejectedValue(new Error('mget failed'));
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).rejects.toThrow(
+      'mget failed'
+    );
+  });
+
+  it('throws when saving the observables to the case fails', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
+    });
+    caseService.getCase.mockResolvedValue(caseSO);
+    caseService.patchCase.mockRejectedValue(new Error('version conflict'));
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).rejects.toThrow(
+      'version conflict'
+    );
+  });
+
+  it('does not look up linked-project references and reports them as not found', async () => {
+    await expect(
+      extractObservablesFromAlerts(
+        'case-1',
+        [{ id: 'alert-id-1', index: 'linked-project:alert-index-1' }],
+        clientArgs
+      )
+    ).resolves.toEqual({ status: 'alerts_not_found', alertsRequested: 1, alertsFound: 0 });
+    expect(alertsService.getAlerts).not.toHaveBeenCalled();
+  });
+
+  it('looks up only the local references when the case also has linked-project references', async () => {
+    alertsService.getAlerts.mockResolvedValue({ docs: [] });
+
+    await extractObservablesFromAlerts(
+      'case-1',
+      [...alertInfo, { id: 'alert-id-2', index: 'linked-project:alert-index-1' }],
+      clientArgs
+    );
+
+    expect(alertsService.getAlerts).toHaveBeenCalledTimes(1);
+    expect(alertsService.getAlerts).toHaveBeenCalledWith(alertInfo);
+  });
+
+  it('reads the references in batches when there are more than the lookup limit', async () => {
+    const manyAlertInfo = Array.from({ length: MAX_ALERTS_PER_CASE + 1 }, (_, index) => ({
+      id: `alert-id-${index}`,
+      index: 'alert-index-1',
+    }));
+    alertsService.getAlerts
+      .mockResolvedValueOnce({ docs: [] })
+      .mockResolvedValueOnce({ docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })] });
+    caseService.getCase.mockResolvedValue(caseSO);
+    caseService.patchCase.mockResolvedValue(caseSO);
+
+    const outcome = await extractObservablesFromAlerts('case-1', manyAlertInfo, clientArgs);
+
+    expect(alertsService.getAlerts).toHaveBeenCalledTimes(2);
+    expect(alertsService.getAlerts).toHaveBeenNthCalledWith(
+      1,
+      manyAlertInfo.slice(0, MAX_ALERTS_PER_CASE)
+    );
+    expect(alertsService.getAlerts).toHaveBeenNthCalledWith(
+      2,
+      manyAlertInfo.slice(MAX_ALERTS_PER_CASE)
+    );
+    expect(outcome).toEqual(
+      expect.objectContaining({
+        status: 'extracted',
+        alertsRequested: MAX_ALERTS_PER_CASE + 1,
+        alertsFound: 1,
+      })
+    );
   });
 });
