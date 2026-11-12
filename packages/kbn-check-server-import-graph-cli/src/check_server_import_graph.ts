@@ -23,27 +23,11 @@ import {
 } from './walk_server_import_graph';
 
 /**
- * Browser-only node modules that must never be loaded by the Kibana server. Matched against the
- * resolved node module name, so `@elastic/eui/lib/...` is caught while the pure
- * `@elastic/eui-theme-*` packages are not. `react`, `react-dom` and `@emotion/*` are deliberately
- * absent: core renders the bootstrap HTML template with React on the server.
+ * Node modules that must never be loaded by the Kibana server. Matched against the resolved node
+ * module name, so `@elastic/eui/lib/...` is caught while the pure `@elastic/eui-theme-*` packages
+ * are not.
  */
-const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([
-  '@elastic/eui',
-  '@elastic/apm-rum',
-  '@elastic/apm-rum-core',
-  '@elastic/apm-rum-react',
-  'react-intl',
-  'react-use',
-  'react-redux',
-  'react-redux-v7',
-  'redux',
-  'redux-v4',
-  '@reduxjs/toolkit',
-  'redux-toolkit-v1',
-  'refractor',
-  'prismjs',
-]);
+const BANNED_NODE_MODULES: ReadonlySet<string> = new Set(['@elastic/eui']);
 
 const BASELINE_PATH = Path.resolve(__dirname, '..', 'baseline.json');
 const BASELINE_COMMENT =

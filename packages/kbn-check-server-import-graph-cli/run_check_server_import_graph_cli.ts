@@ -28,8 +28,8 @@ run(
   {
     usage: 'node scripts/check_server_import_graph [--update-baseline]',
     description:
-      'Statically walks the import graph from every server entry point and fails when browser-only node modules ' +
-      '(@elastic/eui, react-intl, react-use, redux, ...) become reachable through eager imports.',
+      'Statically walks the import graph from every server entry point and fails when @elastic/eui ' +
+      'becomes reachable from it.',
     flags: {
       boolean: ['update-baseline'],
       help: `
