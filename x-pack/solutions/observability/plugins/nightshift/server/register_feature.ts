@@ -25,6 +25,9 @@ const AGENTIC_INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
 const AGENTIC_INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
 const PROPOSALS_API_PRIVILEGE_READ = 'read_proposals';
 const PROPOSALS_API_PRIVILEGE_MANAGE = 'manage_proposals';
+// Closing or reopening a significant event is an Alerting v2 alert action, which the alert
+// actions client authorizes against "Alerts: All".
+const ALERTING_V2_ALERTS_API_PRIVILEGE_WRITE = 'manage_alerting-v2-alerts';
 // Significant Events manages the Alerting v2 rules behind query knowledge indicators with the
 // current user's saved objects client.
 const ALERTING_V2_RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
@@ -50,6 +53,7 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
           AGENTIC_INVESTIGATIONS_API_PRIVILEGE_MANAGE,
           PROPOSALS_API_PRIVILEGE_READ,
           PROPOSALS_API_PRIVILEGE_MANAGE,
+          ALERTING_V2_ALERTS_API_PRIVILEGE_WRITE,
         ],
         ui: [NIGHTSHIFT_UI_PRIVILEGES.show, NIGHTSHIFT_UI_PRIVILEGES.manage],
         // Grants implicit read on `.rule-events*` / `.alert-actions*` (Alerting v2), which

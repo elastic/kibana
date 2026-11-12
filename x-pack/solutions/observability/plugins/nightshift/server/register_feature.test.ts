@@ -17,7 +17,7 @@ const getRegisteredFeature = (): KibanaFeatureConfig => {
 };
 
 describe('registerNightshiftFeature', () => {
-  it('grants the agentic investigations and proposals API privileges with `all`', () => {
+  it('grants the agentic investigations, proposals and Alerting v2 alerts write API privileges with `all`', () => {
     const { privileges } = getRegisteredFeature();
 
     expect(privileges?.all.api).toEqual([
@@ -27,6 +27,7 @@ describe('registerNightshiftFeature', () => {
       'manage_investigations',
       'read_proposals',
       'manage_proposals',
+      'manage_alerting-v2-alerts',
     ]);
   });
 
