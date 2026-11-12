@@ -102,6 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.sleep(1000);
 
       await lens.saveAndReturn();
+      await testSubjects.existOrFail('dashboardViewOnlyMode');
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('kql');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
