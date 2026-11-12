@@ -9,10 +9,7 @@
 
 import { findImportedSavedObjectId, spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  getDashboardPanels,
-  openDashboard,
-} from '../../../utils/migration_smoke_helpers';
+import { getDashboardPanels, openDashboard } from '../../../utils/migration_smoke_helpers';
 import { MIGRATION_SMOKE_EXPORTS_DIR, SHAKESPEARE_DATA_VIEW_TITLE } from '../../constants';
 
 const EXPORT_PATH = `${MIGRATION_SMOKE_EXPORTS_DIR}/controls_dashboard_migration_test_8_0_0.json`;

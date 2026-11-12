@@ -9,9 +9,7 @@
 
 import { findImportedSavedObjectId, spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  getDashboardPanels,
-} from '../../../utils/migration_smoke_helpers';
+import { getDashboardPanels } from '../../../utils/migration_smoke_helpers';
 import {
   DASHBOARD_EDIT_PANEL_ACTION_TEST_SUBJ,
   LOGSTASH_DATA_VIEW_TITLE,
