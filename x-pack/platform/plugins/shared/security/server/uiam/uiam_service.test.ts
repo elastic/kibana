@@ -10,6 +10,7 @@ import undici from 'undici';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
@@ -1588,7 +1589,14 @@ describe('UiamService', () => {
 
   describe('#getApiKeyCreator', () => {
     const authorization = new HTTPAuthorizationHeader('ApiKey', 'essu_api_key');
-    const respondWith = (creator?: unknown) =>
+    const getCreator = (credential: HTTPAuthorizationHeader = authorization) =>
+      uiamService.getApiKeyCreator({
+        request: httpServerMock.createKibanaRequest({
+          headers: { authorization: credential.toString() },
+        }),
+        user: null,
+      });
+    const respondWith = (creator?: string | Record<string, string | number>) =>
       fetchSpy.mockResolvedValue({
         ok: true,
         json: async () => ({
@@ -1601,7 +1609,7 @@ describe('UiamService', () => {
     it('authenticates the key with Kibana client authentication and returns a user creator', async () => {
       respondWith({ type: 'user', user_id: 12345 });
 
-      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toEqual({
+      await expect(getCreator()).resolves.toEqual({
         type: 'user',
         user_id: 12345,
       });
@@ -1622,32 +1630,69 @@ describe('UiamService', () => {
       );
     });
 
+    it.each([
+      ['an Elasticsearch API key', new HTTPAuthorizationHeader('ApiKey', 'some-es-api-key')],
+      ['a UIAM bearer token', new HTTPAuthorizationHeader('Bearer', 'essu_access_token')],
+    ])('does not ask UIAM for %s', async (_, credential) => {
+      await expect(getCreator(credential)).resolves.toBeUndefined();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not ask UIAM for an external key the user authenticated with', async () => {
+      await expect(
+        uiamService.getApiKeyCreator({
+          request: httpServerMock.createKibanaRequest({
+            headers: { authorization: authorization.toString() },
+          }),
+          user: mockAuthenticatedUser({
+            authentication_type: 'api_key',
+            api_key: { id: 'key-id', name: 'key', internal: false, managed_by: 'cloud' },
+          }),
+        })
+      ).resolves.toBeUndefined();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not ask UIAM for an external key on a fake request', async () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: authorization.toString() },
+      });
+      markExternalUiamCredential(request);
+
+      await expect(uiamService.getApiKeyCreator({ request, user: null })).resolves.toBeUndefined();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
     it('returns an API key creator for a key granted from another API key', async () => {
       respondWith({ type: 'api-key', api_key_id: 'source-key-id' });
 
-      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toEqual({
+      await expect(getCreator()).resolves.toEqual({
         type: 'api-key',
         api_key_id: 'source-key-id',
       });
     });
 
     it.each([
+      ['a creator type that is not supported', { type: 'service-account', id: 'sa-id' }],
       ['no creator', undefined],
-      ['an unknown creator type', { type: 'service-account', id: 'sa-id' }],
       ['a user creator without a numeric id', { type: 'user', user_id: 'not-a-number' }],
       ['an API key creator without an id', { type: 'api-key' }],
       ['a creator that is not an object', 'user'],
     ])('returns undefined when UIAM reports %s', async (_, creator) => {
       respondWith(creator);
 
-      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toBeUndefined();
+      await expect(getCreator()).resolves.toBeUndefined();
+      expect(uiamServiceLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('UIAM did not report a supported creator for the API key')
+      );
+      expect(uiamServiceLogger.warn).not.toHaveBeenCalled();
       expect(uiamServiceLogger.error).not.toHaveBeenCalled();
     });
 
     it('returns undefined when the response has no credentials', async () => {
       fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ type: 'api-key' }) });
 
-      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toBeUndefined();
+      await expect(getCreator()).resolves.toBeUndefined();
     });
 
     it.each([
@@ -1656,8 +1701,8 @@ describe('UiamService', () => {
     ])('caches %s', async (_, creator) => {
       respondWith(creator);
 
-      const first = await uiamService.getApiKeyCreator(authorization);
-      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toEqual(first);
+      const first = await getCreator();
+      await expect(getCreator()).resolves.toEqual(first);
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
@@ -1665,11 +1710,7 @@ describe('UiamService', () => {
     it('shares one lookup between concurrent requests for the same key', async () => {
       respondWith({ type: 'user', user_id: 12345 });
 
-      const creators = await Promise.all([
-        uiamService.getApiKeyCreator(authorization),
-        uiamService.getApiKeyCreator(authorization),
-        uiamService.getApiKeyCreator(authorization),
-      ]);
+      const creators = await Promise.all([getCreator(), getCreator(), getCreator()]);
 
       expect(creators).toEqual(Array(3).fill({ type: 'user', user_id: 12345 }));
       expect(fetchSpy).toHaveBeenCalledTimes(1);
@@ -1678,8 +1719,8 @@ describe('UiamService', () => {
     it('looks up each key separately', async () => {
       respondWith({ type: 'user', user_id: 12345 });
 
-      await uiamService.getApiKeyCreator(authorization);
-      await uiamService.getApiKeyCreator(new HTTPAuthorizationHeader('ApiKey', 'essu_another'));
+      await getCreator();
+      await getCreator(new HTTPAuthorizationHeader('ApiKey', 'essu_another'));
 
       expect(fetchSpy).toHaveBeenCalledTimes(2);
     });
@@ -1692,17 +1733,17 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'UIAM is down' } }),
       });
 
-      await expect(uiamService.getApiKeyCreator(authorization)).rejects.toThrow('UIAM is down');
+      await expect(getCreator()).rejects.toThrow('UIAM is down');
 
       respondWith({ type: 'user', user_id: 12345 });
-      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toEqual({
+      await expect(getCreator()).resolves.toEqual({
         type: 'user',
         user_id: 12345,
       });
       expect(fetchSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('logs and throws when UIAM rejects the key', async () => {
+    it('throws without logging when UIAM rejects the key', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 401,
@@ -1710,10 +1751,9 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Authentication failed', code: '0x8560B2' } }),
       });
 
-      await expect(uiamService.getApiKeyCreator(authorization)).rejects.toThrow(
-        'Authentication failed'
-      );
-      expect(uiamServiceLogger.error).toHaveBeenCalledTimes(1);
+      await expect(getCreator()).rejects.toThrow('Authentication failed');
+      // Callers log the failure with their own context, and decide whether it's an error.
+      expect(uiamServiceLogger.error).not.toHaveBeenCalled();
     });
   });
 

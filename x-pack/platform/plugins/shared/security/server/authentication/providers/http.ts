@@ -11,7 +11,6 @@ import type { AuthenticatedUser, AuthHeaders, KibanaRequest } from '@kbn/core/se
 import {
   HTTPAuthorizationHeader,
   isUiamBearerCredential,
-  isUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 
@@ -20,7 +19,7 @@ import { BaseAuthenticationProvider } from './base';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
-import { getRequestSpacePrefix, isExternalApiKey } from '../../uiam';
+import { getRequestSpacePrefix } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -140,7 +139,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
 
       return AuthenticationResult.succeeded(
         {
-          ...(await this.withUiamApiKeyCreator(authorizationHeader, user)),
+          ...(await this.withUiamApiKeyCreator(request, user)),
           http_authentication_scheme: authorizationHeader.scheme.toLowerCase(),
         },
         {
@@ -184,21 +183,16 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    * identity when UIAM reports no user creator or the lookup fails.
    */
   private async withUiamApiKeyCreator(
-    authorizationHeader: HTTPAuthorizationHeader,
+    request: KibanaRequest,
     user: AuthenticatedUser
   ): Promise<AuthenticatedUser> {
     const { uiam } = this.options;
-    if (
-      !uiam ||
-      !user.api_key ||
-      isExternalApiKey(user) ||
-      !isUiamCredential(authorizationHeader)
-    ) {
+    if (!uiam) {
       return user;
     }
 
     try {
-      const creator = await uiam.getApiKeyCreator(authorizationHeader);
+      const creator = await uiam.getApiKeyCreator({ request, user });
       return creator?.type === 'user' ? { ...user, username: String(creator.user_id) } : user;
     } catch (err) {
       this.logger.error(

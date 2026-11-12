@@ -766,9 +766,16 @@ describe('HTTPAuthenticationProvider', () => {
           api_key: expect.objectContaining({ id: 'task-key-id' }),
         })
       );
-      expect(options.uiam!.getApiKeyCreator).toHaveBeenCalledWith(
+      // The service skips other credentials and external keys, so it needs both.
+      const [[{ request: lookedUpRequest, user: lookedUpUser }]] =
+        options.uiam!.getApiKeyCreator.mock.calls;
+      expect(HTTPAuthorizationHeader.parseFromRequest(lookedUpRequest)).toEqual(
         new HTTPAuthorizationHeader('ApiKey', 'essu_task_manager_key')
       );
+      expect(lookedUpUser).toEqual({
+        ...user,
+        authentication_provider: { type: 'http', name: 'http' },
+      });
     });
 
     it('keeps the key identity when the key was created by another API key', async () => {
@@ -792,27 +799,14 @@ describe('HTTPAuthenticationProvider', () => {
       );
     });
 
-    it('does not look up external keys', async () => {
+    it('keeps the identity when there is no creator to report', async () => {
+      // As for an external key, an Elasticsearch API key, or a credential that is not an API key.
+      options.uiam!.getApiKeyCreator.mockResolvedValue(undefined);
+
       const result = await authenticate(options, { user: apiKeyUser(false) });
 
+      expect(result.succeeded()).toBe(true);
       expect(result.user?.username).toBe('task-key-id');
-      expect(options.uiam!.getApiKeyCreator).not.toHaveBeenCalled();
-    });
-
-    it('does not look up Elasticsearch API keys', async () => {
-      const result = await authenticate(options, { authorization: 'ApiKey some-es-api-key' });
-
-      expect(result.user?.username).toBe('task-key-id');
-      expect(options.uiam!.getApiKeyCreator).not.toHaveBeenCalled();
-    });
-
-    it('does not look up credentials that are not API keys', async () => {
-      const result = await authenticate(options, {
-        user: mockAuthenticatedUser({ username: 'user' }),
-      });
-
-      expect(result.user?.username).toBe('user');
-      expect(options.uiam!.getApiKeyCreator).not.toHaveBeenCalled();
     });
 
     it('does not look anything up when UIAM is not enabled', async () => {

@@ -14,10 +14,12 @@ import { Agent } from 'undici';
 
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
+  isUiamCredential,
   resolveUiamClientAuthentication,
   UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
@@ -47,6 +49,7 @@ import {
   getUiamAuthorizationHeaderFromRequest,
   getUiamCredentialsFromRequest,
 } from './get_uiam_credentials';
+import { isExternalApiKey } from './is_external_api_key';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
@@ -208,9 +211,18 @@ const apiKeyAuthenticateResponseSchema = lazySchema(() =>
 
 export type UiamApiKeyCreator = z.infer<typeof apiKeyCreatorSchema>;
 
+/** Parameters for {@link UiamServicePublic.getApiKeyCreator}. */
+export interface GetUiamApiKeyCreatorParams {
+  /** The request that carries the API key. */
+  request: KibanaRequest;
+  /** The user the request authenticated as, if known. On a real request it tells an external key. */
+  user: AuthenticatedUser | null;
+}
+
 /**
- * A key's creator never changes, and a revoked key fails authentication before it gets here, so
- * a long TTL is safe. Background tasks use the same key over and over.
+ * Background tasks use the same key over and over. A key's creator never changes, so entries only
+ * expire to bound memory. The cache says who created a key, not that the key is still valid, so
+ * callers must authenticate the key first.
  */
 const API_KEY_CREATOR_CACHE_MAX_SIZE = 1000;
 const API_KEY_CREATOR_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -311,13 +323,15 @@ export interface UiamServicePublic {
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
 
   /**
-   * Returns the principal UIAM records as the creator of an internal API key, or `undefined` when
-   * UIAM reports none we recognize. Results are cached per key, failures are not. The key is
-   * authenticated with Kibana's own client authentication, so do not call this for external
-   * (user-created) keys: UIAM rejects those when they carry it.
-   * @param authorization The `ApiKey` credential whose creator is requested.
+   * Returns the principal UIAM records as the creator of the internal UIAM API key a request
+   * carries, or `undefined` when UIAM reports none we support. Any other credential, and an
+   * external (user-created) key, resolves to `undefined` without asking UIAM: the key is
+   * authenticated with Kibana's own client authentication, which UIAM rejects for external keys.
+   * Results are cached per key, so the caller must have authenticated the key: a cached creator
+   * outlives a revoked or expired key. A failed request is thrown for the caller to log and is not
+   * cached, while a response without a supported creator resolves to `undefined`.
    */
-  getApiKeyCreator(authorization: HTTPAuthorizationHeader): Promise<UiamApiKeyCreator | undefined>;
+  getApiKeyCreator(params: GetUiamApiKeyCreatorParams): Promise<UiamApiKeyCreator | undefined>;
 
   /**
    * Creates a service account via the UIAM service.
@@ -879,9 +893,24 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getApiKeyCreator}.
    */
-  async getApiKeyCreator(
-    authorization: HTTPAuthorizationHeader
-  ): Promise<UiamApiKeyCreator | undefined> {
+  async getApiKeyCreator({
+    request,
+    user,
+  }: GetUiamApiKeyCreatorParams): Promise<UiamApiKeyCreator | undefined> {
+    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (
+      !authorization ||
+      authorization.scheme.toLowerCase() !== 'apikey' ||
+      !isUiamCredential(authorization)
+    ) {
+      return undefined;
+    }
+
+    if (isExternalUiamCredential(request) || isExternalApiKey(user)) {
+      this.#logger.debug('Skipping the creator lookup for an external UIAM API key.');
+      return undefined;
+    }
+
     const cacheKey = createHash('sha256').update(authorization.credentials).digest('hex');
     const cached = this.#apiKeyCreators.get(cacheKey);
     if (cached) {
@@ -898,38 +927,30 @@ export class UiamService implements UiamServicePublic {
   async #fetchApiKeyCreator(
     authorization: HTTPAuthorizationHeader
   ): Promise<UiamApiKeyCreator | undefined> {
-    try {
-      const requestOptions: RequestInit & { dispatcher?: Agent } = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': this.#userAgentHeader,
-          ...this.#getClientAuthenticationHeaders(),
-          Authorization: authorization.toString(),
-        },
-        dispatcher: this.#dispatcher,
-      };
+    const requestOptions: RequestInit & { dispatcher?: Agent } = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': this.#userAgentHeader,
+        ...this.#getClientAuthenticationHeaders(),
+        Authorization: authorization.toString(),
+      },
+      dispatcher: this.#dispatcher,
+    };
 
-      const response = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`, requestOptions)
+    const response = await UiamService.#parseUiamResponse(
+      await fetch(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`, requestOptions)
+    );
+
+    const parsed = apiKeyAuthenticateResponseSchema.safeParse(response);
+    if (!parsed.success) {
+      this.#logger.debug(
+        `UIAM did not report a supported creator for the API key: ${parsed.error.message}`
       );
-
-      const parsed = apiKeyAuthenticateResponseSchema.safeParse(response);
-      if (!parsed.success) {
-        this.#logger.debug(
-          `UIAM did not report a known creator for the API key: ${parsed.error.message}`
-        );
-        return undefined;
-      }
-
-      return parsed.data.credentials.creator;
-    } catch (err) {
-      this.#logger.error(
-        () => `Failed to get the creator of an API key: ${getDetailedErrorMessage(err)}`
-      );
-
-      throw err;
+      return undefined;
     }
+
+    return parsed.data.credentials.creator;
   }
 
   /**

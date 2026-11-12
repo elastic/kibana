@@ -7,13 +7,11 @@
 
 import { createHash } from 'crypto';
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import { isExternalUiamCredential } from '@kbn/core-security-server';
 
-import { getDetailedErrorMessage } from '../errors';
-import { isExternalApiKey, type UiamServicePublic } from '../uiam';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import type { UiamServicePublic } from '../uiam';
 
 /**
  * Elastic Cloud users are not part of a security domain, so Elasticsearch creates their profile ID
@@ -25,43 +23,50 @@ const getCloudUserProfileId = (userId: number) =>
 
 interface UiamApiKeyProfileIdResolverParams {
   uiam: UiamServicePublic;
+  clusterClient: IClusterClient;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   logger: Logger;
 }
 
+export type UiamApiKeyProfileIdResolver = (request: KibanaRequest) => Promise<string | undefined>;
+
 /**
- * Creates a function that resolves the profile ID of the user who created a UIAM API key, as UIAM
- * reports it. The ID is not available for a key created by another API key, and external
- * (user-created) keys are skipped: UIAM rejects them when they carry Kibana's client
- * authentication. Failures are logged and resolve to `undefined`. The lookup is cached by
- * {@link UiamServicePublic.getApiKeyCreator}.
+ * Creates a function that resolves the profile ID of the user who created the UIAM API key a
+ * request carries, as {@link UiamServicePublic.getApiKeyCreator} reports it. The ID is not
+ * available for a key created by another API key, or for an external (user-created) key. Failures
+ * are logged and resolve to `undefined`.
  */
 export const createUiamApiKeyProfileIdResolver = ({
   uiam,
+  clusterClient,
   getCurrentUser,
   logger,
-}: UiamApiKeyProfileIdResolverParams) => {
-  return async (
-    request: KibanaRequest,
-    authorization: HTTPAuthorizationHeader
-  ): Promise<string | undefined> => {
-    if (isExternalUiamCredential(request) || isExternalApiKey(getCurrentUser(request))) {
-      logger.debug(`Skipping the creator lookup for an external UIAM API key.`);
-      return undefined;
-    }
-
+}: UiamApiKeyProfileIdResolverParams): UiamApiKeyProfileIdResolver => {
+  return async (request) => {
     try {
-      const creator = await uiam.getApiKeyCreator(authorization);
-      const profileId =
-        creator?.type === 'user' ? getCloudUserProfileId(creator.user_id) : undefined;
-      if (!profileId) {
-        logger.debug(`The UIAM API key was not created by a user, cannot retrieve profile id.`);
+      const creator = await uiam.getApiKeyCreator({ request, user: getCurrentUser(request) });
+      if (creator?.type !== 'user') {
+        logger.debug(`UIAM reported no user creator for the API key, cannot retrieve profile id.`);
+        return undefined;
       }
 
-      return profileId;
+      // A fake request reaches here without its key being authenticated, and the cached creator
+      // would outlive a revoked or expired key, so Elasticsearch checks the key before the creator
+      // is trusted. Checking only now spares the call when there is no profile id to return.
+      if (request.isFakeRequest) {
+        await clusterClient.asScoped(request).asCurrentUser.security.authenticate();
+      }
+
+      return getCloudUserProfileId(creator.user_id);
     } catch (error) {
+      // A task can outlive its key, so a key that no longer authenticates is expected.
+      if (getErrorStatusCode(error) === 401) {
+        logger.debug(`The UIAM API key no longer authenticates, cannot retrieve profile id.`);
+        return undefined;
+      }
+
       logger.error(
-        `Failed to retrieve the creator of a UIAM API key for user profile retrieval: ${getDetailedErrorMessage(
+        `Failed to resolve the creator of a UIAM API key for user profile retrieval: ${getDetailedErrorMessage(
           error
         )}`
       );
@@ -69,5 +74,3 @@ export const createUiamApiKeyProfileIdResolver = ({
     }
   };
 };
-
-export type UiamApiKeyProfileIdResolver = ReturnType<typeof createUiamApiKeyProfileIdResolver>;

@@ -19,7 +19,6 @@ import {
 } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
@@ -682,6 +681,86 @@ describe('UserProfileService', () => {
       });
     });
 
+    describe('with UIAM api key', () => {
+      const cloudUserProfileId = 'u_WZRHGrsBESr8wYFZ9sx0tPURuZgG2lmzyvWpwXPKz8U_0';
+      let mockUiam: ReturnType<typeof uiamServiceMock.create>;
+      let mockUiamApiKeyRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
+      const startWithUiam = () => userProfileService.start({ ...mockStartParams, uiam: mockUiam });
+
+      beforeEach(() => {
+        mockUiam = uiamServiceMock.create();
+        mockUiam.getApiKeyCreator.mockResolvedValue({ type: 'user', user_id: 12345 });
+        mockUiamApiKeyRequest = httpServerMock.createKibanaRequest({
+          headers: { authorization: 'ApiKey essu_some-uiam-api-key' },
+        });
+      });
+
+      it('returns the profile of the user who created the key', async () => {
+        await expect(
+          startWithUiam().getCurrent({ request: mockUiamApiKeyRequest })
+        ).resolves.toEqual(expect.objectContaining({ uid: 'UID' }));
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({ uid: cloudUserProfileId });
+      });
+
+      it('returns `null` without an error when the creator has no profile yet', async () => {
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+          profiles: [],
+        });
+
+        await expect(
+          startWithUiam().getCurrent({ request: mockUiamApiKeyRequest })
+        ).resolves.toBeNull();
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({ uid: cloudUserProfileId });
+        expect(logger.error).not.toHaveBeenCalled();
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith(
+          expect.objectContaining({ outcome: 'failure' })
+        );
+      });
+
+      it('still throws for an Elasticsearch API key whose profile is not found', async () => {
+        mockStartParams.clusterClient
+          .asScoped()
+          .asCurrentUser.security.getApiKey.mockResolvedValue({
+            api_keys: [
+              {
+                id: 'some-api-key-id',
+                type: 'rest',
+                name: 'some-api-key',
+                creation: 0,
+                invalidated: false,
+                username: 'es-key-owner',
+                realm: 'native',
+                metadata: {},
+                profile_uid: 'es-key-owner-profile',
+              },
+            ],
+          });
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+          profiles: [],
+        });
+        const esKeyRequest = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `apikey ${Buffer.from('some-api-key-id:some-api-key-value').toString(
+              'base64'
+            )}`,
+          },
+        });
+
+        await expect(startWithUiam().getCurrent({ request: esKeyRequest })).rejects.toThrow(
+          'User profile is not found.'
+        );
+        expect(logger.error).toHaveBeenCalled();
+        expect(mockUiam.getApiKeyCreator).not.toHaveBeenCalled();
+      });
+    });
+
     describe(`with api key`, () => {
       const testApiKeyValue = 'some-api-key-value';
       const testApiKeyId = 'some-api-key-id';
@@ -1294,9 +1373,10 @@ describe('UserProfileService', () => {
           startWithUiam().getCurrentProfileId({ request: mockUiamApiKeyRequest })
         ).resolves.toBe('u_WZRHGrsBESr8wYFZ9sx0tPURuZgG2lmzyvWpwXPKz8U_0');
 
-        expect(mockUiam.getApiKeyCreator).toHaveBeenCalledWith(
-          new HTTPAuthorizationHeader('ApiKey', uiamApiKey)
-        );
+        expect(mockUiam.getApiKeyCreator).toHaveBeenCalledWith({
+          request: mockUiamApiKeyRequest,
+          user: null,
+        });
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
         ).not.toHaveBeenCalled();

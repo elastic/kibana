@@ -128,6 +128,9 @@ interface GetCurrentTelemetry {
 
 interface ResolvedCurrentUserProfileId {
   profileId?: string;
+  // Set when `profileId` was derived from the creator of a UIAM API key instead of read from a profile, so the
+  // profile may not exist yet: `getCurrent` returns `null` for it, as for an Elasticsearch API key without one.
+  profileIdIsDerived?: boolean;
   sessionId?: string;
   // Only set when the profile was resolved via Basic auth activation, since activation returns the full profile.
   // `getCurrent` uses it to avoid a redundant `getUserProfile` re-fetch; `getCurrentProfileId` ignores it.
@@ -151,7 +154,13 @@ export class UserProfileService {
 
   start({ clusterClient, session, getCurrentUser, uiam }: UserProfileServiceStartParams) {
     this.resolveUiamApiKeyProfileId =
-      uiam && createUiamApiKeyProfileIdResolver({ uiam, getCurrentUser, logger: this.logger });
+      uiam &&
+      createUiamApiKeyProfileIdResolver({
+        uiam,
+        clusterClient,
+        getCurrentUser,
+        logger: this.logger,
+      });
 
     return {
       activate: this.activate.bind(this, clusterClient),
@@ -424,6 +433,7 @@ export class UserProfileService {
     }
 
     let profileId: string | undefined;
+    let profileIdIsDerived: boolean | undefined;
     let sessionId: string | undefined;
     let activatedProfile: UserProfileWithSecurity | undefined;
     let profileActivationRequired: boolean | undefined;
@@ -483,15 +493,18 @@ export class UserProfileService {
 
         // Elasticsearch doesn't know UIAM API keys, so those are resolved through UIAM instead.
         const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-        profileId =
-          this.resolveUiamApiKeyProfileId && authorization && isUiamCredential(authorization)
-            ? await this.resolveUiamApiKeyProfileId(request, authorization)
-            : await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+        if (this.resolveUiamApiKeyProfileId && authorization && isUiamCredential(authorization)) {
+          profileId = await this.resolveUiamApiKeyProfileId(request);
+          profileIdIsDerived = true;
+        } else {
+          profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+        }
       }
     }
 
     return {
       profileId,
+      profileIdIsDerived,
       sessionId,
       activatedProfile,
       telemetry: {
@@ -523,7 +536,7 @@ export class UserProfileService {
       return null;
     }
 
-    const { profileId, sessionId, activatedProfile, telemetry } = resolved;
+    const { profileId, profileIdIsDerived, sessionId, activatedProfile, telemetry } = resolved;
 
     // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
     // we will need to re-fetch the profile like in the other cases (session, API key).
@@ -559,6 +572,13 @@ export class UserProfileService {
 
     if (body.profiles.length === 0) {
       this.recordGetCurrentFailure(telemetry);
+      if (profileIdIsDerived) {
+        this.logger.debug(
+          `The user profile for the current user${requestDescriptor} has not been created yet.`
+        );
+        return null;
+      }
+
       this.logger.error(`The user profile for the current user${requestDescriptor} is not found.`);
       throw new Error(`User profile is not found.`);
     }
