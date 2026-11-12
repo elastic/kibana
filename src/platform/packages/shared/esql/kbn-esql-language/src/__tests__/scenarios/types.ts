@@ -14,6 +14,8 @@ import type {
   ESQLControlVariable,
   ESQLFieldWithMetadata,
   ESQLSourceResult,
+  EsqlDatasetsResult,
+  EsqlViewsResult,
   IndexAutocompleteItem,
   InferenceEndpointAutocompleteItem,
   RecommendedField,
@@ -48,6 +50,10 @@ export interface ScenarioPolicy {
 export interface ScenarioWorld {
   readonly columns: readonly ESQLFieldWithMetadata[];
   readonly sources: readonly ESQLSourceResult[];
+  readonly views: Readonly<EsqlViewsResult['views']>;
+  readonly datasets: Readonly<EsqlDatasetsResult['datasets']>;
+  /** The editor can open the data source browser. */
+  readonly supportsResourceBrowser: boolean;
   readonly policies: readonly ScenarioPolicy[];
   readonly joinIndices: readonly IndexAutocompleteItem[];
   /** The columns of each lookup index, by index name. */

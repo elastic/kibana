@@ -37,6 +37,9 @@ const SINGLE_SOURCE_QUERY = /^\s*FROM\s+(\S+)\s*$/i;
 export const DEFAULT_WORLD: ScenarioWorld = {
   columns: defaultColumns,
   sources: mockContext.sources ?? [],
+  views: [],
+  datasets: [],
+  supportsResourceBrowser: false,
   policies,
   joinIndices,
   lookupColumns: Object.fromEntries(joinIndices.map(({ name }) => [name, defaultLookupColumns])),
@@ -64,6 +67,9 @@ export const createCallbacks = (overrides: Partial<ScenarioWorld> = {}): ESQLCal
       return [...(world.lookupColumns[source] ?? world.columns)];
     },
     getSources: async () => [...world.sources],
+    getViews: async () => ({ views: [...world.views] }),
+    getDatasets: async () => ({ datasets: [...world.datasets] }),
+    canSuggestResourceBrowser: async () => world.supportsResourceBrowser,
     getPolicies: async () => [...world.policies],
     getJoinIndices: async () => ({ indices: [...world.joinIndices] }),
     canCreateLookupIndex: async () => world.canCreateLookupIndex,
