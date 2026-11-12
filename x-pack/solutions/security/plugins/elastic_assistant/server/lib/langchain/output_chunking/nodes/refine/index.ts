@@ -11,6 +11,7 @@ import {
   attackDiscoveryRefineTemplateRequest,
   getEmptyModelResponseError,
   getParseErrorSummary,
+  handleModelRefusal,
   isEmptyModelResponseError,
   type AttackDiscoveryTemplateCompletion,
 } from '@kbn/discoveries';
@@ -158,6 +159,8 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
+      handleModelRefusal({ error, logger, nodeName: 'refine', state });
+
       const parsingError = isEmptyModelResponseError(error)
         ? getEmptyModelResponseError({
             cause: error,

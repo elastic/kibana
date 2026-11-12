@@ -11,12 +11,16 @@ import React, { type PropsWithChildren } from 'react';
 
 import {
   canOverrideHoverActions,
+  getSelectionApi,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import classNames from 'classnames';
 import { BehaviorSubject } from 'rxjs';
-import type { PresentationPanelHoverActionsProps } from './presentation_panel_hover_actions';
+import type {
+  PanelSelection,
+  PresentationPanelHoverActionsProps,
+} from './presentation_panel_hover_actions';
 import { PresentationPanelHoverActions } from './presentation_panel_hover_actions';
 import { useHoverActionStyles } from './use_hover_actions_styles';
 
@@ -35,14 +39,25 @@ const customActionsStyles = css({
 export const PresentationPanelHoverActionsWrapper = (
   props: PropsWithChildren<PresentationPanelHoverActionsProps>
 ) => {
-  const [defaultTitle, title, hasLockedHoverActions, overrideHoverActions] =
+  const selectionApi = getSelectionApi(props.api);
+  const [defaultTitle, title, hasLockedHoverActions, overrideHoverActions, selectedPanelIds] =
     useBatchedPublishingSubjects(
       props.api.defaultTitle$ ?? new BehaviorSubject(undefined),
       props.api.title$ ?? new BehaviorSubject(undefined),
       props.api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
-      props.api.overrideHoverActions$ ?? new BehaviorSubject(false)
+      props.api.overrideHoverActions$ ?? new BehaviorSubject(false),
+      selectionApi?.selectedPanelIds$ ?? new BehaviorSubject<string[]>([])
     );
   const containerStyles = useHoverActionStyles(props.viewMode === 'edit', props.showBorder);
+  const panelId = props.api?.uuid;
+  const selection: PanelSelection | undefined =
+    selectionApi && panelId && props.viewMode === 'edit'
+      ? {
+          isSelectionMode: selectedPanelIds.length > 0,
+          isSelected: selectedPanelIds.includes(panelId),
+          toggle: () => selectionApi.togglePanelSelection(panelId),
+        }
+      : undefined;
 
   let OverriddenHoverActionsComponent = null;
   if (canOverrideHoverActions(props.api) && overrideHoverActions) {
@@ -55,6 +70,7 @@ export const PresentationPanelHoverActionsWrapper = (
         'embPanel__hoverActionsAnchor--lockHoverActions':
           hasLockedHoverActions || Boolean(OverriddenHoverActionsComponent),
         'embPanel__hoverActionsAnchor--editMode': props.viewMode === 'edit',
+        'embPanel__hoverActionsAnchor--selectionMode': Boolean(selection?.isSelectionMode),
       })}
       data-test-embeddable-id={props.api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
@@ -69,7 +85,9 @@ export const PresentationPanelHoverActionsWrapper = (
         </div>
       )}
       {props.children}
-      {!OverriddenHoverActionsComponent && <PresentationPanelHoverActions {...props} />}
+      {!OverriddenHoverActionsComponent && (
+        <PresentationPanelHoverActions {...props} selection={selection} />
+      )}
     </div>
   );
 };

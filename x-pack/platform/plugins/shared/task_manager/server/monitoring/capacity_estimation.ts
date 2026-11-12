@@ -8,11 +8,11 @@
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
 import type { JsonObject } from '@kbn/utility-types';
-import type { Logger } from '@kbn/core/server';
 import type { RawMonitoringStats, RawMonitoredStat } from './monitoring_stats_stream';
 import { HealthStatus } from './monitoring_stats_stream';
 import type { AveragedStat } from './task_run_calculators';
 import type { TaskPersistenceTypes } from './task_run_statistics';
+import type { HealthStatusLogger } from '../lib/health_status_logger';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, map } from '../lib/result_type';
 
@@ -47,9 +47,10 @@ function isCapacityEstimationParams(
 }
 
 export function estimateCapacity(
-  logger: Logger,
+  logger: HealthStatusLogger,
   capacityStats: CapacityEstimationParams,
-  assumedKibanaInstances: number
+  assumedKibanaInstances: number,
+  esBackpressureActive = false
 ): RawMonitoredStat<CapacityEstimationStat> {
   const workload = capacityStats.workload.value;
 
@@ -192,11 +193,15 @@ export function estimateCapacity(
     averageCapacityUsedByNonRecurringTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
 
-  const { status, reason } = getHealthStatus(logger, {
-    assumedRequiredThroughputPerMinutePerKibana,
-    assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
-    capacityPerMinutePerKibana,
-  });
+  const { status, reason } = getHealthStatus(
+    logger,
+    {
+      assumedRequiredThroughputPerMinutePerKibana,
+      assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+      capacityPerMinutePerKibana,
+    },
+    esBackpressureActive
+  );
   return {
     status,
     reason,
@@ -241,8 +246,9 @@ interface GetHealthStatusParams {
 }
 
 function getHealthStatus(
-  logger: Logger,
-  params: GetHealthStatusParams
+  logger: HealthStatusLogger,
+  params: GetHealthStatusParams,
+  esBackpressureActive: boolean
 ): { status: HealthStatus; reason?: string } {
   const {
     assumedRequiredThroughputPerMinutePerKibana,
@@ -251,31 +257,37 @@ function getHealthStatus(
   } = params;
   if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
     const reason = `Task Manager is healthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-    logger.debug(reason);
+    logger.healthy(reason);
     return { status: HealthStatus.OK, reason };
   }
 
   if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana > capacityPerMinutePerKibana) {
     const reason = `Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) > capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-    logger.warn(reason);
+    logger.unhealthy(reason, esBackpressureActive);
     return { status: HealthStatus.OK, reason };
   }
 
   const reason = `Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-  logger.warn(reason);
+  logger.unhealthy(reason, esBackpressureActive);
   return { status: HealthStatus.OK, reason };
 }
 
 export function withCapacityEstimate(
-  logger: Logger,
+  logger: HealthStatusLogger,
   monitoredStats: RawMonitoringStats['stats'],
-  assumedKibanaInstances: number
+  assumedKibanaInstances: number,
+  esBackpressureActive = false
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
     try {
       return {
         ...monitoredStats,
-        capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
+        capacity_estimation: estimateCapacity(
+          logger,
+          monitoredStats,
+          assumedKibanaInstances,
+          esBackpressureActive
+        ),
       };
     } catch (e) {
       // Return monitoredStats with out capacity estimation

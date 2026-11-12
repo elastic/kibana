@@ -10,11 +10,10 @@ import {
   ToolResultType,
   type ConversationRoundStep,
   type ReasoningStep,
-  type TodosStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
-import { applyStepUpdates, countNonTodosSteps, persistableSteps, stepUpdates } from './step_state';
+import { applyStepUpdates, persistableSteps, stepUpdates } from './step_state';
 
 const toolCall = (id: string, groupId = 'g1'): ToolCallStep => ({
   type: ConversationRoundStepType.toolCall,
@@ -29,11 +28,6 @@ const toolCall = (id: string, groupId = 'g1'): ToolCallStep => ({
 const reasoning = (text: string): ReasoningStep => ({
   type: ConversationRoundStepType.reasoning,
   reasoning: text,
-});
-
-const todos = (n: number): TodosStep => ({
-  type: ConversationRoundStepType.updateTodos,
-  todos: [{ content: `todo ${n}`, status: 'pending' }],
 });
 
 const invalidStateError = expect.objectContaining({
@@ -132,36 +126,19 @@ describe('applyStepUpdates', () => {
     expect(second[0]).toMatchObject({ prompt_id: 'p1', answers: [{ choice: [0] }] });
   });
 
-  it('keeps the todos step as a trailing singleton', () => {
-    const result = applyStepUpdates(
-      [reasoning('a'), todos(1)],
-      [
-        stepUpdates.append(reasoning('b')),
-        stepUpdates.setTodos(todos(2)),
-        stepUpdates.appendToolCall(toolCall('c1')),
-      ]
-    );
+  it('appends in order and returns the input untouched when there is no update', () => {
+    const input = [reasoning('a')];
+    expect(applyStepUpdates(input, [])).toBe(input);
+    const result = applyStepUpdates(input, [
+      stepUpdates.append(reasoning('b')),
+      stepUpdates.appendToolCall(toolCall('c1')),
+    ]);
     expect(result.map((s) => s.type)).toEqual([
       ConversationRoundStepType.reasoning,
       ConversationRoundStepType.reasoning,
       ConversationRoundStepType.toolCall,
-      ConversationRoundStepType.updateTodos,
     ]);
-    expect(result.at(-1)).toMatchObject({ todos: [{ content: 'todo 2' }] });
-  });
-
-  it('keeps the last todos step when the input carries several (legacy merged rounds)', () => {
-    const result = applyStepUpdates(
-      [todos(1), reasoning('r'), todos(2)],
-      [stepUpdates.append(reasoning('s'))]
-    );
-    expect(result).toEqual([reasoning('r'), reasoning('s'), todos(2)]);
-  });
-});
-
-describe('countNonTodosSteps', () => {
-  it('ignores the todos step', () => {
-    expect(countNonTodosSteps([reasoning('a'), todos(1), toolCall('c1')])).toBe(2);
+    expect(input).toEqual([reasoning('a')]);
   });
 });
 

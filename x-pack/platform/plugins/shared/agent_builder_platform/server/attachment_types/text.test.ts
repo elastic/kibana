@@ -12,10 +12,10 @@ import { createTextAttachmentType } from './text';
 const toSurfaceText = async (content: string) => {
   const composition = await createTextAttachmentType().toSurfaceComposition?.(
     { id: 'text-1', type: AttachmentType.text, data: { content } },
-    { request: httpServerMock.createKibanaRequest(), spaceId: 'default' }
+    { request: httpServerMock.createKibanaRequest(), spaceId: 'default', agentId: 'agent-1' }
   );
 
-  return composition?.body.map(({ text }) => text);
+  return composition?.body.map((node) => (node.type === 'markdown' ? node.text : undefined));
 };
 
 describe('text attachment type', () => {

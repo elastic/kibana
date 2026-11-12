@@ -28,16 +28,21 @@ import {
   type OnConnectStart,
   type OnNodesDelete,
   type OnReconnect,
+  type XYPosition,
 } from '@xyflow/react';
+import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { buildClassicStreamsGraph } from './build_graph';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { useUnitId } from '../../../../hooks/use_unit_id';
 import {
-  buildUnitConnectionEdges,
+  buildUnitCanvasGraph,
+  withRoutingDiagnostics,
   configuredDestinationNodeId,
   configuredSourceNodeId,
   readConfiguredDestinationId,
-  readConfiguredSourceId,
+  readLineOrigin,
+  readLineTarget,
 } from './build_unit_connection_edges';
 import {
   CanvasContextMenu,
@@ -51,14 +56,21 @@ import { CanvasSearchOverlay } from './canvas_search_overlay';
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
 import { ConnectionTargetsProvider } from './nodes/connection_handle';
 import { CanvasToolbar } from './canvas_toolbar';
-import { applyLayout } from './layout';
-import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
+import { CanvasReadOnlyProvider } from './canvas_read_only_context';
+import { UnitReadOnlyCallout } from '../../../streams_layout/unit_read_only_callout';
+import { applyLayout, getConnectedNodeIds } from './layout';
+import { getGraphNodeIds, syncCanvasNodeMetadata, syncCanvasEdgeData } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
-import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
+import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
+import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
+import type { IndexInspectTabId } from '../../../index_inspect/types';
 import {
   DESTINATION_NODE_TYPE,
+  PROCESSING_NODE_TYPE,
+  ROUTING_NODE_TYPE,
   SOURCE_NODE_TYPE,
+  type ClassicCanvasEdge,
   type ClassicCanvasGraph,
   type ClassicCanvasNode,
   type DestinationNode,
@@ -72,13 +84,17 @@ import {
   useCanvasHasUnsavedChanges,
   useCanvasIsInitializing,
   useCanvasIsSaving,
+  useCanvasIsSavingProcessing,
+  useCanvasRoutingStagedUnit,
   useCanvasIsUnitUnavailable,
   useCanvasNodePositions,
   useCanvasUnitDefinition,
   useCanvasDestinationsRef,
   useCanvasSourcesRef,
   useCanvasUrlRef,
+  useCanvasRoutingDiagnostics,
   useCanvasRoutingFlyout,
+  useCanvasProcessingFlyout,
 } from './state_management';
 import {
   useSourceApiKeyGenerationDeps,
@@ -88,28 +104,46 @@ import {
 import { createUnitRepository, type Unit } from '../../../../services/unit_repository';
 import type { SourceType, SourceViewModel } from '../../../streams_layout/sources/types';
 import { SOURCE_TYPE_CONFIG_BY_TYPE } from '../../../streams_layout/sources/source_type_config';
-import { getUnitSources, withUnitSources } from '../../../streams_layout/sources/source_models';
+import {
+  getSourceDisplaySignals,
+  getUnitSources,
+  withUnitSources,
+} from '../../../streams_layout/sources/source_models';
 import { CreateSourceModal } from '../../../streams_layout/sources/create_source_modal';
 import { SourceDetailsFlyout } from '../../../streams_layout/sources/source_details_flyout';
 import { useDestinations } from '../../../streams_layout/destinations/destinations_context';
 import { CreateDestinationModal } from '../../../streams_layout/destinations/create_destination_modal';
 import { UnitDestinationFlyout } from '../../../streams_layout/destinations/unit_destination_flyout';
-import type { DestinationViewModel } from '../../../streams_layout/destinations/types';
+import type {
+  DestinationViewModel,
+  ElasticsearchDestinationViewModel,
+} from '../../../streams_layout/destinations/types';
+import { DESTINATION_SIGNAL_LABELS } from '../../../streams_layout/destinations/destination_type_config';
 import {
+  getDestinationIndices,
   getUnitDestinations,
   withUnitDestinations,
 } from '../../../streams_layout/destinations/destination_models';
 import {
-  canConnectSourceToDestination,
-  connectSourceToDestination,
-  disconnectSourceFromDestination,
-  moveUnitConnection,
+  canConnectLine,
+  canMoveLine,
+  connectLine,
+  disconnectLine,
+  moveLine,
   removeComponentFromPipelines,
+  type UnitLineMove,
+  type UnitLineOrigin,
+  type UnitLineTarget,
 } from '../../../../services/unit_connections';
 import { RoutingFlyout } from '../../../stream_routing_flyout';
 import { ProcessingFlyout } from '../../../stream_processing_flyout';
+import { STATS_POLL_INTERVAL_MS } from '../../../unit_stats/state_management/constants';
+import { StatsManagerProvider } from '../../../unit_stats/state_management/use_stats_manager';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
+
+const noop = () => {};
+const NO_DESTINATION_INDICES: ResolvedDestinationIndex[] = [];
 const canvasColumnStyles = css`
   display: flex;
   flex: 1 1 auto;
@@ -132,8 +166,7 @@ interface CanvasContextMenuState {
 }
 
 /**
- * Renders classic streams as inferred source -> destination pairs, plus unit
- * sources and destinations wired by each source pipeline.
+ * Renders unit sources and destinations wired by each source pipeline.
  */
 export function StreamsCanvas() {
   const {
@@ -144,12 +177,15 @@ export function StreamsCanvas() {
       },
     },
   } = useKibana();
+  const { timeState, timeState$ } = useTimefilter();
+  const unitId = useUnitId();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
   const unitDefinitionRepository = useMemo(
-    () => createUnitRepository({ streamsRepositoryClient }),
-    [streamsRepositoryClient]
+    () =>
+      createUnitRepository({ streamsRepositoryClient, unitId, toasts: core.notifications.toasts }),
+    [core.notifications.toasts, streamsRepositoryClient, unitId]
   );
 
   return (
@@ -157,41 +193,50 @@ export function StreamsCanvas() {
       core={core}
       urlStateStorageContainer={urlStateStorageContainer}
       apiKeyGenerationDeps={apiKeyGenerationDeps}
+      timeState={timeState}
+      timeState$={timeState$}
       loadSourceEnvironment={loadSourceEnvironment}
       loadUnitDefinition={unitDefinitionRepository.load}
       persistUnitDefinition={unitDefinitionRepository.persist}
     >
-      <StreamsCanvasInner />
+      <StatsManagerProvider unitId={unitId} pollIntervalMs={STATS_POLL_INTERVAL_MS}>
+        <StreamsCanvasInner />
+      </StatsManagerProvider>
     </CanvasStateContextProvider>
   );
 }
 
 function StreamsCanvasInner() {
+  useSyncStatsWithSavedUnit();
   const { euiTheme } = useEuiTheme();
   const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
-  const { flyoutName, flyoutTab, query } = useCanvasUrlRef();
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
+  const readOnly = !canManage;
+  const { flyoutName, flyoutKind, flyoutTab, query } = useCanvasUrlRef();
   const {
     openFlyout,
     closeFlyout,
     selectTab,
     changeSearchQuery,
     updateNodePositions,
+    restoreNodePositions,
     saveUnit,
     changeUnitConnection,
+    openProcessingFlyout,
+    openRoutingFlyout,
   } = useCanvasEvents();
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
   const isSaving = useCanvasIsSaving();
+  const isSavingProcessing = useCanvasIsSavingProcessing();
+  const routingStagedUnit = useCanvasRoutingStagedUnit();
   const isInitializing = useCanvasIsInitializing();
   const isUnitUnavailable = useCanvasIsUnitUnavailable();
   const nodePositions = useCanvasNodePositions();
-  const [routingFlyout, mode] = useCanvasRoutingFlyout();
+  const routingFlyout = useCanvasRoutingFlyout();
+  const routingDiagnostics = useCanvasRoutingDiagnostics();
+  const processingFlyout = useCanvasProcessingFlyout();
   const nodePositionsRef = useRef(nodePositions);
   useEffect(() => {
     nodePositionsRef.current = nodePositions;
@@ -212,7 +257,6 @@ function StreamsCanvasInner() {
     sources,
     selectedSource,
     isCreateModalOpen,
-    unconfiguredNodeIds,
     openCreateModal,
     closeCreateModal,
     openSourceFlyout,
@@ -220,88 +264,68 @@ function StreamsCanvasInner() {
   } = sourcesController;
   const {
     destinations,
+    resolvedIndicesByDestination,
+    resolvedIndicesStatus,
+    resolvedIndicesError,
     isCreateModalOpen: isCreateDestinationModalOpen,
-    unconfiguredNodeIds: unconfiguredDestinationNodeIds,
     openCreateModal: openCreateDestinationModal,
     closeCreateModal: closeCreateDestinationModal,
   } = destinationsController;
-  const { value, loading, refresh } = useStreamsAppFetch(
-    ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams/classic', { signal }),
-    [streamsRepositoryClient]
-  );
 
-  const openFlyoutTab = useCallback(
-    (name: string, initialTab: StreamFlyoutTabId = 'overview') => {
-      openFlyout(name);
+  const openIndexFlyout = useCallback(
+    (name: string, initialTab: IndexInspectTabId = 'overview') => {
+      openFlyout(name, 'index');
       selectTab(initialTab);
     },
     [openFlyout, selectTab]
   );
+  const openDestinationFlyout = useCallback(
+    (destinationId: string) => {
+      openFlyout(destinationId, 'destination');
+    },
+    [openFlyout]
+  );
 
   const graph = useMemo<ClassicCanvasGraph>(() => {
-    const nextGraph = buildClassicStreamsGraph(value?.streams ?? []);
-    const unitConnectionEdges = buildUnitConnectionEdges(
+    const { processingNodes, routingNodes, edges } = buildUnitCanvasGraph(
       unitDefinition,
       sources.map((source) => source.id),
       destinations.map((destination) => destination.id)
     );
     const connectedDestinationIds = new Set(
-      unitConnectionEdges.flatMap((edge) => {
+      edges.flatMap((edge) => {
         const destinationId = readConfiguredDestinationId(edge.target);
         return destinationId ? [destinationId] : [];
       })
     );
     const configuredSourceNodes = sources.map(buildConfiguredSourceNode);
-    const unconfiguredSourceNodes = unconfiguredNodeIds.map(buildUnconfiguredSourceNode);
     const configuredDestinationNodes = destinations.map((destination) =>
-      buildConfiguredDestinationNode(destination, connectedDestinationIds.has(destination.id))
+      buildConfiguredDestinationNode(
+        destination,
+        connectedDestinationIds.has(destination.id),
+        resolvedIndicesByDestination.get(destination.id)?.map((index) => index.name) ?? []
+      )
     );
-    const unconfiguredDestinationNodes = unconfiguredDestinationNodeIds.map(
-      buildUnconfiguredDestinationNode
-    );
-    const edges = [...nextGraph.edges, ...unitConnectionEdges];
     const graphNodes = [
       ...configuredSourceNodes,
-      ...unconfiguredSourceNodes,
+      ...processingNodes,
+      ...withRoutingDiagnostics(routingNodes, routingDiagnostics),
       ...configuredDestinationNodes,
-      ...unconfiguredDestinationNodes,
-      ...nextGraph.nodes.map(
-        (node): ClassicCanvasNode =>
-          node.type === DESTINATION_NODE_TYPE
-            ? {
-                ...node,
-                deletable: false,
-                data: {
-                  ...node.data,
-                  onProcessingClick: (streamName: string) =>
-                    openFlyoutTab(streamName, 'processing'),
-                },
-              }
-            : { ...node, deletable: false }
-      ),
     ];
     return {
-      ...nextGraph,
       nodes: applyLayout(graphNodes, edges),
       edges,
     };
-  }, [
-    destinations,
-    openFlyoutTab,
-    sources,
-    unconfiguredDestinationNodeIds,
-    unconfiguredNodeIds,
-    unitDefinition,
-    value,
-  ]);
+  }, [destinations, resolvedIndicesByDestination, routingDiagnostics, sources, unitDefinition]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
-  // Metadata-only updates (e.g. hasProcessing after a save) are merged onto the
-  // live nodes so a user's in-progress tidy or keyboard move is not wiped.
-  // Undo history resets when the classic stream set changes, not when a unit
-  // node is added or removed, so a deleted unit node can be restored.
+  // Metadata-only updates (e.g. index count after resolved indices reload) are
+  // merged onto the live nodes so a user's in-progress tidy or keyboard move is
+  // not wiped.
   const [nodes, setNodes, applyNodesChange] = useNodesState(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
+  const liveNodesRef = useRef(nodes);
+  liveNodesRef.current = nodes;
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
 
   const searchedFlow = useMemo(() => resolveCanvasSearch(graph, query), [graph, query]);
@@ -309,52 +333,75 @@ function StreamsCanvasInner() {
     () => applyCanvasSearch(nodes, edges, searchedFlow),
     [nodes, edges, searchedFlow]
   );
+  const canEditConnections = !readOnly && !isSaving;
+  // A per-edge `reconnectable` overrides the canvas-wide `edgesReconnectable`, so lock each edge.
+  const visibleEdges = useMemo(
+    () =>
+      canEditConnections
+        ? visible.edges
+        : visible.edges.map((edge) => ({ ...edge, reconnectable: false })),
+    [canEditConnections, visible.edges]
+  );
   const restoreHistory = useCallback(
     (extra: CanvasEditSnapshot) => {
       if (extra.unit !== unitDefinition) {
         changeUnitConnection(extra.unit);
       }
-      if (!sameIds(extra.unconfiguredSourceNodeIds, unconfiguredNodeIds)) {
-        sourcesActorRef.send({
-          type: 'unconfiguredNodes.set',
-          nodeIds: extra.unconfiguredSourceNodeIds,
-        });
-      }
-      if (!sameIds(extra.unconfiguredDestinationNodeIds, unconfiguredDestinationNodeIds)) {
-        destinationsActorRef.send({
-          type: 'unconfiguredNodes.set',
-          nodeIds: extra.unconfiguredDestinationNodeIds,
-        });
+      // Stored positions go back with the unit, or the graph sync below would
+      // re-apply the ones written after this snapshot was taken.
+      if (extra.nodePositions !== nodePositions) {
+        restoreNodePositions(extra.nodePositions);
       }
     },
-    [
-      changeUnitConnection,
-      destinationsActorRef,
-      sourcesActorRef,
-      unconfiguredDestinationNodeIds,
-      unconfiguredNodeIds,
-      unitDefinition,
-    ]
+    [changeUnitConnection, nodePositions, restoreNodePositions, unitDefinition]
   );
-  const { record, hold, commit, discard, undo, redo, reset, canUndo, canRedo } = useCanvasHistory({
+  const { record, hold, reset, discard, undo, redo, canUndo, canRedo } = useCanvasHistory({
     nodes,
     edges,
     extra: {
       unit: unitDefinition,
-      unconfiguredSourceNodeIds: unconfiguredNodeIds,
-      unconfiguredDestinationNodeIds,
+      nodePositions,
     },
     setNodes,
     setEdges,
     onRestore: restoreHistory,
   });
-  // The machine holds this canvas when a create save starts, then commits or
-  // discards that step from the persist success and failure transitions.
-  useBindCanvasCreateHistory({ hold, commit, discard });
+  // The machine holds this canvas when a create save starts, then resets the
+  // stack on persist success so undo cannot restore a destination / source whose key was revoked.
+  useBindCanvasCreateHistory({ hold, reset, discard });
+
+  // The unit an edit on this canvas last staged, until the graph sync below sees
+  // it. This is how the sync tells a node the user just placed from one that
+  // undo, redo or a reload brought in.
+  const userEditUnitRef = useRef<Unit>();
+  const stageUserEdit = useCallback(
+    (next: Unit) => {
+      record();
+      userEditUnitRef.current = next;
+      changeUnitConnection(next);
+    },
+    [changeUnitConnection, record]
+  );
+
+  // The routing flyout stages its rules in the machine, not through stageUserEdit.
+  // Each staged unit counts as an edit once, so undo or redo back to it does not.
+  const seenRoutingStagedUnitRef = useRef<Unit>();
+
   const graphNodeIdsRef = useRef('');
   const graphEdgeIdsRef = useRef('');
+  const knownNodeIdsRef = useRef<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
+    const isRoutingStage =
+      routingStagedUnit === unitDefinition &&
+      seenRoutingStagedUnitRef.current !== routingStagedUnit;
+    if (isRoutingStage) {
+      seenRoutingStagedUnitRef.current = routingStagedUnit;
+    }
+    const isUserEdit = userEditUnitRef.current === unitDefinition || isRoutingStage;
+    if (userEditUnitRef.current === unitDefinition) {
+      userEditUnitRef.current = undefined;
+    }
     const nextNodeIds = getGraphNodeIds(graph.nodes);
     const nextEdgeIds = graph.edges.map((edge) => edge.id).join('\n');
     if (graphNodeIdsRef.current === nextNodeIds) {
@@ -362,28 +409,76 @@ function StreamsCanvasInner() {
       if (graphEdgeIdsRef.current !== nextEdgeIds) {
         graphEdgeIdsRef.current = nextEdgeIds;
         setEdges(graph.edges);
+      } else {
+        setEdges((current) => syncCanvasEdgeData(current, graph.edges));
       }
       return;
     }
     graphNodeIdsRef.current = nextNodeIds;
     graphEdgeIdsRef.current = nextEdgeIds;
 
-    setNodes(
-      graph.nodes.map((node) => {
-        const storedPosition = nodePositionsRef.current[node.id];
-        return storedPosition ? { ...node, position: storedPosition } : node;
-      })
-    );
-    setEdges(graph.edges);
-  }, [graph, setNodes, setEdges]);
+    const knownNodeIds = knownNodeIdsRef.current;
+    knownNodeIdsRef.current = new Set(graph.nodes.map((node) => node.id));
 
-  const classicNodeIds = useMemo(
-    () => getGraphNodeIds(buildClassicStreamsGraph(value?.streams ?? []).nodes),
-    [value]
-  );
-  useEffect(() => {
-    reset();
-  }, [classicNodeIds, reset]);
+    const positionedNodes = graph.nodes.map((node) => {
+      const storedPosition = nodePositionsRef.current[node.id];
+      return storedPosition ? { ...node, position: storedPosition } : node;
+    });
+    setEdges(graph.edges);
+
+    // A routing or processing node placed on a line makes that flow one column
+    // longer, so tidy the flow it joined as "Tidy up selection" would with that
+    // flow selected. Other flows keep their positions. Only an edit on this canvas
+    // or a routing or processing flyout save places a node: one that the initial load, undo,
+    // redo or a reload brings in keeps its stored position.
+    const placedNodeIds = new Set(
+      isUserEdit || isSavingProcessing
+        ? graph.nodes
+            .filter(
+              ({ id, type }) =>
+                (type === ROUTING_NODE_TYPE || type === PROCESSING_NODE_TYPE) &&
+                !knownNodeIds.has(id)
+            )
+            .map(({ id }) => id)
+        : []
+    );
+    if (placedNodeIds.size === 0) {
+      setNodes(positionedNodes);
+      return;
+    }
+
+    // Tidy from where the nodes are on screen right now, as the menu action does.
+    const liveNodesById = new Map(liveNodesRef.current.map((node) => [node.id, node]));
+    const liveNodes = positionedNodes.map((node) => {
+      const liveNode = liveNodesById.get(node.id);
+      return liveNode
+        ? { ...node, position: liveNode.position, measured: liveNode.measured }
+        : node;
+    });
+    const flowNodeIds = getConnectedNodeIds(placedNodeIds, graph.edges);
+    // The placed node is not on screen yet, so keep the flow where its other nodes are.
+    const tidiedNodes = applyLayout(liveNodes, graph.edges, {
+      onlyIds: flowNodeIds,
+      anchorIds: new Set([...flowNodeIds].filter((id) => !placedNodeIds.has(id))),
+    });
+    setNodes(tidiedNodes);
+    // Store the tidied positions so the next graph change does not undo them.
+    updateNodePositions(
+      Object.fromEntries(
+        tidiedNodes
+          .filter(({ id }) => flowNodeIds.has(id))
+          .map(({ id, position }) => [id, position])
+      )
+    );
+  }, [
+    graph,
+    unitDefinition,
+    isSavingProcessing,
+    routingStagedUnit,
+    setNodes,
+    setEdges,
+    updateNodePositions,
+  ]);
 
   // Tracks whether a pointer drag is in progress so we snapshot each gesture
   // exactly once.
@@ -466,41 +561,75 @@ function StreamsCanvasInner() {
 
   const [connectionTargetIds, setConnectionTargetIds] = useState<ReadonlySet<string> | null>(null);
 
+  const readConnectionOrigin = useCallback(
+    (nodeId: string | null | undefined, handleId: string | null | undefined) =>
+      readLineOrigin(graph.nodes, nodeId, handleId),
+    [graph.nodes]
+  );
+  const readConnectionTarget = useCallback(
+    (nodeId: string | null | undefined) => readLineTarget(graph.nodes, nodeId),
+    [graph.nodes]
+  );
+
+  // The line being moved, if any. Drops are then checked as a move of that line,
+  // so a rule can swap its one connection for another target.
+  const reconnectingRef = useRef<Pick<UnitLineMove, 'previousOrigin' | 'previousTarget'> | null>(
+    null
+  );
+
+  const canDropConnection = useCallback(
+    (origin: UnitLineOrigin, target: UnitLineTarget): boolean => {
+      const reconnecting = reconnectingRef.current;
+      return reconnecting
+        ? canMoveLine(unitDefinition, { ...reconnecting, origin, target })
+        : canConnectLine(unitDefinition, origin, target);
+    },
+    [unitDefinition]
+  );
+
+  const onReconnectStart = useCallback<
+    NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectStart']>
+  >(
+    (_event, edge) => {
+      const previousOrigin = readConnectionOrigin(edge.source, edge.sourceHandle);
+      const previousTarget = readConnectionTarget(edge.target);
+      reconnectingRef.current =
+        previousOrigin && previousTarget ? { previousOrigin, previousTarget } : null;
+    },
+    [readConnectionOrigin, readConnectionTarget]
+  );
+
   const onConnect = useCallback<OnConnect>(
     (connection) => {
-      const sourceId = readConfiguredSourceId(connection.source);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!sourceId || !destinationId) {
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
+      const target = readConnectionTarget(connection.target);
+      if (!origin || !target) {
         return;
       }
-      record();
-      changeUnitConnection(connectSourceToDestination(unitDefinition, sourceId, destinationId));
+      stageUserEdit(connectLine(unitDefinition, origin, target));
     },
-    [changeUnitConnection, record, unitDefinition]
+    [readConnectionOrigin, readConnectionTarget, stageUserEdit, unitDefinition]
   );
 
   const onConnectStart = useCallback<OnConnectStart>(
     (_event, params) => {
-      if (params.handleType !== 'source') {
+      const origin =
+        params.handleType === 'source'
+          ? readConnectionOrigin(params.nodeId, params.handleId)
+          : undefined;
+      if (!origin) {
         setConnectionTargetIds(null);
         return;
       }
-      const sourceId = readConfiguredSourceId(params.nodeId);
-      if (!sourceId) {
-        setConnectionTargetIds(null);
-        return;
-      }
-      setConnectionTargetIds(
-        new Set(
-          destinations
-            .map((destination) => destination.id)
-            .filter((destinationId) =>
-              canConnectSourceToDestination(unitDefinition, sourceId, destinationId)
-            )
-        )
-      );
+      const targets = graph.nodes
+        .map(({ id }) => id)
+        .filter((id) => {
+          const target = readConnectionTarget(id);
+          return target && canDropConnection(origin, target);
+        });
+      setConnectionTargetIds(new Set(targets));
     },
-    [destinations, unitDefinition]
+    [canDropConnection, graph.nodes, readConnectionOrigin, readConnectionTarget]
   );
 
   const clearConnectionTargets = useCallback(() => {
@@ -509,74 +638,64 @@ function StreamsCanvasInner() {
 
   const isValidConnection = useCallback<IsValidConnection>(
     (connection) => {
-      const sourceId = readConfiguredSourceId(connection.source);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!sourceId || !destinationId) {
-        return false;
-      }
-      return canConnectSourceToDestination(unitDefinition, sourceId, destinationId);
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
+      const target = readConnectionTarget(connection.target);
+      return origin !== undefined && target !== undefined && canDropConnection(origin, target);
     },
-    [unitDefinition]
+    [canDropConnection, readConnectionOrigin, readConnectionTarget]
   );
 
   const onReconnect = useCallback<OnReconnect>(
     (oldEdge, connection) => {
-      const previousSourceId = readConfiguredSourceId(oldEdge.source);
-      const previousDestinationId = readConfiguredDestinationId(oldEdge.target);
-      const sourceId = readConfiguredSourceId(connection.source);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!previousSourceId || !previousDestinationId || !sourceId || !destinationId) {
+      if (!canEditConnections) {
         return;
       }
-      record();
-      changeUnitConnection(
-        moveUnitConnection(unitDefinition, {
-          previousSourceId,
-          previousDestinationId,
-          sourceId,
-          destinationId,
-        })
-      );
+      const previousOrigin = readConnectionOrigin(oldEdge.source, oldEdge.sourceHandle);
+      const previousTarget = readConnectionTarget(oldEdge.target);
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
+      const target = readConnectionTarget(connection.target);
+      if (!previousOrigin || !previousTarget || !origin || !target) {
+        return;
+      }
+      const next = moveLine(unitDefinition, { previousOrigin, previousTarget, origin, target });
+      // Dropping the line back where it started changes nothing, so it is not an undo step.
+      if (next === unitDefinition) {
+        return;
+      }
+      stageUserEdit(next);
     },
-    [changeUnitConnection, record, unitDefinition]
+    [canEditConnections, readConnectionOrigin, readConnectionTarget, stageUserEdit, unitDefinition]
   );
 
   const onReconnectEnd = useCallback<
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectEnd']>
   >(
     (_event, edge, _handleType, connectionState) => {
+      reconnectingRef.current = null;
       // Dropping on a handle keeps or moves the line. Releasing on the canvas unhooks it.
-      if (connectionState.toHandle) {
+      if (!canEditConnections || connectionState.toHandle) {
         return;
       }
-      const sourceId = readConfiguredSourceId(edge.source);
-      const destinationId = readConfiguredDestinationId(edge.target);
-      if (!sourceId || !destinationId) {
+      const origin = readConnectionOrigin(edge.source, edge.sourceHandle);
+      const target = readConnectionTarget(edge.target);
+      if (!origin || !target) {
         return;
       }
-      record();
-      changeUnitConnection(
-        disconnectSourceFromDestination(unitDefinition, sourceId, destinationId)
-      );
+      const next = disconnectLine(unitDefinition, origin, target);
+      // A line that cannot be unhooked (a delegated child's last destination) snaps back.
+      if (next === unitDefinition) {
+        return;
+      }
+      stageUserEdit(next);
     },
-    [changeUnitConnection, record, unitDefinition]
+    [canEditConnections, readConnectionOrigin, readConnectionTarget, stageUserEdit, unitDefinition]
   );
 
   const onNodesDelete = useCallback<OnNodesDelete<ClassicCanvasNode>>(
     (deletedNodes) => {
       const removedSourceIds: string[] = [];
       const removedDestinationIds: string[] = [];
-      const removedSourcePlaceholders: string[] = [];
-      const removedDestinationPlaceholders: string[] = [];
       for (const node of deletedNodes) {
-        if (node.data.unconfiguredNodeId) {
-          if (node.type === SOURCE_NODE_TYPE) {
-            removedSourcePlaceholders.push(node.data.unconfiguredNodeId);
-          } else {
-            removedDestinationPlaceholders.push(node.data.unconfiguredNodeId);
-          }
-          continue;
-        }
         if (node.type === SOURCE_NODE_TYPE && node.data.sourceId) {
           removedSourceIds.push(node.data.sourceId);
           continue;
@@ -585,39 +704,17 @@ function StreamsCanvasInner() {
           removedDestinationIds.push(node.data.destinationId);
         }
       }
-      if (
-        removedSourceIds.length === 0 &&
-        removedDestinationIds.length === 0 &&
-        removedSourcePlaceholders.length === 0 &&
-        removedDestinationPlaceholders.length === 0
-      ) {
+      if (removedSourceIds.length === 0 && removedDestinationIds.length === 0) {
         return;
       }
-      record();
-      for (const nodeId of removedSourcePlaceholders) {
-        sourcesActorRef.send({ type: 'unconfiguredNode.remove', nodeId });
-      }
-      for (const nodeId of removedDestinationPlaceholders) {
-        destinationsActorRef.send({ type: 'unconfiguredNode.remove', nodeId });
-      }
-      if (removedSourceIds.length > 0 || removedDestinationIds.length > 0) {
-        changeUnitConnection(
-          withoutDeletedComponents(unitDefinition, removedSourceIds, removedDestinationIds)
-        );
-      }
+      stageUserEdit(
+        withoutDeletedComponents(unitDefinition, removedSourceIds, removedDestinationIds)
+      );
       if (flyoutName && removedDestinationIds.includes(flyoutName)) {
         closeFlyout();
       }
     },
-    [
-      changeUnitConnection,
-      closeFlyout,
-      destinationsActorRef,
-      flyoutName,
-      record,
-      sourcesActorRef,
-      unitDefinition,
-    ]
+    [closeFlyout, flyoutName, stageUserEdit, unitDefinition]
   );
 
   const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
@@ -625,32 +722,27 @@ function StreamsCanvasInner() {
       if (event.target instanceof Element && event.target.closest('.react-flow__handle')) {
         return;
       }
+      if (node.type === PROCESSING_NODE_TYPE && !event.shiftKey) {
+        event.preventDefault();
+        openProcessingFlyout(node.data.ref);
+        return;
+      }
+      if (node.type === ROUTING_NODE_TYPE && !event.shiftKey) {
+        event.preventDefault();
+        openRoutingFlyout({ kind: 'pipeline', pipelineId: node.data.pipelineId }, readOnly);
+        return;
+      }
       if (node.type === SOURCE_NODE_TYPE && node.data.sourceId && !event.shiftKey) {
         event.preventDefault();
         openSourceFlyout(node.data.sourceId);
         return;
       }
-      if (node.type === SOURCE_NODE_TYPE && node.data.unconfiguredNodeId && !event.shiftKey) {
-        event.preventDefault();
-        openCreateModal(node.data.unconfiguredNodeId);
-        return;
-      }
       if (node.type === DESTINATION_NODE_TYPE && node.data.destinationId && !event.shiftKey) {
         event.preventDefault();
-        openFlyoutTab(node.data.destinationId);
-        return;
-      }
-      if (node.type === DESTINATION_NODE_TYPE && node.data.unconfiguredNodeId && !event.shiftKey) {
-        event.preventDefault();
-        openCreateDestinationModal(node.data.unconfiguredNodeId);
-        return;
-      }
-      if (node.type === DESTINATION_NODE_TYPE && node.data.streamName && !event.shiftKey) {
-        event.preventDefault();
-        openFlyoutTab(node.data.streamName);
+        openDestinationFlyout(node.data.destinationId);
       }
     },
-    [openCreateDestinationModal, openCreateModal, openFlyoutTab, openSourceFlyout]
+    [openDestinationFlyout, openProcessingFlyout, openRoutingFlyout, openSourceFlyout, readOnly]
   );
 
   const reopenContextMenu = useCallback(
@@ -691,20 +783,13 @@ function StreamsCanvasInner() {
     redo();
   }, [canRedo, isSaving, redo]);
 
-  // Each new placeholder is its own undo step. Reopening the create modal does not add one.
-  const addUnconfiguredSource = useCallback(() => {
-    if (!isCreateModalOpen) {
-      record();
-    }
+  const addSource = useCallback(() => {
     openCreateModal();
-  }, [isCreateModalOpen, openCreateModal, record]);
+  }, [openCreateModal]);
 
-  const addUnconfiguredDestination = useCallback(() => {
-    if (!isCreateDestinationModalOpen) {
-      record();
-    }
+  const addDestination = useCallback(() => {
     openCreateDestinationModal();
-  }, [isCreateDestinationModalOpen, openCreateDestinationModal, record]);
+  }, [openCreateDestinationModal]);
 
   // Escape closes the context menu and clears any node selection.
   const onEscape = useCallback(() => {
@@ -721,35 +806,38 @@ function StreamsCanvasInner() {
     // Disregard if more than one node is selected for whatever reason.
     if (selected.length === 1) {
       const selectedNode = selected[0];
+      if (selectedNode.type === PROCESSING_NODE_TYPE) {
+        openProcessingFlyout(selectedNode.data.ref);
+      }
+      if (selectedNode.type === ROUTING_NODE_TYPE) {
+        openRoutingFlyout({ kind: 'pipeline', pipelineId: selectedNode.data.pipelineId }, readOnly);
+      }
       if (selectedNode.type === SOURCE_NODE_TYPE && selectedNode.data.sourceId) {
         openSourceFlyout(selectedNode.data.sourceId);
       }
-      if (selectedNode.type === SOURCE_NODE_TYPE && selectedNode.data.unconfiguredNodeId) {
-        openCreateModal(selectedNode.data.unconfiguredNodeId);
-      }
       if (selectedNode.type === DESTINATION_NODE_TYPE && selectedNode.data.destinationId) {
-        openFlyoutTab(selectedNode.data.destinationId);
-      }
-      if (selectedNode.type === DESTINATION_NODE_TYPE && selectedNode.data.unconfiguredNodeId) {
-        openCreateDestinationModal(selectedNode.data.unconfiguredNodeId);
-      }
-      if (
-        selectedNode.type === DESTINATION_NODE_TYPE &&
-        selectedNode.data.streamName &&
-        !selectedNode.data.destinationId
-      ) {
-        openFlyoutTab(selectedNode.data.streamName);
+        openDestinationFlyout(selectedNode.data.destinationId);
       }
     }
-  }, [nodes, openCreateDestinationModal, openCreateModal, openFlyoutTab, openSourceFlyout]);
+  }, [
+    nodes,
+    openDestinationFlyout,
+    openProcessingFlyout,
+    openRoutingFlyout,
+    openSourceFlyout,
+    readOnly,
+  ]);
 
-  useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
+  useCanvasKeyboardShortcuts({
+    onUndo: readOnly ? noop : handleUndo,
+    onRedo: readOnly ? noop : handleRedo,
+    onEscape,
+    onEnter,
+  });
 
-  // Hold the spinner until classic streams, the unit, the source environment,
-  // and the first unit.loaded sync have all settled. Otherwise the graph
-  // remounts mid-interaction and undo history is wiped.
+  // Hold the spinner until the unit, the source environment, and the first
+  // unit.loaded sync have settled. Resolved indices refresh in the background.
   const isCanvasLoading =
-    (loading && !value) ||
     isInitializing ||
     isSourceEnvironmentLoading ||
     ((!hasReceivedUnit || !hasReceivedDestinationsUnit) && !isUnitUnavailable);
@@ -771,15 +859,31 @@ function StreamsCanvasInner() {
     );
   }
 
-  const flyoutDestination = flyoutName
-    ? destinations.find((destination) => destination.id === flyoutName)
-    : undefined;
-  const flyoutStreamName = flyoutDestination?.index ?? flyoutName;
+  const flyoutDestination =
+    flyoutName && flyoutKind !== 'index'
+      ? destinations.find((destination) => destination.id === flyoutName)
+      : undefined;
+  const flyoutIndexName =
+    flyoutName && flyoutKind === 'index'
+      ? flyoutName
+      : flyoutName && !flyoutKind && !flyoutDestination
+      ? flyoutName
+      : undefined;
 
   return (
     <div css={canvasColumnStyles}>
       {searchBar}
-      {(hasUnsavedChanges || isSaving) && (
+      {readOnly && (
+        <div
+          css={css`
+            flex: 0 0 auto;
+            padding: ${euiTheme.size.m};
+          `}
+        >
+          <UnitReadOnlyCallout />
+        </div>
+      )}
+      {!readOnly && (hasUnsavedChanges || isSaving) && (
         <EuiFlexGroup
           responsive={false}
           justifyContent="flexEnd"
@@ -804,220 +908,304 @@ function StreamsCanvasInner() {
           </EuiButton>
         </EuiFlexGroup>
       )}
-      <ConnectionTargetsProvider value={connectionTargetIds}>
-        <CanvasShell<ClassicCanvasNode>
-          nodes={visible.nodes}
-          edges={visible.edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodesDelete={onNodesDelete}
-          deleteKeyCode={
-            isSaving ||
-            sourcesController.isCreatingSource ||
-            destinationsController.isCreatingDestination
-              ? null
-              : ['Backspace', 'Delete']
-          }
-          onConnect={onConnect}
-          onConnectStart={onConnectStart}
-          onConnectEnd={clearConnectionTargets}
-          onReconnect={onReconnect}
-          onReconnectEnd={onReconnectEnd}
-          isValidConnection={isValidConnection}
-          nodesConnectable={!isSaving}
-          edgesReconnectable={!isSaving}
-          connectionLineStyle={{ stroke: euiTheme.colors.primary, strokeWidth: 1 }}
-          onNodeClick={onNodeClick}
-          onNodeContextMenu={onNodeContextMenu}
-          onPaneContextMenu={onPaneContextMenu}
-          onSelectionContextMenu={onSelectionContextMenu}
-          ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
-            defaultMessage: 'Streams canvas',
-          })}
-          ariaDescribedById={KEYBOARD_INSTRUCTIONS_ID}
-        >
-          {loading && (
-            <EuiProgress
-              size="xs"
-              color="primary"
-              position="absolute"
-              data-test-subj="streamsCanvasRefreshing"
-              aria-label={i18n.translate('xpack.streams.canvas.refreshingLabel', {
-                defaultMessage: 'Refreshing streams',
-              })}
-            />
-          )}
-          {nodes.length === 0 && <CanvasEmptyState />}
-          <CanvasSearchOverlay flow={searchedFlow} />
-          {flyoutDestination ? (
-            <UnitDestinationFlyout
-              destinationName={flyoutDestination.name}
-              onClose={closeFlyout}
-              isDeleteDisabled={isSaving}
-              onDelete={() => {
-                destinationsController.deleteDestination(flyoutDestination.id);
-                closeFlyout();
-              }}
-            />
-          ) : (
-            flyoutName &&
-            flyoutStreamName && (
-              <StreamFlyout
-                name={flyoutStreamName}
-                onClose={closeFlyout}
-                refreshStreams={refresh}
-                selectedTab={flyoutTab}
-                onSelectTab={selectTab}
+      <CanvasReadOnlyProvider value={readOnly}>
+        <ConnectionTargetsProvider value={connectionTargetIds}>
+          <CanvasShell<ClassicCanvasNode, ClassicCanvasEdge>
+            nodes={visible.nodes}
+            edges={visibleEdges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onNodesDelete={onNodesDelete}
+            deleteKeyCode={
+              readOnly ||
+              isSaving ||
+              sourcesController.isCreatingSource ||
+              destinationsController.isCreatingDestination
+                ? null
+                : ['Backspace', 'Delete']
+            }
+            onConnect={onConnect}
+            onConnectStart={onConnectStart}
+            onConnectEnd={clearConnectionTargets}
+            onReconnect={onReconnect}
+            onReconnectStart={onReconnectStart}
+            onReconnectEnd={onReconnectEnd}
+            isValidConnection={isValidConnection}
+            nodesConnectable={canEditConnections}
+            edgesReconnectable={canEditConnections}
+            nodesDraggable={!readOnly && !isSaving}
+            zoomControlsDisabled={isSaving}
+            connectionLineStyle={{ stroke: euiTheme.colors.primary, strokeWidth: 1 }}
+            onNodeClick={onNodeClick}
+            onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
+            onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
+            onSelectionContextMenu={readOnly ? undefined : onSelectionContextMenu}
+            ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {
+              defaultMessage: 'Streams map',
+            })}
+            ariaDescribedById={KEYBOARD_INSTRUCTIONS_ID}
+          >
+            {resolvedIndicesStatus === 'loading' && (
+              <EuiProgress
+                size="xs"
+                color="primary"
+                position="absolute"
+                data-test-subj="streamsCanvasRefreshing"
+                aria-label={i18n.translate('xpack.streams.canvas.refreshingLabel', {
+                  defaultMessage: 'Refreshing indices',
+                })}
               />
-            )
-          )}
-          {selectedSource && (
-            <SourceDetailsFlyout
-              sources={sourcesController}
-              source={selectedSource}
-              onClose={closeSourceFlyout}
+            )}
+            {nodes.length === 0 && <CanvasEmptyState onAddSource={addSource} />}
+            <CanvasSearchOverlay flow={searchedFlow} />
+            {flyoutDestination ? (
+              <UnitDestinationFlyout
+                destination={flyoutDestination}
+                indices={
+                  resolvedIndicesByDestination.get(flyoutDestination.id) ?? NO_DESTINATION_INDICES
+                }
+                indicesStatus={resolvedIndicesStatus}
+                indicesError={resolvedIndicesError}
+                destinationDetailRef={destinationsController.destinationDetailRefs.get(
+                  flyoutDestination.id
+                )}
+                onShowDestinationDetail={destinationsController.showDestinationDetail}
+                onHideDestinationDetail={destinationsController.hideDestinationDetail}
+                onClose={closeFlyout}
+                isDeleteDisabled={isSaving}
+                readOnly={readOnly}
+                onIndexClick={openIndexFlyout}
+                onDelete={() => {
+                  destinationsController.deleteDestination(flyoutDestination.id);
+                  closeFlyout();
+                }}
+              />
+            ) : (
+              flyoutIndexName && (
+                <IndexInspectFlyout
+                  indexName={flyoutIndexName}
+                  onClose={closeFlyout}
+                  selectedTab={flyoutTab}
+                  onSelectTab={selectTab}
+                />
+              )
+            )}
+            {selectedSource && (
+              <SourceDetailsFlyout
+                sources={sourcesController}
+                source={selectedSource}
+                onClose={closeSourceFlyout}
+                readOnly={readOnly}
+              />
+            )}
+            {!readOnly && isCreateModalOpen && (
+              <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
+            )}
+            {!readOnly && isCreateDestinationModalOpen && (
+              <CreateDestinationModal
+                destinations={destinationsController}
+                onClose={closeCreateDestinationModal}
+              />
+            )}
+            {routingFlyout ? (
+              <RoutingFlyout
+                key={routingFlyout.ref?.sessionId}
+                flyout={routingFlyout}
+                onBeforeSave={record}
+                readOnly={readOnly}
+              />
+            ) : null}
+            {processingFlyout ? (
+              <ProcessingFlyout
+                key={processingFlyout.ref.sessionId}
+                flyout={processingFlyout}
+                readOnly={readOnly}
+              />
+            ) : null}
+            <EuiScreenReaderOnly>
+              <p id={KEYBOARD_INSTRUCTIONS_ID}>
+                {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
+                  defaultMessage:
+                    'Use Tab to move between nodes. Use the arrow keys to reposition the focused node. Press Delete to remove a selected source or destination. Press Control or Command plus Z to undo, add Shift to redo. Press Escape to close menus and clear the selection.',
+                })}
+              </p>
+            </EuiScreenReaderOnly>
+            {!readOnly && (
+              <CanvasToolbar
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                onAddSource={addSource}
+                onAddDestination={addDestination}
+                canUndo={canUndo && !isSaving}
+                canRedo={canRedo && !isSaving}
+                canAdd={!isSaving}
+              />
+            )}
+            <CanvasContextMenu
+              position={contextMenu?.position ?? null}
+              target={contextMenu?.target ?? 'pane'}
+              onTidyUp={onTidyUp}
+              onReopen={reopenContextMenu}
+              onClose={closeContextMenu}
             />
-          )}
-          {isCreateModalOpen && (
-            <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
-          )}
-          {isCreateDestinationModalOpen && (
-            <CreateDestinationModal
-              destinations={destinationsController}
-              onClose={closeCreateDestinationModal}
-            />
-          )}
-          {routingFlyout && mode === 'routing' ? <RoutingFlyout edge={routingFlyout} /> : null}
-          {routingFlyout && mode === 'processing' ? (
-            <ProcessingFlyout edge={routingFlyout} />
-          ) : null}
-          <EuiScreenReaderOnly>
-            <p id={KEYBOARD_INSTRUCTIONS_ID}>
-              {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
-                defaultMessage:
-                  'Use Tab to move between nodes. Use the arrow keys to reposition the focused node. Press Delete to remove a selected source or destination. Press Control or Command plus Z to undo, add Shift to redo. Press Escape to close menus and clear the selection.',
-              })}
-            </p>
-          </EuiScreenReaderOnly>
-          <CanvasToolbar
-            onUndo={handleUndo}
-            onRedo={handleRedo}
-            onAddSource={addUnconfiguredSource}
-            onAddDestination={addUnconfiguredDestination}
-            canUndo={canUndo && !isSaving}
-            canRedo={canRedo && !isSaving}
-            canAdd={!isSaving}
-          />
-          <CanvasContextMenu
-            position={contextMenu?.position ?? null}
-            target={contextMenu?.target ?? 'pane'}
-            onTidyUp={onTidyUp}
-            onReopen={reopenContextMenu}
-            onClose={closeContextMenu}
-          />
-        </CanvasShell>
-      </ConnectionTargetsProvider>
+          </CanvasShell>
+        </ConnectionTargetsProvider>
+      </CanvasReadOnlyProvider>
     </div>
   );
 }
 
-const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => ({
-  id: configuredSourceNodeId(source.id),
-  type: SOURCE_NODE_TYPE,
-  position: { x: 0, y: 0 },
-  deletable: true,
-  ariaLabel: i18n.translate('xpack.streams.canvas.configuredSourceNode.ariaLabel', {
-    defaultMessage: 'Source: {name}, {type}',
-    values: { name: source.name ?? source.id, type: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].label },
-  }),
-  data: {
-    sourceId: source.id,
-    title: source.name ?? source.id,
-    subtitle: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].shortLabel,
-    iconType: SOURCE_TYPE_ICONS[source.type],
-  },
-});
+const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
+  const signals = getSourceDisplaySignals(source, source.supportedTelemetry);
+  const name = source.name ?? source.id;
+  const type = SOURCE_TYPE_CONFIG_BY_TYPE[source.type].label;
+  return {
+    id: configuredSourceNodeId(source.id),
+    type: SOURCE_NODE_TYPE,
+    position: { x: 0, y: 0 },
+    deletable: true,
+    ariaLabel:
+      signals.length > 0
+        ? i18n.translate('xpack.streams.canvas.configuredSourceNode.withSignalsAriaLabel', {
+            defaultMessage: 'Source: {name}, {type}, {signal}',
+            values: {
+              name,
+              type,
+              signal: signals.map((signal) => DESTINATION_SIGNAL_LABELS[signal]).join(', '),
+            },
+          })
+        : i18n.translate('xpack.streams.canvas.configuredSourceNode.ariaLabel', {
+            defaultMessage: 'Source: {name}, {type}',
+            values: { name, type },
+          }),
+    data: {
+      sourceId: source.id,
+      sourceType: source.type,
+      title: name,
+      subtitle: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].shortLabel,
+      iconType: SOURCE_TYPE_ICONS[source.type],
+      signals,
+    },
+  };
+};
 
-const buildConfiguredDestinationNode = (
+const getDestinationSubtitle = (destination: ElasticsearchDestinationViewModel): string => {
+  const indices = getDestinationIndices(destination);
+  if (destination.mode === 'auto' || indices.length === 0) {
+    return i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
+      defaultMessage: 'Auto',
+    });
+  }
+  if (indices.length === 1) {
+    return indices[0];
+  }
+  return i18n.translate('xpack.streams.canvas.configuredDestinationNode.fixedIndicesLabel', {
+    defaultMessage: '{count} fixed indices',
+    values: { count: indices.length },
+  });
+};
+
+const getEndpointHost = (endpoint: string): string => {
+  try {
+    return new URL(endpoint).host || endpoint;
+  } catch {
+    return endpoint;
+  }
+};
+
+export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
-  hasConnectedSource: boolean
-): DestinationNode => ({
-  id: configuredDestinationNodeId(destination.id),
-  type: DESTINATION_NODE_TYPE,
-  position: { x: 0, y: 0 },
-  deletable: true,
-  ariaLabel: hasConnectedSource
-    ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.ariaLabel', {
-        defaultMessage: 'Destination: {name}',
-        values: { name: destination.name },
-      })
-    : i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceAriaLabel', {
-        defaultMessage: 'Destination: {name}, no source',
-        values: { name: destination.name },
-      }),
-  data: {
-    destinationId: destination.id,
-    streamName: destination.index,
-    title: destination.name,
-    subtitle: hasConnectedSource
-      ? undefined
-      : i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceLabel', {
-          defaultMessage: 'No source',
+  hasConnectedSource: boolean,
+  targetedIndexNames: string[]
+): DestinationNode => {
+  const signal = destination.signals.map((value) => DESTINATION_SIGNAL_LABELS[value]).join(', ');
+  const noSourceLabel = i18n.translate(
+    'xpack.streams.canvas.configuredDestinationNode.noSourceLabel',
+    { defaultMessage: 'No source' }
+  );
+  if (destination.type !== 'elasticsearch') {
+    const location =
+      destination.type === 's3'
+        ? { bucket: destination.bucket }
+        : {
+            endpoint: destination.endpoint,
+            remoteIndexNames: [...new Set(Object.values(destination.indexBySignal))],
+          };
+    return {
+      id: configuredDestinationNodeId(destination.id),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      deletable: true,
+      ariaLabel: hasConnectedSource
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.nonLocalAriaLabel', {
+            defaultMessage: 'Destination: {name}, {signal}',
+            values: { name: destination.name, signal },
+          })
+        : i18n.translate(
+            'xpack.streams.canvas.configuredDestinationNode.nonLocalNoSourceAriaLabel',
+            {
+              defaultMessage: 'Destination: {name}, {signal}, no source',
+              values: { name: destination.name, signal },
+            }
+          ),
+      data: {
+        destinationId: destination.id,
+        destinationType: destination.type,
+        signals: destination.signals,
+        ...location,
+        title: destination.name,
+        subtitle: !hasConnectedSource
+          ? noSourceLabel
+          : destination.description ||
+            (destination.type === 's3'
+              ? destination.bucket
+              : getEndpointHost(destination.endpoint)),
+      },
+    };
+  }
+  return {
+    id: configuredDestinationNodeId(destination.id),
+    type: DESTINATION_NODE_TYPE,
+    position: { x: 0, y: 0 },
+    deletable: true,
+    ariaLabel: hasConnectedSource
+      ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.ariaLabel', {
+          defaultMessage:
+            'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}',
+          values: {
+            name: destination.name,
+            signal,
+            indexCount: targetedIndexNames.length,
+          },
+        })
+      : i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceAriaLabel', {
+          defaultMessage:
+            'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}, no source',
+          values: {
+            name: destination.name,
+            signal,
+            indexCount: targetedIndexNames.length,
+          },
         }),
-  },
-});
-
-const buildUnconfiguredDestinationNode = (nodeId: string): DestinationNode => ({
-  id: nodeId,
-  type: DESTINATION_NODE_TYPE,
-  position: { x: 0, y: 0 },
-  deletable: true,
-  ariaLabel: i18n.translate('xpack.streams.canvas.unconfiguredDestinationNode.ariaLabel', {
-    defaultMessage: 'New destination. Click to configure.',
-  }),
-  data: {
-    unconfiguredNodeId: nodeId,
-    configurationLabel: i18n.translate(
-      'xpack.streams.canvas.unconfiguredDestinationNode.configurationLabel',
-      { defaultMessage: 'Click to configure' }
-    ),
-    title: i18n.translate('xpack.streams.canvas.unconfiguredDestinationNode.title', {
-      defaultMessage: 'New destination',
-    }),
-  },
-});
-
-const buildUnconfiguredSourceNode = (nodeId: string): SourceNode => ({
-  id: nodeId,
-  type: SOURCE_NODE_TYPE,
-  position: { x: 0, y: 0 },
-  deletable: true,
-  ariaLabel: i18n.translate('xpack.streams.canvas.unconfiguredSourceNode.ariaLabel', {
-    defaultMessage: 'New source. Click to configure.',
-  }),
-  data: {
-    unconfiguredNodeId: nodeId,
-    configurationLabel: i18n.translate(
-      'xpack.streams.canvas.unconfiguredSourceNode.configurationLabel',
-      {
-        defaultMessage: 'Click to configure',
-      }
-    ),
-    title: i18n.translate('xpack.streams.canvas.unconfiguredSourceNode.title', {
-      defaultMessage: 'New source',
-    }),
-    subtitle: '---',
-  },
-});
+    data: {
+      destinationId: destination.id,
+      destinationType: destination.type,
+      signals: destination.signals,
+      streamName: getDestinationIndices(destination).join(' ') || undefined,
+      indexCount: targetedIndexNames.length,
+      targetedIndexNames,
+      title: destination.name,
+      subtitle: !hasConnectedSource
+        ? noSourceLabel
+        : destination.description || getDestinationSubtitle(destination),
+    },
+  };
+};
 
 interface CanvasEditSnapshot {
   unit: Unit;
-  unconfiguredSourceNodeIds: string[];
-  unconfiguredDestinationNodeIds: string[];
+  nodePositions: Record<string, XYPosition>;
 }
-
-const sameIds = (left: readonly string[], right: readonly string[]): boolean =>
-  left.length === right.length && left.every((id, index) => id === right[index]);
 
 const withoutDeletedComponents = (
   unit: Unit,

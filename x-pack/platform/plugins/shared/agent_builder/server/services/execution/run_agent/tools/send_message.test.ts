@@ -6,7 +6,12 @@
  */
 
 import { ReplaySubject } from 'rxjs';
-import { ChatEventType, SELF_AGENT_ID } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  SELF_AGENT_ID,
+  createConversationBusyError,
+  ChatTriggerMode,
+} from '@kbn/agent-builder-common';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '../../../../mocks';
@@ -37,6 +42,7 @@ const callHandler = async (
     to: string;
     prompt: string;
     run_in_background?: boolean;
+    trigger_mode?: ChatTriggerMode;
   },
   context: ReturnType<typeof createMockContext>['context']
 ) => tool.handler(params, context) as Promise<{ results: any[] }>;
@@ -229,9 +235,60 @@ describe('createSendMessageTool', () => {
     });
     // Critical: without this, checkForCompletions can never surface a
     // backgroundAgentComplete event for this send_message call.
-    expect(registerExecution).toHaveBeenCalledWith('bg-sub-exec');
+    expect(registerExecution).toHaveBeenCalledWith('bg-sub-exec', 'test-agent');
+    // The follow-up outlives this run and wakes the parent like a creation does.
+    expect(sendToSubAgent).toHaveBeenCalledWith(expect.objectContaining({ background: {} }));
+    expect(sendToSubAgent.mock.calls[0][0]).not.toHaveProperty('abortSignal');
+    expect(tool.schema.shape).not.toHaveProperty('trigger_mode');
 
     events$.complete();
+  });
+
+  it('offers trigger_mode and passes it on while a finished sub-agent can wake the parent', async () => {
+    const sendToSubAgent = jest.fn().mockResolvedValue({
+      executionId: 'bg-sub-exec',
+      events$: new ReplaySubject<ChatEvent>().asObservable(),
+    });
+    const subagentTracker = new SubagentTracker({
+      researcher: { conversation_id: 'child-convo', agent_id: 'test-agent' },
+    });
+
+    const tool = createSendMessageTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent,
+        getExecution: jest.fn(),
+      },
+      subagentTracker,
+      allowedIds: new Set(['test-agent']),
+      backgroundWakeEnabled: true,
+    });
+
+    expect(tool.schema.shape).toHaveProperty('trigger_mode');
+
+    const { context } = createMockContext();
+    const result = await callHandler(
+      tool,
+      {
+        to: 'researcher',
+        prompt: 'go',
+        run_in_background: true,
+        trigger_mode: ChatTriggerMode.Never,
+      },
+      context
+    );
+
+    expect(result.results[0].data).toEqual({
+      agent_execution_id: 'bg-sub-exec',
+      status: 'queued',
+      trigger_mode: 'never',
+    });
+    expect(sendToSubAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ background: { parentTriggerMode: 'never' } })
+    );
   });
 
   describe('allowlist gating', () => {
@@ -381,5 +438,38 @@ describe('createSendMessageTool', () => {
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect(result.results[0].data.message).toContain('send_message failed');
     expect(result.results[0].data.message).toContain('inference offline');
+  });
+
+  it('returns a wait message when the sub-agent is busy', async () => {
+    const sendToSubAgent = jest
+      .fn()
+      .mockRejectedValue(
+        createConversationBusyError({ conversationId: 'child-convo', activeExecutionId: 'e1' })
+      );
+    const subagentTracker = new SubagentTracker({
+      researcher: { conversation_id: 'child-convo', agent_id: 'test-agent' },
+    });
+
+    const tool = createSendMessageTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent,
+        getExecution: jest.fn(),
+      },
+      subagentTracker,
+      allowedIds: new Set(['test-agent']),
+    });
+
+    const { context } = createMockContext();
+    const result = await callHandler(tool, { to: 'researcher', prompt: 'hi' }, context);
+
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data.message).toBe(
+      'Sub-agent "researcher" is still answering your previous message. Wait for its reply before sending another message.'
+    );
   });
 });

@@ -1,5 +1,5 @@
 {
-  "sha1": "79d5aac5618d2dda8b4450ed9b791ce359c067cf",
+  "sha1": "884f20b3ab92a7fc1ce55cf2b9cb2bc7fa8974a9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,12 +21,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-security_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 186,
-        "column": 15
+        "line": 169,
+        "column": 9
       }
     },
     {
@@ -35,11 +37,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-security_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 302,
+        "line": 286,
         "column": 24
       }
     },
@@ -49,12 +53,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-security_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 469,
-        "column": 20
+        "line": 473,
+        "column": 26
       }
     },
     {
@@ -69,7 +75,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 38,
+        "line": 31,
         "column": 20
       }
     },
@@ -85,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 47,
-        "column": 33
+        "line": 40,
+        "column": 7
       }
     },
     {

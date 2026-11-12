@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import {
   getEmptyModelResponseError,
   getParseErrorSummary,
+  handleModelRefusal,
   isEmptyModelResponseError,
   type AttackDiscoveryTemplateCompletion,
 } from '@kbn/discoveries';
@@ -172,6 +173,8 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
+      handleModelRefusal({ error, logger, nodeName: 'generate', state });
+
       const parsingError = isEmptyModelResponseError(error)
         ? getEmptyModelResponseError({
             cause: error,

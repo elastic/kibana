@@ -17,6 +17,13 @@ import {
   isEmptyModelResponseError,
 } from './language_models/empty_model_response_error';
 import { InferenceClientLlm } from './language_models/inference_client_llm';
+import {
+  MODEL_REFUSAL_ERROR_CODE,
+  MODEL_REFUSAL_ERROR_MESSAGE_PREFIX,
+  ModelRefusalError,
+  isModelRefusalError,
+  throwIfModelRefusal,
+} from './language_models/model_refusal_error';
 import { parseBedrockStream } from './utils/bedrock';
 import { parseGeminiResponse } from './utils/gemini';
 import {
@@ -43,4 +50,9 @@ export {
   ActionsClientLlm,
   ActionsClientChatBedrockConverse,
   InferenceClientLlm,
+  MODEL_REFUSAL_ERROR_CODE,
+  MODEL_REFUSAL_ERROR_MESSAGE_PREFIX,
+  ModelRefusalError,
+  isModelRefusalError,
+  throwIfModelRefusal,
 };

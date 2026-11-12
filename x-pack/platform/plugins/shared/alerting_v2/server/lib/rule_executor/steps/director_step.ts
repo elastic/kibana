@@ -50,6 +50,7 @@ export class DirectorStep implements RuleExecutionStep {
           ...state,
           alertEventsBatch: alertEvents,
           newEpisodeIds: stats.newEpisodeIds,
+          alertStatusTransitions: stats.statusTransitions,
           previousAlertStateByGroupHash,
         },
       };

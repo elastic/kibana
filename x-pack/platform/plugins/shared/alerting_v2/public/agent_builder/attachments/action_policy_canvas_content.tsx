@@ -21,7 +21,7 @@ import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
-import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -175,7 +175,7 @@ export const ActionPolicyCanvasContent = ({
           defaultMessage: 'View in Policies',
         }),
         icon: 'external',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: () => {
           getAlertingV2Locators(share).actionPolicyLocators.navigateSync({
             page: 'edit',
@@ -198,7 +198,7 @@ export const ActionPolicyCanvasContent = ({
   ]);
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false}>
+    <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
       <EuiTitle size="s">
         <h2>{data.name ?? EMPTY_VALUE}</h2>
       </EuiTitle>

@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/telemetry-plugin'
   - '@kbn/config-schema'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
@@ -31,6 +32,4 @@ fileGroups:
   src:
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

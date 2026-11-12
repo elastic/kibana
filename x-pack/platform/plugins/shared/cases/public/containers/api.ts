@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { CaseCustomField, User } from '../../common/types/domain';
+import type { CaseCustomField, UnifiedAttachments, User } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
   BulkCreateUnifiedAttachmentsRequest,
@@ -93,6 +93,7 @@ import {
 
 import type {
   ActionLicense,
+  AttachmentUIV2,
   CaseUI,
   FeatureIdsResponse,
   SingleCaseMetrics,
@@ -112,6 +113,7 @@ import {
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
   decodeFindAllAttachedAlertsResponse,
+  decodeUnifiedAttachmentsResponse,
 } from './utils';
 import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
@@ -552,8 +554,8 @@ export const createAttachments = async ({
   attachments: BulkCreateUnifiedAttachmentsRequest;
   caseId: string;
   signal?: AbortSignal;
-}): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(
+}): Promise<AttachmentUIV2[]> => {
+  const response = await KibanaServices.get().http.fetch<UnifiedAttachments>(
     INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', caseId),
     {
       method: 'POST',
@@ -561,7 +563,7 @@ export const createAttachments = async ({
       signal,
     }
   );
-  return convertCaseToCamelCase(decodeCaseResponse(response));
+  return convertAttachmentsToCamelCase(decodeUnifiedAttachmentsResponse(response));
 };
 
 export const deleteFileAttachments = async ({
@@ -583,15 +585,20 @@ export const deleteFileAttachments = async ({
 export const bulkDeleteAttachments = async ({
   caseId,
   request,
+  includeRelated,
   signal,
 }: {
   caseId: string;
   request: BulkDeleteAttachmentsRequest;
+  /** Whether the related attachments go too; the server defaults to `true`. */
+  includeRelated?: boolean;
   signal?: AbortSignal;
 }): Promise<void> => {
   await KibanaServices.get().http.fetch(getCaseBulkDeleteAttachmentsUrl(caseId), {
     method: 'POST',
-    body: JSON.stringify(request),
+    body: JSON.stringify(
+      includeRelated == null ? request : { ...request, include_related: includeRelated }
+    ),
     signal,
   });
 };

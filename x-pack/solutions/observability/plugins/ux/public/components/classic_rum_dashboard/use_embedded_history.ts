@@ -22,20 +22,24 @@ const isSameTimeRange = (a?: ClassicRumTimeRange, b?: ClassicRumTimeRange): bool
   a?.rangeFrom === b?.rangeFrom && a?.rangeTo === b?.rangeTo;
 
 /**
- * In-memory URL for the embedded dashboard: pins `serviceName` and keeps the time range in sync
- * with the host app in both directions.
+ * In-memory URL for the embedded dashboard: pins `serviceName`, starts in the host's environment and
+ * keeps the time range in sync with the host app in both directions.
  */
 export const useEmbeddedHistory = ({
   serviceName,
+  environment,
   timeRange,
   onTimeRangeChange,
 }: {
   serviceName: string;
+  environment?: string;
   timeRange?: ClassicRumTimeRange;
   onTimeRangeChange?: (timeRange: ClassicRumTimeRange) => void;
 }): MemoryHistory => {
   const timeRangeRef = useRef(timeRange);
   timeRangeRef.current = timeRange;
+  const environmentRef = useRef(environment);
+  environmentRef.current = environment;
   const onTimeRangeChangeRef = useRef(onTimeRangeChange);
   onTimeRangeChangeRef.current = onTimeRangeChange;
 
@@ -43,7 +47,13 @@ export const useEmbeddedHistory = ({
   const history = useMemo(
     () =>
       createMemoryHistory({
-        initialEntries: [`/?${fromQuery({ serviceName, ...timeRangeRef.current })}`],
+        initialEntries: [
+          `/?${fromQuery({
+            serviceName,
+            ...(environmentRef.current ? { environment: environmentRef.current } : {}),
+            ...timeRangeRef.current,
+          })}`,
+        ],
       }),
     [serviceName]
   );

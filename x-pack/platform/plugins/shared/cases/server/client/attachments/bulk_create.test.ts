@@ -11,15 +11,23 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_BULK_CREATE_ATTACHMENTS,
   MAX_USER_ACTIONS_PER_CASE,
+  OBSERVABLE_TYPE_IPV4,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import { bulkCreate } from './bulk_create';
+import { bulkCreate, bulkCreateAndGetCase } from './bulk_create';
 import {
   createAttachmentServiceMock,
   createCaseServiceMock,
   createUserActionServiceMock,
 } from '../../services/mocks';
 import { commentAttachmentType } from '../../attachment_framework/attachments';
+import { extractAndAddObservables } from './extract_observables';
+
+jest.mock('./extract_observables');
+
+const extractAndAddObservablesMock = extractAndAddObservables as jest.MockedFunction<
+  typeof extractAndAddObservables
+>;
 
 describe('bulkCreate', () => {
   const caseId = 'test-case';
@@ -53,7 +61,7 @@ describe('bulkCreate', () => {
     await expect(
       // @ts-expect-error: excess attribute
       bulkCreate({ attachments: [{ ...comment, foo: 'bar' }], caseId }, clientArgs)
-    ).rejects.toThrow('invalid keys "foo"');
+    ).rejects.toThrow('Excess keys are not allowed');
   });
 
   it('rejects a legacy v1 body', async () => {
@@ -100,7 +108,9 @@ describe('bulkCreate', () => {
           { attachments: [{ ...comment, data: { content: longComment } }], caseId },
           clientArgs
         )
-      ).rejects.toThrow(/Comment content exceeds maximum length/);
+      ).rejects.toThrow(
+        `Comment content exceeds maximum length of ${MAX_COMMENT_LENGTH} characters`
+      );
     });
 
     it('should throw an error if the comment is an empty string', async () => {
@@ -116,19 +126,13 @@ describe('bulkCreate', () => {
     });
   });
 
-  it('accepts unified comments', async () => {
+  it('returns the created unified attachments without loading the case comments', async () => {
     registerCommentType();
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
 
     const theCase = { ...mockCases[0], id: caseId };
     caseService.getCase.mockResolvedValue(theCase);
     caseService.patchCase.mockResolvedValue(theCase);
-    caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [],
-      total: 2,
-      per_page: 2,
-      page: 1,
-    });
     attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
       new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
     );
@@ -144,9 +148,13 @@ describe('bulkCreate', () => {
       { type: 'comment' as const, data: { content: 'second' }, owner: SECURITY_SOLUTION_OWNER },
     ];
 
-    await expect(
-      bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs)
-    ).resolves.toBeDefined();
+    const res = await bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs);
+
+    expect(res).toEqual([
+      expect.objectContaining({ id: mockCaseUnifiedAttachments[0].id, type: 'comment' }),
+      expect.objectContaining({ id: 'comment-2', type: 'comment' }),
+    ]);
+    expect(caseService.getAllCaseComments).not.toHaveBeenCalled();
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -166,12 +174,6 @@ describe('bulkCreate', () => {
     const theCase = { ...mockCases[0], id: caseId };
     caseService.getCase.mockResolvedValue(theCase);
     caseService.patchCase.mockResolvedValue(theCase);
-    caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [],
-      total: 2,
-      per_page: 2,
-      page: 1,
-    });
     attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
       new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
     );
@@ -194,10 +196,79 @@ describe('bulkCreate', () => {
       clientArgs.request,
       expect.objectContaining({
         caseId,
-        attachmentIds: expect.arrayContaining([expect.any(String), expect.any(String)]),
+        ids: expect.arrayContaining([expect.any(String), expect.any(String)]),
         attachmentType: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
       })
     );
+  });
+
+  it('returns the case with the observables extracted from the attachments', async () => {
+    registerCommentType();
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 0,
+      page: 1,
+    });
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.bulkCreate.mockResolvedValue({
+      saved_objects: [mockCaseUnifiedAttachments[0]],
+    });
+    const observable = {
+      id: '5c431380-c6ef-459f-b0fe-1699e978517b',
+      typeKey: OBSERVABLE_TYPE_IPV4.key,
+      value: '1.2.3.4',
+      description: null,
+      createdAt: '2026-09-08T00:00:00.000Z',
+      updatedAt: '2026-09-08T00:00:00.000Z',
+    };
+    extractAndAddObservablesMock.mockResolvedValueOnce({
+      ...theCase,
+      version: 'patched-version',
+      attributes: { ...theCase.attributes, observables: [observable], total_observables: 1 },
+    });
+
+    const res = await bulkCreateAndGetCase({ attachments: [comment], caseId }, clientArgs);
+
+    expect(res.version).toBe('patched-version');
+    expect(res.observables).toEqual([observable]);
+    expect(res.total_observables).toBe(1);
+  });
+
+  describe('empty request', () => {
+    const theCase = { ...mockCases[0], id: caseId };
+
+    beforeEach(() => {
+      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+      caseService.getCase.mockResolvedValue(theCase);
+    });
+
+    it('authorizes against the case owner', async () => {
+      await bulkCreate({ attachments: [], caseId }, clientArgs);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entities: [{ owner: theCase.attributes.owner, id: caseId }],
+        })
+      );
+    });
+
+    it('does not return the case when the user cannot access the case owner', async () => {
+      clientArgs.authorization.ensureAuthorized.mockRejectedValueOnce(new Error('Unauthorized'));
+
+      await expect(bulkCreateAndGetCase({ attachments: [], caseId }, clientArgs)).rejects.toThrow(
+        'Unauthorized'
+      );
+      expect(caseService.getAllCaseComments).not.toHaveBeenCalled();
+    });
   });
 });

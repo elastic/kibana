@@ -11,6 +11,7 @@ import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
 import { EmptyModelResponseError } from './empty_model_response_error';
+import { throwIfModelRefusal } from './model_refusal_error';
 import { safeToString } from '../utils/safe_to_string';
 import { sanitizeErrorMessage } from '../utils/sanitize_error_message';
 
@@ -128,6 +129,25 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
         );
         throw error;
       });
+
+    // A refusal is reported as such even when its content is empty; only a completion with neither
+    // a refusal nor content is an empty response.
+    try {
+      throwIfModelRefusal({
+        connectorId: this.#connectorId,
+        content: response.content,
+        model: this.#model,
+        refusal: response.refusal,
+      });
+    } catch (error: unknown) {
+      const err = error as Error & { code?: string };
+      this.#logger.error(
+        `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${err.code} - ${
+          err.message
+        }`
+      );
+      throw error;
+    }
 
     this.#throwIfResponseIsEmpty({
       completionTokens: response.tokens?.completion,

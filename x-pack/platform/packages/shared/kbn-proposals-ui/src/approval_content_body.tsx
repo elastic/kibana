@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCallOut,
@@ -13,9 +13,11 @@ import {
   EuiMarkdownFormat,
   getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
-  type IconType,
 } from '@elastic/eui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApprovalOutcomeBanner } from './approval_outcome';
+import { InlineCalloutTitle } from './inline_callout_title';
+import { createMarkdownLink } from './markdown_link';
 
 interface ApprovalContentBodyProps {
   /** Hidden while `'declining'`: `DeclineReasonForm` takes this space instead. */
@@ -24,19 +26,27 @@ interface ApprovalContentBodyProps {
   comment?: string;
   /** `undefined` for a still-pending decision, which has no outcome to report yet. */
   banner?: ApprovalOutcomeBanner;
-  /** Appended to the banner title after a ` • `, e.g. a decline's reason. */
+  /** Appended to the banner title after a ` • `: who decided and when, then any reason. */
   bannerSuffix?: React.ReactNode;
   /** A rejected `primaryAction`/`onDismiss` call, surfaced here rather than thrown away. */
   actionError?: string;
+  /** See `ApprovalContentProps.basePath`. */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
-const processingPluginList = getDefaultEuiMarkdownProcessingPlugins({
-  linkProps: { target: '_blank' },
-});
-
-const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
-  color === 'success' ? 'check' : color === 'danger' ? 'warning' : 'clock';
+/**
+ * EUI's default processing plugins with the `a` component swapped for one that resolves in-app
+ * links against `basePath`. Built per base path: the default list is a module-level singleton,
+ * and `getDefaultEuiMarkdownProcessingPlugins` returns a fresh copy each call, so this never
+ * mutates anything shared with other markdown on the page.
+ */
+const buildProcessingPluginList = (basePath?: IBasePath) => {
+  const plugins = getDefaultEuiMarkdownProcessingPlugins({ linkProps: { target: '_blank' } });
+  // The rehype-react plugin sits at index 1; its options carry the component map.
+  plugins[1][1].components.a = createMarkdownLink(basePath);
+  return plugins;
+};
 
 /**
  * The scrollable middle of `ApprovalContent`: the proposal's comment, its outcome banner once
@@ -45,8 +55,24 @@ const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
  * viewport.
  */
 export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
-  ({ mode, comment, banner, bannerSuffix, actionError, 'data-test-subj': dataTestSubj }) => {
+  ({
+    mode,
+    comment,
+    banner,
+    bannerSuffix,
+    actionError,
+    basePath,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { euiTheme } = useEuiTheme();
+    const processingPluginList = useMemo(() => buildProcessingPluginList(basePath), [basePath]);
+
+    // Declining with no banner or error leaves nothing to show, so no empty padded box sits
+    // between the header and the reason form.
+    const hasContent = (mode === 'view' && comment !== undefined) || banner || actionError;
+    if (!hasContent) {
+      return null;
+    }
 
     return (
       <div
@@ -77,22 +103,9 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
             announceOnMount
             size="s"
             color={banner.color}
-            iconType={banner.isLoading ? EuiLoadingSpinner : bannerIconFor(banner.color)}
-            title={
-              // The reason suffix reads as detail, not part of the state word itself — the
-              // callout's own title styling would otherwise bold all of it.
-              bannerSuffix ? (
-                <>
-                  {banner.title}
-                  <span css={css({ fontWeight: euiTheme.font.weight.regular })}>
-                    {' • '}
-                    {bannerSuffix}
-                  </span>
-                </>
-              ) : (
-                banner.title
-              )
-            }
+            // Undefined keeps EUI's own icon for the colour; only the loader is custom.
+            iconType={banner.isLoading ? EuiLoadingSpinner : undefined}
+            title={<InlineCalloutTitle title={banner.title} description={bannerSuffix} />}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-outcome` : undefined}
           />
         )}

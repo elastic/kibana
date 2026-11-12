@@ -15,6 +15,9 @@ import { WorkflowRunFixture } from '../workflow_run_fixture';
 describe('workflow with wait step', () => {
   let duration: string;
 
+  // A timer-based wait is not millisecond-exact against the wall clock measured here.
+  const TIMER_TOLERANCE_MS = 50;
+
   const buildYaml = () => {
     return `
 steps:
@@ -109,7 +112,7 @@ steps:
           'fake_workflow_execution_id'
         );
       // The configured wait must elapse.
-      expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(1999);
+      expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(2000 - TIMER_TOLERANCE_MS);
       expect(workflowExecutionDoc?.duration).toBeLessThan(10_000);
     });
 
@@ -129,9 +132,9 @@ steps:
       const waitStepEndTime = new Date(waitStepExecution!.finishedAt!).getTime();
       const lastStepStartTime = new Date(lastStepExecution!.startedAt).getTime();
 
-      // Wait step execution time should be at least 2s
+      // Wait step execution time should be ~2s
       const waitStepExecutionTime = waitStepEndTime - waitStepStartTime;
-      expect(waitStepExecutionTime).toBeGreaterThanOrEqual(2000);
+      expect(waitStepExecutionTime).toBeGreaterThanOrEqual(2000 - TIMER_TOLERANCE_MS);
 
       // Last step should start after wait step completes
       expect(lastStepStartTime).toBeGreaterThanOrEqual(waitStepEndTime);
@@ -406,6 +409,14 @@ steps:
         );
       expect(execution()?.status).toBe(ExecutionStatus.WAITING);
       const expectedDeadline = new Date(now.getTime() + (timeout ? 10 * 60_000 : 60 * 60_000));
+      const scheduledRunAt = fixture.taskManagerMock.schedule.mock.calls.at(-1)?.[0]?.runAt;
+      expect(scheduledRunAt?.getTime()).toBe(expectedDeadline.getTime());
+      const parkedPause = Array.from(
+        fixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((step) => step.stepId === 'pause');
+      expect(parkedPause?.state?.resumeAt).toBe(
+        new Date(now.getTime() + 60 * 60_000).toISOString()
+      );
 
       // Each call constructs real runtime/state/IO services from the persisted repositories.
       for (let notification = 0; notification < 2; notification++) {
@@ -418,12 +429,70 @@ steps:
         expect(pause?.status).toBe(ExecutionStatus.WAITING);
       }
 
+      jest.setSystemTime(expectedDeadline);
+      await fixture.resumeWorkflow();
+      const pause = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
+        (step) => step.stepId === 'pause'
+      );
       if (!timeout) {
-        jest.setSystemTime(expectedDeadline);
-        await fixture.resumeWorkflow();
         expect(execution()?.status).toBe(ExecutionStatus.COMPLETED);
+        expect(pause?.status).toBe(ExecutionStatus.COMPLETED);
         expect(fixture.unsecuredActionsClientMock.execute).toHaveBeenCalledTimes(1);
+        return;
       }
+
+      expect(execution()?.status).toBe(ExecutionStatus.TIMED_OUT);
+      expect(pause?.status).toBe(ExecutionStatus.FAILED);
+      expect(fixture.unsecuredActionsClientMock.execute).not.toHaveBeenCalled();
     }
   );
+
+  it('times out a parked wait at its enclosing step timeout', async () => {
+    const now = new Date('2026-09-14T12:00:00.000Z');
+    jest.useFakeTimers({ now });
+    const fixture = new WorkflowRunFixture();
+    await fixture.runWorkflow({
+      workflowYaml: `
+steps:
+  - name: enclosingLoop
+    type: foreach
+    foreach: '[1]'
+    timeout: 10m
+    steps:
+      - name: pause
+        type: wait
+        with:
+          duration: 1h
+  - name: afterWait
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: done
+`,
+    });
+
+    const execution = () =>
+      fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
+    expect(execution()?.status).toBe(ExecutionStatus.WAITING);
+    const scheduledRunAt = fixture.taskManagerMock.schedule.mock.calls.at(-1)?.[0]?.runAt;
+    expect(scheduledRunAt?.getTime()).toBe(now.getTime() + 10 * 60_000);
+    const parkedPause = Array.from(
+      fixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).find((step) => step.stepId === 'pause' && step.stepType === 'wait');
+    expect(parkedPause?.state?.resumeAt).toBe(new Date(now.getTime() + 60 * 60_000).toISOString());
+
+    jest.setSystemTime(new Date(now.getTime() + 10 * 60_000));
+    await fixture.resumeWorkflow();
+
+    expect(execution()?.status).toBe(ExecutionStatus.FAILED);
+    expect(execution()?.error).toEqual({
+      type: 'TimeoutError',
+      message: 'Step execution exceeded the configured timeout of 10m.',
+    });
+    const pause = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
+      (step) => step.stepId === 'pause' && step.stepType === 'wait'
+    );
+    expect(pause?.status).toBe(ExecutionStatus.FAILED);
+    expect(fixture.unsecuredActionsClientMock.execute).not.toHaveBeenCalled();
+  });
 });

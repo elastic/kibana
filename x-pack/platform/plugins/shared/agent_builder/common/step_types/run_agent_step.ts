@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { apiSelectorsByTarget } from '@kbn/agent-builder-common/apis/known_apis';
+import { authorNameSchema } from '../workflows/author_name_schema';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -124,6 +125,7 @@ export const InputSchema = z.object({
     .string()
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
+  author_name: authorNameSchema,
   /**
    * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
    * via the execution service's findExecutions. Lets a caller that doesn't yet know the
@@ -498,6 +500,17 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
   with:
     conversation_id: "{{ steps.initial_analysis.output.conversation_id }}"
     message: "Continue from the previous analysis and complete any missing steps."
+\`\`\``,
+
+      `## Name the writer when the workflow runs as a service account
+A workflow running as a service account has no display name, so the chat would show the raw account id. \`author_name\` is recorded as the display name on the user message; it is ignored when an interactive user runs the workflow.
+\`\`\`yaml
+- name: journal_note
+  type: ${RunAgentStepTypeId}
+  with:
+    conversation_id: "{{ inputs.conversation_id }}"
+    author_name: "{{ workflow.name }}"
+    message: "Investigation note: {{ event.summary }}"
 \`\`\``,
 
       `## Create a public conversation

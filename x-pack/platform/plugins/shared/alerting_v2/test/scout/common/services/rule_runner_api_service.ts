@@ -96,10 +96,12 @@ export const getRuleRunnerApiService = ({
     return expect
       .poll(
         async () => {
+          // Snapshot the runs before the condition, so a run landing between the two reads is
+          // observed by the condition read instead of looking like a run that produced nothing.
+          const completedRuns = await countCompletedRuns();
           const current = await count();
           if (current >= min) return current;
 
-          const completedRuns = await countCompletedRuns();
           const runInFlight = drivenAtRuns !== undefined && completedRuns <= drivenAtRuns;
 
           if (!runInFlight) {

@@ -23,6 +23,7 @@ import {
 } from '../helpers/empty_model_response';
 import { getParseErrorSummary } from '../helpers/get_parse_error_summary';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+import { handleModelRefusal } from '../helpers/handle_model_refusal';
 import type { AttackDiscoveryTemplateCompletion } from '../../../../../attack_discovery/graphs/template_completion';
 
 // the length is a diagnostic for truncated responses; it is empty when the call failed before returning one
@@ -196,6 +197,8 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
+      handleModelRefusal({ error, logger, nodeName: 'generate', state });
+
       const parsingError = isEmptyModelResponseError(error)
         ? getEmptyModelResponseError({
             cause: error,

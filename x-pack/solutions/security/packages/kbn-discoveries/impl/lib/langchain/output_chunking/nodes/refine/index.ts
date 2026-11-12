@@ -30,6 +30,7 @@ import {
 } from '../helpers/empty_model_response';
 import { getParseErrorSummary } from '../helpers/get_parse_error_summary';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+import { handleModelRefusal } from '../helpers/handle_model_refusal';
 
 // the length is a diagnostic for truncated responses; it is empty when the call failed before returning one
 const getRawResponseLength = (rawResponse: string): string =>
@@ -202,6 +203,8 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
+      handleModelRefusal({ error, logger, nodeName: 'refine', state });
+
       const parsingError = isEmptyModelResponseError(error)
         ? getEmptyModelResponseError({
             cause: error,

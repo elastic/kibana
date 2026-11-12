@@ -50,7 +50,7 @@ export interface LayoutSection {
   removed?: LayoutGrid[];
 }
 
-/** The dashboard as it is after the operations, with the grids of the panels already placed. */
+/** The dashboard as it is after the changes, with the grids of the panels already placed. */
 export interface LayoutRequest {
   /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;

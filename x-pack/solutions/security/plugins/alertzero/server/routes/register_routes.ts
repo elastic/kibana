@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IClusterClient, Logger } from '@kbn/core/server';
 import type { AttachmentsStart, ConversationsStart } from '@kbn/agent-builder-server';
 import type { AlertZeroRouter, AlertZeroSpaceIdResolver } from '../types';
+import type { WatchWorkflowsManagementClient } from '../services/watches/watch_workflows_management_client';
 import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
 import type { ConversationProposalsService } from '../services/conversation_proposals/conversation_proposals_service';
@@ -31,6 +32,10 @@ export interface RouteDependencies {
   router: AlertZeroRouter;
   logger: Logger;
   getSpaceId: AlertZeroSpaceIdResolver;
+  /** The deployment cluster client from core start; routes scope it per request. */
+  getClusterClient: () => IClusterClient;
+  /** True when cross-project search is on, where unqualified index patterns reach linked projects. */
+  isCpsEnabled: () => boolean;
   getWatchesService: () => WatchesService;
   getWorkersService: () => WorkersService;
   getConversationProposalsService: () => ConversationProposalsService;
@@ -40,6 +45,10 @@ export interface RouteDependencies {
   getHuntServices: () => HuntServices;
   getScanFailuresService: () => ScanFailuresService;
   getThreatIntelSupplyService: () => ThreatIntelSupplyService | undefined;
+  /** True on Serverless, where built-in worker roles carry a `_` prefix. */
+  isServerless: boolean;
+  /** The workflows management client; undefined when workflows management is unavailable. */
+  getWorkflowsManagement: () => WatchWorkflowsManagementClient | undefined;
   /** Reports an AlertZero telemetry event; never throws. */
   reportTelemetryEvent: AlertZeroTelemetryReporter;
 }

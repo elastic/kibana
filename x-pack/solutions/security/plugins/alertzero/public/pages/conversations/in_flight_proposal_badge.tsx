@@ -9,13 +9,24 @@ import React from 'react';
 import { useIsApprovingProposal, useIsDecliningProposal } from '@kbn/proposals-plugin/public';
 import { getApprovalOutcomeBadge, ProposedActionStatusBadge } from '@kbn/proposals-ui';
 
-/** The Applying/Declining badge while this proposal's decision is being submitted, else nothing. */
-export const InFlightProposalBadge = ({ proposalId }: { proposalId: string }) => {
-  const isApproving = useIsApprovingProposal(proposalId);
-  const isDeclining = useIsDecliningProposal(proposalId);
+/**
+ * Shows the Applying or Declining badge while a decision is sent or an approved action runs.
+ * Shows nothing at other times.
+ */
+export const InFlightProposalBadge = ({
+  proposalId,
+  isProposalSettling,
+  isDecisionShown = false,
+}: {
+  proposalId: string;
+  isProposalSettling?: boolean;
+  isDecisionShown?: boolean;
+}) => {
+  const isApproving = useIsApprovingProposal(proposalId, isDecisionShown);
+  const isDeclining = useIsDecliningProposal(proposalId, isDecisionShown);
 
   const badge = getApprovalOutcomeBadge(
-    isApproving ? 'applying' : isDeclining ? 'declining' : 'pending'
+    isApproving || isProposalSettling ? 'applying' : isDeclining ? 'declining' : 'pending'
   );
   if (!badge) return null;
 
@@ -25,6 +36,7 @@ export const InFlightProposalBadge = ({ proposalId }: { proposalId: string }) =>
       iconType={badge.iconType}
       label={badge.label}
       isLoading={badge.isLoading}
+      isDisabled={badge.isDisabled}
     />
   );
 };

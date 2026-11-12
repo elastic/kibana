@@ -18,6 +18,7 @@ import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { EmptyModelResponseError } from './empty_model_response_error';
 import { getMessageContentAndRole } from './helpers';
+import { throwIfModelRefusal } from './model_refusal_error';
 import { safeToString } from '../utils/safe_to_string';
 import type { TraceOptions } from './types';
 
@@ -143,6 +144,9 @@ export class ActionsClientLlm extends LLM {
           temperature: this.temperature,
           modelName: this.model,
           timeout: this.#timeout,
+          ...(this.telemetryMetadata != null
+            ? { metadata: { connectorTelemetry: this.telemetryMetadata } }
+            : {}),
         });
 
         // raw response for .inference/EIS connectors (via the inference client's chatComplete):
@@ -150,6 +154,15 @@ export class ActionsClientLlm extends LLM {
           () =>
             `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${result.content}`
         );
+
+        // A refusal is reported as such even when its content is empty; only a completion with
+        // neither a refusal nor content is an empty response.
+        throwIfModelRefusal({
+          connectorId: this.#connectorId,
+          content: result.content,
+          model: this.model,
+          refusal: result.refusal,
+        });
 
         this.#throwIfResponseIsEmpty({
           completionTokens: result.tokens?.completion,

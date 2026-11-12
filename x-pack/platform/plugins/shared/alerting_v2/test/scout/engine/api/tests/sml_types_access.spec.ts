@@ -25,7 +25,8 @@ import { apiTest } from '../fixtures';
 
 const TOOLS_EXECUTE_API = '/api/agent_builder/tools/_execute';
 const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
-const CRAWL_POLL_TIMEOUT_MS = 45_000;
+// Must outlive one fully missed 1m crawl cycle (the crawler's `fetchFrequency`) plus a slow Cloud crawl.
+const CRAWL_POLL_TIMEOUT_MS = 150_000;
 const CRAWL_POLL_INTERVAL_MS = 1_000;
 
 const EXECUTE_HEADERS = {
@@ -116,12 +117,12 @@ apiTest.describe('Agent Builder — alerting V2 SML type access', { tag: API_ENG
   let ruleAttachmentId: string;
   let policyAttachmentId: string;
 
-  const executeSmlSearch = async (
+  const postSmlSearch = (
     apiClient: ApiClientFixture,
     credentials: RoleApiCredentials,
     toolParams: { query: string; size?: number; types?: string[] }
-  ) => {
-    const response = await apiClient.post(TOOLS_EXECUTE_API, {
+  ) =>
+    apiClient.post<SmlSearchExecuteBody>(TOOLS_EXECUTE_API, {
       headers: { ...EXECUTE_HEADERS, ...credentials.apiKeyHeader },
       body: {
         tool_id: platformCoreTools.smlSearch,
@@ -129,11 +130,20 @@ apiTest.describe('Agent Builder — alerting V2 SML type access', { tag: API_ENG
       },
       responseType: 'json',
     });
+
+  const executeSmlSearch = async (
+    apiClient: ApiClientFixture,
+    credentials: RoleApiCredentials,
+    toolParams: { query: string; size?: number; types?: string[] }
+  ) => {
+    const response = await postSmlSearch(apiClient, credentials, toolParams);
     expect(response).toHaveStatusCode(200);
-    return response.body as SmlSearchExecuteBody;
+    return response.body;
   };
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, apiServices }) => {
+    apiTest.setTimeout(CRAWL_POLL_TIMEOUT_MS + 30_000);
+
     await kbnClient.uiSettings.update({
       [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
     });
@@ -182,10 +192,14 @@ apiTest.describe('Agent Builder — alerting V2 SML type access', { tag: API_ENG
     await expect
       .poll(
         async () => {
-          const hits = getSearchHits(
-            await executeSmlSearch(apiClient, limitedCredentials, { query: searchToken })
-          );
-          const attachmentIds = hits.map((hit) => hit.attachment_id);
+          const response = await postSmlSearch(apiClient, limitedCredentials, {
+            query: searchToken,
+          });
+          // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
+          if (response.statusCode !== 200) {
+            return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+          }
+          const attachmentIds = getSearchHits(response.body).map((hit) => hit.attachment_id);
           return (
             attachmentIds.includes(ruleAttachmentId) && attachmentIds.includes(policyAttachmentId)
           );

@@ -1,0 +1,57 @@
+overlay: 1.0.0
+info:
+  title: OpenSearch API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths
+    description: >-
+      The spec doesn't cover the Alerting plugin. https://docs.opensearch.org/latest/observing-your-data/alerting/api/#search-monitors
+      documents monitor search, which takes a Query DSL body and only reads; the plugin registers it for
+      POST as well as GET (RestSearchMonitorAction in https://github.com/opensearch-project/alerting).
+    update:
+      /_plugins/_alerting/monitors/_search:
+        post:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    query:
+                      type: object
+                    size:
+                      type: integer
+                    from:
+                      type: integer
+          responses:
+            '200':
+              description: Search results
+              content:
+                application/json:
+                  schema:
+                    type: object
+  - target: $.paths
+    description: >-
+      The spec doesn't cover Security Analytics detectors.
+      https://docs.opensearch.org/latest/security-analytics/api-tools/detector-api/#search-detector
+      documents POST /_plugins/_security_analytics/detectors/_search, which takes a Query DSL body and only reads.
+    update:
+      /_plugins/_security_analytics/detectors/_search:
+        post:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    query:
+                      type: object
+                    size:
+                      type: integer
+          responses:
+            '200':
+              description: Search results
+              content:
+                application/json:
+                  schema:
+                    type: object

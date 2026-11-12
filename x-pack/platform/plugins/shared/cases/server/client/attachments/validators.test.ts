@@ -14,7 +14,7 @@ import {
   MAX_IDS_PER_ATTACHMENT,
   MAX_OWNER_LENGTH,
 } from '../../../common/constants';
-import { CommentAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/comment/v2';
+import { CommentAttachmentPayloadSchema } from '../../../common/types/domain/attachment/comment/v2';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { validateUnifiedAttachments } from './validators';
 
