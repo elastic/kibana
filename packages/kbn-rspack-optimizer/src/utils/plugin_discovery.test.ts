@@ -173,6 +173,21 @@ describe('plugin_discovery', () => {
 });
 
 describe('discoverPlugins with explicit paths', () => {
+  it('keeps the user storage test plugin opt-in', async () => {
+    const pluginPath = Path.resolve(REPO_ROOT, 'src/platform/test_plugins/user_storage');
+    const [defaultPlugins, testPlugins, explicitPlugins] = await Promise.all([
+      discoverPlugins({ repoRoot: REPO_ROOT }),
+      discoverPlugins({ repoRoot: REPO_ROOT, testPlugins: true }),
+      discoverPlugins({ repoRoot: REPO_ROOT, paths: [pluginPath] }),
+    ]);
+
+    expect(defaultPlugins.some((plugin) => plugin.id === 'userStorageTest')).toBe(false);
+    expect(testPlugins.some((plugin) => plugin.id === 'userStorageTest')).toBe(true);
+    expect(explicitPlugins).toContainEqual(
+      expect.objectContaining({ id: 'userStorageTest', contextDir: pluginPath })
+    );
+  }, 60000);
+
   it('includes an explicitly selected test plugin', async () => {
     const pluginPath = Path.resolve(
       REPO_ROOT,
