@@ -21,8 +21,9 @@ consts:
   connector_id: __CONNECTOR_ID__
   instructions: __INSTRUCTIONS__
   mode: __MODE__
-  max_tombstone_share: __MAX_TOMBSTONE_SHARE__
 outputs:
+  - name: mode
+    type: string
   - name: reviewed
     type: number
   - name: written
@@ -104,13 +105,18 @@ steps:
             includeOutput: true
             omitStepExecutions: true
 
+  - name: cursor
+    type: data.set
+    with:
+      restart: '${{ steps.last_output.output.context.output != blank and steps.last_output.output.context.output.mode != consts.mode }}'
+
   - name: gather
     type: context-engine.gatherMaintenance
     with:
       ai_index_id: '{{ consts.ai_index_id }}'
-      since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
-      after_id: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after_id }}{% endif %}'
-      sweep_after_id: '{{ steps.last_output.output.context.output.sweep_after_id }}'
+      since: '{% if inputs.since != blank %}{{ inputs.since }}{% elsif variables.restart == true %}1970-01-01T00:00:00.000Z{% else %}{{ steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}{% endif %}'
+      after_id: '{% if inputs.since == blank and variables.restart != true %}{{ steps.last_output.output.context.output.resume_after_id }}{% endif %}'
+      sweep_after_id: '{% if variables.restart != true %}{{ steps.last_output.output.context.output.sweep_after_id }}{% endif %}'
 
   - name: plan_fixes
     type: context-engine.applyMaintenanceChanges
@@ -316,16 +322,11 @@ steps:
               needs_review: '${{ variables.needs_review | concat: steps.plan_batch.output.needs_review }}'
               rejected: '${{ variables.rejected | concat: steps.plan_batch.output.rejected }}'
 
-  - name: limits
-    type: data.set
-    with:
-      allowed_tombstones: '${{ steps.gather.output.reviewed | plus: steps.gather.output.fixes.size | times: consts.max_tombstone_share | floor }}'
-
   - name: brake
     type: data.set
     with:
-      braked: '${{ variables.tombstones > variables.allowed_tombstones }}'
-      reason: '{% if variables.tombstones > variables.allowed_tombstones %}It would tombstone {{ variables.tombstones }} items, more than the {{ variables.allowed_tombstones }} ({{ consts.max_tombstone_share | times: 100 }}% of {{ steps.gather.output.reviewed | plus: steps.gather.output.fixes.size }}) one run may.{% endif %}'
+      braked: '${{ variables.tombstones > steps.gather.output.max_tombstones }}'
+      reason: '{% if variables.tombstones > steps.gather.output.max_tombstones %}It would tombstone {{ variables.tombstones }} facts and entities, more than the {{ steps.gather.output.max_tombstones }} one run may.{% endif %}'
 
   - name: dry_run_result
     type: if
@@ -346,6 +347,7 @@ steps:
         type: workflow.output
         status: cancelled
         with:
+          mode: dry_run
           reviewed: '${{ steps.record_dry_run.output.reviewed }}'
           written: '${{ steps.record_dry_run.output.written }}'
           merged: '${{ steps.record_dry_run.output.merged }}'
@@ -377,6 +379,7 @@ steps:
       - name: report_output
         type: workflow.output
         with:
+          mode: report
           reviewed: '${{ steps.record_report.output.reviewed }}'
           written: '${{ steps.record_report.output.written }}'
           merged: '${{ steps.record_report.output.merged }}'
@@ -412,7 +415,16 @@ steps:
         type: workflow.output
         status: cancelled
         with:
-          reviewed: '${{ steps.gather.output.reviewed }}'
+          mode: apply
+          reviewed: '${{ steps.record_braked.output.reviewed }}'
+          written: '${{ steps.record_braked.output.written }}'
+          merged: '${{ steps.record_braked.output.merged }}'
+          superseded: '${{ steps.record_braked.output.superseded }}'
+          rewritten: '${{ steps.record_braked.output.rewritten }}'
+          summarized: '${{ steps.record_braked.output.summarized }}'
+          tombstoned: '${{ steps.record_braked.output.tombstoned }}'
+          needs_review: '${{ steps.record_braked.output.needs_review }}'
+          rejected: '${{ steps.record_braked.output.rejected }}'
           braked: true
           reason: '{{ variables.reason }} Nothing was changed.'
           changes: '${{ variables.changes | concat: variables.needs_review }}'
@@ -468,6 +480,7 @@ steps:
   - name: output_result
     type: workflow.output
     with:
+      mode: apply
       reviewed: '${{ steps.record.output.reviewed }}'
       written: '${{ steps.record.output.written }}'
       merged: '${{ steps.record.output.merged }}'

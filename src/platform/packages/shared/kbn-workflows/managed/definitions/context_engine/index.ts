@@ -196,15 +196,17 @@ export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
 
 export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID = 'system-context-engine-maintenance';
 
-/** The dreaming config, which maintenance reuses, and its own settings. */
+/** The part of the dreaming config maintenance reuses, and its own settings. */
 export interface ContextEngineMaintenanceWorkflowTemplateValues
-  extends ContextEngineDreamingWorkflowTemplateValues {
+  extends ManagedWorkflowTemplateValues,
+    Pick<
+      ContextEngineDreamingWorkflowTemplateValues,
+      'aiIndexId' | 'instanceKey' | 'connectorId' | 'instructions'
+    > {
   /** How often maintenance runs. */
   maintenanceIntervalMinutes: number;
   /** `report` plans changes and writes nothing; `apply` writes them. */
   maintenanceMode: 'report' | 'apply';
-  /** The share of the items a run reviews it may tombstone before it stops without writing. */
-  maxTombstoneShare: number;
 }
 
 /**
@@ -226,7 +228,6 @@ export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW = {
       __CONNECTOR_ID__: values.connectorId,
       __INSTRUCTIONS__: values.instructions,
       __MODE__: values.maintenanceMode,
-      __MAX_TOMBSTONE_SHARE__: values.maxTombstoneShare,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineMaintenanceWorkflowTemplateValues>;

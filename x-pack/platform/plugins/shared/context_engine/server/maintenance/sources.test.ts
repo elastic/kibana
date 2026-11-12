@@ -31,9 +31,9 @@ const memory = (id: string, deleted = false): [string, DreamedKi] => [
 
 describe('citedMemoryKiIds', () => {
   it('lists the memory KIs, leaving out trace rounds', () => {
-    expect(
-      citedMemoryKiIds(fact({ references: derivedFrom('ki://m-1', 'trace://abc') }))
-    ).toEqual(['m-1']);
+    expect(citedMemoryKiIds(fact({ references: derivedFrom('ki://m-1', 'trace://abc') }))).toEqual([
+      'm-1',
+    ]);
   });
 });
 
@@ -73,9 +73,7 @@ describe('sourceVerdictOf', () => {
 
   it('leaves a person-edited item for review', () => {
     const edited = fact({
-      governance: {
-        provenance: { edited_by: { uri: 'api://context_engine.ki.update', metadata: {} } },
-      },
+      attributes: { 'memory.edited_by': 'api://context_engine.ki.update' },
     });
 
     expect(sourceVerdictOf(edited, new Map([memory('m-1', true)]))).toEqual({

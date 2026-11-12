@@ -117,9 +117,9 @@ describe('dreamingConfigSchema', () => {
     });
 
     it('accepts maintenance with only enabled set', () => {
-      expect(
-        dreamingConfigSchema.validate({ ...config, maintenance: { enabled: false } })
-      ).toEqual({ ...config, maintenance: { enabled: false } });
+      expect(dreamingConfigSchema.validate({ ...config, maintenance: { enabled: false } })).toEqual(
+        { ...config, maintenance: { enabled: false } }
+      );
     });
 
     it('rejects an unknown mode', () => {
@@ -131,13 +131,18 @@ describe('dreamingConfigSchema', () => {
     it.each([
       ['neighbors', 0],
       ['neighbors', 21],
+      ['neighbors', 2.5],
       ['sweep_size', 0],
       ['sweep_size', 1001],
+      ['sweep_size', 10.5],
       ['max_tombstone_share', -0.1],
       ['max_tombstone_share', 1.5],
     ])('rejects %s of %d', (field, value) => {
       expect(() =>
-        dreamingConfigSchema.validate({ ...config, maintenance: { ...maintenance, [field]: value } })
+        dreamingConfigSchema.validate({
+          ...config,
+          maintenance: { ...maintenance, [field]: value },
+        })
       ).toThrow();
     });
 

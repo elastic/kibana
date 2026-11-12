@@ -159,6 +159,45 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
     expect(output).not.toHaveProperty('plans');
   });
 
+  it('rejects every change once no item of the batch is left', async () => {
+    const neighborsOnly = {
+      ...batch,
+      items: [{ ...toMaintenanceItem(stored.get('f-gone')!), reasons: ['changed' as const] }],
+      neighbors: batch.items.map(({ reasons: _reasons, ...item }) => item),
+    };
+    const reader: Partial<MaintenanceReader> = {
+      latestByIds: async (ids) =>
+        new Map(
+          ids.flatMap((id) => {
+            const ki = stored.get(id);
+            if (!ki) {
+              return [];
+            }
+            const latest: DreamedKi =
+              id === 'f-gone' ? { ...ki, governance: { lifecycle: { status: 'deleted' } } } : ki;
+            return [[id, latest] as const];
+          })
+        ),
+      citing: async () => [],
+    };
+    jest.mocked(createMaintenanceReader).mockReturnValue(reader as MaintenanceReader);
+    const context = createMockStepContext({
+      input: { ai_index_id: 'support', batch: neighborsOnly, changes },
+      esClient: {},
+    });
+
+    const { output } = await definition().handler(context);
+
+    expect(putKiRevision).not.toHaveBeenCalled();
+    expect(softDeleteKi).not.toHaveBeenCalled();
+    expect(output?.rejected).toEqual([
+      {
+        item: 'contradiction between f-old and f-new',
+        reason: 'no item of the batch is left to take its permissions from',
+      },
+    ]);
+  });
+
   it('fails on changes the model got wrong', async () => {
     const context = createMockStepContext({
       input: { ai_index_id: 'support', batch, changes: { merges: [{ survivor: 'f-new' }] } },

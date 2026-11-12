@@ -8,7 +8,10 @@
  */
 
 import { parse } from 'yaml';
-import type { ContextEngineMaintenanceWorkflowTemplateValues } from '.';
+import type {
+  ContextEngineDreamingWorkflowTemplateValues,
+  ContextEngineMaintenanceWorkflowTemplateValues,
+} from '.';
 import { CONTEXT_ENGINE_DREAMING_WORKFLOW, CONTEXT_ENGINE_MAINTENANCE_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { convertToWorkflowGraph } from '../../../graph';
@@ -32,7 +35,8 @@ const findStep = (steps: Step[], name: string): Step => {
   return step;
 };
 
-const values: ContextEngineMaintenanceWorkflowTemplateValues = {
+const values: ContextEngineDreamingWorkflowTemplateValues &
+  ContextEngineMaintenanceWorkflowTemplateValues = {
   aiIndexId: 'support-cases',
   instanceKey: 'support-cases-0123456789abcdef',
   memoriesIndex: 'ai-index-idx-support-cases',
@@ -44,7 +48,6 @@ const values: ContextEngineMaintenanceWorkflowTemplateValues = {
   relationshipTypes: [],
   maintenanceIntervalMinutes: 1440,
   maintenanceMode: 'report',
-  maxTombstoneShare: 0.1,
 };
 
 const render = (overrides: Partial<ContextEngineMaintenanceWorkflowTemplateValues> = {}) =>
@@ -107,12 +110,11 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
   });
 
   it('writes its settings and the instructions into the consts exactly as given', () => {
-    expect(render({ maintenanceMode: 'apply', maxTombstoneShare: 0.25 }).consts).toEqual({
+    expect(render({ maintenanceMode: 'apply' }).consts).toEqual({
       ai_index_id: 'support-cases',
       connector_id: 'my-connector',
       instructions: values.instructions,
       mode: 'apply',
-      max_tombstone_share: 0.25,
     });
   });
 
@@ -122,11 +124,11 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
       'paused',
       'last_run',
       'resume',
+      'cursor',
       'gather',
       'plan_fixes',
       'planned',
       'review',
-      'limits',
       'brake',
       'dry_run_result',
       'report_result',
@@ -148,22 +150,29 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
 
   it('gathers from where the last successful run stopped, or from the given time', () => {
     const gather = findStep(steps(), 'gather').with;
-    const lastOutput = {
+    const lastOutput = (mode: string) => ({
       output: {
         context: {
           output: {
+            mode,
             resume_from: '2026-11-03T00:00:00Z',
             resume_after_id: 'fact-9',
             sweep_after_id: 'entity-4',
           },
         },
       },
-    };
-    const scope = {
-      consts: render().consts,
+    });
+    const consts = render().consts;
+    const lastRun = { output: { since: '2026-11-01T00:00:00Z' } };
+    const withCursor = (scope: Record<string, unknown>) => ({
+      ...scope,
+      variables: renderWith(findStep(steps(), 'cursor').with, scope),
+    });
+    const scope = withCursor({
+      consts,
       inputs: {},
-      steps: { last_run: { output: { since: '2026-11-01T00:00:00Z' } }, last_output: lastOutput },
-    };
+      steps: { last_run: lastRun, last_output: lastOutput('report') },
+    });
 
     expect(renderWith(gather, scope)).toEqual({
       ai_index_id: 'support-cases',
@@ -174,9 +183,41 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
     expect(renderWith(gather, { ...scope, inputs: { since: '2026-10-01T00:00:00Z' } })).toEqual(
       expect.objectContaining({ since: '2026-10-01T00:00:00Z', after_id: '' })
     );
-    expect(renderWith(gather, { ...scope, steps: { last_run: scope.steps.last_run } })).toEqual(
-      expect.objectContaining({ since: '2026-11-01T00:00:00Z', after_id: '' })
-    );
+    expect(
+      renderWith(gather, withCursor({ consts, inputs: {}, steps: { last_run: lastRun } }))
+    ).toEqual(expect.objectContaining({ since: '2026-11-01T00:00:00Z', after_id: '' }));
+  });
+
+  it('starts over when the last successful run had another mode', () => {
+    const gather = findStep(steps(), 'gather').with;
+    const scope = {
+      consts: render({ maintenanceMode: 'apply' }).consts,
+      inputs: {},
+      steps: {
+        last_run: { output: { since: '2026-11-01T00:00:00Z' } },
+        last_output: {
+          output: {
+            context: {
+              output: {
+                mode: 'report',
+                resume_from: '2026-11-03T00:00:00Z',
+                resume_after_id: 'fact-9',
+                sweep_after_id: 'entity-4',
+              },
+            },
+          },
+        },
+      },
+    };
+    const variables = renderWith(findStep(steps(), 'cursor').with, scope);
+
+    expect(variables).toEqual({ restart: true });
+    expect(renderWith(gather, { ...scope, variables })).toEqual({
+      ai_index_id: 'support-cases',
+      since: '1970-01-01T00:00:00.000Z',
+      after_id: '',
+      sweep_after_id: '',
+    });
   });
 
   it('plans each batch from the model, retrying the model, and adds the plans up', () => {
@@ -260,22 +301,18 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
     ]);
   });
 
-  it('brakes when the run would tombstone more than its share of what it reviewed', () => {
-    const { consts } = render();
-    const gather = { output: { reviewed: 18, fixes: [{}, {}] } };
-    const limits = renderWith(findStep(steps(), 'limits').with, { consts, steps: { gather } });
+  it('brakes when the run would tombstone more than the gather step allows', () => {
     const brake = (tombstones: number) =>
       renderWith(findStep(steps(), 'brake').with, {
-        consts,
-        steps: { gather },
-        variables: { tombstones, ...limits },
+        consts: render().consts,
+        steps: { gather: { output: { max_tombstones: 3 } } },
+        variables: { tombstones },
       });
 
-    expect(limits).toEqual({ allowed_tombstones: 2 });
-    expect(brake(2)).toEqual({ braked: false, reason: '' });
-    expect(brake(3)).toEqual({
+    expect(brake(3)).toEqual({ braked: false, reason: '' });
+    expect(brake(4)).toEqual({
       braked: true,
-      reason: 'It would tombstone 3 items, more than the 2 (10% of 20) one run may.',
+      reason: 'It would tombstone 4 facts and entities, more than the 3 one run may.',
     });
   });
 
@@ -318,6 +355,19 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
       ['workflow.output', 'cancelled'],
     ]);
     expect(names.indexOf('braked_result')).toBeLessThan(names.indexOf('apply_fixes'));
+    expect(findStep(braked.steps ?? [], 'braked_output').with).toEqual(
+      expect.objectContaining({
+        mode: 'apply',
+        tombstoned: '${{ steps.record_braked.output.tombstoned }}',
+      })
+    );
+  });
+
+  it('outputs its mode at every end that can be a successful run', () => {
+    const report = findStep(findStep(steps(), 'report_result').steps ?? [], 'report_output');
+
+    expect(report.with?.mode).toBe('report');
+    expect(findStep(steps(), 'output_result').with?.mode).toBe('apply');
   });
 
   it('applies the fixes and each plan, then records the run and outputs its cursors', () => {

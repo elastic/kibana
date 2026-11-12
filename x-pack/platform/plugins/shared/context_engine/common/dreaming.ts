@@ -47,6 +47,10 @@ export const ABOUT_RELATIONSHIP_TYPE = 'about';
 export const OCCURRENCES_ATTRIBUTE = 'memory.number_of_occurrences';
 /** When the latest memory a fact or entity was seen in was recorded. */
 export const LAST_SEEN_AT_ATTRIBUTE = 'memory.last_seen_at';
+/** Who edited what a KI says through the KI update API. Automation then leaves its text alone. */
+export const EDITED_BY_ATTRIBUTE = 'memory.edited_by';
+/** When a person last edited what a KI says. */
+export const EDITED_AT_ATTRIBUTE = 'memory.edited_at';
 
 /** Maximum items in each list of a change set. */
 export const MAX_DREAMING_CHANGE_SET_ITEMS = 200;
@@ -127,8 +131,7 @@ export const maintenanceConfigOf = (
   schedule: { interval: maintenance?.schedule?.interval ?? DEFAULT_MAINTENANCE_INTERVAL },
   neighbors: maintenance?.neighbors ?? DEFAULT_MAINTENANCE_NEIGHBORS,
   sweep_size: maintenance?.sweep_size ?? DEFAULT_MAINTENANCE_SWEEP_SIZE,
-  max_tombstone_share:
-    maintenance?.max_tombstone_share ?? DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE,
+  max_tombstone_share: maintenance?.max_tombstone_share ?? DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE,
 });
 
 /**

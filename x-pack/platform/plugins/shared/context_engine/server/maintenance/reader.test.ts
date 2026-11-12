@@ -51,6 +51,7 @@ describe('createMaintenanceReader', () => {
     expect(filters).toContainEqual(buildAiIndexSpaceFilter('team-a'));
     expect(JSON.stringify(filters)).toContain('"id":{"gt":"fact-000"}');
     expect(page.kis).toHaveLength(MAINTENANCE_CHANGED_PAGE_SIZE);
+    expect(page.cursors[1]).toEqual({ from: '2026-11-02T00:00:00.000Z', afterId: 'fact-001' });
     expect(page.resume).toEqual({ from: '2026-11-02T00:00:00.000Z', afterId: 'fact-299' });
   });
 
@@ -65,30 +66,60 @@ describe('createMaintenanceReader', () => {
     );
   });
 
-  it('finds similar items semantically, and lexically where the AI index has no semantic field', async () => {
+  const items = Array.from({ length: 51 }, (_, index) => ({
+    id: `fact-${index}`,
+    type: 'fact.note',
+    title: 'Tom',
+    content: 'Tom eats vegetarian.',
+  }));
+  const hitsFor = (count: number) => ({
+    took: 1,
+    responses: Array.from({ length: count }, () => ({
+      hits: { hits: [collapsedHit({ id: 'fact-near', type: 'fact.note', title: 'Near' })] },
+    })),
+  });
+  const notSemantic = { status: 400, error: { type: 'illegal_argument_exception', reason: 'no' } };
+
+  it('finds similar items by meaning and words together', async () => {
     const { esClient, reader } = setup();
-    const neighbor = collapsedHit({ id: 'fact-2', type: 'fact.note', title: 'Near' });
+    esClient.msearch.mockResolvedValueOnce(hitsFor(1) as never);
+
+    const similar = await reader.similar([items[0]], 5);
+
+    const request = JSON.stringify(esClient.msearch.mock.calls[0][0]);
+    expect(request).toContain('"semantic":{"field":"content.semantic"');
+    expect(request).toContain('"multi_match"');
+    expect(request).toContain('"minimum_should_match":1');
+    expect(similar.get('fact-0')?.map(({ id }) => id)).toEqual(['fact-near']);
+  });
+
+  it('falls back to words alone where the AI index rejects the semantic query, from then on', async () => {
+    const { esClient, reader } = setup();
     esClient.msearch
-      .mockResolvedValueOnce({
-        took: 1,
-        responses: [
-          { status: 400, error: { type: 'illegal_argument_exception', reason: 'not semantic' } },
-        ],
-      } as never)
-      .mockResolvedValueOnce({
-        took: 1,
-        responses: [{ hits: { hits: [neighbor] } }],
-      } as never);
+      .mockResolvedValueOnce({ took: 1, responses: Array(50).fill(notSemantic) } as never)
+      .mockResolvedValueOnce(hitsFor(50) as never)
+      .mockResolvedValueOnce(hitsFor(1) as never);
 
-    const similar = await reader.similar(
-      [{ id: 'fact-1', type: 'fact.note', title: 'Tom', content: 'Tom eats vegetarian.' }],
-      5
+    const similar = await reader.similar(items, 5);
+
+    const requests = esClient.msearch.mock.calls.map(([request]) => JSON.stringify(request));
+    expect(requests).toHaveLength(3);
+    expect(requests[1]).not.toContain('"semantic"');
+    expect(requests[2]).not.toContain('"semantic"');
+    expect(similar.get('fact-50')?.map(({ id }) => id)).toEqual(['fact-near']);
+  });
+
+  it('fails on errors other than a rejected query', async () => {
+    const { esClient, reader } = setup();
+    esClient.msearch.mockResolvedValueOnce({
+      took: 1,
+      responses: [
+        { status: 429, error: { type: 'es_rejected_execution_exception', reason: 'busy' } },
+      ],
+    } as never);
+
+    await expect(reader.similar([items[0]], 5)).rejects.toThrow(
+      'Could not look up similar items (429): busy'
     );
-
-    const [first] = esClient.msearch.mock.calls[0];
-    const [second] = esClient.msearch.mock.calls[1];
-    expect(JSON.stringify(first)).toContain('"semantic":{"field":"content.semantic"');
-    expect(JSON.stringify(second)).toContain('"multi_match"');
-    expect(similar.get('fact-1')?.map(({ id }) => id)).toEqual(['fact-2']);
   });
 });

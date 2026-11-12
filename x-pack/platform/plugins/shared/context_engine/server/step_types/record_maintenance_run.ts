@@ -11,18 +11,36 @@ import {
   type RecordMaintenanceRunOutput,
 } from '../../common/step_types/record_maintenance_run';
 import type { MaintenanceChange } from '../../common/step_types/gather_maintenance';
+import { resolveDreamingAiIndex } from './gather_maintenance';
 import type { DreamingKiStepDependencies } from './helpers';
+import { assertDreamingAvailable, assertKiWritePrivilege } from './helpers';
 
 const countOf = (changes: MaintenanceChange[], change: MaintenanceChange['change']): number =>
   changes.filter((candidate) => candidate.change === change).length;
 
 export const getRecordMaintenanceRunStepDefinition = ({
   analyticsService,
+  getAiIndexService,
+  isDreamingAvailable,
+  checkWritePrivilege,
   logger,
-}: Pick<DreamingKiStepDependencies, 'analyticsService' | 'logger'>) =>
+}: Pick<
+  DreamingKiStepDependencies,
+  | 'analyticsService'
+  | 'getAiIndexService'
+  | 'isDreamingAvailable'
+  | 'checkWritePrivilege'
+  | 'logger'
+>) =>
   createServerStepDefinition({
     ...recordMaintenanceRunStepCommonDefinition,
     handler: async (context) => {
+      const request = context.contextManager.getFakeRequest();
+      const { spaceId } = context.contextManager.getContext().workflow;
+      await assertDreamingAvailable(isDreamingAvailable, spaceId);
+      await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
+      await resolveDreamingAiIndex(getAiIndexService, context.input.ai_index_id, spaceId);
+
       const {
         ai_index_id: aiIndexId,
         mode,

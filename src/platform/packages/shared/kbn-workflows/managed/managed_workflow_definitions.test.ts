@@ -154,16 +154,10 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
     instanceKey: 'my-ai-index-0123456789abcdef',
-    memoriesIndex: 'ai-index-idx-my-ai-index',
-    intervalMinutes: 60,
     connectorId: 'my-connector',
     instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
-    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
-    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
-    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
     maintenanceIntervalMinutes: 1440,
     maintenanceMode: 'report',
-    maxTombstoneShare: 0.1,
   },
   [CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
@@ -363,7 +357,7 @@ it.each([
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
   [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '6:1605ffd5'],
   [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '3:6d7dc8a7'],
-  [CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID, CONTEXT_ENGINE_MAINTENANCE_YAML, '1:e8ed8ccc'],
+  [CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID, CONTEXT_ENGINE_MAINTENANCE_YAML, '1:9a301ea1'],
   [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_TRACE_DREAMING_YAML, '6:5bda8559'],
   [
     CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,

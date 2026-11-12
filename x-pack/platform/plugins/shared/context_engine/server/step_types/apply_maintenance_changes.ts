@@ -18,7 +18,7 @@ import type { ApplyContext, PlannedWrite } from '../dreaming/apply';
 import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
 import { kiUri } from '../dreaming/ids';
 import { applyMaintenanceGroups, emptyApplyResult } from '../maintenance/apply_maintenance';
-import { parseRelationship } from '../maintenance/gather';
+import { audienceOf, parseRelationship } from '../maintenance/gather';
 import { createMaintenanceReader } from '../maintenance/reader';
 import { resolveMaintenanceChanges, type MaintenanceGroup } from '../maintenance/resolve_changes';
 import { resolveDreamingAiIndex } from './gather_maintenance';
@@ -126,9 +126,24 @@ export const getApplyMaintenanceChangesStepDefinition = ({
         kis.set(endId, ki);
       }
 
+      const audienceKi = batch?.items
+        .map(({ id }) => kis.get(id))
+        .find(
+          (ki): ki is DreamedKi =>
+            ki !== undefined && !isKiDeleted(ki) && audienceOf(ki) === batch.audience
+        );
       const resolved = batch
         ? resolveMaintenanceChanges(changeSet, { batch, kis, links, spaceId })
         : { groups: [], needsReview: [], rejected: [] };
+      if (batch && !audienceKi) {
+        resolved.rejected.push(
+          ...resolved.groups.map(({ item }) => ({
+            item,
+            reason: 'no item of the batch is left to take its permissions from',
+          }))
+        );
+        resolved.groups = [];
+      }
 
       const dryRun = planOnly ? new Map<string, PlannedWrite>() : undefined;
       const applyContext: ApplyContext = {
@@ -153,11 +168,8 @@ export const getApplyMaintenanceChangesStepDefinition = ({
         fixGroups,
         emptyApplyResult()
       );
-      const audiencePermissions = batch
-        ? kis.get(batch.items[0]?.id ?? '')?.permissions
-        : undefined;
       await applyMaintenanceGroups(
-        { ...applyContext, audience: { permissions: audiencePermissions } },
+        { ...applyContext, audience: { permissions: audienceKi?.permissions } },
         resolved.groups,
         result
       );

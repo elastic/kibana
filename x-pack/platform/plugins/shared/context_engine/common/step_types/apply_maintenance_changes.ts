@@ -31,6 +31,9 @@ const MAX_REASON_LENGTH = 1024;
 
 const idSchema = lazySchema(() => z.string().min(1).max(MAX_KI_ID_LENGTH));
 const reasonSchema = lazySchema(() => z.string().max(MAX_REASON_LENGTH));
+const titleSchema = lazySchema(() => z.string().min(1).max(MAX_KI_TITLE_LENGTH));
+const descriptionSchema = lazySchema(() => z.string().min(1).max(MAX_KI_DESCRIPTION_LENGTH));
+const contentSchema = lazySchema(() => z.string().min(1).max(MAX_KI_CONTENT_LENGTH));
 
 /** The changes the maintenance model proposes for one batch. */
 export const maintenanceChangeSetSchema = lazySchema(() =>
@@ -40,9 +43,9 @@ export const maintenanceChangeSetSchema = lazySchema(() =>
         z.object({
           survivor: idSchema,
           absorbed: z.array(idSchema).min(1).max(MAINTENANCE_BATCH_SIZE),
-          title: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
-          description: z.string().max(MAX_KI_DESCRIPTION_LENGTH).optional(),
-          content: z.string().max(MAX_KI_CONTENT_LENGTH).optional(),
+          title: titleSchema.optional(),
+          description: descriptionSchema.optional(),
+          content: contentSchema.optional(),
           reason: reasonSchema,
         })
       )
@@ -53,7 +56,9 @@ export const maintenanceChangeSetSchema = lazySchema(() =>
         z.object({
           ids: z.tuple([idSchema, idSchema]),
           label: z.enum(['changed', 'conflict']),
-          content: z.string().max(MAX_KI_CONTENT_LENGTH).optional(),
+          content: contentSchema
+            .optional()
+            .describe('With changed: what the newer fact says, now that it replaces the older'),
           reason: reasonSchema,
         })
       )
@@ -63,8 +68,8 @@ export const maintenanceChangeSetSchema = lazySchema(() =>
       .array(
         z.object({
           id: idSchema,
-          title: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
-          content: z.string().max(MAX_KI_CONTENT_LENGTH),
+          title: titleSchema.optional(),
+          content: contentSchema,
           reason: reasonSchema,
         })
       )
@@ -74,8 +79,8 @@ export const maintenanceChangeSetSchema = lazySchema(() =>
       .array(
         z.object({
           id: idSchema,
-          description: z.string().max(MAX_KI_DESCRIPTION_LENGTH).optional(),
-          content: z.string().max(MAX_KI_CONTENT_LENGTH),
+          description: descriptionSchema.optional(),
+          content: contentSchema,
           reason: reasonSchema,
         })
       )

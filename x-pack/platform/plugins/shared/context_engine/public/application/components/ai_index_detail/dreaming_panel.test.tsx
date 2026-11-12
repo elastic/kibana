@@ -263,6 +263,37 @@ describe('DreamingPanel', () => {
     expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
   });
 
+  it('does not round a share that is not a whole percent', () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMaxTombstoneShare'), {
+      target: { value: '12.5' },
+    });
+
+    expect(screen.getByTestId('contextAiIndexMaintenanceMaxTombstoneShare')).toHaveValue(12.5);
+    expect(screen.getByText('Must be a whole number from 0 to 100.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
+  });
+
+  it('keeps the saved maintenance settings when it turns maintenance off', async () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceNeighbors'), {
+      target: { value: '50' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexMaintenanceEnabled'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: expect.objectContaining({ enabled: false, neighbors: 5 }),
+        }),
+      })
+    );
+  });
+
   it('discards edits', () => {
     renderPanel(aiIndexWith(factsOnly));
 

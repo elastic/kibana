@@ -28,6 +28,7 @@ import {
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
   validateDreamingConfig,
 } from '../../../common/dreaming';
+import { MIN_MAINTENANCE_TOMBSTONES } from '../../../common/step_types/gather_maintenance';
 import { validateDreamingInterval } from '../../../common/validation';
 
 const validateType = (value: string): string | undefined =>
@@ -60,21 +61,21 @@ const typeDescriptionSchema = schema.maybe(
   })
 );
 
+const validateWholeNumber = (value: number): string | undefined =>
+  Number.isInteger(value) ? undefined : 'Must be a whole number.';
+
 const maintenanceSchema = schema.object(
   {
     enabled: schema.boolean({
       meta: { description: 'Whether maintenance runs on its schedule.' },
     }),
     mode: schema.maybe(
-      schema.oneOf(
-        [schema.literal(MAINTENANCE_MODES[0]), schema.literal(MAINTENANCE_MODES[1])],
-        {
-          meta: {
-            description:
-              '`report` lists the changes maintenance would make without making them; `apply` makes them. Defaults to `report`.',
-          },
-        }
-      )
+      schema.oneOf([schema.literal(MAINTENANCE_MODES[0]), schema.literal(MAINTENANCE_MODES[1])], {
+        meta: {
+          description:
+            '`report` lists the changes maintenance would make without making them; `apply` makes them. Defaults to `report`.',
+        },
+      })
     ),
     schedule: schema.maybe(
       schema.object({
@@ -91,6 +92,7 @@ const maintenanceSchema = schema.object(
       schema.number({
         min: 1,
         max: MAX_MAINTENANCE_NEIGHBORS,
+        validate: validateWholeNumber,
         meta: {
           description: `How many similar items each reviewed item is compared with. Defaults to ${DEFAULT_MAINTENANCE_NEIGHBORS}.`,
         },
@@ -100,6 +102,7 @@ const maintenanceSchema = schema.object(
       schema.number({
         min: 1,
         max: MAX_MAINTENANCE_SWEEP_SIZE,
+        validate: validateWholeNumber,
         meta: {
           description: `How many unchanged items each run also reviews, so every item is reviewed in time. Defaults to ${DEFAULT_MAINTENANCE_SWEEP_SIZE}.`,
         },
@@ -110,7 +113,7 @@ const maintenanceSchema = schema.object(
         min: 0,
         max: 1,
         meta: {
-          description: `The largest share of reviewed items one run may tombstone. Over it, the run writes nothing. Defaults to ${DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE}.`,
+          description: `The largest share of reviewed facts and entities one run may tombstone, and at least ${MIN_MAINTENANCE_TOMBSTONES}. Over it, the run writes nothing. Defaults to ${DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE}.`,
         },
       })
     ),

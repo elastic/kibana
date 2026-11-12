@@ -308,9 +308,14 @@ describe('applyOperations', () => {
         type: 'entity.person',
         title: 'Robert',
         content: 'Robert, the on-call SRE.',
-        attributes: { role: 'SRE', 'memory.number_of_occurrences': 1 },
+        attributes: {
+          role: 'SRE',
+          'memory.number_of_occurrences': 1,
+          'memory.edited_by': person.uri,
+          'memory.edited_at': '2026-11-01T00:00:00.000Z',
+        },
         references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
-        governance: { provenance: { updated_by: writer, edited_by: person } },
+        governance: { provenance: { updated_by: writer } },
       });
     });
 
@@ -338,13 +343,49 @@ describe('applyOperations', () => {
             role: 'SRE',
             'memory.number_of_occurrences': 2,
             'memory.last_seen_at': '2026-11-03T00:00:00.000Z',
+            'memory.edited_by': person.uri,
+            'memory.edited_at': '2026-11-01T00:00:00.000Z',
           },
           references: [
             { uri: 'ki://m-1', relation: 'derived_from' },
             { uri: 'ki://m-2', relation: 'derived_from' },
           ],
+        })
+      );
+    });
+
+    it('keeps a KI edited before the marker existed protected after it writes it', async () => {
+      stored.set('entity-person-bob', {
+        id: 'entity-person-bob',
+        type: 'entity.person',
+        title: 'Robert',
+        updated_at: '2026-10-01T00:00:00.000Z',
+        attributes: { 'memory.number_of_occurrences': 1 },
+        references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
+        governance: { provenance: { updated_by: person } },
+      });
+
+      await applyOperations(context(), [
+        {
+          op: 'upsert_entity',
+          id: 'entity-person-bob',
+          type: 'person',
+          title: 'Bob',
+          attributes: {},
+          sourceMemoryIds: ['m-2'],
+        },
+      ]);
+
+      expect(written()[0]).toEqual(
+        expect.objectContaining({
+          title: 'Robert',
+          attributes: {
+            'memory.number_of_occurrences': 2,
+            'memory.edited_by': person.uri,
+            'memory.edited_at': '2026-10-01T00:00:00.000Z',
+          },
           governance: expect.objectContaining({
-            provenance: expect.objectContaining({ updated_by: writer, edited_by: person }),
+            provenance: expect.objectContaining({ updated_by: writer }),
           }),
         })
       );
