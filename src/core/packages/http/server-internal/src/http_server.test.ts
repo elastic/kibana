@@ -174,18 +174,16 @@ test('mounts routes registered after the server is already listening', async () 
     },
   };
 
-  router.get(
-    { path: '/ping', validate: false, security: routeSecurity },
-    (context, req, res) => res.ok({ body: 'pong' })
+  router.get({ path: '/ping', validate: false, security: routeSecurity }, (context, req, res) =>
+    res.ok({ body: 'pong' })
   );
 
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
   await server.start();
 
-  router.get(
-    { path: '/later', validate: false, security: routeSecurity },
-    (context, req, res) => res.ok({ body: 'later' })
+  router.get({ path: '/later', validate: false, security: routeSecurity }, (context, req, res) =>
+    res.ok({ body: 'later' })
   );
 
   await supertest(innerServer.listener).get('/foo/later').expect(404);
