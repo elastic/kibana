@@ -1117,9 +1117,10 @@ Otherwise, and after every live run, clean up in this order:
      -H 'Content-Type: application/json' -d "$IDS"
    ```
 
-3. Delete the check documents of that space. The tag is the same in every space, so the query also filters on `meta.space_id`. The response has the number of deleted documents:
+3. Delete the check documents of that space. The tag is the same in every space, so the query also filters on `meta.space_id`. `SPACE` is the `spaceId` of the run. The first line keeps a value you already set, and otherwise uses `default`, so this step works on its own when you skipped step 2. The response has the number of deleted documents:
 
    ```sh
+   SPACE=${SPACE:-default}
    curl -s -u elastic:changeme -X POST "http://localhost:9200/synthetics-*/_delete_by_query?refresh=true" \
      -H 'Content-Type: application/json' \
      -d "{\"query\":{\"bool\":{\"filter\":[{\"term\":{\"tags\":\"synthtrace-synthetics_overview\"}},{\"term\":{\"meta.space_id\":\"$SPACE\"}}]}}}"
