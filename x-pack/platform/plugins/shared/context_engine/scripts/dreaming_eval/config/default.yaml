@@ -1,0 +1,78 @@
+# Dreaming eval: which datasets to import as Agent Builder traces, and the AI indices that dream
+# over them. Copy this file and pass it with --config to try other AI indices or dreaming configs.
+
+space: default
+data_dir: data/context_engine_dreaming_eval
+# traces_index: traces-agent_builder.otel-default
+schedule_interval: 7d
+
+datasets:
+  # Personal assistant chats (https://github.com/xiaowu0162/LongMemEval). Each question has a
+  # haystack of about 50 sessions; only the sessions that hold its answer, and a few others, are
+  # imported.
+  longmemeval_s:
+    agent: { id: longmemeval-assistant, name: Personal assistant }
+    question_ids: []
+    questions_per_type: 1
+    include_abstention: false
+    distractor_sessions: 1
+
+  # ServiceNow agent trajectories (https://github.com/xiaowu0162/LongMemEval-V2, WorkArena).
+  # All enterprise questions share one haystack of 100 trajectories in the small tier.
+  longmemeval_v2_enterprise:
+    agent: { id: workarena-agent, name: ServiceNow agent }
+    haystack: small
+    trajectories: 100
+    max_observation_chars: 600
+    include_abstention: false
+    include_image_questions: false
+    start_time: '2026-01-05T09:00:00.000Z'
+
+ai_indices:
+  - id: dreaming-eval-longmemeval
+    description: What a personal assistant learned about its user, from LongMemEval chats.
+    datasets: [longmemeval_s]
+    dreaming:
+      template: personal_assistant
+    # targets: [x-pack/platform/plugins/shared/context_engine/scripts/dreaming_eval/targets/longmemeval_s.json]
+
+  - id: dreaming-eval-workarena
+    description: How the company's ServiceNow portal works, from the runs of an agent working in it.
+    datasets: [longmemeval_v2_enterprise]
+    dreaming:
+      instructions: |-
+        An agent works in the company's ServiceNow portal: it orders catalog items, assigns and closes incidents and problems, and follows company protocols. Record what a colleague would need to know to do the same work: the steps that complete each recurring task, where things are in the portal, the values records and catalog items have, the company's rules, and what goes wrong and how to avoid it. Keep exact module, page, field, button and option names, and exact prices and numbers.
+
+        Learn from failed runs as well as successful ones: a step that failed is a gotcha, and what worked instead is the procedure.
+
+        Skip:
+        - Record numbers and agent names that only matter to one task.
+        - Page layout details that are the same on every page, such as the navigation bar.
+      facts:
+        - type: procedure
+          description: The steps or modules that complete a recurring task, such as "reassign problems by tag through Reports, then Problems".
+        - type: gotcha
+          description: Something that goes wrong in this portal and how to avoid it, such as "the global search needs Enter to show full results".
+        - type: ui_location
+          description: Where something is in the portal, such as "the Filters dropdown on the Incidents list holds My Open Incidents".
+        - type: record_value
+          description: A value of a record or catalog item, such as "a Dell XPS developer laptop costs $300 more with the largest SSD".
+        - type: company_rule
+          description: A rule from a company protocol, such as "incidents are assigned to network or software agents by category".
+      entities:
+        nodes:
+          - type: module
+            description: A ServiceNow application or module, such as Incidents, Problems, Reports or Service Catalog.
+          - type: page
+            description: A list, form or dashboard page in the portal.
+            attributes: [module]
+          - type: catalog_item
+            description: Something that can be ordered from the service catalog.
+            attributes: [base_price]
+          - type: protocol
+            description: A company protocol document that describes how a task is done.
+      relationships:
+        - type: part_of
+          description: A page is part of a module.
+        - type: uses
+          description: A protocol uses a module or page.
