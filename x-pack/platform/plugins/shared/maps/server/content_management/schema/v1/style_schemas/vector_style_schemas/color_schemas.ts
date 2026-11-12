@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   COLOR_MAP_TYPE,
   DATA_MAPPING_FUNCTION,
@@ -28,34 +28,36 @@ export const ordinalColorStop = z
   })
   .strict();
 
-export const colorDynamicOptions = z
-  .object({
-    // ordinal color properties
-    color: z.string().optional(),
-    custom_color_ramp: z.array(ordinalColorStop).optional(),
-    use_custom_color_ramp: z.boolean().optional(),
-    data_mapping_function: z
-      .union([
-        z.literal(DATA_MAPPING_FUNCTION.INTERPOLATE),
-        z.literal(DATA_MAPPING_FUNCTION.PERCENTILES),
-      ])
-      .optional(),
-    invert: z.boolean().optional(),
+export const colorDynamicOptions = lazySchema(() =>
+  z
+    .object({
+      // ordinal color properties
+      color: z.string().optional(),
+      custom_color_ramp: z.array(ordinalColorStop).optional(),
+      use_custom_color_ramp: z.boolean().optional(),
+      data_mapping_function: z
+        .union([
+          z.literal(DATA_MAPPING_FUNCTION.INTERPOLATE),
+          z.literal(DATA_MAPPING_FUNCTION.PERCENTILES),
+        ])
+        .optional(),
+      invert: z.boolean().optional(),
 
-    // category color properties
-    color_category: z.string().optional(),
-    custom_color_palette: z.array(categoryColorStop).optional(),
-    use_custom_color_palette: z.boolean().optional(),
-    other_category_color: z.string().optional(),
+      // category color properties
+      color_category: z.string().optional(),
+      custom_color_palette: z.array(categoryColorStop).optional(),
+      use_custom_color_palette: z.boolean().optional(),
+      other_category_color: z.string().optional(),
 
-    field: styleFieldSchema.optional(),
-    field_meta_options: fieldMetaOptionsSchema,
+      field: styleFieldSchema.optional(),
+      field_meta_options: fieldMetaOptionsSchema,
 
-    type: z
-      .union([z.literal(COLOR_MAP_TYPE.CATEGORICAL), z.literal(COLOR_MAP_TYPE.ORDINAL)])
-      .optional(),
-  })
-  .strict();
+      type: z
+        .union([z.literal(COLOR_MAP_TYPE.CATEGORICAL), z.literal(COLOR_MAP_TYPE.ORDINAL)])
+        .optional(),
+    })
+    .strict()
+);
 
 export const colorStaticOptions = z
   .object({

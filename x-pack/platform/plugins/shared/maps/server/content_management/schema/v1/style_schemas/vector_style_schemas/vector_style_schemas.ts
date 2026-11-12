@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { VECTOR_STYLES } from '../../../../../../common';
 import { LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 import {
@@ -48,13 +48,15 @@ export const vectorStylePropertiesSchema = z
   })
   .strict();
 
-export const vectorStyleSchema = z
-  .object({
-    properties: vectorStylePropertiesSchema.default({}), // need default to match config-schema behavior
-    is_time_aware: z.boolean().default(true).optional().meta({
-      description:
-        'Set to true to apply global time to style metadata requests. When set to true, style metadata will be re-fetched when global time changes.',
-    }),
-    type: z.literal(LAYER_STYLE_TYPE.VECTOR),
-  })
-  .strict();
+export const vectorStyleSchema = lazySchema(() =>
+  z
+    .object({
+      properties: vectorStylePropertiesSchema.default({}), // need default to match config-schema behavior
+      is_time_aware: z.boolean().default(true).optional().meta({
+        description:
+          'Set to true to apply global time to style metadata requests. When set to true, style metadata will be re-fetched when global time changes.',
+      }),
+      type: z.literal(LAYER_STYLE_TYPE.VECTOR),
+    })
+    .strict()
+);
