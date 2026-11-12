@@ -52,6 +52,25 @@ describe('normalizeToolCallIndexes', () => {
     expect(indexesOf(events)).toEqual([0, 0, 0, 1, 1]);
   });
 
+  it('starts a tool call for an id-less chunk at a source index that has none, and continues it', async () => {
+    const events = await normalize(
+      toolCallChunk({ index: 0, name: 'toolA', args: '{"foo":' }),
+      toolCallChunk({ index: 0, args: '"bar"}' })
+    );
+
+    expect(indexesOf(events)).toEqual([0, 0]);
+  });
+
+  it('does not let an id-less tool call collide with the index of a later real toolCallId', async () => {
+    const events = await normalize(
+      toolCallChunk({ index: 0, name: 'toolA', args: '{}' }),
+      toolCallChunk({ index: 0, toolCallId: 'b', name: 'toolB' }),
+      toolCallChunk({ index: 0, args: '{}' })
+    );
+
+    expect(indexesOf(events)).toEqual([0, 1, 1]);
+  });
+
   it('keeps indexes unchanged for providers that already emit distinct indexes', async () => {
     const events = await normalize(
       toolCallChunk({ index: 0, toolCallId: 'a', name: 'toolA' }),
