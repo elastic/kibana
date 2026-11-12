@@ -7,14 +7,10 @@
 
 import moment from 'moment';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import { getAssetCriticality } from '../../../../lib/entity_analytics/lead_generation/observation_modules/utils';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import {
-  SIGNAL_CARD_IDS,
-  TIME_RANGE_OPTIONS,
-} from '../../../../../common/entity_analytics/home/constants';
+import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityFacts } from './types';
 import {
   BRIEF_PERIOD_LABELS,
@@ -25,6 +21,8 @@ import {
 import type { CandidateEntities } from './read_entities';
 import type { VerifiedBrief } from './verify_draft';
 import { JOB_MENTION_PATTERN, MENTION_PATTERN, RULE_MENTION_PATTERN } from './verify_draft';
+import type { BriefViewModel } from '../../../../../common/entity_analytics/ai_brief/result';
+export { BriefViewModel } from '../../../../../common/entity_analytics/ai_brief/result';
 
 export const QUIET_LINE = 'Nothing in this view is flagged as needing attention.';
 /** The titles when the model wrote none: nothing flagged, or nothing with enough evidence to prioritize. */
@@ -32,81 +30,9 @@ export const QUIET_TITLE = 'All clear: nothing needs immediate attention';
 export const NO_PRIORITIES_TITLE = 'Nothing to prioritize right now';
 export const NO_PRIORITIES_LINE = 'No entity in this view has enough evidence to prioritize.';
 
-const RiskHistory = lazySchema(() =>
-  z.object({
-    of: z.enum(['entity', 'resolution group']),
-    from: z.iso.datetime(),
-    to: z.iso.datetime(),
-    /** Oldest first, at most 12. */
-    points: z.array(z.object({ t: z.iso.datetime(), score: z.number(), level: z.string() })),
-  })
-);
-export type BriefRiskHistory = z.infer<typeof RiskHistory>;
+export type BriefRiskHistory = NonNullable<BriefViewModel['priorities'][number]['riskHistory']>;
 
-/**
- * Everything the HTML brief shows, and nothing else: `renderBriefHtml` takes this object only. A new
- * signal adds an optional field here and a function there.
- */
-export const BriefViewModel = lazySchema(() =>
-  z.object({
-    version: z.literal(1),
-    scope: z.object({
-      period: z.enum(TIME_RANGE_OPTIONS),
-      periodLabel: z.string(),
-      capturedAt: z.iso.datetime(),
-      spaceId: z.string(),
-      focusTileTitle: z.string().optional(),
-      entityFilters: z.array(z.object({ label: z.string(), value: z.string() })),
-      sample: z.string().optional(),
-    }),
-    /** What wasn't checked: what couldn't be read, and the flagged entities the Entity Store didn't have. */
-    notChecked: z.object({
-      unreadable: z.array(z.string()),
-      notFound: z.string().optional(),
-    }),
-    /** The model's headline, when there was a model call and it found priorities. */
-    title: z.string().optional(),
-    summary: z.string().optional(),
-    /** The page's counts in its order, for the tiles that could be read. */
-    counts: z.array(
-      z.object({
-        tileId: z.enum(SIGNAL_CARD_IDS),
-        title: z.string(),
-        description: z.string().optional(),
-        value: z.number().int(),
-        delta: z.number().int().optional(),
-      })
-    ),
-    priorities: z.array(
-      z.object({
-        rank: z.number().int(),
-        entityId: z.string(),
-        name: z.string(),
-        type: z.enum(['host', 'user', 'service', 'generic']),
-        risk: z
-          .object({
-            score: z.number(),
-            level: z.string(),
-            of: z.enum(['entity', 'resolution group']),
-          })
-          .optional(),
-        /** As the Entity Store stores it, such as `extreme_impact`. */
-        assetCriticality: z.string().optional(),
-        /** The names of the watchlists the entity is on. */
-        watchlists: z.array(z.string()),
-        firstSeen: z.string().optional(),
-        assessment: z.string(),
-        whyFirst: z.string(),
-        nextStep: z.string(),
-        riskHistory: RiskHistory.optional(),
-      })
-    ),
-    recommendation: z.string().optional(),
-  })
-);
-export type BriefViewModel = z.infer<typeof BriefViewModel>;
-
-/** The model writing "rule 1" or "job 1" without the double braces: the reader would see it as written. */
+/** The captured data stored in the result attachment and presented by its React renderer. */
 const BARE_CITATION_PATTERN = /\b([Rr]ule|[Jj]ob)\s+(\d+)\b/;
 
 const TOKEN_PATTERN = new RegExp(
