@@ -41719,7 +41719,7 @@ paths:
                         reserve_diskspace:
                           description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
                           type: boolean
-                          x-state: Generally available; added in 9.7.0
+                          x-state: Generally available; added in 9.6.0
                         secrets:
                           additionalProperties: false
                           type: object
@@ -41902,7 +41902,7 @@ paths:
                 reserve_diskspace:
                   description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
                   type: boolean
-                  x-state: Generally available; added in 9.7.0
+                  x-state: Generally available; added in 9.6.0
                 secrets:
                   additionalProperties: false
                   type: object
@@ -42026,7 +42026,7 @@ paths:
                       reserve_diskspace:
                         description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
                         type: boolean
-                        x-state: Generally available; added in 9.7.0
+                        x-state: Generally available; added in 9.6.0
                       secrets:
                         additionalProperties: false
                         type: object
@@ -42297,7 +42297,7 @@ paths:
                       reserve_diskspace:
                         description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
                         type: boolean
-                        x-state: Generally available; added in 9.7.0
+                        x-state: Generally available; added in 9.6.0
                       secrets:
                         additionalProperties: false
                         type: object
@@ -42487,7 +42487,7 @@ paths:
                 reserve_diskspace:
                   description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
                   type: boolean
-                  x-state: Generally available; added in 9.7.0
+                  x-state: Generally available; added in 9.6.0
                 secrets:
                   additionalProperties: false
                   type: object
@@ -42611,7 +42611,7 @@ paths:
                       reserve_diskspace:
                         description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
                         type: boolean
-                        x-state: Generally available; added in 9.7.0
+                        x-state: Generally available; added in 9.6.0
                       secrets:
                         additionalProperties: false
                         type: object
