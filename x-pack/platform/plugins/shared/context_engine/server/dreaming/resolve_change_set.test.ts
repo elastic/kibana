@@ -285,6 +285,45 @@ describe('resolveChangeSet', () => {
     ]);
   });
 
+  it('takes a round cited without its trace: prefix as the round', () => {
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        entities: [
+          { ref: 'new:1', type: 'team', title: 'A', source_memory_ids: ['abc', 'trace:abc'] },
+        ],
+      }),
+      context({ memories: new Map([['trace:abc', '2026-10-01T10:00:00.000Z']]) })
+    );
+
+    expect(rejected).toEqual([]);
+    expect((operations[0] as UpsertEntityOperation).sourceMemoryIds).toEqual(['trace:abc']);
+  });
+
+  it('takes a new fact keyed otherwise than new:, such as fact:1, as a new fact', () => {
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        facts: [
+          {
+            ref: 'fact:1',
+            type: 'preference',
+            title: 'T',
+            content: 'C',
+            source_memory_ids: ['m-1'],
+          },
+        ],
+      }),
+      context()
+    );
+
+    expect(rejected).toEqual([]);
+    expect(operations).toEqual([
+      expect.objectContaining({
+        op: 'upsert_fact',
+        id: factId('exec-1', batchKeyOf(['m-1', 'm-2']), 'fact:1'),
+      }),
+    ]);
+  });
+
   it('rejects a fact ref that is neither existing nor a new key', () => {
     const { rejected } = resolveChangeSet(
       changeSet({
