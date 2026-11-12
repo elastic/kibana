@@ -12,6 +12,7 @@ import { createSHA256Hash } from '@kbn/crypto';
 import { stableStringify } from '@kbn/std';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { runPackStepCommonDefinition } from '../../common/workflows/step_types/run_pack/run_pack_common';
 import { runQueryStepCommonDefinition } from '../../common/workflows/step_types/run_query/run_query_common';
 
 /**
@@ -58,7 +59,10 @@ const loadApprovedHash = (stepId: string): string | null => {
   }
 };
 
-const DEFINITIONS = [runQueryStepCommonDefinition] as unknown as CommonStepDefinition[];
+const DEFINITIONS = [
+  runQueryStepCommonDefinition,
+  runPackStepCommonDefinition,
+] as unknown as CommonStepDefinition[];
 
 describe('osquery workflow step definition approvals', () => {
   it('every osquery step contract matches its approved hash', () => {

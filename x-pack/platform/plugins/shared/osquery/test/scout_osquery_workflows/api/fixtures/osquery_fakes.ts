@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import { set } from '@kbn/safer-lodash-set';
 import type { KbnClient, ScoutTestConfig } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test-es-server';
@@ -33,7 +33,11 @@ export interface FakeAgent {
   hostname: string;
   /** Fleet `local_metadata.os.platform`: the distribution for Linux, e.g. `ubuntu`. */
   platform: string;
+  /** Spaces the agent is visible in (Fleet space awareness). Defaults to `default`. */
+  namespaces?: string[];
 }
+
+const spacePrefix = (spaceId?: string) => (spaceId ? `/s/${spaceId}` : '');
 
 export const createSystemIndicesClient = async (
   esClient: Client,
@@ -122,7 +126,7 @@ export const indexFakeAgents = async (
         type: 'PERMANENT',
         policy_id: policyId,
         policy_revision_idx: 1,
-        namespaces: ['default'],
+        namespaces: agent.namespaces ?? ['default'],
         enrolled_at: now,
         last_checkin: now,
         last_checkin_status: 'online',
@@ -278,14 +282,23 @@ export const deleteSavedQuery = async (
   });
 };
 
+export interface PackQuery {
+  query: string;
+  interval: number;
+  /** Per-query switch: the live-query route skips `enabled: false` queries. */
+  enabled?: boolean;
+  ecs_mapping?: Record<string, { field?: string; value?: string | string[] }>;
+}
+
 export const createPack = async (
   kbnClient: KbnClient,
   name: string,
-  queries: Record<string, { query: string; interval: number }>
+  queries: Record<string, PackQuery>,
+  spaceId?: string
 ): Promise<string> => {
   const { data } = await kbnClient.request<{ data: { saved_object_id: string } }>({
     method: 'POST',
-    path: '/api/osquery/packs',
+    path: `${spacePrefix(spaceId)}/api/osquery/packs`,
     headers: API_VERSION,
     body: { name, enabled: false, queries },
   });
@@ -293,11 +306,112 @@ export const createPack = async (
   return data.data.saved_object_id;
 };
 
-export const deletePack = async (kbnClient: KbnClient, packId: string) => {
+export const deletePack = async (kbnClient: KbnClient, packId: string, spaceId?: string) => {
   await kbnClient.request({
     method: 'DELETE',
-    path: `/api/osquery/packs/${packId}`,
+    path: `${spacePrefix(spaceId)}/api/osquery/packs/${packId}`,
     headers: API_VERSION,
     ignoreErrors: [404],
+  });
+};
+
+/** The osquery action documents dispatched for a pack id (a live query run with `pack_id`). */
+export const findPackActionDocs = async (
+  systemEs: Client,
+  packId: string,
+  actionId?: string
+): Promise<Array<Record<string, any>>> => {
+  await systemEs.indices.refresh({ index: OSQUERY_ACTIONS_INDEX }, { ignore: [404] });
+  const result = await systemEs.search({
+    index: OSQUERY_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    size: 10,
+    query: {
+      bool: {
+        filter: [
+          { term: { pack_id: packId } },
+          ...(actionId ? [{ term: { action_id: actionId } }] : []),
+        ],
+      },
+    },
+  });
+
+  return result.hits.hits.map((hit) => hit._source as Record<string, any>);
+};
+
+/** All osquery action ids for one agent, including actions from earlier executions. */
+export const findAgentActionIds = async (
+  systemEs: Client,
+  agentId: string
+): Promise<Set<string>> => {
+  await systemEs.indices.refresh({ index: OSQUERY_ACTIONS_INDEX }, { ignore: [404] });
+  const ids = new Set<string>();
+  let searchAfter: estypes.SortResults | undefined;
+  while (true) {
+    const result = await systemEs.search<{ action_id: string }>({
+      index: OSQUERY_ACTIONS_INDEX,
+      ignore_unavailable: true,
+      size: 100,
+      query: { term: { agents: agentId } },
+      sort: [{ action_id: 'asc' }],
+      search_after: searchAfter,
+      _source: ['action_id'],
+    });
+    const { hits } = result.hits;
+    for (const hit of hits) {
+      if (hit._source) ids.add(hit._source.action_id);
+    }
+
+    if (hits.length < 100) return ids;
+    searchAfter = hits[hits.length - 1].sort;
+  }
+};
+
+/**
+ * Creates a space for a test that changes space-wide state, such as loading the Elastic prebuilt
+ * packs, so it never touches packs that already exist in other spaces. Deleting the space
+ * (`deleteTestSpace`) removes every saved object the test created in it.
+ */
+export const createTestSpace = async (kbnClient: KbnClient, spaceId: string): Promise<void> => {
+  await kbnClient.request({
+    method: 'POST',
+    path: '/api/spaces/space',
+    body: { id: spaceId, name: spaceId },
+    ignoreErrors: [409],
+  });
+};
+
+export const deleteTestSpace = async (kbnClient: KbnClient, spaceId: string): Promise<void> => {
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `/api/spaces/space/${spaceId}`,
+    ignoreErrors: [404],
+  });
+};
+
+/**
+ * Deletes the copies of the Elastic prebuilt packs loaded in a test-owned space. Only call it
+ * for a space the test created: `POST /internal/osquery/assets/update` copies every prebuilt
+ * pack into the space, and other spaces may hold copies a user loaded on purpose.
+ */
+export const deleteLoadedPrebuiltPacks = async (
+  kbnClient: KbnClient,
+  spaceId: string
+): Promise<void> => {
+  const { data } = await kbnClient.request<{ data: Array<{ pack_id: string }> }>({
+    method: 'GET',
+    path: `${spacePrefix(spaceId)}/internal/osquery/packs/_prebuilt`,
+    headers: { 'elastic-api-version': '1', 'x-elastic-internal-origin': 'kibana' },
+  });
+  for (const { pack_id: packId } of data.data) {
+    await deletePack(kbnClient, packId, spaceId);
+  }
+};
+
+export const loadPrebuiltPacks = async (kbnClient: KbnClient, spaceId: string): Promise<void> => {
+  await kbnClient.request({
+    method: 'POST',
+    path: `${spacePrefix(spaceId)}/internal/osquery/assets/update`,
+    headers: { 'elastic-api-version': '1', 'x-elastic-internal-origin': 'kibana' },
   });
 };
