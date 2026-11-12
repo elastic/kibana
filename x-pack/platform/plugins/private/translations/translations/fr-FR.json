@@ -21882,7 +21882,6 @@
     "xpack.apm.subFeatureRegistry.modifySettings": "Possibilité de modifier les paramètres",
     "xpack.apm.subFeatureRegistry.settings": "Paramètres",
     "xpack.apm.suggestionsSelect.comboBox.ariaLabel": "Sélectionner une valeur",
-    "xpack.apm.technicalPreviewBadge.ariaLabel": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera de corriger tout problème, mais les fonctionnalités des versions d'évaluation technique ne sont pas soumises aux SLA de support des fonctionnalités officielles en disponibilité générale.",
     "xpack.apm.technicalPreviewBadgeDescription": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera de corriger tout problème, mais les fonctionnalités des versions d'évaluation technique ne sont pas soumises aux SLA de support des fonctionnalités officielles en disponibilité générale.",
     "xpack.apm.technicalPreviewBadgeLabel": "Version d'évaluation technique",
     "xpack.apm.templateDescription.clearBundleButtonLabel": "Effacer le groupe",
