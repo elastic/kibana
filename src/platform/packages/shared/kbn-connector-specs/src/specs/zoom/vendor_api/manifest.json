@@ -113,15 +113,15 @@
   "sources": {
     "meetings": {
       "apiVersion": "2",
-      "fetchedAt": "2026-10-07T20:21:44.904Z",
+      "fetchedAt": "2026-11-12T23:06:19.496Z",
       "format": "openapi",
-      "url": "https://developers.zoom.us/api-hub/meetings/methods/endpoints.json"
+      "url": "https://developers.zoom.us/api/zoap/meetings/methods"
     },
     "users": {
       "apiVersion": "2",
-      "fetchedAt": "2026-10-07T20:21:44.905Z",
+      "fetchedAt": "2026-11-12T23:06:19.681Z",
       "format": "openapi",
-      "url": "https://developers.zoom.us/api-hub/users/methods/endpoints.json"
+      "url": "https://developers.zoom.us/api/zoap/users/methods"
     }
   },
   "unmatched": {

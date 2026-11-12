@@ -2,396 +2,13 @@
   "components": {
     "securitySchemes": {
       "openapi_authorization": {
-        "in": "header",
-        "name": "Authorization",
-        "type": "apiKey"
-      },
-      "openapi_oauth": {
-        "flows": {
-          "authorizationCode": {
-            "authorizationUrl": "/",
-            "refreshUrl": "",
-            "scopes": {
-              "archiving:delete:archived_files:admin": "archiving:delete:archived_files:admin",
-              "archiving:read:archived_file_statistics:admin": "archiving:read:archived_file_statistics:admin",
-              "archiving:read:archived_files": "archiving:read:archived_files",
-              "archiving:read:archived_files:admin": "archiving:read:archived_files:admin",
-              "archiving:read:list_archived_files:admin": "archiving:read:list_archived_files:admin",
-              "archiving:read:list_archived_files:master": "archiving:read:list_archived_files:master",
-              "archiving:update:archived_file_auto_delete_status": "archiving:update:archived_file_auto_delete_status",
-              "archiving:update:archived_file_auto_delete_status:admin": "archiving:update:archived_file_auto_delete_status:admin",
-              "cloud_recording:delete:meeting_recording": "cloud_recording:delete:meeting_recording",
-              "cloud_recording:delete:meeting_recording:admin": "cloud_recording:delete:meeting_recording:admin",
-              "cloud_recording:delete:meeting_recording:master": "cloud_recording:delete:meeting_recording:master",
-              "cloud_recording:delete:meeting_transcript": "cloud_recording:delete:meeting_transcript",
-              "cloud_recording:delete:meeting_transcript:admin": "cloud_recording:delete:meeting_transcript:admin",
-              "cloud_recording:delete:recording_file": "cloud_recording:delete:recording_file",
-              "cloud_recording:delete:recording_file:admin": "cloud_recording:delete:recording_file:admin",
-              "cloud_recording:delete:recording_file:master": "cloud_recording:delete:recording_file:master",
-              "cloud_recording:read:list_recording_files": "cloud_recording:read:list_recording_files",
-              "cloud_recording:read:list_recording_files:admin": "cloud_recording:read:list_recording_files:admin",
-              "cloud_recording:read:list_recording_files:master": "cloud_recording:read:list_recording_files:master",
-              "cloud_recording:read:list_recording_registrants": "cloud_recording:read:list_recording_registrants",
-              "cloud_recording:read:list_recording_registrants:admin": "cloud_recording:read:list_recording_registrants:admin",
-              "cloud_recording:read:list_recording_registrants:master": "cloud_recording:read:list_recording_registrants:master",
-              "cloud_recording:read:list_user_recordings": "cloud_recording:read:list_user_recordings",
-              "cloud_recording:read:list_user_recordings:admin": "cloud_recording:read:list_user_recordings:admin",
-              "cloud_recording:read:list_user_recordings:master": "cloud_recording:read:list_user_recordings:master",
-              "cloud_recording:read:meeting_transcript": "cloud_recording:read:meeting_transcript",
-              "cloud_recording:read:meeting_transcript:admin": "cloud_recording:read:meeting_transcript:admin",
-              "cloud_recording:read:recording_analytics_details": "cloud_recording:read:recording_analytics_details",
-              "cloud_recording:read:recording_analytics_details:admin": "cloud_recording:read:recording_analytics_details:admin",
-              "cloud_recording:read:recording_analytics_details:master": "cloud_recording:read:recording_analytics_details:master",
-              "cloud_recording:read:recording_analytics_summary": "cloud_recording:read:recording_analytics_summary",
-              "cloud_recording:read:recording_analytics_summary:admin": "cloud_recording:read:recording_analytics_summary:admin",
-              "cloud_recording:read:recording_analytics_summary:master": "cloud_recording:read:recording_analytics_summary:master",
-              "cloud_recording:read:recording_settings": "cloud_recording:read:recording_settings",
-              "cloud_recording:read:recording_settings:admin": "cloud_recording:read:recording_settings:admin",
-              "cloud_recording:read:recording_settings:master": "cloud_recording:read:recording_settings:master",
-              "cloud_recording:read:registration_questions": "cloud_recording:read:registration_questions",
-              "cloud_recording:read:registration_questions:admin": "cloud_recording:read:registration_questions:admin",
-              "cloud_recording:read:registration_questions:master": "cloud_recording:read:registration_questions:master",
-              "cloud_recording:update:recording_settings": "cloud_recording:update:recording_settings",
-              "cloud_recording:update:recording_settings:admin": "cloud_recording:update:recording_settings:admin",
-              "cloud_recording:update:recording_settings:master": "cloud_recording:update:recording_settings:master",
-              "cloud_recording:update:recover_meeting_recordings": "cloud_recording:update:recover_meeting_recordings",
-              "cloud_recording:update:recover_meeting_recordings:admin": "cloud_recording:update:recover_meeting_recordings:admin",
-              "cloud_recording:update:recover_meeting_recordings:master": "cloud_recording:update:recover_meeting_recordings:master",
-              "cloud_recording:update:recover_single_recording": "cloud_recording:update:recover_single_recording",
-              "cloud_recording:update:recover_single_recording:admin": "cloud_recording:update:recover_single_recording:admin",
-              "cloud_recording:update:recover_single_recording:master": "cloud_recording:update:recover_single_recording:master",
-              "cloud_recording:update:registrant_status": "cloud_recording:update:registrant_status",
-              "cloud_recording:update:registrant_status:admin": "cloud_recording:update:registrant_status:admin",
-              "cloud_recording:update:registrant_status:master": "cloud_recording:update:registrant_status:master",
-              "cloud_recording:update:registration_questions": "cloud_recording:update:registration_questions",
-              "cloud_recording:update:registration_questions:admin": "cloud_recording:update:registration_questions:admin",
-              "cloud_recording:update:registration_questions:master": "cloud_recording:update:registration_questions:master",
-              "cloud_recording:write:recording_registrant": "cloud_recording:write:recording_registrant",
-              "cloud_recording:write:recording_registrant:admin": "cloud_recording:write:recording_registrant:admin",
-              "cloud_recording:write:recording_registrant:master": "cloud_recording:write:recording_registrant:master",
-              "device:delete:zpa_device:admin": "device:delete:zpa_device:admin",
-              "device:delete:zpa_device:master": "device:delete:zpa_device:master",
-              "device:read:admin": "device:read:admin",
-              "device:read:list_groups:admin": "device:read:list_groups:admin",
-              "device:read:list_groups:master": "device:read:list_groups:master",
-              "device:read:list_zpa_versions:admin": "device:read:list_zpa_versions:admin",
-              "device:read:list_zpa_versions:master": "device:read:list_zpa_versions:master",
-              "device:read:user_setting:admin": "device:read:user_setting:admin",
-              "device:read:user_setting:master": "device:read:user_setting:master",
-              "device:update:zdm_device_assignment:admin": "device:update:zdm_device_assignment:admin",
-              "device:write:admin": "device:write:admin",
-              "device:write:group:admin": "device:write:group:admin",
-              "device:write:group:master": "device:write:group:master",
-              "device:write:zpa_device:admin": "device:write:zpa_device:admin",
-              "device:write:zpa_device:master": "device:write:zpa_device:master",
-              "device:write:zpa_os_app:admin": "device:write:zpa_os_app:admin",
-              "device:write:zpa_os_app:master": "device:write:zpa_os_app:master",
-              "h323:read:admin": "h323:read:admin",
-              "h323:write:admin": "h323:write:admin",
-              "h323_device:delete:device:admin": "h323_device:delete:device:admin",
-              "h323_device:read:list_devices:admin": "h323_device:read:list_devices:admin",
-              "h323_device:update:device:admin": "h323_device:update:device:admin",
-              "h323_device:write:device:admin": "h323_device:write:device:admin",
-              "meeting:delete:live_meeting_chat_message": "meeting:delete:live_meeting_chat_message",
-              "meeting:delete:live_meeting_chat_message:admin": "meeting:delete:live_meeting_chat_message:admin",
-              "meeting:delete:meeting": "meeting:delete:meeting",
-              "meeting:delete:meeting:admin": "meeting:delete:meeting:admin",
-              "meeting:delete:open_app": "meeting:delete:open_app",
-              "meeting:delete:open_app:admin": "meeting:delete:open_app:admin",
-              "meeting:delete:poll": "meeting:delete:poll",
-              "meeting:delete:poll:admin": "meeting:delete:poll:admin",
-              "meeting:delete:registrant": "meeting:delete:registrant",
-              "meeting:delete:registrant:admin": "meeting:delete:registrant:admin",
-              "meeting:delete:summary": "meeting:delete:summary",
-              "meeting:delete:summary:admin": "meeting:delete:summary:admin",
-              "meeting:delete:survey": "meeting:delete:survey",
-              "meeting:delete:survey:admin": "meeting:delete:survey:admin",
-              "meeting:master": "meeting:master",
-              "meeting:read": "meeting:read",
-              "meeting:read:admin": "meeting:read:admin",
-              "meeting:read:invitation": "meeting:read:invitation",
-              "meeting:read:invitation:admin": "meeting:read:invitation:admin",
-              "meeting:read:list_meetings": "meeting:read:list_meetings",
-              "meeting:read:list_meetings:admin": "meeting:read:list_meetings:admin",
-              "meeting:read:list_past_instances": "meeting:read:list_past_instances",
-              "meeting:read:list_past_instances:admin": "meeting:read:list_past_instances:admin",
-              "meeting:read:list_past_participants": "meeting:read:list_past_participants",
-              "meeting:read:list_past_participants:admin": "meeting:read:list_past_participants:admin",
-              "meeting:read:list_poll_results": "meeting:read:list_poll_results",
-              "meeting:read:list_poll_results:admin": "meeting:read:list_poll_results:admin",
-              "meeting:read:list_polls": "meeting:read:list_polls",
-              "meeting:read:list_polls:admin": "meeting:read:list_polls:admin",
-              "meeting:read:list_registrants": "meeting:read:list_registrants",
-              "meeting:read:list_registrants:admin": "meeting:read:list_registrants:admin",
-              "meeting:read:list_registration_questions": "meeting:read:list_registration_questions",
-              "meeting:read:list_registration_questions:admin": "meeting:read:list_registration_questions:admin",
-              "meeting:read:list_summaries": "meeting:read:list_summaries",
-              "meeting:read:list_summaries:admin": "meeting:read:list_summaries:admin",
-              "meeting:read:list_templates": "meeting:read:list_templates",
-              "meeting:read:list_templates:admin": "meeting:read:list_templates:admin",
-              "meeting:read:list_upcoming_meetings": "meeting:read:list_upcoming_meetings",
-              "meeting:read:list_upcoming_meetings:admin": "meeting:read:list_upcoming_meetings:admin",
-              "meeting:read:live_streaming_token": "meeting:read:live_streaming_token",
-              "meeting:read:live_streaming_token:admin": "meeting:read:live_streaming_token:admin",
-              "meeting:read:livestream": "meeting:read:livestream",
-              "meeting:read:livestream:admin": "meeting:read:livestream:admin",
-              "meeting:read:local_archiving_token:admin": "meeting:read:local_archiving_token:admin",
-              "meeting:read:local_recording_token": "meeting:read:local_recording_token",
-              "meeting:read:local_recording_token:admin": "meeting:read:local_recording_token:admin",
-              "meeting:read:meeting": "meeting:read:meeting",
-              "meeting:read:meeting:admin": "meeting:read:meeting:admin",
-              "meeting:read:past_meeting": "meeting:read:past_meeting",
-              "meeting:read:past_meeting:admin": "meeting:read:past_meeting:admin",
-              "meeting:read:past_qa": "meeting:read:past_qa",
-              "meeting:read:past_qa:admin": "meeting:read:past_qa:admin",
-              "meeting:read:poll": "meeting:read:poll",
-              "meeting:read:poll:admin": "meeting:read:poll:admin",
-              "meeting:read:registrant": "meeting:read:registrant",
-              "meeting:read:registrant:admin": "meeting:read:registrant:admin",
-              "meeting:read:summary": "meeting:read:summary",
-              "meeting:read:summary:admin": "meeting:read:summary:admin",
-              "meeting:read:survey": "meeting:read:survey",
-              "meeting:read:survey:admin": "meeting:read:survey:admin",
-              "meeting:read:token": "meeting:read:token",
-              "meeting:read:token:admin": "meeting:read:token:admin",
-              "meeting:update:in_meeting_controls": "meeting:update:in_meeting_controls",
-              "meeting:update:in_meeting_controls:admin": "meeting:update:in_meeting_controls:admin",
-              "meeting:update:live_meeting_chat_message": "meeting:update:live_meeting_chat_message",
-              "meeting:update:live_meeting_chat_message:admin": "meeting:update:live_meeting_chat_message:admin",
-              "meeting:update:livestream": "meeting:update:livestream",
-              "meeting:update:livestream:admin": "meeting:update:livestream:admin",
-              "meeting:update:livestream_status": "meeting:update:livestream_status",
-              "meeting:update:livestream_status:admin": "meeting:update:livestream_status:admin",
-              "meeting:update:meeting": "meeting:update:meeting",
-              "meeting:update:meeting:admin": "meeting:update:meeting:admin",
-              "meeting:update:participant_rtms_app_status": "meeting:update:participant_rtms_app_status",
-              "meeting:update:participant_rtms_app_status:admin": "meeting:update:participant_rtms_app_status:admin",
-              "meeting:update:poll": "meeting:update:poll",
-              "meeting:update:poll:admin": "meeting:update:poll:admin",
-              "meeting:update:registrant_status": "meeting:update:registrant_status",
-              "meeting:update:registrant_status:admin": "meeting:update:registrant_status:admin",
-              "meeting:update:registration_question": "meeting:update:registration_question",
-              "meeting:update:registration_question:admin": "meeting:update:registration_question:admin",
-              "meeting:update:status": "meeting:update:status",
-              "meeting:update:status:admin": "meeting:update:status:admin",
-              "meeting:update:survey": "meeting:update:survey",
-              "meeting:update:survey:admin": "meeting:update:survey:admin",
-              "meeting:write": "meeting:write",
-              "meeting:write:admin": "meeting:write:admin",
-              "meeting:write:admin:sip_dialing": "meeting:write:admin:sip_dialing",
-              "meeting:write:batch_polls": "meeting:write:batch_polls",
-              "meeting:write:batch_polls:admin": "meeting:write:batch_polls:admin",
-              "meeting:write:batch_registrants": "meeting:write:batch_registrants",
-              "meeting:write:batch_registrants:admin": "meeting:write:batch_registrants:admin",
-              "meeting:write:invite_links": "meeting:write:invite_links",
-              "meeting:write:invite_links:admin": "meeting:write:invite_links:admin",
-              "meeting:write:meeting": "meeting:write:meeting",
-              "meeting:write:meeting:admin": "meeting:write:meeting:admin",
-              "meeting:write:open_app": "meeting:write:open_app",
-              "meeting:write:open_app:admin": "meeting:write:open_app:admin",
-              "meeting:write:poll": "meeting:write:poll",
-              "meeting:write:poll:admin": "meeting:write:poll:admin",
-              "meeting:write:registrant": "meeting:write:registrant",
-              "meeting:write:registrant:admin": "meeting:write:registrant:admin",
-              "meeting:write:sip_dialing": "meeting:write:sip_dialing",
-              "meeting:write:sip_dialing:admin": "meeting:write:sip_dialing:admin",
-              "meeting:write:template": "meeting:write:template",
-              "meeting:write:template:admin": "meeting:write:template:admin",
-              "meeting_summary:read": "meeting_summary:read",
-              "meeting_summary:read:admin": "meeting_summary:read:admin",
-              "meeting_summary:write": "meeting_summary:write",
-              "meeting_summary:write:admin": "meeting_summary:write:admin",
-              "meeting_token:read:admin:live_streaming": "meeting_token:read:admin:live_streaming",
-              "meeting_token:read:admin:local_archiving": "meeting_token:read:admin:local_archiving",
-              "meeting_token:read:admin:local_recording": "meeting_token:read:admin:local_recording",
-              "meeting_token:read:live_streaming": "meeting_token:read:live_streaming",
-              "meeting_token:read:local_recording": "meeting_token:read:local_recording",
-              "pac:read": "pac:read",
-              "pac:read:admin": "pac:read:admin",
-              "pac:read:list_pac_accounts": "pac:read:list_pac_accounts",
-              "pac:read:list_pac_accounts:admin": "pac:read:list_pac_accounts:admin",
-              "phone_recording:read:admin": "phone_recording:read:admin",
-              "recording:read": "recording:read",
-              "recording:read:admin": "recording:read:admin",
-              "recording:write": "recording:write",
-              "recording:write:admin": "recording:write:admin",
-              "report:read:admin": "report:read:admin",
-              "report:read:billing:admin": "report:read:billing:admin",
-              "report:read:billing_invoice:admin": "report:read:billing_invoice:admin",
-              "report:read:disclaimer:admin": "report:read:disclaimer:admin",
-              "report:read:list_history_meetings:admin": "report:read:list_history_meetings:admin",
-              "report:read:list_meeting_participants:admin": "report:read:list_meeting_participants:admin",
-              "report:read:list_meeting_polls:admin": "report:read:list_meeting_polls:admin",
-              "report:read:list_users:admin": "report:read:list_users:admin",
-              "report:read:list_webinar_participants:admin": "report:read:list_webinar_participants:admin",
-              "report:read:list_webinar_polls:admin": "report:read:list_webinar_polls:admin",
-              "report:read:meeting:admin": "report:read:meeting:admin",
-              "report:read:meeting_activity_log:admin": "report:read:meeting_activity_log:admin",
-              "report:read:meeting_qna:admin": "report:read:meeting_qna:admin",
-              "report:read:meeting_survey:admin": "report:read:meeting_survey:admin",
-              "report:read:operation_logs:admin": "report:read:operation_logs:admin",
-              "report:read:remote_support:admin": "report:read:remote_support:admin",
-              "report:read:telephone:admin": "report:read:telephone:admin",
-              "report:read:upcoming_meetings_webinars:admin": "report:read:upcoming_meetings_webinars:admin",
-              "report:read:user:admin": "report:read:user:admin",
-              "report:read:user_activities:admin": "report:read:user_activities:admin",
-              "report:read:webinar:admin": "report:read:webinar:admin",
-              "report:read:webinar_qna:admin": "report:read:webinar_qna:admin",
-              "report:read:webinar_survey:admin": "report:read:webinar_survey:admin",
-              "sip_phone:delete:sip_phone:admin": "sip_phone:delete:sip_phone:admin",
-              "sip_phone:read:admin": "sip_phone:read:admin",
-              "sip_phone:read:list_sip_phones:admin": "sip_phone:read:list_sip_phones:admin",
-              "sip_phone:update:sip_phone:admin": "sip_phone:update:sip_phone:admin",
-              "sip_phone:write:admin": "sip_phone:write:admin",
-              "sip_phone:write:sip_phone:admin": "sip_phone:write:sip_phone:admin",
-              "tracking_field:delete:tracking_field:admin": "tracking_field:delete:tracking_field:admin",
-              "tracking_field:read:list_tracking_fields:admin": "tracking_field:read:list_tracking_fields:admin",
-              "tracking_field:read:tracking_field:admin": "tracking_field:read:tracking_field:admin",
-              "tracking_field:update:tracking_field:admin": "tracking_field:update:tracking_field:admin",
-              "tracking_field:write:tracking_field:admin": "tracking_field:write:tracking_field:admin",
-              "tracking_fields:read:admin": "tracking_fields:read:admin",
-              "tracking_fields:write:admin": "tracking_fields:write:admin",
-              "tsp:delete:tsp_account": "tsp:delete:tsp_account",
-              "tsp:delete:tsp_account:admin": "tsp:delete:tsp_account:admin",
-              "tsp:read": "tsp:read",
-              "tsp:read:admin": "tsp:read:admin",
-              "tsp:read:list_tsp_accounts": "tsp:read:list_tsp_accounts",
-              "tsp:read:list_tsp_accounts:admin": "tsp:read:list_tsp_accounts:admin",
-              "tsp:read:tsp:admin": "tsp:read:tsp:admin",
-              "tsp:read:tsp_account": "tsp:read:tsp_account",
-              "tsp:read:tsp_account:admin": "tsp:read:tsp_account:admin",
-              "tsp:update:tsp:admin": "tsp:update:tsp:admin",
-              "tsp:update:tsp_account": "tsp:update:tsp_account",
-              "tsp:update:tsp_account:admin": "tsp:update:tsp_account:admin",
-              "tsp:update:tsp_settings": "tsp:update:tsp_settings",
-              "tsp:update:tsp_settings:admin": "tsp:update:tsp_settings:admin",
-              "tsp:write": "tsp:write",
-              "tsp:write:admin": "tsp:write:admin",
-              "tsp:write:tsp_account": "tsp:write:tsp_account",
-              "tsp:write:tsp_account:admin": "tsp:write:tsp_account:admin",
-              "webinar:delete:branding_name_tag": "webinar:delete:branding_name_tag",
-              "webinar:delete:branding_name_tag:admin": "webinar:delete:branding_name_tag:admin",
-              "webinar:delete:branding_virtual_background": "webinar:delete:branding_virtual_background",
-              "webinar:delete:branding_virtual_background:admin": "webinar:delete:branding_virtual_background:admin",
-              "webinar:delete:branding_wallpaper": "webinar:delete:branding_wallpaper",
-              "webinar:delete:branding_wallpaper:admin": "webinar:delete:branding_wallpaper:admin",
-              "webinar:delete:live_webinar_chat_message": "webinar:delete:live_webinar_chat_message",
-              "webinar:delete:live_webinar_chat_message:admin": "webinar:delete:live_webinar_chat_message:admin",
-              "webinar:delete:panelist": "webinar:delete:panelist",
-              "webinar:delete:panelist:admin": "webinar:delete:panelist:admin",
-              "webinar:delete:poll": "webinar:delete:poll",
-              "webinar:delete:poll:admin": "webinar:delete:poll:admin",
-              "webinar:delete:registrant": "webinar:delete:registrant",
-              "webinar:delete:registrant:admin": "webinar:delete:registrant:admin",
-              "webinar:delete:survey": "webinar:delete:survey",
-              "webinar:delete:survey:admin": "webinar:delete:survey:admin",
-              "webinar:delete:webinar": "webinar:delete:webinar",
-              "webinar:delete:webinar:admin": "webinar:delete:webinar:admin",
-              "webinar:read": "webinar:read",
-              "webinar:read:admin": "webinar:read:admin",
-              "webinar:read:branding": "webinar:read:branding",
-              "webinar:read:branding:admin": "webinar:read:branding:admin",
-              "webinar:read:list_absentees": "webinar:read:list_absentees",
-              "webinar:read:list_absentees:admin": "webinar:read:list_absentees:admin",
-              "webinar:read:list_panelists": "webinar:read:list_panelists",
-              "webinar:read:list_panelists:admin": "webinar:read:list_panelists:admin",
-              "webinar:read:list_past_instances": "webinar:read:list_past_instances",
-              "webinar:read:list_past_instances:admin": "webinar:read:list_past_instances:admin",
-              "webinar:read:list_past_participants": "webinar:read:list_past_participants",
-              "webinar:read:list_past_participants:admin": "webinar:read:list_past_participants:admin",
-              "webinar:read:list_past_polls": "webinar:read:list_past_polls",
-              "webinar:read:list_past_polls:admin": "webinar:read:list_past_polls:admin",
-              "webinar:read:list_polls": "webinar:read:list_polls",
-              "webinar:read:list_polls:admin": "webinar:read:list_polls:admin",
-              "webinar:read:list_registrants": "webinar:read:list_registrants",
-              "webinar:read:list_registrants:admin": "webinar:read:list_registrants:admin",
-              "webinar:read:list_registration_questions": "webinar:read:list_registration_questions",
-              "webinar:read:list_registration_questions:admin": "webinar:read:list_registration_questions:admin",
-              "webinar:read:list_templates": "webinar:read:list_templates",
-              "webinar:read:list_templates:admin": "webinar:read:list_templates:admin",
-              "webinar:read:list_tracking_sources": "webinar:read:list_tracking_sources",
-              "webinar:read:list_tracking_sources:admin": "webinar:read:list_tracking_sources:admin",
-              "webinar:read:list_webinars": "webinar:read:list_webinars",
-              "webinar:read:list_webinars:admin": "webinar:read:list_webinars:admin",
-              "webinar:read:live_streaming_token": "webinar:read:live_streaming_token",
-              "webinar:read:live_streaming_token:admin": "webinar:read:live_streaming_token:admin",
-              "webinar:read:livestream": "webinar:read:livestream",
-              "webinar:read:livestream:admin": "webinar:read:livestream:admin",
-              "webinar:read:local_archiving_token:admin": "webinar:read:local_archiving_token:admin",
-              "webinar:read:local_recording_token": "webinar:read:local_recording_token",
-              "webinar:read:local_recording_token:admin": "webinar:read:local_recording_token:admin",
-              "webinar:read:past_qa": "webinar:read:past_qa",
-              "webinar:read:past_qa:admin": "webinar:read:past_qa:admin",
-              "webinar:read:poll": "webinar:read:poll",
-              "webinar:read:poll:admin": "webinar:read:poll:admin",
-              "webinar:read:registrant": "webinar:read:registrant",
-              "webinar:read:registrant:admin": "webinar:read:registrant:admin",
-              "webinar:read:survey": "webinar:read:survey",
-              "webinar:read:survey:admin": "webinar:read:survey:admin",
-              "webinar:read:token": "webinar:read:token",
-              "webinar:read:token:admin": "webinar:read:token:admin",
-              "webinar:read:webinar": "webinar:read:webinar",
-              "webinar:read:webinar:admin": "webinar:read:webinar:admin",
-              "webinar:update:branding_name_tag": "webinar:update:branding_name_tag",
-              "webinar:update:branding_name_tag:admin": "webinar:update:branding_name_tag:admin",
-              "webinar:update:branding_virtual_background": "webinar:update:branding_virtual_background",
-              "webinar:update:branding_virtual_background:admin": "webinar:update:branding_virtual_background:admin",
-              "webinar:update:livestream": "webinar:update:livestream",
-              "webinar:update:livestream:admin": "webinar:update:livestream:admin",
-              "webinar:update:livestream_status": "webinar:update:livestream_status",
-              "webinar:update:livestream_status:admin": "webinar:update:livestream_status:admin",
-              "webinar:update:poll": "webinar:update:poll",
-              "webinar:update:poll:admin": "webinar:update:poll:admin",
-              "webinar:update:registrant_status": "webinar:update:registrant_status",
-              "webinar:update:registrant_status:admin": "webinar:update:registrant_status:admin",
-              "webinar:update:registration_question": "webinar:update:registration_question",
-              "webinar:update:registration_question:admin": "webinar:update:registration_question:admin",
-              "webinar:update:status": "webinar:update:status",
-              "webinar:update:status:admin": "webinar:update:status:admin",
-              "webinar:update:survey": "webinar:update:survey",
-              "webinar:update:survey:admin": "webinar:update:survey:admin",
-              "webinar:update:webinar": "webinar:update:webinar",
-              "webinar:update:webinar:admin": "webinar:update:webinar:admin",
-              "webinar:write": "webinar:write",
-              "webinar:write:admin": "webinar:write:admin",
-              "webinar:write:admin:sip_dialing": "webinar:write:admin:sip_dialing",
-              "webinar:write:batch_registrants": "webinar:write:batch_registrants",
-              "webinar:write:batch_registrants:admin": "webinar:write:batch_registrants:admin",
-              "webinar:write:branding_name_tag": "webinar:write:branding_name_tag",
-              "webinar:write:branding_name_tag:admin": "webinar:write:branding_name_tag:admin",
-              "webinar:write:branding_virtual_background": "webinar:write:branding_virtual_background",
-              "webinar:write:branding_virtual_background:admin": "webinar:write:branding_virtual_background:admin",
-              "webinar:write:branding_wallpaper": "webinar:write:branding_wallpaper",
-              "webinar:write:branding_wallpaper:admin": "webinar:write:branding_wallpaper:admin",
-              "webinar:write:invite_links": "webinar:write:invite_links",
-              "webinar:write:invite_links:admin": "webinar:write:invite_links:admin",
-              "webinar:write:panelist": "webinar:write:panelist",
-              "webinar:write:panelist:admin": "webinar:write:panelist:admin",
-              "webinar:write:poll": "webinar:write:poll",
-              "webinar:write:poll:admin": "webinar:write:poll:admin",
-              "webinar:write:registrant": "webinar:write:registrant",
-              "webinar:write:registrant:admin": "webinar:write:registrant:admin",
-              "webinar:write:sip_dialing": "webinar:write:sip_dialing",
-              "webinar:write:sip_dialing:admin": "webinar:write:sip_dialing:admin",
-              "webinar:write:template": "webinar:write:template",
-              "webinar:write:template:admin": "webinar:write:template:admin",
-              "webinar:write:webinar": "webinar:write:webinar",
-              "webinar:write:webinar:admin": "webinar:write:webinar:admin",
-              "webinar_token:read:admin:live_streaming": "webinar_token:read:admin:live_streaming",
-              "webinar_token:read:admin:local_archiving": "webinar_token:read:admin:local_archiving",
-              "webinar_token:read:admin:local_recording": "webinar_token:read:admin:local_recording",
-              "webinar_token:read:live_streaming": "webinar_token:read:live_streaming",
-              "webinar_token:read:local_recording": "webinar_token:read:local_recording"
-            },
-            "tokenUrl": ""
-          }
-        },
-        "type": "oauth2"
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
   "info": {
-    "title": "Meetings"
+    "title": "Meetings API"
   },
   "openapi": "3.0.0",
   "paths": {
@@ -449,7 +66,8 @@
                       "enum": [
                         "other",
                         "open_api",
-                        "web_portal"
+                        "web_portal",
+                        "zoom_scheduler"
                       ],
                       "type": "string"
                     },
@@ -604,6 +222,21 @@
                         },
                         "allow_multiple_devices": {
                           "type": "boolean"
+                        },
+                        "allow_participants_to_transcribe_meetings_with_my_notes": {
+                          "properties": {
+                            "enable": {
+                              "type": "boolean"
+                            },
+                            "participant_scope": {
+                              "enum": [
+                                "organization",
+                                "all"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         },
                         "alternative_host_manage_cloud_recording": {
                           "type": "boolean"
@@ -1233,13 +866,7 @@
         },
         "security": [
           {
-            "openapi_authorization": [],
-            "openapi_oauth": [
-              "meeting:read",
-              "meeting:read:admin",
-              "meeting:read:meeting",
-              "meeting:read:meeting:admin"
-            ]
+            "openapi_authorization": []
           }
         ]
       }
@@ -1548,14 +1175,7 @@
         },
         "security": [
           {
-            "openapi_authorization": [],
-            "openapi_oauth": [
-              "recording:read",
-              "phone_recording:read:admin",
-              "cloud_recording:read:list_recording_files:admin",
-              "cloud_recording:read:list_recording_files",
-              "cloud_recording:read:list_recording_files:master"
-            ]
+            "openapi_authorization": []
           }
         ]
       }
@@ -1827,13 +1447,7 @@
         },
         "security": [
           {
-            "openapi_authorization": [],
-            "openapi_oauth": [
-              "meeting:read:admin",
-              "meeting:read",
-              "meeting:read:list_registrants",
-              "meeting:read:list_registrants:admin"
-            ]
+            "openapi_authorization": []
           }
         ]
       }
@@ -1927,13 +1541,7 @@
         },
         "security": [
           {
-            "openapi_authorization": [],
-            "openapi_oauth": [
-              "meeting:read:admin",
-              "meeting:read",
-              "meeting:read:past_meeting",
-              "meeting:read:past_meeting:admin"
-            ]
+            "openapi_authorization": []
           }
         ]
       }
@@ -2049,13 +1657,7 @@
         },
         "security": [
           {
-            "openapi_authorization": [],
-            "openapi_oauth": [
-              "meeting:read:admin",
-              "meeting:read",
-              "meeting:read:list_past_participants",
-              "meeting:read:list_past_participants:admin"
-            ]
+            "openapi_authorization": []
           }
         ]
       }
@@ -2244,13 +1846,7 @@
         },
         "security": [
           {
-            "openapi_authorization": [],
-            "openapi_oauth": [
-              "meeting:read:admin",
-              "meeting:read",
-              "meeting:read:list_meetings",
-              "meeting:read:list_meetings:admin"
-            ]
+            "openapi_authorization": []
           }
         ]
       }
@@ -2611,14 +2207,7 @@
         },
         "security": [
           {
-            "openapi_authorization": [],
-            "openapi_oauth": [
-              "recording:read:admin",
-              "recording:read",
-              "cloud_recording:read:list_user_recordings",
-              "cloud_recording:read:list_user_recordings:master",
-              "cloud_recording:read:list_user_recordings:admin"
-            ]
+            "openapi_authorization": []
           }
         ]
       }
