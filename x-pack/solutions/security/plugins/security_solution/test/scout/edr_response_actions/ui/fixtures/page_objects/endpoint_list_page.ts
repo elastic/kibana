@@ -57,6 +57,15 @@ export class EndpointListPage {
     });
   }
 
+  agentStatusFor(hostname: string): Locator {
+    return this.rowFor(hostname).getByTestId('rowHostStatus-agentStatus');
+  }
+
+  /** The action status badge (for example "Isolated") in the row for `hostname`; absent when the host has none. */
+  actionStatusesFor(hostname: string): Locator {
+    return this.rowFor(hostname).getByTestId('rowHostStatus-actionStatuses');
+  }
+
   /** Opens the row action menu for `hostname` and chooses Respond. */
   async openResponder(hostname: string): Promise<void> {
     await this.rowFor(hostname).getByTestId('endpointTableRowActions').click();

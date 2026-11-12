@@ -413,3 +413,146 @@ describe('createEmulatorFetch', () => {
     });
   });
 });
+
+describe('createEmulatorFetch with capture', () => {
+  const sendItem = (fetch: typeof globalThis.fetch, name: string) =>
+    fetch(`${BASE_URL}/items`, {
+      method: 'POST',
+      headers: { ...json, authorization: 'Bearer abc', 'x-api-key': 'key' },
+      body: JSON.stringify({ name, apiToken: 't', client_secret: 's', private_key: 'pem' }),
+    });
+
+  it('adds the redacted headers, query and bodies to each call', async () => {
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], capture: true });
+
+    await sendItem(fetch, 'a');
+    await fetch(`${BASE_URL}/items?limit=10&refresh_token=r`);
+
+    expect(calls[0].captured).toEqual({
+      request: {
+        headers: expect.objectContaining({
+          'content-type': 'application/json',
+          authorization: 'Bearer [redacted]',
+          'x-api-key': '[redacted]',
+        }),
+        query: {},
+        body: {
+          name: 'a',
+          apiToken: '[redacted]',
+          client_secret: '[redacted]',
+          private_key: '[redacted]',
+        },
+      },
+      response: { headers: json, body: { name: expect.any(String) } },
+    });
+    // An undeclared parameter is a violation, and the capture still shows what was sent.
+    expect(calls[1]).toMatchObject({
+      status: 422,
+      captured: { request: { query: { limit: '10', refresh_token: '[redacted]' } } },
+    });
+  });
+
+  it('passes calls with their capture to onCall', async () => {
+    const onCall = jest.fn();
+    const { fetch } = createEmulatorFetch({ specs: [spec], capture: true, onCall });
+
+    await sendItem(fetch, 'a');
+
+    expect(onCall).toHaveBeenCalledWith(
+      expect.objectContaining({ captured: expect.objectContaining({ request: expect.anything() }) })
+    );
+  });
+
+  it('keeps captures on the latest maxCalls calls, and every call', async () => {
+    const { fetch, calls, reset } = createEmulatorFetch({
+      specs: [spec],
+      capture: { maxCalls: 2 },
+    });
+
+    for (const name of ['a', 'b', 'c']) {
+      await sendItem(fetch, name);
+    }
+    expect(calls).toHaveLength(3);
+    expect(calls.map(({ captured }) => captured?.request.body)).toEqual([
+      undefined,
+      expect.objectContaining({ name: 'b' }),
+      expect.objectContaining({ name: 'c' }),
+    ]);
+
+    reset();
+    await sendItem(fetch, 'd');
+    await sendItem(fetch, 'e');
+    expect(calls.map(({ captured }) => captured?.request.body)).toEqual([
+      expect.objectContaining({ name: 'd' }),
+      expect.objectContaining({ name: 'e' }),
+    ]);
+  });
+
+  it('cuts bodies longer than maxBodyBytes and flags them', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [spec],
+      capture: { maxBodyBytes: 12 },
+      respond: listResponder,
+    });
+
+    await fetch(`${BASE_URL}/items`);
+
+    expect(calls[0].captured?.response).toEqual({
+      headers: json,
+      body: '[{"name":"a"',
+      bodyTruncated: true,
+    });
+  });
+
+  it('leaves calls without a capture by default', async () => {
+    const { fetch, calls, maxCapturedCalls } = createEmulatorFetch({ specs: [spec] });
+
+    await sendItem(fetch, 'a');
+
+    expect(calls[0]).not.toHaveProperty('captured');
+    expect(maxCapturedCalls).toBeUndefined();
+  });
+
+  it('redacts the API key parameters the spec declares, such as Figma’s header and Trello’s key', async () => {
+    const securedSpec = {
+      ...spec,
+      components: {
+        securitySchemes: {
+          figma: { type: 'apiKey', in: 'header', name: 'X-Figma-Token' },
+          // Camel-cased, as fetch lowercases the header it arrives in to x-docusign-authentication.
+          docusign: { type: 'apiKey', in: 'header', name: 'X-DocuSign-Authentication' },
+          trello: { type: 'apiKey', in: 'query', name: 'key' },
+        },
+      },
+      security: [{ figma: [], docusign: [], trello: [] }],
+    };
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [securedSpec],
+      capture: true,
+      respond: listResponder,
+    });
+
+    await fetch(`${BASE_URL}/items?key=k`, {
+      headers: { 'X-Figma-Token': 'f', 'x-docusign-AUTHENTICATION': 'd' },
+    });
+
+    expect(calls[0]).toMatchObject({
+      status: 200,
+      captured: {
+        request: {
+          headers: {
+            'x-figma-token': '[redacted]',
+            'x-docusign-authentication': '[redacted]',
+          },
+          query: { key: '[redacted]' },
+        },
+      },
+    });
+  });
+
+  it.each([-1, 1.5])('refuses maxCalls %p when created', (maxCalls) => {
+    expect(() => createEmulatorFetch({ specs: [spec], capture: { maxCalls } })).toThrow(
+      'capture.maxCalls must be a whole number of at least 0'
+    );
+  });
+});
