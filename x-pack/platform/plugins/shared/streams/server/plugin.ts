@@ -65,6 +65,7 @@ import { createComponentCatalogueService } from './lib/component_catalogue/compo
 import { createEncryptionKeyStore } from './lib/unit_config/encryption_key_store';
 import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
 import type { UnitConfigHooks } from './lib/unit_config/types';
+import { createRemoteDestinationProbe } from './lib/unit_config/remote_destination_probe';
 import {
   registerRepublishUnitsTask,
   removeRepublishUnitsTask,
@@ -357,6 +358,7 @@ export class StreamsPlugin
             logger: this.logger.get('credential-sealer'),
           })
         : undefined,
+      probeRemoteDestination: createRemoteDestinationProbe(),
     };
     const componentCatalogue = createComponentCatalogueService({
       fetchComponentCatalogue: distributorClient.fetchComponentCatalogue,

@@ -10,7 +10,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { DocumentSummarySection } from './document_summary_section';
 import { EventKind } from '../constants/event_kinds';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';

@@ -173,7 +173,7 @@ const TOOLS: Tool[] = [
   {
     name: 'list_calls',
     description:
-      'Lists the requests the emulator received, in order: the operation, the status it answered, where the response came from (responseSource), and any violations of the vendor spec by the request or response. Pass since (the total of an earlier call) to see only later requests.',
+      'Lists the requests the emulator received, in order: the operation, the status it answered, where the response came from (responseSource), and any violations of the vendor spec by the request or response. When the emulator captures exchanges, as server mode does, the latest calls also carry captured: the headers, query and body of the request and the headers and body of the response, with secrets redacted and long bodies cut (bodyTruncated). Pass since (the total of an earlier call) to see only later requests.',
     inputSchema: {
       type: 'object',
       properties: { since: { type: 'integer', minimum: 0 } },

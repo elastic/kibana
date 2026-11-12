@@ -69,6 +69,7 @@ export type ManagementId =
   | 'role_mappings'
   | 'roles'
   | 'rollup_jobs'
+  | 'search_boost'
   | 'search_sessions'
   | 'service_accounts'
   | 'settings'
