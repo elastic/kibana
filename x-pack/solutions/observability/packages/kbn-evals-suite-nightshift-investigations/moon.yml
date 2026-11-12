@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/std'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
 tags:
   - functional-tests
   - package

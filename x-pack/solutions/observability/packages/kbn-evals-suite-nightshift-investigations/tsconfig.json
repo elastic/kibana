@@ -26,6 +26,8 @@
     "@kbn/zod",
     "@kbn/config",
     "@kbn/config-schema",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors"
   ]
 }
