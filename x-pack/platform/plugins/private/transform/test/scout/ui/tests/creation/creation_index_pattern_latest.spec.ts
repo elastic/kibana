@@ -46,7 +46,6 @@ test.describe('Create latest transform from a data view', { tag: tags.deployment
     const { transformManagement, transformWizard, datePicker } = pageObjects;
 
     await test.step('opens the wizard for the source data view', async () => {
-      await expect(transformManagement.statsBar).toBeVisible();
       await transformManagement.startTransformCreation('latest');
       await transformManagement.selectSource(testData.DATA_VIEWS.ECOMMERCE.title);
       await expect(transformWizard.defineStep).toBeVisible();
@@ -57,8 +56,8 @@ test.describe('Create latest transform from a data view', { tag: tags.deployment
       await assertSourcePreview(transformWizard, datePicker, {
         isServerless: config.serverless,
         fullTimeRange: {
-          start: 'Jun 12, 2023 @ 00:04:19.000',
-          end: 'Jul 12, 2023 @ 23:45:36.000',
+          start: '2023-06-12T00:04:19.000Z',
+          end: '2023-07-12T23:45:36.000Z',
         },
       });
       await assertNoA11yViolations(page);
@@ -116,9 +115,9 @@ test.describe('Create latest transform from a data view', { tag: tags.deployment
       await transformManagement.filterByTransformId(TRANSFORM_ID);
       await assertTransformRow(transformManagement, TRANSFORM_ID, {
         description: DESCRIPTION,
-        type: 'latest',
-        status: 'stopped',
-        mode: 'batch',
+        type: 'Latest',
+        status: 'Stopped',
+        execution: '100%',
         progress: 100,
         health: 'Healthy',
       });

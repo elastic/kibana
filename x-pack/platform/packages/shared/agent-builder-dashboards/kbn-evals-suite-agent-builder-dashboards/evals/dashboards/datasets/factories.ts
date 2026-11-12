@@ -15,6 +15,10 @@ import type {
   DashboardStructureGold,
   EnhanceMode,
   LayoutEditGold,
+  PanelEditGold,
+  ReplaceConfirmationGold,
+  UnavailableRequestGold,
+  VisualizationAttachment,
 } from '../../../src/types';
 import { getDefectScope } from '../../../src/evaluators/seed_defects';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../../../src/extract_dashboard';
@@ -28,7 +32,13 @@ import { SECTIONED_LOGS_DASHBOARD } from '../../../src/fixtures/sectioned_logs_d
 
 /** Slicing keys stored on every example so golden-cluster results can be split by behaviour. */
 export interface ExampleMetadata {
-  behaviour: 'creation' | 'routing' | 'enhance' | 'discover_results' | 'layout_edit';
+  behaviour:
+    | 'creation'
+    | 'routing'
+    | 'enhance'
+    | 'discover_results'
+    | 'layout_edit'
+    | 'edit_scenario';
   /** `logs_dissect` is the sample logs index read through a `DISSECT` query attached from Discover. */
   dataSource: 'logs' | 'logs_dissect';
   enhanceMode?: EnhanceMode;
@@ -87,6 +97,22 @@ export const routingExample = ({
 });
 
 /**
+ * A dashboard request nothing of which the data can back. The dashboard skill
+ * loads, but no dashboard may be written, and the reply names each request.
+ */
+export const unavailableDashboardExample = ({
+  question,
+  unavailableRequests,
+}: {
+  question: string;
+  unavailableRequests: readonly UnavailableRequestGold[];
+}): DashboardDatasetExample => ({
+  input: { question },
+  metadata: { behaviour: 'routing', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: { route: 'dashboard', noDashboard: true, unavailableRequests },
+});
+
+/**
  * Enhance request over the seeded messy logs dashboard. The mode is answered
  * with `mode` if the agent asks; the gold defects are the seeded ones `mode`
  * may fix, since appearance mode must leave the duplicate panel and missing
@@ -126,6 +152,29 @@ export const enhanceExample = ({
 });
 
 /**
+ * Bare enhance request over the seeded messy logs dashboard, where the user
+ * answers the mode question with free text that names specific charts. The
+ * agent edits only those charts, with the default presentation applied to them.
+ */
+export const scopedEnhanceExample = ({
+  question,
+  answer,
+  panelIds,
+}: {
+  question: string;
+  answer: string;
+  panelIds: string[];
+}): DashboardDatasetExample => ({
+  input: { question, dashboard: MESSY_LOGS_DASHBOARD, modeAnswer: { text: answer } },
+  metadata: { behaviour: 'enhance', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: {
+    route: 'dashboard',
+    scopedEnhance: { panelIds },
+    goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
+  },
+});
+
+/**
  * Dashboard request over Discover ES|QL results that parse the sample logs
  * with `DISSECT`, attached the way the "AI Agent" action attaches them. The
  * derived columns are not mapped on the index, so controls may only use
@@ -154,22 +203,39 @@ export const discoverResultsExample = ({
 /**
  * A request that adds, removes, moves or edits panels of the seeded sectioned
  * logs dashboard. `layoutEdit` names the containers the edit may rearrange
- * and where the prompt puts things.
+ * and where the prompt puts things; the other gold covers what else the
+ * prompt asks of the edit. `visualizations` are charts the agent created
+ * earlier in the conversation. `edit_scenario` tags the edits beyond moving
+ * ES|QL panels.
  */
 export const layoutEditExample = ({
   question,
-  layoutEdit,
+  controls,
+  visualizations,
   dashboard = SECTIONED_LOGS_DASHBOARD,
+  behaviour = 'layout_edit',
+  ...gold
 }: {
   question: string;
-  layoutEdit: LayoutEditGold;
+  layoutEdit?: LayoutEditGold;
+  panelEdits?: readonly PanelEditGold[];
+  structure?: DashboardStructureGold;
+  controls?: Omit<ControlsGold, 'mappedFields'>;
+  replaceConfirmation?: ReplaceConfirmationGold;
+  unavailableRequests?: readonly UnavailableRequestGold[];
+  visualizations?: readonly VisualizationAttachment[];
   dashboard?: DashboardAttachmentData;
+  behaviour?: 'layout_edit' | 'edit_scenario';
 }): DashboardDatasetExample => ({
-  input: { question, dashboard },
-  metadata: { behaviour: 'layout_edit', dataSource: 'logs' } satisfies ExampleMetadata,
+  input: { question, dashboard, ...(visualizations ? { visualizations } : {}) },
+  metadata: { behaviour, dataSource: 'logs' } satisfies ExampleMetadata,
   output: {
     route: 'dashboard',
-    layoutEdit,
-    goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
+    ...gold,
+    ...(controls ? { controls: { mappedFields: SAMPLE_LOGS_MAPPED_FIELDS, ...controls } } : {}),
+    // A replace confirmation ends without a write, and Trajectory skips it.
+    ...(gold.replaceConfirmation
+      ? {}
+      : { goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID] }),
   },
 });

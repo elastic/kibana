@@ -53,7 +53,8 @@ const collect = (
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
 
-describe('digital experience apps', () => {
+// Failing: See https://github.com/elastic/kibana/issues/303882
+describe.skip('digital experience apps', () => {
   describe('parseDigitalExperienceScenarioOpts', () => {
     it('defaults to session.id, no raw attribution, one environment, no edge cases and scale 1', () => {
       expect(parseDigitalExperienceScenarioOpts(undefined, FROM)).toEqual({

@@ -17,6 +17,22 @@ describe('Nightshift investigations configuration', () => {
   it('preserves an explicit Wiki opt-out', () => {
     expect(config.schema.validate({ wiki: { enabled: false } }).wiki.enabled).toBe(false);
   });
+
+  it('enables learning by default', () => {
+    expect(config.schema.validate({}).learning.enabled).toBe(true);
+  });
+
+  it('enables decision trees by default without requiring Wiki', () => {
+    const validated = config.schema.validate({ wiki: { enabled: false }, decision_trees: {} });
+    expect(validated.decision_trees.enabled).toBe(true);
+    expect(validated.wiki.enabled).toBe(false);
+  });
+
+  it('preserves an explicit decision-tree opt-out', () => {
+    expect(
+      config.schema.validate({ decision_trees: { enabled: false } }).decision_trees.enabled
+    ).toBe(false);
+  });
 });
 
 describe('Nightshift investigations configuration deprecations', () => {

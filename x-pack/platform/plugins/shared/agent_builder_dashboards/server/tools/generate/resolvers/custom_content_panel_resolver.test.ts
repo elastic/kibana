@@ -62,7 +62,7 @@ describe('createCustomContentPanelResolver', () => {
   beforeEach(() => {
     mockedBuild.mockReset();
     mockedBuild.mockResolvedValue({
-      esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY host',
+      esqlQueries: ['FROM logs-* | STATS count = COUNT(*) BY host'],
       template: '<div>resolved</div>',
       height: 320,
     });
@@ -95,7 +95,11 @@ describe('createCustomContentPanelResolver', () => {
     });
 
     it('stores no query for a panel without data', async () => {
-      mockedBuild.mockResolvedValue({ template: '<div>banner</div>', height: 200 });
+      mockedBuild.mockResolvedValue({
+        esqlQueries: [],
+        template: '<div>banner</div>',
+        height: 200,
+      });
 
       const result = await resolve(addRequest({ hasData: false }));
 
@@ -134,9 +138,67 @@ describe('createCustomContentPanelResolver', () => {
       expect(mockedBuild).toHaveBeenCalledWith(
         expect.objectContaining({
           nlQuery: 'Make the badges blue',
-          existing: { esqlQuery: 'FROM logs-*', template: '<div>old</div>' },
+          existing: {
+            esqlQueries: ['FROM logs-*'],
+            template: '<div>old</div>',
+          },
         })
       );
+    });
+
+    it('hands the additional queries of a multi-query panel to the builder', async () => {
+      await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>{{ queries[1].rows.size }}</div>',
+            esql_query: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+          { nlQuery: 'Restyle' }
+        )
+      );
+
+      expect(mockedBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          existing: expect.objectContaining({
+            esqlQueries: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+        })
+      );
+    });
+
+    it('stores the additional queries the builder keeps after the main one', async () => {
+      mockedBuild.mockResolvedValue({
+        esqlQueries: ['FROM logs-*', 'FROM metrics-*'],
+        template: '<div>resolved</div>',
+        height: 320,
+      });
+
+      const result = await resolve(
+        editRequest(customContentPanel({ esql_query: ['FROM logs-*', 'FROM metrics-*'] }), {
+          nlQuery: 'Update',
+        })
+      );
+
+      expect(result).toMatchObject({
+        panelContent: { config: { esql_query: ['FROM logs-*', 'FROM metrics-*'] } },
+      });
+    });
+
+    it('stores no query, and so no additional ones, when the builder returns none', async () => {
+      mockedBuild.mockResolvedValue({
+        esqlQueries: [],
+        template: '<div>static</div>',
+        height: 200,
+      });
+
+      const result = await resolve(
+        editRequest(customContentPanel({ esql_query: ['FROM logs-*', 'FROM metrics-*'] }), {
+          nlQuery: 'Make it static',
+          hasData: false,
+        })
+      );
+
+      expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
     });
 
     it('forwards the data flags', async () => {
@@ -171,7 +233,11 @@ describe('createCustomContentPanelResolver', () => {
     });
 
     it('drops the query but keeps the other settings when the builder returns none', async () => {
-      mockedBuild.mockResolvedValue({ template: '<div>static</div>', height: 200 });
+      mockedBuild.mockResolvedValue({
+        esqlQueries: [],
+        template: '<div>static</div>',
+        height: 200,
+      });
 
       const result = await resolve(editRequest(panel, { esql: null }));
 

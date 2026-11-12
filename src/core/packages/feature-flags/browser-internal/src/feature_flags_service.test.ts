@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactElement, ReactNode } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { act, renderHook } from '@testing-library/react';
 import { apm } from '@elastic/apm-rum';
 import {
   type Client,
   ClientProviderEvents,
+  type EvaluationDetails,
   OpenFeature,
   type Provider,
+  StandardResolutionReasons,
 } from '@openfeature/web-sdk';
 import { OFREPWebProvider } from '@openfeature/ofrep-web-provider';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
@@ -24,10 +27,32 @@ import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { FeatureFlagsService } from '..';
+import { mountFeatureFlagsHelper } from './helper';
+
+const cachedDetails = <T extends boolean | string | number>(
+  value: T,
+  reason: string = StandardResolutionReasons.CACHED
+): EvaluationDetails<T> => ({ flagKey: 'my-flag', flagMetadata: {}, value, reason });
 
 jest.mock('@openfeature/ofrep-web-provider', () => ({
   OFREPWebProvider: jest.fn(),
 }));
+
+jest.mock('./helper', () => ({
+  mountFeatureFlagsHelper: jest.fn(() => ({
+    unmount: jest.fn(),
+    open: jest.fn(),
+    close: jest.fn(),
+    setCornerButtonVisible: jest.fn(),
+  })),
+}));
+
+/** Dynamic `import()` settles across more than one microtask. */
+async function flushAsyncWork() {
+  await act(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+  });
+}
 
 async function isSettledPromise(p: Promise<unknown>) {
   const immediateValue = {};
@@ -284,7 +309,7 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('getBooleanValue$ delivers the current evaluation before subscribe returns', () => {
-      jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(true);
+      jest.spyOn(featureFlagsClient, 'getBooleanDetails').mockReturnValue(cachedDetails(true));
 
       let value: boolean | undefined;
       startContract
@@ -298,7 +323,7 @@ describe('FeatureFlagsService Browser', () => {
       // undefined unless the current value was delivered synchronously.
       expect(value).toBe(true);
 
-      jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(false);
+      jest.spyOn(featureFlagsClient, 'getBooleanDetails').mockReturnValue(cachedDetails(false));
       value = undefined;
       startContract
         .getBooleanValue$('my-flag', true)
@@ -337,13 +362,13 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('useBooleanValue seeds from the synchronous evaluation and updates when the flag changes', () => {
-      jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(true);
+      jest.spyOn(featureFlagsClient, 'getBooleanDetails').mockReturnValue(cachedDetails(true));
 
       const { result } = renderHook(() => startContract.useBooleanValue('my-flag', false));
 
       expect(result.current).toBe(true);
 
-      jest.mocked(featureFlagsClient.getBooleanValue).mockReturnValue(false);
+      jest.mocked(featureFlagsClient.getBooleanDetails).mockReturnValue(cachedDetails(false));
       act(() => {
         addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       });
@@ -353,9 +378,9 @@ describe('FeatureFlagsService Browser', () => {
 
     test('useBooleanValue uses the synchronous evaluation when the flag or fallback changes', () => {
       jest
-        .spyOn(featureFlagsClient, 'getBooleanValue')
+        .spyOn(featureFlagsClient, 'getBooleanDetails')
         .mockImplementation((flagName: string, fallback: boolean) =>
-          flagName === 'my-flag' ? false : fallback
+          cachedDetails(flagName === 'my-flag' ? false : fallback)
         );
 
       const seen: boolean[] = [];
@@ -378,13 +403,13 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('useStringValue seeds from the synchronous evaluation and updates when the flag changes', () => {
-      jest.spyOn(featureFlagsClient, 'getStringValue').mockReturnValue('live');
+      jest.spyOn(featureFlagsClient, 'getStringDetails').mockReturnValue(cachedDetails('live'));
 
       const { result } = renderHook(() => startContract.useStringValue('my-flag', 'fallback'));
 
       expect(result.current).toBe('live');
 
-      jest.mocked(featureFlagsClient.getStringValue).mockReturnValue('updated');
+      jest.mocked(featureFlagsClient.getStringDetails).mockReturnValue(cachedDetails('updated'));
       act(() => {
         addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       });
@@ -393,13 +418,13 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('useNumberValue seeds from the synchronous evaluation and updates when the flag changes', () => {
-      jest.spyOn(featureFlagsClient, 'getNumberValue').mockReturnValue(2);
+      jest.spyOn(featureFlagsClient, 'getNumberDetails').mockReturnValue(cachedDetails(2));
 
       const { result } = renderHook(() => startContract.useNumberValue('my-flag', 1));
 
       expect(result.current).toBe(2);
 
-      jest.mocked(featureFlagsClient.getNumberValue).mockReturnValue(3);
+      jest.mocked(featureFlagsClient.getNumberDetails).mockReturnValue(cachedDetails(3));
       act(() => {
         addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       });
@@ -467,7 +492,7 @@ describe('FeatureFlagsService Browser', () => {
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-          body: JSON.stringify({ value: false }),
+          body: JSON.stringify({ value: false, reason: 'No-op' }),
         });
       });
 
@@ -479,7 +504,7 @@ describe('FeatureFlagsService Browser', () => {
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-          body: JSON.stringify({ value: false }),
+          body: JSON.stringify({ value: false, reason: 'No-op' }),
         });
       });
 
@@ -489,20 +514,22 @@ describe('FeatureFlagsService Browser', () => {
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-          body: JSON.stringify({ value: NaN }),
+          body: JSON.stringify({ value: NaN, reason: 'No-op' }),
         });
       });
 
       test('reports again when the evaluated value changes', async () => {
-        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
-        getBooleanValueSpy.mockReturnValueOnce(true).mockReturnValueOnce(false);
+        const getBooleanDetailsSpy = jest.spyOn(featureFlagsClient, 'getBooleanDetails');
+        getBooleanDetailsSpy
+          .mockReturnValueOnce(cachedDetails(true))
+          .mockReturnValueOnce(cachedDetails(false));
 
         await expect(
           firstValueFrom(startContract.getBooleanValue$('my-flag', false))
         ).resolves.toEqual(true);
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
-          body: JSON.stringify({ value: true }),
+          body: JSON.stringify({ value: true, reason: 'CACHED' }),
         });
 
         await expect(
@@ -510,7 +537,25 @@ describe('FeatureFlagsService Browser', () => {
         ).resolves.toEqual(false);
         expect(http.post).toHaveBeenCalledTimes(2);
         expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
-          body: JSON.stringify({ value: false }),
+          body: JSON.stringify({ value: false, reason: 'CACHED' }),
+        });
+      });
+
+      test('reports again when only the evaluation reason changes', async () => {
+        jest
+          .spyOn(featureFlagsClient, 'getBooleanDetails')
+          .mockReturnValueOnce(cachedDetails(false, StandardResolutionReasons.ERROR))
+          .mockReturnValueOnce(cachedDetails(false));
+
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
+
+        expect(http.post).toHaveBeenCalledTimes(2);
+        expect(http.post).toHaveBeenNthCalledWith(1, '/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: false, reason: 'ERROR' }),
+        });
+        expect(http.post).toHaveBeenNthCalledWith(2, '/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: false, reason: 'CACHED' }),
         });
       });
 
@@ -520,10 +565,10 @@ describe('FeatureFlagsService Browser', () => {
 
         expect(http.post).toHaveBeenCalledTimes(2);
         expect(http.post).toHaveBeenNthCalledWith(1, '/internal/feature-flags/my-flag/counter', {
-          body: JSON.stringify({ value: '1' }),
+          body: JSON.stringify({ value: '1', reason: 'No-op' }),
         });
         expect(http.post).toHaveBeenNthCalledWith(2, '/internal/feature-flags/my-flag/counter', {
-          body: JSON.stringify({ value: 1 }),
+          body: JSON.stringify({ value: 1, reason: 'No-op' }),
         });
       });
 
@@ -539,19 +584,19 @@ describe('FeatureFlagsService Browser', () => {
       });
 
       test('observable reports again when the evaluated value changes', () => {
-        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
-        getBooleanValueSpy.mockReturnValue(true);
+        const getBooleanDetailsSpy = jest.spyOn(featureFlagsClient, 'getBooleanDetails');
+        getBooleanDetailsSpy.mockReturnValue(cachedDetails(true));
 
         const flag$ = startContract.getBooleanValue$('my-flag', false);
         const subscription = flag$.subscribe();
         expect(http.post).toHaveBeenCalledTimes(1);
 
-        getBooleanValueSpy.mockReturnValue(false);
+        getBooleanDetailsSpy.mockReturnValue(cachedDetails(false));
         addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
 
         expect(http.post).toHaveBeenCalledTimes(2);
         expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
-          body: JSON.stringify({ value: false }),
+          body: JSON.stringify({ value: false, reason: 'CACHED' }),
         });
         subscription.unsubscribe();
       });
@@ -561,8 +606,8 @@ describe('FeatureFlagsService Browser', () => {
       const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
       featureFlagsService.setup(createSetupDeps());
 
-      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
-      getBooleanValueSpy.mockReturnValue(false);
+      const getBooleanDetailsSpy = jest.spyOn(featureFlagsClient, 'getBooleanDetails');
+      getBooleanDetailsSpy.mockReturnValue(cachedDetails(false));
 
       const observedValues: boolean[] = [];
       const flag$ = startContract.getBooleanValue$('my-flag', false);
@@ -575,11 +620,104 @@ describe('FeatureFlagsService Browser', () => {
       )?.[1];
       expect(readyHandler).toBeDefined();
 
-      getBooleanValueSpy.mockReturnValue(true);
+      getBooleanDetailsSpy.mockReturnValue(cachedDetails(true));
       await readyHandler!();
       expect(observedValues).toEqual([false, true]);
 
       openFeatureAddHandlerSpy.mockRestore();
+    });
+
+    test('records evaluations for the helper', async () => {
+      const flag$ = startContract.getBooleanValue$('my-flag', false);
+      flag$.subscribe(() => {});
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+
+      expect(featureFlagsService.getEvaluatedFlags()).toEqual([{ key: 'my-flag', value: false }]);
+    });
+  });
+
+  describe('helper registration', () => {
+    const helperDeps = () => ({
+      http,
+      overlays: { openFlyout: jest.fn() },
+      rendering: {
+        addContext: (element: ReactNode) => element as ReactElement,
+      },
+    });
+
+    beforeEach(() => {
+      localStorage.clear();
+      delete globalThis.toggleFeatureFlagsHelper;
+      jest.mocked(mountFeatureFlagsHelper).mockClear();
+    });
+
+    test('toggles the corner button and closes the flyout when hiding it', async () => {
+      featureFlagsService.registerHelper(helperDeps());
+      expect(globalThis.toggleFeatureFlagsHelper).toEqual(expect.any(Function));
+      expect(mountFeatureFlagsHelper).not.toHaveBeenCalled();
+
+      globalThis.toggleFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: true })
+      );
+      const mounted = jest.mocked(mountFeatureFlagsHelper).mock.results[0]?.value;
+
+      globalThis.toggleFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('false');
+      expect(mounted?.setCornerButtonVisible).toHaveBeenCalledWith(false);
+      expect(mounted?.close).toHaveBeenCalledTimes(1);
+      expect(mounted?.unmount).not.toHaveBeenCalled();
+    });
+
+    test('opens the helper flyout from the developer toolbar without storing the button', async () => {
+      const open = jest.fn();
+      const close = jest.fn();
+      const setCornerButtonVisible = jest.fn();
+      jest.mocked(mountFeatureFlagsHelper).mockReturnValue({
+        unmount: jest.fn(),
+        open,
+        close,
+        setCornerButtonVisible,
+      });
+      const { helper } = await featureFlagsService.start();
+      featureFlagsService.registerHelper(helperDeps());
+
+      helper.open();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBeNull();
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: false })
+      );
+      expect(open).toHaveBeenCalledTimes(1);
+
+      globalThis.toggleFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
+      expect(setCornerButtonVisible).toHaveBeenCalledWith(true);
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
+    });
+
+    test('restores the corner button when it was left visible', async () => {
+      localStorage.setItem('core.featureFlags.helper.enabled', 'true');
+      featureFlagsService.registerHelper(helperDeps());
+      await flushAsyncWork();
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: true })
+      );
+    });
+
+    test('refresh asks the provider to load the current context again', async () => {
+      const setContext = jest.spyOn(OpenFeature, 'setContext').mockResolvedValue(undefined);
+      featureFlagsService.setup(createSetupDeps());
+      await featureFlagsService.refresh();
+      expect(setContext).toHaveBeenCalledWith({ kind: 'multi' });
     });
   });
 });

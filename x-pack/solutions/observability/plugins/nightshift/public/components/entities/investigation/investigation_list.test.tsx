@@ -50,6 +50,7 @@ const makeSection = (
   id,
   investigations: [],
   total: 0,
+  matchTotal: 0,
   hasMore: false,
   isInitialLoading: false,
   isFetchingNextPage: false,

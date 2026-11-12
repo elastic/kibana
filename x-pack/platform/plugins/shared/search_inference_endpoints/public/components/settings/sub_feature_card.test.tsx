@@ -203,6 +203,22 @@ describe('SubFeatureCard', () => {
     expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeInTheDocument();
   });
 
+  it('marks the feature title as unsaved when the feature is dirty', () => {
+    renderCard(['ep-1'], undefined, undefined, undefined, { isFeatureDirty: true });
+
+    expect(
+      screen.getByTestId(`subFeatureCardTitle-${feature.featureId}-unsaved`)
+    ).toBeInTheDocument();
+  });
+
+  it('does not mark the feature title as unsaved when the feature is clean', () => {
+    renderCard(['ep-1']);
+
+    expect(
+      screen.queryByTestId(`subFeatureCardTitle-${feature.featureId}-unsaved`)
+    ).not.toBeInTheDocument();
+  });
+
   describe('feature status badges', () => {
     it.each([
       {
@@ -306,6 +322,37 @@ describe('SubFeatureCard', () => {
       // Toggle is now off so the editable controls render.
       expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).not.toBeChecked();
       expect(screen.getByTestId('add-model-button')).toBeInTheDocument();
+    });
+
+    it('leaves custom mode when the page discards unsaved changes', () => {
+      const cardProps = {
+        featureId: feature.featureId,
+        feature,
+        endpointIds: ['ep-1'],
+        effectiveRecommendedEndpoints: ['ep-1'],
+        onEndpointsChange,
+        invalidEndpointIds: new Set<string>(),
+        deprecatedEndpointsMap: new Map(),
+        ...defaultGlobalRowProps,
+      };
+      const { rerender } = render(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} discardVersion={0} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('useRecommendedDefaultsToggle-test_feature'));
+      fireEvent.click(screen.getByText('Turn off recommended defaults'));
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).not.toBeChecked();
+
+      rerender(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} discardVersion={1} />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeChecked();
+      expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
     });
 
     it('opens the reset modal when toggling OFF to ON', () => {

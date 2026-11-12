@@ -26,7 +26,7 @@ export const conclusionQualityJudge: RegisteredEvaluatorDefinition = {
   kind: 'llm',
   direction: 'maximize',
   description:
-    "Reference-free: grades the root cause conclusion of a Nightshift investigation from the agent's final answer alone, without its tool calls.",
+    "Reference-free: grades the root cause conclusion of a nightshift investigation from the agent's final answer alone, without its tool calls.",
   evidenceSchema: conclusionEvidenceSchema,
   async evaluate({ round, inferenceClient }) {
     if (!inferenceClient) {
