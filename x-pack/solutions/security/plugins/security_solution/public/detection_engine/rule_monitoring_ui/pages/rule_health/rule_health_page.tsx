@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { useRuleHealth } from '../../../rule_monitoring/logic/detection_engine_health/use_rule_health';
+import { RuleHealthAppHeader } from './rule_health_app_header';
 
 export const DetectionEngineRuleHealthPage = memo(
   function DetectionEngineRuleHealthPage(): JSX.Element {
@@ -77,16 +77,9 @@ export const DetectionEngineRuleHealthPage = memo(
     return (
       <>
         <SecuritySolutionPageWrapper>
+          <RuleHealthAppHeader ruleId={id} />
           <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h3>
-                  {`Detection Engine Rule Health (${id})`} <TechnicalPreviewBadge label="" />
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              {isLoading ? skeleton : data}{' '}
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{isLoading ? skeleton : data}</EuiFlexItem>
           </EuiFlexGroup>
         </SecuritySolutionPageWrapper>
 

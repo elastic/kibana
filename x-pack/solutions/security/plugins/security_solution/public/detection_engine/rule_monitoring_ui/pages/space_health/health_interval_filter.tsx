@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { HealthIntervalParameters } from '../../../../../common/api/detection_engine';
 import {
   HealthIntervalGranularity,
@@ -24,6 +24,8 @@ import {
 import * as i18n from '../../components/health_overview/translations';
 
 export interface HealthIntervalFilterProps {
+  /** The currently selected interval. */
+  value?: HealthIntervalParameters;
   /** Called whenever the user changes any interval parameter. */
   onChange: (interval: HealthIntervalParameters) => void;
   /** Whether the filter controls should be disabled (e.g. while loading). */
@@ -31,15 +33,36 @@ export interface HealthIntervalFilterProps {
 }
 
 export const HealthIntervalFilter = memo(function HealthIntervalFilter({
+  value,
   onChange,
   disabled = false,
 }: HealthIntervalFilterProps) {
-  const [intervalType, setIntervalType] = useState<HealthIntervalType>(HealthIntervalType.last_day);
+  const initialIntervalType = value?.type ?? HealthIntervalType.last_day;
+  const [intervalType, setIntervalType] = useState<HealthIntervalType>(initialIntervalType);
   const [granularity, setGranularity] = useState<HealthIntervalGranularity>(
-    DEFAULT_GRANULARITY[HealthIntervalType.last_day]
+    value?.granularity ?? DEFAULT_GRANULARITY[initialIntervalType]
   );
-  const [fromDate, setFromDate] = useState<Moment>(moment().subtract(1, 'day'));
-  const [toDate, setToDate] = useState<Moment>(moment());
+  const [fromDate, setFromDate] = useState<Moment>(() =>
+    value?.type === HealthIntervalType.custom_range
+      ? moment(value.from)
+      : moment().subtract(1, 'day')
+  );
+  const [toDate, setToDate] = useState<Moment>(() =>
+    value?.type === HealthIntervalType.custom_range ? moment(value.to) : moment()
+  );
+
+  useEffect(() => {
+    if (!value) {
+      return;
+    }
+
+    setIntervalType(value.type);
+    setGranularity(value.granularity);
+    if (value.type === HealthIntervalType.custom_range) {
+      setFromDate(moment(value.from));
+      setToDate(moment(value.to));
+    }
+  }, [value]);
 
   const granularityOptions = useMemo(
     () =>

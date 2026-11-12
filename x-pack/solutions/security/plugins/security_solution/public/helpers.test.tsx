@@ -16,7 +16,9 @@ import {
   isDashboardViewPath,
   isRuleCreationPath,
   isRuleEditPath,
+  isRuleHealthPath,
   isPageWithAppHeaderPath,
+  isSpaceRulesHealthPath,
   isEndpointManagementPath,
   isSubPluginAvailable,
   parseRoute,
@@ -331,6 +333,10 @@ describe('isRuleEditPath', () => {
 
 describe('isPageWithAppHeaderPath', () => {
   it.each([
+    ['the Space Rules Health page', '/rules/health'],
+    ['the Space Rules Health page with a trailing slash', '/rules/health/'],
+    ['the Rule Health page', '/rules/id/rule-id/health'],
+    ['the Rule Health page with an encoded rule id', '/rules/id/rule%20id/health'],
     ['the rule changes history page', '/rules/id/rule-id/changes-history'],
     ['the installed rules tab', '/rules/management'],
     ['the rule monitoring tab', '/rules/monitoring'],
@@ -364,6 +370,10 @@ describe('isPageWithAppHeaderPath', () => {
   });
 
   it.each([
+    ['the Space Rules Health page with an extra segment', '/rules/health/extra'],
+    ['a path that only starts like Space Rules Health', '/rules/healthcheck'],
+    ['the Rule Health page with an extra segment', '/rules/id/rule-id/health/extra'],
+    ['the Rule Health page with an empty rule id', '/rules/id//health'],
     ['a rule details path without a tab', '/rules/id/rule-id'],
     ['a rule details path with an unknown tab', '/rules/id/rule-id/unknown_tab'],
     ['the alerts page', '/alerts'],
@@ -391,6 +401,35 @@ describe('isPageWithAppHeaderPath', () => {
   ])('returns false for %s', (_name, pathname) => {
     expect(isPageWithAppHeaderPath(pathname)).toBe(false);
   });
+});
+
+describe('isSpaceRulesHealthPath', () => {
+  it.each(['/rules/health', '/rules/health/'])('returns true for %s', (pathname) => {
+    expect(isSpaceRulesHealthPath(pathname)).toBe(true);
+  });
+
+  it.each(['/rules/health/extra', '/rules/healthcheck', '/rules/id/rule-id/health'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isSpaceRulesHealthPath(pathname)).toBe(false);
+    }
+  );
+});
+
+describe('isRuleHealthPath', () => {
+  it.each(['/rules/id/rule-id/health', '/rules/id/rule%20id/health'])(
+    'returns true for %s',
+    (pathname) => {
+      expect(isRuleHealthPath(pathname)).toBe(true);
+    }
+  );
+
+  it.each(['/rules/id//health', '/rules/id/rule-id/health/extra', '/rules/health'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isRuleHealthPath(pathname)).toBe(false);
+    }
+  );
 });
 
 describe('isEndpointManagementPath', () => {

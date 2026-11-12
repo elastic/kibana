@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const SPACE_RULES_HEALTH_TITLE = i18n.translate(
+  'xpack.securitySolution.spaceRulesHealth.pageTitle',
+  {
+    defaultMessage: 'Detection Engine Space Rules Health',
+  }
+);
+
+export const TIME_RANGE = i18n.translate('xpack.securitySolution.spaceRulesHealth.timeRange', {
+  defaultMessage: 'Time range',
+});
+
+export const TIME_RANGE_SETTINGS = i18n.translate(
+  'xpack.securitySolution.spaceRulesHealth.timeRangeSettings',
+  {
+    defaultMessage: 'Time range settings',
+  }
+);
+
+export const CLOSE_TIME_RANGE_SETTINGS = i18n.translate(
+  'xpack.securitySolution.spaceRulesHealth.closeTimeRangeSettings',
+  {
+    defaultMessage: 'Close time range settings',
+  }
+);

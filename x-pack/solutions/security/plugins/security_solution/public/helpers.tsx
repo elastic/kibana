@@ -27,6 +27,8 @@ import {
   CONFIGURATIONS_PATH,
   COVERAGE_OVERVIEW_PATH,
   DASHBOARDS_PATH,
+  DE_RULE_HEALTH_PATH,
+  DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
   MANAGE_PATH,
   RULES_ADD_PATH,
@@ -224,6 +226,20 @@ export const isRuleChangesHistoryPath = (pathname: string): boolean =>
     strict: false,
   });
 
+export const isSpaceRulesHealthPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: DE_SPACE_RULES_HEALTH_PATH,
+    exact: true,
+    strict: false,
+  });
+
+export const isRuleHealthPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: DE_RULE_HEALTH_PATH,
+    exact: true,
+    strict: false,
+  });
+
 /**
  * Matches the Create new rule page, whose app header owns the page actions.
  */
@@ -347,6 +363,8 @@ export const isManageLandingPath = (pathname: string): boolean =>
  */
 export const isPageWithAppHeaderPath = (pathname: string): boolean =>
   [
+    isSpaceRulesHealthPath,
+    isRuleHealthPath,
     isRuleChangesHistoryPath,
     isRulesManagementPath,
     isRulesAddPath,

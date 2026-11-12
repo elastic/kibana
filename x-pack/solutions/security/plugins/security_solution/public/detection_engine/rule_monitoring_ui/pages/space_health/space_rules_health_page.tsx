@@ -10,7 +10,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiSkeletonText,
   EuiSkeletonLoading,
   EuiSkeletonTitle,
@@ -18,7 +17,6 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import type { HealthIntervalParameters } from '../../../../../common/api/detection_engine';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
@@ -33,8 +31,8 @@ import {
   TopMessagesSection,
   HistoricalTrendsSection,
 } from '../../components/health_overview';
-import { HealthIntervalFilter } from './health_interval_filter';
 import { ExecutionOutcomesChart } from '../../components/health_overview/execution_outcomes';
+import { SpaceRulesHealthAppHeader } from './space_rules_health_app_header';
 
 export const DetectionEngineSpaceRulesHealthPage = memo(
   function DetectionEngineSpaceRulesHealthPage(): JSX.Element {
@@ -138,23 +136,13 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
     return (
       <>
         <SecuritySolutionPageWrapper>
+          <SpaceRulesHealthAppHeader
+            interval={interval}
+            onIntervalChange={handleIntervalChange}
+            disabled={isLoading}
+          />
           <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="s">
-                    <h3>
-                      {'Detection Engine Space Rules Health'} <TechnicalPreviewBadge label="" />
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <HealthIntervalFilter onChange={handleIntervalChange} disabled={isLoading} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              {isLoading ? skeleton : dashboard}
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{isLoading ? skeleton : dashboard}</EuiFlexItem>
           </EuiFlexGroup>
         </SecuritySolutionPageWrapper>
 
