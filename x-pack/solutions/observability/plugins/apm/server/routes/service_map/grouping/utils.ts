@@ -5,7 +5,20 @@
  * 2.0.
  */
 
+import type { WeightedEdge } from './types';
+
 /** Orders by code unit, the same on every machine whatever its locale. */
 export function compareNames(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/** The edges whose services are both among the given ones. */
+export function edgesBetween({
+  edges,
+  services,
+}: {
+  edges: readonly WeightedEdge[];
+  services: ReadonlySet<string>;
+}): WeightedEdge[] {
+  return edges.filter(({ source, target }) => services.has(source) && services.has(target));
 }

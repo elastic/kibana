@@ -6,14 +6,8 @@
  */
 
 import type { MatchedServiceCallGraph } from './match_service_call_graph';
+import type { WeightedEdge } from './types';
 import { compareNames } from './utils';
-
-/** Two services that call each other, in either direction, and how much. */
-interface WeightedEdge {
-  source: string;
-  target: string;
-  weight: number;
-}
 
 interface ServiceCallStats {
   /** Distinct services that call it. */

@@ -53,3 +53,16 @@ export const MAX_SPLIT_DEPTH = 4;
 export const SPLIT_MAX_TINY_PART_SHARE = 0.3;
 /** Parts this small count as tiny when judging a split. */
 export const SPLIT_TINY_PART_MAX_SIZE = 3;
+
+/**
+ * Safety limit: community detection stops merging groups after this many
+ * levels. Each level at least halves the groups in practice, so real estates stop well before.
+ */
+export const COMMUNITY_DETECTION_MAX_LEVELS = 20;
+/**
+ * Safety limit: services stop moving between groups after this many passes,
+ * in case rounding errors make two groups trade a service back and forth.
+ */
+export const COMMUNITY_DETECTION_MAX_PASSES = 50;
+/** A move must gain more than this, so a rounding error doesn't count as an improvement. */
+export const COMMUNITY_DETECTION_GAIN_TOLERANCE = 1e-12;
