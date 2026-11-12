@@ -840,6 +840,11 @@ export class LogsExtractionClient {
           entityPagination = resumeEntityPagination;
           lastLogsPages = false;
         } else {
+          entityStoreMetrics.extractionSliceRawTarget.record(
+            effectiveMaxLogsPerPage,
+            metricAttributes
+          );
+
           const probe = await this.runLogPaginationCursorProbeForNextPage({
             indexPatterns,
             type,
@@ -949,6 +954,12 @@ export class LogsExtractionClient {
           totalCount += sliceIngestOutcome.addedToTotalCount;
           pages += sliceIngestOutcome.addedToPageCount;
           state = sliceIngestOutcome.state;
+
+          entityStoreMetrics.extractionSliceCount.add(1, metricAttributes);
+          entityStoreMetrics.extractionSliceEntities.record(
+            sliceIngestOutcome.addedToTotalCount,
+            metricAttributes
+          );
         }
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);

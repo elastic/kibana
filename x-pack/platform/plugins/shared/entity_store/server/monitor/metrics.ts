@@ -54,6 +54,17 @@ const LOGS_COUNT_BOUNDARIES = [
   200000, 300000, 500000,
 ];
 const ENTITY_COUNT_BOUNDARIES = [0, 100, 1000, 10000, 100000, 500000, 1000000, 5000000];
+// Finer resolution around the default entity page size (docsLimit, 10,000): the question this
+// answers is whether a slice's entities fit one page or spill into several, so the buckets are
+// placed to separate those cases rather than to cover a wide range.
+const SLICE_ENTITY_COUNT_BOUNDARIES = [
+  0, 100, 500, 1000, 2500, 5000, 7500, 10000, 15000, 25000, 50000, 100000,
+];
+// Spans the default per-slice raw target (maxLogsPerPage, 50,000) through the much larger targets
+// a sampled slice can be scaled to, so both ends stay resolvable in the same histogram.
+const PAGE_TARGET_LOGS_BOUNDARIES = [
+  1000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000, 2500000, 5000000,
+];
 
 /**
  * Attributes every extraction metric carries.
@@ -196,6 +207,29 @@ export const entityStoreMetrics = {
     unit: '1',
     valueType: ValueType.DOUBLE,
     advice: { explicitBucketBoundaries: FRACTION_BOUNDARIES },
+  }),
+
+  extractionSliceCount: counter<ExtractionAttributes>(m('extraction.slice.count'), {
+    description:
+      'Raw-log slices that ran an extraction, counted once per slice. Divided by extraction.task.success this gives slices per run, which the probe-query count can no longer stand in for once a slice may issue more than one probe. Stalled slices are excluded; they are counted by extraction.logs_per_page.dropped',
+    unit: '{slice}',
+    valueType: ValueType.INT,
+  }),
+
+  extractionSliceEntities: histogram<ExtractionAttributes>(m('extraction.slice.entities'), {
+    description:
+      'Entities produced by one raw-log slice, across all of its entity pages. Read against the configured docsLimit to tell whether a slice fills an entity page or leaves most of it empty',
+    unit: '{entity}',
+    valueType: ValueType.INT,
+    advice: { explicitBucketBoundaries: SLICE_ENTITY_COUNT_BOUNDARIES },
+  }),
+
+  extractionSliceRawTarget: histogram<ExtractionAttributes>(m('extraction.slice.raw_target'), {
+    description:
+      'Raw log documents the boundary probe aimed to place in one slice (the effective maxLogsPerPage). Recorded once per probed slice, so resumed slices, which skip the probe, are not represented',
+    unit: '{document}',
+    valueType: ValueType.INT,
+    advice: { explicitBucketBoundaries: PAGE_TARGET_LOGS_BOUNDARIES },
   }),
 
   extractionLogsPerPageDropped: counter<ExtractionAttributes>(

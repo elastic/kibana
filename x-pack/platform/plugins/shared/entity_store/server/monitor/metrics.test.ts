@@ -78,6 +78,16 @@ describe('entityStoreMetrics', () => {
     );
   });
 
+  it('registers the slice-shape instruments', () => {
+    expect(registeredNames()).toEqual(
+      expect.arrayContaining([
+        'kibana.entity_store.extraction.slice.count',
+        'kibana.entity_store.extraction.slice.entities',
+        'kibana.entity_store.extraction.slice.raw_target',
+      ])
+    );
+  });
+
   it('no longer registers the ambiguous entities.upserted counter', () => {
     // Replaced by the created/updated/noop split: one counter could not say whether a process
     // was discovering entities or re-touching ones the other process already covered.
@@ -192,6 +202,27 @@ describe('entityStoreMetrics', () => {
 
       const nearTheDefaultCap = boundaries.filter((b) => b > 70000 && b < 100000);
       expect(nearTheDefaultCap.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('gives extraction.slice.entities resolution around the default entity page size', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.slice.entities')!;
+
+      // The metric exists to say whether a slice fills an entity page or leaves most of it
+      // empty, so the default docsLimit must be a boundary rather than fall inside a bucket.
+      expect(boundaries).toContain(10000);
+      const belowTheDefaultPage = boundaries.filter((b) => b > 0 && b < 10000);
+      expect(belowTheDefaultPage.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it('gives extraction.slice.raw_target boundaries above the default per-slice target', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.slice.raw_target')!;
+
+      // A sampled slice can be scaled well past the default maxLogsPerPage, so the histogram
+      // must keep resolving above it instead of clipping every scaled slice into one bucket.
+      expect(boundaries).toContain(50000);
+      expect(Math.max(...boundaries)).toBeGreaterThanOrEqual(1000000);
+      const aboveTheDefaultTarget = boundaries.filter((b) => b > 50000);
+      expect(aboveTheDefaultTarget.length).toBeGreaterThanOrEqual(4);
     });
 
     it('gives fraction histograms finer resolution between the sampling floor and 0.5', () => {
