@@ -76,13 +76,13 @@ export const ASSESSMENT_NOTE_ROLE_RULE = dedent`
 export const DISCOVERY_SEVERITY_APPLICATION_RULE = dedent`
   How discovery applies this contract to what the confirming signal descriptions state. When a higher tier is not supported, say in the assessment_note which of outcome or reach is missing. Work through these in order:
   1. The critical check comes first and stops the walk when it matches: the descriptions must state one of the contract's critical conditions, the block included; no share is needed.
-  2. Weigh every cue the descriptions state about the outcome and the conditions, whichever way it points. A cue that the failure was contained (caught, retried, absorbed or recovered by the system) leaves the outcome unstated and the reach limited, unless a description separately states the operation's final failure to complete; demonstrated tolerance is what "low" needs. A cue that the failure is spreading or blocking points the other way.
-  3. Outcome. A stated failed outcome is one the descriptions state for the operation: it failed, was rejected, was refused, timed out or did not complete. Unless a containment cue applies, an error, rejection, refusal, timeout or other expiry a description reports for the operation is one. When no outcome is stated, completion is unresolved.
-  4. Reach and strength. Beyond the contract's definition of "high", it additionally needs a stated failed outcome, the failure still happening, and one of:
+  2. Weigh every cue the descriptions state about the outcome and the conditions, whichever way it points. A cue that the failure was contained (caught, absorbed, or retried or recovered successfully by the system) leaves the outcome unstated and the reach limited, unless a description separately states the operation's final failure to complete; retries that ran out are a final failure, not containment; demonstrated tolerance is what "low" needs. A cue that the failure is spreading or blocking points the other way.
+  3. Outcome. A stated failed outcome is one the descriptions state for the operation: it failed, was rejected, was refused, timed out or did not complete. Unless a containment cue applies, an error, rejection, refusal, timeout or other expiry a description reports for the operation is one. A caller's call to a named dependency or component that timed out, was refused or failed is the caller's operation failing. When no outcome is stated, completion is unresolved.
+  4. Strength. For "high", discovery needs a stated failed outcome that is still happening and one of these, checked in this order:
+     - the failing operation is a caller's call to a named dependency or component (step 3): enough on its own, with no share and no total;
      - a reach: a numerator and denominator in operations, attempts, requests or users;
-     - a rate clearly above the operation's own normal for the same period, citing its prior-period figure;
-     - a caller's own operation stated failing because its call to a named dependency or component timed out, was refused or failed. This one is enough on its own: it needs no share and no total.
-     A measure supports the tier only at the scope it measures: a count or share of log lines is volume, not a count of attempts or users, so without one of the above the tier is "medium". A count with no measured total is volume. An unmeasured reach never raises the tier.
+     - a rate clearly above the operation's own normal for the same period, citing its prior-period figure.
+     Without one of them the tier is "medium": a count or share of log lines is volume, not attempts or users, and an unmeasured reach never raises the tier.
   5. Rows and the knowledge base. The rows outrank the knowledge base; an edge no failing row shows is context only. An edge, an empty blast_radius or a knowledge gap never raises or lowers the tier by itself, apart from identifying a mandatory component for the critical check.
 `;
 
