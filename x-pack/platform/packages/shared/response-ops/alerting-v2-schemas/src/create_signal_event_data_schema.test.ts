@@ -105,8 +105,9 @@ describe('createSignalEventInternalDataSchema', () => {
       createSignalEventInternalDataSchema.safeParse({ source: 'datadog', rule_id: 'rule-1' })
         .success
     ).toBe(false);
-    expect(createSignalEventInternalDataSchema.safeParse({ source: 'datadog', extra: 1 }).success)
-      .toBe(false);
+    expect(
+      createSignalEventInternalDataSchema.safeParse({ source: 'datadog', extra: 1 }).success
+    ).toBe(false);
   });
 
   it('accepts the same status values as the external schema', () => {
@@ -115,8 +116,7 @@ describe('createSignalEventInternalDataSchema', () => {
         .success
     ).toBe(true);
     expect(
-      createSignalEventInternalDataSchema.safeParse({ source: 'datadog', status: 'active' })
-        .success
+      createSignalEventInternalDataSchema.safeParse({ source: 'datadog', status: 'active' }).success
     ).toBe(false);
   });
 });
