@@ -15,6 +15,8 @@ import type {
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
+  DiscoveryCompletedProps,
+  DiscoveryStartedProps,
   DiscoveryTriggeredProps,
   EventStatusChangedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
@@ -599,6 +601,95 @@ const discoveryTriggeredSchema: RootSchema<DiscoveryTriggeredProps> = {
   },
 };
 
+const optionalCount = (description: string) => ({
+  type: 'long' as const,
+  _meta: { description, optional: true as const },
+});
+
+const discoveryStartedSchema: RootSchema<DiscoveryStartedProps> = {
+  parent_workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution that started this run: the orchestrator execution `discovery-triggered` carries as `workflow_execution_id` for a manual run, the scheduled review execution for a scheduled one (several runs can share it, one per review pass); absent when the discovery workflow was run directly',
+      optional: true,
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The discovery workflow execution that reported; pairs `discovery-started` with `discovery-completed` and joins the workflow engine events for that execution',
+    },
+  },
+  space_id: {
+    type: 'keyword',
+    _meta: { description: 'The Kibana space the run worked in' },
+  },
+  alert_source: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The `.rule-events` `source` of the alerts this run produces; always `elastic.significant_events` until other sources feed discovery',
+    },
+  },
+};
+
+const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
+  ...discoveryStartedSchema,
+  outcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        '`completed` when the workflow reached an exit, `failed` when a step failed and `timed_out` when the discovery agent step exceeded its timeout; the workflow-level fallback reports both. A cancelled run, or one ended by the workflow timeout, never reports; pair with the workflow engine `workflows_execution_workflow_cancelled` event',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description:
+        'Milliseconds from the discovery execution start to this report; absent when the execution could not be read',
+      optional: true,
+    },
+  },
+  has_work: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether any detection reached the discovery agent',
+      optional: true,
+    },
+  },
+  budget_denied: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the run ended before reading any detection because the run quota denied it',
+      optional: true,
+    },
+  },
+  processed_count: optionalCount('Detections handed to the run after classification'),
+  skipped_count: optionalCount('Detections the classifier skipped'),
+  held_back_count: optionalCount('Detections the classifier held back'),
+  needs_agent_count: optionalCount('Detections the classifier routed to the agent'),
+  written_rule_count: optionalCount(
+    'Distinct rules the agent reported done in this run, including those whose detections it wrote no event for'
+  ),
+  classifier_failed: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the detection classifier failed and the run fell back to the agent',
+      optional: true,
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'The failing step error when `outcome` is `failed`',
+      optional: true,
+    },
+  },
+};
+
 const detectionScanSchema: RootSchema<DetectionScanProps> = {
   ...optionalWorkflowExecutionTelemetrySchema,
   took_ms: {
@@ -899,6 +990,8 @@ export {
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
+  discoveryCompletedSchema,
+  discoveryStartedSchema,
   discoveryTriggeredSchema,
   eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
