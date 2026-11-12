@@ -9,12 +9,13 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateWikiWorkspace } from '../wiki/register_wiki';
 import { WIKI_WORKSPACE_ROOT } from '../wiki/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { getSandboxStepCaller } from './sandbox_caller';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck write so it cannot stall the rest of the parallel hydrate. */
@@ -28,7 +29,7 @@ export const wikiHydrateStepDefinition = ({
   logger,
   isEnabled,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   analytics: AnalyticsServiceSetup;
@@ -37,7 +38,7 @@ export const wikiHydrateStepDefinition = ({
 }) =>
   createServerStepDefinition({
     id: 'nightshift.wikiHydrate',
-    label: 'Hydrate Nightshift Wiki into Sandbox',
+    label: 'Hydrate nightshift Wiki into Sandbox',
     category: StepCategory.Ai,
     description:
       'Writes the current Wiki into /workspace/wiki for the sandbox obtained ' +
@@ -115,7 +116,8 @@ export const wikiHydrateStepDefinition = ({
 
       const session = sandboxStart.getSessionForSpace(
         spaceId,
-        unscopeConversationId(spaceId, sandboxId)
+        unscopeConversationId(spaceId, sandboxId),
+        getSandboxStepCaller(context)
       );
 
       context.logger.info(`Hydrating Wiki into sandbox ${sandboxId} (space ${spaceId})`);

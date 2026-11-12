@@ -22,6 +22,7 @@ const stubAction = (overrides: Partial<EpisodeAction> = {}): EpisodeAction => ({
   order: 1,
   displayName: 'Stub',
   iconType: 'star',
+  enforcesOwnPrivileges: false,
   isCompatible: jest.fn(() => true),
   execute: jest.fn(async () => {}),
   ...overrides,

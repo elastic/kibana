@@ -15,11 +15,30 @@ import React, {
   useState,
 } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIllustration,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { searchBarAnalytics } from '@elastic/eui-illustrations';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { NO_INVESTIGATIONS_FOUND_MESSAGE } from '../../../common/messages';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import {
+  CREATE_AUTOMATION_BUTTON_LABEL,
+  INVESTIGATE_BUTTON_LABEL,
+  NO_INVESTIGATIONS_EMPTY_BODY,
+  NO_INVESTIGATIONS_EMPTY_TITLE,
+  NO_INVESTIGATIONS_FILTERED_EMPTY_TITLE,
+} from '../../../common/messages';
 import type {
   InvestigationSectionId,
   InvestigationSectionState,
@@ -49,11 +68,24 @@ export interface InvestigationListProps {
   sections: InvestigationSectionState[];
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: InvestigationSummary) => void;
+  /** Opens the start-investigation modal from the empty prompt. */
+  onStartInvestigation?: () => void;
+  /** Opens the automations page from the empty prompt. */
+  onCreateAutomation?: () => void;
+  /** True when a search/filter is active; uses the filtered empty copy instead of the first-run prompt. */
+  hasActiveSearch?: boolean;
 }
 
 export const InvestigationList = forwardRef<InvestigationListHandle, InvestigationListProps>(
   function InvestigationList(
-    { sections, selectedInvestigationId, onInvestigationClick },
+    {
+      sections,
+      selectedInvestigationId,
+      onInvestigationClick,
+      onStartInvestigation,
+      onCreateAutomation,
+      hasActiveSearch = false,
+    },
     ref
   ): React.ReactElement {
     const { euiTheme } = useEuiTheme();
@@ -125,12 +157,15 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
     }));
 
     if (visibleSections.length === 0) {
+      const emptyTitle = hasActiveSearch
+        ? NO_INVESTIGATIONS_FILTERED_EMPTY_TITLE
+        : NO_INVESTIGATIONS_EMPTY_TITLE;
+
       return (
         <EuiPanel
           hasBorder
           hasShadow={false}
-          paddingSize="l"
-          color="subdued"
+          paddingSize="none"
           data-test-subj="nightshiftInvestigationsEmpty"
           css={css`
             box-sizing: border-box;
@@ -138,9 +173,74 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
             border-radius: ${euiTheme.border.radius.panel};
           `}
         >
-          <EuiText textAlign="center" color="subdued" size="s">
-            {NO_INVESTIGATIONS_FOUND_MESSAGE}
-          </EuiText>
+          <EuiEmptyPrompt
+            color="transparent"
+            titleSize="xs"
+            paddingSize="m"
+            css={css`
+              padding-block: ${euiTheme.size.l};
+            `}
+            icon={
+              <EuiIllustration
+                type={searchBarAnalytics}
+                alt=""
+                fullWidth={false}
+                css={css`
+                  max-inline-size: ${euiTheme.base * 5}px;
+                  margin-inline: auto;
+                `}
+              />
+            }
+            title={<h3>{emptyTitle}</h3>}
+            body={
+              <EuiText size="s">
+                <p>{NO_INVESTIGATIONS_EMPTY_BODY}</p>
+              </EuiText>
+            }
+            actions={
+              onStartInvestigation || onCreateAutomation ? (
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  justifyContent="center"
+                  responsive={false}
+                  wrap={false}
+                >
+                  {onStartInvestigation && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        iconType="inspect"
+                        onClick={onStartInvestigation}
+                        data-test-subj="nightshiftInvestigationsEmptyInvestigate"
+                        {...getEbtProps({
+                          action: NIGHTSHIFT_EBT_ACTIONS.OPEN_START_INVESTIGATION,
+                          element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+                        })}
+                      >
+                        {INVESTIGATE_BUTTON_LABEL}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
+                  {onCreateAutomation && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        onClick={onCreateAutomation}
+                        data-test-subj="nightshiftInvestigationsEmptyCreateAutomation"
+                        {...getEbtProps({
+                          action: NIGHTSHIFT_EBT_ACTIONS.VIEW_AUTOMATIONS,
+                          element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+                        })}
+                      >
+                        {CREATE_AUTOMATION_BUTTON_LABEL}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              ) : undefined
+            }
+          />
         </EuiPanel>
       );
     }

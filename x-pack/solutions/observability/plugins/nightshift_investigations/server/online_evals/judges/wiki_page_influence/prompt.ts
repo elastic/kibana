@@ -8,6 +8,7 @@
 import type { ToolSchema } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { gradeSchema } from '../run_judge';
+import { withIdentifierRule } from '../with_identifier_rule';
 import systemPromptText from './system_prompt.text';
 
 export const WIKI_PAGE_INFLUENCE_TOOL_NAME = 'score_wiki_page_influence';
@@ -19,7 +20,7 @@ const MAX_JUDGE_TEXT_LENGTH = 100_000;
 export const INFLUENCE_LEVELS = ['none', 'incidental', 'supporting', 'decisive'] as const;
 export const MISSED_INFLUENCE_LEVELS = ['none', 'minor', 'significant', 'critical'] as const;
 
-export const WIKI_PAGE_INFLUENCE_SYSTEM_PROMPT: string = systemPromptText;
+export const WIKI_PAGE_INFLUENCE_SYSTEM_PROMPT: string = withIdentifierRule(systemPromptText);
 
 export const wikiPageInfluenceOutputSchema = lazySchema(() =>
   z.object({
@@ -93,7 +94,7 @@ export const buildScoringRequest = ({
   [
     'The conversation above is the investigation to evaluate.',
     omittedToolCalls > 0
-      ? `${omittedToolCalls} later tool calls were left out to fit your context.`
+      ? `${omittedToolCalls} tool calls from the middle of the investigation were left out to fit your context.`
       : undefined,
     `The agent opened these Wiki pages. Their text is in the tool results above:\n${pageIds
       .map((id) => `- ${id}`)

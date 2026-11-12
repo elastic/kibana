@@ -13,7 +13,7 @@ import type { EventLogServiceContract } from '../services/event_log_service/even
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { createSpacesServiceMock } from '../services/spaces_service/spaces_service.mock';
-import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
+import { ACTION_POLICY_EVENT_ACTIONS } from '../services/event_log_service/constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ActionPolicyExecutionHistoryClient } from './action_policy_execution_history_client';
 

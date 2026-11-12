@@ -40,6 +40,7 @@ export interface ModelSettingsForm {
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
   updateEfforts: (featureId: string, endpointEfforts: EndpointEfforts) => void;
   save: () => Promise<void>;
+  reset: () => void;
 }
 
 const getEffectiveEndpoints = (
@@ -291,6 +292,10 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     setEfforts((prev) => ({ ...prev, [featureId]: endpointEfforts }));
   }, []);
 
+  const reset = useCallback(() => {
+    setAssignments(defaultAssignments);
+  }, [defaultAssignments]);
+
   const save = useCallback(async () => {
     const changed = getChangedAssignments(
       assignments,
@@ -324,5 +329,6 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     updateEndpoints,
     updateEfforts,
     save,
+    reset,
   };
 };

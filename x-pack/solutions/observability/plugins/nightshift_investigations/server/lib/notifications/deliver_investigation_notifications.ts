@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { InvestigationNotificationDestination } from '../../../common';
 import { prepareNotificationDelivery } from './notification_delivery';
 import type {
@@ -39,6 +40,7 @@ interface DeliverInvestigationNotificationsParams {
   notificationDestinations: InvestigationNotificationDestination[];
   investigationUrl: string;
   getExecute: () => Promise<ExecuteConnector>;
+  getIsomerRuntime: () => Promise<KibanaIsomerRuntime>;
   routingClient: NotificationRoutingClient;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
@@ -113,10 +115,11 @@ export const getStartedMessageTs = (
       attempt.status === 'sent'
   )?.message_ts;
 
-const prepareDestinationDelivery = (
+const prepareDestinationDelivery = async (
   {
     investigation,
     investigationUrl,
+    getIsomerRuntime,
     executionId,
     phase,
     reason,
@@ -124,7 +127,7 @@ const prepareDestinationDelivery = (
   routing: NotificationRouting,
   destination: NotificationDestination,
   setupError?: string
-): PreparedDestinationDelivery => {
+): Promise<PreparedDestinationDelivery> => {
   const explicitParent = destination.params.thread_ts;
   const threadTs =
     destination.thread?.thread_ts ||
@@ -154,6 +157,7 @@ const prepareDestinationDelivery = (
   let delivery: NotificationDelivery | undefined;
   try {
     delivery = prepareNotificationDelivery({
+      runtime: await getIsomerRuntime(),
       investigation,
       url: investigationUrl,
       phase,
@@ -268,7 +272,7 @@ const deliverToDestination = async (
   if (!destination) {
     throw new Error('Notification destination disappeared');
   }
-  const delivery = prepareDestinationDelivery(params, routing, destination, setupError);
+  const delivery = await prepareDestinationDelivery(params, routing, destination, setupError);
   if (signal.aborted) {
     return;
   }
