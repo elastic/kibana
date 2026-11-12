@@ -23,17 +23,6 @@ export interface SavedViews {
   remove: (id: string) => Promise<void>;
 }
 
-/** The message a failed request carries from the server, or the error's own. */
-export const messageOfRequestError = (error: unknown): string => {
-  const body = typeof error === 'object' && error !== null ? Reflect.get(error, 'body') : undefined;
-  const serverMessage =
-    typeof body === 'object' && body !== null ? Reflect.get(body, 'message') : undefined;
-  if (typeof serverMessage === 'string') {
-    return serverMessage;
-  }
-  return error instanceof Error ? error.message : String(error);
-};
-
 /**
  * The saved views of the space, read when the hook mounts: use it where the views are shown, not
  * where they are not, as every mount is a request.

@@ -37,9 +37,10 @@ import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../../../ebt_constants';
-import { messageOfRequestError, useSavedViews } from '../../../../hooks/use_saved_views';
+import { useSavedViews } from '../../../../hooks/use_saved_views';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { useApplyView, useCurrentView } from '../../../../hooks/use_view_state';
+import { httpErrorMessage } from '../../../../utils/http_error_message';
 
 const LABEL = i18n.translate('xpack.digitalExperience.savedViews.buttonLabel', {
   defaultMessage: 'Views',
@@ -91,6 +92,41 @@ const deleteLabel = (name: string) =>
     values: { name },
   });
 
+const CANCEL = i18n.translate('xpack.digitalExperience.savedViews.cancel', {
+  defaultMessage: 'Cancel',
+});
+
+/**
+ * What a view's two changes ask again before they are made. Everyone in the space shares a view,
+ * so replacing what it keeps asks first, like deleting it does.
+ */
+const CONFIRMATIONS = {
+  update: {
+    label: i18n.translate('xpack.digitalExperience.savedViews.confirmUpdate', {
+      defaultMessage: 'Replace',
+    }),
+    color: 'primary',
+    testSubj: 'digitalExperienceSavedViewConfirmUpdate',
+    action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SAVE_VIEW,
+    element: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEW_UPDATE_CONFIRM,
+    cancelAction: DIGITAL_EXPERIENCE_EBT_ACTIONS.CANCEL_UPDATE_VIEW,
+    cancelElement: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEW_UPDATE,
+  },
+  delete: {
+    label: i18n.translate('xpack.digitalExperience.savedViews.confirmDelete', {
+      defaultMessage: 'Delete',
+    }),
+    color: 'danger',
+    testSubj: 'digitalExperienceSavedViewConfirmDelete',
+    action: DIGITAL_EXPERIENCE_EBT_ACTIONS.DELETE_VIEW,
+    element: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEW_DELETE_CONFIRM,
+    cancelAction: DIGITAL_EXPERIENCE_EBT_ACTIONS.CANCEL_DELETE_VIEW,
+    cancelElement: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEW_DELETE,
+  },
+} as const;
+
+type Confirmation = keyof typeof CONFIRMATIONS;
+
 /** The views of the space and, with the privilege, a form to save the Overview as another. */
 function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
   const { euiTheme } = useEuiTheme();
@@ -102,7 +138,7 @@ function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
   const keepTimeRangeId = useGeneratedHtmlId({ prefix: 'digitalExperienceSavedViewKeepTime' });
   const [name, setName] = useState('');
   const [keepTimeRange, setKeepTimeRange] = useState(false);
-  const [confirmingId, setConfirmingId] = useState<string>();
+  const [confirming, setConfirming] = useState<{ id: string; change: Confirmation }>();
   const [requestError, setRequestError] = useState<string>();
   const [isBusy, setIsBusy] = useState(false);
 
@@ -114,7 +150,9 @@ function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
       await change();
       return true;
     } catch (changeError) {
-      setRequestError(messageOfRequestError(changeError));
+      setRequestError(
+        changeError instanceof Error ? httpErrorMessage(changeError) : String(changeError)
+      );
       return false;
     } finally {
       setIsBusy(false);
@@ -130,8 +168,8 @@ function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
     }
   };
 
-  const saveAgain = (view: SavedView) =>
-    run(() =>
+  const saveAgain = async (view: SavedView) => {
+    await run(() =>
       update(view.id, {
         name: view.name,
         description: view.description,
@@ -140,10 +178,12 @@ function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
         ...(view.rangeFrom ? timeRange : {}),
       })
     );
+    setConfirming(undefined);
+  };
 
   const deleteView = async (view: SavedView) => {
     await run(() => remove(view.id));
-    setConfirmingId(undefined);
+    setConfirming(undefined);
   };
 
   return (
@@ -204,7 +244,7 @@ function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
                 />
               </EuiFlexItem>
             )}
-            {canSave && confirmingId !== view.id && (
+            {canSave && confirming?.id !== view.id && (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={updateLabel(view.name)} disableScreenReaderOutput>
@@ -213,11 +253,11 @@ function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
                       size="xs"
                       aria-label={updateLabel(view.name)}
                       isDisabled={isBusy}
-                      onClick={() => saveAgain(view)}
+                      onClick={() => setConfirming({ id: view.id, change: 'update' })}
                       data-test-subj={`digitalExperienceSavedViewUpdate-${view.name}`}
                       {...getEbtProps({
                         action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SAVE_VIEW,
-                        element: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEWS,
+                        element: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEW_UPDATE,
                       })}
                     />
                   </EuiToolTip>
@@ -230,7 +270,7 @@ function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
                       size="xs"
                       aria-label={deleteLabel(view.name)}
                       isDisabled={isBusy}
-                      onClick={() => setConfirmingId(view.id)}
+                      onClick={() => setConfirming({ id: view.id, change: 'delete' })}
                       data-test-subj={`digitalExperienceSavedViewDelete-${view.name}`}
                       {...getEbtProps({
                         action: DIGITAL_EXPERIENCE_EBT_ACTIONS.DELETE_VIEW,
@@ -241,38 +281,36 @@ function SavedViewsPanel({ onApplied }: { onApplied: () => void }) {
                 </EuiFlexItem>
               </>
             )}
-            {canSave && confirmingId === view.id && (
+            {canSave && confirming?.id === view.id && (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="xs"
-                    color="danger"
+                    color={CONFIRMATIONS[confirming.change].color}
                     isDisabled={isBusy}
-                    onClick={() => deleteView(view)}
-                    data-test-subj={`digitalExperienceSavedViewConfirmDelete-${view.name}`}
+                    onClick={() =>
+                      confirming.change === 'update' ? saveAgain(view) : deleteView(view)
+                    }
+                    data-test-subj={`${CONFIRMATIONS[confirming.change].testSubj}-${view.name}`}
                     {...getEbtProps({
-                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.DELETE_VIEW,
-                      element: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEW_DELETE_CONFIRM,
+                      action: CONFIRMATIONS[confirming.change].action,
+                      element: CONFIRMATIONS[confirming.change].element,
                     })}
                   >
-                    {i18n.translate('xpack.digitalExperience.savedViews.confirmDelete', {
-                      defaultMessage: 'Delete',
-                    })}
+                    {CONFIRMATIONS[confirming.change].label}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj="digitalExperienceSavedViewsPanelCancelButton"
                     size="xs"
-                    onClick={() => setConfirmingId(undefined)}
+                    onClick={() => setConfirming(undefined)}
                     {...getEbtProps({
-                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CANCEL_DELETE_VIEW,
-                      element: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEW_DELETE,
+                      action: CONFIRMATIONS[confirming.change].cancelAction,
+                      element: CONFIRMATIONS[confirming.change].cancelElement,
                     })}
                   >
-                    {i18n.translate('xpack.digitalExperience.savedViews.cancelDelete', {
-                      defaultMessage: 'Cancel',
-                    })}
+                    {CANCEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </>
@@ -359,7 +397,7 @@ export function SavedViewsMenu() {
           onClick={() => setIsOpen((open) => !open)}
           data-test-subj="digitalExperienceOverviewSavedViews"
           {...getEbtProps({
-            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_FILTER,
+            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_VIEWS,
             element: APPLICATION_OVERVIEW_EBT_ELEMENTS.SAVED_VIEWS,
           })}
         >
