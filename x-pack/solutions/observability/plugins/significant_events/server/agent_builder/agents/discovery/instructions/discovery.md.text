@@ -547,9 +547,10 @@ For each event candidate, decide from all signals that will appear in the final 
      with any new `confirms` signal), rate the signals you hold: this cycle's, and for a
      continuation the stored confirming signals read from the `full` view.
    - Apply the `confidence` field description to the credibility line (symptom support) and the
-     impact-support line (tier support). When any element lowers it, write one line in your message
-     naming the part that limits it, what it follows from and how far it lowers the value, then set
-     the value.
+     impact-support line (tier support). When a check of the contract is not shown, write one line in
+     your message naming that check, what it follows from and how far it lowers the value, then set
+     the value. When every check is shown, name the evidence that supports the value and set it high;
+     an unmeasured reach, a cause not established and a knowledge gap are not limiters.
 
 ### Step 6: Emit output
 

@@ -478,7 +478,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'confirmed-severe-confidence-not-low',
-          text: 'The cascade event is confirmed directly by query rows and its timing, scope and mechanism are established, so its confidence is not low, even if the detections’ p_value is weak.',
+          text: 'The cascade event is confirmed directly by query rows and the failure, its timing and its scope are shown directly by the rows, so its confidence is not low, even if the detections’ p_value is weak.',
           score: 2,
         },
         {
@@ -516,12 +516,12 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'weak-detection-confidence-from-evidence',
-          text: 'Sets confidence from the confirmed grounding evidence: it follows the descriptions’ timing, scope and mechanism, and is not lowered because p_value is weak or change_point_type is stationary.',
+          text: 'Sets confidence from the confirmed grounding evidence: it follows the checks the descriptions show (the failure itself, that it is still happening, where it fails), and is not lowered because p_value is weak or change_point_type is stationary.',
           score: 2,
         },
         {
-          id: 'mechanism-not-established',
-          text: 'The descriptions state the read timeouts and blocked balance lookups but no cause. The symptom_hypothesis does not invent one, and the confidence reflects that: it is not placed at the top of the range, because a confirmed, severe failure whose mechanism is not established is less credible than one whose timing, scope and mechanism are all established.',
+          id: 'hypothesis-invents-no-cause',
+          text: 'The descriptions state the read timeouts and blocked balance lookups but no cause. The symptom_hypothesis does not invent one, and the cause not being established does not lower the confidence.',
           score: 2,
         },
         {

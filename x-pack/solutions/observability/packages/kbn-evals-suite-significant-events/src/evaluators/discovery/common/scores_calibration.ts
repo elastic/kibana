@@ -67,7 +67,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'confidence_basis_stated',
-    text: 'When the agent’s one-line statement of what its confidence follows from is visible, it names evidence the descriptions actually carry (timing, scope, mechanism, contradictions or unresolved items) and the number fits that basis.',
+    text: 'When the agent’s one-line statement of what its confidence follows from is visible, it names evidence the descriptions actually carry (the failure, its timing and scope, contradictions between signals) and the number fits that basis. A limiter is named only for a check the descriptions do not show.',
   },
   {
     id: 'detection_metadata_not_confidence',

@@ -365,7 +365,7 @@ export const CONFIDENCE_CONTRACT_RULE = dedent`
     - it is still happening in the latest hour the descriptions give;
     - the signals agree with each other and with the knowledge-base topology where both speak;
     - the descriptions say where it fails (a service, operation or scope);
-    - the evidence the rated tier needs is stated (for "medium", an observed failure with its reach unmeasured is what that tier means).
+    - the evidence the rated tier needs is stated, as the severity rules name it for that tier.
     Every check the descriptions show keeps confidence high. Each one they do not show lowers it, and several that are not shown make it low.
     These never lower confidence, whatever the tier: a reach, outcome or rate that was not measured and so set a lower tier; a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
     An event written without signals is rated on the evidence its author holds. Confidence reflects the evidence held, never how strong or unusual the detection was.
