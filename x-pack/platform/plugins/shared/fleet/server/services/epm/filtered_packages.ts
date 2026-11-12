@@ -13,10 +13,10 @@ import {
 } from '../../../common/constants';
 
 export function getFilteredSearchPackages() {
-  const isElasticConnectorsServerlessEnabled = getElasticConnectorsServerlessEnabled();
+  const isElasticConnectorsEnabled = getElasticConnectorsEnabled();
   const shouldFilterFleetServer = appContextService.getConfig()?.internal?.fleetServerStandalone;
   const filtered: string[] = ['profiler_collector', 'profiler_symbolizer'];
-  if (!isElasticConnectorsServerlessEnabled) {
+  if (!isElasticConnectorsEnabled) {
     filtered.push('elastic_connectors');
   }
   // Do not allow to search for Fleet server integration if configured to use  standalone fleet server
@@ -30,9 +30,9 @@ export function getFilteredSearchPackages() {
 }
 
 export function getFilteredInstallPackages() {
-  const isElasticConnectorsServerlessEnabled = getElasticConnectorsServerlessEnabled();
+  const isElasticConnectorsEnabled = getElasticConnectorsEnabled();
   const filtered: string[] = [];
-  if (!isElasticConnectorsServerlessEnabled) {
+  if (!isElasticConnectorsEnabled) {
     filtered.push('elastic_connectors');
   }
 
@@ -49,23 +49,6 @@ export function getAllowedSearchAiLakeInstallPackagesIfEnabled() {
     : undefined;
 }
 
-export function getElasticConnectorsServerlessEnabled() {
-  const ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES = [
-    'security',
-    'observability',
-    'search',
-    'vectordb',
-  ];
-
-  const cloud = appContextService.getCloud();
-
-  return (
-    // is cloud and not serverless
-    (cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) ||
-    // is serverless and project type is one of the supported
-    (cloud?.isServerlessEnabled &&
-      ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES.includes(
-        appContextService.getCloud()?.serverless.projectType ?? ''
-      ))
-  );
+export function getElasticConnectorsEnabled() {
+  return Boolean(appContextService.getCloud()?.isCloudEnabled);
 }
