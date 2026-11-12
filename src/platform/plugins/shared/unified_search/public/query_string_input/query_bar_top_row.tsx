@@ -544,11 +544,6 @@ export const QueryBarTopRow = React.memo(
       !isSendingToBackground &&
       !backgroundSearchAvailability.disabled;
 
-    const sendToBackgroundTooltipProps =
-      backgroundSearchAvailability.disabled && backgroundSearchAvailability.reasonText
-        ? { content: backgroundSearchAvailability.reasonText }
-        : { content: strings.getSendToBackgroundLabel(), disableScreenReaderOutput: true };
-
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
     queryRef.current = props.query;
@@ -1137,7 +1132,10 @@ export const QueryBarTopRow = React.memo(
               isLoading={isSendingToBackground}
               isDisabled={!canSendToBackground}
               onClick={onClickSendToBackground}
-              tooltipProps={sendToBackgroundTooltipProps}
+              tooltipProps={{
+                content: strings.getSendToBackgroundLabel(),
+                disableScreenReaderOutput: true,
+              }}
               aria-label={strings.getSendToBackgroundLabel()}
               iconType="backgroundTask"
               data-test-subj="queryCancelButton-secondary-button"
@@ -1252,7 +1250,10 @@ export const QueryBarTopRow = React.memo(
             isLoading={isSendingToBackground}
             isDisabled={!canSendToBackground || Boolean(props.disableSubmitAction)}
             onClick={onClickSendToBackground}
-            tooltipProps={sendToBackgroundTooltipProps}
+            tooltipProps={{
+              content: strings.getSendToBackgroundLabel(),
+              disableScreenReaderOutput: true,
+            }}
             aria-label={strings.getSendToBackgroundLabel()}
             data-test-subj="querySubmitButton-secondary-button"
           />

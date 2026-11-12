@@ -549,8 +549,6 @@ describe('QueryBarTopRowTopRow', () => {
     });
 
     describe('when the app disables background search', () => {
-      const reasonText = 'Search storage is disabled by the app.';
-
       beforeEach(() => {
         jest.useFakeTimers();
       });
@@ -564,7 +562,10 @@ describe('QueryBarTopRowTopRow', () => {
         const data = dataPluginMock.createStartContract();
         data.search.session = getSessionServiceMock({ state$: stateSubject.asObservable() });
         jest.mocked(data.search.session.getSearchSessionIndicatorUiConfig).mockReturnValue({
-          isDisabled: () => ({ disabled: true, reasonText }),
+          isDisabled: () => ({
+            disabled: true,
+            reasonText: 'Search storage is disabled by the app.',
+          }),
         });
 
         const renderResult = render(
@@ -592,16 +593,10 @@ describe('QueryBarTopRowTopRow', () => {
       it.each([
         { button: 'queryCancelButton-secondary-button', onCancel: jest.fn() },
         { button: 'querySubmitButton-secondary-button', onCancel: undefined },
-      ])('keeps $button disabled and shows the reason', async ({ button, onCancel }) => {
-        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      ])('keeps $button disabled while a search is loading', ({ button, onCancel }) => {
         const { getByTestId } = renderLoadingQueryBar(onCancel);
-        const secondaryButton = getByTestId(button);
 
-        expect(secondaryButton).toBeDisabled();
-        await user.hover(secondaryButton);
-
-        act(() => jest.advanceTimersByTime(500));
-        expect(screen.getByRole('tooltip')).toHaveTextContent(reasonText);
+        expect(getByTestId(button)).toBeDisabled();
       });
     });
   });
