@@ -17,6 +17,9 @@ const ALLOWED = new Set([
   'curl',
   'carves',
   'yara',
+  'curl_certificate',
+  'ec2_instance_metadata',
+  'wifi_survey',
 ]);
 
 describe('validateReadOnlyQuery', () => {
@@ -125,6 +128,9 @@ describe('validateReadOnlyQuery', () => {
       ['curl', "SELECT * FROM curl WHERE url = 'http://169.254.169.254/latest/meta-data/'"],
       ['carves', 'SELECT * FROM carves WHERE carve = 1'],
       ['yara', "SELECT * FROM yara WHERE sigrule = 'rule r {}'"],
+      ['curl_certificate', "SELECT * FROM curl_certificate WHERE hostname = 'internal.example'"],
+      ['ec2_instance_metadata', 'SELECT * FROM ec2_instance_metadata'],
+      ['wifi_survey', 'SELECT * FROM wifi_survey'],
     ])('rejects catalog table %s because it performs host-side effects', (table, query) => {
       expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/not read-only/i);
       expect(validateReadOnlyQuery(query, ALLOWED)).toContain(table);
@@ -134,6 +140,52 @@ describe('validateReadOnlyQuery', () => {
       expect(
         validateReadOnlyQuery('SELECT * FROM processes JOIN curl USING (pid)', ALLOWED)
       ).toMatch(/not read-only/i);
+    });
+  });
+
+  describe('CTE alias scoping', () => {
+    it.each([
+      [
+        'alias defined only inside a sibling sub-select',
+        'SELECT * FROM processes, (WITH shell AS (SELECT 1) SELECT 1) UNION SELECT * FROM shell',
+      ],
+      [
+        'alias defined inside a sub-select, used as an outer table',
+        'SELECT * FROM shell, (WITH shell AS (SELECT 1) SELECT 1)',
+      ],
+      [
+        'alias used after its defining SELECT closed',
+        'SELECT * FROM (WITH shell AS (SELECT 1) SELECT * FROM shell) JOIN shell ON 1=1',
+      ],
+    ])('does not let a CTE name leak out of its scope: %s', (_name, query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).not.toBeNull();
+    });
+
+    it('still rejects a physical non-read-only table shadowed only in an inner scope', () => {
+      expect(
+        validateReadOnlyQuery(
+          'SELECT * FROM (WITH curl AS (SELECT 1) SELECT * FROM curl), curl',
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+
+    it('accepts a CTE name used in the SELECT that defines it (negative control)', () => {
+      expect(
+        validateReadOnlyQuery(
+          'WITH a AS (SELECT pid FROM processes), b AS (SELECT pid FROM a) SELECT * FROM b',
+          ALLOWED
+        )
+      ).toBeNull();
+    });
+
+    it('accepts a CTE name used inside a nested sub-select (negative control)', () => {
+      expect(
+        validateReadOnlyQuery(
+          'WITH a AS (SELECT pid FROM processes) SELECT * FROM (SELECT pid FROM a)',
+          ALLOWED
+        )
+      ).toBeNull();
     });
   });
 

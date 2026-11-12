@@ -47,7 +47,16 @@ export interface PollActionResponsesResult {
   responded: number;
   expected?: number;
   rows: Array<Record<string, unknown>>;
+  /** Total result rows indexed for the action, which can exceed `rows.length`. */
+  totalRows: number;
+  /** True when `totalRows` is larger than the returned `rows`. */
+  truncated: boolean;
   status: LiveQueryPollStatus;
+}
+
+interface ResultRead {
+  rows: Array<Record<string, unknown>>;
+  total: number;
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -85,12 +94,14 @@ export const pollActionResponses = async (
   const spaceFilter = buildSpaceIdFilter(spaceId, { matchActionDataSpaceId: true });
   let responded = 0;
   let rows: Array<Record<string, unknown>> = [];
+  let totalRows = 0;
 
-  const readResultRows = async (): Promise<Array<Record<string, unknown>> | undefined> => {
+  const readResultRows = async (): Promise<ResultRead | undefined> => {
     const resultsResult = await esClient.search({
       index: RESULTS_INDEX_PATTERN,
       size: maxRows,
       ignore_unavailable: true,
+      track_total_hits: true,
       query: {
         bool: {
           filter: [{ term: { action_id: actionId } }, spaceFilter],
@@ -100,9 +111,24 @@ export const pollActionResponses = async (
 
     const hits = resultsResult.hits.hits;
 
-    return hits.length > 0
-      ? hits.map((hit) => extractRowFromHit((hit._source ?? {}) as Record<string, unknown>))
-      : undefined;
+    if (hits.length === 0) {
+      return undefined;
+    }
+
+    const total = resultsResult.hits.total;
+    const totalCount = typeof total === 'number' ? total : total?.value ?? hits.length;
+
+    return {
+      rows: hits.map((hit) => extractRowFromHit((hit._source ?? {}) as Record<string, unknown>)),
+      total: Math.max(totalCount, hits.length),
+    };
+  };
+
+  const applyRead = (read: ResultRead | undefined): void => {
+    if (read) {
+      rows = read.rows;
+      totalRows = read.total;
+    }
   };
 
   const allAgentsResponded = () =>
@@ -137,7 +163,7 @@ export const pollActionResponses = async (
         (responsesResult.aggregations?.distinct_agents as { value: number } | undefined)?.value ??
         0;
 
-      rows = (await readResultRows()) ?? rows;
+      applyRead(await readResultRows());
 
       // Only stop early once every dispatched agent has reported. Stopping at
       // the first response reports a multi-agent query as complete while other
@@ -161,7 +187,7 @@ export const pollActionResponses = async (
   if (allAgentsResponded()) {
     try {
       await sleep(intervalMs);
-      rows = (await readResultRows()) ?? rows;
+      applyRead(await readResultRows());
     } catch (finalReadErr) {
       logger?.debug(`Live-query final results read failed: ${finalReadErr}`);
     }
@@ -177,6 +203,8 @@ export const pollActionResponses = async (
     responded,
     ...(expectedAgentCount !== undefined && { expected: expectedAgentCount }),
     rows: rows.slice(0, maxRows),
+    totalRows,
+    truncated: totalRows > maxRows,
     status,
   };
 };

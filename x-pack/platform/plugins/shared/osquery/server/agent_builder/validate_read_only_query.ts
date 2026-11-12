@@ -92,14 +92,37 @@ const sanitizeSql = (sql: string): string => {
  * - `curl`   — performs an outbound HTTP request for every row (SSRF)
  * - `carves` — `carve=1` turns the SELECT into a new carve request (file exfil)
  * - `yara`   — triggers a one-off YARA scan on the host
+ * - `curl_certificate` — opens an outbound TLS connection to the WHERE hostname
+ * - `ec2_instance_metadata` — issues HTTP requests to the instance metadata endpoint
+ * - `wifi_survey` — triggers an active wireless scan
  */
-const NON_READ_ONLY_TABLES = new Set(['curl', 'carves', 'yara']);
+const NON_READ_ONLY_TABLES = new Set([
+  'curl',
+  'carves',
+  'yara',
+  'curl_certificate',
+  'ec2_instance_metadata',
+  'wifi_survey',
+]);
 
 /** Upper bound on query size; validation is linear, this keeps the work bounded. */
 const MAX_QUERY_LENGTH = 20000;
 
+interface TableRef {
+  name: string;
+  /** True when a CTE defined in an enclosing scope shadows this name. */
+  isCte: boolean;
+}
+
+interface Scope {
+  /** CTE names defined by the WITH clause at this parenthesis level. */
+  ctes: Set<string>;
+  /** True from a WITH keyword until the SELECT that ends its CTE list. */
+  withOpen: boolean;
+}
+
 interface TableRefs {
-  refs: string[];
+  refs: TableRef[];
   /** Set when a FROM/JOIN item has a form this validator cannot check. */
   unsupported: string | null;
 }
@@ -145,10 +168,17 @@ const FROM_LIST_END = new Set([
  */
 const extractTableRefs = (sql: string): TableRefs => {
   const tokens = sql.match(TOKEN_RE) ?? [];
-  const refs: string[] = [];
+  const refs: TableRef[] = [];
   const parentStates: FromState[] = [];
+  const ancestorScopes: Scope[] = [];
+  let scope: Scope = { ctes: new Set(), withOpen: false };
   let unsupported: string | null = null;
   let state: FromState = 'none';
+
+  // A CTE name is visible in the SELECT that defines it and in everything
+  // nested inside it, never in a sibling or enclosing scope.
+  const isVisibleCte = (name: string): boolean =>
+    scope.ctes.has(name) || ancestorScopes.some((ancestor) => ancestor.ctes.has(name));
 
   const flag = (reason: string): void => {
     unsupported = unsupported ?? reason;
@@ -167,7 +197,8 @@ const extractTableRefs = (sql: string): TableRefs => {
     } else if (following === '(') {
       flag('table-valued functions');
     } else {
-      refs.push(name.toLowerCase());
+      const lowered = name.toLowerCase();
+      refs.push({ name: lowered, isCte: isVisibleCte(lowered) });
     }
   };
 
@@ -179,14 +210,32 @@ const extractTableRefs = (sql: string): TableRefs => {
       const isSubSelect = /^(?:SELECT|WITH)$/i.test(tokens[i + 1] ?? '');
       if (state === 'expectTable' && !isSubSelect) flag('parenthesised table references');
       parentStates.push(state);
+      ancestorScopes.push(scope);
+      scope = { ctes: new Set(), withOpen: false };
       state = 'none';
     } else if (token === ')') {
       const parent = parentStates.pop();
-      if (parent === undefined) {
+      const parentScope = ancestorScopes.pop();
+      if (parent === undefined || parentScope === undefined) {
         flag('unbalanced parentheses');
       } else {
+        scope = parentScope;
         state = parent === 'expectTable' ? 'afterTable' : parent;
       }
+    } else if (state !== 'expectTable' && upper === 'WITH') {
+      scope.withOpen = true;
+    } else if (state !== 'expectTable' && upper === 'SELECT') {
+      scope.withOpen = false;
+    } else if (
+      scope.withOpen &&
+      state === 'none' &&
+      /^[A-Za-z_][A-Za-z0-9_]*$/.test(token) &&
+      upper !== 'RECURSIVE' &&
+      tokens[i + 1]?.toUpperCase() === 'AS' &&
+      tokens[i + 2] === '('
+    ) {
+      // Registered before the body is scanned so a recursive CTE can name itself.
+      scope.ctes.add(token.toLowerCase());
     } else if (state === 'expectTable') {
       readTableRef(i);
       state = 'afterTable';
@@ -264,22 +313,19 @@ export const validateReadOnlyQuery = (
     return 'Query contains a forbidden keyword. Only read-only SELECT queries against schema-catalog tables are allowed.';
   }
 
-  // CTE aliases (WITH name AS (...)) are not physical tables — allow them
-  const cteAliases = new Set(
-    [...scannable.matchAll(/\b(?:WITH|,)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+AS\s*\(/gi)].map((m) =>
-      m[1].toLowerCase()
-    )
-  );
-
-  const { refs: tableRefs, unsupported } = extractTableRefs(scannable);
+  const { refs: allRefs, unsupported } = extractTableRefs(scannable);
 
   if (unsupported) {
     return `Unsupported table reference form (${unsupported}). Reference Osquery tables by plain name in FROM / JOIN.`;
   }
 
-  if (tableRefs.length === 0) {
+  if (allRefs.length === 0) {
     return 'Query must reference at least one Osquery table via FROM / JOIN';
   }
+
+  // A name only counts as a CTE alias where a WITH clause in scope defines it.
+  // Anything else is a physical table and goes through the allowlist.
+  const tableRefs = allRefs.filter((ref) => !ref.isCte).map((ref) => ref.name);
 
   const nonReadOnly = [...new Set(tableRefs)].filter((t) => NON_READ_ONLY_TABLES.has(t));
   if (nonReadOnly.length > 0) {
@@ -288,9 +334,7 @@ export const validateReadOnlyQuery = (
     )}. These tables perform host-side actions (HTTP requests, file carving, YARA scans) even in a SELECT.`;
   }
 
-  const unknown = [...new Set(tableRefs)].filter(
-    (t) => !allowedTables.has(t) && !cteAliases.has(t)
-  );
+  const unknown = [...new Set(tableRefs)].filter((t) => !allowedTables.has(t));
   if (unknown.length > 0) {
     return `Table(s) not in the Osquery schema catalog (allowlist): ${unknown.join(
       ', '

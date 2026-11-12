@@ -98,8 +98,35 @@ describe('pollActionResponses', () => {
       responded: 1,
       expected: 2,
       rows: [{ pid: 1, name: 'launchd' }],
+      totalRows: 1,
+      truncated: false,
       status: 'partial',
     });
+  });
+
+  it('reports the true total and truncated when results exceed maxRows', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(responsesSearchResult(1))
+      .mockResolvedValueOnce({
+        hits: {
+          total: { value: 2500, relation: 'eq' },
+          hits: [{ _source: { osquery: { pid: 1 } } }, { _source: { osquery: { pid: 2 } } }],
+        },
+      });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+      maxRows: 2,
+    });
+
+    expect(search).toHaveBeenNthCalledWith(2, expect.objectContaining({ track_total_hits: true }));
+    expect(result.rows).toHaveLength(2);
+    expect(result.totalRows).toBe(2500);
+    expect(result.truncated).toBe(true);
   });
 
   it('only reports completed after every expected agent responds', async () => {

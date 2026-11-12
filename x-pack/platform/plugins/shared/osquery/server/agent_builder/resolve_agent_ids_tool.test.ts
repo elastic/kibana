@@ -87,6 +87,18 @@ const getResultData = (result: ToolHandlerReturn<ToolResult>): ResolvedResult =>
 };
 
 describe('resolveAgentIdsTool', () => {
+  describe('hostnames schema', () => {
+    const schema = () => resolveAgentIdsTool(buildContext([]).context, loggerMock.create()).schema;
+
+    it.each([[''], ['   '], ['a'.repeat(256)]])('rejects hostname %j', (hostname) => {
+      expect(schema().safeParse({ hostnames: [hostname] }).success).toBe(false);
+    });
+
+    it('accepts a normal hostname (negative control)', () => {
+      expect(schema().safeParse({ hostnames: ['SRV-DC01'] }).success).toBe(true);
+    });
+  });
+
   it('prefers the online agent over stale offline/uninstalled enrollments for the same hostname', async () => {
     // Simulates a host that was re-enrolled multiple times (e.g. an agent
     // version upgrade): Fleet retains every prior enrollment record, all

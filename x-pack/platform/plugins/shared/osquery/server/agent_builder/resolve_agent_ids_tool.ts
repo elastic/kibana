@@ -26,7 +26,7 @@ export const RESOLVE_AGENT_IDS_TOOL_ID = osqueryTool('resolve_agent_ids');
 const resolveAgentIdsSchema = lazySchema(() =>
   z.object({
     hostnames: z
-      .array(z.string())
+      .array(z.string().trim().min(1).max(255))
       .min(1)
       .max(50)
       .describe(

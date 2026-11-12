@@ -214,6 +214,8 @@ export const runLiveQueryTool = (
                   : 'Not every agent has responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
               responded_agents: responded,
               row_count: rows.length,
+              total_rows: pollResult.totalRows,
+              truncated: pollResult.truncated,
               rows: rows.slice(0, MAX_RESULT_ROWS),
             },
           },
