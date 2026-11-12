@@ -11,7 +11,6 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import type { PathsOf, RouteMap } from '@kbn/typed-react-router-config';
 import { EntityInventoryPageShell } from '../application/components/page_shell';
 import { EntityCategoryResults } from '../application/components/entity_table/entity_category_results';
-import { EntityTypesProvider } from '../application/context/entity_types_context';
 import { EntityInventoryPageFilterControls } from '../application/filters/page_filter_controls';
 import type { EntityInventoryEntityCategory } from '../types';
 
@@ -33,15 +32,12 @@ const EntityInventoryPage = ({
   entityCategory: EntityInventoryEntityCategory;
 }) => {
   return (
-    // Keyed by page, so a page change requests the types again.
-    <EntityTypesProvider key={entityCategory}>
-      <EntityInventoryPageShell
-        entityCategory={entityCategory}
-        secondaryControls={<EntityInventoryPageFilterControls />}
-      >
-        <EntityCategoryResults entityTypes={ENTITY_TYPES_BY_CATEGORY[entityCategory]} />
-      </EntityInventoryPageShell>
-    </EntityTypesProvider>
+    <EntityInventoryPageShell
+      entityCategory={entityCategory}
+      secondaryControls={<EntityInventoryPageFilterControls />}
+    >
+      <EntityCategoryResults entityTypes={ENTITY_TYPES_BY_CATEGORY[entityCategory]} />
+    </EntityInventoryPageShell>
   );
 };
 

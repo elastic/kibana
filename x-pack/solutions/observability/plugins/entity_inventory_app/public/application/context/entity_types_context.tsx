@@ -21,9 +21,9 @@ export interface EntityTypesContextValue {
 const EntityTypesContext = createContext<EntityTypesContextValue | null>(null);
 
 /**
- * Loads the registered entity types once for the page below it. A page mounts its own provider,
- * so the types are requested again on a page change, a browser reload and a retry, and not on a
- * time range change.
+ * Loads the registered entity types once per app mount, for every page below it. The types are
+ * requested again on a browser reload, a retry and leaving and re-entering the app, and not on a
+ * page change or a time range change.
  */
 export const EntityTypesProvider = ({ children }: { children: React.ReactNode }) => {
   const {
@@ -41,7 +41,7 @@ export const EntityTypesProvider = ({ children }: { children: React.ReactNode })
   return <EntityTypesContext.Provider value={contextValue}>{children}</EntityTypesContext.Provider>;
 };
 
-/** The registered entity types of the page and the state of their request. */
+/** The registered entity types of the app and the state of their request. */
 export const useEntityTypes = (): EntityTypesContextValue => {
   const context = useContext(EntityTypesContext);
   if (!context) {

@@ -164,15 +164,50 @@ describe('EntityInventoryShell', () => {
     expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
   });
 
-  it('requests the entity types again on a page change', async () => {
+  it('requests the entity types once while moving between pages, and renders each page from that response', async () => {
     const fixtureClient = createFixtureEntityInventoryApiClient();
     const getTypes = jest.fn(fixtureClient.getTypes);
     const { history } = renderShellAt('/hosts', { ...fixtureClient, getTypes });
-    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
-    expect(getTypes).toHaveBeenCalledTimes(1);
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'host'
+    );
 
     act(() => history.push('/kubernetes'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'k8s.deployment'
+    );
 
+    act(() => history.push('/all-resources'));
+    await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+
+    act(() => history.push('/hosts'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'host'
+    );
+    expect(getTypes).toHaveBeenCalledTimes(1);
+  });
+
+  it('requests the entity types once more on a retry after the types request fails, and not again on a page change', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getTypes = jest
+      .fn(fixtureClient.getTypes)
+      .mockRejectedValueOnce(new Error('Types failed'));
+    const { history } = renderShellAt('/hosts', { ...fixtureClient, getTypes });
+    expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
+    expect(getTypes).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('entityInventoryTableRetry'));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'host'
+    );
+    expect(getTypes).toHaveBeenCalledTimes(2);
+
+    act(() => history.push('/kubernetes'));
     expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
       'data-entity-type',
       'k8s.deployment'

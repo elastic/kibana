@@ -21,6 +21,7 @@ import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
 import type { EntityInventoryAppStartDependencies } from '../types';
 import { entityInventoryRouter } from '../routes/config';
 import { EntityTablePreferencesProvider } from './context/entity_table_preferences_context';
+import { EntityTypesProvider } from './context/entity_types_context';
 import { createHttpEntityInventoryApiClient } from '../inventory_api/http_client';
 
 interface EntityInventoryShellProps {
@@ -58,9 +59,11 @@ export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps
     <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
       <AppHeader title={title} badges={TECH_PREVIEW_BADGE} menu={{}} spacing="standard" />
       <EuiPageSection paddingSize="m" grow restrictWidth={false}>
-        <EntityTablePreferencesProvider>
-          <RouteRenderer />
-        </EntityTablePreferencesProvider>
+        <EntityTypesProvider>
+          <EntityTablePreferencesProvider>
+            <RouteRenderer />
+          </EntityTablePreferencesProvider>
+        </EntityTypesProvider>
       </EuiPageSection>
     </PageTemplate>
   );
