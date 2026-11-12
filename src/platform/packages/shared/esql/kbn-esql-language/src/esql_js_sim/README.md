@@ -27,6 +27,32 @@ What `grammar/` holds so far:
   generated, with the tokens that can come right before and after it. `getCallSites` gives the
   same for any rule call, labelled or not, read from the parser at runtime.
 
+- `cursor_location/`: the raw locator. It runs the code completion on the command around the
+  cursor and returns the expected tokens and rules as the grammar names them.
+- `cursor_ir/`: `locate`, the function Kibana calls. It turns the raw location into the Cursor
+  IR: a description of the cursor that holds for every command.
+
+## The Cursor IR
+
+`locate(text, offset)` answers, from the grammar alone:
+
+- `position`: one of a closed set (`start_of_query`, `start_of_statement`, `start_of_command`,
+  `start_of_argument`, `inside_argument`, `after_argument`, `inside_string`, `inside_comment`,
+  `invalid`).
+- `command` and `enclosingCommands`: the grammar rule of the command around the cursor
+  (`whereCommand`) and of the commands around a branch or a subquery.
+- `arguments`: what can be filled in. Each has the path of call sites from the command down to
+  it. A call site is `rule.label` where the grammar labels the call (`renameClause.newName`)
+  and `rule>called` where it does not (`keepCommand>qualifiedNamePatterns`).
+- `followers`: the tokens that can come next, each with a class (`keyword`, `operator`,
+  `separator`, `opener`, `closer`, `pipe`, `terminator`, `value`, `end`) and, when it has one,
+  its fixed text. The class is read from the token's text and from whether it is expected
+  inside an expression rule. No token is named in the code.
+- `previous`: the token before the cursor, and `word`: the word being typed, with the expected
+  keyword it spells in full.
+
+A command the grammar has and Kibana has not registered is located like any other.
+
 Regenerate the labels after an `@elastic/esql` upgrade (from the Kibana root):
 
 ```sh
