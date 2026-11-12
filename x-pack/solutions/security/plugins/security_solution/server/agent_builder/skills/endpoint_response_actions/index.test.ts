@@ -53,6 +53,7 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.description).toContain('by hostname or agent ID');
       expect(skill.description).toContain('isolation state');
       expect(skill.description).toContain('response action by ID');
+      expect(skill.description).toContain('closing incident summary');
       expect(skill.content).toContain('Endpoint Response Actions Skill');
     });
 
