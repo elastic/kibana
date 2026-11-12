@@ -8,6 +8,10 @@
  */
 
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+/** Height of a grid row, in pixels. */
+export const DASHBOARD_GRID_ROW_HEIGHT = 20;
+/** Space between panels, in pixels, when the dashboard uses margins. */
+export const DASHBOARD_GRID_MARGIN_SIZE = 8;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;
 export const MAX_PANELS = 1000;

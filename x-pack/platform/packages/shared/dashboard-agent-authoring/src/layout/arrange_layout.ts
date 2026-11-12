@@ -6,7 +6,10 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_DASHBOARD_OPTIONS,
+} from '@kbn/as-code-dashboard-schema';
 import {
   isSection,
   type AttachmentPanel,
@@ -97,16 +100,20 @@ const getPanelsById = (widgets: Widgets): Map<string, AttachmentPanel> =>
 
 /** The grid height of every custom content panel of the dashboard that has a declared content height. */
 const getHeightRowsById = (
-  widgets: Widgets,
+  { panels, options }: DashboardAttachmentData,
   heightHints: readonly PanelHeightHint[]
 ): Map<string, number> => {
-  const panelsById = getPanelsById(widgets);
+  const panelsById = getPanelsById(panels);
+  const useMargins = options?.use_margins ?? DEFAULT_DASHBOARD_OPTIONS.use_margins;
+  const hidesTitles = options?.hide_panel_titles ?? DEFAULT_DASHBOARD_OPTIONS.hide_panel_titles;
   return new Map(
     heightHints.flatMap(({ panelId, heightPx }): Array<[string, number]> => {
       const panel = panelsById.get(panelId);
-      return panel?.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE
-        ? [[panelId, getGridRowsForHeight(heightPx, typeof panel.config.title === 'string')]]
-        : [];
+      if (panel?.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
+        return [];
+      }
+      const hasTitleBar = !hidesTitles && typeof panel.config.title === 'string';
+      return [[panelId, getGridRowsForHeight(heightPx, { hasTitleBar, useMargins })]];
     })
   );
 };
@@ -297,7 +304,7 @@ export const arrangeDashboardLayout = async ({
   const aliasById = createAliases(dashboardData.panels);
   const previousKinds = getPreviousKinds(dashboardData.panels, originalPanels);
   const changedTextIds = getChangedTextIds(dashboardData.panels, originalPanels);
-  const heightRowsById = getHeightRowsById(dashboardData.panels, heightHints);
+  const heightRowsById = getHeightRowsById(dashboardData, heightHints);
   if (
     instructions === undefined &&
     previousKinds.size === 0 &&

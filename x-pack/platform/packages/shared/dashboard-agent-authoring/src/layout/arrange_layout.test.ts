@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { DEFAULT_DASHBOARD_OPTIONS } from '@kbn/as-code-dashboard-schema';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
@@ -342,17 +343,22 @@ describe('arrangeDashboardLayout', () => {
       expect(arrangeLayout).not.toHaveBeenCalled();
     });
 
-    it.each([
-      ['without a title', undefined, 13],
-      ['with a title, which adds the title bar', 'Flights', 15],
+    it.each<[string, string | undefined, boolean, number]>([
+      ['without a title', undefined, false, 13],
+      ['with a title, which adds the title bar', 'Flights', false, 15],
+      ['with a title that the dashboard hides', 'Flights', true, 13],
     ])(
       'sends the grid height that the declared content height needs %s',
-      async (_, title, rows) => {
+      async (_, title, hidePanelTitles, rows) => {
         const panels = [createCustomContentPanel('<p>same</p>', title)];
 
         await arrangeDashboardLayout({
           originalPanels: panels,
-          dashboardData: { title: 'Dashboard', panels },
+          dashboardData: {
+            title: 'Dashboard',
+            panels,
+            options: { ...DEFAULT_DASHBOARD_OPTIONS, hide_panel_titles: hidePanelTitles },
+          },
           heightHints: [{ panelId: 'card', heightPx: 352 }],
           arrangeLayout,
           logger,
@@ -361,6 +367,24 @@ describe('arrangeDashboardLayout', () => {
         expect(getSentPanels()[0]).toEqual(expect.objectContaining({ heightRows: rows }));
       }
     );
+
+    it('sizes rows by the bare row height when the dashboard has no margins', async () => {
+      const panels = [createCustomContentPanel('<p>same</p>')];
+
+      await arrangeDashboardLayout({
+        originalPanels: panels,
+        dashboardData: {
+          title: 'Dashboard',
+          panels,
+          options: { ...DEFAULT_DASHBOARD_OPTIONS, use_margins: false },
+        },
+        heightHints: [{ panelId: 'card', heightPx: 352 }],
+        arrangeLayout,
+        logger,
+      });
+
+      expect(getSentPanels()[0]).toEqual(expect.objectContaining({ heightRows: 18 }));
+    });
 
     it('ignores a height declared for a panel that is not custom content', async () => {
       await arrangeDashboardLayout({
