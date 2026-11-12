@@ -75,12 +75,26 @@ export const useChangeHistoryCompare = ({
     enabled: shouldLoadTarget,
   });
 
+  // keepPreviousData can leave a detail for a different id here; ignore it.
   const baselineChange =
-    baselineChangeId === selectedChangeId ? selectedChange : loadedBaselineChange;
-  const targetChange = targetChangeId === selectedChangeId ? selectedChange : loadedTargetChange;
+    baselineChangeId === selectedChangeId
+      ? selectedChange
+      : loadedBaselineChange?.id === baselineChangeId
+      ? loadedBaselineChange
+      : undefined;
+  const targetChange =
+    targetChangeId === selectedChangeId
+      ? selectedChange
+      : loadedTargetChange?.id === targetChangeId
+      ? loadedTargetChange
+      : undefined;
+
+  const isLoadingCompareContext =
+    (shouldLoadBaseline && isLoadingBaseline) || (shouldLoadTarget && isLoadingTarget);
 
   const compareSpec = useMemo((): ChangeHistoryCompareSpec | undefined => {
-    if (!endpoints || !baselineChange || !targetChange) {
+    // while loading, baseline/target may still hold the previous comparison's data
+    if (isLoadingCompareContext || !endpoints || !baselineChange || !targetChange) {
       return undefined;
     }
 
@@ -89,11 +103,7 @@ export const useChangeHistoryCompare = ({
       baseline: baselineChange,
       target: targetChange,
     };
-  }, [baselineChange, endpoints, targetChange]);
+  }, [baselineChange, endpoints, isLoadingCompareContext, targetChange]);
 
-  return {
-    compareSpec,
-    isLoadingCompareContext:
-      (shouldLoadBaseline && isLoadingBaseline) || (shouldLoadTarget && isLoadingTarget),
-  };
+  return { compareSpec, isLoadingCompareContext };
 };
