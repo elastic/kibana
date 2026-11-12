@@ -18,6 +18,7 @@ import {
   deleteConnector,
   executeAction,
   expectVendorRequest,
+  setFixtures,
 } from '../fixtures/emulated_connector';
 
 const EMULATOR_NAME = 'censys';
@@ -103,7 +104,7 @@ apiTest.describe(
     });
 
     apiTest('reports a vendor error as an error, without a result', async ({ apiClient }) => {
-      await control.setFixtures([
+      await setFixtures(control, [
         {
           operation: { source: 'platform', method: 'get', path: '/v3/global/asset/host/{host_id}' },
           response: { status: 429, body: { error: { code: 429, message: 'Too many requests' } } },

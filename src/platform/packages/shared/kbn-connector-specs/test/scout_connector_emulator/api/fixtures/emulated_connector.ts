@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractCall, EmulatorControl } from '@kbn/connector-emulate';
+import type { ContractCall, EmulatorControl, ResponseFixture } from '@kbn/connector-emulate';
 import { createEmulatorControl, resolveEmulatorLocation } from '@kbn/connector-emulate';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ApiClientFixture, KbnClient, RoleApiCredentials } from '@kbn/scout';
@@ -105,5 +105,16 @@ export const expectVendorRequest = async (
   }
   if (headers) {
     expect(call.captured?.request.headers).toMatchObject(headers);
+  }
+};
+
+/** Sets runtime fixtures, failing when the vendor's spec rejects any, as the emulator then sets none. */
+export const setFixtures = async (
+  control: EmulatorControl,
+  fixtures: readonly ResponseFixture[]
+): Promise<void> => {
+  const rejected = await control.setFixtures(fixtures);
+  if (rejected.length > 0) {
+    throw new Error(`The emulator rejected the fixtures: ${JSON.stringify(rejected, null, 2)}`);
   }
 };

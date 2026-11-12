@@ -1,9 +1,35 @@
 {
-  "sha1": "277efda2066c00a779db3ffeb02c8eeaa080a2c5",
+  "sha1": "90fdc8cd4fecbe4cb7c8f9edf1f10abeecbe456c",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "02c1df9c2c44ee0-8d6900685144746",
+      "title": "a Brave Search workflow through the Workflows app against the connector emulator runs a step per action, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/brave_search_workflow.spec.ts",
+        "line": 67,
+        "column": 25
+      }
+    },
+    {
+      "id": "3ff5f3c7c276a34-873b900f847eb9a",
+      "title": "a Censys workflow through the Workflows app against the connector emulator runs a step per action, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/censys_workflow.spec.ts",
+        "line": 65,
+        "column": 13
+      }
+    },
     {
       "id": "7da835a652aea91-89b2c1ebbe5b1eb",
       "title": "a Firecrawl workflow through the Workflows app against the connector emulator runs a step per action, and the emulator answers each request",
@@ -13,8 +39,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/firecrawl_workflow.spec.ts",
-        "line": 63,
-        "column": 10
+        "line": 57,
+        "column": 30
+      }
+    },
+    {
+      "id": "0a979735afd48d4-ab82a468aede68f",
+      "title": "a Jina Reader workflow through the Workflows app against the connector emulator runs a step per action, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/jina_workflow.spec.ts",
+        "line": 62,
+        "column": 13
+      }
+    },
+    {
+      "id": "7e85c0ae0aaef7e-be57c57daa74ab3",
+      "title": "a Shodan workflow through the Workflows app against the connector emulator runs a step per action, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/shodan_workflow.spec.ts",
+        "line": 71,
+        "column": 11
       }
     }
   ]

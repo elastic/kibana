@@ -13,6 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { setFixtures } from '../fixtures/emulated_connector';
 import {
   FIRECRAWL_CRAWL_ID as CRAWL_ID,
   FIRECRAWL_VENDOR_URL as VENDOR,
@@ -184,7 +185,7 @@ apiTest.describe(
 
     apiTest('crawlAndWait polls the crawl until it has completed', async ({ apiClient }) => {
       // The crawl is still running at the first poll, and has completed at the second.
-      await control.setFixtures([
+      await setFixtures(control, [
         {
           operation: { source: 'v2', method: 'post', path: '/crawl' },
           response: {
@@ -215,7 +216,7 @@ apiTest.describe(
     });
 
     apiTest('reports a vendor error as an error, without a result', async ({ apiClient }) => {
-      await control.setFixtures([
+      await setFixtures(control, [
         {
           operation: { source: 'v2', method: 'post', path: '/search' },
           response: { status: 429, body: { success: false, error: 'Rate limit exceeded' } },

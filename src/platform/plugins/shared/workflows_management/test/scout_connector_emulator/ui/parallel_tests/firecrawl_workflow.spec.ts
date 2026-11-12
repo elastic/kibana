@@ -10,29 +10,30 @@
 import type { EmulatorControl } from '@kbn/connector-emulate';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../../scout/ui/fixtures';
-import { LONG_EXECUTION_TIMEOUT } from '../../../scout/ui/fixtures/constants';
-import { connectToEmulator, CRAWL_ID, getFirecrawlFixtures, VENDOR } from '../fixtures/emulator';
+import { PAUSE_SECONDS, runWorkflow } from '../fixtures/connector_workflow';
+import {
+  connectToEmulator,
+  CRAWL_ID,
+  createConnectorInSpace,
+  deleteConnectorInSpace,
+  getFirecrawlFixtures,
+  setFixtures,
+  VENDOR,
+} from '../fixtures/emulator';
 import { FIRECRAWL_STEP_NAMES, getFirecrawlWorkflowYaml } from '../fixtures/firecrawl_workflow';
-
-/**
- * For a demo, CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS makes the workflow wait that long after each
- * step, and the test stay that long on each step's result once it has completed, so what each step
- * returned can be read. Without it nothing waits.
- */
-const parsedPause = Number(process.env.CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS);
-const PAUSE_SECONDS = Number.isFinite(parsedPause) && parsedPause > 0 ? parsedPause : 0;
 
 /**
  * Runs a workflow with a step per action of the Firecrawl connector from the Workflows app, with the
  * connector emulator standing in for the vendor, using only the `connector_emulator` server config
  * set:
  *
- *   node scripts/connector_emulate --connector firecrawl
+ *   node scripts/connector_emulate --connector .firecrawl,.brave-search,.shodan,.censys,.jina
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet connector_emulator
  *   node scripts/playwright test --config <this folder>/parallel.playwright.config.ts --project local --headed
  *
  * To watch it with time to read each step's result, start the emulator with --log-responses to see
- * what it answers, and run the test with CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS=4.
+ * what it answers, and run the test with CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS=4. The tests of the
+ * other connectors in this folder work the same way.
  *
  * The tests share the emulator's calls and runtime fixtures, so they run one at a time (one worker).
  */
@@ -45,19 +46,12 @@ test.describe(
     let connectorId: string;
 
     test.beforeAll(async ({ kbnClient, scoutSpace }) => {
-      control = await connectToEmulator();
-      const { data } = await kbnClient.request<{ id: string }>({
-        method: 'POST',
-        path: `/s/${scoutSpace.id}/api/actions/connector`,
-        body: {
-          connector_type_id: '.firecrawl',
-          name: 'Firecrawl against the emulator',
-          config: {},
-          // The emulator accepts any credential.
-          secrets: { authType: 'bearer', token: 'a-token-the-emulator-accepts' },
-        },
+      control = await connectToEmulator('firecrawl');
+      connectorId = await createConnectorInSpace(kbnClient, scoutSpace.id, {
+        connectorTypeId: '.firecrawl',
+        name: 'Firecrawl against the emulator',
+        secrets: { authType: 'bearer', token: 'a-token-the-emulator-accepts' },
       });
-      connectorId = data.id;
     });
 
     test.beforeEach(async ({ browserAuth }) => {
@@ -66,10 +60,7 @@ test.describe(
 
     test.afterAll(async ({ kbnClient, scoutSpace, apiServices }) => {
       await apiServices.workflows.deleteAll();
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/s/${scoutSpace.id}/api/actions/connector/${connectorId}`,
-      });
+      await deleteConnectorInSpace(kbnClient, scoutSpace.id, connectorId);
     });
 
     test('runs a step per action, and the emulator answers each request', async ({
@@ -77,30 +68,15 @@ test.describe(
       pageObjects,
     }) => {
       await control.reset();
-      await control.setFixtures([...getFirecrawlFixtures()]);
+      await setFixtures(control, [...getFirecrawlFixtures()]);
 
-      await pageObjects.workflowEditor.gotoNewWorkflow();
-      await pageObjects.workflowEditor.setYamlEditorValue(
-        getFirecrawlWorkflowYaml(connectorId, { pauseSeconds: PAUSE_SECONDS })
-      );
-      await pageObjects.workflowEditor.saveWorkflow();
-
-      await pageObjects.workflowEditor.clickRunButton();
-      await pageObjects.workflowExecution.waitForExecutionStatus(
-        'completed',
-        LONG_EXECUTION_TIMEOUT + PAUSE_SECONDS * FIRECRAWL_STEP_NAMES.length * 1000
-      );
-      await pageObjects.workflowExecution.expandStepsTree();
-
-      // Opens a step's result, and stays on it for a demo.
-      const resultOf = async <T>(step: string, type: 'input' | 'output' = 'output'): Promise<T> => {
-        await (await pageObjects.workflowExecution.getStep(step)).click();
-        const result = await pageObjects.workflowExecution.getStepResultJson<T>(type);
-        if (PAUSE_SECONDS > 0) {
-          await page.waitForTimeout(PAUSE_SECONDS * 1000);
+      const resultOf = await runWorkflow(
+        { page, pageObjects },
+        {
+          yaml: getFirecrawlWorkflowYaml(connectorId, { pauseSeconds: PAUSE_SECONDS }),
+          stepNames: FIRECRAWL_STEP_NAMES,
         }
-        return result;
-      };
+      );
 
       for (const step of FIRECRAWL_STEP_NAMES) {
         await expect(await pageObjects.workflowExecution.getStep(step)).toHaveCount(1);

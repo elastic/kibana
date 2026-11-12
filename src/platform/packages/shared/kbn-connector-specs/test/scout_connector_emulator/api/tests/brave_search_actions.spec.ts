@@ -18,6 +18,7 @@ import {
   deleteConnector,
   executeAction,
   expectVendorRequest,
+  setFixtures,
 } from '../fixtures/emulated_connector';
 
 const EMULATOR_NAME = 'brave-search';
@@ -91,7 +92,7 @@ apiTest.describe(
     );
 
     apiTest('reports a vendor error as an error, without a result', async ({ apiClient }) => {
-      await control.setFixtures([
+      await setFixtures(control, [
         {
           operation: { source: 'search', method: 'get', path: '/v1/web/search' },
           response: {

@@ -18,6 +18,7 @@ import {
   deleteConnector,
   executeAction,
   expectVendorRequest,
+  setFixtures,
 } from '../fixtures/emulated_connector';
 
 const EMULATOR_NAME = 'shodan';
@@ -92,7 +93,7 @@ apiTest.describe(
     });
 
     apiTest('reports a vendor error as an error, without a result', async ({ apiClient }) => {
-      await control.setFixtures([
+      await setFixtures(control, [
         {
           operation: { source: 'rest', method: 'get', path: '/shodan/host/search' },
           response: { status: 429, body: { error: 'Request rate limit reached' } },
