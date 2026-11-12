@@ -609,9 +609,14 @@ export class ManagedWorkflowsService {
   }): Promise<ManagedInstallWrite | undefined> {
     const { id, definition, workflowDocumentId, spaceId, definitionHash, values } = target;
     // The read covers all spaces and deleted documents; install() only sees live ones in its space.
-    if (stored && (stored.source.spaceId !== spaceId || stored.source.deleted_at != null)) {
+    if (stored && stored.source.spaceId !== spaceId) {
       throw new Error(
-        `Cannot install managed workflow '${id}' as '${workflowDocumentId}' because a workflow with the same id is deleted or exists in another space`
+        `Cannot install managed workflow '${id}' as '${workflowDocumentId}' because a workflow with the same id exists in space '${stored.source.spaceId}'`
+      );
+    }
+    if (stored?.source.deleted_at != null) {
+      throw new Error(
+        `Cannot install managed workflow '${id}' as '${workflowDocumentId}' because a deleted workflow with the same id is still stored`
       );
     }
 

@@ -1503,12 +1503,14 @@ describe('ManagedWorkflowsService', () => {
       const otherPlugin = createDefinition({ id: 'system-other-plugin', pluginId: 'otherPlugin' });
       const userWorkflow = createDefinition({ id: 'system-user-workflow' });
       const otherSpace = createDefinition({ id: 'system-other-space' });
+      const deleted = createDefinition({ id: 'system-deleted' });
       mockManagedWorkflowDefinitions = [
         installable,
         dynamic,
         otherPlugin,
         userWorkflow,
         otherSpace,
+        deleted,
       ];
       const { crudService, service } = createService();
       crudService.getWorkflowDocumentsWithVersionByIds.mockResolvedValue(
@@ -1518,12 +1520,18 @@ describe('ManagedWorkflowsService', () => {
             otherSpace.id,
             createVersionedDocument(createInstalledSource(otherSpace, { spaceId: 'other-space' })),
           ],
+          [
+            deleted.id,
+            createVersionedDocument(
+              createInstalledSource(deleted, { deleted_at: new Date('2024-02-01T00:00:00.000Z') })
+            ),
+          ],
         ])
       );
 
       const { failed } = await service.bulkInstallManagedWorkflows(
         [
-          ...toItems([installable, dynamic, otherPlugin, userWorkflow, otherSpace]),
+          ...toItems([installable, dynamic, otherPlugin, userWorkflow, otherSpace, deleted]),
           { id: 'system-unknown' as ManagedWorkflowId, spaceId: SPACE_ID },
           { id: installable.id as ManagedWorkflowId, spaceId: SPACE_ID },
         ],
@@ -1539,7 +1547,14 @@ describe('ManagedWorkflowsService', () => {
           'system-user-workflow',
           expect.stringContaining('a user workflow with the same id already exists'),
         ],
-        ['system-other-space', expect.stringContaining('is deleted or exists in another space')],
+        [
+          'system-other-space',
+          expect.stringContaining("a workflow with the same id exists in space 'other-space'"),
+        ],
+        [
+          'system-deleted',
+          expect.stringContaining('a deleted workflow with the same id is still stored'),
+        ],
       ]);
       expect(crudService.bulkWriteWorkflowDocuments.mock.calls[0][0].map(({ id }) => id)).toEqual([
         'system-installable',
