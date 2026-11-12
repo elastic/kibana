@@ -1251,6 +1251,7 @@ x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
 x-pack/platform/plugins/private/reporting @elastic/response-ops
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
+x-pack/platform/plugins/private/search_boost @elastic/kibana-management
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/subscription_status @elastic/appex-sharedux
 x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops
@@ -2849,6 +2850,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
 /src/platform/test/accessibility/apps/management.ts @elastic/kibana-discover
 /x-pack/platform/test/functional/apps/rollup_job/ @elastic/kibana-management
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/search_boost @elastic/kibana-management
 
 ## Kibana Cases
 
