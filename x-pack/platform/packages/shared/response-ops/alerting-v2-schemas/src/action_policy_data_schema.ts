@@ -303,7 +303,7 @@ const actionPolicyDescriptionSchema = lazySchema(() =>
 const ENABLED_DESCRIPTIONS = {
   create:
     'Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.',
-  put: 'Whether the action policy is enabled. When you omit this field, a new policy defaults to `true` and an existing policy keeps its current enabled state. A disabled policy is saved but is not applied to alerts until you enable it.',
+  put: 'Whether the action policy is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the policy it defaults to `true`. When the request replaces an existing policy, omitting it keeps the current state and supplying it enables or disables the policy, the same as `_enable` or `_disable`. A disabled policy is saved but is not applied to alerts until you enable it.',
 } as const;
 
 type ActionPolicyWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
@@ -338,8 +338,13 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
 
 /**
  * Request body schema for `PUT /api/alerting/v2/action_policies/{id}`: the create-action-policy
- * data, including the optional `enabled`. A replace that omits it preserves the stored value; a
- * supplied value sets the state, like `_enable`/`_disable`. PATCH does not accept it.
+ * data.
+ *
+ * `enabled` is deliberately the only field on PUT that is kept when omitted. Every other field
+ * follows replace semantics and is cleared when absent. It is lifecycle state, not definition: on
+ * create it defaults to `true`, on replace omitting it keeps the stored value and supplying it
+ * applies the same transition as `_enable` / `_disable`. The default lives in the client, not here,
+ * because "omitted" means different things on create and replace. PATCH does not accept it.
  */
 export const putActionPolicyDataSchema = lazySchema(() =>
   buildActionPolicyDataBaseSchema('put')

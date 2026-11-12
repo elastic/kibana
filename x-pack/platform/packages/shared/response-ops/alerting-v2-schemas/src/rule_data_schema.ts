@@ -719,7 +719,7 @@ const timeFieldSchema = lazySchema(() => z.string().min(1).max(MAX_FIELD_NAME_LE
 const ENABLED_DESCRIPTIONS = {
   create:
     'Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.',
-  put: 'Whether the rule is enabled. When you omit this field, a new rule defaults to `true` and an existing rule keeps its current enabled state. A disabled rule is saved but does not run until you enable it.',
+  put: 'Whether the rule is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the rule it defaults to `true`. When the request replaces an existing rule, omitting it keeps the current state and supplying it enables or disables the rule, the same as `_enable` or `_disable`. A disabled rule is saved but does not run until you enable it.',
 } as const;
 
 type RuleWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
@@ -937,7 +937,15 @@ export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
  * Request body schema for `PUT /api/alerting/v2/rules/{id}`: the create-rule
- * data, including the optional `enabled`.
+ * data.
+ *
+ * `enabled` is deliberately the only field on PUT that is kept when omitted.
+ * Every other field follows replace semantics and is cleared when absent.
+ * It is lifecycle state, not definition: on create it defaults to `true`, on
+ * replace omitting it keeps the stored value and supplying it applies the same
+ * transition as `_enable` / `_disable`. The default lives in the client, not
+ * here, because "omitted" means different things on create and replace.
+ * PATCH does not accept it.
  */
 export const putRuleDataSchema = applyCreateRuleRefinements(buildRuleDataBaseSchema('put')).meta({
   id: 'alerting_put_rule',
