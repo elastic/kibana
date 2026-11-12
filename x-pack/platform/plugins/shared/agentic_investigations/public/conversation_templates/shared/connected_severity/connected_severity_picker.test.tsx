@@ -61,6 +61,20 @@ describe('ConnectedSeverityPicker', () => {
     expect(screen.getByTestId('connectedSeverityPicker')).toHaveTextContent('High');
   });
 
+  it('keeps a newer pick when an earlier save finishes its refetch afterwards', async () => {
+    renderPicker();
+    pick();
+    fireEvent.click(screen.getByTestId('connectedSeverityPicker'));
+    fireEvent.click(screen.getByTestId('severityPickerOption-medium'));
+
+    const [, { onSuccess }] = mockMutate.mock.calls[0];
+    await act(async () => {
+      await onSuccess();
+    });
+
+    expect(screen.getByTestId('connectedSeverityPicker')).toHaveTextContent('Medium');
+  });
+
   it('reverts to the stored severity and reports it when the request fails', () => {
     renderPicker();
     pick();
