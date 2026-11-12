@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { PIPELINE_SIMULATE_MAX_DOCS } from '../../../common/constants/trained_models';
 
 const modelIdSchemaBasic = {
   modelId: schema.string({ meta: { description: 'Model ID' } }),
@@ -80,7 +81,7 @@ export const inferTrainedModelBody = schema.object({
 
 export const pipelineSimulateBody = schema.object({
   pipeline: schema.any(),
-  docs: schema.arrayOf(schema.any()),
+  docs: schema.arrayOf(schema.any(), { maxSize: PIPELINE_SIMULATE_MAX_DOCS }),
 });
 export const pipelineDocs = schema.arrayOf(schema.string());
 
