@@ -543,7 +543,7 @@
                       },
                       "observableTypes": {
                         "type": "array",
-                        "description": "Custom observable type configuration details.",
+                        "description": "Custom observable type configuration details, and the changes to the built-in observable types. An entry for a built-in type has its built-in label and only the fields that differ from the defaults.\n",
                         "items": {
                           "type": "object",
                           "properties": {
@@ -556,6 +556,40 @@
                               "type": "string",
                               "description": "The observable type label.",
                               "example": "My observable type"
+                            },
+                            "valuePattern": {
+                              "type": "string",
+                              "description": "A regular expression. Auto-extraction keeps only the values that match it.",
+                              "example": "^E\\d{6}$"
+                            },
+                            "paths": {
+                              "type": "array",
+                              "description": "The alert fields that auto-extraction reads for this type.",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "path": {
+                                    "type": "string",
+                                    "description": "The name of the alert field.",
+                                    "example": "user.employee_id"
+                                  },
+                                  "enabled": {
+                                    "type": "boolean",
+                                    "description": "When `false`, auto-extraction skips this field.",
+                                    "example": true
+                                  },
+                                  "excludedValues": {
+                                    "type": "array",
+                                    "description": "Values of this field that auto-extraction skips. The match is exact and case-sensitive.",
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "example": [
+                                      "E000000"
+                                    ]
+                                  }
+                                }
+                              }
                             }
                           }
                         }
@@ -819,7 +853,7 @@
                     },
                     "observableTypes": {
                       "type": "array",
-                      "description": "Custom observable type configuration details.",
+                      "description": "Custom observable type configuration details, and the changes to the built-in observable types. An entry for a built-in type has its built-in label and only the fields that differ from the defaults.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -832,6 +866,40 @@
                             "type": "string",
                             "description": "The observable type label.",
                             "example": "My observable type"
+                          },
+                          "valuePattern": {
+                            "type": "string",
+                            "description": "A regular expression. Auto-extraction keeps only the values that match it.",
+                            "example": "^E\\d{6}$"
+                          },
+                          "paths": {
+                            "type": "array",
+                            "description": "The alert fields that auto-extraction reads for this type.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "path": {
+                                  "type": "string",
+                                  "description": "The name of the alert field.",
+                                  "example": "user.employee_id"
+                                },
+                                "enabled": {
+                                  "type": "boolean",
+                                  "description": "When `false`, auto-extraction skips this field.",
+                                  "example": true
+                                },
+                                "excludedValues": {
+                                  "type": "array",
+                                  "description": "Values of this field that auto-extraction skips. The match is exact and case-sensitive.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "example": [
+                                    "E000000"
+                                  ]
+                                }
+                              }
+                            }
                           }
                         }
                       }
@@ -950,6 +1018,9 @@
               "examples": {
                 "updateCaseConfigurationRequest": {
                   "$ref": "#/components/examples/update_case_configuration_request"
+                },
+                "updateCaseConfigurationObservableTypesRequest": {
+                  "$ref": "#/components/examples/update_case_configuration_observable_types_request"
                 }
               }
             }
@@ -1099,7 +1170,7 @@
                     },
                     "observableTypes": {
                       "type": "array",
-                      "description": "Custom observable type configuration details.",
+                      "description": "Custom observable type configuration details, and the changes to the built-in observable types. An entry for a built-in type has its built-in label and only the fields that differ from the defaults.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -1112,6 +1183,40 @@
                             "type": "string",
                             "description": "The observable type label.",
                             "example": "My observable type"
+                          },
+                          "valuePattern": {
+                            "type": "string",
+                            "description": "A regular expression. Auto-extraction keeps only the values that match it.",
+                            "example": "^E\\d{6}$"
+                          },
+                          "paths": {
+                            "type": "array",
+                            "description": "The alert fields that auto-extraction reads for this type.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "path": {
+                                  "type": "string",
+                                  "description": "The name of the alert field.",
+                                  "example": "user.employee_id"
+                                },
+                                "enabled": {
+                                  "type": "boolean",
+                                  "description": "When `false`, auto-extraction skips this field.",
+                                  "example": true
+                                },
+                                "excludedValues": {
+                                  "type": "array",
+                                  "description": "Values of this field that auto-extraction skips. The match is exact and case-sensitive.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "example": [
+                                    "E000000"
+                                  ]
+                                }
+                              }
+                            }
                           }
                         }
                       }
@@ -6155,6 +6260,83 @@
           }
         }
       },
+      "observable_types_request": {
+        "type": "array",
+        "description": "The custom observable types, and the changes to the built-in observable types. An entry with a label is a custom type. An entry without a label changes the fields of the built-in type with the same key. The configuration stores only the fields that differ from the defaults of the built-in type.\n",
+        "minItems": 0,
+        "maxItems": 19,
+        "items": {
+          "type": "object",
+          "required": [
+            "key"
+          ],
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "The observable type key. For a built-in type, use the key of that type, for example `observable-type-agent-id`.\n",
+              "minLength": 1,
+              "maxLength": 36,
+              "pattern": "^[a-z0-9_-]+$",
+              "example": "employee-id"
+            },
+            "label": {
+              "type": "string",
+              "description": "The observable type label. It is required for a custom type. A built-in type has no label in a request.\n",
+              "minLength": 1,
+              "maxLength": 50,
+              "example": "Employee ID"
+            },
+            "valuePattern": {
+              "type": "string",
+              "description": "A regular expression. Auto-extraction keeps only the values that match it. It applies only to a custom type, and to values of at most 1024 characters. A request with an expression that does not compile returns a 400 error.\n",
+              "minLength": 1,
+              "maxLength": 256,
+              "example": "^E\\d{6}$"
+            },
+            "paths": {
+              "type": "array",
+              "description": "The alert fields that auto-extraction reads for this type. For a built-in type, send only the fields that you turn off, add, or give excluded values. A field name can appear one time in an entry.\n",
+              "minItems": 0,
+              "maxItems": 50,
+              "items": {
+                "type": "object",
+                "required": [
+                  "path",
+                  "enabled"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "description": "The name of the alert field.",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "example": "user.employee_id"
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "When `false`, auto-extraction skips this field.",
+                    "example": true
+                  },
+                  "excludedValues": {
+                    "type": "array",
+                    "description": "Values of this field that auto-extraction skips. The match is exact and case-sensitive.\n",
+                    "minItems": 0,
+                    "maxItems": 50,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "example": [
+                      "E000000"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "set_case_configuration_request": {
         "title": "Set case configuration request",
         "description": "External connection details, such as the closure type and default connector for cases.",
@@ -6254,6 +6436,9 @@
           "extractObservables": {
             "type": "boolean",
             "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.\n"
+          },
+          "observableTypes": {
+            "$ref": "#/components/schemas/observable_types_request"
           },
           "owner": {
             "$ref": "#/components/schemas/owner"
@@ -6368,6 +6553,9 @@
           "extractObservables": {
             "type": "boolean",
             "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.\n"
+          },
+          "observableTypes": {
+            "$ref": "#/components/schemas/observable_types_request"
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
@@ -8944,6 +9132,38 @@
               "label": "my-toggle",
               "required": false,
               "type": "toggle"
+            }
+          ]
+        }
+      },
+      "update_case_configuration_observable_types_request": {
+        "summary": "Change the observable types that auto-extraction reads.",
+        "description": "The first entry turns off the `agent.id` field of the built-in agent ID type and skips one static value. The second entry is a custom type with one field and a value pattern.\n",
+        "value": {
+          "version": "WzExOSw0XQ==",
+          "observableTypes": [
+            {
+              "key": "observable-type-agent-id",
+              "paths": [
+                {
+                  "path": "agent.id",
+                  "enabled": false,
+                  "excludedValues": [
+                    "static-integration-id"
+                  ]
+                }
+              ]
+            },
+            {
+              "key": "employee-id",
+              "label": "Employee ID",
+              "valuePattern": "^E\\d{6}$",
+              "paths": [
+                {
+                  "path": "user.employee_id",
+                  "enabled": true
+                }
+              ]
             }
           ]
         }

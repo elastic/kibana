@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { OBSERVABLE_TYPE_EMAIL, OBSERVABLE_TYPE_IPV4 } from '../../common/constants';
+import {
+  OBSERVABLE_TYPE_EMAIL,
+  OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_TYPES_BUILTIN,
+} from '../../common/constants';
 import { createCasesClientMock } from './mocks';
 import {
   validateDuplicatedKeysInRequest,
   validateDuplicatedObservableTypesInRequest,
   validateDuplicatedObservablesInRequest,
   validateObservableTypeKeyExists,
+  validateObservableTypePathsInRequest,
   validateObservableValue,
 } from './validators';
 
@@ -154,6 +159,107 @@ describe('validators', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid duplicated observable types in request: email"`
+      );
+    });
+
+    it('does not throw for an override entry of a built-in type without a label', () => {
+      expect(() =>
+        validateDuplicatedObservableTypesInRequest({
+          requestFields: [{ key: 'observable-type-agent-id' }],
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe('validateObservableTypePathsInRequest', () => {
+    it('does not throw for valid custom types and built-in overrides', () => {
+      expect(() =>
+        validateObservableTypePathsInRequest({
+          requestFields: [
+            { key: 'observable-type-agent-id', paths: [{ path: 'agent.id' }] },
+            { key: 'observable-type-ipv4', paths: [{ path: 'zscaler.client_ip' }] },
+            {
+              key: 'employee-id',
+              label: 'Employee ID',
+              paths: [{ path: 'user.employee_id' }],
+              valuePattern: '^E\\d{6}$',
+            },
+            { key: 'ticket-ref', label: 'Ticket ref' },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('throws for a custom type without a label', () => {
+      expect(() =>
+        validateObservableTypePathsInRequest({ requestFields: [{ key: 'employee-id' }] })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable types in request: custom observable type employee-id needs a label"`
+      );
+    });
+
+    it('throws for two override entries of one built-in type', () => {
+      expect(() =>
+        validateObservableTypePathsInRequest({
+          requestFields: [{ key: 'observable-type-agent-id' }, { key: 'observable-type-agent-id' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable types in request: built-in observable type observable-type-agent-id has more than one entry"`
+      );
+    });
+
+    it('throws for a value pattern on a built-in type', () => {
+      expect(() =>
+        validateObservableTypePathsInRequest({
+          requestFields: [{ key: 'observable-type-ipv4', valuePattern: '.*' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable types in request: built-in observable type observable-type-ipv4 cannot have a value pattern"`
+      );
+    });
+
+    it('throws for a value pattern that does not compile', () => {
+      expect(() =>
+        validateObservableTypePathsInRequest({
+          requestFields: [{ key: 'employee-id', label: 'Employee ID', valuePattern: '(' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable types in request: observable type employee-id has an invalid value pattern"`
+      );
+    });
+
+    it('throws for duplicated paths in one entry', () => {
+      expect(() =>
+        validateObservableTypePathsInRequest({
+          requestFields: [
+            {
+              key: 'observable-type-hostname',
+              paths: [{ path: 'host.name' }, { path: 'host.name' }],
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable types in request: observable type observable-type-hostname has duplicated paths"`
+      );
+    });
+
+    it('counts only custom types against the custom type limit', () => {
+      const overrides = OBSERVABLE_TYPES_BUILTIN.map(({ key }) => ({ key }));
+      const customTypes = Array.from({ length: 10 }, (_, index) => ({
+        key: `custom-${index}`,
+        label: `Custom ${index}`,
+      }));
+
+      expect(() =>
+        validateObservableTypePathsInRequest({ requestFields: [...overrides, ...customTypes] })
+      ).not.toThrow();
+
+      expect(() =>
+        validateObservableTypePathsInRequest({
+          requestFields: [...customTypes, { key: 'custom-10', label: 'Custom 10' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable types in request: the maximum of custom observable types is 10"`
       );
     });
   });
