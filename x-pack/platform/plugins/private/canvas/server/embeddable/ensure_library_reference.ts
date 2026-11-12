@@ -8,10 +8,7 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils/src/constants';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VISUALIZE_SAVED_OBJECT_TYPE,
-} from '@kbn/visualizations-common/constants';
+import { VISUALIZE_EMBEDDABLE_TYPE, VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 
 const BY_REF_LIBRARY_TYPES = ['search', 'visualization', 'lens', 'map'];
 

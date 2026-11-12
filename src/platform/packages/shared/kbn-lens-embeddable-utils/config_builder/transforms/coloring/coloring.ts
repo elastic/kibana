@@ -13,7 +13,7 @@ import {
   DEFAULT_COLOR_STEPS,
   LEGACY_COMPLIMENTARY_PALETTE,
   COMPLEMENTARY_PALETTE,
-} from '@kbn/coloring/src/palettes/constants';
+} from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,

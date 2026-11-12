@@ -13,7 +13,7 @@ import {
   LegendSize,
   ChartPosition,
 } from '@kbn/chart-expressions-common';
-import { prepareLogTable } from '@kbn/visualizations-common/prepare_log_table';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import {
   EmptySizeRatios,
   LegendDisplay,

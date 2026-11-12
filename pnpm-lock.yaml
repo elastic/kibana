@@ -979,6 +979,9 @@ importers:
       '@kbn/coloring':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-coloring
+      '@kbn/coloring-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-coloring-components
       '@kbn/config':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-config
@@ -3019,6 +3022,9 @@ importers:
       '@kbn/palettes':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-palettes
+      '@kbn/palettes-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-palettes-components
       '@kbn/panel-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-panel-loader
@@ -4159,6 +4165,9 @@ importers:
       '@kbn/visualizations-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-visualizations-common
+      '@kbn/visualizations-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-visualizations-components
       '@kbn/visualizations-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/visualizations
@@ -8045,6 +8054,8 @@ importers:
 
   src/platform/packages/shared/kbn-coloring: {}
 
+  src/platform/packages/shared/kbn-coloring-components: {}
+
   src/platform/packages/shared/kbn-config: {}
 
   src/platform/packages/shared/kbn-config-schema: {}
@@ -8291,6 +8302,8 @@ importers:
 
   src/platform/packages/shared/kbn-palettes: {}
 
+  src/platform/packages/shared/kbn-palettes-components: {}
+
   src/platform/packages/shared/kbn-profiler: {}
 
   src/platform/packages/shared/kbn-profiling-utils: {}
@@ -8464,6 +8477,8 @@ importers:
   src/platform/packages/shared/kbn-visualization-utils: {}
 
   src/platform/packages/shared/kbn-visualizations-common: {}
+
+  src/platform/packages/shared/kbn-visualizations-components: {}
 
   src/platform/packages/shared/kbn-workflows: {}
 

@@ -30,7 +30,7 @@ import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elas
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
-import { ChartTooltipFooterMessage } from '@kbn/chart-expressions-common/components/chart_tooltip_footer_message';
+import { ChartTooltipFooterMessage } from '@kbn/visualizations-components';
 import {
   getAccessorByDimension,
   getFormatByAccessor,

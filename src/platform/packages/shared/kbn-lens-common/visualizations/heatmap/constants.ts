@@ -14,7 +14,7 @@ import {
   DEFAULT_MIN_STOP,
   DEFAULT_MAX_STOP,
   DEFAULT_COLOR_STEPS,
-} from '@kbn/coloring/src/palettes/constants';
+} from '@kbn/coloring';
 
 export const LENS_HEATMAP_ID = 'lnsHeatmap';
 
