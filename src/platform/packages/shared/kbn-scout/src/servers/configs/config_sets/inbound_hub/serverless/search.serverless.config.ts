@@ -8,6 +8,10 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
+import {
+  serviceAccountsServerArgs,
+  serviceAccountsUiamServerArgs,
+} from '../../service_accounts/shared';
 import { servers as uiamConfig } from '../../uiam_local/serverless/search.serverless.config';
 import { inboundHubServerArgs } from '../shared';
 
@@ -18,19 +22,13 @@ import { inboundHubServerArgs } from '../shared';
  */
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
-  esTestCluster: {
-    ...uiamConfig.esTestCluster,
-    // The ML native controller fails to boot when its temp pipe is missing, which
-    // stops the cluster before Kibana starts.
-    serverArgs: [...uiamConfig.esTestCluster.serverArgs, 'xpack.ml.enabled=false'],
-  },
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
       ...uiamConfig.kbnTestServer.serverArgs,
       ...inboundHubServerArgs,
-      '--xpack.security.serviceAccounts.enabled=true',
-      '--xpack.task_manager.grant_uiam_api_keys=true',
+      ...serviceAccountsServerArgs,
+      ...serviceAccountsUiamServerArgs,
       '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',
     ],
   },

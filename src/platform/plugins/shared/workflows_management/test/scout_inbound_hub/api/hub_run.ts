@@ -21,8 +21,7 @@ export const INBOUND_HUB_API_KEY_CONNECTOR_ID = 'inbound-hub-api-key';
 export const INBOUND_HUB_SERVICE_ACCOUNT_CONNECTOR_ID = 'inbound-hub-service-account';
 
 const HUB_API_VERSION = '2023-10-31';
-const FIRST_SCHEDULE_TIMEOUT_MS = 20_000;
-const RETRY_SCHEDULE_TIMEOUT_MS = 70_000;
+const SCHEDULE_TIMEOUT_MS = 90_000;
 const EXECUTION_TIMEOUT_MS = 60_000;
 
 /** Saved inbound webhook plus the one-time ingest token from rotate. */
@@ -82,8 +81,8 @@ steps:
 `;
 
 /**
- * POSTs the public hub and waits until the matching workflow reaches a completed execution.
- * A second POST covers the gap before the new workflow document is visible to trigger lookup.
+ * POSTs the public hub once and waits until the matching workflow reaches a completed execution.
+ * Creating the workflow refreshes its index, so a missing execution fails the test.
  */
 export const expectHubTriggersWorkflow = async ({
   apiClient,
@@ -116,24 +115,14 @@ export const expectHubTriggersWorkflow = async ({
     expect(response.body).toStrictEqual({ ok: true });
   };
 
-  const waitForExecution = (timeout: number) =>
-    waitForConditionOrThrow({
-      action: () => workflowsApi.getExecutions(workflowId),
-      condition: ({ results }) => results.length > 0,
-      interval: 2000,
-      timeout,
-      errorMessage: `Hub accepted the event for connector ${connectorId} but no workflow execution was scheduled`,
-    });
-
   await postHub();
-  let scheduled: Awaited<ReturnType<typeof waitForExecution>>;
-  try {
-    scheduled = await waitForExecution(FIRST_SCHEDULE_TIMEOUT_MS);
-  } catch {
-    // The workflow document can miss the first lookup. One more POST, then wait out the run.
-    await postHub();
-    scheduled = await waitForExecution(RETRY_SCHEDULE_TIMEOUT_MS);
-  }
+  const scheduled = await waitForConditionOrThrow({
+    action: () => workflowsApi.getExecutions(workflowId),
+    condition: ({ results }) => results.length > 0,
+    interval: 2000,
+    timeout: SCHEDULE_TIMEOUT_MS,
+    errorMessage: `Hub accepted the event for connector ${connectorId} but no workflow execution was scheduled`,
+  });
 
   const execution = await workflowsApi.waitForTermination({
     workflowExecutionId: scheduled.results[0].id,

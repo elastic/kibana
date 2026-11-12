@@ -17,12 +17,6 @@ import { inboundHubServerArgs } from '../shared';
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
-  esTestCluster: {
-    ...defaultConfig.esTestCluster,
-    // The ML native controller fails to boot when its temp pipe is missing, which
-    // stops the cluster before Kibana starts.
-    serverArgs: [...defaultConfig.esTestCluster.serverArgs, 'xpack.ml.enabled=false'],
-  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...inboundHubServerArgs],
