@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SlackAppBindingsResponse } from '@kbn/significant-events-plugin/common';
 import {
   formatChannelValue,
+  RELAY_APP_BINDINGS_QUERY_KEY,
   useAllRelayAppBindings,
   useRelayAppBindings,
   useBindChannel,
@@ -27,6 +28,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const httpGet = jest.fn();
 const httpPost = jest.fn();
 const addError = jest.fn();
+const addSuccess = jest.fn();
 
 const createSetup = () => {
   const queryClient = new QueryClient({
@@ -222,7 +224,7 @@ describe('useBindChannel', () => {
     mockUseKibana.mockReturnValue({
       services: {
         http: { get: httpGet, post: httpPost },
-        notifications: { toasts: { addError } },
+        notifications: { toasts: { addError, addSuccess } },
       },
     } as any);
   });
@@ -243,6 +245,23 @@ describe('useBindChannel', () => {
 
     expect(httpPost).toHaveBeenCalledWith(
       '/internal/significant_events/apps/slack/bindings/C123/bind'
+    );
+  });
+
+  it('toasts the connected channel by its name', async () => {
+    httpPost.mockResolvedValue({ status: 'bound' });
+    const { queryClient, wrapper } = createSetup();
+    queryClient.setQueryData([...RELAY_APP_BINDINGS_QUERY_KEY, null], {
+      bindings: [{ channel: 'C123', displayName: 'general', status: 'bound_to_self' }],
+    });
+    const { result } = renderHook(() => useBindChannel(), { wrapper });
+
+    await act(async () => {
+      await result.current.bind('C123');
+    });
+
+    expect(addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ title: '#general connected' })
     );
   });
 

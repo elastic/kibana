@@ -83,7 +83,7 @@ import { decisionTreeReinforceStepDefinition } from './step_definitions/decision
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createWikiStore, registerWikiAiIndex } from './wiki/register_wiki';
 import { registerMemoryAiIndex } from './memory/register_memory';
-import { registerWikiTelemetryEvents } from './telemetry';
+import { registerDecisionTreeTelemetryEvents, registerWikiTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
@@ -261,6 +261,7 @@ export class NightshiftInvestigationsPlugin
       this.ctx.config.get().decision_trees.enabled && Boolean(plugins.sandbox?.isAvailable);
     if (this.decisionTreesEnabled) {
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
+      registerDecisionTreeTelemetryEvents(core.analytics);
     }
 
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
@@ -514,6 +515,7 @@ export class NightshiftInvestigationsPlugin
             connectorNames: [],
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
+            analytics: core.analytics,
             logger: decisionTreeLogger,
           })) {
             plugins.agentBuilder.tools.register(tool);
@@ -662,6 +664,7 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart: getGatedSandboxStart,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
+            analytics: core.analytics,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })

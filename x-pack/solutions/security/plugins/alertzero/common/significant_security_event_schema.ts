@@ -53,6 +53,9 @@ const detectionSchema = lazySchema(() =>
       users: z.array(z.string().min(1).max(512)).max(50).optional(),
       host_count: z.number().int().min(0).optional(),
       user_count: z.number().int().min(0).optional(),
+      /** True when `host_count` / `user_count` is a lower bound: the producer capped the names it kept. */
+      hosts_truncated: z.boolean().optional(),
+      users_truncated: z.boolean().optional(),
       total: z.number().int().min(0),
       first_seen: isoDatetimeSchema.optional(),
       last_seen: isoDatetimeSchema.optional(),
