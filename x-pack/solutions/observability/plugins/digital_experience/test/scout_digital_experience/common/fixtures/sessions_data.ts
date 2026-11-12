@@ -10,8 +10,6 @@ import {
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
-  SESSIONS_PIPELINE_NAME,
-  SESSIONS_TRANSFORM_PATTERN,
 } from '../../../../common/sessions';
 import { OTEL_APPS } from './constants';
 
@@ -19,8 +17,7 @@ import { OTEL_APPS } from './constants';
 export const SESSIONS_APP = OTEL_APPS.shop;
 
 /**
- * The mock sessions are from the last day: the transform's retention policy deletes summaries that
- * ended more than 31 days ago, so ones from `TIME_RANGE` would vanish at its next checkpoint.
+ * The mock sessions are from the last day, so they are within the sessions' lookback and this range.
  */
 export const SESSIONS_TIME_RANGE = { rangeFrom: 'now-7d', rangeTo: 'now' };
 
@@ -50,7 +47,7 @@ const at = (startMs: number, offsetMs: number) => new Date(startMs + offsetMs).t
 
 const sessionId = (index: number) => `dx-session-${String(index + 1).padStart(2, '0')}`;
 
-/** A summary as the sessions transform and its pipeline write it. */
+/** A summary as the sessions index stores it. */
 const summaryOf = (sessionsStartMs: number, index: number) => {
   const isDetailed = index === 0;
   const startMs = index * 4 * 60 * SECOND_MS;
@@ -132,8 +129,7 @@ const RAW_EVENT_IDS = rawEventsOfDetailedSession(0).map((_, index) => rawEventId
 
 /**
  * Sets sessions up as the system user, then writes the mock summaries straight to the sessions
- * index. The transform never rewrites them: their raw events have no `telemetry.sdk.language`, which
- * it filters on.
+ * index, and the raw events of the detailed session to theirs.
  */
 export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
   const sessionsStartMs = Date.now() - DAY_MS;
@@ -169,13 +165,6 @@ export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClien
 
 /** Removes the sessions setup and the mock sessions, leaving the rest of the data streams. */
 export const deleteSessionsData = async (esClient: EsClient) => {
-  const { transforms } = await esClient.transform.getTransform({
-    transform_id: SESSIONS_TRANSFORM_PATTERN,
-    allow_no_match: true,
-  });
-  for (const { id } of transforms) {
-    await esClient.transform.deleteTransform({ transform_id: id, force: true });
-  }
   // Test clusters refuse wildcard deletes (`action.destructive_requires_name`), so by name.
   const indices = Object.keys(
     await esClient.indices.get({
@@ -191,7 +180,6 @@ export const deleteSessionsData = async (esClient: EsClient) => {
     { name: SESSIONS_INDEX_TEMPLATE_NAME },
     { ignore: [404] }
   );
-  await esClient.ingest.deletePipeline({ id: SESSIONS_PIPELINE_NAME }, { ignore: [404] });
   await esClient.deleteByQuery({
     index: RAW_EVENTS_INDEX,
     query: { ids: { values: RAW_EVENT_IDS } },

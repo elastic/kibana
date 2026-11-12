@@ -52,7 +52,7 @@ describe('sessionsSearch', () => {
     });
   });
 
-  it('adds up the counts the sessions transform keeps, per application', () => {
+  it('adds up the counts the session summaries keep, per application', () => {
     const { applications } = inEnvironment().aggs;
 
     expect(applications.terms).toEqual({
