@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LayerWizard, RenderWizardArguments } from '../../layers';
 import { CreateSourceEditor } from './create_source_editor';
-// @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
 import { getKibanaTileMap } from '../../../util';
