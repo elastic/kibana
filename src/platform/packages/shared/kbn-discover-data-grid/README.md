@@ -77,9 +77,10 @@ Row virtualization is enabled by default. Its estimated height and overscan can 
 
 Each column must provide a `getAccessibilityValue` callback. It is the semantic and clipboard value
 for a cell and is deliberately separate from `renderCell`, so visual React content never has to be
-inspected or converted back into text. Phase 1 `renderCell` output is read-only visual content.
-Package-owned controls use the internal interaction registration seam rather than relying on DOM
-discovery.
+inspected or converted back into text. Phase 1 `renderCell` output is read-only visual content and
+must not include tabbable descendants such as links, buttons, or inputs. Interactive controls and
+complex cell content will be introduced through public capabilities that preserve the grid's
+composite tab stop without inspecting or rewriting consumer DOM.
 
 ## Keyboard and focus behavior
 
@@ -90,9 +91,6 @@ are not part of the keyboard navigation plane.
 - Arrow keys move one cell without wrapping.
 - Home and End move to the first and last cell in the current row.
 - Ctrl/Cmd+Home and Ctrl/Cmd+End move to the first and last body cell.
-- Enter moves into a package-owned registered interaction target when one is present.
-- Tab remains within active cell interaction content until that mode is dismissed.
-- Escape returns from cell interaction mode to the owning cell.
 - Cmd+C on macOS and Ctrl+C elsewhere copy the column-provided accessibility value unless the user
   has an explicit text selection.
 

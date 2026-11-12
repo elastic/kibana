@@ -14,7 +14,6 @@ import { useTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import type { DataGridApi, DataGridCommandResult } from './data_grid_api';
-import { useDataGridCellInteraction } from './data_grid_cell_interaction';
 import { DataGrid } from './data_grid';
 import type { DataGridColumn } from './data_grid_column';
 import { createDataGridColumnHelper } from './data_grid_column';
@@ -715,45 +714,6 @@ describe('DataGrid', () => {
       expect(screen.getByRole('status').textContent).toContain('Cell value could not be copied.')
     );
     expect(document.activeElement).toBe(cell);
-  });
-
-  it('separates grid navigation mode from registered cell interaction mode', async () => {
-    const InteractionButton = () => {
-      const interactionProps = useDataGridCellInteraction<HTMLButtonElement>();
-      return <button {...interactionProps}>Interact</button>;
-    };
-    const interactionColumns = [
-      columnHelper.accessor({
-        id: 'interaction',
-        header: 'Interaction',
-        getValue: (row) => row.name,
-        getAccessibilityValue: ({ value }) => value,
-        renderCell: () => <InteractionButton />,
-      }),
-    ];
-    const { container } = renderGrid({ gridColumns: interactionColumns });
-    const cell = screen.getByRole('gridcell', { name: 'Name 0' });
-    const button = cell.querySelector('button');
-    if (!button) {
-      throw new Error('Expected an interaction button in the active cell.');
-    }
-    expect(cell.getAttribute('tabindex')).toBe('0');
-    expect(button.getAttribute('tabindex')).toBe('-1');
-
-    focusElement(cell);
-    fireEvent.keyDown(cell, { key: 'Enter' });
-    await waitFor(() => expect(document.activeElement).toBe(button));
-    expect(cell.getAttribute('tabindex')).toBe('-1');
-    expect(button.getAttribute('tabindex')).toBe('0');
-    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
-
-    expect(button.closest('[data-eui="EuiFocusTrap"]')).not.toBeNull();
-    fireEvent.keyDown(button, { key: 'ArrowDown' });
-    expect(document.activeElement).toBe(button);
-    fireEvent.keyDown(button, { key: 'Escape' });
-    await waitFor(() => expect(document.activeElement).toBe(cell));
-    expect(cell.getAttribute('tabindex')).toBe('0');
-    expect(button.getAttribute('tabindex')).toBe('-1');
   });
 
   it('renders only the virtual window and measures every mounted row', () => {

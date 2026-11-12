@@ -286,15 +286,10 @@ export const DataGrid = <TRow extends object>({
                       rowIds={rowIds}
                       columnIds={columnIds}
                       activeCell={focus.activeCell}
-                      interactionCell={focus.interactionCell}
                       cellStyles={styles.cell}
                       focusCell={focus.focusCell}
                       registerCell={focus.registerCell}
-                      registerInteractionTarget={focus.registerInteractionTarget}
                       enterNavigationMode={focus.enterNavigationMode}
-                      enterInteractionMode={focus.enterInteractionMode}
-                      deactivateInteractionMode={focus.deactivateInteractionMode}
-                      leaveInteractionMode={focus.leaveInteractionMode}
                       announceCopySuccess={announceCopySuccess}
                       announceCopyFailure={announceCopyFailure}
                     />

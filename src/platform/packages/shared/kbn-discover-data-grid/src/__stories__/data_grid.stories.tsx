@@ -11,7 +11,6 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { createDataGridColumnHelper, DataGrid, type DataGridProps } from '../..';
-import { useDataGridCellInteraction } from '../data_grid_cell_interaction';
 
 interface ExampleRow {
   id: string;
@@ -44,34 +43,6 @@ const rows = Array.from({ length: 1_000 }, (_, index) => ({
       ? 'A longer value that wraps onto multiple lines and exercises dynamic row measurement.'
       : `value_${index}`,
 }));
-
-const InspectButton = ({ field }: { field: string }) => {
-  const interactionProps = useDataGridCellInteraction<HTMLButtonElement>();
-  const [wasActivated, setWasActivated] = React.useState(false);
-
-  return (
-    <button
-      {...interactionProps}
-      type="button"
-      onClick={() => setWasActivated(true)}
-      aria-label={`Inspect ${field}`}
-    >
-      {wasActivated ? 'Inspected' : 'Inspect'}
-    </button>
-  );
-};
-
-const interactionColumns = [
-  ...columns,
-  columnHelper.accessor({
-    id: 'inspect',
-    header: 'Inspect',
-    ariaLabel: 'Inspect action',
-    getValue: (row) => row.field,
-    getAccessibilityValue: ({ value }) => `Inspect ${value}`,
-    renderCell: ({ value }) => <InspectButton field={value} />,
-  }),
-];
 
 type ExampleDataGridProps = DataGridProps<ExampleRow>;
 
@@ -160,32 +131,6 @@ const meta = {
 export default meta;
 
 export const Default: StoryObj<typeof meta> = {};
-
-export const CellInteractionMode: StoryObj<typeof meta> = {
-  args: {
-    ariaLabel: 'Fields with inspect actions',
-    columns: interactionColumns,
-    rows: rows.slice(0, 20),
-    height: 360,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Navigate to an Inspect action cell with the arrow keys. Press Enter to move focus into the button, then press Escape to return focus to the owning grid cell.',
-      },
-    },
-  },
-  render: (args) => (
-    <>
-      <p>
-        Navigate to an Inspect action cell with the arrow keys. Press Enter to interact with the
-        button, then press Escape to resume grid navigation.
-      </p>
-      <ExampleDataGrid {...args} />
-    </>
-  ),
-};
 
 export const ConfigurableSize: StoryObj<typeof ConfigurableDataGrid> = {
   args: {
