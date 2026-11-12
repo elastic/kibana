@@ -960,6 +960,7 @@ src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 src/platform/plugins/shared/workflows_management @elastic/workflows-eng
 src/platform/test
 src/platform/test_plugins/data_search @elastic/kibana-discover
+src/platform/test_plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 src/platform/test_plugins/otel_metrics @elastic/obs-signals-metrics-team
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
@@ -986,7 +987,6 @@ src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 src/platform/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
@@ -1352,6 +1352,7 @@ x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performan
 x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_fixture @elastic/response-ops
 x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes @elastic/response-ops
 x-pack/platform/test_plugins/response_ops/task_manager/service_accounts @elastic/response-ops
+x-pack/platform/test_plugins/search_inference_endpoints_fixtures @elastic/search-ml-ux
 x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases @elastic/security-investigations
 x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability @elastic/security-investigations
 x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution @elastic/security-investigations
@@ -1365,7 +1366,6 @@ x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
-x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture @elastic/search-ml-ux
 x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
@@ -1713,7 +1713,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/fixtures/es_archives/lens @elastic/kibana-dashboards
 /x-pack/platform/test/examples/embedded_lens @elastic/kibana-dashboards
 /src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-dashboards
-/src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
+/src/platform/test_plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 /x-pack/platform/test/functional/fixtures/kbn_archives/visualize @elastic/kibana-dashboards
 /x-pack/platform/test/functional/fixtures/kbn_archives/lens @elastic/kibana-dashboards
 /src/platform/test/functional/page_objects/legacy/data_table_vis.ts @elastic/kibana-dashboards
