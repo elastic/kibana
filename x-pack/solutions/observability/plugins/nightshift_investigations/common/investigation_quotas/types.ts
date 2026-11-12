@@ -25,11 +25,12 @@ export type InvestigationQuotaLimits = Record<InvestigationQuotaGroup, number | 
 
 export type InvestigationQuotaCounts = Record<InvestigationQuotaGroup, number>;
 
-export const DEFAULT_INVESTIGATION_QUOTA_LIMITS: Readonly<InvestigationQuotaLimits> = {
-  automatic_investigation: 5,
-  manual_investigation: 5,
-  total_investigation: 10,
-};
+export const DEFAULT_INVESTIGATION_QUOTA_LIMITS: Readonly<Record<InvestigationQuotaGroup, number>> =
+  {
+    automatic_investigation: 5,
+    manual_investigation: 5,
+    total_investigation: 10,
+  };
 
 export interface InvestigationQuotaSettings {
   /**
