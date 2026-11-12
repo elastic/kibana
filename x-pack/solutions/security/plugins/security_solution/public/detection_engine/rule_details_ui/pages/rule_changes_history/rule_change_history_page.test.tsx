@@ -25,8 +25,8 @@ jest.mock('../../components/changes_history', () => ({
   RuleChangesHistory: () => <div data-test-subj="mockRuleChangesHistory" />,
 }));
 
-jest.mock('./rule_change_history_page_header', () => ({
-  RuleChangesHistoryPageHeader: () => <div data-test-subj="mockRuleChangesHistoryPageHeader" />,
+jest.mock('./rule_change_history_app_header', () => ({
+  RuleChangeHistoryAppHeader: () => <div data-test-subj="mockRuleChangeHistoryAppHeader" />,
 }));
 
 const mockedTelemetry = createTelemetryServiceMock();

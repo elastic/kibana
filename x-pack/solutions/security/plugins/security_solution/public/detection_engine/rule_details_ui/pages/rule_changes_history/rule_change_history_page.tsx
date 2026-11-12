@@ -15,7 +15,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { RuleChangesHistoryEventTypes } from '../../../../common/lib/telemetry/events/rule_changes_history/types';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import { RuleChangesHistory } from '../../components/changes_history';
-import { RuleChangesHistoryPageHeader } from './rule_change_history_page_header';
+import { RuleChangeHistoryAppHeader } from './rule_change_history_app_header';
 
 export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JSX.Element {
   const { ruleId } = useParams<{ ruleId: string }>();
@@ -39,7 +39,7 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
       >
         <RuleChangesHistory
           ruleId={ruleId}
-          header={<RuleChangesHistoryPageHeader ruleId={ruleId} rule={rule} />}
+          header={<RuleChangeHistoryAppHeader ruleId={ruleId} rule={rule} />}
         />
       </SecuritySolutionPageWrapper>
       {/* We can't use SecurityPageName.rulesChangesHistory here for
