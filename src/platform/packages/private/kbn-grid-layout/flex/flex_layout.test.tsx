@@ -582,7 +582,10 @@ describe('FlexLayout pointer resize with wrapping', () => {
 
         const panels = Array.from(
           panel.parentElement?.querySelectorAll<HTMLElement>(':scope > .kbnFlexPanel') ?? []
-        ).sort((a, b) => parseInt(getComputedStyle(a).order, 10) - parseInt(getComputedStyle(b).order, 10));
+        ).sort(
+          (a, b) =>
+            parseInt(getComputedStyle(a).order, 10) - parseInt(getComputedStyle(b).order, 10)
+        );
         let x = 0;
         let y = 0;
         for (const current of panels) {
