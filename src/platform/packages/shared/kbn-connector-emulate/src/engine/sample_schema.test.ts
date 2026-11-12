@@ -72,6 +72,46 @@ describe('sampleSchema', () => {
     expect(sampleSchema(schema, {}, { boundary: true })).toEqual(expected);
   });
 
+  it.each([
+    [{ type: 'string' }, ['string', 'string1', 'string2']],
+    [{ type: 'string', maxLength: 6 }, ['string', 'strin1', 'strin2']],
+    [{ type: 'string', enum: ['open', 'closed', 'merged'] }, ['open', 'closed', 'merged']],
+    [{ type: 'integer', maximum: 1 }, [0, 1, -2]],
+    [{ type: 'boolean' }, [true, false]],
+    [
+      { type: 'object', required: ['id'], properties: { id: { type: 'integer' } } },
+      [{ id: 0 }, { id: 1 }, { id: 2 }],
+    ],
+  ])('samples distinct items of %j for uniqueItems arrays', (items, expected) => {
+    const schema = { type: 'array', uniqueItems: true, minItems: expected.length, items };
+
+    expect(sampleSchema(schema, {})).toEqual(expected);
+  });
+
+  it.each([false, true])(
+    'samples object items as independent copies (uniqueItems: %s)',
+    (uniqueItems) => {
+      const schema = {
+        type: 'array',
+        minItems: 2,
+        uniqueItems,
+        items: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            tags: { type: 'array', items: { type: 'string' } },
+          },
+        },
+      };
+
+      const [first, second] = sampleSchema(schema, {}) as Array<{ tags: string[] }>;
+      first.tags.push('changed');
+
+      expect(second).not.toBe(first);
+      expect(second.tags).not.toContain('changed');
+    }
+  );
+
   it('skips the null that nullable enums end with in boundary mode', () => {
     expect(
       sampleSchema({ type: ['string', 'null'], enum: ['a', 'b', null] }, {}, { boundary: true })

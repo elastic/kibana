@@ -117,6 +117,38 @@ describe('createOperationMatcher', () => {
     });
   });
 
+  it('answers 405 for methods a literal path lacks instead of falling through to a template', () => {
+    const matcher = createMatcher([{ url: 'https://api.example.com' }]);
+
+    expect(match(matcher, 'DELETE', 'https://api.example.com/items/new')).toEqual({
+      status: 405,
+      message: 'The path only allows GET',
+    });
+  });
+
+  it('treats templates that differ only in parameter names as one path across specs', () => {
+    const load = (paths: Record<string, unknown>) =>
+      loadOperations({
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1' },
+        servers: [{ url: 'https://api.example.com' }],
+        paths,
+      });
+    const matcher = createOperationMatcher([
+      ...load({ '/items/{id}': { get: { operationId: 'get', responses: ok } } }),
+      ...load({ '/items/{itemId}': { delete: { operationId: 'delete', responses: ok } } }),
+    ]);
+
+    expect(match(matcher, 'DELETE', 'https://api.example.com/items/7')).toEqual({
+      operation: 'delete',
+      pathParameters: { itemId: '7' },
+    });
+    expect(match(matcher, 'PUT', 'https://api.example.com/items/7')).toEqual({
+      status: 405,
+      message: 'The path only allows GET, DELETE',
+    });
+  });
+
   it('prefers the template with more literal text among as many parameters', () => {
     const matcher = createMatcher([{ url: 'https://api.example.com' }]);
 

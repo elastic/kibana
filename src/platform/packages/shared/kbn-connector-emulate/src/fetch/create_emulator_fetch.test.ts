@@ -255,6 +255,102 @@ describe('createEmulatorFetch', () => {
     expect(valid.status).toBe(201);
   });
 
+  describe('with JSON bodies that are strings', () => {
+    const notes = {
+      ...spec,
+      paths: {
+        '/notes': {
+          get: {
+            responses: {
+              '200': {
+                description: 'ok',
+                content: { 'application/json': { schema: { type: ['string', 'null'] } } },
+              },
+            },
+          },
+          post: {
+            requestBody: { content: { 'application/json': { schema: { type: 'string' } } } },
+            responses: { '204': { description: 'created' } },
+          },
+        },
+      },
+    };
+
+    it('reports request bodies that are not JSON, though the raw text fits the schema', async () => {
+      const { fetch, calls } = createEmulatorFetch({ specs: [notes] });
+      const post = (body: string) =>
+        fetch(`${BASE_URL}/notes`, { method: 'POST', headers: json, body });
+
+      const malformed = await post('hello');
+      const valid = await post('"hello"');
+
+      expect(malformed.status).toBe(422);
+      expect(calls[0].requestViolations).toEqual([
+        expect.objectContaining({ path: ['body'], code: 'syntax' }),
+      ]);
+      expect(valid.status).toBe(204);
+    });
+
+    it.each([
+      ['hello', '"hello"'],
+      [null, 'null'],
+    ])('serializes the JSON response body %j', async (body, text) => {
+      const { fetch } = createEmulatorFetch({
+        specs: [notes],
+        respond: () => ({ statusCode: 200, headers: json, body }),
+      });
+
+      const response = await fetch(`${BASE_URL}/notes`);
+
+      expect(await response.text()).toBe(text);
+    });
+
+    it('keeps NDJSON request bodies as text instead of reporting a JSON syntax error', async () => {
+      const { fetch, calls } = createEmulatorFetch({
+        specs: [
+          {
+            ...notes,
+            paths: {
+              '/bulk': {
+                post: {
+                  requestBody: {
+                    content: { 'application/x-ndjson': { schema: { type: 'string' } } },
+                  },
+                  responses: { '204': { description: 'indexed' } },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      const response = await fetch(`${BASE_URL}/bulk`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-ndjson' },
+        body: '{"a":1}\n{"b":2}\n',
+      });
+
+      expect(response.status).toBe(204);
+      expect(calls[0].requestViolations).toEqual([]);
+    });
+
+    it('sends a JSON text sequence response body as it is', async () => {
+      const sequence = '\u001e{"a":1}\n\u001e{"b":2}\n';
+      const { fetch } = createEmulatorFetch({
+        specs: [notes],
+        respond: () => ({
+          statusCode: 200,
+          headers: { 'content-type': 'application/json-seq' },
+          body: sequence,
+        }),
+      });
+
+      const response = await fetch(`${BASE_URL}/notes`);
+
+      expect(await response.text()).toBe(sequence);
+    });
+  });
+
   describe('with a responder in front of the default chain', () => {
     const CREATED = Symbol('created items');
     // Remembers created items for the run and lists them back; defers the rest to next().

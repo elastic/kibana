@@ -8,7 +8,7 @@
  */
 
 import { fromXml, isBareXmlValue, isXmlMediaType } from '../xml/xml_codec';
-import { coerceValue } from './coerce_value';
+import { coerceValue, wrapFormArrays } from './coerce_value';
 import type { Direction } from './schema_violations';
 import { validateValue } from './schema_violations';
 import type { ContractOperation, MediaTypeContent, Violation } from './types';
@@ -19,6 +19,13 @@ const SUBJECTS = { request: 'Request', response: 'Response' } as const;
 
 const getMediaType = (contentType = ''): string => contentType.split(';')[0].trim().toLowerCase();
 
+/**
+ * Whether a content type is one JSON document: `application/json`, a `+json` type, or
+ * `application/x-amz-json-1.0` and `-1.1`, which AWS's JSON RPC protocols send.
+ */
+export const isJsonMediaType = (contentType?: string): boolean =>
+  /[/+]json$|^application\/x-amz-json-1\.[01]$/.test(getMediaType(contentType));
+
 // Specs key content by media type, by range such as `text/*`, or by `*/*`.
 const findContent = (contents: readonly MediaTypeContent[], mediaType: string) => {
   const [type] = mediaType.split('/');
@@ -27,13 +34,9 @@ const findContent = (contents: readonly MediaTypeContent[], mediaType: string) =
     .find(Boolean);
 };
 
-// Multipart, binary and XML bodies arrive as text that their schemas don't describe. AWS's JSON
-// RPC protocols send JSON as `application/x-amz-json-1.0` and `-1.1`.
+// Multipart, binary and XML bodies arrive as text that their schemas don't describe.
 const canValidate = (mediaType: string): boolean =>
-  /[/+]json$/.test(mediaType) ||
-  /^application\/x-amz-json-1\.[01]$/.test(mediaType) ||
-  mediaType === FORM_MEDIA_TYPE ||
-  mediaType.startsWith('text/');
+  isJsonMediaType(mediaType) || mediaType === FORM_MEDIA_TYPE || mediaType.startsWith('text/');
 
 const toFormFields = (body: string): Record<string, string | string[]> => {
   const fields: Record<string, string | string[]> = {};
@@ -84,16 +87,15 @@ export const validateContent = (
   if (!canValidate(mediaType) && !isXmlMediaType(mediaType)) {
     return [];
   }
+  const { document } = operation.spec;
+  const schema = content.schema?.schema;
   // XML documents are read as the value their schema describes. Fixtures may give a scalar
   // response directly, but a request is on the wire and has to be a document.
   const xml =
     isXmlMediaType(mediaType) &&
     typeof body === 'string' &&
-    !(
-      direction === 'response' &&
-      isBareXmlValue(body, content.schema?.schema, operation.spec.document)
-    )
-      ? fromXml(body, content.schema?.schema, operation.spec.document)
+    !(direction === 'response' && isBareXmlValue(body, schema, document))
+      ? fromXml(body, schema, document)
       : undefined;
   if (xml && 'error' in xml) {
     return [{ path: ['body'], code: 'xml', message: `${subject} body is not XML: ${xml.error}` }];
@@ -101,7 +103,7 @@ export const validateContent = (
   const value = xml
     ? xml.value
     : mediaType === FORM_MEDIA_TYPE && typeof body === 'string'
-    ? coerceValue(toFormFields(body), content.schema?.schema, operation.spec.document)
+    ? coerceValue(wrapFormArrays(toFormFields(body), schema, document), schema, document)
     : body;
   return validateValue(operation, content.schema, value, {
     path: ['body'],

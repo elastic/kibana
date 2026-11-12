@@ -129,4 +129,93 @@ describe('validateRequest', () => {
       'Request body at /count: Instance type "string" is invalid. Expected "integer".',
     ]);
   });
+
+  describe('with object, content and form array parameters', () => {
+    const [filtered] = loadContractOperations({
+      openapi: '3.0.3',
+      info: { title: 'Test', version: '1' },
+      paths: {
+        '/search': {
+          post: {
+            parameters: [
+              {
+                name: 'filter',
+                in: 'query',
+                schema: {
+                  type: 'object',
+                  properties: { min: { type: 'integer' }, name: { type: 'string' } },
+                },
+              },
+              {
+                name: 'where',
+                in: 'query',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      required: ['state'],
+                      properties: { state: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            ],
+            requestBody: {
+              content: {
+                'application/x-www-form-urlencoded': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      tags: { type: 'array', items: { type: 'integer' } },
+                      scope: {
+                        oneOf: [
+                          { type: 'string', enum: ['all'] },
+                          { type: 'array', items: { type: 'integer' }, minItems: 2 },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: { '200': { description: 'ok' } },
+          },
+        },
+      },
+    });
+    const check = (query: RequestInput['query'], body?: string) =>
+      validateRequest(filtered, {
+        query,
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        pathParameters: {},
+        body,
+      }).map(({ message }) => message);
+
+    it('reads exploded form-style objects from their property keys', () => {
+      expect(check({ min: '1', name: 'x' })).toEqual([]);
+      expect(check({ min: 'one' })).toEqual([
+        'Request query parameter filter at /min: Instance type "string" is invalid. Expected "integer".',
+      ]);
+    });
+
+    it('validates parameters described by JSON content', () => {
+      expect(check({ where: '{"state":"open"}' })).toEqual([]);
+      expect(check({ where: '{}' })).toEqual([
+        'Request query parameter where: Instance does not have required property "state".',
+      ]);
+      expect(check({ where: '{state' })).toEqual([
+        expect.stringMatching(/^Request query parameter where is not JSON/),
+      ]);
+    });
+
+    it('reads a form field sent once as a one-item array when its property is an array', () => {
+      expect(check({}, 'tags=1')).toEqual([]);
+      expect(check({}, 'tags=1&tags=2')).toEqual([]);
+    });
+
+    it('keeps a form field sent once as a scalar when its property also allows one', () => {
+      expect(check({}, 'scope=all')).toEqual([]);
+      expect(check({}, 'scope=1&scope=2')).toEqual([]);
+    });
+  });
 });
