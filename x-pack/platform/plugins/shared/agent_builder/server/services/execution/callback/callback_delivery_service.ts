@@ -35,11 +35,8 @@ export interface ConversationResolution {
 const CALLBACK_RETRIES = 2;
 const CALLBACK_RETRY_MIN_DELAY_MS = 200;
 const CALLBACK_RETRY_BACKOFF_FACTOR = 2.5;
-/** The longest a receiver's `Retry-After` can hold back the next attempt. */
 const MAX_CALLBACK_RETRY_AFTER_MS = 60_000;
-
-const getBackoffDelay = (retryCount: number): number =>
-  CALLBACK_RETRY_MIN_DELAY_MS * CALLBACK_RETRY_BACKOFF_FACTOR ** (retryCount - 1);
+const RETRY_AFTER_HEADER = 'retry-after';
 
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
@@ -186,13 +183,10 @@ export class CallbackDeliveryService {
     );
   }
 
-  /**
-   * The wait before the next attempt: the receiver's `Retry-After`, capped, else the backoff.
-   * Throws the error back when it is not retryable.
-   */
+  /** Throws the error back when it is not retryable. */
   private getRetryDelay(error: Error, retryCount: number): number {
     if (!isCallbackDeliveryError(error)) {
-      return getBackoffDelay(retryCount);
+      return this.getBackoffDelay(retryCount);
     }
 
     if (!error.retryable) {
@@ -200,7 +194,7 @@ export class CallbackDeliveryService {
     }
 
     if (error.retryAfterMs === undefined) {
-      return getBackoffDelay(retryCount);
+      return this.getBackoffDelay(retryCount);
     }
 
     const delay = Math.min(error.retryAfterMs, MAX_CALLBACK_RETRY_AFTER_MS);
@@ -210,6 +204,10 @@ export class CallbackDeliveryService {
     );
 
     return delay;
+  }
+
+  private getBackoffDelay(retryCount: number): number {
+    return CALLBACK_RETRY_MIN_DELAY_MS * CALLBACK_RETRY_BACKOFF_FACTOR ** (retryCount - 1);
   }
 
   /** The first transport that handles the URL, else one that delivers with fetch. */
@@ -235,7 +233,7 @@ export class CallbackDeliveryService {
 
         throwIfNotDelivered({
           status: response.status,
-          retryAfterMs: parseRetryAfterMs(response.headers.get('retry-after')),
+          retryAfterMs: parseRetryAfterMs(response.headers.get(RETRY_AFTER_HEADER)),
         });
       },
     };
@@ -256,7 +254,7 @@ export class CallbackDeliveryService {
 
         throwIfNotDelivered({
           status,
-          retryAfterMs: parseRetryAfterMs(headers.get('retry-after')),
+          retryAfterMs: parseRetryAfterMs(headers.get(RETRY_AFTER_HEADER)),
         });
       },
     };

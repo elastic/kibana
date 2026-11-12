@@ -14,8 +14,7 @@ export interface CallbackTestServerRequest {
   headers: http.IncomingHttpHeaders;
   rawBody: string;
   body: unknown;
-  /** When the request arrived, in epoch milliseconds. */
-  receivedAt: number;
+  receivedAtMs: number;
 }
 
 export interface CallbackTestServerResponse {
@@ -113,14 +112,14 @@ export class CallbackTestServer {
 
   private async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     const rawBody = await this.readBody(req);
-    const receivedAt = Date.now();
+    const receivedAtMs = Date.now();
     const request: CallbackTestServerRequest = {
       method: req.method,
       url: req.url,
       headers: req.headers,
       rawBody,
       body: rawBody ? JSON.parse(rawBody) : undefined,
-      receivedAt,
+      receivedAtMs,
     };
 
     const waiter = this.waiters.shift();

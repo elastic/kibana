@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-/**
- * A callback transport's failure to deliver. Only a retryable one is sent again, after
- * `retryAfterMs` when the receiver asked for a delay.
- */
+/** A callback transport's failure to deliver. Only a retryable one is sent again. */
 export class CallbackDeliveryError extends Error {
   readonly retryable: boolean;
   readonly retryAfterMs?: number;
@@ -27,10 +24,7 @@ export class CallbackDeliveryError extends Error {
 export const isCallbackDeliveryError = (error: unknown): error is CallbackDeliveryError =>
   error instanceof CallbackDeliveryError;
 
-/**
- * The delay in milliseconds a `Retry-After` header asks for, as delta-seconds or an HTTP-date
- * (RFC 9110); `undefined` when the value is missing or unparseable.
- */
+/** The delay in milliseconds a `Retry-After` header asks for, in delta-seconds or an HTTP-date. */
 export const parseRetryAfterMs = (
   value: string | null | undefined,
   now: number = Date.now()
@@ -52,10 +46,7 @@ export const parseRetryAfterMs = (
   return Number.isNaN(date) ? undefined : Math.max(0, date - now);
 };
 
-/**
- * Throws for a non-2xx response status; a 5xx or 429 is retryable, any other is not. A retryable
- * error carries the delay the receiver asked for.
- */
+/** Throws for a non-2xx response status; a 5xx or 429 is retryable, any other is not. */
 export const throwIfNotDelivered = ({
   status,
   retryAfterMs,

@@ -293,7 +293,7 @@ apiTest.describe(
 
         expect(retriedPayload.idempotency_key).toBe(accepted.execution_id);
         expect(throttledPayload.idempotency_key).toBe(accepted.execution_id);
-        expect(retried.receivedAt - throttled.receivedAt).toBeGreaterThanOrEqual(1000);
+        expect(retried.receivedAtMs - throttled.receivedAtMs).toBeGreaterThanOrEqual(1000);
       }
     );
 
