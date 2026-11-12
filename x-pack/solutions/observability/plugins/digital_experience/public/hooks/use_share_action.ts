@@ -12,11 +12,10 @@ import type { AppHeaderShareAction } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import {
   DIGITAL_EXPERIENCE_LOCATOR_ID,
-  DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS,
+  pickLocatorQuery,
   type DigitalExperienceLocatorParams,
-  type DigitalExperienceLocatorTab,
 } from '../../common/locator';
-import type { ApplicationSource } from '../../common/types/applications';
+import type { ApplicationSource, ApplicationTabId } from '../../common/types/applications';
 import { canCreateShortUrl } from '../capabilities';
 import { useKibanaServices } from './use_kibana_services';
 
@@ -37,18 +36,14 @@ export const getShareParams = ({
 }: {
   serviceName: string;
   source: ApplicationSource;
-  tab: DigitalExperienceLocatorTab;
+  tab: ApplicationTabId;
   search: string;
-}): DigitalExperienceLocatorParams => {
-  const query = qs.parse(search);
-  const state = Object.fromEntries(
-    DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS.flatMap((key) => {
-      const value = query[key];
-      return typeof value === 'string' && value !== '' ? [[key, value]] : [];
-    })
-  );
-  return { ...state, serviceName, tab, source };
-};
+}): DigitalExperienceLocatorParams => ({
+  ...pickLocatorQuery(qs.parse(search)),
+  serviceName,
+  tab,
+  source,
+});
 
 /**
  * The Share action of an application's header. It opens Kibana's Share modal on the page the URL
@@ -62,7 +57,7 @@ export const useShareAction = ({
 }: {
   serviceName: string;
   source: ApplicationSource;
-  tab: DigitalExperienceLocatorTab;
+  tab: ApplicationTabId;
 }): AppHeaderShareAction | undefined => {
   const { share, application } = useKibanaServices();
   const { search } = useLocation();

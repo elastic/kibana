@@ -13,7 +13,11 @@ import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
-import type { ApplicationSource } from '../../../common/types/applications';
+import {
+  APPLICATION_TAB_IDS,
+  type ApplicationSource,
+  type ApplicationTabId,
+} from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useApplicationsHref } from '../../hooks/use_applications_href';
@@ -26,11 +30,6 @@ import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
 import { OtelOverview } from './otel_overview/otel_overview';
-
-/** Tabs of the Application view, in display order. */
-const APPLICATION_TAB_IDS = ['overview', 'errors', 'network', 'sessions'] as const;
-
-export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
 
 const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
