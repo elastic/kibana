@@ -50,6 +50,7 @@ export const MetricCell = ({
           size="l"
           name={label}
           iconType={icon}
+          iconSize="m"
           color={background}
           iconColor={iconColor}
         />

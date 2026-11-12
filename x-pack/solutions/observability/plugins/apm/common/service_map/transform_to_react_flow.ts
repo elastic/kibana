@@ -45,6 +45,7 @@ import {
   markBidirectionalConnections,
 } from './get_service_map_nodes';
 import { DEFAULT_EDGE_STYLE } from './constants';
+import { markIdleServices } from './mark_idle_services';
 
 function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
   return {
@@ -159,7 +160,7 @@ export function transformToReactFlow(
   const grouped = groupResourceNodes(reactFlowNodes, reactFlowEdges);
 
   return {
-    nodes: grouped.nodes,
+    nodes: markIdleServices(grouped.nodes),
     edges: grouped.edges,
     nodesCount: grouped.nodesCount,
     tracesCount,

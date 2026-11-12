@@ -1,6 +1,16 @@
 [
   {
     "attributes": {
+      "cycle_hooks.phase": "start",
+      "elastic.inference.span.kind": "CHAIN",
+      "gen_ai.conversation.id": "[CONVERSATION_ID]",
+      "hook.cycle": 0
+    },
+    "kind": "Internal",
+    "name": "cycle_hooks"
+  },
+  {
+    "attributes": {
       "elastic.cache_control.session_id": "[CONVERSATION_ID]",
       "elastic.cache_control.ttl": "5m",
       "elastic.cache_control.type": "ephemeral",
@@ -76,7 +86,10 @@
       "elastic.inference.span.kind": "CHAIN",
       "gen_ai.conversation.id": "[CONVERSATION_ID]",
       "hook.call": "getHandler",
-      "hook.id": "relevant-skills"
+      "hook.id": "relevant-skills",
+      "hook.outcome": "ok",
+      "hook.timeout_ms": 11000,
+      "hook.when": "first"
     },
     "kind": "Internal",
     "name": "cycle_hook relevant-skills"

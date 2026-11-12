@@ -67,6 +67,10 @@ const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
 };
 
+const hasTemplateValues = (
+  values: ManagedWorkflowTemplateValues | null | undefined
+): values is ManagedWorkflowTemplateValues => values != null && Object.keys(values).length > 0;
+
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
@@ -76,11 +80,13 @@ type ManagedInstallPlan =
       action: 'create';
       yaml: string;
       managedTemplateValues: ManagedWorkflowTemplateValues | null;
+      definitionHash: string;
     }
   | {
       action: 'update';
       yaml: string;
       managedTemplateValues: ManagedWorkflowTemplateValues | null;
+      definitionHash: string;
       stored: VersionedWorkflowDocument;
     };
 
@@ -90,7 +96,6 @@ interface ManagedInstallTarget {
   definition: ManagedWorkflowDefinition;
   workflowDocumentId: string;
   spaceId: string;
-  definitionHash: string;
   values?: ManagedWorkflowTemplateValues;
 }
 
@@ -284,7 +289,6 @@ export class ManagedWorkflowsService {
 
     const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
     const now = new Date();
-    const definitionHash = this.computeManagedDefinitionHash(definition);
     const existingDocument = await this.deps.crudService.getWorkflowDocumentWithVersion(
       workflowDocumentId,
       spaceId
@@ -305,7 +309,6 @@ export class ManagedWorkflowsService {
       id,
       definition,
       workflowDocumentId,
-      definitionHash,
       values: options.values,
       stored: existingDocument ?? undefined,
       isStartupWindow,
@@ -315,7 +318,7 @@ export class ManagedWorkflowsService {
       return;
     }
 
-    const { yaml, managedTemplateValues } = plan;
+    const { yaml, managedTemplateValues, definitionHash } = plan;
     if (plan.action === 'create') {
       if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
         // Never wrote — untrack so a *complete* later pass can orphan-clean; mark incomplete
@@ -548,7 +551,6 @@ export class ManagedWorkflowsService {
           definition,
           workflowDocumentId,
           spaceId,
-          definitionHash: this.computeManagedDefinitionHash(definition),
           values: item.values,
         });
       } catch (error) {
@@ -607,7 +609,7 @@ export class ManagedWorkflowsService {
     isStartupWindow: boolean;
     now: Date;
   }): Promise<ManagedInstallWrite | undefined> {
-    const { id, definition, workflowDocumentId, spaceId, definitionHash, values } = target;
+    const { id, definition, workflowDocumentId, spaceId, values } = target;
     // The read covers all spaces and deleted documents; install() only sees live ones in its space.
     if (stored && stored.source.spaceId !== spaceId) {
       throw new Error(
@@ -624,7 +626,6 @@ export class ManagedWorkflowsService {
       id,
       definition,
       workflowDocumentId,
-      definitionHash,
       values,
       stored,
       isStartupWindow,
@@ -639,7 +640,7 @@ export class ManagedWorkflowsService {
       workflowDocumentId,
       yaml: plan.yaml,
       managedTemplateValues: plan.managedTemplateValues,
-      definitionHash,
+      definitionHash: plan.definitionHash,
       spaceId,
       now,
       existing: previous?.source,
@@ -906,7 +907,6 @@ export class ManagedWorkflowsService {
       options,
       registeredPluginId
     );
-    const registryHash = this.computeManagedDefinitionHash(definition);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId,
@@ -915,7 +915,6 @@ export class ManagedWorkflowsService {
         includeGlobal: true,
       }
     );
-
     if (!existing || existing.deleted_at) {
       return this.createManagedWorkflowStatusReport({
         status: 'missing',
@@ -923,9 +922,14 @@ export class ManagedWorkflowsService {
         definitionId: id,
         spaceId,
         definition,
-        registryHash,
+        registryHash: this.computeRegistryHash({ definition, storedTemplateValues: null }),
       });
     }
+
+    const registryHash = this.computeRegistryHash({
+      definition,
+      storedTemplateValues: existing.managedTemplateValues,
+    });
 
     if (existing.managed !== true) {
       return this.createManagedWorkflowStatusReport({
@@ -947,6 +951,7 @@ export class ManagedWorkflowsService {
     } else if (!existing.enabled) {
       status = 'disabled';
     } else if (
+      registryHash === null ||
       storedHash !== registryHash ||
       storedVersion !== definition.version ||
       existing.originManagedWorkflowId !== definition.id
@@ -1267,7 +1272,7 @@ export class ManagedWorkflowsService {
     definitionId: ManagedWorkflowId;
     spaceId: string;
     definition: ManagedWorkflowDefinition;
-    registryHash: string;
+    registryHash: string | null;
     existing?: WorkflowProperties;
   }): ManagedWorkflowStatusReport {
     const {
@@ -1301,7 +1306,6 @@ export class ManagedWorkflowsService {
     id,
     definition,
     workflowDocumentId,
-    definitionHash,
     values,
     stored,
     isStartupWindow,
@@ -1309,7 +1313,6 @@ export class ManagedWorkflowsService {
     id: ManagedWorkflowId;
     definition: ManagedWorkflowDefinition;
     workflowDocumentId: string;
-    definitionHash: string;
     values?: ManagedWorkflowTemplateValues;
     stored?: VersionedWorkflowDocument;
     isStartupWindow: boolean;
@@ -1319,9 +1322,11 @@ export class ManagedWorkflowsService {
       values,
       existingTemplateValues: stored?.source.managedTemplateValues,
     });
+    // The hash of the YAML this install renders, so a template's hash follows its values.
+    const definitionHash = computeDefinitionHash(yaml);
 
     if (!stored) {
-      return { action: 'create', yaml, managedTemplateValues };
+      return { action: 'create', yaml, managedTemplateValues, definitionHash };
     }
 
     const { source: existing } = stored;
@@ -1345,7 +1350,7 @@ export class ManagedWorkflowsService {
       return { action: 'skip' };
     }
 
-    return { action: 'update', yaml, managedTemplateValues, stored };
+    return { action: 'update', yaml, managedTemplateValues, definitionHash, stored };
   }
 
   /** Builds the versioned document an install writes, keeping `enabled` and `created_at` on update. */
@@ -1498,7 +1503,7 @@ export class ManagedWorkflowsService {
 
     if (definition.yamlTemplate) {
       const templateValues = values ?? existingTemplateValues;
-      if (!templateValues || Object.keys(templateValues).length === 0) {
+      if (!hasTemplateValues(templateValues)) {
         throw new Error(
           `Managed workflow '${definition.id}' uses yamlTemplate but no template values were provided and none are persisted`
         );
@@ -1527,16 +1532,37 @@ export class ManagedWorkflowsService {
     };
   }
 
-  private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
-    if (definition.yamlTemplate) {
-      return computeDefinitionHash(definition.yamlTemplate.toString());
+  /**
+   * The hash an up-to-date document holds: of the definition's `yaml`, or of its `yamlTemplate`
+   * rendered with the document's stored values. `null` for a template with no stored values or
+   * whose render throws for them.
+   */
+  private computeRegistryHash({
+    definition,
+    storedTemplateValues,
+  }: {
+    definition: ManagedWorkflowDefinition;
+    storedTemplateValues: ManagedWorkflowTemplateValues | null | undefined;
+  }): string | null {
+    if (!definition.yamlTemplate) {
+      return computeDefinitionHash(this.resolveManagedWorkflowYaml({ definition }).yaml);
     }
-    if (!definition.yaml) {
-      throw new Error(
-        `Managed workflow '${definition.id}' must define either yaml or yamlTemplate`
+    if (!hasTemplateValues(storedTemplateValues)) {
+      return null;
+    }
+    try {
+      const { yaml } = this.resolveManagedWorkflowYaml({
+        definition,
+        existingTemplateValues: storedTemplateValues,
+      });
+      return computeDefinitionHash(yaml);
+    } catch (error) {
+      this.logger.warn(
+        `Managed workflows: could not render '${definition.id}' with its stored values`,
+        { error }
       );
+      return null;
     }
-    return computeDefinitionHash(definition.yaml);
   }
 
   private areTemplateValuesEqual(

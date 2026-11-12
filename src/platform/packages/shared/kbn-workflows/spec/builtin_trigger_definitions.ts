@@ -8,9 +8,11 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import type { TriggerSchemaOptions } from './schema/triggers';
 import {
   AlertRuleTriggerSchema,
   ManualTriggerSchema,
+  PageTriggerSchema,
   ScheduledTriggerSchema,
 } from './schema/triggers';
 
@@ -27,7 +29,7 @@ export interface BaseTriggerDefinition {
   documentation: TriggerDocumentation;
 }
 
-export const builtInTriggerDefinitions: BaseTriggerDefinition[] = [
+const baseTriggerDefinitions: BaseTriggerDefinition[] = [
   {
     id: 'manual',
     label: 'Manual',
@@ -113,7 +115,47 @@ steps:
   },
 ];
 
-const builtInTriggerDefinitionsMap = new Map(builtInTriggerDefinitions.map((t) => [t.id, t]));
+const pageTriggerDefinition: BaseTriggerDefinition = {
+  id: 'page',
+  label: 'Page',
+  description: 'Run a workflow from a hosted form built from the trigger inputs',
+  schema: PageTriggerSchema,
+  documentation: {
+    details:
+      'Declare the form fields under the trigger using JSON Schema ' +
+      '(`inputs.properties` + `inputs.required`). Reference the submitted values in steps with ' +
+      '`{{ page.inputs.<name> }}`, not `{{ inputs.<name> }}`. A workflow can have at most one ' +
+      'page trigger. The page URL and access level are managed outside the workflow definition.',
+    examples: [
+      `triggers:
+  - type: page
+    title: Report an incident
+    inputs:
+      properties:
+        summary:
+          type: string
+          description: What happened
+      required:
+        - summary
+steps:
+  - name: log_report
+    type: console
+    with:
+      message: "Incident: {{ page.inputs.summary }}"`,
+    ],
+  },
+};
+
+/** Built-in trigger types that a workflow author can use, with the same options as `getTriggerSchema`. */
+export const getBuiltInTriggerDefinitions = ({
+  includePageTrigger = false,
+}: TriggerSchemaOptions = {}): BaseTriggerDefinition[] =>
+  includePageTrigger ? [...baseTriggerDefinitions, pageTriggerDefinition] : baseTriggerDefinitions;
+
+/** Includes the page trigger, so labels and docs resolve for workflows saved with pages enabled. */
+const builtInTriggerDefinitionsMap = new Map(
+  getBuiltInTriggerDefinitions({ includePageTrigger: true }).map((t) => [t.id, t])
+);
 
 export function getBuiltInTriggerDefinition(id: string): BaseTriggerDefinition | undefined {
   return builtInTriggerDefinitionsMap.get(id);

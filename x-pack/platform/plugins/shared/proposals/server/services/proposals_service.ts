@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { asyncMapWithLimit } from '@kbn/std';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { JSONSchema7 } from 'json-schema';
 import {
@@ -66,6 +66,7 @@ import {
   ProposalLookupTruncatedError,
   ProposalNotFoundError,
 } from './errors';
+import { reportProposalDecided, reportProposalReopened } from '../telemetry/proposal_decided_event';
 import type { ResolveProposalUser } from './resolve_proposal_user';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -110,6 +111,8 @@ export interface UpdateProposalParams {
 export interface ProposalsServiceDeps {
   storage: ProposalsStorageClient;
   logger: Logger;
+  /** Reports a decision once it is written. */
+  analytics: AnalyticsServiceStart;
   getWorkflowsApi: () => WorkflowsManagementApi;
   getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
   /**
@@ -800,6 +803,13 @@ export class ProposalsService {
 
     await this.writeDocument(id, document, { seqNo, primaryTerm });
 
+    // The one place a decision is recorded, whichever route reached it: the gate workflow's
+    // update step, or a gateless proposal decided directly. Reported only after the write
+    // landed, so a refused or conflicting decision is never counted.
+    if (params.decision !== undefined) {
+      reportProposalDecided(this.deps.analytics, this.deps.logger, updated);
+    }
+
     return stripRanks(updated);
   }
 
@@ -983,6 +993,11 @@ export class ProposalsService {
     // Only once the link landed, so the card never points at a row the chain
     // disowned.
     await this.attachToConversation(successorId, document.conversationId, document.title, request);
+
+    reportProposalReopened(this.deps.analytics, this.deps.logger, {
+      proposal,
+      successorId,
+    });
 
     return { proposalId: successorId };
   }

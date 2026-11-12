@@ -7,7 +7,7 @@
 
 import type { ExpandWildcards, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { JsonObject } from '@kbn/utility-types';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/api/search_strategy/model/runtime_mappings';
+import type { ApiRunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 
 export const buildTimelineDetailsQuery = ({
   authFilter,
@@ -19,7 +19,7 @@ export const buildTimelineDetailsQuery = ({
   authFilter?: JsonObject;
   id: string;
   indexName: string;
-  runtimeMappings: RunTimeMappings;
+  runtimeMappings: ApiRunTimeMappings;
   includeHiddenIndices?: boolean;
 }) => {
   const basicFilter = {
