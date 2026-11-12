@@ -1,9 +1,8 @@
 # Graph Enrichment: NULLIFY Workarounds
 
 This document explains why `SET unmapped_fields="NULLIFY"` is used in the graph ES|QL query
-instead of `"LOAD"`, what problems NULLIFY caused, the research done to address them, and why
-`"LOAD"` cannot read subfields of `flattened` fields (the graph reads them with `FIELD_EXTRACT`
-under NULLIFY).
+instead of `"LOAD"`, what problems NULLIFY caused, the research done to address them, and how the
+graph reads subfields of `flattened` fields.
 
 ---
 
@@ -61,9 +60,9 @@ The TODO comment was later removed (`ac225f7d525b`) once NULLIFY was confirmed a
 working mode, and the workarounds described below were put in place.
 
 **Kibana 9.5.0 includes the ES fix** ([elastic/elasticsearch#150676](https://github.com/elastic/elasticsearch/pull/150676),
-confirmed in snapshot SHA `ba0b1375`). `"LOAD"` still cannot read subfields of `flattened`-type
-parents, which the graph needs for a handful of integration fields. See **Flattened Subfields**
-below.
+confirmed in snapshot SHA `ba0b1375`). Released ES versions still reject dotted references to
+subfields of `flattened` fields under `"LOAD"`, and the graph needs a handful of them. See
+**Flattened Subfields** below.
 
 ---
 
@@ -102,14 +101,32 @@ All parent fields (`m365_defender.event.additional_fields`, `snyk.audit_logs.con
 `greenhouse.audit.event.meta`, `cisco_meraki.8021x_eap_success`, `cisco_meraki.wpa_auth`,
 `cisco_meraki.splash_auth`) are mapped as `flattened` in the integration packages.
 
-Under `NULLIFY`, a dotted reference to a flattened subfield does not fail but resolves to a
-null-typed column even when the document holds the value, silently dropping the actor or target.
+How each way of reading a subfield behaves under `NULLIFY` depends on the mapping and the ES
+version:
 
-The graph therefore reads these subfields with `FIELD_EXTRACT(<flattened field>, "<key>")`, which
-returns the stored value as `keyword` under `NULLIFY` and returns null without error for indices
-where the flattened field is not mapped. `FIELD_EXTRACT` is available in ES|QL since 9.6.0 (preview
-in 9.5.0). The key must be a string literal, so each
-subfield read names its flattened root and key explicitly.
+| Index mapping | Dotted path (`<root>.<key>`) | `FIELD_EXTRACT(<root>, "<key>")` |
+|---|---|---|
+| Root is `flattened` (integration package installed) | null on released ES; the value where ES reads keys of flattened fields as columns | the value |
+| Key mapped as a regular field (data indexed without the package, dynamic mapping) | the value | null |
+| Not mapped at all | null | null |
+
+Neither read errors in any of these cases, including when one query covers indices with different
+mappings, so a wrong choice silently drops the actor or target. ES reads keys of flattened fields
+as columns from [elastic/elasticsearch#164665](https://github.com/elastic/elasticsearch/pull/164665),
+which is behind the `esql_flattened_subfields` feature flag (on in snapshot builds, off in
+releases), so dev stacks on a recent snapshot read the dotted path even on flattened mappings.
+
+The graph therefore reads each subfield with both:
+
+```sql
+COALESCE(m365_defender.event.additional_fields.SourceAccountSid,
+         FIELD_EXTRACT(m365_defender.event.additional_fields, "SourceAccountSid"))
+```
+
+`FIELD_EXTRACT` is available in ES|QL since 9.6.0 (preview in 9.5.0). Its key must be a string
+literal, so each read names its root and key explicitly. A root whose name starts with a digit is
+quoted with backticks in both reads (`` `cisco_meraki.8021x_eap_success.vap` `` and
+`` FIELD_EXTRACT(`cisco_meraki.8021x_eap_success`, "vap") ``).
 
 ---
 
@@ -297,7 +314,10 @@ One ES issue had to be fixed before LOAD can be used:
    — `UnsupportedOperationException` when a keyword field with multi-fields is partially unmapped.
    **Status: FIXED** in ES PR #150676, included in 9.5.0-SNAPSHOT from 2026-07-07 onwards.
 
-The flattened-subfield reads need no change under LOAD because they use `FIELD_EXTRACT`.
+The flattened-subfield reads include a dotted path, which ES rejects under LOAD unless it reads
+keys of flattened fields as columns ([elastic/elasticsearch#164665](https://github.com/elastic/elasticsearch/pull/164665)
+enabled in the target version). Until then, LOAD needs the reads switched to `FIELD_EXTRACT` alone,
+which loses the indices that map the key as a regular field.
 
 To revert, follow these steps:
 

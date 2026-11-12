@@ -3965,12 +3965,13 @@ export default function (providerContext: FtrProviderContext) {
       //      CASE-result-only fields (host.id, service.id, entity.id, etc.) are left
       //      unmapped since ES|QL accepts null-typed values in result positions.
       //
-      //   3. Flattened fields — subfields of flattened fields (e.g.
+      //   3. Flattened fields — keys of flattened fields (e.g.
       //      m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
-      //      greenhouse.audit.event.meta.name, cisco_meraki.*.vap) are not readable by dotted path:
-      //      they are null under NULLIFY and rejected under LOAD.  The integration evaluations
-      //      read them with FIELD_EXTRACT(<flattened field>, "<key>"), so the test index maps the
-      //      flattened roots as flattened.
+      //      greenhouse.audit.event.meta.name, cisco_meraki.*.vap) read by dotted path are null
+      //      under NULLIFY on ES versions that cannot read them, and FIELD_EXTRACT returns null
+      //      where the key is mapped as a regular field.  The integration evaluations read them
+      //      with COALESCE(<root>.<key>, FIELD_EXTRACT(<root>, "<key>")), so the test index maps the
+      //      roots as flattened and keyAsFieldIndex maps a key as keyword.
       const testIndex = 'test-graph-type-mismatch';
 
       before(async () => {
@@ -4084,8 +4085,47 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      // An index created without the integration package maps the keys of the flattened roots as
+      // regular fields, which FIELD_EXTRACT does not read.
+      const keyAsFieldIndex = 'test-graph-flattened-key-as-field';
+
+      before(async () => {
+        await es.indices.create({
+          index: keyAsFieldIndex,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'event.id': { type: 'keyword' },
+              'event.action': { type: 'keyword' },
+              'event.dataset': { type: 'keyword' },
+              'data_stream.dataset': { type: 'keyword' },
+              'user.name': { type: 'keyword' },
+              'host.name': { type: 'keyword' },
+              'm365_defender.event.additional_fields.SourceAccountSid': { type: 'keyword' },
+            },
+          },
+        });
+
+        await es.index({
+          index: keyAsFieldIndex,
+          id: 'key-as-field-evt-1',
+          refresh: true,
+          document: {
+            '@timestamp': '2024-09-01T12:00:00.000Z',
+            'event.id': 'key-as-field-evt-1',
+            'event.action': 'logonsuccess',
+            'event.dataset': 'm365_defender.event',
+            'data_stream.dataset': 'm365_defender.event',
+            'user.name': 'key-as-field-user',
+            'host.name': 'key-as-field-host',
+            'm365_defender.event.additional_fields': { SourceAccountSid: 'S-1-5-21-key-as-field' },
+          },
+        });
+      });
+
       after(async () => {
         await es.indices.delete({ index: testIndex, ignore_unavailable: true });
+        await es.indices.delete({ index: keyAsFieldIndex, ignore_unavailable: true });
       });
 
       it('returns 200 when user.id is mapped as long and many fields are unmapped', async () => {
@@ -4147,6 +4187,33 @@ export default function (providerContext: FtrProviderContext) {
         const sourceFields = userNode.documentsData.find((d: any) => d.type === 'entity').entity
           .sourceFields;
         expect(sourceFields['user.id']).to.equal('S-1-5-21-flattened');
+      });
+
+      it('reads user.id from a key mapped as a regular field next to a flattened mapping', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            // testIndex maps the root as flattened, keyAsFieldIndex maps the key as keyword.
+            indexPatterns: [testIndex, keyAsFieldIndex],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [{ match_phrase: { 'event.id': 'key-as-field-evt-1' } }],
+              },
+            },
+          },
+        }).expect(result(200, logger));
+
+        const userNode = response.body.nodes.find((n: any) =>
+          n.documentsData?.some(
+            (d: any) => d.type === 'entity' && d.entity?.sourceFields?.['user.id'] !== undefined
+          )
+        );
+        expect(userNode).to.not.be(undefined);
+        const sourceFields = userNode.documentsData.find((d: any) => d.type === 'entity').entity
+          .sourceFields;
+        expect(sourceFields['user.id']).to.equal('S-1-5-21-key-as-field');
       });
     });
   });
