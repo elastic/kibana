@@ -1,6 +1,6 @@
 version: '1'
 name: __NAME__
-description: 'Extracts long-term facts, entities and the relationships between them from the agent conversations the trace sources of a Context Engine AI index record, as the AI index dreaming config describes.'
+description: 'Extracts long-term facts and entities from the agent conversations the trace sources of a Context Engine AI index record, as the AI index dreaming config describes.'
 enabled: false
 tags:
   - context-engine
@@ -27,14 +27,6 @@ outputs:
   - name: deleted
     type: number
   - name: rejected
-    type: number
-  - name: relationships_created
-    type: number
-  - name: relationships_updated
-    type: number
-  - name: relationships_deleted
-    type: number
-  - name: relationships_rejected
     type: number
   - name: resume_from
     type: string
@@ -114,10 +106,6 @@ steps:
       updated: 0
       deleted: 0
       rejected: 0
-      relationships_created: 0
-      relationships_updated: 0
-      relationships_deleted: 0
-      relationships_rejected: 0
       would_write: []
 
   - name: dream
@@ -130,8 +118,7 @@ steps:
         concurrency: 4
         steps:
           # A batch's steps run in a workflow of their own: a parallel branch can hold only
-          # straight-line steps, and a batch retries its model call and links relationships when
-          # it wrote something.
+          # straight-line steps, and a batch retries its model call.
           - name: dream_batch
             type: workflow.execute
             with:
@@ -151,10 +138,6 @@ steps:
               updated: '${{ variables.updated | plus: foreach.item.output.updated }}'
               deleted: '${{ variables.deleted | plus: foreach.item.output.deleted }}'
               rejected: '${{ variables.rejected | plus: foreach.item.output.rejected }}'
-              relationships_created: '${{ variables.relationships_created | plus: foreach.item.output.relationships_created }}'
-              relationships_updated: '${{ variables.relationships_updated | plus: foreach.item.output.relationships_updated }}'
-              relationships_deleted: '${{ variables.relationships_deleted | plus: foreach.item.output.relationships_deleted }}'
-              relationships_rejected: '${{ variables.relationships_rejected | plus: foreach.item.output.relationships_rejected }}'
               would_write: '${{ variables.would_write | concat: foreach.item.output.would_write }}'
 
   - name: dry_run_result
@@ -170,10 +153,6 @@ steps:
           updated: '${{ variables.updated | default: 0 }}'
           deleted: '${{ variables.deleted | default: 0 }}'
           rejected: '${{ variables.rejected | default: 0 }}'
-          relationships_created: '${{ variables.relationships_created | default: 0 }}'
-          relationships_updated: '${{ variables.relationships_updated | default: 0 }}'
-          relationships_deleted: '${{ variables.relationships_deleted | default: 0 }}'
-          relationships_rejected: '${{ variables.relationships_rejected | default: 0 }}'
           would_write: '${{ variables.would_write }}'
           reason: 'Dry run: nothing was written.'
 
@@ -185,9 +164,5 @@ steps:
       updated: '${{ variables.updated | default: 0 }}'
       deleted: '${{ variables.deleted | default: 0 }}'
       rejected: '${{ variables.rejected | default: 0 }}'
-      relationships_created: '${{ variables.relationships_created | default: 0 }}'
-      relationships_updated: '${{ variables.relationships_updated | default: 0 }}'
-      relationships_deleted: '${{ variables.relationships_deleted | default: 0 }}'
-      relationships_rejected: '${{ variables.relationships_rejected | default: 0 }}'
       resume_from: '{{ variables.resume_from }}'
       resume_after: '{{ variables.resume_after }}'

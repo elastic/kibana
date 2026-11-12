@@ -9,7 +9,7 @@
 
 import { parse } from 'yaml';
 import type { ContextEngineTraceDreamingBatchWorkflowTemplateValues } from '.';
-import { CONTEXT_ENGINE_DREAMING_WORKFLOW, CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW } from '.';
+import { CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { convertToWorkflowGraph } from '../../../graph';
 
@@ -58,7 +58,6 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
       instructions: values.instructions,
       fact_types: values.factTypes,
       entity_types: values.entityTypes,
-      relationship_types: values.relationshipTypes,
     });
     expect(workflow.settings.concurrency).toBeUndefined();
     expect(workflow.triggers).toEqual([
@@ -75,16 +74,18 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     ]);
   });
 
-  it('extracts from the rounds it is given, applies the changes citing them, and links what it wrote', () => {
+  it('extracts from the rounds it is given and applies the changes citing them, building no relationships', () => {
     const { steps } = render();
 
     expect(steps.map(({ name }: Step) => name)).toEqual([
       'read_existing',
       'extract',
       'apply_changes',
-      'relationships',
       'batch_output',
     ]);
+    expect(CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW.yamlTemplate(values)).not.toMatch(
+      /relationship/i
+    );
     expect(findStep(steps, 'apply_changes').with).toEqual({
       ai_index_id: '{{ consts.ai_index_id }}',
       memories: '${{ inputs.memories }}',
@@ -93,26 +94,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     });
   });
 
-  it('links what it writes with the same relationship steps as dreaming, on the rounds it is given', () => {
-    const dreamingBatches = findStep(
-      findStep(parse(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values)).steps, 'dream').steps ??
-        [],
-      'batches'
-    );
-    const dreamingRelationships = findStep(dreamingBatches.steps ?? [], 'relationships');
-    const expected = JSON.parse(
-      JSON.stringify({
-        ...dreamingRelationships,
-        steps: (dreamingRelationships.steps ?? []).filter(
-          ({ name }) => name !== 'tally_relationships'
-        ),
-      }).replace(/foreach\.item/g, 'inputs.memories')
-    );
-
-    expect(findStep(render().steps, 'relationships')).toEqual(expected);
-  });
-
-  it('outputs what it wrote, with nothing for relationships when it linked none', () => {
+  it('outputs what it wrote', () => {
     const output = findStep(render().steps, 'batch_output');
     const engine = createWorkflowLiquidEngine();
     const evaluate = (expression: unknown, scope: Record<string, unknown>) =>
@@ -136,10 +118,6 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
       updated: 1,
       deleted: 0,
       rejected: 1,
-      relationships_created: 0,
-      relationships_updated: 0,
-      relationships_deleted: 0,
-      relationships_rejected: 0,
       would_write: [],
     });
   });

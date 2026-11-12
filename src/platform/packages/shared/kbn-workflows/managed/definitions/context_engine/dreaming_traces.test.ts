@@ -200,15 +200,11 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     const engine = createWorkflowLiquidEngine();
     const evaluate = (expression: unknown, scope: Record<string, unknown>) =>
       engine.evalValueSync(String(expression).slice(3, -2).trim(), scope);
-    const batch = (created: number, relationshipsRejected: number) => ({
+    const batch = (created: number) => ({
       created,
       updated: 1,
       deleted: 0,
       rejected: 0,
-      relationships_created: 2,
-      relationships_updated: 0,
-      relationships_deleted: 0,
-      relationships_rejected: relationshipsRejected,
       would_write: [{ id: `ki-${created}` }],
     });
 
@@ -220,13 +216,9 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
       updated: 0,
       deleted: 0,
       rejected: 0,
-      relationships_created: 0,
-      relationships_updated: 0,
-      relationships_deleted: 0,
-      relationships_rejected: 0,
       would_write: [],
     };
-    for (const output of [batch(3, 1), batch(4, 0)]) {
+    for (const output of [batch(3), batch(4)]) {
       variables = Object.fromEntries(
         Object.entries(add).map(([key, expression]) => [
           key,
@@ -241,16 +233,12 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
       updated: 2,
       deleted: 0,
       rejected: 0,
-      relationships_created: 4,
-      relationships_updated: 0,
-      relationships_deleted: 0,
-      relationships_rejected: 1,
       would_write: [{ id: 'ki-3' }, { id: 'ki-4' }],
     });
     expect(findStep(render().steps, 'output_result').with).toEqual(
       expect.objectContaining({
         created: '${{ variables.created | default: 0 }}',
-        relationships_rejected: '${{ variables.relationships_rejected | default: 0 }}',
+        rejected: '${{ variables.rejected | default: 0 }}',
       })
     );
   });

@@ -113,8 +113,8 @@ export type ContextEngineTraceDreamingWorkflowTemplateValues =
   ContextEngineDreamingWorkflowTemplateValues;
 
 /**
- * Extracts long-term facts, entities and relationships from the agent conversations the trace
- * sources of one AI index record.
+ * Extracts long-term facts and entities from the agent conversations the trace sources of one AI
+ * index record.
  */
 export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -140,9 +140,9 @@ export type ContextEngineTraceDreamingBatchWorkflowTemplateValues =
   ContextEngineDreamingWorkflowTemplateValues;
 
 /**
- * Extracts long-term facts, entities and relationships from one batch of agent rounds. Trace
- * dreaming runs a read's batches at once, each with this workflow, as a parallel step can only run
- * straight-line steps.
+ * Extracts long-term facts and entities from one batch of agent rounds. Trace dreaming runs a
+ * read's batches at once, each with this workflow, as a parallel step can only run straight-line
+ * steps.
  */
 export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
@@ -158,7 +158,6 @@ export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
       __INSTRUCTIONS__: values.instructions,
       __FACT_TYPES__: values.factTypes,
       __ENTITY_TYPES__: values.entityTypes,
-      __RELATIONSHIP_TYPES__: values.relationshipTypes,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingBatchWorkflowTemplateValues>;
