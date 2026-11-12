@@ -9,7 +9,7 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiHealth, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { RuleExecutionOutcome } from '@kbn/alerting-v2-schemas';
-import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { useRuleAutoAttach, useRuleManualAddToChat } from '@kbn/alerting-v2-browser-shared';
 import { RULE_KIND_ICONS, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -72,6 +72,7 @@ export const RuleSummaryFlyout = ({
     | undefined;
   const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
+  const { addToChat, isAddToChatAvailable } = useRuleManualAddToChat(rule, { agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
   const lastExecution = useRuleLastExecution(rule.id);
   const takeActionPanels = useRuleMenuPanels({
@@ -209,6 +210,14 @@ export const RuleSummaryFlyout = ({
       </Body>
 
       <Footer>
+        {isAddToChatAvailable && (
+          <Footer.SecondaryAction
+            variant="ai"
+            iconType="addToChat"
+            onClick={addToChat}
+            data-test-subj="ruleSummaryFlyoutAddToChatButton"
+          />
+        )}
         <Footer.PrimaryActionMenu
           label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.takeAction', {
             defaultMessage: 'Take action',
