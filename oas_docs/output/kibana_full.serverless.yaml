@@ -88277,7 +88277,7 @@ paths:
           name: product_name
   /api/status:
     get:
-      description: Returns Kibana's overall operational status and a per-service breakdown for Elasticsearch, Saved Objects, and registered plugins. The endpoint is intended for liveness and readiness checks (for example, by Kubernetes probes) and for operators monitoring a Kibana deployment. Unauthenticated callers receive a redacted response that exposes only the overall status level.
+      description: Returns Kibana's overall operational status and a per-service breakdown for Elasticsearch, Saved Objects, the Kibana server, and registered plugins. The endpoint is intended for liveness and readiness checks (for example, by Kubernetes probes) and for operators monitoring a Kibana deployment. Unauthenticated callers receive a redacted response that exposes only the overall status level.
       operationId: get-status
       parameters:
         - description: Set to "true" to get the response in v7 format.
@@ -88317,6 +88317,9 @@ paths:
                         savedObjects:
                           level: available
                           summary: SavedObjects service has completed migrations and is available
+                        server:
+                          level: available
+                          summary: Server is started
                       overall:
                         level: available
                         summary: All services are available
@@ -88366,6 +88369,9 @@ paths:
                         savedObjects:
                           level: unavailable
                           summary: SavedObjects service depends on Elasticsearch
+                        server:
+                          level: critical
+                          summary: Server is initializing
                       overall:
                         level: unavailable
                         summary: Some services are unavailable
@@ -160478,9 +160484,40 @@ components:
                     - level
                     - summary
                     - meta
+                server:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: Service status levels as human and machine readable values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties:
+                        nullable: true
+                      description: An unstructured set of extra metadata about this service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
               required:
                 - elasticsearch
                 - savedObjects
+                - server
             overall:
               additionalProperties: false
               type: object
