@@ -21,7 +21,7 @@ import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_t
 const ingestPipelineLabel = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
   {
-    defaultMessage: 'Ingest Pipeline',
+    defaultMessage: 'Ingest pipeline',
   }
 );
 
@@ -43,14 +43,17 @@ export const EditTransformIngestPipeline: FC = () => {
             label={ingestPipelineLabel}
             isInvalid={errorMessages.length > 0}
             error={errorMessages}
+            display="rowCompressed"
+            fullWidth
           >
             <EuiSkeletonRectangle
               width="100%"
-              height={euiTheme.size.xxl}
+              height={euiTheme.size.xl}
               isLoading={isLoading}
               contentAriaLabel={ingestPipelineLabel}
             >
               <EuiComboBox
+                compressed
                 data-test-subj="transformEditFlyoutDestinationIngestPipelineFieldSelect"
                 aria-label={i18n.translate(
                   'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectAriaLabel',
@@ -64,9 +67,11 @@ export const EditTransformIngestPipeline: FC = () => {
                     defaultMessage: 'Select an ingest pipeline',
                   }
                 )}
+                fullWidth
+                isClearable={false}
                 singleSelection={{ asPlainText: true }}
                 options={ingestPipelineNames.map((label: string) => ({ label }))}
-                selectedOptions={[{ label: value }]}
+                selectedOptions={value ? [{ label: value }] : []}
                 onChange={(o) =>
                   setFormField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
                 }

@@ -29,6 +29,7 @@ import {
   useEditTransformFlyoutContext,
 } from '../state_management/edit_transform_flyout_state';
 import { useFormSections } from '../state_management/selectors/form_sections';
+import { useHasAttemptedSubmit } from '../state_management/selectors/has_attempted_submit';
 import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
 
 import { EditTransformDurationInput } from './edit_transform_duration_input';
@@ -42,6 +43,7 @@ export const EditTransformRetentionPolicy: FC = () => {
 
   const { config, dataViewId } = useEditTransformFlyoutContext();
   const formSections = useFormSections();
+  const hasAttemptedSubmit = useHasAttemptedSubmit();
   const retentionPolicyField = useRetentionPolicyField();
   const { setFormField, setFormSection } = useEditTransformFlyoutActions();
 
@@ -156,7 +158,7 @@ export const EditTransformRetentionPolicy: FC = () => {
         label={i18n.translate(
           'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
           {
-            defaultMessage: 'Retention policy',
+            defaultMessage: 'Enable custom retention',
           }
         )}
         checked={formSections.retentionPolicy.enabled}
@@ -182,9 +184,10 @@ export const EditTransformRetentionPolicy: FC = () => {
                     defaultMessage: 'Field',
                   }
                 )}
-                isInvalid={retentionPolicyField.errorMessages.length > 0}
-                error={retentionPolicyField.errorMessages}
+                isInvalid={hasAttemptedSubmit && retentionPolicyField.errorMessages.length > 0}
+                error={hasAttemptedSubmit ? retentionPolicyField.errorMessages : []}
                 fullWidth
+                display="rowCompressed"
                 helpText={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyDateFieldHelpText',
                   {
@@ -194,7 +197,8 @@ export const EditTransformRetentionPolicy: FC = () => {
                 )}
               >
                 <EuiSelect
-                  isInvalid={retentionPolicyField.errorMessages.length > 0}
+                  compressed
+                  isInvalid={hasAttemptedSubmit && retentionPolicyField.errorMessages.length > 0}
                   aria-label={i18n.translate(
                     'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldSelectAriaLabel',
                     {
@@ -218,6 +222,7 @@ export const EditTransformRetentionPolicy: FC = () => {
             ) : (
               <EditTransformFlyoutFormTextInput
                 field="retentionPolicyField"
+                showErrors={hasAttemptedSubmit}
                 label={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
                   {
@@ -230,6 +235,7 @@ export const EditTransformRetentionPolicy: FC = () => {
           <EditTransformDurationInput
             defaultUnit="d"
             field="retentionPolicyMaxAge"
+            showErrors={hasAttemptedSubmit}
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel',
               {

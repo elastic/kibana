@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren, useState } from 'react';
 
-import { EuiAccordion, EuiForm, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -24,6 +34,66 @@ import {
 interface EditTransformFlyoutFormProps {
   onOpenProjectScope: (projects: LoadedTransformProjectScopeProjects) => void;
 }
+
+interface EditTransformAccordionProps {
+  'data-test-subj': string;
+  id: string;
+  title: string;
+}
+
+const EditTransformAccordion: FC<PropsWithChildren<EditTransformAccordionProps>> = ({
+  children,
+  'data-test-subj': dataTestSubj,
+  id,
+  title,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <EuiAccordion
+      css={css`
+        margin-inline: -${euiTheme.size.l};
+      `}
+      data-test-subj={dataTestSubj}
+      id={id}
+      buttonContent={
+        <EuiFlexGroup
+          alignItems="center"
+          css={css`
+            width: 100%;
+          `}
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <EuiFlexItem>
+            <EuiText
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+              size="s"
+            >
+              {title}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'} aria-hidden={true} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      arrowDisplay="none"
+      borders="horizontal"
+      buttonContentClassName="eui-fullWidth"
+      buttonProps={{ paddingSize: 'l' }}
+      forceState={isOpen ? 'open' : 'closed'}
+      onToggle={setIsOpen}
+      paddingSize="l"
+    >
+      {children}
+    </EuiAccordion>
+  );
+};
 
 export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   onOpenProjectScope,
@@ -56,19 +126,15 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
 
     <EuiSpacer size="l" />
 
-    <EuiAccordion
+    <EditTransformAccordion
       data-test-subj="transformEditAccordionDestination"
       id="transformEditAccordionDestination"
-      buttonContent={i18n.translate(
+      title={i18n.translate(
         'xpack.transform.transformList.editFlyoutFormDestinationButtonContent',
         {
           defaultMessage: 'Destination configuration',
         }
       )}
-      arrowDisplay="right"
-      borders="horizontal"
-      buttonProps={{ paddingSize: 'm' }}
-      paddingSize="m"
     >
       <div data-test-subj="transformEditAccordionDestinationContent">
         <EditTransformFlyoutFormTextInput
@@ -87,21 +153,17 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
           <EditTransformIngestPipeline />
         </div>
       </div>
-    </EuiAccordion>
+    </EditTransformAccordion>
 
-    <EuiAccordion
+    <EditTransformAccordion
       data-test-subj="transformEditAccordionAdvancedSettings"
       id="transformEditAccordionAdvancedSettings"
-      buttonContent={i18n.translate(
+      title={i18n.translate(
         'xpack.transform.transformList.editFlyoutFormAdvancedSettingsButtonContent',
         {
           defaultMessage: 'Advanced settings',
         }
       )}
-      arrowDisplay="right"
-      borders="horizontal"
-      buttonProps={{ paddingSize: 'm' }}
-      paddingSize="m"
     >
       <div data-test-subj="transformEditAccordionAdvancedSettingsContent">
         <EditTransformFlyoutFormTextInput
@@ -147,6 +209,6 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
           })}
         />
       </div>
-    </EuiAccordion>
+    </EditTransformAccordion>
   </EuiForm>
 );

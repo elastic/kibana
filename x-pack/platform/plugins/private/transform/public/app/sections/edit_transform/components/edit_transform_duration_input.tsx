@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useState } from 'react';
+import React, { type FC, useMemo, useRef, useState } from 'react';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
@@ -19,36 +20,41 @@ export type DurationUnit = 'nanos' | 'micros' | 'ms' | 's' | 'm' | 'h' | 'd';
 
 const durationUnitLabels: Record<DurationUnit, string> = {
   nanos: i18n.translate('xpack.transform.transformList.durationUnit.nanoseconds', {
-    defaultMessage: 'Nanoseconds',
+    defaultMessage: 'nanoseconds',
   }),
   micros: i18n.translate('xpack.transform.transformList.durationUnit.microseconds', {
-    defaultMessage: 'Microseconds',
+    defaultMessage: 'microseconds',
   }),
   ms: i18n.translate('xpack.transform.transformList.durationUnit.milliseconds', {
-    defaultMessage: 'Milliseconds',
+    defaultMessage: 'milliseconds',
   }),
   s: i18n.translate('xpack.transform.transformList.durationUnit.seconds', {
-    defaultMessage: 'Seconds',
+    defaultMessage: 'seconds',
   }),
   m: i18n.translate('xpack.transform.transformList.durationUnit.minutes', {
-    defaultMessage: 'Minutes',
+    defaultMessage: 'minutes',
   }),
   h: i18n.translate('xpack.transform.transformList.durationUnit.hours', {
-    defaultMessage: 'Hours',
+    defaultMessage: 'hours',
   }),
   d: i18n.translate('xpack.transform.transformList.durationUnit.days', {
-    defaultMessage: 'Days',
+    defaultMessage: 'days',
   }),
 };
 
 const durationPattern = /^(\d+)(nanos|micros|ms|s|m|h|d)$/;
 const invalidNumberKeys = ['-', '+', '.', 'e', 'E'];
+const durationUnitSelectStyles = css`
+  background: transparent;
+  box-shadow: none;
+`;
 
 interface EditTransformDurationInputProps {
   defaultUnit: DurationUnit;
   field: Extract<FormFields, 'frequency' | 'retentionPolicyMaxAge'>;
   helpText?: string;
   label: string;
+  showErrors?: boolean;
   units: readonly DurationUnit[];
 }
 
@@ -57,6 +63,7 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
   field,
   helpText,
   label,
+  showErrors = true,
   units,
 }) => {
   const { errorMessages, value } = useFormField(field);
@@ -65,7 +72,12 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
   const durationValue = durationMatch?.[1] ?? '';
   const parsedUnit = durationMatch?.[2] as DurationUnit | undefined;
   const [pickedUnit, setPickedUnit] = useState<DurationUnit>();
-  const unit = parsedUnit ?? pickedUnit ?? defaultUnit;
+  const previousParsedUnit = useRef(parsedUnit);
+  if (parsedUnit !== undefined) {
+    previousParsedUnit.current = parsedUnit;
+  }
+  const unit = parsedUnit ?? pickedUnit ?? previousParsedUnit.current ?? defaultUnit;
+  const displayedErrors = showErrors ? errorMessages : [];
   const upperCaseField = capitalizeFirstLetter(field);
   const unitOptions = useMemo(
     () =>
@@ -94,35 +106,13 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
     <EuiFormRow
       label={label}
       helpText={helpText}
-      isInvalid={errorMessages.length > 0}
-      error={errorMessages}
+      isInvalid={displayedErrors.length > 0}
+      error={displayedErrors}
       fullWidth
+      display="rowCompressed"
     >
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={2}>
-          <EuiFieldNumber
-            aria-label={i18n.translate(
-              'xpack.transform.transformList.editFlyoutDurationValueAriaLabel',
-              {
-                defaultMessage: '{label} value',
-                values: { label },
-              }
-            )}
-            data-test-subj={`transformEditFlyout${upperCaseField}Input`}
-            fullWidth
-            isInvalid={errorMessages.length > 0}
-            min={1}
-            step={1}
-            value={durationValue}
-            onChange={(event) => setDurationValue(event.target.value)}
-            onKeyDown={(event) => {
-              if (invalidNumberKeys.includes(event.key)) {
-                event.preventDefault();
-              }
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
+      <EuiFieldNumber
+        append={
           <EuiSelect
             aria-label={i18n.translate(
               'xpack.transform.transformList.editFlyoutDurationUnitAriaLabel',
@@ -131,14 +121,35 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
                 values: { label },
               }
             )}
+            compressed
+            css={durationUnitSelectStyles}
             data-test-subj={`transformEditFlyout${upperCaseField}UnitSelect`}
-            fullWidth
             options={unitOptions}
             value={unit}
             onChange={(event) => setDurationUnit(event.target.value as DurationUnit)}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+        aria-label={i18n.translate(
+          'xpack.transform.transformList.editFlyoutDurationValueAriaLabel',
+          {
+            defaultMessage: '{label} value',
+            values: { label },
+          }
+        )}
+        compressed
+        data-test-subj={`transformEditFlyout${upperCaseField}Input`}
+        fullWidth
+        isInvalid={displayedErrors.length > 0}
+        min={1}
+        step={1}
+        value={durationValue}
+        onChange={(event) => setDurationValue(event.target.value)}
+        onKeyDown={(event) => {
+          if (invalidNumberKeys.includes(event.key)) {
+            event.preventDefault();
+          }
+        }}
+      />
     </EuiFormRow>
   );
 };

@@ -20,6 +20,7 @@ import { getTransformConfigMock } from '../state_management/__mocks__/transform_
 import { getDefaultState } from '../state_management/get_default_state';
 import { useFormField } from '../state_management/selectors/form_field';
 import { useFormSections } from '../state_management/selectors/form_sections';
+import { useHasAttemptedSubmit } from '../state_management/selectors/has_attempted_submit';
 import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
 
@@ -42,6 +43,9 @@ jest.mock('../state_management/selectors/form_sections', () => ({
 }));
 jest.mock('../state_management/selectors/form_field', () => ({
   useFormField: jest.fn(),
+}));
+jest.mock('../state_management/selectors/has_attempted_submit', () => ({
+  useHasAttemptedSubmit: jest.fn(),
 }));
 jest.mock('../state_management/selectors/retention_policy_field', () => ({
   useRetentionPolicyField: jest.fn(),
@@ -69,6 +73,7 @@ describe('EditTransformRetentionPolicy', () => {
     } as unknown as ReturnType<typeof useEditTransformFlyoutActions>);
     jest.mocked(useFormField).mockImplementation((field) => defaultState.formFields[field]);
     jest.mocked(useFormSections).mockReturnValue(defaultState.formSections);
+    jest.mocked(useHasAttemptedSubmit).mockReturnValue(false);
     jest
       .mocked(useRetentionPolicyField)
       .mockReturnValue(defaultState.formFields.retentionPolicyField);
@@ -185,5 +190,40 @@ describe('EditTransformRetentionPolicy', () => {
     expect(screen.getByTestId('transformEditFlyoutRetentionPolicyFieldInput')).toHaveValue(
       'timestamp'
     );
+  });
+
+  it('shows required retention errors only after a submit attempt', () => {
+    const defaultState = getDefaultState(getTransformConfigMock());
+    jest.mocked(useGetTransformsPreview).mockReturnValue({
+      data: {
+        generated_dest_index: {
+          mappings: {
+            properties: {
+              timestamp: { type: 'date' },
+            },
+          },
+        },
+      },
+      error: null,
+    } as unknown as ReturnType<typeof useGetTransformsPreview>);
+    jest.mocked(useFormSections).mockReturnValue({
+      retentionPolicy: {
+        ...defaultState.formSections.retentionPolicy,
+        enabled: true,
+      },
+    });
+    jest.mocked(useRetentionPolicyField).mockReturnValue({
+      ...defaultState.formFields.retentionPolicyField,
+      errorMessages: ['A retention field is required.'],
+    });
+
+    const { rerender } = renderWithI18n(<EditTransformRetentionPolicy />);
+
+    expect(screen.queryByText('A retention field is required.')).not.toBeInTheDocument();
+
+    jest.mocked(useHasAttemptedSubmit).mockReturnValue(true);
+    rerender(<EditTransformRetentionPolicy />);
+
+    expect(screen.getByText('A retention field is required.')).toBeInTheDocument();
   });
 });

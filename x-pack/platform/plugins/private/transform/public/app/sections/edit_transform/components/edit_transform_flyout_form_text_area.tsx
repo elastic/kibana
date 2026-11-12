@@ -41,9 +41,11 @@ export const EditTransformFlyoutFormTextArea: FC<EditTransformFlyoutFormTextInpu
       isInvalid={errorMessages.length > 0}
       error={errorMessages}
       fullWidth
+      display="rowCompressed"
     >
       <EuiTextArea
         data-test-subj={`transformEditFlyout${upperCaseField}Input`}
+        compressed
         fullWidth
         placeholder={
           placeHolder

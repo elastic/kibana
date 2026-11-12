@@ -146,6 +146,7 @@ const EditTransformProjectScopeButton: FC<EditTransformProjectScopeButtonProps> 
         error={hasError ? unavailableLabel : undefined}
         isInvalid={hasError}
         label={projectScopeLabel}
+        display="rowCompressed"
       >
         <EuiButton
           color="text"
@@ -154,7 +155,7 @@ const EditTransformProjectScopeButton: FC<EditTransformProjectScopeButtonProps> 
           isDisabled={isProjectScopeLoading || hasError}
           isLoading={isProjectScopeLoading}
           onClick={openProjectScope}
-          size="m"
+          size="s"
         >
           {hasError ? unavailableLabel : isProjectScopeLoading ? loadingLabel : buttonLabel}
         </EuiButton>

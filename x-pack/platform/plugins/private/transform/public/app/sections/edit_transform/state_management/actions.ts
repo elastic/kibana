@@ -44,6 +44,10 @@ export const setApiError = (state: State, action: PayloadAction<string | undefin
   state.apiErrorMessage = action.payload;
 };
 
+export const attemptSubmit = (state: State) => {
+  state.hasAttemptedSubmit = true;
+};
+
 export const setFormField = (
   state: State,
   action: PayloadAction<{ field: FormFields; value: string }>

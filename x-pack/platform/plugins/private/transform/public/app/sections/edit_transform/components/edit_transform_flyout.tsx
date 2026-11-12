@@ -68,7 +68,7 @@ export const EditTransformFlyout: FC<EditAction> = ({
             : 'transformEditFlyoutTitle'
         }
         data-test-subj="transformEditFlyout"
-        size="s"
+        size={448}
       >
         {isProjectScopeFlyoutVisible ? (
           <EditTransformProjectScopeFlyout
@@ -81,7 +81,7 @@ export const EditTransformFlyout: FC<EditAction> = ({
               <EuiTitle size="s">
                 <h2 id="transformEditFlyoutTitle">
                   {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
-                    defaultMessage: 'Edit {transformId}',
+                    defaultMessage: 'Edit "{transformId}"',
                     values: {
                       transformId: config.id,
                     },
@@ -110,7 +110,7 @@ export const EditTransformFlyout: FC<EditAction> = ({
             <EuiFlyoutFooter>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="cross" onClick={closeEditFlyout} flush="left">
+                  <EuiButtonEmpty iconType="cross" onClick={closeEditFlyout} flush="left" size="s">
                     {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
                       defaultMessage: 'Cancel',
                     })}

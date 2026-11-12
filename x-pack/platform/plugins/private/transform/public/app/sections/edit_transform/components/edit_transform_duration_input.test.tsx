@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getTransformConfigMock } from '../state_management/__mocks__/transform_config';
@@ -62,5 +63,39 @@ describe('EditTransformDurationInput', () => {
       target: { value: 'h' },
     });
     expect(mockSetFormField).toHaveBeenCalledWith({ field: 'frequency', value: '10h' });
+  });
+
+  it('preserves the existing unit when the duration value is cleared and replaced', () => {
+    const frequencyField = getDefaultState(getTransformConfigMock()).formFields.frequency;
+    jest.mocked(useFormField).mockReturnValue({ ...frequencyField, value: '30s' });
+
+    const { rerender } = renderWithI18n(
+      <EditTransformDurationInput
+        defaultUnit="m"
+        field="frequency"
+        label="Frequency"
+        units={['s', 'm', 'h']}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('transformEditFlyoutFrequencyInput'), {
+      target: { value: '' },
+    });
+    jest.mocked(useFormField).mockReturnValue({ ...frequencyField, value: '' });
+    rerender(
+      <I18nProvider>
+        <EditTransformDurationInput
+          defaultUnit="m"
+          field="frequency"
+          label="Frequency"
+          units={['s', 'm', 'h']}
+        />
+      </I18nProvider>
+    );
+    fireEvent.change(screen.getByTestId('transformEditFlyoutFrequencyInput'), {
+      target: { value: '20' },
+    });
+
+    expect(mockSetFormField).toHaveBeenLastCalledWith({ field: 'frequency', value: '20s' });
   });
 });
