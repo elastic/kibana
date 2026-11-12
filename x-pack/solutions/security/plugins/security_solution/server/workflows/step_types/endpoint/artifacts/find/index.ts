@@ -31,7 +31,7 @@ import {
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { isArtifactDisabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { toApiExecutionError } from '../../../../utils/to_api_execution_error';
-import { isNotFound, isUnauthorized } from '../../common/read_error';
+import { isNotFound, isUnauthorized, readErrorDetails } from '../../common/read_error';
 
 const PAGE_SIZE = 100;
 const MAX_SUMMARY_ROWS = 5;
@@ -99,6 +99,7 @@ export const buildFindFilter = (params: {
   policyId?: string;
   itemIds?: readonly string[];
 }): string | undefined => {
+  const quoteValue = (value: string): string => escapeQuotes(value).replace(/,/g, '\\u002c');
   const filters: string[] = [];
 
   if (params.os) {
@@ -106,7 +107,7 @@ export const buildFindFilter = (params: {
   }
 
   if (params.policyId) {
-    const escaped = escapeQuotes(params.policyId);
+    const escaped = quoteValue(params.policyId);
     filters.push(
       `(exception-list-agnostic.attributes.tags:"${GLOBAL_ARTIFACT_TAG}" OR exception-list-agnostic.attributes.tags:"${BY_POLICY_ARTIFACT_TAG_PREFIX}${escaped}")`
     );
@@ -115,12 +116,35 @@ export const buildFindFilter = (params: {
   if (params.itemIds && params.itemIds.length > 0) {
     filters.push(
       `exception-list-agnostic.attributes.item_id:(${params.itemIds
-        .map((id) => `"${escapeQuotes(id)}"`)
+        .map((id) => `"${quoteValue(id)}"`)
         .join(' OR ')})`
     );
   }
 
   return filters.length > 0 ? filters.join(' AND ') : undefined;
+};
+
+const buildFindQuery = ({
+  listId,
+  page,
+  perPage,
+  filter,
+}: {
+  listId: string;
+  page: number;
+  perPage: number;
+  filter?: string;
+}): URLSearchParams => {
+  const queryParams = new URLSearchParams({
+    namespace_type: 'agnostic',
+    list_id: listId,
+    page: String(page),
+    per_page: String(perPage),
+  });
+  if (filter !== undefined) {
+    queryParams.set('filter', filter);
+  }
+  return queryParams;
 };
 
 const buildArtifactSummary = (item: ArtifactItem): ArtifactSummary => {
@@ -193,10 +217,16 @@ export const findEndpointArtifactsStepDefinition = createServerStepDefinition({
     } = parsed.data;
 
     if (saved_object_ids && saved_object_ids.length > 0) {
-      const items: ArtifactItem[] = [];
-      const notFoundIds: string[] = [];
-      let unauthorized = false;
-      for (const id of saved_object_ids) {
+      if ([item_ids, search, policy_id, os].some((filter) => filter && filter.length > 0)) {
+        throw new ExecutionError({
+          type: 'ValidationError',
+          message: 'saved_object_ids cannot be combined with item_ids, search, policy_id, or os',
+        });
+      }
+
+      const requestedIds = [...new Set(saved_object_ids)];
+      const candidates: ArtifactItem[] = [];
+      for (const id of requestedIds) {
         const queryParams = new URLSearchParams({ id, namespace_type: 'agnostic' });
         try {
           const { body } = await context.contextManager.callKibanaApi<ArtifactItem>({
@@ -205,23 +235,51 @@ export const findEndpointArtifactsStepDefinition = createServerStepDefinition({
             headers: { 'elastic-api-version': '2023-10-31' },
           });
           if (body.list_id === list_id) {
-            items.push(body);
-          } else {
-            notFoundIds.push(id);
+            candidates.push(body);
           }
         } catch (error) {
-          if (isNotFound(error)) {
-            notFoundIds.push(id);
-          } else if (isUnauthorized(error)) {
-            unauthorized = true;
-            items.length = 0;
-            notFoundIds.length = 0;
-            break;
-          } else {
+          if (
+            !isNotFound(error) &&
+            !isUnauthorized(error) &&
+            readErrorDetails(error).statusCode !== 400
+          ) {
             throw toApiExecutionError(error, 'find endpoint artifacts');
           }
         }
       }
+
+      const queryParams = buildFindQuery({
+        listId: list_id,
+        page: 1,
+        perPage: candidates.length || 1,
+        filter: buildFindFilter({ itemIds: candidates.map(({ item_id }) => item_id) }),
+      });
+
+      let items: ArtifactItem[] = [];
+      let unauthorized = false;
+      try {
+        const { body } = await context.contextManager.callKibanaApi<FindApiResponse>({
+          method: 'GET',
+          path: `/api/exception_lists/items/_find?${queryParams.toString()}`,
+        });
+        const candidateIds = new Set(candidates.map(({ id }) => id));
+        const confirmedItems = new Map(
+          (body.data ?? []).filter(({ id }) => candidateIds.has(id)).map((item) => [item.id, item])
+        );
+        items = requestedIds.flatMap((id) => {
+          const item = confirmedItems.get(id);
+          return item ? [item] : [];
+        });
+      } catch (error) {
+        if (isUnauthorized(error)) {
+          unauthorized = true;
+        } else if (!isNotFound(error)) {
+          throw toApiExecutionError(error, 'find endpoint artifacts');
+        }
+      }
+
+      const foundIds = new Set(items.map(({ id }) => id));
+      const notFoundIds = unauthorized ? [] : requestedIds.filter((id) => !foundIds.has(id));
 
       return {
         output: {
@@ -252,16 +310,12 @@ export const findEndpointArtifactsStepDefinition = createServerStepDefinition({
 
     try {
       while (fetchedItems.length < fetch_cap) {
-        const queryParams = new URLSearchParams({
-          namespace_type: 'agnostic',
-          list_id,
-          page: String(page),
-          per_page: String(PAGE_SIZE),
+        const queryParams = buildFindQuery({
+          listId: list_id,
+          page,
+          perPage: PAGE_SIZE,
+          filter,
         });
-
-        if (filter !== undefined) {
-          queryParams.set('filter', filter);
-        }
         if (search !== undefined && search.length > 0) {
           queryParams.set('search', search);
         }

@@ -16,6 +16,7 @@ import {
   MAX_FIND_LIMIT,
   MAX_INPUT_STRING_CHARS,
   MAX_ITEM_IDS,
+  MAX_SAVED_OBJECT_IDS,
 } from '../../../common/budget';
 import { artifactItemSchema, artifactSummarySchema } from '../contracts/artifact_ref';
 import { artifactListIdSchema, osSchema } from '../contracts/enums';
@@ -26,48 +27,32 @@ const boundedString = lazySchema(() => z.string().max(MAX_INPUT_STRING_CHARS));
 export const FindEndpointArtifactsStepId = 'security.findEndpointArtifacts' as const;
 
 export const findEndpointArtifactsInputSchema = lazySchema(() =>
-  z
-    .object({
-      list_id: artifactListIdSchema,
-      saved_object_ids: z.array(z.string().min(1).max(MAX_INPUT_STRING_CHARS)).max(10).nullish(),
-      item_ids: z.array(boundedString).max(MAX_ITEM_IDS).optional(),
-      policy_id: boundedString.optional(),
-      os: osSchema.optional(),
-      search: boundedString.optional(),
-      fetch_cap: z
-        .number()
-        .int()
-        .positive()
-        .max(FETCH_CAP_MAX)
-        .optional()
-        .default(FETCH_CAP_DEFAULT),
-      sort_field: boundedString
-        .optional()
-        .describe(
-          'Route sort field selecting the fetch window. With sort updated_at_item_id, the returned window is ordered by updated_at then item_id, ascending.'
-        ),
-      sort_order: z
-        .enum(['asc', 'desc'])
-        .optional()
-        .describe(
-          'Route sort direction selecting the fetch window. With sort updated_at_item_id, the returned window is ordered by updated_at then item_id, ascending.'
-        ),
-      sort: z.literal('updated_at_item_id').optional(),
-      offset: z.number().int().nonnegative().optional().default(0),
-      limit: z.number().int().positive().max(MAX_FIND_LIMIT).optional().default(DEFAULT_FIND_LIMIT),
-    })
-    .refine(
-      ({ saved_object_ids, item_ids, search, policy_id, os }) =>
-        !saved_object_ids?.length ||
-        (item_ids === undefined &&
-          search === undefined &&
-          policy_id === undefined &&
-          os === undefined),
-      {
-        message: 'saved_object_ids cannot be combined with item_ids, search, policy_id, or os',
-        path: ['saved_object_ids'],
-      }
-    )
+  z.object({
+    list_id: artifactListIdSchema,
+    saved_object_ids: z
+      .array(z.string().min(1).max(MAX_INPUT_STRING_CHARS))
+      .max(MAX_SAVED_OBJECT_IDS)
+      .nullish(),
+    item_ids: z.array(boundedString).max(MAX_ITEM_IDS).optional(),
+    policy_id: boundedString.optional(),
+    os: osSchema.optional(),
+    search: boundedString.optional(),
+    fetch_cap: z.number().int().positive().max(FETCH_CAP_MAX).optional().default(FETCH_CAP_DEFAULT),
+    sort_field: boundedString
+      .optional()
+      .describe(
+        'Route sort field selecting the fetch window. With sort updated_at_item_id, the returned window is ordered by updated_at then item_id, ascending.'
+      ),
+    sort_order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .describe(
+        'Route sort direction selecting the fetch window. With sort updated_at_item_id, the returned window is ordered by updated_at then item_id, ascending.'
+      ),
+    sort: z.literal('updated_at_item_id').optional(),
+    offset: z.number().int().nonnegative().optional().default(0),
+    limit: z.number().int().positive().max(MAX_FIND_LIMIT).optional().default(DEFAULT_FIND_LIMIT),
+  })
 );
 
 export const findEndpointArtifactsOutputSchema = lazySchema(() =>
@@ -75,7 +60,7 @@ export const findEndpointArtifactsOutputSchema = lazySchema(() =>
     items: z.array(artifactItemSchema),
     summaries: z.array(artifactSummarySchema),
     population: populationSchema,
-    not_found_ids: z.array(boundedString).max(10),
+    not_found_ids: z.array(boundedString).max(MAX_SAVED_OBJECT_IDS),
     next_offset: z.number().int().nonnegative().nullable().optional(),
     unauthorized: z.boolean(),
   })
@@ -105,7 +90,7 @@ export const findEndpointArtifactsStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.findEndpointArtifacts.documentation.details',
       {
         defaultMessage:
-          'Reads GET /api/exception_lists/items/_find for exactly one list_id. item_ids, when set, resolves only those ids. policy_id, os, and search filter the route. fetch_cap bounds the fetched window. sort_field and sort_order select the fetch window through the route. sort updated_at_item_id orders that window by updated_at then item_id, ascending, in memory. offset and limit slice that union. A nonempty saved_object_ids array reads GET /api/exception_lists/items by saved-object ID in request order. It accepts at most 10 IDs and cannot be combined with item_ids, policy_id, os, or search; limit, offset, and sort are ignored. Absent, null, or empty saved_object_ids uses the find route. not_found_ids always lists missing or invisible saved-object IDs, never item_ids. A 403 on any read returns unauthorized with empty items and not_found_ids.',
+          'Reads GET /api/exception_lists/items/_find for exactly one list_id. item_ids, when set, resolves only those ids. policy_id, os, and search filter the route. fetch_cap bounds the fetched window. sort_field and sort_order select the fetch window through the route. sort updated_at_item_id orders that window by updated_at then item_id, ascending, in memory. offset and limit slice that union. A nonempty saved_object_ids array accepts at most 10 IDs, removes duplicates keeping their first position, and reads every ID through GET /api/exception_lists/items. Items belonging to the requested list become candidates; other-list items and 404s are misses, while 403s and 400s remain unresolved. Other read failures fail the step. One GET /api/exception_lists/items/_find on the requested list then confirms candidates by item_id with the agnostic namespace and active-space visibility. On 200, only candidates returned by saved-object ID are included, using the confirmed item bodies; all remaining requested IDs go to not_found_ids. Confirmation 403 returns unauthorized with empty items and not_found_ids; 404 puts every requested ID in not_found_ids; 400 or other failures fail the step without partial output. items and not_found_ids preserve deduplicated request order. A nonempty saved_object_ids array cannot be combined with nonempty item_ids, policy_id, os, or search; empty strings and arrays do not count as set filters. limit, offset, and sort are ignored. Absent, null, or empty saved_object_ids uses the normal find route. not_found_ids always contains saved-object IDs, never item_ids.',
       }
     ),
     examples: [
