@@ -69,6 +69,7 @@ function TraceMetricsGrid({
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
+  isChartLoading,
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) {
@@ -191,6 +192,7 @@ function TraceMetricsGrid({
           timeTo={fetchParams.timeRange?.to}
           services={services}
           actions={actions}
+          isChartLoading={isChartLoading}
         />
       </ChartsGrid>
     );

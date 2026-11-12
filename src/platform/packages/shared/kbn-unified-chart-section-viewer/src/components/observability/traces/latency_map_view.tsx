@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiDelayRender, EuiPanel, EuiProgress } from '@elastic/eui';
 import { appendToESQLQuery, getESQLResults } from '@kbn/esql-utils';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -36,6 +36,8 @@ export interface TracesLatencyMapViewProps {
   timeTo?: string;
   services: UnifiedMetricsGridProps['services'];
   actions: UnifiedMetricsGridProps['actions'];
+  /** Discover's documents query is running, as after a committed selection rewrites it. */
+  isChartLoading?: boolean;
 }
 
 /**
@@ -50,6 +52,7 @@ export function TracesLatencyMapView({
   timeTo,
   services,
   actions,
+  isChartLoading,
 }: TracesLatencyMapViewProps) {
   const { updateESQLQuery, setExpandedDoc } = actions;
   const selectionClause = filters.find(isSelectionCondition);
@@ -166,10 +169,23 @@ export function TracesLatencyMapView({
       paddingSize="s"
       // The chart section can be resized smaller than the map; scroll rather than clip.
       css={css`
+        position: relative;
         height: 100%;
         overflow-y: auto;
       `}
     >
+      {/* A committed selection rewrites the query; the bar says the documents are following.
+          Delayed as in the unified histogram, so fast queries never flash it. */}
+      {isChartLoading && (
+        <EuiDelayRender delay={500}>
+          <EuiProgress
+            size="xs"
+            color="accent"
+            position="absolute"
+            data-test-subj="tracesLatencyMapProgressBar"
+          />
+        </EuiDelayRender>
+      )}
       <LatencyMap
         source={source}
         runEsql={runEsql}

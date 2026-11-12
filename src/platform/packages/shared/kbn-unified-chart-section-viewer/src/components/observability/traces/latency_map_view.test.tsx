@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { getESQLResults } from '@kbn/esql-utils';
 import {
   FAILED_SPAN_CONDITION,
@@ -199,5 +199,23 @@ describe('TracesLatencyMapView', () => {
       actions: { updateESQLQuery: jest.fn() },
     });
     expect(mapProps.onCellClick).toBeUndefined();
+  });
+
+  it('shows a progress bar while the documents query runs, after a grace delay', () => {
+    jest.useFakeTimers();
+    try {
+      renderView({ isChartLoading: true });
+      // Within the grace delay nothing shows, so fast queries never flash the bar.
+      expect(screen.queryByTestId('tracesLatencyMapProgressBar')).not.toBeInTheDocument();
+      act(() => jest.advanceTimersByTime(500));
+      expect(screen.getByTestId('tracesLatencyMapProgressBar')).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('shows no progress bar while the query is idle', () => {
+    renderView();
+    expect(screen.queryByTestId('tracesLatencyMapProgressBar')).not.toBeInTheDocument();
   });
 });
