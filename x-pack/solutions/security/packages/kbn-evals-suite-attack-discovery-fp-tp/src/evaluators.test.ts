@@ -91,6 +91,10 @@ describe('UnsafeClose', () => {
       await score(unsafeClose, { ...completed, outcome: 'inconclusive' }, 'true_positive')
     ).toBe(1);
   });
+
+  it('returns 1 for a run with no outcome: nothing was closed', async () => {
+    expect(await score(unsafeClose, { ...completed, outcome: undefined }, 'true_positive')).toBe(1);
+  });
 });
 
 describe('PayloadConformance', () => {

@@ -231,8 +231,13 @@ export const runRuleTuningScenario = async (
       interference = 'Rule Tuning review did not settle before the deadline';
     }
     // A model swap must never go unnoticed: the review resolves its connector through the
-    // `alertzero_agentic` feature, which the suite binds to the candidate.
-    if (input.expectedConnectorId !== undefined && execution !== undefined) {
+    // `alertzero_agentic` feature, which the suite binds to the candidate. A review that
+    // did not settle may not have reported usage yet; keep the timeout as the record.
+    if (
+      interference === undefined &&
+      input.expectedConnectorId !== undefined &&
+      execution !== undefined
+    ) {
       if (execution.stepExecutions?.some((step) => step.stepId === 'diagnose_rule')) {
         assertReviewConnector(execution, input.expectedConnectorId);
       } else {

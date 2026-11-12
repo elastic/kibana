@@ -60,6 +60,7 @@ describe('AlertZero Attack Discovery worker chain (review -> fp/tp analysis -> e
         ids: [FAKE_ATTACK_DISCOVERY_ID],
         status: 'closed',
         reason: 'false_positive',
+        updateRelatedAlerts: false,
       });
     });
 
@@ -167,6 +168,7 @@ describe('AlertZero Attack Discovery worker chain (review -> fp/tp analysis -> e
         expect(fixture.backend.attackStatusCalls).toContainEqual({
           ids: [FAKE_ATTACK_DISCOVERY_ID],
           status: 'closed',
+          updateRelatedAlerts: false,
         });
         // Stated outright rather than inferred from `toContainEqual`'s
         // extra-property inequality: a dismissal that wrongly closed the attack

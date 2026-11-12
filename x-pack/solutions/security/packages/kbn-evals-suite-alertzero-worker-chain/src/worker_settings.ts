@@ -118,6 +118,7 @@ export const restoreWorker = async (
     // When the snapshot had NONE, the run's write added one and the patch
     // merge would keep it; `serviceAccountId: null` is the contract's explicit
     // clear (applyWorkerSettingsWrite branches on undefined, not null).
+    // Autonomy needs no clear: the WorkerSettings read shape always carries one.
     settings: {
       autonomy: snapshot.settings.autonomy,
       serviceAccountId:
@@ -152,8 +153,9 @@ export const preflightWorkerServiceAccounts = async (
     }
     const override =
       typeof serviceAccountIds === 'string' ? serviceAccountIds : serviceAccountIds?.[workerId];
-    const resolved = override ?? worker.settings.serviceAccountId;
-    if (resolved !== undefined) effective[workerId] = resolved;
+    // An empty override (e.g. a blank env var) is unset, not an account.
+    const resolved = override || worker.settings.serviceAccountId;
+    if (resolved) effective[workerId] = resolved;
     else missing.push(workerId);
   }
   if (missing.length > 0) {

@@ -122,7 +122,12 @@ export interface FakeConversation {
 export interface FakeAlertZeroBackend {
   conversations: Map<string, FakeConversation>;
   /** Every `security.setAttackStatus` call, in order, for assertions. */
-  attackStatusCalls: Array<{ ids: string[]; status: string; reason?: string }>;
+  attackStatusCalls: Array<{
+    ids: string[];
+    status: string;
+    reason?: string;
+    updateRelatedAlerts: boolean;
+  }>;
   /** Every `security.setAlertTags` call, in order, for assertions. */
   alertTagCalls: Array<{ alertIds: string[]; tagsToAdd: string[]; tagsToRemove: string[] }>;
   /** Every knowledge indicator `context-engine.createKi` wrote, keyed by ki_id. */
@@ -178,7 +183,7 @@ export const createFakeAlertZeroBackend = (): {
   stepDefinitions: unknown[];
 } => {
   const conversations = new Map<string, FakeConversation>();
-  const attackStatusCalls: Array<{ ids: string[]; status: string; reason?: string }> = [];
+  const attackStatusCalls: FakeAlertZeroBackend['attackStatusCalls'] = [];
   const alertTagCalls: FakeAlertZeroBackend['alertTagCalls'] = [];
   const knowledgeIndicators = new Map<string, { ai_index_id: string; ki: unknown }>();
   const agentVerdictQueue: Array<{
@@ -342,9 +347,15 @@ export const createFakeAlertZeroBackend = (): {
         ids: string | string[];
         status: 'open' | 'acknowledged' | 'closed';
         reason?: string;
+        update_related_alerts?: boolean;
       };
       const ids = Array.isArray(input.ids) ? input.ids : [input.ids];
-      attackStatusCalls.push({ ids, status: input.status, reason: input.reason });
+      attackStatusCalls.push({
+        ids,
+        status: input.status,
+        reason: input.reason,
+        updateRelatedAlerts: input.update_related_alerts === true,
+      });
       return {
         output: {
           success: true,

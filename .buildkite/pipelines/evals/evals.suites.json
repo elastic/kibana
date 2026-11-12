@@ -543,7 +543,8 @@
       "ciLabels": [
         "evals:security-alertzero-worker-chain"
       ],
-      "serverConfigSet": "evals_alertzero_worker_chain"
+      "serverConfigSet": "evals_alertzero_worker_chain",
+      "localOnly": true
     },
     {
       "id": "skill-selection-benchmark",

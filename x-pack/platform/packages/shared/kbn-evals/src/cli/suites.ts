@@ -71,6 +71,8 @@ export interface EvalSuiteMetadata {
   defaultJudge?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
+  /** Not selectable from PR CI labels; runs only through `node scripts/evals`. */
+  localOnly?: boolean;
 }
 
 export interface EvalSuiteDefinition {
@@ -92,6 +94,7 @@ export interface EvalSuiteDefinition {
   defaultJudge?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
+  localOnly?: boolean;
 }
 
 interface MetadataFile {
@@ -204,6 +207,7 @@ const normalizeSuite = (
     defaultJudge: metadata?.defaultJudge,
     shards: metadata?.shards,
     stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
+    localOnly: metadata?.localOnly,
   };
 };
 

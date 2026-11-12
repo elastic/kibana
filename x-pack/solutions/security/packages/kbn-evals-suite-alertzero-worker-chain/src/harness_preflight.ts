@@ -47,8 +47,21 @@ export const bindWorkerChainInferenceFeatures = async (
   endpointId: string
 ): Promise<() => Promise<void>> => {
   const restores: Array<() => Promise<void>> = [];
+  // Every restore runs even when an earlier one throws, so one failure cannot leave
+  // another feature bound to the candidate connector.
   const restoreAll = async () => {
-    for (const restore of restores.splice(0).reverse()) await restore();
+    const errors: unknown[] = [];
+    for (const restore of restores.splice(0).reverse()) {
+      try {
+        await restore();
+      } catch (error) {
+        errors.push(error);
+      }
+    }
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) {
+      throw new AggregateError(errors, `${errors.length} inference feature restores failed`);
+    }
   };
   try {
     for (const featureId of [ALERTZERO_REASONING_FEATURE_ID, ALERTZERO_AGENTIC_FEATURE_ID]) {

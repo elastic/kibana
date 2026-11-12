@@ -39,7 +39,7 @@ export const selectWorkerChainExampleIds = (
   const selected: string[] = [];
   const unknown: string[] = [];
   for (const token of tokens) {
-    const ids = WORKER_CHAIN_SUBSETS[token] ?? [token];
+    const ids = Object.hasOwn(WORKER_CHAIN_SUBSETS, token) ? WORKER_CHAIN_SUBSETS[token] : [token];
     for (const id of ids) {
       if (!eligible.includes(id)) unknown.push(id);
       else if (!selected.includes(id)) selected.push(id);
@@ -86,9 +86,10 @@ export const deriveWorkerChainTimeoutMs = (env: Env = process.env): number => {
 
 /**
  * Fails fast, before any setup, when a Buildkite run could not finish inside
- * the step budget. The Buildkite step does not forward `WORKER_CHAIN_EXAMPLES`,
- * so a CI run takes every example and its derived timeout would otherwise sit
- * far above the step kill with nothing to say so.
+ * the step budget. PR labels never select this `localOnly` suite, but a direct
+ * on-demand build can; its step does not forward `WORKER_CHAIN_EXAMPLES`, so it
+ * takes every example and the derived timeout would otherwise sit far above the
+ * step kill with nothing to say so.
  */
 export const assertWorkerChainFitsCiBudget = (env: Env = process.env): void => {
   if (env.BUILDKITE !== 'true') return;
@@ -98,6 +99,7 @@ export const assertWorkerChainFitsCiBudget = (env: Env = process.env): void => {
     `AlertZero worker-chain: derived timeout ${Math.round(timeoutMs / 60000)} min exceeds the ` +
       `Buildkite step budget of ${Math.round(WORKER_CHAIN_CI_STEP_BUDGET_MS / 60000)} min ` +
       `(${WORKER_CHAIN_EXAMPLES_ENV} is not forwarded to the step, so CI selects all examples). ` +
-      `Run this suite from a controller with ${WORKER_CHAIN_EXAMPLES_ENV}=smoke6 instead.`
+      `Run it locally instead: ${WORKER_CHAIN_EXAMPLES_ENV}=smoke6 node scripts/evals start ` +
+      `--suite security-alertzero-worker-chain`
   );
 };

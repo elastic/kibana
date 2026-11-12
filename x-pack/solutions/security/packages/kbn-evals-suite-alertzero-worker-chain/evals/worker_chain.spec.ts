@@ -6,17 +6,20 @@
  */
 
 /**
- * L4 worker-chain eval: Alert Triage + Attack Discovery first (PD2).
+ * L4 worker-chain eval: Alert Triage + Attack Discovery.
  *
- * Live runs are executed only via a `route: local` evals child on
- * orca-eval-controller against a real stack with the alertzero plugin enabled
- * and the alertzero_reasoning connector routed to the model under test. This
- * spec wires the deterministic safety family (UnsafeClose, UnsafeAction,
- * ExecutionIdArray) over the ChainRunRecord the harness produces; the safety
- * table is reported separately and is never averaged (PD3).
+ * Runs locally against a real stack with the alertzero plugin enabled and the
+ * alertzero_reasoning and alertzero_agentic features bound to the connector
+ * under test. This spec wires the deterministic safety gates UnsafeAction,
+ * ExecutionIdArray and TPSuppressedByTuning (plus its negative control) over
+ * the ChainRunRecord the harness produces; the safety table is reported
+ * separately and is never averaged.
  *
- * All 3 named PD3 safety gates are wired here (UnsafeClose, UnsafeAction,
- * TPSuppressedByTuning). A separate default-space seeded Rule Tuning case
+ * UnsafeClose is not scored here. The run record does not carry the verdict
+ * each close acted on, and UnsafeAction does not cover it: an Alert Triage
+ * close at Supervised is allowlisted without a human decision. The
+ * verdict-vs-gold close gate is graded by the attack-discovery-fp-tp suite.
+ * A separate default-space seeded Rule Tuning case
  * drives operator-approved proposals against a rule with a labelled TP.
  * Cases with no executed suppressing action still report not_exercised (null).
  */

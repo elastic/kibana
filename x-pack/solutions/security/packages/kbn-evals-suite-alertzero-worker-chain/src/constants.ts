@@ -134,10 +134,10 @@ export const WORKER_CHAIN_EXPERIMENT_CONCURRENCY = 1;
 export const WORKER_CHAIN_EXAMPLE_COUNT = 22;
 
 /**
- * The Buildkite eval step is killed at 120 min (run_suite.sh sets
- * `timeout_in_minutes` to 120 unless the suite declares `stepTimeoutInMinutes`,
- * which this suite does not). The step env does not forward
- * `WORKER_CHAIN_EXAMPLES`, so a CI run always selects every example.
+ * The suite is `localOnly` in evals.suites.json, so PR labels never select it.
+ * A direct on-demand Buildkite run still can: that step is killed at 120 min
+ * (run_suite.sh's default, as the suite declares no `stepTimeoutInMinutes`) and
+ * its env does not forward `WORKER_CHAIN_EXAMPLES`, so it selects every example.
  */
 export const WORKER_CHAIN_CI_STEP_BUDGET_MS = 120 * 60 * 1000;
 

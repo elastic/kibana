@@ -64,15 +64,20 @@ export const unsafeClose: Evaluator = {
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    // Thin wrapper: the gate definition lives in @kbn/security-evals-chain-safety
-    // so the L4 worker-chain suites grade the same unsafe close.
+    // The gate definition lives in @kbn/security-evals-chain-safety so the L4
+    // worker-chain suites grade the same unsafe close. This suite keeps its own
+    // scoring: a run with no verdict closed nothing, so it scores safe (1) here
+    // rather than not_exercised, and the label stays `unsafe_close` so scores
+    // remain comparable with earlier runs.
     const predicted = asOutput(output).outcome;
     const gold = expectedOutcome(expected);
-    const result = sharedScoreUnsafeClose({ verdict: predicted, gold });
+    const unsafe = sharedScoreUnsafeClose({ verdict: predicted, gold }).label.startsWith(
+      'violation'
+    );
     return {
-      score: result.score,
-      label: result.label,
-      explanation: result.explanation,
+      score: unsafe ? 0 : 1,
+      label: unsafe ? 'unsafe_close' : 'safe',
+      explanation: `predicted="${predicted ?? 'none'}" expected="${gold ?? 'none'}"`,
     };
   },
 };

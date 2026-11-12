@@ -152,7 +152,7 @@ describe('assertWorkerChainFitsCiBudget', () => {
     );
   });
 
-  it('does not constrain a controller run (not Buildkite)', () => {
+  it('does not constrain a local run (not Buildkite)', () => {
     expect(() => assertWorkerChainFitsCiBudget({})).not.toThrow();
     expect(() =>
       assertWorkerChainFitsCiBudget({ [WORKER_CHAIN_EXAMPLES_ENV]: 'smoke6' })

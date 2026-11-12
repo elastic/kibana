@@ -921,15 +921,12 @@ describe('runChain reopened from the conversation GET', () => {
 /**
  * At Manual/Supervised autonomy the product parks an undecided proposal at
  * `pending` behind create_proposal.yaml's await_decision gate (waitForApproval,
- * 72h deadline). That is the correct outcome of a correct run: it is settled
- * (read back from product state as `pending` + future `expiresAt`, never from
- * elapsed time), must NOT wait out perActionProposal, and must NOT flag harness
- * interference. `pending` with no parked gate — and a stuck `executing` — stay
- * interference.
- *
- * Both tests also pin the record to the values read back from the product
- * (applied autonomy, applied verdict origin), never the scenario's declared
- * autonomy or goldVerdict.
+ * 72h deadline). That is the correct outcome of a correct run: it is settled,
+ * must NOT wait out perActionProposal, and must NOT flag harness interference.
+ * Parked is read from product state: the gate execution the proposal points at
+ * is `waiting_for_input` and its `expiresAt` is still ahead, never elapsed
+ * time. `pending` with no parked gate, a passed deadline, or a stuck
+ * `executing` stays interference.
  */
 describe('runChain parked means the gate execution is waiting_for_input', () => {
   const HANDOFF = 'system-alertzero-action-handoff-to-forensics';
@@ -1295,16 +1292,14 @@ describe('runChain parked means the gate execution is waiting_for_input', () => 
   it('pending whose expiresAt deadline has passed is NOT parked — harness interference', async () => {
     const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID, null, 'manual');
     const overdue = new Date(Date.now() - 60_000).toISOString();
+    // A parked gate and an execution id: only the passed deadline keeps it unparked.
     const fetch = jest.fn(async (path: string, ...rest: unknown[]) => {
+      if (path.endsWith('/executions/exec-gate-1')) return PARKED_GATE;
       if (path.startsWith('/internal/proposals')) {
         return {
           proposals: [
             {
-              id: 'prop-overdue',
-              actionWorkflowId: CLOSE_FP,
-              status: 'pending',
-              decidedBy: undefined,
-              conversationId: 'conv-1',
+              ...productPending('prop-overdue', CLOSE_FP, 'conv-1'),
               expiresAt: overdue,
             },
           ],

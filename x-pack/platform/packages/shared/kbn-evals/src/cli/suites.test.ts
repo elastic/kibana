@@ -31,6 +31,11 @@ describe('resolveEvalSuites', () => {
             id: 'without-secret',
             configPath: 'x-pack/packages/kbn-evals-suite-without-secret/playwright.config.ts',
           },
+          {
+            id: 'local-only',
+            configPath: 'x-pack/packages/kbn-evals-suite-local-only/playwright.config.ts',
+            localOnly: true,
+          },
         ],
       })
     );
@@ -48,5 +53,12 @@ describe('resolveEvalSuites', () => {
       vaultSecret: 'with-secret',
     });
     expect(suites.find(({ id }) => id === 'without-secret')?.vaultSecret).toBeUndefined();
+  });
+
+  it('keeps a localOnly suite resolvable for local runs and carries the flag', () => {
+    const suites = resolveEvalSuites(repoRoot);
+
+    expect(suites.find(({ id }) => id === 'local-only')?.localOnly).toBe(true);
+    expect(suites.find(({ id }) => id === 'without-secret')?.localOnly).toBeUndefined();
   });
 });

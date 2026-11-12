@@ -54,6 +54,13 @@ const SUITES = {
       configPath: 'x-pack/pinned-judge/playwright.config.ts',
       defaultJudge: 'eis-abc-1',
     },
+    {
+      id: 'local-only',
+      name: 'Local Only',
+      ciLabels: ['evals:local-only'],
+      configPath: 'x-pack/local-only/playwright.config.ts',
+      localOnly: true,
+    },
   ],
 };
 
@@ -199,6 +206,20 @@ describe('eval_pipeline', () => {
       expect(getForwardablePrLabels('evals:smoke-tests,evals:skip-smoke-tests')).toBe(
         'evals:smoke-tests,evals:skip-smoke-tests'
       );
+    });
+  });
+
+  describe('a `localOnly` suite', () => {
+    it('is not selected by its own label', () => {
+      expect(shouldRunEvals('evals:local-only,models:eis/openai-gpt-5.4')).toBe(false);
+      expect(getEvalPipeline('evals:local-only,models:eis/openai-gpt-5.4')).toBeNull();
+    });
+
+    it('is not selected by `evals:all`', () => {
+      const yaml = getEvalPipeline('evals:all,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain('kbn-evals-agent-builder');
+      expect(yaml).not.toContain('kbn-evals-local-only');
     });
   });
 

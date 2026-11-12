@@ -13,10 +13,10 @@ export default createPlaywrightEvalsConfig({
   // The experiment runs one chain at a time (WORKER_CHAIN_EXPERIMENT_CONCURRENCY),
   // so the single test covers every selected example (WORKER_CHAIN_EXAMPLES) times
   // EVAL_REPETITIONS back to back: selected x repetitions x the per-chain bound
-  // (constants.ts). A ceiling, not a target. CI is deliberately not resized: the
-  // Buildkite step is capped at 120 min (run_suite.sh:240) and does not forward
-  // WORKER_CHAIN_EXAMPLES, so a Buildkite run refuses to start
-  // (assertWorkerChainFitsCiBudget) rather than hit the step kill. Run it on a
-  // controller with WORKER_CHAIN_EXAMPLES=smoke6.
+  // (constants.ts). A ceiling, not a target. The suite is localOnly, so PR labels
+  // never select it. A direct on-demand Buildkite run is capped at 120 min and
+  // does not forward WORKER_CHAIN_EXAMPLES, so it refuses to start
+  // (assertWorkerChainFitsCiBudget) rather than hit the step kill. Run it with
+  // `WORKER_CHAIN_EXAMPLES=smoke6 node scripts/evals start --suite <id>`.
   timeout: deriveWorkerChainTimeoutMs(),
 });

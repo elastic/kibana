@@ -32,7 +32,7 @@ export const buildRuleTuningWorld = (
       ...source,
       'kibana.alert.uuid': id,
       'kibana.alert.rule.uuid': ruleId,
-      'kibana.alert.rule.rule_id': ruleId,
+      'kibana.alert.rule.rule_id': `tuning-${suffix}`,
       // The sweep only fans out a rule whose alerts carry its current revision.
       'kibana.alert.rule.revision': ruleRevision,
       'kibana.alert.rule.name': `Rule Tuning TP control ${suffix}`,

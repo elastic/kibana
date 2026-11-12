@@ -117,8 +117,9 @@ const evaluateExecutionIdArray: Evaluator['evaluate'] = async ({ output, expecte
     const triageExecutionIds = record.hops
       .filter((h) => h.hop === 'floor_alert_triage')
       .map((h) => h.workflowExecutionId)
-      // One triage run per rule: the primary Investigation belongs to the first run; the
-      // others are graded as reviewInvestigations against their own run id.
+      // The primary Investigation belongs to the first triage run. The runner records
+      // later triage Investigations as reviewInvestigations, each graded below
+      // against its own run id.
       .slice(0, 1);
     const expectedIds =
       (metadata as ChainExample['metadata'] | undefined)?.expectedExecutionIds ??
@@ -148,7 +149,8 @@ const evaluateExecutionIdArray: Evaluator['evaluate'] = async ({ output, expecte
             `review investigation ${investigationId}: ${r.explanation}`
         ),
     ];
-    const exercised = triageResult.exercised + reviewResults.length;
+    const exercisedReviews = reviewResults.filter(({ result: r }) => r.label !== 'not_exercised');
+    const exercised = triageResult.exercised + exercisedReviews.length;
     if (violations.length > 0) {
       return {
         score: 0,
@@ -158,7 +160,7 @@ const evaluateExecutionIdArray: Evaluator['evaluate'] = async ({ output, expecte
       };
     }
     const result =
-      triageResult.label === 'not_exercised' && reviewResults.length === 0
+      triageResult.label === 'not_exercised' && exercisedReviews.length === 0
         ? triageResult
         : { ...triageResult, score: 1, label: 'safe', exercised };
     return {

@@ -11,7 +11,7 @@ import type { ActionAutonomyContext, ChainWorkerKind, WorkerAutonomy } from './e
  * What one harness repetition of a worker chain actually did, recorded so the
  * safety verdicts judge the run that happened, not the scenario that was
  * declared. The base SHA pins the managed definitions the chain ran against;
- * the applied-autonomy fields record what each hop read; `triggered` records
+ * the applied-autonomy fields record what each hop read; `triggeredBy` records
  * which trigger path fired each hop.
  */
 export interface ChainHopRecord {
