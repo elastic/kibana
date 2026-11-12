@@ -44,7 +44,7 @@ import {
 } from './worker_settings';
 
 /**
- * F1: minimal structural view of the ES client the spec passes in (Scout's
+ * Minimal structural view of the ES client the spec passes in (Scout's
  * esClient). Only mget is needed: after seeding, the real alert docs are read
  * back from the seeded `.alerts-security.alerts-<space>` index so the triage
  * run receives the same full-document event the product's alert trigger emits.
@@ -118,7 +118,7 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * F2/N1: the concurrency manager takes an overlapping run out of the race in
+ * The concurrency manager takes an overlapping run out of the race in
  * three ways (concurrency_manager.ts): `cancel-in-progress` marks the displaced
  * run CANCELLED with `Cancelled due to concurrency limit (max: N)` (:199);
  * `drop` marks the NEW run SKIPPED with `Dropped due to concurrency limit
@@ -143,7 +143,7 @@ const concurrencyCancellation = (
 };
 
 /**
- * F2: floor_attack_discovery carries `settings.concurrency: {max: 1,
+ * floor_attack_discovery carries `settings.concurrency: {max: 1,
  * strategy: cancel-in-progress}` (floor_attack_discovery.yaml) — the product's
  * own limit, which the harness must not touch. When the eval runner executes
  * examples concurrently, overlapping AD hops cancel each other
@@ -161,7 +161,7 @@ export interface ChainScenario {
   key: string;
   workerChain: ChainWorkerKind[];
   declaredAutonomy: Partial<Record<ChainWorkerKind, WorkerAutonomy>>;
-  /** Seeded alerts: id + the host the alert fired on, for the D15 wrong-host check. */
+  /** Seeded alerts: id + the host the alert fired on, for the wrong-host check. */
   alerts: Array<{ id: string; hostId?: string }>;
   rule: { id: string; name: string };
   /** Rule uuids of rules whose alerts the scenario labels TRUE POSITIVE (TPSuppressedByTuning). */
@@ -169,7 +169,7 @@ export interface ChainScenario {
   goldVerdict: 'true_positive' | 'false_positive' | 'inconclusive';
 }
 
-/** F4: one AD review Investigation's D55 array next to the array the product must have written. */
+/** One AD review Investigation's `workflow_execution_ids` array next to the array the product must have written. */
 export interface ReviewInvestigationExecutionIds {
   investigationId: string;
   expectedExecutionIds: string[];
@@ -190,19 +190,19 @@ export interface RunChainParams {
   log: ToolingLog;
   scenario: ChainScenario;
   /**
-   * F1: ES access for reading the seeded alert documents back (mget). The
+   * ES access for reading the seeded alert documents back (mget). The
    * spec's Scout esClient satisfies this; kept structural so the package takes
    * no runtime dependency on @kbn/scout.
    */
   alertStore: AlertDocumentStore;
   /** kibana base commit the managed definitions shipped in; recorded on every run. */
   baseSha: string;
-  /** Firing strategy for floor_alert_triage (design Rev 3 §3 / N3). */
+  /** Firing strategy for floor_alert_triage. */
   triageTrigger: 'manual-event' | 'alert-trigger';
   /** How the forensics sweep autonomy reaches the KI. */
   forensicsSweepMode: 'scheduled' | 'blocked';
   /**
-   * B5/G20/R1: identities the chain's Workers run as — the per-worker
+   * Identities the chain's Workers run as — the per-worker
    * `settings.serviceAccountId` set, resolved by the caller before the run.
    * A `decidedBy` matching any of them is a worker auto-approval, not a human
    * decision. Never sourced from /internal/security/me (that is the eval
@@ -231,15 +231,15 @@ interface ProposalDto {
   conversationId: string;
   /** What the action runs with; Rule Tuning actions name their target rule here. */
   actionInput?: unknown;
-  /** Decision deadline the product parked the proposal under (R7). */
+  /** Decision deadline the product parked the proposal under. */
   expiresAt?: string;
-  /** Gating execution to resume; absent when no workflow is waiting (R7). */
+  /** Gating execution to resume; absent when no workflow is waiting. */
   workflowExecutionId?: string;
 }
 
 interface InvestigationConversation {
   id: string;
-  /** D55 array, on the conversation's metadata — not top level (review B7). */
+  /** The `workflow_execution_ids` array, on the conversation's metadata — not top level. */
   metadata?: { workflow_execution_ids?: string[] };
   reopened?: boolean;
 }
@@ -382,7 +382,7 @@ const waitForTerminal = async (
     if (last && isTerminal(last.status)) {
       return { status: last.status, overrun: false, parked: false };
     }
-    // B1: settled but not terminal = parked on its gate by design, reported
+    // Settled but not terminal = parked on its gate by design, reported
     // as `parked` so the hop is not mistaken for a stuck/failed one.
     if (last && isSettled?.(last)) {
       return { status: last.status, overrun: false, parked: true };
@@ -429,7 +429,7 @@ const readInvestigation = async (
     .catch(() => undefined)) as InvestigationConversation | undefined;
 
 /**
- * R6: a proposal is settled once its lifecycle can no longer reach success —
+ * A proposal is settled once its lifecycle can no longer reach success —
  * pending/executing proposals are dropped by `isExecuted`, so reading one of
  * those and reporting `not_exercised` would silently mask an unsafe action.
  */
@@ -442,7 +442,7 @@ const SETTLED_PROPOSAL_STATUSES = new Set([
 ]);
 
 /**
- * R7/R8: at Manual/Supervised autonomy the product parks an undecided proposal
+ * At Manual/Supervised autonomy the product parks an undecided proposal
  * at `pending` behind create_proposal.yaml's await_decision gate
  * (waitForApproval, 72h deadline). `workflowExecutionId` and `expiresAt` are
  * stamped on EVERY proposal at creation (create_proposal_step.ts), including the
@@ -491,7 +491,7 @@ const waitForProposals = async (
       return { proposals, unsettledAtTimeout: false };
     }
     if (Date.now() >= deadline) {
-      // R6: proposals exist but never settled inside perActionProposal. Return
+      // Proposals exist but never settled inside perActionProposal. Return
       // them anyway (the record shows what was read) and let the caller flag
       // harness interference — never a silent `not_exercised`.
       return { proposals, unsettledAtTimeout: !(await allSettled(ctx, proposals)) };
@@ -625,13 +625,13 @@ const asTriageTrigger = (value: unknown): ChainHopRecord['triggeredBy'] | undefi
  * Runs one repetition of a worker chain end to end and returns the
  * ChainRunRecord the safety gates judge:
  *
- *   seed (caller) → trigger floor_alert_triage (manual event or alert trigger,
- *   N3: the path used is recorded) or attack_discovery_runner (manual trigger;
- *   floor_attack_discovery is scheduled-only) → wait per-hop terminal (N5,
- *   per-hop timeouts name the hop that overran) → read Investigation
- *   (workflow_execution_ids, D55) + Proposals (decidedBy) → record.
+ *   seed (caller) → trigger floor_alert_triage (manual event or alert trigger;
+ *   the path used is recorded) or attack_discovery_runner (manual trigger;
+ *   floor_attack_discovery is scheduled-only) → wait per-hop terminal
+ *   (per-hop timeouts name the hop that overran) → read Investigation
+ *   (workflow_execution_ids) + Proposals (decidedBy) → record.
  *
- * Autonomy is applied, not declared (N2): the caller has already written each
+ * Autonomy is applied, not declared: the caller has already written each
  * Worker's saved autonomy (worker_settings.ts); this reads back what each hop
  * actually consumed and stores that on the record.
  */
@@ -647,7 +647,7 @@ export const runChain = ({
   maxWaitMs = {},
   pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
 }: RunChainParams): Promise<WorkerChainRunRecord> => {
-  // F2: whole chains run one at a time — floor_attack_discovery is max-1
+  // Whole chains run one at a time — floor_attack_discovery is max-1
   // cancel-in-progress, so overlapping AD hops cancel each other (18/21 in the
   // live smoke). The product's own limit stays untouched. The queue tail
   // swallows rejections (a failed chain must not poison the next example) but
@@ -706,13 +706,13 @@ const runChainUnserialized = async ({
   let investigationId: string | undefined;
   const actions: ChainRunRecord['actions'] = [];
   let harnessInterference: string | undefined;
-  // N4: append, never overwrite — a second overrun must not hide the first.
+  // Append, never overwrite — a second overrun must not hide the first.
   const markInterference = (note: string) => {
     harnessInterference =
       harnessInterference === undefined ? note : `${harnessInterference}; ${note}`;
   };
 
-  // B6: autonomy read back from the product, not the scenario's declaration.
+  // Autonomy read back from the product, not the scenario's declaration.
   // The caller writes the settings before runChain; this is the applied value.
   const appliedAutonomy: Partial<Record<ChainWorkerKind, WorkerAutonomy>> = {};
   const readBackAutonomy = async (worker: ChainWorkerKind, workerId: string) => {
@@ -729,7 +729,7 @@ const runChainUnserialized = async ({
     /** The runner execution that dispatched this review (its `parent_run_id`). */
     runnerExecutionId: string;
   }> = [];
-  /** F4: what each review's Investigation actually carries vs. what the product writes. */
+  /** What each review's Investigation actually carries vs. what the product writes. */
   const reviewInvestigationIds: ReviewInvestigationExecutionIds[] = [];
 
   if (scenario.workerChain.includes('alert-triage')) {
@@ -740,7 +740,7 @@ const runChainUnserialized = async ({
       WORKER_IDS.alertTriage,
       WORKFLOW_IDS.alertTriage
     );
-    // F1: mirror the production trigger path exactly. The alert trigger emits
+    // Mirror the production trigger path exactly. The alert trigger emits
     // full alert documents (`buildAlertEvent` over `preprocessAlertInputs`,
     // server/connectors/workflows/index.ts:269 in workflows_management — the
     // alert-trigger emitter; not the public/ twin of the same name), and the
@@ -760,7 +760,7 @@ const runChainUnserialized = async ({
       throw new Error(
         `Scenario "${scenario.key}": seeded alert(s) not found in ` +
           `"${seededAlerts.index}": ${missing.join(', ')}. ` +
-          'The triage workflow requires full alert documents (F1); the seed must index them first.'
+          'The triage workflow requires full alert documents; the seed must index them first.'
       );
     }
     // The workflow anchors all enrichment on the first alert's rule and rejects a caller
@@ -781,8 +781,8 @@ const runChainUnserialized = async ({
           ? {
               // The manual trigger declares no inputs, but the engine accepts an
               // event payload shaped like the alert trigger's (verified in
-              // workflows_management_api.test.ts:2330). N3 records which path ran.
-              // F1: alertIds ({_id,_index}), not expanded docs — the run route's
+              // workflows_management_api.test.ts:2330). The record notes which path ran.
+              // alertIds ({_id,_index}), not expanded docs — the run route's
               // preprocessing expands them the way the product's own trigger
               // would, through the rule type's formatAlert + expandFlattenedAlert.
               event: {
@@ -841,7 +841,7 @@ const runChainUnserialized = async ({
         );
       }
 
-      // B7/R3: the Investigation id is the create_investigation step's output —
+      // The Investigation id is the create_investigation step's output —
       // the triage workflow declares no top-level outputs carrying it. The DTO
       // field is `stepExecutions` (WorkflowExecutionDto), not `steps`.
       const stepExecutions = triageExecution?.stepExecutions ?? [];
@@ -861,7 +861,7 @@ const runChainUnserialized = async ({
   }
 
   if (scenario.workerChain.includes('attack-discovery')) {
-    // R2: never POST /run on the bare system-security-attack-discovery-worker
+    // Never POST /run on the bare system-security-attack-discovery-worker
     // runner — its run_generation step uses run-as-mode inherit, which fails
     // without a parent worker SA. Drive the installed per-space floor AD
     // workflow (scheduled-only in the product; POST /run on it is accepted —
@@ -872,7 +872,7 @@ const runChainUnserialized = async ({
       WORKER_IDS.attackDiscovery,
       WORKFLOW_IDS.attackDiscovery
     );
-    // N9: the floor AD workflow also carries a product schedule with
+    // The floor AD workflow also carries a product schedule with
     // `cancel-in-progress` (floor_attack_discovery.yaml). A schedule tick landing
     // mid-run would cancel this manual run; the run then reads back as a
     // cancelled hop, not a model failure. Run the cell with the Worker's
@@ -927,7 +927,7 @@ const runChainUnserialized = async ({
     );
     if (overrun) markInterference('floor_attack_discovery overran its per-hop timeout');
 
-    // B6: verdict origin is each review's own verdict, read back from the
+    // Verdict origin is each review's own verdict, read back from the
     // product — never scenario.goldVerdict. The reviews are async grandchildren
     // (floor → runner → executeAsync review): walk to them, wait each to
     // terminal, then read its verdict and the Investigation it raised proposals on.
@@ -962,7 +962,7 @@ const runChainUnserialized = async ({
           `attack_discovery_review ${reviewId} cancelled by the product's concurrency limit: ${reviewConcurrencyCancel}`
         );
       }
-      // B1: a review parked on its escalation gate is the correct outcome at
+      // A review parked on its escalation gate is the correct outcome at
       // Manual/Assisted autonomy; record it distinctly so ChainTerminal can
       // tell it from a failed/cancelled review (which stays a real 0).
       const reviewStatus = reviewWait.overrun
@@ -1043,7 +1043,7 @@ const runChainUnserialized = async ({
       pollIntervalMs
     );
     if (unsettledAtTimeout) {
-      // R6/R7: a proposal stuck in executing, or pending with no parked
+      // A proposal stuck in executing, or pending with no parked
       // decision gate, past perActionProposal would be dropped by the gate as
       // not executed — that is a harness timing failure, not a clean run;
       // never a silent `not_exercised`.
@@ -1070,17 +1070,17 @@ const runChainUnserialized = async ({
         actionWorkflowId,
         executionStatus: proposal.status === 'succeeded' ? 'completed' : proposal.status,
         proposalId: proposal.id,
-        // B5: an auto-approval writes decidedBy with the run-as identity —
+        // An auto-approval writes decidedBy with the run-as identity —
         // "someone decided" — so presence alone cannot stand in for a human.
         // `gate_answered: false` on the auto path means decidedAt is the only
         // honest separator; the gate treats decidedBy === runAsIdentity as
-        // worker-decided. The identity is parameterized (G20): the harness
+        // worker-decided. The identity is parameterized: the harness
         // records it, the gate compares it.
         decidedBy: proposal.decidedBy,
         actionInput: proposal.actionInput,
         autonomyContext: {
           worker,
-          // B6: applied autonomy read back from the product above.
+          // Applied autonomy read back from the product above.
           autonomy: appliedAutonomy[worker] ?? 'manual',
           verdictOrigin: source.verdict,
           investigationReopened: source.reopened,
@@ -1102,7 +1102,7 @@ const runChainUnserialized = async ({
     actions,
     investigation: {
       id: investigationId ?? reviewInvestigations[0]?.id,
-      // B7: D55 array lives on the conversation's metadata, not top level.
+      // The `workflow_execution_ids` array lives on the conversation's metadata, not top level.
       workflowExecutionIds: investigation?.metadata?.workflow_execution_ids ?? [],
       reopened: investigation?.reopened ?? false,
     },

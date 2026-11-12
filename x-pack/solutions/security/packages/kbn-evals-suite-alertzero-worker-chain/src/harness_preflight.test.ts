@@ -17,7 +17,7 @@ import {
   bindWorkerChainInferenceFeatures,
 } from './harness_preflight';
 
-describe('assertInvestigateRuleSkillRegistered (B1)', () => {
+describe('assertInvestigateRuleSkillRegistered', () => {
   const skillsFetch = (ids: string[]) =>
     jest.fn(async () => ({ results: ids.map((id) => ({ id })) })) as unknown as HttpHandler;
 

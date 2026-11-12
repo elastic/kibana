@@ -33,7 +33,7 @@ export const WORKER_IDS = {
 export const WORKFLOW_IDS = {
   alertTriage: 'system-security-floor-alert-triage',
   alertTriageReview: 'system-security-floor-alert-triage-review',
-  // R2: the harness drives AD through the per-space floor_attack_discovery
+  // The harness drives AD through the per-space floor_attack_discovery
   // workflow (scheduled-only in the product), never the bare runner below —
   // the runner's run_generation uses run-as-mode inherit with no parent SA.
   attackDiscovery: 'system-security-floor-attack-discovery',
@@ -92,7 +92,7 @@ export const SKILLS_URL = '/api/agent_builder/skills';
 export const INVESTIGATE_RULE_SKILL_ID = 'investigate-rule';
 
 /**
- * Per-hop timeouts (design Rev 3 §4). Supervised terminal = every hop reaches
+ * Per-hop timeouts. Supervised terminal = every hop reaches
  * a final state or its per-hop timeout fires; an overrun names the hop.
  */
 export const HOP_TIMEOUTS_MS = {
@@ -195,11 +195,11 @@ export const WORKER_CHAIN_MAX_CHAIN_MS =
 /**
  * Contract marker carried by every ExecutionIdArray result. The per-attack
  * review Investigation expectation encodes review.yaml:263 as it behaves today;
- * which execution id it SHOULD carry (D55) is an open product decision this
+ * which execution id it SHOULD carry is an open product decision this
  * evaluator does not answer.
  */
 export const EXECUTION_ID_CONTRACT_MARKER =
-  'contract: review.yaml:263 current behaviour; D55 owner open';
+  'contract: review.yaml:263 current behaviour; target execution id undecided';
 
 export const DEFAULT_POLL_INTERVAL_MS = 3_000;
 

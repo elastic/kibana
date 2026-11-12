@@ -13,12 +13,12 @@ describe('spacePath', () => {
     expect(spacePath('default', '/internal/x')).toBe('/internal/x');
   });
 
-  it('prefixes a non-default space (G20)', () => {
+  it('prefixes a non-default space', () => {
     expect(spacePath('sec team', '/internal/x')).toBe('/s/sec%20team/internal/x');
   });
 });
 
-describe('worker settings round trip (B3/B4)', () => {
+describe('worker settings round trip', () => {
   const makeFetch = () => {
     const calls: Array<{ path: string; options: Record<string, unknown> }> = [];
     let worker = {
@@ -68,7 +68,7 @@ describe('worker settings round trip (B3/B4)', () => {
     }
   });
 
-  it('N8: restores the captured serviceAccountId, not just autonomy', async () => {
+  it('restores the captured serviceAccountId, not just autonomy', async () => {
     const { fetch, current } = makeFetch();
     const ctx = { fetch, spaceId: 'default' };
     await restoreWorker(ctx, {

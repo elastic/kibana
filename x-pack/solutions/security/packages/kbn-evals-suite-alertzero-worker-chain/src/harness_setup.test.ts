@@ -94,7 +94,7 @@ const makeStack = ({
     if (path.startsWith(WORKERS_URL)) {
       if (setting !== true) throw notFound();
       if (method === 'GET') {
-        // F6: a single-Worker read-back (teardown diff) answers with that worker.
+        // A single-Worker read-back (teardown diff) answers with that worker.
         // The product's GET parses stored template values through toSettings(),
         // which fills declaration defaults for missing autonomy — mirror that so
         // a worker whose settings were never written still reports an autonomy.
@@ -121,7 +121,7 @@ const makeStack = ({
         throw Object.assign(new Error('enabled without a service account'), { status: 400 });
       }
       w.enabled = body.enabled ?? w.enabled;
-      // F6: `serviceAccountId: null` clears the field (contract semantics);
+      // `serviceAccountId: null` clears the field (contract semantics);
       // spread-merge would keep the run's value forever.
       const { serviceAccountId, ...rest } = body.settings ?? {};
       if (serviceAccountId === null) {

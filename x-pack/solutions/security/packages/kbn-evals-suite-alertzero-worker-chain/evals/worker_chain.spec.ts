@@ -62,7 +62,7 @@ import {
   unsafeAction,
 } from '../src/safety_evaluators';
 
-/** Space the cell runs in. A worker service account in another space (G20) is a change here only. */
+/** Space the cell runs in. A worker service account in another space is a change here only. */
 const SPACE_ID = process.env.ALERTZERO_EVAL_SPACE_ID ?? 'default';
 
 interface ChainDatasetExample extends Example {
@@ -76,7 +76,7 @@ const asString = (value: unknown): string | undefined =>
 
 evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, () => {
   const ctxOf = (fetch: HttpHandler): KbnRequestContext => ({ fetch, spaceId: SPACE_ID });
-  /** Everything setup changed (B4 snapshots, the AlertZero setting), put back in afterAll even when a run fails. */
+  /** Everything setup changed (Worker snapshots, the AlertZero setting), put back in afterAll even when a run fails. */
   const harness = createHarnessState();
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
   let candidateConnectorId: string | undefined;
@@ -152,7 +152,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
               examples,
             } satisfies EvaluationDataset,
           ],
-          // B2: one example at a time. seedFixture/cleanup run in the task but
+          // One example at a time. seedFixture/cleanup run in the task but
           // outside runChain's queue, and the AD worker scans the whole space, so
           // at the default concurrency another example's alerts and reviews leak
           // into this one. Also overrides --concurrency / EVAL_CONCURRENCY.
@@ -187,7 +187,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
                 ctx: ctxOf(fetch),
                 log,
                 scenario,
-                // F1: the seeded alert documents are read back from the seeded
+                // The seeded alert documents are read back from the seeded
                 // alerts index via mget, so the triage run receives the same
                 // full-doc event the product's alert trigger emits.
                 alertStore: {

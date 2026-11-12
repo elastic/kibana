@@ -273,7 +273,7 @@ describe('Rule Tuning proposal scenario', () => {
     expect(calls(fetch, '/approve')).toHaveLength(0);
   });
 
-  describe('exception action (B2)', () => {
+  describe('exception action', () => {
     it('approves and scores an add-rule-exception proposal on the seeded rule', async () => {
       const { operator, fetch } = fixture('assisted', { action: 'exception' });
       const record = await runRuleTuningScenario(operator, input);
@@ -300,7 +300,7 @@ describe('Rule Tuning proposal scenario', () => {
     });
   });
 
-  describe('approve race (B3)', () => {
+  describe('approve race', () => {
     it('retries a 409 "not waiting for input" until the review is waiting, then approves once', async () => {
       const { operator, fetch } = fixture('assisted', { approveConflicts: 2 });
       const record = await runRuleTuningScenario(operator, input);

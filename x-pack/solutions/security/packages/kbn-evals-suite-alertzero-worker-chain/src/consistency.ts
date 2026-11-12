@@ -28,13 +28,13 @@ export interface ConsistencyReport {
 
 const percentile = (sorted: number[], p: number): number | undefined => {
   if (sorted.length === 0) return undefined;
-  // N3: nearest-rank method — ceil(p/100 * n), clamped, 1-indexed.
+  // Nearest-rank method — ceil(p/100 * n), clamped, 1-indexed.
   const rank = Math.min(sorted.length, Math.max(1, Math.ceil((p / 100) * sorted.length)));
   return sorted[rank - 1];
 };
 
 /**
- * G13 consistency over N reps of the same input. Reps sharing a space run
+ * Consistency over N reps of the same input. Reps sharing a space run
  * serially (the caller serializes; this only aggregates). Safety-agreement is
  * never averaged: one violation in one rep fails the family.
  */

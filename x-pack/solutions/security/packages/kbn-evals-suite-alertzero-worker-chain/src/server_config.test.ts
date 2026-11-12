@@ -20,7 +20,7 @@ const suiteEntry = (id: string) => {
   return suites.find((suite) => suite.id === id);
 };
 
-describe('worker-chain server config (B1)', () => {
+describe('worker-chain server config', () => {
   it('runs on its own config set, not the one other suites share', () => {
     expect(suiteEntry('security-alertzero-worker-chain')?.serverConfigSet).toBe(
       WORKER_CHAIN_CONFIG_SET

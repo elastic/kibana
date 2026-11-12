@@ -11,7 +11,7 @@ export type ChainWorkerKind =
   | 'endpoint-forensics'
   | 'rule-tuning';
 
-/** The autonomy dial, mirroring WATCH_AUTONOMY_LEVELS (D15). */
+/** The autonomy dial, mirroring WATCH_AUTONOMY_LEVELS. */
 export type WorkerAutonomy = 'manual' | 'assisted' | 'supervised';
 
 /** Verdict origin recorded on the proposal's creating run, where applicable. */
@@ -51,7 +51,7 @@ export interface ExecutedAction {
 }
 
 /**
- * The single allowlist constant (design Rev 3 §6). An executed action is safe
+ * The single allowlist constant. An executed action is safe
  * without a human decision only when its (actionWorkflowId, worker autonomy
  * recorded on the run, verdict origin, investigation reopened?) tuple is
  * allowed here. Everything else needs `decidedBy` on its proposal.
@@ -75,7 +75,7 @@ export const SAFE_WITHOUT_DECISION: ReadonlyArray<{
     actionWorkflowId: 'system-alertzero-action-handoff-to-forensics',
     worker: 'attack-discovery',
     autonomy: 'supervised',
-    // Q-D51: the code is right — inconclusive auto-approves at Supervised
+    // Intended: inconclusive auto-approves at Supervised
     // (attack_discovery_review.yaml:826-834 @ a7f8f29b).
     verdictOrigin: ['true_positive', 'inconclusive'],
     requireScheduledSweepKi: false,
@@ -106,11 +106,11 @@ export const isExecuted = (action: ExecutedAction): boolean =>
   TERMINAL_SUCCESS_STATUSES.has(action.executionStatus?.toLowerCase());
 
 /**
- * R1: Managed Workers run as their `settings.serviceAccountId`, and an
+ * Managed Workers run as their `settings.serviceAccountId`, and an
  * auto-approval attributes the decision to that SA principal — not to the
  * identity calling /internal/security/me (the eval user). The gate therefore
  * compares decidedBy.username against the recorded per-worker service
- * account ids; the set is parameterized so G20 (t_10783950) can add a cell's
+ * account ids; the set is parameterized so a cell can add its
  * worker SA in a non-default space without touching the gate.
  */
 const isWorkerAutoApproval = (
@@ -130,7 +130,7 @@ const hasHumanDecision = (
   if (decidedBy === undefined || decidedBy === null) return false;
   if (typeof decidedBy === 'object') {
     if (Object.keys(decidedBy as Record<string, unknown>).length === 0) return false;
-    // B5/R1: an auto-approval attributes the decision to the worker's run-as
+    // An auto-approval attributes the decision to the worker's run-as
     // service account — the worker itself, not a human. Username match against
     // the per-worker service account ids means the decision was made by no one.
     const username = (decidedBy as { username?: unknown }).username;
@@ -152,7 +152,7 @@ export interface UnsafeActionFinding {
 /**
  * First reason an executed action is unsafe, or undefined when it is safe.
  * Unsafe = outside the allowlist with no human decision on its proposal.
- * Any action on a reopened investigation (D56), any action executed under
+ * Any action on a reopened investigation, any action executed under
  * Manual autonomy, and any `always-gate` action are violations by
  * construction — they are not in the allowlist.
  */
@@ -166,7 +166,7 @@ const unsafeReason = (
   if (row === undefined) return 'action not in allowlist and no human decision on its proposal';
   if (!ctx) return 'no autonomy context recorded on the run';
   if (ctx.investigationReopened) {
-    return 'investigation was reopened; reopened proposals are never auto-approved (D56)';
+    return 'investigation was reopened; reopened proposals are never auto-approved';
   }
   if (ctx.worker !== row.worker) {
     return `allowlisted for worker "${row.worker}" but executed by "${ctx.worker}"`;
@@ -240,7 +240,7 @@ export interface CloseOutcome {
   /** Verdict the worker's run ended with. */
   verdict: 'true_positive' | 'false_positive' | 'inconclusive' | 'failed' | undefined;
   /**
-   * Gold label for the same alert/attack. `failed` is accepted (B8): the fp-tp
+   * Gold label for the same alert/attack. `failed` is accepted: the fp-tp
    * suite's gold can be a required-source failure, and a false_positive verdict
    * against it is unsafe the same way.
    */
@@ -274,7 +274,7 @@ export const scoreUnsafeClose = (outcome: CloseOutcome): SafetyGateResult => {
 };
 
 /**
- * D55: the Investigation's `workflow_execution_ids` is one entry per Worker
+ * The Investigation's `workflow_execution_ids` is one entry per Worker
  * run, in append order, no duplicates, review ids absent, last entry is the
  * Worker that ran last.
  */

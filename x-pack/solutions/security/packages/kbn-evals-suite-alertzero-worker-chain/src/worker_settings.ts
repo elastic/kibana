@@ -10,9 +10,8 @@ import type { WorkerAutonomy } from '@kbn/security-evals-chain-safety';
 import { ALERTZERO_API_VERSION, ALERTZERO_WORKERS_URL } from './constants';
 
 /**
- * Space-aware request helper. Identity and space stay parameters (G20
- * t_10783950 runs a cell under a worker service account in a non-default
- * space): every request this harness makes goes through here, so a non-default
+ * Space-aware request helper. Identity and space stay parameters (a cell can
+ * run under a worker service account in a non-default space): every request this harness makes goes through here, so a non-default
  * space is a URL-prefix change (`/s/{spaceId}/internal/...`, how Kibana routes
  * internal APIs per space), not a refactor. The authenticated identity is
  * whatever the fetch handler carries.
@@ -87,7 +86,7 @@ export const resolveWorkerWorkflowId = async (
 
 /**
  * Snapshot of a Worker's autonomy/enabled state, so a run can restore it in a
- * `finally` even when a later step fails (review B4).
+ * `finally` even when a later step fails.
  */
 export interface WorkerAutonomySnapshot {
   workerId: string;
@@ -115,8 +114,8 @@ export const restoreWorker = async (
   await patchWorker(ctx, snapshot.workerId, {
     ...(snapshot.enabled !== current.enabled ? { enabled: snapshot.enabled } : {}),
     settingsRevision: current.settingsRevision,
-    // N8: put the service account back too — writeWorkerAutonomy may have set it.
-    // F6: when the snapshot had NONE, the run's write added one and the patch
+    // Put the service account back too — writeWorkerAutonomy may have set it.
+    // When the snapshot had NONE, the run's write added one and the patch
     // merge would keep it; `serviceAccountId: null` is the contract's explicit
     // clear (applyWorkerSettingsWrite branches on undefined, not null).
     settings: {
@@ -130,11 +129,12 @@ export const restoreWorker = async (
 };
 
 /**
- * R4: PATCH enabled:true without a service account is rejected ("a worker
+ * PATCH enabled:true without a service account is rejected ("a worker
  * that is enabled without a service account"). Call once in beforeAll,
  * before any write: each Worker either already stores a service account or is
  * given the caller's `serviceAccountId`. Returns the effective id per Worker,
- * so the same value serves R1 (run-as attribution), R4 and G20.
+ * so the same value serves run-as attribution, the enable preflight and
+ * non-default-space cells.
  */
 export const preflightWorkerServiceAccounts = async (
   ctx: KbnRequestContext,
@@ -167,12 +167,12 @@ export const preflightWorkerServiceAccounts = async (
 };
 
 /**
- * Writes a Worker's saved autonomy setting (design Rev 3 §2): the harness
+ * Writes a Worker's saved autonomy setting: the harness
  * writes the setting itself before each run and records what the product then
  * reports via `readWorkerAutonomy`. Returns nothing — read back with
  * `readWorkerAutonomy` instead of trusting the declaration.
  *
- * `serviceAccountId` (R4) rides along so an enabling PATCH is accepted;
+ * `serviceAccountId` rides along so an enabling PATCH is accepted;
  * callers get it from `preflightWorkerServiceAccounts`.
  */
 export const writeWorkerAutonomy = async (
@@ -203,7 +203,7 @@ export const readWorkerAutonomy = async (
 };
 
 /**
- * R1: the service account each given Worker runs as, read back from the
+ * The service account each given Worker runs as, read back from the
  * Workers API (`settings.serviceAccountId`). Managed Workers run as these
  * principals and auto-approvals attribute their decisions to them — never to
  * the identity calling /internal/security/me.

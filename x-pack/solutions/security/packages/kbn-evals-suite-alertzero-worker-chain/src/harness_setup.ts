@@ -25,13 +25,13 @@ import {
 
 /** What setup changed, so teardown can put it back even when setup failed half way. */
 export interface WorkerChainHarnessState {
-  /** B4: captured before the first write to each Worker. */
+  /** Captured before the first write to each Worker. */
   snapshots: WorkerAutonomySnapshot[];
   /** Puts `securitySolution:enableAlertZero` back; set as soon as the setting is written. */
   restoreAlertZeroSetting?: () => Promise<void>;
   /** Puts the space's alert-analysis workflow setting back; set as soon as it is written. */
   restoreAlertAnalysisSetting?: () => Promise<void>;
-  /** R1/R4: service account each Worker runs as. */
+  /** Service account each Worker runs as. */
   workerServiceAccounts: Record<string, string>;
 }
 
@@ -46,7 +46,7 @@ export const createHarnessState = (): WorkerChainHarnessState => ({
  *     404s while it is false (its default), including the Workers list;
  *  2. provision the Worker service accounts (a fresh stack has none) unless the
  *     caller pinned one with `ALERTZERO_EVAL_SERVICE_ACCOUNT_ID`;
- *  3. preflight (R4), then per Worker capture -> write -> assert the per-space
+ *  3. preflight, then per Worker capture -> write -> assert the per-space
  *     workflow is installed (the write is what installs it).
  */
 export const setupWorkerChainHarness = async ({
@@ -73,7 +73,7 @@ export const setupWorkerChainHarness = async ({
     : await provisionWorkerServiceAccounts(fetch, workerIds);
   state.workerServiceAccounts = await preflightWorkerServiceAccounts(ctx, workerIds, provisioned);
   log.info(
-    `Worker service accounts (R1): ${Object.entries(state.workerServiceAccounts)
+    `Worker service accounts: ${Object.entries(state.workerServiceAccounts)
       .map(([id, sa]) => `${id} -> ${sa}`)
       .join(', ')}`
   );
@@ -90,7 +90,7 @@ export const setupWorkerChainHarness = async ({
     const workflowId = await assertWorkerInstalled(ctx, workerId);
     log.info(`Worker ${workerId} enabled (workflow ${workflowId})`);
   }
-  // F6: the pre-run Worker snapshot — what teardown's read-back diff compares
+  // The pre-run Worker snapshot — what teardown's read-back diff compares
   // against, logged here so the run log carries both sides of the comparison.
   log.info(
     `Pre-run Worker snapshot: ${state.snapshots
@@ -132,7 +132,7 @@ export const diffWorkerSnapshots = (
  * routes, which 404 once the setting is back to false. Every step is attempted
  * and failures are logged, not thrown.
  *
- * F6: after each restore the Worker is read back and the read-back is diffed
+ * After each restore the Worker is read back and the read-back is diffed
  * against the pre-run snapshot, so a failed restore is visible in the log, not
  * silent. The eval user's identity is logged too (it is who the Workers reads
  * ran as — the run-as identities are the service accounts, never this user).
@@ -146,8 +146,8 @@ export const teardownWorkerChainHarness = async ({
   state: WorkerChainHarnessState;
   log: ToolingLog;
 }): Promise<void> => {
-  // F6: the eval user the harness has been acting as — distinct from the
-  // Workers' run-as service accounts (recorded on the run record, R1).
+  // The eval user the harness has been acting as — distinct from the
+  // Workers' run-as service accounts (recorded on the run record).
   await ctx
     .fetch('/internal/security/me', { method: 'GET' })
     .then((me: unknown) => {
@@ -160,7 +160,7 @@ export const teardownWorkerChainHarness = async ({
     await restoreWorker(ctx, snapshot).catch((error: Error) =>
       log.warning(`Could not restore worker ${snapshot.workerId}: ${error.message}`)
     );
-    // F6: read the restored state back and diff it against the snapshot.
+    // Read the restored state back and diff it against the snapshot.
     await captureWorker(ctx, snapshot.workerId)
       .then((after) => {
         const diffs = diffWorkerSnapshots(after, snapshot);

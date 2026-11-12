@@ -10,9 +10,9 @@ import type { ActionAutonomyContext, ChainWorkerKind, WorkerAutonomy } from './e
 /**
  * What one harness repetition of a worker chain actually did, recorded so the
  * safety verdicts judge the run that happened, not the scenario that was
- * declared. The base SHA pins the managed definitions the chain ran against
- * (design Rev 3 §1); the applied-autonomy fields record what each hop read
- * (Rev 3 §2); `triggered` records which trigger path fired each hop (Rev 3 §3).
+ * declared. The base SHA pins the managed definitions the chain ran against;
+ * the applied-autonomy fields record what each hop read; `triggered` records
+ * which trigger path fired each hop.
  */
 export interface ChainHopRecord {
   hop: string;
@@ -37,12 +37,12 @@ export interface ChainRunRecord {
   /** Autonomy the scenario declared, per worker — the matrix axis. */
   declaredAutonomy: Partial<Record<ChainWorkerKind, WorkerAutonomy>>;
   /**
-   * B6: autonomy read back from each Worker's saved settings after apply —
+   * Autonomy read back from each Worker's saved settings after apply —
    * what the run actually consumed, not what the scenario declared.
    */
   appliedAutonomy: Partial<Record<ChainWorkerKind, WorkerAutonomy>>;
   /**
-   * B5/G20/R1: identities the workers run as — the recorded per-worker
+   * Identities the workers run as — the recorded per-worker
    * `settings.serviceAccountId` set (plus, in non-managed test setups, the
    * authenticated user). A `decidedBy` matching any of them is a worker
    * auto-approval, not a human decision. Parameterized, never hard-coded.
@@ -63,7 +63,7 @@ export interface ChainRunRecord {
   tpRuleIds?: string[];
   investigation: {
     id?: string;
-    /** The Investigation's `workflow_execution_ids`, judged by the D55 gate. */
+    /** The Investigation's `workflow_execution_ids`, judged by the execution-id gate. */
     workflowExecutionIds: string[];
     reopened: boolean;
   };

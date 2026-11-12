@@ -177,7 +177,7 @@ describe('tpSuppressedByTuning evaluator', () => {
   });
 });
 
-describe('executionIdArray evaluator (D55)', () => {
+describe('executionIdArray evaluator', () => {
   it('passes when the investigation matches the expected list', async () => {
     const result = await executionIdArray.evaluate!({
       output: output(record()),
@@ -196,8 +196,8 @@ describe('executionIdArray evaluator (D55)', () => {
     expect(result.score).toBe(0);
   });
 
-  it('F4/D55: every result carries the current-behaviour contract marker, pass or fail', async () => {
-    const marker = 'contract: review.yaml:263 current behaviour; D55 owner open';
+  it('every result carries the current-behaviour contract marker, pass or fail', async () => {
+    const marker = 'contract: review.yaml:263 current behaviour; target execution id undecided';
     const pass = await executionIdArray.evaluate!({
       output: output(record()),
       expected: { expectedExecutionIds: ['exec-1'] },
@@ -254,7 +254,7 @@ describe('chainTerminal evaluator', () => {
       expected: {},
       metadata: {},
     } as never);
-    // N1: interference is not a model failure nor a pass — score is null.
+    // Interference is not a model failure nor a pass — score is null.
     expect(result.score).toBeNull();
     expect(result.label).toContain('harness_interference');
   });
@@ -270,7 +270,7 @@ describe('chainTerminal evaluator', () => {
   });
 });
 
-describe('F3: chainTerminal scores only completed chains', () => {
+describe('chainTerminal scores only completed chains', () => {
   it('failed hop scores 0, not 1 (was vacuous: 1.0 with zero successful hops)', async () => {
     const result = await chainTerminal.evaluate!({
       output: output(record({ hops: [{ ...record().hops[0], executionStatus: 'failed' }] })),
@@ -310,7 +310,7 @@ describe('F3: chainTerminal scores only completed chains', () => {
   });
 });
 
-describe('F4: ExecutionIdArray derives the expectation from the product contract', () => {
+describe('ExecutionIdArray derives the expectation from the product contract', () => {
   it('defaults to the recorded triage execution ids, not []', async () => {
     const result = await executionIdArray.evaluate!({
       output: output(record()),
@@ -342,7 +342,7 @@ describe('F4: ExecutionIdArray derives the expectation from the product contract
   });
 });
 
-describe('B1: a parked review is a reached outcome', () => {
+describe('a parked review is a reached outcome', () => {
   const withReviewStatus = (executionStatus: string) =>
     record({
       hops: [
@@ -381,7 +381,7 @@ describe('B1: a parked review is a reached outcome', () => {
   );
 });
 
-describe('B3: harness interference is INVALID on every gate', () => {
+describe('harness interference is INVALID on every gate', () => {
   const interfered = record({ harnessInterference: 'floor_attack_discovery overran' });
 
   it.each([
@@ -414,7 +414,7 @@ describe('B3: harness interference is INVALID on every gate', () => {
   });
 });
 
-describe('F4 scope: AD review Investigations carry their runner execution id', () => {
+describe('AD review Investigations carry their runner execution id', () => {
   const withReviews = (reviews: Array<{ ids: string[]; expected: string[] }>) =>
     record({
       reviewInvestigations: reviews.map((r, i) => ({

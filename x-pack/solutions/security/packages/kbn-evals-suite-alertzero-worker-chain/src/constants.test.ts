@@ -56,7 +56,7 @@ describe('Worker ids are registered Workers', () => {
   });
 });
 
-// Drift guard (review B1/B2): every inlined id must equal the upstream managed
+// Drift guard: every inlined id must equal the upstream managed
 // definition's exported constant. If upstream renames one, this fails before any
 // live run silently targets a nonexistent workflow.
 describe('inlined managed ids match upstream', () => {
@@ -81,7 +81,7 @@ describe('inlined managed ids match upstream', () => {
   });
 });
 
-describe('B2: serial experiment isolation', () => {
+describe('serial experiment isolation', () => {
   it('runs the experiment one example at a time', () => {
     expect(WORKER_CHAIN_EXPERIMENT_CONCURRENCY).toBe(1);
   });

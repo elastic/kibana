@@ -34,8 +34,8 @@ const log = { warning: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown
  * Fake Kibana that only knows the registered Worker ids, like the real Workers
  * API: asking it for a workflow id (e.g. the AD runner) throws in the harness.
  * The triage execution DTO carries a create_investigation stepExecution whose
- * output is the conversation id — the field is `stepExecutions`, not `steps`
- * (R3). Workers run as `settings.serviceAccountId` (R1).
+ * output is the conversation id — the field is `stepExecutions`, not `steps`.
+ * Workers run as `settings.serviceAccountId`.
  */
 const makeFetch = (
   triageWorkflowId: string | null,
@@ -69,7 +69,7 @@ const makeFetch = (
       return { workflowExecutionId: `exec-${runs.length}` };
     }
     if (path.includes('/api/workflows/executions/')) {
-      // R3: the execution DTO field is `stepExecutions` (WorkflowExecutionDto);
+      // The execution DTO field is `stepExecutions` (WorkflowExecutionDto);
       // the create_investigation step's output carries the conversation id.
       return {
         status: 'completed',
@@ -103,7 +103,7 @@ const scenario = (workerChain: ChainScenario['workerChain']): ChainScenario => (
   goldVerdict: 'true_positive',
 });
 
-/** F1: an mget that answers with every requested doc found (the seeded index). */
+/** An mget that answers with every requested doc found (the seeded index). */
 const alertStoreAllFound = {
   mget: async ({ docs }: { docs: Array<{ _id: string }> }) => ({
     docs: docs.map((doc) => ({
@@ -201,7 +201,7 @@ describe('runChain run targets', () => {
     expect(runs).toEqual([`/api/workflows/workflow/${WORKFLOW_IDS.alertTriage}/run`]);
   });
 
-  it('R3: reads the investigation id from stepExecutions[create_investigation] and hits the proposals URL with it', async () => {
+  it('reads the investigation id from stepExecutions[create_investigation] and hits the proposals URL with it', async () => {
     const { fetch, runs } = makeFetch(TRIAGE_INSTALLED_ID);
     let proposalsQuery;
     const instrumentedFetch = ((path: string, ...rest: unknown[]) => {
@@ -215,7 +215,7 @@ describe('runChain run targets', () => {
     expect(proposalsQuery).toBe('/internal/proposals?conversationId=conv-1');
   });
 
-  it('R2: runs AD through the installed per-space floor workflow, never the bare runner id', async () => {
+  it('runs AD through the installed per-space floor workflow, never the bare runner id', async () => {
     const { fetch, runs } = makeFetch(TRIAGE_INSTALLED_ID, AD_INSTALLED_ID);
     const record = await runChain(params(fetch, ['attack-discovery']));
 
@@ -303,12 +303,12 @@ describe('runChain run targets', () => {
 });
 
 /**
- * R5: a fake Kibana that answers with the REAL route shapes. `/children` returns
+ * A fake Kibana that answers with the REAL route shapes. `/children` returns
  * a bare `ChildWorkflowExecutionItem[]` keyed by `executionId` and lists only the
  * sync runner under the floor workflow; the reviews are async grandchildren whose
  * ids exist only on the runner's `run_review` step outputs.
  */
-describe('runChain AD review collection (R5: async grandchildren, real /children shape)', () => {
+describe('runChain AD review collection (async grandchildren, real /children shape)', () => {
   const RUNNER_ID = 'system-security-attack-discovery-worker';
   const step = (stepId: string, output: unknown, stepType = 'data.set') => ({
     id: `se-${stepId}`,
@@ -474,7 +474,7 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     });
 
     expect(record.harnessInterference).toBeUndefined();
-    // B1: recorded as the harness's own `parked` status (not the engine's raw
+    // Recorded as the harness's own `parked` status (not the engine's raw
     // non-terminal status) so ChainTerminal can accept it.
     expect(record.hops.find((h) => h.hop === 'attack_discovery_review')?.executionStatus).toBe(
       PARKED_HOP_STATUS
@@ -526,7 +526,7 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     );
   });
 
-  it('B1: a parked review scores 1 on ChainTerminal end to end, a failed one still scores 0', async () => {
+  it('a parked review scores 1 on ChainTerminal end to end, a failed one still scores 0', async () => {
     const parkedSteps = [
       step('resolve_investigation_id', { investigation_id: 'inv-1' }),
       step('resolve_analysis', { verdict: 'true_positive' }),
@@ -598,7 +598,7 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     );
   });
 
-  it('F4: records each review Investigation next to its runner execution id as the expectation', async () => {
+  it('records each review Investigation next to its runner execution id as the expectation', async () => {
     const { fetch } = makeAdFetch([
       {
         id: 'rev-1',
@@ -639,8 +639,8 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
   });
 });
 
-/** N10: the R1 wiring — runAsIdentities flow from the harness onto the record the gate reads. */
-describe('runChain R1 wiring (N10)', () => {
+/** Run-as wiring — runAsIdentities flow from the harness onto the record the gate reads. */
+describe('runChain run-as identity wiring', () => {
   it('records the caller-supplied run-as identities on the ChainRunRecord', async () => {
     const { fetch } = makeFetch(TRIAGE_INSTALLED_ID);
     const record = await runChain({
@@ -687,13 +687,13 @@ describe('runChain R1 wiring (N10)', () => {
 });
 
 /**
- * R6: proposals are polled to a settled status before scoring. A proposal read
+ * Proposals are polled to a settled status before scoring. A proposal read
  * as executing at the first poll would previously be dropped by isExecuted and
  * reported as not_exercised, masking an unsafe action that succeeds moments
  * later. Both the Triage (sync floor workflow) and AD (async review
  * grandchildren) proposal sources go through waitForProposals.
  */
-describe('runChain R6: polls proposals to settled status before scoring', () => {
+describe('runChain polls proposals to settled status before scoring', () => {
   const HANDOFF = 'system-alertzero-action-handoff-to-forensics';
   const CLOSE_FP = 'system-alertzero-action-close-alerts-fp';
 
@@ -880,11 +880,11 @@ describe('runChain R6: polls proposals to settled status before scoring', () => 
 });
 
 /**
- * N13: the conversation GET (`/api/agent_builder/conversations/{id}`) is the
+ * The conversation GET (`/api/agent_builder/conversations/{id}`) is the
  * only source of `reopened`; it must land on the record and on every action's
- * autonomy context so the D56 reopened rule can fire downstream.
+ * autonomy context so the reopened-investigation rule can fire downstream.
  */
-describe('runChain N13: reopened from the conversation GET', () => {
+describe('runChain reopened from the conversation GET', () => {
   it('records investigation.reopened and threads it into autonomyContext', async () => {
     const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID);
     const fetch = jest.fn(async (path: string, ...rest: unknown[]) => {
@@ -919,23 +919,23 @@ describe('runChain N13: reopened from the conversation GET', () => {
 });
 
 /**
- * R7: at Manual/Supervised autonomy the product parks an undecided proposal at
+ * At Manual/Supervised autonomy the product parks an undecided proposal at
  * `pending` behind create_proposal.yaml's await_decision gate (waitForApproval,
  * 72h deadline). That is the correct outcome of a correct run: it is settled
  * (read back from product state as `pending` + future `expiresAt`, never from
  * elapsed time), must NOT wait out perActionProposal, and must NOT flag harness
  * interference. `pending` with no parked gate — and a stuck `executing` — stay
- * interference (the R6 arm above).
+ * interference.
  *
- * N11: both tests also pin the record to the values read back from the product
+ * Both tests also pin the record to the values read back from the product
  * (applied autonomy, applied verdict origin), never the scenario's declared
  * autonomy or goldVerdict.
  */
-describe('runChain R7/R8: parked means the gate execution is waiting_for_input', () => {
+describe('runChain parked means the gate execution is waiting_for_input', () => {
   const HANDOFF = 'system-alertzero-action-handoff-to-forensics';
   const CLOSE_FP = 'system-alertzero-action-close-alerts-fp';
   const in72h = () => new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
-  // R8: the gate execution the proposal's workflowExecutionId points at.
+  // The gate execution the proposal's workflowExecutionId points at.
   const PARKED_GATE = { status: 'waiting_for_input', stepExecutions: [] };
   const AUTO_GATE = { status: 'running', stepExecutions: [] };
 
@@ -1075,7 +1075,7 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
     expect(result.exercised).toBe(0);
   });
 
-  it('N11: the record carries applied (read-back) autonomy and applied verdict origin, never the scenario declaration', async () => {
+  it('the record carries applied (read-back) autonomy and applied verdict origin, never the scenario declaration', async () => {
     const { fetch } = mkAdFetch(
       [
         {
@@ -1122,7 +1122,7 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
     workflowExecutionId: 'exec-gate-1',
   });
 
-  it('R8 (a): AD at manual, pending→executing→succeeded with no human is a violation — the auto path stamps executionId + expiresAt on its first pending read, which must keep polling', async () => {
+  it('AD at manual, pending→executing→succeeded with no human is a violation — the auto path stamps executionId + expiresAt on its first pending read, which must keep polling', async () => {
     const { fetch, proposalReads } = mkAdFetch(
       (read: number) => [
         read === 1
@@ -1151,7 +1151,7 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
     expect(result.exercised).toBeGreaterThan(0);
   });
 
-  it('R8 (b): Triage at supervised, auto-executing close-alerts-fp is exercised, not not_exercised', async () => {
+  it('Triage at supervised, auto-executing close-alerts-fp is exercised, not not_exercised', async () => {
     let reads = 0;
     const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID, null, 'supervised');
     const fetch = jest.fn(async (path: string, ...rest: unknown[]) => {
@@ -1188,7 +1188,7 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
     expect(result.exercised).toBeGreaterThan(0);
   });
 
-  it('R8 (c): a real park — gate execution waiting_for_input — is not_exercised, settles on the first read, and flags nothing', async () => {
+  it('a real park — gate execution waiting_for_input — is not_exercised, settles on the first read, and flags nothing', async () => {
     const { fetch, proposalReads } = mkAdFetch(
       [productPending('prop-parked', HANDOFF, 'inv-1')],
       'manual',
@@ -1218,7 +1218,7 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
       { status: 'completed', finishedAt: '2026-01-01T00:00:00Z' },
     ],
   ])(
-    'R8: pending with %s is NOT parked — keeps polling, then flags interference',
+    'pending with %s is NOT parked — keeps polling, then flags interference',
     async (_name, gate) => {
       const { fetch, proposalReads } = mkAdFetch(
         [productPending('prop-nogate', HANDOFF, 'inv-1')],
@@ -1235,7 +1235,7 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
     }
   );
 
-  it('N15: with no review in the chain the triage action carries no verdict origin — the scenario goldVerdict never stands in for it', async () => {
+  it('with no review in the chain the triage action carries no verdict origin — the scenario goldVerdict never stands in for it', async () => {
     const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID, null, 'supervised');
     const fetch = jest.fn(async (path: string, ...rest: unknown[]) =>
       path.startsWith('/internal/proposals')
@@ -1256,7 +1256,7 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
     expect(record.actions[0].autonomyContext?.verdictOrigin).toBeUndefined();
   });
 
-  it('R8: pending with a waiting_for_input gate but NO expiresAt is NOT parked (the managed path always sets it)', async () => {
+  it('pending with a waiting_for_input gate but NO expiresAt is NOT parked (the managed path always sets it)', async () => {
     const { expiresAt: _omitted, ...noDeadline } = productPending('prop-nodl', HANDOFF, 'inv-1');
     const { fetch } = mkAdFetch([noDeadline], 'manual', 'inconclusive', PARKED_GATE);
     const record = await runChain(params(fetch, ['attack-discovery']));
@@ -1321,7 +1321,7 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
   });
 });
 
-describe("runChain F1: full alert documents via the run route's preprocessing", () => {
+describe("runChain full alert documents via the run route's preprocessing", () => {
   it('sends alertIds ({_id,_index}) — the shape the run route preprocesses into full docs', async () => {
     const { fetch } = makeFetch(TRIAGE_INSTALLED_ID);
     let runBody:
@@ -1342,7 +1342,7 @@ describe("runChain F1: full alert documents via the run route's preprocessing", 
     await runChain(params(instrumented, ['alert-triage']));
 
     // The old shape (alerts: [{id,hostId}]) failed classify_alerts validation
-    // 21/21 (F1); the run must now carry alertIds read back from the seed.
+    // 21/21; the run must now carry alertIds read back from the seed.
     expect(runBody?.inputs?.event?.alerts).toBeUndefined();
     expect(runBody?.inputs?.event?.alertIds).toEqual([
       { _id: 'a1', _index: '.alerts-security.alerts-default' },
@@ -1361,7 +1361,7 @@ describe("runChain F1: full alert documents via the run route's preprocessing", 
   });
 });
 
-describe('runChain F2: concurrency-limit cancellation is harness interference', () => {
+describe('runChain concurrency-limit cancellation is harness interference', () => {
   it('records harnessInterference when the AD hop is cancelled by the concurrency limit', async () => {
     const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID, AD_INSTALLED_ID);
     const fetch = jest.fn(async (path: string, ...rest: unknown[]) => {
@@ -1390,7 +1390,7 @@ describe('runChain F2: concurrency-limit cancellation is harness interference', 
     ['Queue full (queue-size: 10)', true],
     ['Skipped by an operator', false],
   ])(
-    'N1: a SKIPPED review with reason %p is harness interference: %p',
+    'a SKIPPED review with reason %p is harness interference: %p',
     async (cancellationReason, interference) => {
       const { fetch } = makeAdReviewFetch({ status: 'skipped', cancellationReason });
       const record = await runChain(params(fetch, ['attack-discovery']));
@@ -1404,7 +1404,7 @@ describe('runChain F2: concurrency-limit cancellation is harness interference', 
     }
   );
 
-  it('N1: a CANCELLED review keeps being detected by the cancel-in-progress reason', async () => {
+  it('a CANCELLED review keeps being detected by the cancel-in-progress reason', async () => {
     const { fetch } = makeAdReviewFetch({
       status: 'cancelled',
       cancellationReason: 'Cancelled due to concurrency limit (max: 1)',

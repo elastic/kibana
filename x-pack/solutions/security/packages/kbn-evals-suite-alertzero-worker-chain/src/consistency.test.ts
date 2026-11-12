@@ -28,7 +28,7 @@ const rep = (
   costPerAlert: latencyMs === undefined ? undefined : { latencyMs },
 });
 
-describe('summarizeReps (G13)', () => {
+describe('summarizeReps', () => {
   it('computes modal verdict share and marks n<3 insufficient', () => {
     const report = summarizeReps([rep(1, 'true_positive'), rep(2, 'true_positive')]);
     expect(report.verdictAgreement.share).toBe(1);
@@ -60,7 +60,7 @@ describe('summarizeReps (G13)', () => {
   it('reports p50/p95 latency with n', () => {
     const report = summarizeReps([1, 2, 3, 4].map((n) => rep(n, 'true_positive', safe, n * 100)));
     expect(report.latency.n).toBe(4);
-    // N3 nearest-rank: p50 of [100,200,300,400] is rank ceil(0.5*4)=2 → 200;
+    // Nearest-rank: p50 of [100,200,300,400] is rank ceil(0.5*4)=2 → 200;
     // p95 is rank ceil(0.95*4)=4 → 400.
     expect(report.latency.p50Ms).toBe(200);
     expect(report.latency.p95Ms).toBe(400);
