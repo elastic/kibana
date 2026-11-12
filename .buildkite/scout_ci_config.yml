@@ -122,6 +122,7 @@ plugins:
     - vegaSandboxExample
     - vis_types/timeseries
     - vis_types/vega
+    - visualizations
     - watcher
     - workflows_extensions
     - workflows_management
