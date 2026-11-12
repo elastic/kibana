@@ -20,6 +20,8 @@ export interface RecentRunsScope {
   pipeline: string;
   branch: string;
   since: Date;
+  /** Times the pipeline's jobs retry a test failure, `DEFAULT_JOB_RETRIES` unless given. */
+  jobRetries?: number;
 }
 
 /** A config file and Scout target; a build runs a test once per setup. */
@@ -51,7 +53,7 @@ const TESTS_PER_QUERY = 5;
  * attempt that reports a test is the last one that can. A single report, even from a retried
  * job, may still be followed by another attempt.
  */
-const ATTEMPTS_TO_SETTLE = 2;
+const DEFAULT_JOB_RETRIES = 1;
 
 /**
  * Per build, test and setup, how the test's runs went and how many job attempts reported it,
@@ -131,9 +133,9 @@ const chunk = <T>(values: readonly T[], size: number): T[][] =>
  * recovered on a retry, oldest build first.
  *
  * Tests are queried in batches, per execution model, since Playwright and the other frameworks
- * record outcomes differently. A build is marked settled only when a second job attempt reported
- * the test; the caller settles the rest. Throws when a query hits the row limit, as a cut-off
- * history would pass for a shorter one.
+ * record outcomes differently. A build is marked settled once its last job attempt reported the
+ * test, right away on a pipeline without job retries. Throws when a query hits the row limit, as a
+ * cut-off history would pass for a shorter one.
  */
 export const fetchRecentRuns = async (
   es: ESClient,
@@ -177,7 +179,7 @@ export const fetchRecentRuns = async (
       failed: row.failed,
       recovered: row.recovered,
       skipped: row.skipped,
-      settled: (row.attempts ?? 0) >= ATTEMPTS_TO_SETTLE,
+      settled: (row.attempts ?? 0) > (scope.jobRetries ?? DEFAULT_JOB_RETRIES),
     });
     bySetup.set(key, entry);
   }
