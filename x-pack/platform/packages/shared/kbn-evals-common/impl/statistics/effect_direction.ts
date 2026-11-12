@@ -8,7 +8,7 @@
 import { isImproved } from './pairing';
 import type { ComparisonResult } from '../schemas/experiments/compare_experiments_route.gen';
 import type { PairedScore } from './pairing';
-import { groupDifferences, sliceKey } from './wilcoxon_ties';
+import { groupDifferences, roundDifference, sliceKey } from './wilcoxon_ties';
 
 export type EffectSign = -1 | 0 | 1;
 
@@ -68,7 +68,8 @@ export const attachEffectSigns = <T extends ComparisonResult>(
 
 export const getEffectDirection = (result: WithEffectSign<ComparisonResult>): EffectDirection => {
   if (result.direction === 'neutral') return 'unchanged';
-  const meanSign = Math.sign(result.meanTarget - result.meanBaseline);
+  // Same grid as the rank test's differences, so float noise in averaged means is not a direction.
+  const meanSign = Math.sign(roundDifference(result.meanTarget - result.meanBaseline));
   const testSign = result.effectSign ?? meanSign;
   if (testSign !== meanSign) return 'mixed';
   if (testSign === 0) return 'unchanged';

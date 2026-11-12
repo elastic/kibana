@@ -92,6 +92,16 @@ describe('getEffectDirection', () => {
     expect(row.meanTarget - row.meanBaseline).toBeLessThan(0);
     expect(getEffectDirection(row)).toBe('unchanged');
   });
+
+  it('ignores float noise in the mean difference, as the rank test does', () => {
+    const pairs = makePairs([...repeat<[number, number]>(12, [0, 1]), [1, 1], [0, 0]], 'Passed');
+    const [row] = compare(pairs);
+    const noisy = { ...row, meanTarget: 0.1 + 0.2, meanBaseline: 0.3 };
+
+    expect(noisy.meanTarget).not.toBe(noisy.meanBaseline);
+    expect(getEffectDirection(noisy)).toBe('unchanged');
+    expect(getEffectDirection({ ...noisy, effectSign: 0 })).toBe('unchanged');
+  });
 });
 
 describe('attachEffectSigns', () => {

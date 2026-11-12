@@ -67,8 +67,8 @@ export interface RegressionGateDecision {
   status: RegressionGateStatus;
   tripped: boolean;
   /**
-   * Rows that were actually tested: in scope, directional, enough pairs, a usable p-value, and
-   * able to reach significance.
+   * Rows that were actually tested: in scope, directional, enough pairs, a usable p-value, able to
+   * reach significance, and not a significant row whose test and mean disagree (`directionConflicts`).
    */
   checked: number;
   /** In-scope directional rows the gate considered: checked plus every row it had to skip. */

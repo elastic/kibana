@@ -293,6 +293,7 @@ describe('regressionGateCmd exit codes', () => {
     );
 
     // Averaging all 3 target repetitions would give 1/3 against 1 on every example and trip.
+    // Pass/fail scores go to McNemar, which gives p = 1 with no discordant pairs: checked, passed.
     expect(await runGate([TARGET, BASELINE])).toEqual({ exitCode: 0 });
   });
 
