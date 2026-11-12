@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
-} from '@kbn/custom-content-common';
+import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
 import { MAX_VEGA_SPEC_LENGTH, visualizationAttachmentDataSchema } from './visualization_schema';
 
 describe('visualizationAttachmentDataSchema', () => {
@@ -149,24 +146,12 @@ describe('visualizationAttachmentDataSchema', () => {
       });
     });
 
-    // The tools and the panel itself accept a query this long, so the attachment must keep it.
-    it('accepts a query as long as the tools allow', () => {
+    it('rejects a query longer than a chart query may be', () => {
       const result = visualizationAttachmentDataSchema.safeParse({
         renderer: 'custom_content',
         query: 'a status board per host',
         visualization: { template: '<div>x</div>' },
-        esql: ['FROM logs | WHERE x == "' + 'a'.repeat(5000) + '"'],
-      });
-
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects a query longer than the limit', () => {
-      const result = visualizationAttachmentDataSchema.safeParse({
-        renderer: 'custom_content',
-        query: 'a status board per host',
-        visualization: { template: '<div>x</div>' },
-        esql: ['a'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH + 1)],
+        esql: ['a'.repeat(4097)],
       });
 
       expect(result.success).toBe(false);

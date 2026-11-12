@@ -776,24 +776,6 @@ describe('createVisualizationTool handler', () => {
       expect(JSON.stringify(data)).not.toContain('row["host"]');
     });
 
-    it('returns only the start of a very long query to the model, and stores all of it', async () => {
-      const longQuery = `FROM logs | WHERE x == "${'a'.repeat(50000)}"`;
-      mockBuildCustomContent.mockResolvedValue({
-        esqlQueries: [longQuery],
-        template: '<div>x</div>',
-        height: 200,
-      });
-
-      const { result, attachments } = await runHandler({
-        query: 'a status board',
-        target: customContentTarget(),
-      });
-
-      expect(result.results[0].data.esql).toContain('truncated, ');
-      expect(result.results[0].data.esql.length).toBeLessThan(5000);
-      expect(attachments.add.mock.calls[0][0].data.esql).toEqual([longQuery]);
-    });
-
     describe('data queries', () => {
       const dataQueries = [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }];
 
@@ -877,6 +859,19 @@ describe('createVisualizationTool handler', () => {
 
         expect(result.results[0].type).toBe(ToolResultType.error);
         expect(messageOf(result)).toContain('"esql" only applies to Lens and Vega');
+        expect(mockBuildCustomContent).not.toHaveBeenCalled();
+      });
+
+      it('rejects a supplied query that a visualization could not store, before generating anything', async () => {
+        const { result } = await runHandler({
+          query: 'x',
+          target: customContentTarget({
+            dataQueries: [{ description: 'totals' }, { esql: 'a'.repeat(4097) }],
+          }),
+        });
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(messageOf(result)).toContain('at most 4096 characters');
         expect(mockBuildCustomContent).not.toHaveBeenCalled();
       });
 

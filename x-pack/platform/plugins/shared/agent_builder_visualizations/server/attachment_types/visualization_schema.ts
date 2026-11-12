@@ -9,7 +9,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_VEGA_SPEC_LENGTH, toQueryList } from '@kbn/agent-builder-visualizations-common';
 import {
   CUSTOM_CONTENT_MAX_ESQL_QUERIES,
-  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MIN_HEIGHT,
@@ -96,9 +95,9 @@ const customContentVisualizationSchema = lazySchema(() =>
     // could have several hold a single string: it is read as the first query.
     esql: z
       .union([
-        z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH),
+        z.string().max(4096),
         z
-          .array(z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH))
+          .array(z.string().max(4096))
           .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES)
           .refine(fitsEsqlQueriesTotalLength, { message: ESQL_QUERIES_TOTAL_LENGTH_MESSAGE }),
       ])

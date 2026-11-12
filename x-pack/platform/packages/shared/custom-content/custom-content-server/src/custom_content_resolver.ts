@@ -17,9 +17,7 @@ import {
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MIN_HEIGHT,
   CUSTOM_CONTENT_MAX_HEIGHT,
-  fenceCode,
   stripMarkdownFences,
-  truncateQueryForPrompt,
 } from '@kbn/custom-content-common';
 import { extractDeclaredHeight } from './extract_declared_height';
 import { getLiquidSyntaxError } from './liquid_syntax';
@@ -257,7 +255,7 @@ function describeOtherQuery(query: string, position: number, data: SampledData |
   const name = queryName(position);
   const header = `${name} — the template reads this query's rows as ${name}.rows${
     data ? '' : ' (not changing)'
-  }:\n${fenceCode(truncateQueryForPrompt(query), 'esql')}`;
+  }:\n\`\`\`esql\n${query}\n\`\`\``;
   return data && data.columns.length > 0 ? `${header}\n${describeData(data)}` : header;
 }
 

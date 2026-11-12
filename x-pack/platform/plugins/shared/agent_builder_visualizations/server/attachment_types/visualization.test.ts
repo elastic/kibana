@@ -139,11 +139,4 @@ describe('createVisualizationAttachmentType format()', () => {
       'ES|QL: FROM legacy'
     );
   });
-
-  it('shows only the start of a very long query', async () => {
-    const value = await describeAttachment({ ...customContent, esql: ['a'.repeat(100000)] });
-
-    expect(value).toContain('truncated, 100000 characters in total');
-    expect(value.length).toBeLessThan(5000);
-  });
 });
