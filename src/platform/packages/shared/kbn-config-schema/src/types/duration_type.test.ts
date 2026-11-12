@@ -10,6 +10,7 @@
 import { duration as momentDuration } from 'moment';
 import { schema } from '../..';
 import { ensureDuration } from '../duration';
+import { internals } from '../internals';
 
 const { duration, object, contextRef, siblingRef } = schema;
 
@@ -229,11 +230,24 @@ describe('#maxLength', () => {
     expect(() => duration({ maxLength: 32 }).validate(value)).not.toThrow(value);
   });
 
-  test('rejects a long repeated-unit string quickly instead of recursing through it', () => {
+  test('rejects a long repeated-unit string with the length error instead of parsing it', () => {
+    // without the limit, this input fails inside the recursive parser with a stack overflow
     const value = '0s'.repeat(500_000);
-    const start = Date.now();
-    expect(() => duration({ maxLength: 32 }).validate(value)).toThrow(/at most \[32\]/);
-    expect(Date.now() - start).toBeLessThan(500);
+    expect(() => duration({ maxLength: 32 }).validate(value)).toThrow(
+      'Value must be a string of at most [32] characters'
+    );
+  });
+
+  test('is enforced even when conversion is disabled', () => {
+    const type = internals.duration().maxLength(3);
+    const errorTypes = (value: unknown) =>
+      type.validate(value, { convert: false }).error?.details.map(({ type: t }) => t);
+
+    expect(errorTypes('100s')).toEqual(['duration.maxLength']);
+    expect(errorTypes('0s'.repeat(500_000))).toEqual(['duration.maxLength']);
+    // strings within the limit are still not parsed without conversion
+    expect(errorTypes('30s')).toEqual(['duration.base']);
+    expect(errorTypes(momentDuration(30, 's'))).toBeUndefined();
   });
 
   test('does not limit numbers', () => {

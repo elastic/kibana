@@ -15,6 +15,10 @@ import { Stream } from 'stream';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { ensureDuration } from '../duration';
 
+function isOverMaxLength(value: unknown, maxLength: number | undefined): boolean {
+  return typeof value === 'string' && maxLength !== undefined && value.length > maxLength;
+}
+
 function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;
 }
@@ -137,7 +141,7 @@ export const internals: JoiRoot = Joi.extend(
     coerce(value, { error, schema }) {
       // the string parser is recursive, so reject over-long input before parsing it
       const maxLength = schema.$_getFlag('maxLength');
-      if (typeof value === 'string' && maxLength !== undefined && value.length > maxLength) {
+      if (isOverMaxLength(value, maxLength)) {
         return {
           errors: [error('duration.maxLength', { limit: maxLength })],
         };
@@ -154,7 +158,14 @@ export const internals: JoiRoot = Joi.extend(
       }
       return { value };
     },
-    validate(value, { error }) {
+    validate(value, { error, schema }) {
+      // `coerce` is skipped when `convert` is false, so enforce the length limit here as well
+      const maxLength = schema.$_getFlag('maxLength');
+      if (isOverMaxLength(value, maxLength)) {
+        return {
+          errors: [error('duration.maxLength', { limit: maxLength })],
+        };
+      }
       if (!isDuration(value)) {
         return {
           errors: [error('duration.base')],

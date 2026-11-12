@@ -168,7 +168,7 @@ describe('Search service', () => {
 
     it('rejects a long string before parsing it', () => {
       const pollLength = '0s'.repeat(100_000);
-      expect(() => getBodySchema().validate({ pollLength })).toThrow(/at most \[32\] characters/);
+      expect(() => getBodySchema().validate({ pollLength })).toThrow(/at most \[30\] characters/);
     });
   });
 
