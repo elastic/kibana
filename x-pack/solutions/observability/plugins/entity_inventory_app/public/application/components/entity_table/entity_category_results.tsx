@@ -31,7 +31,10 @@ export interface EntityCategoryResultsProps {
  * asks for that the response does not have gets a "not available" prompt instead of a section.
  * One truncation callout above the sections names every type whose shown list was truncated.
  */
-export const EntityCategoryResults = ({ entityTypes, entityTypePrefix }: EntityCategoryResultsProps) => {
+export const EntityCategoryResults = ({
+  entityTypes,
+  entityTypePrefix,
+}: EntityCategoryResultsProps) => {
   const { types, loading, error, refresh } = useEntityTypes();
   const [truncatedTypes, setTruncatedTypes] = useState<ReadonlySet<string>>(() => new Set());
   const onTruncatedChange = useCallback((type: string, truncated: boolean) => {
