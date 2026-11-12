@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
@@ -22,11 +23,6 @@ import {
   type AppMenuBreakpointSource,
   type AppMenuLayout,
 } from './app_menu_responsive';
-
-const secondaryActionsCss = css`
-  display: flex;
-  align-items: center;
-`;
 
 export type { AppMenuBreakpointSource };
 
@@ -50,6 +46,13 @@ export const AppMenuComponent = ({
   staticItems,
 }: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  const { euiTheme } = useEuiTheme();
+
+  const secondaryActionsCss = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+  `;
 
   /**
    * Global static items are registered once, usually before
