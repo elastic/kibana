@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-grid-constants';
 
 export interface LayoutGrid {
   x: number;

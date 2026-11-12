@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-grid-constants';
 
 /** The base API path for public dashboard endpoints. */
 export const DASHBOARD_API_PATH = '/api/dashboards';

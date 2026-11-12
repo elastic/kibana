@@ -13,7 +13,6 @@ export const LANDING_PAGE_PATH = '/list';
 /** The application ID for the Dashboard app. */
 export const DASHBOARD_APP_ID = 'dashboards';
 export const SEARCH_SESSION_ID = 'searchSessionId';
-export { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-grid-constants';
 
 // Do not change constant value - part of dashboard REST API
 export const DASHBOARD_DRILLDOWN_TYPE = 'dashboard_drilldown';
