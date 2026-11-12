@@ -3847,7 +3847,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/share_page.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846648444
 /src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
-/x-pack/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
+/src/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
 /src/platform/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270

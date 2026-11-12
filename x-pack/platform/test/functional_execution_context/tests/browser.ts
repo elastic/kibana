@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'discover',
     'header',
-    'home',
     'timePicker',
   ]);
 
@@ -24,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let logs: Ecs[];
     let discoverSessionFirstTabId = '';
     const retry = getService('retry');
+    const sampleData = getService('sampleData');
 
     const logContains = async ({
       predicate,
@@ -44,19 +44,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     };
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSetFromUi('flights');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await sampleData.testResources.installKibanaSampleData('flights');
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.removeSampleDataSetFromUi('flights');
+      await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
     describe('discover app', () => {

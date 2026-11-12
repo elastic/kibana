@@ -12,30 +12,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
-  const { common, header, home, appMenu, graph } = getPageObjects([
+  const sampleData = getService('sampleData');
+  const { common, appMenu, graph } = getPageObjects([
     'common',
-    'header',
-    'home',
     'appMenu',
     'graph',
   ]);
 
   describe('Graph app a11y tests', () => {
     before(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await header.waitUntilLoadingHasFinished();
-      await home.addSampleDataSetFromUi('flights');
+      await sampleData.testResources.installKibanaSampleData('flights');
       await common.navigateToApp('graph');
     });
 
     after(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await header.waitUntilLoadingHasFinished();
-      await home.removeSampleDataSetFromUi('flights');
+      await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
     it('Graph listing page', async function () {

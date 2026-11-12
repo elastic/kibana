@@ -11,12 +11,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const sampleData = getService('sampleData');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { common, dashboard, home, dashboardControls } = getPageObjects([
+  const { common, dashboard, dashboardControls } = getPageObjects([
     'common',
     'dashboard',
-    'home',
     'dashboardControls',
   ]);
   const browser = getService('browser');
@@ -25,19 +25,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe.skip('Dashboard controls a11y tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await home.addSampleDataSetFromUi('flights');
+      await sampleData.testResources.installKibanaSampleData('flights');
       await common.navigateToApp('dashboard');
       await dashboard.loadDashboardInEditMode('[Flights] Global Flight Dashboard');
     });
 
     after(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await home.removeSampleDataSetFromUi('flights');
+      await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
     it('Add controls panel', async () => {

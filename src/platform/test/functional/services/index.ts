@@ -57,6 +57,7 @@ import { ESQLService } from './esql';
 import { DataViewsService } from './data_views';
 import { SynthtraceClientProvider } from './synthtrace/sythtrace';
 import { SearchSessionsService } from './search_sessions';
+import { SampleDataServiceProvider } from './sample_data';
 
 export const services = {
   ...commonFunctionalServices,
@@ -102,4 +103,5 @@ export const services = {
   esql: ESQLService,
   synthtrace: SynthtraceClientProvider,
   searchSessions: SearchSessionsService,
+  sampleData: SampleDataServiceProvider,
 };

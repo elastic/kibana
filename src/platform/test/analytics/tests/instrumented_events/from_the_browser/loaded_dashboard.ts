@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
   const PageObjects = getPageObjects([
     'common',
-    'home',
     'header',
     'dashboard',
     'visEditor',
@@ -26,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
+  const sampleData = getService('sampleData');
 
   // Failing: See https://github.com/elastic/kibana/issues/142548
   describe.skip('Loaded Dashboard', () => {
@@ -66,16 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      await PageObjects.common.navigateToApp('home');
-      await PageObjects.home.goToSampleDataPage();
-      await PageObjects.home.addSampleDataSetFromUi('flights');
-      await PageObjects.home.isSampleDataSetInstalled('flights');
+      await sampleData.testResources.installKibanaSampleData('flights');
     });
 
     after(async () => {
-      await PageObjects.common.navigateToApp('home');
-      await PageObjects.home.goToSampleDataPage();
-      await PageObjects.home.removeSampleDataSetFromUi('flights');
+      await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
     describe('simple dashboard', () => {
