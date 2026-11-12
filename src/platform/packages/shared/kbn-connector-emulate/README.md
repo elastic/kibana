@@ -143,6 +143,8 @@ Runtime fixtures and `describeOperation` are per connector too. A fixture goes t
 
 **Running tests in parallel.** One Kibana sends its requests through one emulator, so tests running at the same time share its state. Tests on different connectors may run in parallel when they scope what they read and change with `?connector=` (or `createEmulatorControl(proxyUrl, { connector })`). Tests on the same connector that set fixtures, read calls or reset must run serially: they share that connector's calls and runtime fixtures, so one test's fixture answers another's requests, and one test's reset clears what another set up.
 
+**Scout.** The `connector_emulator` Scout server config set starts Kibana against the emulator: `xpack.actions.proxyUrl` and `NODE_EXTRA_CA_CERTS` for its CA. Start the emulator before the Scout servers, as it creates the CA. Where the emulator listens and keeps its CA is `resolveEmulatorLocation`, which the script and that config both use, moved by `KBN_CONNECTOR_EMULATOR_PORT`, `KBN_CONNECTOR_EMULATOR_HOST` and `KBN_CONNECTOR_EMULATOR_CA_DIR`. The set's README has the commands.
+
 ## GraphQL
 
 GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.
