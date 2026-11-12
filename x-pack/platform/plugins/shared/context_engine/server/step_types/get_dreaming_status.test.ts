@@ -24,7 +24,7 @@ describe('getDreamingStatusStepDefinition', () => {
     memoryEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
-    source?: 'memories' | 'traces' | 'relationships';
+    source?: 'memories' | 'traces' | 'relationships' | 'maintenance';
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
@@ -135,6 +135,29 @@ describe('getDreamingStatusStepDefinition', () => {
     });
     await expect(
       run({ source: 'relationships', get: get({ ...withTypes, enabled: false }) })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
+    });
+  });
+
+  it('maintains only an AI index that dreams with maintenance on', async () => {
+    const get = (config: Record<string, unknown>) =>
+      jest.fn().mockResolvedValue({ id: 'support', dreaming: config, traces: [] });
+
+    await expect(
+      run({ source: 'maintenance', get: get({ ...dreaming, maintenance: { enabled: true } }) })
+    ).resolves.toEqual({ output: { dream: true } });
+    await expect(run({ source: 'maintenance' })).resolves.toEqual({
+      output: {
+        dream: false,
+        reason: "Memory maintenance is not turned on for AI index 'support'.",
+      },
+    });
+    await expect(
+      run({
+        source: 'maintenance',
+        get: get({ ...dreaming, enabled: false, maintenance: { enabled: true } }),
+      })
     ).resolves.toEqual({
       output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
     });

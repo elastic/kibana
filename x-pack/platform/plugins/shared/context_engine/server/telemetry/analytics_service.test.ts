@@ -161,4 +161,39 @@ describe('ContextEngineAnalyticsService', () => {
       expect(logger.debug).toHaveBeenCalled();
     });
   });
+
+  describe('reportMemoryMaintenanceRun', () => {
+    const run = {
+      ai_index_id: 'my-index',
+      mode: 'apply' as const,
+      braked: false,
+      reviewed: 20,
+      written: 3,
+      merged: 1,
+      superseded: 2,
+      rewritten: 0,
+      summarized: 1,
+      tombstoned: 0,
+      needs_review: 1,
+      rejected: 0,
+    };
+
+    it('reports the run', () => {
+      service.reportMemoryMaintenanceRun(run);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        CONTEXT_ENGINE_EVENT_TYPES.MemoryMaintenanceRun,
+        run
+      );
+    });
+
+    it('does not propagate a throwing reportEvent', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('EBT unavailable');
+      });
+
+      expect(() => service.reportMemoryMaintenanceRun(run)).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
 });

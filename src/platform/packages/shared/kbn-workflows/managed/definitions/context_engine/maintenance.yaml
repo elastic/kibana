@@ -1,0 +1,484 @@
+version: '1'
+name: __NAME__
+description: 'Maintains the long-term facts and entities of a Context Engine AI index: merges duplicates, settles contradictions, rewrites items whose memories were deleted, refreshes entity summaries, and removes duplicate and inverse relationships.'
+enabled: false
+tags:
+  - context-engine
+  - memory
+  - dreaming
+  - maintenance
+  - scheduled
+settings:
+  timeout: '1h'
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: queue
+    max: 1
+    queue-size: 10
+    queue-ttl: '24h'
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  connector_id: __CONNECTOR_ID__
+  instructions: __INSTRUCTIONS__
+  mode: __MODE__
+  max_tombstone_share: __MAX_TOMBSTONE_SHARE__
+outputs:
+  - name: reviewed
+    type: number
+  - name: written
+    type: number
+  - name: merged
+    type: number
+  - name: superseded
+    type: number
+  - name: rewritten
+    type: number
+  - name: summarized
+    type: number
+  - name: tombstoned
+    type: number
+  - name: needs_review
+    type: number
+  - name: rejected
+    type: number
+  - name: braked
+    type: boolean
+  - name: reason
+    type: string
+  - name: resume_from
+    type: string
+  - name: resume_after_id
+    type: string
+  - name: sweep_after_id
+    type: string
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: Report what maintenance would change, and change nothing. The run ends cancelled, so the next run reviews the same items.
+        since:
+          type: string
+          maxLength: 64
+          description: Review the items and memories changed since this ISO 8601 time, instead of since the last successful run.
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: maintenance
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          reviewed: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: last_run
+    type: workflow.getLastRun
+    with:
+      default_hours: 168
+      max_hours: 720
+
+  - name: resume
+    type: if
+    condition: '${{ inputs.since == blank and steps.last_run.output.last_success.execution_id != blank }}'
+    steps:
+      - name: last_output
+        type: kibana.request
+        with:
+          method: GET
+          path: '/s/{{ workflow.spaceId }}/api/workflows/executions/{{ steps.last_run.output.last_success.execution_id }}'
+          query:
+            includeOutput: true
+            omitStepExecutions: true
+
+  - name: gather
+    type: context-engine.gatherMaintenance
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+      after_id: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after_id }}{% endif %}'
+      sweep_after_id: '{{ steps.last_output.output.context.output.sweep_after_id }}'
+
+  - name: plan_fixes
+    type: context-engine.applyMaintenanceChanges
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      fixes: '${{ steps.gather.output.fixes }}'
+      plan_only: true
+
+  - name: planned
+    type: data.set
+    with:
+      plans: []
+      written: '${{ steps.plan_fixes.output.written }}'
+      tombstones: '${{ steps.plan_fixes.output.tombstones }}'
+      changes: '${{ steps.plan_fixes.output.changes }}'
+      needs_review: '${{ steps.gather.output.needs_review }}'
+      rejected: '${{ steps.plan_fixes.output.rejected }}'
+
+  - name: review
+    type: if
+    condition: '${{ steps.gather.output.batches.size > 0 }}'
+    steps:
+      - name: batches
+        type: foreach
+        foreach: '${{ steps.gather.output.batches }}'
+        steps:
+          - name: maintain
+            type: ai.prompt
+            connector-id: '{{ consts.connector_id }}'
+            connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '30s'
+            with:
+              prompt: |
+                You maintain the long-term memory of an AI index: facts and entities built from the memories agents saved.
+
+                You are given ITEMS to review, NEIGHBORS (similar items they may duplicate or contradict), FACTS ABOUT the reviewed entities, and RELATIONSHIPS between them. Each item shows its kind (fact or entity), how many memories it was seen in (occurrences) and when it was last seen (last_seen_at). Each of the ITEMS shows why it is reviewed (reasons).
+
+                Return only changes, each with a short reason. Change nothing you are not sure about: an empty answer is valid.
+                - merges: items of the same kind that state or name the same thing. Keep the most complete one as survivor and list the others in absorbed. Give a title and content for the survivor that keep everything the group states, with exact names, numbers, codes and dates. Never merge items that are only related.
+                - contradictions: two facts that cannot both be true now.
+                  - label changed: each was true at a different time, such as a plan that moved from Basic to Pro. Give content for the newer one that states the latest value and the earlier ones with when they held, such as "28 mpg as of May 2023, down from 30 in February 2023".
+                  - label conflict: they cannot both be true and nothing shows a change over time. The one seen last is kept.
+                - rewrites: an item with lost_source_ids lost some of the memories it came from. Rewrite its content from its remaining_memories only, dropping what only the lost ones stated.
+                - summaries: an entity whose facts changed (reasons has about_facts_changed). Give content that sums up its FACTS ABOUT and its own content, with exact values.
+                - relationships: remove a relationship that repeats another between the same two items, or is the inverse of another, such as "Alex reports_to Priya" next to "Priya manages Alex". Keep the one that reads most naturally.
+
+                Rules:
+                - Use only ids shown below. Every change involves at least one of the ITEMS.
+                - Name each item in one change at most.
+                - Only facts contradict each other. Two entities for the same thing are a merge.
+                - An item with person_edited true was edited by a person: never absorb it, and never rewrite or summarize it. You may merge others into it.
+
+                INSTRUCTIONS:
+
+                {{ consts.instructions }}
+
+                ITEMS (one per line):
+                {%- for item in foreach.item.items %}
+                {{ item | json }}
+                {%- endfor %}
+
+                NEIGHBORS (one per line, none when empty):
+                {%- for item in foreach.item.neighbors %}
+                {{ item | json }}
+                {%- endfor %}
+
+                FACTS ABOUT (one per line, none when empty):
+                {%- for item in foreach.item.about_facts %}
+                {{ item | json }}
+                {%- endfor %}
+
+                RELATIONSHIPS (one per line, none when empty):
+                {%- for relationship in foreach.item.relationships %}
+                {{ relationship | json }}
+                {%- endfor %}
+              schema:
+                type: object
+                properties:
+                  merges:
+                    type: array
+                    description: Groups of items of the same kind that state or name the same thing.
+                    items:
+                      type: object
+                      properties:
+                        survivor:
+                          type: string
+                          description: The id of the item to keep.
+                        absorbed:
+                          type: array
+                          items:
+                            type: string
+                          description: The ids of the items merged into the survivor.
+                        title:
+                          type: string
+                          description: The survivor's new title, when it changes.
+                        description:
+                          type: string
+                          description: The survivor's new description, when it changes.
+                        content:
+                          type: string
+                          description: The survivor's new content, keeping everything the group states.
+                        reason:
+                          type: string
+                      required:
+                        - survivor
+                        - absorbed
+                        - reason
+                  contradictions:
+                    type: array
+                    description: Pairs of facts that cannot both be true now.
+                    items:
+                      type: object
+                      properties:
+                        ids:
+                          type: array
+                          items:
+                            type: string
+                          minItems: 2
+                          maxItems: 2
+                          description: The ids of the two facts.
+                        label:
+                          type: string
+                          enum:
+                            - changed
+                            - conflict
+                        content:
+                          type: string
+                          description: For changed, the newer fact's content with the value history.
+                        reason:
+                          type: string
+                      required:
+                        - ids
+                        - label
+                        - reason
+                  rewrites:
+                    type: array
+                    description: Items rewritten from their remaining memories.
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        content:
+                          type: string
+                        reason:
+                          type: string
+                      required:
+                        - id
+                        - content
+                        - reason
+                  summaries:
+                    type: array
+                    description: Entities whose content sums up their facts again.
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        description:
+                          type: string
+                        content:
+                          type: string
+                        reason:
+                          type: string
+                      required:
+                        - id
+                        - content
+                        - reason
+                  relationships:
+                    type: array
+                    description: Relationships to remove, as duplicates or inverses of another one.
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        reason:
+                          type: string
+                      required:
+                        - id
+                        - reason
+
+          - name: plan_batch
+            type: context-engine.applyMaintenanceChanges
+            with:
+              ai_index_id: '{{ consts.ai_index_id }}'
+              batch: '${{ foreach.item }}'
+              changes: '${{ steps.maintain.output.content }}'
+              plan_only: true
+
+          - name: tally
+            type: data.set
+            with:
+              plans: '${{ variables.plans | concat: steps.plan_batch.output.plans }}'
+              written: '${{ variables.written | plus: steps.plan_batch.output.written }}'
+              tombstones: '${{ variables.tombstones | plus: steps.plan_batch.output.tombstones }}'
+              changes: '${{ variables.changes | concat: steps.plan_batch.output.changes }}'
+              needs_review: '${{ variables.needs_review | concat: steps.plan_batch.output.needs_review }}'
+              rejected: '${{ variables.rejected | concat: steps.plan_batch.output.rejected }}'
+
+  - name: limits
+    type: data.set
+    with:
+      allowed_tombstones: '${{ steps.gather.output.reviewed | plus: steps.gather.output.fixes.size | times: consts.max_tombstone_share | floor }}'
+
+  - name: brake
+    type: data.set
+    with:
+      braked: '${{ variables.tombstones > variables.allowed_tombstones }}'
+      reason: '{% if variables.tombstones > variables.allowed_tombstones %}It would tombstone {{ variables.tombstones }} items, more than the {{ variables.allowed_tombstones }} ({{ consts.max_tombstone_share | times: 100 }}% of {{ steps.gather.output.reviewed | plus: steps.gather.output.fixes.size }}) one run may.{% endif %}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: record_dry_run
+        type: context-engine.recordMaintenanceRun
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          mode: dry_run
+          braked: '${{ variables.braked }}'
+          reviewed: '${{ steps.gather.output.reviewed }}'
+          written: '${{ variables.written }}'
+          changes: '${{ variables.changes }}'
+          needs_review: '${{ variables.needs_review }}'
+          rejected: '${{ variables.rejected }}'
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          reviewed: '${{ steps.record_dry_run.output.reviewed }}'
+          written: '${{ steps.record_dry_run.output.written }}'
+          merged: '${{ steps.record_dry_run.output.merged }}'
+          superseded: '${{ steps.record_dry_run.output.superseded }}'
+          rewritten: '${{ steps.record_dry_run.output.rewritten }}'
+          summarized: '${{ steps.record_dry_run.output.summarized }}'
+          tombstoned: '${{ steps.record_dry_run.output.tombstoned }}'
+          needs_review: '${{ steps.record_dry_run.output.needs_review }}'
+          rejected: '${{ steps.record_dry_run.output.rejected }}'
+          braked: '${{ variables.braked }}'
+          reason: 'Dry run: nothing was changed. {{ variables.reason }}'
+          changes: '${{ variables.changes | concat: variables.needs_review }}'
+
+  - name: report_result
+    type: if
+    condition: '${{ consts.mode != "apply" }}'
+    steps:
+      - name: record_report
+        type: context-engine.recordMaintenanceRun
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          mode: report
+          braked: '${{ variables.braked }}'
+          reviewed: '${{ steps.gather.output.reviewed }}'
+          written: '${{ variables.written }}'
+          changes: '${{ variables.changes }}'
+          needs_review: '${{ variables.needs_review }}'
+          rejected: '${{ variables.rejected }}'
+      - name: report_output
+        type: workflow.output
+        with:
+          reviewed: '${{ steps.record_report.output.reviewed }}'
+          written: '${{ steps.record_report.output.written }}'
+          merged: '${{ steps.record_report.output.merged }}'
+          superseded: '${{ steps.record_report.output.superseded }}'
+          rewritten: '${{ steps.record_report.output.rewritten }}'
+          summarized: '${{ steps.record_report.output.summarized }}'
+          tombstoned: '${{ steps.record_report.output.tombstoned }}'
+          needs_review: '${{ steps.record_report.output.needs_review }}'
+          rejected: '${{ steps.record_report.output.rejected }}'
+          braked: '${{ variables.braked }}'
+          reason: 'Report only: nothing was changed. {{ variables.reason }}'
+          changes: '${{ variables.changes | concat: variables.needs_review }}'
+          resume_from: '{{ steps.gather.output.resume_from }}'
+          resume_after_id: '{{ steps.gather.output.resume_after_id }}'
+          sweep_after_id: '{{ steps.gather.output.sweep_after_id }}'
+
+  - name: braked_result
+    type: if
+    condition: '${{ variables.braked == true }}'
+    steps:
+      - name: record_braked
+        type: context-engine.recordMaintenanceRun
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          mode: apply
+          braked: true
+          reviewed: '${{ steps.gather.output.reviewed }}'
+          written: 0
+          changes: []
+          needs_review: '${{ variables.needs_review }}'
+          rejected: '${{ variables.rejected }}'
+      - name: braked_output
+        type: workflow.output
+        status: cancelled
+        with:
+          reviewed: '${{ steps.gather.output.reviewed }}'
+          braked: true
+          reason: '{{ variables.reason }} Nothing was changed.'
+          changes: '${{ variables.changes | concat: variables.needs_review }}'
+
+  - name: apply_fixes
+    type: context-engine.applyMaintenanceChanges
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      fixes: '${{ steps.gather.output.fixes }}'
+
+  - name: applied
+    type: data.set
+    with:
+      written: '${{ steps.apply_fixes.output.written }}'
+      changes: '${{ steps.apply_fixes.output.changes }}'
+      needs_review: '${{ steps.gather.output.needs_review }}'
+      rejected: '${{ steps.apply_fixes.output.rejected }}'
+
+  - name: apply
+    type: if
+    condition: '${{ variables.plans.size > 0 }}'
+    steps:
+      - name: plans
+        type: foreach
+        foreach: '${{ variables.plans }}'
+        steps:
+          - name: apply_batch
+            type: context-engine.applyMaintenanceChanges
+            with:
+              ai_index_id: '{{ consts.ai_index_id }}'
+              batch: '${{ foreach.item.batch }}'
+              changes: '${{ foreach.item.changes }}'
+
+          - name: tally_applied
+            type: data.set
+            with:
+              written: '${{ variables.written | plus: steps.apply_batch.output.written }}'
+              changes: '${{ variables.changes | concat: steps.apply_batch.output.changes }}'
+              needs_review: '${{ variables.needs_review | concat: steps.apply_batch.output.needs_review }}'
+              rejected: '${{ variables.rejected | concat: steps.apply_batch.output.rejected }}'
+
+  - name: record
+    type: context-engine.recordMaintenanceRun
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      mode: apply
+      reviewed: '${{ steps.gather.output.reviewed }}'
+      written: '${{ variables.written }}'
+      changes: '${{ variables.changes }}'
+      needs_review: '${{ variables.needs_review }}'
+      rejected: '${{ variables.rejected }}'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      reviewed: '${{ steps.record.output.reviewed }}'
+      written: '${{ steps.record.output.written }}'
+      merged: '${{ steps.record.output.merged }}'
+      superseded: '${{ steps.record.output.superseded }}'
+      rewritten: '${{ steps.record.output.rewritten }}'
+      summarized: '${{ steps.record.output.summarized }}'
+      tombstoned: '${{ steps.record.output.tombstoned }}'
+      needs_review: '${{ steps.record.output.needs_review }}'
+      rejected: '${{ steps.record.output.rejected }}'
+      braked: false
+      changes: '${{ variables.changes | concat: variables.needs_review }}'
+      resume_from: '{{ steps.gather.output.resume_from }}'
+      resume_after_id: '{{ steps.gather.output.resume_after_id }}'
+      sweep_after_id: '{{ steps.gather.output.sweep_after_id }}'

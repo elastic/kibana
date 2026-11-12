@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -21,8 +22,10 @@ import type { DreamingWorkflowsApi } from './schedule';
 import {
   createDreamingScheduleService,
   dreamingWorkflowIdFor,
+  maintenanceWorkflowIdFor,
   relationshipsWorkflowIdFor,
   shouldDream,
+  shouldMaintain,
   traceDreamingBatchWorkflowIdFor,
   traceDreamingWorkflowIdFor,
 } from './schedule';
@@ -120,6 +123,9 @@ describe('createDreamingScheduleService', () => {
         factTypes: dreaming.facts,
         entityTypes: dreaming.entities.nodes,
         relationshipTypes: dreaming.relationships,
+        maintenanceIntervalMinutes: 1440,
+        maintenanceMode: 'report',
+        maxTombstoneShare: 0.1,
       },
     });
   });
@@ -308,6 +314,74 @@ describe('createDreamingScheduleService', () => {
     });
   });
 
+  describe('memory maintenance', () => {
+    const maintenanceWorkflowId = `${CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID}-${suffix}`;
+    const maintaining = (maintenance: Record<string, unknown> = {}) =>
+      aiIndex({ dreaming: { ...dreaming, maintenance: { enabled: true, ...maintenance } } });
+
+    it('maintains only an AI index that dreams with maintenance on', () => {
+      expect(shouldMaintain(maintaining())).toBe(true);
+      expect(shouldMaintain(maintaining({ enabled: false }))).toBe(false);
+      expect(shouldMaintain(aiIndex())).toBe(false);
+      expect(
+        shouldMaintain(
+          aiIndex({ dreaming: { ...dreaming, enabled: false, maintenance: { enabled: true } } })
+        )
+      ).toBe(false);
+    });
+
+    it('installs, enables and attaches its workflow last, on its own schedule and mode', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: maintaining({ mode: 'apply', schedule: { interval: '12h' } }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(maintenanceWorkflowIdFor('support', SPACE)).toBe(maintenanceWorkflowId);
+      const [definitionId, install] = client.install.mock.calls[4];
+      expect(definitionId).toBe(CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID);
+      expect(install.values).toEqual(
+        expect.objectContaining({ maintenanceIntervalMinutes: 720, maintenanceMode: 'apply' })
+      );
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        maintenanceWorkflowId,
+        { enabled: true },
+        SPACE,
+        request
+      );
+      expect(aiIndexService.addAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: maintenanceWorkflowId,
+      });
+      expect(client.uninstall).not.toHaveBeenCalled();
+    });
+
+    it('is removed and detached while maintenance is off, and dreaming keeps running', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: maintaining({ enabled: false }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.install).not.toHaveBeenCalledWith(
+        CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
+        expect.anything()
+      );
+      expect(client.install).toHaveBeenCalledWith(
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        expect.anything()
+      );
+      expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID, {
+        spaceId: SPACE,
+        workflowIdSuffix: suffix,
+      });
+      expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: maintenanceWorkflowId,
+      });
+    });
+  });
+
   it('refuses to install a workflow it could not enable', async () => {
     await expect(
       createService(undefined).reconcile({ aiIndex: aiIndex(), spaceId: SPACE, request })
@@ -350,7 +424,7 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    expect(client.uninstall).toHaveBeenCalledTimes(6);
+    expect(client.uninstall).toHaveBeenCalledTimes(7);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {

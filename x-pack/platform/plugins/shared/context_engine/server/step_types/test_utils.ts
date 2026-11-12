@@ -60,6 +60,7 @@ export const mockKiStepTelemetry = () => ({
   analyticsService: {
     reportKiWrite: jest.fn(),
     reportKiVerification: jest.fn(),
+    reportMemoryMaintenanceRun: jest.fn(),
   } as unknown as jest.Mocked<ContextEngineAnalyticsService>,
   logger: {
     debug: jest.fn(),
