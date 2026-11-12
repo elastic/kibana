@@ -45,9 +45,9 @@ import {
 } from '../../fixtures/built_in_role_access';
 import { deleteSignificantEvent, seedSignificantEvent } from '../../fixtures/rule_events';
 
-// No Kibana privilege besides Nightshift `all` and Agent Builder `read` (for the tools), and no
-// index privilege besides reading the data the source queries. Anything else Significant Events
-// needs, Alerting v2 included, has to come from the Nightshift feature privilege.
+// No Kibana privilege besides Nightshift `all`, Agent Builder `read` (for the tools) and Alerts
+// `all`, and no index privilege besides reading the data the source queries. Closing or reopening
+// an event is an Alerting v2 alert action that needs Alerts `all`, which Nightshift `all` lacks.
 const NIGHTSHIFT_ALL_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
@@ -56,7 +56,13 @@ const NIGHTSHIFT_ALL_ROLE: KibanaRole = {
   kibana: [
     {
       base: [],
-      feature: { [NIGHTSHIFT_FEATURE_ID]: ['all'], agentBuilder: ['read'] },
+      feature: {
+        [NIGHTSHIFT_FEATURE_ID]: ['all'],
+        agentBuilder: ['read'],
+        // Close and reopen go through the Alerting v2 alert actions client, which authorizes the
+        // caller against Alerts `all`. The Nightshift feature privilege does not grant it.
+        alerting_v2_alerts: ['all'],
+      },
       spaces: ['*'],
     },
   ],
@@ -74,7 +80,7 @@ const ROLES: ReadonlyArray<{
   { name: 'admin', label: 'the built-in admin role', role: 'admin', canChangeSources: true },
   {
     name: 'nightshift-all',
-    label: 'a role with only Nightshift all and Agent Builder read',
+    label: 'a role with only Nightshift all, Agent Builder read and Alerts all',
     role: NIGHTSHIFT_ALL_ROLE,
     canChangeSources: false,
   },
