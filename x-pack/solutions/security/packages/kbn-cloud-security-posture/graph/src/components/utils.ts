@@ -42,7 +42,7 @@ export const isConnectorKind = (kind?: string): boolean =>
   kind === 'event' || kind === 'relationship';
 
 /**
- * Returns true for nodes that act as connectors between entity nodes (label or relationship nodes).
+ * Returns true for nodes that act as connectors between entity nodes (event or relationship nodes).
  * These nodes share similar layout and sizing behavior.
  */
 export const isConnectorNode = (
@@ -52,7 +52,10 @@ export const isConnectorNode = (
 export const isStackNode = (node: NodeViewModel): node is ConnectorGroupNodeViewModel =>
   node.kind === 'connectorGroup';
 
-export const isStackedLabel = (node: NodeViewModel): boolean =>
+/**
+ * Returns true unless the node is an event or relationship node stacked inside a connector group.
+ */
+export const isOutsideConnectorGroup = (node: NodeViewModel): boolean =>
   !((node.kind === 'event' || node.kind === 'relationship') && Boolean(node.parentId));
 
 /**

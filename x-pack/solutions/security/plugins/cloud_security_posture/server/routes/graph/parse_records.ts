@@ -405,7 +405,7 @@ const createEventNode = (logger: Logger | undefined, record: EventEdge): EventNo
 };
 
 /**
- * Unified function to process connector nodes (labels and relationships).
+ * Unified function to process connector nodes (events and relationships).
  * Adds the node to nodesMap if new, and accumulates edges in connectorEdges.
  */
 const processConnectorNode = (
@@ -593,7 +593,7 @@ const sortEdges = (
 };
 
 /**
- * Helper to process either label or relationship connector groups.
+ * Helper to process either event or relationship connector groups.
  */
 const processConnectorGroup = (
   groupingKey: string,
@@ -607,7 +607,7 @@ const processConnectorGroup = (
     const connectorId = connectorIds[0];
     const edges = connectorEdgesMap[connectorId];
 
-    // A single label can fan out to multiple targets (e.g., one action affecting multiple entities)
+    // A single event can fan out to multiple targets (e.g., one action affecting multiple entities)
     // Create edges for all source-target pairs
     edges.forEach((edge) => {
       connectEntitiesAndConnectorNode(
@@ -629,7 +629,7 @@ const processConnectorGroup = (
 
     let groupEdgesColor: EdgeColor = 'subdued';
 
-    // Get all unique source-target pairs from all labels in this group
+    // Get all unique source-target pairs from all events in this group
     const firstConnectorEdges = connectorEdgesMap[connectorIds[0]];
 
     // Order of creation matters when using dagre layout, first create edges to the group node,
@@ -670,9 +670,9 @@ const processConnectorGroup = (
 const createEdgesAndGroups = (context: ParseContext) => {
   const { edgesMap, nodesMap, connectorEdges } = context;
 
-  // Build grouping for connector nodes (labels and relationships)
+  // Build grouping for connector nodes (events and relationships)
   // Nodes with same source-target pairs get stacked together
-  const labelGrouping: Record<string, string[]> = {};
+  const eventGrouping: Record<string, string[]> = {};
   const relationshipGrouping: Record<string, string[]> = {};
 
   Object.entries(connectorEdges).forEach(([connectorNodeId, edges]) => {
@@ -686,10 +686,10 @@ const createEdgesAndGroups = (context: ParseContext) => {
 
     // Build grouping maps by node type
     if (node.kind === 'event') {
-      if (!labelGrouping[groupingKey]) {
-        labelGrouping[groupingKey] = [];
+      if (!eventGrouping[groupingKey]) {
+        eventGrouping[groupingKey] = [];
       }
-      labelGrouping[groupingKey].push(connectorNodeId);
+      eventGrouping[groupingKey].push(connectorNodeId);
     } else if (node.kind === 'relationship') {
       if (!relationshipGrouping[groupingKey]) {
         relationshipGrouping[groupingKey] = [];
@@ -699,7 +699,7 @@ const createEdgesAndGroups = (context: ParseContext) => {
   });
 
   // Process event nodes (handles stacking)
-  Object.entries(labelGrouping).forEach(([groupingKey, nodeIds]) => {
+  Object.entries(eventGrouping).forEach(([groupingKey, nodeIds]) => {
     processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'event');
   });
 

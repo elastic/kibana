@@ -30,7 +30,7 @@ const storybookToolbarItems = () => [
   { iconType: 'maximize', label: 'Show entity details', onClick: () => {} },
 ];
 
-/** Reusable toolbar items for label (event) node Storybook previews. */
+/** Reusable toolbar items for event node Storybook previews. */
 const storybookEventToolbarItems = () => [
   { iconType: 'filter', label: 'Show events with this action', onClick: () => {} },
   { iconType: 'inspect', label: 'Show event details', onClick: () => {} },
@@ -71,7 +71,7 @@ type EnhancedNodeViewModel =
   | (EventNodeViewModel & { source: string; target: string })
   | (RelationshipNodeViewModel & { source: string; target: string });
 
-// Helper to get edge color for connector nodes (label or relationship)
+// Helper to get edge color for connector nodes (event or relationship)
 const getConnectorEdgeColor = (node: EventNodeViewModel | RelationshipNodeViewModel): EdgeColor => {
   // Relationship nodes use 'subdued' color, event nodes use their color property
   return node.kind === 'relationship' ? 'subdued' : node.color;
@@ -80,7 +80,7 @@ const getConnectorEdgeColor = (node: EventNodeViewModel | RelationshipNodeViewMo
 const extractEdges = (
   graphData: EnhancedNodeViewModel[]
 ): { nodes: NodeViewModel[]; edges: EdgeViewModel[] } => {
-  // Process nodes, transform connector nodes (label/relationship) to edges
+  // Process nodes, transform connector nodes (event/relationship) to edges
   // If there are multiple connectors from a to b, create a parent node and group them under it.
   // The parent node will be a group node.
   const nodesMetadata: { [key: string]: { edgesIn: number; edgesOut: number } } = {};
@@ -1498,7 +1498,7 @@ export const EventsAndRelationshipsStacked: Story = {
  * to verify proper distribution when there are more than two targets.
  *
  * Graph structure:
- *   Actor → Label → Target1
+ *   Actor → Event → Target1
  *                ├─→ Target2
  *                └─→ Target3
  */
