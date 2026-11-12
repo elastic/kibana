@@ -77,39 +77,22 @@ describe('summarizeResults', () => {
     engine: 'FROM',
     attributes: [],
   };
-  const result = (rowCount: number, isPartial = false): PlanResult => ({
+  const result = (rowCount: number): PlanResult => ({
     plan,
     columns: [],
     rows: Array.from({ length: rowCount }, (_, position) => ({ 'entity.id': `e${position}` })),
-    isPartial,
   });
 
-  it('is exact and not truncated when no plan is cut and fewer rows merged than requested', () => {
-    expect(summarizeResults([result(3), result(2)], 10, 4)).toEqual({
-      total: 4,
-      truncated: false,
-    });
+  it('is not truncated when no plan is cut and fewer rows merged than requested', () => {
+    expect(summarizeResults([result(3), result(2)], 10, 4)).toEqual({ truncated: false });
   });
 
-  it('is exact and truncated when more rows merged than requested', () => {
-    expect(summarizeResults([result(5), result(5)], 5, 8)).toEqual({
-      total: 8,
-      truncated: true,
-    });
+  it('is truncated when more rows merged than requested', () => {
+    expect(summarizeResults([result(5), result(5)], 5, 8)).toEqual({ truncated: true });
   });
 
-  it('has no total and is truncated when a plan returned its full limit', () => {
-    expect(summarizeResults([result(6), result(1)], 5, 6)).toEqual({
-      total: null,
-      truncated: true,
-    });
-  });
-
-  it('has no total and is not truncated when a plan was partial', () => {
-    expect(summarizeResults([result(1), result(1, true)], 5, 2)).toEqual({
-      total: null,
-      truncated: false,
-    });
+  it('is truncated when a plan returned its full limit', () => {
+    expect(summarizeResults([result(6), result(1)], 5, 6)).toEqual({ truncated: true });
   });
 });
 

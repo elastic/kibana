@@ -140,6 +140,7 @@ test.describe('Streams V2 privileges', { tag: tags.serverless.observability.comp
     await expect(page).toHaveURL(/\/app\/streams\/v2\/unit\/default\/map/);
     await expect(pageObjects.streams.canvasTab).toBeVisible();
     await expect(pageObjects.collapsibleNav.getNavItemByDeepLinkId('streams')).toBeVisible();
+    await expect(pageObjects.streams.getStreamsLayoutTab('classic')).toHaveCount(0);
   });
 
   test('a legacy-only read user is sent back from V2', async ({ browserAuth, page }) => {

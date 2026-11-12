@@ -30,7 +30,7 @@ const optionsOf = (aggs: ReturnType<typeof filterOptionsAggs>, name: string) =>
   aggs[`${name}Options`] as unknown as FilterAggregation;
 
 describe('filterRuntimeMappings', () => {
-  it('reads the same fields as the sessions transform, so a value means the same in both', () => {
+  it('reads the same fields as the sessions, so a value means the same in both', () => {
     const mappings = filterRuntimeMappings();
 
     const fieldsOf = (name: string) =>
