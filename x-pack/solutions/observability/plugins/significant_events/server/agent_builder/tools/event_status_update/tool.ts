@@ -10,9 +10,8 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import {
-  MAX_DEACTIVATION_REASON_LENGTH,
   significantEventManualStatusSchema,
   significantEventCloseReasonSchema,
   significantEventSchema,
@@ -44,13 +43,9 @@ export const eventStatusUpdateSchema = lazySchema(() =>
       event_id: significantEventSchema.shape.event_id.describe(
         'The event_id of the existing significant event to update.'
       ),
-      assessment_note: z
-        .string()
-        .max(MAX_DEACTIVATION_REASON_LENGTH)
-        .optional()
-        .describe(
-          'Optional short reason for the change, for example why the event recovered or was a false alarm.'
-        ),
+      assessment_note: significantEventSchema.shape.assessment_note.describe(
+        'Optional short reason for the change, for example why the event recovered or was a false alarm.'
+      ),
     })
 );
 
