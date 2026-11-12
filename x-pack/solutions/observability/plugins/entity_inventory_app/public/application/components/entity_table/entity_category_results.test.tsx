@@ -17,7 +17,10 @@ import {
   K8S_DEPLOYMENT_TYPE_FIXTURE,
 } from '../../../__fixtures__/inventory_data';
 import type { FixtureScenario } from '../../../__fixtures__/inventory_scenarios';
-import { createScenarioEntityInventoryApiClient } from '../../../__fixtures__/inventory_scenarios';
+import {
+  buildScenarioListResponse,
+  createScenarioEntityInventoryApiClient,
+} from '../../../__fixtures__/inventory_scenarios';
 import { createAppServicesMock } from '../../../mocks';
 import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
 import {
@@ -33,6 +36,7 @@ import {
   EMPTY_WITH_FAILURES_BODY,
   getEmptyTitle,
   getEmptyWithFailuresTitle,
+  getSourceErrorText,
   getTypeNotAvailableTitle,
 } from './translations';
 
@@ -88,7 +92,7 @@ describe('EntityCategoryResults', () => {
     );
     expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('entityInventoryDiagnosticsCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
   });
 
   it('shows a spinner and no section while the types load', async () => {
@@ -187,11 +191,42 @@ describe('EntityCategoryResults', () => {
     });
   });
 
-  it('lists source errors and unavailable columns above the table', async () => {
-    renderScenario('withDiagnostics');
+  describe('source errors', () => {
+    const getScenarioErrors = (scenario: FixtureScenario) =>
+      buildScenarioListResponse('host', scenario)?.errors ?? [];
 
-    expect(await screen.findByTestId('entityInventoryDiagnosticsCallout')).toBeInTheDocument();
-    expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
+    it('keeps the table and lists the failed sources in the tooltip of an indicator in the section header', async () => {
+      renderScenario('withDiagnostics');
+
+      const section = await screen.findByTestId('entityInventoryTypeSection');
+      expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
+      fireEvent.mouseOver(within(section).getByTestId('entityInventorySourceErrorsIndicator'));
+
+      const tooltip = await screen.findByRole('tooltip');
+      const errors = getScenarioErrors('withDiagnostics');
+      expect(errors.length).toBeGreaterThan(0);
+      errors.forEach((sourceError) =>
+        expect(tooltip).toHaveTextContent(getSourceErrorText(sourceError))
+      );
+    });
+
+    it('never shows the unavailable columns of the response', async () => {
+      renderScenario('withDiagnostics');
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(buildScenarioListResponse('host', 'withDiagnostics')?.unavailableColumns).not.toEqual(
+        []
+      );
+      expect(screen.queryByText(/is not available in/)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventoryDiagnosticsCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows no indicator when every source answered', async () => {
+      renderScenario('normal');
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
+    });
   });
 
   it('shows an empty prompt when no entities match', async () => {
@@ -210,7 +245,7 @@ describe('EntityCategoryResults', () => {
     expect(empty).toHaveTextContent(getEmptyWithFailuresTitle(HOST_TYPE_FIXTURE.name));
     expect(empty).toHaveTextContent(EMPTY_WITH_FAILURES_BODY);
     expect(empty).not.toHaveTextContent(EMPTY_BODY);
-    expect(screen.getByTestId('entityInventoryDiagnosticsCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventorySourceErrorsIndicator')).toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
   });
 

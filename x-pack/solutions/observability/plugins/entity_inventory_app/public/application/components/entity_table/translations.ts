@@ -10,7 +10,6 @@ import type {
   InventoryTypeColumn,
   OutputColumnKind,
   SourceError,
-  UnavailableColumn,
 } from '@kbn/entity-inventory-plugin/common';
 
 export const getTableAriaLabel = (typeName: string) =>
@@ -60,9 +59,9 @@ export const getTruncatedTypesText = (typeNames: readonly string[]) =>
     values: { typeNames: typeNames.join(', ') },
   });
 
-export const DIAGNOSTICS_TITLE = i18n.translate(
-  'xpack.entityInventoryApp.entityTable.diagnostics.title',
-  { defaultMessage: 'Some data sources returned incomplete results' }
+export const SOURCE_ERRORS_TITLE = i18n.translate(
+  'xpack.entityInventoryApp.entityTable.sourceErrors.title',
+  { defaultMessage: 'Some data sources failed' }
 );
 
 export const getSourceErrorText = ({ indexPattern, status, reason }: SourceError) =>
@@ -75,15 +74,6 @@ export const getSourceErrorText = ({ indexPattern, status, reason }: SourceError
         defaultMessage: '{indexPattern} ({status}): {reason}',
         values: { indexPattern, status, reason },
       });
-
-export const getUnavailableColumnText = ({
-  column,
-  indexPattern,
-}: Pick<UnavailableColumn, 'column' | 'indexPattern'>) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.diagnostics.unavailableColumn', {
-    defaultMessage: '{column} is not available in {indexPattern}',
-    values: { column, indexPattern },
-  });
 
 export const LOADING_ENTITIES_LABEL = i18n.translate(
   'xpack.entityInventoryApp.entityTable.loading',
@@ -125,7 +115,7 @@ export const EMPTY_WITH_FAILURES_BODY = i18n.translate(
   'xpack.entityInventoryApp.entityTable.empty.withFailures.sourcesFailedBody',
   {
     defaultMessage:
-      'Some data sources failed, so entities may exist that are not shown. See the details above.',
+      "Some data sources failed, so entities may exist that are not shown. The warning icon in this section's header lists them.",
   }
 );
 

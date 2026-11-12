@@ -11,20 +11,44 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiProgress,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
+import type { InventoryType, SourceError } from '@kbn/entity-inventory-plugin/common';
 import { useEntityTablePreferences } from '../../context/entity_table_preferences_context';
 import type { UseEntityListResult } from '../../hooks/use_entity_list';
 import { useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
-import { EntityTableDiagnosticsCallout } from './entity_table_callouts';
 import { EntityTableEmpty, EntityTableLoadError, EntityTableSkeleton } from './entity_table_states';
-import { ENTITY_COUNT_LABEL, getEntityCountValue } from './translations';
+import {
+  ENTITY_COUNT_LABEL,
+  SOURCE_ERRORS_TITLE,
+  getEntityCountValue,
+  getSourceErrorText,
+} from './translations';
+
+/** A warning icon whose tooltip lists each source of `errors` that failed. */
+const SourceErrorsIndicator = ({ errors }: { errors: readonly SourceError[] }) => (
+  <EuiIconTip
+    type="warning"
+    color="warning"
+    title={SOURCE_ERRORS_TITLE}
+    aria-label={SOURCE_ERRORS_TITLE}
+    content={
+      <ul>
+        {/* Both plans of one source can fail, so an index pattern can appear twice. */}
+        {errors.map((sourceError, index) => (
+          <li key={index}>{getSourceErrorText(sourceError)}</li>
+        ))}
+      </ul>
+    }
+    iconProps={{ 'data-test-subj': 'entityInventorySourceErrorsIndicator' }}
+  />
+);
 
 export interface EntityTypeResultsProps {
   entityType: InventoryType;
@@ -69,6 +93,11 @@ export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeR
         extraAction={
           list && (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {list.errors.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <SourceErrorsIndicator errors={list.errors} />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiText size="s">{ENTITY_COUNT_LABEL}</EuiText>
               </EuiFlexItem>
@@ -110,7 +139,7 @@ const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResults
     return <EntityTableSkeleton />;
   }
 
-  const { rows, errors, unavailableColumns } = list;
+  const { rows, errors } = list;
   const isEmpty = rows.length === 0;
 
   return (
@@ -118,11 +147,6 @@ const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResults
       {loading && (
         <EuiFlexItem grow={false}>
           <EuiProgress size="xs" color="accent" data-test-subj="entityInventoryTableReloading" />
-        </EuiFlexItem>
-      )}
-      {(errors.length > 0 || unavailableColumns.length > 0) && (
-        <EuiFlexItem grow={false}>
-          <EntityTableDiagnosticsCallout errors={errors} unavailableColumns={unavailableColumns} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
