@@ -5488,8 +5488,8 @@ importers:
         specifier: 7.1.1
         version: 7.1.1(eslint@8.57.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3)
       exit-hook:
-        specifier: 2.2.0
-        version: 2.2.0
+        specifier: 5.1.0
+        version: 5.1.0
       expect:
         specifier: 29.7.0
         version: 29.7.0
@@ -16289,9 +16289,9 @@ packages:
     resolution: {integrity: sha512-8iA79xD3uAch729dUG8xaaBBFGaEa0wdD2VkYLFHwlqosEj/jT66AzcreRDSgV7ehnNLBW2WR5jIXwGKjVdTLg==}
     engines: {node: '>=4'}
 
-  exit-hook@2.2.0:
-    resolution: {integrity: sha512-YFH+2oGdldRH5GqGpnaiKbBxWHMmuXHmKTMtUC58kWSOrnTf95rKITVSFTTtas14DWvWpih429+ffAvFetPwNA==}
-    engines: {node: '>=6'}
+  exit-hook@5.1.0:
+    resolution: {integrity: sha512-INjr2xyxHo7bhAqf5ong++GZPPnpcuBcaXUKt03yf7Fie9yWD7FapL4teOU0+awQazGs5ucBh7xWs/AD+6nhog==}
+    engines: {node: '>=20'}
 
   exit-on-epipe@1.0.1:
     resolution: {integrity: sha512-h2z5mrROTxce56S+pnvAV890uu7ls7f1kEvVGJbw1OlFH3/mlJ5bkXu0KRyW94v37zzHPiUd55iLn3DA7TjWpw==}
@@ -33320,7 +33320,7 @@ snapshots:
     dependencies:
       pify: 2.3.0
 
-  exit-hook@2.2.0: {}
+  exit-hook@5.1.0: {}
 
   exit-on-epipe@1.0.1: {}
 
