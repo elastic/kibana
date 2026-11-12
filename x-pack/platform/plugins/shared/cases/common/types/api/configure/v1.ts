@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
-  MAX_CUSTOM_OBSERVABLE_TYPES,
+  MAX_OBSERVABLE_TYPE_ENTRIES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
+  MAX_OBSERVABLE_TYPE_PATHS,
+  MAX_OBSERVABLE_TYPE_PATH_LENGTH,
+  MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
@@ -90,26 +95,60 @@ export const CustomFieldsConfigurationSchema = limitedArraySchema({
   fieldName: 'customFields',
 });
 
+export const ObservableTypePathConfigurationSchema = lazySchema(() =>
+  z.object({
+    path: limitedStringSchema({ fieldName: 'path', min: 1, max: MAX_OBSERVABLE_TYPE_PATH_LENGTH }),
+    enabled: z.boolean(),
+    excludedValues: limitedArraySchema({
+      min: 0,
+      max: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+      fieldName: 'excludedValues',
+      codec: limitedStringSchema({
+        fieldName: 'excluded value',
+        min: 1,
+        max: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
+      }),
+    }).optional(),
+  })
+);
+
+/**
+ * An entry is a custom type when it has a label. An entry without a label overrides the
+ * paths of the built-in type with the same key.
+ */
 export const ObservableTypesConfigurationSchema = limitedArraySchema({
   min: 0,
-  max: MAX_CUSTOM_OBSERVABLE_TYPES,
+  max: MAX_OBSERVABLE_TYPE_ENTRIES,
   fieldName: 'observableTypes',
-  codec: z.object({
-    key: regexStringSchema({
-      codec: limitedStringSchema({
-        fieldName: 'key',
-        min: 1,
-        max: MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+  codec: lazySchema(() =>
+    z.object({
+      key: regexStringSchema({
+        codec: limitedStringSchema({
+          fieldName: 'key',
+          min: 1,
+          max: MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+        }),
+        pattern: '^[a-z0-9_-]+$',
+        message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
       }),
-      pattern: '^[a-z0-9_-]+$',
-      message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
-    }),
-    label: limitedStringSchema({
-      fieldName: 'label',
-      min: 1,
-      max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
-    }),
-  }),
+      label: limitedStringSchema({
+        fieldName: 'label',
+        min: 1,
+        max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
+      }).optional(),
+      paths: limitedArraySchema({
+        min: 0,
+        max: MAX_OBSERVABLE_TYPE_PATHS,
+        fieldName: 'paths',
+        codec: ObservableTypePathConfigurationSchema,
+      }).optional(),
+      valuePattern: limitedStringSchema({
+        fieldName: 'valuePattern',
+        min: 1,
+        max: MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH,
+      }).optional(),
+    })
+  ),
 });
 
 export const WorkflowTagsConfigurationSchema = limitedArraySchema({
