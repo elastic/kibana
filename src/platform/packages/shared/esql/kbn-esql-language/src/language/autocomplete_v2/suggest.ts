@@ -9,16 +9,65 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ISuggestionItem } from '../../commands/registry/types';
-import { locate } from '../../esql_js_sim/grammar';
+import {
+  EXPRESSION_PARTS,
+  type ArgumentRole,
+  type ResolvedRole,
+  type RoleKind,
+} from '../../esql_js_sim/definitions';
+import { locate, type ExpectedArgument } from '../../esql_js_sim/grammar';
 import { createContext } from './context';
 import { provideColumns, provideConstant, provideNewName } from './providers/arguments';
 import { provideCommandNames } from './providers/command_names';
 import { provideEntities } from './providers/entities';
+import { dependentRoles, provideMap, provideOptionNames } from './providers/structured';
 import { provideEndOfCommand, provideToken } from './providers/tokens';
 import { resolve } from './resolve';
 import type { SuggestionContext, SuggestionRequest } from './types';
 
-const NOTHING_APPLIES: readonly string[] = ['inside_comment', 'inside_string', 'invalid'];
+const NOTHING_APPLIES: readonly string[] = ['inside_comment', 'invalid'];
+
+/** The items for an argument that has a role, by the kind of the role alone. */
+const provideForRole = async (
+  role: ArgumentRole,
+  argument: ExpectedArgument,
+  resolved: ResolvedRole,
+  context: SuggestionContext
+): Promise<ISuggestionItem[]> => {
+  switch (role.kind) {
+    case 'column':
+      return provideColumns(role, resolved, context);
+    case 'new_name':
+      return provideNewName(role, context);
+    case 'constant':
+      return provideConstant(role, context);
+    case 'entity':
+      return provideEntities(role, resolved, context);
+    case 'option_name':
+      return provideOptionNames(role, resolved, context);
+    case 'map':
+      return provideMap(role, argument, context);
+    // The value takes the role its name gives it. A map is offered only inside a map, and
+    // the other roles only outside one.
+    case 'dependent_value': {
+      const isInMap = EXPRESSION_PARTS[argument.id] !== undefined;
+      const roles = dependentRoles(role, context).filter(
+        (candidate) => (candidate.kind === 'map') === isInMap
+      );
+      const items = await Promise.all(
+        roles.map((candidate) => provideForRole(candidate, argument, resolved, context))
+      );
+
+      return items.flat();
+    }
+    // The providers of the other roles come with the next steps.
+    default:
+      return [];
+  }
+};
+
+// The roles whose value can be a string, and so can be offered inside an open one.
+const STRING_VALUED: readonly RoleKind[] = ['map', 'constant', 'dependent_value'];
 
 const provideArgument = async (
   { argument, resolved }: Extract<SuggestionRequest, { kind: 'argument' }>,
@@ -29,21 +78,11 @@ const provideArgument = async (
   if (!resolved || (argument.continues && !isBeingTyped)) {
     return [];
   }
-
-  const { role } = resolved;
-  switch (role.kind) {
-    case 'column':
-      return provideColumns(role, resolved, context);
-    case 'new_name':
-      return provideNewName(role, context);
-    case 'constant':
-      return provideConstant(role, context);
-    case 'entity':
-      return provideEntities(role, resolved, context);
-    // The providers of the other roles come with the next steps.
-    default:
-      return [];
+  if (context.ir.position === 'inside_string' && !STRING_VALUED.includes(resolved.role.kind)) {
+    return [];
   }
+
+  return provideForRole(resolved.role, argument, resolved, context);
 };
 
 const provide = async (
@@ -90,7 +129,10 @@ export const suggest = async (
     return [];
   }
 
-  const requests = resolve(ir);
+  // Inside a string only a value can be offered: no keyword and no command starts there.
+  const requests = resolve(ir).filter(
+    ({ kind }) => ir.position !== 'inside_string' || kind === 'argument'
+  );
   const context = await createContext(fullText, ir, callbacks);
 
   const items = await Promise.all(requests.map((request) => provide(request, context)));
