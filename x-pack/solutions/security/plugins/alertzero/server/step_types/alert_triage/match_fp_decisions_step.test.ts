@@ -50,6 +50,7 @@ const setup = ({
   enabled = true,
   mgetError,
   unreadable = [],
+  missingIndex = false,
   searchError,
   closedToday = 0,
   countError,
@@ -67,6 +68,8 @@ const setup = ({
   mgetError?: Error & { statusCode?: number };
   /** Decision ids the `mget` answers with a per-document error, inside an HTTP 200. */
   unreadable?: string[];
+  /** The decisions index does not exist: `mget` answers 200 with `index_not_found_exception` per document. */
+  missingIndex?: boolean;
   searchError?: Error;
   closedToday?: number;
   countError?: Error;
@@ -113,7 +116,9 @@ const setup = ({
     if (mgetError) throw mgetError;
     return {
       docs: ids.map((_id) =>
-        unreadable.includes(_id)
+        missingIndex
+          ? { _id, error: { type: 'index_not_found_exception', reason: 'no such index' } }
+          : unreadable.includes(_id)
           ? { _id, error: { type: 'no_shard_available_action_exception', reason: 'shard down' } }
           : { _id, found: decisions[_id] !== undefined, _source: decisions[_id] }
       ),
@@ -368,19 +373,25 @@ describe('triage match decisions step', () => {
     expect(mget).not.toHaveBeenCalled();
   });
 
-  it('treats a missing decisions index as no decisions, not as a failure', async () => {
-    const { run, tags } = setup({
-      alerts: [['a', source('C:\\x.exe')]],
-      mgetError: Object.assign(new Error('index_not_found'), { statusCode: 404 }),
-    });
+  it.each([
+    ['an error on each document, as Elasticsearch answers', { missingIndex: true }],
+    [
+      'a thrown 404',
+      { mgetError: Object.assign(new Error('index_not_found'), { statusCode: 404 }) },
+    ],
+  ])(
+    'treats a missing decisions index (%s) as no decisions, not as a failure',
+    async (_name, missing) => {
+      const { run, tags } = setup({ alerts: [['a', source('C:\\x.exe')]], ...missing });
 
-    const { output } = await run();
+      const { output } = await run();
 
-    expect(output).toEqual(
-      expect.objectContaining({ status: 'ok', candidates: 1, would_close: 0 })
-    );
-    expect(tags()).toEqual([]);
-  });
+      expect(output).toEqual(
+        expect.objectContaining({ status: 'ok', candidates: 1, would_close: 0 })
+      );
+      expect(tags()).toEqual([]);
+    }
+  );
 
   it('acts on no match when one decision document cannot be read, so an unread dismissal cannot let its approval close alerts', async () => {
     const hash = hashOf('C:\\x.exe');

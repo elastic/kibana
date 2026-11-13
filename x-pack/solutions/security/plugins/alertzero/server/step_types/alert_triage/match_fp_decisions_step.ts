@@ -491,7 +491,7 @@ interface MgetResponse {
 /**
  * Reads the decisions of the given key hashes by their ids: one read per hash and kind, no search,
  * so no field mapping is needed and expiry is checked here. A missing index means no decisions.
- * A document that could not be read throws: read as missing, an unread dismissal would let the
+ * Any other document that could not be read throws: read as missing, an unread dismissal would let the
  * approval of the same key close alerts the dismissal protects.
  */
 const readDecisions = async ({
@@ -522,6 +522,9 @@ const readDecisions = async ({
       throw error;
     }
     for (const doc of response.docs) {
+      // Before the first decision is written the index does not exist. `_mget` then answers 200 with
+      // this error on each document, which means no decisions, not a failed read.
+      if (doc.error?.type === 'index_not_found_exception') continue;
       if (doc.error !== undefined) {
         throw new Error(
           `Decision ${doc._id} could not be read: ${doc.error.type ?? 'unknown'} ${
