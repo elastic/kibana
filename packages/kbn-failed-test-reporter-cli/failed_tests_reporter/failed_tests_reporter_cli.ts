@@ -37,6 +37,8 @@ const DISABLE_MISSING_TEST_REPORT_ERRORS =
   process.env.DISABLE_MISSING_TEST_REPORT_ERRORS === 'true';
 /** `owner/name`, as GitHub spells a repository. */
 const REPO_PATTERN = /^[\w.-]+\/[\w.-]+$/;
+/** The clone URL of `elastic/kibana`, over HTTPS or SSH, as `BUILDKITE_REPO` gives it. */
+const KIBANA_REPO_URL = /[/:]elastic\/kibana(\.git)?$/;
 
 /**
  * Checks the job's failures for tests that fail every attempt build after build, by the Scout
@@ -47,14 +49,20 @@ async function checkConsistentFailures({
   log,
   failures,
   repo,
+  jobRetries,
   dryRun,
 }: {
   log: ToolingLog;
   failures: TestFailure[];
   repo: string;
+  jobRetries: number;
   dryRun: boolean;
 }) {
-  const { BUILDKITE_PIPELINE_SLUG: pipeline, BUILDKITE_BRANCH: branch } = process.env;
+  const {
+    BUILDKITE_PIPELINE_SLUG: pipeline,
+    BUILDKITE_BRANCH: branch,
+    BUILDKITE_REPO: buildRepo = '',
+  } = process.env;
   if (!pipeline || !branch) {
     log.warning('Not in a Buildkite job, skipping the consistent failure check');
     return;
@@ -79,6 +87,8 @@ async function checkConsistentFailures({
       github: new GithubApi({ log, token: process.env.GITHUB_TOKEN, dryRun, repo }),
       repo,
       build: { pipeline, branch },
+      jobRetries,
+      kibanaCommits: KIBANA_REPO_URL.test(buildRepo),
       dryRun,
     });
   } finally {
@@ -111,6 +121,10 @@ export function runFailedTestsReporterCli() {
         (typeof failingSuitesRepo !== 'string' || !REPO_PATTERN.test(failingSuitesRepo))
       ) {
         throw createFlagError('--failing-suites-repo must be of the form owner/name');
+      }
+      const jobRetries = Number(flags['failing-suites-job-retries']);
+      if (reportFailingSuites && !(Number.isInteger(jobRetries) && jobRetries >= 0)) {
+        throw createFlagError('--failing-suites-job-retries must be a non-negative integer');
       }
 
       let branch: string = '';
@@ -214,6 +228,7 @@ export function runFailedTestsReporterCli() {
                 log,
                 failures: [...junitFailures, ...scoutFailures],
                 repo: failingSuitesRepo,
+                jobRetries,
                 dryRun: !updateGithub,
               });
             } catch (error) {
@@ -240,7 +255,7 @@ export function runFailedTestsReporterCli() {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
         boolean: ['github-update', 'report-update', 'report-failing-suites'],
-        string: ['build-url', 'failing-suites-repo'],
+        string: ['build-url', 'failing-suites-repo', 'failing-suites-job-retries'],
         default: {
           'github-update': true,
           'report-update': true,
@@ -248,6 +263,7 @@ export function runFailedTestsReporterCli() {
           'build-url': process.env.BUILD_URL,
           'report-failing-suites': process.env.REPORT_FAILING_SUITES === 'true',
           'failing-suites-repo': process.env.FAILING_SUITES_REPO || 'elastic/kibana',
+          'failing-suites-job-retries': process.env.FAILING_SUITES_JOB_RETRIES || '1',
         },
         help: `
         --no-github-update       Execute the CLI without writing to Github
@@ -262,6 +278,9 @@ export function runFailedTestsReporterCli() {
                                  by the Scout test events
         --failing-suites-repo    owner/name of the repository those issues go to, defaults to
                                  process.env.FAILING_SUITES_REPO, then elastic/kibana
+        --failing-suites-job-retries  Times this pipeline's jobs retry a test failure, which a build
+                                 waits for before it counts, defaults to
+                                 process.env.FAILING_SUITES_JOB_RETRIES, then 1
       `,
       },
     }

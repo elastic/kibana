@@ -77,6 +77,10 @@ export interface ConsistentFailureIssuesOptions {
   /** `owner/name` of that repository; team labels are only added in `elastic/kibana`. */
   repo: string;
   build: CurrentBuild;
+  /** Times the pipeline's jobs retry a test failure, which a build waits for before it counts. */
+  jobRetries?: number;
+  /** Whether the builds are of `elastic/kibana`, so the issues can link the commits in between. */
+  kibanaCommits?: boolean;
   dryRun: boolean;
   now?: Date;
 }
@@ -251,7 +255,18 @@ const describeSuite = ({ filePath, framework }: FailingSuite): string =>
 export const reportConsistentFailureIssues = async (
   options: ConsistentFailureIssuesOptions
 ): Promise<ConsistentFailureIssuesSummary> => {
-  const { log, failures, es, github, repo, build, dryRun, now = new Date() } = options;
+  const {
+    log,
+    failures,
+    es,
+    github,
+    repo,
+    build,
+    jobRetries,
+    kibanaCommits = true,
+    dryRun,
+    now = new Date(),
+  } = options;
   const summary: ConsistentFailureIssuesSummary = {
     created: [],
     commented: [],
@@ -271,7 +286,7 @@ export const reportConsistentFailureIssues = async (
   const since = new Date(now.getTime() - HISTORY_DAYS * MS_PER_DAY);
   const runs = await fetchRecentRuns(
     es,
-    { pipeline: build.pipeline, branch: build.branch, since },
+    { pipeline: build.pipeline, branch: build.branch, since, jobRetries },
     candidates
   );
 
@@ -283,7 +298,9 @@ export const reportConsistentFailureIssues = async (
       continue;
     }
     const name = `${candidate.filePath} › ${testLabel(candidate.failure)} (${setupLabel(setup)})`;
-    const found = findConsistentFailure(builds);
+    const found = findConsistentFailure(
+      kibanaCommits ? builds : builds.map((run) => ({ ...run, commit: undefined }))
+    );
     if (found) {
       const { failingBuilds, lastPassingBuild } = found;
       log.info(

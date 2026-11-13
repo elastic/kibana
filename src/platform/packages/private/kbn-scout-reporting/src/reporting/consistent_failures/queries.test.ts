@@ -152,6 +152,16 @@ describe('fetchRecentRuns', () => {
     });
   });
 
+  it('settles a build on its one attempt on a pipeline without job retries', async () => {
+    const { client } = mockEs([row({ build: 1, passed: 0, failed: 1, attempts: 1 })]);
+
+    const [{ runs }] = await fetchRecentRuns(client, { ...scope, jobRetries: 0 }, [
+      { testId: 'test-1', framework: 'playwright' },
+    ]);
+
+    expect(runs).toEqual([expect.objectContaining({ build: 1, failed: 1, settled: true })]);
+  });
+
   it('takes the suite title of the latest build and none when the framework reports none', async () => {
     const { client } = mockEs([
       row({ build: 2, suite_title: 'Discover moved' }),

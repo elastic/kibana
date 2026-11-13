@@ -325,6 +325,26 @@ describe('reportConsistentFailureIssues', () => {
     );
   });
 
+  it('counts a build on its one attempt without job retries, and links no commits outside elastic/kibana', async () => {
+    const rows = brokenSince('test-1', 101, 102).map((record) =>
+      record.failed ? { ...record, failed: 1, attempts: 1 } : record
+    );
+    const { github, createIssue } = mockGithub();
+
+    const summary = await report({
+      es: mockEs(rows).es,
+      github,
+      failures: [scoutFailure('test-1', 'shows results')],
+      jobRetries: 0,
+      kibanaCommits: false,
+    });
+
+    expect(summary.created).toHaveLength(1);
+    const [[, body]] = createIssue.mock.calls;
+    expect(body).toContain('after passing in [#100]');
+    expect(body).not.toContain('/compare/');
+  });
+
   it('posts the break on the issue already about the suite instead of filing one, once a day per pipeline and branch', async () => {
     const { es } = mockEs(brokenSince('test-1', 101, 102));
     const failures = [scoutFailure('test-1', 'shows results')];
