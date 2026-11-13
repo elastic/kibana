@@ -1,4 +1,5 @@
 Task: merge the new initial investigation steps into the accessed decision tree file(s) (existing tree = Plan A, this investigation = Plan B).
 Use the investigation tool calls, tool results, and first answer in the transcript above as evidence.
 Collapse overlapping steps onto existing nodes and reuse their IDs; preserve unrelated branches and add only genuinely new investigation structure.
-When done, call {{submit_tool}} with the edited decision-tree files.
+A root cause is confirmed only when the first answer confirms it. Then mark its causal path with ✅; otherwise add no ✅.
+When done, call {{submit_tool}} with the edited decision-tree files and the traversals.

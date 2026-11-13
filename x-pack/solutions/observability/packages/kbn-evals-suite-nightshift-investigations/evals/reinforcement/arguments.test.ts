@@ -276,6 +276,29 @@ describe('gradeSubmissions', () => {
     expect(score).toBe(0);
     expect(explanation).toContain('does not confirm a cause');
   });
+
+  it('takes the follow-up verdict over the response', () => {
+    const { score, explanation } = gradeSubmissions({
+      submissions: [
+        {
+          traversals: [
+            {
+              tree_id: 'symptom:eql-slo-burn-rate',
+              visited_path: ['S1', 'E1'],
+              causal_path: ['S1', 'E1'],
+            },
+          ],
+        },
+      ],
+      prior,
+      submitted: prior,
+      response: '{"status":"confirmed","candidate":"pod deleted"}',
+      causalConfirmed: false,
+    });
+
+    expect(score).toBe(0);
+    expect(explanation).toContain('does not confirm a cause');
+  });
 });
 
 describe('submissionsForTree', () => {

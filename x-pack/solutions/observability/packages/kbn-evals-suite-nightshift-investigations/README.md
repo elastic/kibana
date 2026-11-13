@@ -386,37 +386,49 @@ workflow.
 
 ## Reinforcement micro-eval
 
-`NIGHTSHIFT_DATASETS=reinforcement` replays four Customer-0 rounds through the reinforcement
-agent (`system-nightshift-agent-optimize`). Each round seeds its prior tree and includes the
-investigator's view of that file, so the agent merges into an existing tree instead of creating one.
-The run is started with `replay: true` under a fresh synthetic conversation id, so the reinforcement
-step builds the round from the supplied tool calls and results instead of reading a conversation.
-Afterward the eval rolls back only the trees that replay owns: the seeded tree and every tree whose
-commit or counts carry its conversation id. A tree another investigation writes in the same space
-meanwhile is left alone, even when a submit named it.
-The first prior tree has both "Pod restarted" and "Pod deleted" for one pod-loss event, and the LLM
-judge scores whether the agent folds them. No committed round sets `metadata.require_merge` yet,
-which would make an empty `merged_nodes` list score 0, because the prompt doesn't ask for merges. The question and conclusion are the published
-`customer0-eql-slo-burn-rate-2026-09-14` label. The gateway and proxy rounds are the two symptoms
-that label names. The fourth round is a proxy round that confirms no cause, so a causal path on it
-scores 0. It is not part of the label. Each `view_file` result is the prior tree, and each sandbox
-command is an ES|QL query. In the first three rounds its rows restate the label. The rounds are not
-a captured cluster transcript.
+`NIGHTSHIFT_DATASETS=reinforcement` replays seven Customer-0 rounds through the reinforcement
+agent (`system-nightshift-agent-optimize`). The run is started with `replay: true` under a fresh
+synthetic conversation id, so the reinforcement step builds the round from the supplied tool calls
+and results instead of reading a conversation. Afterward the eval rolls back only what that replay
+owns: the seeded tree, every tree whose commit or counts carry its conversation id, and every
+learning stamped with that id. A tree another investigation writes in the same space meanwhile is
+left alone, even when a submit named it.
 
-A code evaluator checks that the submit includes a traversal for each tree it names, that the visit
-path is non-empty and resolves on the submitted tree, that a causal path is present only when the
-investigator response confirms a cause and those edges carry ✅, and that declared `merged_nodes`
-agree with the tree before the run and the tree after it. An LLM judge scores whether those merges
-and paths match the investigation. A run passes when its reinforce step finishes with a code score
-of 1, and the spec fails when fewer than 75% of runs pass: one miss in four replays passes, two
-fail. A replay that throws is a failed run rather than a failed experiment. A failed rollback
-also fails the spec outright once the scores are recorded, since it leaves trees for later
-replays. It is not part of an unset or `all` run: selecting it exports
-`NIGHTSHIFT_DECISION_TREES`, which enables decision trees without turning Wiki on. It cannot be
-combined with other dataset ids or with `NIGHTSHIFT_KNOWLEDGE`. Restart Scout when switching to or
-from it. Each example's trace is the reinforcement agent's Agent Builder trace, which shows the system prompt and the submit tool schema. It is not the eval task span.
-The system prompt does not yet ask the agent to report traversals; those fields are on the submit
-tool. Asking for them in the prompt is a follow-up.
+The first three rounds restate the published `customer0-eql-slo-burn-rate-2026-09-14` label; the
+other four are reduced rounds written for the micro-eval. Each `view_file` result is the prior tree
+and each sandbox command is an ES|QL query; they are not a captured cluster transcript.
+
+- Four first rounds merge into a seeded tree. The first tree has both "Pod restarted" and "Pod
+  deleted" for one pod-loss event, so that round sets `metadata.require_merge` and an empty
+  `merged_nodes` scores 0. The gateway and proxy rounds are the two symptoms the label names. The
+  fourth is a proxy round that confirms no cause.
+- Two follow-up rounds set `follow_up.causal_confirmed`, which the replay passes as
+  `replay_causal_confirmed` so the round runs as a follow-up with that causal verdict instead of
+  the LLM check. The confirmed one gets the reinforce script on a gateway tree with branches it
+  does not walk; the unconfirmed one gets the extend script.
+- One first round seeds no tree and confirms no cause, so the agent creates a tree with no ✅.
+
+A round confirms a cause when its follow-up verdict says so, or, on a first round, when the
+investigator response marks a hypothesis `confirmed`. Seven evaluators grade each run:
+
+| Evaluator | Checks | Pass bar |
+| --- | --- | --- |
+| `submit_arguments_consistent` (code) | The submit has a traversal for each tree it names, the paths resolve, a causal path is set only when the round confirms a cause, and declared `merged_nodes` agree with the two trees. | At least 75% of runs. A model still slips on a long submit now and then; unfinished runs count as misses. |
+| `no_visited_checkmarks` (code) | Every graded tree parses, has a symptom, evidence, decision and end node, and adds ✅ only on its causal path. A ✅ the prior tree already had is left alone. | Every scored run. These four are the #573 acceptance checks for the prompt. |
+| `causal_path_marked` (code) | On the seeded tree, or any written tree when none was seeded: a confirmed round gives a causal path from a symptom to an end node whose edges are exactly the new ✅; an unconfirmed round gives none and adds no ✅. | Every scored run. |
+| `structure_preserved` (code) | Every node and edge of the seeded tree that the round did not walk or merge keeps its id, type, label, and condition. A branch the round walked may gain verified steps before its old target. | Every scored run. |
+| `reinforcement_detected` (code) | A confirmed round on a seeded tree is applied as a `reinforce` write; a round that confirms no cause reinforces nothing. | Every scored run. |
+| `merges_declared` (code) | On a `require_merge` round, the last submit naming the seeded tree declares a `merged_nodes` entry with `from` and `into` set. Other rounds are unscored. | Every scored run. A round that must fold duplicates fails on an empty merge, not only through the submit rate. |
+| `merged_nodes_and_paths` (LLM) | Whether the paths, the merges and the new ✅ fit the investigation. The score is the share of its three verdicts that pass. | Mean of at least 0.75. An LLM grade is noisier than the code checks. |
+
+A run that throws is a failed run rather than a failed experiment. The four prompt checks and
+`merges_declared` leave it unscored (`not_run`), since the submit rate already counts it. A failed rollback fails the spec
+outright once the scores are recorded, since it leaves trees for later replays. The micro-eval is
+not part of an unset or `all` run: selecting it exports `NIGHTSHIFT_DECISION_TREES`, which enables
+decision trees without turning Wiki on. It cannot be combined with other dataset ids or with
+`NIGHTSHIFT_KNOWLEDGE`. Restart Scout when switching to or from it. Each example's trace is the
+reinforcement agent's Agent Builder trace, which shows the system prompt and the submit tool schema.
+It is not the eval task span.
 
 ```bash
 NIGHTSHIFT_DATASETS=reinforcement \
@@ -438,10 +450,9 @@ defaults to 3). That grades the optimize submit the investigation already produc
 
 To replay a private export of full rounds instead, set `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` to a
 JSON file `{"examples":[...]}` whose examples carry `input.question`, `input.response`,
-`input.tool_calls`, `input.tool_results`, `input.prior_tree`, and `metadata.case_id`. Set
-`metadata.require_merge` when that round must fold nodes. A missing traversal, an empty visit path,
-a causal path that disagrees with the response, or a merge that does not match the two trees scores
-0. The judge's explanation is what shows whether the arguments and merged nodes look right.
+`input.tool_calls`, `input.tool_results`, and `metadata.case_id`. Add `input.prior_tree` to seed a
+tree, `input.follow_up` to replay a follow-up, and `metadata.require_merge` when that round must
+fold nodes. The same evaluators and pass bars apply.
 
 ## Knowledge switches
 
