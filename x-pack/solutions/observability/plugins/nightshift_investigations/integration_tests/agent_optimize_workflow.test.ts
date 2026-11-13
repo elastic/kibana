@@ -133,7 +133,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(agentParams.nextInput).toEqual({ message: 'reinforcement turn prompt' });
     expect(agentParams.conversation?.id).not.toBe(ELIGIBLE_ROUND_INPUTS.conversation_id);
     expect(telemetryMetadata).toMatchObject({
-      pluginId: 'nightshift_investigation_memory',
+      pluginId: 'nightshift_investigation_decision_tree',
       aggregateBy: 'nightshift',
       productSolution: 'observability',
       productFeature: 'nightshift',

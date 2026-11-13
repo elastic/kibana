@@ -13,6 +13,8 @@ import { onlineEvalsStepFailedEvent } from './online_evals_step_failed_event';
 import { investigationSkippedEvent } from './investigation_skipped_event';
 import { alertEnteredPipelineEvent } from './alert_entered_pipeline_event';
 import { investigationStartedEvent } from './investigation_started_event';
+import { investigationEndedEvent } from './investigation_ended_event';
+import { backgroundActivityEvent } from './background_activity_event';
 
 export const setupNightshiftTelemetry = ({
   analytics,
@@ -28,6 +30,8 @@ export const setupNightshiftTelemetry = ({
   analytics.registerEventType(investigationSkippedEvent);
   analytics.registerEventType(alertEnteredPipelineEvent);
   analytics.registerEventType(investigationStartedEvent);
+  analytics.registerEventType(investigationEndedEvent);
+  analytics.registerEventType(backgroundActivityEvent);
   return new NightshiftTelemetryClient(analytics, logger);
 };
 
@@ -50,6 +54,17 @@ export {
   NIGHTSHIFT_INVESTIGATION_SKIPPED_EVENT,
   type InvestigationSkippedEvent,
 } from './investigation_skipped_event';
+export {
+  NIGHTSHIFT_INVESTIGATION_ENDED_EVENT,
+  type InvestigationEndedEvent,
+  type InvestigationRunOutcome,
+} from './investigation_ended_event';
+export {
+  NIGHTSHIFT_BACKGROUND_ACTIVITY_EVENT,
+  type BackgroundActivityEvent,
+  type BackgroundActivityType,
+} from './background_activity_event';
+export { trackBackgroundActivity } from './track_background_activity';
 export {
   NIGHTSHIFT_ONLINE_EVALS_STEP_FAILED_EVENT,
   type OnlineEvalsStepFailedEvent,
