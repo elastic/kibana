@@ -13,7 +13,7 @@ import { defaultUser, postCaseReq, postCommentUserReq } from '../../../../common
 import {
   deleteAllCaseItems,
   createCase,
-  bulkCreateAttachments,
+  bulkCreateAttachmentsRaw,
   removeServerGeneratedPropertiesFromSavedObject,
 } from '../../../../common/lib/api';
 
@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('rejects a legacy comment payload (type, comment, owner) with 400', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
-        await bulkCreateAttachments({
+        await bulkCreateAttachmentsRaw({
           supertest,
           caseId: postedCase.id,
           params: [postCommentUserReq] as unknown as BulkCreateUnifiedAttachmentsRequest,
@@ -47,14 +47,14 @@ export default ({ getService }: FtrProviderContext): void => {
           data: { content: 'unified comment' },
           owner: 'securitySolutionFixture',
         };
-        const updatedCase = await bulkCreateAttachments({
+        const { body: createdAttachments } = await bulkCreateAttachmentsRaw({
           supertest,
           caseId: postedCase.id,
           params: [unifiedCommentPayload],
         });
 
-        expect(updatedCase.comments?.length).to.be(1);
-        const comment = removeServerGeneratedPropertiesFromSavedObject(updatedCase.comments![0]);
+        expect(createdAttachments.length).to.be(1);
+        const comment = removeServerGeneratedPropertiesFromSavedObject(createdAttachments[0]);
         expect(comment).to.eql({
           ...unifiedCommentPayload,
           created_by: defaultUser,
@@ -62,7 +62,34 @@ export default ({ getService }: FtrProviderContext): void => {
           pushed_by: null,
           updated_by: null,
         });
-        expect(updatedCase.owner).to.eql('securitySolutionFixture');
+      });
+
+      it('returns only the attachments created by the request', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const firstPayload = {
+          type: 'comment' as const,
+          data: { content: 'first comment' },
+          owner: 'securitySolutionFixture',
+        };
+        const secondPayload = {
+          type: 'comment' as const,
+          data: { content: 'second comment' },
+          owner: 'securitySolutionFixture',
+        };
+
+        await bulkCreateAttachmentsRaw({
+          supertest,
+          caseId: postedCase.id,
+          params: [firstPayload],
+        });
+        const { body: createdAttachments } = await bulkCreateAttachmentsRaw({
+          supertest,
+          caseId: postedCase.id,
+          params: [secondPayload],
+        });
+
+        expect(createdAttachments.length).to.be(1);
+        expect(createdAttachments[0].data).to.eql(secondPayload.data);
       });
     });
   });

@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import type { ReportingCore } from '../../../..';
 import {
   DEFAULT_SCHEDULED_REPORT_LIST_SIZE,
@@ -99,7 +99,7 @@ export const registerInternalListRoute = ({
 
         return res.ok({ body: results, headers: { 'content-type': 'application/json' } });
       } catch (err) {
-        if (err instanceof KibanaResponse) {
+        if (isKibanaResponse(err)) {
           return err;
         }
         throw err;

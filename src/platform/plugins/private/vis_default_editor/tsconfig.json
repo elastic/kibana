@@ -28,11 +28,11 @@
     "@kbn/saved-search-plugin",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
-    "@kbn/palettes",
     "@kbn/css-utils",
     "@kbn/visualizations-common",
     "@kbn/chart-expressions-common",
     "@kbn/kql",
+    "@kbn/palettes-components",
   ],
   "exclude": [
     "target/**/*",

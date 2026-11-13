@@ -158,4 +158,5 @@ export {
   mockLoadSkill,
   mockTitleGeneration,
   mockToolResultCall,
+  mockToolResultCallOnAttachment,
 } from './llm_mocks';

@@ -12,6 +12,7 @@
     "requiredPlugins": [
       "spaces",
       "taskManager",
+      "taskManagerDependencies",
       "dataViews",
       "security",
       "licensing",

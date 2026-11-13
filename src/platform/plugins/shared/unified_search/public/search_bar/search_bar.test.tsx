@@ -185,6 +185,23 @@ describe('SearchBar', () => {
     expect(screen.queryByRole('group', { name: 'Time window actions' })).not.toBeInTheDocument();
   });
 
+  it('forwards legacyDatePickerProps to the legacy date picker', async () => {
+    render(
+      wrapSearchBarInContext({
+        showFilterBar: false,
+        showQueryInput: false,
+        enableDateRangePicker: false,
+        legacyDatePickerProps: {
+          commonlyUsedRanges: [{ start: 'now-3d', end: 'now', label: 'Last 3 days' }],
+        },
+      })
+    );
+
+    await userEvent.click(await screen.findByTestId('superDatePickerToggleQuickMenuButton'));
+
+    expect(await screen.findByText('Last 3 days')).toBeInTheDocument();
+  });
+
   it('forwards showTimeWindowButtons through the stateful SearchBar', async () => {
     const data = dataPluginMock.createStartContract();
     data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => ({
@@ -235,6 +252,60 @@ describe('SearchBar', () => {
       expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
     });
     expect(screen.queryByRole('group', { name: 'Time window actions' })).not.toBeInTheDocument();
+  });
+
+  it('forwards legacyDatePickerProps through the stateful SearchBar with the default behaviors', async () => {
+    const data = dataPluginMock.createStartContract();
+    data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => ({
+      value: 0,
+      pause: true,
+    }));
+    data.query.timefilter.timefilter.getRefreshIntervalDefaults = jest.fn(() => ({
+      value: 0,
+      pause: true,
+    }));
+    data.query.timefilter.timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
+    data.query.timefilter.timefilter.getTimeDefaults = jest.fn(() => ({
+      from: 'now-15m',
+      to: 'now',
+    }));
+    data.query.timefilter.timefilter.getMinRefreshInterval = jest.fn(() => 1000);
+    data.query.timefilter.history = createMockTimeHistory();
+
+    const StatefulSearchBar = createSearchBar({
+      core: startMock,
+      data,
+      storage: createMockStorage(),
+      kql: kqlPluginMock.createStartContract(),
+      cps: cpsPluginMock.createStartContract(),
+    });
+
+    render(
+      <EuiThemeProvider>
+        <I18nProvider>
+          <StatefulSearchBar
+            appName="test"
+            useDefaultBehaviors
+            disableSubscribingToGlobalDataServices
+            showFilterBar={false}
+            showQueryInput={false}
+            enableDateRangePicker={false}
+            legacyDatePickerProps={{
+              commonlyUsedRanges: [{ start: 'now-3d', end: 'now', label: 'Last 3 days' }],
+            }}
+            dateRangeFrom="now-15m"
+            dateRangeTo="now"
+            query={kqlQuery}
+            filters={[]}
+            indexPatterns={[]}
+          />
+        </I18nProvider>
+      </EuiThemeProvider>
+    );
+
+    await userEvent.click(await screen.findByTestId('superDatePickerToggleQuickMenuButton'));
+
+    expect(await screen.findByText('Last 3 days')).toBeInTheDocument();
   });
 
   it('Should render filter bar, when required fields are provided', async () => {

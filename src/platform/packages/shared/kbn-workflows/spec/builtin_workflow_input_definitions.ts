@@ -132,13 +132,19 @@ const alertingV2NotificationGroup: JsonSchema = {
     rules: {
       type: 'object',
       description:
-        'Rule metadata keyed by rule id. Each value contains rule metadata (e.g. `{ name }`) for a rule referenced by the alerts. Access via `rules[alert.rule_id].name`.',
+        'Rule metadata keyed by rule id. Each value contains `{ name, grouping_fields }` for a rule referenced by the alerts. Access via `rules[alert.rule_id].name`.',
       additionalProperties: {
         type: 'object',
         properties: {
           name: {
             type: 'string',
             description: 'Display name of the rule',
+          },
+          grouping_fields: {
+            type: 'array',
+            items: { type: 'string' },
+            description:
+              'Fields the rule groups its alerts by (the rule `grouping.fields`). Empty when the rule has no grouping. Dotted names are nested under `alert.data` (`host.name` is `alert.data.host.name`).',
           },
         },
         required: ['name'],

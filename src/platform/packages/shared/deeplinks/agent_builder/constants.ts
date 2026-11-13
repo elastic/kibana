@@ -8,3 +8,8 @@
  */
 
 export const AGENT_BUILDER_APP_ID = 'agent_builder';
+
+export const AGENT_BUILDER_MANAGE_PATHS = {
+  connectors: '/manage/connectors',
+  skills: '/manage/skills',
+} as const;

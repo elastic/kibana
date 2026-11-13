@@ -8,13 +8,6 @@
  */
 
 import chroma from 'chroma-js';
-import { isColorDark } from '@elastic/eui';
-
-export const enforceColorContrast = (color: string, backgroundColor: string) => {
-  const finalColor =
-    chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
-  return isColorDark(...finalColor.rgb());
-};
 
 export function isValidColor(colorString?: string) {
   // chroma can handle also hex values with alpha channel/transparency

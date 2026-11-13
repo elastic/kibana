@@ -144,6 +144,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_str_replace',
   'nightshift_sandbox_write_file',
 
+  // Nightshift – Investigation
+  'nightshift_time_converter_tool',
+  `${internalNamespaces.platformNightshift}.slack_read`,
+
   // Nightshift – Decision trees
   'nightshift_submit_optimizer_result',
   'nightshift_record_system_learning',
@@ -475,6 +479,8 @@ export const isAllowedBuiltinAttachment = (
 export const AGENT_BUILDER_CYCLE_HOOKS = [
   // Platform
   relevantSkillsHookId,
+  // Nightshift
+  'nightshift.findings_recorder',
 ] as const;
 
 export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];

@@ -11,7 +11,8 @@
     "public/**/*.json",
     "server/**/*",
     ".storybook/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_streams_v2/**/*"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [

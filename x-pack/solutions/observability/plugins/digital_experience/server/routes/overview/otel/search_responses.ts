@@ -11,6 +11,7 @@ import type {
 } from '../../../lib/helpers/aggregations';
 import type { WebVitalAggregations } from '../../../lib/helpers/web_vitals';
 import type { ByEnvironmentAggregations } from '../../../lib/otel/environments';
+import type { FilterOptionsAggregations } from '../../../lib/otel/overview_filters';
 
 // The aggregations `search_requests.ts` asks for, by the same names.
 
@@ -21,7 +22,10 @@ export interface TrendBucket {
   loadTime: PercentilesAggregation;
 }
 
-/** `logsSearch`: the metrics in the selected environment, and every environment for the picker. */
+/**
+ * `logsSearch`: the metrics in the selected environment and filters, every environment for the
+ * picker, and the values of every filter.
+ */
 export type OverviewLogsAggregations = ByEnvironmentAggregations<
   WebVitalAggregations & {
     pageLoads: {
@@ -32,7 +36,8 @@ export type OverviewLogsAggregations = ByEnvironmentAggregations<
     };
     jsErrors: { doc_count: number };
   }
->;
+> &
+  FilterOptionsAggregations;
 
 /** `spansSearch`: the HTTP requests in the selected environment only. */
 export interface OverviewSpansAggregations {

@@ -22,7 +22,7 @@ jest.mock('@kbn/embeddable-plugin/public', () => ({
 }));
 
 // Import after the mock so the component picks up the mocked EmbeddableRenderer
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { LensRenderer } from './lens_custom_renderer_component';
 
 describe('LensRenderer interactivity inheritance', () => {
@@ -45,5 +45,34 @@ describe('LensRenderer interactivity inheritance', () => {
     const parentApi = lastGetParentApi?.();
     expect(parentApi?.viewMode$).toBe(dashboardParentApi.viewMode$);
     expect(parentApi?.disableTriggers$).toBe(dashboardParentApi.disableTriggers$);
+  });
+});
+
+describe('LensRenderer project routing', () => {
+  beforeEach(() => {
+    lastGetParentApi = undefined;
+  });
+
+  it('publishes the projectRouting prop to the embeddable', () => {
+    const props = getLensComponentProps({
+      projectRouting: '_alias:*',
+    }) as unknown as LensRendererProps;
+
+    render(<LensRenderer {...props} />);
+
+    expect(lastGetParentApi?.().projectRouting$?.getValue()).toBe('_alias:*');
+  });
+
+  it('forwards the parent projectRouting$ over the prop', () => {
+    const dashboardParentApi = { projectRouting$: new BehaviorSubject('_alias:_origin') };
+
+    const props = getLensComponentProps({
+      parentApi: dashboardParentApi,
+      projectRouting: '_alias:*',
+    }) as unknown as LensRendererProps;
+
+    render(<LensRenderer {...props} />);
+
+    expect(lastGetParentApi?.().projectRouting$).toBe(dashboardParentApi.projectRouting$);
   });
 });

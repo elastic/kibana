@@ -21,14 +21,14 @@ apiTest.describe(
   () => {
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, sloHostsDataForge }) => {
-      await sloHostsDataForge.setup();
+    apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
+      await apiServices.slo.deleteAllSLOs();
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
     });
 
-    apiTest.afterAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.teardown();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
     apiTest('finds SLOs by different tags', async ({ apiClient }) => {
@@ -192,7 +192,7 @@ apiTest.describe(
           }
           return true;
         },
-        { timeoutMs: 180_000, intervalMs: 3000, label: 'SLO health in definitions' }
+        { timeoutMs: 180_000, label: 'SLO health in definitions' }
       );
     });
   }

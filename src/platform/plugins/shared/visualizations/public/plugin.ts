@@ -123,7 +123,10 @@ import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 import { registerActions } from './actions/register_actions';
 import type { VisualizeByReferenceState } from '../common/embeddable/types';
 import { VegaIcon } from './components/vega_icon';
-import { updateBasicSoAttributes } from './utils/saved_objects_utils/update_basic_attributes';
+import {
+  deleteSOByType,
+  updateBasicSoAttributes,
+} from './utils/saved_objects_utils/update_basic_attributes';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -151,6 +154,7 @@ export interface VisualizationsStart extends TypesStart {
       description: string;
     }
   ) => ReturnType<typeof updateBasicSoAttributes>;
+  deleteVisualizationLibraryItem: (id: string, type: string) => ReturnType<typeof deleteSOByType>;
 }
 
 export interface VisualizationsSetupDeps {
@@ -516,7 +520,7 @@ export class VisualizationsPlugin
       }),
       getIconForSavedObject: (savedObject) => {
         const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
-        return visState.type === 'vega' ? VegaIcon : 'visualizeApp';
+        return visState.type === 'vega' ? VegaIcon : 'chartMix';
       },
     });
     embeddable.registerLegacyURLTransform(
@@ -617,6 +621,13 @@ export class VisualizationsPlugin
         findListItems(types, search, size, references, referencesToExclude),
       updateVisualizationLibraryItem: (id, type, newAttributes) =>
         updateBasicSoAttributes(id, type, newAttributes, {
+          savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+          typesService: getTypes(),
+          contentManagement,
+          ...core,
+        }),
+      deleteVisualizationLibraryItem: (id, type) =>
+        deleteSOByType(id, type, {
           savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
           typesService: getTypes(),
           contentManagement,

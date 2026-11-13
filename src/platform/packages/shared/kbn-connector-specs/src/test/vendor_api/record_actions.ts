@@ -8,12 +8,12 @@
  */
 
 import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-emulate';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
 import type { ContractContext, ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
-import type { QueryOperation, VendorApiFixtures } from './fixtures';
+import type { ActionFixture, QueryOperation, VendorApiFixtures } from './fixtures';
 import { toResponseFixtures } from './fixtures';
-import type { RejectedInput } from './generate_action_inputs';
+import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';
 import { generateActionInputs } from './generate_action_inputs';
 import type { ManifestOperation } from './manifest';
 import { matchesPathTemplate } from './manifest';
@@ -53,6 +53,14 @@ export type RecordingFinding =
       readonly kind: 'request-violation';
       readonly action: string;
       readonly request: string;
+      readonly violations: readonly Violation[];
+    }
+  /** The OAuth scopes the auth type requests don't cover an operation the action calls. */
+  | {
+      readonly kind: 'insufficient-scope';
+      readonly action: string;
+      readonly authType: string;
+      readonly operation: string;
       readonly violations: readonly Violation[];
     }
   /** A `read` scoped action sent a request that may change state and isn't a listed query. */
@@ -131,6 +139,25 @@ const authTypeIdsOf = ({ auth }: ConnectorSpec): string[] =>
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+// A list of overrides generates the inputs once per entry; inputs that come out the same run once.
+const generateFixtureInputs = async (
+  definition: ActionDefinition,
+  input: ActionFixture['input']
+): Promise<GeneratedInputs> => {
+  const overrides = Array.isArray(input) ? input : [input];
+  const generated = await Promise.all(
+    overrides.map((override) => generateActionInputs(definition, override))
+  );
+  const unique = new Map<string, unknown>();
+  for (const candidate of generated.flatMap(({ inputs }) => inputs)) {
+    unique.set(JSON.stringify(candidate), candidate);
+  }
+  return {
+    inputs: [...unique.values()],
+    rejected: generated.flatMap(({ rejected }) => rejected),
+  };
+};
+
 /**
  * Runs every action of a connector against the contract mock, with inputs generated from its
  * schema, under each of its auth types, and records the vendor operations the runs call.
@@ -143,6 +170,7 @@ export const recordActions = async ({
   fixtures = {},
   config,
   authType,
+  checkScopes = 'report',
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
   const connectorConfig = config ?? (await sampleConfig(connector));
@@ -166,7 +194,7 @@ export const recordActions = async ({
 
   for (const action of Object.keys(connector.actions).sort()) {
     const fixture = fixtures[action] ?? {};
-    const { inputs, rejected } = await generateActionInputs(
+    const { inputs, rejected } = await generateFixtureInputs(
       connector.actions[action],
       fixture.input
     );
@@ -186,6 +214,7 @@ export const recordActions = async ({
         try {
           context = await createContractContext({
             ...contextOptions,
+            checkScopes,
             connector,
             authType: id,
             config: { ...connectorConfig, ...fixture.config },
@@ -207,6 +236,22 @@ export const recordActions = async ({
         const vendorCalls = mock.calls.filter(({ token }) => !token);
         worked ||= vendorCalls.length > 0;
         calls.push(...vendorCalls);
+        for (const { request, matched, scopeViolations: violations = [] } of vendorCalls) {
+          if (violations.length > 0) {
+            // Named by operation, so the runs of one action report each shortfall once.
+            const operation =
+              matched && 'method' in matched
+                ? `${matched.method.toUpperCase()} ${matched.path}`
+                : request;
+            findings.push({
+              kind: 'insufficient-scope',
+              action,
+              authType: id,
+              operation,
+              violations,
+            });
+          }
+        }
         if (ran.length === 0 && input === inputs[0]) {
           for (const { operation, violations } of mock.rejectedResponses) {
             findings.push({ kind: 'rejected-response', action, operation, violations });
