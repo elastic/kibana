@@ -19,10 +19,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 const COLOR_MAP = {
-  success: 'success',
-  warning: 'warning',
-  danger: 'danger',
-  primary: 'primary',
+  success: 'successText',
+  warning: 'warningText',
+  danger: 'dangerText',
+  primary: 'primaryText',
   text: 'text',
   subdued: 'subduedText',
 } as const;
@@ -94,8 +94,6 @@ export function TrendSubtitle({
   loading?: boolean;
   children?: React.ReactNode;
 }) {
-  const { euiTheme } = useEuiTheme();
-
   if (children !== undefined) {
     return (
       <EuiText size="xs" color="subdued">
@@ -108,7 +106,7 @@ export function TrendSubtitle({
   }
   if (trend === null || trend === undefined) {
     return (
-      <EuiText size="xs" css={{ color: euiTheme.colors.textDisabled }}>
+      <EuiText size="xs" color="subdued">
         {i18n.translate('xpack.streams.ingestChartStatistics.trend.noTrendAvailable', {
           defaultMessage: 'no trends available yet',
         })}
