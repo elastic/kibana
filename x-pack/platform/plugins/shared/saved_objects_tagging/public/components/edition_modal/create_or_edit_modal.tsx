@@ -181,7 +181,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   <EuiButtonEmpty
                     onClick={() => setColor(getRandomColor())}
                     size="xs"
-                    css={{ height: '18px', fontSize: '0.75rem' }}
+                    // Fit the label's line so the color field lines up with the name field.
+                    css={{ blockSize: euiTheme.size.base, verticalAlign: 'top' }}
                     aria-label={i18n.translate(
                       'xpack.savedObjectsTagging.management.createModal.color.randomizeAriaLabel',
                       {

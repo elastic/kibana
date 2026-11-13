@@ -64,7 +64,11 @@ test.describe('Tags management create', { tag: tags.stateful.classic }, () => {
     const errors = await tagModal.getValidationErrors();
     expect(errors.name).toBeDefined();
     expect(errors.color).toBeUndefined();
-    expect(await modal.evaluate((element) => element.clientHeight)).toBe(initialHeight);
+    await expect(modal).toHaveJSProperty('clientHeight', initialHeight);
+
+    await tagModal.fillForm({ color: '#zz' });
+    await expect.poll(async () => (await tagModal.getValidationErrors()).color).toBeDefined();
+    await expect(modal).toHaveJSProperty('clientHeight', initialHeight);
   });
 
   test('creates a tag after fixing validation errors', async ({ pageObjects }) => {
