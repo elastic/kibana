@@ -6052,8 +6052,8 @@ importers:
         specifier: 0.6.2
         version: 0.6.2(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
       '@redocly/cli':
-        specifier: 2.36.0
-        version: 2.36.0
+        specifier: 2.64.1
+        version: 2.64.1
       '@rsdoctor/rspack-plugin':
         specifier: 1.6.1
         version: 1.6.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@rspack/core@2.1.8(@swc/helpers@0.5.19))(supports-color@10.2.2)(webpack@5.96.1)
@@ -9891,13 +9891,13 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test_plugins/resolver_test: {}
-
   x-pack/solutions/security/test/security_solution_api_integration: {}
 
   x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
 
   x-pack/solutions/security/test/security_solution_endpoint: {}
+
+  x-pack/solutions/security/test_plugins/resolver_test: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 
@@ -13958,8 +13958,8 @@ packages:
       yauzl:
         optional: true
 
-  '@redocly/cli@2.36.0':
-    resolution: {integrity: sha512-0ky8u/Zzx4zT35rJZY27KOuzXMI29JLt5FMbfzFV7AtVlK3DLjDmJjqprnhqUMJlt04R+FKSXahBZo1dUF6R5A==}
+  '@redocly/cli@2.64.1':
+    resolution: {integrity: sha512-SkCnNexidfvHmkOCqRZ29oaHh1nVbpnQEF5Qweu8M2cUfVEh1/jSAvd5+LX+D/uNbPnhL6v03AamXHeeB2AwsQ==}
     engines: {node: '>=22.12.0 || >=20.19.0 <21.0.0', npm: '>=10'}
     hasBin: true
 
@@ -30473,7 +30473,7 @@ snapshots:
       proxy-agent: 8.0.2(supports-color@10.2.2)
       yauzl: 3.4.0
 
-  '@redocly/cli@2.36.0': {}
+  '@redocly/cli@2.64.1': {}
 
   '@redux-saga/core@1.3.0':
     dependencies:
