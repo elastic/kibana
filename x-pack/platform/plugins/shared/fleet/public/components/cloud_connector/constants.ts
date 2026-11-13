@@ -6,15 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
-export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
-export const TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR = 'RESOURCE_TYPE';
-export const TEMPLATE_URL_ELASTIC_ORGANIZATION_ID_ENV_VAR = 'ORGANIZATION_ID';
-export const TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR = 'CLOUD_PROVIDER';
-export const TEMPLATE_URL_CLOUD_REGION_ENV_VAR = 'CLOUD_REGION';
-export const TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR = 'CLOUD_ENVIRONMENT';
-
-export const TEMPLATE_URL_TOKENS = [
+export {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR,
@@ -22,22 +14,18 @@ export const TEMPLATE_URL_TOKENS = [
   TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR,
   TEMPLATE_URL_CLOUD_REGION_ENV_VAR,
   TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR,
-] as const;
-export type TemplateUrlToken = (typeof TEMPLATE_URL_TOKENS)[number];
-
-export const ELASTIC_RESOURCE_TYPE_DEPLOYMENT = 'deployment';
-export const ELASTIC_RESOURCE_TYPE_PROJECT = 'project';
-export type ElasticResourceType =
-  | typeof ELASTIC_RESOURCE_TYPE_DEPLOYMENT
-  | typeof ELASTIC_RESOURCE_TYPE_PROJECT;
-
-export const ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION = 'production';
-export const ELASTIC_CLOUD_ENVIRONMENT_STAGING = 'staging';
-export const ELASTIC_CLOUD_ENVIRONMENT_QA = 'qa';
-export type ElasticCloudEnvironment =
-  | typeof ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION
-  | typeof ELASTIC_CLOUD_ENVIRONMENT_STAGING
-  | typeof ELASTIC_CLOUD_ENVIRONMENT_QA;
+  TEMPLATE_URL_TOKENS,
+  ELASTIC_RESOURCE_TYPE_DEPLOYMENT,
+  ELASTIC_RESOURCE_TYPE_PROJECT,
+  ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION,
+  ELASTIC_CLOUD_ENVIRONMENT_STAGING,
+  ELASTIC_CLOUD_ENVIRONMENT_QA,
+} from '../../../common/services/cloud_connector_template/constants';
+export type {
+  TemplateUrlToken,
+  ElasticResourceType,
+  ElasticCloudEnvironment,
+} from '../../../common/services/cloud_connector_template/constants';
 
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
   'cloud_formation_cloud_connectors_template';

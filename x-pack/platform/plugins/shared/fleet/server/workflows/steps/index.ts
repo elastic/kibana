@@ -7,9 +7,13 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 
+import { awsOnboardingCloudContextStepDefinition } from './cloud_context';
+import { awsOnboardingCreateConnectorStepDefinition } from './create_connector';
+import { awsOnboardingCreateStackStepDefinition } from './create_stack';
 import { awsOnboardingCredentialsStepDefinition } from './credentials';
 import { awsOnboardingDiscoverStepDefinition } from './discover';
 import { awsOnboardingResolveStepDefinition } from './resolve';
+import { awsOnboardingStackStatusStepDefinition } from './stack_status';
 
 /**
  * Registered unconditionally: each handler checks the `fleet.agenticAwsOnboarding` flag when it
@@ -19,4 +23,8 @@ export const registerAwsOnboardingSteps = (setup: WorkflowsExtensionsServerPlugi
   setup.registerStepDefinition(awsOnboardingCredentialsStepDefinition);
   setup.registerStepDefinition(awsOnboardingDiscoverStepDefinition);
   setup.registerStepDefinition(awsOnboardingResolveStepDefinition);
+  setup.registerStepDefinition(awsOnboardingCloudContextStepDefinition);
+  setup.registerStepDefinition(awsOnboardingCreateStackStepDefinition);
+  setup.registerStepDefinition(awsOnboardingStackStatusStepDefinition);
+  setup.registerStepDefinition(awsOnboardingCreateConnectorStepDefinition);
 };

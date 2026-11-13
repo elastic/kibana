@@ -9,6 +9,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../common';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '../../../common/types';
+import type { CloudSetupForCloudConnector } from '../../../common/services/cloud_connector_template';
 import type { AccountType, CloudConnectorSecretReference, CloudProvider } from '../../types';
 
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
@@ -117,20 +118,7 @@ export interface CloudConnectorFormProps {
   templateSha?: string;
 }
 
-export type CloudSetupForCloudConnector = Pick<
-  CloudSetup,
-  | 'isCloudEnabled'
-  | 'cloudId'
-  | 'cloudHost'
-  | 'baseUrl'
-  | 'deploymentUrl'
-  | 'deploymentId'
-  | 'organizationId'
-  | 'csp'
-  | 'region'
-  | 'serverless'
-  | 'isServerlessEnabled'
->;
+export type { CloudSetupForCloudConnector };
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   cloud: CloudSetupForCloudConnector;
