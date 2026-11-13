@@ -75,12 +75,16 @@ const SECRET_PATTERNS: SecretPattern[] = [
   },
   {
     name: 'openai-key',
-    pattern: /\bsk-[A-Za-z0-9]{20,}\b/g,
+    // Legacy `sk-…` keys and project/service-account/admin keys (`sk-proj-…`). The
+    // capture group is the secret part of a prefixed key, so the prefix does not inflate
+    // entropy. Legacy keys stay alphanumeric so hyphenated words starting `sk-` do not match.
+    pattern: /\bsk-(?:(?:proj|svcacct|admin)-([A-Za-z0-9_-]{20,})|[A-Za-z0-9]{20,}\b)/g,
     validate: (m) => shannonEntropy(m) >= MIN_ENTROPY,
   },
   {
     name: 'private-key-block',
-    pattern: /-----BEGIN (?:RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----/g,
+    pattern:
+      /-----BEGIN (?:(?:RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY|PGP PRIVATE KEY BLOCK)-----/g,
   },
   {
     name: 'elastic-api-key',
@@ -92,7 +96,7 @@ const SECRET_PATTERNS: SecretPattern[] = [
   },
   {
     name: 'generic-bearer',
-    pattern: /\bBearer\s+[A-Za-z0-9_.\-+/=]{20,}\b/g,
+    pattern: /\bBearer\s+([A-Za-z0-9_.\-+/=]{20,})\b/g,
     validate: (m) => shannonEntropy(m) >= MIN_ENTROPY,
   },
 ];

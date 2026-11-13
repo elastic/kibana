@@ -69,6 +69,30 @@ describe('esql-compile', () => {
     });
   });
 
+  it('compiles a fenced query with a pipe once, without a fence-polluted inline copy', async () => {
+    const { esClient, requestMock } = createEsClient();
+    const result = await esqlCompileEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('Run this:\n```esql\nFROM logs-*\n| LIMIT 5\n```\nDone.'),
+      log,
+    });
+    expect(requestMock).toHaveBeenCalledTimes(1);
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({ body: { query: 'FROM logs-*\n| LIMIT 5\n| LIMIT 0' } })
+    );
+    expect(result.scores[0].score).toBe(1);
+  });
+
+  it('still compiles an inline query that sits next to a fenced one', async () => {
+    const { esClient, requestMock } = createEsClient();
+    await esqlCompileEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('```esql\nFROM logs-*\n| LIMIT 5\n```\nAlso FROM metrics-* | STATS count()'),
+      log,
+    });
+    expect(requestMock).toHaveBeenCalledTimes(2);
+  });
+
   it('appends LIMIT 0 even after an existing LIMIT', async () => {
     const { esClient, requestMock } = createEsClient();
     await esqlCompileEvaluator.evaluate({
@@ -155,6 +179,32 @@ describe('esql-compile', () => {
     });
     expect(requestMock).not.toHaveBeenCalled();
     expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('does not read prose "from" followed by a markdown table as a query', async () => {
+    const { esClient, requestMock } = createEsClient();
+    const result = await esqlCompileEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('Data from last week\n\n| host | count |\n| a | 1 |'),
+      log,
+    });
+    expect(requestMock).not.toHaveBeenCalled();
+    expect(result.scores[0]).toMatchObject({ score: 1 });
+  });
+
+  it('stops an inline query at the next line that does not continue with a pipe', async () => {
+    const { esClient, requestMock } = createEsClient();
+    await esqlCompileEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('FROM logs-* | WHERE x > 1\n  | LIMIT 5\nThis returns rows.'),
+      log,
+    });
+    expect(requestMock).toHaveBeenCalledTimes(1);
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: { query: 'FROM logs-* | WHERE x > 1\n  | LIMIT 5\n| LIMIT 0' },
+      })
+    );
   });
 
   it('compiles an inline tool-argument query without the following argument values', async () => {

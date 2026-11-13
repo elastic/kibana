@@ -10,8 +10,12 @@ import type { EvaluatorDefinition } from '../types';
 import { collectRoundText } from '../round_text';
 
 const ESQL_BLOCK_PATTERN = /```(?:esql|ES\|QL|esql-query)\s*\n([\s\S]*?)```/gi;
-// Inline ES|QL: starts with FROM, ends at blank line or end of input.
-const INLINE_ESQL_PATTERN = /\bFROM\s+[\w.*,\s-]+\|[\s\S]*?(?=\n\n|$)/gi;
+// Inline ES|QL: starts with FROM and runs over lines that continue with `|`; it ends at
+// a line that does not, a fence or end of input, so trailing prose is not compiled.
+// Case-sensitive and the source list stays on one line, so prose "from last week" followed
+// by a markdown table is not read as a query.
+const INLINE_ESQL_PATTERN =
+  /\bFROM[ \t]+[\w.*, \t-]+(?:\r?\n[ \t]*)?\|[\s\S]*?(?=\n(?![ \t]*\|)|```|$)/g;
 
 const extractEsqlQueries = (content: string): string[] => {
   const queries = new Set<string>();
@@ -24,12 +28,15 @@ const extractEsqlQueries = (content: string): string[] => {
     m = ESQL_BLOCK_PATTERN.exec(content);
   }
 
+  // Fenced queries are already collected; scanning them again would add a variant with a
+  // different shape that the Set cannot dedupe.
+  const unfenced = content.replace(ESQL_BLOCK_PATTERN, '\n\n');
   INLINE_ESQL_PATTERN.lastIndex = 0;
-  m = INLINE_ESQL_PATTERN.exec(content);
+  m = INLINE_ESQL_PATTERN.exec(unfenced);
   while (m) {
     const q = m[0].trim();
     if (q) queries.add(q);
-    m = INLINE_ESQL_PATTERN.exec(content);
+    m = INLINE_ESQL_PATTERN.exec(unfenced);
   }
 
   return Array.from(queries);

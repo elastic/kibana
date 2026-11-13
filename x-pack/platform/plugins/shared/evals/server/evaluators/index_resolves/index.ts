@@ -14,8 +14,10 @@ import { collectRoundText } from '../round_text';
 //   - `index:` / `index pattern <x>` mentions
 //   - backticked tokens that are not field paths
 //   - bare tokens that match a recognisable index shape (`logs-*`, `.alerts-*`)
+// Case-sensitive: prose "from well-known." must not read as a FROM clause. Lowercase
+// queries are still caught when their patterns have a known index shape.
 const FROM_CLAUSE_PATTERN =
-  /\bFROM\s+([\w.*-]+(?:\s*,\s*[\w.*-]+)*)(?=\s*(?:\||\r?\n|$)|\s+METADATA\b)/gi;
+  /\bFROM\s+([\w.*-]+(?:\s*,\s*[\w.*-]+)*)(?=\s*(?:\||\r?\n|$)|\s+METADATA\b)/g;
 const INDEX_CONTEXT_PATTERN =
   /\bindex(?:es)?(?:\s+pattern)?s?\s*[:=]\s*[`'"]?([\w.*-]+(?:\s*,\s*[\w.*-]+)*)|\bindex\s+pattern\s+[`'"]?([\w.*-]+)/gi;
 const BACKTICKED_PATTERN = /`([^`\s]+)`/g;

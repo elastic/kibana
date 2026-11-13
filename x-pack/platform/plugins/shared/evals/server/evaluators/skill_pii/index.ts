@@ -16,8 +16,10 @@ interface PiiPattern {
 const PII_PATTERNS: PiiPattern[] = [
   {
     name: 'email',
-    // Match realistic email addresses but exclude template placeholders like {email} or <email>
-    pattern: /(?<![{<])[\w.+-]+@[\w-]+\.[\w.]+(?![}>])/g,
+    // Match realistic email addresses, including `<a@b.com>` (placeholders like <email>
+    // have no `@`). The lookbehind only lets a match start at the beginning of a local-part
+    // run and the local part is capped at 64 (the RFC limit), so a long run is scanned once.
+    pattern: /(?<![\w.+\-{])[\w.+-]{1,64}@[\w-]+\.[\w.]+(?!})/g,
   },
   {
     name: 'ssn',
@@ -53,7 +55,7 @@ const PII_PATTERNS: PiiPattern[] = [
 const SAFE_MATCH_PATTERNS = [
   /^(?:test|user)@/i,
   /@(?:[\w-]+\.)*example\.(?:com|org)$/i,
-  /placeholder/i,
+  /^placeholder@/i,
 ];
 
 // Template syntax is tested against the token around the match, because the PII

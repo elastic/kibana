@@ -74,6 +74,73 @@ describe('skill-secret-scanner', () => {
     });
   });
 
+  it.each([
+    ['a legacy key', 'sk-Zq8Xk2Lm9Pw4Rt6Yv1Bn3Cd5Fg7Hj0Ks2L'],
+    ['a project key', 'sk-proj-Zq8Xk2Lm9Pw4_Rt6Yv1Bn3Cd5-Fg7Hj0Ks2L'],
+    ['a service-account key', 'sk-svcacct-Zq8Xk2Lm9Pw4Rt6Yv1Bn3Cd5Fg7Hj0'],
+    ['an admin key', 'sk-admin-Zq8Xk2Lm9Pw4Rt6Yv1Bn3Cd5Fg7Hj0'],
+  ])('flags %s as an OpenAI key', async (_label, key) => {
+    const result = await skillSecretScannerEvaluator.evaluate({
+      trace,
+      round: round(`Call the API with ${key} as the key`),
+      log,
+    });
+    expect(result.scores[0].metadata?.grouped).toEqual({ 'openai-key': 1 });
+  });
+
+  it('does not flag a hyphenated identifier that starts with sk-', async () => {
+    const result = await skillSecretScannerEvaluator.evaluate({
+      trace,
+      round: round('See sk-learn-pipeline-configuration-guide for details'),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('judges a bearer token on its value, not the Bearer prefix', async () => {
+    const result = await skillSecretScannerEvaluator.evaluate({
+      trace,
+      round: round(`Authorization: Bearer ${'a'.repeat(30)}`),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('does not flag a low-entropy sk-proj- value', async () => {
+    const result = await skillSecretScannerEvaluator.evaluate({
+      trace,
+      round: round(`sk-proj-${'a'.repeat(30)}`),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it.each([
+    'PRIVATE KEY',
+    'RSA PRIVATE KEY',
+    'EC PRIVATE KEY',
+    'DSA PRIVATE KEY',
+    'OPENSSH PRIVATE KEY',
+    'ENCRYPTED PRIVATE KEY',
+    'PGP PRIVATE KEY BLOCK',
+  ])('flags a "-----BEGIN %s-----" header', async (header) => {
+    const result = await skillSecretScannerEvaluator.evaluate({
+      trace,
+      round: round(`-----BEGIN ${header}-----\nMIIE\n-----END ${header}-----`),
+      log,
+    });
+    expect(result.scores[0].metadata?.grouped).toEqual({ 'private-key-block': 1 });
+  });
+
+  it('does not flag a public key block', async () => {
+    const result = await skillSecretScannerEvaluator.evaluate({
+      trace,
+      round: round('-----BEGIN PGP PUBLIC KEY BLOCK-----'),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
   it('does not flag a low-entropy value just because the key prefix raises entropy', async () => {
     const value = 'abcdefgh'.repeat(5);
     const result = await skillSecretScannerEvaluator.evaluate({

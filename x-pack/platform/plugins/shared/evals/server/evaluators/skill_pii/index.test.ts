@@ -147,6 +147,53 @@ describe('skill-pii', () => {
     expect(result.scores[0]).toMatchObject({ score: 0, label: 'fail' });
   });
 
+  it('flags an address wrapped in angle brackets', async () => {
+    const result = await skillPiiEvaluator.evaluate({
+      trace,
+      round: round('Contact <admin@contoso.com> for access'),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 0, label: 'fail' });
+  });
+
+  it('does not flag an <email> placeholder', async () => {
+    const result = await skillPiiEvaluator.evaluate({
+      trace,
+      round: round('Send it to <email> or {email}'),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('scans a long local-part-only run in linear time', async () => {
+    const started = Date.now();
+    const result = await skillPiiEvaluator.evaluate({
+      trace,
+      round: round('a'.repeat(200000)),
+      log,
+    });
+    expect(Date.now() - started).toBeLessThan(2000);
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('flags a real address whose domain merely contains "placeholder"', async () => {
+    const result = await skillPiiEvaluator.evaluate({
+      trace,
+      round: round('Email ceo@placeholder-bank.com for approval'),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 0, label: 'fail' });
+  });
+
+  it('still exempts a placeholder@ address', async () => {
+    const result = await skillPiiEvaluator.evaluate({
+      trace,
+      round: round('Send to placeholder@corp.com'),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
   it('does not let a comma-separated placeholder exempt a real address', async () => {
     const result = await skillPiiEvaluator.evaluate({
       trace,

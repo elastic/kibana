@@ -74,6 +74,16 @@ describe('skill-index-resolves', () => {
     );
   });
 
+  it('resolves a FROM-clause pattern that has no recognisable index shape', async () => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('Run FROM my-index | LIMIT 5'),
+      log,
+    });
+    expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: 'my-index' }));
+  });
+
   it('fails when the only referenced pattern resolves to nothing', async () => {
     const { esClient } = createEsClient(async () => ({ indices: [] }));
     const result = await indexResolvesEvaluator.evaluate({
@@ -114,6 +124,16 @@ describe('skill-index-resolves', () => {
       expect(resolveIndexMock).not.toHaveBeenCalled();
     }
   );
+
+  it('does not read prose "from <word>" at the end of a line as a FROM clause', async () => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('The idea comes from well-known.\nNext line.'),
+      log,
+    });
+    expect(resolveIndexMock).not.toHaveBeenCalled();
+  });
 
   it('does not treat a hyphenated word at the end of a sentence as an index', async () => {
     const { esClient, resolveIndexMock } = createEsClient();
