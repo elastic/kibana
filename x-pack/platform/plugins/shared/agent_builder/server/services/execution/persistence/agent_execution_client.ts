@@ -30,6 +30,7 @@ type CreateExecutionParams = Pick<
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'rootExecutionId'
   | 'owner'
   | 'runAs'
 >;
@@ -53,6 +54,7 @@ export interface ExecutionPeek {
   spaceId?: string;
   owner?: UserIdAndName;
   runAs?: AgentExecution['runAs'];
+  rootExecutionId?: string;
 }
 
 const runAsFromEs = (
@@ -72,6 +74,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     executionMode: source.execution_mode ?? AgentExecutionMode.conversation,
     ...(source.interactivity ? { interactivity: source.interactivity } : {}),
     ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
+    rootExecutionId: source.root_execution_id ?? source.execution_id,
     spaceId: source.space_id,
     ...(source.owner ? { owner: source.owner } : {}),
     ...(source.run_as ? { runAs: runAsFromEs(source.run_as) } : {}),
@@ -173,6 +176,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     executionMode,
     interactivity,
     parentExecutionId,
+    rootExecutionId,
     owner,
     runAs,
   }: CreateExecutionParams): Promise<AgentExecution> {
@@ -194,6 +198,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       execution_mode: executionMode,
       ...(interactivity ? { interactivity } : {}),
       parent_execution_id: parentExecutionId,
+      root_execution_id: rootExecutionId,
       space_id: spaceId,
       ...(owner ? { owner } : {}),
       ...(runAs
@@ -299,6 +304,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
           'space_id',
           'owner',
           'run_as',
+          'root_execution_id',
         ] as string[],
       });
       const source = response._source;
@@ -311,6 +317,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         space_id: spaceId,
         owner,
         run_as: runAs,
+        root_execution_id: rootExecutionId = executionId,
       } = source;
       const conversationId =
         agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
@@ -324,6 +331,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         ...(spaceId ? { spaceId } : {}),
         ...(owner ? { owner } : {}),
         ...(runAs ? { runAs: runAsFromEs(runAs) } : {}),
+        rootExecutionId,
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {

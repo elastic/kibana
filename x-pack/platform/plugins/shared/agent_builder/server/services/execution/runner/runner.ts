@@ -39,7 +39,6 @@ import type {
   RunAgentReturn,
   RunContext,
   RunApprovals,
-  Runner,
   RunToolReturn,
   ScopedRunner,
   ScopedRunnerRunAgentParams,
@@ -74,6 +73,7 @@ import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import type { ModelProviderFactoryFn } from './model_provider';
+import type { InternalRunner } from './types';
 import { connectorModelSource } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import {
@@ -161,6 +161,8 @@ export interface CreateScopedRunnerDeps {
    * rebuilt for an agent run (see `runAgent`) still passes it on to the sub-agents it spawns.
    */
   workflowExecutionId?: string;
+  /** Root execution of the run tree, read from the execution document; nested runs keep it. */
+  rootExecutionId?: string;
   /** Lazy getter for the execution service. */
   getExecutionService: () => AgentExecutionService;
   /** Experimental features enabled for this runner context. */
@@ -195,6 +197,7 @@ export type CreateRunnerDeps = Omit<
   | 'toolManager'
   | 'subAgentExecutor'
   | 'workflowExecutionId'
+  | 'rootExecutionId'
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
@@ -284,7 +287,7 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
   return manager.getRunner();
 };
 
-export const createRunner = (deps: CreateRunnerDeps): Runner => {
+export const createRunner = (deps: CreateRunnerDeps): InternalRunner => {
   const { modelProviderFactory, ...runnerDeps } = deps;
   const { getExecutionService } = runnerDeps;
 
@@ -307,6 +310,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     parentExecutionId,
     conversationAccess = 'readWrite',
     workflowExecutionId,
+    rootExecutionId,
   }: {
     request: KibanaRequest;
     owner?: UserIdAndName;
@@ -328,6 +332,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     conversationAccess?: ExecutionConversationAccess;
     /** Passed on to the sub-agents this run spawns, so their rounds join to the workflow run. */
     workflowExecutionId?: string;
+    rootExecutionId?: string;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -424,6 +429,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       conversationAccess,
       subAgentExecutor,
       workflowExecutionId,
+      rootExecutionId,
       experimentalFeatures,
       ...(deductive ? { deductive } : {}),
     };
@@ -459,7 +465,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       });
       return runner.runInternalTool(otherParams);
     },
-    runAgent: async (params) => {
+    runAgent: async (params, { rootExecutionId } = {}) => {
       const {
         request,
         owner,
@@ -498,6 +504,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         parentExecutionId,
         conversationAccess,
         workflowExecutionId,
+        rootExecutionId,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

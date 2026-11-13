@@ -21,11 +21,12 @@ import type {
   ClientTypeSpec,
   ConnectorNetworkSettings,
   PlatformServices,
-  RelayActionClient,
 } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import type { ExecutorParams } from '../../sub_action_framework/types';
+import { isAgentBuilderExecutionSource } from '../action_execution_source';
+import type { RelayClientContract } from '../relay';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
@@ -169,7 +170,7 @@ export const generateExecutorFunction = ({
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
   getCredential: GetCredentialFn;
   getClientLeasePool: () => LeasePool<unknown>;
-  getRelayClient?: () => RelayActionClient | undefined;
+  getRelayClient?: () => RelayClientContract | undefined;
   networkSettings: ConnectorNetworkSettings;
   platform: PlatformServices;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
@@ -189,6 +190,7 @@ export const generateExecutorFunction = ({
       authMode,
       profileUid,
       connectorVersion,
+      source,
     } = execOptions;
     const { subAction, subActionParams, fetchOptions } = params as ExecutorParams & {
       fetchOptions?: FetchOptions;
@@ -318,13 +320,16 @@ export const generateExecutorFunction = ({
       }
     };
 
+    const relayClient = authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined;
+    const runContext = isAgentBuilderExecutionSource(source) ? source.source.runContext : undefined;
+
     const actionContext = {
       log: logger,
       client: axiosInstance,
       secrets,
       config,
       getClient: getClient as ActionContext['getClient'],
-      relay: authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined,
+      relay: runContext ? relayClient?.withRunContext(runContext) : relayClient,
       signJwt: getJwtSigner?.(connectorId),
     };
 

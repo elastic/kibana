@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Runner } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../config';
 import type {
@@ -18,6 +17,7 @@ import type { ConversationEventBus } from '../workflows/triggers/conversation_ev
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
+import type { InternalRunner } from './execution/runner/types';
 import { ConversationServiceImpl } from './conversation';
 import { createWorkspaceService } from './workspaces';
 import { type AttachmentService, createAttachmentService } from './attachments';
@@ -148,7 +148,7 @@ export class ServiceManager {
     }
 
     // eslint-disable-next-line prefer-const
-    let runner: Runner | undefined;
+    let runner: InternalRunner | undefined;
     const getRunner = () => {
       if (!runner) {
         throw new Error('Trying to access runner before initialization');

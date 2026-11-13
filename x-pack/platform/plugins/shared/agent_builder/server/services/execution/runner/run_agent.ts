@@ -209,6 +209,7 @@ export const runAgent = async ({
     agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
+    rootExecutionId: parentManager.deps.rootExecutionId,
     origin: resolveTelemetryOrigin({
       conversation: agentParams.conversation,
       requestOrigin: agentParams.origin?.type,

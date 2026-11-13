@@ -14,6 +14,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import {
   getToolResultId,
   createErrorResult,
+  getToolRunContext,
   resolveAllowedConnectorIds,
 } from '@kbn/agent-builder-server';
 import {
@@ -268,7 +269,10 @@ export const createExecuteConnectorSubActionTool = ({
           subAction,
           subActionParams: params ?? {},
         },
-        source: asAgentBuilderExecutionSource({ toolId: context.callContext.toolId }),
+        source: asAgentBuilderExecutionSource({
+          toolId: context.callContext.toolId,
+          runContext: getToolRunContext(context),
+        }),
       });
     } catch (error) {
       return {
