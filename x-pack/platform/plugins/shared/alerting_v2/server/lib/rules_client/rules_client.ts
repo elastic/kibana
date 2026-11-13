@@ -64,8 +64,6 @@ import {
 import type { AlertingPublisherContext } from '../events/domain_events';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
-import { RULE_UPDATED_EVENT_TYPE } from '../events/rule_event_publisher/events';
-import { RuleChangesHistoryEventLogger } from '../events/rule_changes_history_subscriber/rule_changes_history_event_logger';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -245,8 +243,6 @@ export class RulesClient {
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
     @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin,
-    @inject(RuleChangesHistoryEventLogger)
-    private readonly changeHistoryEventLogger: RuleChangesHistoryEventLogger,
     @inject(RuleChangesHistoryClientToken)
     private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract
   ) {
@@ -1975,7 +1971,7 @@ export class RulesClient {
   /**
    * Replaces a rule's configuration with the snapshot recorded by a
    * change-history event. The current `enabled` state is kept and the version
-   * is bumped. Resolves once the restore's change-history entry is searchable.
+   * is bumped.
    */
   @withApm
   public async restoreRule({ changeId }: { changeId: string }): Promise<RuleResponse> {
@@ -1986,17 +1982,15 @@ export class RulesClient {
     const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
-    return this.replaceExistingRule({ id: ruleId, parsed, awaitChangeHistory: true });
+    return this.replaceExistingRule({ id: ruleId, parsed });
   }
 
   private async replaceExistingRule({
     id,
     parsed,
-    awaitChangeHistory = false,
   }: {
     id: string;
     parsed: PutRuleData;
-    awaitChangeHistory?: boolean;
   }): Promise<RuleResponse> {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();

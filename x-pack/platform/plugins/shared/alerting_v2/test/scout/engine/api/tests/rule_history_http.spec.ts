@@ -244,15 +244,19 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
 
       expect(fetched).toStrictEqual(restored);
 
-      // The restore responds only once its history entry is searchable, so no wait is needed.
-      const afterRestoreResponse = await apiClient.get(
-        `${CHANGE_HISTORY_URL}?rule_id=${encodeURIComponent(created.id)}`,
-        { headers: readerHeaders }
-      );
+      // The restore's history entry is written asynchronously after the response.
+      const listHistory = async (): Promise<ListRuleChangeHistoryResponse> => {
+        const response = await apiClient.get(
+          `${CHANGE_HISTORY_URL}?rule_id=${encodeURIComponent(created.id)}`,
+          { headers: readerHeaders }
+        );
+        expect(response).toHaveStatusCode(200);
+        return response.body;
+      };
 
-      expect(afterRestoreResponse).toHaveStatusCode(200);
+      await expect.poll(async () => (await listHistory()).items[0]?.version).toBe(restored.version);
 
-      const afterRestore: ListRuleChangeHistoryResponse = afterRestoreResponse.body;
+      const afterRestore = await listHistory();
 
       expect(afterRestore.items[0]).toMatchObject({
         action: RuleChangesHistoryAction.ruleUpdate,
