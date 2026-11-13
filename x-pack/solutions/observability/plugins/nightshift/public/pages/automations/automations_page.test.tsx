@@ -31,6 +31,13 @@ import type { Automation } from '../../data/automations/use_automations';
 jest.mock('../../data/automations/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
   useAutomationRunsInRange: jest.fn(),
+  useAutomationDetail: () => ({
+    data: { isWorkflowMissing: false },
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+  useRepairAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
   useAutomationRunActivity: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
   useAutomationsRunCounts: jest.fn(),

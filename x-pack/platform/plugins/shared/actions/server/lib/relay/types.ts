@@ -94,6 +94,17 @@ export interface RelayBindingsPage {
   nextCursor?: string;
 }
 
+export interface RelayAvailableChannel {
+  scope_id: string;
+  display_name: string;
+}
+
+export interface RelayAvailableChannelsPage {
+  channels: RelayAvailableChannel[];
+  /** True when the Relay stopped listing early, so some channels are missing. */
+  truncated: boolean;
+}
+
 /**
  * The Relay resolves `channel` to a bound Slack conversation. Accepts a conversation id (`C…` /
  * `G…` / `D…`) or a connected channel name (`#general`, `general`).
@@ -176,6 +187,8 @@ export interface RelayClientContract {
    * read subsequent pages of the cursor-paginated endpoint.
    */
   listBindings(tenantKey: string, options?: RelayListBindingsOptions): Promise<RelayBindingsPage>;
+  /** Public channels the bot is in that no deployment has bound. 429 if Slack throttled the listing. */
+  listAvailableChannels(tenantKey: string): Promise<RelayAvailableChannelsPage>;
   /** Claim an unclaimed channel for this deployment (put-if-absent; 409 if already claimed). */
   bind(tenantKey: string, channelId: string): Promise<void>;
   /** Release a channel binding owned by this deployment (404 if none; 403 if owned by another). */

@@ -52,6 +52,12 @@ export type DeclarativeTemplateRoot = 'input' | 'config';
 
 export type DeclarativeHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+export interface DeclarativeResponseMapping {
+  dataPath?: string;
+  outputKey?: string;
+  linkHeader?: { header?: string; outputKey: string };
+}
+
 export interface DeclarativeRequest {
   method: DeclarativeHttpMethod;
   url?: string;
@@ -60,6 +66,8 @@ export interface DeclarativeRequest {
   query?: Record<string, unknown>;
   headers?: Record<string, unknown>;
   body?: unknown;
+  bodyType?: 'json' | 'form' | 'text';
+  response?: DeclarativeResponseMapping;
 }
 
 export interface DeclarativeAction {

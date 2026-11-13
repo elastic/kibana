@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import {
   useInfiniteQuery,
@@ -25,6 +26,7 @@ import {
   AUTOMATIONS_QUERY_KEY,
   RUN_QUOTAS_QUERY_KEY,
   automationRunActivityQueryKey,
+  automationDetailQueryKey,
 } from '../query_keys';
 
 type AutomationsResponse =
@@ -53,13 +55,23 @@ const errorToastTitles = {
   run: i18n.translate('xpack.nightshift.automations.runErrorMessage', {
     defaultMessage: 'Failed to run automation',
   }),
+  repair: i18n.translate('xpack.nightshift.automations.repairError', {
+    defaultMessage: 'Failed to repair automation',
+  }),
   delete: i18n.translate('xpack.nightshift.automations.deleteError', {
     defaultMessage: 'Failed to delete automation',
   }),
 };
 
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(String(error));
+const toError = (error: unknown): Error => {
+  if (isHttpFetchError(error)) {
+    const { body } = error;
+    if (body && typeof body === 'object' && 'message' in body && typeof body.message === 'string') {
+      return new Error(body.message);
+    }
+  }
+  return error instanceof Error ? error : new Error(String(error));
+};
 
 export const useFetchAutomations = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { notifications, nightshiftInvestigations } = useKibana().services;
@@ -79,6 +91,24 @@ export const useFetchAutomations = ({ enabled = true }: { enabled?: boolean } = 
     retry: (failureCount, error) => !isHttpClientError(error) && failureCount < 3,
     onError: (error: unknown) =>
       notifications.toasts.addError(toError(error), { title: errorToastTitles.load }),
+  });
+};
+
+export const useAutomationDetail = (id: string) => {
+  const { nightshiftInvestigations } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+  return useQuery({
+    queryKey: automationDetailQueryKey(id),
+    enabled: investigationsClient != null,
+    queryFn: async ({ signal }) => {
+      if (!investigationsClient) throw new Error('Nightshift investigations plugin is unavailable');
+      return investigationsClient.fetch('GET /internal/nightshift/automations/{id}', {
+        params: { path: { id } },
+        signal: signal ?? null,
+      });
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -381,6 +411,31 @@ export const useRunAutomation = () => {
       });
       await queryClient.invalidateQueries({ queryKey: RUN_QUOTAS_QUERY_KEY });
     }
+  );
+};
+
+export const useRepairAutomation = () => {
+  const { nightshiftInvestigations, notifications } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+
+  return useAutomationMutation<Pick<Automation, 'id' | 'name'>>(
+    ({ id }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('POST /internal/nightshift/automations/{id}/repair', {
+        params: { path: { id } },
+        signal: null,
+      });
+    },
+    errorToastTitles.repair,
+    ({ name }) =>
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.automations.repairedToast', {
+          defaultMessage: 'Automation repaired',
+        }),
+        text: name,
+      })
   );
 };
 
