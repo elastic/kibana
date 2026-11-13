@@ -35,7 +35,7 @@ export const useCustomDragHandles = ({
       const classObservers: MutationObserver[] = [];
 
       for (const handle of dragHandles) {
-        if (handle === null) return;
+        if (handle === null) continue;
         handle.addEventListener('mousedown', startDrag, { passive: true });
         handle.addEventListener('touchstart', startDrag, { passive: true });
         handle.addEventListener('keydown', startDrag);
@@ -52,7 +52,7 @@ export const useCustomDragHandles = ({
       removeEventListenersRef.current = () => {
         classObservers.forEach((observer) => observer.disconnect());
         for (const handle of dragHandles) {
-          if (handle === null) return;
+          if (handle === null) continue;
           handle.removeEventListener('mousedown', startDrag);
           handle.removeEventListener('touchstart', startDrag);
           handle.removeEventListener('keydown', startDrag);
