@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('edit embeddable redirects', () => {
     before(async () => {
@@ -82,6 +83,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await visualize.notLinkedToOriginatingApp();
       await dashboard.navigateToApp();
+    });
+
+    it('loses originatingApp connection after first save when redirectToOrigin is false', async () => {
+      const newTitle = 'test create panel originatingApp';
+      await dashboard.loadDashboardInEditMode('few panels');
+      await dashboardAddPanel.clickAddTsvb();
+      await visualize.saveVisualizationExpectSuccess(newTitle, {
+        saveAsNew: true,
+        redirectToOrigin: false,
+      });
+      await visualize.notLinkedToOriginatingApp();
     });
   });
 }
