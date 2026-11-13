@@ -1247,7 +1247,7 @@ export const Templates = lazySchema(() =>
 export type Templates = z.infer<typeof Templates>;
 
 /**
-  * The custom observable types, and the changes to the built-in observable types. An entry with a label is a custom type. An entry without a label changes the fields of the built-in type with the same key. The configuration stores only the fields that differ from the defaults of the built-in type.
+  * The custom observable types. To change how auto-extraction reads a type, use `observableTypeSettings`.
 
   */
 export const ObservableTypesRequest = lazySchema(() =>
@@ -1255,7 +1255,34 @@ export const ObservableTypesRequest = lazySchema(() =>
     .array(
       z.object({
         /**
-      * The observable type key. For a built-in type, use the key of that type, for example `observable-type-agent-id`.
+         * The observable type key.
+         */
+        key: z
+          .string()
+          .min(1)
+          .max(36)
+          .regex(/^[a-z0-9_-]+$/)
+          .describe('The observable type key.'),
+        /**
+         * The observable type label.
+         */
+        label: z.string().min(1).max(50).describe('The observable type label.'),
+      })
+    )
+    .max(10)
+);
+export type ObservableTypesRequest = z.infer<typeof ObservableTypesRequest>;
+
+/**
+  * The auto-extraction settings of the built-in and custom observable types. Each entry has the key of a built-in type or of a custom type in `observableTypes`, and a key can appear one time. A type without an entry uses its default settings. When a request changes `observableTypes` and omits this property, the settings of the deleted custom types are removed.
+
+  */
+export const ObservableTypeSettingsRequest = lazySchema(() =>
+  z
+    .array(
+      z.object({
+        /**
+      * The key of a built-in or custom observable type. For a built-in type, use the key of that type, for example `observable-type-agent-id`.
 
       */
         key: z
@@ -1264,31 +1291,7 @@ export const ObservableTypesRequest = lazySchema(() =>
           .max(36)
           .regex(/^[a-z0-9_-]+$/)
           .describe(
-            'The observable type key. For a built-in type, use the key of that type, for example `observable-type-agent-id`.\n'
-          ),
-        /**
-      * The observable type label. It is required for a custom type. A built-in type has no label in a request.
-
-      */
-        label: z
-          .string()
-          .min(1)
-          .max(50)
-          .optional()
-          .describe(
-            'The observable type label. It is required for a custom type. A built-in type has no label in a request.\n'
-          ),
-        /**
-      * A regular expression. Auto-extraction keeps only the values that match it. It applies only to a custom type, and to values of at most 1024 characters. A request with an expression that does not compile returns a 400 error.
-
-      */
-        valuePattern: z
-          .string()
-          .min(1)
-          .max(256)
-          .optional()
-          .describe(
-            'A regular expression. Auto-extraction keeps only the values that match it. It applies only to a custom type, and to values of at most 1024 characters. A request with an expression that does not compile returns a 400 error.\n'
+            'The key of a built-in or custom observable type. For a built-in type, use the key of that type, for example `observable-type-agent-id`.\n'
           ),
         /**
       * The alert fields that auto-extraction reads for this type. For a built-in type, send only the fields that you turn off, add, or give excluded values. A field name can appear one time in an entry.
@@ -1298,9 +1301,13 @@ export const ObservableTypesRequest = lazySchema(() =>
           .array(
             z.object({
               /**
-               * The name of the alert field.
+               * The name of the alert field. The value is not trimmed.
                */
-              path: z.string().min(1).max(256).describe('The name of the alert field.'),
+              path: z
+                .string()
+                .min(1)
+                .max(256)
+                .describe('The name of the alert field. The value is not trimmed.'),
               /**
                * When `false`, auto-extraction skips this field.
                */
@@ -1323,11 +1330,23 @@ export const ObservableTypesRequest = lazySchema(() =>
           .describe(
             'The alert fields that auto-extraction reads for this type. For a built-in type, send only the fields that you turn off, add, or give excluded values. A field name can appear one time in an entry.\n'
           ),
+        /**
+      * A regular expression. Auto-extraction keeps only the values that match it. It applies only to a custom type, and to values of at most 1024 characters. A request with an expression that does not compile returns a 400 error.
+
+      */
+        valuePattern: z
+          .string()
+          .min(1)
+          .max(256)
+          .optional()
+          .describe(
+            'A regular expression. Auto-extraction keeps only the values that match it. It applies only to a custom type, and to values of at most 1024 characters. A request with an expression that does not compile returns a 400 error.\n'
+          ),
       })
     )
     .max(19)
 );
-export type ObservableTypesRequest = z.infer<typeof ObservableTypesRequest>;
+export type ObservableTypeSettingsRequest = z.infer<typeof ObservableTypeSettingsRequest>;
 
 /**
  * External connection details, such as the closure type and default connector for cases.
@@ -1435,6 +1454,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
         "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.\n"
       ),
     observableTypes: ObservableTypesRequest.optional(),
+    observableTypeSettings: ObservableTypeSettingsRequest.optional(),
     owner: Owner,
     templates: Templates.optional(),
     /**
@@ -1559,6 +1579,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
         'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.\n'
       ),
     observableTypes: ObservableTypesRequest.optional(),
+    observableTypeSettings: ObservableTypeSettingsRequest.optional(),
     templates: Templates.optional(),
     /**
       * Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
