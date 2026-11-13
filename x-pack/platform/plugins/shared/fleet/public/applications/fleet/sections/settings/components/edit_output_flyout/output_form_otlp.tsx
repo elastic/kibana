@@ -10,11 +10,13 @@ import {
   EuiAccordion,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCode,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormErrorText,
   EuiFormRow,
+  EuiRadioGroup,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -23,12 +25,17 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { otlpCompressionType } from '../../../../../../../common/constants';
+import { otlpCompressionType, otlpProtocol } from '../../../../../../../common/constants';
 
 import type { useInput, useSwitchInput } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
-import { isOtlpGrpc } from './use_otlp_inputs';
+import {
+  changeOtlpProtocol,
+  hasOtlpGrpcSettings,
+  hasOtlpHttpSettings,
+  isOtlpGrpc,
+} from './use_otlp_inputs';
 import { OTEL_SPEC_URLS, OtlpSpecDefaultHint, OtlpSpecLink } from './otlp_spec';
 
 type HeadersErrors = Array<{
@@ -48,6 +55,13 @@ const GRPC_COMPRESSION_OPTIONS = [
 const HTTP_COMPRESSION_OPTIONS = [otlpCompressionType.Gzip, otlpCompressionType.None].map(
   (value) => ({ value, text: value })
 );
+
+const HTTP_ENCODING_OPTIONS = ['proto', 'json'].map((value) => ({ value, text: value }));
+
+const PROTOCOL_OPTIONS = [
+  { id: 'otlpProtocolGrpc', value: otlpProtocol.Grpc, label: 'gRPC' },
+  { id: 'otlpProtocolHttpProtobuf', value: otlpProtocol.HttpProtobuf, label: 'HTTP/Protobuf' },
+];
 
 const TextSetting: React.FunctionComponent<{
   label: React.ReactNode;
@@ -215,25 +229,56 @@ const keepaliveDisabledDefault = (
   />
 );
 
-const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ inputs }) => {
-  const hasGrpcSettings =
-    [
-      inputs.otlpBalancerNameInput,
-      inputs.otlpKeepaliveTimeInput,
-      inputs.otlpKeepaliveTimeoutInput,
-      inputs.otlpReadBufferSizeInput,
-      inputs.otlpWriteBufferSizeInput,
-      inputs.otlpUserAgentInput,
-      inputs.otlpAuthorityInput,
-    ].some((input) => !!input.value) ||
-    inputs.otlpKeepalivePermitWithoutStreamInput.value ||
-    inputs.otlpWaitForReadyInput.value;
+const Protocol: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ inputs }) => (
+  <EuiFormRow
+    fullWidth
+    label={
+      <FormattedMessage
+        id="xpack.fleet.settings.editOutputFlyout.otlpProtocolLabel"
+        defaultMessage="Protocol"
+      />
+    }
+    helpText={
+      <FormattedMessage
+        id="xpack.fleet.settings.editOutputFlyout.otlpProtocolHelpText"
+        defaultMessage="Changing the protocol resets the settings of the previous protocol. See the {grpcSpecLink} and the {httpSpecLink}."
+        values={{
+          grpcSpecLink: <OtlpSpecLink specUrl={OTEL_SPEC_URLS.otlpExporter} />,
+          httpSpecLink: <OtlpSpecLink specUrl={OTEL_SPEC_URLS.otlpHttpExporter} />,
+        }}
+      />
+    }
+  >
+    <EuiRadioGroup
+      name="otlpProtocol"
+      style={{ display: 'flex', gap: 30 }}
+      data-test-subj="settingsOutputsFlyout.otlpProtocolInput"
+      compressed
+      disabled={inputs.otlpProtocolInput.props.disabled}
+      options={PROTOCOL_OPTIONS.map(({ id, label }) => ({
+        id,
+        label,
+        'data-test-subj': `settingsOutputsFlyout.${id}`,
+      }))}
+      idSelected={
+        PROTOCOL_OPTIONS.find(({ value }) => value === inputs.otlpProtocolInput.value)?.id
+      }
+      onChange={(id) => {
+        const option = PROTOCOL_OPTIONS.find((protocolOption) => protocolOption.id === id);
+        if (option) {
+          changeOtlpProtocol(inputs, option.value);
+        }
+      }}
+    />
+  </EuiFormRow>
+);
 
+const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ inputs }) => {
   return (
     <EuiAccordion
       id="otlpGrpcSettings"
       data-test-subj="settingsOutputsFlyout.otlpGrpcSettings"
-      initialIsOpen={hasGrpcSettings}
+      initialIsOpen={hasOtlpGrpcSettings(inputs)}
       paddingSize="m"
       buttonContent={
         <FormattedMessage
@@ -393,6 +438,328 @@ const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = 
   );
 };
 
+const signalEndpointDefault = (path: string) => (
+  <FormattedMessage
+    id="xpack.fleet.settings.editOutputFlyout.otlpSignalEndpointDefault"
+    defaultMessage="the endpoint followed by {path}"
+    values={{ path: <EuiCode>{path}</EuiCode> }}
+  />
+);
+
+const SIGNAL_ENDPOINTS = [
+  {
+    inputKey: 'otlpTracesEndpointInput',
+    testSubj: 'otlpTracesEndpointInput',
+    path: '/v1/traces',
+    label: (
+      <FormattedMessage
+        id="xpack.fleet.settings.editOutputFlyout.otlpTracesEndpointLabel"
+        defaultMessage="Traces endpoint (optional)"
+      />
+    ),
+  },
+  {
+    inputKey: 'otlpMetricsEndpointInput',
+    testSubj: 'otlpMetricsEndpointInput',
+    path: '/v1/metrics',
+    label: (
+      <FormattedMessage
+        id="xpack.fleet.settings.editOutputFlyout.otlpMetricsEndpointLabel"
+        defaultMessage="Metrics endpoint (optional)"
+      />
+    ),
+  },
+  {
+    inputKey: 'otlpLogsEndpointInput',
+    testSubj: 'otlpLogsEndpointInput',
+    path: '/v1/logs',
+    label: (
+      <FormattedMessage
+        id="xpack.fleet.settings.editOutputFlyout.otlpLogsEndpointLabel"
+        defaultMessage="Logs endpoint (optional)"
+      />
+    ),
+  },
+  {
+    inputKey: 'otlpProfilesEndpointInput',
+    testSubj: 'otlpProfilesEndpointInput',
+    path: '/v1development/profiles',
+    label: (
+      <FormattedMessage
+        id="xpack.fleet.settings.editOutputFlyout.otlpProfilesEndpointLabel"
+        defaultMessage="Profiles endpoint (optional)"
+      />
+    ),
+  },
+] as const;
+
+const HttpSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ inputs }) => {
+  return (
+    <EuiAccordion
+      id="otlpHttpSettings"
+      data-test-subj="settingsOutputsFlyout.otlpHttpSettings"
+      initialIsOpen={hasOtlpHttpSettings(inputs)}
+      paddingSize="m"
+      buttonContent={
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.otlpHttpSettingsLabel"
+          defaultMessage="HTTP settings"
+        />
+      }
+    >
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpEncodingLabel"
+            defaultMessage="Encoding"
+          />
+        }
+        helpText={
+          <OtlpSpecDefaultHint defaultValue="proto" specUrl={OTEL_SPEC_URLS.otlpHttpExporter} />
+        }
+      >
+        <EuiSelect
+          fullWidth
+          data-test-subj="settingsOutputsFlyout.otlpEncodingInput"
+          {...inputs.otlpEncodingInput.props}
+          options={HTTP_ENCODING_OPTIONS}
+        />
+      </EuiFormRow>
+      {SIGNAL_ENDPOINTS.map(({ inputKey, testSubj, path, label }) => (
+        <TextSetting
+          key={inputKey}
+          label={label}
+          helpText={
+            <OtlpSpecDefaultHint
+              defaultText={signalEndpointDefault(path)}
+              specUrl={OTEL_SPEC_URLS.otlpHttpExporter}
+            />
+          }
+          input={inputs[inputKey]}
+          testSubj={testSubj}
+          placeholder={`https://collector.example.com:4318${path}`}
+        />
+      ))}
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpProxyUrlLabel"
+            defaultMessage="Proxy URL (optional)"
+          />
+        }
+        helpText={
+          <OtlpSpecDefaultHint
+            defaultText={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.otlpProxyUrlDefault"
+                defaultMessage="none, requests are sent directly"
+              />
+            }
+            specUrl={OTEL_SPEC_URLS.configHttp}
+          />
+        }
+        input={inputs.otlpProxyUrlInput}
+        testSubj="otlpProxyUrlInput"
+        placeholder="http://proxy.example.com:3128"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpHttpReadBufferSizeLabel"
+            defaultMessage="Read buffer size in bytes (optional)"
+          />
+        }
+        helpText={
+          <OtlpSpecDefaultHint defaultValue="0" specUrl={OTEL_SPEC_URLS.otlpHttpExporter} />
+        }
+        input={inputs.otlpHttpReadBufferSizeInput}
+        testSubj="otlpHttpReadBufferSizeInput"
+        placeholder="0"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpHttpWriteBufferSizeLabel"
+            defaultMessage="Write buffer size in bytes (optional)"
+          />
+        }
+        helpText={
+          <OtlpSpecDefaultHint defaultValue="524288" specUrl={OTEL_SPEC_URLS.otlpHttpExporter} />
+        }
+        input={inputs.otlpHttpWriteBufferSizeInput}
+        testSubj="otlpHttpWriteBufferSizeInput"
+        placeholder="524288"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpMaxIdleConnsLabel"
+            defaultMessage="Maximum idle connections (optional)"
+          />
+        }
+        helpText={<OtlpSpecDefaultHint defaultValue="100" specUrl={OTEL_SPEC_URLS.configHttp} />}
+        input={inputs.otlpMaxIdleConnsInput}
+        testSubj="otlpMaxIdleConnsInput"
+        placeholder="100"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpMaxIdleConnsPerHostLabel"
+            defaultMessage="Maximum idle connections per host (optional)"
+          />
+        }
+        helpText={
+          <OtlpSpecDefaultHint
+            defaultText={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.otlpMaxIdleConnsPerHostDefault"
+                defaultMessage="not set, the Go HTTP client default of 2 is used"
+              />
+            }
+            specUrl={OTEL_SPEC_URLS.configHttp}
+          />
+        }
+        input={inputs.otlpMaxIdleConnsPerHostInput}
+        testSubj="otlpMaxIdleConnsPerHostInput"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpMaxConnsPerHostLabel"
+            defaultMessage="Maximum connections per host (optional)"
+          />
+        }
+        helpText={
+          <OtlpSpecDefaultHint
+            defaultText={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.otlpMaxConnsPerHostDefault"
+                defaultMessage="not set, the number of connections is not limited"
+              />
+            }
+            specUrl={OTEL_SPEC_URLS.configHttp}
+          />
+        }
+        input={inputs.otlpMaxConnsPerHostInput}
+        testSubj="otlpMaxConnsPerHostInput"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpIdleConnTimeoutLabel"
+            defaultMessage="Idle connection timeout (optional)"
+          />
+        }
+        helpText={<OtlpSpecDefaultHint defaultValue="90s" specUrl={OTEL_SPEC_URLS.configHttp} />}
+        input={inputs.otlpIdleConnTimeoutInput}
+        testSubj="otlpIdleConnTimeoutInput"
+        placeholder="90s"
+      />
+      <SwitchSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpDisableKeepAlivesLabel"
+            defaultMessage="Disable keep-alives and use a new connection for every request"
+          />
+        }
+        helpText={<OtlpSpecDefaultHint defaultValue="false" specUrl={OTEL_SPEC_URLS.configHttp} />}
+        input={inputs.otlpDisableKeepAlivesInput}
+        testSubj="otlpDisableKeepAlivesInput"
+      />
+      <SwitchSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpForceAttemptHttp2Label"
+            defaultMessage="Attempt to use HTTP/2"
+          />
+        }
+        helpText={<OtlpSpecDefaultHint defaultValue="true" specUrl={OTEL_SPEC_URLS.configHttp} />}
+        input={inputs.otlpForceAttemptHttp2Input}
+        testSubj="otlpForceAttemptHttp2Input"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpHttp2ReadIdleTimeoutLabel"
+            defaultMessage="HTTP/2 read idle timeout (optional)"
+          />
+        }
+        helpText={
+          <OtlpSpecDefaultHint
+            defaultText={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.otlpHttp2ReadIdleTimeoutDefault"
+                defaultMessage="not set, health check pings are disabled"
+              />
+            }
+            specUrl={OTEL_SPEC_URLS.configHttp}
+          />
+        }
+        input={inputs.otlpHttp2ReadIdleTimeoutInput}
+        testSubj="otlpHttp2ReadIdleTimeoutInput"
+        placeholder="10s"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpHttp2PingTimeoutLabel"
+            defaultMessage="HTTP/2 ping timeout (optional)"
+          />
+        }
+        helpText={<OtlpSpecDefaultHint defaultValue="15s" specUrl={OTEL_SPEC_URLS.configHttp} />}
+        input={inputs.otlpHttp2PingTimeoutInput}
+        testSubj="otlpHttp2PingTimeoutInput"
+        placeholder="15s"
+      />
+      <TextSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpCompressionLevelLabel"
+            defaultMessage="Compression level (optional)"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpCompressionLevelHelpText"
+            defaultMessage="Applies to {gzip} compression, from {min} to {max}. {defaultHint}"
+            values={{
+              gzip: <EuiCode>{otlpCompressionType.Gzip}</EuiCode>,
+              min: <EuiCode>-2</EuiCode>,
+              max: <EuiCode>9</EuiCode>,
+              defaultHint: (
+                <OtlpSpecDefaultHint
+                  defaultText={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.otlpCompressionLevelDefault"
+                      defaultMessage="the default level of the compression"
+                    />
+                  }
+                  specUrl={OTEL_SPEC_URLS.configHttp}
+                />
+              ),
+            }}
+          />
+        }
+        input={inputs.otlpCompressionLevelInput}
+        testSubj="otlpCompressionLevelInput"
+      />
+      <SwitchSetting
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.otlpCookiesEnabledLabel"
+            defaultMessage="Store the cookies of the responses and send them in later requests"
+          />
+        }
+        helpText={<OtlpSpecDefaultHint defaultValue="false" specUrl={OTEL_SPEC_URLS.configHttp} />}
+        input={inputs.otlpCookiesEnabledInput}
+        testSubj="otlpCookiesEnabledInput"
+      />
+    </EuiAccordion>
+  );
+};
+
 export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
   inputs,
 }) => {
@@ -400,6 +767,7 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
 
   return (
     <>
+      <Protocol inputs={inputs} />
       <TextSetting
         label={
           <FormattedMessage
@@ -454,18 +822,20 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
             defaultMessage="Timeout (optional)"
           />
         }
-        helpText={<OtlpSpecDefaultHint defaultValue="5s" specUrl={OTEL_SPEC_URLS.exporterHelper} />}
+        helpText={
+          isGrpc ? (
+            <OtlpSpecDefaultHint defaultValue="5s" specUrl={OTEL_SPEC_URLS.exporterHelper} />
+          ) : (
+            <OtlpSpecDefaultHint defaultValue="30s" specUrl={OTEL_SPEC_URLS.otlpHttpExporter} />
+          )
+        }
         input={inputs.otlpTimeoutInput}
         testSubj="otlpTimeoutInput"
-        placeholder="5s"
+        placeholder={isGrpc ? '5s' : '30s'}
       />
       <Headers inputs={inputs} />
-      {isGrpc && (
-        <>
-          <EuiSpacer size="m" />
-          <GrpcSettings inputs={inputs} />
-        </>
-      )}
+      <EuiSpacer size="m" />
+      {isGrpc ? <GrpcSettings inputs={inputs} /> : <HttpSettings inputs={inputs} />}
       <EuiSpacer size="m" />
     </>
   );

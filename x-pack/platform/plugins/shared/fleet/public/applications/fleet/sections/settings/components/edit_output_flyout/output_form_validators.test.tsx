@@ -29,10 +29,13 @@ import {
   validateKibanaURL,
   validateKibanaAPIKey,
   validateOtlpByteSize,
+  validateOtlpCompressionLevel,
+  validateOtlpCount,
   validateOtlpDuration,
   validateOtlpEndpoint,
   validateOtlpHeaders,
   validateOtlpShortString,
+  validateOtlpUrl,
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
@@ -688,6 +691,47 @@ describe('OTLP validators', () => {
 
     it.each(['-1', '1.5', 'abc', '99999999999999999999'])('should reject %p', (value) => {
       expect(validateOtlpByteSize(value)).toEqual(['Specify a whole number of bytes, 0 or more']);
+    });
+  });
+
+  describe('validateOtlpCount', () => {
+    it.each(['', '0', '100'])('should accept %p', (value) => {
+      expect(validateOtlpCount(value)).toBeUndefined();
+    });
+
+    it.each(['-1', '1.5', 'abc', '99999999999999999999'])('should reject %p', (value) => {
+      expect(validateOtlpCount(value)).toEqual(['Specify a whole number, 0 or more']);
+    });
+  });
+
+  describe('validateOtlpCompressionLevel', () => {
+    it.each(['', '-2', '-1', '0', '9'])('should accept %p', (value) => {
+      expect(validateOtlpCompressionLevel(value)).toBeUndefined();
+    });
+
+    it.each(['-3', '10', '1.5', 'best'])('should reject %p', (value) => {
+      expect(validateOtlpCompressionLevel(value)).toEqual(['Specify a whole number from -2 to 9']);
+    });
+  });
+
+  describe('validateOtlpUrl', () => {
+    it.each(['', 'https://collector.example.com:4318/v1/traces', 'http://proxy:3128'])(
+      'should accept %p',
+      (value) => {
+        expect(validateOtlpUrl(value)).toBeUndefined();
+      }
+    );
+
+    it.each(['collector', 'https://collector example.com'])('should reject %p', (value) => {
+      expect(validateOtlpUrl(value)).toEqual([
+        'Specify a URL such as https://collector.example.com:4318',
+      ]);
+    });
+
+    it('should reject URLs longer than 2048 characters', () => {
+      expect(validateOtlpUrl(`https://${'a'.repeat(2048)}`)).toEqual([
+        'URL must be at most 2048 characters',
+      ]);
     });
   });
 

@@ -2277,36 +2277,414 @@ describe('EditOutputFlyout', () => {
       });
     });
 
-    it('should keep the HTTP protocol of an output created through the API, without gRPC settings', async () => {
-      const { utils } = renderFlyout({
+    describe('protocol', () => {
+      const httpOutput: Output = {
         ...otlpOutput,
         otlp_exporter: {
           protocol: 'http/protobuf',
           endpoint: 'https://collector.example.com:4318',
           compression: 'none',
+          timeout: '10s',
+          headers: { 'x-tenant': 'acme' },
+          encoding: 'json',
+          traces_endpoint: 'https://traces.example.com:4318/v1/traces',
+          metrics_endpoint: 'https://metrics.example.com:4318/v1/metrics',
+          logs_endpoint: 'https://logs.example.com:4318/v1/logs',
+          profiles_endpoint: 'https://profiles.example.com:4318/v1development/profiles',
+          read_buffer_size: 1024,
+          write_buffer_size: 2048,
+          proxy_url: 'http://proxy.example.com:3128',
+          max_idle_conns: 50,
+          max_idle_conns_per_host: 5,
+          max_conns_per_host: 10,
+          idle_conn_timeout: '60s',
+          disable_keep_alives: true,
+          http2_read_idle_timeout: '20s',
+          http2_ping_timeout: '5s',
+          force_attempt_http2: false,
+          compression_params: { level: 9 },
+          cookies: { enabled: true },
         },
+      };
+
+      const GRPC_FIELDS = [
+        'otlpBalancerNameInput',
+        'otlpKeepaliveTimeInput',
+        'otlpKeepaliveTimeoutInput',
+        'otlpKeepalivePermitWithoutStreamInput',
+        'otlpReadBufferSizeInput',
+        'otlpWriteBufferSizeInput',
+        'otlpWaitForReadyInput',
+        'otlpUserAgentInput',
+        'otlpAuthorityInput',
+      ];
+
+      const HTTP_FIELDS = [
+        'otlpEncodingInput',
+        'otlpTracesEndpointInput',
+        'otlpMetricsEndpointInput',
+        'otlpLogsEndpointInput',
+        'otlpProfilesEndpointInput',
+        'otlpProxyUrlInput',
+        'otlpHttpReadBufferSizeInput',
+        'otlpHttpWriteBufferSizeInput',
+        'otlpMaxIdleConnsInput',
+        'otlpMaxIdleConnsPerHostInput',
+        'otlpMaxConnsPerHostInput',
+        'otlpIdleConnTimeoutInput',
+        'otlpDisableKeepAlivesInput',
+        'otlpForceAttemptHttp2Input',
+        'otlpHttp2ReadIdleTimeoutInput',
+        'otlpHttp2PingTimeoutInput',
+        'otlpCompressionLevelInput',
+        'otlpCookiesEnabledInput',
+      ];
+
+      const selectProtocol = (
+        utils: ReturnType<typeof renderFlyout>['utils'],
+        protocol: 'gRPC' | 'HTTP/Protobuf'
+      ) => fireEvent.click(utils.getByLabelText(protocol));
+
+      const expectFields = (
+        utils: ReturnType<typeof renderFlyout>['utils'],
+        testSubjs: string[],
+        rendered: boolean
+      ) =>
+        testSubjs.forEach((testSubj) => {
+          const field = utils.queryByTestId(`settingsOutputsFlyout.${testSubj}`);
+          if (rendered) {
+            expect(field).not.toBeNull();
+          } else {
+            expect(field).toBeNull();
+          }
+        });
+
+      it('should select gRPC by default and show the fields of the selected protocol', () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+
+        expect(utils.getByLabelText('gRPC')).toBeChecked();
+        expectFields(utils, GRPC_FIELDS, true);
+        expectFields(utils, HTTP_FIELDS, false);
+
+        selectProtocol(utils, 'HTTP/Protobuf');
+
+        expect(utils.getByLabelText('HTTP/Protobuf')).toBeChecked();
+        expectFields(utils, GRPC_FIELDS, false);
+        expectFields(utils, HTTP_FIELDS, true);
+
+        selectProtocol(utils, 'gRPC');
+
+        expectFields(utils, GRPC_FIELDS, true);
+        expectFields(utils, HTTP_FIELDS, false);
       });
 
-      expect(utils.queryByTestId('settingsOutputsFlyout.otlpGrpcSettings')).toBeNull();
+      it('should show the HTTP defaults with a link to the versioned spec', () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        selectProtocol(utils, 'HTTP/Protobuf');
 
-      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
-        target: { value: 'http output' },
+        const hint = utils
+          .getByText('Proxy URL (optional)')
+          .closest('.euiFormRow')
+          ?.querySelector('a');
+        expect(hint?.getAttribute('href')).toBe(
+          'https://github.com/open-telemetry/opentelemetry-collector/blob/v0.155.0/config/confighttp/README.md'
+        );
+        expect(utils.getByText('Timeout (optional)').closest('.euiFormRow')?.textContent).toContain(
+          'Default: 30s'
+        );
       });
-      fireEvent.click(utils.getByText('Save and apply settings'));
 
-      await waitFor(() => {
-        expect(mockSendPutOutput).toHaveBeenCalledWith(
-          'outputOtlp',
-          expect.objectContaining({
+      it('should create an OTLP output with the HTTP protocol', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        selectProtocol(utils, 'HTTP/Protobuf');
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp http' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'https://collector.example.com:4318' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEncodingInput'), {
+          target: { value: 'json' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpTracesEndpointInput'), {
+          target: { value: ' https://traces.example.com:4318/v1/traces ' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpMaxIdleConnsInput'), {
+          target: { value: '50' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpIdleConnTimeoutInput'), {
+          target: { value: '60s' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpCompressionLevelInput'), {
+          target: { value: '-1' },
+        });
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpCookiesEnabledInput'));
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpForceAttemptHttp2Input'));
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPostOutput).toHaveBeenCalledWith({
+            name: 'my otlp http',
+            type: 'otlp',
+            is_default: false,
+            is_default_monitoring: false,
             otlp_exporter: {
               protocol: 'http/protobuf',
               endpoint: 'https://collector.example.com:4318',
-              compression: 'none',
+              compression: 'gzip',
               timeout: null,
               headers: null,
+              encoding: 'json',
+              traces_endpoint: 'https://traces.example.com:4318/v1/traces',
+              metrics_endpoint: null,
+              logs_endpoint: null,
+              profiles_endpoint: null,
+              read_buffer_size: null,
+              write_buffer_size: null,
+              proxy_url: null,
+              max_idle_conns: 50,
+              max_idle_conns_per_host: null,
+              max_conns_per_host: null,
+              idle_conn_timeout: '60s',
+              disable_keep_alives: false,
+              http2_read_idle_timeout: null,
+              http2_ping_timeout: null,
+              force_attempt_http2: false,
+              compression_params: { level: -1 },
+              cookies: { enabled: true },
             },
-          })
+          });
+        });
+      });
+
+      it('should load the stored HTTP settings and send them back on update', async () => {
+        const { utils } = renderFlyout(httpOutput);
+
+        expect(utils.getByLabelText('HTTP/Protobuf')).toBeChecked();
+        expect(utils.queryByTestId('settingsOutputsFlyout.otlpGrpcSettings')).toBeNull();
+
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'http output' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              name: 'http output',
+              otlp_exporter: httpOutput.otlp_exporter,
+            })
+          );
+        });
+      });
+
+      it('should send null for the cleared HTTP settings so the stored values are unset', async () => {
+        const { utils } = renderFlyout(httpOutput);
+        [
+          'otlpTracesEndpointInput',
+          'otlpMetricsEndpointInput',
+          'otlpLogsEndpointInput',
+          'otlpProfilesEndpointInput',
+          'otlpProxyUrlInput',
+          'otlpHttpReadBufferSizeInput',
+          'otlpHttpWriteBufferSizeInput',
+          'otlpMaxIdleConnsInput',
+          'otlpMaxIdleConnsPerHostInput',
+          'otlpMaxConnsPerHostInput',
+          'otlpIdleConnTimeoutInput',
+          'otlpHttp2ReadIdleTimeoutInput',
+          'otlpHttp2PingTimeoutInput',
+          'otlpCompressionLevelInput',
+        ].forEach((testSubj) => clear(utils, testSubj));
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpCookiesEnabledInput'));
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                protocol: 'http/protobuf',
+                traces_endpoint: null,
+                metrics_endpoint: null,
+                logs_endpoint: null,
+                profiles_endpoint: null,
+                proxy_url: null,
+                read_buffer_size: null,
+                write_buffer_size: null,
+                max_idle_conns: null,
+                max_idle_conns_per_host: null,
+                max_conns_per_host: null,
+                idle_conn_timeout: null,
+                http2_read_idle_timeout: null,
+                http2_ping_timeout: null,
+                compression_params: null,
+                cookies: null,
+              }),
+            })
+          );
+        });
+      });
+
+      it('should validate the HTTP settings', async () => {
+        const { utils } = renderFlyout(httpOutput);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpTracesEndpointInput'), {
+          target: { value: 'not a url' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpMaxConnsPerHostInput'), {
+          target: { value: '-1' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpCompressionLevelInput'), {
+          target: { value: '12' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHttp2PingTimeoutInput'), {
+          target: { value: 'soon' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText('Specify a URL such as https://collector.example.com:4318')
+          ).toBeInTheDocument();
+          expect(utils.getByText('Specify a whole number, 0 or more')).toBeInTheDocument();
+          expect(utils.getByText('Specify a whole number from -2 to 9')).toBeInTheDocument();
+          expect(
+            utils.getByText('Specify a duration such as 500ms, 5s, 1m30s')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
+      it('should clear the settings of the previous protocol when switching protocol', () => {
+        const { utils } = renderFlyout(otlpOutput);
+
+        selectProtocol(utils, 'HTTP/Protobuf');
+
+        // snappy and zstd are gRPC only
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpCompressionInput')).toHaveValue('gzip');
+        // the settings shared by both protocols are kept
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput')).toHaveValue(
+          'collector.example.com:4317'
         );
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpTimeoutInput')).toHaveValue('10s');
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpHeaderName0')).toHaveValue('x-tenant');
+
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpProxyUrlInput'), {
+          target: { value: 'http://proxy.example.com:3128' },
+        });
+        selectProtocol(utils, 'gRPC');
+
+        [
+          'otlpBalancerNameInput',
+          'otlpKeepaliveTimeInput',
+          'otlpKeepaliveTimeoutInput',
+          'otlpReadBufferSizeInput',
+          'otlpWriteBufferSizeInput',
+          'otlpUserAgentInput',
+          'otlpAuthorityInput',
+        ].forEach((testSubj) =>
+          expect(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`)).toHaveValue('')
+        );
+        expect(
+          utils.getByTestId('settingsOutputsFlyout.otlpKeepalivePermitWithoutStreamInput')
+        ).not.toBeChecked();
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpWaitForReadyInput')).not.toBeChecked();
+
+        selectProtocol(utils, 'HTTP/Protobuf');
+
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpProxyUrlInput')).toHaveValue('');
+      });
+
+      it('should not keep the errors of the settings of the previous protocol', () => {
+        const { utils } = renderFlyout(otlpOutput);
+        const writeBufferSizeInput = utils.getByTestId(
+          'settingsOutputsFlyout.otlpWriteBufferSizeInput'
+        );
+        fireEvent.change(writeBufferSizeInput, { target: { value: '-1' } });
+        fireEvent.blur(writeBufferSizeInput);
+
+        expect(utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
+
+        selectProtocol(utils, 'HTTP/Protobuf');
+
+        expect(utils.getByTestId('saveApplySettingsBtn')).not.toBeDisabled();
+      });
+
+      it('should send only the settings of the new protocol when switching from gRPC to HTTP', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        selectProtocol(utils, 'HTTP/Protobuf');
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'https://collector.example.com:4318' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: {
+                protocol: 'http/protobuf',
+                endpoint: 'https://collector.example.com:4318',
+                compression: 'gzip',
+                timeout: '10s',
+                headers: { 'x-tenant': 'acme' },
+                encoding: 'proto',
+                traces_endpoint: null,
+                metrics_endpoint: null,
+                logs_endpoint: null,
+                profiles_endpoint: null,
+                read_buffer_size: null,
+                write_buffer_size: null,
+                proxy_url: null,
+                max_idle_conns: null,
+                max_idle_conns_per_host: null,
+                max_conns_per_host: null,
+                idle_conn_timeout: null,
+                disable_keep_alives: false,
+                http2_read_idle_timeout: null,
+                http2_ping_timeout: null,
+                force_attempt_http2: true,
+                compression_params: null,
+                cookies: null,
+              },
+            })
+          );
+        });
+      });
+
+      it('should send only the settings of the new protocol when switching from HTTP to gRPC', async () => {
+        const { utils } = renderFlyout(httpOutput);
+        selectProtocol(utils, 'gRPC');
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: {
+                protocol: 'grpc',
+                endpoint: 'collector.example.com:4317',
+                compression: 'none',
+                timeout: '10s',
+                headers: { 'x-tenant': 'acme' },
+                balancer_name: null,
+                keepalive: null,
+                read_buffer_size: null,
+                write_buffer_size: null,
+                wait_for_ready: false,
+                user_agent: null,
+                authority: null,
+              },
+            })
+          );
+        });
       });
     });
 

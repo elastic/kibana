@@ -749,6 +749,74 @@ export function validateOtlpByteSize(value: string) {
   }
 }
 
+/** An optional whole number that is not negative, such as a number of connections. */
+export function validateOtlpCount(value: string) {
+  const count = value?.trim() ?? '';
+  if (!count) {
+    return;
+  }
+  if (!/^\d+$/.test(count) || !Number.isSafeInteger(Number(count))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpCountInvalid', {
+        defaultMessage: 'Specify a whole number, 0 or more',
+      }),
+    ];
+  }
+}
+
+const OTLP_COMPRESSION_LEVEL_MIN = -2;
+const OTLP_COMPRESSION_LEVEL_MAX = 9;
+
+/** An optional gzip compression level. */
+export function validateOtlpCompressionLevel(value: string) {
+  const level = value?.trim() ?? '';
+  if (!level) {
+    return;
+  }
+  if (
+    !/^-?\d+$/.test(level) ||
+    Number(level) < OTLP_COMPRESSION_LEVEL_MIN ||
+    Number(level) > OTLP_COMPRESSION_LEVEL_MAX
+  ) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpCompressionLevelInvalid', {
+        defaultMessage: 'Specify a whole number from {min} to {max}',
+        values: { min: OTLP_COMPRESSION_LEVEL_MIN, max: OTLP_COMPRESSION_LEVEL_MAX },
+      }),
+    ];
+  }
+}
+
+/** An optional absolute URL of at most 2048 characters, such as `https://collector:4318/v1/traces`. */
+export function validateOtlpUrl(value: string) {
+  const url = value?.trim() ?? '';
+  if (!url) {
+    return;
+  }
+  if (url.length > 2048) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpUrlTooLong', {
+        defaultMessage: 'URL must be at most {max} characters',
+        values: { max: 2048 },
+      }),
+    ];
+  }
+  let isValid = !/\s/.test(url);
+  try {
+    new URL(url); // eslint-disable-line no-new
+  } catch (e) {
+    isValid = false;
+  }
+  if (!isValid) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpUrlInvalid', {
+        defaultMessage: 'Specify a URL such as {example}',
+        values: { example: 'https://collector.example.com:4318' },
+      }),
+    ];
+  }
+}
+
 /** An optional string of at most 256 characters. */
 export function validateOtlpShortString(value: string) {
   if ((value?.trim() ?? '').length > 256) {
