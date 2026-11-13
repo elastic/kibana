@@ -3453,8 +3453,8 @@ importers:
         specifier: 4.0.3
         version: 4.0.3
       cbor2:
-        specifier: 2.4.0
-        version: 2.4.0
+        specifier: 2.4.1
+        version: 2.4.1
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -9106,9 +9106,9 @@ packages:
     peerDependencies:
       postcss-selector-parser: ^7.1.1
 
-  '@cto.af/wtf8@0.0.6':
-    resolution: {integrity: sha512-xp/zbWLXuh2WBxi9tIc+Jep7BAwLu8ETTI8xN68ks10bxOBMISs/jcu9DBEkOeGXLaTKUbA0Y2Ficx/jmmPABg==}
-    engines: {node: '>=20'}
+  '@cto.af/wtf8@1.0.0':
+    resolution: {integrity: sha512-qI0XnZxcj/FmASB8XXWqG49bSIzu0I/02deAjhnTni9IZ7KMRVlh8EFLE+mmJlMA169lET6rTCFhEsZSjOwlhA==}
+    engines: {node: '>=22'}
 
   '@cypress/debugging-proxy@2.0.1':
     resolution: {integrity: sha512-kUFQSNQfvZUO5yqtiir65FPPJZKPQaA68trYiKlHuWhDu9sopjIAXoZv/ff0GbLSNDHdxIuF0VyJhJIRRHuhAw==}
@@ -14491,8 +14491,8 @@ packages:
   caseless@0.12.0:
     resolution: {integrity: sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==}
 
-  cbor2@2.4.0:
-    resolution: {integrity: sha512-s6+CPoEI6tgwasK2cWMTXt5sy8Yxo4vgRmKgkJSCdKDL/0bHU3aYJoYeHRX7/oywKYA3bxcpqEYkXkrdHe0+0Q==}
+  cbor2@2.4.1:
+    resolution: {integrity: sha512-h4OqPnSvIEUNCxTNb9pwMZPKjhNKO9bkPwQJOR7d5oBIrZR/CO098atrLl4AkQmB1p3opCvo2UFt4fhRSWC/vQ==}
     engines: {node: '>=22'}
 
   ccount@1.0.5:
@@ -24618,7 +24618,7 @@ snapshots:
     dependencies:
       postcss-selector-parser: 7.1.6
 
-  '@cto.af/wtf8@0.0.6': {}
+  '@cto.af/wtf8@1.0.0': {}
 
   '@cypress/debugging-proxy@2.0.1(supports-color@8.1.1)':
     dependencies:
@@ -31179,9 +31179,9 @@ snapshots:
 
   caseless@0.12.0: {}
 
-  cbor2@2.4.0:
+  cbor2@2.4.1:
     dependencies:
-      '@cto.af/wtf8': 0.0.6
+      '@cto.af/wtf8': 1.0.0
 
   ccount@1.0.5: {}
 
