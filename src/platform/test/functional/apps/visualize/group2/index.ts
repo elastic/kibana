@@ -45,5 +45,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_gauge_chart'));
     loadTestFile(require.resolve('./_heatmap_chart'));
     loadTestFile(require.resolve('./_metric_chart'));
+    loadTestFile(require.resolve('./_legend_colors'));
   });
 }
