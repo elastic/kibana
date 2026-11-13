@@ -215,6 +215,22 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to create'));
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
+
+    it('shows a danger toast when linking the created policy to the attachment fails', async () => {
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('Conversation update failed'));
+      const { registerActionButtons } = await renderCanvas(
+        { data: { id: 'pre-assigned-id' } },
+        { updateOrigin }
+      );
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Create policy')!.handler();
+
+      expect(mockAddDanger).toHaveBeenCalledWith(
+        expect.stringContaining('Conversation update failed')
+      );
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
   });
 
   describe('action buttons for persisted (saved) policies', () => {
@@ -245,8 +261,8 @@ describe('ActionPolicyCanvasContent', () => {
       expect(buttons.find((b) => b.label === 'Create policy')).toBeUndefined();
     });
 
-    it('Update Policy handler calls upsertActionPolicy with data.id', async () => {
-      const { registerActionButtons } = await renderCanvas({
+    it('Update Policy handler calls upsertActionPolicy with data.id, then refreshes the origin', async () => {
+      const { registerActionButtons, updateOrigin } = await renderCanvas({
         origin: 'policy-123',
         data: { id: 'policy-123' },
       });
@@ -259,13 +275,17 @@ describe('ActionPolicyCanvasContent', () => {
         'policy-123',
         expect.objectContaining({ name: 'My Policy' })
       );
+      expect(updateOrigin).toHaveBeenCalledWith('policy-123');
+      expect(mockUpsertActionPolicy.mock.invocationCallOrder[0]).toBeLessThan(
+        updateOrigin.mock.invocationCallOrder[0]
+      );
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
     it('shows a danger toast when update fails', async () => {
       mockUpsertActionPolicy.mockRejectedValueOnce({ message: 'Conflict' });
 
-      const { registerActionButtons } = await renderCanvas({
+      const { registerActionButtons, updateOrigin } = await renderCanvas({
         origin: 'policy-123',
         data: { id: 'policy-123' },
       });
@@ -276,6 +296,21 @@ describe('ActionPolicyCanvasContent', () => {
 
       expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to update'));
       expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
+    });
+
+    it('still reports success when refreshing the origin fails after the policy was saved', async () => {
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('Conversation update failed'));
+      const { registerActionButtons } = await renderCanvas(
+        { origin: 'policy-123', data: { id: 'policy-123' } },
+        { updateOrigin }
+      );
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Update Policy')!.handler();
+
+      expect(mockAddSuccess).toHaveBeenCalled();
+      expect(mockAddDanger).not.toHaveBeenCalled();
     });
 
     it('View in Policies handler navigates with the observability host', async () => {
