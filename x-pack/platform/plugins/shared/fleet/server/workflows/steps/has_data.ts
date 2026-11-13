@@ -20,6 +20,12 @@ interface EnrolledAgent {
   status?: string;
 }
 
+const networkError = (action: string, error: unknown) =>
+  new ExecutionError({
+    type: 'NetworkError',
+    message: `Failed while ${action}: ${error instanceof Error ? error.message : String(error)}`,
+  });
+
 export const awsOnboardingHasDataStepDefinition = createServerStepDefinition({
   ...awsOnboardingHasDataCommonDefinition,
   handler: async (context) => {
@@ -39,38 +45,50 @@ export const awsOnboardingHasDataStepDefinition = createServerStepDefinition({
     } = context.input;
 
     // Agentless agents are hidden from the agents list unless `showAgentless` is set.
-    const agentsResponse = await context.contextManager.callKibanaApi<{ items: EnrolledAgent[] }>({
-      method: 'GET',
-      path: '/api/fleet/agents',
-      query: {
-        kuery: buildPolicyBaseIdsWithFallbackKuery(
-          policyIds,
-          'fleet-agents.policy_base_id',
-          'fleet-agents.policy_id'
-        ),
-        perPage: 1000,
-        showAgentless: true,
-      },
-    });
-    const enrolled = agentsResponse.body.items;
+    let enrolled: EnrolledAgent[];
+    try {
+      const agentsResponse = await context.contextManager.callKibanaApi<{
+        items: EnrolledAgent[];
+      }>({
+        method: 'GET',
+        path: '/api/fleet/agents',
+        query: {
+          kuery: buildPolicyBaseIdsWithFallbackKuery(
+            policyIds,
+            'fleet-agents.policy_base_id',
+            'fleet-agents.policy_id'
+          ),
+          perPage: 1000,
+          showAgentless: true,
+        },
+      });
+      enrolled = agentsResponse.body.items;
+    } catch (error) {
+      return { error: networkError('listing the enrolled agents', error) };
+    }
 
     // Data is checked per agent, never per index pattern: an account that already has aws data
     // must not report success before the newly enrolled agent reports.
     let idsWithData = new Set<string>();
     if (enrolled.length > 0) {
-      const dataResponse = await context.contextManager.callKibanaApi<{
-        items: Array<Record<string, { data: boolean }>>;
-      }>({
-        method: 'GET',
-        path: '/api/fleet/agent_status/data',
-        query: { agentsIds: enrolled.map(({ id }) => id).join(','), pkgName, pkgVersion },
-      });
-      idsWithData = new Set(extractAgentIdsWithData(dataResponse.body.items));
+      try {
+        const dataResponse = await context.contextManager.callKibanaApi<{
+          items: Array<Record<string, { data: boolean }>>;
+        }>({
+          method: 'GET',
+          path: '/api/fleet/agent_status/data',
+          query: { agentsIds: enrolled.map(({ id }) => id).join(','), pkgName, pkgVersion },
+        });
+        idsWithData = new Set(extractAgentIdsWithData(dataResponse.body.items));
+      } catch (error) {
+        return { error: networkError('checking agent data', error) };
+      }
     }
 
     const agents: Array<{
       policy_id: string;
       agent_id?: string;
+      agent_policy_id?: string;
       status?: string;
       data: boolean;
     }> = [];
@@ -87,8 +105,9 @@ export const awsOnboardingHasDataStepDefinition = createServerStepDefinition({
       }
       for (const agent of policyAgents) {
         agents.push({
-          policy_id: agent.policy_id ?? policyId,
+          policy_id: policyId,
           agent_id: agent.id,
+          agent_policy_id: agent.policy_id,
           status: agent.status,
           data: idsWithData.has(agent.id),
         });

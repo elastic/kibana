@@ -27,6 +27,7 @@ export const awsOnboardingHasDataOutputSchema = lazySchema(() =>
       z.object({
         policy_id: z.string(),
         agent_id: z.string().optional(),
+        agent_policy_id: z.string().optional(),
         status: z.string().optional(),
         data: z.boolean(),
       })

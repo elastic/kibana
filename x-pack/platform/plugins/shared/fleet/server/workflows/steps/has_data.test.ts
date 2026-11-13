@@ -66,7 +66,12 @@ describe('awsOnboardingHasDataStepDefinition', () => {
       .mockResolvedValueOnce({
         body: {
           items: [
-            { id: 'agent-1', policy_id: 'policy-a', status: 'online' },
+            {
+              id: 'agent-1',
+              policy_id: 'policy-a:2',
+              policy_base_id: 'policy-a',
+              status: 'online',
+            },
             { id: 'agent-2', policy_id: 'policy-b', status: 'enrolling' },
           ],
         },
@@ -86,8 +91,20 @@ describe('awsOnboardingHasDataStepDefinition', () => {
       output: {
         has_data: true,
         agents: [
-          { policy_id: 'policy-a', agent_id: 'agent-1', status: 'online', data: true },
-          { policy_id: 'policy-b', agent_id: 'agent-2', status: 'enrolling', data: false },
+          {
+            policy_id: 'policy-a',
+            agent_id: 'agent-1',
+            agent_policy_id: 'policy-a:2',
+            status: 'online',
+            data: true,
+          },
+          {
+            policy_id: 'policy-b',
+            agent_id: 'agent-2',
+            agent_policy_id: 'policy-b',
+            status: 'enrolling',
+            data: false,
+          },
         ],
       },
     });
