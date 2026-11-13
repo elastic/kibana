@@ -106,9 +106,64 @@ record_suite_failure() {
   fi
 }
 
+# The token-usage data stream lives on the step's throwaway ES, so copy it into a build artifact
+# before Scout is stopped. Suites that never enable token usage tracking write nothing, so an empty
+# export uploads nothing. Best effort: it must never change the step's exit status, and it prints
+# only counts and model ids, never the ES URL or credentials.
+export_token_usage() {
+  [[ -f .scout/servers/local.json ]] || return 0
+  command -v buildkite-agent >/dev/null 2>&1 || return 0
+  local es_url out_dir out_file scroll_id='' page hits pages=0 truncated=0 max_pages=500 name_part artifact_name=''
+  es_url="$(jq -r '.hosts.elasticsearch // empty' .scout/servers/local.json | sed -E 's:/*$::; s:^([a-z]+\://)[^/@]*@:\1:')"
+  [[ -n "$es_url" ]] || return 0
+  out_dir="target/token_usage"
+  mkdir -p "$out_dir"
+  # Suite, model and shard in the name: shards and suites upload from separate steps, and a bare
+  # EVAL_PROJECT would collide across them.
+  for name_part in "$EVAL_SUITE_ID" "${EVAL_PROJECT:-all}" "${EVAL_SHARD_ID:-}"; do
+    [[ -n "$name_part" ]] || continue
+    artifact_name+="_$(printf '%s' "$name_part" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+  done
+  out_file="$out_dir/token_usage${artifact_name}.ndjson"
+  : >"$out_file"
+  page="$(es_curl -sS --max-time 60 "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
+    -H 'Content-Type: application/json' -d '{"sort":["_doc"]}' 2>/dev/null)" || page=""
+  while true; do
+    hits="$(printf '%s' "$page" | jq -c '.hits.hits[]?._source' 2>/dev/null)" || break
+    # Assigned before the empty-page exit so the scroll context is cleared even when page 1 is empty.
+    scroll_id="$(printf '%s' "$page" | jq -r '._scroll_id // empty' 2>/dev/null)" || scroll_id=""
+    [[ -n "$hits" ]] || break
+    if (( pages >= max_pages )); then
+      truncated=1
+      break
+    fi
+    printf '%s\n' "$hits" >>"$out_file"
+    pages=$((pages + 1))
+    [[ -n "$scroll_id" ]] || break
+    page="$(es_curl -sS --max-time 60 "$es_url/_search/scroll" -H 'Content-Type: application/json' \
+      -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}" 2>/dev/null)" || break
+  done
+  if (( truncated )); then
+    echo "--- Token usage export truncated at $max_pages pages; the artifact is incomplete"
+  fi
+  if [[ -n "${scroll_id:-}" ]]; then
+    es_curl -sS --max-time 30 -X DELETE "$es_url/_search/scroll" -H 'Content-Type: application/json' \
+      -d "{\"scroll_id\":\"$scroll_id\"}" >/dev/null 2>&1 || true
+  fi
+  if [[ ! -s "$out_file" ]]; then
+    echo "--- Token usage docs: 0 (nothing to upload)"
+    rm -f "$out_file"
+    return 0
+  fi
+  echo "--- Token usage docs: $(wc -l <"$out_file") (by model)"
+  jq -r '.model.model_id // "unknown"' "$out_file" | sort | uniq -c || true
+  buildkite-agent artifact upload "$out_file" || true
+}
+
 on_exit() {
   local exit_status=$?
   trap - EXIT
+  export_token_usage || true
   # The pre-run snapshot is only a baseline; ES fills `.es` while the suite runs, so these are the
   # numbers that show a watermark breach. Skipped in the parent fanout step, which never starts ES.
   # Diagnostics must never abort the trap under `set -e`, or the steps below are skipped and the

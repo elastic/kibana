@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as evalsSecurityConfig } from '../../evals_security/stateful/classic.stateful.config';
 
 /**
  * Config set for the detection-watch-rule-creation eval suite. The suite measures the
@@ -21,11 +21,11 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * is disabled by default.
  */
 export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
+  ...evalsSecurityConfig,
   kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
+    ...evalsSecurityConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsSecurityConfig.kbnTestServer.serverArgs,
       '--xpack.inbox.enabled=true',
       '--xpack.securitySolution.enableExperimental=["rulePreviewAttachmentEnabled"]',
       '--uiSettings.overrides.workflows:ui:enabled=true',
