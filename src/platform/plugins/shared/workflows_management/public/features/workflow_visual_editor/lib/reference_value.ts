@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isDynamicValue, isVariableValue } from '@kbn/workflows-yaml';
 import type { DataReferenceCatalog, DataReferenceItem } from './build_data_reference_catalog';
 import { formatValueReferenceToken, toReferenceIconType } from './build_data_reference_catalog';
+import type { ReferenceForm } from './reference_grammar';
+import {
+  blankQuoted,
+  hasFilter,
+  rewriteReferenceSpans,
+  scanReferenceSpans,
+} from './reference_grammar';
 
-/** `text` is `{{ … }}` (always becomes a string); `value` is `${{ … }}` (keeps its type). */
-export type ReferenceForm = 'text' | 'value';
+export type { ReferenceForm };
 
 export interface WholeReference {
   readonly form: ReferenceForm;
@@ -21,20 +26,17 @@ export interface WholeReference {
 }
 
 /**
- * Parses a value that is exactly one reference. Sentences that merely contain references,
- * and values mixing several `{{ }}` spans, are not whole references.
+ * Parses a value that is exactly one reference, with nothing around it: the engine reads the
+ * value form only when the value starts with `${{` and ends with `}}`. Sentences that merely
+ * contain references, and values mixing several of them, are not whole references.
  */
 export const parseWholeReference = (value: unknown): WholeReference | undefined => {
   if (typeof value !== 'string') return undefined;
-  const parsed: WholeReference | undefined = isDynamicValue(value)
-    ? { form: 'value', expression: value.slice(3, -2).trim() }
-    : isVariableValue(value)
-    ? { form: 'text', expression: value.slice(2, -2).trim() }
-    : undefined;
-  if (!parsed || parsed.expression.includes('{{') || parsed.expression.includes('}}')) {
-    return undefined;
-  }
-  return parsed;
+  const [span, ...others] = scanReferenceSpans(value);
+  if (!span || others.length > 0 || span.start !== 0 || span.end !== value.length) return undefined;
+  // An opening inside the expression (outside a string) is not one reference but a broken one.
+  if (span.expression === '' || blankQuoted(span.expression).includes('{{')) return undefined;
+  return { form: span.form, expression: span.expression };
 };
 
 /** Rewrites a whole text-form reference (`{{ x }}`) as the value form (`${{ x }}`). */
@@ -72,7 +74,7 @@ const SINGLE_VALUE_ICON_TYPES: ReadonlySet<string> = new Set([
  */
 export const isContainerReference = (expression: string, typeLabel?: string): boolean => {
   const iconType = toReferenceIconType(typeLabel ?? 'unknown');
-  return (iconType === 'array' || iconType === 'object') && !expression.includes('|');
+  return (iconType === 'array' || iconType === 'object') && !hasFilter(expression);
 };
 
 /**
@@ -82,7 +84,7 @@ export const isContainerReference = (expression: string, typeLabel?: string): bo
  */
 export const isSingleValueReference = (expression: string, typeLabel?: string): boolean => {
   const iconType = toReferenceIconType(typeLabel ?? 'unknown');
-  return SINGLE_VALUE_ICON_TYPES.has(iconType) && !expression.includes('|');
+  return SINGLE_VALUE_ICON_TYPES.has(iconType) && !hasFilter(expression);
 };
 
 /**
@@ -93,12 +95,10 @@ export const isSingleValueReference = (expression: string, typeLabel?: string): 
 export const normalizeReferenceForm = (text: string): string => {
   const whole = parseWholeReference(text);
   if (whole) return whole.form === 'text' ? formatValueReferenceToken(whole.expression) : text;
-  return text.includes('${{') ? text.replaceAll('${{', '{{') : text;
+  return rewriteReferenceSpans(text, (span, source) =>
+    span.form === 'value' ? source.slice(1) : source
+  );
 };
-
-/** Blanks out quoted text so operators and pipes inside a string literal don't count. */
-const blankQuoted = (expression: string): string =>
-  expression.replace(/'[^']*'|"[^"]*"/g, (quoted) => '_'.repeat(quoted.length));
 
 const COMPARISON_OR_LOGIC = /==|!=|<>|<=|>=|<|>|\s(?:contains|and|or)\s/;
 
@@ -116,9 +116,8 @@ export const lookupReferenceTypeLabel = (
   catalog: DataReferenceCatalog,
   expression: string
 ): string | undefined => {
-  const unquoted = blankQuoted(expression);
-  if (unquoted.includes('|')) return undefined;
-  if (COMPARISON_OR_LOGIC.test(unquoted)) return 'boolean';
+  if (hasFilter(expression)) return undefined;
+  if (COMPARISON_OR_LOGIC.test(blankQuoted(expression))) return 'boolean';
   const path = expression.trim();
   let entityLabel: string | undefined;
   const walk = (items: readonly DataReferenceItem[]): string | undefined => {

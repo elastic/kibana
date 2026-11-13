@@ -21,6 +21,7 @@ import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
 import { isReferenceValue, parseTemplateString } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { inferVariant } from './form_variants';
+import { rewriteReferenceSpans, scanReferenceSpans } from './reference_grammar';
 import { prettifyCatalogKey } from '../../../shared/utils/catalog_display_name';
 
 /**
@@ -916,9 +917,6 @@ export const findUnclosedTemplateExpression = (value: string): boolean => {
   return false;
 };
 
-/** A `{{ }}` output, with the `$` of its value form (`${{ }}`) when it has one. */
-const LIQUID_OUTPUT_PATTERN = /\$?\{\{[\s\S]*?\}\}/g;
-
 /** Longer text is not checked: this runs on every render and a huge template is slow to parse. */
 const MAX_VALIDATED_JSON_LIQUID_CHARS = 100_000;
 
@@ -942,7 +940,7 @@ const validateJsonLiquid = (text: string): string | undefined => {
   }
   if (text.includes('{%')) return undefined;
   try {
-    JSON.parse(text.replace(LIQUID_OUTPUT_PATTERN, '0'));
+    JSON.parse(rewriteReferenceSpans(text, () => '0'));
   } catch {
     return i18n.translate('workflows.stepConfigPanel.validation.mustBeJsonIgnoringVariables', {
       defaultMessage: 'Must be valid JSON (ignoring variables)',
@@ -951,14 +949,12 @@ const validateJsonLiquid = (text: string): string | undefined => {
   return undefined;
 };
 
-const LIQUID_TEMPLATE_PATTERN = /\{\{[\s\S]*\}\}/;
-
 /** A duration, or (where the step takes Liquid) a `{{ }}` template that renders to one. */
 const validateDuration = (text: string, templatable: boolean): string | undefined => {
   const isTemplate =
     templatable &&
     text.length <= DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH &&
-    LIQUID_TEMPLATE_PATTERN.test(text);
+    scanReferenceSpans(text).length > 0;
   if (isTemplate || isValidDuration(text)) return undefined;
   return templatable
     ? i18n.translate('workflows.stepConfigPanel.validation.mustBeDurationOrTemplate', {

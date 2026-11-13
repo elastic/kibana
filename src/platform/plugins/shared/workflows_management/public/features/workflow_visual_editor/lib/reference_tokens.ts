@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataReferenceCatalog } from './build_data_reference_catalog';
 import { toReferenceIconType } from './build_data_reference_catalog';
 import type { ReferenceChipTone } from './reference_chip_styles';
+import { scanReferenceSpans } from './reference_grammar';
 import type { ReferenceForm } from './reference_value';
 import { isContainerReference, lookupReferenceTypeLabel } from './reference_value';
 
@@ -105,36 +106,32 @@ export const findReferenceTokens = (
     quotedStringsAreValues = false,
   }: FindReferenceTokensOptions = {}
 ): ReferenceToken[] => {
-  const tokens: ReferenceToken[] = [];
   const trimmedStart = text.length - text.trimStart().length;
   const trimmedEnd = text.trimEnd().length;
-  let cursor = 0;
-  while (cursor < text.length) {
-    const open = text.indexOf(OPEN, cursor);
-    const close = open === -1 ? -1 : text.indexOf(CLOSE, open + OPEN.length);
-    if (open === -1 || close === -1) break;
-
-    const isValueForm = open > 0 && text[open - 1] === '$';
-    const start = isValueForm ? open - 1 : open;
-    const end = close + CLOSE.length;
-    const expression = text.slice(open + OPEN.length, close).trim();
-    if (expression !== '') {
+  return scanReferenceSpans(text)
+    .filter((span) => span.expression !== '')
+    .map(({ start, end, openLength, expression, form }): ReferenceToken => {
       const typeLabel = catalog ? lookupReferenceTypeLabel(catalog, expression) : undefined;
       const iconType = toReferenceIconType(typeLabel ?? 'unknown');
       const fillsQuotedString =
         quotedStringsAreValues && text[start - 1] === '"' && text[end] === '"';
-      const isWhole = (start <= trimmedStart && end >= trimmedEnd) || fillsQuotedString;
-      const form: ReferenceForm = isValueForm ? 'value' : 'text';
+      // The engine reads the value form only as the exact whole value, so padding spoils it; the
+      // text form is a string whatever surrounds it, so padding is no matter.
+      const isWhole =
+        fillsQuotedString ||
+        (form === 'value'
+          ? start === 0 && end === text.length
+          : start <= trimmedStart && end >= trimmedEnd);
       const isContainerInSentence =
         warnContainersInSentence &&
         form === 'text' &&
         !isWhole &&
         isContainerReference(expression, typeLabel);
       const isValueFormInSentence = form === 'value' && !isWhole;
-      tokens.push({
+      return {
         start,
         end,
-        openLength: isValueForm ? OPEN.length + 1 : OPEN.length,
+        openLength,
         expression,
         form,
         typeLabel,
@@ -149,11 +146,8 @@ export const findReferenceTokens = (
           isValueFormInSentence,
         }),
         isContainerInSentence,
-      });
-    }
-    cursor = end;
-  }
-  return tokens;
+      };
+    });
 };
 
 /** Rewrites one token as JSON text (`{{ x | json }}`) so a list or record prints readably. */
