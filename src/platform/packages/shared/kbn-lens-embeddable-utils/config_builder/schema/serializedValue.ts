@@ -9,7 +9,7 @@
 
 import { z, lazySchema } from '@kbn/zod';
 
-const rangeValueSchema = lazySchema(() => z.union([z.string(), z.number()]));
+const rangeValueSchema = lazySchema(() => z.union([z.string(), z.number(), z.null()]));
 
 const rangeKeySchema = lazySchema(() =>
   z

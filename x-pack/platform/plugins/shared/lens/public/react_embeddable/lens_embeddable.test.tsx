@@ -14,6 +14,10 @@ import { createLensEmbeddableFactory } from './lens_embeddable';
 import { createEmptyLensState } from './helper';
 import { makeEmbeddableServices } from './mocks';
 
+jest.mock('../lazy_builder', () => ({
+  getLensBuilder: jest.fn(() => null),
+}));
+
 jest.mock('./data_loader', () => ({
   loadEmbeddableData: () => ({ cleanup: jest.fn() }),
 }));
