@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import CLOSE_ATTACK_AND_ALERTS_YAML from './close_attack_and_alerts.yaml';
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW_ID =
   'system-alertzero-close-attack-and-alerts';
@@ -29,5 +29,7 @@ export const ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yaml: CLOSE_ATTACK_AND_ALERTS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'close_attack_and_alerts.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

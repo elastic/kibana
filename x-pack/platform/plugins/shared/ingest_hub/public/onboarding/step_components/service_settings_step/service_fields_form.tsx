@@ -34,6 +34,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import type { VarGroupSelections } from './field_config';
 import {
+  DATASET_VAR_NAME,
   ECF_TRIGGER_VAR_NAMES,
   REGION_FIELD_NAMES,
   getFlyoutFields,
@@ -42,6 +43,7 @@ import {
   getRequiredTextFields,
   getStreamVarGroups,
   isAdvancedVar,
+  offersDatasetTemplates,
   isFieldVisible,
   isInSelectedVarGroupOption,
   isRequiredBySelectedOption,
@@ -86,6 +88,14 @@ export interface ServiceFieldsFormProps {
     groupName: string,
     optionName: string
   ) => void;
+  /** The user turned the dedicated index template on or off. */
+  onCreateDatasetTemplatesChange?: (enabled: boolean) => void;
+  /** Whether the dedicated index template is on; the policy takes one value, as in Fleet. */
+  createDatasetTemplates?: boolean;
+  /** The service is already deployed; Fleet only creates the template with a new policy. */
+  isDeployed?: boolean;
+  /** The other services that deploy in the same policy, which share the template choice. */
+  datasetTemplatesSharedWith?: string[];
 }
 
 function VarField({
@@ -203,6 +213,9 @@ function InputVarFields({
   globalRegion,
   onFieldChange,
   onVarGroupSelectionChange,
+  createDatasetTemplates,
+  onCreateDatasetTemplatesChange,
+  datasetTemplatesSharedWith,
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
@@ -211,6 +224,10 @@ function InputVarFields({
   globalRegion: string;
   onFieldChange: (input: string, fieldName: string, value: string) => void;
   onVarGroupSelectionChange?: (input: string, groupName: string, optionName: string) => void;
+  /** Set only where the switch applies: a new policy, so not for a deployed service. */
+  createDatasetTemplates?: boolean;
+  onCreateDatasetTemplatesChange?: (enabled: boolean) => void;
+  datasetTemplatesSharedWith?: string[];
 }) {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
 
@@ -276,6 +293,55 @@ function InputVarFields({
   const hasAdvancedOptions = advancedBoolFields.length > 0 || advancedOtherFields.length > 0;
 
   const draft = varsByInput[activeInput] ?? {};
+  // Like Fleet, offered for a dataset that is set and not `generic`, and on creation only.
+  const templatesSharedWith = datasetTemplatesSharedWith ?? [];
+  const renderDatasetTemplatesSwitch = (fieldName: string) =>
+    fieldName === DATASET_VAR_NAME &&
+    onCreateDatasetTemplatesChange &&
+    offersDatasetTemplates(service, activeInput, draft) ? (
+      <>
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          fullWidth
+          helpText={
+            <>
+              {i18n.translate(
+                'xpack.ingestHub.serviceSettingsStep.flyout.createDatasetTemplates.helpText',
+                {
+                  defaultMessage:
+                    'Creates a dedicated index template with proper mappings and settings for this custom dataset.',
+                }
+              )}
+              {templatesSharedWith.length > 0 && (
+                <p data-test-subj="serviceSettingsFlyout-createDatasetTemplatesShared">
+                  {i18n.translate(
+                    'xpack.ingestHub.serviceSettingsStep.flyout.createDatasetTemplates.sharedWith',
+                    {
+                      defaultMessage:
+                        'Applies to every service in this policy, which also deploys {services}.',
+                      values: { services: templatesSharedWith.join(', ') },
+                    }
+                  )}
+                </p>
+              )}
+            </>
+          }
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate(
+              'xpack.ingestHub.serviceSettingsStep.flyout.createDatasetTemplates.label',
+              {
+                defaultMessage: 'Create dedicated index template for custom dataset (recommended)',
+              }
+            )}
+            checked={createDatasetTemplates ?? true}
+            onChange={(e) => onCreateDatasetTemplatesChange(e.target.checked)}
+            data-test-subj="serviceSettingsFlyout-createDatasetTemplatesSwitch"
+          />
+        </EuiFormRow>
+      </>
+    ) : null;
   const anyRequiredEmpty = requiredTextFields.some((f) => {
     const meta = resolveFieldMeta(service, activeInput, f);
     const effective = meta ? toTyped(draft[f], meta) : draft[f] ?? '';
@@ -357,6 +423,7 @@ function InputVarFields({
                 datastreams={datastreams}
                 varGroupSelections={varGroupSelections}
               />
+              {renderDatasetTemplatesSwitch(fieldName)}
             </React.Fragment>
           ))}
         </>
@@ -376,6 +443,7 @@ function InputVarFields({
                 onFieldChange={onFieldChange}
                 datastreams={datastreams}
               />
+              {renderDatasetTemplatesSwitch(fieldName)}
             </React.Fragment>
           ))}
         </>
@@ -414,6 +482,7 @@ function InputVarFields({
                 onFieldChange={onFieldChange}
                 datastreams={datastreams}
               />
+              {renderDatasetTemplatesSwitch(fieldName)}
             </React.Fragment>
           ))}
         </>
@@ -451,6 +520,7 @@ function InputVarFields({
                     draft={varsByInput}
                     onFieldChange={onFieldChange}
                   />
+                  {renderDatasetTemplatesSwitch(fieldName)}
                 </React.Fragment>
               ))}
               {advancedOtherFields.map((fieldName, i) => (
@@ -463,6 +533,7 @@ function InputVarFields({
                     draft={varsByInput}
                     onFieldChange={onFieldChange}
                   />
+                  {renderDatasetTemplatesSwitch(fieldName)}
                 </React.Fragment>
               ))}
             </>
@@ -480,6 +551,10 @@ export function ServiceFieldsForm({
   onFieldChange,
   onInputToggle,
   onVarGroupSelectionChange,
+  onCreateDatasetTemplatesChange,
+  createDatasetTemplates,
+  isDeployed = false,
+  datasetTemplatesSharedWith,
 }: ServiceFieldsFormProps) {
   const { euiTheme } = useEuiTheme();
   const dataStreams = service.dataStreams ?? [];
@@ -525,6 +600,11 @@ export function ServiceFieldsForm({
                       onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
                       onVarGroupSelectionChange={(inp, group, option) =>
                         onVarGroupSelectionChange?.(dsId, inp, group, option)
+                      }
+                      createDatasetTemplates={createDatasetTemplates}
+                      datasetTemplatesSharedWith={datasetTemplatesSharedWith}
+                      onCreateDatasetTemplatesChange={
+                        isDeployed ? undefined : onCreateDatasetTemplatesChange
                       }
                     />
                   </div>
@@ -578,6 +658,11 @@ export function ServiceFieldsForm({
                     onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
                     onVarGroupSelectionChange={(inp, group, option) =>
                       onVarGroupSelectionChange?.(dsId, inp, group, option)
+                    }
+                    createDatasetTemplates={createDatasetTemplates}
+                    datasetTemplatesSharedWith={datasetTemplatesSharedWith}
+                    onCreateDatasetTemplatesChange={
+                      isDeployed ? undefined : onCreateDatasetTemplatesChange
                     }
                   />
                 </div>

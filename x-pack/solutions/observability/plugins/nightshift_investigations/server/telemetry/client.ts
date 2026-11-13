@@ -25,6 +25,10 @@ import {
   type InvestigationSkippedEvent,
 } from './investigation_skipped_event';
 import {
+  NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT,
+  type AlertEnteredPipelineEvent,
+} from './alert_entered_pipeline_event';
+import {
   NIGHTSHIFT_INVESTIGATION_STARTED_EVENT,
   type InvestigationStartedEvent,
 } from './investigation_started_event';
@@ -50,6 +54,10 @@ export class NightshiftTelemetryClient {
 
   reportInvestigationSkipped(event: InvestigationSkippedEvent): void {
     this.report(NIGHTSHIFT_INVESTIGATION_SKIPPED_EVENT, event);
+  }
+
+  reportAlertEnteredPipeline(event: AlertEnteredPipelineEvent): void {
+    this.report(NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT, event);
   }
 
   reportInvestigationStarted(event: InvestigationStartedEvent): void {
