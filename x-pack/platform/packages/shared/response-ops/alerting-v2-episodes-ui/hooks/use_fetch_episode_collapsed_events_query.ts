@@ -22,6 +22,7 @@ import type {
   SeverityChangeSourceRow,
   StateChangeSourceRow,
 } from '../components/details/timeline/entries';
+import { sweepPhaseRanges } from '../utils/sweep_phase_ranges';
 import { useSpaceId } from './use_space_id';
 
 /** A status row for the episode timelines: one event, or one collapsed status phase. */
@@ -43,13 +44,32 @@ export interface EpisodeCollapsedEvents {
   severityRows: EpisodeTimelineSeverityRow[];
 }
 
-const byTimestamp = (a: { '@timestamp': string }, b: { '@timestamp': string }) =>
-  a['@timestamp'].localeCompare(b['@timestamp']);
+interface CollapsedPhaseRow {
+  seg_start: string;
+  seg_end: string;
+}
+
+/**
+ * Sweeps collapsed phase rows into the chronological changes of the current value, so a
+ * phase that is still open (an alert that flapped but is active now) stays the last one.
+ */
+const sweepRows = <Row extends CollapsedPhaseRow>(
+  rows: Row[]
+): Array<{ row: Row; timestamp: string }> =>
+  sweepPhaseRanges(
+    rows.map((row) => ({
+      value: row,
+      startMs: Date.parse(row.seg_start),
+      endMs: Date.parse(row.seg_end),
+    }))
+  ).map(({ value, atMs }) => ({ row: value, timestamp: new Date(atMs).toISOString() }));
 
 /**
  * Loads an episode's events collapsed to one row per status and one row per
- * severity (the rule-details Gantt chart grouping), oldest first. Scoped by
- * space and episode only, so alerts without a rule (external ingest) collapse too.
+ * severity (the rule-details Gantt chart grouping), swept into chronological
+ * changes, oldest first. Scoped by space and episode only, so alerts without a
+ * rule (external ingest) collapse too. Per-change event counts are not
+ * available once phases are merged, so the rows carry none.
  */
 export const useFetchEpisodeCollapsedEventsQuery = ({
   episodeId,
@@ -82,23 +102,21 @@ export const useFetchEpisodeCollapsedEventsQuery = ({
         )
       );
 
-      const statusRows = rowsFromEsql(phasesQuery, phasesRaw)
-        .map((row) => ({
-          '@timestamp': row.seg_start,
+      const statusRows = sweepRows(rowsFromEsql(phasesQuery, phasesRaw)).map(
+        ({ row, timestamp }) => ({
+          '@timestamp': timestamp,
           'episode.id': row['episode.id'],
           'episode.status': row['episode.status'],
           group_hash: row.group_hash,
-          event_count: row.event_count,
-        }))
-        .sort(byTimestamp);
+        })
+      );
 
-      const severityRows = rowsFromEsql(severityQuery, severityRaw)
-        .map((row) => ({
-          '@timestamp': row.seg_start,
+      const severityRows = sweepRows(rowsFromEsql(severityQuery, severityRaw)).map(
+        ({ row, timestamp }) => ({
+          '@timestamp': timestamp,
           severity: row.severity,
-          event_count: row.event_count,
-        }))
-        .sort(byTimestamp);
+        })
+      );
 
       return { statusRows, severityRows };
     },

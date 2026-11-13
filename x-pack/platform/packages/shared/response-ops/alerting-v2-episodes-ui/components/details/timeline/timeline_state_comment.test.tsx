@@ -54,6 +54,7 @@ describe('AlertEpisodeTimelineStateComment', () => {
     renderComment(changedEntry, 1000);
 
     expect(screen.getByTestId('alertingV2EpisodeCollapsedEventsWarning')).toBeInTheDocument();
+    expect(screen.queryByText(/after 5 pending events/i)).not.toBeInTheDocument();
   });
 
   it('does not show the collapsed warning on the initial status', () => {

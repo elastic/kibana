@@ -46,7 +46,7 @@ export const AlertEpisodeTimelineStateComment = ({
           <EuiFlexItem grow={false}>
             <AlertEpisodeStatusBadge status={entry.newStatus} />
           </EuiFlexItem>
-          {entry.prevStatus !== undefined && (
+          {entry.prevStatus !== undefined && collapsedEventLimit === undefined && (
             <EuiFlexItem grow={false}>
               {i18n.getAfterNEventsLabel(
                 entry.prevEventCount,

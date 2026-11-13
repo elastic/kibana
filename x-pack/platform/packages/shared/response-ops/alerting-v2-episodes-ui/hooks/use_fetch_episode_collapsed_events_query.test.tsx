@@ -61,7 +61,7 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
     expect(severityQueryString).not.toContain('rule.id');
   });
 
-  it('maps the Gantt phase rows to timeline rows, oldest first', async () => {
+  it('sweeps the Gantt phase rows into timeline changes, oldest first', async () => {
     runEsqlAsyncSearchMock.mockImplementation(async ({ params }) =>
       params.query === phasesQueryString
         ? {
@@ -132,19 +132,19 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
           'episode.id': 'ep-1',
           'episode.status': ALERT_EPISODE_STATUS.PENDING,
           group_hash: 'hash-1',
-          event_count: 2,
         },
         {
           '@timestamp': '2024-01-01T00:01:00.000Z',
           'episode.id': 'ep-1',
           'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
           group_hash: 'hash-1',
-          event_count: 5000,
         },
       ],
+      // `high` is still open when `critical` ends, so it becomes the current severity again.
       severityRows: [
-        { '@timestamp': '2024-01-01T00:00:00.000Z', severity: 'high', event_count: 4992 },
-        { '@timestamp': '2024-01-01T12:00:00.000Z', severity: 'critical', event_count: 10 },
+        { '@timestamp': '2024-01-01T00:00:00.000Z', severity: 'high' },
+        { '@timestamp': '2024-01-01T12:00:00.000Z', severity: 'critical' },
+        { '@timestamp': '2024-01-01T12:10:00.000Z', severity: 'high' },
       ],
     });
   });

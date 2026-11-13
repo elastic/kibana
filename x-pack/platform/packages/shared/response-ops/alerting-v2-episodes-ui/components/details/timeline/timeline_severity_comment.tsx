@@ -47,7 +47,7 @@ export const AlertEpisodeTimelineSeverityComment = ({
           <EuiFlexItem grow={false}>
             <AlertEpisodeSeverityBadge severity={entry.newSeverity} />
           </EuiFlexItem>
-          {entry.prevSeverity !== undefined && (
+          {entry.prevSeverity !== undefined && collapsedEventLimit === undefined && (
             <EuiFlexItem grow={false}>
               {i18n.getAfterNEventsLabel(
                 entry.prevEventCount,
