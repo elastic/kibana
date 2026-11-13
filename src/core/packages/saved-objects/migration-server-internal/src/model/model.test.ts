@@ -19,6 +19,8 @@ import {
 import type {
   BaseState,
   CalculateExcludeFiltersState,
+  CheckRelocationCompletedState,
+  ReleaseRelocationWaitGroupsState,
   UpdateSourceMappingsPropertiesState,
   CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
@@ -1774,6 +1776,15 @@ describe('migrations v2 model', () => {
         const newState = model(setWriteBlockState, res);
         expect(newState.controlState).toEqual('REFRESH_TARGET');
       });
+
+      test('SET_SOURCE_WRITE_BLOCK -> RELEASE_RELOCATION_WAIT_GROUPS if source index matches target index and the migrator is involved in a relocation', () => {
+        const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
+          type: 'source_equals_target' as const,
+          index: `.kibana_${setWriteBlockState.kibanaVersion}_001`,
+        });
+        const newState = model({ ...setWriteBlockState, mustRelocateDocuments: true }, res);
+        expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
+      });
     });
 
     describe('CALCULATE_EXCLUDE_FILTERS', () => {
@@ -1904,33 +1915,13 @@ describe('migrations v2 model', () => {
         controlState: 'READY_TO_REINDEX_SYNC',
       };
 
-      describe('if the migrator source index did NOT exist', () => {
-        test('READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
-            type: 'synchronization_successful' as const,
-            data: [],
-          });
-          const newState = model(state, res);
-          expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
+      test('READY_TO_REINDEX_SYNC -> CHECK_RELOCATION_COMPLETED if synchronization succeeds', () => {
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+          type: 'synchronization_successful' as const,
+          data: [],
         });
-      });
-
-      describe('if the migrator source index did exist', () => {
-        test('READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
-            type: 'synchronization_successful' as const,
-            data: [],
-          });
-          const newState = model(
-            {
-              ...state,
-              sourceIndex: Option.fromNullable('.kibana'),
-              sourceIndexMappings: Option.fromNullable({} as IndexMapping),
-            },
-            res
-          );
-          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
-        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CHECK_RELOCATION_COMPLETED');
       });
 
       test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
@@ -1943,6 +1934,90 @@ describe('migrations v2 model', () => {
         expect(newState.reason).toMatchInlineSnapshot(
           `"An error occurred whilst waiting for other migrators to get to this step."`
         );
+      });
+    });
+
+    describe('CHECK_RELOCATION_COMPLETED', () => {
+      const state: CheckRelocationCompletedState = {
+        ...postInitState,
+        controlState: 'CHECK_RELOCATION_COMPLETED',
+        mustRelocateDocuments: true,
+      };
+      const stateWithSource: CheckRelocationCompletedState = {
+        ...state,
+        sourceIndex: Option.some('.kibana_7.10.0_001'),
+        sourceIndexMappings: Option.some({} as IndexMapping),
+      };
+      const indexWithAliases = (index: string, aliases: string[]) => ({
+        [index]: {
+          aliases: Object.fromEntries(aliases.map((alias) => [alias, {}])),
+          mappings: { properties: {} },
+          settings: {},
+        },
+      });
+      const relocationNotPublished: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right(
+        indexWithAliases('.kibana_7.10.0_001', ['.kibana'])
+      );
+      const relocationPublished: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right(
+        indexWithAliases('.kibana_7.11.0_001', ['.kibana', '.kibana_7.11.0'])
+      );
+
+      describe('if the relocation is not published yet', () => {
+        test('CHECK_RELOCATION_COMPLETED -> DONE_REINDEXING_SYNC if the migrator source index did NOT exist', () => {
+          const newState = model(state, relocationNotPublished);
+          expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
+        });
+
+        test('CHECK_RELOCATION_COMPLETED -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if the migrator source index did exist', () => {
+          const newState = model(stateWithSource, relocationNotPublished);
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        });
+
+        test('CHECK_RELOCATION_COMPLETED -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if the current alias points to multiple indices', () => {
+          const res: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right({
+            ...indexWithAliases('.kibana_7.10.0_001', ['.kibana']),
+            ...indexWithAliases('.kibana_7.11.0_001', ['.kibana', '.kibana_7.11.0']),
+          });
+          const newState = model(stateWithSource, res);
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        });
+      });
+
+      describe('if another instance already published the relocation', () => {
+        test('CHECK_RELOCATION_COMPLETED -> RELEASE_RELOCATION_WAIT_GROUPS if the migrator source index did exist', () => {
+          const newState = model(stateWithSource, relocationPublished);
+          expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
+        });
+
+        test('CHECK_RELOCATION_COMPLETED -> RELEASE_RELOCATION_WAIT_GROUPS if the migrator source index did NOT exist', () => {
+          const newState = model(state, relocationPublished);
+          expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
+        });
+      });
+
+      test('CHECK_RELOCATION_COMPLETED -> CHECK_RELOCATION_COMPLETED if the action fails with a retryable error', () => {
+        const res: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.left({
+          type: 'retryable_es_client_error',
+          message: 'search_phase_execution_exception',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CHECK_RELOCATION_COMPLETED');
+        expect(newState.retryCount).toEqual(1);
+      });
+    });
+
+    describe('RELEASE_RELOCATION_WAIT_GROUPS', () => {
+      test('RELEASE_RELOCATION_WAIT_GROUPS -> DONE', () => {
+        const state: ReleaseRelocationWaitGroupsState = {
+          ...postInitState,
+          controlState: 'RELEASE_RELOCATION_WAIT_GROUPS',
+          mustRelocateDocuments: true,
+        };
+        const res: ResponseType<'RELEASE_RELOCATION_WAIT_GROUPS'> = Either.right(
+          'relocation_wait_groups_released'
+        );
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('DONE');
       });
     });
 

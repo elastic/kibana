@@ -802,6 +802,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'CALCULATE_EXCLUDE_FILTERS',
       };
     } else if (isTypeof(res.left, 'source_equals_target')) {
+      if (stateP.mustRelocateDocuments) {
+        // Another instance already published the aliases of this relocation, which is
+        // its last step. Sibling migrators of this instance may be waiting on us.
+        return {
+          ...stateP,
+          controlState: 'RELEASE_RELOCATION_WAIT_GROUPS',
+        };
+      }
       // As part of a reindex-migration, we wanted to block the source index to prevent updates
       // However, this migrator's source index matches the target index.
       // Thus, another instance's migrator is ahead of us. We skip the clone steps and continue the flow
@@ -885,19 +893,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'READY_TO_REINDEX_SYNC') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (Option.isSome(stateP.sourceIndex) && Option.isSome(stateP.sourceIndexMappings)) {
-        // this migrator's source index exist, reindex its entries
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
-          sourceIndex: stateP.sourceIndex as Option.Some<string>,
-          sourceIndexMappings: stateP.sourceIndexMappings as Option.Some<IndexMapping>,
-        };
-      } else {
-        // this migrator's source index did NOT exist
-        // this migrator does not need to reindex anything (others might need to)
-        return { ...stateP, controlState: 'DONE_REINDEXING_SYNC' };
-      }
+      // This migrator read the aliases in INIT, possibly before another instance published them
+      return { ...stateP, controlState: 'CHECK_RELOCATION_COMPLETED' };
     } else if (Either.isLeft(res)) {
       const left = res.left;
 
@@ -911,6 +908,40 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         throwBadResponse(stateP, left);
       }
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CHECK_RELOCATION_COMPLETED') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      const aliases = getAliases(res.right);
+      if (
+        Either.isRight(aliases) &&
+        versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases.right)
+      ) {
+        // Another instance finished the relocation. Copying now would write onto the live index.
+        return { ...stateP, controlState: 'RELEASE_RELOCATION_WAIT_GROUPS' };
+      }
+      if (Option.isSome(stateP.sourceIndex) && Option.isSome(stateP.sourceIndexMappings)) {
+        // this migrator's source index exist, reindex its entries
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
+          sourceIndex: stateP.sourceIndex as Option.Some<string>,
+          sourceIndexMappings: stateP.sourceIndexMappings as Option.Some<IndexMapping>,
+        };
+      } else {
+        // this migrator's source index did NOT exist
+        // this migrator does not need to reindex anything (others might need to)
+        return { ...stateP, controlState: 'DONE_REINDEXING_SYNC' };
+      }
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'RELEASE_RELOCATION_WAIT_GROUPS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return { ...stateP, controlState: 'DONE' };
     } else {
       throwBadResponse(stateP, res);
     }
