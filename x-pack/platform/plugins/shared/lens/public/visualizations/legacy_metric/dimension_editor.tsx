@@ -6,7 +6,8 @@
  */
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { CustomizablePalette, applyPaletteParams } from '@kbn/coloring';
+import { applyPaletteParams } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring-components';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';

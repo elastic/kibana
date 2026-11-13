@@ -13,6 +13,11 @@ import { parse } from 'yaml';
 import { renderSteps } from './render.ts';
 import { normalizeSemantics } from './semantic_normalization.ts';
 import { prBaseEnv, prBaseSteps } from './steps/pull_request_base.ts';
+import { apiContracts } from './steps/api_contracts.ts';
+import { codeQuality } from './steps/code_quality.ts';
+import { kbnHandlebars } from './steps/kbn_handlebars.ts';
+import { promptChanges } from './steps/prompt_changes.ts';
+import { syncModelLabels } from './steps/sync_model_labels.ts';
 import { buildFipsImage } from './steps/build_fips_image.ts';
 import { buildCloudFipsImageSteps } from './steps/build_cloud_fips_image.ts';
 import { buildCloudImageSteps } from './steps/build_cloud_image.ts';
@@ -82,7 +87,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('fips/verify_fips_enabled'), steps: verifyFipsEnabled },
   { ...yamlFragment('pull_request/agent_builder_smoke_tests'), steps: agentBuilderSmokeTestsSteps },
   { ...yamlFragment('pull_request/ai_infra_gen_ai'), steps: aiInfraGenAiSteps },
-  yamlFragment('pull_request/api_contracts'),
+  { ...yamlFragment('pull_request/api_contracts'), steps: apiContracts },
   { ...yamlFragment('pull_request/base'), steps: prBaseSteps, env: prBaseEnv },
   { ...yamlFragment('pull_request/build_cloud_fips_image'), steps: buildCloudFipsImageSteps },
   { ...yamlFragment('pull_request/build_cloud_image'), steps: buildCloudImageSteps },
@@ -90,7 +95,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/check_next_docs'), steps: checkNextDocs },
   { ...yamlFragment('pull_request/check_oas_snapshot'), steps: checkOasSnapshot },
   { ...yamlFragment('pull_request/check_saved_objects'), steps: checkSavedObjects },
-  yamlFragment('pull_request/code_quality'),
+  { ...yamlFragment('pull_request/code_quality'), steps: codeQuality },
   { ...yamlFragment('pull_request/cps_testing'), steps: cpsTests },
   { ...yamlFragment('pull_request/deploy_cloud'), steps: deployCloudSteps },
   { ...yamlFragment('pull_request/deploy_project'), steps: deployProjectSteps },
@@ -98,11 +103,11 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/fleet_cypress'), steps: fleetCypressSteps },
   { ...yamlFragment('pull_request/ftr_bench'), steps: ftrBenchSteps },
   { ...yamlFragment('pull_request/jest_bench'), steps: jestBenchSteps },
-  yamlFragment('pull_request/kbn_handlebars'),
+  { ...yamlFragment('pull_request/kbn_handlebars'), steps: kbnHandlebars },
   { ...yamlFragment('pull_request/local_check'), steps: localCheck },
   { ...yamlFragment('pull_request/page_load_bench'), steps: pageLoadBenchSteps },
   { ...yamlFragment('pull_request/post_build'), steps: postBuildSteps },
-  yamlFragment('pull_request/prompt_changes'),
+  { ...yamlFragment('pull_request/prompt_changes'), steps: promptChanges },
   { ...yamlFragment('pull_request/renovate'), steps: renovateValidation },
   { ...yamlFragment('pull_request/response_ops'), steps: responseOpsSteps },
   { ...yamlFragment('pull_request/response_ops_cases'), steps: responseOpsCasesSteps },
@@ -123,7 +128,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/security_solution/rule_management'), steps: ruleManagementSteps },
   { ...yamlFragment('pull_request/security_solution/scout_edr_real_fleet'), steps: scoutEdrRealFleetSteps },
   { ...yamlFragment('pull_request/storybooks'), steps: storybooks },
-  yamlFragment('pull_request/sync_model_labels'),
+  { ...yamlFragment('pull_request/sync_model_labels'), steps: syncModelLabels },
   { ...yamlFragment('pull_request/trigger_entity_store_performance'), steps: entityStoreSteps },
   { ...yamlFragment('pull_request/warm_start_memory_bench'), steps: warmStartMemoryBenchSteps },
   { ...yamlFragment('pull_request/workflows_oom_testing'), steps: workflowsOomTestingSteps },

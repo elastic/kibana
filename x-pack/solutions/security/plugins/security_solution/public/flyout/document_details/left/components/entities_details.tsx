@@ -24,8 +24,6 @@ import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 import type { CspInsightLeftPanelSubTab } from '../../../entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityTableLinkRenderer } from '../../../entity_details/shared/components/entity_table/types';
 
-export const ENTITIES_TAB_ID = 'entity';
-
 export interface EntitySectionOverrides {
   /** Called when the user clicks to preview the entity in a side panel instead of navigating away. */
   onPreviewEntity?: () => void;

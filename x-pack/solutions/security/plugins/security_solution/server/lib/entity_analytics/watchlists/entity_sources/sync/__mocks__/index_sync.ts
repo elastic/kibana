@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export const mockPlainIndexSync = jest.fn();
+export const mockPlainIndexSync = jest.fn().mockResolvedValue([]);
+export const mockResolveFullSyncState = jest.fn().mockResolvedValue({ hasNewFullSync: false });
+export const mockMarkFullSyncProcessed = jest.fn().mockResolvedValue(undefined);
 export const mockCreateIndexSyncService = jest.fn().mockImplementation(() => ({
   plainIndexSync: mockPlainIndexSync,
+  resolveFullSyncState: mockResolveFullSyncState,
+  markFullSyncProcessed: mockMarkFullSyncProcessed,
 }));
 
 export const createIndexSyncService = mockCreateIndexSyncService;

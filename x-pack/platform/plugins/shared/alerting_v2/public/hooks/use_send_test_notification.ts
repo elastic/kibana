@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { ActionPolicyTestSendResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  ActionPolicyTestSendResponse,
+  ActionPolicyWorkflowPayloadInput,
+} from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@kbn/react-query';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 
 interface SendTestNotificationVariables {
-  seed: number;
+  payload: ActionPolicyWorkflowPayloadInput;
   destinationIds: string[];
 }
 
@@ -21,9 +24,9 @@ export const useSendTestNotification = (policyId: string) => {
   const { toasts } = useService(CoreStart('notifications'));
 
   return useMutation<ActionPolicyTestSendResponse, Error, SendTestNotificationVariables>({
-    mutationFn: ({ seed, destinationIds }) =>
+    mutationFn: ({ payload, destinationIds }) =>
       actionPoliciesApi.sendTestNotification(policyId, {
-        seed,
+        payload,
         destination_ids: destinationIds,
       }),
     onError: (error) => {

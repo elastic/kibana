@@ -42,10 +42,6 @@ export interface CorrelationsDetailsViewProps {
    * When not provided, the expand button column is hidden.
    */
   onShowAttack?: (id: string, indexName: string, title?: string) => void;
-  /**
-   * Whether to render rule links as PreviewLink instead of OpenFlyoutLink
-   */
-  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -53,13 +49,7 @@ export interface CorrelationsDetailsViewProps {
  * so it can be used both inside a flyout body and inline in a tab panel.
  */
 export const CorrelationsDetailsView = memo(
-  ({
-    hit,
-    scopeId,
-    onShowAlert,
-    onShowAttack,
-    useLegacyExpandableFlyout,
-  }: CorrelationsDetailsViewProps) => {
+  ({ hit, scopeId, onShowAlert, onShowAttack }: CorrelationsDetailsViewProps) => {
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
@@ -121,7 +111,6 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -132,7 +121,6 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -143,7 +131,6 @@ export const CorrelationsDetailsView = memo(
                   documentId={ancestryDocumentId}
                   documentIndex={ancestryDocumentIndex}
                   onShowAlert={onShowAlert}
-                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}

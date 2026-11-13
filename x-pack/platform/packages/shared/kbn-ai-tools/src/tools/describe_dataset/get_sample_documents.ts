@@ -21,9 +21,13 @@ import {
   parseEsqlSourceDocuments,
   getEsqlDocumentId,
 } from '../../utils/parse_esql_source_documents';
+import { esqlTimeRange } from '../../utils/esql_time_range';
 
 const SAMPLE_PROBABILITY_FACTOR = 3;
 const SAMPLE_LIMIT_FACTOR = 10;
+const ESQL_VIEW_PREFIX = '$.';
+
+const isEsqlView = (index: string) => index.startsWith(ESQL_VIEW_PREFIX);
 
 type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
@@ -52,8 +56,8 @@ interface GetSampleDocumentsEsqlParams {
    * `filter` parameter. ES applies these at the request layer (before the ES|QL
    * pipeline runs), so callers can pass raw fixture-style DSL (`term`, `terms`,
    * `match`, `match_phrase`, `exists`, `bool { should, minimum_should_match }`,
-   * ...) without translating to KQL. Multiple clauses are ANDed with the
-   * internal date-range filter.
+   * ...) without translating to KQL. On ES|QL views a request-level `filter`
+   * blocks `SAMPLE` / `LIMIT` / `STATS` pushdown (see `esqlTimeRange`).
    */
   dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   abortSignal: AbortSignal;
@@ -170,14 +174,15 @@ export async function getSampleDocumentsEsql({
 }: GetSampleDocumentsEsqlParams): Promise<GetSampleDocumentsEsqlResponse> {
   const indices = Array.isArray(index) ? index : [index];
   const extraDslClauses = dslFilter ? castArray(dslFilter) : [];
-  const filter = {
-    bool: { filter: [...dateRangeQuery(start, end), ...extraDslClauses] },
-  };
+  const filter = extraDslClauses.length > 0 ? { bool: { filter: extraDslClauses } } : undefined;
 
-  const runQuery = (params: { query: string; filter: typeof filter; drop_null_columns: true }) =>
-    esClient.esql.query(params, { signal: abortSignal }) as unknown as Promise<ESQLSearchResponse>;
+  const runQuery = (params: { query: string; drop_null_columns: true }) =>
+    esClient.esql.query(
+      { ...params, ...(filter ? { filter } : {}) },
+      { signal: abortSignal }
+    ) as unknown as Promise<ESQLSearchResponse>;
 
-  const whereExpression = buildWhereExpression({ kql, whereCondition });
+  const whereExpression = buildWhereExpression({ start, end, kql, whereCondition });
   const printQuery = (query: ComposerQuery) => {
     if (unmappedFields) {
       query.addSetCommand('unmapped_fields', unmappedFields);
@@ -192,10 +197,10 @@ export async function getSampleDocumentsEsql({
     sampleProbability?: number;
     limit?: number;
   } = {}) => {
-    let query = esql.from(indices, ['_id', '_source']);
-    if (whereExpression) {
-      query = query.where`${whereExpression}`;
-    }
+    // Outer METADATA on a view is null-injected as an Eval between FROM and WHERE,
+    // which makes QSTR/MATCH fail with "cannot be used after FROM".
+    const metadata = indices.some(isEsqlView) ? undefined : ['_id', '_source'];
+    let query = esql.from(indices, metadata).where`${whereExpression}`;
     if (sampleProbability !== undefined && sampleProbability < 1) {
       query = query.sample(sampleProbability);
     }
@@ -207,11 +212,7 @@ export async function getSampleDocumentsEsql({
   };
 
   const buildCountQuery = () => {
-    let query = esql.from(indices);
-    if (whereExpression) {
-      query = query.where`${whereExpression}`;
-    }
-    query = query.pipe`STATS total = COUNT(*)`;
+    const query = esql.from(indices).where`${whereExpression}`.pipe`STATS total = COUNT(*)`;
     return printQuery(query);
   };
 
@@ -222,7 +223,6 @@ export async function getSampleDocumentsEsql({
 
     const countResponse = await runQuery({
       query: buildCountQuery(),
-      filter,
       drop_null_columns: true,
     });
 
@@ -235,7 +235,6 @@ export async function getSampleDocumentsEsql({
     const sampleLimit = SAMPLE_LIMIT_FACTOR * sampleSize;
     const sampleResponse = await runQuery({
       query: buildQuery({ sampleProbability, limit: sampleLimit }),
-      filter,
       drop_null_columns: true,
     });
 
@@ -246,7 +245,6 @@ export async function getSampleDocumentsEsql({
 
   const response = await runQuery({
     query: buildQuery({ limit: size }),
-    filter,
     drop_null_columns: true,
   });
   const hits = parseHits(response);
@@ -254,18 +252,24 @@ export async function getSampleDocumentsEsql({
 }
 
 function buildWhereExpression({
+  start,
+  end,
   kql,
   whereCondition,
 }: {
+  start: number;
+  end: number;
   kql?: string;
   whereCondition?: WhereCondition;
 }) {
-  const kqlCondition = kql ? esql.exp`KQL(${esql.str(kql)})` : undefined;
-
-  if (kqlCondition && whereCondition) {
-    return esql.exp`${kqlCondition} AND ${whereCondition}`;
+  let expression = esqlTimeRange(start, end);
+  if (kql) {
+    expression = esql.exp`${expression} AND KQL(${esql.str(kql)})`;
   }
-  return kqlCondition ?? whereCondition;
+  if (whereCondition) {
+    expression = esql.exp`${expression} AND ${whereCondition}`;
+  }
+  return expression;
 }
 
 function parseHits(response: ESQLSearchResponse): Array<SearchHit<Record<string, unknown>>> {

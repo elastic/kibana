@@ -32,6 +32,7 @@ const DEFAULT_FORM_SETTINGS: FormSettings = {
 /**
  * Form root. It must not read `formState` or call `watch` so that field changes never re-render the
  * whole form; per-field subscriptions live in the children via `useWatch` / `useFormState`.
+ * `initialValues` is read on mount only: later prop changes do not reset the form.
  */
 export function SloEditForm({
   slo,
@@ -44,7 +45,6 @@ export function SloEditForm({
 
   const form = useForm<CreateSLOForm>({
     defaultValues: initialValues ?? SLO_EDIT_FORM_DEFAULT_VALUES,
-    values: initialValues,
     mode: 'all',
   });
 

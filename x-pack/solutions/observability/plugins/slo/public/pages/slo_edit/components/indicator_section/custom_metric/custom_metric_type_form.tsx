@@ -22,10 +22,11 @@ import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
 import { useIndicatorDataView } from '../custom_common/use_indicator_data_view';
 import { MetricIndicator } from './metric_indicator';
+import { HISTOGRAM_FIELD_TYPES } from '../../../constants';
 
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
-const SUPPORTED_METRIC_FIELD_TYPES = ['number', 'histogram'];
+const SUPPORTED_METRIC_FIELD_TYPES = ['number', ...HISTOGRAM_FIELD_TYPES];
 
 export function CustomMetricIndicatorTypeForm() {
   const { dataView, loading: isIndexFieldsLoading } = useIndicatorDataView();

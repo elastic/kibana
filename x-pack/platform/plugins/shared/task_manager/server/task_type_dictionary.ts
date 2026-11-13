@@ -63,6 +63,9 @@ export const REMOVED_TYPES: string[] = [
 
   // Legacy streams description generation task replaced by the synchronous suggestion API
   'streams_description_generation',
+
+  // Legacy risk engine task removed in https://github.com/elastic/kibana/pull/303438
+  'risk_engine:risk_scoring',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [

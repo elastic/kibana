@@ -7,11 +7,7 @@
 
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  BuiltinToolDefinition,
-  StaticToolRegistration,
-  ToolAvailabilityResult,
-} from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { lazySchema, isoDateTime } from '@kbn/zod/v4';
@@ -21,13 +17,16 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import {
   loadSourceCatalog,
   resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
+import { trackTelemetryBestEffort } from '../bulk_write';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
@@ -61,7 +60,7 @@ export function createFeatureKnowledgeIndicatorTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create a feature Knowledge Indicator (KI) for a Nightshift source and persist it to
+      Create a feature Knowledge Indicator (KI) for a nightshift source and persist it to
       significant events feature storage.
 
       Use this tool when the conversation discovers a new source behavior pattern and it should be
@@ -95,33 +94,10 @@ export function createFeatureKnowledgeIndicatorTool({
         };
       },
     },
-    availability: {
-      cacheMode: 'space',
-      handler: async (): Promise<ToolAvailabilityResult> => {
-        try {
-          await assertSignificantEventsAccess({
-            server,
-            licensing: server.licensing,
-          });
-          return { status: 'available' };
-        } catch (error) {
-          if (error instanceof Error) {
-            logger.debug(error.stack ?? error.message);
-          } else {
-            logger.debug(String(error));
-          }
-          return {
-            status: 'unavailable',
-            reason:
-              error instanceof Error
-                ? error.message
-                : 'Significant events access is not available in the current context',
-          };
-        }
-      },
-    },
+    availability: createSignificantEventsAvailability({ server, logger }),
     handler: async ({ slug, expires_at, ...featureInput }, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let sourceId = '';
       try {
         const scopedClients = await getScopedClients({
@@ -146,11 +122,19 @@ export function createFeatureKnowledgeIndicatorTool({
           logger,
         });
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'feature',
-          tool_id: 'ki_feature_create',
-          success: true,
-          source_id: source.id,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'ki_feature_create telemetry',
+          track: () =>
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
+              workflow_execution_id: workflowExecutionId,
+              ki_kind: 'feature',
+              tool_id: 'ki_feature_create',
+              success: true,
+              source_id: source.id,
+              space_id: request.spaceId,
+              knowledge_indicator_id: id,
+            }),
         });
 
         return {
@@ -176,12 +160,20 @@ export function createFeatureKnowledgeIndicatorTool({
           logger.debug(String(error));
         }
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'feature',
-          tool_id: 'ki_feature_create',
-          success: false,
-          source_id: sourceId,
-          error_message: message,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed ki_feature_create telemetry',
+          track: () =>
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
+              workflow_execution_id: workflowExecutionId,
+              ki_kind: 'feature',
+              tool_id: 'ki_feature_create',
+              success: false,
+              source_id: sourceId,
+              space_id: request.spaceId,
+              knowledge_indicator_id: featureInput.id,
+              error_message: message,
+            }),
         });
 
         return {

@@ -90,6 +90,7 @@ export const SelectionBar = ({
       <EuiButton
         color="danger"
         iconType="trash"
+        size="s"
         onClick={() => requestDelete(selectedItems)}
         data-test-subj={getContentListSelectionBarSubjects(dataTestSubj).deleteButton}
       >

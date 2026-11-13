@@ -121,7 +121,9 @@ export const Rootly: ConnectorSpec = {
       {
         type: 'bearer',
         isRecommended: true,
-        supportsSandbox: true,
+        // Sandbox use is turned off until Night Shift has evals for this connector.
+        // Set back to true to re-enable it (elastic/nightshift-program#2256).
+        supportsSandbox: false,
         defaults: {},
         overrides: {
           meta: {
@@ -140,6 +142,8 @@ export const Rootly: ConnectorSpec = {
   },
 
   schema: lazySchema(() => z.object({})),
+
+  sandbox: { hosts: ['api.rootly.com'] },
 
   actions: {
     createIncident: {

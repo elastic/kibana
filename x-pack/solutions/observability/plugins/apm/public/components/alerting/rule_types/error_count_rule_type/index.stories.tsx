@@ -38,6 +38,7 @@ interface Args {
 const stories: Meta<{}> = {
   title: 'alerting/ErrorCountRuleType',
   component: ErrorCountRuleType,
+  parameters: { skipApmJestDecorator: true },
   decorators: [
     (StoryComponent) => {
       createCallApmApi(coreMock);
