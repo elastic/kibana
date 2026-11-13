@@ -12,17 +12,30 @@ import { getFlyoutManagerStore } from '@elastic/eui';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { SELECTED_CONVERSATION_ID_PARAM } from './conversations_url_params';
 
-/** History entry state: how many flyouts are stacked on the investigation flyout at this entry. */
+/** History entry state: how many flyout Back steps sit on top of the investigation flyout at this entry. */
 export const STACKED_FLYOUTS_STATE_KEY = 'alertZeroInvestigationStackedFlyouts';
 
-/** Main flyout ids of the investigation flyout's history group, the investigation flyout first. */
-const getGroupFlyoutIds = (): string[] =>
+/** A flyout stack the flyout's own Back can return to: a main flyout, with one of its earlier children. */
+interface BackStep {
+  mainFlyoutId: string;
+  childFlyoutId?: string;
+}
+
+/**
+ * The investigation flyout's history group as the flyout's own Back walks it, oldest first: each
+ * session's earlier children (Back pops those first), then the session itself. A session's only
+ * child is not a step of its own, since Back closes it together with its main flyout.
+ */
+const getBackSteps = (): BackStep[] =>
   getFlyoutManagerStore()
     .getState()
     .sessions.filter(({ historyKey }) => historyKey === CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY)
-    .map(({ mainFlyoutId }) => mainFlyoutId);
+    .flatMap(({ mainFlyoutId, childHistory }) => [
+      ...childHistory.map(({ flyoutId }) => ({ mainFlyoutId, childFlyoutId: flyoutId })),
+      { mainFlyoutId },
+    ]);
 
-const countStacked = (groupFlyoutIds: string[]): number => Math.max(groupFlyoutIds.length - 1, 0);
+const countStacked = (steps: BackStep[]): number => Math.max(steps.length - 1, 0);
 
 const asStateRecord = (state: unknown): Record<string, unknown> =>
   typeof state === 'object' && state !== null ? (state as Record<string, unknown>) : {};
@@ -58,54 +71,84 @@ export const useInvestigationFlyoutBrowserHistory = (conversationId?: string): v
     const isThisInvestigation = ({ search }: Location) =>
       new URLSearchParams(search).get(SELECTED_CONVERSATION_ID_PARAM) === conversationId;
 
-    let stacked = countStacked(getGroupFlyoutIds());
+    // The depth of the entry the browser is on, or heading to: `history.go` lands asynchronously.
+    let entryStacked = readStacked(history.location);
 
-    // Stacked flyouts are not restored on reload or Forward, so the entry must not claim any.
-    if (readStacked(history.location) > stacked) {
-      history.replace(withStacked(history.location, stacked));
+    const goToStacked = (stacked: number) => {
+      const delta = stacked - entryStacked;
+      entryStacked = stacked;
+      history.go(delta);
+    };
+
+    // Stacked flyouts are not restored on reload, nor once their stack was closed (with its close
+    // button, or by picking another investigation) and Back lands on their entries. Return to the
+    // entry of the flyouts that are open, so Back is not spent on entries that change nothing.
+    const openStacked = countStacked(getBackSteps());
+    if (entryStacked > openStacked) {
+      goToStacked(openStacked);
     }
 
-    const unsubscribe = store.subscribe(() => {
-      const groupFlyoutIds = getGroupFlyoutIds();
-      const nextStacked = countStacked(groupFlyoutIds);
-      if (nextStacked === stacked) {
-        return;
-      }
-      stacked = nextStacked;
-
+    const syncHistory = () => {
+      const steps = getBackSteps();
       // The whole group closed: the investigation flyout's own close updates the URL.
-      if (groupFlyoutIds.length === 0 || !isThisInvestigation(history.location)) {
+      if (steps.length === 0 || !isThisInvestigation(history.location)) {
         return;
       }
 
-      const entryStacked = readStacked(history.location);
-      if (nextStacked > entryStacked) {
-        for (let depth = entryStacked + 1; depth <= nextStacked; depth++) {
+      const stacked = countStacked(steps);
+      if (stacked > entryStacked) {
+        for (let depth = entryStacked + 1; depth <= stacked; depth++) {
           history.push(withStacked(history.location, depth));
         }
-      } else if (nextStacked < entryStacked) {
+      } else if (stacked < entryStacked) {
         // The flyout's own Back closed them: drop their entries too.
-        history.go(nextStacked - entryStacked);
+        goToStacked(stacked);
       }
+    };
+
+    // Moving to an earlier flyout can take several store updates (session, then child); sync the
+    // history once they settle, rather than to each intermediate stack.
+    let isSyncScheduled = false;
+    let isDisposed = false;
+    const unsubscribe = store.subscribe(() => {
+      if (isSyncScheduled) {
+        return;
+      }
+      isSyncScheduled = true;
+      queueMicrotask(() => {
+        isSyncScheduled = false;
+        if (!isDisposed) {
+          syncHistory();
+        }
+      });
     });
 
     const unlisten = history.listen((location, action) => {
-      if (action !== 'POP' || !isThisInvestigation(location)) {
+      if (!isThisInvestigation(location)) {
+        return;
+      }
+      entryStacked = readStacked(location);
+      if (action !== 'POP') {
         return;
       }
 
-      const entryStacked = readStacked(location);
+      const steps = getBackSteps();
+      const stacked = countStacked(steps);
       if (entryStacked < stacked) {
-        const targetFlyoutId = getGroupFlyoutIds()[entryStacked];
-        if (targetFlyoutId) {
-          store.goToFlyout(targetFlyoutId, 'main');
+        const { mainFlyoutId, childFlyoutId } = steps[entryStacked];
+        store.goToFlyout(mainFlyoutId, 'main');
+        if (childFlyoutId) {
+          store.goToFlyout(childFlyoutId, 'child');
         }
       } else if (entryStacked > stacked) {
+        // Forward onto a flyout that is gone: rewinding would leave Forward stuck on this entry.
+        entryStacked = stacked;
         history.replace(withStacked(location, stacked));
       }
     });
 
     return () => {
+      isDisposed = true;
       unsubscribe();
       unlisten();
     };
