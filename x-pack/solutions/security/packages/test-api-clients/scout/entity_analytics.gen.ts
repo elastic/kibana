@@ -83,15 +83,7 @@ import type {
   DeletePrivMonUserResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/delete.gen';
 import type { DeleteWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/delete.gen';
-import type {
-  DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
-  DeprecatedTriggerRiskScoreCalculationResponse,
-  TriggerRiskScoreCalculationRequestBodyInput,
-  TriggerRiskScoreCalculationResponse,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { DisableMonitoringEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/disable.gen';
-import type { DisableRiskEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_disable_route.gen';
-import type { EnableRiskEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_enable_route.gen';
 import type {
   EntityDetailsHighlightsRequestBodyInput,
   EntityDetailsHighlightsResponse,
@@ -114,7 +106,6 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetAssetCriticalityStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality_status.gen';
 import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/privileged_access_detection/status.gen';
-import type { GetRiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type {
   GetRiskScoreHistoryRequestQueryInput,
   GetRiskScoreHistoryResponse,
@@ -128,7 +119,6 @@ import type {
   GetWatchlistEntitySourceResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/get.gen';
 import type { InitMonitoringEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/init.gen';
-import type { InitRiskEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_init_route.gen';
 import type { InstallPrivilegedAccessDetectionPackageResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/privileged_access_detection/install.gen';
 import type {
   InternalUploadAssetCriticalityV2CsvResponse,
@@ -155,10 +145,6 @@ import type { ReadRiskEngineSettingsResponse } from '@kbn/security-solution-plug
 import type { RiskEngineGetPrivilegesResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/get_risk_engine_privileges.gen';
 import type { RunEntityAnalyticsMigrationsResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/migrations/run_migrations_route.gen';
 import type { ScheduleMonitoringEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/schedule_now.gen';
-import type {
-  ScheduleRiskEngineNowRequestBodyInput,
-  ScheduleRiskEngineNowResponse,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type {
   SearchPrivilegesIndicesRequestQueryInput,
   SearchPrivilegesIndicesResponse,
@@ -317,7 +303,7 @@ If asset criticality records already exist for the specified entities, those rec
     });
   },
   /**
-   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+   * Stops risk scoring for the space. Removes the risk score data stream, the lookup index and its template, the risk engine configuration, and the risk score maintainer task, and clears risk fields stored on entity documents.
    */
   async cleanUpRiskEngine<TResponseType extends ScoutResponseType = 'json'>(
     options: ScoutApiRequestOptions<TResponseType> = {}
@@ -658,34 +644,6 @@ Removes a privileged user from monitoring by their document ID.
     });
   },
   /**
-   * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
-   */
-  async deprecatedTriggerRiskScoreCalculation<TResponseType extends ScoutResponseType = 'json'>(
-    props: DeprecatedTriggerRiskScoreCalculationProps,
-    options: ScoutApiRequestOptions<TResponseType> = {}
-  ): Promise<
-    ApiClientResponse<
-      ScoutResponseBody<TResponseType, DeprecatedTriggerRiskScoreCalculationResponse>
-    >
-  > {
-    const basePath =
-      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}/api/risk_scores/calculation/entity`;
-
-    return apiClient.post<
-      ScoutResponseBody<TResponseType, DeprecatedTriggerRiskScoreCalculationResponse>
-    >(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
-  },
-  /**
    * **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
    */
   async disableMonitoringEngine<TResponseType extends ScoutResponseType = 'json'>(
@@ -699,42 +657,6 @@ Removes a privileged user from monitoring by their document ID.
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
-  },
-  async disableRiskEngine<TResponseType extends ScoutResponseType = 'json'>(
-    options: ScoutApiRequestOptions<TResponseType> = {}
-  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DisableRiskEngineResponse>>> {
-    const basePath =
-      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}/internal/risk_score/engine/disable`;
-
-    return apiClient.post<ScoutResponseBody<TResponseType, DisableRiskEngineResponse>>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
-  },
-  async enableRiskEngine<TResponseType extends ScoutResponseType = 'json'>(
-    options: ScoutApiRequestOptions<TResponseType> = {}
-  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EnableRiskEngineResponse>>> {
-    const basePath =
-      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}/internal/risk_score/engine/enable`;
-
-    return apiClient.post<ScoutResponseBody<TResponseType, EnableRiskEngineResponse>>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -948,27 +870,6 @@ Get an entity source configuration by ID.
     });
   },
   /**
-   * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
-   */
-  async getRiskEngineStatus<TResponseType extends ScoutResponseType = 'json'>(
-    options: ScoutApiRequestOptions<TResponseType> = {}
-  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRiskEngineStatusResponse>>> {
-    const basePath =
-      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}/internal/risk_score/engine/status`;
-
-    return apiClient.get<ScoutResponseBody<TResponseType, GetRiskEngineStatusResponse>>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
-  },
-  /**
    * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
    */
   async getRiskScoreHistory<TResponseType extends ScoutResponseType = 'json'>(
@@ -1056,27 +957,6 @@ Get an entity source configuration by ID.
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: options.body,
-      responseType: options.responseType ?? 'json',
-    });
-  },
-  /**
-   * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
-   */
-  async initRiskEngine<TResponseType extends ScoutResponseType = 'json'>(
-    options: ScoutApiRequestOptions<TResponseType> = {}
-  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, InitRiskEngineResponse>>> {
-    const basePath =
-      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}/internal/risk_score/engine/init`;
-
-    return apiClient.post<ScoutResponseBody<TResponseType, InitRiskEngineResponse>>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -1427,28 +1307,6 @@ Check if the current user has all required permissions for Privilege Monitoring.
     );
   },
   /**
-   * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
-   */
-  async scheduleRiskEngineNow<TResponseType extends ScoutResponseType = 'json'>(
-    props: ScheduleRiskEngineNowProps,
-    options: ScoutApiRequestOptions<TResponseType> = {}
-  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, ScheduleRiskEngineNowResponse>>> {
-    const basePath =
-      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}/api/risk_score/engine/schedule_now`;
-
-    return apiClient.post<ScoutResponseBody<TResponseType, ScheduleRiskEngineNowResponse>>(path, {
-      headers: {
-        'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-        ...options.headers,
-      },
-      body: props.body,
-      responseType: options.responseType ?? 'json',
-    });
-  },
-  /**
       * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Search Indices for Privileges Monitoring import.
@@ -1497,33 +1355,6 @@ Search Indices for Privileges Monitoring import.
       body: options.body,
       responseType: options.responseType ?? 'json',
     });
-  },
-  /**
-   * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
-   */
-  async triggerRiskScoreCalculation<TResponseType extends ScoutResponseType = 'json'>(
-    props: TriggerRiskScoreCalculationProps,
-    options: ScoutApiRequestOptions<TResponseType> = {}
-  ): Promise<
-    ApiClientResponse<ScoutResponseBody<TResponseType, TriggerRiskScoreCalculationResponse>>
-  > {
-    const basePath =
-      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}/internal/risk_score/calculation/entity`;
-
-    return apiClient.post<ScoutResponseBody<TResponseType, TriggerRiskScoreCalculationResponse>>(
-      path,
-      {
-        headers: {
-          'kbn-xsrf': 'true',
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-          ...options.headers,
-        },
-        body: props.body,
-        responseType: options.responseType ?? 'json',
-      }
-    );
   },
   /**
       * Unassigns the provided entities from the specified watchlist.
@@ -1806,9 +1637,6 @@ export interface DeletePrivMonUserProps {
 export interface DeleteWatchlistEntitySourceProps {
   params: DeleteWatchlistEntitySourceRequestParamsInput;
 }
-export interface DeprecatedTriggerRiskScoreCalculationProps {
-  body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
-}
 export interface EntityDetailsHighlightsProps {
   body: EntityDetailsHighlightsRequestBodyInput;
 }
@@ -1851,17 +1679,11 @@ export interface ListWatchlistEntitySourcesProps {
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
 }
-export interface ScheduleRiskEngineNowProps {
-  body: ScheduleRiskEngineNowRequestBodyInput;
-}
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
 }
 export interface SyncWatchlistProps {
   params: SyncWatchlistRequestParamsInput;
-}
-export interface TriggerRiskScoreCalculationProps {
-  body: TriggerRiskScoreCalculationRequestBodyInput;
 }
 export interface UnassignWatchlistEntitiesProps {
   params: UnassignWatchlistEntitiesRequestParamsInput;

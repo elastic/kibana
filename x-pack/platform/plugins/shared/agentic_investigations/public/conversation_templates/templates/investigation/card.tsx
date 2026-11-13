@@ -18,11 +18,11 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { ConversationMetaInfo, toPlainSummary } from '@kbn/agentic-investigations-common';
-import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
 import type { InvestigationSummary } from '../../../../common';
+import { GradientLabel } from './gradient_label';
 import { InvestigatingTypingDots } from './investigating_typing_dots';
 import { getInvestigationDisplayTitle } from './to_view_model';
-import { IN_PROGRESS_LABEL, moreEntitiesLabel } from './translations';
+import { IN_PROGRESS_LABEL, moreEntitiesLabel, updatedAgoLabel } from './translations';
 
 const MAX_VISIBLE_ENTITIES = 3;
 
@@ -41,6 +41,11 @@ export interface InvestigationCardProps {
    * AI gradient ring) without reaching into the card's DOM.
    */
   borderless?: boolean;
+  /**
+   * Which time the card shows. `created` (default) is when the investigation started; `updated`
+   * is when it last changed, shown as "Updated 2 hours ago", for hosts that rank by recency.
+   */
+  timestamp?: 'created' | 'updated';
 }
 
 const EntityChips = ({ investigation }: { investigation: InvestigationSummary }) => {
@@ -85,12 +90,15 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   isSelected = false,
   actions,
   borderless = false,
+  timestamp = 'created',
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { labelCss: aiLabelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
-  // Same primary→assistance stop colors the AI label gradient uses (dots can't use background-clip).
-  const aiDotsFill = `linear-gradient(135deg, ${euiTheme.colors.textPrimary} 2.98%, ${euiTheme.colors.textAssistance} 66.24%)`;
-  const { metadata, in_progress: inProgress, created_at: createdAt } = investigation;
+  const {
+    metadata,
+    in_progress: inProgress,
+    created_at: createdAt,
+    updated_at: updatedAt,
+  } = investigation;
   const title = getInvestigationDisplayTitle(investigation);
   const { summary } = metadata;
   const hasEntities = (investigation.impact?.entities?.length ?? 0) > 0;
@@ -117,20 +125,8 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       <EuiText size="xs" color="subdued" component="span" aria-hidden>
         •
       </EuiText>
-      <EuiText
-        size="xs"
-        component="span"
-        css={[
-          aiLabelCss,
-          css`
-            padding: 0;
-            line-height: 1;
-          `,
-        ]}
-      >
-        {IN_PROGRESS_LABEL}
-      </EuiText>
-      <InvestigatingTypingDots color={aiDotsFill} />
+      <GradientLabel>{IN_PROGRESS_LABEL}</GradientLabel>
+      <InvestigatingTypingDots />
     </span>
   ) : undefined;
 
@@ -201,7 +197,11 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
               direction="row"
             >
               <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                <ConversationMetaInfo timestamp={createdAt} inFlightStatus={inProgressStatus} />
+                <ConversationMetaInfo
+                  timestamp={timestamp === 'updated' ? updatedAt : createdAt}
+                  renderAge={timestamp === 'updated' ? updatedAgoLabel : undefined}
+                  inFlightStatus={inProgressStatus}
+                />
               </EuiFlexItem>
               {hasActions && (
                 <EuiFlexItem

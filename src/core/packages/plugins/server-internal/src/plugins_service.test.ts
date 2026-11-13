@@ -121,6 +121,7 @@ const createPlugin = (
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
+    initialization: Promise.withResolvers<void>(),
   });
 };
 

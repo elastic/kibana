@@ -245,6 +245,23 @@ describe('convertDiscovery', () => {
     expect(list.status).toBe(200);
   });
 
+  it.each([
+    ['original', 'https://accounts.google.com/o/oauth2/auth'],
+    ['current', 'https://accounts.google.com/o/oauth2/v2/auth'],
+  ])("serves Google's %s authorization URL", async (_, authorizationUrl) => {
+    const { fetch } = createEmulatorFetch({ specs: [convertDiscovery(discovery)] });
+    const query = new URLSearchParams({
+      response_type: 'code',
+      client_id: 'id',
+      redirect_uri: 'https://kibana/cb',
+    });
+
+    const response = await fetch(`${authorizationUrl}?${query}`);
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toMatch(/^https:\/\/kibana\/cb\?code=/);
+  });
+
   it('serves simple media uploads from rootUrl', () => {
     const upload = paths['/upload/gmail/v1/users/{userId}/messages/send'].post;
     expect(upload.servers).toEqual([{ url: 'https://secretmanager.googleapis.com' }]);

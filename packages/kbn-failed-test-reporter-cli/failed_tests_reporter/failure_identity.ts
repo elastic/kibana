@@ -31,8 +31,24 @@ export const getTestFilePath = (
 };
 
 /**
- * The id the Scout reporters give a test. Scout failures carry it; FTR and Jest failures get the
- * id their Scout reporter computes from the file and the full title, which is the JUnit name.
+ * The full title in a Cypress JUnit name, which Security Solution's `junit_transformer` follows
+ * with the test's own title again; the longest such title, or the whole name without one.
+ */
+const cypressFullTitle = (name: string): string => {
+  for (let space = name.indexOf(' '); space !== -1; space = name.indexOf(' ', space + 1)) {
+    const fullTitle = name.slice(0, space);
+    const title = name.slice(space + 1);
+    if (fullTitle === title || fullTitle.endsWith(` ${title}`)) {
+      return fullTitle;
+    }
+  }
+  return name;
+};
+
+/**
+ * The id the Scout reporters give a test. Scout failures carry it; FTR, Jest and Cypress failures
+ * get the id their Scout reporter computes from the file and the full title, which is the JUnit
+ * name.
  */
 export const getScoutTestId = (
   failure: TestFailure | ScoutTestFailureExtended
@@ -40,9 +56,10 @@ export const getScoutTestId = (
   if (isScoutFailure(failure)) {
     return failure.id;
   }
-  if (failure.testType !== 'ftr' && failure.testType !== 'jest') {
+  if (!failure.testType) {
     return undefined;
   }
   const filePath = getTestFilePath(failure);
-  return filePath && failure.name ? computeTestID(filePath, failure.name) : undefined;
+  const title = failure.testType === 'cypress' ? cypressFullTitle(failure.name) : failure.name;
+  return filePath && title ? computeTestID(filePath, title) : undefined;
 };

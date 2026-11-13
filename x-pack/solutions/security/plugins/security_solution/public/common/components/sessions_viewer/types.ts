@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Filter } from '@kbn/es-query';
-import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { EntityType } from '@kbn/securitysolution-timeline-search-strategy';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { QueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
