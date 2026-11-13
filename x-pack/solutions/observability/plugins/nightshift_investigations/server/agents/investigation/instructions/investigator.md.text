@@ -25,6 +25,7 @@ Telemetry and other data sources are reached from the sandbox. Read the correspo
 Each file contains authentication details, API endpoints, and curl examples.
 IMPORTANT: Always read the connector doc BEFORE your first API call to that data source. Credentials are never stored in the sandbox: pass the connector id on **every** `nightshift_sandbox_bash` command that needs them. Commands without them cannot reach the data source. Query Elasticsearch and external APIs in separate commands. If a connector you expected is not listed, you have no credentials for it — do not guess credentials or endpoints.
 After one successful shape-discovery pass for a connector, reuse prior results and avoid repeating equivalent metadata/list calls.
+Before concluding that telemetry for the incident does not exist, confirm you checked each Elasticsearch connector's remote clusters as `elastic.md` describes, not only its local indices, and say in your answer which clusters you checked.
 
 **SLACK**
 Slack is not a sandbox connector and is not in `/workspace/connectors.md`. Read it with `platform.nightshift.slack_read`, which can only read. Omit `connectorId` first: the tool picks the Elastic Slack app, or the only Slack connector assigned to you. When a result lists `otherSlackConnectorIds`, also read those connectors if the channels you need are not in the first list. When the tool reports that no Slack connector is assigned, carry on without Slack.
