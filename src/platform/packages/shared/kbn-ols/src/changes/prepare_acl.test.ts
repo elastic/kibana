@@ -557,6 +557,21 @@ describe('prepareAclChange', () => {
       });
     });
 
+    it('keeps entries past MAX_ACL_ENTRIES, so that they never block a repair', () => {
+      const ids = Array.from({ length: MAX_ACL_ENTRIES + 1 }, (_, i) => `u_${i}`);
+      const oversized: StoredAcl = {
+        version: [1],
+        owner: { type: ['user', 'service_account'], id: [OWNER.id] },
+        general_access: ['none'],
+        entries: [{ type: ['user'], id: ids, access: ['use'], added_at: [EARLIER] }],
+      };
+
+      expect(
+        change(oversized, STRANGER, { kind: 'transfer', owner: STRANGER }, { recovery: true }).next
+          .entries
+      ).toHaveLength(MAX_ACL_ENTRIES + 1);
+    });
+
     it('drops an entry stored for the former owner', () => {
       const current: StoredAcl = {
         ...stored,

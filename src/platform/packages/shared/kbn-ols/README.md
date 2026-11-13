@@ -284,8 +284,9 @@ other refusal reveals something about the object, such as that it exists or alre
 - **`transfer`** makes another principal the owner. It needs `transfer`, so only the owner or a recovery
   administrator can do it. The former owner keeps nothing: entries for the former and the new owner are dropped. The
   rest of the ACL is kept as `readEditableAcl` reads it, so a transfer also repairs an invalid ACL. Kept entries aren't
-  checked again, so that one deleted recipient can't block the only way to repair the ACL. An object without an ACL
-  has nobody to transfer from, so it needs a claim instead.
+  checked again, so that one deleted recipient can't block the only way to repair the ACL. For the same reason, they
+  don't count against `MAX_ACL_ENTRIES`: an ACL stored from outside Kibana can have more, and the new owner trims them
+  with a replacement. An object without an ACL has nobody to transfer from, so it needs a claim instead.
 
 `readEditableAcl` reads an object's current access from its stored ACL into an `EditableAcl`, so that it can be shown,
 edited, or written back in the shapes Kibana writes. It keeps only what grants something. An entry with several IDs

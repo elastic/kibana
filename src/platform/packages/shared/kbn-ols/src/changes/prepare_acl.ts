@@ -17,7 +17,8 @@ import { readEditableAcl } from './read_editable_acl';
 
 /**
  * The most entries a caller can ask for in one request. An entry for the owner counts, even though
- * it's dropped, so an ACL that Kibana writes never has more.
+ * it's dropped. A transfer asks for no entries and keeps the stored ones, so it can write more when
+ * the stored ACL came from outside Kibana with more.
  */
 export const MAX_ACL_ENTRIES = 100;
 
@@ -329,6 +330,10 @@ const prepareClaim = (
  * an entry stored for them, and the new owner needs no entry. General access and the other
  * entries are kept as {@link readEditableAcl} reads them, so a transfer also repairs an invalid
  * ACL. A kept entry keeps its `added_at`, or gets the current time when it has none.
+ *
+ * Kept entries aren't counted against {@link MAX_ACL_ENTRIES}. An ACL stored from outside Kibana
+ * can have more, for example one entry with many IDs, and refusing it would leave an ACL without a
+ * single owner with no way to repair it. The new owner trims the entries with a replacement.
  *
  * @param policy The access policy of the object's type.
  * @param current The object's stored ACL.
