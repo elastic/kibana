@@ -275,9 +275,9 @@ caller who can't view the object gets `not_found` before any other check, as wit
 other refusal reveals something about the object, such as that it exists or already has an ACL.
 
 - **`replace`** sets general access and replaces every entry. It keeps the owner, and needs `manage_access`. The
-  stored owner has to be a single principal: one known kind and exactly one ID. Otherwise, the replacement is refused,
-  and only a transfer can repair the ACL. A kept entry keeps its `added_at`, even when its level changes, or gets the
-  current time when it has none.
+  stored owner has to be a single principal: one known kind and exactly one non-empty ID. Otherwise, the replacement
+  is refused, and only a transfer can repair the ACL. A kept entry keeps its `added_at`, even when its level changes,
+  or gets the current time when it has none.
 - **`claim`** makes the caller the owner of an object without an ACL, with the requested or the default general
   access and no entries. It needs `edit` and a principal. An object with an ACL, even an invalid one, can't be
   claimed.
@@ -291,7 +291,8 @@ other refusal reveals something about the object, such as that it exists or alre
 `readEditableAcl` reads an object's current access from its stored ACL into an `EditableAcl`, so that it can be shown,
 edited, or written back in the shapes Kibana writes. It keeps only what grants something. An entry with several IDs
 becomes one entry for each ID, an entry that grants nothing is dropped, and several entries for one principal keep the
-highest grant. The owner is read only when it is a single principal.
+highest grant. An empty ID names nobody, so it's skipped, in the owner and in entries. The owner is read only when it
+is a single principal.
 
 ## The fixture table
 

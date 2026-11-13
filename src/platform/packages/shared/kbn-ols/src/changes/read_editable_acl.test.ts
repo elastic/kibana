@@ -41,8 +41,28 @@ describe('readEditableAcl', () => {
     ['no owner', { type: [], id: [] }],
     ['an owner with two known kinds', { type: ['user', 'service_account'], id: ['u_owner'] }],
     ['an owner with several IDs', { type: ['user'], id: ['u_owner', 'u_other'] }],
+    ['an owner with only an empty ID', { type: ['user'], id: [''] }],
   ])('reads no owner from %s', (_, owner) => {
     expect(readEditableAcl(FIXTURE_POLICY, acl({ owner })).owner).toBeUndefined();
+  });
+
+  it('skips empty IDs in the owner and in entries', () => {
+    expect(
+      readEditableAcl(
+        FIXTURE_POLICY,
+        acl({
+          owner: { type: ['user'], id: ['', 'u_owner'] },
+          entries: [
+            { type: ['user'], id: ['', 'u_grantee'], access: ['use'], added_at: [] },
+            { type: ['user'], id: [''], access: ['use'], added_at: [] },
+          ],
+        })
+      )
+    ).toEqual({
+      owner: { type: 'user', id: 'u_owner' },
+      general_access: 'none',
+      entries: [{ type: 'user', id: 'u_grantee', access: 'use' }],
+    });
   });
 
   it('uses the lowest allowed general access, or none', () => {

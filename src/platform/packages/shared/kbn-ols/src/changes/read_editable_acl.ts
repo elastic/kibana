@@ -21,11 +21,12 @@ import { getPrincipalKey, getPrincipalKind, type Principal } from '../principals
  */
 export interface EditableAcl {
   /**
-   * The owner, when the stored owner names exactly one principal: one known kind and one ID. It's
-   * left out when the stored owner has no known kind, several known kinds, no ID, or several IDs.
-   * Kibana always writes one owner, so each of these came from outside Kibana. Only several IDs
-   * leave the ACL valid, with each ID as an owner, but none of them can be written back as the one
-   * owner. A replacement refuses an ACL without an owner here, and a transfer repairs it.
+   * The owner, when the stored owner names exactly one principal: one known kind and one non-empty
+   * ID. It's left out when the stored owner has no known kind, several known kinds, or not exactly
+   * one non-empty ID. Kibana always writes one owner, so each of these came from outside Kibana.
+   * Several IDs leave the ACL valid, with each ID as an owner, and so does an owner with only an
+   * empty ID, which nobody matches. Neither can be written back as the one owner. A replacement
+   * refuses an ACL without an owner here, and a transfer repairs it.
    */
   owner?: Principal;
   /** The general access that applies, or `none` when the type allows none of the stored values. */
@@ -47,10 +48,17 @@ export interface EditableAclEntry extends AclGrant {
 }
 
 /**
+ * Whether a stored ID can name a principal. An empty ID matches nobody, and a request can't
+ * contain one, so it's read as if it weren't stored.
+ */
+const isPrincipalId = (id: string) => id.length > 0;
+
+/**
  * Reads an object's current access from its stored ACL, so that it can be shown, edited, or written
  * back in the shapes Kibana writes. It applies the rules for reading a stored ACL: an entry that
  * grants to several IDs becomes one entry for each ID, an entry without exactly one known kind or
- * an allowed level is dropped, and several entries for one principal keep the highest grant.
+ * an allowed level is dropped, and several entries for one principal keep the highest grant. An
+ * empty ID is skipped, in the owner and in entries, because it names nobody.
  *
  * @param policy The access policy of the object's type.
  * @param acl The object's stored ACL. It can be invalid: it's read the same way.
@@ -58,8 +66,9 @@ export interface EditableAclEntry extends AclGrant {
  */
 export const readEditableAcl = (policy: AccessPolicy, acl: StoredAcl): EditableAcl => {
   const ownerKind = getPrincipalKind(acl.owner.type);
+  const ownerIds = acl.owner.id.filter(isPrincipalId);
   const owner =
-    ownerKind && acl.owner.id.length === 1 ? { type: ownerKind, id: acl.owner.id[0] } : undefined;
+    ownerKind && ownerIds.length === 1 ? { type: ownerKind, id: ownerIds[0] } : undefined;
 
   const entries = new Map<string, EditableAclEntry>();
   for (const entry of acl.entries) {
@@ -69,7 +78,7 @@ export const readEditableAcl = (policy: AccessPolicy, acl: StoredAcl): EditableA
       continue;
     }
 
-    for (const id of entry.id) {
+    for (const id of entry.id.filter(isPrincipalId)) {
       const key = getPrincipalKey({ type: kind, id });
       const existing = entries.get(key);
       if (!existing || compareLevels(access, existing.access) > 0) {

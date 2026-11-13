@@ -22,6 +22,7 @@ import {
   prepareInitialAcl,
   type AclChange,
 } from './prepare_acl';
+import { readEditableAcl } from './read_editable_acl';
 
 const NOW = '2026-10-30T00:00:00.000Z';
 const EARLIER = '2026-10-01T00:00:00.000Z';
@@ -311,6 +312,19 @@ describe('prepareAclChange', () => {
 
       expect(result.next.entries).toEqual([{ ...GRANTEE, access: 'use', added_at: NOW }]);
       expect(result.principalsToCheck).toEqual([]);
+    });
+
+    it('accepts the unchanged access read from a stored ACL with an empty ID', () => {
+      const current: StoredAcl = {
+        ...stored,
+        entries: [{ type: ['user'], id: ['', GRANTEE.id], access: ['use'], added_at: [EARLIER] }],
+      };
+      const { general_access: generalAccess, entries } = readEditableAcl(policy, current);
+
+      expect(
+        change(current, OWNER, { kind: 'replace', general_access: generalAccess, entries }).next
+          .entries
+      ).toEqual([{ ...GRANTEE, access: 'use', added_at: EARLIER }]);
     });
 
     it('requires access management', () => {
