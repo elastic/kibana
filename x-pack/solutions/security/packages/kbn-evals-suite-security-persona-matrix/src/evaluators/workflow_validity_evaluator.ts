@@ -47,6 +47,8 @@ const CANCEL_SETTLE_INTERVAL_MS = 1_000;
 const DELETE_MAX_ATTEMPTS = 4;
 const DELETE_BACKOFF_MS = 1_000;
 
+// Enough for a connector params error; the full error stays on the execution.
+const EXECUTION_ERROR_MAX_CHARS = 500;
 // Mirrors `TerminalExecutionStatuses` in @kbn/workflows; inlined because this
 // package does not depend on it.
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled', 'timed_out', 'skipped']);
@@ -250,7 +252,13 @@ export const auditSteps = (root: Record<string, unknown>): StepAudit => {
 
 type ParsedWorkflow = { ok: true; root: Record<string, unknown> } | { ok: false; reason: string };
 
-const MANUAL_TRIGGERS = [{ type: 'manual' }];
+const manualTriggerOf = (root: Record<string, unknown>): Record<string, unknown> | undefined =>
+  Array.isArray(root.triggers)
+    ? root.triggers.find(
+        (trigger): trigger is Record<string, unknown> =>
+          isRecord(trigger) && trigger.type === 'manual'
+      )
+    : undefined;
 
 const fixtureValueFor = (declaration: Record<string, unknown>): unknown => {
   const options = declaration.options ?? declaration.enum;
@@ -289,6 +297,8 @@ const fixtureValueFor = (declaration: Record<string, unknown>): unknown => {
  * declared defaults are left to the engine. Handles the list form
  * (`[{ name, type, required, default }]`) and the JSON-schema form
  * (`{ properties: { <name>: { type, default } }, required: [<name>] }`).
+ * Reads the declarations where the engine does: the manual trigger's `inputs`
+ * first, then the legacy root-level `inputs`.
  */
 export const buildRunInputs = (root: Record<string, unknown>): Record<string, unknown> => {
   const inputs: Record<string, unknown> = {};
@@ -297,7 +307,7 @@ export const buildRunInputs = (root: Record<string, unknown>): Record<string, un
     if (!required || 'default' in declaration) return;
     inputs[name] = fixtureValueFor(declaration);
   };
-  const declared = root.inputs;
+  const declared = manualTriggerOf(root)?.inputs ?? root.inputs;
   if (Array.isArray(declared)) {
     declared.forEach(
       (entry) => isRecord(entry) && declare(entry.name, entry, entry.required === true)
@@ -327,8 +337,17 @@ const parseWorkflow = (yaml: string): ParsedWorkflow => {
   }
 };
 
+/**
+ * Where the evaluator looks for the authored YAML. `text_only` reads the answer
+ * text alone, as the Chrysalis harness does: a workflow that is only rendered as
+ * an attachment scores `no_yaml` there.
+ */
+export type WorkflowYamlExtractionMode = 'text_only' | 'text_then_attachment';
+
 export interface WorkflowValidityDeps {
   fetch: HttpHandler;
+  /** Defaults to `text_then_attachment`. */
+  extractionMode?: WorkflowYamlExtractionMode;
   sleep?: (ms: number) => Promise<void>;
   now?: () => number;
   /**
@@ -363,6 +382,7 @@ export const createWorkflowValidityEvaluator = ({
   sleep = defaultSleep,
   now = Date.now,
   stubVerified,
+  extractionMode = 'text_then_attachment',
 }: WorkflowValidityDeps): Evaluator => ({
   name: WORKFLOW_VALIDITY_EVALUATOR_NAME,
   kind: 'CODE',
@@ -385,6 +405,7 @@ export const createWorkflowValidityEvaluator = ({
       workflow_id?: string;
       run_id?: string;
       execution_status?: string;
+      execution_error?: string;
       final_execution_status?: string;
       skipped_steps?: string[];
       triggers_rewritten?: boolean;
@@ -402,28 +423,41 @@ export const createWorkflowValidityEvaluator = ({
       return {
         score: SCORE_BY_OUTCOME[outcome],
         label: outcome,
-        explanation: detail.error
-          ? `Workflow validation outcome: ${outcome} (${detail.error}).`
-          : `Workflow validation outcome: ${outcome}.`,
+        explanation:
+          detail.error ?? detail.execution_error
+            ? `Workflow validation outcome: ${outcome} (${detail.error ?? detail.execution_error}).`
+            : `Workflow validation outcome: ${outcome}.`,
         metadata: { ...detail, duration_ms: now() - startedAt },
       };
     };
 
-    const yaml = extractWorkflowYaml(getAnswerText(output), attachmentsOf(output));
+    const yaml = extractWorkflowYaml(
+      getAnswerText(output),
+      extractionMode === 'text_only' ? [] : attachmentsOf(output)
+    );
     if (!yaml) {
       return finish();
     }
 
     const executionPath = (runId: string) => `${EXECUTIONS_PATH}/${encodeURIComponent(runId)}`;
-    const readStatus = async (runId: string): Promise<string | undefined> => {
-      const execution = await fetch<{ status?: string }>({
+    const readExecution = async (runId: string): Promise<{ status?: string; error?: string }> => {
+      const execution = await fetch<{ status?: unknown; error?: unknown }>({
         path: executionPath(runId),
         method: 'GET',
         version: API_VERSION,
         headers: PUBLIC_HEADERS,
       });
-      return typeof execution?.status === 'string' ? execution.status : undefined;
+      const status = typeof execution?.status === 'string' ? execution.status : undefined;
+      const error = isRecord(execution?.error) ? execution?.error : undefined;
+      const message = typeof error?.message === 'string' ? error.message : undefined;
+      const type = typeof error?.type === 'string' ? error.type : undefined;
+      return {
+        status,
+        error: message && type ? `${type}: ${message}` : message ?? type,
+      };
     };
+    const readStatus = async (runId: string): Promise<string | undefined> =>
+      (await readExecution(runId)).status;
 
     const parsed = parseWorkflow(yaml);
     if (!parsed.ok) {
@@ -465,7 +499,9 @@ export const createWorkflowValidityEvaluator = ({
       // enabled; only the evaluator's explicit run may execute it.
       let createYaml = yaml;
       if (hasNonManualTrigger(parsed.root)) {
-        createYaml = stringify({ ...parsed.root, triggers: MANUAL_TRIGGERS });
+        // Keep an authored manual trigger: it carries the workflow's inputs.
+        const manual = manualTriggerOf(parsed.root) ?? { type: 'manual' };
+        createYaml = stringify({ ...parsed.root, triggers: [manual] });
         detail.triggers_rewritten = true;
       }
       detail.stage = 'create';
@@ -515,10 +551,13 @@ export const createWorkflowValidityEvaluator = ({
       const pollStart = now();
       let terminal = false;
       while (now() - pollStart < POLL_TIMEOUT_MS) {
-        const status = await readStatus(runId);
+        const { status, error: executionError } = await readExecution(runId);
         lastStatus = status;
         if (status !== undefined && TERMINAL_STATUSES.has(status)) {
           detail.execution_status = status;
+          if (status !== 'completed' && executionError) {
+            detail.execution_error = executionError.slice(0, EXECUTION_ERROR_MAX_CHARS);
+          }
           detail.outcome =
             status === 'completed'
               ? 'completed'

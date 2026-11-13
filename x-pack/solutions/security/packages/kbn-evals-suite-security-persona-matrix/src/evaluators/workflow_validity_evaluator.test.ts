@@ -9,6 +9,7 @@ import {
   buildRunInputs,
   createWorkflowValidityEvaluator,
   extractWorkflowYaml,
+  type WorkflowYamlExtractionMode,
 } from './workflow_validity_evaluator';
 import { parse } from 'yaml';
 import { buildOutput } from '../__fixtures__/task_output_builders';
@@ -52,6 +53,8 @@ const setup = ({
   statusAfterCancel = 'cancelled',
   stubVerified = true,
   validateResult = { valid: true, errors: [] } as { valid: boolean; errors: string[] } | 'throw',
+  extractionMode,
+  executionError,
 }: {
   workflow?: Record<string, unknown>;
   statuses?: string[];
@@ -64,6 +67,9 @@ const setup = ({
   statusAfterCancel?: string;
   stubVerified?: boolean;
   validateResult?: { valid: boolean; errors: string[] } | 'throw';
+  extractionMode?: WorkflowYamlExtractionMode;
+  /** `error` the execution GET carries alongside each status. */
+  executionError?: Record<string, unknown>;
 } = {}) => {
   const calls: Call[] = [];
   const sleeps: number[] = [];
@@ -103,7 +109,7 @@ const setup = ({
       if (cancelled) return { status: statusAfterCancel };
       const status = statuses[Math.min(pollIndex, statuses.length - 1)];
       pollIndex++;
-      return { status };
+      return executionError ? { status, error: executionError } : { status };
     }
     if (method === 'DELETE') {
       deleteAttempts++;
@@ -120,6 +126,7 @@ const setup = ({
     },
     now: () => clock,
     stubVerified: () => stubVerified,
+    extractionMode,
   });
   return { evaluator, calls, fetch, sleeps };
 };
@@ -271,6 +278,22 @@ describe('WorkflowValidity', () => {
       expect(parse(createBody(calls).yaml).triggers).toEqual([{ type: 'manual' }]);
     });
 
+    it('keeps the authored manual trigger, and its inputs, when it drops the others', async () => {
+      const { evaluator, calls } = setup();
+      await run(
+        evaluator,
+        `\`\`\`yaml\n${withTriggers(
+          'triggers:\n  - type: scheduled\n    with:\n      every: 1m\n  - type: manual\n    inputs:\n      properties:\n        message:\n          type: string\n      required:\n        - message\n'
+        )}\`\`\``
+      );
+      expect(parse(createBody(calls).yaml).triggers).toEqual([
+        {
+          type: 'manual',
+          inputs: { properties: { message: { type: 'string' } }, required: ['message'] },
+        },
+      ]);
+    });
+
     it('leaves a manual-only workflow byte-for-byte untouched and unflagged', async () => {
       const { evaluator, calls } = setup();
       const result = await run(evaluator, `\`\`\`yaml\n${YAML}\`\`\``);
@@ -285,6 +308,35 @@ describe('WorkflowValidity', () => {
       expect(createBody(calls).yaml).toBe(yaml.trim());
       expect(result.metadata).not.toHaveProperty('triggers_rewritten');
     });
+  });
+
+  it('records the execution error of a run that ends failed', async () => {
+    const { evaluator } = setup({
+      statuses: ['failed'],
+      executionError: {
+        type: 'ConnectorExecutionError',
+        message: 'error validating action params: Invalid URL',
+      },
+    });
+    const result = await run(evaluator, `\`\`\`yaml\n${YAML}\`\`\``);
+    expect(result.metadata).toMatchObject({
+      outcome: 'failed',
+      execution_error: 'ConnectorExecutionError: error validating action params: Invalid URL',
+    });
+    expect(result.explanation).toContain('Invalid URL');
+  });
+
+  it('caps a long execution error and ignores one on a completed run', async () => {
+    const failed = await run(
+      setup({ statuses: ['failed'], executionError: { message: 'x'.repeat(2000) } }).evaluator,
+      `\`\`\`yaml\n${YAML}\`\`\``
+    );
+    expect((failed.metadata as { execution_error: string }).execution_error).toHaveLength(500);
+    const completed = await run(
+      setup({ executionError: { message: 'stale' } }).evaluator,
+      `\`\`\`yaml\n${YAML}\`\`\``
+    );
+    expect(completed.metadata).not.toHaveProperty('execution_error');
   });
 
   it('scores 0.5 for a run that ends failed', async () => {
@@ -431,6 +483,32 @@ describe('WorkflowValidity', () => {
     );
     expect(result.score).toBe(1);
     expect(JSON.parse(calls[0].body as string)).toEqual({ yaml: YAML });
+  });
+
+  describe('text_only extraction', () => {
+    it('scores no_yaml when the YAML exists only as an attachment', async () => {
+      const { evaluator, calls } = setup({ extractionMode: 'text_only' });
+      const result = await run(
+        evaluator,
+        'rendered above',
+        { validateWorkflow: true },
+        { workflowAttachments: [{ id: 'a', version: 1, yaml: YAML }] }
+      );
+      expect(result.label).toBe('no_yaml');
+      expect(calls).toHaveLength(0);
+    });
+
+    it('still validates YAML from the answer text', async () => {
+      const { evaluator, calls } = setup({ extractionMode: 'text_only' });
+      const result = await run(
+        evaluator,
+        `\`\`\`yaml\n${YAML}\`\`\``,
+        { validateWorkflow: true },
+        { workflowAttachments: [{ id: 'a', version: 1, yaml: 'name: other\nsteps: []' }] }
+      );
+      expect(result.score).toBe(1);
+      expect(JSON.parse(calls[0].body as string)).toEqual({ yaml: YAML.trim() });
+    });
   });
 
   it('records settle_error, not cancel_error, when a status read fails while settling', async () => {
@@ -780,6 +858,51 @@ describe('run inputs', () => {
     expect(
       buildRunInputs({ inputs: { properties: { ids: { type: 'array', minItems: 1 } } } })
     ).toEqual({});
+  });
+
+  it('reads inputs declared on the manual trigger, as the engine does', () => {
+    expect(
+      buildRunInputs({
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: { message: { type: 'string' }, note: { type: 'string' } },
+              required: ['message'],
+            },
+          },
+        ],
+      })
+    ).toEqual({ message: 'persona-matrix-fixture' });
+  });
+
+  it('prefers the manual trigger inputs over legacy root inputs', () => {
+    expect(
+      buildRunInputs({
+        triggers: [{ type: 'manual', inputs: [{ name: 'a', type: 'string', required: true }] }],
+        inputs: [{ name: 'b', type: 'string', required: true }],
+      })
+    ).toEqual({ a: 'persona-matrix-fixture' });
+  });
+
+  it('falls back to root inputs when the manual trigger declares none', () => {
+    expect(
+      buildRunInputs({
+        triggers: [{ type: 'alert' }, { type: 'manual' }],
+        inputs: [{ name: 'b', type: 'number', required: true }],
+      })
+    ).toEqual({ b: 1 });
+  });
+
+  it('sends a trigger-declared required input on run (the authoring prompts shape)', async () => {
+    const { evaluator, calls } = setup();
+    const yaml =
+      'name: demo\nenabled: true\ntriggers:\n  - type: manual\n    inputs:\n      properties:\n        summary:\n          type: string\n      required:\n        - summary\nsteps:\n  - name: a\n    type: console\n    with:\n      message: "{{ inputs.summary }}"\n';
+    await run(evaluator, `\`\`\`yaml\n${yaml}\`\`\``);
+    const started = calls.find((call) => call.path.endsWith('/run'));
+    expect(JSON.parse(started?.body as string)).toEqual({
+      inputs: { summary: 'persona-matrix-fixture' },
+    });
   });
 
   it('ignores malformed inputs declarations', () => {

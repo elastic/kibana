@@ -15,12 +15,15 @@ import {
   CHRYSALIS_AD_DATASET_NAME,
   createChrysalisAdExperimentEvaluators,
 } from '../src/attack_discovery_experiment';
+import { assertAdDataGate } from '../src/attack_discovery_data_gate';
 
 const CHRYSALIS_95_SNAPSHOT = {
   bucket: 'security-ai-datasets',
   basePath: 'attack-discovery/oh-my-malware-95-deduped/2026-07-24',
   snapshotName: 'alerts-snapshot',
 };
+
+const AD_ALERTS_INDEX = '.alerts-security.alerts-default';
 
 // AD `_generate` exposes no temperature/seed, so the discovery count varies
 // run-to-run on identical input. The alert corpus is byte-reproducible.
@@ -50,8 +53,7 @@ evaluate.describe(
         executorClient,
       }) => {
         await restoreAlertsSnapshot({ esClient, log, config: CHRYSALIS_95_SNAPSHOT });
-        const { count } = await esClient.count({ index: '.alerts-security.alerts-default' });
-        log.info(`[attack-discovery] corpus ready: ${count} alerts (reference: 95)`);
+        await assertAdDataGate({ esClient, log, index: AD_ALERTS_INDEX, ...CORPUS_WINDOW });
 
         const dataset = {
           name: CHRYSALIS_AD_DATASET_NAME,
@@ -64,7 +66,7 @@ evaluate.describe(
               input: {
                 mode: 'generateApi' as const,
                 connectorId: connector.id,
-                alertsIndexPattern: '.alerts-security.alerts-default',
+                alertsIndexPattern: AD_ALERTS_INDEX,
                 size: 100,
                 ...CORPUS_WINDOW,
               },

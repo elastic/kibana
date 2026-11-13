@@ -4,7 +4,12 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": ["**/*.ts", "persona_matrix.config.json", "persona_matrix.production.config.json"],
+  "include": [
+    "**/*.ts",
+    "persona_matrix.config.json",
+    "persona_matrix.production.config.json",
+    "persona_matrix.parity.config.json"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-common",
@@ -16,6 +21,7 @@
     "@kbn/security-evals-matrix",
     "@kbn/tooling-log",
     "@kbn/kbn-client",
-    "@kbn/evals-common"
+    "@kbn/evals-common",
+    "@kbn/workflows"
   ]
 }

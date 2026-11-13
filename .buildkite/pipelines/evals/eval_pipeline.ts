@@ -32,6 +32,8 @@ export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
   ciLabels?: string[];
+  /** Keeps the suite out of `evals:all`; only its own ci label (or an on-demand build) runs it. */
+  excludeFromEvalsAll?: boolean;
   configPath?: string;
   serverConfigSet?: string;
   scoutArch?: string;
@@ -307,7 +309,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const runAllEvals = parsedLabels.includes('evals:all');
   const selectedEvalSuites = (
     runAllEvals
-      ? evalSuites
+      ? evalSuites.filter((suite) => !suite.excludeFromEvalsAll)
       : evalSuites.filter((suite) => {
           const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
           return labels.some((label) => parsedLabels.includes(label));

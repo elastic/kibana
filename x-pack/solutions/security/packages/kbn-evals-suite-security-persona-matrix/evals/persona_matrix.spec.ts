@@ -40,7 +40,9 @@ const selectRunExamples = () => selectShard(examples, process.env.PERSONA_MATRIX
 evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     if (agentProfile === 'chrysalis-parity' && seedProfile !== 'parity') {
-      throw new Error('AGENT_PROFILE=chrysalis-parity requires SEED_PROFILE=parity');
+      throw new Error(
+        'AGENT_PROFILE=chrysalis-parity requires SEED_PROFILE=parity; run the `security-persona-matrix-parity` suite id to set both'
+      );
     }
     await seedChrysalisAlerts({ esClient: esClient as unknown as EsClient, log, count: 3 });
     log.info('[persona-matrix] seeded Chrysalis alerts');

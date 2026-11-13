@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/kbn-client'
   - '@kbn/evals-common'
+  - '@kbn/workflows'
 tags:
   - functional-tests
   - package
@@ -39,5 +40,6 @@ fileGroups:
     - '**/*.ts'
     - persona_matrix.config.json
     - persona_matrix.production.config.json
+    - persona_matrix.parity.config.json
     - '!target/**/*'
 tasks: {}

@@ -190,7 +190,7 @@ Add GitHub labels to trigger evals in PR CI:
 | Label                         | Effect                                                            |
 | ----------------------------- | ----------------------------------------------------------------- |
 | `evals:<suite-id>`            | Run a specific suite                                              |
-| `evals:all`                   | Run all suites                                                    |
+| `evals:all`                   | Run all suites except those with `excludeFromEvalsAll` set        |
 | `models:<model-group>`        | Select model(s) to evaluate (required -- evals skip without this) |
 | `models:judge:<connector-id>` | Override the judge connector                                      |
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
