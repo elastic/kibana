@@ -225,4 +225,13 @@ describe('getSortPredicate', () => {
     } as DatatableColumn;
     expect(getSortPredicate(column, 'asc')).toEqual('alphaAsc');
   });
+
+  it('should return dataIndex for number_range columns, as their rows are sorted beforehand', () => {
+    const column = {
+      id: 'range',
+      name: 'bucket',
+      meta: { type: 'number_range' },
+    } as DatatableColumn;
+    expect(getSortPredicate(column, 'asc')).toEqual('dataIndex');
+  });
 });

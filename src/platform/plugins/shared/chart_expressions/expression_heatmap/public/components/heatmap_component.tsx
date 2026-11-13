@@ -38,6 +38,7 @@ import {
   getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  sortRowsByRangeLowerBound,
 } from '@kbn/chart-expressions-common';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
@@ -470,6 +471,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         });
       }
     }
+
+    chartData = sortRowsByRangeLowerBound(chartData, xAxisColumn, args.gridConfig.xSortPredicate);
+    chartData = sortRowsByRangeLowerBound(chartData, yAxisColumn, args.gridConfig.ySortPredicate);
 
     const xScaleType = isTimeBasedX ? ScaleType.Time : args.gridConfig.xScaleType;
 

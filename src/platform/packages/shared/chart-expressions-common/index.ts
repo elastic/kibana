@@ -24,6 +24,7 @@ export {
   getFormatByAccessor,
 } from './accessors';
 export { getColorCategories, getLegacyColorCategories } from './color_categories';
+export { sortRowsByRangeLowerBound } from './sort_rows_by_range';
 export {
   LegendSize,
   LegendLayout,

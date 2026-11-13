@@ -87,6 +87,18 @@ describe('xy_suggestions', () => {
     };
   }
 
+  function numberRangeCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number_range',
+        label: `${columnId} range`,
+        isBucketed: true,
+        scale: 'ordinal',
+      },
+    };
+  }
+
   function ipCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
@@ -2041,6 +2053,32 @@ describe('xy_suggestions', () => {
       expect(suggestion.state.preferredSeriesType).toBe('bar_horizontal_stacked');
       const dataLayer = suggestion.state.layers[0] as XYDataLayerConfig;
       expect(dataLayer.seriesType).toBe('bar_horizontal_stacked');
+    });
+  });
+
+  describe('number_range buckets', () => {
+    const getVisibleSuggestions = (columns: TableSuggestionColumn[]) =>
+      getSuggestions({
+        table: { isMultiRow: true, columns, layerId: 'first', changeType: 'unchanged' },
+        keptLayerIds: [],
+        datasourceId: 'textBased',
+      }).filter((suggestion) => !suggestion.hide);
+
+    test('hides suggestions for a range over time, a heatmap fits better', () => {
+      expect(
+        getVisibleSuggestions([numCol('count'), numberRangeCol('bucket'), dateCol('date')])
+      ).toHaveLength(0);
+    });
+
+    test('shows suggestions for a range over time with another bucket', () => {
+      expect(
+        getVisibleSuggestions([
+          numCol('count'),
+          numberRangeCol('bucket'),
+          dateCol('date'),
+          strCol('host'),
+        ]).length
+      ).toBeGreaterThan(0);
     });
   });
 });

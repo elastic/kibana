@@ -268,7 +268,8 @@ export type FieldOnlyDataType =
   | 'geo_shape'
   | 'counter'
   | 'gauge'
-  | 'murmur3';
+  | 'murmur3'
+  | 'number_range';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 // An operation represents a column in a table, not any information

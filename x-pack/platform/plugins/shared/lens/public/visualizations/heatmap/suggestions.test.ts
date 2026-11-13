@@ -882,5 +882,40 @@ describe('heatmap suggestions', () => {
       expect(result).toHaveLength(1);
       expect(result[0].state.gridConfig).not.toHaveProperty('ySortPredicate');
     });
+
+    test('puts time on x for a range bucket over time', () => {
+      const [suggestion] = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'range-column',
+              operation: { isBucketed: true, dataType: 'number_range', label: 'bucket' },
+            },
+            {
+              columnId: 'date-column',
+              operation: { isBucketed: true, dataType: 'date', label: 'Date' },
+            },
+            {
+              columnId: 'metric-column',
+              operation: { isBucketed: false, dataType: 'number', label: 'Count' },
+            },
+          ],
+          changeType: 'initial',
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestion).toMatchObject({
+        hide: false,
+        score: 0.9,
+        state: {
+          xAccessor: 'date-column',
+          yAccessor: 'range-column',
+          gridConfig: { ySortPredicate: 'desc' },
+        },
+      });
+    });
   });
 });
