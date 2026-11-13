@@ -134,6 +134,12 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
+import {
+  buildTypeFromStoredSpec,
+  createConnectorCatalogStorage,
+  startConnectorCatalog,
+  type ConnectorCatalogHandle,
+} from './lib/connector_catalog';
 
 export interface PluginSetupContract {
   registerType<
@@ -262,6 +268,9 @@ export interface PluginStartContract {
     request: KibanaRequest,
     connectorIds: string[]
   ) => Promise<Set<string>>;
+
+  /** Resolves when the first connector catalog load is done, failed, or timed out. Never rejects. */
+  whenCatalogReady(): Promise<void>;
 }
 
 export interface ActionsPluginsSetup {
@@ -327,6 +336,12 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private setupContract?: PluginSetupContract;
+  private connectorCatalog?: ConnectorCatalogHandle;
+  private resolveCatalogReady: () => void = () => {};
+  private readonly catalogReady: Promise<void> = new Promise<void>((resolve) => {
+    this.resolveCatalogReady = resolve;
+  });
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -535,7 +550,7 @@ export class ActionsPlugin
       inboundEvents,
     });
 
-    return {
+    const setupContract: PluginSetupContract = {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -620,6 +635,8 @@ export class ActionsPlugin
         this.connectorEventEmitter = emitter;
       },
     };
+    this.setupContract = setupContract;
+    return setupContract;
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
@@ -672,6 +689,7 @@ export class ActionsPlugin
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       spaceId?: SpaceId;
     }) => {
+      await this.catalogReady;
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         connectorSigningKeysEnabled: this.actionsConfig.connectorSigningKeys.enabled,
@@ -767,6 +785,7 @@ export class ActionsPlugin
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
         connectorTypeRegistry: actionTypeRegistry!,
+        whenCatalogReady: () => this.catalogReady,
       });
     };
 
@@ -892,7 +911,10 @@ export class ActionsPlugin
       }).catch(() => {});
     }
 
-    this.validateEnabledConnectorTypes(plugins);
+    this.startConnectorCatalog(core);
+
+    // Spec types register after start, so an unknown id can only be judged once they are in.
+    void this.catalogReady.then(() => this.validateEnabledConnectorTypes(plugins));
 
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
@@ -931,6 +953,7 @@ export class ActionsPlugin
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
       getRelayClient: () => this.relayClient,
+      whenCatalogReady: () => this.catalogReady,
       getUsableUserOAuthConnectorIds: async (request: KibanaRequest, connectorIds: string[]) => {
         throwIfCannotEncrypt();
         const profileUid = await getCurrentUserProfileId(request);
@@ -1113,9 +1136,12 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
+    const whenCatalogReady = () => this.catalogReady;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
+      // Requests that arrive before the first catalog load ends wait for it.
+      await whenCatalogReady();
       const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
       const { savedObjects } = coreStart;
 
@@ -1188,6 +1214,26 @@ export class ActionsPlugin
     };
   };
 
+  /** Runs the first catalog load in the background. Start does not wait for it. */
+  private startConnectorCatalog(core: CoreStart) {
+    const { setupContract, actionTypeRegistry, logger } = this;
+    this.connectorCatalog = startConnectorCatalog({
+      featureFlags: core.featureFlags,
+      storage: createConnectorCatalogStorage({
+        esClient: core.elasticsearch.client.asInternalUser,
+      }),
+      actionTypeRegistry: actionTypeRegistry!,
+      buildType: (definition) => {
+        if (!setupContract) {
+          throw new Error('The actions plugin setup contract is not available.');
+        }
+        return buildTypeFromStoredSpec(definition, setupContract);
+      },
+      logger,
+    });
+    void this.connectorCatalog.ready.then(this.resolveCatalogReady);
+  }
+
   private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
     if (
       !!plugins.serverless &&
@@ -1195,8 +1241,11 @@ export class ActionsPlugin
       this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
     ) {
       this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
-        // Throws error if action type doesn't exist
-        this.actionTypeRegistry?.get(connectorType);
+        if (!this.actionTypeRegistry?.has(connectorType)) {
+          this.logger.warn(
+            `Connector type "${connectorType}" in "xpack.actions.enabledActionTypes" is not registered.`
+          );
+        }
       });
     }
   };
@@ -1262,6 +1311,7 @@ export class ActionsPlugin
       this.licenseState.clean();
     }
     this.clientLeasePool.stop();
+    this.connectorCatalog?.stop();
   }
 }
 

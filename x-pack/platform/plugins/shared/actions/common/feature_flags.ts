@@ -10,3 +10,6 @@
  * `xpack.actions.inboundEvents.enabled` remains the hard gate; this flag can only force ingress off.
  */
 export const ACTIONS_INBOUND_EVENTS_ENABLED_FLAG = 'actions.inboundEventsEnabled';
+
+/** Turns on the connector catalog load at start. Fallback is false. */
+export const ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG = 'actions.connectorCatalogEnabled';
