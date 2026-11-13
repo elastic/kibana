@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERT_EVENTS_DATA_IGNORE_ABOVE,
   alertEventSchema,
   buildRuleEventDocument,
   getAlertEventsResourceDefinition,
@@ -18,6 +19,14 @@ describe('getAlertEventsResourceDefinition', () => {
 
   it('manages its lifecycle so retention changes reach existing data streams', () => {
     expect(getAlertEventsResourceDefinition().manageLifecycle).toBe(true);
+  });
+
+  it('skips indexing data leaf values that exceed the Lucene term limit for 4-byte characters', () => {
+    expect(ALERT_EVENTS_DATA_IGNORE_ABOVE * 4).toBeLessThanOrEqual(32766);
+    expect(getAlertEventsResourceDefinition().mappings.properties?.data).toEqual({
+      type: 'flattened',
+      ignore_above: ALERT_EVENTS_DATA_IGNORE_ABOVE,
+    });
   });
 
   it('sets data_retention when a retention is provided', () => {
