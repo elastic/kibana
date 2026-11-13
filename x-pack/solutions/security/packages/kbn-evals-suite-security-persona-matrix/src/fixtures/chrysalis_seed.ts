@@ -84,8 +84,13 @@ function loadParityDocs(): { docs: ParityDoc[]; anchor: number } {
   return { docs, anchor: Math.max(...timestamps) };
 }
 
+/** Offset that moves the parity corpus's newest doc to `nowMs`; `seedChrysalisAlerts` uses it. */
+export function parityRestampOffset(nowMs: number): number {
+  return nowMs - loadParityDocs().anchor;
+}
+
 /** Re-stamp all timestamp-like fields relative to `now`, preserving deltas. */
-function restamp(doc: Record<string, unknown>, offsetMs: number): Record<string, unknown> {
+export function restamp(doc: Record<string, unknown>, offsetMs: number): Record<string, unknown> {
   const walk = (o: unknown): unknown => {
     if (Array.isArray(o)) return o.map(walk);
     if (o && typeof o === 'object') {
@@ -117,8 +122,8 @@ export async function seedChrysalisAlerts({
   assertValidCount(count);
   try {
     if (seedProfile === 'parity') {
-      const { docs, anchor } = loadParityDocs();
-      const offset = Date.now() - anchor;
+      const { docs } = loadParityDocs();
+      const offset = parityRestampOffset(Date.now());
       const byIndex = new Map<string, Array<Record<string, unknown>>>();
       for (const { index, doc } of docs) {
         const list = byIndex.get(index) ?? [];
@@ -226,6 +231,9 @@ export async function assertParityDataGate({
 
 const SEED_DOC_ID_PREFIX = 'persona-matrix-seed';
 const seedIdPrefix = (index: string) => `${SEED_DOC_ID_PREFIX}-${index}`;
+
+/** `_id` the seed gives the `position`-th doc it writes into `index`. */
+export const seedDocId = (index: string, position: number) => `${seedIdPrefix(index)}-${position}`;
 
 /** Number of alerts `seedChrysalisAlerts` writes when `count` is omitted. */
 export const DEFAULT_SEED_COUNT = 3;

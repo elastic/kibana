@@ -37,6 +37,7 @@ import { createSimulationAwarenessEvaluator } from './evaluators/simulation_awar
 import { createStalledAfterLoadSkillEvaluator } from './evaluators/stalled_after_load_skill_evaluator';
 import { createUnrequestedSideEffectsEvaluator } from './evaluators/unrequested_side_effects_evaluator';
 import { createWorkflowValidityEvaluator } from './evaluators/workflow_validity_evaluator';
+import { personaMatrixQueryArgs } from './fixtures/chrysalis_parity_attachments';
 import { isStubConnectorVerified } from './fixtures/persona_matrix_tools_seed';
 import { TRACE_INDEX_PATTERN } from './evaluators/trace_index_pattern';
 import {
@@ -804,7 +805,9 @@ export function createEvaluatePersonaMatrixDataset({
           if (!question) throw new Error('Missing question in example input');
           let response: Awaited<ReturnType<PersonaMatrixChatClient['query']>>;
           try {
-            response = await chatClient.query(question, input?.attachment);
+            response = await chatClient.query(
+              ...personaMatrixQueryArgs(example.id, agentProfile, question, input?.attachment)
+            );
           } catch (error) {
             // Fail soft: one unreachable agent must not abort the whole suite. The
             // executor has no per-example boundary, so a throw here discards every

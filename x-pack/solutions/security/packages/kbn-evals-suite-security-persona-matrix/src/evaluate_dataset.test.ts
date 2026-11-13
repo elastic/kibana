@@ -1297,3 +1297,70 @@ describe('reporting identity per agent profile', () => {
     });
   });
 });
+
+describe('parity attachment inlining', () => {
+  const sentFor = async (agentProfile: AgentProfile, exampleId: string) => {
+    const query = jest.fn(async (..._args: unknown[]) => ({
+      messages: [{ message: 'final answer' }],
+      steps: [],
+      errors: [],
+      traceId: 'trace-1',
+    }));
+    const example = PERSONA_MATRIX_EXAMPLES.find(({ id }) => id === exampleId);
+    if (!example) throw new Error(`no example ${exampleId}`);
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: { query } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {},
+        criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn(async () => ({})) }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn(async () => ({ metadata: {} })) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn(async () => ({ metadata: {} })) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(
+          async ({ task }: { task: (example: unknown) => Promise<unknown> }) => {
+            await task(toDatasetExample(example));
+          }
+        ),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+      agentProfile,
+    });
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [example] } });
+    expect(query).toHaveBeenCalledTimes(1);
+    return { args: query.mock.calls[0], example };
+  };
+
+  it.each(['alert-analysis-a', 'detection-rule-edit-b'])(
+    'sends %s unchanged for the default agent',
+    async (exampleId) => {
+      const { args, example } = await sentFor('default', exampleId);
+      expect(args).toEqual([example.input.question, example.input.attachment]);
+    }
+  );
+
+  it.each([
+    ['alert-analysis-a', 'Chrysalis Sim Passthrough', 'kibana.alert.depth'],
+    ['multi-step-a', 'Chrysalis Sim Passthrough', 'kibana.alert.depth'],
+    ['detection-rule-edit-a', 'chrysalis-sim-passthrough', '"query": "kibana.alert.rule.name:*"'],
+    ['detection-rule-edit-b', 'chrysalis-sim-passthrough', '"query": "kibana.alert.rule.name:*"'],
+    ['detection-rule-edit-c', 'chrysalis-sim-passthrough', '"query": "kibana.alert.rule.name:*"'],
+  ])('inlines the benchmark attachment into %s for the parity agent', async (id, a, b) => {
+    const { args, example } = await sentFor('chrysalis-parity', id);
+    expect(args).toHaveLength(1);
+    const [input] = args as [string];
+    expect(
+      input.startsWith(`${example.input.question}\n\n--- Attached alert (most recent) ---\n{`)
+    ).toBe(true);
+    expect(input).toContain(a);
+    expect(input).toContain(b);
+    if (example.input.attachment) expect(input).not.toContain(example.input.attachment);
+  });
+
+  it('sends prompts the benchmark attached nothing to unchanged for the parity agent', async () => {
+    const { args, example } = await sentFor('chrysalis-parity', 'alert-analysis-b');
+    expect(args).toEqual([example.input.question, example.input.attachment]);
+  });
+});
