@@ -49,6 +49,7 @@ const setup = ({
   mode = 'shadow',
   enabled = true,
   mgetError,
+  unreadable = [],
   searchError,
   closedToday = 0,
   countError,
@@ -64,6 +65,8 @@ const setup = ({
   mode?: DecisionAutoCloseMode;
   enabled?: boolean;
   mgetError?: Error & { statusCode?: number };
+  /** Decision ids the `mget` answers with a per-document error, inside an HTTP 200. */
+  unreadable?: string[];
   searchError?: Error;
   closedToday?: number;
   countError?: Error;
@@ -109,11 +112,11 @@ const setup = ({
   const mget = jest.fn(async ({ ids }: { ids: string[] }) => {
     if (mgetError) throw mgetError;
     return {
-      docs: ids.map((_id) => ({
-        _id,
-        found: decisions[_id] !== undefined,
-        _source: decisions[_id],
-      })),
+      docs: ids.map((_id) =>
+        unreadable.includes(_id)
+          ? { _id, error: { type: 'no_shard_available_action_exception', reason: 'shard down' } }
+          : { _id, found: decisions[_id] !== undefined, _source: decisions[_id] }
+      ),
     };
   });
   const get = jest.fn(async ({ id }: { id: string }) => {
@@ -377,6 +380,27 @@ describe('triage match decisions step', () => {
       expect.objectContaining({ status: 'ok', candidates: 1, would_close: 0 })
     );
     expect(tags()).toEqual([]);
+  });
+
+  it('acts on no match when one decision document cannot be read, so an unread dismissal cannot let its approval close alerts', async () => {
+    const hash = hashOf('C:\\x.exe');
+    const { run, tags, closes } = setup({
+      mode: 'on',
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: {
+        [decisionId('false_positive', hash)]: stored('false_positive'),
+        [decisionId('do_not_propose', hash)]: stored('do_not_propose'),
+      },
+      unreadable: [decisionId('do_not_propose', hash)],
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(
+      expect.objectContaining({ status: 'failed', would_close: 0, closed: 0, skipped: 0 })
+    );
+    expect(tags()).toEqual([]);
+    expect(closes()).toEqual([]);
   });
 
   it.each([

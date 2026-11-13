@@ -518,7 +518,7 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     status: z
       .enum(MATCH_FP_DECISIONS_STATUSES)
       .describe(
-        '`off` when the kill switch is on, `disabled` when the Context Engine is off in the space, `failed` when nothing could be matched.'
+        '`off` when the flag is `off`, which is the default, `disabled` when the Context Engine is off in the space, `failed` when nothing could be matched.'
       ),
     candidates: z.number().describe('Open untriaged alerts of the look-back that were checked.'),
     decisions_matched: z.number().describe('Distinct decisions that matched an alert.'),

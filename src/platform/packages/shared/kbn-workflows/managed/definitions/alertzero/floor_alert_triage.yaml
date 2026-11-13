@@ -128,14 +128,14 @@ steps:
       batch_workflow_id: "{{ consts.batch_workflow_id }}"
 
   # ---------------------------------------------------------------------------
-  # 2b. Match the open backlog against the decisions analysts approved. In `shadow` (the default)
-  #     it only tags the matches `az:would_close:<decision>`, and the alerts still go through
-  #     analysis, so nothing changes but what shadow shows. It covers the whole backlog the planner
-  #     could see, not only the alerts it picks. It fails open: a failed match leaves every alert
-  #     for analysis, so the step never fails the sweep. `alertzero.triageDecisionAutoClose` is
-  #     the kill switch (`off`). It waits for the headroom
-  #     read and skips when Task Manager is behind or unknown, so a struggling cluster is not given
-  #     more reads.
+  # 2b. Match the open backlog against the decisions analysts approved. The flag
+  #     `alertzero.triageDecisionAutoClose` sets the mode. It is `off` by default, and then the step
+  #     does nothing. A deployment opts in to `shadow` or `on`. In `shadow` it only tags the matches
+  #     `az:would_close:<decision>`, and the alerts still go through analysis, so nothing changes
+  #     but what shadow shows. It covers the whole backlog the planner could see, not only the
+  #     alerts it picks. It fails open: a failed match leaves every alert for analysis, so the step
+  #     never fails the sweep. It waits for the headroom read and skips when Task Manager is behind
+  #     or unknown, so a struggling cluster is not given more reads.
   # ---------------------------------------------------------------------------
   - name: match_fp_decisions
     type: alertzero.triage.matchFpDecisions

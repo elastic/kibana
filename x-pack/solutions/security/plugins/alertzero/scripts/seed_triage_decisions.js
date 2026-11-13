@@ -208,8 +208,10 @@ const clean = async () => {
     `/${DECISIONS_INDEX}/_delete_by_query?refresh=true&conflicts=proceed`,
     {
       // UI mode decisions are written by a real approval, so they carry the UI rules, not the fixture investigation.
+      // The index holds every space, and the fixture ids are the same in each, so only this space is cleaned.
       query: {
         bool: {
+          filter: [{ term: { 'attributes.space_id': SPACE } }],
           should: [
             { term: { 'attributes.investigation_id': 'triage-decisions-fixture' } },
             { terms: { 'attributes.rule_id': [UI_RULE.ruleUuid, UI_OTHER_RULE.ruleUuid] } },
