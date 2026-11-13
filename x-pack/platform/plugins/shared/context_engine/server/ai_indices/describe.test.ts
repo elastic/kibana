@@ -439,10 +439,10 @@ describe('describeAiIndex', () => {
         'a managed AI index registered with memory_enabled true',
         { managed: true, memory_enabled: true },
       ],
-    ])('renders memory capability for %s, without dreamed types', async (_kind, fields) => {
+    ])('renders memory capability for %s, without dreamed types', async (_kind, overrides) => {
       const response = await describeAiIndex({
         ...params,
-        aiIndex: { ...aiIndex, ...fields },
+        aiIndex: { ...aiIndex, ...overrides },
         includeMemory: true,
       });
 
@@ -460,10 +460,10 @@ describe('describeAiIndex', () => {
     it.each([
       ['without memory_enabled', {}],
       ['with memory_enabled false', { memory_enabled: false }],
-    ])('omits memory capability for a managed AI index registered %s', async (_kind, fields) => {
+    ])('omits memory capability for a managed AI index registered %s', async (_kind, overrides) => {
       const response = await describeAiIndex({
         ...params,
-        aiIndex: { ...aiIndex, managed: true, ...fields },
+        aiIndex: { ...aiIndex, managed: true, ...overrides },
         includeMemory: true,
       });
 

@@ -6,7 +6,6 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -66,7 +65,7 @@ const renderPage = () => {
   services.http.put.mockResolvedValue({ dreaming: { enabled: true } });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
-    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+    services.chrome.withProvider(
       <I18nProvider>
         <EuiProvider>
           <KibanaContextProvider
@@ -91,7 +90,7 @@ const renderPage = () => {
           </KibanaContextProvider>
         </EuiProvider>
       </I18nProvider>
-    </ChromeServiceProvider>
+    )
   );
   return services;
 };
