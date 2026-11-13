@@ -51,9 +51,8 @@ import { isSerializedError } from '../utils/errors';
  *    reference `variables`.
  *
  * Open scope frames (the workflow timeout zone, an in-progress foreach) are not
- * included. They have no output until they leave the stack, and their inputs and
- * state are already on the execution. Fetching them re-reads Elasticsearch for a
- * document that has nothing to rehydrate.
+ * included. They have no output until they leave the stack. An open foreach's
+ * input is requested separately, from the LRU.
  */
 export function resolveRehydrationTargets(
   node: GraphNodeUnion,
@@ -89,9 +88,40 @@ export function resolveRehydrationTargets(
 }
 
 /**
+ * Step execution ids whose inputs this node reads besides `steps.X.input`: an open
+ * foreach, or a dynamic parallel branch, keeps its item list on `input.items`.
+ */
+export function resolveOpenScopeInputIds(
+  state: WorkflowExecutionState,
+  stackFrames: readonly StackFrame[] | undefined
+): string[] {
+  if (!stackFrames?.length) {
+    return [];
+  }
+
+  const executionId = state.getWorkflowExecution().id;
+  const ids: string[] = [];
+  let scopeStack = WorkflowScopeStack.fromStackFrames(stackFrames);
+  while (!scopeStack.isEmpty()) {
+    const topFrame = scopeStack.getCurrentScope();
+    scopeStack = scopeStack.exitScope();
+    if (topFrame.stepId) {
+      const id = buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames);
+      const stepExecution = state.getStepExecution(id);
+      const isDynamicParallel =
+        stepExecution?.stepType === 'parallel' && stepExecution.state?.static !== true;
+      if (stepExecution?.stepType === 'foreach' || isDynamicParallel) {
+        ids.push(id);
+      }
+    }
+  }
+  return ids;
+}
+
+/**
  * Resolves the subset of `neededIds` whose inputs must be re-fetched: only steps the node
- * reads via `steps.X.input`. Inputs of finished steps are evicted, and fetching them for
- * every node run would add a round trip for data that is never read.
+ * reads via `steps.X.input`. Fetching every predecessor input would add a round trip for
+ * data that is never read.
  */
 export function resolveInputRehydrationTargets(
   node: GraphNodeUnion,
@@ -202,12 +232,17 @@ export class WorkflowContextManager {
       this.workflowExecutionState,
       this.stackFrames
     );
-    const inputIds = resolveInputRehydrationTargets(
-      this.node,
-      neededIds,
-      this.workflowExecutionState,
-      this.stackFrames
-    );
+    const inputIds = [
+      ...new Set([
+        ...resolveInputRehydrationTargets(
+          this.node,
+          neededIds,
+          this.workflowExecutionState,
+          this.stackFrames
+        ),
+        ...resolveOpenScopeInputIds(this.workflowExecutionState, this.stackFrames),
+      ]),
+    ];
     const [outputs, inputs] = await Promise.all([
       this.stepIoService.readBatch([...neededIds], 'output'),
       this.stepIoService.readBatch(inputIds, 'input'),

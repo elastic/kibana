@@ -2174,6 +2174,33 @@ describe('WorkflowContextManager', () => {
       expect(testContainer.stepIoService.readBatch).toHaveBeenCalledWith([], 'input');
     });
 
+    it('requests an open foreach input so the item list is read from the LRU', async () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'loop',
+          nestedScopes: [
+            { nodeId: 'enterForeach_loop', nodeType: 'enter-foreach', stepId: 'loop' },
+          ],
+        },
+      ];
+      const container = createTestContainer(workflow, { stackFrames });
+      container.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'exec-1',
+        workflowDefinition: workflow,
+      } as EsWorkflowExecution);
+      container.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId: string) =>
+          stepExecutionId === 'loop_generated'
+            ? { id: stepExecutionId, stepId: 'loop', stepType: 'foreach' }
+            : undefined
+        );
+
+      await container.underTest.beforeNodeStart();
+
+      expect(container.stepIoService.readBatch).toHaveBeenCalledWith(['loop_generated'], 'input');
+    });
+
     it('serves the same context until the node ends', async () => {
       await testContainer.underTest.beforeNodeStart();
 

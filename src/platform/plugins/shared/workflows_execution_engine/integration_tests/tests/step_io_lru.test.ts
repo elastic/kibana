@@ -13,7 +13,7 @@
  * Covers:
  * 1. Linear workflow — outputs flow through `write`→LRU→`read` correctly.
  * 2. data.set variables — the new inline `getVariables()` in WorkflowContextManager.
- * 3. Pause + resume — on resume `load()` excludes outputs, forcing `prepareForRead`
+ * 3. Pause + resume — on resume `load()` excludes inputs and outputs, forcing a fetch
  *    to rehydrate from ES via `getStepExecutionsByIds`.
  * 4. Small `maxCacheSize` on pause/resume — even when the LRU cannot hold any item
  *    (1-byte budget), outputs are still retrievable after resume because `prepareForRead`
@@ -126,7 +126,7 @@ describe('StepIoService (LRU): pause + resume triggers ES rehydration', () => {
 
   // Workflow: before_pause → pause (wait) → after_pause reads before_pause output.
   // On resume, the LRU cache is cold (new StepIoService instance) and WorkflowExecutionState
-  // loads metadata without outputs (excludeFields: ['output']). prepareForRead must fetch
+  // loads metadata without inputs or outputs. The next read must fetch
   // the output from ES via getStepExecutionsByIds.
   const yaml = `
 name: lru-pause-resume
@@ -195,9 +195,9 @@ steps:
       expect(afterPause?.output).toBe('xxx');
     });
 
-    it('getStepExecutionsByIds was called to rehydrate outputs (load() excludes output fields)', () => {
-      // load() fetches step docs with excludeFields: ['output']. The LRU cache is empty at
-      // resume time. prepareForRead detects the cache miss and fetches from ES.
+    it('getStepExecutionsByIds was called to rehydrate outputs (load() excludes input and output)', () => {
+      // load() fetches step docs without input or output. The LRU cache is empty at
+      // resume time, so the next read fetches the output from ES.
       const rehydrationCalls = getByIdsSpy.mock.calls.filter(
         (call) => Array.isArray(call[1]) && call[1].includes('output')
       );

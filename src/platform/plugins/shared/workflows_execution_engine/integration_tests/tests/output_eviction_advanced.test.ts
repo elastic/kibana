@@ -153,9 +153,8 @@ steps:
     });
 
     it('step_fail output remains null after rehydration (failed steps produce no output — rehydration is a no-op for them)', () => {
-      // load() marks ALL non-data.set steps as "evicted" (including failed ones) for memory
-      // efficiency. rehydrateOutputs() will fetch step_fail from ES and get null output back.
-      // This is correct: null output is the faithful representation of a failed step's state.
+      // Resume load() leaves outputs out of memory, so the consumer fetches step_fail
+      // and gets null back. Null is the stored output of a failed step.
       const stepFailExec = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_fail');
@@ -182,9 +181,9 @@ describe('output eviction: if/then/else branch + eviction + resume', () => {
   //   → pause (wait: 20m) → final_step (references setup_step AND then_step outputs)
   //
   // On resume:
-  //   - load() marks all non-data.set steps as evicted
-  //   - beforeNodeStart() for final_step must load setup_step and then_step
-  //   - else_step never executed → not in eviction state → no crash
+  //   - load() fetches step metadata without input or output
+  //   - beforeNodeStart() for final_step reads setup_step and then_step outputs
+  //   - else_step never executed, so it is absent from that read
   const yaml = `
 name: if-branch-eviction-resume
 enabled: false
@@ -273,11 +272,11 @@ steps:
       expect(finalStep?.status).toBe(ExecutionStatus.COMPLETED);
     });
 
-    it('resume load() fetched steps with output excluded (memory optimization)', () => {
-      // The first call to getStepExecutionsByIds is from load(), which uses sourceExcludes: ['output']
+    it('resume load() fetched steps with input and output excluded', () => {
+      // The first call to getStepExecutionsByIds is from load().
       const loadCall = getByIdsSpy.mock.calls[0];
       expect(loadCall[1]).toBeUndefined(); // sourceIncludes: undefined
-      expect(loadCall[2]).toEqual(['output']); // sourceExcludes: ['output']
+      expect(loadCall[2]).toEqual(['input', 'output']);
     });
 
     it('setup_step and then_step were rehydrated for final_step', () => {
@@ -445,12 +444,9 @@ steps:
       expect(rehydratedIds).toContain(stepLargeExec?.id);
     });
 
-    it('step_small output is intact after rehydration (load() marks all non-data.set steps as evicted; threshold only gates live-execution eviction)', () => {
-      // The eviction threshold (10KB) prevents step_small from being evicted during live execution.
-      // However, load() on resume marks ALL non-data.set steps as "evicted with 0 bytes" for
-      // memory efficiency — regardless of their original size. rehydrateOutputs() then fetches
-      // step_small from ES and restores its output. This is expected: the threshold only applies
-      // to the deferred eviction during execution, not to the resume load path.
+    it('step_small output is intact after rehydration (resume load leaves every output out of memory)', () => {
+      // Resume load() fetches metadata only, so step_small's output is read back when a
+      // later node references it. The stored document is unchanged.
       const stepSmallExec = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_small');

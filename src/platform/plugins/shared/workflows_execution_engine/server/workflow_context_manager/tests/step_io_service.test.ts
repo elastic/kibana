@@ -68,13 +68,20 @@ describe('StepIoService', () => {
       expect((await service.readBatch(['step-1'], 'input')).get('step-1')).toEqual({ foo: 'bar' });
     });
 
-    it('routes outputs to both the cache and state, and inputs to state only', () => {
-      const { state, service } = buildHarness();
+    it('routes inputs and outputs to both the cache and state', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness();
       service.write('step-1', 'input', { foo: 'bar' });
       service.write('step-1', 'output', { result: 'ok' });
 
       expect(state.getStepIo('step-1', 'input')).toEqual({ foo: 'bar' });
       expect(state.getStepIo('step-1', 'output')).toEqual({ result: 'ok' });
+
+      state.clearFlushedOutputs(['step-1']);
+      expect((await service.readBatch(['step-1'], 'input')).get('step-1')).toEqual({ foo: 'bar' });
+      expect((await service.readBatch(['step-1'], 'output')).get('step-1')).toEqual({
+        result: 'ok',
+      });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
     it('omits IO that was never written', async () => {
@@ -291,20 +298,21 @@ describe('StepIoService', () => {
       );
     });
 
-    it('fetches an input that state dropped after the step finished', async () => {
-      const { service, state, stepExecutionRepository } = buildHarness();
-      state.upsertStep({
-        id: 'a',
-        stepId: 'foreach',
-        stepType: 'foreach',
-        status: ExecutionStatus.COMPLETED,
-      } as Partial<EsWorkflowStepExecution>);
+    it('fetches an input the LRU refused and fetches it again afterwards', async () => {
+      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 0 });
       service.write('a', 'input', { items: [1] });
       state.clearFlushedOutputs(['a']);
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
         { id: 'a', input: { items: [1] } } as unknown as EsWorkflowStepExecution,
       ]);
 
+      expect((await service.readBatch(['a'], 'input')).get('a')).toEqual({ items: [1] });
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['a'],
+        ['id', 'input']
+      );
+
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
       expect((await service.readBatch(['a'], 'input')).get('a')).toEqual({ items: [1] });
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['a'],

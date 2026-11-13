@@ -486,14 +486,14 @@ describe('WorkflowExecutionState', () => {
       ]);
     });
 
-    it('should drop flushed outputs from memory but keep inputs readable', async () => {
+    it('should drop flushed inputs and outputs from memory', async () => {
       underTest.upsertStep({ id: 'io-step', stepId: 'test-step-execution-id' });
       underTest.setStepIo('io-step', { input: { in: 1 }, output: { out: 2 } });
 
       await underTest.flushStepChanges();
 
       expect(underTest.getStepIo('io-step', 'output')).toBeUndefined();
-      expect(underTest.getStepIo('io-step', 'input')).toEqual({ in: 1 });
+      expect(underTest.getStepIo('io-step', 'input')).toBeUndefined();
     });
 
     it('should keep an output that was rewritten while the bulk write was in flight', async () => {
@@ -682,7 +682,7 @@ describe('WorkflowExecutionState', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['11', '22'],
         undefined,
-        ['output']
+        ['input', 'output']
       );
       expect(underTest.getLatestStepExecution('testStep')).toEqual(
         expect.objectContaining({
@@ -700,7 +700,7 @@ describe('WorkflowExecutionState', () => {
       );
     });
 
-    it('should load inputs of unfinished steps into the live IO map and leave outputs to on-demand rehydration', async () => {
+    it('should load step metadata without inputs or outputs', async () => {
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
       (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
         {
@@ -719,29 +719,11 @@ describe('WorkflowExecutionState', () => {
       ]);
       await underTest.load();
 
-      expect(underTest.getStepIo('11', 'input')).toEqual({ url: 'https://example.com' });
+      expect(underTest.getStepIo('11', 'input')).toBeUndefined();
       expect(underTest.getStepIo('11', 'output')).toBeUndefined();
       expect(underTest.getStepIo('22', 'output')).toBeUndefined();
       expect(underTest.getDataSetStepExecutions().map((step) => step.id)).toEqual(['22']);
-      // A single fetch: outputs are no longer eagerly fetched for any step type.
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not load inputs of finished steps into the live IO map but mark them evicted', async () => {
-      underTest.updateWorkflowExecution({ stepExecutionIds: ['11'] });
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
-        {
-          id: '11',
-          stepId: 'connectorStep',
-          stepType: 'connector',
-          status: ExecutionStatus.COMPLETED,
-          input: { url: 'https://example.com' },
-        } as unknown as EsWorkflowStepExecution,
-      ]);
-      await underTest.load();
-
-      expect(underTest.getStepIo('11', 'input')).toBeUndefined();
-      expect(underTest.isInputEvicted('11')).toBe(true);
     });
 
     it('should not queue loaded inputs for the next flush', async () => {
