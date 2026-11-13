@@ -18,7 +18,8 @@ import { transformLinksOut } from './transform_links';
 
 export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
-  references?: Reference[]
+  references?: Reference[],
+  containerReferences?: Reference[]
 ): LinksEmbeddableState {
   const { enhancements, disabledActions, ...latestState } = isLegacyState(storedState)
     ? transformLegacyState(storedState)
@@ -30,10 +31,9 @@ export function transformOut(
       ? { links: latestState.links.map(({ order, id, ...link }) => link) }
       : {}),
   };
-
   /** Inject saved object reference when by-reference */
-  const savedObjectRef = (references ?? []).find(
-    ({ name, type }) => name === 'savedObjectRef' && type === LINKS_LIBRARY_TYPE
+  const savedObjectRef = [...(references ?? []), ...(containerReferences ?? [])].find(
+    ({ name, type }) => name.includes('savedObjectRef') && type === LINKS_LIBRARY_TYPE
   );
   if (savedObjectRef) {
     const { links, ...rest } = state; // some by-ref panels had links serialized for some reason

@@ -7,21 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import {
   asCodeEsqlApproximationSchema,
   asCodeQuerySchema,
   getAsCodeTagsSchema,
 } from '@kbn/as-code-shared-schemas';
+import {
+  DEFAULT_PINNED_CONTROL_STATE,
+  ESQL_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
+import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { getControlsGroupSchema } from '@kbn/controls-schemas';
-import { basePanelSchema } from './base_panel';
-import { getSectionSchema } from './section';
-import { optionsSchema } from './options';
-import { accessControlSchema } from './access_control';
+import { z } from '@kbn/zod';
 import { MAX_PANELS } from '../constants';
+import { accessControlSchema } from './access_control';
+import { basePanelSchema } from './base_panel';
+import { optionsSchema } from './options';
+import { getSectionSchema } from './section';
 
 /** Creates a discriminated union schema for dashboard panels based on registered embeddable schemas. */
 export function getPanelSchema(
@@ -48,12 +55,57 @@ export function getPanelSchema(
   return z.discriminatedUnion('type', panelSchemas as [PanelSchema, ...PanelSchema[]]);
 }
 
+/** Creates a discriminated union schema for pinned dashboard panels based on pinnable panel types */
+export function getPinnedPanelSchema(
+  embeddableSchemas: Record<string, { schema: z.ZodType<Record<string, unknown>>; title: string }>
+) {
+  const panelSchemas = Object.entries(embeddableSchemas)
+    .filter(([type]) => {
+      return [
+        OPTIONS_LIST_CONTROL,
+        RANGE_SLIDER_CONTROL,
+        ESQL_CONTROL,
+        TIME_SLIDER_CONTROL,
+        'links',
+      ].includes(type);
+    })
+    // sort to ensure consistent order in OAS documentation
+    .sort(([, { title: aTitle }], [, { title: bTitle }]) => aTitle.localeCompare(bTitle))
+    .map(([type, { schema: configSchema, title }]) =>
+      basePanelSchema
+        .extend({
+          type: z.literal(type),
+          // TODO: enforce Serializable type, see https://github.com/elastic/kibana/pull/269196
+          config: configSchema as z.ZodType<{}>,
+        })
+        .strict()
+        .meta({
+          id: `kbn-dashboard-pinned-panel-type-${type}`,
+          title,
+        })
+    );
+
+  type PanelSchema = (typeof panelSchemas)[number];
+  return z.discriminatedUnion('type', panelSchemas as [PanelSchema, ...PanelSchema[]]);
+}
+
+export const pinnedPanelSchema = z
+  .object({
+    id: z.string().optional().meta({ description: 'The unique ID of the control' }),
+    width: z.number(),
+    grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
+      description:
+        'When `true`, the control expands to fill any available horizontal space. Defaults to `false`.',
+    }),
+  })
+  .strict();
+
 /** Creates a full dashboard state schema, accepting runtime dependencies as parameters. */
 export function getDashboardDataSchema<P extends z.ZodTypeAny>(
   embeddableSchemas: Record<string, { schema: z.ZodType<Record<string, unknown>>; title: string }>,
   options?: { isDashboardAppRequest?: boolean; isReadRequest?: boolean }
 ) {
-  const pinnedPanelsSchema = getControlsGroupSchema();
+  const pinnedPanelsSchema = getPinnedPanelSchema(embeddableSchemas);
 
   const { isDashboardAppRequest = false, isReadRequest = false } = options ?? {};
   const panelSchema = getPanelSchema(embeddableSchemas);
@@ -67,7 +119,11 @@ export function getDashboardDataSchema<P extends z.ZodTypeAny>(
 
   return z
     .object({
-      pinned_panels: effectivePinnedPanelsSchema,
+      pinned_panels: z.array(
+        isDashboardAppRequest // looser route validation for dashboard application requests
+          ? (z.object({}).loose() as unknown as ReturnType<typeof effectivePinnedPanelsSchema>) // keeps derived types happy
+          : effectivePinnedPanelsSchema
+      ),
       description: z
         .string()
         .optional()

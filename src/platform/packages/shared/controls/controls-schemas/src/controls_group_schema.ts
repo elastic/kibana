@@ -36,7 +36,7 @@ export const controlWidthSchema = z
 export const pinnedControlSchema = z
   .object({
     id: z.string().optional().meta({ description: 'The unique ID of the control' }),
-    width: controlWidthSchema,
+    width: z.number(),
     grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
       description:
         'When `true`, the control expands to fill any available horizontal space. Defaults to `false`.',

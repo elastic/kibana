@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { panelGridSchema } from './panel_grid';
+import { panelGridSchema, pinnedPanelLayoutSchema } from './panel_grid';
 
 export const basePanelSchema = z
   .object({
@@ -21,4 +21,18 @@ export const basePanelSchema = z
   .strict()
   .meta({
     id: 'kbn-dashboard-panel-type-unknown',
+  });
+
+export const basePinnedPanelSchema = pinnedPanelLayoutSchema
+  .merge(
+    z.object({
+      id: z.string().optional().meta({ description: 'The unique ID of the pinned panel.' }),
+      type: z.string(),
+      // TODO: enforce Serializable type, see https://github.com/elastic/kibana/pull/269196
+      config: z.object({}).loose() as z.ZodType<{}>,
+    })
+  )
+  .strict()
+  .meta({
+    id: 'kbn-dashboard-pinned-panel-type-unknown',
   });

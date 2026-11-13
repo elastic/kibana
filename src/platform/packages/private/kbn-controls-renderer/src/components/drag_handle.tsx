@@ -43,6 +43,9 @@ const dragHandleStyles = {
       '.euiIcon': {
         color: euiTheme.colors.textParagraph,
       },
+      '&:hover > .euiIcon:first-of-type': {
+        color: euiTheme.colors.primary,
+      },
     }),
 };
 

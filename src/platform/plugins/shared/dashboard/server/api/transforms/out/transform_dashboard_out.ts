@@ -55,7 +55,6 @@ export function transformDashboardOut(
     references,
     isDashboardAppRequest
   );
-
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
