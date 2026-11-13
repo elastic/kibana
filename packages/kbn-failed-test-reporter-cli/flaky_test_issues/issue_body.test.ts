@@ -1034,3 +1034,70 @@ describe('refreshing a suite issue', () => {
     }
   });
 });
+
+describe('a suite flaky only in a pipeline judged on its own', () => {
+  const [pooled] = flakyTest().byBranch;
+  const fips = {
+    ...pooled,
+    pipeline: 'kibana-fips',
+    builds: 14,
+    failedBuilds: 4,
+    buildFailRate: 4 / 14,
+  };
+  const [localTarget] = flakyTest().byTarget;
+  const report = flakyReport([
+    flakyTest({
+      byBranch: [{ ...pooled, failedBuilds: 1, buildFailRate: 1 / 509 }, fips],
+      byTarget: [
+        { ...localTarget, failedBuilds: 1, buildFailRate: 1 / 509 },
+        {
+          ...localTarget,
+          pipeline: 'kibana-fips',
+          builds: 14,
+          failedBuilds: 4,
+          buildFailRate: 4 / 14,
+        },
+        {
+          mode: 'serverless-observability_complete',
+          type: 'cloud',
+          pipeline: 'appex-qa-serverless-kibana-scout-tests',
+          builds: 65,
+          failedBuilds: 0,
+          buildFailRate: 0,
+        },
+      ],
+      flakiestBranch: {
+        branch: 'main',
+        pipeline: 'kibana-fips',
+        builds: 14,
+        failedBuilds: 4,
+        buildFailRate: 4 / 14,
+      },
+    }),
+  ]);
+  const [suite] = groupIntoSuites(report.flaky, report.files);
+
+  it('names the pipeline where it is flaky, and records only the branch for /skip', () => {
+    const body = renderFlakySuiteIssueBody(suite, { report });
+
+    expect(body).toContain('**`main` in `kibana-fips` 29% (4 / 14)**');
+    expect(body).toContain('| `main` in `kibana-fips` | 🔴 Flaky | 4 / 14');
+    expect(body).toContain('| `main` | 🟠 Some failures | 1 / 509');
+    expect(readFlakySuiteIssueMetadata(body)?.['suite.branches']).toEqual(['main']);
+  });
+
+  it('gives the FIPS runs of a target their own row in the failures by target', () => {
+    const body = renderFlakySuiteIssueBody(suite, { report });
+
+    expect(body).toContain('| 🔴 `stateful-classic` | Local deployment (FIPS enabled) | 4 / 14');
+    expect(body).toContain('| 🔴 `stateful-classic` | Local deployment | 1 / 509');
+    // a Cloud target already says where it ran
+    expect(body).toContain('| ✅ `serverless-observability_complete` | MKI | 0 / 65');
+  });
+
+  it('says where it is still flaky in its comments', () => {
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toMatch(
+      /^Still flaky on `main` in `kibana-fips`:\n\n- `creates default alert[^`]*`: 29% of builds \(4 \/ 14\)/
+    );
+  });
+});

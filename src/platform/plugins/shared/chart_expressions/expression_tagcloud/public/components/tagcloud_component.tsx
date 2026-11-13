@@ -29,7 +29,7 @@ import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-comm
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
-import { useKbnPalettes } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 import { css } from '@emotion/react';
 import { getFormatService } from '../format_service';
 import type { TagcloudRendererConfig } from '../../common/types';
