@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { DEFAULT_RUN_QUOTA_TIME_ZONE, type RunQuotaWindow } from '../../../common/run_quotas';
+/** Daily run quotas reset at UTC midnight. */
+export const DEFAULT_RUN_QUOTA_TIME_ZONE = 'UTC';
+
+export const MIN_RUN_LIMIT = 0;
+export const MAX_RUN_LIMIT = 10_000;
+
+export interface RunQuotaWindow {
+  start: string;
+  resetsAt: string;
+  timezone: typeof DEFAULT_RUN_QUOTA_TIME_ZONE;
+}
 
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
