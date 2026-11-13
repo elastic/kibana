@@ -22,6 +22,7 @@ import type {
 import { deleteSessionsData } from '../../common/fixtures/sessions_data';
 import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const { APPLICATIONS_PATH, COMMON_HEADERS, SESSIONS_ENABLE_PATH } = testData;
 
@@ -208,7 +209,8 @@ apiTest.describe(
       return response.body as ApplicationsResponse;
     };
 
-    apiTest.beforeAll(async ({ esClient, kbnClient, samlAuth }) => {
+    apiTest.beforeAll(async ({ apiServices, esClient, kbnClient, samlAuth }) => {
+      await apiServices.core.settings(FLAG_ON_OVERRIDE);
       await deleteSessionsData(esClient, kbnClient);
       await deleteEvents(esClient);
       viewerHeaders = {
@@ -236,7 +238,8 @@ apiTest.describe(
     });
 
     // Removing the task also invalidates the API key enabling sessions granted.
-    apiTest.afterAll(async ({ esClient, kbnClient }) => {
+    apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
       await deleteSessionsData(esClient, kbnClient);
       await deleteEvents(esClient);
     });
