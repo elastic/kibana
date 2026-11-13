@@ -215,11 +215,6 @@ export const toPythonJson = (value: unknown): string => {
 export const inlineParityAttachment = (question: string, data: Record<string, unknown>): string =>
   `${question}\n\n--- Attached alert (most recent) ---\n${toPythonJson(data)}`;
 
-/**
- * The arguments to send to the converse client for one example: the parity
- * profile's inlined attachment when the benchmark attached one, otherwise the
- * example's own question and attachment, unchanged.
- */
 export const personaMatrixQueryArgs = (
   exampleId: string | undefined,
   profile: AgentProfile,

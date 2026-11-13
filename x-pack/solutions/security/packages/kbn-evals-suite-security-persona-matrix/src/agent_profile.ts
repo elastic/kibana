@@ -103,11 +103,7 @@ const PARITY_EXPECTED_TOOL_ALIASES: Readonly<Record<string, string>> = {
 export const resolveExpectedToolId = (toolId: string, profile: AgentProfile): string =>
   (profile === 'chrysalis-parity' && PARITY_EXPECTED_TOOL_ALIASES[toolId]) || toolId;
 
-/**
- * The external benchmark validates only YAML found in the answer text; a
- * workflow left solely as a rendered attachment scores `no_yaml` there. The
- * parity profile grades the same way so its workflow outcomes stay comparable.
- */
+/** The parity profile grades workflow YAML the way the external benchmark does. */
 export const resolveWorkflowYamlExtractionMode = (
   profile: AgentProfile
 ): WorkflowYamlExtractionMode =>

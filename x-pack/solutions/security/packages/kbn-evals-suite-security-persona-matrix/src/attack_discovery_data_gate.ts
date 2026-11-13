@@ -26,11 +26,7 @@ const CHRYSALIS_SIGNAL_QUERY = {
   },
 };
 
-/**
- * AD data gate, mirroring the external benchmark's: before any model traffic,
- * the alerts AD will read (same index and time window) must hold at least
- * {@link AD_MIN_ENDPOINT_ALERTS} endpoint alerts and no Chrysalis signal.
- */
+/** Mirrors the external benchmark's AD data gate; call it before any model traffic. */
 export const assertAdDataGate = async ({
   esClient,
   log,
