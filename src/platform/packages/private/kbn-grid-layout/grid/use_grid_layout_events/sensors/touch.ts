@@ -22,9 +22,9 @@ export const getTouchSensorPosition = ({ touches }: UserTouchEvent) => ({
 
 /*
  * This function should be attached to `touchstart` event listener.
- * It follows the flow of `touchstart` -> `touchmove` -> `touchend` /`touchcancel` where the consumer is responsible for handling the the interaction logic and defining what happens on each event.
+ * It follows the flow of `touchstart` -> `touchmove` -> `touchend` / `touchcancel` where the consumer is
+ * responsible for handling the interaction logic and defining what happens on each event.
  */
-
 export const startTouchInteraction = ({
   e,
   onMove,

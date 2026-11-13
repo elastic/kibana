@@ -42,7 +42,7 @@ export const ControlsRenderer = ({
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [viewMode, setViewMode] = useState(parentApi.viewMode$.getValue());
 
-  // derived synchronously from `controlState` so the flex layout never lags a render behind it
+  // derived synchronously from `controlState`
   const flexLayout = useMemo<FlexLayoutData>(
     () => controlsLayoutToFlexLayout(controlState),
     [controlState]
@@ -131,11 +131,7 @@ const controlsGroupStyles = {
       --controlsActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
         ${euiTheme.colors.vis.euiColorVis0};
 
-      padding-top: 0;
-
-      &.controlsGroup--editing .controlFrameFloatingActions {
-        visibility: hidden !important;
-      }
+      padding-top: 0; // remove padding added by FlexLayout
 
       .kbnFlexPanel--dragPreview {
         border-radius: ${euiTheme.border.radius.control};

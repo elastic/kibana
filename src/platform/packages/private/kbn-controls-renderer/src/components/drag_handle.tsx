@@ -60,9 +60,7 @@ export const DragHandle = ({
 }: DragHandleProps) => {
   const styles = useMemoCss(dragHandleStyles);
 
-  // a pointer drag leaves the handle focused, which keeps the floating actions (shown on
-  // `:focus-within`) visible after the drop; release focus once the pointer is released.
-  // Keyboard interactions never trigger this, so they keep their focus.
+  // hide hover actions on drop; otherwise, they get stuck
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     const handle = event.currentTarget;
     const release = () => {

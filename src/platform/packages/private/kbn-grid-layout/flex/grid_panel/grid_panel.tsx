@@ -14,11 +14,12 @@ import { euiBreakpoint, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { DefaultDragHandle } from './drag_handle/default_drag_handle';
+import { DefaultDragHandle } from '../../common/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './grid_panel_resize_handle';
 import { useGridPanelState } from './use_panel_grid_data';
 import { ResizeGauge } from './grid_panel_resize_gauge';
+import { applyActivePanelStyles, clearActivePanelStyles, pinPanelWidth } from './panel_styles';
 
 export interface GridPanelProps {
   panelId: string;
@@ -68,13 +69,9 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
         pairwise(),
         tap(([before, after]) => {
           if (before !== undefined || after?.type !== 'resize') return;
-          // pin this panel at its rendered width so no panel can grow/shrink and shift the resized one
           const ref = gridLayoutStateManager.panelRefs.current[panelId];
           const pinnedWidth = after.panelWidths?.[panelId];
-          if (!ref || pinnedWidth === undefined) return;
-          ref.style.width = `${pinnedWidth}px`;
-          ref.style.flexGrow = '0';
-          ref.style.flexShrink = '0';
+          if (ref && pinnedWidth !== undefined) pinPanelWidth(ref, pinnedWidth);
         }),
         filter(([before]) => before !== undefined),
         map(([, after]) => after),
@@ -83,54 +80,15 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       panel$,
     ])
       .pipe(skip(1))
-      .subscribe(([activePanel, currentPanel]) => {
-        if (!currentPanel) return;
-        const ref = gridLayoutStateManager.panelRefs.current[currentPanel.id];
-        const isPanelActive = activePanel && activePanel.id === currentPanel.id;
-        if (!ref) return;
+      .subscribe(([activePanel, panel]) => {
+        const ref = panel && gridLayoutStateManager.panelRefs.current[panel.id];
+        if (!panel || !ref) return;
 
-        if (isPanelActive) {
-          // allow click events through before triggering active status
-          ref.classList.add('kbnFlexPanel--active');
-
-          // if the current panel is active, give it fixed positioning depending on the interaction event
-          const { position: draggingPosition } = activePanel;
-
-          ref.style.zIndex = `${euiTheme.levels.modal}`;
-          if (activePanel.type === 'resize') {
-            // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
-            ref.style.flexShrink = '0';
-            ref.style.flexGrow = '0';
-            ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
-          } else if (activePanel.sensorType === 'keyboard') {
-            // keyboard "drags" move the panel by changing its order, so it stays in the flow
-            ref.style.order = `${currentPanel.order + 1}`;
-          } else {
-            // if the current panel is being dragged via mouse, render it with a fixed position + size
-            ref.style.position = 'fixed';
-
-            ref.style.left = `${draggingPosition.left}px`;
-            ref.style.top = `${draggingPosition.top}px`;
-            ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
-            ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
-          }
-        } else {
+        if (activePanel?.id === panel.id) {
+          applyActivePanelStyles({ ref, activePanel, panel, zIndex: euiTheme.levels.modal });
+        } else if (activePanel?.type !== 'resize') {
           // siblings stay pinned (see above) until the resize ends
-          if (activePanel?.type === 'resize') return;
-
-          ref.classList.remove('kbnFlexPanel--active');
-          ref.style.zIndex = `auto`;
-
-          // if the panel is not being dragged and/or resized, undo any fixed position styles
-          ref.style.position = '';
-          ref.style.left = ``;
-          ref.style.top = ``;
-          ref.style.width = `${currentPanel.width}px`;
-          ref.style.height = ``;
-
-          ref.style.order = `${currentPanel.order + 1}`;
-          ref.style.flexShrink = '';
-          ref.style.flexGrow = currentPanel.grow ? '1' : '0';
+          clearActivePanelStyles(ref, panel);
         }
       });
 
@@ -155,7 +113,9 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       css={[initialStyles, styles.panel]}
       className="kbnFlexPanel"
     >
-      {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
+      {!useCustomDragHandle && (
+        <DefaultDragHandle dragHandleApi={dragHandleApi} layoutPrefix="kbnFlex" />
+      )}
       {panelContents}
       <ResizeHandle panelId={panelId} />
       <ResizeGauge panelId={panelId} />

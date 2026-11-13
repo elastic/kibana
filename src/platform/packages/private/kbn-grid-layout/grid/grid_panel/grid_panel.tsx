@@ -14,7 +14,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { DefaultDragHandle } from './drag_handle/default_drag_handle';
+import { DefaultDragHandle } from '../../common/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './grid_panel_resize_handle';
 import { useGridPanelState } from './use_panel_grid_data';
@@ -187,7 +187,9 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       css={initialStyles}
       className="kbnGridPanel"
     >
-      {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
+      {!useCustomDragHandle && (
+        <DefaultDragHandle dragHandleApi={dragHandleApi} layoutPrefix="kbnGrid" />
+      )}
       {panelContents}
       <ResizeHandle panelId={panelId} sectionId={sectionId} />
       <ResizeGauge panelId={panelId} />
