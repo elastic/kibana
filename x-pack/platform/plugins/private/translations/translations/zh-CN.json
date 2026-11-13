@@ -4261,8 +4261,6 @@
     "discover.dataCascade.grouping.function": "<bold>{selectedColumn}：</bold> <badge></badge>",
     "discover.dataCascade.header.groupBySelectorAriaLabel": "选择分组依据的组",
     "discover.dataCascade.header.layoutSwitchLabel": "分组依据",
-    "discover.dataCascade.header.techPreviewLabel": "分组结果（技术预览）",
-    "discover.dataCascade.header.techPreviewTooltip": "运行 Stats BY 时对结果进行分组",
     "discover.dataCascade.inspector.cascadeQueryDescription": "此请求将查询 Elasticsearch 以获取与展开的级联行值匹配的文档。",
     "discover.dataCascade.inspector.cascadeQueryTitle": "级联行数据查询",
     "discover.dataCascade.row.action.copyToClipboard": "复制到剪贴板",
