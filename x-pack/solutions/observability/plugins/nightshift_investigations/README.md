@@ -261,7 +261,7 @@ If none match, the start claims the subjects for a new investigation id. That wa
 
 #### Daily investigation limits
 
-The global investigation quota is registered by Significant Events and set on the Nightshift settings page. It has three deployment-wide limits per UTC day, each of which can be turned off:
+The investigation quota is kept by this plugin in two hidden saved objects (the settings and a daily ledger) and set on the Nightshift settings page, through `GET` and `PUT /internal/nightshift/investigation_quotas`. Changing the limits takes the manage and configure privileges in all spaces. It has three deployment-wide limits per UTC day. A limit of `null` is unlimited, and one switch turns enforcement of all three off and on without losing their values (runs are still counted while it is off):
 
 - automatic investigations (`trigger_type: automatic`, all automations combined), default 5;
 - manual investigations (`trigger_type: manual`: the start API behind the homepage and the CLI, and Slack mentions), default 5;
