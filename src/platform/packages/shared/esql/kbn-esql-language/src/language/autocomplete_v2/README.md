@@ -66,9 +66,23 @@ one as any argument of any function; which argument takes one is a fact of the f
 - the body is offered as the value of the argument: the expression engine does not know
   lambdas, so it reads the text with the parameters and the arrow blanked out.
 
-Two things are still borrowed from the current flow here, and go away when the expression
-engine reads the grammar position itself: the syntax tree of the command at the cursor, and
-the names the function definitions use for the places a function is allowed in.
+What to offer inside an expression is being moved from the expression engine of the current
+flow into this flow, one position at a time:
+
+- `providers/expression_position.ts` says where the cursor is inside the expression from the
+  grammar position alone: the start of an operand, after an operand, after an operator, after
+  `NOT` or a cast, the function call and the argument the cursor is in.
+  `expression_position.test.ts` keeps, in a snapshot, how this agrees with what the current
+  engine works out from the syntax tree and the text, on every scenario row.
+- `providers/expression_decisions.ts` decides the items for the positions in `DECIDED_KINDS`,
+  with the item builders the current flow has (columns, functions, operators and literals by
+  type). The other positions still go to the current engine.
+  `expression_decisions.test.ts` is the guard for moving a position: on every scenario row the
+  flow must offer the same items with the decisions as without them.
+
+What stays shared with the current flow once every position is moved: the item builders, the
+function definitions with the names they use for the places a function is allowed in, and the
+type of a written expression, which is read from the syntax tree.
 
 Entities come from `entities/registry.ts`: one definition per kind, each turning what the
 editor provides today into entities, in a scope. The scope is all a definition gets: the index

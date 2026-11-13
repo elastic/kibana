@@ -15,6 +15,8 @@ import {
   getExpressionType,
   suggestForExpression,
 } from '../../../commands/definitions/utils';
+import type { SuggestForExpressionParams } from '../../../commands/definitions/utils/autocomplete/expressions/types';
+import { isExpressionComplete } from '../../../commands/definitions/utils/expressions';
 import { getUnmappedFieldsStrategy } from '../../../commands/definitions/utils/settings';
 import { withAutoSuggest } from '../../../commands/definitions/utils/autocomplete/helpers';
 import {
@@ -35,6 +37,8 @@ import type { CursorIR } from '../../../esql_js_sim/grammar';
 import { enhanceWithFunctionsContext } from '../../autocomplete/get_command_context';
 import { getAutocompleteCursorContext } from '../../shared/parse_for_autocomplete_query';
 import type { SuggestionContext, SuggestionRequest } from '../types';
+import { decideExpression } from './expression_decisions';
+import { describeExpressionPosition } from './expression_position';
 import { getLambdas, getLambdaState, type LambdaParameter, type LambdaState } from './lambdas';
 
 /** What the expression at the cursor offers, and whether the command can go on after it. */
@@ -263,16 +267,17 @@ export const provideExpression = async (
     isTimeseriesSource: context.sourceIsTimeSeries,
   };
 
-  const { suggestions, computed } = await suggestForExpression({
+  const fullContext = {
+    ...commandContext,
+    ...(await enhanceWithFunctionsContext(command, commandContext, callbacks)),
+  };
+  const request: SuggestForExpressionParams = {
     query: text,
     expressionRoot,
     command,
     cursorPosition: offset,
     location: locationOf(role, resolved, context),
-    context: {
-      ...commandContext,
-      ...(await enhanceWithFunctionsContext(command, commandContext, callbacks)),
-    },
+    context: fullContext,
     callbacks: getCallbacks(role, parameters, context),
     options: {
       ...(role.types && { preferredExpressionType: [...role.types] }),
@@ -287,13 +292,26 @@ export const provideExpression = async (
         }),
       }),
     },
-  });
+  };
+  // The position comes from the grammar. A position that is not decided here yet still goes
+  // to the expression engine of the current flow.
+  const position = describeExpressionPosition(ir, entry);
+  const items =
+    (await decideExpression({ ir, position, request })) ??
+    (await suggestForExpression(request)).suggestions;
 
-  const hasItsType = !role.completeAs || computed.expressionType === role.completeAs;
+  const expressionType = getExpressionType(
+    expressionRoot,
+    fullContext.columns,
+    fullContext.unmappedFieldsStrategy,
+    fullContext.isTimeseriesSource === true
+  );
+  const isComplete = isExpressionComplete(expressionType, text.slice(0, offset));
+  const hasItsType = !role.completeAs || expressionType === role.completeAs;
 
   return {
     entry,
-    items: suggestions,
-    isUnfinished: expressionRoot !== undefined && !(computed.isComplete && hasItsType),
+    items,
+    isUnfinished: expressionRoot !== undefined && !(isComplete && hasItsType),
   };
 };
