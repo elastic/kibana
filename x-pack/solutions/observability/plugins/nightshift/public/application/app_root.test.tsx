@@ -16,7 +16,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { NightshiftStartDependencies } from '../types';
 import { AppRoot } from './app_root';
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('./nightshift_page', () => ({

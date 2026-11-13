@@ -11,6 +11,7 @@ import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useTIDataView } from './use_ti_data_view';
 import type { RawIndicatorsResponse } from '../services/fetch_indicators';
+import { IOC_TRANSFORM_SOURCE_QUERY } from '../../../../../common/cti/constants';
 
 export const useIndicatorsTotalCount = () => {
   const {
@@ -42,6 +43,7 @@ export const useIndicatorsTotalCount = () => {
             },
           },
         ],
+        must_not: [IOC_TRANSFORM_SOURCE_QUERY],
       },
     };
     const req = {

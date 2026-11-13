@@ -9,7 +9,7 @@ import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
-import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { DEFAULT_SUPPORTED_TELEMETRY, PIPELINE_ENTRY } from './unit_pipeline';
 import { toPublishedUnit } from './unit_connections';
@@ -124,9 +124,49 @@ export const createUnitRepository = ({
       });
     }
 
+    for (const unverified of response.remote_destinations_unverified ?? []) {
+      toasts?.addWarning({
+        title: i18n.translate('xpack.streams.unitRepository.remoteClusterUnverifiedTitle', {
+          defaultMessage: 'Could not verify the remote cluster',
+        }),
+        text: getRemoteClusterUnverifiedText(unverified),
+      });
+    }
+
     return unit;
   },
 });
+
+type RemoteDestinationUnverified = NonNullable<
+  APIReturnType<'PUT /internal/streams/unit/{id}'>['remote_destinations_unverified']
+>[number];
+
+const getRemoteClusterUnverifiedText = ({
+  host,
+  reason,
+  status,
+}: RemoteDestinationUnverified): string => {
+  switch (reason) {
+    case 'unexpected_status':
+      return i18n.translate('xpack.streams.unitRepository.remoteClusterUnverifiedStatusText', {
+        defaultMessage:
+          'The destination was saved, but {host} answered with HTTP {status}. Check that the cluster is reachable and the API key can write.',
+        values: { host, status },
+      });
+    case 'timeout':
+      return i18n.translate('xpack.streams.unitRepository.remoteClusterUnverifiedTimeoutText', {
+        defaultMessage:
+          'The destination was saved, but {host} did not answer in time. Check that the cluster is reachable and the API key can write.',
+        values: { host },
+      });
+    case 'unreachable':
+      return i18n.translate('xpack.streams.unitRepository.remoteClusterUnverifiedUnreachableText', {
+        defaultMessage:
+          'The destination was saved, but {host} could not be reached. Check that the cluster is reachable and the API key can write.',
+        values: { host },
+      });
+  }
+};
 
 export const isNotFoundError = (error: unknown): boolean =>
   isHttpFetchError(error) && error.body?.statusCode === 404;

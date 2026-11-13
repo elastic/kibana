@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DIAGNOSE_YAML from './diagnose.yaml';
-import FIND_ARTIFACTS_YAML from './find_artifacts.yaml';
-import KNOWLEDGE_SEARCH_YAML from './knowledge_search.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 
 export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW_ID =
   'system-security-endpoint-configuration-troubleshooting-diagnose';
@@ -33,7 +31,9 @@ export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW = {
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
   version: 1,
-  yaml: DIAGNOSE_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'diagnose.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW = {
@@ -42,7 +42,9 @@ export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW = 
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
   version: 1,
-  yaml: KNOWLEDGE_SEARCH_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'knowledge_search.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW = {
@@ -51,7 +53,9 @@ export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW = {
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
   version: 1,
-  yaml: FIND_ARTIFACTS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'find_artifacts.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_WORKFLOW_IDS = [

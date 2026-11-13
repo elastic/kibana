@@ -11,8 +11,8 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './forensics_run_endpoint_analysis.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
   'system-security-forensics-run-endpoint-analysis';
@@ -27,5 +27,7 @@ export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 17,
-  yaml: FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'forensics_run_endpoint_analysis.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

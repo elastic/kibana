@@ -49,7 +49,10 @@ import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/reg
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/execution/runner/model_provider';
+import {
+  createModelProviderFactory,
+  createRuntimeModelProviderFactory,
+} from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
@@ -492,7 +495,7 @@ export class AgentBuilderPlugin
         findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
-        createModelProvider: modelProviderFactory,
+        createModelProvider: createRuntimeModelProviderFactory(modelProviderFactory),
       },
       conversations: {
         getScopedClient: async ({ request }) => {

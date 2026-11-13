@@ -14,6 +14,7 @@ import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { CoreStart } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { REPLAY_CONVERSATION_ID_PREFIX } from '@kbn/nightshift-decision-trees';
+import { NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -32,6 +33,8 @@ import {
   reinforcementSessionRegistry,
 } from '../tools/decision_tree';
 import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { createInvestigationBackgroundTelemetry } from '../lib/create_optimize_model';
+import { trackBackgroundActivity, type NightshiftTelemetryClient } from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 
 const MAX_INPUT_CHARS = 100_000;
@@ -75,11 +78,13 @@ export const decisionTreeReinforceStepDefinition = ({
   getSavedObjects,
   getUiSettings,
   isEnabled,
+  telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   isEnabled?: () => boolean;
+  telemetry?: NightshiftTelemetryClient;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.decisionTreeReinforce',
@@ -237,64 +242,73 @@ export const decisionTreeReinforceStepDefinition = ({
         // Wrapping `runAgent` in `withNightshiftBackgroundSpan` joins the entire reinforcement
         // sub-agent run (`invoke_agent` -> `chat <model>` -> `execute_tool nightshift_*`)
         // under `T_background` in `traces-agent_builder.otel-<spaceId>`.
-        const { result, sessionState } = await withNightshiftBackgroundSpan(
+        const { result, sessionState } = await trackBackgroundActivity(
           {
-            name: 'nightshift.decisionTreeReinforce',
-            traceId: context.input.background_trace_id || executionId,
-            foregroundTraceId: loadedRound.traceId,
-            roundId: resolvedRoundId,
-            conversationId: inputConversationId || undefined,
-            spaceId,
+            telemetry,
+            activity: 'decision_tree_reinforcement',
             workflowExecutionId: executionId,
-            request,
-            getSavedObjects,
-            getUiSettings,
-            logger: context.logger,
-            attributes: {
-              'nightshift.reinforcement_conversation_id': conversation.id,
-              'nightshift.turn_kind': turnKind,
-            },
+            conversationId: inputConversationId,
+            roundId: resolvedRoundId,
           },
-          async (span) => {
-            try {
-              const agentReturn = await agentBuilder.agents.runAgent({
+          (modelUsage) =>
+            withNightshiftBackgroundSpan(
+              {
+                name: 'nightshift.decisionTreeReinforce',
+                traceId: context.input.background_trace_id || executionId,
+                foregroundTraceId: loadedRound.traceId,
+                roundId: resolvedRoundId,
+                conversationId: inputConversationId || undefined,
+                spaceId,
+                workflowExecutionId: executionId,
                 request,
-                agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
-                interactive: { enabled: false },
-                defaultConnectorId: connectorId || undefined,
-                abortSignal: context.abortSignal,
-                telemetryMetadata: {
-                  pluginId: 'nightshift_investigation_memory',
-                  aggregateBy: 'nightshift',
-                  productSolution: 'observability',
-                  productFeature: 'nightshift',
-                  interactionId: executionId,
+                getSavedObjects,
+                getUiSettings,
+                logger: context.logger,
+                attributes: {
+                  'nightshift.reinforcement_conversation_id': conversation.id,
+                  'nightshift.turn_kind': turnKind,
                 },
-                agentParams: {
-                  conversation,
-                  nextInput: { message },
-                  ...(configurationOverrides ? { configurationOverrides } : {}),
-                },
-              });
-              const drained = reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
-              if (drained.appliedWrites.length > 0) {
-                span?.setAttribute(
-                  'nightshift.applied_writes',
-                  JSON.stringify(drained.appliedWrites)
-                );
+              },
+              async (span) => {
+                try {
+                  const agentReturn = await agentBuilder.agents.runAgent({
+                    request,
+                    agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+                    interactive: { enabled: false },
+                    defaultModel: connectorId ? { connectorId } : undefined,
+                    abortSignal: context.abortSignal,
+                    telemetryMetadata: createInvestigationBackgroundTelemetry(
+                      NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID,
+                      executionId
+                    ),
+                    agentParams: {
+                      conversation,
+                      nextInput: { message },
+                      ...(configurationOverrides ? { configurationOverrides } : {}),
+                    },
+                  });
+                  modelUsage.addRound(agentReturn.result.round.model_usage);
+                  const drained =
+                    reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
+                  if (drained.appliedWrites.length > 0) {
+                    span?.setAttribute(
+                      'nightshift.applied_writes',
+                      JSON.stringify(drained.appliedWrites)
+                    );
+                  }
+                  return { result: agentReturn.result, sessionState: drained };
+                } finally {
+                  const remaining =
+                    reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
+                  if (remaining.appliedWrites.length > 0) {
+                    span?.setAttribute(
+                      'nightshift.applied_writes',
+                      JSON.stringify(remaining.appliedWrites)
+                    );
+                  }
+                }
               }
-              return { result: agentReturn.result, sessionState: drained };
-            } finally {
-              const remaining =
-                reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
-              if (remaining.appliedWrites.length > 0) {
-                span?.setAttribute(
-                  'nightshift.applied_writes',
-                  JSON.stringify(remaining.appliedWrites)
-                );
-              }
-            }
-          }
+            )
         );
 
         const traceId = agentTraceId(result.round.trace_id);

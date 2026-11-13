@@ -141,21 +141,21 @@ export const validateRemoteEndpoint = (value: string): 'required' | 'invalid' | 
   return canParseUrl(endpoint) ? undefined : 'invalid';
 };
 
-/** Matches the saved node's supported_telemetry: all three in Auto, the filled ones in Fixed. */
+/** Matches the saved node's supported_telemetry: every signal in Auto, the filled ones in Fixed. */
 const getRemoteDestinationSignals = (
   remoteElasticsearch: RemoteElasticsearchDestinationFormData
 ): readonly DestinationSignal[] => {
   if (remoteElasticsearch.auto) {
-    return PREFIXED_DESTINATION_SIGNALS;
+    return DESTINATION_SIGNALS;
   }
   const indexBySignal = getRemoteIndexBySignal(remoteElasticsearch);
-  return PREFIXED_DESTINATION_SIGNALS.filter((signal) => indexBySignal[signal]);
+  return DESTINATION_SIGNALS.filter((signal) => indexBySignal[signal]);
 };
 
 type RemoteElasticsearchErrors = RemoteElasticsearchConnectionErrors &
   Pick<
     DestinationCreationFormErrors,
-    'staticIndexes' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+    'staticIndexes' | 'logsIndex' | 'metricsIndex' | 'tracesIndex' | 'docsIndex'
   >;
 
 const getRemoteElasticsearchErrors = (
@@ -177,6 +177,10 @@ const getRemoteElasticsearchErrors = (
     if (error) {
       errors[field] = error;
     }
+  }
+  const docsIndexError = validateFreeFormIndexName(remoteElasticsearch.docsIndex);
+  if (docsIndexError) {
+    errors.docsIndex = docsIndexError;
   }
   return errors;
 };
@@ -325,12 +329,13 @@ const ERROR_FIELD_PATHS: Record<DestinationCreationFormField, readonly FormField
     'remoteElasticsearch.logsIndex',
     'remoteElasticsearch.metricsIndex',
     'remoteElasticsearch.tracesIndex',
+    'remoteElasticsearch.docsIndex',
   ],
   customSignals: ['elasticsearch.customSignals'],
   logsIndex: ['elasticsearch.logsIndex', 'remoteElasticsearch.logsIndex'],
   metricsIndex: ['elasticsearch.metricsIndex', 'remoteElasticsearch.metricsIndex'],
   tracesIndex: ['elasticsearch.tracesIndex', 'remoteElasticsearch.tracesIndex'],
-  docsIndex: ['elasticsearch.docsIndex'],
+  docsIndex: ['elasticsearch.docsIndex', 'remoteElasticsearch.docsIndex'],
   docsWritePatterns: ['elasticsearch.docsWritePatterns'],
   endpoint: ['remoteElasticsearch.endpoint'],
   apiKey: ['remoteElasticsearch.apiKey'],

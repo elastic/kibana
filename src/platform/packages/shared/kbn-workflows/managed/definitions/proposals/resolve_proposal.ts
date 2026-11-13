@@ -8,8 +8,8 @@
  */
 
 import { PROPOSALS_MANAGED_WORKFLOW_PLUGIN_ID, PROPOSALS_WORKFLOW_MANAGEMENT } from './constants';
-import RESOLVE_PROPOSAL_YAML from './resolve_proposal.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const RESOLVE_PROPOSAL_WORKFLOW_ID = 'system-resolve-proposal';
 
@@ -19,5 +19,7 @@ export const RESOLVE_PROPOSAL_WORKFLOW = {
   management: PROPOSALS_WORKFLOW_MANAGEMENT,
   pluginId: PROPOSALS_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yaml: RESOLVE_PROPOSAL_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'resolve_proposal.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

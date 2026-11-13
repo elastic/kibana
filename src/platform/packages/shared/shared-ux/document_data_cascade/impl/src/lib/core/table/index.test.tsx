@@ -10,7 +10,11 @@
 import React, { type PropsWithChildren } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { GroupNode } from '../../../store_provider';
-import { DataCascadeProvider, useDataCascadeState } from '../../../store_provider';
+import {
+  DataCascadeProvider,
+  useDataCascadeActions,
+  useDataCascadeState,
+} from '../../../store_provider';
 import {
   getAdaptedTableRows,
   useCascadeTable,
@@ -32,10 +36,12 @@ describe('table', () => {
 
   describe('useCascadeTable', () => {
     let cascadeState: ReturnType<typeof useDataCascadeState>;
+    let cascadeActions: ReturnType<typeof useDataCascadeActions>;
 
     const TestHelper = ({ children }: PropsWithChildren) => {
       // capture the cascade state for assertions
       cascadeState = useDataCascadeState();
+      cascadeActions = useDataCascadeActions();
 
       return <React.Fragment>{children}</React.Fragment>;
     };
@@ -119,6 +125,62 @@ describe('table', () => {
     });
 
     describe('row expansion', () => {
+      it('keeps rows expanded when the children of a group node are loaded', async () => {
+        const data = Array.from(new Array(3)).map((_, index) => ({
+          id: String(index),
+          name: `Item ${index}`,
+        }));
+
+        const { result } = renderHook(useCascadeTable, {
+          wrapper: ({ children }) =>
+            createHookWrapper({
+              children,
+              data,
+              helper: TestHelper,
+            }),
+          initialProps: {
+            allowMultipleRowToggle: false,
+            enableRowSelection: false,
+            header: jest.fn(),
+            rowCell: jest.fn(),
+          } satisfies TableProps<GroupNode, unknown>,
+        });
+
+        act(() => result.current.rows[0].getToggleExpandedHandler()());
+        expect(cascadeState.table.expanded).toEqual({ '0': true });
+
+        // loading the children replaces the table data, which must not reset the expanded state
+        act(() =>
+          cascadeActions.setRowGroupNodeData({
+            id: '0',
+            data: [{ id: '0-0', name: 'Item 0-0' }],
+          })
+        );
+
+        // the table schedules its automatic state resets, so let them run
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        expect(result.current.rows[0].subRows).toHaveLength(1);
+        expect(cascadeState.table.expanded).toEqual({ '0': true });
+
+        // the same holds for a nested row whose children are loaded afterwards
+        act(() => result.current.rows[0].subRows[0].getToggleExpandedHandler()());
+        act(() =>
+          cascadeActions.setRowGroupNodeData({
+            id: '0-0',
+            data: [{ id: '0-0-0', name: 'Item 0-0-0' }],
+          })
+        );
+
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        expect(cascadeState.table.expanded).toEqual({ '0': true, '0-0': true });
+      });
+
       it('supports multiple root rows to stay expanded when `allowMultipleRowToggle` is true', () => {
         const data = Array.from(new Array(3)).map((_, index) => ({
           id: String(index),

@@ -21,7 +21,14 @@ const makeClient = (overrides: Record<string, unknown> = {}) => ({
     ...overrides,
   }),
   getLifecycleCorrelation: jest.fn().mockResolvedValue({}),
+  reportRunEnded: jest.fn().mockResolvedValue(undefined),
 });
+
+const workflowRequest = {
+  ...mockRequest,
+  isInternalApiRequest: true,
+  headers: { 'x-kibana-workflow-execution-id': 'investigation-execution-1' },
+} as unknown as KibanaRequest;
 
 const makeResources = (
   emitter: jest.Mock | undefined,
@@ -185,4 +192,38 @@ it('is a no-op when no trigger emitter is available', async () => {
   });
 
   await expect(handler(resources as never)).resolves.toEqual({ accepted: false });
+});
+
+it('reports the end of a completed run without waiting for it', async () => {
+  const emitter = jest.fn();
+  const client = makeClient();
+  // Never settles: the trigger must not wait for the telemetry reads.
+  client.reportRunEnded.mockReturnValue(new Promise(() => {}));
+  const resources = {
+    ...makeResources(emitter, { path: { id: 'inv-1' }, body: { status: 'completed' } }, client),
+    request: workflowRequest,
+  };
+
+  await expect(handler(resources as never)).resolves.toEqual({ accepted: true });
+
+  expect(client.reportRunEnded).toHaveBeenCalledWith(
+    'inv-1',
+    'investigation-execution-1',
+    'completed'
+  );
+  expect(emitter).toHaveBeenCalledWith(
+    'nightshift-investigations.completed',
+    expect.objectContaining({ status: 'completed' })
+  );
+});
+
+it('reports the end of a completed run that has no emitter or subject', async () => {
+  const client = makeClient();
+  client.getLifecycleSubject.mockResolvedValue(undefined);
+  const params = { path: { id: 'inv-1' }, body: { status: 'completed' } };
+
+  await handler({ ...makeResources(undefined, params, client), request: workflowRequest } as never);
+  await handler({ ...makeResources(jest.fn(), params, client), request: workflowRequest } as never);
+
+  expect(client.reportRunEnded).toHaveBeenCalledTimes(2);
 });

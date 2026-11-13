@@ -152,6 +152,7 @@ function createDefaultEvaluators(): DefaultEvaluators {
       latency: createTraceEvaluator('Latency', 'minimize'),
       toolCalls: createTraceEvaluator('ToolCalls', 'minimize'),
       cachedTokens: createTraceEvaluator('CachedTokens', 'minimize'),
+      estimatedCost: createTraceEvaluator('EstimatedCost', 'minimize'),
     },
   };
 }

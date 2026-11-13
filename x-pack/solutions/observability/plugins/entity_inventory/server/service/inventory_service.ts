@@ -7,6 +7,17 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
+import type {
+  GetTypesResponse,
+  InventoryRow,
+  InventoryType,
+  InventoryTypeColumn,
+  ListQueryDiagnostic,
+  ListResponse,
+  Provenance,
+  SourceError,
+  UnavailableColumn,
+} from '../../common';
 import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
 import { InventoryTypeNotFoundError } from '../inventory/errors/inventory_type_not_found_error';
 import {
@@ -22,13 +33,7 @@ import {
   summarizeResults,
   toSourceError,
 } from '../inventory/executor';
-import type {
-  EsqlQueryResult,
-  InventoryRow,
-  PlanResult,
-  Provenance,
-  SourceError,
-} from '../inventory/executor';
+import type { EsqlQueryResult, PlanResult } from '../inventory/executor';
 import {
   buildColumns,
   ENTITY_ID_COLUMN,
@@ -39,14 +44,6 @@ import {
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
 import type { ListRequest } from '../inventory/types';
-import type {
-  GetTypesResponse,
-  InventoryType,
-  InventoryTypeColumn,
-  ListQueryDiagnostic,
-  ListResponse,
-  UnavailableColumn,
-} from '../routes/types';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {

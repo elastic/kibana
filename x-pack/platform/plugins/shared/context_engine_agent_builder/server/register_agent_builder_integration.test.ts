@@ -58,7 +58,10 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
     const coreSetup = {
       getStartServices: jest.fn().mockResolvedValue([
-        { elasticsearch: { client: { asScoped } } },
+        {
+          elasticsearch: { client: { asScoped } },
+          savedObjects: { getScopedClient: jest.fn() },
+        },
         {
           contextEngine: { getAiIndexDataReadService },
           security,
@@ -123,14 +126,14 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
   });
 
-  it('registers a resolver mapping registry items to id, esqlTarget (dest.value) and description', async () => {
+  it('registers a resolver mapping registry items to id, esqlTarget (dest.value), description and whether it takes memories', async () => {
     const { resolver } = setup({
       aiIndices: [
         {
           id: 'my-custom',
+          managed: false,
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
-          memory_enabled: true,
         },
       ],
     });
@@ -145,19 +148,45 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     ]);
   });
 
+  it('reports memory for every AI index that is not managed, and for managed ones that opt in', async () => {
+    const { resolver } = setup({
+      aiIndices: [
+        {
+          id: 'custom',
+          managed: false,
+          memory_enabled: false,
+          dest: { type: 'index', value: 'idx-custom' },
+        },
+        { id: 'managed', managed: true, dest: { type: 'index', value: 'idx-managed' } },
+        {
+          id: 'opted-in',
+          managed: true,
+          memory_enabled: true,
+          dest: { type: 'index', value: 'idx-opted-in' },
+        },
+      ],
+    });
+
+    expect(await resolver({ ids: ['custom', 'managed', 'opted-in'], request })).toEqual([
+      { id: 'custom', esqlTarget: 'idx-custom', memoryEnabled: true },
+      { id: 'managed', esqlTarget: 'idx-managed', memoryEnabled: false },
+      { id: 'opted-in', esqlTarget: 'idx-opted-in', memoryEnabled: true },
+    ]);
+  });
+
   it('asks the service for the requested ids only, so just those are probed', async () => {
     const { resolver, list } = setup({
       aiIndices: [
         {
           id: 'wanted',
+          managed: false,
           dest: { type: 'index', value: 'idx-wanted' },
-          memory_enabled: false,
         },
       ],
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
-      { id: 'wanted', esqlTarget: 'idx-wanted', memoryEnabled: false },
+      { id: 'wanted', esqlTarget: 'idx-wanted', memoryEnabled: true },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
     expect(list).toHaveBeenCalledWith(['wanted', 'unknown']);
