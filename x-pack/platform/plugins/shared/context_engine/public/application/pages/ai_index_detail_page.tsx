@@ -66,7 +66,7 @@ const sourcesTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.s
 const knowledgeIndicatorsTabLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators',
   {
-    defaultMessage: 'Knowledge Indicators',
+    defaultMessage: 'Knowledge documents',
   }
 );
 

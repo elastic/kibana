@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { ListKiBody } from './list_ki_body';
 import { ListKiFooter } from './list_ki_footer';
 import { ListKiHeader } from './list_ki_header';
 import { useListKiPanel } from './use_list_ki_panel';
+import { useListKiPanelStyles } from './list_ki_panel_styles';
 
 interface ListKiPanelProps {
   aiIndex: GetAiIndexResponse;
@@ -40,10 +41,11 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
     onSearchSubmitClick,
   } = useListKiPanel(aiIndex);
 
+  const styles = useListKiPanelStyles();
   const isRefetching = isFetching && !isLoading;
 
   return (
-    <div data-test-subj="contextListKiPanel">
+    <EuiPanel hasBorder paddingSize="l" css={styles.panel} data-test-subj="contextListKiPanel">
       <ListKiHeader
         searchText={searchText}
         submittedQuery={submittedQuery}
@@ -58,24 +60,27 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
         onSearchSubmitClick={onSearchSubmitClick}
       />
 
-      <EuiSpacer size="l" />
+      <div css={styles.split} data-test-subj="contextListKiSplit">
+        <div css={styles.list} data-test-subj="contextListKiList">
+          <ListKiBody
+            aiIndexId={aiIndexId}
+            kis={kis}
+            isLoading={isLoading}
+            isRefetching={isRefetching}
+            error={error}
+          />
 
-      <ListKiBody
-        aiIndexId={aiIndexId}
-        kis={kis}
-        isLoading={isLoading}
-        isRefetching={isRefetching}
-        error={error}
-      />
-
-      <ListKiFooter
-        loadedCount={kis.length}
-        total={total}
-        size={size}
-        isLoading={isFetching}
-        discoverHref={discoverHref}
-        onLoadMore={loadMore}
-      />
-    </div>
+          <ListKiFooter
+            loadedCount={kis.length}
+            total={total}
+            size={size}
+            isLoading={isFetching}
+            discoverHref={discoverHref}
+            onLoadMore={loadMore}
+          />
+        </div>
+        <div css={styles.viewerColumn} data-test-subj="contextListKiViewerColumn" />
+      </div>
+    </EuiPanel>
   );
 };
