@@ -10,11 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { TILE_QUERY_TIMEOUT_MS } from './tile_query_timeout';
 
-export const TILE_TIMEOUT_MESSAGE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.tiles.timedOut',
-  { defaultMessage: 'Timed out' }
-);
-
 /**
  * Shows one warning when any tile count times out, once per page load and again for each new
  * range or filter (`runKey`), like Kibana's own search timeout notice; each tile says so itself.
@@ -34,7 +29,7 @@ export const useTilesTimeoutNotice = (isAnyCountTimedOut: boolean, runKey: strin
     isNotified.current = true;
     addWarning({
       title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.timedOutTitle', {
-        defaultMessage: 'Some tiles timed out',
+        defaultMessage: 'Some metrics timed out',
       }),
       text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.timedOutText', {
         defaultMessage:

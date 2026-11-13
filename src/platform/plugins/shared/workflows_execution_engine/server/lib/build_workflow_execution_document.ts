@@ -20,6 +20,7 @@ import {
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
 } from './execution_identity';
+import type { ResolvedExecutionIdentity } from './get_user';
 import { normalizeEventChainVisitedWorkflowIds } from './telemetry/utils/extract_execution_metadata';
 import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
 
@@ -29,10 +30,11 @@ export interface BuildWorkflowExecutionDocumentParams {
   spaceId: string;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
-  authenticatedUser: string | undefined;
+  authenticatedUser: ResolvedExecutionIdentity | undefined;
   now: Date;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
+  getRunName: (workflowExecution: WorkflowExecutionForInputRendering) => string | undefined;
 }
 
 const stampExecutionWorkflowVersion = (
@@ -58,15 +60,22 @@ export const buildWorkflowExecutionDocument = (
     now,
     maxEventChainDepth,
     getConcurrencyGroupKey,
+    getRunName,
   } = params;
   const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
   // Strip the context's space so property order cannot override the trusted execution space.
   const executionContext = { spaceId, ...omit(context, 'spaceId') };
   const metadata = context.metadata as Record<string, unknown> | undefined;
   const eventPayload = context.event as Record<string, unknown> | undefined;
+  const hasEventChain =
+    eventPayload?.eventChainDepth !== undefined ||
+    eventPayload?.eventChainVisitedWorkflowIds !== undefined;
+  const chainSource = hasEventChain
+    ? eventPayload
+    : (context.parentEventChain as Record<string, unknown> | undefined);
   let rootEventChainDepth: number | undefined;
-  if (eventPayload) {
-    const rawDepth = eventPayload.eventChainDepth;
+  if (chainSource) {
+    const rawDepth = chainSource.eventChainDepth;
     if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
       rootEventChainDepth = rawDepth;
     } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
@@ -77,7 +86,7 @@ export const buildWorkflowExecutionDocument = (
     }
   }
   const rootVisited = normalizeEventChainVisitedWorkflowIds(
-    eventPayload?.eventChainVisitedWorkflowIds,
+    chainSource?.eventChainVisitedWorkflowIds,
     maxEventChainDepth
   );
   const dispatchEventId =
@@ -95,7 +104,8 @@ export const buildWorkflowExecutionDocument = (
     context: executionContext,
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
-    executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
+    executedBy: authenticatedUser?.executedBy ?? UNKNOWN_EXECUTION_IDENTITY,
+    ...(authenticatedUser ? { executedByUser: authenticatedUser.user } : {}),
     ...(inheritedIdentity
       ? { effectiveIdentity: inheritedIdentity }
       : workflow.definition?.settings?.run_as
@@ -123,6 +133,7 @@ export const buildWorkflowExecutionDocument = (
   };
 
   stampExecutionWorkflowVersion(workflowExecution, workflow);
+  workflowExecution.runName = getRunName(workflowExecution);
 
   const concurrencyGroupKey = getConcurrencyGroupKey(workflowExecution);
   if (concurrencyGroupKey) {

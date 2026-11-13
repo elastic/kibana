@@ -1,0 +1,19 @@
+## Question (context only)
+{{{question}}}
+
+## Wiki files the agent opened
+{{{wikiReads}}}
+
+## Memory files the agent opened
+{{{memoryReads}}}
+
+## Final report (conclusion, hypotheses, recommendations)
+{{{answer}}}
+
+## Report's own selected evidence
+{{{evidence}}}
+
+## Tool-call trajectory (everything the agent called, in order)
+{{{trajectory}}}
+
+Judge the wiki influence and which memories the final report cites, then call the `score` tool.

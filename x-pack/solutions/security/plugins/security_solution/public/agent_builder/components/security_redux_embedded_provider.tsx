@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Provider } from 'react-redux-v7';
 import { createMemoryHistory } from 'history';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
@@ -37,20 +37,12 @@ export interface SecurityReduxEmbeddedProviderProps {
   children: React.ReactNode;
 }
 
-const useHasRouterContext = (): boolean => {
-  try {
-    useLocation();
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 /**
  * Reuse a host Router when present and mount an in-memory Router for surfaces with none (chrome embeddable)
  */
 const EmbeddedRouter: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const hasRouterContext = useHasRouterContext();
+  // `useHistory` reads the context provided by `<Router>`, so it is undefined outside of one.
+  const hasRouterContext = useHistory() !== undefined;
   const [fallbackHistory] = useState(() => createMemoryHistory());
 
   if (hasRouterContext) {

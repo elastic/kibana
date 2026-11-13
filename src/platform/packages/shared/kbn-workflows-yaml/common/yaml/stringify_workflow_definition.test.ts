@@ -23,9 +23,11 @@ describe('getYamlStringFromJSON', () => {
       ],
       description: 'test',
       name: 'test',
+      'run-name': 'Run {{ execution.id }}',
     };
     const yaml = stringifyWorkflowDefinition(json);
     expect(yaml).toBe(`name: test
+run-name: Run {{ execution.id }}
 description: test
 enabled: true
 steps:

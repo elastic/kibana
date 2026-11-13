@@ -33,6 +33,7 @@ const { createFailureIssue, updateFailureIssue, updateSuiteIssue } =
   jest.requireMock('./report_failure');
 const { reportFailuresToEs } = jest.requireMock('./report_failures_to_es');
 const { reportFailuresToFile } = jest.requireMock('./report_failures_to_file');
+const { addMessagesToReport } = jest.requireMock('./add_messages_to_report');
 
 const makeFailure = (i: number): TestFailure => ({
   classname: `suite ${i}`,
@@ -94,6 +95,8 @@ const createParams = (
     pipeline: 'kibana-on-merge',
     prependTitle: '',
     updateGithub: true,
+    perTestIssues: true,
+    suiteIssueComments: false,
     indexInEs: true,
     reportUpdate: true,
     bkMeta: {},
@@ -202,6 +205,33 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
   });
 });
 
+describe('processJUnitReports with issue creation off', () => {
+  it('updates tracked failures but opens no issue for new ones', async () => {
+    const failures = [makeFailure(0), makeFailure(1)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams([createExistingIssue(failures[0])]);
+    params.perTestIssues = false;
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue).not.toHaveBeenCalled();
+    expect(failures[1].failureCount).toBe(0);
+  });
+
+  it('still indexes every failure and hands them to the file reporter', async () => {
+    const failures = [makeFailure(0), makeFailure(1)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+    params.perTestIssues = false;
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(2);
+    expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(2);
+  });
+});
+
 describe('processJUnitReports flaky suite issues', () => {
   it('records a failure on its suite issue instead of on a per-test issue', async () => {
     const failures = [makeFailure(0), makeFailure(1)];
@@ -216,8 +246,9 @@ describe('processJUnitReports flaky suite issues', () => {
     await processJUnitReports(['report.xml'], params);
 
     expect(updateSuiteIssue).toHaveBeenCalledTimes(1);
-    expect(updateSuiteIssue.mock.calls[0][1]).toBe(suiteIssue);
-    expect(updateSuiteIssue.mock.calls[0][5]).toBe(failures[0]);
+    expect(updateSuiteIssue.mock.calls[0][0]).toBe(suiteIssue);
+    // the consistent failure check of the job posts breaks on it
+    expect(updateSuiteIssue.mock.calls[0][2]).toBeUndefined();
     expect(updateFailureIssue).not.toHaveBeenCalled();
     expect(failures[0].githubIssue).toBe('https://github.com/issues/7');
     expect(failures[0].failureCount).toBe(5);
@@ -226,6 +257,22 @@ describe('processJUnitReports flaky suite issues', () => {
     // the suite-tracked failure does not use up the one new issue per report
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
     expect(createFailureIssue.mock.calls[0][1]).toBe(failures[1]);
+  });
+
+  it('comments on the suite issue about the failure in a job without the consistent failure check', async () => {
+    const failures = [makeFailure(0)];
+    getFailures.mockReturnValue(failures);
+    const suiteIssue = createSuiteIssue(failures[0]);
+    const { params } = createParams([], [[failures[0], suiteIssue]]);
+
+    await processJUnitReports(['report.xml'], { ...params, suiteIssueComments: true });
+
+    expect(updateSuiteIssue.mock.calls[0][2]).toEqual({
+      buildUrl: 'https://build-url',
+      branch: 'main',
+      pipeline: 'kibana-on-merge',
+      failure: failures[0],
+    });
   });
 
   it('shows the count the suite issue had without bumping it when GitHub updates are off', async () => {
@@ -245,7 +292,7 @@ describe('processJUnitReports flaky suite issues', () => {
     expect(failures[0].failureCount).toBe(4);
     // nothing was written, so the second failure of the suite counts from the same body
     expect(suiteIssue.github.body).toBe('suite body');
-    expect(updateSuiteIssue.mock.calls[1][1].github.body).toBe('suite body');
+    expect(updateSuiteIssue.mock.calls[1][0].github.body).toBe('suite body');
   });
 });
 
@@ -302,5 +349,39 @@ describe('processJUnitReports cascading failures', () => {
 
     expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(3);
     expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(3);
+  });
+});
+
+describe('processJUnitReports infrastructure failures', () => {
+  const makeInfraFailure = (i: number): TestFailure => ({
+    ...makeFailure(i),
+    likelyIrrelevant: true,
+    infraReason: { category: 'es_timeout', message: 'Elasticsearch timed out.' },
+  });
+
+  it('neither creates nor updates issues for them', async () => {
+    const failures = [makeInfraFailure(0), makeInfraFailure(1)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams([createExistingIssue(failures[1])]);
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).not.toHaveBeenCalled();
+    expect(updateFailureIssue).not.toHaveBeenCalled();
+  });
+
+  it('explains the infrastructure reason in the report message', async () => {
+    getFailures.mockReturnValue([makeInfraFailure(0)]);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(addMessagesToReport.mock.calls[0][0].messages).toContainEqual({
+      classname: 'suite 0',
+      name: 'test 0',
+      message:
+        'Failure is likely an infrastructure issue (es_timeout), so an issue was not created ' +
+        'or updated. Elasticsearch timed out.',
+    });
   });
 });

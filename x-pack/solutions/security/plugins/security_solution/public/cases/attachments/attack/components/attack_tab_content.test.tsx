@@ -57,15 +57,9 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
 jest.mock('../../../../assistant/use_assistant_availability');
 jest.mock('../hooks/use_investigate_attack_in_timeline');
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
-}));
 const mockOpenAttackFlyout = jest.fn();
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({ openAttackFlyout: mockOpenAttackFlyout }),
-}));
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => true,
 }));
 
 /** EUI's own handles on the data grid controls, which have no constant of ours to come from. */

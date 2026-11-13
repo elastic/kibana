@@ -17,6 +17,10 @@ export interface RenderOptions {
   // Keep the leading `steps:` line instead of emitting a bare chunk.
   // TODO: remove this field and always emit the leading `steps:` once the migration is complete.
   header?: boolean;
+
+  // The document's top-level `env`. Only valid with `header`, since a continuation chunk has no
+  // document header to put it in.
+  env?: Readonly<Record<string, string>>;
 }
 
 // Mirror `extractStepKeys` from `buildkite/utils.ts`
@@ -51,8 +55,12 @@ export const getStepKeys = (steps: readonly Step[]): string[] =>
 
 export const renderSteps = (
   steps: readonly Step[],
-  { cancelOnGateFailure = false, header = false }: RenderOptions = {}
+  { cancelOnGateFailure = false, header = false, env }: RenderOptions = {}
 ): string => {
+  if (env && !header) {
+    throw new Error('renderSteps: `env` requires `header: true`');
+  }
+
   if (cancelOnGateFailure) {
     registerCancelKeys(getStepKeys(steps));
   }
@@ -64,6 +72,6 @@ export const renderSteps = (
 
   // lineWidth 0 stops from folding long commands. The default indentSeq keeps list items two
   // spaces in, which is what lets this chunk continue a document that already has `steps:`.
-  const text = stringify({ steps }, { lineWidth: 0 });
+  const text = stringify(env ? { env, steps } : { steps }, { lineWidth: 0 });
   return header ? text : text.replace(/^steps:/, '');
 };

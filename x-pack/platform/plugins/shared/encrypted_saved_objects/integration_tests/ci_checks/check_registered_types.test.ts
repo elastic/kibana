@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 29 as const;
+export const ESO_TYPES_COUNT = 28 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -64,7 +64,7 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "c2291acc23b540b16a7e33ca80289a18d7b26663e268d290f943929e047ffc75",
+        "action": "7db12f2990b53abac574ebe9decf7f439f1a12a50a57bcd330f7bc716ec106e9",
         "action_task_params": "06aa563283bdcd5c07ec433a7d0b8425019ad11d75595ee1431691667ecd2cec",
         "ad_hoc_run_params": "492d390fb70fba457acb3b33ce76d4ea027625b3a7d7e9dd76c5c3255655c544",
         "alert": "878a3b83179bbf2ad9d3862fcba539b7066429869b14c120a1dc7a8d39f4a7fa",
@@ -80,7 +80,6 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
         "ingest-download-sources": "b3740796eab0a91736e43bd22f7489cbf6f2ad0241ae370d1c8195b6a8d8ad52",
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
-        "nightshift-secrets": "dda5d9c34f2dfad530fd3ce2f7d30aa1b626e925ba8da6469f7da62136e2d8aa",
         "oauth_state": "b01289e5c133db9d4d802a2b838e43cce4a8399566dedb21de551da57c88894a",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
         "service-account-credential": "5d9f328d92718249b324fbd5d01332bcef80be980003d510a3bd24af230244ff",
@@ -119,6 +118,7 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(modelVersionMap).toMatchInlineSnapshot(`
       Array [
+        "action|5",
         "action|4",
         "action|3",
         "action|2",
@@ -168,6 +168,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",
         "fleet-uninstall-tokens|1",
+        "ingest-download-sources|3",
         "ingest-download-sources|2",
         "ingest-download-sources|1",
         "ingest-outputs|9",
@@ -183,12 +184,15 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|11",
         "ingest-outputs|10",
         "ingest-outputs|1",
-        "nightshift-secrets|1",
         "oauth_state|1",
         "service-account-credential|1",
         "service-account-workload-binding|1",
+        "synthetics-monitor|4",
+        "synthetics-monitor|3",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
+        "synthetics-monitor-multi-space|2",
+        "synthetics-monitor-multi-space|1",
         "synthetics-secret-connection|1",
         "task|9",
         "task|8",

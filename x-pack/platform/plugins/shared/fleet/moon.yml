@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/ui-theme'
   - '@kbn/config-schema'
+  - '@kbn/schema-string-helpers'
   - '@kbn/telemetry-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/saved-objects-tagging-plugin'
@@ -119,7 +120,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
-  - '@kbn/fs'
+  - '@kbn/content-sanitization'
   - '@kbn/kql'
   - '@kbn/scout'
   - '@kbn/es'
@@ -143,6 +144,9 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*

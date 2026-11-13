@@ -69,6 +69,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/sse-utils'
   - '@kbn/cloud-plugin'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

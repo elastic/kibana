@@ -286,6 +286,16 @@ describe('UserMessageText', () => {
       expect(screen.getByText('@dashboard/A')).toBeInTheDocument();
     });
 
+    it('renders a mention as a badge with the name saved at send time, without a link', () => {
+      renderWithProvider(
+        <UserMessageText text="[@Julian Rosado](mention://u_julian_0?kind=user) look at this" />
+      );
+
+      expect(screen.getByText('@Julian Rosado')).toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      expect(screen.getByText(/look at this/)).toBeInTheDocument();
+    });
+
     it.each(['@dashboard/logs-*,metrics-*', '@dashboard/a `code` b', '@dashboard/~~old~~ sales'])(
       'renders markdown characters in a command badge label literally: %s',
       (label) => {
@@ -297,6 +307,14 @@ describe('UserMessageText', () => {
         expect(container.querySelector('em, code, del')).not.toBeInTheDocument();
       }
     );
+
+    it('renders a badge whose label contains escaped brackets', () => {
+      renderWithProvider(
+        <UserMessageText text="[#dashboard/\[Elastic Security\] Rules](sml://dashboard%3Asec-dash)" />
+      );
+
+      expect(screen.getByText('#dashboard/[Elastic Security] Rules')).toBeInTheDocument();
+    });
 
     it('renders an image badge for image scheme links', () => {
       renderWithProvider(<UserMessageText text="[photo.png](image://photo.png)" />);

@@ -9,3 +9,4 @@
 
 export { getHighlightReact } from './highlight_react';
 export { getHighlightRequest } from './highlight_request';
+export { highlightTags } from './highlight_tags';

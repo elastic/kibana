@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+const DEFAULT_POLL_INTERVAL_MS = 500;
+
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -12,14 +14,15 @@ const sleep = (ms: number): Promise<void> =>
 
 export async function pollUntilTrue(
   fn: () => Promise<boolean>,
-  options: { timeoutMs: number; intervalMs: number; label?: string }
+  options: { timeoutMs: number; intervalMs?: number; label?: string }
 ): Promise<void> {
-  const deadline = Date.now() + options.timeoutMs;
+  const { timeoutMs, intervalMs = DEFAULT_POLL_INTERVAL_MS, label } = options;
+  const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await fn()) {
       return;
     }
-    await sleep(options.intervalMs);
+    await sleep(intervalMs);
   }
-  throw new Error(options.label ?? `pollUntilTrue timed out after ${options.timeoutMs}ms`);
+  throw new Error(label ?? `pollUntilTrue timed out after ${timeoutMs}ms`);
 }

@@ -43,13 +43,6 @@ export interface ConversationDetailsFlyoutFooterProps {
   onCloseInvestigation?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
 }
 
-interface ModalState {
-  type: CardActionType | null;
-  recordId: Investigation['recordId'] | null;
-}
-
-const CLOSED_MODAL: ModalState = { type: null, recordId: null };
-
 /**
  * Footer slot content. It owns its action modals rather than delegating them upwards: the flyout
  * can be mounted through `core.overlays.openFlyout`, where there is no page-level React tree.
@@ -62,23 +55,16 @@ export const ConversationDetailsFlyoutFooter = ({
   wrapEscalationButton,
   onCloseInvestigation,
 }: ConversationDetailsFlyoutFooterProps) => {
-  const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
-  const closeModal = useCallback(() => setModalState(CLOSED_MODAL), []);
+  const [modalAction, setModalAction] = useState<CardActionType | null>(null);
+  const closeModal = useCallback(() => setModalAction(null), []);
   const canRenderEscalationButton = Boolean(onOpenEscalation);
-
-  const onClickAction = useCallback(
-    (action: CardActionType, recordId: Investigation['recordId']) => {
-      setModalState({ type: action, recordId });
-    },
-    []
-  );
 
   const escalationButton = (
     <EuiFlexItem grow={false}>
       <EuiButton
         color="primary"
         iconType="document"
-        onClick={() => onClickAction('createEscalation', investigation.recordId)}
+        onClick={() => setModalAction('createEscalation')}
         size="s"
       >
         {ACTIONS_TRANSLATIONS.buttons.openEscalation}
@@ -110,9 +96,7 @@ export const ConversationDetailsFlyoutFooter = ({
       </EuiFlexGroup>
 
       <InvestigationActionModals
-        action={modalState.type}
-        recordId={modalState.recordId}
-        initialAssignee={investigation.assignee}
+        action={modalAction}
         investigation={investigation}
         onCloseAction={closeModal}
         onCloseApproval={closeModal}

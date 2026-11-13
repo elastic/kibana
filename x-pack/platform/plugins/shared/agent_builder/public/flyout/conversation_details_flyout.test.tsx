@@ -161,10 +161,14 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     return conversationTemplatesService;
   };
 
-  const renderSnapshot = () => {
+  const renderSnapshot = (onNotFound?: () => void, onConversationUpdated?: () => void) => {
     const get = jest.fn();
     const conversationsService = { get } as unknown as ConversationsService;
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+      // Several tests reject on purpose; react-query would otherwise log each failure.
+      logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    });
     const Wrapper = ({ children }: PropsWithChildren) => (
       <EuiProvider>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -177,6 +181,8 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
           conversationsService={conversationsService}
           conversationTemplatesService={createTemplatesService()}
           titleId="title"
+          onNotFound={onNotFound}
+          onConversationUpdated={onConversationUpdated}
         />,
         { wrapper: Wrapper }
       );
@@ -254,21 +260,68 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     expect(screen.getByRole('button', { name: 'Second clicked 1' })).toBeInTheDocument();
   });
 
-  it('hands registered tabs a refetchConversation that refetches on demand', async () => {
-    const { get, renderResult } = renderSnapshot();
+  it('hands registered tabs a refetchConversation that refetches on demand and reports the update, unlike polling', async () => {
+    const onConversationUpdated = jest.fn();
+    const { get, renderResult } = renderSnapshot(undefined, onConversationUpdated);
     get
       .mockResolvedValueOnce(createConversation({ title: 'First fetch' }))
+      .mockResolvedValueOnce(createConversation({ title: 'Polled' }))
       .mockResolvedValue(createConversation({ title: 'Refetched' }));
 
     renderResult();
 
     expect(await screen.findByText('First fetch')).toBeInTheDocument();
+    await advance(5_000);
+    expect(await screen.findByText('Polled')).toBeInTheDocument();
+    expect(onConversationUpdated).not.toHaveBeenCalled();
+    expect(get).toHaveBeenCalledTimes(2);
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Refetch' }));
     });
 
-    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(onConversationUpdated).toHaveBeenCalledTimes(1));
+    expect(get).toHaveBeenCalledTimes(3);
     expect(screen.getByText('Refetched')).toBeInTheDocument();
+  });
+
+  it('reports a missing conversation once and stops polling', async () => {
+    const onNotFound = jest.fn();
+    const { get, renderResult } = renderSnapshot(onNotFound);
+    get.mockRejectedValue({ response: { status: 404 } });
+
+    renderResult();
+
+    await waitFor(() => expect(onNotFound).toHaveBeenCalledTimes(1));
+    await advance(15_000);
+
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(onNotFound).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps polling after a transient error exhausts its retries and recovers once the backend does', async () => {
+    const onNotFound = jest.fn();
+    const { get, renderResult } = renderSnapshot(onNotFound);
+    const serverError = { response: { status: 500 } };
+    get
+      .mockRejectedValueOnce(serverError)
+      .mockRejectedValueOnce(serverError)
+      .mockRejectedValueOnce(serverError)
+      .mockRejectedValueOnce(serverError)
+      .mockResolvedValue(createConversation({ title: 'Recovered' }));
+
+    renderResult();
+    // Retries back off 1s, 2s, 4s and each waits on the previous rejection, so step the clock.
+    for (let elapsed = 0; elapsed < 8; elapsed++) {
+      await advance(1_000);
+    }
+
+    expect(get).toHaveBeenCalledTimes(4);
+    expect(await screen.findByText(ERROR_BODY)).toBeInTheDocument();
+
+    await advance(5_000);
+
+    expect(await screen.findByText('Recovered')).toBeInTheDocument();
+    expect(onNotFound).not.toHaveBeenCalled();
   });
 
   it('omits refetchConversation for the in-chat host', () => {
@@ -325,5 +378,23 @@ describe('ConversationDetailsFlyout', () => {
     const [{ flyoutMenuProps }] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
     expect(trailingActions).toHaveBeenCalledWith({ conversation });
     expect(flyoutMenuProps?.trailingActions).toEqual(trailingActions.mock.results[0].value);
+  });
+
+  it('opens resizable at the remembered width', () => {
+    localStorage.setItem('agentBuilder.conversationDetailsFlyoutWidth', '620');
+    jest.mocked(useConversation).mockReturnValue({
+      conversation: createConversation(),
+      isLoading: false,
+    } as ReturnType<typeof useConversation>);
+    jest.mocked(useAgentBuilderServices).mockReturnValue({
+      conversationTemplatesService: new ConversationTemplatesService(),
+    } as ReturnType<typeof useAgentBuilderServices>);
+
+    render(<ConversationDetailsFlyout onClose={jest.fn()} />, { wrapper: EuiProvider });
+
+    const [flyoutProps] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
+    expect(flyoutProps).toEqual(
+      expect.objectContaining({ size: 620, minWidth: 400, maxWidth: 640, resizable: true })
+    );
   });
 });

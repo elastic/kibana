@@ -64,11 +64,11 @@ const renderFlyout = ({
 } = {}) => {
   const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
   const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters);
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(initialDataViews);
+  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(initialDataViews);
   const api = {
     query$,
     filters$,
-    dataViews$,
+    dataSources$,
     setQuery: jest.fn((query?: Query) => query$.next(query)),
     setFilters: jest.fn((filters?: Filter[]) => filters$.next(filters)),
   } as unknown as VegaEmbeddableApi;
@@ -186,6 +186,20 @@ describe('VegaEditorFlyout', () => {
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled()
     );
+  });
+
+  it('cannot be saved with more than 100 filters', async () => {
+    renderFlyout({
+      initialFilters: Array.from({ length: 101 }, () => ({
+        meta: {},
+        query: { match_all: {} },
+      })),
+    });
+
+    fireEvent.click(await screen.findByText('changeSpec'));
+
+    expect(screen.getByTestId('vegaEditorTooManyFiltersCallout')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
   });
 
   it('does not enable saving when filters only differ in display metadata', async () => {

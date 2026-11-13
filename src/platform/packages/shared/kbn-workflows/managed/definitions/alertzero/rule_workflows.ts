@@ -11,13 +11,8 @@ import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from './constants';
-import COVERAGE_REVIEW_YAML from './coverage_review.yaml';
-import COVERAGE_WORKER_YAML from './coverage_worker.yaml';
-import RULE_CREATION_YAML from './rule_creation.yaml';
-import RULE_PREVIEW_YAML from './rule_preview.yaml';
-import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
-import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID = 'system-security-coverage-review';
 export const ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID = 'system-security-coverage-worker';
@@ -27,55 +22,67 @@ export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tu
 export const ALERTZERO_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
 
 export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 6,
-  yaml: COVERAGE_REVIEW_YAML,
+  version: 8,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'coverage_review.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_COVERAGE_WORKER_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 5,
-  yaml: COVERAGE_WORKER_YAML,
+  version: 6,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'coverage_worker.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_PREVIEW_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
-  yaml: RULE_PREVIEW_YAML,
+  version: 4,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'rule_preview.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 30,
-  yaml: RULE_TUNING_WORKER_YAML,
+  version: 34,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'rule_tuning_worker.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 32,
-  yaml: RULE_TUNING_REVIEW_YAML,
+  version: 36,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'rule_tuning_review.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_CREATION_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
-  yaml: RULE_CREATION_YAML,
+  version: 7,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'rule_creation.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

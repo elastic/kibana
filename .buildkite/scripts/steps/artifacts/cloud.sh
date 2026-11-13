@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-# Release artifacts must not hydrate the shared webpack bundles from the remote cache
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 .buildkite/scripts/bootstrap.sh
 
 source "$(dirname "$0")/../../common/util.sh"
@@ -14,6 +11,8 @@ if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
   echo "--- Nothing to do in DRY_RUN mode"
   exit 0
 fi
+
+load_cloud_deploy_credentials
 
 echo "--- Clean up cached images"
 clean_cached_images

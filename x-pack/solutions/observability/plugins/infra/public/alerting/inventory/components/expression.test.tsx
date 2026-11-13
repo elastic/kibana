@@ -75,6 +75,8 @@ const exampleCustomMetric = {
 
 const dataViewMock = dataViewPluginMocks.createStartContract();
 
+const EXISTING_RULE_ID = 'existing-rule-id';
+
 describe('Expression', () => {
   async function setup(
     currentOptions: AlertContextMeta,
@@ -181,7 +183,7 @@ describe('Expression', () => {
     expect(chart.prop('kuery')).toBe(ruleParams.filterQueryText);
   });
 
-  function renderShallow(ruleParams: Partial<ExpressionsProps['ruleParams']>) {
+  function renderShallow(ruleParams: Partial<ExpressionsProps['ruleParams']>, id?: string) {
     const params: ExpressionsProps['ruleParams'] = {
       criteria: [
         {
@@ -202,6 +204,7 @@ describe('Expression', () => {
         ruleInterval="1m"
         ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
+        id={id}
         ruleParams={params}
         errors={{}}
         setRuleParams={(key, value) => Reflect.set(params, key, value)}
@@ -226,8 +229,8 @@ describe('Expression', () => {
   const hasSchemaControl = (ruleParams: Partial<ExpressionsProps['ruleParams']>) =>
     renderShallow(ruleParams).wrapper.exists('[data-test-subj="schemaExpressionSelect"]');
 
-  const selectedSchema = (ruleParams: Partial<ExpressionsProps['ruleParams']>) =>
-    renderShallow(ruleParams)
+  const selectedSchema = (ruleParams: Partial<ExpressionsProps['ruleParams']>, id?: string) =>
+    renderShallow(ruleParams, id)
       .wrapper.find('[data-test-subj="schemaExpressionSelect"]')
       .prop('value');
 
@@ -275,9 +278,44 @@ describe('Expression', () => {
       expect(selectedSchema({ nodeType: 'pod', schema: 'ecs' })).toBe('ecs');
     });
 
-    it('falls back to the default schema for a host rule that has none', () => {
+    it('falls back to the default schema for a new host rule that has none', () => {
       expect(selectedSchema({ nodeType: 'host' })).toBe(DEFAULT_SCHEMA);
       expect(selectedSchema({ nodeType: 'host', schema: 'ecs' })).toBe('ecs');
+    });
+
+    it.each(['host', 'pod'] as const)(
+      'displays ecs for an existing %s rule without a schema',
+      (nodeType) => {
+        expect(selectedSchema({ nodeType }, EXISTING_RULE_ID)).toBe('ecs');
+        expect(selectedSchema({ nodeType, schema: null }, EXISTING_RULE_ID)).toBe('ecs');
+      }
+    );
+
+    it('writes semconv when the user picks OpenTelemetry on an existing rule without a schema', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'host' }, EXISTING_RULE_ID);
+
+      wrapper.find('[data-test-subj="schemaExpressionSelect"]').simulate('change', 'semconv');
+
+      expect(params.schema).toBe('semconv');
+    });
+
+    it('does not write a schema when an existing rule switches to a selectable node type', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'container' }, EXISTING_RULE_ID);
+
+      wrapper.find('[data-test-subj="forExpressionSelect"]').simulate('change', 'host');
+
+      expect(params.nodeType).toBe('host');
+      expect(params.schema).toBeUndefined();
+      expect(selectedSchema(params, EXISTING_RULE_ID)).toBe('ecs');
+    });
+
+    it('defaults the schema when a new rule switches to a selectable node type', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'container' });
+
+      wrapper.find('[data-test-subj="forExpressionSelect"]').simulate('change', 'host');
+
+      expect(params.nodeType).toBe('host');
+      expect(params.schema).toBe(DEFAULT_SCHEMA);
     });
 
     it('stores the schema picked in the schema control for a pod rule', () => {
@@ -306,6 +344,15 @@ describe('Expression', () => {
       expect(ruleParams.schema).toBe('semconv');
     });
 
+    it('prefills an ecs host schema from Inventory', async () => {
+      const { ruleParams } = await setup({
+        nodeType: 'host',
+        schema: 'ecs',
+      } as AlertContextMeta);
+
+      expect(ruleParams.schema).toBe('ecs');
+    });
+
     it('persists the default schema when creating a new host rule without touching the selector', async () => {
       const { ruleParams } = await setup({ nodeType: 'host' } as AlertContextMeta);
 
@@ -318,18 +365,36 @@ describe('Expression', () => {
       expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
     });
 
-    it('defaults the schema when opening an existing rule that has none', async () => {
+    it('keeps the schema omitted when opening an existing host rule that has none', async () => {
       const { ruleParams } = await setup({} as AlertContextMeta, {
-        id: 'existing-rule-id',
+        id: EXISTING_RULE_ID,
         initialRuleParams: { nodeType: 'host', schema: undefined },
       });
 
-      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+      expect(ruleParams.schema).toBeUndefined();
+    });
+
+    it('keeps the schema omitted when opening an existing pod rule that has none', async () => {
+      const { ruleParams } = await setup({} as AlertContextMeta, {
+        id: EXISTING_RULE_ID,
+        initialRuleParams: { nodeType: 'pod', schema: undefined },
+      });
+
+      expect(ruleParams.schema).toBeUndefined();
+    });
+
+    it('keeps a null schema when opening an existing rule', async () => {
+      const { ruleParams } = await setup({} as AlertContextMeta, {
+        id: EXISTING_RULE_ID,
+        initialRuleParams: { nodeType: 'host', schema: null },
+      });
+
+      expect(ruleParams.schema).toBeNull();
     });
 
     it('keeps the stored schema when opening an existing rule', async () => {
       const { ruleParams } = await setup({} as AlertContextMeta, {
-        id: 'existing-rule-id',
+        id: EXISTING_RULE_ID,
         initialRuleParams: { nodeType: 'host', schema: 'ecs' },
       });
 
@@ -338,7 +403,7 @@ describe('Expression', () => {
 
     it('does not default the schema when opening an existing container rule that has none', async () => {
       const { ruleParams } = await setup({} as AlertContextMeta, {
-        id: 'existing-rule-id',
+        id: EXISTING_RULE_ID,
         initialRuleParams: { nodeType: 'container', schema: undefined },
       });
 
