@@ -265,7 +265,8 @@ const aiIndexPropertiesSchema = {
   memory_enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description: 'Deprecated and ignored.',
+        description:
+          'Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.',
         deprecated: true,
       },
     })
