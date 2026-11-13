@@ -17,11 +17,20 @@ import {
   type OtelEventFields,
 } from './get_session';
 import type { StoredSessionDocument } from './list_sessions';
+import { SESSION_REQUESTS_SIZE } from './session_requests';
 
 const START = '2026-10-20T10:00:00.000Z';
 const startMs = Date.parse(START);
 const at = (offsetMs: number) => new Date(startMs + offsetMs).toISOString();
 const DAY_MS = 24 * 60 * 60 * 1000;
+const JOURNEY_EVENT_NAMES = [
+  'documentLoad',
+  'browser.navigation',
+  'click',
+  'browser.user_action.click',
+  'exception',
+  'browser.web_vital',
+];
 
 /** Raw events as the `fields` option returns them: arrays of values by dotted name. */
 const events: OtelEventFields[] = [
@@ -173,6 +182,7 @@ describe('buildPageVisits', () => {
         clickCount: 1,
         errorCount: 0,
         webVitals: { lcp: 1200, inp: null, cls: null, fcp: null, ttfb: null },
+        load: null,
       },
       {
         page: '/cart',
@@ -183,6 +193,7 @@ describe('buildPageVisits', () => {
         clickCount: 0,
         errorCount: 1,
         webVitals: { lcp: null, inp: null, cls: null, fcp: null, ttfb: null },
+        load: null,
       },
     ]);
   });
@@ -217,7 +228,8 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)));
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
@@ -250,6 +262,16 @@ describe('getSession', () => {
                   },
                 },
               },
+              // Only what the journey shows, so that requests can't push it out.
+              {
+                bool: {
+                  should: [
+                    { terms: { event_name: JOURNEY_EVENT_NAMES } },
+                    { terms: { name: JOURNEY_EVENT_NAMES } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
             ],
           },
         },
@@ -272,12 +294,52 @@ describe('getSession', () => {
     );
   });
 
+  it('loads the requests with a query of their own, and the page load on the visit it started', async () => {
+    client.search
+      .mockResolvedValueOnce(
+        summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
+      )
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(
+        eventsResponse(
+          [
+            {
+              '@timestamp': [at(1_800)],
+              event_name: ['browser.navigation_timing'],
+              'attributes.url.full': ['https://shop.example.com/?ref=ad'],
+              'attributes.browser.resource_timing.fetch_start': [2],
+              'attributes.browser.resource_timing.response_end': [300],
+              'attributes.browser.navigation_timing.load_event_end': [1_800],
+            },
+          ],
+          SESSION_REQUESTS_SIZE + 1
+        )
+      );
+
+    const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
+
+    expect(detail?.requests).toEqual([
+      expect.objectContaining({ initiatorType: 'navigation', startTime: at(2), visitIndex: 0 }),
+    ]);
+    expect(detail?.requestsTruncated).toBe(true);
+    expect(detail?.pageVisits.map(({ load }) => load?.loadMs ?? null)).toEqual([1_800, null]);
+
+    const [requestsRequest] = client.search.mock.calls[2];
+    expect(requestsRequest).toEqual(
+      expect.objectContaining({ size: SESSION_REQUESTS_SIZE, sort: [{ '@timestamp': 'asc' }] })
+    );
+    expect(requestsRequest?.fields).toEqual(
+      expect.arrayContaining(['attributes.browser.resource_timing.fetch_start', 'span_id'])
+    );
+  });
+
   it('flags a timeline cut off at its size', async () => {
     client.search
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), SESSION_TIMELINE_SIZE + 1));
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), SESSION_TIMELINE_SIZE + 1))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
@@ -289,7 +351,8 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse([events[0], undefined]));
+      .mockResolvedValueOnce(eventsResponse([events[0], undefined]))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
@@ -301,7 +364,8 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(3_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)));
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 
@@ -314,7 +378,8 @@ describe('getSession', () => {
   it('does not throw when the summary has no start or end time', async () => {
     client.search
       .mockResolvedValueOnce(summaryResponse(sessionSource({})))
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)));
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
 

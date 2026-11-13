@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -22,21 +22,27 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import type { SessionDetailResponse } from '../../../common/sessions';
+import type { AppHeaderBadge, AppHeaderMetadataItems } from '@kbn/app-header';
+import type { SessionDetailResponse, SessionSummary as Session } from '../../../common/sessions';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../ebt_constants';
 import { useApiClient } from '../../hooks/use_api_client';
 import { useApplicationLinks } from '../../hooks/use_application_links';
+import { useDiscoverHref } from '../../hooks/use_discover_href';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
-import { SESSIONS_LABEL } from '../../labels';
+import { ANONYMOUS_USER, SESSIONS_LABEL } from '../../labels';
+import { formatSessionDuration } from '../../utils/format_session_duration';
 import { pickSessionsListQuery } from '../../utils/sessions_list_query';
+import { JourneyFilters } from './components/journey_filters';
 import { PageJourney } from './components/page_journey';
 import { SessionSummary } from './components/session_summary';
 import { SessionWaterfall, pageColors } from './components/session_waterfall';
+import { sessionEsqlQuery, sessionTimeRange } from './utils/session_discover';
 import { groupEventsByVisit, layoutWaterfall } from './utils/session_timeline';
+import { ACTIVITY_KINDS, type ActivityFilters, type ActivityKind } from './utils/visit_activity';
 
 /** Characters of the session ID shown in the breadcrumb; the header has it in full. */
 const SHORT_ID_LENGTH = 8;
@@ -53,6 +59,74 @@ const SESSION_ID_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.s
 const COPY_ID_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.copyIdLabel', {
   defaultMessage: 'Copy ID',
 });
+
+const USER_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.userLabel', {
+  defaultMessage: 'User',
+});
+
+const STARTED_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.startedLabel', {
+  defaultMessage: 'Started',
+});
+
+const OPEN_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.openInDiscoverLabel',
+  { defaultMessage: 'Open in Discover' }
+);
+
+/** What kind of session it is, at a glance: its errors, failed requests, bounce and environment. */
+const sessionBadges = (session: Session): AppHeaderBadge[] => [
+  ...(session.jsErrorCount > 0
+    ? [
+        {
+          label: i18n.translate('xpack.digitalExperience.sessionDetail.badges.jsErrors', {
+            defaultMessage: '{count, plural, one {# JS error} other {# JS errors}}',
+            values: { count: session.jsErrorCount },
+          }),
+          color: 'danger' as const,
+          'data-test-subj': 'digitalExperienceSessionBadge-jsErrors',
+        },
+      ]
+    : []),
+  ...(session.failedRequestCount > 0
+    ? [
+        {
+          label: i18n.translate('xpack.digitalExperience.sessionDetail.badges.failedRequests', {
+            defaultMessage: '{count, plural, one {# failed request} other {# failed requests}}',
+            values: { count: session.failedRequestCount },
+          }),
+          color: 'warning' as const,
+          'data-test-subj': 'digitalExperienceSessionBadge-failedRequests',
+        },
+      ]
+    : []),
+  ...(session.bounced
+    ? [
+        {
+          label: i18n.translate('xpack.digitalExperience.sessionDetail.badges.bounced', {
+            defaultMessage: 'Bounced',
+          }),
+          tooltip: i18n.translate('xpack.digitalExperience.sessionDetail.badges.bouncedTooltip', {
+            defaultMessage: 'The user left after viewing one page.',
+          }),
+          color: 'hollow' as const,
+          'data-test-subj': 'digitalExperienceSessionBadge-bounced',
+        },
+      ]
+    : []),
+  ...(session.environment
+    ? [
+        {
+          label: session.environment,
+          tooltip: i18n.translate(
+            'xpack.digitalExperience.sessionDetail.badges.environmentTooltip',
+            { defaultMessage: 'Environment' }
+          ),
+          color: 'hollow' as const,
+          'data-test-subj': 'digitalExperienceSessionBadge-environment',
+        },
+      ]
+    : []),
+];
 
 const ID_COPIED_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.idCopiedToast', {
   defaultMessage: 'Session ID copied',
@@ -81,14 +155,35 @@ function SessionDetail({
   detail: SessionDetailResponse;
   formatters: ReturnType<typeof useFormatters>;
 }) {
-  const { session, pageVisits, timeline, timelineTruncated } = detail;
+  const { session, pageVisits, timeline, timelineTruncated, requests, requestsTruncated } = detail;
+  const [filters, setFilters] = useState<ActivityFilters>(() => ({
+    kinds: new Set(ACTIVITY_KINDS),
+    search: '',
+  }));
   const visitElements = useRef(new Map<number, HTMLElement>());
   const colors = useMemo(() => pageColors(pageVisits), [pageVisits]);
   const layout = useMemo(
     () => layoutWaterfall(session, pageVisits, timeline),
     [session, pageVisits, timeline]
   );
-  const visits = useMemo(() => groupEventsByVisit(pageVisits, timeline), [pageVisits, timeline]);
+  const visits = useMemo(
+    () => groupEventsByVisit(pageVisits, timeline, requests),
+    [pageVisits, timeline, requests]
+  );
+  const counts = useMemo(() => {
+    const byKind: Record<ActivityKind, number> = {
+      request: requests.length,
+      click: 0,
+      error: 0,
+      web_vital: 0,
+    };
+    for (const { kind } of timeline) {
+      if (kind === 'click' || kind === 'error' || kind === 'web_vital') {
+        byKind[kind] += 1;
+      }
+    }
+    return byKind;
+  }, [requests, timeline]);
 
   const registerVisit = useCallback((index: number, element: HTMLElement | null) => {
     if (element) {
@@ -114,6 +209,19 @@ function SessionDetail({
             title={i18n.translate('xpack.digitalExperience.sessionDetail.timelineTruncatedTitle', {
               defaultMessage:
                 'This session has more events than can be shown, so the timeline and journey end early.',
+            })}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {requestsTruncated && (
+        <>
+          <KbnWarningCallout
+            data-test-subj="digitalExperienceSessionRequestsTruncated"
+            size="s"
+            title={i18n.translate('xpack.digitalExperience.sessionDetail.requestsTruncatedTitle', {
+              defaultMessage:
+                'This session made more requests than can be shown, so the last pages miss some of theirs. Their clicks and errors all show.',
             })}
           />
           <EuiSpacer size="m" />
@@ -167,11 +275,13 @@ function SessionDetail({
               })}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <JourneyFilters filters={filters} counts={counts} onChange={setFilters} />
           <EuiSpacer size="m" />
           <PageJourney
             visits={visits}
             colors={colors}
-            sessionDurationMs={layout.totalMs}
+            filters={filters}
             formatters={formatters}
             registerVisit={registerVisit}
           />
@@ -280,29 +390,78 @@ export function SessionDetailPage({
     }
   };
 
+  const session = detail?.session;
+  const discoverTimeRange = useMemo(
+    () => (session ? sessionTimeRange(session) : undefined),
+    [session]
+  );
+  const discoverHref = useDiscoverHref(
+    session ? sessionEsqlQuery(session) : undefined,
+    discoverTimeRange
+  );
+  const copyIdItem = {
+    type: 'button' as const,
+    label: COPY_ID_LABEL,
+    onClick: copySessionId,
+    'data-test-subj': 'digitalExperienceSessionIdCopy',
+  };
+  // Who and when once the session loads; the header holds three items, so the ID moves to the summary.
+  const metadata: AppHeaderMetadataItems = session
+    ? [
+        {
+          type: 'text',
+          label: USER_LABEL,
+          value: session.user ?? ANONYMOUS_USER,
+          'data-test-subj': 'digitalExperienceSessionUser',
+        },
+        {
+          type: 'text',
+          label: STARTED_LABEL,
+          value: `${formatters.formatDate(session.startTime)} · ${formatSessionDuration(
+            session.durationMs
+          )}`,
+          'data-test-subj': 'digitalExperienceSessionStarted',
+        },
+        copyIdItem,
+      ]
+    : [
+        {
+          type: 'text',
+          label: SESSION_ID_LABEL,
+          value: sessionId,
+          'data-test-subj': 'digitalExperienceSessionId',
+        },
+        copyIdItem,
+      ];
+
   return (
     <div data-test-subj="digitalExperienceSessionPage">
       {/* The header's back is the way to the list, so there is no in-page back button, and Chrome
-      Next shows a single back control. */}
+    Next shows a single back control. */}
       <AppHeader
         title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
           defaultMessage: 'Session',
         })}
         back={{ href: backHref, label: SESSIONS_LABEL }}
-        metadata={[
-          {
-            type: 'text',
-            label: SESSION_ID_LABEL,
-            value: sessionId,
-            'data-test-subj': 'digitalExperienceSessionId',
-          },
-          {
-            type: 'button',
-            label: COPY_ID_LABEL,
-            onClick: copySessionId,
-            'data-test-subj': 'digitalExperienceSessionIdCopy',
-          },
-        ]}
+        badges={session ? sessionBadges(session) : undefined}
+        metadata={metadata}
+        menu={
+          discoverHref
+            ? {
+                items: [
+                  {
+                    id: 'openInDiscover',
+                    order: 1,
+                    label: OPEN_IN_DISCOVER_LABEL,
+                    iconType: 'discoverApp',
+                    href: discoverHref,
+                    testId: 'digitalExperienceSessionOpenInDiscover',
+                    ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER },
+                  },
+                ],
+              }
+            : undefined
+        }
       />
       {/* The app shell is unpadded, so the header spans the page; the content pads itself. */}
       <EuiPageSection paddingSize="m" restrictWidth={false}>

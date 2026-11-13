@@ -219,8 +219,64 @@ export interface SessionTimelineEvent {
   durationMs: number | null;
   page: string | null;
   detail: string | null;
+  /** The stack trace of an error, when the browser reported one. */
+  stacktrace: string | null;
   traceId: string | null;
   spanId: string | null;
+}
+
+/** How long each network phase of a request took, in milliseconds; 0 when it didn't happen. */
+export interface SessionRequestPhases {
+  /** Queued before the DNS lookup or the connection started. */
+  queued: number;
+  dns: number;
+  /** TCP connection, TLS included. */
+  connect: number;
+  tls: number;
+  /** From sending the request to the first byte of the response. */
+  waiting: number;
+  download: number;
+}
+
+/** A network request of the session: the page document, a resource, or a fetch/XHR call. */
+export interface SessionRequest {
+  url: string;
+  /** The W3C `initiatorType`, e.g. `script` or `fetch`; `navigation` for the page document. */
+  initiatorType: string;
+  method: string | null;
+  statusCode: number | null;
+  failed: boolean;
+  /** When the request started, placed from the timings relative to its page's time origin. */
+  startTime: string;
+  durationMs: number;
+  /**
+   * The phases, unless the browser withheld them: a cross-origin resource whose server doesn't
+   * send `Timing-Allow-Origin` only reports when it started and ended.
+   */
+  phases: SessionRequestPhases | null;
+  /** The browser withheld the phases and sizes: `Timing-Allow-Origin` is missing. */
+  timingWithheld: boolean;
+  /** Served from the browser cache, without network transfer. */
+  cached: boolean;
+  /** Bytes over the network, headers included. */
+  transferSize: number | null;
+  /** Bytes of the response body after decompression. */
+  decodedBodySize: number | null;
+  renderBlocking: boolean;
+  protocol: string | null;
+  traceId: string | null;
+  spanId: string | null;
+  /** The index of the page visit the request belongs to, in `pageVisits`. */
+  visitIndex: number;
+}
+
+/** The milestones of a full page load, in milliseconds from the start of its navigation. */
+export interface SessionPageLoad {
+  navigationStart: string;
+  /** Time to first byte. */
+  responseStartMs: number | null;
+  domContentLoadedMs: number | null;
+  loadMs: number | null;
 }
 
 export interface SessionPageVisit {
@@ -232,6 +288,8 @@ export interface SessionPageVisit {
   clickCount: number;
   errorCount: number;
   webVitals: SessionWebVitals;
+  /** Set on a visit that loaded the page document, rather than an in-app navigation. */
+  load: SessionPageLoad | null;
 }
 
 export interface SessionDetailResponse {
@@ -239,6 +297,8 @@ export interface SessionDetailResponse {
   timeline: SessionTimelineEvent[];
   timelineTruncated: boolean;
   pageVisits: SessionPageVisit[];
+  requests: SessionRequest[];
+  requestsTruncated: boolean;
 }
 
 export const emptyWebVitals = (): SessionWebVitals => ({

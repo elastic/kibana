@@ -53,6 +53,25 @@ export const RESOURCE_TIMING_RENDER_BLOCKING_STATUS =
   'browser.resource_timing.render_blocking_status';
 export const RESOURCE_TIMING_TRANSFER_SIZE = 'browser.resource_timing.transfer_size';
 export const RENDER_BLOCKING_STATUS_BLOCKING = 'blocking';
+/**
+ * The Resource Timing values, in milliseconds from the page's time origin, of resources and, on
+ * `browser.navigation_timing` events, of the page document itself.
+ */
+export const RESOURCE_TIMING_FETCH_START = 'browser.resource_timing.fetch_start';
+export const RESOURCE_TIMING_DOMAIN_LOOKUP_START = 'browser.resource_timing.domain_lookup_start';
+export const RESOURCE_TIMING_DOMAIN_LOOKUP_END = 'browser.resource_timing.domain_lookup_end';
+export const RESOURCE_TIMING_CONNECT_START = 'browser.resource_timing.connect_start';
+export const RESOURCE_TIMING_CONNECT_END = 'browser.resource_timing.connect_end';
+export const RESOURCE_TIMING_SECURE_CONNECTION_START =
+  'browser.resource_timing.secure_connection_start';
+export const RESOURCE_TIMING_REQUEST_START = 'browser.resource_timing.request_start';
+export const RESOURCE_TIMING_RESPONSE_START = 'browser.resource_timing.response_start';
+export const RESOURCE_TIMING_RESPONSE_END = 'browser.resource_timing.response_end';
+export const RESOURCE_TIMING_DECODED_BODY_SIZE = 'browser.resource_timing.decoded_body_size';
+export const RESOURCE_TIMING_ENCODED_BODY_SIZE = 'browser.resource_timing.encoded_body_size';
+export const RESOURCE_TIMING_NEXT_HOP_PROTOCOL = 'browser.resource_timing.next_hop_protocol';
+export const NAVIGATION_TIMING_DOM_CONTENT_LOADED_EVENT_END =
+  'browser.navigation_timing.dom_content_loaded_event_end';
 export const BROWSER_CSS_SELECTOR = 'browser.css_selector';
 export const BROWSER_TAG_NAME = 'browser.tag_name';
 
