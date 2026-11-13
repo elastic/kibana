@@ -15,8 +15,8 @@ import {
   useEuiTheme,
   EuiBadge,
   EuiPanel,
+  EuiButtonIcon,
   EuiCopy,
-  EuiIcon,
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
@@ -26,6 +26,13 @@ import { BenchmarkIcons } from '../findings_flyout';
 export interface FindingsMisconfigurationFlyoutHeaderProps {
   finding: CspFinding;
 }
+
+const COPY_TO_CLIPBOARD_LABEL = i18n.translate(
+  'xpack.csp.findings.findingsFlyout.header.copyToClipboard',
+  {
+    defaultMessage: 'Copy to clipboard',
+  }
+);
 
 export const TruncatedCopyableText = ({ textToCopy }: { textToCopy: string }) => {
   return (
@@ -50,18 +57,15 @@ export const TruncatedCopyableText = ({ textToCopy }: { textToCopy: string }) =>
       </div>
       <EuiCopy textToCopy={textToCopy}>
         {(copy) => (
-          <EuiIcon
-            css={css`
-              :hover {
-                cursor: pointer;
-              }
-            `}
-            onClick={copy}
-            type="copy"
-            aria-label={i18n.translate('xpack.csp.findings.findingsFlyout.header.copyToClipboard', {
-              defaultMessage: 'Copy to clipboard',
-            })}
-          />
+          <EuiToolTip content={COPY_TO_CLIPBOARD_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              color="text"
+              size="xs"
+              iconType="copy"
+              onClick={copy}
+              aria-label={COPY_TO_CLIPBOARD_LABEL}
+            />
+          </EuiToolTip>
         )}
       </EuiCopy>
     </EuiText>
