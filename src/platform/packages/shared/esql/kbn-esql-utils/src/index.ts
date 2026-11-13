@@ -116,7 +116,7 @@ export {
 } from './utils/cascaded_documents_helpers';
 export {
   getStatsGroupFieldType,
-  getFieldParamDefinition,
+  getFieldParamDefinition as getFieldParamDefinition,
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';
