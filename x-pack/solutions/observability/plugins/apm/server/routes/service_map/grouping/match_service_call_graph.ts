@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ServiceMapSpan } from '../../../common/service_map/types';
-import type { ServiceCallGraph } from './get_service_call_graph';
-import { recordByService } from './record_by_service';
+import type { ServiceMapSpan } from '../../../../common/service_map/types';
+import type { ServiceCallGraph } from '../get_service_call_graph';
+import { recordByService } from '../record_by_service';
 
 export interface MatchedServiceCall {
   service: string;

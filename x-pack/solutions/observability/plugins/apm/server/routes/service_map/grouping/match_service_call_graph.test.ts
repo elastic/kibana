@@ -6,7 +6,7 @@
  */
 
 import { matchCallGraphToServices } from './match_service_call_graph';
-import type { ServiceCallGraph } from './get_service_call_graph';
+import type { ServiceCallGraph } from '../get_service_call_graph';
 
 const services = ['gateway', 'cart', 'payment'];
 

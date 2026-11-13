@@ -7,38 +7,12 @@
 
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-
-// A whole hour on its own day, apart from the metrics data, so every rollup (1m, 10m and 60m)
-// covers the same transactions
-export const SERVICE_MAP_STATS_START_DATE = '2021-10-11T00:00:00.000Z';
-export const SERVICE_MAP_STATS_END_DATE = '2021-10-11T01:00:00.000Z';
-
-export const SERVICE_MAP_STATS_FRONTEND = 'map-stats-frontend';
-export const SERVICE_MAP_STATS_BACKEND = 'map-stats-backend';
-export const SERVICE_MAP_STATS_WORKER = 'map-stats-worker';
-
-/** Transactions per minute and durations, which the stats are checked against. */
-export const SERVICE_MAP_STATS_DATA = {
-  frontend: {
-    // `GET /api`: successful and failed; `GET /other`: successful
-    apiSuccessPerMinute: 2,
-    apiFailurePerMinute: 1,
-    otherPerMinute: 1,
-    durationMs: 100,
-  },
-  backend: {
-    // `request` is a default type, so it wins over the busier `custom` type
-    requestPerMinute: 1,
-    requestDurationMs: 50,
-    customPerMinute: 3,
-    customDurationMs: 10,
-  },
-  worker: {
-    // No default type, so the busiest type is used
-    jobPerMinute: 2,
-    jobDurationMs: 200,
-  },
-} as const;
+import {
+  SERVICE_MAP_STATS_BACKEND,
+  SERVICE_MAP_STATS_DATA,
+  SERVICE_MAP_STATS_FRONTEND,
+  SERVICE_MAP_STATS_WORKER,
+} from '../constants';
 
 /** Three services: frontend calls backend, and worker runs on its own. */
 export function serviceMapStats({

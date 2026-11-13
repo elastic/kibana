@@ -8,14 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { APM_METRICS_SERVICE_NAMES, APM_SYSTEM_METRICS, RUBY_JRUBY_METRICS } from '@kbn/synthtrace';
-import { apiTest, testData } from '../../fixtures';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'scout',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
-  Accept: 'application/json',
-};
+import { apiTest, COMMON_HEADERS, testData } from '../../fixtures';
 
 const buildQuery = (params: Record<string, string>): string =>
   new URLSearchParams(params).toString();
