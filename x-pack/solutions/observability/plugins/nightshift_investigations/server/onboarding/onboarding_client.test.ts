@@ -10,6 +10,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { createOnboardingClient, OnboardingUnavailableError } from './onboarding_client';
@@ -32,6 +33,7 @@ const setup = ({
   withAgentBuilder = true,
   withActions = true,
   assistantEnabled = false,
+  spaceId,
 }: {
   executions?: Array<{ id: string }>;
   execution?: Record<string, unknown>;
@@ -42,6 +44,8 @@ const setup = ({
   withAgentBuilder?: boolean;
   withActions?: boolean;
   assistantEnabled?: boolean;
+  /** Space the request targets; the default space unless a test overrides it. */
+  spaceId?: string;
 } = {}) => {
   const management = {
     getWorkflowExecutions: jest.fn().mockResolvedValue({ results: executions }),
@@ -82,6 +86,13 @@ const setup = ({
         ? ({ agents } as unknown as AgentBuilderPluginStart)
         : undefined,
       agentAvailability,
+      ...(spaceId
+        ? {
+            spaces: {
+              spacesService: { getSpaceId: () => spaceId },
+            } as unknown as SpacesPluginStart,
+          }
+        : {}),
       actions: withActions ? actions : undefined,
       elasticsearch,
       assistantEnabled,
@@ -230,6 +241,13 @@ describe('createOnboardingClient', () => {
         agent: expect.objectContaining({ id: 'nightshift.assistant' }),
       })
     );
+  });
+
+  it('refuses to enable Nightshift outside the default space', async () => {
+    const { client, agents, request } = setup({ agentInstalled: false, spaceId: 'marketing' });
+
+    await expect(client.enable(request)).rejects.toThrow(/only available in the "default" space/);
+    expect(agents.ensure).not.toHaveBeenCalled();
   });
 
   it('cannot enable Nightshift without Agent Builder', async () => {

@@ -18,7 +18,7 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -48,14 +48,7 @@ import {
 } from './lib/slack_app/saved_object';
 import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
-import {
-  consumeInvestigationRunQuota,
-  createRunQuotaInternalRepository,
-  dayKey,
-  resolveDailyWindow,
-  runQuotaLedgerSavedObjectType,
-  runQuotaSettingsSavedObjectType,
-} from './lib/run_quotas';
+import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -184,25 +177,6 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async (trigger) => {
-      if (!this.server?.core) {
-        throw new Error('Significant Events start services are unavailable');
-      }
-      const result = await consumeInvestigationRunQuota({
-        internalRepository: createRunQuotaInternalRepository(this.server),
-        group: trigger === 'manual' ? 'manual_investigation' : 'investigation',
-        date: dayKey(resolveDailyWindow()),
-      });
-      if (result.allowed) {
-        return result;
-      }
-      return {
-        allowed: false,
-        deniedBy: result.deniedBy === 'total_investigation' ? 'all' : trigger,
-        limit: result.limit,
-      };
-    });
-
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 
@@ -256,6 +230,13 @@ export class SignificantEventsPlugin
         return alertEventsClientPromise;
       };
 
+      let alertActionsClientPromise: Promise<AlertActionsClientApi> | undefined;
+      const getAlertActionsClient = (): Promise<AlertActionsClientApi> => {
+        alertActionsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertActionsClientWithRequest(request);
+        return alertActionsClientPromise;
+      };
+
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
@@ -264,11 +245,13 @@ export class SignificantEventsPlugin
         logger: this.logger,
         space,
         getAlertEventsClient,
+        getAlertActionsClient,
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
           logger: this.logger,
         }),
+        telemetry: this.ebtTelemetryService.getClient(),
       });
 
       const getAlertingV2RulesClient = async () =>
@@ -384,6 +367,7 @@ export class SignificantEventsPlugin
           return true;
         },
         getAlertEventsClient,
+        getAlertActionsClient,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -843,7 +827,7 @@ export class SignificantEventsPlugin
 
   private logFlagOffPauseError(error: unknown): void {
     this.logger.error(
-      `significantEvents: failed to pause after Nightshift was turned off: ${
+      `significantEvents: failed to pause after nightshift was turned off: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

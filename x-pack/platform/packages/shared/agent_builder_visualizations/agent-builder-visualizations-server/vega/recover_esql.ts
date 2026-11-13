@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { parse as parseHjson } from 'hjson';
+
 /** Read the ES|QL query from a Kibana Vega-Lite `data.url` object, if it is one. */
 const esqlQueryFromUrl = (url: unknown): string | undefined => {
   if (!url || typeof url !== 'object') {
@@ -23,7 +25,7 @@ const esqlQueryFromUrl = (url: unknown): string | undefined => {
  * `normalizeVegaSpec` binds the query as a `%type%: 'esql'` `data.url`, so the
  * stored spec is the source of truth across save/import round-trips.
  *
- * Accepts a serialized spec or a parsed object; returns undefined when no ES|QL
+ * Accepts a serialized spec (JSON or Kibana's HJSON) or a parsed object; returns undefined when no ES|QL
  * data binding is present or the input cannot be parsed.
  */
 export const extractEsqlFromSpec = (
@@ -35,7 +37,7 @@ export const extractEsqlFromSpec = (
 
   let parsed: unknown;
   try {
-    parsed = typeof spec === 'string' ? JSON.parse(spec) : spec;
+    parsed = typeof spec === 'string' ? parseHjson(spec) : spec;
   } catch {
     return undefined;
   }

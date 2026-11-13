@@ -53,7 +53,7 @@ const consumeRoute =
 
 const repository = {} as RunQuotaSavedObjectsRepository;
 const server = {} as SignificantEventsServer;
-const request = {};
+const request = { spaceId: 'default' };
 
 const defaultSettings: RunQuotaSettingsAttributes = {
   enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,

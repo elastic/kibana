@@ -8,7 +8,7 @@
 import { firstValueFrom } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { UserProfileAPIClient } from './user_profile_api_client';
 

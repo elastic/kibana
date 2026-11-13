@@ -8,6 +8,7 @@
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
 import type { ThreatIntelSourceRequestOptionsInput } from '../../../../../../common/api/search_strategy';
+import { buildTransformSourceExclusionMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 
 export const mockOptions: ThreatIntelSourceRequestOptionsInput = {
   defaultIndex: ['logs-ti_*', 'filebeat-8*'],
@@ -53,6 +54,7 @@ export const expectedDsl = {
           },
         },
       ],
+      must_not: [buildTransformSourceExclusionMock()],
     },
   },
   ignore_unavailable: true,
@@ -65,5 +67,14 @@ export const expectedDsl = {
 describe('buildbuildTiDataSourceQueryQuery', () => {
   test('build query from options correctly', () => {
     expect(buildTiDataSourceQuery(mockOptions)).toEqual(expectedDsl);
+  });
+
+  test('excludes raw indicator copies when no time range is given', () => {
+    expect(buildTiDataSourceQuery({ ...mockOptions, timerange: undefined }).query).toEqual({
+      bool: {
+        filter: [],
+        must_not: [buildTransformSourceExclusionMock()],
+      },
+    });
   });
 });

@@ -44,10 +44,6 @@ export interface RelatedAlertsByAncestryProps {
    * Callback to open the alert preview
    */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
-  /**
-   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
-   */
-  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -60,7 +56,6 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   documentIndex,
   scopeId,
   onShowAlert,
-  useLegacyExpandableFlyout,
 }) => {
   const { storage } = useKibana().services;
   const { indexPatterns } = useSecurityDefaultPatterns();
@@ -100,12 +95,10 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   const columns = useMemo(
     () =>
       getColumns({
-        scopeId,
         dataTestSubj: CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
         onShowAlert,
-        useLegacyExpandableFlyout,
       }),
-    [scopeId, onShowAlert, useLegacyExpandableFlyout]
+    [onShowAlert]
   );
 
   return (

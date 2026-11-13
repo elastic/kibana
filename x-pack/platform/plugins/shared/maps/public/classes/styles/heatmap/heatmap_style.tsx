@@ -8,11 +8,12 @@
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { EuiIcon } from '@elastic/eui';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { IStyle } from '../style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME, getOrdinalMbColorRampStops } from '../color_palettes';
-import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
+import { LAYER_STYLE_TYPE } from '../../../../common/constants';
 import type { HeatmapStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
 import type { IField } from '../../fields/field';
 

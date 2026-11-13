@@ -18,5 +18,6 @@ describe('GET /internal/digital_experience/applications/{serviceName}/errors', (
     },
     getData: jest.mocked(getOtelErrors),
     hasFilters: true,
+    takesPage: false,
   });
 });

@@ -47,7 +47,7 @@ describe('useDisableWorkflowsConfirmation', () => {
   });
 
   it('resolves to true without a prompt when no rule runs the workflows', async () => {
-    (services.http.post as jest.Mock).mockResolvedValue({ total: 0, rules: [] });
+    (services.http.post as jest.Mock).mockResolvedValue({ total: 0, hiddenTotal: 0, rules: [] });
 
     await expect(confirmDisable(['wf-1'])).resolves.toBe(true);
 
@@ -61,6 +61,7 @@ describe('useDisableWorkflowsConfirmation', () => {
   it('lists the linked rules with links and resolves to true on confirm', async () => {
     (services.http.post as jest.Mock).mockResolvedValue({
       total: 12,
+      hiddenTotal: 0,
       rules: [
         { id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' },
         { id: 'rule-2', name: 'Stack rule', ruleTypeId: '.es-query' },
@@ -85,9 +86,22 @@ describe('useDisableWorkflowsConfirmation', () => {
     expect(screen.queryByTestId('workflowsDisableConfirmationModal')).not.toBeInTheDocument();
   });
 
+  it('warns about linked rules that the user cannot see', async () => {
+    (services.http.post as jest.Mock).mockResolvedValue({ total: 0, hiddenTotal: 2, rules: [] });
+
+    await openConfirmation();
+
+    expect(screen.getByText('2 alerting rules run this workflow')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowLinkedRulesHidden')).toHaveTextContent(
+      '2 rules are not visible to you.'
+    );
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('resolves to false when the user cancels', async () => {
     (services.http.post as jest.Mock).mockResolvedValue({
       total: 1,
+      hiddenTotal: 0,
       rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
     });
 
@@ -100,6 +114,7 @@ describe('useDisableWorkflowsConfirmation', () => {
   it('resolves a previous confirmation to false when a new one starts', async () => {
     (services.http.post as jest.Mock).mockResolvedValue({
       total: 1,
+      hiddenTotal: 0,
       rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
     });
 

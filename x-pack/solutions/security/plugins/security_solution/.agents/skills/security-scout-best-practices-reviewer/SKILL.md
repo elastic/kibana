@@ -66,7 +66,7 @@ Available services in `@kbn/scout-security`:
 |---------|---------|
 | `detectionRule` | `createCustomQueryRule()`, `deleteAll()` |
 | `detectionAlerts` | `deleteAll()` |
-| `entityAnalytics` | `deleteEntityStoreEngines()`, `deleteRiskEngineConfiguration()`, `getRiskEngineStatus()`, `waitForEntityStoreStatus()` |
+| `entityAnalytics` | `installEntityStoreV2()`, `deleteEntityStoreEngines()`, `getEntityStoreStatus()`, `waitForEntityStoreStatus()` |
 | `cloudConnectorApi` | Cloud connector operations |
 | `timeline` | `createTimeline()`, `createTimelineTemplate()`, `deleteAll()` |
 

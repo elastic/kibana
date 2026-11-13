@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InventoryRow } from './types';
+import type { InventoryRow } from '../../../common';
 import { asNumber, asText, hasValue, isNewer, lastSeenInstant } from './utils';
 
 describe('lastSeenInstant', () => {

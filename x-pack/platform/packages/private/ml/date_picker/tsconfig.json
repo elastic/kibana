@@ -28,5 +28,8 @@
     "@kbn/ml-query-utils",
     "@kbn/react-kibana-mount",
     "@kbn/cps",
+    "@kbn/date-range-picker",
+    "@kbn/date-range-picker-presets",
+    "@kbn/use-observable",
   ]
 }

@@ -13,6 +13,7 @@ import {
   type TriggerFormValues,
 } from './automation_form_values';
 import type { Automation } from '../../../../data/automations/use_automations';
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 import { toAutomationRequestBody, toAutomationUpdateBody } from './to_automation_request';
 
 const buildAutomation = (overrides: Partial<Automation>): Automation => ({
@@ -87,6 +88,9 @@ describe('automation request', () => {
             ruleNamePattern: ' cpu ',
             ruleNames: ['Disk full'],
             ruleTags: ['infra'],
+            severities: ['critical', 'major'],
+            alertSources: ['classic', 'elastic.significant_events'],
+            alertSourceMode: 'exclude',
           },
         })
       ).toEqual({
@@ -98,8 +102,11 @@ describe('automation request', () => {
             {
               kind: 'alert',
               ruleNamePattern: 'cpu',
+              severities: ['critical', 'major'],
               ruleNames: ['Disk full'],
               tags: ['infra'],
+              alertSources: ['classic', 'elastic.significant_events'],
+              alertSourceMode: 'exclude',
             },
           ],
         },
@@ -215,6 +222,43 @@ describe('automation request', () => {
         toAutomationUpdateBody({ ...values, instructions: ' ' }, automation).execution
       ).toEqual({ promptTemplate: null, reasoningMode: 'observe' });
     });
+
+    it.each<AlertSeverity[] | undefined>([undefined, [], ['high', 'warning']])(
+      'round trips severity selection through editing and clears it: %j',
+      (severities) => {
+        const automation = buildAutomation({
+          trigger: {
+            rows: [
+              { kind: 'alert', severities, alertSources: ['internal'], alertSourceMode: 'exclude' },
+            ],
+          },
+        });
+        const values = toAutomationFormValues(automation);
+        const { trigger } = values;
+        if (trigger?.kind !== 'alert') throw new Error('Expected an alert trigger');
+
+        expect(trigger.severities).toEqual(severities ?? []);
+        expect(toAutomationRequestBody({ ...values, trigger }).trigger.rows[0]).toEqual({
+          kind: 'alert',
+          ...(severities?.length ? { severities } : {}),
+          alertSources: ['internal'],
+          alertSourceMode: 'exclude',
+        });
+        expect(
+          toAutomationUpdateBody(
+            { ...values, trigger: { ...trigger, ruleNamePattern: 'cpu', severities: [] } },
+            automation
+          ).trigger?.rows
+        ).toEqual([
+          {
+            kind: 'alert',
+            ruleNamePattern: 'cpu',
+            alertSources: ['internal'],
+            alertSourceMode: 'exclude',
+          },
+        ]);
+      }
+    );
 
     it('keeps trigger fields and rows the form does not model', () => {
       const automation = buildAutomation({

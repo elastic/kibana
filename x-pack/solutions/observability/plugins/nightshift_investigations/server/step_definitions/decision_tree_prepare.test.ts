@@ -21,7 +21,7 @@ jest.mock('../decision_trees/register_decision_trees', () => ({
 
 jest.mock('../lib/create_optimize_model', () => ({
   createOptimizeModel: jest.fn(),
-  createInvestigationMemoryTelemetry: jest.fn(() => ({})),
+  createInvestigationBackgroundTelemetry: jest.fn(() => ({})),
 }));
 
 const readTree = (slug: string) => ({
