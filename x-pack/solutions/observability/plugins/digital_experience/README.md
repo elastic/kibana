@@ -53,7 +53,7 @@ privileges like the app.
   and a role narrower than the wildcard still passes when it covers every existing index. Classic
   RUM leaves out the EDOT wildcards of the default APM indices, and both sources leave out the Agent
   Builder OTel indices, as in APM Diagnostics. EDOT Browser has no warning when the sessions index
-  answered, as its transform reads the raw events with its own access. With security disabled, or
+  answered, as it is summarized with the access of the user who enabled sessions. With security disabled, or
   if the check fails, no warning is shown. It doesn't name the indices, and document- or
   field-level security isn't reported.
 - **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice

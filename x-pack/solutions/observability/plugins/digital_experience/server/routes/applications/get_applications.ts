@@ -111,8 +111,8 @@ export const getApplications = async ({
       if (source === APPLICATION_SOURCE.otel) {
         sessionsOverTime = result.value.sessionsOverTime;
       }
-      // A transform with its own access fills the sessions index, so when it answered (the only
-      // source with sessions), the user's raw indices hide no rows.
+      // The sessions index is summarized with the access of the user who enabled sessions, so when
+      // it answered (the only source with sessions), the user's raw indices hide no rows.
       if (partialAccess[index] && result.value.sessionsOverTime === null) {
         partiallyAvailableSources.push(source);
       }
