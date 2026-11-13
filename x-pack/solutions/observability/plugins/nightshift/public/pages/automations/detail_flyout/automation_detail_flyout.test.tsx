@@ -264,7 +264,12 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
         data: {
           enabled: true,
           investigationLimitsEnabled: true,
-          limits: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
+          limits: {
+            investigation: -1,
+            manual_investigation: -1,
+            total_investigation: -1,
+            [group]: 1,
+          },
           counts: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
           window: {
             start: '2040-01-01T00:00:00.000Z',

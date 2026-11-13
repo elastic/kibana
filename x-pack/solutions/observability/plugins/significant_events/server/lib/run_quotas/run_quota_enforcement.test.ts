@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { RunQuotaGroup } from '../../../common/run_quotas';
+import { UNLIMITED_RUN_LIMIT, type RunQuotaGroup } from '../../../common/run_quotas';
 import { consumeInvestigationRunQuota, consumeRunQuota, releaseRunQuota } from './consume';
 import {
   getRunQuotaLedgerId,
@@ -218,6 +218,25 @@ describe('run quota admission behavior', () => {
     ).resolves.toEqual({ allowed: false, limit: 1 });
 
     await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(1);
+  });
+
+  it('denies every investigation at a limit of zero and allows them with no limit', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    const repository = createRepository();
+    await patchRunQuotaSettings(repository.client, { limits: { investigation: 0 } });
+
+    await expect(
+      consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
+    ).resolves.toEqual({ allowed: false, limit: 0 });
+    await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(0);
+
+    await patchRunQuotaSettings(repository.client, {
+      limits: { investigation: UNLIMITED_RUN_LIMIT },
+    });
+
+    await expect(
+      consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
+    ).resolves.toEqual({ allowed: true, limit: UNLIMITED_RUN_LIMIT });
   });
 
   it('enforces the investigation limit while the global enabled flag is off', async () => {

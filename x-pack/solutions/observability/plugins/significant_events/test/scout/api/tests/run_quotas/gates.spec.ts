@@ -59,8 +59,15 @@ apiTest.describe(
       const current = await readSnapshot(apiClient);
       const limits = Object.fromEntries(
         Object.entries(desired.limits ?? {})
-          .filter(([group, limit]) => current.limits[group as RunQuotaGroup] !== (limit ?? 0))
-          .map(([group, limit]) => [group, group === 'investigation' && limit === 0 ? null : limit])
+          .filter(
+            ([group, limit]) =>
+              current.limits[group as RunQuotaGroup] !==
+              (limit ?? (group === 'investigation' ? -1 : 0))
+          )
+          .map(([group, limit]) => [
+            group,
+            group === 'investigation' && limit === -1 ? null : limit,
+          ])
       ) as Partial<Record<RunQuotaGroup, number | null>>;
       const body = {
         ...(desired.enabled !== undefined && desired.enabled !== current.enabled
@@ -187,5 +194,19 @@ apiTest.describe(
         expect(after.counts.investigation).toBe(before.counts.investigation);
       }
     );
+
+    apiTest('denies every investigation at a limit of zero', async ({ apiClient }) => {
+      const before = await updateSettings(apiClient, { limits: { investigation: 0 } });
+
+      const denied = await consume(apiClient, { group: 'investigation' });
+
+      expect(denied).toHaveStatusCode(200);
+      expect(denied.body).toStrictEqual({ allowed: false, limit: 0 });
+      const after = await readSnapshot(apiClient);
+      expect(after.counts.investigation).toBe(before.counts.investigation);
+
+      await updateSettings(apiClient, { limits: { investigation: null } });
+      await consumeAllowed(apiClient, { group: 'investigation' });
+    });
   }
 );

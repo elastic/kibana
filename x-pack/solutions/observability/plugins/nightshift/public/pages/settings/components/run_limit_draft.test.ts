@@ -55,22 +55,34 @@ describe('run quota drafts', () => {
     });
   });
 
-  it('treats zero as unlimited but not as a valid limited value', () => {
+  it('treats zero as unlimited for discovery but as a valid limit for investigations', () => {
     expect(parseRunLimitDraft('0')).toBe(0);
-    expect(isValidRunLimitDraft(0)).toBe(true);
-    expect(isValidLimitedRunLimitDraft(0)).toBe(false);
-    expect(isValidRunLimitDraft(10_000)).toBe(true);
-    expect(isValidRunLimitDraft('')).toBe(false);
-    expect(isValidRunLimitDraft(1.5)).toBe(false);
-    expect(isValidRunLimitDraft(-1)).toBe(false);
-    expect(isValidRunLimitDraft(10_001)).toBe(false);
+    expect(isValidRunLimitDraft(0, 'detection')).toBe(true);
+    expect(isValidLimitedRunLimitDraft(0, 'detection')).toBe(false);
+    expect(isValidLimitedRunLimitDraft(0, 'investigation')).toBe(true);
+    expect(isValidRunLimitDraft(-1, 'investigation')).toBe(true);
+    expect(isValidRunLimitDraft(-1, 'detection')).toBe(false);
+    expect(isValidRunLimitDraft(10_000, 'detection')).toBe(true);
+    expect(isValidRunLimitDraft('', 'detection')).toBe(false);
+    expect(isValidRunLimitDraft(1.5, 'detection')).toBe(false);
+    expect(isValidRunLimitDraft(10_001, 'detection')).toBe(false);
+  });
+
+  it('sends a zero investigation limit as zero and a removed one as null', () => {
+    const state = createRunQuotaDraftState({ ...response, enabled: true });
+    state.draft.limits.manual_investigation = 0;
+    state.draft.limits.investigation = -1;
+
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      limits: { manual_investigation: 0, investigation: null },
+    });
   });
 
   it('restores the previous finite limit after a category limit is re-enabled', () => {
     const state = createRunQuotaDraftState({ ...response, enabled: true });
     const unlimited = setRunLimitEnabled(state, 'investigation', false);
 
-    expect(unlimited.draft.limits.investigation).toBe(0);
+    expect(unlimited.draft.limits.investigation).toBe(-1);
     expect(unlimited.draft.restoreLimits.investigation).toBe(5);
 
     const limited = setRunLimitEnabled(unlimited, 'investigation', true);
@@ -79,8 +91,8 @@ describe('run quota drafts', () => {
 
   it('builds a partial update with only settings changed by the user', () => {
     const state = createRunQuotaDraftState({ ...response, enabled: true });
-    state.draft.limits.investigation = 0;
-    state.draft.limits.manual_investigation = 0;
+    state.draft.limits.investigation = -1;
+    state.draft.limits.manual_investigation = -1;
     state.draft.limits.total_investigation = 8;
 
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({
@@ -157,9 +169,9 @@ describe('run quota drafts', () => {
       investigationLimitsEnabled: false,
       limits: {
         ...response.limits,
-        investigation: 0,
-        manual_investigation: 0,
-        total_investigation: 0,
+        investigation: -1,
+        manual_investigation: -1,
+        total_investigation: -1,
       },
     });
 

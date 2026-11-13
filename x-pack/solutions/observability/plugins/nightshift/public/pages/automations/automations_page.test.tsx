@@ -237,7 +237,12 @@ describe('AutomationsPage', () => {
         data: {
           enabled: true,
           investigationLimitsEnabled: true,
-          limits: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
+          limits: {
+            investigation: -1,
+            manual_investigation: -1,
+            total_investigation: -1,
+            [group]: 1,
+          },
           counts: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
           window: {
             start: '2040-01-01T00:00:00.000Z',
@@ -268,7 +273,7 @@ describe('AutomationsPage', () => {
 
   it.each([
     { investigationLimitsEnabled: true, manualLimit: 1, manualCount: 0 },
-    { investigationLimitsEnabled: true, manualLimit: 0, manualCount: 20 },
+    { investigationLimitsEnabled: true, manualLimit: -1, manualCount: 20 },
     { investigationLimitsEnabled: false, manualLimit: 1, manualCount: 20 },
   ])(
     'keeps Run available for automatic-only limits, unlimited or disabled manual quotas: %j',
@@ -299,7 +304,7 @@ describe('AutomationsPage', () => {
           limits: {
             investigation: 1,
             manual_investigation: settings.manualLimit,
-            total_investigation: 0,
+            total_investigation: -1,
           },
           counts: {
             investigation: 1,

@@ -73,11 +73,12 @@ describe('getAutomationBlockingLimit', () => {
     [quotas({ used: 2 }), undefined],
     [quotas({ used: 3 }), 'investigation'],
     [quotas({ used: 5 }), 'investigation'],
-    [quotas({ limit: 0, used: 5 }), undefined],
+    [quotas({ limit: -1, used: 5 }), undefined],
+    [quotas({ limit: 0, used: 0 }), 'investigation'],
     [quotas({ enabled: false }), 'investigation'],
     [quotas({ used: 0, totalUsed: 10 }), 'total_investigation'],
     [quotas({ used: 3, totalUsed: 10 }), 'total_investigation'],
-    [quotas({ used: 0, totalLimit: 0, totalUsed: 50 }), undefined],
+    [quotas({ used: 0, totalLimit: -1, totalUsed: 50 }), undefined],
   ])('%j -> %s', (input, expected) => {
     expect(getAutomationBlockingLimit(input)).toBe(expected);
   });

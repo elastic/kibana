@@ -22,11 +22,11 @@ import {
 import {
   MAX_RUN_LIMIT,
   isValidLimitedRunLimitDraft,
+  minLimitedRunLimit,
+  unlimitedLimitFor,
   parseRunLimitDraft,
   type RunLimitDraft,
 } from './run_limit_draft';
-
-const MIN_LIMITED_RUN_LIMIT = 1;
 
 export const RUN_QUOTA_GROUP_LABELS: Record<RunQuotaGroup, string> = {
   detection: i18n.translate('xpack.nightshift.settings.runLimits.discoveryRowTitle', {
@@ -93,10 +93,11 @@ export const RunLimitRow = ({
   sectionEnabled = false,
 }: RunLimitRowProps) => {
   const hasOwnSwitch = onEnabledChange !== undefined;
-  const limitEnabled = limit !== 0;
+  const unlimited = unlimitedLimitFor(group);
+  const limitEnabled = limit !== unlimited;
   const showInput = hasOwnSwitch ? limitEnabled : sectionEnabled;
   const invalid =
-    limitEnabled && (hasOwnSwitch || limit !== '') && !isValidLimitedRunLimitDraft(limit);
+    limitEnabled && (hasOwnSwitch || limit !== '') && !isValidLimitedRunLimitDraft(limit, group);
   const dailyLimitLabel = i18n.translate(
     'xpack.nightshift.settings.runLimits.dailyLimitInputLabel',
     {
@@ -160,7 +161,7 @@ export const RunLimitRow = ({
             invalid
               ? i18n.translate('xpack.nightshift.settings.runLimits.invalidLimitErrorMessage', {
                   defaultMessage: 'Enter a whole number from {minimum} to {maximum}.',
-                  values: { minimum: MIN_LIMITED_RUN_LIMIT, maximum: MAX_RUN_LIMIT },
+                  values: { minimum: minLimitedRunLimit(group), maximum: MAX_RUN_LIMIT },
                 })
               : undefined
           }
@@ -184,14 +185,14 @@ export const RunLimitRow = ({
                     defaultMessage: 'No limit',
                   })
             }
-            min={MIN_LIMITED_RUN_LIMIT}
+            min={minLimitedRunLimit(group)}
             max={MAX_RUN_LIMIT}
             step={1}
             isInvalid={invalid}
             disabled={disabled}
             onChange={(event) => {
               const nextLimit = parseRunLimitDraft(event.target.value);
-              if (nextLimit !== 0) {
+              if (nextLimit !== unlimited) {
                 onChange(nextLimit);
               }
             }}
