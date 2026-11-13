@@ -13,7 +13,7 @@ import {
   SESSION_COUNT,
   SESSIONS_APP,
   SESSIONS_TIME_RANGE,
-  SESSIONS_WITH_ERRORS,
+  SESSIONS_WITH_JS_ERRORS,
 } from '../../common/fixtures/sessions_data';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
@@ -50,14 +50,14 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
       await expect(page).toHaveURL(/page=1/);
     });
 
-    await test.step('keeps the sessions with errors, from the first page', async () => {
-      await digitalExperience.sessionsErrorsFilter.click();
+    await test.step('keeps the sessions with JS errors, from the first page', async () => {
+      await digitalExperience.sessionsJsErrorsFilter.click();
 
-      await expect(digitalExperience.sessionsTable.rows).toHaveCount(SESSIONS_WITH_ERRORS);
+      await expect(digitalExperience.sessionsTable.rows).toHaveCount(SESSIONS_WITH_JS_ERRORS);
       await expect(digitalExperience.sessionsKpi('total')).toContainText(
-        String(SESSIONS_WITH_ERRORS)
+        String(SESSIONS_WITH_JS_ERRORS)
       );
-      await expect(page).toHaveURL(/hasErrors=true/);
+      await expect(page).toHaveURL(/withJsErrors=true/);
       await expect(page).not.toHaveURL(/page=/);
     });
 
@@ -85,7 +85,11 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     page,
     pageObjects: { digitalExperience },
   }) => {
-    await digitalExperience.gotoSessions(SESSIONS_APP, { hasErrors: 'true' }, SESSIONS_TIME_RANGE);
+    await digitalExperience.gotoSessions(
+      SESSIONS_APP,
+      { withJsErrors: 'true' },
+      SESSIONS_TIME_RANGE
+    );
     await digitalExperience.sessionLink(DETAILED_SESSION.id).click();
 
     await test.step('summarizes the session', async () => {
@@ -118,11 +122,11 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
       // header. Both lead back to the same list; unit tests cover the breadcrumb's link.
       await digitalExperience.sessionBack.click();
 
-      await expect(page).toHaveURL(/hasErrors=true/);
+      await expect(page).toHaveURL(/withJsErrors=true/);
       await expect(page).toHaveURL(
         new RegExp(`rangeFrom=${encodeURIComponent(SESSIONS_TIME_RANGE.rangeFrom)}`)
       );
-      await expect(digitalExperience.sessionsTable.rows).toHaveCount(SESSIONS_WITH_ERRORS);
+      await expect(digitalExperience.sessionsTable.rows).toHaveCount(SESSIONS_WITH_JS_ERRORS);
     });
   });
 });

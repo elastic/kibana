@@ -12,7 +12,7 @@ export const DIGITAL_EXPERIENCE_FEATURE_ID = OBLT_DIGITAL_EXPERIENCE_APP_ID;
 export const DIGITAL_EXPERIENCE_API_PRIVILEGES = {
   read: 'read_digital_experience',
   manage: 'manage_digital_experience',
-  /** Set sessions up; a separate grant, not part of `all`. */
+  /** Set up the session summaries; a separate grant, not part of `all`. */
   manageSessions: 'manage_digital_experience_sessions',
 } as const;
 

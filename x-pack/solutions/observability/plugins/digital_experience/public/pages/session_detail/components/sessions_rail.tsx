@@ -1,0 +1,628 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import { css } from '@emotion/react';
+import moment from 'moment-timezone';
+import {
+  EuiBadge,
+  EuiButtonGroup,
+  EuiButtonIcon,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  euiPaletteColorBlind,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import { useAbortableAsync } from '@kbn/react-hooks';
+import {
+  SESSIONS_LIST_MAX_SEARCH_LENGTH,
+  type GeoLocation,
+  type SessionSummary,
+} from '../../../../common/sessions';
+import type { ApplicationSource } from '../../../../common/types/applications';
+import { LoadErrorPrompt } from '../../../components/load_error_prompt';
+import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
+import { useApiClient } from '../../../hooks/use_api_client';
+import { useApplicationLinks } from '../../../hooks/use_application_links';
+import { useDigitalExperienceParams } from '../../../hooks/use_digital_experience_params';
+import { useEnvironment } from '../../../hooks/use_environment';
+import { useEqualValue } from '../../../hooks/use_equal_value';
+import { useFormatters } from '../../../hooks/use_formatters';
+import { useKibanaServices } from '../../../hooks/use_kibana_services';
+import { usePersistedChoice } from '../../../hooks/use_persisted_choice';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
+import { ANONYMOUS_USER } from '../../../labels';
+import { clientOf, journeyOf, locationOf, shortSessionId } from '../../../utils/describe_session';
+import { formatSessionDuration } from '../../../utils/format_session_duration';
+import { pickSessionsListQuery } from '../../../utils/sessions_list_query';
+import { SEARCH_DEBOUNCE_MS } from '../../sessions/components/sessions_filters';
+import { sessionsListRequestQuery } from '../../sessions/hooks/sessions_list_request';
+import {
+  hasSessionsListFilters,
+  sessionsListStateOf,
+} from '../../sessions/hooks/use_sessions_list_query';
+import { SessionsMap } from './sessions_map';
+
+const PALETTE = euiPaletteColorBlind();
+
+const TITLE = i18n.translate('xpack.digitalExperience.sessionDetail.rail.title', {
+  defaultMessage: 'Sessions',
+});
+
+const HIDE_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.rail.hide', {
+  defaultMessage: 'Hide the sessions list',
+});
+
+const PREVIOUS_PAGE_LABEL = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.rail.previousPage',
+  { defaultMessage: 'Previous page of sessions' }
+);
+
+const NEXT_PAGE_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.rail.nextPage', {
+  defaultMessage: 'Next page of sessions',
+});
+
+const VIEW_STORAGE_KEY = 'digitalExperience.sessionDetail.railView';
+const VIEWS = ['list', 'map'] as const;
+type RailView = (typeof VIEWS)[number];
+
+const VIEW_LEGEND = i18n.translate('xpack.digitalExperience.sessionDetail.rail.viewLegend', {
+  defaultMessage: 'Show the sessions as',
+});
+
+const VIEW_OPTIONS: Array<{ id: RailView; label: string; iconType: string }> = [
+  {
+    id: 'list',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.rail.listView', {
+      defaultMessage: 'List',
+    }),
+    iconType: 'listBullet',
+  },
+  {
+    id: 'map',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.rail.mapView', {
+      defaultMessage: 'Map',
+    }),
+    iconType: 'globe',
+  },
+];
+
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.rail.searchPlaceholder',
+  { defaultMessage: 'User, page or error' }
+);
+
+/** The pages a session went through, as a bar of equal parts colored by page. */
+function JourneyBar({ journey }: { journey: string[] }) {
+  const { euiTheme } = useEuiTheme();
+  const colors = new Map<string, string>();
+  for (const page of journey) {
+    if (!colors.has(page)) {
+      colors.set(page, PALETTE[colors.size % PALETTE.length]);
+    }
+  }
+  return (
+    <div
+      aria-hidden={true}
+      css={css({ display: 'flex', gap: 2, height: euiTheme.size.xs, marginTop: euiTheme.size.xs })}
+    >
+      {journey.map((page, index) => (
+        <span
+          key={index}
+          css={css({ flex: 1, borderRadius: euiTheme.border.radius.small })}
+          style={{ background: colors.get(page) }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function RailItem({
+  session,
+  href,
+  selected,
+  timeZone,
+}: {
+  session: SessionSummary;
+  href: string;
+  selected: boolean;
+  timeZone: string;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const ref = useRef<HTMLAnchorElement>(null);
+  // Keeps the session in view when the list loads or the user steps to another one.
+  useEffect(() => {
+    if (selected) {
+      ref.current?.scrollIntoView?.({ block: 'nearest' });
+    }
+  }, [selected]);
+
+  // Who the user is when known; otherwise where the session went, as anonymous sessions all look
+  // alike by their user.
+  const journey = journeyOf(session);
+  const title = session.user ?? journey ?? ANONYMOUS_USER;
+  const titleIsJourney = !session.user && journey !== null;
+  const details = [
+    titleIsJourney ? ANONYMOUS_USER : null,
+    moment(session.startTime).tz(timeZone).format('MMM D, HH:mm'),
+    clientOf(session),
+    locationOf(session),
+  ].filter(Boolean);
+
+  return (
+    <a
+      ref={ref}
+      href={href}
+      aria-current={selected ? 'page' : undefined}
+      data-test-subj={`digitalExperienceSessionsRailItem-${session.sessionId}`}
+      {...getEbtProps({
+        action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_SESSION,
+        element: SESSIONS_EBT_ELEMENTS.RAIL_SESSION,
+      })}
+      css={css({
+        display: 'block',
+        padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+        borderBottom: euiTheme.border.thin,
+        borderLeft: `${euiTheme.size.xs} solid ${
+          selected ? euiTheme.colors.primary : 'transparent'
+        }`,
+        background: selected ? euiTheme.colors.backgroundBasePrimary : undefined,
+        color: euiTheme.colors.textParagraph,
+        '&:hover, &:focus-visible': {
+          background: selected
+            ? euiTheme.colors.backgroundBasePrimary
+            : euiTheme.colors.backgroundBaseSubdued,
+          textDecoration: 'none',
+        },
+      })}
+    >
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="baseline">
+        <EuiFlexItem css={css({ minWidth: 0 })}>
+          <EuiText
+            size="s"
+            className="eui-textTruncate"
+            data-test-subj="digitalExperienceSessionsRailItemTitle"
+            css={titleIsJourney ? css({ fontFamily: euiTheme.font.familyCode }) : undefined}
+          >
+            <strong>{title}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {formatSessionDuration(session.durationMs)}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="baseline">
+        <EuiFlexItem css={css({ minWidth: 0 })}>
+          <EuiText size="xs" color="subdued" className="eui-textTruncate">
+            {details.join(' · ')}
+          </EuiText>
+        </EuiFlexItem>
+        {/* To match a session against an ID from a ticket, a log or the breadcrumb. */}
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="digitalExperienceSessionsRailItemId"
+            css={css({ fontFamily: euiTheme.font.familyCode })}
+          >
+            {shortSessionId(session.sessionId)}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {session.journey.length > 0 && <JourneyBar journey={session.journey} />}
+      {(session.jsErrorCount > 0 || session.failedRequestCount > 0 || session.bounced) && (
+        <EuiFlexGroup gutterSize="xs" responsive={false} wrap css={css({ marginTop: 4 })}>
+          {session.jsErrorCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="danger">
+                {i18n.translate('xpack.digitalExperience.sessionDetail.rail.errors', {
+                  defaultMessage: '{count, plural, one {# error} other {# errors}}',
+                  values: { count: session.jsErrorCount },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+          {session.failedRequestCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.digitalExperience.sessionDetail.rail.failedRequests', {
+                  defaultMessage: '{count} failed',
+                  values: { count: session.failedRequestCount },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+          {session.bounced && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.digitalExperience.sessionDetail.rail.bounced', {
+                  defaultMessage: 'Bounced',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
+    </a>
+  );
+}
+
+/**
+ * The sessions list beside a session, with the list's search, filters, sort and page from the URL,
+ * so the user can step from session to session without going back to the list.
+ */
+export function SessionsRail({
+  serviceName,
+  sessionId,
+  source,
+  side,
+  onHide,
+  headerHeight,
+  selectedLocation = null,
+}: {
+  serviceName: string;
+  sessionId: string;
+  source: ApplicationSource;
+  /** The side of the session the list shows on, which its hide button points to. */
+  side: 'left' | 'right';
+  onHide: () => void;
+  /** The height of the session's page header, which the list's header matches. */
+  headerHeight?: number;
+  /** Where the open session is from, which the map rings. */
+  selectedLocation?: GeoLocation | null;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const apiClient = useApiClient();
+  const { timeZone, formatNumber } = useFormatters();
+  const { timeRange } = useTimeRange();
+  const { environment } = useEnvironment();
+  const updateUrlQuery = useUpdateUrlQuery();
+  const { query } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
+  // The route gives a new query object on each navigation; moving to another session must not
+  // load the list again.
+  const sessionsQuery = useEqualValue(pickSessionsListQuery(query));
+  const state = useMemo(() => sessionsListStateOf(sessionsQuery), [sessionsQuery]);
+  const { sessionHref, sessionsHref } = useApplicationLinks(serviceName, source);
+  const { maps } = useKibanaServices();
+  const [savedView, setView] = usePersistedChoice<RailView>(VIEW_STORAGE_KEY, VIEWS, 'list');
+  // Without the Maps plugin, the sessions only show as a list.
+  const view: RailView = maps ? savedView : 'list';
+
+  const {
+    value: response,
+    loading,
+    error,
+    refresh,
+  } = useAbortableAsync(
+    // The map loads its own clusters.
+    ({ signal }) =>
+      view === 'list'
+        ? apiClient.fetch('GET /internal/digital_experience/applications/{serviceName}/sessions', {
+            signal,
+            params: {
+              path: { serviceName },
+              query: sessionsListRequestQuery({ timeRange, environment, state }),
+            },
+          })
+        : undefined,
+    [apiClient, serviceName, timeRange, environment, state, view],
+    { unsetValueOnError: true }
+  );
+
+  // Searches as the user types, once they pause, like the sessions list.
+  const [search, setSearch] = useState(state.search ?? '');
+  const applySearch = useCallback(
+    (value: string) => {
+      if (value.trim() !== (state.search ?? '')) {
+        // Replaced, so Back doesn't step through each search as it was typed.
+        updateUrlQuery({ search: value.trim() || undefined }, { replace: true, remove: ['page'] });
+      }
+    },
+    [state.search, updateUrlQuery]
+  );
+  useDebounce(() => applySearch(search), SEARCH_DEBOUNCE_MS, [search]);
+  // Follows the URL, e.g. when the user goes back; spaces still being typed around it stay.
+  useEffect(
+    () =>
+      setSearch((current) =>
+        current.trim() === (state.search ?? '') ? current : state.search ?? ''
+      ),
+    [state.search]
+  );
+
+  const total = response?.total ?? 0;
+  const firstShown = state.page * state.perPage + 1;
+  const lastShown = Math.min(total, (state.page + 1) * state.perPage);
+  const setPage = (page: number) =>
+    updateUrlQuery({ page: page > 0 ? String(page) : undefined }, { replace: true });
+
+  return (
+    <div
+      data-test-subj="digitalExperienceSessionsRail"
+      css={css({ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 })}
+    >
+      {/* As tall as the session's header, so that their bottom borders line up. */}
+      <div
+        css={css({
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          minHeight: headerHeight,
+          padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+          borderBottom: euiTheme.border.thin,
+        })}
+      >
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h2>{TITLE}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {response && view === 'list' && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj="digitalExperienceSessionsRailTotal">
+                {formatNumber(total)}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem />
+          {maps && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={VIEW_LEGEND}
+                options={VIEW_OPTIONS.map(({ id, label, iconType }) => ({
+                  id,
+                  label,
+                  iconType,
+                  'data-test-subj': `digitalExperienceSessionsRailView-${id}`,
+                  ...getEbtProps({
+                    action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SWITCH_SESSIONS_VIEW,
+                    element: SESSIONS_EBT_ELEMENTS.RAIL_VIEW,
+                  }),
+                }))}
+                idSelected={view}
+                onChange={setView}
+                isIconOnly
+                buttonSize="compressed"
+                data-test-subj="digitalExperienceSessionsRailView"
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={HIDE_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType={side === 'right' ? 'transitionRightOut' : 'transitionLeftOut'}
+                aria-label={HIDE_LABEL}
+                onClick={onHide}
+                data-test-subj="digitalExperienceSessionsRailHide"
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST,
+                  element: SESSIONS_EBT_ELEMENTS.RAIL_HIDE,
+                })}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {/* Spaced by a spacer, not a margin on the field: its icon is placed against its wrapper. */}
+        <EuiSpacer size="s" />
+        <EuiFieldSearch
+          compressed
+          fullWidth
+          value={search}
+          maxLength={SESSIONS_LIST_MAX_SEARCH_LENGTH}
+          placeholder={SEARCH_PLACEHOLDER}
+          aria-label={SEARCH_PLACEHOLDER}
+          onChange={(event) => setSearch(event.target.value)}
+          // Enter searches at once, without waiting for the pause.
+          onSearch={applySearch}
+          data-test-subj="digitalExperienceSessionsRailSearch"
+        />
+      </div>
+
+      {view === 'list' && state.bounds && (
+        <EuiText
+          size="xs"
+          color="subdued"
+          data-test-subj="digitalExperienceSessionsRailMapArea"
+          css={css({
+            padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+            borderBottom: euiTheme.border.thin,
+          })}
+        >
+          {i18n.translate('xpack.digitalExperience.sessionDetail.rail.mapArea', {
+            defaultMessage: 'Sessions from the map area.',
+          })}{' '}
+          <EuiLink
+            onClick={() =>
+              updateUrlQuery({ bounds: undefined }, { replace: true, remove: ['page'] })
+            }
+            data-test-subj="digitalExperienceSessionsRailClearMapArea"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CLEAR_FILTERS,
+              element: SESSIONS_EBT_ELEMENTS.MAP_CLEAR_AREA,
+            })}
+          >
+            {i18n.translate('xpack.digitalExperience.sessionDetail.rail.clearMapArea', {
+              defaultMessage: 'Show all',
+            })}
+          </EuiLink>
+        </EuiText>
+      )}
+
+      {/* The map area is the map's own filter, which it shows on the map. */}
+      {hasSessionsListFilters({ ...state, search: undefined, bounds: undefined }) && (
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css({
+            padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+            borderBottom: euiTheme.border.thin,
+          })}
+        >
+          {i18n.translate('xpack.digitalExperience.sessionDetail.rail.filtered', {
+            defaultMessage: 'Filtered like the sessions list.',
+          })}{' '}
+          <EuiLink
+            href={sessionsHref(sessionsQuery)}
+            data-test-subj="digitalExperienceSessionsRailEditFilters"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.BACK_TO_SESSIONS,
+              element: SESSIONS_EBT_ELEMENTS.RAIL_EDIT_FILTERS,
+            })}
+          >
+            {i18n.translate('xpack.digitalExperience.sessionDetail.rail.editFilters', {
+              defaultMessage: 'Edit filters',
+            })}
+          </EuiLink>
+        </EuiText>
+      )}
+
+      {view === 'map' && maps ? (
+        <SessionsMap
+          maps={maps}
+          serviceName={serviceName}
+          sessionId={sessionId}
+          state={state}
+          selectedLocation={selectedLocation}
+          sessionHref={(id) => sessionHref(id, sessionsQuery)}
+          onShowList={() => setView('list')}
+        />
+      ) : (
+        <>
+          {/* A new search or page keeps the current sessions until the next ones arrive. */}
+          <div css={css({ position: 'relative', height: 2 })}>
+            {loading && response && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                data-test-subj="digitalExperienceSessionsRailLoading"
+              />
+            )}
+          </div>
+          <div
+            css={css({ flex: 1, minHeight: 0, overflowY: 'auto' })}
+            role="navigation"
+            aria-label={TITLE}
+          >
+            {error ? (
+              <LoadErrorPrompt
+                data-test-subj="digitalExperienceSessionsRailError"
+                retryDataTestSubj="digitalExperienceSessionsRailRetry"
+                retryEbtElement={SESSIONS_EBT_ELEMENTS.RETRY}
+                title={i18n.translate('xpack.digitalExperience.sessionDetail.rail.loadError', {
+                  defaultMessage: 'Could not load the sessions',
+                })}
+                error={error}
+                onRetry={refresh}
+              />
+            ) : !response ? (
+              <EuiFlexGroup justifyContent="center" css={css({ padding: euiTheme.size.l })}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexGroup>
+            ) : response.sessions.length === 0 ? (
+              <EuiText size="s" color="subdued" css={css({ padding: euiTheme.size.m })}>
+                {i18n.translate('xpack.digitalExperience.sessionDetail.rail.empty', {
+                  defaultMessage: 'No sessions match.',
+                })}
+              </EuiText>
+            ) : (
+              response.sessions.map((session) => (
+                <RailItem
+                  key={session.sessionId}
+                  session={session}
+                  href={sessionHref(session.sessionId, sessionsQuery)}
+                  selected={session.sessionId === sessionId}
+                  timeZone={timeZone}
+                />
+              ))
+            )}
+          </div>
+
+          {total > state.perPage && (
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              css={css({
+                // A flex group grows by default, which would take the list's height.
+                flexGrow: 0,
+                padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+                borderTop: euiTheme.border.thin,
+              })}
+            >
+              <EuiFlexItem>
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  data-test-subj="digitalExperienceSessionsRailRange"
+                >
+                  {i18n.translate('xpack.digitalExperience.sessionDetail.rail.range', {
+                    defaultMessage: '{first}–{last} of {total}',
+                    values: {
+                      first: formatNumber(firstShown),
+                      last: formatNumber(lastShown),
+                      total: formatNumber(total),
+                    },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              {(
+                [
+                  {
+                    id: 'previous',
+                    iconType: 'chevronSingleLeft',
+                    label: PREVIOUS_PAGE_LABEL,
+                    disabled: state.page === 0,
+                    page: state.page - 1,
+                  },
+                  {
+                    id: 'next',
+                    iconType: 'chevronSingleRight',
+                    label: NEXT_PAGE_LABEL,
+                    disabled: lastShown >= total,
+                    page: state.page + 1,
+                  },
+                ] as const
+              ).map(({ id, iconType, label, disabled, page }) => (
+                <EuiFlexItem grow={false} key={id}>
+                  <EuiToolTip content={label} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType={iconType}
+                      aria-label={label}
+                      isDisabled={disabled}
+                      onClick={() => setPage(page)}
+                      data-test-subj={`digitalExperienceSessionsRail-${id}Page`}
+                      {...getEbtProps({
+                        action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CHANGE_PAGE,
+                        element: SESSIONS_EBT_ELEMENTS.RAIL_PAGE,
+                      })}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

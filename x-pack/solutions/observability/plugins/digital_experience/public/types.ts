@@ -11,6 +11,8 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UxPluginStart } from '@kbn/ux-plugin/public';
 
@@ -24,6 +26,10 @@ export interface DigitalExperienceStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   /** Undefined on serverless, which disables the ux plugin and so has no Classic RUM data. */
   ux?: UxPluginStart;
+  /** For links to other apps, e.g. Discover; undefined when the share plugin is disabled. */
+  share?: SharePluginStart;
+  /** Draws the sessions map; without it, the sessions beside a session only show as a list. */
+  maps?: MapsStartApi;
 }
 
 export type DigitalExperienceServices = CoreStart & DigitalExperienceStartDeps;

@@ -1245,8 +1245,12 @@ export const generateEdotBrowserSessions = (
             const sameTab = random() < SAME_TAB_RATE;
             const gap = random();
 
+            // Drawn apart from the session, so that it doesn't change the rest of its draws
+            const location = edotBrowser.pickVisitorLocation(
+              createSeededRandom(`${seed}:${sessionKey}:${index}:location`)
+            );
             const client = (options: EdotBrowserClientOptions = {}) =>
-              app.client(profile, { includeRawAttribution, ...options });
+              app.client(profile, { includeRawAttribution, ...options }, location);
             // The visits of every session, in the tab each happened in: what replay records. A session
             // that expired has its own ID, so it records, or not, on its own.
             const visitsBySession = new Map<string, EdotBrowserReplayVisit[]>();

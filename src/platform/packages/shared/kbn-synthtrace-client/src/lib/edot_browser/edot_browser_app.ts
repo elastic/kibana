@@ -9,6 +9,7 @@
 
 import type { BrowserProfile } from './browser_profiles';
 import { EdotBrowserClient, type EdotBrowserClientOptions } from './edot_browser_client';
+import type { VisitorLocation } from './visitor_locations';
 
 export interface EdotBrowserAppOptions {
   serviceName: string;
@@ -43,10 +44,17 @@ export class EdotBrowserApp {
     };
   }
 
-  /** A browser of the given profile running this app. */
-  client(profile: BrowserProfile, options?: EdotBrowserClientOptions): EdotBrowserClient {
+  /**
+   * A browser of the given profile running this app; with a `location`, its telemetry carries the
+   * geo attributes a Collector's GeoIP processor adds.
+   */
+  client(
+    profile: BrowserProfile,
+    options?: EdotBrowserClientOptions,
+    location?: VisitorLocation
+  ): EdotBrowserClient {
     return new EdotBrowserClient(
-      { ...this.resourceAttributes, ...profile.resourceAttributes },
+      { ...this.resourceAttributes, ...profile.resourceAttributes, ...location?.geo },
       options
     );
   }

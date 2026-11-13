@@ -7,21 +7,16 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { SESSIONS_INDEX } from '../../common/sessions';
 import {
   checkSessionsPrivileges,
-  enableSessions,
   getMissingSessionsPrivileges,
   getRestrictedSourceIndices,
-  getSessionsStatus,
   indexPatternCovers,
   indexPatternsOverlap,
-} from './sessions_setup';
+} from './sessions_privileges';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
 import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
-import { sessionsIndexTemplate } from './sessions_spec';
 
-type ScopedClient = ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
 type Client = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
 const SOURCE_INDICES = ['traces-*.otel-*', 'logs-*.otel-*'];
@@ -70,85 +65,96 @@ const grantAll = (client: Client) => {
   mockReadPrivileges(client, [{}]);
 };
 
-describe('sessions setup', () => {
-  let esClient: ScopedClient;
+/** What the summaries task does with the user's API key: read the events, manage the summaries. */
+const requestedIndexPrivileges = [
+  { names: SOURCE_INDICES, privileges: ['read', 'view_index_metadata'] },
+  {
+    names: ['digital-experience-sessions-*'],
+    privileges: ['read', 'view_index_metadata', 'index', 'create_index', 'delete', 'delete_index'],
+  },
+];
+
+describe('sessions privileges', () => {
+  let client: Client;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient();
+    client = elasticsearchServiceMock.createElasticsearchClient();
   });
 
   describe('getMissingSessionsPrivileges', () => {
-    it('lists every missing cluster and index privilege', async () => {
-      esClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+    it('lists every missing index privilege', async () => {
+      client.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
-        cluster: { manage_index_templates: false },
-        index: { 'traces-*.otel-*': { read: false, view_index_metadata: true } },
+        cluster: {},
+        index: {
+          'traces-*.otel-*': { read: false, view_index_metadata: true },
+          'digital-experience-sessions-*': { read: true, delete_index: false },
+        },
         application: {},
         username: 'reader',
       });
 
-      expect(
-        await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: false })
-      ).toEqual(['cluster:manage_index_templates', 'index:traces-*.otel-*:read']);
+      expect(await getMissingSessionsPrivileges(client, { isServerless: false })).toEqual([
+        'index:traces-*.otel-*:read',
+        'index:digital-experience-sessions-*:delete_index',
+      ]);
+    });
+
+    it('needs no cluster privilege on stateful, as the internal user puts the template', async () => {
+      grantAll(client);
+
+      expect(await getMissingSessionsPrivileges(client, { isServerless: false })).toEqual([]);
+      expect(client.security.hasPrivileges).toHaveBeenCalledWith({
+        cluster: [],
+        index: requestedIndexPrivileges,
+      });
     });
 
     it('also requires read_security on Serverless, to read the user’s roles', async () => {
-      esClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      client.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
-        cluster: { manage_index_templates: false, read_security: false },
-        index: {},
+        cluster: { read_security: false },
+        index: { 'logs-*.otel-*': { read: false } },
         application: {},
         username: 'reader',
       });
 
-      expect(
-        await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: true })
-      ).toEqual(['cluster:manage_index_templates', 'cluster:read_security']);
-      expect(esClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
-        expect.objectContaining({
-          cluster: ['manage_index_templates', 'read_security'],
-        })
-      );
-    });
-
-    it('does not require read_security on stateful', async () => {
-      grantAll(esClient.asCurrentUser);
-
-      await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: false });
-
-      expect(esClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
-        expect.objectContaining({
-          cluster: ['manage_index_templates'],
-        })
-      );
+      expect(await getMissingSessionsPrivileges(client, { isServerless: true })).toEqual([
+        'cluster:read_security',
+        'index:logs-*.otel-*:read',
+      ]);
+      expect(client.security.hasPrivileges).toHaveBeenCalledWith({
+        cluster: ['read_security'],
+        index: requestedIndexPrivileges,
+      });
     });
   });
 
   describe('checkSessionsPrivileges', () => {
-    it('refuses a user who lacks privileges', async () => {
-      esClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+    it('refuses a user who lacks privileges, before checking their source reads', async () => {
+      client.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
-        cluster: { manage_index_templates: false },
-        index: {},
+        cluster: {},
+        index: { 'digital-experience-sessions-*': { create_index: false } },
         application: {},
         username: 'reader',
       });
 
-      await expect(
-        checkSessionsPrivileges(esClient.asCurrentUser, { isServerless: false })
-      ).rejects.toBeInstanceOf(SessionsPrivilegesError);
+      const error = await checkSessionsPrivileges(client, { isServerless: false }).catch((e) => e);
+
+      expect(error).toBeInstanceOf(SessionsPrivilegesError);
+      expect(error.missingPrivileges).toEqual(['index:digital-experience-sessions-*:create_index']);
+      expect(client.security.getUserPrivileges).not.toHaveBeenCalled();
     });
 
     it.each([
       ['document-level security', { query: ['{"term":{"service.name":"checkout-web"}}'] }],
       ['field-level security', { field_security: [{ grant: ['@timestamp', 'resource.*'] }] }],
     ])('refuses a user whose source read is filtered by %s', async (_name, restriction) => {
-      grantAll(esClient.asCurrentUser);
-      mockReadPrivileges(esClient.asCurrentUser, [restriction]);
+      grantAll(client);
+      mockReadPrivileges(client, [restriction]);
 
-      const error = await checkSessionsPrivileges(esClient.asCurrentUser, {
-        isServerless: false,
-      }).catch((e) => e);
+      const error = await checkSessionsPrivileges(client, { isServerless: false }).catch((e) => e);
 
       expect(error).toBeInstanceOf(SessionsRestrictedReadError);
       expect(error.restrictedIndices).toEqual(SOURCE_INDICES);
@@ -156,112 +162,11 @@ describe('sessions setup', () => {
     });
 
     it('passes a user with every privilege and unfiltered reads', async () => {
-      grantAll(esClient.asCurrentUser);
+      grantAll(client);
 
       await expect(
-        checkSessionsPrivileges(esClient.asCurrentUser, { isServerless: false })
+        checkSessionsPrivileges(client, { isServerless: false })
       ).resolves.toBeUndefined();
-    });
-  });
-
-  describe('enableSessions', () => {
-    const enableArgs = () => ({ esClient, isServerless: false });
-    const alreadyExists = () =>
-      new errors.ResponseError({
-        statusCode: 400,
-        body: { error: { type: 'resource_already_exists_exception' } },
-        headers: {},
-        warnings: null,
-        meta: {} as never,
-      });
-
-    beforeEach(() => {
-      grantAll(esClient.asCurrentUser);
-    });
-
-    it('puts the index template and creates the index as the user', async () => {
-      await enableSessions(enableArgs());
-
-      const { asCurrentUser, asInternalUser, asSecondaryAuthUser } = esClient;
-      expect(asCurrentUser.indices.putIndexTemplate).toHaveBeenCalledWith(sessionsIndexTemplate);
-      expect(asCurrentUser.indices.create).toHaveBeenCalledWith({ index: SESSIONS_INDEX });
-      expect(asInternalUser.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(asSecondaryAuthUser.indices.putIndexTemplate).not.toHaveBeenCalled();
-    });
-
-    it('creates the index after its template, so the template maps it', async () => {
-      await enableSessions(enableArgs());
-
-      const { putIndexTemplate, create } = esClient.asCurrentUser.indices;
-      expect(putIndexTemplate.mock.invocationCallOrder[0]).toBeLessThan(
-        create.mock.invocationCallOrder[0]
-      );
-    });
-
-    it('writes nothing for a user who lacks privileges', async () => {
-      esClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        has_all_requested: false,
-        cluster: { manage_index_templates: false },
-        index: {},
-        application: {},
-        username: 'reader',
-      });
-
-      await expect(enableSessions(enableArgs())).rejects.toBeInstanceOf(SessionsPrivilegesError);
-      expect(esClient.asCurrentUser.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(esClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
-    });
-
-    it('writes nothing for a user whose source read is filtered', async () => {
-      mockReadPrivileges(esClient.asCurrentUser, [
-        { query: ['{"term":{"service.name":"checkout-web"}}'] },
-      ]);
-
-      await expect(enableSessions(enableArgs())).rejects.toBeInstanceOf(
-        SessionsRestrictedReadError
-      );
-      expect(esClient.asCurrentUser.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(esClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
-    });
-
-    it('also checks read_security on Serverless', async () => {
-      await enableSessions({ esClient, isServerless: true });
-
-      expect(esClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
-        expect.objectContaining({ cluster: ['manage_index_templates', 'read_security'] })
-      );
-    });
-
-    it('waits until the new index accepts searches', async () => {
-      const { count } = esClient.asCurrentUser;
-      count.mockRejectedValueOnce(esError(503));
-
-      await enableSessions(enableArgs());
-
-      expect(count).toHaveBeenCalledTimes(2);
-      expect(count).toHaveBeenCalledWith({ index: SESSIONS_INDEX, ignore_unavailable: true });
-    });
-
-    it('does not wait on errors other than an unavailable index', async () => {
-      esClient.asCurrentUser.count.mockRejectedValue(esError(403));
-
-      await enableSessions(enableArgs());
-
-      expect(esClient.asCurrentUser.count).toHaveBeenCalledTimes(1);
-    });
-
-    it('keeps an existing index, without needing view_index_metadata to check for it', async () => {
-      esClient.asCurrentUser.indices.create.mockRejectedValue(alreadyExists());
-
-      await expect(enableSessions(enableArgs())).resolves.toBeUndefined();
-      expect(esClient.asCurrentUser.indices.exists).not.toHaveBeenCalled();
-    });
-
-    it('fails when the index cannot be created for another reason', async () => {
-      esClient.asCurrentUser.indices.create.mockRejectedValue(esError(403));
-
-      await expect(enableSessions(enableArgs())).rejects.toThrow();
-      expect(esClient.asCurrentUser.count).not.toHaveBeenCalled();
     });
   });
 
@@ -301,12 +206,6 @@ describe('sessions setup', () => {
   });
 
   describe('getRestrictedSourceIndices', () => {
-    let client: Client;
-
-    beforeEach(() => {
-      client = elasticsearchServiceMock.createElasticsearchClient();
-    });
-
     it('accepts unrestricted read on the source patterns', async () => {
       mockReadPrivileges(client, [{}]);
       expect(await getRestrictedSourceIndices(client)).toEqual({ indices: [], reason: 'filtered' });
@@ -515,49 +414,6 @@ describe('sessions setup', () => {
 
         await expect(getRestrictedSourceIndices(client)).rejects.toThrow();
       });
-    });
-  });
-
-  describe('getSessionsStatus', () => {
-    let client: Client;
-
-    beforeEach(() => {
-      client = elasticsearchServiceMock.createElasticsearchClient();
-    });
-
-    it('reports sessions as set up when the sessions index exists', async () => {
-      client.indices.exists.mockResolvedValue(true);
-
-      expect(await getSessionsStatus(client)).toEqual({ installed: true });
-      expect(client.indices.exists).toHaveBeenCalledWith(
-        { index: SESSIONS_INDEX },
-        { signal: undefined }
-      );
-    });
-
-    it('reports sessions as not set up without the sessions index', async () => {
-      client.indices.exists.mockResolvedValue(false);
-
-      expect(await getSessionsStatus(client)).toEqual({ installed: false });
-    });
-
-    it('passes the abort signal on', async () => {
-      client.indices.exists.mockResolvedValue(true);
-      const { signal } = new AbortController();
-
-      await getSessionsStatus(client, { signal });
-
-      expect(client.indices.exists).toHaveBeenCalledWith({ index: SESSIONS_INDEX }, { signal });
-    });
-
-    it('never writes', async () => {
-      client.indices.exists.mockResolvedValue(true);
-
-      await getSessionsStatus(client);
-
-      expect(client.indices.create).not.toHaveBeenCalled();
-      expect(client.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(client.indices.delete).not.toHaveBeenCalled();
     });
   });
 });

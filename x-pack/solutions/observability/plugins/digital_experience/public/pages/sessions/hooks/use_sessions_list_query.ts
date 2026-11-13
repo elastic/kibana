@@ -18,8 +18,10 @@ const FILTER_KEYS = [
   'os',
   'country',
   'entryPage',
-  'hasErrors',
+  'withJsErrors',
+  'withFailedRequests',
   'duration',
+  'bounds',
 ] as const satisfies ReadonlyArray<keyof SessionsListUrlQuery>;
 
 export interface SessionsListState {
@@ -28,13 +30,37 @@ export interface SessionsListState {
   os?: string;
   country?: string;
   entryPage?: string;
-  hasErrors: boolean;
+  withJsErrors: boolean;
+  withFailedRequests: boolean;
   duration?: DurationBucket;
+  /** The map area the sessions are from, as the `bounds` param. */
+  bounds?: string;
   sortField: SessionSortField;
   sortDirection: 'asc' | 'desc';
   page: number;
   perPage: number;
 }
+
+/** The list's state from a URL query, with the defaults of what it leaves out. */
+export const sessionsListStateOf = (query: SessionsListUrlQuery): SessionsListState => ({
+  search: query.search,
+  browser: query.browser,
+  os: query.os,
+  country: query.country,
+  entryPage: query.entryPage,
+  withJsErrors: query.withJsErrors ?? false,
+  withFailedRequests: query.withFailedRequests ?? false,
+  duration: query.duration,
+  bounds: query.bounds,
+  sortField: query.sortField ?? 'start_time',
+  sortDirection: query.sortDirection ?? 'desc',
+  page: query.page ?? 0,
+  perPage: query.perPage ?? SESSIONS_LIST_DEFAULT_PER_PAGE,
+});
+
+/** Whether the state narrows the list. */
+export const hasSessionsListFilters = (state: SessionsListState): boolean =>
+  FILTER_KEYS.some((key) => Boolean(state[key]));
 
 /**
  * The sessions list's search, filters, sort and page from the URL, and setters that keep the other
@@ -44,22 +70,7 @@ export const useSessionsListQuery = () => {
   const { query } = useDigitalExperienceParams('/{serviceName}/sessions');
   const updateUrlQuery = useUpdateUrlQuery();
 
-  const state = useMemo<SessionsListState>(
-    () => ({
-      search: query.search,
-      browser: query.browser,
-      os: query.os,
-      country: query.country,
-      entryPage: query.entryPage,
-      hasErrors: query.hasErrors ?? false,
-      duration: query.duration,
-      sortField: query.sortField ?? 'start_time',
-      sortDirection: query.sortDirection ?? 'desc',
-      page: query.page ?? 0,
-      perPage: query.perPage ?? SESSIONS_LIST_DEFAULT_PER_PAGE,
-    }),
-    [query]
-  );
+  const state = useMemo(() => sessionsListStateOf(query), [query]);
 
   const update = useCallback(
     (patch: Partial<Record<keyof SessionsListUrlQuery, string | undefined>>, replace = false) =>
@@ -79,9 +90,7 @@ export const useSessionsListQuery = () => {
     [update]
   );
 
-  const hasActiveFilters = FILTER_KEYS.some((key) =>
-    key === 'hasErrors' ? state.hasErrors : Boolean(state[key])
-  );
+  const hasActiveFilters = hasSessionsListFilters(state);
 
   return { state, update, setSearch, clearFilters, hasActiveFilters };
 };

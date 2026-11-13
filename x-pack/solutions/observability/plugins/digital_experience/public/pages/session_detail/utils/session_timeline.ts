@@ -7,6 +7,7 @@
 
 import type {
   SessionPageVisit,
+  SessionRequest,
   SessionSummary,
   SessionTimelineEvent,
   SessionTimelineEventKind,
@@ -23,6 +24,7 @@ export const JOURNEY_EVENT_KINDS: readonly SessionTimelineEventKind[] = [
 export interface PageVisitEvents {
   visit: SessionPageVisit;
   events: SessionTimelineEvent[];
+  requests: SessionRequest[];
 }
 
 /**
@@ -32,12 +34,14 @@ export interface PageVisitEvents {
  */
 export const groupEventsByVisit = (
   pageVisits: SessionPageVisit[],
-  timeline: SessionTimelineEvent[]
+  timeline: SessionTimelineEvent[],
+  requests: SessionRequest[] = []
 ): PageVisitEvents[] => {
   const groups = pageVisits.map((visit) => ({
     visit,
     startMs: Date.parse(visit.startTime),
     events: [] as SessionTimelineEvent[],
+    requests: [] as SessionRequest[],
   }));
   if (groups.length === 0) {
     return [];
@@ -50,7 +54,15 @@ export const groupEventsByVisit = (
     const group = groups.findLast(({ startMs }) => startMs <= eventMs) ?? groups[0];
     group.events.push(event);
   }
-  return groups.map(({ visit, events }) => ({ visit, events }));
+  // The API attributes requests to visits, as only it knows which page load each came from.
+  for (const request of requests) {
+    groups[request.visitIndex]?.requests.push(request);
+  }
+  return groups.map(({ visit, events, requests: visitRequests }) => ({
+    visit,
+    events,
+    requests: visitRequests,
+  }));
 };
 
 export interface WaterfallSegment {

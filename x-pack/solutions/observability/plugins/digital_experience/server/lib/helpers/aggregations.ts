@@ -16,8 +16,19 @@ export interface PercentilesAggregation {
   values: Array<{ key: number; value: number | null }>;
 }
 
+/** A terms aggregation whose bucket counts are read, not only its keys. */
+export interface CountedTermsAggregation {
+  buckets: Array<{ key: string | number; doc_count: number }>;
+}
+
 export const bucketKeys = (aggregation?: TermsAggregation): string[] =>
   (aggregation?.buckets ?? []).map(({ key }) => String(key));
+
+/** Each bucket's key, as a string, and document count. */
+export const bucketCounts = (
+  aggregation?: CountedTermsAggregation
+): Array<{ key: string; count: number }> =>
+  (aggregation?.buckets ?? []).map(({ key, doc_count: count }) => ({ key: String(key), count }));
 
 /** The key of a `size: 1` terms aggregation, e.g. a resource's initiator type; `null` without. */
 export const firstBucketKey = (aggregation?: TermsAggregation): string | null => {
@@ -58,6 +69,9 @@ export interface ValueCountAggregation {
 
 /** The documents of a bucket that have a value for `field`, e.g. the samples of a percentile. */
 export const countOf = (field: string) => ({ value_count: { field } });
+
+/** The sum of `field` over the documents of a bucket, e.g. a count the session summaries kept. */
+export const sumOf = (field: string) => ({ sum: { field } });
 
 /** The latest document of a bucket. */
 export const LAST_SEEN_AGGREGATION = { max: { field: '@timestamp' } } as const;

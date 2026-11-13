@@ -91,6 +91,33 @@ describe('Page template', () => {
     expect(component.exists('lazy')).toBe(true);
   });
 
+  it.each([
+    [undefined, true, true],
+    [undefined, false, false],
+    [true, false, true],
+    [false, true, false],
+  ])(
+    'with showSolutionNav %s and the sidebar enabled %s, shows the solution nav: %s',
+    (showSolutionNav, isSidebarEnabled, expected) => {
+      const LazyObservabilityPageTemplate = createLazyObservabilityPageTemplate({
+        currentAppId$: of('Test app ID'),
+        getUrlForApp: () => '/test-url',
+        navigateToApp: async () => {},
+        navigationSections$: navigationRegistry.sections$,
+        getPageTemplateServices,
+        isSidebarEnabled$: new BehaviorSubject<boolean>(isSidebarEnabled),
+      });
+
+      const component = shallow(
+        <LazyObservabilityPageTemplate showSolutionNav={showSolutionNav}>
+          <div>Test structure</div>
+        </LazyObservabilityPageTemplate>
+      );
+
+      expect(component.find('lazy').prop('showSolutionNav')).toBe(expected);
+    }
+  );
+
   it('Utilises the KibanaPageTemplate for rendering', () => {
     const component = shallow(
       <ObservabilityPageTemplate

@@ -10,6 +10,7 @@ import {
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
+  SESSIONS_TASK_ID,
 } from '../../../../common/sessions';
 import { OTEL_APPS } from './constants';
 
@@ -17,7 +18,8 @@ import { OTEL_APPS } from './constants';
 export const SESSIONS_APP = OTEL_APPS.shop;
 
 /**
- * The mock sessions are from the last day, so they are within the sessions' lookback and this range.
+ * The mock sessions are from the last day: the summaries task deletes summaries that ended more
+ * than 31 days ago, so ones from `TIME_RANGE` would vanish at its next run.
  */
 export const SESSIONS_TIME_RANGE = { rangeFrom: 'now-7d', rangeTo: 'now' };
 
@@ -33,8 +35,8 @@ export const DETAILED_SESSION = {
   errorMessage: 'cart is undefined',
 } as const;
 
-/** Sessions with errors: the detailed one and `dx-session-02`. */
-export const SESSIONS_WITH_ERRORS = 2;
+/** Sessions with JS errors: the detailed one and `dx-session-02`. */
+export const SESSIONS_WITH_JS_ERRORS = 2;
 
 /** Sessions on Firefox: every third one. */
 export const FIREFOX_SESSIONS = 4;
@@ -47,14 +49,18 @@ const at = (startMs: number, offsetMs: number) => new Date(startMs + offsetMs).t
 
 const sessionId = (index: number) => `dx-session-${String(index + 1).padStart(2, '0')}`;
 
-/** A summary as the sessions index stores it. */
+/** A summary as the summaries task writes it. */
 const summaryOf = (sessionsStartMs: number, index: number) => {
   const isDetailed = index === 0;
   const startMs = index * 4 * 60 * SECOND_MS;
   const durationMs = isDetailed ? 150 * SECOND_MS : (index + 1) * 10 * SECOND_MS;
-  const errorCount = index < SESSIONS_WITH_ERRORS ? index + 1 : 0;
+  const errorCount = index < SESSIONS_WITH_JS_ERRORS ? index + 1 : 0;
   const journey = isDetailed ? [...DETAILED_SESSION.pages] : ['/', `/products/${index}`];
   const firefox = index % 3 === 2;
+  const user = isDetailed ? DETAILED_SESSION.user : null;
+  const userAgent = firefox
+    ? { browser: 'Firefox', browser_version: '131', os: 'Linux' }
+    : { browser: 'Chrome', browser_version: '130', os: 'macOS' };
   return {
     session: { id: sessionId(index) },
     service: { name: SESSIONS_APP },
@@ -71,17 +77,20 @@ const summaryOf = (sessionsStartMs: number, index: number) => {
     environment: 'production',
     // The detailed session's raw events have one click.
     click_count: isDetailed ? 1 : index,
-    error_count: errorCount,
-    has_error: errorCount > 0,
     bounced: false,
     entry_page: journey[0],
     exit_page: journey[journey.length - 1],
     journey,
-    user: { key: isDetailed ? DETAILED_SESSION.user : null },
-    user_agent: firefox
-      ? { browser: 'Firefox', browser_version: '131', os: 'Linux' }
-      : { browser: 'Chrome', browser_version: '130', os: 'macOS' },
-    geo: { country_iso: 'NL', city: 'Amsterdam' },
+    user: { key: user },
+    user_agent: userAgent,
+    geo: { country_iso: 'NL', city: 'Amsterdam', location: { lat: 52.3676, lon: 4.9041 } },
+    search: [
+      ...new Set(
+        [sessionId(index), user, userAgent.browser, userAgent.os, 'NL', 'Amsterdam', ...journey]
+          .filter((value): value is string => value !== null)
+          .map((value) => value.toLowerCase())
+      ),
+    ],
     web_vitals: { lcp: 1800, cls: 0.05 },
     web_vital_samples: {
       lcp: { count: 1, good: 1, needs_improvement: 0, poor: 0 },
@@ -129,7 +138,8 @@ const RAW_EVENT_IDS = rawEventsOfDetailedSession(0).map((_, index) => rawEventId
 
 /**
  * Sets sessions up as the system user, then writes the mock summaries straight to the sessions
- * index, and the raw events of the detailed session to theirs.
+ * index. The summaries task never rewrites them: their raw events have no
+ * `telemetry.sdk.language`, which it filters on.
  */
 export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
   const sessionsStartMs = Date.now() - DAY_MS;
@@ -163,8 +173,19 @@ export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClien
   }
 };
 
+/** Removes the summaries task, which also invalidates its API key; a missing task is fine. */
+export const removeSessionsTask = async (kbnClient: KbnClient) => {
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `/internal/task_manager/tasks/${encodeURIComponent(SESSIONS_TASK_ID)}`,
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+    ignoreErrors: [404],
+  });
+};
+
 /** Removes the sessions setup and the mock sessions, leaving the rest of the data streams. */
-export const deleteSessionsData = async (esClient: EsClient) => {
+export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
+  await removeSessionsTask(kbnClient);
   // Test clusters refuse wildcard deletes (`action.destructive_requires_name`), so by name.
   const indices = Object.keys(
     await esClient.indices.get({

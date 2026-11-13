@@ -12,8 +12,10 @@ import { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
 import { idleTab, session, sessionWithDocuments } from './edot_browser_session';
 import { HEALTH_PROFILES } from './health_profiles';
 import { replaySession, REPLAY_SIZES } from './replay/edot_browser_replay';
+import { pickVisitorLocation, VISITOR_LOCATIONS } from './visitor_locations';
 
 export type { BrowserProfileId } from './browser_profiles';
+export type { EdotBrowserGeoAttributes, VisitorLocation } from './visitor_locations';
 export type { HealthProfileName } from './health_profiles';
 export type { EdotBrowserClientOptions } from './edot_browser_client';
 export type { EdotBrowserSpanDocument } from './edot_browser_span';
@@ -43,5 +45,7 @@ export const edotBrowser = {
   browserProfiles: BROWSER_PROFILES,
   pickBrowserProfile,
   withoutBrowserDetails,
+  visitorLocations: VISITOR_LOCATIONS,
+  pickVisitorLocation,
   healthProfiles: HEALTH_PROFILES,
 };
