@@ -52,4 +52,12 @@ describe('useSelectedKi', () => {
     expect(history.location.pathname).toBe('/ai_index/a/knowledge_documents/idx');
     expect(result.current.selectedKi).toEqual({ kiId: 'ki-1', index: 'idx' });
   });
+
+  it('drops other query params, like an old index param', () => {
+    const { history, result } = renderSelectedKi(
+      '/ai_index/a/knowledge_documents/i?doc=x&index=old-index'
+    );
+    act(() => result.current.selectKi({ id: 'y', index: 'i' }));
+    expect(history.location.search).toBe('?doc=y');
+  });
 });

@@ -60,8 +60,8 @@ export const useSelectedKi = (): UseSelectedKiResult => {
       { id, index }: Pick<KiListItem, 'id' | 'index'>,
       { replace = false }: SelectKiOptions = {}
     ) => {
-      const params = new URLSearchParams(search);
-      params.set(KI_DOC_QUERY_PARAM, id);
+      // A fresh query: the document is the only page state in the URL.
+      const params = new URLSearchParams({ [KI_DOC_QUERY_PARAM]: id });
       const location = {
         pathname:
           index.length > 0
@@ -75,7 +75,7 @@ export const useSelectedKi = (): UseSelectedKiResult => {
       }
       history.push(location);
     },
-    [aiIndexId, history, search]
+    [aiIndexId, history]
   );
 
   return { selectedKi, selectKi };
