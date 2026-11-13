@@ -34,6 +34,7 @@ import {
   listAutomationRunsRoute,
   runAutomationRoute,
   getAutomationRunActivityRoute,
+  getAutomationsRunCountsRoute,
   repairAutomationRoute,
 } from './automations';
 import { getMemoryAvailabilityRoute } from './get_memory_availability';
@@ -79,6 +80,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...listAutomationRunsRoute,
   ...runAutomationRoute,
   ...getAutomationRunActivityRoute,
+  ...getAutomationsRunCountsRoute,
   ...repairAutomationRoute,
   ...getMemoryAvailabilityRoute,
   ...listMemoryPagesRoute,

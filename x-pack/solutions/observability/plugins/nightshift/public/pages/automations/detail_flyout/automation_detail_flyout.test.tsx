@@ -14,6 +14,7 @@ import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_ru
 import { AutomationDetailFlyout } from './automation_detail_flyout';
 import {
   useAutomationRunsInRange,
+  useAutomationsRunCounts,
   useAutomationDetail,
   useAutomationRunActivity,
   useToggleAutomation,
@@ -24,6 +25,7 @@ import type { Automation } from '../../../data/automations/use_automations';
 
 jest.mock('../../../data/automations/use_automations', () => ({
   useAutomationRunsInRange: jest.fn(),
+  useAutomationsRunCounts: jest.fn(),
   useAutomationDetail: jest.fn(),
   useAutomationRunActivity: jest.fn(),
   useToggleAutomation: jest.fn(),
@@ -91,10 +93,8 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
       },
     });
-    (useAutomationRunsInRange as jest.Mock).mockReturnValue({
-      data: { runs: [], total: 0 },
-      isLoading: false,
-    });
+    (useAutomationRunsInRange as jest.Mock).mockReturnValue({ runs: [], isLoading: false });
+    (useAutomationsRunCounts as jest.Mock).mockReturnValue(undefined);
     (useToggleAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn() });
     (useUpdateAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
   });

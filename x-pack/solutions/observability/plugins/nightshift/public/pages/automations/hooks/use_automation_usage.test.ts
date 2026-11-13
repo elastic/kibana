@@ -7,11 +7,16 @@
 
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryObserver } from '@kbn/react-query';
-import { useAutomationsRunsInRange } from '../../../data/automations/use_automations';
+import {
+  useAutomationsRunCounts,
+  useAutomationsRunsInRange,
+} from '../../../data/automations/use_automations';
+import type { Automation } from '../../../data/automations/use_automations';
 import { useAutomationUsage } from './use_automation_usage';
 
 jest.mock('../../../data/automations/use_automations', () => ({
   useAutomationsRunsInRange: jest.fn(() => []),
+  useAutomationsRunCounts: jest.fn(),
 }));
 
 const calls = () => jest.mocked(useAutomationsRunsInRange).mock.calls;
@@ -50,6 +55,27 @@ describe('useAutomationUsage', () => {
     );
     expect(result.current.usedToday.get('a1')).toBe(2);
     queryClient.clear();
+  });
+
+  it('exposes exact run counts per automation, including running', () => {
+    jest.mocked(useAutomationsRunCounts).mockReturnValue({
+      a1: { succeeded: 4, running: 2, failed: 1, skipped: 3 },
+    });
+    const automation = { id: 'a1' } as Automation;
+    const { result } = renderHook(() =>
+      useAutomationUsage([automation], { start: 'now-1d', end: 'now' }, Date.now())
+    );
+    expect(result.current.runCounts.get('a1')).toEqual({
+      succeeded: 4,
+      running: 2,
+      failed: 1,
+      skipped: 3,
+    });
+    expect(useAutomationsRunCounts).toHaveBeenCalledWith(
+      ['a1'],
+      expect.any(String),
+      expect.any(String)
+    );
   });
 
   it('moves today to the new UTC day when the range is refreshed after midnight', () => {

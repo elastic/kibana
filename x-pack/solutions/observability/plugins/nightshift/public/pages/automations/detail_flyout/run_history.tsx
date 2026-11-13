@@ -300,6 +300,7 @@ export const RunStatusIndicator = ({ status }: { status: RunStatus }) => {
 
 export const RunHistory = ({
   runs,
+  runCounts,
   isLoading,
   startedAfter,
   startedBefore,
@@ -309,6 +310,7 @@ export const RunHistory = ({
   onSelect,
 }: {
   runs: Run[];
+  runCounts?: Record<RunStatus, number>;
   isLoading: boolean;
   startedAfter: string;
   startedBefore: string;
@@ -350,7 +352,7 @@ export const RunHistory = ({
   const visibleRuns = filter ? runs.filter(({ status }) => status === filter) : runs;
   const counts = STATUSES.map((status) => ({
     status,
-    count: runs.filter((run) => run.status === status).length,
+    count: runCounts ? runCounts[status] : runs.filter((run) => run.status === status).length,
   })).filter(({ count, status }) => count > 0 || status === filter);
   const baseline = toBuckets(runs, startMs, endMs, bucketMs);
   const buckets = toBuckets(visibleRuns, startMs, endMs, bucketMs);
@@ -364,7 +366,7 @@ export const RunHistory = ({
     day,
     runs: visibleRuns.filter((run) => dayStart(run) === day),
   }));
-  const startedRuns = runs.filter(({ status }) => status !== 'skipped').length;
+  const startedRuns = runCounts && runCounts.succeeded + runCounts.running + runCounts.failed;
 
   const handlePointerUpdate = (event: PointerEvent) =>
     setHoveredBucketMs(
@@ -424,12 +426,14 @@ export const RunHistory = ({
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued" css={{ whiteSpace: 'nowrap' }}>
-              {i18n.translate('xpack.nightshift.automations.detail.runsSummary', {
-                defaultMessage: '{count, plural, one {# run} other {# runs}} · {range}',
-                values: { count: startedRuns, range: rangeLabel },
-              })}
-            </EuiText>
+            {startedRuns !== undefined && (
+              <EuiText size="s" color="subdued" css={{ whiteSpace: 'nowrap' }}>
+                {i18n.translate('xpack.nightshift.automations.detail.runsSummary', {
+                  defaultMessage: '{count, plural, one {# run} other {# runs}} · {range}',
+                  values: { count: startedRuns, range: rangeLabel },
+                })}
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <div
