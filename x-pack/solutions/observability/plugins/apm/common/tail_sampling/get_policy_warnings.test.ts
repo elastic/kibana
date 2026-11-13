@@ -117,6 +117,49 @@ describe('getTailSamplingPolicyWarnings', () => {
     });
   });
 
+  it('finds a rate limit two levels down', () => {
+    const warnings = getTailSamplingPolicyWarnings([
+      {
+        name: 'errors-unlimited',
+        type: 'and',
+        and: {
+          and_sub_policy: [
+            keepErrors,
+            {
+              name: 'not-limited',
+              type: 'not',
+              not: {
+                not_sub_policy: {
+                  name: 'limit',
+                  type: 'rate_limiting',
+                  rate_limiting: { spans_per_second: 100 },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+    expect(warnings.map((w) => w.code)).toEqual([
+      TAIL_SAMPLING_WARNING_CODES.RATE_LIMIT_PER_REPLICA,
+    ]);
+  });
+
+  it('finds a span-kind condition in a not policy inside a drop policy', () => {
+    const warnings = getTailSamplingPolicyWarnings([
+      {
+        name: 'drop-non-clients',
+        type: 'drop',
+        drop: {
+          drop_sub_policy: [
+            { name: 'not-client', type: 'not', not: { not_sub_policy: spanKindCondition } },
+          ],
+        },
+      },
+    ]);
+    expect(warnings.map((w) => w.code)).toEqual([TAIL_SAMPLING_WARNING_CODES.EXIT_SPANS_DROPPED]);
+  });
+
   it('reports the index of the policy that triggered each warning', () => {
     const warnings = getTailSamplingPolicyWarnings([
       keepErrors,
