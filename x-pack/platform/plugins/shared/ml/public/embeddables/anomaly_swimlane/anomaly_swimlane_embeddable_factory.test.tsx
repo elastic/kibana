@@ -21,11 +21,12 @@ jest.mock('../../application/explorer/swimlane_container', () => ({
   isViewBySwimLaneData: jest.fn(() => false),
   SwimlaneContainer: (props: Record<string, unknown>) => {
     mockSwimlaneContainer(props);
+    const onResize = props.onResize as ((size: number) => void) | undefined;
     // The real SwimlaneContainer calls onResize on mount, which triggers the chartWidth$
     // observable that the data fetcher subscribes to. Simulate that here.
     React.useEffect(() => {
-      (props.onResize as (size: number) => void)?.(800);
-    }, [props.onResize]);
+      onResize?.(800);
+    }, [onResize]);
     return <div data-test-subj={props['data-test-subj'] as string} />;
   },
 }));
