@@ -38,6 +38,14 @@ export interface ModelSelectionPreferences {
 }
 
 /**
+ * Where a model comes from: either an explicit connector, or an inference feature whose
+ * configured model (and reasoning settings) is resolved by the inference plugin.
+ */
+export type ModelSource =
+  | { connectorId: string; featureId?: never }
+  | { featureId: string; connectorId?: never };
+
+/**
  * Provider, allowing to select various models depending on the needs.
  */
 export interface ModelProvider {
