@@ -35,6 +35,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import { computeRetryDelayMs } from '@kbn/workflows';
+import { WORKFLOWS_PAGES_ENABLED_SETTING_ID } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type { ManagedFilter } from '@kbn/workflows/server';
@@ -409,6 +410,15 @@ export class WorkflowsService {
       },
       { ref, secret }
     );
+  }
+
+  /** Reads the global page kill switch. Read on every page request, so it needs no restart. */
+  public async arePagesEnabled(): Promise<boolean> {
+    await this.ensureInitialized();
+    const client = this.coreStart.savedObjects.getUnsafeInternalClient();
+    return this.coreStart.uiSettings
+      .globalAsScopedToClient(client)
+      .get<boolean>(WORKFLOWS_PAGES_ENABLED_SETTING_ID);
   }
 
   public async getAccessControl(): Promise<WorkflowAccessControlService> {

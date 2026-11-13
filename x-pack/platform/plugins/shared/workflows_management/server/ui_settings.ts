@@ -13,6 +13,7 @@ import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+  WORKFLOWS_PAGES_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -21,7 +22,8 @@ import { WORKFLOWS_DOCUMENTATION_URL } from '../common';
 
 export const registerUISettings = (
   { uiSettings }: CoreSetup,
-  plugins: WorkflowsServerPluginSetupDeps
+  plugins: WorkflowsServerPluginSetupDeps,
+  { pagesEnabled }: { pagesEnabled: boolean } = { pagesEnabled: false }
 ) => {
   let licenseText = '';
 
@@ -129,4 +131,22 @@ export const registerUISettings = (
       requiresPageReload: true,
     },
   });
+
+  // TODO: register unconditionally when pages graduate, like the `workflow-page` type.
+  if (pagesEnabled) {
+    uiSettings.registerGlobal({
+      [WORKFLOWS_PAGES_ENABLED_SETTING_ID]: {
+        name: i18n.translate('workflows.uiSettings.pagesEnabled.name', {
+          defaultMessage: 'Workflow pages',
+        }),
+        description: i18n.translate('workflows.uiSettings.pagesEnabled.description', {
+          defaultMessage:
+            'Serves public workflow pages. Turn it off to take every page offline at once.',
+        }),
+        schema: schema.boolean(),
+        value: true,
+        requiresPageReload: false,
+      },
+    });
+  }
 };
