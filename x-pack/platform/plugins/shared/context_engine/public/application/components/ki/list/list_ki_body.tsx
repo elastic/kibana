@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLink, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -78,29 +85,29 @@ export const ListKiBody = ({
     return (
       <>
         <EuiSpacer size="m" />
-        <EuiText size="s" color="subdued" data-test-subj="contextListKiNoResults">
+        <EuiText size="s" data-test-subj="contextListKiNoResults">
           <p>
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.listKi.noResults"
-              defaultMessage="Nothing matches these filters. {clearFiltersLink}"
-              values={{
-                clearFiltersLink: (
-                  <EuiLink
-                    onClick={onClearFilters}
-                    data-test-subj="contextListKiClearFilters"
-                    {...getEbtProps({
-                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-                      action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CLEAR_FILTERS,
-                    })}
-                  >
-                    <FormattedMessage
-                      id="xpack.contextEngine.aiIndexDetail.listKi.clearFilters"
-                      defaultMessage="Clear filters"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
+            {/* Only the sentence is subdued, so the link keeps the link color. */}
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.listKi.noResults"
+                defaultMessage="Nothing matches these filters."
+              />
+            </EuiTextColor>{' '}
+            <EuiLink
+              color="primary"
+              onClick={onClearFilters}
+              data-test-subj="contextListKiClearFilters"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CLEAR_FILTERS,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.listKi.clearFilters"
+                defaultMessage="Clear filters"
+              />
+            </EuiLink>
           </p>
         </EuiText>
       </>
