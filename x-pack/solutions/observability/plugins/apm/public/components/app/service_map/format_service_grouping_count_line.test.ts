@@ -31,4 +31,10 @@ describe('formatServiceGroupingCountLine', () => {
       '4 services in 1 group, by name prefix'
     );
   });
+
+  it('still formats when closedGroupCount is 0 (caller decides whether to show it)', () => {
+    expect(formatServiceGroupingCountLine(grouping, 0)).toBe(
+      '4 services in 0 groups, by name prefix'
+    );
+  });
 });

@@ -28,6 +28,7 @@ import {
   IDLE_NODE_OPACITY,
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
+  NODE_LABEL_MAX_WIDTH,
   SERVICE_NODE_SIZE,
 } from '../../../../common/service_map/constants';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
@@ -200,7 +201,7 @@ export const ServiceNode = memo(
 
     const badgesRowStyles = css`
       pointer-events: none;
-      max-width: 220px;
+      max-width: ${NODE_LABEL_MAX_WIDTH}px;
       justify-content: center;
     `;
 

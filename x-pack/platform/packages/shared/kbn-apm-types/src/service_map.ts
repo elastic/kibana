@@ -292,6 +292,8 @@ export interface ServiceGroupNodeData extends BaseNodeData {
   groupKind: ServiceMapGroup['kind'];
   memberServiceIds: string[];
   memberCount: number;
+  /** True when a selected / highlighted service is a member of this closed group */
+  contextHighlight?: boolean;
   serviceAnomalyStats?: ServiceAnomalyStats;
   alertsCount?: number;
   alertsByStatus?: Partial<Record<AlertStatus, number>>;

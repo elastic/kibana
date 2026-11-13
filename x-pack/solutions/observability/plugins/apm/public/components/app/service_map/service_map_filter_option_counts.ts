@@ -17,9 +17,10 @@ import type { SloStatus } from '../../../../common/service_inventory';
 import type {
   ServiceMapNode,
   ServiceMapEdge,
+  ServiceGroupNodeData,
   ServiceNodeData,
 } from '../../../../common/service_map';
-import { isServiceNodeData } from '../../../../common/service_map';
+import { isServiceGroupNodeData, isServiceNodeData } from '../../../../common/service_map';
 import {
   getMlSeverityForServiceMapNode,
   getNormalizedSloStatusForMapFilters,
@@ -34,19 +35,29 @@ const ALERT_STATUSES: AlertStatus[] = [
   ALERT_STATUS_DELAYED,
 ];
 
-/** Count services that have ≥1 alert in each status. */
-function getAlertStatusServiceCounts(serviceNodes: ServiceMapNode[]): Record<AlertStatus, number> {
+type FilterableNodeData = ServiceNodeData | ServiceGroupNodeData;
+
+/** Services and closed groups both carry the badge fields used by map filters. */
+function getFilterableNodeData(node: ServiceMapNode): FilterableNodeData | undefined {
+  if (isServiceNodeData(node.data) || isServiceGroupNodeData(node.data)) {
+    return node.data;
+  }
+  return undefined;
+}
+
+/** Count services/groups that have ≥1 alert in each status. */
+function getAlertStatusServiceCounts(
+  filterableData: FilterableNodeData[]
+): Record<AlertStatus, number> {
   const counts: Record<AlertStatus, number> = {
     [ALERT_STATUS_ACTIVE]: 0,
     [ALERT_STATUS_RECOVERED]: 0,
     [ALERT_STATUS_UNTRACKED]: 0,
     [ALERT_STATUS_DELAYED]: 0,
   };
-  for (const node of serviceNodes) {
-    if (node.type !== 'service' || !isServiceNodeData(node.data)) continue;
-    const serviceNodeData = node.data as ServiceNodeData;
+  for (const data of filterableData) {
     for (const status of ALERT_STATUSES) {
-      if (getServiceNodeAlertCountForStatus(serviceNodeData, status) > 0) {
+      if (getServiceNodeAlertCountForStatus(data, status) > 0) {
         counts[status]++;
       }
     }
@@ -54,25 +65,24 @@ function getAlertStatusServiceCounts(serviceNodes: ServiceMapNode[]): Record<Ale
   return counts;
 }
 
-/** Count services by SLO status (see `getNormalizedSloStatusForMapFilters`). */
-function getSloStatusCounts(serviceNodes: ServiceMapNode[]): Record<SloStatus, number> {
+/** Count services/groups by SLO status (see `getNormalizedSloStatusForMapFilters`). */
+function getSloStatusCounts(filterableData: FilterableNodeData[]): Record<SloStatus, number> {
   const counts: Record<SloStatus, number> = {
     healthy: 0,
     degrading: 0,
     violated: 0,
     noData: 0,
   };
-  for (const node of serviceNodes) {
-    if (node.type !== 'service' || !isServiceNodeData(node.data)) continue;
-    const status = getNormalizedSloStatusForMapFilters(node.data as ServiceNodeData);
+  for (const data of filterableData) {
+    const status = getNormalizedSloStatusForMapFilters(data);
     counts[status]++;
   }
   return counts;
 }
 
-/** Count services by ML anomaly severity band (from anomaly score), same as inventory / map coloring. */
+/** Count services/groups by ML anomaly severity band (from anomaly score). */
 function getAnomalySeverityCounts(
-  serviceNodes: ServiceMapNode[]
+  filterableData: FilterableNodeData[]
 ): Record<ML_ANOMALY_SEVERITY, number> {
   const counts: Record<ML_ANOMALY_SEVERITY, number> = {
     [ML_ANOMALY_SEVERITY.CRITICAL]: 0,
@@ -82,9 +92,8 @@ function getAnomalySeverityCounts(
     [ML_ANOMALY_SEVERITY.LOW]: 0,
     [ML_ANOMALY_SEVERITY.UNKNOWN]: 0,
   };
-  for (const node of serviceNodes) {
-    if (node.type !== 'service' || !isServiceNodeData(node.data)) continue;
-    const severity = getMlSeverityForServiceMapNode(node.data as ServiceNodeData);
+  for (const data of filterableData) {
+    const severity = getMlSeverityForServiceMapNode(data);
     counts[severity]++;
   }
   return counts;
@@ -121,20 +130,23 @@ function getConnectionCounts(
 }
 
 /**
- * Aggregates per-status service counts from the **unfiltered** map nodes
- * so filter options can show count badges.
+ * Aggregates per-status counts from the **unfiltered** map nodes (services and closed
+ * groups) so filter options can show count badges.
  */
 export function computeServiceMapFilterOptionCounts(
   nodes: ServiceMapNode[],
   edges: ServiceMapEdge[]
 ): ServiceMapFilterOptionCounts {
-  const serviceNodes = nodes.filter((n) => n.type === 'service' && isServiceNodeData(n.data));
+  const filterableData = nodes.flatMap((node) => {
+    const data = getFilterableNodeData(node);
+    return data ? [data] : [];
+  });
 
   return {
-    alerts: getAlertStatusServiceCounts(serviceNodes),
-    slo: getSloStatusCounts(serviceNodes),
-    anomaly: getAnomalySeverityCounts(serviceNodes),
+    alerts: getAlertStatusServiceCounts(filterableData),
+    slo: getSloStatusCounts(filterableData),
+    anomaly: getAnomalySeverityCounts(filterableData),
     connection: getConnectionCounts(nodes, edges),
-    totalServiceNodes: serviceNodes.length,
+    totalServiceNodes: filterableData.length,
   };
 }

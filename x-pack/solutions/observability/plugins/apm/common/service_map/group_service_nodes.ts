@@ -319,8 +319,18 @@ function rewriteEdges(
     }
 
     const id = getEdgeId(source, target);
-    if (merged.has(id)) {
-      // e.g. checkout→postgres and cart→postgres both become shop→postgres
+    const existing = merged.get(id);
+    if (existing) {
+      // e.g. checkout→postgres and cart→postgres both become shop→postgres.
+      // Keep bidirectional markers if any member edge had them (app-a→c + app-b↔c).
+      if (edge.data?.isBidirectional && !existing.data?.isBidirectional) {
+        const stroke = existing.style?.stroke ?? DEFAULT_EDGE_STYLE.stroke;
+        merged.set(id, {
+          ...existing,
+          markerStart: existing.markerStart ?? edge.markerStart ?? createEdgeMarker(stroke),
+          data: { ...existing.data, isBidirectional: true },
+        });
+      }
       continue;
     }
 

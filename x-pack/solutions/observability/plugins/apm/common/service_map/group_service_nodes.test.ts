@@ -71,15 +71,17 @@ function dependencyNode(id: string): ServiceMapNode {
   };
 }
 
-function edge(source: string, target: string): ServiceMapEdge {
+function edge(source: string, target: string, bidirectional = false): ServiceMapEdge {
+  const marker = createEdgeMarker(DEFAULT_EDGE_STYLE.stroke);
   return {
     id: getEdgeId(source, target),
     source,
     target,
     type: 'default',
     style: DEFAULT_EDGE_STYLE,
-    markerEnd: createEdgeMarker(DEFAULT_EDGE_STYLE.stroke),
-    data: { isBidirectional: false },
+    markerEnd: marker,
+    ...(bidirectional ? { markerStart: marker } : {}),
+    data: { isBidirectional: bidirectional },
   };
 }
 
@@ -158,6 +160,40 @@ describe('groupServiceNodes', () => {
     expect(edgeKeys.some((k) => k.includes('frontend') || k.includes('cart'))).toBe(false);
     expect(edgeKeys).not.toContain('search>indexer');
     expect(edgeKeys.every((k) => !k.startsWith('calls:search>calls:search'))).toBe(true);
+  });
+
+  it('keeps bidirectional markers when merging edges onto a closed group', () => {
+    const grouping: ServiceMapGrouping = {
+      services: ['app-a', 'app-b'],
+      automatic: 'namePrefix',
+      strategies: [
+        {
+          source: 'namePrefix',
+          passes: true,
+          groups: [
+            {
+              id: 'namePrefix:app',
+              kind: 'attribute',
+              attribute: 'namePrefix',
+              value: 'app',
+            },
+          ],
+          assignment: [0, 0],
+        },
+      ],
+    };
+    const nodes = [serviceNode('app-a'), serviceNode('app-b'), dependencyNode('postgres')];
+    // First edge is one-way; second is both ways. Both become namePrefix:app → postgres.
+    const edges = [edge('app-a', 'postgres'), edge('app-b', 'postgres', true)];
+
+    const { edges: nextEdges } = groupServiceNodes(nodes, edges, grouping);
+    const toPostgres = nextEdges.find(
+      (e) => e.source === 'namePrefix:app' && e.target === 'postgres'
+    );
+
+    expect(toPostgres?.data?.isBidirectional).toBe(true);
+    expect(toPostgres?.markerStart).toBeDefined();
+    expect(toPostgres?.markerEnd).toBeDefined();
   });
 
   it('keeps the transaction type with the most requests', () => {

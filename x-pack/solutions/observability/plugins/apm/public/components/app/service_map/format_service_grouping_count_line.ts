@@ -10,8 +10,13 @@ import type { ServiceGroupingSource, ServiceMapGrouping } from '../../../../comm
 
 /**
  * Count line for the map, e.g. "20 services in 3 groups, by name prefix".
- * `closedGroupCount` is the number of group squares actually drawn (members that
- * resolved to nodes and collapsed). Groups of 1 stay service nodes.
+ *
+ * - Uses `grouping.automatic` only (no Group-by picker yet). When a strategy can
+ *   be chosen, pass that source into `groupServiceNodes` and look it up here too.
+ * - `serviceCount` is `grouping.services.length` from the payload (every service
+ *   the server assigned), not how many service/group nodes are on the graph.
+ * - `closedGroupCount` is how many group squares were actually drawn (members that
+ *   resolved to nodes and collapsed). Groups of 1 stay service nodes.
  */
 export function formatServiceGroupingCountLine(
   grouping: ServiceMapGrouping,

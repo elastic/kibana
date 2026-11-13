@@ -389,16 +389,35 @@ function GraphInner({
     onDagreLayoutFailure,
   });
 
+  const highlightedNodeIds = useMemo(() => {
+    if (!highlightedServiceNames?.length) {
+      return undefined;
+    }
+    const selected = new Set(highlightedServiceNames);
+    const ids = new Set<string>();
+    for (const node of nodesAfterFilters) {
+      if (isServiceNode(node) && selected.has(node.id)) {
+        ids.add(node.id);
+      } else if (
+        isServiceGroupNode(node) &&
+        node.data.memberServiceIds.some((memberId) => selected.has(memberId))
+      ) {
+        ids.add(node.id);
+      }
+    }
+    return ids;
+  }, [nodesAfterFilters, highlightedServiceNames]);
+
   const nodesWithContextHighlight = useMemo(
     () =>
       nodesAfterFilters.map((n) => {
-        if (!isServiceNode(n)) {
+        if (!isServiceNode(n) && !isServiceGroupNode(n)) {
           return n;
         }
-        const contextHighlight = Boolean(highlightedServiceNames?.includes(n.id));
+        const contextHighlight = Boolean(highlightedNodeIds?.has(n.id));
         return { ...n, data: { ...n.data, contextHighlight } };
       }),
-    [nodesAfterFilters, highlightedServiceNames]
+    [nodesAfterFilters, highlightedNodeIds]
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithContextHighlight);
@@ -413,13 +432,13 @@ function GraphInner({
     });
 
     const edgesWithContextHighlight =
-      highlightedServiceNames && highlightedServiceNames.length > 0
+      highlightedNodeIds && highlightedNodeIds.size > 0
         ? highlightedEdges.map((edge) => ({
             ...edge,
             data: {
               ...edge.data,
-              sourceContextHighlight: highlightedServiceNames.includes(edge.source),
-              targetContextHighlight: highlightedServiceNames.includes(edge.target),
+              sourceContextHighlight: highlightedNodeIds.has(edge.source),
+              targetContextHighlight: highlightedNodeIds.has(edge.target),
             },
           }))
         : highlightedEdges;
@@ -440,7 +459,7 @@ function GraphInner({
     handleFitView,
     applyEdgeHighlighting,
     nodesAfterFilters.length,
-    highlightedServiceNames,
+    highlightedNodeIds,
   ]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(

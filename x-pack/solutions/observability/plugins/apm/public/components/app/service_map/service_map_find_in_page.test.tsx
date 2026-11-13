@@ -153,4 +153,29 @@ describe('ServiceMapFindInPage', () => {
       expect(lastCall.activeMatchNodeId).toBeNull();
     });
   });
+
+  it('matches a closed group by label and by a member service name', async () => {
+    const user = userEvent.setup();
+    const group: ServiceMapNode = {
+      id: 'namePrefix:opbeans',
+      type: 'serviceGroup',
+      position: { x: 100, y: 100 },
+      data: {
+        id: 'namePrefix:opbeans',
+        label: 'opbeans',
+        isService: false,
+        isServiceGroup: true,
+        groupKind: 'attribute',
+        memberServiceIds: ['opbeans-java', 'opbeans-node'],
+        memberCount: 2,
+      },
+    };
+
+    render(<ServiceMapFindInPage nodes={[group, banana]} />);
+
+    await user.type(screen.getByTestId('serviceMapControlsSearch'), 'opbeans-java');
+    await user.click(screen.getByTestId('serviceMapFindNext'));
+    expectCenteredOn(group);
+    expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
+  });
 });

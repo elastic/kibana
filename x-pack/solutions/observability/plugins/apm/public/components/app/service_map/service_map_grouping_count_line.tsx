@@ -6,6 +6,7 @@
  */
 
 import { EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 /** Count line above the service map and the dashboard panel. Renders nothing when there is no line. */
@@ -21,7 +22,9 @@ export function ServiceMapGroupingCountLine({ countLine }: { countLine?: string 
       size="s"
       color="subdued"
       data-test-subj="serviceMapGroupingCountLine"
-      style={{ padding: `${euiTheme.size.s} ${euiTheme.size.m} 0` }}
+      css={css`
+        padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
+      `}
     >
       <p>{countLine}</p>
     </EuiText>

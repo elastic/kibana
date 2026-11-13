@@ -68,6 +68,8 @@ export const IDLE_NODE_OPACITY = 0.5;
 // Node dimensions for React Flow service map (circle for services, square for closed groups)
 export const SERVICE_NODE_SIZE = 56;
 export const DEPENDENCY_NODE_DIAMOND_SIZE = 48;
+/** Max width for service / group labels and badge rows under the node. */
+export const NODE_LABEL_MAX_WIDTH = 220;
 
 /** Border width (px) for service and dependency nodes when not selected. */
 export const NODE_BORDER_WIDTH_DEFAULT = 3;

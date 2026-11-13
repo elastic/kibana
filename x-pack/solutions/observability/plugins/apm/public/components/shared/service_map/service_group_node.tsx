@@ -15,6 +15,7 @@ import type { ServiceGroupNodeData } from '../../../../common/service_map';
 import {
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
+  NODE_LABEL_MAX_WIDTH,
   SERVICE_NODE_SIZE,
 } from '../../../../common/service_map/constants';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
@@ -155,13 +156,13 @@ export const ServiceGroupNode = memo(
       font-size: ${euiTheme.size.s};
       color: ${euiTheme.colors.textSubdued};
       text-align: center;
-      max-width: 220px;
+      max-width: ${NODE_LABEL_MAX_WIDTH}px;
       pointer-events: none;
     `;
 
     const badgesRowStyles = css`
       pointer-events: none;
-      max-width: 220px;
+      max-width: ${NODE_LABEL_MAX_WIDTH}px;
       justify-content: center;
     `;
 
@@ -178,7 +179,7 @@ export const ServiceGroupNode = memo(
     );
 
     return (
-      <HighlightWrapper nodeId={data.id} contextHighlight={false}>
+      <HighlightWrapper nodeId={data.id} contextHighlight={Boolean(data.contextHighlight)}>
         <EuiFlexGroup
           direction="column"
           alignItems="center"

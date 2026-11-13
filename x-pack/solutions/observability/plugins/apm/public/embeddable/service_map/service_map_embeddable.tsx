@@ -6,7 +6,14 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -546,9 +553,18 @@ export function ServiceMapEmbeddable({
             flyoutOptions={flyoutOptions}
           />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-            {!isLoading && <ServiceMapGroupingCountLine countLine={groupingCountLine} />}
-            <div style={{ flex: 1, minHeight: 0 }}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+            css={{ height: '100%', minHeight: 0 }}
+          >
+            {!isLoading && (
+              <EuiFlexItem grow={false}>
+                <ServiceMapGroupingCountLine countLine={groupingCountLine} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow css={{ minHeight: 0 }}>
               <ServiceMapGraph
                 height="100%"
                 nodes={isLoading ? [] : nodesForGraph}
@@ -573,8 +589,8 @@ export function ServiceMapEmbeddable({
                 onViewFiltersChange={onViewFiltersChange}
                 flyoutOptions={flyoutOptions}
               />
-            </div>
-          </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </div>
       {sloOverviewFlyout && (
