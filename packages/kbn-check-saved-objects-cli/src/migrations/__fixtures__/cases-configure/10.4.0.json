@@ -198,6 +198,28 @@
           "key": "ticket-ref",
           "label": "Ticket ref"
         }
+      ],
+      "observableTypeSettings": [
+        {
+          "key": "observable-type-agent-id",
+          "paths": [
+            {
+              "path": "agent.id",
+              "enabled": false
+            }
+          ]
+        },
+        {
+          "key": "employee-id",
+          "paths": [
+            {
+              "path": "user.employee_id",
+              "enabled": true,
+              "excludedValues": ["E000000"]
+            }
+          ],
+          "valuePattern": "^E\\d{6}$"
+        }
       ]
     }
   ]
