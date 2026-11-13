@@ -37,13 +37,33 @@ const toResponse = ({
   data_streams: dataStreams.map((name) => ({ name, backing_indices: [], timestamp_field: '' })),
 });
 
-/** `all` is what the internal user resolves, `readable` what the user resolves. */
-const setup = ({ all = {}, readable = {} }: { all?: Resolved; readable?: Resolved }) => {
+/**
+ * `all` is what the internal user resolves, `readable` what the user resolves; of those, the user
+ * can read every name but the `metadataOnly` ones.
+ */
+const setup = ({
+  all = {},
+  readable = {},
+  metadataOnly = [],
+}: {
+  all?: Resolved;
+  readable?: Resolved;
+  metadataOnly?: string[];
+}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
   internalEsClient.indices.resolveIndex.mockResolvedValue(toResponse(all));
   esClient.indices.resolveIndex.mockResolvedValue(toResponse(readable));
+  esClient.security.hasPrivileges.mockImplementation((async ({
+    index,
+  }: {
+    index: Array<{ names: string[] }>;
+  }) => ({
+    index: Object.fromEntries(
+      index[0].names.map((name) => [name, { read: !metadataOnly.includes(name) }])
+    ),
+  })) as never);
   return { esClient, internalEsClient, logger };
 };
 
@@ -142,16 +162,72 @@ describe('hasPartialReadAccess', () => {
       ).resolves.toBe(false);
     });
 
+    it('returns true when the user only holds metadata access to some of the data it resolves', async () => {
+      const dataStreams = ['traces-generic.otel-production', 'logs-generic.otel-production'];
+      const params = setup({
+        all: { dataStreams },
+        readable: { dataStreams },
+        metadataOnly: ['logs-generic.otel-production'],
+      });
+
+      await expect(hasPartialReadAccess({ ...params, getIndices: async () => OTEL })).resolves.toBe(
+        true
+      );
+      expect(params.esClient.security.hasPrivileges).toHaveBeenCalledWith(
+        { index: [{ names: dataStreams, privileges: ['read'] }] },
+        expect.anything()
+      );
+    });
+
+    it('does not count an alias the user only holds metadata access to', async () => {
+      const aliases = { 'apm-transaction': ['legacy-transaction'] };
+      const params = setup({
+        all: { aliases },
+        readable: { aliases },
+        metadataOnly: ['apm-transaction'],
+      });
+
+      await expect(
+        hasPartialReadAccess({ ...params, getIndices: async () => ['apm-*'] })
+      ).resolves.toBe(true);
+    });
+
+    it('counts a backing index read through its data stream privileges', async () => {
+      const backingIndices = { '.ds-traces-apm.rum-default-000001': 'traces-apm.rum-default' };
+      const params = setup({
+        all: { backingIndices },
+        readable: { backingIndices },
+        metadataOnly: ['.ds-traces-apm.rum-default-000001'],
+      });
+
+      await expect(
+        hasPartialReadAccess({ ...params, getIndices: async () => ['.ds-traces-apm.rum-*'] })
+      ).resolves.toBe(false);
+      expect(params.esClient.security.hasPrivileges).toHaveBeenCalledWith(
+        {
+          index: [
+            {
+              names: ['.ds-traces-apm.rum-default-000001', 'traces-apm.rum-default'],
+              privileges: ['read'],
+            },
+          ],
+        },
+        expect.anything()
+      );
+    });
+
     it('returns false when the expression matches nothing', async () => {
       const params = setup({});
 
       await expect(
         hasPartialReadAccess({ ...params, getIndices: async () => ['apm-*'] })
       ).resolves.toBe(false);
+      expect(params.esClient.security.hasPrivileges).not.toHaveBeenCalled();
     });
 
     it('resolves the same expression with both clients and passes the abort signal', async () => {
-      const params = setup({});
+      const dataStreams = ['traces-apm-default'];
+      const params = setup({ all: { dataStreams }, readable: { dataStreams } });
       const { signal } = new AbortController();
 
       await hasPartialReadAccess({ ...params, getIndices: async () => ['traces-apm*'], signal });
@@ -166,6 +242,9 @@ describe('hasPartialReadAccess', () => {
         signal,
       });
       expect(params.esClient.indices.resolveIndex).toHaveBeenCalledWith(request, { signal });
+      expect(params.esClient.security.hasPrivileges).toHaveBeenCalledWith(expect.anything(), {
+        signal,
+      });
     });
   });
 
@@ -270,6 +349,19 @@ describe('hasPartialReadAccess', () => {
         hasPartialReadAccess({ ...params, getIndices: async () => ['traces-apm*'] })
       ).resolves.toBe(false);
       expect(params.logger.debug).toHaveBeenCalledWith(expect.stringContaining('forbidden'));
+    });
+
+    it('returns false when the privilege check throws, as with security disabled', async () => {
+      const dataStreams = ['traces-apm-default'];
+      const params = setup({ all: { dataStreams }, readable: { dataStreams } });
+      params.esClient.security.hasPrivileges.mockRejectedValue(new Error('security disabled'));
+
+      await expect(
+        hasPartialReadAccess({ ...params, getIndices: async () => ['traces-apm*'] })
+      ).resolves.toBe(false);
+      expect(params.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('security disabled')
+      );
     });
 
     it('returns false when resolving as the internal user throws', async () => {

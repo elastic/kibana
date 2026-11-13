@@ -65,11 +65,48 @@ const toReachableData = ({
 };
 
 /**
+ * The part of the user's resolved names they can read. `_resolve/index` also lists the names the
+ * user only holds `view_index_metadata` or `manage` on, which the search skips. A backing index is
+ * readable through its own name or its data stream's.
+ */
+const keepReadable = async (
+  esClient: ElasticsearchClient,
+  resolved: estypes.IndicesResolveIndexResponse,
+  signal?: AbortSignal
+): Promise<estypes.IndicesResolveIndexResponse> => {
+  const { indices, aliases, data_streams: dataStreams } = resolved;
+  const names = [
+    ...indices.flatMap(({ name, data_stream: dataStream }) =>
+      dataStream ? [name, dataStream] : [name]
+    ),
+    ...aliases.map(({ name }) => name),
+    ...dataStreams.map(({ name }) => name),
+  ].filter(isLocal);
+  if (names.length === 0) {
+    return resolved;
+  }
+
+  const { index: privileges } = await esClient.security.hasPrivileges(
+    { index: [{ names: [...new Set(names)], privileges: ['read'] }] },
+    { signal }
+  );
+  const canRead = (name: string): boolean => privileges[name]?.read === true;
+  return {
+    indices: indices.filter(
+      ({ name, data_stream: dataStream }) =>
+        canRead(name) || (dataStream !== undefined && canRead(dataStream))
+    ),
+    aliases: aliases.filter(({ name }) => canRead(name)),
+    data_streams: dataStreams.filter(({ name }) => canRead(name)),
+  };
+};
+
+/**
  * Whether the user can't read all the data the source's search would read with full access.
  * Elasticsearch skips the names of a wildcard the user can't read instead of failing the search,
  * so the check resolves the search's expression as the internal user and as the user, which
- * Elasticsearch limits to what they can read, and compares the two. Any error means full access,
- * as with security disabled, and never fails the request.
+ * Elasticsearch limits to what they can access, keeps what the user can read, and compares the
+ * two. Any error means full access, as with security disabled, and never fails the request.
  */
 export const hasPartialReadAccess = async ({
   esClient,
@@ -102,13 +139,17 @@ export const hasPartialReadAccess = async ({
       ignore_unavailable: true,
       allow_no_indices: true,
     };
-    const [everything, readable] = await Promise.all([
+    const [everything, visible] = await Promise.all([
       internalEsClient.indices.resolveIndex(request, { signal }),
       esClient.indices.resolveIndex(request, { signal }),
     ]);
 
-    const readableData = toReachableData(readable);
-    return [...toReachableData(everything)].some((name) => !readableData.has(name));
+    const allData = toReachableData(everything);
+    if (allData.size === 0) {
+      return false;
+    }
+    const readableData = toReachableData(await keepReadable(esClient, visible, signal));
+    return [...allData].some((name) => !readableData.has(name));
   } catch (error) {
     logger.debug(`Could not check the read access to the indices: ${describeError(error)}`);
     return false;
