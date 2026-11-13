@@ -66,7 +66,7 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
         ...getAnyMissingReadPrivileges(entityEnginePrivileges),
         ...getAnyMissingReadPrivileges(leadGenerationPrivileges),
         ...getAnyMissingReadPrivileges(anomalyPrivileges),
-        ...getIndexMissingReadPrivileges(alertsIndexPrivileges),
+        ...getIndexMissingReadPrivileges(alertsIndexPrivileges, false),
       ];
 
       const featurePrivileges: MissingFeaturePrivileges[] = [
@@ -109,23 +109,27 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
 );
 EntityAnalyticsReadPrivilegesCallout.displayName = 'EntityAnalyticsPrivilegesCallout';
 
-const READ_RELEVANT_PRIVILEGES = new Set(['read', 'view_index_metadata']);
-
 type IndexPrivileges = Readonly<Record<string, Readonly<Record<string, boolean>>>>;
 
 const getIndexMissingReadPrivileges = (
-  index: IndexPrivileges | undefined
-): MissingIndexPrivileges[] =>
-  Object.entries(index ?? {})
+  index: IndexPrivileges | undefined,
+  includeIndexMetadata: boolean = true
+): MissingIndexPrivileges[] => {
+  const relevantPrivileges = includeIndexMetadata
+    ? new Set(['read', 'view_index_metadata'])
+    : new Set(['read']);
+
+  return Object.entries(index ?? {})
     .map(
       ([indexName, privs]): MissingIndexPrivileges => [
         indexName,
         Object.entries(privs)
-          .filter(([priv, authorized]) => !authorized && READ_RELEVANT_PRIVILEGES.has(priv))
+          .filter(([priv, authorized]) => !authorized && relevantPrivileges.has(priv))
           .map(([priv]) => priv),
       ]
     )
     .filter(([, missingPrivs]) => missingPrivs.length > 0);
+};
 
 const getAnyMissingReadPrivileges = (
   privileges: EntityAnalyticsPrivileges | undefined

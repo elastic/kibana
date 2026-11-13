@@ -8,7 +8,9 @@
 import { EuiCallOut, EuiCode, EuiText } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ENGINE_DESCRIPTOR_CREATE_PRIVILEGE } from '@kbn/entity-store/common';
 import { LineClamp } from '../../common/components/line_clamp';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import { getAllMissingPrivileges } from '../../../common/entity_analytics/privileges';
@@ -21,6 +23,19 @@ interface MissingPrivilegesCalloutProps {
    */
   title: ReactNode;
 }
+
+/**
+ * `saved_object:entity-engine-descriptor-v2/create` comes from the Security feature (`siemV5`,
+ * named "Security" in the role editor): its `all` privilege lists `EngineDescriptorTypeName` in
+ * `savedObject.all`, while `read` does not. The type is added to the feature in
+ * `securityV5SavedObjects` (server/lib/product_features_service/security_saved_objects.ts).
+ */
+const KIBANA_PRIVILEGE_LABELS: Readonly<Record<string, string>> = {
+  [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE]: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.missingPrivilegesCallOut.securityAll',
+    { defaultMessage: 'Security: All' }
+  ),
+};
 
 /**
  * The height of the callout when the content is clamped.
@@ -97,7 +112,7 @@ export const MissingPrivilegesCallout = React.memo(
                         id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
                         defaultMessage="Missing privilege for the {feature} feature."
                         values={{
-                          feature: <EuiCode>{feature}</EuiCode>,
+                          feature: <EuiCode>{KIBANA_PRIVILEGE_LABELS[feature] ?? feature}</EuiCode>,
                         }}
                       />
                     </li>
