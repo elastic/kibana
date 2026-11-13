@@ -13,6 +13,7 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import {
@@ -23,6 +24,7 @@ import {
 import { stringify } from 'yaml';
 import { confirmToolCall, hashDefinition } from './utils/confirm_tool_call';
 import { formatCodeBlock } from './utils/code_block';
+import { getSpecProvider } from './utils/get_spec_provider';
 import { findUnsafeSteps, getWorkflowSteps, type UnsafeStep } from './utils/step_risk';
 
 /** `execute_api` selectors for the same operations, so one auto-approval covers both tools. */
@@ -109,6 +111,7 @@ const confirmRun = ({
   toolContext,
   workflowApi,
   getSecurity,
+  getActions,
   yaml,
   workflowId,
   name,
@@ -117,6 +120,7 @@ const confirmRun = ({
   toolContext: ToolHandlerContext;
   workflowApi: WorkflowsServerPluginSetup['management'];
   getSecurity: () => SecurityPluginStart | undefined;
+  getActions: () => ActionsPluginStart | undefined;
   yaml?: string;
   workflowId?: string;
   name?: string;
@@ -154,7 +158,10 @@ const confirmRun = ({
       }
       const parsed = getWorkflowSteps(workflowYaml);
       // Steps that cannot be read are not known to be safe, so ask.
-      const unsafeSteps = 'error' in parsed ? [] : findUnsafeSteps(parsed.steps, interactivity);
+      const unsafeSteps =
+        'error' in parsed
+          ? []
+          : await findUnsafeSteps(parsed.steps, interactivity, getSpecProvider(getActions));
       if ('steps' in parsed && unsafeSteps.length === 0) {
         return undefined;
       }
@@ -200,9 +207,11 @@ const confirmRun = ({
 export const executeWorkflowTool = ({
   workflowsManagement,
   getSecurity,
+  getActions,
 }: {
   workflowsManagement: WorkflowsServerPluginSetup;
   getSecurity: () => SecurityPluginStart | undefined;
+  getActions: () => ActionsPluginStart | undefined;
 }): BuiltinToolDefinition<typeof executeWorkflowSchema> => {
   const { management: workflowApi } = workflowsManagement;
 
@@ -318,6 +327,7 @@ If set to false, or if the workflow does not complete within the timeout, the to
         toolContext,
         workflowApi,
         getSecurity,
+        getActions,
         yaml: resolvedYaml,
         workflowId: resolvedWorkflowId,
         name: resolvedName,

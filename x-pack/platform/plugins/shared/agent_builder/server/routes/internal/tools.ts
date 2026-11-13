@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { createConnectorSpecSummaryProvider } from '@kbn/agent-builder-server';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse } from '@kbn/mcp-client';
@@ -536,16 +537,22 @@ export function registerInternalToolsRoutes({
         oauthConnectorIds
       );
 
-      const connectors: ConnectorItem[] = filteredConnectors.map((connector) => {
-        const isOAuth = connector.authMode === PER_USER_AUTH_MODE;
-        return toConnectorItem(connector, {
-          oauthStatus: isOAuth
-            ? authorizedConnectorIds.has(connector.id)
-              ? OAUTH_STATUS.AUTHORIZED
-              : OAUTH_STATUS.DISCONNECTED
-            : undefined,
-        });
+      const specProvider = createConnectorSpecSummaryProvider({
+        actionsStart: pluginsStart.actions,
       });
+      const connectors: ConnectorItem[] = await Promise.all(
+        filteredConnectors.map((connector) => {
+          const isOAuth = connector.authMode === PER_USER_AUTH_MODE;
+          return toConnectorItem(connector, {
+            specProvider,
+            oauthStatus: isOAuth
+              ? authorizedConnectorIds.has(connector.id)
+                ? OAUTH_STATUS.AUTHORIZED
+                : OAUTH_STATUS.DISCONNECTED
+              : undefined,
+          });
+        })
+      );
 
       return response.ok<ListConnectorsResponse>({
         body: {
@@ -587,7 +594,12 @@ export function registerInternalToolsRoutes({
 
       return response.ok<GetConnectorResponse>({
         body: {
-          connector: toConnectorItem(connector, { oauthStatus }),
+          connector: await toConnectorItem(connector, {
+            specProvider: createConnectorSpecSummaryProvider({
+              actionsStart: pluginsStart.actions,
+            }),
+            oauthStatus,
+          }),
         },
       });
     })

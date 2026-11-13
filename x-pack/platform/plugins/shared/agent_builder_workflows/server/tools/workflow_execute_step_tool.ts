@@ -22,11 +22,16 @@ import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type {
+  AgentBuilderPluginSetup,
+  ConnectorSpecSummaryProvider,
+} from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows';
 import { confirmToolCall, hashDefinition } from './utils/confirm_tool_call';
 import { formatCodeBlock } from './utils/code_block';
+import { getSpecProvider } from './utils/get_spec_provider';
 import { findUnsafeSteps, resolveYamlAliases, type UnsafeStep } from './utils/step_risk';
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
@@ -97,15 +102,16 @@ const getDescendantStepIds = (stepId: string, allSteps: Record<string, StepInfo>
 const findUnsafeStepsIn = (
   stepId: string,
   allSteps: Record<string, StepInfo>,
-  interactivity: ToolHandlerContext['interactivity']
-): UnsafeStep[] => {
+  interactivity: ToolHandlerContext['interactivity'],
+  specProvider: ConnectorSpecSummaryProvider
+): Promise<UnsafeStep[]> => {
   const step = allSteps[stepId];
-  if (!step) return [];
+  if (!step) return Promise.resolve([]);
 
   const descendants = getDescendantStepIds(stepId, allSteps)
     .map((id) => allSteps[id])
     .filter((descendant): descendant is StepInfo => descendant !== undefined);
-  return findUnsafeSteps([step, ...descendants], interactivity);
+  return findUnsafeSteps([step, ...descendants], interactivity, specProvider);
 };
 
 /**
@@ -454,7 +460,8 @@ const pollExecution = async (
 export function registerWorkflowExecuteStepTool(
   agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi,
-  getSecurity: () => SecurityPluginStart | undefined
+  getSecurity: () => SecurityPluginStart | undefined,
+  getActions: () => ActionsPluginStart | undefined
 ): void {
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
@@ -562,7 +569,12 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
         });
       }
 
-      const unsafeSteps = findUnsafeStepsIn(stepName, lookup.steps, context.interactivity);
+      const unsafeSteps = await findUnsafeStepsIn(
+        stepName,
+        lookup.steps,
+        context.interactivity,
+        getSpecProvider(getActions)
+      );
       const isCondition = CONDITION_STEP_TYPES.has(stepInfo.stepType);
 
       // Conditions with unsafe descendants: stub the children and run the

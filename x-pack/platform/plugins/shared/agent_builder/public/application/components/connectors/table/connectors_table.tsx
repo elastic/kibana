@@ -9,7 +9,7 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { memo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { isEarsExperimentalConnector } from '@kbn/connector-specs';
+import { useIsEarsExperimentalConnector } from '../../../hooks/connectors/use_connector_spec_summaries';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -33,6 +33,7 @@ export const AgentBuilderConnectorsTable = memo(() => {
 
   const { euiTheme } = useEuiTheme();
   const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
+  const isEarsExperimentalConnector = useIsEarsExperimentalConnector();
 
   const isDisabledEarsConnector = (connector: ConnectorItem): boolean => {
     if (connector.config?.authType !== 'ears') return false;

@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { useConnectorOAuthDisconnect } from '@kbn/response-ops-oauth-hooks';
 import React, { useCallback, useState } from 'react';
-import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { useIsEarsExperimentalConnector } from '../../../hooks/connectors/use_connector_spec_summaries';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
 import { useConnectorsActions } from '../../../context/connectors_provider';
@@ -108,6 +108,7 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
   } = useKibana();
   const canDelete = application.capabilities.actions?.delete === true;
   const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
+  const isEarsExperimentalConnector = useIsEarsExperimentalConnector();
   const isEarsDisabled =
     connector.config?.authType === 'ears' &&
     (!isEarsEnabled ||

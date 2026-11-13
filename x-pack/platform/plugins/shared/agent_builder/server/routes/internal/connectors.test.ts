@@ -13,6 +13,7 @@ import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
 
 jest.mock('@kbn/agent-builder-server', () => ({
+  createConnectorSpecProvider: jest.fn(() => ({ kind: 'spec-provider' })),
   listAgentConnectors: jest.fn(),
   getAgentConnectorDetail: jest.fn(),
 }));
@@ -108,6 +109,7 @@ describe('registerInternalConnectorRoutes', () => {
       expect(mockRegistryGet).not.toHaveBeenCalled();
       expect(mockListAgentConnectors).toHaveBeenCalledWith(expect.anything(), {
         allowedIds: undefined,
+        specProvider: expect.anything(),
       });
     });
 
@@ -119,6 +121,7 @@ describe('registerInternalConnectorRoutes', () => {
       expect(mockResolveAgentConfiguration).toHaveBeenCalled();
       expect(mockListAgentConnectors).toHaveBeenCalledWith(expect.anything(), {
         allowedIds: ['id1', 'id2'],
+        specProvider: expect.anything(),
       });
     });
 
@@ -129,6 +132,7 @@ describe('registerInternalConnectorRoutes', () => {
 
       expect(mockListAgentConnectors).toHaveBeenCalledWith(expect.anything(), {
         allowedIds: undefined,
+        specProvider: expect.anything(),
       });
     });
 
@@ -137,7 +141,10 @@ describe('registerInternalConnectorRoutes', () => {
 
       await handler(mockCtx, makeRequest({ agentId: 'unknown-agent' }), mockResponse);
 
-      expect(mockListAgentConnectors).toHaveBeenCalledWith(expect.anything(), { allowedIds: [] });
+      expect(mockListAgentConnectors).toHaveBeenCalledWith(expect.anything(), {
+        allowedIds: [],
+        specProvider: expect.anything(),
+      });
     });
 
     it('propagates transient registry errors rather than falling back to unscoped access', async () => {
@@ -182,6 +189,7 @@ describe('registerInternalConnectorRoutes', () => {
       expect(result.type).toBe('ok');
       expect(mockGetAgentConnectorDetail).toHaveBeenCalledWith(expect.anything(), 'conn-1', {
         allowedIds: ['conn-1'],
+        specProvider: expect.anything(),
       });
     });
 

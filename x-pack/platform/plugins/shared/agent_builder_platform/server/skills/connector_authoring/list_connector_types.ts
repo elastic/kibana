@@ -8,11 +8,15 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import type { ConnectorSpecSummaryProvider } from '@kbn/agent-builder-server';
+import {
+  createConnectorSpecSummaryProvider,
+  getToolResultId,
+  createErrorResult,
+} from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { ActionType } from '@kbn/actions-plugin/common';
-import { getConnectorSpec } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
   getConnectorTypeDisplayName,
@@ -36,31 +40,25 @@ interface ListedConnectorType {
   available_in_chat: boolean;
 }
 
-const projectConnectorType = (actionType: ActionType): ListedConnectorType => {
-  const spec = getConnectorSpec(actionType.id);
+const projectConnectorType = async (
+  actionType: ActionType,
+  specProvider: ConnectorSpecSummaryProvider
+): Promise<ListedConnectorType> => {
+  const spec = await specProvider.getSpec(actionType.id);
 
-  const authMethods = (spec?.auth?.types ?? []).map((authType) =>
-    typeof authType === 'string' ? authType : authType.type
-  );
-
-  const toolActions = spec
-    ? Object.entries(spec.actions)
-        .filter(([, action]) => action.isTool)
-        .map(([actionName, action]) => ({
-          name: actionName,
-          description: action.description ?? actionName,
-        }))
-    : [];
+  const toolActions = (spec?.actions ?? [])
+    .filter(({ isTool }) => isTool)
+    .map(({ name, description }) => ({ name, description: description ?? name }));
 
   return {
     connector_type: actionType.id,
-    name: getConnectorTypeDisplayName(actionType),
-    description: spec?.metadata.description ?? actionType.description ?? '',
+    name: getConnectorTypeDisplayName(actionType, spec),
+    description: spec?.description ?? actionType.description ?? '',
     minimum_license: actionType.minimumLicenseRequired,
-    technical_preview: actionType.isExperimental ?? spec?.metadata.isTechnicalPreview ?? false,
-    auth_methods: authMethods,
+    technical_preview: actionType.isExperimental ?? spec?.isTechnicalPreview ?? false,
+    auth_methods: spec?.authTypeIds ?? [],
     tool_actions: toolActions,
-    available_in_chat: isChatCallableConnectorType(actionType.id),
+    available_in_chat: await isChatCallableConnectorType(actionType.id, specProvider),
   };
 };
 
@@ -72,7 +70,7 @@ export type ListConnectorTypesInput = z.infer<typeof listConnectorTypesSchema>;
  * Inline tool that enumerates the connector types the agent can create from chat.
  *
  * Lists Agent Builder connector types from the Actions registry (same source as
- * the Connectors UI), enriched from `@kbn/connector-specs` when a spec exists.
+ * the Connectors UI), enriched from the connector spec when one exists.
  * Filtered by {@link isConnectorTypeAvailable}. Call before `propose_connector`.
  *
  * Types without a spec (and that aren't MCP) are still listed — they may be
@@ -93,11 +91,15 @@ export const createListConnectorTypesTool = ({
   handler: async () => {
     try {
       const actionsStart = await getActionsStart();
-      const connectorTypes = actionsStart
-        .listTypes(AgentBuilderConnectorFeatureId)
-        .filter((t) => isConnectorTypeAvailable(t))
-        .map(projectConnectorType)
-        .sort((a, b) => a.name.localeCompare(b.name));
+      const specProvider = createConnectorSpecSummaryProvider({ actionsStart });
+      const connectorTypes = (
+        await Promise.all(
+          actionsStart
+            .listTypes(AgentBuilderConnectorFeatureId)
+            .filter((t) => isConnectorTypeAvailable(t))
+            .map((t) => projectConnectorType(t, specProvider))
+        )
+      ).sort((a, b) => a.name.localeCompare(b.name));
 
       return {
         results: [

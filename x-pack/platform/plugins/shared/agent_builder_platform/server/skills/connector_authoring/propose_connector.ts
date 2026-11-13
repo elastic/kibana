@@ -8,7 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import {
+  createConnectorSpecSummaryProvider,
+  getToolResultId,
+  createErrorResult,
+} from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -81,7 +85,8 @@ export const createProposeConnectorTool = ({
       };
     }
 
-    const displayName = getConnectorTypeDisplayName(actionType);
+    const spec = await createConnectorSpecSummaryProvider({ actionsStart }).getSpec(actionType.id);
+    const displayName = getConnectorTypeDisplayName(actionType, spec);
 
     const data: ConnectorSetupAttachmentData = {
       connector_type: input.connector_type,

@@ -88,6 +88,7 @@ export const queryKeys = {
   },
   connectors: {
     all: ['connectors'] as const,
+    specSummaries: ['connectors', 'specSummaries'] as const,
   },
   workspaceFiles: {
     byPath: (conversationId: string, path: string) =>

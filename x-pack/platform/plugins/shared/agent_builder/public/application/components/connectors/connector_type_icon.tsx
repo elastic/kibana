@@ -10,6 +10,7 @@ import type { EuiSkeletonCircleProps, IconSize, IconType } from '@elastic/eui';
 import { EuiIcon, EuiSkeletonCircle } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { useKibana } from '../../hooks/use_kibana';
+import { useConnectorSpecSummaries } from '../../hooks/connectors/use_connector_spec_summaries';
 
 export interface ConnectorTypeIconProps {
   actionTypeId: string;
@@ -33,12 +34,13 @@ export const ConnectorTypeIcon: React.FC<ConnectorTypeIconProps> = ({
   } = useKibana();
 
   const { actionTypeRegistry } = triggersActionsUi;
+  const specSummaries = useConnectorSpecSummaries();
 
   const iconType: IconType =
     ConnectorIconsMap.get(actionTypeId) ?? // v2 connector icons
     (actionTypeRegistry.has(actionTypeId)
       ? actionTypeRegistry.get(actionTypeId).iconClass // legacy connector icons
-      : 'plugs');
+      : specSummaries.get(actionTypeId)?.icon ?? 'plugs'); // types the package does not know
 
   return (
     <Suspense fallback={<EuiSkeletonCircle size={toSkeletonSize(size)} />}>
