@@ -191,10 +191,33 @@ const outputFormats = [
   },
 ];
 
+const subMillisecondUnits = [
+  {
+    text: i18n.translate('fieldFormats.duration.subMillisecondUnits.microseconds', {
+      defaultMessage: 'Microseconds',
+    }),
+    shortText: i18n.translate('fieldFormats.duration.subMillisecondUnits.microseconds.short', {
+      defaultMessage: 'µs',
+    }),
+    method: 'asMicroseconds',
+  },
+  {
+    text: i18n.translate('fieldFormats.duration.subMillisecondUnits.nanoseconds', {
+      defaultMessage: 'Nanoseconds',
+    }),
+    shortText: i18n.translate('fieldFormats.duration.subMillisecondUnits.nanoseconds.short', {
+      defaultMessage: 'ns',
+    }),
+    method: 'asNanoseconds',
+  },
+];
+
 export const DEFAULT_DURATION_INPUT_FORMAT = DEFAULT_INPUT_FORMAT;
 export const DEFAULT_DURATION_OUTPUT_FORMAT = DEFAULT_OUTPUT_FORMAT;
 export const DURATION_INPUT_FORMATS = inputFormats;
 export const DURATION_OUTPUT_FORMATS = outputFormats;
+/** Units used only by the human-readable (precise) output for values below one millisecond. */
+export const DURATION_SUB_MILLISECOND_UNITS = subMillisecondUnits;
 
 export const getDurationUnitInSeconds = (inputFormat: string): number | undefined =>
   durationUnitSeconds[inputFormat as keyof typeof durationUnitSeconds];
