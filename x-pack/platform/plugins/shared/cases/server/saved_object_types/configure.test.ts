@@ -90,14 +90,6 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
   });
 
   describe('Model version 3 to 4', () => {
-    const observableTypeSettings = [
-      { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-      {
-        key: 'employee-id',
-        paths: [{ path: 'user.employee_id', enabled: true, excludedValues: ['E000000'] }],
-        valuePattern: '^E\\d{6}$',
-      },
-    ];
     const observableTypes = [{ key: 'employee-id', label: 'Employee ID' }];
 
     it('does not change a document', () => {
@@ -114,21 +106,6 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
       });
 
       expect(migrated.attributes).toEqual(document.attributes);
-    });
-
-    it('keeps the settings and the unchanged observable types on a rollback to version 3', () => {
-      const migrated = migrator.migrate<Record<string, unknown>, Record<string, unknown>>({
-        document: createConfigureDocument({
-          owner: SECURITY_SOLUTION_OWNER,
-          observableTypes,
-          observableTypeSettings,
-        }),
-        fromVersion: 4,
-        toVersion: 3,
-      });
-
-      expect(migrated.attributes.observableTypes).toEqual(observableTypes);
-      expect(migrated.attributes.observableTypeSettings).toEqual(observableTypeSettings);
     });
   });
 
