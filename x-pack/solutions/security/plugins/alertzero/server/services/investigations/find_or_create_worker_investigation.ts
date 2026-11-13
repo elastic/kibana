@@ -11,8 +11,7 @@ import {
   ConversationAccessControlMode,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
-import type { MetadataFieldValue } from '@kbn/agent-builder-common';
-import type { ConversationWithPermissions } from '@kbn/agent-builder-server';
+import type { ConversationWithPermissions, MetadataFieldValue } from '@kbn/agent-builder-common';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import type { FindOrCreateWorkerInvestigationResponse } from '@kbn/alertzero-common';
 import { buildWorkerInvestigationConversationId } from './worker_investigation_id';
