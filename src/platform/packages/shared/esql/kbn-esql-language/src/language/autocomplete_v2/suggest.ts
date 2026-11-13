@@ -13,6 +13,7 @@ import { locate } from '../../esql_js_sim/grammar';
 import { createContext } from './context';
 import { provideColumns, provideConstant, provideNewName } from './providers/arguments';
 import { provideCommandNames } from './providers/command_names';
+import { provideEntities } from './providers/entities';
 import { provideEndOfCommand, provideToken } from './providers/tokens';
 import { resolve } from './resolve';
 import type { SuggestionContext, SuggestionRequest } from './types';
@@ -37,6 +38,8 @@ const provideArgument = async (
       return provideNewName(role, context);
     case 'constant':
       return provideConstant(role, context);
+    case 'entity':
+      return provideEntities(role, resolved, context);
     // The providers of the other roles come with the next steps.
     default:
       return [];

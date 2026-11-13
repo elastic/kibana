@@ -31,8 +31,14 @@ What the engine offers today:
   registered commands.
 - Keywords, the pipe, the separator of a list and the next line.
 - Arguments with the roles `column` (by type, each listed once where the role says so),
-  `new_name` (a free name with its assignment) and `constant` (its allowed values). The other
-  roles are resolved and not provided yet.
+  `new_name` (a free name with its assignment), `constant` (its allowed values) and `entity`.
+  The other roles are resolved and not provided yet.
+
+Entities come from `entities/registry.ts`: one definition per kind, each turning what the
+editor provides today into entities, in a scope. The scope is all a definition gets: the index
+mode, the parent's name, the task, serverless. `providers/entities.ts` builds the scope from
+the role and from what is written (the policy an enrich field depends on), and presents the
+entities. The editor's callbacks are unchanged.
 
 The columns a command can read are those of the query before the cursor (`pipeline.ts`): the
 commands before it in its pipeline, plus the outer pipeline for a branch, and only the

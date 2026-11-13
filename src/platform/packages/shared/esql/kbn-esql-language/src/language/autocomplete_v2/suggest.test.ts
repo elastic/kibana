@@ -218,4 +218,56 @@ describe('suggest (v2)', () => {
       expect(await textsAt('FROM x | FUSE ')).toEqual(expect.arrayContaining(['linear ', 'rrf ']));
     });
   });
+
+  describe('entities', () => {
+    const callbacks = createCallbacks();
+
+    it('offers the sources, without the hidden ones, and each only once', async () => {
+      const sources = await textsAt('FROM ', callbacks);
+
+      expect(sources).toEqual(expect.arrayContaining(['index', 'a_index']));
+      expect(sources).not.toContain('.secret_index');
+      expect(await textsAt('FROM index, ', callbacks)).not.toContain('index');
+    });
+
+    it('offers only time-series sources where the signature says so', async () => {
+      const sources = await textsAt('TS ', callbacks);
+
+      expect(sources).toEqual(
+        expect.arrayContaining(['timeseries_index', 'timeseries_index_alias_1'])
+      );
+      expect(sources).not.toContain('index');
+    });
+
+    it('offers an entity that stands alone with a space after it', async () => {
+      expect(await textsAt('FROM a | ENRICH ', callbacks)).toEqual(['policy ', '`policy$` ']);
+      expect(await textsAt('FROM a | LOOKUP JOIN ', callbacks)).toContain('join_index ');
+    });
+
+    it('offers the entities of the parent another argument names', async () => {
+      expect(await textsAt('FROM a | ENRICH policy ON b WITH c = ', callbacks)).toEqual([
+        'otherField',
+        'yetAnotherField',
+      ]);
+      expect(await textsAt('FROM a | ENRICH unknown ON b WITH c = ', callbacks)).toEqual([]);
+    });
+
+    it('leaves out an entity that is already listed where each is listed once', async () => {
+      const fields = await textsAt('FROM a METADATA _id, ', callbacks);
+
+      expect(fields).toContain('_index');
+      expect(fields).not.toContain('_id');
+    });
+
+    it('offers the entities of the scope', async () => {
+      const serverless = createCallbacks({ isServerless: true });
+
+      expect(await textsAt('FROM a METADATA ', callbacks)).not.toContain('_project._id');
+      expect(await textsAt('FROM a METADATA ', serverless)).toContain('_project._id');
+    });
+
+    it('adds the only symbol that can follow a name', async () => {
+      expect(await textsAt('SET ', callbacks)).toContain('unmapped_fields = ');
+    });
+  });
 });
