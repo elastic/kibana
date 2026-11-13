@@ -7,6 +7,7 @@
 
 import type {
   SessionPageVisit,
+  SessionRequest,
   SessionSummary,
   SessionTimelineEvent,
   SessionTimelineEventKind,
@@ -24,6 +25,7 @@ export const JOURNEY_EVENT_KINDS: readonly SessionTimelineEventKind[] = [
 export interface PageVisitEvents {
   visit: SessionPageVisit;
   events: SessionTimelineEvent[];
+  requests: SessionRequest[];
 }
 
 /**
@@ -51,7 +53,8 @@ const ownVisitIndex = (
  */
 export const groupEventsByVisit = (
   pageVisits: SessionPageVisit[],
-  timeline: SessionTimelineEvent[]
+  timeline: SessionTimelineEvent[],
+  requests: SessionRequest[] = []
 ): PageVisitEvents[] => {
   if (pageVisits.length === 0) {
     return [];
@@ -69,7 +72,16 @@ export const groupEventsByVisit = (
     );
     events[ownVisitIndex(pageVisits, openIndex, event)].push(event);
   }
-  return pageVisits.map((visit, index) => ({ visit, events: events[index] }));
+  // The API attributes requests to visits, as only it knows which page load each came from.
+  const visitRequests = pageVisits.map((): SessionRequest[] => []);
+  for (const request of requests) {
+    visitRequests[request.visitIndex]?.push(request);
+  }
+  return pageVisits.map((visit, index) => ({
+    visit,
+    events: events[index],
+    requests: visitRequests[index],
+  }));
 };
 
 export interface WaterfallSegment {
