@@ -17,6 +17,7 @@ interface IScenario {
   projectType?: 'observability' | 'security';
   tierAvailable?: boolean;
   hasEnterpriseLicense?: boolean;
+  licenseActive?: boolean;
 }
 
 function createService({
@@ -24,12 +25,14 @@ function createService({
   projectType = 'observability',
   tierAvailable = true,
   hasEnterpriseLicense = true,
+  licenseActive = true,
 }: IScenario = {}) {
   const core = coreMock.createStart();
   core.featureFlags.getBooleanValue$.mockReturnValue(of(flagEnabled));
   core.pricing.isFeatureAvailable.mockReturnValue(tierAvailable);
 
   const license = licenseMock.createLicenseMock();
+  license.isActive = licenseActive;
   license.hasAtLeast.mockReturnValue(hasEnterpriseLicense);
   const licensing = licensingMock.createStart();
   licensing.getLicense.mockResolvedValue(license);
@@ -91,6 +94,12 @@ describe('AvailabilityService', () => {
 
     it('reports the license below enterprise', async () => {
       const { service } = createService({ hasEnterpriseLicense: false });
+
+      await expect(service.getUnavailableReason()).resolves.toBe('license');
+    });
+
+    it('reports the license when an Enterprise license has expired', async () => {
+      const { service } = createService({ licenseActive: false });
 
       await expect(service.getUnavailableReason()).resolves.toBe('license');
     });

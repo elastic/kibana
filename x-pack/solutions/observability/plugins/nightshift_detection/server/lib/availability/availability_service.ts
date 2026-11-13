@@ -59,7 +59,10 @@ export class AvailabilityService {
       return 'pricing_tier';
     }
 
-    if (!(await this.licensing.getLicense()).hasAtLeast('enterprise')) {
+    // `hasAtLeast` only compares the license type, so an expired Enterprise license also needs
+    // the activity check.
+    const license = await this.licensing.getLicense();
+    if (!license.isActive || !license.hasAtLeast('enterprise')) {
       return 'license';
     }
 
