@@ -22,6 +22,7 @@ export {
 export type { EntityFacts, EntityItem, EntityOrigin, EntityScope } from './entities/types';
 export { COMMAND_FACTS, UNDESCRIBED_COMMANDS } from './signatures/command_facts';
 export { EXPRESSION_PARTS, FUNCTION_CALL } from './signatures/expression_parts';
+export { FUNCTION_LAMBDAS, type FunctionLambda } from './signatures/function_lambdas';
 export { getExpressionEntry, INHERITED_FIELDS, resolveRole } from './signatures/resolve_role';
 export { ROLE_KINDS, validateArgumentRoles } from './signatures/validate_roles';
 export type {

@@ -10,10 +10,16 @@
 import { Walker } from '@elastic/esql';
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
 import { FULL_TEXT_SEARCH_DEFINITIONS } from '../../../commands/definitions/constants';
-import { suggestForExpression } from '../../../commands/definitions/utils';
+import {
+  buildFieldsDefinitionsWithMetadata,
+  getExpressionType,
+  suggestForExpression,
+} from '../../../commands/definitions/utils';
 import { getUnmappedFieldsStrategy } from '../../../commands/definitions/utils/settings';
+import { withAutoSuggest } from '../../../commands/definitions/utils/autocomplete/helpers';
 import {
   Location,
+  type ESQLColumnData,
   type ICommandCallbacks,
   type ICommandContext,
   type ISuggestionItem,
@@ -29,6 +35,7 @@ import type { CursorIR } from '../../../esql_js_sim/grammar';
 import { enhanceWithFunctionsContext } from '../../autocomplete/get_command_context';
 import { getAutocompleteCursorContext } from '../../shared/parse_for_autocomplete_query';
 import type { SuggestionContext, SuggestionRequest } from '../types';
+import { getLambdas, getLambdaState, type LambdaParameter, type LambdaState } from './lambdas';
 
 /** What the expression at the cursor offers, and whether the command can go on after it. */
 export interface ExpressionSuggestions {
@@ -122,15 +129,68 @@ const findExpressionRoot = (
   }, undefined);
 };
 
+const ARROW = '->';
+const PARAMETER_NAMES: readonly string[] = ['x', 'y', 'z'];
+
+/**
+ * The parameters of lambdas as columns. A parameter has the type of the argument whose values
+ * it stands for, when the function says which.
+ */
+const asColumns = (
+  parameters: LambdaParameter[],
+  command: ESQLAstAllCommands,
+  columns: Map<string, ESQLColumnData>
+): ESQLColumnData[] =>
+  parameters.map(({ name, valuesFrom }) => ({
+    name,
+    type: getExpressionType(findExpressionRoot(command, valuesFrom), columns),
+    userDefined: true,
+    location: { min: 0, max: 0 },
+  }));
+
+/** The items of the head of a lambda: its parameters with the arrow, or the arrow alone. */
+const provideLambdaHead = (
+  lambda: Exclude<LambdaState, { kind: 'body' }>,
+  { usedNames }: SuggestionContext
+): ISuggestionItem[] => {
+  if (lambda.kind === 'arrow') {
+    return [withAutoSuggest({ label: ARROW, text: `${ARROW} `, kind: 'Operator', detail: '' })];
+  }
+
+  const free = PARAMETER_NAMES.filter((name) => !usedNames.has(name));
+  const names = (free.length >= lambda.count ? free : PARAMETER_NAMES).slice(0, lambda.count);
+  const head = names.length === 1 ? names[0] : `(${names.join(', ')})`;
+
+  return [
+    withAutoSuggest({
+      label: `${head} ${ARROW}`,
+      text: `${head} ${ARROW} `,
+      kind: 'Variable',
+      detail: '',
+    }),
+  ];
+};
+
 const getCallbacks = (
   role: ExpressionRole,
+  parameters: ESQLColumnData[],
   context: SuggestionContext
 ): ICommandCallbacks | undefined => {
   const { callbacks, hasLicense, getColumnsByType, usedNames } = context;
   const getColumnsFor = callbacks?.getColumnsFor;
+  const getByType: ICommandCallbacks['getByType'] = async (type, ignored, options) => [
+    ...buildFieldsDefinitionsWithMetadata(
+      parameters.filter(
+        ({ type: own }) => type === 'any' || type.includes('any') || type.includes(own)
+      ),
+      [],
+      options
+    ),
+    ...(await getColumnsByType(type, ignored, options)),
+  ];
 
   return {
-    getByType: readsColumnsHere(role, context.ir) ? getColumnsByType : undefined,
+    getByType: readsColumnsHere(role, context.ir) || parameters.length ? getByType : undefined,
     getSuggestedUserDefinedColumnName: () => {
       let index = 0;
       while (usedNames.has(`col${index}`)) {
@@ -157,7 +217,21 @@ export const provideExpression = async (
   { role, resolved, entry }: Extract<SuggestionRequest, { kind: 'expression' }>,
   context: SuggestionContext
 ): Promise<ExpressionSuggestions> => {
-  const { text, offset, ir, callbacks } = context;
+  const { offset, ir, callbacks } = context;
+  const lambda = getLambdaState(ir);
+
+  if (lambda && lambda.kind !== 'body') {
+    return { entry, items: provideLambdaHead(lambda, context), isUnfinished: true };
+  }
+
+  // The body of a lambda is the value of the argument: the expression engine reads it as
+  // that once the parameters and the arrow before it are blanked out.
+  const lambdas = getLambdas(ir);
+  const text = lambdas.reduce(
+    (blanked, { head: { start, end } }) =>
+      `${blanked.slice(0, start)}${' '.repeat(end - start)}${blanked.slice(end)}`,
+    context.text
+  );
   const { root, astContext } = getAutocompleteCursorContext(text, offset);
 
   if (astContext.type !== 'expression') {
@@ -167,8 +241,21 @@ export const provideExpression = async (
   const { command, isCursorInSubquery } = astContext;
   const expressionRoot = findExpressionRoot(command, getWrittenStart(ir, entry));
   const canBrowseFields = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
+  const columns = await context.getColumnMap();
+  // Every parameter has a type for what is written with it; only the lambdas around the cursor
+  // offer theirs.
+  const typed = asColumns(
+    lambdas.flatMap((written) => written.parameters),
+    command,
+    columns
+  );
+  const inScope = lambda?.kind === 'body' ? lambda.parameters.map(({ name }) => name) : [];
+  const parameters = typed.filter(({ name }) => inScope.includes(name));
   const commandContext: ICommandContext = {
-    columns: await context.getColumnMap(),
+    columns: new Map([
+      ...columns,
+      ...typed.map((column): [string, ESQLColumnData] => [column.name, column]),
+    ]),
     activeProduct: context.activeProduct,
     isCursorInSubquery,
     isFieldsBrowserEnabled: canBrowseFields && !isCursorInSubquery,
@@ -186,7 +273,7 @@ export const provideExpression = async (
       ...commandContext,
       ...(await enhanceWithFunctionsContext(command, commandContext, callbacks)),
     },
-    callbacks: getCallbacks(role, context),
+    callbacks: getCallbacks(role, parameters, context),
     options: {
       ...(role.types && { preferredExpressionType: [...role.types] }),
       ...(role.subqueries && { allowSubquery: true }),
