@@ -1,5 +1,5 @@
 {
-  "sha1": "2f692e5cc8eaf34c5833c1af9716acc205a2a1a3",
+  "sha1": "99eb31166a08d7d1bd1b0117e81c55ab8a5f0f63",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -658,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/assignees.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 23
       }
     },
@@ -672,8 +672,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/assignees.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 29
+      }
+    },
+    {
+      "id": "648a8883d47a049-3e9271b186e382c",
+      "title": "Investigation assignees endpoint — authorization the investigations list returns the assignees",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/assignees.spec.ts",
+        "line": 120,
+        "column": 11
       }
     },
     {
@@ -686,8 +700,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/assignees.spec.ts",
-        "line": 119,
-        "column": 11
+        "line": 155,
+        "column": 7
       }
     },
     {
@@ -700,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/assignees.spec.ts",
-        "line": 138,
-        "column": 15
+        "line": 172,
+        "column": 32
       }
     },
     {

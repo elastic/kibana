@@ -42,19 +42,6 @@ const LIST_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceNam
 
 const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   installed: true,
-  health: 'healthy',
-  state: 'started',
-  installedVersion: 1,
-  currentVersion: 1,
-  needsUpdate: false,
-  reason: null,
-  lagSeconds: 30,
-  configured: { frequency: '1m', partitions: 1 },
-  installedPartitions: 1,
-  enabledBy: null,
-  enabledAt: null,
-  authorization: null,
-  transforms: [],
   ...overrides,
 });
 
@@ -84,7 +71,6 @@ const listResponse = (overrides: Partial<SessionListResponse> = {}): SessionList
   total: 1,
   page: 0,
   perPage: 25,
-  failedSummaries: 0,
   facets: {
     browsers: [{ key: 'Chrome', count: 8 }],
     os: [{ key: 'macOS', count: 5 }],
@@ -177,7 +163,7 @@ beforeEach(() => {
 describe('SessionsTab', () => {
   describe('when sessions are not set up', () => {
     it('lets a user with the Manage sessions privilege set them up, then lists the sessions', async () => {
-      respondWith({ sessionsStatus: status({ installed: false, health: 'missing' }) });
+      respondWith({ sessionsStatus: status({ installed: false }) });
       renderTab();
 
       fireEvent.click(await screen.findByTestId('digitalExperienceSessionsEnable'));
@@ -190,24 +176,24 @@ describe('SessionsTab', () => {
     });
 
     it('shows why setting them up failed', async () => {
-      respondWith({ sessionsStatus: status({ installed: false, health: 'missing' }) });
+      respondWith({ sessionsStatus: status({ installed: false }) });
       mockFetch.mockImplementation(async (endpoint: string) => {
         if (endpoint === ENABLE_ENDPOINT) {
-          throw new Error('Missing the manage_transform cluster privilege');
+          throw new Error('Missing the manage_index_templates cluster privilege');
         }
-        return status({ installed: false, health: 'missing' });
+        return status({ installed: false });
       });
       renderTab();
 
       fireEvent.click(await screen.findByTestId('digitalExperienceSessionsEnable'));
 
       expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
-        'Missing the manage_transform cluster privilege'
+        'Missing the manage_index_templates cluster privilege'
       );
     });
 
     it('tells other users to ask an administrator, without a button', async () => {
-      respondWith({ sessionsStatus: status({ installed: false, health: 'missing' }) });
+      respondWith({ sessionsStatus: status({ installed: false }) });
       renderTab({ manageSessions: false });
 
       expect(await screen.findByTestId('digitalExperienceSessionsNotEnabled')).toHaveTextContent(
@@ -216,42 +202,6 @@ describe('SessionsTab', () => {
       expect(screen.queryByTestId('digitalExperienceSessionsEnable')).not.toBeInTheDocument();
       expect(listRequests()).toHaveLength(0);
     });
-  });
-
-  it('flags sessions that need an update above the list', async () => {
-    respondWith({ sessionsStatus: status({ needsUpdate: true, health: 'outdated' }) });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsNeedUpdate')).toBeInTheDocument();
-    expect(screen.getByTestId('digitalExperienceSessionsUpdate')).toBeInTheDocument();
-    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
-  });
-
-  it('warns when sessions were set up by a newer Kibana, which this one cannot update', async () => {
-    respondWith({
-      sessionsStatus: status({
-        installedVersion: 2,
-        currentVersion: 1,
-        reason: 'Sessions transforms are from version 2; upgrade Kibana to manage them.',
-      }),
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsNewerVersion')).toHaveTextContent(
-      'upgrade Kibana to manage them'
-    );
-    expect(screen.queryByTestId('digitalExperienceSessionsUpdate')).not.toBeInTheDocument();
-  });
-
-  it('shows a failing transform with its reason', async () => {
-    respondWith({
-      sessionsStatus: status({ health: 'degraded', reason: 'Transform failed: out of memory' }),
-    });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsDegraded')).toHaveTextContent(
-      'Transform failed: out of memory'
-    );
   });
 
   it('retries a failed status check', async () => {
@@ -522,24 +472,6 @@ describe('SessionsTab', () => {
     fireEvent.click(await screen.findByTestId('digitalExperienceSessionsNoMatchesClear'));
 
     expect(searchParams(history).os).toBeUndefined();
-  });
-
-  it('flags sessions that could not be summarized', async () => {
-    respondWith({ list: listResponse({ failedSummaries: 3 }) });
-    renderTab();
-
-    expect(await screen.findByTestId('digitalExperienceSessionsFailedSummaries')).toHaveTextContent(
-      '3 sessions in this time range could not be summarized'
-    );
-  });
-
-  it('says sessions that could not be summarized cannot be checked for errors', async () => {
-    respondWith({ list: listResponse({ failedSummaries: 2 }) });
-    renderTab({ search: '&hasErrors=true' });
-
-    expect(await screen.findByTestId('digitalExperienceSessionsFailedSummaries')).toHaveTextContent(
-      'whether they had errors is unknown'
-    );
   });
 
   it('shows a failed list with a retry', async () => {

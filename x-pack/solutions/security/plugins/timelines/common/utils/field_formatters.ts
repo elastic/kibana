@@ -14,7 +14,10 @@ import type { TechnicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/ass
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import type { Fields, TimelineEventsDetailsItem } from '../search_strategy';
+import type {
+  Fields,
+  TimelineEventsDetailsItem,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';
 

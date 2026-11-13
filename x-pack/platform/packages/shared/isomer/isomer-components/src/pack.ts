@@ -7,6 +7,19 @@
 
 import { definePrimitivePack } from '@elastic/isomer-sdk';
 import { ISOMER_STYLE_COLLECTOR, isomerStyleAdapter } from '@kbn/isomer-theme';
+import type {
+  ActionsNode,
+  CodeNode,
+  ContextNode,
+  DividerNode,
+  FieldsNode,
+  HeaderNode,
+  LinkNode,
+  MarkdownNode,
+  QuoteNode,
+  SectionNode,
+  TableNode,
+} from './primitives';
 import {
   actions,
   code,
@@ -36,6 +49,20 @@ export const componentsPrimitives = [
   code,
   table,
 ] as const;
+
+/** A node of any of the pack's primitives, one per entry of {@link componentsPrimitives}. */
+export type ComponentsNode =
+  | MarkdownNode
+  | HeaderNode
+  | SectionNode
+  | ContextNode
+  | DividerNode
+  | QuoteNode
+  | ActionsNode
+  | LinkNode
+  | FieldsNode
+  | CodeNode
+  | TableNode;
 
 /** Kibana's content and layout primitives. */
 export const componentsPack = definePrimitivePack({

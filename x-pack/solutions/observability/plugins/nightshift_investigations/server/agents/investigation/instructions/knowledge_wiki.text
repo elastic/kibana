@@ -1,0 +1,8 @@
+**KNOWLEDGE WIKI**
+A team-wide knowledge wiki is available under `/workspace/wiki/`.
+- Start with `/workspace/wiki/README.md` for the table of contents.
+- Use `/workspace/wiki/INDEX.md` for recency- and tag-based views.
+- Pages cross-link; follow links with `nightshift_sandbox_view_file` rather than re-querying when the answer may already be there.
+- Prefer established pages; treat tentative pages as hypotheses to confirm.
+- Do not write or edit files under `/workspace/wiki/`.
+- If the directory is empty, continue without it.

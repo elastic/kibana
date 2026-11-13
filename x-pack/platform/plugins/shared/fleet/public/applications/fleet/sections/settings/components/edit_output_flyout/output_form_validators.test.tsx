@@ -28,6 +28,11 @@ import {
   validateKafkaOAuth2TokenUrl,
   validateKibanaURL,
   validateKibanaAPIKey,
+  validateOtlpByteSize,
+  validateOtlpDuration,
+  validateOtlpEndpoint,
+  validateOtlpHeaders,
+  validateOtlpShortString,
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
@@ -637,6 +642,80 @@ describe('Output form validation', () => {
           },
         ]);
       });
+    });
+  });
+});
+
+describe('OTLP validators', () => {
+  describe('validateOtlpEndpoint', () => {
+    it('should require an endpoint', () => {
+      expect(validateOtlpEndpoint('')).toEqual(['Endpoint is required']);
+      expect(validateOtlpEndpoint('  ')).toEqual(['Endpoint is required']);
+    });
+
+    it('should accept host:port and URLs', () => {
+      expect(validateOtlpEndpoint('collector.example.com:4317')).toBeUndefined();
+      expect(validateOtlpEndpoint('https://collector.example.com:4317')).toBeUndefined();
+    });
+
+    it('should reject spaces and long endpoints', () => {
+      expect(validateOtlpEndpoint('collector example:4317')).toEqual([
+        'Endpoint must not contain spaces',
+      ]);
+      expect(validateOtlpEndpoint('a'.repeat(2049))).toEqual([
+        'Endpoint must be at most 2048 characters',
+      ]);
+    });
+  });
+
+  describe('validateOtlpDuration', () => {
+    it.each(['', '0', '5s', '500ms', '1m30s', '1.5h', '10us', '2µs'])(
+      'should accept %p',
+      (value) => {
+        expect(validateOtlpDuration(value)).toBeUndefined();
+      }
+    );
+
+    it.each(['5', 'five seconds', '-5s', '5 s', 's'])('should reject %p', (value) => {
+      expect(validateOtlpDuration(value)).toEqual(['Specify a duration such as 500ms, 5s, 1m30s']);
+    });
+  });
+
+  describe('validateOtlpByteSize', () => {
+    it.each(['', '0', '524288'])('should accept %p', (value) => {
+      expect(validateOtlpByteSize(value)).toBeUndefined();
+    });
+
+    it.each(['-1', '1.5', 'abc', '99999999999999999999'])('should reject %p', (value) => {
+      expect(validateOtlpByteSize(value)).toEqual(['Specify a whole number of bytes, 0 or more']);
+    });
+  });
+
+  describe('validateOtlpShortString', () => {
+    it('should accept up to 256 characters', () => {
+      expect(validateOtlpShortString('')).toBeUndefined();
+      expect(validateOtlpShortString('a'.repeat(256))).toBeUndefined();
+      expect(validateOtlpShortString('a'.repeat(257))).toEqual(['Must be at most 256 characters']);
+    });
+  });
+
+  describe('validateOtlpHeaders', () => {
+    it('should accept an empty row and complete pairs', () => {
+      expect(validateOtlpHeaders([{ key: '', value: '' }])).toBeUndefined();
+      expect(validateOtlpHeaders([{ key: 'x-tenant', value: 'acme' }])).toBeUndefined();
+    });
+
+    it('should reject incomplete pairs, duplicates and long values', () => {
+      expect(validateOtlpHeaders([{ key: 'a', value: '' }])).toHaveLength(1);
+      expect(
+        validateOtlpHeaders([
+          { key: 'a', value: '1' },
+          { key: 'a', value: '2' },
+        ])
+      ).toHaveLength(1);
+      expect(validateOtlpHeaders([{ key: 'a', value: 'v'.repeat(1001) }])).toEqual([
+        expect.objectContaining({ index: 0, hasKeyError: false, hasValueError: true }),
+      ]);
     });
   });
 });

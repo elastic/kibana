@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import type { BrushEndListener, SettingsProps } from '@elastic/charts';
+import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
@@ -34,20 +35,24 @@ jest.mock('@elastic/charts', () => {
 jest.mock('../../../../hooks/use_kibana_services');
 
 const POINTS: OverviewTrendPoint[] = [
-  { timestamp: 1_000, pageLoads: 2, loadTimeP75Ms: 1500.5 },
-  { timestamp: 2_000, pageLoads: 0, loadTimeP75Ms: null },
+  { timestamp: 1_000, pageLoads: 2, loadTimePercentileMs: 1500.5 },
+  { timestamp: 2_000, pageLoads: 0, loadTimePercentileMs: null },
 ];
 
 const renderTrends = (
   points: OverviewTrendPoint[] = POINTS,
   isLoading = false,
-  onTimeRangeSelect = jest.fn()
+  onTimeRangeSelect = jest.fn(),
+  percentile: OverviewPercentile = 75,
+  onPercentileChange = jest.fn()
 ) =>
   render(
     <OverviewTrends
       points={points}
       pageLoads={points.reduce((sum, { pageLoads }) => sum + pageLoads, 0)}
-      loadTimeP75Ms={1500.5}
+      loadTimePercentileMs={1500.5}
+      percentile={percentile}
+      onPercentileChange={onPercentileChange}
       isLoading={isLoading}
       onTimeRangeSelect={onTimeRangeSelect}
     />,
@@ -86,15 +91,33 @@ describe('OverviewTrends', () => {
     expect(loadTimeChart()).toHaveTextContent('Load time (p75)1.50 s');
   });
 
+  it('names the percentile in the load time, and offers the others', () => {
+    const onPercentileChange = jest.fn();
+    renderTrends(POINTS, false, jest.fn(), 95, onPercentileChange);
+
+    expect(loadTimeChart()).toHaveTextContent('Load time (p95)1.50 s');
+    const select = screen.getByTestId('digitalExperienceOverviewPercentile');
+    expect(select).toHaveValue('95');
+    expect(
+      within(select)
+        .getAllByRole('option')
+        .map((option) => option.textContent)
+    ).toEqual(['p50', 'p75', 'p90', 'p95', 'p99']);
+
+    fireEvent.change(select, { target: { value: '50' } });
+
+    expect(onPercentileChange).toHaveBeenCalledWith(50);
+  });
+
   it('says when there are no page loads in the time range', () => {
-    renderTrends([{ timestamp: 1_000, pageLoads: 0, loadTimeP75Ms: null }]);
+    renderTrends([{ timestamp: 1_000, pageLoads: 0, loadTimePercentileMs: null }]);
 
     expect(within(pageLoadsChart()).getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     expect(within(loadTimeChart()).getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('draws the page loads even when nothing was timed, and says no load time was reported', () => {
-    renderTrends([{ timestamp: 1_000, pageLoads: 3, loadTimeP75Ms: null }]);
+    renderTrends([{ timestamp: 1_000, pageLoads: 3, loadTimePercentileMs: null }]);
 
     expect(hasChart(pageLoadsChart())).toBe(true);
     expect(within(loadTimeChart()).getByText(NO_LOAD_TIMES_MESSAGE)).toBeInTheDocument();

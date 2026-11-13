@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_FEATURE_ID, NIGHTSHIFT_SOURCE_VIEW_PREFIX } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_FEATURE_ID,
+  NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
+  NIGHTSHIFT_SOURCE_VIEW_PREFIX,
+} from '@kbn/nightshift-shared';
 import type { KibanaRole } from '@kbn/scout-oblt';
 
 export const COMMON_HEADERS = {
@@ -37,23 +41,26 @@ const TEST_DATA_READ_PRIVILEGES = {
   privileges: ['read', 'view_index_metadata'],
 };
 
-// The All logs recommendation is `FROM logs*`. The read check asks for that pattern by name.
-// Read on `logsnightshift-sources-recommendation-test-*` does not cover it: the narrower grant
-// still lets the ES|QL probe succeed and hide every other index under `logs*`.
-const ALL_LOGS_RECOMMENDATION_READ_PRIVILEGES = {
-  names: ['logs*'],
-  privileges: ['read', 'view_index_metadata'],
-};
-
 export const NIGHTSHIFT_MANAGER_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
-    indices: [
-      VIEW_MANAGE_PRIVILEGES,
-      TEST_DATA_READ_PRIVILEGES,
-      ALL_LOGS_RECOMMENDATION_READ_PRIVILEGES,
-    ],
+    indices: [VIEW_MANAGE_PRIVILEGES, TEST_DATA_READ_PRIVILEGES],
   },
+  kibana: [
+    {
+      base: [],
+      feature: { [NIGHTSHIFT_FEATURE_ID]: ['all', NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * Nightshift `all` without the Manage engines sub-feature: manage but not configure. Has every
+ * Elasticsearch privilege the manager has, so a 403 can only come from the Kibana privilege.
+ */
+export const NIGHTSHIFT_MANAGE_ONLY_ROLE: KibanaRole = {
+  elasticsearch: NIGHTSHIFT_MANAGER_ROLE.elasticsearch,
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['all'] }, spaces: ['*'] }],
 };
 

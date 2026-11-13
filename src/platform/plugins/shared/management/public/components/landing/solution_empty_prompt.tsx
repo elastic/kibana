@@ -57,7 +57,7 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
   return (
     <KibanaPageTemplate.EmptyPrompt
       data-test-subj="managementHomeSolution"
-      iconType="managementApp"
+      iconType="gear"
       title={
         <h1>
           <FormattedMessage

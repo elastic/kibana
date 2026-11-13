@@ -400,8 +400,10 @@ export function useMiDeploy({
               globalRegion: serviceSettings?.globalRegion ?? '',
               namespace,
               globalNamespace: serviceSettings?.namespace,
+              policySettings: serviceSettings?.policySettings,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
+              onboardingDeploymentId,
               ...connectorOverride,
             }),
           getPolicyId: ([policyId]) => policyId,
@@ -486,7 +488,7 @@ export function useMiDeploy({
           if (plan.targets.length === 0 && !plan.hasPendingCleanup) {
             if (onboardingDeploymentId) {
               const soUpdated = await updateDeployment(onboardingDeploymentId, {
-                ...toSOSettingsUpdate(serviceSettings),
+                ...toSOSettingsUpdate(serviceSettings, 'managed_integration'),
                 services: selectedServiceIds,
                 serviceVars: toSOServiceVars(
                   serviceSettings?.serviceVars ?? {},
@@ -535,6 +537,7 @@ export function useMiDeploy({
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
             globalNamespace: serviceSettings?.namespace,
+            policySettings: serviceSettings?.policySettings,
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
@@ -543,6 +546,7 @@ export function useMiDeploy({
             servicesMap: servicesMap ?? new Map(),
             addedInstanceIdsByPolicy: addedByPolicy,
             alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
+            onboardingDeploymentId,
             ...connectorOverride,
           });
           storedSharedRefs = cleanupOps.sharedRefs ?? storedSharedRefs;
@@ -578,7 +582,7 @@ export function useMiDeploy({
               ([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedIds.has(pid)
             );
             soWriteSucceeded = await updateDeployment(onboardingDeploymentId, {
-              ...toSOSettingsUpdate(serviceSettings),
+              ...toSOSettingsUpdate(serviceSettings, 'managed_integration'),
               services: selectedServiceIds,
               packagePolicyIds: [...new Set(survivingEntries.map(([, pid]) => pid))],
               policyIdsByInstance: Object.fromEntries(survivingEntries),
@@ -640,6 +644,7 @@ export function useMiDeploy({
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
             globalNamespace: serviceSettings?.namespace,
+            policySettings: serviceSettings?.policySettings,
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
@@ -648,6 +653,7 @@ export function useMiDeploy({
             servicesMap: servicesMap ?? new Map(),
             addedInstanceIdsByPolicy: addedByPolicy,
             alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
+            onboardingDeploymentId,
             ...connectorOverride,
           });
           storedSharedRefs = cleanupOps.sharedRefs ?? storedSharedRefs;
@@ -729,7 +735,7 @@ export function useMiDeploy({
               Record<string, unknown>
             >,
             globalRegion,
-            ...toSOSettings(serviceSettings),
+            ...toSOSettings(serviceSettings, 'managed_integration'),
             dataFormat,
             authMethod: connectorId ? 'identity_federation' : 'static_keys',
           })) ?? undefined;
@@ -757,9 +763,11 @@ export function useMiDeploy({
               storedServiceVars,
               globalRegion,
               globalNamespace: serviceSettings?.namespace,
+              policySettings: serviceSettings?.policySettings,
               namespace,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
+              onboardingDeploymentId: currentOnboardingDeploymentId,
               ...connectorOverride,
             }),
           getPolicyId: ({ policyId }) => policyId,
@@ -790,6 +798,7 @@ export function useMiDeploy({
             storedServiceVars,
             integrationName,
             description,
+            policySettings: serviceSettings?.policySettings,
             authenticateAndDeployStep: sharedRefs
               ? withSharedRefs(sharedRefs)
               : { ...authenticateAndDeployStep, existingSecretRefs: keptSecretRefs },
@@ -831,7 +840,7 @@ export function useMiDeploy({
           }).filter(([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedPolicyIds.has(pid))
         );
         soWriteSucceeded = await updateDeployment(currentOnboardingDeploymentId, {
-          ...toSOSettingsUpdate(serviceSettings),
+          ...toSOSettingsUpdate(serviceSettings, 'managed_integration'),
           services: selectedServiceIds,
           serviceVars: toSOServiceVars(
             serviceSettings?.serviceVars ?? {},

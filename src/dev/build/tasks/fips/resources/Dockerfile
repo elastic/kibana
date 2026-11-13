@@ -7,7 +7,8 @@ RUN printf '%s\n' \
       'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20260824T000000Z bullseye main' \
       'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260824T000000Z bullseye-security main' \
       > /etc/apt/sources.list && \
-    apt-get update && \
+    echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries && \
+    apt-get update --error-on=any && \
     apt-get install -y --no-install-recommends gcc libc6-dev make perl && \
     rm -rf /var/lib/apt/lists/*
 

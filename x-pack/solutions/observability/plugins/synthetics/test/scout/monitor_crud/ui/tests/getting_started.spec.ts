@@ -14,6 +14,7 @@ test.describe.skip('GettingStarted', { tag: tags.stateful.classic }, () => {
   let locationLabel: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
+    await syntheticsServices.enable();
     await syntheticsServices.deleteMonitors();
     const location = await syntheticsServices.ensurePrivateLocationExists();
     locationLabel = location.label;
@@ -34,13 +35,8 @@ test.describe.skip('GettingStarted', { tag: tags.stateful.classic }, () => {
       await pageObjects.syntheticsApp.navigateToGettingStarted();
     });
 
-    await test.step('enable monitor management', async () => {
-      await pageObjects.syntheticsApp.enableMonitorManagement(true);
-    });
-
     await test.step('shows validation error on submit', async () => {
-      await page.testSubj.click('observability-nav-synthetics-monitors');
-      await page.click('text=Create monitor');
+      await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
       await expect(page.getByText('URL is required')).toBeVisible();
     });
 

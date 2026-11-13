@@ -19,7 +19,6 @@ import {
   CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
   getConversationDetailsFlyoutWidthProps,
 } from './conversation_details_flyout_width';
-import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 const notFoundMessage = (conversationId: string) =>
   i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.notFoundToast', {
@@ -36,6 +35,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
   onClose?: () => void;
+  onConversationUpdated?: () => void;
   trailingActions?: EuiFlyoutMenuAction[];
 }
 
@@ -45,6 +45,7 @@ export const openConversationDetailsFlyout = async ({
   conversationTemplatesService,
   conversationId,
   onClose,
+  onConversationUpdated,
   trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
@@ -63,6 +64,7 @@ export const openConversationDetailsFlyout = async ({
         conversationTemplatesService={conversationTemplatesService}
         titleId={titleId}
         onNotFound={onNotFound}
+        onConversationUpdated={onConversationUpdated}
       />
     </QueryClientProvider>,
     {
@@ -76,7 +78,6 @@ export const openConversationDetailsFlyout = async ({
       flyoutMenuProps: { trailingActions },
       type: 'push',
       paddingSize: 'm',
-      css: flyoutMenuRowStyles,
       role: 'region',
       'data-test-subj': 'agentBuilderConversationDetailsFlyout-snapshot',
       'aria-labelledby': titleId,

@@ -1560,6 +1560,104 @@
             }
           }
         },
+        "dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr": {
+          "properties": {
+            "per_alert": {
+              "properties": {
+                "p50": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P50 of action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "p99": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P99 of action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                }
+              }
+            },
+            "per_field": {
+              "properties": {
+                "p50": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P50 of action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "p99": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P99 of action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                }
+              }
+            },
+            "all": {
+              "properties": {
+                "p50": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P50 of action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "p99": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "P99 of action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dispatcher_action_groups_throttled_count_by_strategy_24hr": {
+          "properties": {
+            "on_status_change": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of action groups throttled over the last 24 hours with strategy on_status_change (configured, or the default for per_alert policies without throttle)."
+              }
+            },
+            "per_status_interval": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of action groups throttled over the last 24 hours with strategy per_status_interval."
+              }
+            },
+            "time_interval": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of action groups throttled over the last 24 hours with strategy time_interval (configured, or the default for per_field and all policies without throttle)."
+              }
+            },
+            "every_time": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of action groups throttled over the last 24 hours with strategy every_time."
+              }
+            }
+          }
+        },
         "alerts_count": {
           "type": "long",
           "_meta": {
@@ -8575,6 +8673,30 @@
                     "description": "Automatically extract observables setting disabled"
                   }
                 },
+                "extractObservablesSourceExplicit": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cases where the caller set extractObservables to a value that differs from the template or space default. A value from a legacy (configuration-level) template that differs from the space default is counted here, because only a template that the request references is known as a template. Cases created before this attribute existed are not counted in any source bucket"
+                  }
+                },
+                "extractObservablesSourceTemplate": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cases where extractObservables comes from the case template, unless a caller or a rule changed the value. Legacy (configuration-level) templates count here only for cases that a rule creates"
+                  }
+                },
+                "extractObservablesSourceSpaceDefault": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cases where extractObservables comes from the space or owner default, unless a caller or a rule changed the value"
+                  }
+                },
+                "extractObservablesSourceRule": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cases where a detection rule set extractObservables to a value that differs from the template or space default"
+                  }
+                },
                 "observables": {
                   "properties": {
                     "auto": {
@@ -9493,6 +9615,18 @@
                     "automatic": {
                       "type": "long"
                     }
+                  }
+                },
+                "extractObservablesDefaultOn": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of configuration saved objects with the extractObservables default enabled"
+                  }
+                },
+                "extractObservablesDefaultOff": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of configuration saved objects with the extractObservables default disabled"
                   }
                 },
                 "customFields": {

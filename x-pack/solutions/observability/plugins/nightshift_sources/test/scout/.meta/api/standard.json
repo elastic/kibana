@@ -1,5 +1,5 @@
 {
-  "sha1": "ae9e213d73e3d3d7377c36e79a188d75902a5240",
+  "sha1": "1c3fa430e9dad342660bcf72284f23e5b17bca44",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,7 +7,7 @@
     {
       "id": "6395ba18a958586-8abd26b7d5e05b0",
       "title": "Nightshift sources authorization lets a Nightshift reader read but not write",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -16,14 +16,30 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 60,
-        "column": 52
+        "line": 63,
+        "column": 50
+      }
+    },
+    {
+      "id": "6395ba18a958586-e55976c90eca97f",
+      "title": "Nightshift sources authorization lets a user with manage but not configure read sources and refuses every change",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
+        "line": 84,
+        "column": 29
       }
     },
     {
       "id": "6395ba18a958586-49190653b419991",
       "title": "Nightshift sources authorization reports ok health to a reader with only the implicit view grant",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -32,14 +48,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 82,
-        "column": 14
+        "line": 103,
+        "column": 7
       }
     },
     {
       "id": "6395ba18a958586-fe4c40f9fcb3b61",
       "title": "Nightshift sources authorization denies a user without Nightshift privileges",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -48,14 +64,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 92,
-        "column": 14
+        "line": 110,
+        "column": 75
       }
     },
     {
-      "id": "6395ba18a958586-3e324fcdb3821e2",
-      "title": "Nightshift sources authorization does not expose a source created in another space",
-      "expectedStatus": "passed",
+      "id": "6395ba18a958586-0fc8e7fb4565500",
+      "title": "Nightshift sources authorization does not expose a source of one space to another",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -64,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 101,
-        "column": 42
+        "line": 127,
+        "column": 25
       }
     },
     {
@@ -81,7 +97,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
         "line": 67,
-        "column": 7
+        "column": 5
       }
     },
     {
@@ -96,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 98,
-        "column": 94
+        "line": 87,
+        "column": 13
       }
     },
     {
@@ -112,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 176,
+        "line": 165,
         "column": 25
       }
     },
@@ -128,7 +144,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 195,
+        "line": 184,
         "column": 11
       }
     },
@@ -144,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 242,
+        "line": 231,
         "column": 16
       }
     },
@@ -160,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 274,
+        "line": 263,
         "column": 17
       }
     },
@@ -176,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 310,
+        "line": 299,
         "column": 28
       }
     },
@@ -192,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 379,
+        "line": 368,
         "column": 14
       }
     },
@@ -208,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 470,
-        "column": 15
+        "line": 461,
+        "column": 20
       }
     },
     {
@@ -224,7 +240,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 439,
+        "line": 425,
         "column": 27
       }
     },
@@ -240,7 +256,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 445,
+        "line": 431,
         "column": 27
       }
     },

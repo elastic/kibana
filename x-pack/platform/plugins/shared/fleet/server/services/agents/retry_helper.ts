@@ -11,20 +11,132 @@ import { BulkActionTaskType } from './bulk_action_types';
 
 export const MAX_RETRY_COUNT = 20;
 
+/**
+ * What an error from the agent search says about the cursor the run is paging with.
+ *
+ * - `rejected-checkpoint`: Elasticsearch rejected the `search_after` value the run resumed from,
+ *   as opposed to any other bad request. Only the first search of a run can raise it: every later
+ *   page searches with a cursor Elasticsearch has just handed back, and a batch's own writes raise
+ *   ordinary errors.
+ * - `expired-point-in-time`: the point in time the run pages with has expired, as opposed to any
+ *   other 404.
+ */
+export type AgentPagingFailure = 'rejected-checkpoint' | 'expired-point-in-time';
+
+/**
+ * Raised around the agent search alone, so the handler can tell what a status code means for the
+ * cursor rather than guessing from the status. The runner also reads `.fleet-actions` under a
+ * point in time of its own, and neither a 400 nor a 404 from that one says anything about the
+ * agent cursor — clearing it on one of those would throw away a cursor that still works.
+ */
+export class AgentPagingError extends Error {
+  constructor(public readonly kind: AgentPagingFailure, public readonly cause: Error) {
+    super(cause.message);
+    this.name = 'AgentPagingError';
+  }
+}
+
+/** How often the check task wakes up to verify that the action is still making progress. */
+export const CHECK_TASK_INTERVAL_MINUTES = 5;
+
+/**
+ * How often a running runner refreshes `checkpointUpdatedAt` while a batch is in flight. It has
+ * to be comfortably below CHECK_TASK_INTERVAL_MINUTES so that there is always at least one
+ * refresh between two consecutive check task runs, otherwise a live runner still looks dead.
+ */
+export const RUNNER_HEARTBEAT_INTERVAL_MINUTES = 2;
+
+/**
+ * Upper bound on how many times the check task may restart a stalled runner before giving up,
+ * so a permanently failing action cannot be resumed forever.
+ */
+export const MAX_CHECK_TASK_RESUMES = 20;
+
+/**
+ * Absolute ceiling on how many times the check task may run for one action, whatever it observes.
+ * `MAX_CHECK_TASK_RESUMES` only bounds the paths that resume, and a runner wedged inside
+ * `processAgents` keeps heartbeating, so it looks alive forever and never trips that limit. This
+ * stops the watchdog outliving any plausible action: 24 hours at the default interval, against an
+ * action the issue measures in minutes at 100k agents.
+ */
+export const MAX_CHECK_TASK_RUNS = (24 * 60) / CHECK_TASK_INTERVAL_MINUTES;
+
 export interface RetryParams {
   pitId?: string;
   searchAfter?: SortResults;
+  /**
+   * Which attempt this is, counting from 1: the first run of an action is scheduled with
+   * `retryCount: 1` by `runActionAsyncTask`, so only a value above 1 means a retry.
+   */
   retryCount?: number;
+  /**
+   * Set by the check task when it restarts a runner it found stalled. A resume can follow a run
+   * that actioned agents without recording the attempt, so it has to deduplicate whatever
+   * `retryCount` says.
+   */
+  isResumed?: boolean;
   taskId?: string;
+  /** Agents processed by earlier runs of this action, so the count stays cumulative. */
+  nbAgentsProcessed?: number;
 }
 
+/**
+ * State of the recurring check task that watches over a bulk action runner.
+ *
+ * `searchAfter` / `pitId` / `nbAgentsProcessed` / `checkpointUpdatedAt` are written by the runner;
+ * `lastObservedCheckpointAt` / `resumeCount` are written by the check task itself.
+ */
+export interface BulkActionCheckTaskState {
+  searchAfter?: SortResults;
+  /**
+   * The point in time the cursor was taken under. Elasticsearch may return a new id on any
+   * search, and only the latest is guaranteed valid, so it is checkpointed with the cursor.
+   */
+  pitId?: string;
+  nbAgentsProcessed?: number;
+  /**
+   * The attempt the runner was on when it last checkpointed, so a watchdog resume continues this
+   * action's retry budget instead of starting it over at 1 and granting another MAX_RETRY_COUNT.
+   */
+  retryCount?: number;
+  /**
+   * Last time the runner wrote to this state, either by advancing past a batch or by a heartbeat
+   * while one was in flight. Its only use is liveness: the check task resumes the action when it
+   * has not moved since the previous run.
+   *
+   * Its presence is also what tells a cleared checkpoint apart from one that was never written:
+   * once the runner has stamped it, the checkpoint in the task's params is stale by definition
+   * and must not be read as a fallback.
+   */
+  checkpointUpdatedAt?: string;
+  lastObservedCheckpointAt?: string;
+  resumeCount?: number;
+  /**
+   * Set by a runner that has spent its whole retry budget. Removing the check task is what should
+   * follow, but that write is best effort, so this is what a surviving check task reads to stop
+   * rather than resuming the action and granting it a second budget.
+   */
+  stoppedAt?: string;
+  /** How many times the check task has run for this action, bounded by MAX_CHECK_TASK_RUNS. */
+  runCount?: number;
+}
+
+/**
+ * Update tags retries from the beginning rather than from the cursor, under a fresh snapshot.
+ *
+ * The count is reset with the cursor, never on its own. `update_agent_tags` only narrows the
+ * kuery when a single tag is added or a single tag removed, so a rename or a multi-tag change
+ * re-pages every agent the action matched. Carrying the earlier count into that would take
+ * `nbAgentsProcessed` past `total` while the run is still going, and the check task reads that as
+ * a finished action and removes itself — leaving nothing to resume a runner that then dies.
+ */
 export function getRetryParams(taskType: string, retryParams: RetryParams): RetryParams {
-  // update tags will retry with tags filter
   return taskType === BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY
     ? {
         ...retryParams,
         pitId: undefined,
         searchAfter: undefined,
+        nbAgentsProcessed: 0,
       }
     : retryParams;
 }

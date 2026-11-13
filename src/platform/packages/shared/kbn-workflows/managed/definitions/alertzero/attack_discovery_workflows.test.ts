@@ -166,6 +166,9 @@ const journalExecutes = (steps: YamlStep[]) =>
 const AN_ATTACK_ID = '50e2f8aef56286bd953f8e0e1f72b9ddc9c454244a5623bf812a1657b6e82e40';
 const ANOTHER_ATTACK_ID = 'c62d0bf382e6ce929360081730e6353d0e528ca3580b16892854fe4375a0486f';
 
+// The shape of `decidedBy.username` for a Worker's serverless (UIAM) service account.
+const SERVICE_ACCOUNT_USERNAME = 'pEu97WGgSCeNATpE0h-Y-A';
+
 // Renders the derivation exactly as the engine will, so the assertions read the
 // value a real execution produces rather than the template source.
 const renderInvestigationId = (attackDiscoveryId: string): Promise<string> =>
@@ -1927,6 +1930,36 @@ describe('Attack Discovery worker chain', () => {
           expect(verdict).toContain(field);
         }
       );
+
+      // A decline is made by a person, but on serverless a person's `decidedBy.username`
+      // is an opaque user id too. The proposal card already names the decider by display
+      // name, so the verdict does not repeat it.
+      it('does not name the decider on a decline, even when decidedBy is present', async () => {
+        const verdict = await createWorkflowLiquidEngine().parseAndRender(
+          String(
+            (
+              stepIn(reviewSteps, 'close_investigation_declined')?.with?.updates as {
+                verdict?: string;
+              }
+            )?.verdict
+          ),
+          {
+            steps: {
+              read_proposal_decision: {
+                output: {
+                  decidedBy: { username: SERVICE_ACCOUNT_USERNAME },
+                  dismissReason: 'risk_accepted',
+                  rationale: 'Known admin tooling.',
+                },
+              },
+            },
+          }
+        );
+
+        expect(verdict).not.toContain(SERVICE_ACCOUNT_USERNAME);
+        expect(verdict).not.toContain('declined by');
+        expect(verdict).toBe('Escalation declined as "risk_accepted". Known admin tooling.');
+      });
     });
   });
 
@@ -2132,6 +2165,29 @@ describe('Attack Discovery worker chain', () => {
       // would contradict a run that is about to start.
       it('leaves the Investigation open for the forensics report', () => {
         expect((handoff?.with?.updates as { status?: string })?.status).toBe('open');
+      });
+
+      // On an auto-approval `decidedBy.username` is the Worker's service-account id,
+      // which on serverless is an opaque UIAM id. The proposal card already shows who
+      // decided, so the verdict does not repeat it.
+      it('does not name the decider, even when decidedBy is present', async () => {
+        const verdict = await createWorkflowLiquidEngine().parseAndRender(
+          String((handoff?.with?.updates as { verdict?: string })?.verdict),
+          {
+            inputs: { attack_discovery_id: AN_ATTACK_ID },
+            steps: {
+              read_proposal_decision: {
+                output: { decidedBy: { username: SERVICE_ACCOUNT_USERNAME } },
+              },
+            },
+          }
+        );
+
+        expect(verdict).not.toContain(SERVICE_ACCOUNT_USERNAME);
+        expect(verdict).not.toContain('approved by');
+        expect(verdict).toBe(
+          `Handed off to Forensics Watch. Knowledge indicator analyze-endpoint-${AN_ATTACK_ID}. This Investigation stays open for the forensics report.`
+        );
       });
 
       it('closes nothing', () => {
@@ -3852,8 +3908,8 @@ describe('Attack Discovery worker chain', () => {
         expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(22);
       });
 
-      it('bumps batched generation to version 13 so the worker passes generation_source', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(13);
+      it('bumps batched generation to version 14 so generation model calls carry token-usage attribution', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(14);
       });
 
       it('continues when fingerprint matching fails', () => {
@@ -3870,8 +3926,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the review to version 25 so a failed attack close still retires alerts', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(25);
+      it('bumps the review to version 26 so its verdicts no longer name the decider', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(26);
       });
     });
 

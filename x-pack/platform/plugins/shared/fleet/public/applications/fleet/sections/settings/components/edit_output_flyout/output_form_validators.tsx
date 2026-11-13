@@ -686,3 +686,98 @@ export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }
     return errors;
   }
 }
+
+const GO_DURATION_UNIT = '(?:ns|us|µs|μs|ms|s|m|h)';
+const GO_DURATION_REGEX = new RegExp(
+  `^(?:0|(?:(?:\\d+(?:\\.\\d*)?|\\.\\d+)${GO_DURATION_UNIT})+)$`
+);
+
+export function validateOtlpEndpoint(value: string) {
+  const endpoint = value?.trim() ?? '';
+  if (!endpoint) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointIsRequired', {
+        defaultMessage: 'Endpoint is required',
+      }),
+    ];
+  }
+  if (/\s/.test(endpoint)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointInvalid', {
+        defaultMessage: 'Endpoint must not contain spaces',
+      }),
+    ];
+  }
+  if (endpoint.length > 2048) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointTooLong', {
+        defaultMessage: 'Endpoint must be at most {max} characters',
+        values: { max: 2048 },
+      }),
+    ];
+  }
+}
+
+/** An optional duration in the Go format used by the collector, such as `5s` or `1m30s`. */
+export function validateOtlpDuration(value: string) {
+  const duration = value?.trim() ?? '';
+  if (!duration) {
+    return;
+  }
+  if (duration.length > 64 || !GO_DURATION_REGEX.test(duration)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpDurationInvalid', {
+        defaultMessage: 'Specify a duration such as {examples}',
+        values: { examples: '500ms, 5s, 1m30s' },
+      }),
+    ];
+  }
+}
+
+/** An optional number of bytes: a whole number that is not negative. */
+export function validateOtlpByteSize(value: string) {
+  const size = value?.trim() ?? '';
+  if (!size) {
+    return;
+  }
+  if (!/^\d+$/.test(size) || !Number.isSafeInteger(Number(size))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpByteSizeInvalid', {
+        defaultMessage: 'Specify a whole number of bytes, 0 or more',
+      }),
+    ];
+  }
+}
+
+/** An optional string of at most 256 characters. */
+export function validateOtlpShortString(value: string) {
+  if ((value?.trim() ?? '').length > 256) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpShortStringTooLong', {
+        defaultMessage: 'Must be at most {max} characters',
+        values: { max: 256 },
+      }),
+    ];
+  }
+}
+
+export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>) {
+  const errors = [...(validateKafkaHeaders(pairs) ?? [])];
+
+  pairs.forEach(({ key, value }, index) => {
+    if (key.length > 256 || value.length > 1000) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpHeaderTooLong', {
+          defaultMessage:
+            'Header names must be at most {maxKey} characters and values at most {maxValue}',
+          values: { maxKey: 256, maxValue: 1000 },
+        }),
+        index,
+        hasKeyError: key.length > 256,
+        hasValueError: value.length > 1000,
+      });
+    }
+  });
+
+  return errors.length ? errors : undefined;
+}
