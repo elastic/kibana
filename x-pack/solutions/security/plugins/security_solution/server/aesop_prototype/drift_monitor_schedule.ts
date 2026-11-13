@@ -62,14 +62,32 @@ export const aesopDriftMonitorWorkflowIdSuffix = (skillId: string): string => {
 };
 
 // Suffix format before the id hash was added. It is lossy (`foo-bar` and
-// `foo_bar` share it), so uninstall removes a legacy instance only when its
-// stored template values name the same skill.
+// `foo_bar` share it), so a legacy instance is removed only when its stored
+// template values name the same skill.
 const legacyWorkflowIdSuffix = (skillId: string): string | undefined => {
   const slug = skillId
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
   return slug ? `skill-${slug}`.slice(0, 64) : undefined;
+};
+
+const removeLegacyMonitor = async (
+  client: PluginScopedManagedWorkflowsApi,
+  spaceId: string,
+  skillId: string
+): Promise<void> => {
+  const legacySuffix = legacyWorkflowIdSuffix(skillId);
+  if (!legacySuffix) return;
+  const legacyState = await client.getInstalledWorkflowState(
+    `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-${legacySuffix}`,
+    spaceId
+  );
+  if (legacyState?.templateValues?.skillId !== skillId) return;
+  await client.uninstall(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
+    spaceId,
+    workflowIdSuffix: legacySuffix,
+  });
 };
 
 export const aesopDriftMonitorDocumentId = (skillId: string): string =>
@@ -159,6 +177,8 @@ export const enableAesopDriftMonitor = async (
   // scheduled trigger in front of Task Manager under an API key minted from this request —
   // the same split as the context_engine feedback-analysis schedule.
   await workflowsManagement.updateWorkflow(documentId, { enabled: true }, spaceId, deps.request);
+  // Otherwise a monitor enabled under the old suffix keeps grading the same traces.
+  await removeLegacyMonitor(client, spaceId, skillId);
   logger.debug(() => `Enabled AESOP drift monitor for skill '${skillId}' (${documentId})`);
   return { documentId };
 };
@@ -194,19 +214,7 @@ export const uninstallAesopDriftMonitor = async (
     spaceId: deps.spaceId,
     workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix(skillId),
   });
-  const legacySuffix = legacyWorkflowIdSuffix(skillId);
-  if (legacySuffix) {
-    const legacyState = await client.getInstalledWorkflowState(
-      `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-${legacySuffix}`,
-      deps.spaceId
-    );
-    if (legacyState?.templateValues?.skillId === skillId) {
-      await client.uninstall(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
-        spaceId: deps.spaceId,
-        workflowIdSuffix: legacySuffix,
-      });
-    }
-  }
+  await removeLegacyMonitor(client, deps.spaceId, skillId);
   deps.logger.debug(() => `Uninstalled AESOP drift monitor for skill '${skillId}'`);
 };
 

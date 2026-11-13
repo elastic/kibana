@@ -12,10 +12,12 @@ import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
 } from '@kbn/management-settings-ids';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import {
   aesopDriftMonitorDocumentId,
   aesopDriftMonitorWorkflowIdSuffix,
   buildTemplateValues,
+  enableAesopDriftMonitor,
   getAesopDriftMonitorTracingWarnings,
   uninstallAesopDriftMonitor,
 } from './drift_monitor_schedule';
@@ -158,5 +160,47 @@ describe('uninstallAesopDriftMonitor', () => {
     await expect(uninstall('...')).resolves.toEqual([
       { spaceId: 'default', workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix('...') },
     ]);
+  });
+});
+
+describe('enableAesopDriftMonitor', () => {
+  it.each([
+    ['removes a legacy instance of the same skill', 'foo_bar', 1],
+    ['keeps a legacy instance of another skill', 'foo-bar', 0],
+  ])('%s', async (_label, legacyOwner, legacyRemovals) => {
+    const uninstall = jest.fn().mockResolvedValue(undefined);
+    const client = {
+      install: jest.fn().mockResolvedValue(undefined),
+      uninstall,
+      getInstalledWorkflowState: jest
+        .fn()
+        .mockResolvedValue({ templateValues: { skillId: legacyOwner } }),
+    } as unknown as PluginScopedManagedWorkflowsApi;
+    const updateWorkflow = jest.fn().mockResolvedValue(undefined);
+
+    await enableAesopDriftMonitor(
+      {
+        getManagedWorkflowsClient: async () => client,
+        workflowsManagement: { updateWorkflow },
+        logger: loggerMock.create(),
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'default',
+      },
+      { skillId: 'foo_bar' }
+    );
+
+    expect(updateWorkflow).toHaveBeenCalledWith(
+      aesopDriftMonitorDocumentId('foo_bar'),
+      { enabled: true },
+      'default',
+      expect.anything()
+    );
+    expect(uninstall).toHaveBeenCalledTimes(legacyRemovals);
+    if (legacyRemovals) {
+      expect(uninstall).toHaveBeenCalledWith(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
+        spaceId: 'default',
+        workflowIdSuffix: 'skill-foo-bar',
+      });
+    }
   });
 });
