@@ -189,7 +189,9 @@ export const buildDecisionDocument = ({
       ...condition.map((entry) => `- ${entry}`),
     ].join('\n'),
     tags: ['watch:alert_triage', `decision:${kind}`],
-    // Context Engine shows a document with no privileges element in every space.
+    // No `count` or `name`: Elasticsearch hides this document from users, which is intended,
+    // because decisions are for the worker. Keep the element: a document with none is visible in
+    // every space.
     permissions: { kibana: { privileges: [{ space: spaceId }] } },
     attributes: {
       decision: kind,
