@@ -10,8 +10,8 @@
  *
  * Focuses on the Canvas-specific integration points for visualize embeddables:
  *   1. By-reference: adding an existing visualization from the library renders it on the workpad.
- *   2. By-value: creating a new Vega panel via the Canvas editor menu and applying it in the Vega
- *      editor flyout adds a panel to the workpad.
+ *   2. By-value: creating a new Vega panel via the Canvas editor menu adds a panel with the
+ *      default spec to the workpad (Canvas skips the inline Vega editor).
  *
  * The FTR suite also renamed panels to "v2" through the Visualize/Vega editors and re-edited
  * existing panels; those steps exercise the editor flows rather than Canvas, so they are
@@ -53,9 +53,8 @@ test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classi
 
   test('creates a by-value Vega panel via the editor menu', async ({ pageObjects: { canvas } }) => {
     await canvas.addNewPanel('Vega');
-    await canvas.applyVegaEditor();
 
-    // A fresh workpad starts empty, so saving the Vega panel adds exactly one panel.
+    // A fresh workpad starts empty, so adding the Vega panel adds exactly one panel.
     await expect.poll(() => canvas.getEmbeddableCount(), { timeout: EXTENDED_TIMEOUT }).toBe(1);
   });
 });

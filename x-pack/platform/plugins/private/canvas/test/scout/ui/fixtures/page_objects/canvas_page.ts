@@ -373,13 +373,6 @@ export class CanvasPage {
     await this.page.testSubj.locator('lnsApp').waitFor({ state: 'hidden' });
   }
 
-  /** Click "Apply and close" in the Vega editor flyout and wait for it to close. */
-  async applyVegaEditor() {
-    const applyAndClose = this.page.testSubj.locator('vegaEditorFlyoutSaveButton');
-    await applyAndClose.click();
-    await applyAndClose.waitFor({ state: 'hidden' });
-  }
-
   /** Delete the currently selected element via the workpad edit menu. */
   async deleteSelectedElement() {
     await this.page.testSubj.locator('canvasWorkpadEditMenuButton').click();
