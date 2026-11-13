@@ -282,6 +282,12 @@ page loads and in-app navigations (`documentLoad`, `browser.navigation`); `page_
 summary also keeps a lowercased `search` field (`wildcard`) of the session id, user, browser, OS,
 country, city and pages, which the list's search matches anywhere in.
 
+`has_replay` is mapped but never written yet. Session replay records one `elastic.replay.start`
+per recorded segment to `logs-rum.replay.otel-*`, which the task already reads as part of
+`logs-*.otel-*`, so it can set the field without a `SESSIONS_VERSION` bump and the rebuild one
+would cost. It is absent rather than `false` until something sets it, and readers expose it as
+`hasReplay`.
+
 ### Enabling sessions
 
 Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,

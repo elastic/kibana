@@ -50,6 +50,7 @@ const fullDocument: SessionDocument = {
   http_request_count: 5,
   http_failed_request_count: 1,
   bounced: false,
+  has_replay: false,
   entry_page: '/',
   exit_page: '/cart',
   journey: ['/', '/cart'],
