@@ -20,7 +20,6 @@ export const getDefaultEsqlQueryTool = (): BuiltinSkillBoundedTool => ({
   handler: async (_args, context) => {
     try {
       const query = await buildDefaultEsqlQuery({
-        anonymizationFieldsEsClient: context.esClient.asInternalUser,
         esClient: context.esClient.asCurrentUser,
         logger: context.logger,
         spaceId: context.spaceId,

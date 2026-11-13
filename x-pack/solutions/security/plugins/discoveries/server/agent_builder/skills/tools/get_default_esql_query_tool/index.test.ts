@@ -77,11 +77,25 @@ describe('getDefaultEsqlQueryTool', () => {
       await tool.handler({}, mockContext);
 
       expect(mockBuildDefaultEsqlQuery).toHaveBeenCalledWith({
-        anonymizationFieldsEsClient: mockEsClient.asInternalUser,
         esClient: mockEsClient.asCurrentUser,
         logger: mockLogger,
         spaceId: 'test-space',
       });
+    });
+
+    it('never hands the internal user client to buildDefaultEsqlQuery', async () => {
+      mockBuildDefaultEsqlQuery.mockResolvedValueOnce(expectedQuery);
+
+      const tool = getDefaultEsqlQueryTool();
+
+      await tool.handler({}, mockContext);
+
+      const [params] = mockBuildDefaultEsqlQuery.mock.calls[0];
+
+      // The tool performs no authorization of its own, so every read it makes
+      // must run as the caller. Anything the internal user could read would be
+      // exposed to any Agent Builder user.
+      expect(Object.values(params)).not.toContain(mockEsClient.asInternalUser);
     });
 
     it('returns the query wrapped in an other-typed tool result', async () => {

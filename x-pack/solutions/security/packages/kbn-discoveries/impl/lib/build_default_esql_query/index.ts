@@ -14,13 +14,25 @@ const DEFAULT_SIZE = 100;
 
 const REQUIRED_KEEP_FIELDS = ['_id', '@timestamp'] as const;
 
+const isIndexNotFoundError = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const { meta, statusCode } = error as { meta?: { statusCode?: number }; statusCode?: number };
+
+  return (statusCode ?? meta?.statusCode) === 404;
+};
+
 /**
  * Queries the field capabilities API to determine which of the candidate
  * fields actually exist in the given index pattern. Fields that are not
  * present in the index are logged at debug level and excluded.
  *
- * If the field caps request fails (e.g. the index does not exist yet),
- * all candidate fields are returned as-is so the query can still be built.
+ * If the index does not exist yet, all candidate fields are returned as-is so
+ * the query can still be built. Any other failure, such as an authorization
+ * error, is rethrown so the list of candidate fields is never returned to a
+ * caller that cannot read the index.
  */
 const filterFieldsByIndex = async ({
   candidateFields,
@@ -57,12 +69,11 @@ const filterFieldsByIndex = async ({
 
     return filtered;
   } catch (error) {
-    logger.debug(
-      () =>
-        `fieldCaps request failed for index ${index}, using all candidate fields: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-    );
+    if (!isIndexNotFoundError(error)) {
+      throw error;
+    }
+
+    logger.debug(() => `Index ${index} does not exist yet, using all candidate fields`);
 
     return candidateFields;
   }
