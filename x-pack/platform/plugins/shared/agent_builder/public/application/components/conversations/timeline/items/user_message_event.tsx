@@ -7,14 +7,17 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
   UserMessageEvent as UserMessageEventData,
   ConversationRoundAuthor,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
+import { isSteerMessageEvent } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { UserMessage } from '../user_message/user_message';
+import { useTurnContentInset } from '../turn_content_inset';
 import type { SteerState } from '../types';
 
 interface UserMessageEventProps {
@@ -50,8 +53,16 @@ const UserMessageEventComponent: React.FC<UserMessageEventProps> = ({
   attachmentRefs,
   conversationAttachments,
 }) => {
+  const turnContentInset = useTurnContentInset();
+  // A message sent to a running agent is part of that turn: set in like the turn's content, where
+  // it stays once the run has read it and it renders among the steps.
+  const steerStyles = isSteerMessageEvent(event)
+    ? css`
+        margin-inline-start: ${turnContentInset};
+      `
+    : undefined;
   return (
-    <>
+    <div css={steerStyles} data-test-subj={steerStyles ? 'agentBuilderSteerMessage' : undefined}>
       <UserMessage
         input={event.data.message}
         startedAt={event.created_at}
@@ -72,7 +83,7 @@ const UserMessageEventComponent: React.FC<UserMessageEventProps> = ({
           {steerLabels[steerState]}
         </EuiText>
       )}
-    </>
+    </div>
   );
 };
 

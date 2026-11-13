@@ -21,6 +21,7 @@ import { ExecutionFailedEvent } from './items/execution_failed_event';
 import { ExecutionAbortedEvent } from './items/execution_aborted_event';
 import { PendingPrompts } from './items/pending_prompts';
 import type { AgentTurnItem } from './types';
+import { TURN_COLUMN_GUTTER, turnAvatarColumnWidth } from './turn_content_inset';
 import {
   isCompletedTurn,
   isFailedTurn,
@@ -127,7 +128,7 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   const isLoading = status === 'running' || isResuming;
 
   const avatarColumnStyles = css`
-    min-inline-size: ${euiTheme.size.l};
+    min-inline-size: ${turnAvatarColumnWidth(euiTheme)};
   `;
 
   const contentColumnStyles = css`
@@ -137,7 +138,7 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   const content = renderContent(item, conversationId, conversationAttachments);
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+    <EuiFlexGroup gutterSize={TURN_COLUMN_GUTTER} alignItems="flexStart" responsive={false}>
       {/* The column keeps its width while the agent definition is still loading. */}
       <EuiFlexItem
         grow={false}
