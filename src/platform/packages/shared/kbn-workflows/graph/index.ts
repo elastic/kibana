@@ -92,6 +92,7 @@ export {
   isWait,
   isWaitForInput,
   isWaitForApproval,
+  isWorkflowExecute,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,

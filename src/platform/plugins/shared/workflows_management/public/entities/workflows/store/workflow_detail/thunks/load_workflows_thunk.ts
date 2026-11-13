@@ -10,6 +10,7 @@
 import { createAsyncThunk } from 'redux-toolkit-v1';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { getReturnedOutputNames } from '../../../../../../common/lib/get_returned_output_names';
 import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
 import type { RootState } from '../../types';
@@ -50,6 +51,8 @@ export const loadWorkflowsThunk = createAsyncThunk<
           name: workflow.name,
           managed: workflow.managed,
           inputsSchema,
+          outputs: workflow.definition?.outputs,
+          returnedOutputNames: getReturnedOutputNames(workflow.definition),
         };
       });
 

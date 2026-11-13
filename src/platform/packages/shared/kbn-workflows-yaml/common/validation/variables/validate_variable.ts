@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import {
+  getSchemaAtPath,
+  LIQUID_DYNAMIC_KEY_SEGMENT,
+  parsePath,
+} from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { DynamicStepContextSchema } from '@kbn/workflows/spec/schema';
 import { z } from '@kbn/zod/v4';
 import type { VariableItem, YamlValidationResult } from '../types';
@@ -18,6 +22,37 @@ import {
   FOREACH_ITEM_SCHEMA_DESC,
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
+import { getPropertyReferenceOptions } from '../context/property_reference_options';
+
+// The deepest schema on the path that resolves, and the property it doesn't have.
+const getUnresolvedProperty = (
+  context: typeof DynamicStepContextSchema,
+  propertyPath: string
+): { schema: z.ZodType; property: string } | undefined => {
+  const segments = parsePath(propertyPath);
+  const { schema, scopedToPath } = getSchemaAtPath(context, propertyPath, { partial: true });
+  if (!segments || !schema || scopedToPath === null) {
+    return undefined;
+  }
+  const property = segments.find((_, index) => segments.slice(0, index).join('.') === scopedToPath);
+  return property === undefined ? undefined : { schema, property };
+};
+
+// Why `propertyPath` doesn't resolve: unknown when it reads a dynamic key the schema allows.
+const getUnresolvedReference = (
+  context: typeof DynamicStepContextSchema,
+  propertyPath: string
+): { allowed: true } | { allowed: false; message: string } => {
+  const unresolved = getUnresolvedProperty(context, propertyPath);
+  const options = unresolved && getPropertyReferenceOptions(unresolved.schema);
+  if (unresolved?.property === LIQUID_DYNAMIC_KEY_SEGMENT) {
+    return options?.allowDynamicKeys
+      ? { allowed: true }
+      : { allowed: false, message: `Variable ${propertyPath} is invalid` };
+  }
+  const message = unresolved && options?.unknownPropertyMessage?.(unresolved.property);
+  return { allowed: false, message: message ?? `Variable ${propertyPath} is invalid` };
+};
 
 export interface VariableValidationOptions {
   /**
@@ -114,18 +149,22 @@ export function validateVariable(
     };
   }
 
-  const { schema: refSchema } = getSchemaAtPath(context, parsedPath.propertyPath);
+  const { schema: resolvedSchema } = getSchemaAtPath(context, parsedPath.propertyPath);
+  const unresolvedReference = resolvedSchema
+    ? undefined
+    : getUnresolvedReference(context, parsedPath.propertyPath);
 
-  if (!refSchema) {
+  if (unresolvedReference && !unresolvedReference.allowed) {
     return {
       ...variableItem,
-      message: `Variable ${parsedPath.propertyPath} is invalid`,
+      message: unresolvedReference.message,
       severity: 'error',
       owner: 'variable-validation',
       ruleId: 'invalidVariableReference',
       hoverMessage: null,
     };
   }
+  const refSchema = resolvedSchema ?? z.unknown();
 
   if (refSchema instanceof z.ZodAny && refSchema.description) {
     return {

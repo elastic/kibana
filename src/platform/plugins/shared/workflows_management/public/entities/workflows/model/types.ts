@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowYaml } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 
 /**
@@ -19,6 +20,10 @@ export interface WorkflowsMap {
     name: string;
     managed?: boolean;
     inputsSchema?: JsonModelSchemaType;
+    /** The outputs the workflow declares, as written in its definition. */
+    outputs?: WorkflowYaml['outputs'];
+    /** Names the workflow's `workflow.output` steps set; undefined when any field may come back. */
+    returnedOutputNames?: string[];
   };
 }
 
