@@ -300,62 +300,6 @@ describe('fetchEvents', () => {
       expect(args.project_routing).toBe('_alias:_origin');
     });
   });
-
-  describe('flattened field mapped with incompatible types', () => {
-    const mockToRecords = (toRecords: jest.Mock) =>
-      esClient.asCurrentUser.helpers.esql.mockReturnValue({
-        toRecords,
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
-      });
-
-    const callFetchEvents = () =>
-      fetchEvents({
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: ['logs-*'],
-        spaceId: 'default',
-        esQuery: undefined,
-      });
-
-    it('reruns the query without FIELD_EXTRACT when ES|QL rejects a flattened root as ambiguous', async () => {
-      const records = { columns: [], records: [{ id: 'from-rerun' }] };
-      mockToRecords(
-        jest
-          .fn()
-          .mockRejectedValueOnce(
-            new Error(
-              'verification_exception: Found 1 problem\nline 207:133: Cannot use field [m365_defender.event.additional_fields] due to ambiguities being mapped as [2] incompatible types: [flattened] in [index-a], [object] in [index-b]'
-            )
-          )
-          .mockResolvedValueOnce(records)
-      );
-
-      const result = await callFetchEvents();
-
-      expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(2);
-      const [[firstArgs], [rerunArgs]] = esClient.asCurrentUser.helpers.esql.mock.calls;
-      expect(firstArgs.query).toContain(
-        'FIELD_EXTRACT(m365_defender.event.additional_fields, "SourceAccountSid")'
-      );
-      expect(rerunArgs.query).not.toContain('FIELD_EXTRACT(');
-      expect(rerunArgs.query).toContain(
-        'm365_defender.event.additional_fields.SourceAccountSid IS NOT NULL'
-      );
-      expect(result).toEqual(records);
-    });
-
-    it('rethrows other errors without rerunning the query', async () => {
-      mockToRecords(jest.fn().mockRejectedValueOnce(new Error('circuit_breaking_exception')));
-
-      await expect(callFetchEvents()).rejects.toThrow('circuit_breaking_exception');
-      expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(1);
-    });
-  });
 });
 
 // Helper to build a minimal EventEsqlRow (pre-aggregated ESQL output) for tests.

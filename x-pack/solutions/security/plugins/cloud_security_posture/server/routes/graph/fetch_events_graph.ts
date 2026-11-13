@@ -39,7 +39,7 @@ import {
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEsqlRow } from './types';
-import { buildIntegrationRuntimeEvals, isFlattenedRootAmbiguityError } from './runtime_evaluations';
+import { buildIntegrationRuntimeEvals } from './runtime_evaluations';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -49,7 +49,6 @@ interface BuildEsqlQueryParams {
   pinnedIds?: string[];
   integrationRuntimeEvalsEnabled?: boolean;
   showUnknownTarget: boolean;
-  useFieldExtract: boolean;
 }
 
 /**
@@ -118,49 +117,29 @@ export const fetchEvents = async ({
     ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
   ];
 
-  const runQuery = (useFieldExtract: boolean): Promise<EsqlToRecords<EventEsqlRow>> => {
-    const query = buildEsqlQuery({
-      indexPatterns,
-      originEventIds,
-      originAlertIds,
-      alertsMappingsIncluded,
-      pinnedIds,
-      integrationRuntimeEvalsEnabled,
-      showUnknownTarget,
-      useFieldExtract,
-    });
+  const query = buildEsqlQuery({
+    indexPatterns,
+    originEventIds,
+    originAlertIds,
+    alertsMappingsIncluded,
+    pinnedIds,
+    integrationRuntimeEvalsEnabled,
+    showUnknownTarget,
+  });
 
-    logger.trace(
-      `Executing events query [project_routing: ${projectRouting ?? 'default'}] [${query}]`
-    );
+  logger.trace(
+    `Executing events query [project_routing: ${projectRouting ?? 'default'}] [${query}]`
+  );
 
-    return esClient.asCurrentUser.helpers
-      .esql({
-        columnar: false,
-        filter,
-        query,
-        params,
-        ...(projectRouting ? { project_routing: projectRouting } : {}),
-      })
-      .toRecords<EventEsqlRow>();
-  };
-
-  try {
-    return await runQuery(true);
-  } catch (error) {
-    if (!isFlattenedRootAmbiguityError(error)) {
-      throw error;
-    }
-    // ES|QL rejects FIELD_EXTRACT on a root that is `flattened` in one queried index and an
-    // object in another. The dotted path alone still reads the indices that map the key as a
-    // regular field, so rerun with it rather than fail the whole graph.
-    logger.debug(
-      `Events query rejected a flattened field mapped with incompatible types, rerunning without FIELD_EXTRACT: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-    return runQuery(false);
-  }
+  return esClient.asCurrentUser.helpers
+    .esql({
+      columnar: false,
+      filter,
+      query,
+      params,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
+    })
+    .toRecords<EventEsqlRow>();
 };
 
 const buildDslFilter = (
@@ -426,7 +405,6 @@ const buildEsqlQuery = ({
   pinnedIds,
   integrationRuntimeEvalsEnabled,
   showUnknownTarget,
-  useFieldExtract,
 }: BuildEsqlQueryParams): string => {
   // NULLIFY is used because LOAD rejects dotted references to subfields of flattened fields on ES
   // versions that cannot read them. The few integration fields that live in flattened objects
@@ -435,9 +413,7 @@ const buildEsqlQuery = ({
   // dotted path covers indices that map the key as a regular field, FIELD_EXTRACT covers flattened
   // mappings on ES versions where the dotted path resolves to null. ES|QL reads keys of flattened
   // fields by dotted path from https://github.com/elastic/elasticsearch/pull/164665 (behind the
-  // esql_flattened_subfields feature flag, on in snapshot builds only). ES|QL rejects FIELD_EXTRACT
-  // when the queried indices map a root as `flattened` in one and as an object in another, so
-  // fetchEvents then reruns the query with the dotted path alone (useFieldExtract: false).
+  // esql_flattened_subfields feature flag, on in snapshot builds only).
   // When LOAD is restored, keep the global user.id cast below and add similar casts for any
   // other field known to be mapped with the wrong type in some integration index.
   // See NULLIFY_WORKAROUNDS.md for the full revert checklist and the user.id audit results.
@@ -455,10 +431,7 @@ ${
 // Safe across all 47 integrations — see NULLIFY_WORKAROUNDS.md for the mapping audit.
 // Gated behind integrationRuntimeEvalsEnabled so users can disable it as an escape hatch.
 | EVAL user.id = TO_STRING(user.id)
-${buildIntegrationRuntimeEvals({
-  skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'],
-  useFieldExtract,
-})}`
+${buildIntegrationRuntimeEvals({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}`
     : ''
 }
 // Recompute after runtime evals so entity.target.id set by integration runtime evals is visible.
