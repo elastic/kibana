@@ -282,7 +282,7 @@ const MALICIOUS_FILE: LabeledAlert = {
   expected: 'true_positive',
   description:
     'Tier 1 — Elastic Defend malware engine (event.code=malicious_file) matched a known-bad ' +
-    'unsigned executable dropped in a temp path. Gate A: true_positive.',
+    'unsigned executable dropped in the user Downloads folder. Gate A: true_positive.',
   doc: buildDoc({
     id: 'aa-eval-tier1-malicious-file',
     index: 1,
