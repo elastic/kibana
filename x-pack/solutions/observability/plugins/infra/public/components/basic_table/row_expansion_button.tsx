@@ -26,10 +26,7 @@ export const RowExpansionButton = <Item extends any>({
   );
 
   return (
-    <EuiToolTip
-      content={expandAriaLabel}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={expandAriaLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         data-test-subj="infraRowExpansionButtonButton"
         onClick={handleClick}
