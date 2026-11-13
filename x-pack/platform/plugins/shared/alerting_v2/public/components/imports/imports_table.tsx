@@ -10,6 +10,7 @@ import { EuiFieldSearch, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ImportListItem } from '../../hooks/use_fetch_imports';
+import { EMPTY_VALUE } from '../../utils/rule_display';
 
 const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
   '.inboundWebhook': i18n.translate('xpack.alertingV2.imports.list.type.customWebhook', {
@@ -23,7 +24,12 @@ const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
 const getConnectorTypeLabel = (connectorTypeId: string): string =>
   CONNECTOR_TYPE_LABELS[connectorTypeId] ?? connectorTypeId;
 
-const columns: Array<EuiBasicTableColumn<ImportListItem>> = [
+/** A list item with its alert series count; the count is absent until it loads. */
+interface ImportRow extends ImportListItem {
+  alertSeriesCount?: number;
+}
+
+const columns: Array<EuiBasicTableColumn<ImportRow>> = [
   {
     field: 'name',
     name: i18n.translate('xpack.alertingV2.imports.list.column.name', {
@@ -37,9 +43,20 @@ const columns: Array<EuiBasicTableColumn<ImportListItem>> = [
     name: i18n.translate('xpack.alertingV2.imports.list.column.type', {
       defaultMessage: 'Type',
     }),
-    sortable: ({ connectorTypeId }: ImportListItem) => getConnectorTypeLabel(connectorTypeId),
-    render: (connectorTypeId: ImportListItem['connectorTypeId']) =>
+    sortable: ({ connectorTypeId }: ImportRow) => getConnectorTypeLabel(connectorTypeId),
+    render: (connectorTypeId: ImportRow['connectorTypeId']) =>
       getConnectorTypeLabel(connectorTypeId),
+  },
+  {
+    field: 'alertSeriesCount',
+    name: i18n.translate('xpack.alertingV2.imports.list.column.alerts', {
+      defaultMessage: 'Alerts',
+    }),
+    dataType: 'number',
+    sortable: true,
+    render: (alertSeriesCount: ImportRow['alertSeriesCount']) => (
+      <span data-test-subj="importsAlertsCount">{alertSeriesCount ?? EMPTY_VALUE}</span>
+    ),
   },
 ];
 
@@ -62,12 +79,22 @@ interface ImportsTableProps {
   items: ImportListItem[];
   isLoading: boolean;
   error?: Error | null;
+  /** Alert series count per connector id; undefined while loading or after a failure. */
+  alertCounts?: Readonly<Record<string, number>>;
 }
 
 /** The imports of the current space, searched by name, sorted and paged in the browser. */
-export const ImportsTable = ({ items, isLoading, error }: ImportsTableProps) => {
+export const ImportsTable = ({ items, isLoading, error, alertCounts }: ImportsTableProps) => {
   const [searchText, setSearchText] = useState('');
-  const filteredItems = useMemo(() => filterImportsByName(items, searchText), [items, searchText]);
+  const rows = useMemo(
+    (): ImportRow[] =>
+      filterImportsByName(items, searchText).map((item) => ({
+        ...item,
+        // A connector without alerts is absent from the counts.
+        alertSeriesCount: alertCounts ? alertCounts[item.connectorId] ?? 0 : undefined,
+      })),
+    [items, searchText, alertCounts]
+  );
 
   return (
     <>
@@ -85,7 +112,7 @@ export const ImportsTable = ({ items, isLoading, error }: ImportsTableProps) => 
         tableCaption={i18n.translate('xpack.alertingV2.imports.list.tableCaption', {
           defaultMessage: 'Alert imports',
         })}
-        items={filteredItems}
+        items={rows}
         itemId="connectorId"
         columns={columns}
         sorting={{ sort: { field: 'name', direction: 'asc' } }}

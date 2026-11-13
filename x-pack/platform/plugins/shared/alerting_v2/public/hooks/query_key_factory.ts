@@ -121,4 +121,6 @@ export const userProfileKeys = {
 export const importKeys = {
   all: ['import'] as const,
   list: () => [...importKeys.all, 'list'] as const,
+  alertCounts: (connectorIds: readonly string[]) =>
+    [...importKeys.all, 'alertCounts', [...connectorIds].sort()] as const,
 };
