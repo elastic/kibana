@@ -42,7 +42,7 @@ export const buildDenseProfileLiveRetrievalExample = (
     expectedSkills: ['attack-discovery-generator'],
     // The retrieval tools are IN the path because this profile's whole point is
     // the retrieval: `StrictTrajectory` scores
-    // `expectedPath.length / non-load-skill tool calls`, so a path holding only
+    // `expectedPath.length / routing tool calls`, so a path holding only
     // `run` scored a model that skipped retrieval and called `run` directly at
     // 1.0 while scoring a correct scoped retrieval
     // (`get_default_esql_query -> execute_esql -> run`) at 1/3 — the metric

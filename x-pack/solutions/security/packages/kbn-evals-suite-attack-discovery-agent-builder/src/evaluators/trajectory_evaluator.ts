@@ -10,6 +10,7 @@ import type {
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
 } from '../types';
+import { partitionToolCalls } from './tool_call_accounting';
 
 // Distinct from the framework's `trajectory` evaluator, which computes a
 // different metric (0.5 x LCS-order + 0.5 x set-coverage) under that name.
@@ -27,7 +28,7 @@ export const createStrictTrajectoryEvaluator = ({
   name: TRAJECTORY_EVALUATOR_NAME,
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: async ({ output, expected }) => {
+  evaluate: async ({ input, output, expected }) => {
     const actual = extractToolCalls(output);
     const expectedPath = goldenPathExtractor(expected);
 
@@ -57,17 +58,31 @@ export const createStrictTrajectoryEvaluator = ({
       };
     }
 
-    // Natural routing always pays a load_skill call; exclude it from precision scoring.
-    const precisionDenominator = actual.filter((tool) => tool !== 'load_skill').length;
-    const score = expectedPath.length / Math.max(precisionDenominator, expectedPath.length);
+    // The routing requirement — the expected tools appearing in order — is
+    // asserted above. Precision then counts only the calls that ARE routing
+    // decisions: the harness call, the platform's plan-tracking and report
+    // write-back, and the fixture's own attachment read are not choices the
+    // model made, so scoring them against the expected path penalises
+    // compliance. `tool_call_accounting` holds that rule once, shared with
+    // `CostPerAlert`, so both metrics grade the same work.
+    const { investigativeToolCalls: routingToolCalls, excludedToolCalls } = partitionToolCalls(
+      actual,
+      input
+    );
+    const score = expectedPath.length / Math.max(routingToolCalls.length, expectedPath.length);
     return {
       score,
-      explanation: `Expected path found in order. ${
-        actual.length
-      } total tool calls (${precisionDenominator} excluding load_skill), ${
+      explanation: `Expected path found in order. ${actual.length} total tool calls (${
+        routingToolCalls.length
+      } routing, ${excludedToolCalls.length} platform bookkeeping, ${
         expectedPath.length
-      } expected. Precision: ${score.toFixed(3)}.`,
-      metadata: { actualPath: actual, expectedPath, precisionDenominator },
+      } expected). Precision: ${score.toFixed(3)}.`,
+      metadata: {
+        actualPath: actual,
+        expectedPath,
+        routingToolCalls,
+        excludedToolCalls,
+      },
     };
   },
 });
