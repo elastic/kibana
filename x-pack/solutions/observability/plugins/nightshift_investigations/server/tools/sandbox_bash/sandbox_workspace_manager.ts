@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { SandboxCallContext } from './tool_utils';
 import { writeConnectorManifest } from './connector_manifest';
 import { CONNECTOR_DOCS, CONNECTOR_MANIFEST_PATH } from './connector_docs';
@@ -26,14 +26,15 @@ export const createSandboxWorkspaceManager = ({
   getDeps: () => { actions?: ActionsPluginStart };
   logger: Logger;
 }) => {
-  const lastWorkspaceKeys = new Map<SandboxSession, string>();
+  // Keyed by the pod session: the audited view of it is made per tool call.
+  const lastWorkspaceKeys = new Map<object, string>();
 
   return {
     async ensureWorkspaceReady({
       session,
       callContext,
     }: {
-      session: SandboxSession;
+      session: AuditedSandboxSession;
       callContext: SandboxCallContext;
     }): Promise<void> {
       const { actions } = getDeps();
@@ -43,7 +44,7 @@ export const createSandboxWorkspaceManager = ({
       const currentKey = JSON.stringify({
         connectorIds: [...callContext.allowedConnectorIds].sort(),
       });
-      const lastKey = lastWorkspaceKeys.get(session);
+      const lastKey = lastWorkspaceKeys.get(session.sessionKey);
       if (!session.isReset && lastKey === currentKey) {
         // `isReset` is an edge-triggered signal and another sandbox RPC (for example the
         // before-agent allocation step) may consume it before tools run. Verify the actual
@@ -65,9 +66,9 @@ export const createSandboxWorkspaceManager = ({
           getActionsClient,
           logger,
         });
-        lastWorkspaceKeys.set(session, currentKey);
+        lastWorkspaceKeys.set(session.sessionKey, currentKey);
       } catch (err) {
-        lastWorkspaceKeys.delete(session);
+        lastWorkspaceKeys.delete(session.sessionKey);
         logger.warn(`Sandbox manifest write failed: ${(err as Error).message}`);
       }
     },

@@ -157,6 +157,10 @@ export const typescriptOverrides: OxlintOverride[] = [
           modifiers: ['requiresQuotes'],
         },
       ],
+      '@kbn/compat/import-order': [
+        'error',
+        { groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']] },
+      ],
       '@kbn/compat/eslint-no-restricted-syntax': [
         'error',
         {

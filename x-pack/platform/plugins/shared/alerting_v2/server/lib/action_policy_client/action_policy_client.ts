@@ -62,7 +62,7 @@ import {
 import type { AlertingPublisherContext } from '../events/domain_events';
 import { toEventOrigin } from '../event_origin/event_origin';
 import { buildSoSearch } from '../build_so_search';
-import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
+import { savedObjectNamespacesToSpaceId } from '../saved_object_namespaces_to_space_id';
 import { applyPatch } from '../apply_patch';
 import { buildActionPolicySoFilter } from './build_action_policy_filter';
 import { groupRoutingTags } from './group_routing_tags';

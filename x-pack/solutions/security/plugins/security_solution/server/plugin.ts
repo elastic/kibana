@@ -149,7 +149,6 @@ import {
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
-import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
 import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
 import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
@@ -357,7 +356,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       agentBuilder,
       experimentalFeatures,
       getStartServices: core.getStartServices,
-      kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
       ml: plugins.ml,
       options: { endpointAppContextService },
@@ -405,36 +403,23 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
-    if (experimentalFeatures.entityAnalyticsEntityStoreV2) {
-      registerRiskScoreMaintainer({
+    registerRiskScoreMaintainer({
+      entityStore: plugins.entityStore,
+      getStartServices: core.getStartServices,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      logger: this.logger,
+      auditLogger: plugins.security?.audit.withoutRequest,
+      productFeaturesService,
+      entityAnalyticsConfig: config.entityAnalytics,
+      experimentalFeatures,
+      telemetry: core.analytics,
+    });
+    if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+      registerWatchlistMaintainer({
         entityStore: plugins.entityStore,
         getStartServices: core.getStartServices,
-        kibanaVersion: pluginContext.env.packageInfo.version,
         logger: this.logger,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        productFeaturesService,
-        entityAnalyticsConfig: config.entityAnalytics,
-        experimentalFeatures,
-        telemetry: core.analytics,
-      });
-      if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
-        registerWatchlistMaintainer({
-          entityStore: plugins.entityStore,
-          getStartServices: core.getStartServices,
-          logger: this.logger,
-          hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
-        });
-      }
-    } else {
-      registerRiskScoringTask({
-        getStartServices: core.getStartServices,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        logger: this.logger,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        taskManager: plugins.taskManager,
-        telemetry: core.analytics,
-        entityAnalyticsConfig: config.entityAnalytics,
-        experimentalFeatures,
+        hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
       });
     }
 
@@ -921,10 +906,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerWorkflowSteps(plugins.workflowsExtensions);
       registerEndpointWorkflowSteps(plugins.workflowsExtensions, {
         experimentalFeatures: config.experimentalFeatures,
+        analytics: core.analytics,
         getInternalEsClient: async () => {
           const [coreStart] = await core.getStartServices();
           return coreStart.elasticsearch.client.asInternalUser;
         },
+        endpointAppContextService: this.endpointAppContextService,
       });
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
@@ -1005,6 +992,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
         threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
+        automaticTroubleshootingUniversalSkillEnabled:
+          config.experimentalFeatures.automaticTroubleshootingUniversalSkill,
         bootstrapReady: this.threatIntelRuntime.bootstrapReady,
         core,
       });
@@ -1345,9 +1334,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger.debug('Stopping plugin');
     this.asyncTelemetryEventsSender.stop().catch(() => {});
     this.telemetryEventsSender.stop();
-    this.endpointAppContextService.stop();
+    // Watchers use endpoint services, so they must stop before those services drop their dependencies
     this.policyWatcher?.stop();
     this.telemetryWatcher?.stop();
+    this.endpointAppContextService.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();

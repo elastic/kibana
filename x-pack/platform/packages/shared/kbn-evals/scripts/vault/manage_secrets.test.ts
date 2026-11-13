@@ -11,7 +11,12 @@ import { chmod, readFile, writeFile } from 'fs/promises';
 import execa from 'execa';
 import { resolveEvalSuites, type EvalSuiteDefinition } from '../../src/cli/suites';
 import { runScoutHook } from '../../src/cli/scout_hook';
-import { resolveVaultTarget, retrieveConfigFromVault, uploadConfigToVault } from './manage_secrets';
+import {
+  readVaultSecret,
+  resolveVaultTarget,
+  retrieveConfigFromVault,
+  uploadConfigToVault,
+} from './manage_secrets';
 
 jest.mock('execa');
 jest.mock('fs/promises', () => ({
@@ -171,6 +176,22 @@ describe('retrieveConfigFromVault', () => {
 
     await expect(retrieveConfigFromVault(resolveVaultTarget('ci-prod'), 2)).rejects.toThrow();
     expect(mockedWriteFile).not.toHaveBeenCalled();
+  });
+});
+
+describe('readVaultSecret', () => {
+  beforeEach(() => {
+    mockedExeca.mockReset();
+  });
+
+  it('reports a secret that is not JSON without quoting it', async () => {
+    mockedExeca.mockResolvedValue({
+      stdout: Buffer.from('{"apiKey": "leaked-secret"').toString('base64'),
+    } as never);
+
+    const error = await readVaultSecret('dev', 'secret/some/path').catch((e: Error) => e);
+    expect(String(error)).toContain('secret/some/path in the dev vault is not base64-encoded JSON');
+    expect(String(error)).not.toContain('leaked-secret');
   });
 });
 

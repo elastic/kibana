@@ -6,8 +6,16 @@
  */
 
 export type {
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,
 } from './types';
-export { CallbackDeliveryError, isCallbackDeliveryError, throwIfNotDelivered } from './errors';
+export {
+  CallbackDeliveryError,
+  isCallbackDeliveryError,
+  parseRetryAfterMs,
+  throwIfNotDelivered,
+} from './errors';

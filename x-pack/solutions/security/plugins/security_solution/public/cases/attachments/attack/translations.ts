@@ -29,6 +29,18 @@ export const ATTACK_ALERTS_TRUNCATED = ({
     },
   });
 
+export const ATTACKS_ALREADY_ATTACHED = (alreadyAttachedCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.attacksAlreadyAttachedWarningTitle',
+    {
+      defaultMessage:
+        '{alreadyAttachedCount, plural, one {# attack was already attached to this case and was not added again.} other {# attacks were already attached to this case and were not added again.}}',
+      values: {
+        alreadyAttachedCount,
+      },
+    }
+  );
+
 export const ATTACKS_TRUNCATED = ({
   attackCount,
   attachedAttackCount,

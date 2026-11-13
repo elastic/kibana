@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { QueryPlan } from '../generator';
-import type { ESQLValue, InventoryRow } from './types';
+import type { ESQLValue, InventoryRow } from '../../../common';
 
 const labelScalar = (
   value: estypes.FieldValue,

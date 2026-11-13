@@ -16,13 +16,13 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import type { ManagedUserHit } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import type { RiskScoreLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN, type FlyoutOrigin } from '../../../common/lib/telemetry';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { FlyoutApi } from '../../use_flyout_api';
 import { useFlyoutApi } from '../../use_flyout_api';
 import { getAttackAlertIds } from '../../attack/utils/get_attack_alert_ids';
+import { getGraphEntryPointFromOrigin } from '../utils/get_graph_entry_point';
 import type {
   AnalyzerDescriptor,
   AttackCorrelationsDescriptor,
@@ -211,6 +211,9 @@ export const openDescriptorAsStart = (
   const { kind } = descriptor;
   const origin = originOverride ?? descriptor.origin;
   const originParams = origin ? { origin } : {};
+  // Read the descriptor's own origin, not the restore override: a cold restore carries none
+  // (default entry point), while a view opened from the AI chat attachment carries its origin.
+  const graphEntryPoint = getGraphEntryPointFromOrigin(descriptor.origin);
 
   switch (kind) {
     // --- Document main flyouts ---
@@ -430,17 +433,38 @@ export const openDescriptorAsStart = (
     // --- Entity main flyouts ---
     case 'host': {
       const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
-      api.openHostFlyout({ hostName, entityId, scopeId, mode, ...originParams });
+      api.openHostFlyout({
+        hostName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'user': {
       const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
-      api.openUserFlyout({ userName, entityId, scopeId, mode, ...originParams });
+      api.openUserFlyout({
+        userName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'service': {
       const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
-      api.openServiceFlyout({ serviceName, entityId, scopeId, mode, ...originParams });
+      api.openServiceFlyout({
+        serviceName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'genericEntity': {
@@ -503,6 +527,7 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as
           | EntityType.host
           | EntityType.user
+          | EntityType.service
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
@@ -563,6 +588,10 @@ export const openDescriptorAsStart = (
         scopeId: d.scopeId,
         entityName: d.entityName,
         ...originParams,
+        // Read the descriptor's own origin, not the restore override: a cold restore carries none,
+        // so nothing is reported, while a descriptor created by an in-session action (such as the
+        // AI chat attachment) carries its origin.
+        entryPoint: getGraphEntryPointFromOrigin(descriptor.origin),
         onShowEntity: noop,
         onShowOriginatingEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
@@ -678,6 +707,9 @@ export const openDescriptorAsChild = (
   const { kind } = descriptor;
   const origin = originOverride ?? descriptor.origin;
   const originParams = origin ? { origin } : {};
+  // Read the descriptor's own origin, not the restore override: a cold restore carries none
+  // (default entry point), while a view opened from the AI chat attachment carries its origin.
+  const graphEntryPoint = getGraphEntryPointFromOrigin(descriptor.origin);
 
   switch (kind) {
     // Main flyouts that have an explicit AsChild variant
@@ -699,17 +731,38 @@ export const openDescriptorAsChild = (
     }
     case 'host': {
       const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
-      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, mode, ...originParams });
+      api.openHostFlyoutAsChild({
+        hostName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'user': {
       const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
-      api.openUserFlyoutAsChild({ userName, entityId, scopeId, mode, ...originParams });
+      api.openUserFlyoutAsChild({
+        userName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'service': {
       const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
-      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, mode, ...originParams });
+      api.openServiceFlyoutAsChild({
+        serviceName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'genericEntity': {
@@ -786,7 +839,7 @@ export const openDescriptorAsChild = (
  *  - unrelated `history.replace` that preserves the initial URL stack is ignored until that
  *    stack has been opened (after any required fetches)
  *
- * Gated on `useIsNewFlyoutEnabled()`. The initial URL stack is opened at most once; same-app opens
+ * The initial URL stack is opened at most once; same-app opens
  * may fire whenever the URL changes to a different descriptor chain.
  *
  * Mount this hook in the Security Solution app shell, analogous to `useUrlState()` in
@@ -794,7 +847,6 @@ export const openDescriptorAsChild = (
  * Kibana services that the app shell provides.
  */
 export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
-  const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
   const history = useHistory();
   const flyoutApi = useFlyoutApi();
   // The deferred restore open must use the latest API: on the first render `useIsInSecurityApp`
@@ -812,7 +864,6 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
   // is reloaded, so attempting to restore them reproduces the "Cannot find document" error.
   // Drop descriptors whose indexName is a preview index before restoring.
   const [descriptors] = useState<FlyoutV2UrlParamValue | null>(() => {
-    if (!isNewFlyoutEnabled) return null;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     const decoded = decodeFlyoutV2UrlParam(raw);
     if (!decoded) return null;
@@ -831,15 +882,12 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
 
   // Detect a malformed param (raw present but decode failed) to strip it.
   const [isMalformed] = useState<boolean>(() => {
-    if (!isNewFlyoutEnabled) return false;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     return raw != null && decodeFlyoutV2UrlParam(raw) === null;
   });
 
   // Same-app opens: react to external flyoutV2 URL writes while Security stays mounted.
   useEffect(() => {
-    if (!isNewFlyoutEnabled) return;
-
     let pendingOpen: ReturnType<typeof setTimeout> | undefined;
 
     const openFromExternalNavigation = (next: FlyoutV2UrlParamValue): void => {
@@ -889,7 +937,7 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
       unlistenHistory();
       clearTimeout(pendingOpen);
     };
-  }, [descriptors, flyoutApi, history, isNewFlyoutEnabled, urlParamKey]);
+  }, [descriptors, flyoutApi, history, urlParamKey]);
 
   // Strip malformed param once on mount.
   useEffect(() => {

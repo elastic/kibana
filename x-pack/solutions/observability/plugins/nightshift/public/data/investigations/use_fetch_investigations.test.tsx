@@ -80,12 +80,13 @@ describe('useFetchInvestigations', () => {
       expect(result.current.investigations.map(({ id }) => id)).toEqual(['running', 'done'])
     );
     expect(result.current.total).toBe(2);
+    expect(result.current.matchTotal).toBe(12);
     expect(result.current.hasMore).toBe(false);
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations',
       expect.objectContaining({
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: true,
           page: 1,
@@ -110,9 +111,10 @@ describe('useFetchInvestigations', () => {
       '/internal/investigations/investigations',
       expect.objectContaining({
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: false,
+          status: 'open',
           page: 1,
           per_page: INVESTIGATIONS_PAGE_SIZE,
           severity: ['high'],

@@ -1,5 +1,5 @@
 {
-  "sha1": "fc9974608e93080efe481691bbbcfdf93c3294be",
+  "sha1": "77fb803c833c76f00cb6faa9380280e64c46a9ef",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -119,6 +119,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/metric_trendline.spec.ts",
         "line": 77,
         "column": 23
+      }
+    },
+    {
+      "id": "dedb3a2f988636a-cd215a45f9f4ce4",
+      "title": "Lens managed content requires a copy when saving a managed visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/managed_content.spec.ts",
+        "line": 27,
+        "column": 28
       }
     }
   ]

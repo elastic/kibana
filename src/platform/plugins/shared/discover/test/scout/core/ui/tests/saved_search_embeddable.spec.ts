@@ -62,6 +62,37 @@ const createTabbedSession = async (apiServices: ApiServicesFixture, title: strin
     ],
   });
 
+const getSessionWithColumns = (title: string, columns: string[]) => ({
+  title,
+  tabs: [
+    {
+      id: 'default-tab',
+      label: 'Default tab',
+      data_source: {
+        type: 'data_view_reference' as const,
+        ref_id: testData.DEFAULT_DATA_VIEW,
+      },
+      column_order: columns,
+      sort: [{ name: '@timestamp', direction: 'desc' as const }],
+      query: { language: 'kql' as const, expression: '' },
+      filters: [],
+    },
+  ],
+});
+
+const createSessionWithColumns = async (
+  apiServices: ApiServicesFixture,
+  title: string,
+  columns: string[]
+) => await apiServices.discover.create(getSessionWithColumns(title, columns));
+
+const updateSessionColumns = async (
+  apiServices: ApiServicesFixture,
+  id: string,
+  title: string,
+  columns: string[]
+) => await apiServices.discover.update(id, getSessionWithColumns(title, columns));
+
 const getCurrentDashboardId = (url: string) => {
   const dashboardId = new URL(url).hash.match(/\/view\/([^?]+)/)?.[1];
   if (!dashboardId) {
@@ -213,6 +244,28 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     );
   });
 
+  test('should update panel when the dashboard time range changes', async ({
+    apiServices,
+    page,
+    pageObjects,
+  }) => {
+    const searchTitle = `Discover embeddable time range ${randomUUID().replace(/-/g, '')}`;
+
+    const searchId = await createDefaultSession(apiServices, searchTitle);
+    createdSavedObjects.push({ type: 'search', id: searchId });
+    await pageObjects.dashboard.openNewDashboard();
+    await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
+    await page.testSubj.locator('savedSearchTotalDocuments').waitFor({ state: 'visible' });
+    await expect(pageObjects.dataGrid.getCellValue(0, 'bytes')).toBeVisible();
+
+    // Set to a time range with no data
+    await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE_DATES);
+    await expect(
+      page.testSubj.locator('embeddedSavedSearchDocTable').locator('.euiDataGrid__noResults'),
+      'No results message should be visible after setting a time range without data'
+    ).toBeVisible();
+  });
+
   test('should recover a deleted selected tab through inline editing', async ({
     apiServices,
     page,
@@ -251,5 +304,73 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     await pageObjects.dashboard.applyDiscoverEmbeddableInlineEdits();
 
     await expect(page.testSubj.locator('docTable')).toBeVisible();
+  });
+
+  test('should update panel columns when the saved search changes and the panel has no local edits', async ({
+    apiServices,
+    page,
+    pageObjects,
+  }) => {
+    const searchTitle = `Discover embeddable no local edits ${randomUUID().replace(/-/g, '')}`;
+    const dashboardTitle = `Dashboard no local edits ${randomUUID()}`;
+
+    const searchId = await createSessionWithColumns(apiServices, searchTitle, [
+      '@timestamp',
+      'bytes',
+    ]);
+    createdSavedObjects.push({ type: 'search', id: searchId });
+    await pageObjects.dashboard.openNewDashboard();
+    await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
+    await pageObjects.dashboard.saveDashboard(dashboardTitle);
+    const dashboardId = getCurrentDashboardId(page.url());
+    createdSavedObjects.push({ type: 'dashboard', id: dashboardId });
+
+    await expect(pageObjects.dataGrid.getColumnHeader('bytes')).toBeVisible();
+
+    await updateSessionColumns(apiServices, searchId, searchTitle, [
+      '@timestamp',
+      'bytes',
+      'agent',
+    ]);
+    await pageObjects.dashboard.goto();
+    await pageObjects.dashboard.openDashboardWithId(dashboardId);
+
+    await expect(pageObjects.dataGrid.getColumnHeader('bytes')).toBeVisible();
+    await expect(pageObjects.dataGrid.getColumnHeader('agent')).toBeVisible();
+  });
+
+  test('should not update panel columns when the saved search changes and the panel has local edits', async ({
+    apiServices,
+    page,
+    pageObjects,
+  }) => {
+    const searchTitle = `Discover embeddable local edits ${randomUUID().replace(/-/g, '')}`;
+    const dashboardTitle = `Dashboard local edits ${randomUUID()}`;
+
+    const searchId = await createSessionWithColumns(apiServices, searchTitle, [
+      '@timestamp',
+      'bytes',
+    ]);
+    createdSavedObjects.push({ type: 'search', id: searchId });
+    await pageObjects.dashboard.openNewDashboard();
+    await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
+    await expect(pageObjects.dataGrid.getColumnHeader('bytes')).toBeVisible();
+    await pageObjects.dataGrid.removeColumn('bytes');
+    await expect(pageObjects.dataGrid.getColumnHeader('bytes')).toBeHidden();
+    await pageObjects.dashboard.saveDashboard(dashboardTitle);
+    const dashboardId = getCurrentDashboardId(page.url());
+    createdSavedObjects.push({ type: 'dashboard', id: dashboardId });
+
+    await updateSessionColumns(apiServices, searchId, searchTitle, [
+      '@timestamp',
+      'bytes',
+      'agent',
+    ]);
+    await pageObjects.dashboard.goto();
+    await pageObjects.dashboard.openDashboardWithId(dashboardId);
+
+    await expect(pageObjects.dataGrid.getColumnHeader('@timestamp')).toBeVisible();
+    await expect(pageObjects.dataGrid.getColumnHeader('bytes')).toBeHidden();
+    await expect(pageObjects.dataGrid.getColumnHeader('agent')).toBeHidden();
   });
 });

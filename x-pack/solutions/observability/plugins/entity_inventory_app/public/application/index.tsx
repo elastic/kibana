@@ -20,6 +20,9 @@ import type { StartServices } from '../hooks/use_kibana';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
 import type { EntityInventoryAppStartDependencies } from '../types';
 import { entityInventoryRouter } from '../routes/config';
+import { EntityTablePreferencesProvider } from './context/entity_table_preferences_context';
+import { EntityTypesProvider } from './context/entity_types_context';
+import { createHttpEntityInventoryApiClient } from '../inventory_api/http_client';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
@@ -56,7 +59,11 @@ export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps
     <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
       <AppHeader title={title} badges={TECH_PREVIEW_BADGE} menu={{}} spacing="standard" />
       <EuiPageSection paddingSize="m" grow restrictWidth={false}>
-        <RouteRenderer />
+        <EntityTypesProvider>
+          <EntityTablePreferencesProvider>
+            <RouteRenderer />
+          </EntityTablePreferencesProvider>
+        </EntityTypesProvider>
       </EuiPageSection>
     </PageTemplate>
   );
@@ -69,7 +76,11 @@ export function renderApp(
 ) {
   const { PageTemplate } = plugins.observabilityShared.navigation;
 
-  const services: StartServices = { ...core, ...plugins };
+  const services: StartServices = {
+    ...core,
+    ...plugins,
+    inventoryApi: createHttpEntityInventoryApiClient(core.http),
+  };
 
   ReactDOM.render(
     core.rendering.addContext(

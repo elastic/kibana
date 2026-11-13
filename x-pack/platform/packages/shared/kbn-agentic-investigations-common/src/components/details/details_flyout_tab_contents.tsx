@@ -13,7 +13,6 @@ import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
 import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
-import { OVERVIEW_SECTION_LABELS } from './overview_translations';
 import { OverviewLoadingSection } from './overview_loading_section';
 import { WhatsHappenedBlock } from './whats_happened_block';
 
@@ -44,7 +43,7 @@ export interface OverviewTabProps {
 
 /** Host-rendered overview sections, in the order the tab shows them. */
 export interface OverviewSections {
-  /** What the investigation is about. Shown above the subject attachments. */
+  /** Trigger / subject card. Shown under "What's happened", with no section heading. */
   subjects?: React.ReactNode;
   /**
    * Replaces the impact read from the conversation's `investigation_impact` attachment, for a
@@ -75,12 +74,6 @@ export const OverviewTab = memo<OverviewTabProps>(
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
-        {subjects && (
-          <EuiFlexItem data-test-subj="investigationOverviewSubjects">
-            <DetailsBlock title={OVERVIEW_SECTION_LABELS.subjects}>{subjects}</DetailsBlock>
-          </EuiFlexItem>
-        )}
-
         <EuiFlexItem grow={false}>
           <WhatsHappenedBlock
             summary={investigation.summary}
@@ -88,6 +81,10 @@ export const OverviewTab = memo<OverviewTabProps>(
             groupedAttachments={groupedAttachments}
           />
         </EuiFlexItem>
+
+        {subjects && (
+          <EuiFlexItem data-test-subj="investigationOverviewSubjects">{subjects}</EuiFlexItem>
+        )}
 
         {impact ? (
           <EuiFlexItem data-test-subj="investigationOverviewImpact">

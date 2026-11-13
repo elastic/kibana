@@ -13,11 +13,11 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolCallWithIntent } from '@kbn/agent-builder-genai-utils/langchain';
 
 /** What the research model decided on its last turn; drives routing out of `researchAgent`. */
 export type ResearchOutcome =
-  | { type: 'tool_calls'; toolCalls: ToolCallWithReasoning[]; toolCallGroupId: string }
+  | { type: 'tool_calls'; toolCalls: ToolCallWithIntent[]; toolCallGroupId: string }
   | { type: 'handover'; message: string; forceful: boolean }
   | { type: 'retry_error'; error: AgentBuilderAgentExecutionError }
   /** The prompt exceeded the context window; routes to a forced compaction before retrying. */
