@@ -48,6 +48,7 @@
 
 set -euo pipefail
 
+# test-plan-triage (scripts/triage.py) detects published plans by this marker; if you change it, change both skills.
 MARKER='<!-- test-plan-generated -->'
 REPO=''
 MODEL=''

@@ -1,0 +1,13 @@
+(Context: earlier in this conversation the user asked whether elastic/kibana#911002 needs a test plan. You ran `context`, and you showed this decision and stopped:
+
+**Issue:** [elastic/kibana#911002](https://github.com/elastic/kibana/issues/911002) — [Osquery] Run a past live query again from the history table
+**Decision:** Yes — S1: adds a `Run again` row action that opens the live query form pre-filled and creates a new history entry
+**Hierarchy:** [elastic/kibana#911000](https://github.com/elastic/kibana/issues/911000) › **[elastic/kibana#911002](https://github.com/elastic/kibana/issues/911002)**
+**Suggested level for a test plan:** [elastic/kibana#911000](https://github.com/elastic/kibana/issues/911000) — one functionality: the live query history; its plan covers this issue
+**Proposed label changes:**
+- add `Needs Test Plan` to [elastic/kibana#911000](https://github.com/elastic/kibana/issues/911000)
+
+Reply "yes" to apply the label changes above, or tell me which ones to apply.)
+
+The user's new message is:
+no, put it on 911002 itself instead. the epic is going to get split, leave it alone
