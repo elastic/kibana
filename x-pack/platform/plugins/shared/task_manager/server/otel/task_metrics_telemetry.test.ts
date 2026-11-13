@@ -180,6 +180,7 @@ describe('taskManagerMetricsTelemetry', () => {
   test('does not report the overdue count before overdue tasks are first counted', async () => {
     const collected = await collect();
     expect(collected.get('kibana.task.overdue.count') ?? []).toEqual([]);
+    expect(collected.get('kibana.task.overdue.max_delay') ?? []).toEqual([]);
   });
 
   test('reports overdue tasks overall from the total, ignoring per-type buckets', async () => {
@@ -200,17 +201,35 @@ describe('taskManagerMetricsTelemetry', () => {
     expect(collected.get('kibana.task.overdue.count')).toEqual([
       expect.objectContaining({ attributes: {}, value: 4 }),
     ]);
-    expect(collected.get('kibana.task.overdue.delay')).toEqual([
-      expect.objectContaining({
-        attributes: {},
-        value: expect.objectContaining({ count: 4, sum: 30 }),
-      }),
+    expect(collected.get('kibana.task.overdue.max_delay')).toEqual([
+      expect.objectContaining({ attributes: {}, value: 20 }),
     ]);
 
     telemetry.recordTaskOverdue({ total: [] });
     collected = await collect();
     expect(collected.get('kibana.task.overdue.count')).toEqual([
       expect.objectContaining({ attributes: {}, value: 0 }),
+    ]);
+    expect(collected.get('kibana.task.overdue.max_delay')).toEqual([
+      expect.objectContaining({ attributes: {}, value: 0 }),
+    ]);
+  });
+
+  test('ignores empty overdue buckets when computing the max delay', async () => {
+    telemetry.recordTaskOverdue({
+      total: [
+        { key: 0, doc_count: 1 },
+        { key: 30, doc_count: 2 },
+        { key: 40, doc_count: 0 },
+      ],
+    });
+
+    const collected = await collect();
+    expect(collected.get('kibana.task.overdue.count')).toEqual([
+      expect.objectContaining({ attributes: {}, value: 3 }),
+    ]);
+    expect(collected.get('kibana.task.overdue.max_delay')).toEqual([
+      expect.objectContaining({ attributes: {}, value: 30 }),
     ]);
   });
 });

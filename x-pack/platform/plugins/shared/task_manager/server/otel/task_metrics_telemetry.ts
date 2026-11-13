@@ -72,12 +72,13 @@ class TaskManagerMetricsTelemetry {
   private readonly taskClaimDurationHistogram: Histogram<Attributes>;
   private readonly taskClaimAgeGauge: ObservableGauge<Attributes>;
   private readonly taskOverdueCountGauge: ObservableGauge<Attributes>;
-  private readonly taskOverdueDelayHistogram: Histogram<Attributes>;
+  private readonly taskOverdueMaxDelayGauge: ObservableGauge<Attributes>;
   private readonly backpressureActiveGauge: ObservableGauge<Attributes>;
   private readonly backpressureReasonGauge: ObservableGauge<Attributes>;
 
   private lastClaimTimeSeconds?: number;
   private overdueCount?: number;
+  private overdueMaxDelaySeconds?: number;
   private backpressure: TaskBackpressureRecord = { active: false, reason: null };
 
   constructor() {
@@ -132,12 +133,15 @@ class TaskManagerMetricsTelemetry {
       unit: '{task}',
       valueType: ValueType.INT,
     });
-    this.taskOverdueDelayHistogram = this.meter.createHistogram('kibana.task.overdue.delay', {
-      description: 'How long tasks are overdue, sampled each time overdue tasks are counted.',
-      unit: 's',
-      valueType: ValueType.DOUBLE,
-      advice: { explicitBucketBoundaries: DELAY_BUCKETS_SECONDS },
-    });
+    this.taskOverdueMaxDelayGauge = this.meter.createObservableGauge(
+      'kibana.task.overdue.max_delay',
+      {
+        description:
+          'How long the most overdue task has been overdue, in 10 second resolution; 0 when no tasks are overdue.',
+        unit: 's',
+        valueType: ValueType.INT,
+      }
+    );
     this.backpressureActiveGauge = this.meter.createObservableGauge(
       'kibana.task_manager.backpressure.active',
       {
@@ -163,9 +167,14 @@ class TaskManagerMetricsTelemetry {
       }
     });
     this.taskOverdueCountGauge.addCallback((result) => {
-      // nothing is reported until overdue tasks are first counted
+      // nothing is reported for the overdue gauges until overdue tasks are first counted
       if (this.overdueCount != null) {
         result.observe(this.overdueCount);
+      }
+    });
+    this.taskOverdueMaxDelayGauge.addCallback((result) => {
+      if (this.overdueMaxDelaySeconds != null) {
+        result.observe(this.overdueMaxDelaySeconds);
       }
     });
     // Observable gauges keep exporting the last value of every attribute set they have
@@ -226,14 +235,15 @@ class TaskManagerMetricsTelemetry {
   /** Replaces the overdue task snapshot with the latest Elasticsearch aggregation result. */
   recordTaskOverdue({ total }: TaskManagerMetrics['numOverdueTasks']) {
     let count = 0;
+    let maxDelaySeconds = 0;
     for (const { key, doc_count: docCount } of total ?? []) {
-      const overdueBySeconds = parseInt(`${key}`, 10);
-      count += docCount;
-      for (let i = 0; i < docCount; i++) {
-        this.taskOverdueDelayHistogram.record(overdueBySeconds);
+      if (docCount > 0) {
+        count += docCount;
+        maxDelaySeconds = Math.max(maxDelaySeconds, parseInt(`${key}`, 10));
       }
     }
     this.overdueCount = count;
+    this.overdueMaxDelaySeconds = maxDelaySeconds;
   }
 
   /** Updates the current backpressure state reported by the backpressure gauges. */
