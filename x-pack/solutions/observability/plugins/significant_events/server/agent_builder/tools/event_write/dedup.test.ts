@@ -480,6 +480,15 @@ describe('reopenMatchingInactiveSeries', () => {
     });
   });
 
+  it('reuses a series closed while recovering, which holds the rule only as refuted', () => {
+    const [candidate] = reopen(
+      [makeInput()],
+      [makeInactiveEvent({ signals: [makeSignal('rule-abc', 'refutes')] })]
+    );
+
+    expect(candidate).toMatchObject({ mode: 'snapshot', eventId: 'closed-event-id' });
+  });
+
   it('leaves the batch a new event when the closed series has no known latest episode', () => {
     const [candidate] = reopen([makeInput()], [makeInactiveEvent()], []);
 
