@@ -15,6 +15,7 @@ describe('asDataView', () => {
     id: 'source-id',
     title: 'logs-*',
     fields: [],
+    getFieldByName: () => undefined,
     isTimeBased: () => false,
     ...overrides,
   });

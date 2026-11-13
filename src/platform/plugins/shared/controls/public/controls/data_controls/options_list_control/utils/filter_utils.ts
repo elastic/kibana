@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findFilterableField } from '@kbn/data-source';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { FilterableSource } from '@kbn/data-source';
 import {
@@ -30,7 +29,7 @@ export const buildFilter = (
     return undefined;
   }
   let newFilter: Filter | undefined;
-  const field = findFilterableField(dataView, fieldName);
+  const field = dataView.getFieldByName(fieldName);
   if (field) {
     if (filterState.exists_selected) {
       newFilter = buildExistsFilter(field, dataView);

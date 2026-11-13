@@ -17,7 +17,6 @@ export type {
 
 export type { FilterableField, FilterableSource } from './src/filterable_source';
 export {
-  findFilterableField,
   getFilterableFieldSpec,
   isEsqlFilterableSource,
 } from './src/filterable_source';

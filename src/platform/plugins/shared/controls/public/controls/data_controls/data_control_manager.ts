@@ -25,7 +25,6 @@ import {
 } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 
-import { findFilterableField } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -182,7 +181,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         return;
       }
 
-      const field = findFilterableField(dataView, nextFieldName ?? '');
+      const field = dataView.getFieldByName(nextFieldName ?? '');
       if (!field) {
         setBlockingError(
           new Error(

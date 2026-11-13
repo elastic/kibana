@@ -42,8 +42,7 @@ export interface FilterableSource extends DataViewBase {
   readonly timeFieldName?: string;
   getName?(): string;
   isTimeBased(): boolean;
-  /** Looks a field up by name, which a `DataView` does in a map. See {@link findFilterableField}. */
-  getFieldByName?(name: string): FilterableField | undefined;
+  getFieldByName(name: string): FilterableField | undefined;
   getFormatterForField?(field: FilterableField): { convertToText(value: unknown): string };
   /** The spec of the source, of which the runtime fields are read. */
   toSpec?(includeFields?: boolean): { runtimeFieldMap?: Record<string, RuntimeFieldSpec> };
@@ -51,15 +50,6 @@ export interface FilterableSource extends DataViewBase {
 
 /** Whether the source is the dataset of an ES|QL query, whose id is not the id of a data view. */
 export const isEsqlFilterableSource = (source: FilterableSource): boolean => source.kind === 'esql';
-
-/** The field of a source with that name: through its lookup when it has one, otherwise in its fields. */
-export const findFilterableField = (
-  source: FilterableSource | undefined,
-  fieldName: string
-): FilterableField | undefined =>
-  source?.getFieldByName
-    ? source.getFieldByName(fieldName)
-    : source?.fields.find(({ name }) => name === fieldName);
 
 /** The spec of a field: its own when it has one, otherwise the one that the field makes. */
 export const getFilterableFieldSpec = (field: FilterableField): FieldSpec =>

@@ -14,11 +14,7 @@ import { buildEsQuery, buildPhraseFilter } from '@kbn/es-query';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { registerEsqlSourceInDataViewsCache } from './cache_adapter';
 import type { FilterableSource } from './filterable_source';
-import {
-  findFilterableField,
-  getFilterableFieldSpec,
-  isEsqlFilterableSource,
-} from './filterable_source';
+import { getFilterableFieldSpec, isEsqlFilterableSource } from './filterable_source';
 import { DataViewSource } from './sources/data_view_source';
 import { EsqlSource } from './sources/esql_source';
 import { createMockDataViewsService } from './__mocks__/data_views_service.mock';
@@ -139,6 +135,18 @@ describe('toFilterableSource', () => {
         'host',
         'message',
       ]);
+    });
+
+    it('looks a field up by name, as a data view does', async () => {
+      const source = await statsOnDataset('lookup-*', '@timestamp');
+
+      const filterable = await source.toFilterableSource();
+
+      expect(filterable.getFieldByName('host')).toBe(
+        filterable.fields.find(({ name }) => name === 'host')
+      );
+      expect(filterable.getFieldByName('host')).toBeDefined();
+      expect(filterable.getFieldByName('missing')).toBeUndefined();
     });
 
     it('adds the time field when the schema of the dataset lacks it', async () => {
@@ -265,31 +273,6 @@ describe('toFilterableSource', () => {
 
       expect(filterable.kind).toBeUndefined();
       expect(isEsqlFilterableSource(filterable)).toBe(false);
-    });
-  });
-
-  describe('findFilterableField', () => {
-    const host = { name: 'host', type: 'string' };
-    const source = (overrides: Partial<FilterableSource> = {}): FilterableSource => ({
-      id: 'source-id',
-      title: 'logs-*',
-      fields: [host],
-      isTimeBased: () => false,
-      ...overrides,
-    });
-
-    it('reads the fields of a source that has no lookup of its own', () => {
-      expect(findFilterableField(source(), 'host')).toBe(host);
-      expect(findFilterableField(source(), 'missing')).toBeUndefined();
-    });
-
-    it('asks a source that has a lookup of its own, as a data view has', () => {
-      const lookup = jest.fn(() => host);
-
-      expect(findFilterableField(source({ fields: [], getFieldByName: lookup }), 'host')).toBe(
-        host
-      );
-      expect(lookup).toHaveBeenCalledWith('host');
     });
   });
 

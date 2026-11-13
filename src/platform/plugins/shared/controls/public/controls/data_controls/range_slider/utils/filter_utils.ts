@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findFilterableField } from '@kbn/data-source';
 import { type Filter, type RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { FilterableSource } from '@kbn/data-source';
@@ -19,7 +18,7 @@ export const buildFilter = (
 ) => {
   let rangeFilter: Filter | undefined;
   const fieldName = filterState.field_name
-    ? findFilterableField(dataView, filterState.field_name)
+    ? dataView.getFieldByName(filterState.field_name)
     : undefined;
   const gte = parseFloat(filterState.value?.[0] ?? '');
   const lte = parseFloat(filterState.value?.[1] ?? '');

@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { findFilterableField } from '@kbn/data-source';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { DataControlState, OptionsListControlState } from '@kbn/controls-schemas';
 import type { FilterableField } from '@kbn/data-source';
@@ -44,9 +43,9 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       // ES|QL-source controls can sometimes pass a field name that omits a .keyword suffix, so try adding it before
       // declaring the field non-existent
       const field =
-        findFilterableField(dataView, fieldName) ??
+        dataView.getFieldByName(fieldName) ??
         (!fieldName.endsWith('.keyword')
-          ? findFilterableField(dataView, `${fieldName}.keyword`)
+          ? dataView.getFieldByName(`${fieldName}.keyword`)
           : undefined);
       return Boolean(field && isFieldCompatible(field));
     },

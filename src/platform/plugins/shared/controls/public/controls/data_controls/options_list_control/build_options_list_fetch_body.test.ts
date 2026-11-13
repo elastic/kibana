@@ -20,6 +20,7 @@ describe('buildOptionsListFetchBody', () => {
     id: 'esql-dataset-id',
     title: 'logs-*',
     fields: [field],
+    getFieldByName: () => field,
     isTimeBased: () => false,
   };
 
