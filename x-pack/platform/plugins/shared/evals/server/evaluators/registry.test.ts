@@ -62,6 +62,11 @@ describe('createEvaluatorRegistry', () => {
           'input_tokens',
           'output_tokens',
           'tool_calls',
+          'skill-secret-scanner',
+          'skill-prompt-injection',
+          'skill-pii',
+          'esql-compile',
+          'skill-index-resolves',
         ])
       );
     });
@@ -91,6 +96,11 @@ describe('createEvaluatorRegistry', () => {
           input_tokens: 'minimize',
           output_tokens: 'minimize',
           tool_calls: 'neutral',
+          'skill-secret-scanner': 'maximize',
+          'skill-prompt-injection': 'maximize',
+          'skill-pii': 'maximize',
+          'esql-compile': 'maximize',
+          'skill-index-resolves': 'maximize',
           tone: 'maximize',
         })
       );
