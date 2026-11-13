@@ -71,10 +71,17 @@ export const useRuleMenuPanels = ({
   onViewChangeHistory,
   detailsLink,
   closeMenu,
-}: UseRuleMenuPanelsParams): FlyoutFooterMenuPanel[] => {
+}: Omit<UseRuleMenuPanelsParams, 'rule'> & {
+  /** Returns no panels while the rule is not loaded. */
+  rule: RuleApiResponse | undefined;
+}): FlyoutFooterMenuPanel[] => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
+    if (!rule) {
+      return [];
+    }
+
     const viewDetailsItem: FlyoutFooterMenuItem | null = detailsLink
       ? {
           key: 'viewDetails',

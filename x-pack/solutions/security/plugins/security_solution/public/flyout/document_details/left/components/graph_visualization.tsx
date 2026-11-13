@@ -23,6 +23,7 @@ import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_key
 import { buildEntityPreviewPanel } from '../../../entity_details/shared/utils/build_entity_preview_panel';
 import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { getGraphEntryPoint } from '../../../../flyout_v2/shared/utils/get_graph_entry_point';
 
 export { GRAPH_ID } from '../../../../flyout_v2/document/tools/graph/components/graph_visualization';
 
@@ -40,6 +41,8 @@ export const GraphVisualization: React.FC = memo(() => {
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
     [hit]
   );
+
+  const entryPoint = getGraphEntryPoint({ mode: 'event', isAlert });
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
@@ -77,15 +80,21 @@ export const GraphVisualization: React.FC = memo(() => {
     (
       params: Omit<
         GraphGroupedNodePreviewPanelProps,
-        'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+        'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity' | 'onTelemetryEvent'
       >
     ) => {
       openPreviewPanel({
         id: GraphGroupedNodePreviewPanelKey,
-        params: { scopeId, isPreviewMode: true, banner: GROUP_PREVIEW_BANNER, ...params },
+        params: {
+          scopeId,
+          isPreviewMode: true,
+          banner: GROUP_PREVIEW_BANNER,
+          ...params,
+          entryPoint,
+        },
       });
     },
-    [openPreviewPanel, scopeId]
+    [openPreviewPanel, scopeId, entryPoint]
   );
 
   const onShowNetwork = useCallback(

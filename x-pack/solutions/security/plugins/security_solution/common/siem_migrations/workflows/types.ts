@@ -15,10 +15,10 @@ export {
 } from '../model/workflow_migration.gen';
 
 export {
+  CreateTinesWorkflowMigrationWorkflowsRequestBody,
+  CreateTinesWorkflowMigrationWorkflowsRequestParams,
   CreateWorkflowMigrationRequestBody,
   CreateWorkflowMigrationResponse,
-  CreateWorkflowMigrationWorkflowsRequestBody,
-  CreateWorkflowMigrationWorkflowsRequestParams,
   DeleteWorkflowMigrationRequestParams,
   GetAllWorkflowMigrationStatsResponse,
   GetWorkflowMigrationRequestParams,

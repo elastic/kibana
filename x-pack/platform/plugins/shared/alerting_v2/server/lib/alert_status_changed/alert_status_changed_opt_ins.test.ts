@@ -89,4 +89,39 @@ describe('AlertStatusChangedOptIns', () => {
       expect(mockLogger.warn).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('getEnabled and notify', () => {
+    it('returns every enabled opt-in so each integration can receive callbacks', async () => {
+      const { optIns, request } = setup();
+      const first = { isEnabled: jest.fn().mockResolvedValue(true) };
+      const disabled = { isEnabled: jest.fn().mockResolvedValue(false) };
+      const second = { isEnabled: jest.fn().mockResolvedValue(true) };
+      optIns.register(first);
+      optIns.register(disabled);
+      optIns.register(second);
+
+      await expect(optIns.getEnabled(request)).resolves.toEqual([first, second]);
+      expect(disabled.isEnabled).toHaveBeenCalledWith(request);
+    });
+
+    it('isolates callback failures from the other enabled opt-ins', async () => {
+      const { optIns, mockLogger } = setup();
+      const failed = jest.fn().mockRejectedValue(new Error('telemetry failed'));
+      const succeeded = jest.fn().mockResolvedValue(undefined);
+
+      await expect(
+        optIns.notify(
+          [
+            { isEnabled: jest.fn(), onStatusChanges: failed },
+            { isEnabled: jest.fn(), onStatusChanges: succeeded },
+          ],
+          []
+        )
+      ).resolves.toBeUndefined();
+
+      expect(failed).toHaveBeenCalledWith([]);
+      expect(succeeded).toHaveBeenCalledWith([]);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    });
+  });
 });

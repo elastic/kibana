@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import { createToolResultStoreMock } from '../../../../test_utils/runner';
+import { createToolManagerMock, createToolResultStoreMock } from '../../../../test_utils/runner';
 import { timelineFromRounds } from '../../../../test_utils/timeline';
 import type { StateType, StateUpdate } from '../state';
 import { applyStepUpdates, type RunStepUpdate } from '../step_state';
@@ -462,5 +462,18 @@ describe('compactContext node', () => {
     await expect(node(baseState())).rejects.toMatchObject({
       meta: { errCode: AgentExecutionErrorCode.invalidState },
     });
+  });
+
+  it('passes the tool manager to the compactor for the dynamic tools snapshot', async () => {
+    compactContextMock.mockResolvedValue(compactionResult());
+    const toolManager = createToolManagerMock();
+    const { compactContext: node } = createContextManagementNodes(deps({ toolManager }));
+
+    await node(baseState({ compactionRequest: request() }));
+
+    expect(compactContextMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ toolManager })
+    );
   });
 });

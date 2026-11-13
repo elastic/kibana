@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import type { Store } from 'redux-v4';
 import { Provider, useStore } from 'react-redux-v7';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -60,17 +60,9 @@ const TimeRangeSync: FC<{ children: ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-const useHasRouterContext = (): boolean => {
-  try {
-    useLocation();
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 const FlyoutRouter: FC<{ children: ReactNode; history?: History }> = ({ children, history }) => {
-  const hasRouterContext = useHasRouterContext();
+  // `useHistory` reads the context provided by `<Router>`, so it is undefined outside of one.
+  const hasRouterContext = useHistory() !== undefined;
   const fallbackHistory = useMemo(() => createMemoryHistory(), []);
 
   // Security app flyouts can be opened from inside an existing Router, while Discover can
