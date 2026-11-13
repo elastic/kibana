@@ -13,5 +13,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     /* Automatic Dashboard Migrations */
     loadTestFile(require.resolve('./dashboard_migrations'));
+
+    /* Automatic Workflow Migrations */
+    loadTestFile(require.resolve('./workflow_migrations'));
   });
 }

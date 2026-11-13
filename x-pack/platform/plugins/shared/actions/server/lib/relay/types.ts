@@ -56,6 +56,7 @@ export type RelayClaimResponse =
 
 export interface RelayCallbackResponse {
   status: number;
+  headers: Headers;
 }
 
 /**
