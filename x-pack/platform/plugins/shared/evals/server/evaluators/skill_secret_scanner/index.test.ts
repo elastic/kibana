@@ -11,7 +11,7 @@ import type { EvaluatorContext } from '../types';
 
 const traceId = 'trace-1';
 const log = { warn: jest.fn(), debug: jest.fn() } as unknown as EvaluatorContext['log'];
-const trace = { traceId, esClient: {} as EvaluatorContext['trace']['esClient'] };
+const trace = { traceId, esClient: {} as NonNullable<EvaluatorContext['trace']>['esClient'] };
 
 const round = (message: string): EvidenceRound => ({
   input: { message: 'query' },
