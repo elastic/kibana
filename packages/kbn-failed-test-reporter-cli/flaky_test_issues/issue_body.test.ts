@@ -1034,3 +1034,42 @@ describe('refreshing a suite issue', () => {
     }
   });
 });
+
+describe('a suite flaky only in a pipeline judged on its own', () => {
+  const [pooled] = flakyTest().byBranch;
+  const fips = {
+    ...pooled,
+    pipeline: 'kibana-fips',
+    builds: 14,
+    failedBuilds: 4,
+    buildFailRate: 4 / 14,
+  };
+  const report = flakyReport([
+    flakyTest({
+      byBranch: [{ ...pooled, failedBuilds: 1, buildFailRate: 1 / 509 }, fips],
+      flakiestBranch: {
+        branch: 'main',
+        pipeline: 'kibana-fips',
+        builds: 14,
+        failedBuilds: 4,
+        buildFailRate: 4 / 14,
+      },
+    }),
+  ]);
+  const [suite] = groupIntoSuites(report.flaky, report.files);
+
+  it('names the pipeline where it is flaky, and records only the branch for /skip', () => {
+    const body = renderFlakySuiteIssueBody(suite, { report });
+
+    expect(body).toContain('**`main` in `kibana-fips` 29% (4 / 14)**');
+    expect(body).toContain('| `main` in `kibana-fips` | 🔴 Flaky | 4 / 14');
+    expect(body).toContain('| `main` | 🟠 Some failures | 1 / 509');
+    expect(readFlakySuiteIssueMetadata(body)?.['suite.branches']).toEqual(['main']);
+  });
+
+  it('says where it is still flaky in its comments', () => {
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toMatch(
+      /^Still flaky on `main` in `kibana-fips`:\n\n- `creates default alert[^`]*`: 29% of builds \(4 \/ 14\)/
+    );
+  });
+});

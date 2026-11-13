@@ -89,7 +89,9 @@ export const discoverFlakyTests: Command<void> = {
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
   The build thresholds apply per branch: a test qualifies when one branch clears all of them
-  on its own, so a clean branch cannot dilute a flaky one.
+  on its own, so a clean branch cannot dilute a flaky one. The pipelines in --separatePipelines,
+  e.g. those running the tests in another environment, are judged per branch on their own, so
+  the builds of the other pipelines cannot dilute them either.
 
   Examples:
     # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
@@ -97,6 +99,9 @@ export const discoverFlakyTests: Command<void> = {
 
     # Include PR builds and widen the window
     node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14
+
+    # Judge the FIPS pipeline apart from on-merge
+    node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-fips --separatePipelines kibana-fips
 
     # Only Jest and FTR, custom output path, summary suppressed
     node scripts/scout discover-flaky-tests --frameworks jest,ftr --outputPath target/flaky.json --quiet
@@ -114,6 +119,7 @@ export const discoverFlakyTests: Command<void> = {
       'esMaxRetries',
       'lookbackDays',
       'pipelines',
+      'separatePipelines',
       'branches',
       'frameworks',
       'classifications',
@@ -150,6 +156,7 @@ export const discoverFlakyTests: Command<void> = {
     --verifyTLSCerts     (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     --lookbackDays       (optional)  How many days to look back when aggregating [default: ${DEFAULT_LOOKBACK_DAYS}]
     --pipelines          (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEFAULT_PIPELINES}]
+    --separatePipelines  (optional)  Comma-separated pipelines of --pipelines judged per branch on their own, apart from the others
     --branches           (optional)  Comma-separated branches; no filter when omitted
     --frameworks         (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
     --classifications    (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
@@ -191,6 +198,14 @@ export const discoverFlakyTests: Command<void> = {
     if (!Number.isInteger(summaryWidth) || summaryWidth < 1) {
       throw createFlagError('--summaryWidth must be a positive integer');
     }
+    const pipelines = readList(flagsReader, 'pipelines');
+    const separatePipelines = readList(flagsReader, 'separatePipelines');
+    const unread = separatePipelines.filter((pipeline) => !pipelines.includes(pipeline));
+    if (unread.length > 0) {
+      throw createFlagError(
+        `--separatePipelines must be pipelines of --pipelines, ${unread.join(', ')} isn't`
+      );
+    }
 
     log.info(`Connecting to Elasticsearch at ${esURL}`);
     const es = await getValidatedESClient(
@@ -208,7 +223,8 @@ export const discoverFlakyTests: Command<void> = {
       es,
       {
         lookbackDays,
-        pipelines: readList(flagsReader, 'pipelines'),
+        pipelines,
+        separatePipelines,
         branches: readList(flagsReader, 'branches'),
         frameworks: frameworks.length > 0 ? frameworks : defaults.frameworks,
         classifications,

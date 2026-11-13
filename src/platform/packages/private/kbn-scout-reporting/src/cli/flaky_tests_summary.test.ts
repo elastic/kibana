@@ -383,6 +383,7 @@ describe('displaySummary', () => {
     },
     scope: {
       pipelines: ['kibana-on-merge'],
+      separatePipelines: [],
       branches: [],
       frameworks: ['jest', 'playwright'],
       classifications: ['flaky', 'consistently-failing'],

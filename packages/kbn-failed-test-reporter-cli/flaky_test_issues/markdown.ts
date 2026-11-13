@@ -12,6 +12,7 @@ import type {
   FlakyTestEntry,
   FlakyTestPipelineStats,
   FlakyTestReport,
+  JudgedScope,
   TestFramework,
 } from '@kbn/scout-reporting';
 import { redactSensitiveGithubFailureText } from '../failed_tests_reporter/report_failure';
@@ -147,6 +148,10 @@ export const branchesByFailedBuilds = (
   );
 };
 
+/** `` `main` ``, or `` `main` in `kibana-fips` `` for a pipeline judged on its own. */
+export const formatScope = ({ branch, pipeline }: JudgedScope): string =>
+  pipeline === undefined ? inlineCode(branch) : `${inlineCode(branch)} in ${inlineCode(pipeline)}`;
+
 /** The thresholds a branch has to clear on its own for the test to count as flaky there. */
 export type BranchThresholds = Pick<
   FlakyTestReport['thresholds'],
@@ -164,8 +169,8 @@ export const isFlakyBranch = (
 
 /**
  * `` **`9.5` 3% (4 / 122)** ``, one line per branch on which the test clears every threshold of the
- * report, highest rate first. The total over branches is left out on purpose, a clean branch
- * dilutes it below what qualified.
+ * report, highest rate first, a pipeline judged on its own named. The total over branches is left
+ * out on purpose, a clean branch dilutes it below what qualified.
  */
 export const formatBranchRates = (
   test: Pick<FlakyTestEntry, 'byBranch'>,
@@ -180,11 +185,13 @@ export const formatBranchRates = (
       (a, b) =>
         b.buildFailRate - a.buildFailRate ||
         b.failedBuilds - a.failedBuilds ||
-        a.branch.localeCompare(b.branch)
+        formatScope(a).localeCompare(formatScope(b))
     )
     .map(
-      ({ branch, builds, failedBuilds, buildFailRate }) =>
-        `**${inlineCode(branch)} ${formatPercent(buildFailRate)} (${failedBuilds} / ${builds})**`
+      (stats) =>
+        `**${formatScope(stats)} ${formatPercent(stats.buildFailRate)} (${stats.failedBuilds} / ${
+          stats.builds
+        })**`
     )
     .join('<br>');
 };

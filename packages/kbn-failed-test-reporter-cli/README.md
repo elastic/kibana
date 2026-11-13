@@ -67,6 +67,14 @@ the window. Thresholds are checked per branch, so a clean branch cannot hide a f
 branch a test qualified on is recorded as `flakiestBranch`. Tests that never passed in the window
 are consistently failing, not flaky, and are not reported.
 
+The pipelines given to `--separatePipelines` (`FLAKY_TESTS_SEPARATE_PIPELINES` in the pipeline)
+are judged per branch on their own, apart from the other pipelines: those running the tests in
+another environment, FIPS mode (`kibana-fips`) and Elastic Cloud, with far fewer builds. A test
+failing 4 of the 14 FIPS builds on `main` is flaky there, even with 500 clean on-merge builds of
+`main`. Their branch entries carry the pipeline (`byBranch[].pipeline`), and the issue names it:
+"`main` in `kibana-fips`". The issue's `suite.branches` only lists the branch, so `/skip` skips
+the suite on that branch in every pipeline.
+
 Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
 pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
 for a test failing at random as often. A test in a breakage up to its latest build is broken right

@@ -20,6 +20,9 @@ FLAKY_TESTS_CLASSIFICATIONS="${FLAKY_TESTS_CLASSIFICATIONS:-flaky}"
 # Optional; no filter when empty
 FLAKY_TESTS_BRANCHES="${FLAKY_TESTS_BRANCHES:-}"
 FLAKY_TESTS_FRAMEWORKS="${FLAKY_TESTS_FRAMEWORKS:-}"
+# Optional; pipelines of FLAKY_TESTS_PIPELINES judged per branch on their own, e.g. those running
+# the tests in another environment, so that the other pipelines' builds don't dilute them
+FLAKY_TESTS_SEPARATE_PIPELINES="${FLAKY_TESTS_SEPARATE_PIPELINES:-}"
 # The agent PTY is 160 columns wide, but the build page log pane fits fewer once line numbers and
 # timestamps are shown (about 130 on a laptop), so size the summary table explicitly.
 FLAKY_TESTS_SUMMARY_WIDTH="${FLAKY_TESTS_SUMMARY_WIDTH:-140}"
@@ -33,6 +36,7 @@ echo "--- Bootstrap Kibana"
 # `+++` expands this group by default so the log opens on the summary table
 echo "+++ Discover flaky tests"
 echo "    Pipelines       : $FLAKY_TESTS_PIPELINES"
+echo "    Judged apart    : ${FLAKY_TESTS_SEPARATE_PIPELINES:-none}"
 echo "    Lookback (days) : $FLAKY_TESTS_LOOKBACK_DAYS"
 echo "    Classifications : $FLAKY_TESTS_CLASSIFICATIONS"
 echo "    Branches        : ${FLAKY_TESTS_BRANCHES:-any}"
@@ -50,6 +54,9 @@ if [[ -n "$FLAKY_TESTS_BRANCHES" ]]; then
 fi
 if [[ -n "$FLAKY_TESTS_FRAMEWORKS" ]]; then
   args+=(--frameworks "$FLAKY_TESTS_FRAMEWORKS")
+fi
+if [[ -n "$FLAKY_TESTS_SEPARATE_PIPELINES" ]]; then
+  args+=(--separatePipelines "$FLAKY_TESTS_SEPARATE_PIPELINES")
 fi
 
 mkdir -p "$REPORT_DIR"
