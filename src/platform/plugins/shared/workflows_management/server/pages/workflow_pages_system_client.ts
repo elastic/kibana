@@ -48,10 +48,7 @@ export interface WorkflowPagesSystemClient {
     definition: WorkflowYaml | null | undefined;
     valid: boolean;
   }): Promise<void>;
-  /**
-   * Deletes the pages whose trigger the definition no longer has. Saves call it before the
-   * write, so a failed delete fails the save. Throws when a delete fails.
-   */
+  /** Deletes the pages whose trigger the definition no longer has. Throws when a delete fails. */
   retireRemovedPages(params: {
     workflowId: string;
     spaceId: string;

@@ -16,10 +16,7 @@ export interface WorkflowPageRef {
   pageId: string;
 }
 
-/**
- * The longest secret a page URL may carry. Real secrets have 43 characters. The routes bound the
- * URL with it, and the check rejects anything longer before the HMAC runs.
- */
+/** The longest secret a page URL may carry. Real secrets have 43 characters. */
 export const PAGE_SECRET_MAX_LENGTH = 64;
 
 /** Makes a new secret: 256 random bits as 43 base64url characters. */
