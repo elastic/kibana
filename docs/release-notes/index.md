@@ -30,6 +30,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Elastic Agent Builder**:
 * Fix Agent Builder running tools with empty arguments when an Amazon Bedrock model requests several tools in one response [#301775]({{kib-pull}}301775).
+* Fix the Agent Builder anomaly detection jobs tool failing with an "Insufficient privileges to access feature" error when it runs in workflows or in Agent Builder chat, even for superusers [#301983]({{kib-pull}}301983).
 
 **Alerting and cases**:
 * Fix bulk untracking of alerts also untracking alerts for rule types you aren't authorized for [#304048]({{kib-pull}}304048).
@@ -99,7 +100,6 @@ For the {{elastic-sec}} 9.5.7 release information, refer to [{{elastic-sec}} Sol
 **Machine learning and {{infer}}**:
 * Fix AI features failing with a `tool_choice` error on Claude models that don't support forced tool calls, such as Claude Sonnet 5.5 and Opus 5.5 [#301398]({{kib-pull}}301398).
 * Fix {{kib}} logging an unhandled error when it can't read the anonymization settings for an AI request [#304251]({{kib-pull}}304251).
-* Fix the Agent Builder anomaly detection jobs tool failing with an "Insufficient privileges to access feature" error when it runs in workflows or in Agent Builder chat, even for superusers [#301983]({{kib-pull}}301983).
 % !!DEFERRED!! Not in the latest BC (9.5.7-f2560f72, built from ec86614e); the backport merged after the BC was cut. Re-verify against the next BC.
 % * Fix the data drift setup page hiding the **Analyze data drift without saving** button and the **Data view name** field while you type a comparison index pattern [#304648]({{kib-pull}}304648).
 
