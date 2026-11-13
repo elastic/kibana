@@ -117,3 +117,8 @@ export const userProfileKeys = {
   all: ['userProfile'] as const,
   bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
 };
+
+export const importKeys = {
+  all: ['import'] as const,
+  list: () => [...importKeys.all, 'list'] as const,
+};
