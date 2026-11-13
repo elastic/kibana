@@ -8,7 +8,7 @@
 import { EcsFlat as ecsFields } from '@elastic/ecs';
 import { semconvFlat as otelFields } from '@kbn/otel-semantic-conventions';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { FieldsMetadataClient } from './fields_metadata_client';
+import { FieldsMetadataClient, pickFleetCapabilities } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
@@ -57,7 +57,7 @@ export class FieldsMetadataService {
 
     return {
       getClient: async (request) => {
-        const { fleet, fleetv2 } = await core.capabilities.resolveCapabilities(request, {
+        const capabilities = await core.capabilities.resolveCapabilities(request, {
           capabilityPath: '*',
         });
 
@@ -67,7 +67,7 @@ export class FieldsMetadataService {
         });
 
         return FieldsMetadataClient.create({
-          capabilities: { fleet, fleetv2 },
+          capabilities: pickFleetCapabilities(capabilities),
           logger,
           ecsFieldsRepository,
           metadataFieldsRepository,

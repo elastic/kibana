@@ -23,9 +23,42 @@ import type {
 } from './types';
 import type { StreamsFieldsRepository } from './repositories/streams_fields_repository';
 
-interface FleetCapabilities {
-  fleet: Capabilities[string];
-  fleetv2: Capabilities[string];
+/**
+ * The Fleet capability entries this client reads, taken from the capabilities
+ * resolved by core.
+ *
+ * Derived from `Capabilities` via `Partial<Pick<...>>` on purpose. The
+ * `Capabilities` index signature claims every key exists, but only the
+ * capabilities of enabled plugins are present at runtime — when Fleet is
+ * disabled it registers nothing, so `fleet` / `fleetv2` are simply absent.
+ * `Partial` records that absence in the type instead of letting consumers
+ * re-assert presence (the original bug in #303543: `fleet.read` read off a
+ * value the type system claimed was always there).
+ *
+ * The entry values keep core's wide type on purpose: a capability entry maps
+ * privilege names to booleans *or* nested privilege maps, so `.read` is
+ * `boolean | Record<string, boolean>`, not a boolean. It must be read with a
+ * strict `=== true` check (see `hasFleetPermissions`), never a truthiness
+ * test — a nested map is truthy but grants no read permission.
+ */
+export type FleetCapabilities = Partial<Pick<Capabilities, 'fleet' | 'fleetv2'>>;
+
+/**
+ * Extract the Fleet capability entries from the capabilities resolved by core.
+ *
+ * This is the single place where the wide `Capabilities` record is narrowed
+ * to the entries this client reads. Do not destructure `fleet` / `fleetv2`
+ * out of the resolved record elsewhere: the destructured bindings would be
+ * typed as present (the index signature claims every key exists), which
+ * re-introduces the assertion that caused #303543. The result of this
+ * function is typed with optional fields, so every consumer is forced by the
+ * compiler to handle the entries being absent.
+ */
+export function pickFleetCapabilities(capabilities: Capabilities): FleetCapabilities {
+  return {
+    fleet: capabilities.fleet,
+    fleetv2: capabilities.fleetv2,
+  };
 }
 
 interface FieldsMetadataClientDeps {
@@ -203,9 +236,10 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   }
 
   private hasFleetPermissions(capabilities: FleetCapabilities) {
-    const { fleet, fleetv2 } = capabilities;
-
-    return fleet.read && fleetv2.read;
+    // Strict `=== true`: the entry type allows `.read` to be a nested privilege
+    // map (`boolean | Record<string, boolean>`), so a truthiness check would
+    // treat such a map as "has read permission". Only the boolean `true` grants it.
+    return capabilities.fleet?.read === true && capabilities.fleetv2?.read === true;
   }
 
   private makeSourceValidator =
