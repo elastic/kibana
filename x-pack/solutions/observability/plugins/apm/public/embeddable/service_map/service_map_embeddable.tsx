@@ -338,7 +338,8 @@ export function ServiceMapEmbeddable({
   } = useServiceMapClosedGroups({
     nodes: nodesWithBadges,
     edges: data.edges,
-    serviceGrouping: data.serviceGrouping,
+    // Contextual map ignores closed groups; skip API grouping work (still allows URL mock).
+    serviceGrouping: useContextualMap ? undefined : data.serviceGrouping,
   });
 
   // Strip badge-dependent filters (alert/SLO/anomaly) until badge data resolves. On failure,
