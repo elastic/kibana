@@ -150,7 +150,7 @@ Link issues (`linkIssues`) {applies_to}`serverless: preview` {applies_to}`stack:
     - `comment` (optional): A plain-text comment to add to the link.
 
 Delete issue (`deleteIssue`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
-:   Permanently delete an issue. This action is irreversible and is not available as an agent tool.
+:   Permanently delete an issue. This action is irreversible. Agents and workflows can both call it unless this connector limits its actions. The **Actions** setting applies to agents, workflows, and the Run a connector API on this connector. Refer to [Limit a connector's actions](docs-content://explore-analyze/ai-features/agent-builder/connectors.md#limit-a-connectors-actions).
     - `issueId` (required): The issue key or numeric ID.
     - `deleteSubtasks` (optional): Set to `true` to also delete subtasks. Required if the issue has subtasks.
 
