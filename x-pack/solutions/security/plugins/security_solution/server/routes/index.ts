@@ -67,6 +67,7 @@ import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/re
 import { registerAlertAnalysisWorkflowSettingsRoutes } from '../workflows/alert_analysis_workflow/settings_routes';
 import { registerAlertAnalysisWorkflowRuleAttachmentRoutes } from '../workflows/alert_analysis_workflow/rule_attachment_routes';
 import { registerAesopDriftMonitorRoutes } from '../aesop_prototype/drift_monitor_routes';
+import { registerAesopExplorerRoutes } from '../aesop_prototype/explorer_routes';
 import type { AesopDriftMonitorEnablementApi } from '../aesop_prototype/drift_monitor_schedule';
 
 export const initRoutes = (
@@ -180,6 +181,12 @@ export const initRoutes = (
   // AESOP prototype: internal routes are registered only behind the flag.
   if (config.experimentalFeatures.aesopPrototypeEnabled) {
     registerAesopDriftMonitorRoutes({
+      router,
+      getStartServices,
+      logger,
+      getEnablementApi: getEnablementApi ?? (() => undefined),
+    });
+    registerAesopExplorerRoutes({
       router,
       getStartServices,
       logger,

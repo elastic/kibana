@@ -25,3 +25,10 @@ export type {
   AesopDriftMonitorRequestDeps,
 } from './drift_monitor_schedule';
 export { registerAesopDriftMonitorRoutes } from './drift_monitor_routes';
+export {
+  aesopExplorerDocumentId,
+  enableAesopExplorer,
+  uninstallAesopExplorer,
+} from './explorer_schedule';
+export type { AesopExplorerEnableParams, AesopExplorerRequestDeps } from './explorer_schedule';
+export { registerAesopExplorerRoutes } from './explorer_routes';

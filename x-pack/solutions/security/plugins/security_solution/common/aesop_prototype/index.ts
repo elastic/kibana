@@ -67,3 +67,8 @@ export const AESOP_DRIFT_MONITOR_ROUTES_API_VERSION = '1';
 /** Internal route paths the A/B compare workflow calls around deploys. */
 export const AESOP_DRIFT_MONITOR_ROUTE_PATH =
   '/internal/security_solution/aesop/drift_monitor' as const;
+
+/** Internal route that installs and enables the explorer in the request's space. */
+export const AESOP_EXPLORER_ROUTE_PATH = '/internal/security_solution/aesop/explorer' as const;
+
+export const AESOP_EXPLORER_ROUTES_API_VERSION = '1';
