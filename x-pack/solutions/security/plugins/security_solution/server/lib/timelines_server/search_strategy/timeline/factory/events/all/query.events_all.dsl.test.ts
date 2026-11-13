@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineEventsQueries } from '@kbn/timelines-plugin/common/api/search_strategy';
+import { TimelineEventsQueries } from '@kbn/securitysolution-timeline-search-strategy';
 import { Direction } from '@kbn/securitysolution-timeline-common';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 

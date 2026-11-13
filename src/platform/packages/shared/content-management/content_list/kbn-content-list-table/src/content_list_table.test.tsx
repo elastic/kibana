@@ -81,6 +81,19 @@ describe('ContentListTable', () => {
       expect(screen.getByRole('table')).toBeInTheDocument();
     });
 
+    it('clears aria-busy once the fetch settles', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListTable title="My Dashboards" />
+        </Wrapper>
+      );
+
+      expect(await screen.findByText('Dashboard One')).toBeInTheDocument();
+
+      expect(screen.getByTestId('content-list-table')).toHaveAttribute('aria-busy', 'false');
+    });
+
     it('renders items from the provider', async () => {
       const Wrapper = createWrapper();
       render(

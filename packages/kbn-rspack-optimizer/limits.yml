@@ -136,7 +136,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 13400
   newsfeed: 10708
-  nightshift: 5038
+  nightshift: 5665
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -152,7 +152,7 @@ pageLoadAssetSize:
   observabilityShared: 8355
   osquery: 14738
   painlessLab: 2550
-  presentationUtil: 350
+  presentationUtil: 414
   productDocBase: 4218
   productIntercept: 4738
   profiling: 14267
@@ -173,6 +173,7 @@ pageLoadAssetSize:
   screenshotMode: 979
   screenshotting: 1655
   searchAssistant: 1887
+  searchBoost: 1569
   searchGettingStarted: 2697
   searchHomepage: 4290
   searchInferenceEndpoints: 4743
@@ -231,7 +232,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 3118
   visTypeTimelion: 6660
   visTypeTimeseries: 12718
-  visTypeVega: 3994
+  visTypeVega: 4826
   visTypeVislib: 21971
   visTypeXy: 24402
   visualizationListing: 1488

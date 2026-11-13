@@ -1,5 +1,5 @@
 {
-  "sha1": "fb4544fbfad6ba2ffcce2e648e38662b5335c2f5",
+  "sha1": "0b8af276fae1b3e8e248e98b9b8050e503b7ff61",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -786,6 +786,32 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_step_test_spaces.spec.ts",
         "line": 188,
         "column": 18
+      }
+    },
+    {
+      "id": "faac1370f7d182e-70cdc621a67f9ec",
+      "title": "[NON-MKI] Workflow service accounts: execution telemetry reports runAs user for a workflow without run_as",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_telemetry.spec.ts",
+        "line": 44,
+        "column": 61
+      }
+    },
+    {
+      "id": "faac1370f7d182e-a943504312d90ee",
+      "title": "[NON-MKI] Workflow service accounts: execution telemetry reports runAs service_account for a workflow bound by its own run_as",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_telemetry.spec.ts",
+        "line": 52,
+        "column": 48
       }
     },
     {

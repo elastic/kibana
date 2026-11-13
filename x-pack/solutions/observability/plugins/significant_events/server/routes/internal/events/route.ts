@@ -8,6 +8,7 @@
 import {
   significantEventStatusSchema,
   significantEventManualStatusSchema,
+  significantEventCloseReasonSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   severitySchema,
   MAX_ID_LENGTH,
@@ -15,7 +16,7 @@ import {
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
@@ -403,15 +404,18 @@ const eventsUpdateRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    body: z.object({
-      status: significantEventManualStatusSchema,
-      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+      body: z.object({
+        status: significantEventManualStatusSchema,
+        close_reason: significantEventCloseReasonSchema.optional(),
+        assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
@@ -420,6 +424,8 @@ const eventsUpdateRoute = createServerRoute({
     return (await getEventSearchClient()).updateEventStatus({
       eventId: params.path.id,
       change: StatusChange.byOperator(params.body.status),
+      actor: 'rest_api',
+      closeReason: params.body.close_reason,
       assessmentNote: params.body.assessment_note,
       workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
     });

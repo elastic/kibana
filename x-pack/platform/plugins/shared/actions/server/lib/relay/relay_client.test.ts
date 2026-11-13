@@ -378,6 +378,37 @@ describe('RelayClient', () => {
     );
   });
 
+  describe('listAvailableChannels', () => {
+    it('GETs the available filter and maps channels, keeping truncated', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: {
+          channels: [{ scope_id: 'C1', display_name: 'alerts', extra: 'dropped' }],
+          truncated: true,
+        },
+      } as never);
+
+      await expect(createClient().listAvailableChannels('team/A')).resolves.toEqual({
+        channels: [{ scope_id: 'C1', display_name: 'alerts' }],
+        truncated: true,
+      });
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team%2FA/channels?status=available',
+          method: 'get',
+        })
+      );
+    });
+
+    it('rejects a response without a channels array', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+
+      await expect(createClient().listAvailableChannels('team-A')).rejects.toBeInstanceOf(
+        RelayRequestError
+      );
+    });
+  });
+
   describe('listBindings', () => {
     it('GETs a single page and maps SUB entries with their display snapshot, exposing next_cursor', async () => {
       requestMock.mockResolvedValue({

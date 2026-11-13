@@ -18,6 +18,7 @@ import type {
 } from '@kbn/core/server';
 import type { EventEmitter } from 'events';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 import {
   BACKGROUND_TASK_NODE_SO_NAME,
   TASK_SO_NAME,
@@ -68,7 +69,11 @@ const innerTaskSchema = schema.object({
   state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   id: schema.maybe(schema.string()),
   timeoutOverride: schema.maybe(schema.string()),
-  cost: schema.maybe(schema.string()),
+  cost: schema.maybe(
+    schema.number({
+      validate: (value) => (value in TaskCost ? undefined : `Invalid cost "${value}"`),
+    })
+  ),
   priority: schema.maybe(schema.oneOf([schema.literal(1), schema.literal(40), schema.literal(50)])),
 });
 

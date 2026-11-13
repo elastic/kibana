@@ -33,6 +33,39 @@ describe('classifyBasis', () => {
       expect(classifyBasis([{ type: 'ip', value: '203.0.113.5' }], false)).toBe('ioc_strong');
     });
 
+    it.each([
+      ['::1', 'loopback'],
+      ['0:0:0:0:0:0:0:1', 'loopback, expanded'],
+      ['[::1]', 'loopback, bracketed'],
+      ['::', 'unspecified'],
+      ['0:0:0:0:0:0:0:0', 'unspecified, expanded'],
+      ['::ffff:10.0.0.1', 'IPv4-mapped private, dotted'],
+      ['::ffff:a00:1', 'IPv4-mapped private, hex'],
+      ['::FFFF:7F00:1', 'IPv4-mapped loopback, hex upper case'],
+      ['fc00::1', 'unique-local'],
+      ['FD12:3456::1', 'unique-local upper case'],
+      ['fe80:0:0:0:1:2:3:4', 'link-local, expanded'],
+      ['fe80::1%eth0', 'link-local with a zone id'],
+      ['[fe80::1%25eth0]', 'link-local, bracketed with an escaped zone id'],
+      ['0:0:0:0:0:ffff:10.0.0.1', 'IPv4-mapped private, expanded with a dotted tail'],
+    ])('grades %s (%s) as weak regardless of spelling', (value) => {
+      expect(classifyBasis([{ type: 'ip', value }], false)).toBe('ioc_weak');
+    });
+
+    it.each(['2001:db8::1', '2001:0db8:0000:0000:0000:0000:0000:0001', '::ffff:203.0.113.5'])(
+      'grades public IPv6 %s as strong',
+      (value) => {
+        expect(classifyBasis([{ type: 'ip', value }], false)).toBe('ioc_strong');
+      }
+    );
+
+    it.each(['fe80::1::2', '::ffff:999.0.0.1', '::1:', '0:0:0:0:0:0:0:1:', ':::1'])(
+      'does not grade malformed IPv6 value %s as weak',
+      (value) => {
+        expect(classifyBasis([{ type: 'ip', value }], false)).toBe('ioc_strong');
+      }
+    );
+
     it('grades a domain as strong', () => {
       expect(classifyBasis([{ type: 'domain', value: 'evil.example.com' }], false)).toBe(
         'ioc_strong'

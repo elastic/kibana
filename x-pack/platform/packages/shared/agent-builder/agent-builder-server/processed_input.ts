@@ -6,7 +6,11 @@
  */
 
 import type { Attachment, AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTimelineEvent, ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import type {
+  AttachmentTimelineEvent,
+  ConversationRoundAuthor,
+  EventActor,
+} from '@kbn/agent-builder-common';
 import type { AttachmentBoundedTool, AttachmentRepresentation } from './attachments';
 
 /**
@@ -56,4 +60,6 @@ export interface ProcessedRoundInput {
   attachment_events?: AttachmentTimelineEvent[];
   /** Author attributed to this input */
   author?: ConversationRoundAuthor;
+  /** The agent that posted this input, when it did not come from a user. Rendered as a notice, not a user turn. */
+  actor?: EventActor;
 }

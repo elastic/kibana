@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import type { Logger } from '@kbn/logging';
 import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
@@ -21,16 +20,6 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
-
-/**
- * Global workflows install a few at a time. Starting all of them together fills the small
- * Elasticsearch thread pool that system-index writes share, so a login arriving in the first
- * seconds after start-up waits several seconds for its session write.
- *
- * Do not pair this limit with `refresh: 'wait_for'` on serverless. See
- * docs/managed_workflow_startup_install.md.
- */
-export const GLOBAL_WORKFLOW_INSTALL_CONCURRENCY = 4;
 
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,
@@ -59,26 +48,24 @@ export const initializeManagedWorkflows = async ({
     ...ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
   ] as const;
 
-  // One failed install must not stop the others, so each result is recorded instead of thrown.
-  const globalWorkflowInstalls = await pMap(
-    globalWorkflowIds,
-    (id): Promise<PromiseSettledResult<void>> =>
-      client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }).then(
-        (): PromiseFulfilledResult<void> => ({ status: 'fulfilled', value: undefined }),
-        (reason: unknown): PromiseRejectedResult => ({ status: 'rejected', reason })
-      ),
-    { concurrency: GLOBAL_WORKFLOW_INSTALL_CONCURRENCY }
-  );
-  for (const [index, result] of globalWorkflowInstalls.entries()) {
-    if (result.status === 'rejected') {
+  // One pass with `_bulk` writes, so start-up holds at most one of the Elasticsearch threads that
+  // logins also write with. See docs/managed_workflow_startup_install.md.
+  try {
+    const { failed } = await client.installMany(
+      globalWorkflowIds.map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+    );
+    for (const { id, error } of failed) {
       canReconcile = false;
-      logger.error(
-        // Covers rule and action workflows, so this stays generic.
-        `Failed to install managed AlertZero workflow "${globalWorkflowIds[index]}": ${
-          result.reason instanceof Error ? result.reason.message : String(result.reason)
-        }`
-      );
+      // Covers rule and action workflows, so this stays generic.
+      logger.error(`Failed to install managed AlertZero workflow "${id}": ${error.message}`);
     }
+  } catch (error) {
+    canReconcile = false;
+    logger.error(
+      `Failed to install managed AlertZero workflows: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 
   if (canReconcile) {

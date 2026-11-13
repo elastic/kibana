@@ -15,6 +15,13 @@ else
   echo "Creating branch '$branch' from main"
 fi
 
+# Re-triggered minor bumps reach this step after an earlier run already cut the branch;
+# main has moved on since, so re-pushing it would be rejected as non-fast-forward.
+if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+  echo "Branch '$branch' already exists on origin — skipping creation"
+  exit 0
+fi
+
 git config --global user.name kibanamachine
 git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 

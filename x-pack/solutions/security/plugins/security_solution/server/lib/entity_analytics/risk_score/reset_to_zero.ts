@@ -7,11 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import {
-  EntityIdentifierFields,
-  EntityTypeToIdentifierField,
-  type EntityType,
-} from '../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, type EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality';
@@ -31,7 +27,6 @@ export interface ResetToZeroDependencies {
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
   excludedEntities: string[];
-  idBasedRiskScoringEnabled: boolean;
   crudClient?: EntityStoreCRUDClient;
   refresh?: 'wait_for';
 }
@@ -51,14 +46,11 @@ export const resetToZero = async ({
   logger,
   refresh,
   excludedEntities,
-  idBasedRiskScoringEnabled,
   crudClient,
 }: ResetToZeroDependencies): Promise<{ scoresWritten: number }> => {
   const { alias } = await getIndexPatternDataStream(spaceId);
   const entityField = `${entityType}.${RISK_SCORE_ID_VALUE_FIELD}`;
-  const identifierField = idBasedRiskScoringEnabled
-    ? EntityIdentifierFields.generic
-    : EntityTypeToIdentifierField[entityType];
+  const identifierField = EntityIdentifierFields.generic;
   const esql = /* sql */ `
     SET unmapped_fields="nullify";
     FROM ${alias}
@@ -139,7 +131,7 @@ export const resetToZero = async ({
     throw e;
   });
 
-  if (idBasedRiskScoringEnabled && crudClient) {
+  if (crudClient) {
     const { unexpectedErrors: entityStoreErrors } = await persistRiskScoresToEntityStore({
       crudClient,
       logger,
