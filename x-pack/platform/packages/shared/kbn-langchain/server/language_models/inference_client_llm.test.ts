@@ -62,7 +62,7 @@ describe('InferenceClientLlm', () => {
       modelName: 'test-model',
       timeout: 1000,
       system: 'test system prompt',
-      metadata: { pluginId: 'test_plugin' },
+      metadata: { connectorTelemetry: { pluginId: 'test_plugin' } },
     });
   });
 
