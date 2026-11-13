@@ -110,10 +110,14 @@ reason, are reported together with the seed error. Fingerprints and discoveries 
 a failed seed: the workflow has not started, so there are none from it.
 
 After a row has run, `cleanupSeed` clears the alerts (matched exactly by its run marker), the
-space's fingerprints, its discoveries, its Investigations (Agent Builder conversations in the
-shared `.chat-conversations` index), the investigations' side documents (`.kibana-investigation-*`)
+space's fingerprints, its discoveries, the investigations' side documents (`.kibana-investigation-*`)
 and the proposals the review opened (`.kibana-proposals`) — all matched by the space id — then
-refreshes those indices and counts again. A delete
+refreshes those indices and counts again. The Investigations themselves stay: they are Agent
+Builder conversations in `.chat-conversations`, a restricted system index no user may delete from,
+and the conversations API deletes a private one only for its owner (the worker's service account).
+A later row never reads them, because each seed makes new discovery ids and the Investigation id is
+derived from the discovery id. A missing index counts as empty; a delete the user may not run
+fails the round instead of reporting zero matches. A delete
 that reports failures, version conflicts, a timeout or fewer deletions than matches, or a document
 still found by the recount, starts another round (5s pause, `CLEANUP_ROUNDS` = 6); what is left
 after the last round fails the row. Steps of a row can still write after its cleanup (the

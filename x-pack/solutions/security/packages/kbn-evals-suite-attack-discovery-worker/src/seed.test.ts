@@ -127,7 +127,6 @@ describe('cleanupSeed', () => {
       alertsIndexForSpace('space-a'),
       'ai-index-idx-security-attack-fingerprints',
       attackDiscoveryIndexForSpace('space-a'),
-      '.chat-conversations',
       '.kibana-investigation-*',
       '.kibana-proposals',
     ]);
@@ -140,7 +139,7 @@ describe('cleanupSeed', () => {
       .mockRejectedValueOnce(new Error('es unavailable'))
       .mockResolvedValue({});
     await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait });
-    expect(deleteByQuery).toHaveBeenCalledTimes(12);
+    expect(deleteByQuery).toHaveBeenCalledTimes(10);
     expect(wait).toHaveBeenCalledTimes(1);
   });
 
@@ -153,7 +152,7 @@ describe('cleanupSeed', () => {
       .mockImplementationOnce(async () => ({ count: 1 }))
       .mockImplementation(async () => ({ count: 0 }));
     await cleanupSeed({ esClient: esWith({ deleteByQuery, count }), seeded, wait });
-    expect(deleteByQuery).toHaveBeenCalledTimes(12);
+    expect(deleteByQuery).toHaveBeenCalledTimes(10);
     expect(wait).toHaveBeenCalledTimes(1);
   });
 
@@ -168,7 +167,7 @@ describe('cleanupSeed', () => {
     ).rejects.toThrow(
       `Cleanup of space "space-a" failed after ${CLEANUP_ROUNDS} rounds: 1 fingerprints are still present`
     );
-    expect(deleteByQuery).toHaveBeenCalledTimes(6 * CLEANUP_ROUNDS);
+    expect(deleteByQuery).toHaveBeenCalledTimes(5 * CLEANUP_ROUNDS);
     expect(wait).toHaveBeenCalledTimes(CLEANUP_ROUNDS - 1);
   });
 
@@ -185,7 +184,7 @@ describe('cleanupSeed', () => {
     expect((error as AggregateError).message).toMatch(
       /failed after 6 rounds: could not delete fingerprints: es unavailable/
     );
-    expect(deleteByQuery).toHaveBeenCalledTimes(6 * CLEANUP_ROUNDS);
+    expect(deleteByQuery).toHaveBeenCalledTimes(5 * CLEANUP_ROUNDS);
   });
 
   it('treats a failed refresh as a problem, not as clean', async () => {
@@ -525,7 +524,7 @@ describe('seedScenario world documents', () => {
       ['entities-latest-space-a', { ids: { values: ['adw-1-world-entity-0'] } }],
       ['logs-endpoint.events.process-space-a', { ids: { values: ['adw-1-world-process-1'] } }],
     ]);
-    expect(deleteByQuery).toHaveBeenCalledTimes(8);
+    expect(deleteByQuery).toHaveBeenCalledTimes(7);
   });
 });
 
@@ -821,9 +820,36 @@ describe('cleanupSeed alert delete', () => {
   });
 
   it('tolerates a missing index', async () => {
+    const deleteByQuery = jest.fn(async ({ index }: DeleteArgs) => {
+      if (index === '.kibana-proposals') {
+        throw Object.assign(new Error('no such index'), { statusCode: 404 });
+      }
+      return {};
+    });
+    await expect(
+      cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait })
+    ).resolves.toBeUndefined();
+  });
+
+  it('fails on a delete the user may not run instead of reading it as zero matches', async () => {
+    const deleteByQuery = jest.fn(async ({ index }: DeleteArgs) => {
+      if (index === '.kibana-proposals') {
+        throw Object.assign(new Error('unauthorized on restricted indices'), { statusCode: 403 });
+      }
+      return {};
+    });
+    await expect(
+      cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait })
+    ).rejects.toThrow(/could not delete proposals: unauthorized on restricted indices/);
+    expect(deleteByQuery.mock.calls.some(([args]) => 'ignore_unavailable' in args)).toBe(false);
+  });
+
+  it('never deletes from the restricted conversations index', async () => {
     const deleteByQuery = jest.fn(async (_args: DeleteArgs) => ({}));
     await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait });
-    expect(deleteByQuery.mock.calls.every(([args]) => args.ignore_unavailable === true)).toBe(true);
+    expect(deleteByQuery.mock.calls.map(([{ index }]) => index)).not.toContain(
+      '.chat-conversations'
+    );
   });
 
   it('throws when a delete reports failures, after attempting the others', async () => {
@@ -833,7 +859,7 @@ describe('cleanupSeed alert delete', () => {
     await expect(
       cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait })
     ).rejects.toThrow(/Cleanup of space "space-a" failed/);
-    expect(deleteByQuery).toHaveBeenCalledTimes(6 * CLEANUP_ROUNDS);
+    expect(deleteByQuery).toHaveBeenCalledTimes(5 * CLEANUP_ROUNDS);
   });
 
   it('throws when a delete reports version conflicts', async () => {

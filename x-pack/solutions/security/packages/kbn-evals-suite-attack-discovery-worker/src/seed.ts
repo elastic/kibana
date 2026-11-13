@@ -39,8 +39,6 @@ import {
 
 /** Index holding the fingerprints that `match_fingerprints` compares new attacks against. */
 export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';
-/** Agent Builder conversations (Investigations live here); scoped by the top-level `space` field. */
-const CONVERSATIONS_INDEX = '.chat-conversations';
 /** Agentic-investigations side documents (subject/claim/hypotheses/impact), scoped by `spaceId`. */
 const INVESTIGATION_SIDE_INDEX = '.kibana-investigation-*';
 /** Proposals the review opened; scoped by `spaceId` (see `@kbn/proposals-common` storage). */
@@ -519,10 +517,15 @@ export const buildSeededAlert = ({
   );
 };
 
+const isNotFound = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && 'statusCode' in error && error.statusCode === 404;
+
 /**
  * Deletes by query and throws when the response says documents survived. `conflicts: 'proceed'`
  * keeps the delete going past a version conflict, but a response that reports conflicts or
- * failures means the space is still dirty, so it must not read as success.
+ * failures means the space is still dirty, so it must not read as success. A missing index has
+ * nothing to delete; `ignore_unavailable` is not used for that because it also drops an index the
+ * user may not write to and reports `total: 0`, which would hide the 403.
  */
 const deleteMatching = async ({
   esClient,
@@ -533,19 +536,20 @@ const deleteMatching = async ({
   index: string;
   query: estypes.QueryDslQueryContainer;
 }): Promise<void> => {
+  let response: estypes.DeleteByQueryResponse;
+  try {
+    response = await esClient.deleteByQuery({ index, query, conflicts: 'proceed', refresh: true });
+  } catch (error) {
+    if (isNotFound(error)) return;
+    throw error;
+  }
   const {
     failures,
     version_conflicts: versionConflicts,
     timed_out: timedOut,
     deleted,
     total,
-  } = await esClient.deleteByQuery({
-    index,
-    query,
-    conflicts: 'proceed',
-    refresh: true,
-    ignore_unavailable: true,
-  });
+  } = response;
   const problems = [
     (failures?.length ?? 0) > 0 ? `${failures?.length} failures` : undefined,
     (versionConflicts ?? 0) > 0 ? `${versionConflicts} version conflicts` : undefined,
@@ -567,9 +571,6 @@ const deleteMatching = async ({
  */
 const UNSETTLED_REMOVE_ROUNDS = 8;
 const UNSETTLED_REMOVE_PAUSE_MS = 500;
-
-const isNotFound = (error: unknown): boolean =>
-  typeof error === 'object' && error !== null && 'statusCode' in error && error.statusCode === 404;
 
 /** The ids among `ids` that still exist; a missing index means none do. */
 const idsStillPresent = async ({
@@ -1188,15 +1189,11 @@ export const cleanupSeed = async ({
       index: attackDiscoveryIndexForSpace(spaceId),
       query: { match_all: {} },
     },
-    {
-      // Investigations are Agent Builder conversations in the shared `.chat-conversations` index
-      // (top-level `space` keyword); the review derives the id from the attack discovery id
-      // (`investigationIdFor` in collect.ts). Its side documents (subjects/impact/hypotheses)
-      // live in separate indexes keyed by conversationId and are scoped with the same space id.
-      what: 'investigations (conversations)',
-      index: CONVERSATIONS_INDEX,
-      query: { term: { space: spaceId } },
-    },
+    // The Investigations themselves (Agent Builder conversations) stay: `.chat-conversations` is a
+    // restricted system index no user may write to, and the API deletes a private conversation
+    // only for its owner, the worker's service account. They cannot leak into a later row: the
+    // review derives the Investigation id from the discovery id (`investigationIdFor` in
+    // collect.ts), and every seed makes new discovery ids.
     {
       what: 'investigation side documents',
       index: INVESTIGATION_SIDE_INDEX,
@@ -1208,7 +1205,7 @@ export const cleanupSeed = async ({
       query: { term: { spaceId } },
     },
   ];
-  const [alerts, fingerprints, discoveries, conversations, sideDocs, proposals] = targets;
+  const [alerts, fingerprints, discoveries, sideDocs, proposals] = targets;
   const deletions: Array<{ what: string; run: () => Promise<void> }> = [
     ...[alerts, fingerprints].map(({ what, index, query }) => ({
       what,
@@ -1220,11 +1217,6 @@ export const cleanupSeed = async ({
     {
       what: discoveries.what,
       run: () => deleteMatching({ esClient, index: discoveries.index, query: discoveries.query }),
-    },
-    {
-      what: conversations.what,
-      run: () =>
-        deleteMatching({ esClient, index: conversations.index, query: conversations.query }),
     },
     {
       what: sideDocs.what,
