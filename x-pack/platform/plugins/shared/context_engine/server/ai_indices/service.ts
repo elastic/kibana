@@ -70,6 +70,7 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexItem => ({
     feedback_analysis: document.feedback_analysis,
   }),
   ...(document.dreaming !== undefined && { dreaming: document.dreaming }),
+  ...(document.memory_enabled !== undefined && { memory_enabled: document.memory_enabled }),
   managed: document.managed ?? false,
   dest: document.dest,
   automations: document.automations,
@@ -88,9 +89,18 @@ const mergeManagedAiIndex = (
   dest: registration.dest,
 });
 
+/** Properties without the ones the service accepts and ignores. */
+const withoutIgnoredProperties = ({
+  memory_enabled: _memoryEnabled,
+  ...properties
+}: AiIndexProperties): AiIndexProperties => properties;
+
 /** What a whole-record write keeps from the document it replaces: the fields clients cannot set. */
-const keptFields = (existing: AiIndexDocument | undefined): Pick<AiIndexDocument, 'dreaming'> => ({
+const keptFields = (
+  existing: AiIndexDocument | undefined
+): Pick<AiIndexDocument, 'dreaming' | 'memory_enabled'> => ({
   ...(existing?.dreaming !== undefined && { dreaming: existing.dreaming }),
+  ...(existing?.memory_enabled !== undefined && { memory_enabled: existing.memory_enabled }),
 });
 
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
@@ -170,7 +180,7 @@ export class AiIndexService {
     await this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      { ...withoutIgnoredProperties(properties), id: aiIndexId, space: spaceId, managed: false },
       undefined
     );
   }
@@ -197,7 +207,7 @@ export class AiIndexService {
       aiIndexId,
       spaceId,
       {
-        ...properties,
+        ...withoutIgnoredProperties(properties),
         ...keptFields(existing?.document),
         id: aiIndexId,
         space: spaceId,
@@ -230,7 +240,7 @@ export class AiIndexService {
       aiIndexId,
       spaceId,
       {
-        ...properties,
+        ...withoutIgnoredProperties(properties),
         ...keptFields(existing?.document),
         id: aiIndexId,
         space: spaceId,

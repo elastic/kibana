@@ -87,6 +87,11 @@ export interface AiIndexFeedbackAnalysis {
 
 export interface AiIndexProperties {
   description?: string;
+  /**
+   * @deprecated Ignored; see `takesMemories`. Still accepted so existing callers keep compiling and
+   * working.
+   */
+  memory_enabled?: boolean;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
@@ -94,7 +99,7 @@ export interface AiIndexProperties {
   feedback_analysis?: AiIndexFeedbackAnalysis;
 }
 
-export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
+export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces' | 'memory_enabled'> {
   id: string;
   managed: boolean;
   date_created: string;
@@ -106,6 +111,8 @@ export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
 export interface AiIndexItem extends AiIndexHttpItem {
   /** What the AI index learns from its memories, and how often. Set through the internal dreaming route. */
   dreaming?: AiIndexDreamingConfig;
+  /** The `memory_enabled` the AI index was saved with before it was deprecated; see `takesMemories`. */
+  memory_enabled?: boolean;
 }
 
 export type GetAiIndexResponse = AiIndexHttpItem;

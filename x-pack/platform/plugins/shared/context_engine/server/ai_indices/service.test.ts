@@ -921,6 +921,33 @@ describe('AiIndexService', () => {
       );
     });
 
+    it('ignores the deprecated memory_enabled from callers and managed registrations', async () => {
+      await service.create('customer_support', DEFAULT_SPACE, {
+        ...properties,
+        memory_enabled: true,
+      });
+      await service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true });
+      await service.putManaged('elastic', DEFAULT_SPACE, { ...properties, memory_enabled: false });
+
+      for (const [indexArgs] of storageClient.index.mock.calls) {
+        expect(indexArgs.document).not.toHaveProperty('memory_enabled');
+      }
+    });
+
+    it('keeps the memory_enabled a document was saved with, on read and through writes', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, memory_enabled: false }));
+
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ memory_enabled: false })
+      );
+
+      await service.setDreaming('customer_support', DEFAULT_SPACE, { enabled: false });
+      await service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true });
+      for (const [indexArgs] of storageClient.index.mock.calls) {
+        expect(indexArgs.document?.memory_enabled).toBe(false);
+      }
+    });
+
     it('defaults managed to false for legacy documents without the field', async () => {
       const { managed: _managed, ...legacyDocument } = aiIndexDocument;
       mockSearchHits(storedHit(legacyDocument));

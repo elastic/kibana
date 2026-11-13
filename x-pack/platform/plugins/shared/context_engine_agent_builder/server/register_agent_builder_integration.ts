@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import { takesMemories } from '@kbn/context-engine-plugin/common/dreaming';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
@@ -53,7 +54,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
       id: aiIndex.id,
       esqlTarget: aiIndex.dest.value,
       description: aiIndex.description,
-      memoryEnabled: true,
+      memoryEnabled: takesMemories(aiIndex),
     }));
   });
 

@@ -272,10 +272,13 @@ describe('AiIndexDetailPage', () => {
   });
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
+    mockUseAiIndexDreaming.mockReturnValue({ dreaming: preferenceDreaming, isLoading: false });
     const services = createServices();
     services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    expect(mockUseAiIndexDreaming).toHaveBeenCalledWith(aiIndex.id, { enabled: true });
 
     expect(await screen.findByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
     expect(screen.getByText('Your AI index is ready')).toBeInTheDocument();
@@ -294,30 +297,60 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
   });
 
-  it('hides memory wording when the global memory setting is disabled', async () => {
-    mockUseMemoryEnabled.mockReturnValue(false);
+  it.each([
+    ['the global memory setting is disabled', false, true, false],
+    ['the AI index is managed and dreaming is not set up for it', true, false, true],
+  ])(
+    'hides memory wording when %s',
+    async (_scenario, globalMemoryEnabled, dreamingSetUp, managed) => {
+      mockUseMemoryEnabled.mockReturnValue(globalMemoryEnabled);
+      mockUseAiIndexDreaming.mockReturnValue({
+        dreaming: dreamingSetUp ? preferenceDreaming : undefined,
+        isLoading: false,
+      });
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, managed, sources: [] });
+
+      renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+      const callout = await screen.findByTestId('contextAiIndexCreatedCallout');
+      expect(callout).toHaveTextContent('Add sources to build agent context from your data.');
+      expect(callout).not.toHaveTextContent(/memory/i);
+    }
+  );
+
+  it('mentions memory for an AI index that is not managed, without dreaming set up', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
-
-    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
-
-    const callout = await screen.findByTestId('contextAiIndexCreatedCallout');
-    expect(callout).toHaveTextContent('Add sources to build agent context from your data.');
-    expect(callout).not.toHaveTextContent(/memory/i);
-  });
-
-  it.each([
-    ['an AI index that is not managed', false],
-    ['a managed AI index', true],
-  ])('mentions memory for %s while the global memory setting is on', async (_kind, managed) => {
-    const services = createServices();
-    services.http.get.mockResolvedValue({ ...aiIndex, managed, sources: [] });
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
 
     expect(await screen.findByTestId('contextAiIndexCreatedCallout')).toHaveTextContent(
       'or use it to store agent memory'
     );
+  });
+
+  it('mentions memory for a managed AI index once dreaming is set up', async () => {
+    mockUseAiIndexDreaming.mockReturnValue({ dreaming: preferenceDreaming, isLoading: false });
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, managed: true, sources: [] });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    expect(await screen.findByTestId('contextAiIndexCreatedCallout')).toHaveTextContent(
+      'or use it to store agent memory'
+    );
+  });
+
+  it('does not read the dreaming config while the global memory setting is disabled', async () => {
+    mockUseMemoryEnabled.mockReturnValue(false);
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAiIndexCreatedCallout');
+    expect(mockUseAiIndexDreaming).toHaveBeenCalledWith(aiIndex.id, { enabled: false });
   });
 
   it('does not show the success callout without creation navigation state', async () => {

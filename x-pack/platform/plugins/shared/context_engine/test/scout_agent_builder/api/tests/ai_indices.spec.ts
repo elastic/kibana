@@ -197,6 +197,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
             const getResponse = await apiClient.get(path, { headers, responseType: 'json' });
             expect(getResponse).toHaveStatusCode(200);
             expect('dreaming' in getResponse.body).toBe(false);
+            expect('memory_enabled' in getResponse.body).toBe(false);
 
             const replaceResponse = await apiClient.put(path, {
               headers,
@@ -257,6 +258,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({ id: AI_INDEX.lifecycle, ...aiIndexBody });
+      expect('memory_enabled' in response.body).toBe(false);
       expect(response.body.date_created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       expect(response.body.date_modified).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       dateCreated = response.body.date_created;
@@ -278,7 +280,8 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       const response = await apiClient.put(path, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: { ...aiIndexBody, description: 'Updated description' },
+        // Older clients still send `memory_enabled`; it is accepted and ignored.
+        body: { ...aiIndexBody, description: 'Updated description', memory_enabled: false },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -289,6 +292,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
         responseType: 'json',
       });
       expect(updatedResponse.body.description).toBe('Updated description');
+      expect('memory_enabled' in updatedResponse.body).toBe(false);
       expect(updatedResponse.body.date_created).toBe(dateCreated);
     });
 

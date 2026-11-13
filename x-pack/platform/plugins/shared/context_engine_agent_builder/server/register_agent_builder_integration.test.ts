@@ -127,7 +127,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
   });
 
-  it('registers a resolver mapping registry items to id, esqlTarget (dest.value), description and memory', async () => {
+  it('registers a resolver mapping registry items to id, esqlTarget (dest.value), description and whether it takes memories', async () => {
     const { resolver } = setup({
       aiIndices: [
         {
@@ -135,6 +135,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
           managed: true,
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
+          dreaming: { enabled: true, facts: [{ type: 'preference' }] },
         },
       ],
     });
@@ -149,11 +150,33 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     ]);
   });
 
+  it('falls back to the saved memory_enabled, then to not managed, without dreaming set up', async () => {
+    const { resolver } = setup({
+      aiIndices: [
+        { id: 'custom', managed: false, dest: { type: 'index', value: 'idx-custom' } },
+        { id: 'managed', managed: true, dest: { type: 'index', value: 'idx-managed' } },
+        {
+          id: 'opted-out',
+          managed: false,
+          memory_enabled: false,
+          dest: { type: 'index', value: 'idx-opted-out' },
+        },
+      ],
+    });
+
+    expect(await resolver({ ids: ['custom', 'managed', 'opted-out'], request })).toEqual([
+      { id: 'custom', esqlTarget: 'idx-custom', memoryEnabled: true },
+      { id: 'managed', esqlTarget: 'idx-managed', memoryEnabled: false },
+      { id: 'opted-out', esqlTarget: 'idx-opted-out', memoryEnabled: false },
+    ]);
+  });
+
   it('asks the service for the requested ids only, so just those are probed', async () => {
     const { resolver, list } = setup({
       aiIndices: [
         {
           id: 'wanted',
+          managed: false,
           dest: { type: 'index', value: 'idx-wanted' },
         },
       ],

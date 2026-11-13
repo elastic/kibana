@@ -308,6 +308,30 @@ describe('forget tool', () => {
     });
   });
 
+  it('rejects a managed AI index whose dreaming is not set up', async () => {
+    get.mockResolvedValue({
+      id: 'support',
+      managed: true,
+      dest: { type: 'index', value: 'ai-index-idx-support' },
+    });
+
+    const result = await run();
+
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message: "Failed to forget memory: AI index 'support' does not take memories.",
+          },
+        },
+      ],
+    });
+    expect(search).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
+  });
+
   it('returns an error when the memory does not exist', async () => {
     search.mockResolvedValue({ hits: { hits: [] } });
 
