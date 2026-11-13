@@ -23,8 +23,10 @@ import { useEntityTablePreferences } from '../../context/entity_table_preference
 import type { UseEntityListResult } from '../../hooks/use_entity_list';
 import { useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
-import { EntityTableEmpty, EntityTableLoadError, EntityTableSkeleton } from './entity_table_states';
+import { TableSkeleton } from '../table_skeleton/table_skeleton';
+import { EntityTableEmpty, EntityTableLoadError } from './entity_table_states';
 import {
+  LOADING_ENTITIES_LABEL,
   ENTITY_COUNT_LABEL,
   SOURCE_ERRORS_TITLE,
   getEntityCountValue,
@@ -60,6 +62,11 @@ export interface EntityTypeResultsProps {
  * One entity type as a collapsible section: its name from the `types` entry, the number of listed
  * entities once its `_list` response arrives, and its results below. Each section loads and fails
  * on its own.
+ *
+ * The section frame renders in every state, so a load or a failure never takes the name and the
+ * accordion off the page. `EntityTypeListResults` below picks the skeleton, the error, the empty
+ * prompt or the table from the same `listResult`; what this component reads of it is the count
+ * badge and the truncation flag, which belong in the header.
  */
 export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeResultsProps) => {
   const { type, name } = entityType;
@@ -139,10 +146,14 @@ const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResults
 
   const { rows, errors } = list;
   const isEmpty = rows.length === 0;
-  // Only a reload has rows to keep: a first load and a retry after a failure both start from the
-  // initial response, so there is nothing to show but the skeleton.
+
   if (loading && isEmpty) {
-    return <EntityTableSkeleton />;
+    return (
+      <TableSkeleton
+        contentAriaLabel={LOADING_ENTITIES_LABEL}
+        dataTestSubj="entityInventoryTableSkeleton"
+      />
+    );
   }
 
   return (
