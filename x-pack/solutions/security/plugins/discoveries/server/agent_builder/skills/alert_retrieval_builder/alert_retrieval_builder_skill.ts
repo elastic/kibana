@@ -7,9 +7,7 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import type { CoreStart } from '@kbn/core/server';
 
-import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { getDefaultEsqlQueryTool } from '../tools/get_default_esql_query_tool';
 
 /**
@@ -22,17 +20,9 @@ import { getDefaultEsqlQueryTool } from '../tools/get_default_esql_query_tool';
  * the `update_esql_query` browser API tool to update the ES|QL editor in
  * the Attack Discovery settings UI.
  */
-export const createAlertRetrievalBuilderSkill = ({
-  getStartServices,
-}: {
-  getStartServices?: () => Promise<{
-    coreStart: CoreStart;
-    pluginsStart: DiscoveriesPluginStartDeps;
-  }>;
-} = {}) =>
-  defineSkillType({
-    basePath: 'skills/security/attack-discovery',
-    content: `# Attack Discovery Alerts ES|QL Query Builder
+export const alertRetrievalBuilderSkill = defineSkillType({
+  basePath: 'skills/security/attack-discovery',
+  content: `# Attack Discovery Alerts ES|QL Query Builder
 
 ## Purpose
 
@@ -172,15 +162,15 @@ Attack Discovery settings UI with the final query.
 
 See the referenced content for example ES|QL queries that demonstrate the best practices
 described above.`,
-    description:
-      'Guides the agent to build ES|QL queries for retrieving security alerts from the .alerts-security.alerts-<spaceId> index for Attack Discovery analysis.',
-    getInlineTools: () => [getDefaultEsqlQueryTool({ getStartServices })],
-    getRegistryTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
-    id: 'attack-discovery-alert-retrieval-builder',
-    name: 'attack-discovery-alert-retrieval-builder',
-    referencedContent: [
-      {
-        content: `# Example ES|QL Queries for Attack Discovery Alert Retrieval
+  description:
+    'Guides the agent to build ES|QL queries for retrieving security alerts from the .alerts-security.alerts-<spaceId> index for Attack Discovery analysis.',
+  getInlineTools: () => [getDefaultEsqlQueryTool()],
+  getRegistryTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
+  id: 'attack-discovery-alert-retrieval-builder',
+  name: 'attack-discovery-alert-retrieval-builder',
+  referencedContent: [
+    {
+      content: `# Example ES|QL Queries for Attack Discovery Alert Retrieval
 
 ## Default query
 
@@ -269,8 +259,8 @@ FROM .alerts-security.alerts-default METADATA _id
     source.ip, destination.ip,
     user.name
 \`\`\``,
-        name: 'example-esql-queries',
-        relativePath: './examples',
-      },
-    ],
-  });
+      name: 'example-esql-queries',
+      relativePath: './examples',
+    },
+  ],
+});

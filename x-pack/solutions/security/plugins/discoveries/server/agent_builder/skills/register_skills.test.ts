@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 
+import { alertRetrievalBuilderSkill } from './alert_retrieval_builder';
 import { ATTACK_DISCOVERY_GENERATOR_SKILL_ID } from './attack_discovery_generator';
 import { registerSkills } from './register_skills';
 import type { WorkflowExecutionLookup } from './tools/get_attack_discovery_status_tool';
@@ -41,9 +42,7 @@ describe('registerSkills', () => {
   it('registers the alert retrieval builder skill', async () => {
     await registerSkills(mockAgentBuilder, mockLogger, baseOptions);
 
-    expect(mockAgentBuilder.skills.register).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'attack-discovery-alert-retrieval-builder' })
-    );
+    expect(mockAgentBuilder.skills.register).toHaveBeenCalledWith(alertRetrievalBuilderSkill);
   });
 
   it('registers the attack discovery generator skill when status-tool deps are provided', async () => {

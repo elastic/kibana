@@ -507,7 +507,7 @@ export const createAttackDiscoveryGeneratorSkill = ({
     content: SKILL_CONTENT,
     description: SKILL_DESCRIPTION,
     getInlineTools: () => [
-      getDefaultEsqlQueryTool({ getStartServices }),
+      getDefaultEsqlQueryTool(),
       getAttackDiscoveryStatusTool({ getEventLogIndex, getStartServices, workflowExecutionLookup }),
       ...(runAttackDiscoveryToolDeps != null
         ? [getRunAttackDiscoveryTool(runAttackDiscoveryToolDeps)]

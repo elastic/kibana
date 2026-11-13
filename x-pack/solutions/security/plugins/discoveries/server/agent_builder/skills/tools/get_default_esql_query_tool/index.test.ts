@@ -13,12 +13,6 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { GET_DEFAULT_ESQL_QUERY_TOOL_ID, getDefaultEsqlQueryTool } from '.';
 
 const mockBuildDefaultEsqlQuery = jest.fn();
-const mockIsAuthorizedToBuildDefaultQuery = jest.fn();
-
-jest.mock('./is_authorized_to_build_default_query', () => ({
-  isAuthorizedToBuildDefaultQuery: (...args: unknown[]) =>
-    mockIsAuthorizedToBuildDefaultQuery(...args),
-}));
 
 jest.mock('@kbn/discoveries/impl/lib/build_default_esql_query', () => ({
   buildDefaultEsqlQuery: (...args: unknown[]) => mockBuildDefaultEsqlQuery(...args),
@@ -41,22 +35,8 @@ describe('getDefaultEsqlQueryTool', () => {
     spaceId: 'test-space',
   };
 
-  const mockAuthz = { actions: {} };
-  const mockGetStartServices = jest.fn().mockResolvedValue({
-    coreStart: {},
-    pluginsStart: { security: { authz: mockAuthz } },
-  });
-
-  const createTool = () =>
-    getDefaultEsqlQueryTool({
-      getStartServices: mockGetStartServices as unknown as NonNullable<
-        Parameters<typeof getDefaultEsqlQueryTool>[0]
-      >['getStartServices'],
-    });
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockIsAuthorizedToBuildDefaultQuery.mockResolvedValue(true);
   });
 
   it('returns a tool with the expected id', () => {
@@ -92,97 +72,21 @@ describe('getDefaultEsqlQueryTool', () => {
     it('calls buildDefaultEsqlQuery with the correct parameters', async () => {
       mockBuildDefaultEsqlQuery.mockResolvedValueOnce(expectedQuery);
 
-      const tool = createTool();
+      const tool = getDefaultEsqlQueryTool();
 
       await tool.handler({}, mockContext);
 
       expect(mockBuildDefaultEsqlQuery).toHaveBeenCalledWith({
-        anonymizationFieldsEsClient: mockEsClient.asInternalUser,
         esClient: mockEsClient.asCurrentUser,
         logger: mockLogger,
         spaceId: 'test-space',
       });
     });
 
-    it('checks the caller against the request and space', async () => {
-      mockBuildDefaultEsqlQuery.mockResolvedValueOnce(expectedQuery);
-
-      const tool = createTool();
-
-      await tool.handler({}, mockContext);
-
-      expect(mockIsAuthorizedToBuildDefaultQuery).toHaveBeenCalledWith({
-        authz: mockAuthz,
-        request: mockContext.request,
-        spaceId: 'test-space',
-      });
-    });
-
-    describe('when the caller is not authorized', () => {
-      beforeEach(() => {
-        mockIsAuthorizedToBuildDefaultQuery.mockResolvedValue(false);
-      });
-
-      it('returns an error result without building the query', async () => {
-        const tool = createTool();
-
-        const result = await tool.handler({}, mockContext);
-
-        expect(result).toEqual({
-          results: [
-            {
-              data: {
-                message: expect.stringContaining('Unauthorized'),
-              },
-              tool_result_id: expect.any(String),
-              type: ToolResultType.error,
-            },
-          ],
-        });
-        expect(mockBuildDefaultEsqlQuery).not.toHaveBeenCalled();
-      });
-
-      it('never touches the internal user client', async () => {
-        const internalClientAccess = jest.fn();
-        const guardedEsClient = Object.defineProperty(
-          { asCurrentUser: mockEsClient.asCurrentUser },
-          'asInternalUser',
-          { get: internalClientAccess }
-        );
-
-        const tool = createTool();
-
-        await tool.handler({}, { ...mockContext, esClient: guardedEsClient } as never);
-
-        expect(internalClientAccess).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when the tool cannot resolve the security services', () => {
-      it('refuses to build the query', async () => {
-        const tool = getDefaultEsqlQueryTool();
-
-        const result = await tool.handler({}, mockContext);
-
-        expect(result).toEqual({
-          results: [
-            {
-              data: {
-                message: expect.stringContaining('Unable to verify'),
-              },
-              tool_result_id: expect.any(String),
-              type: ToolResultType.error,
-            },
-          ],
-        });
-        expect(mockBuildDefaultEsqlQuery).not.toHaveBeenCalled();
-      });
-    });
-
     it('returns the query wrapped in an other-typed tool result', async () => {
       mockBuildDefaultEsqlQuery.mockResolvedValueOnce(expectedQuery);
 
-      const tool = createTool();
+      const tool = getDefaultEsqlQueryTool();
 
       const result = await tool.handler({}, mockContext);
 
@@ -200,7 +104,7 @@ describe('getDefaultEsqlQueryTool', () => {
     it('returns an error result when buildDefaultEsqlQuery throws', async () => {
       mockBuildDefaultEsqlQuery.mockRejectedValueOnce(new Error('ES connection failed'));
 
-      const tool = createTool();
+      const tool = getDefaultEsqlQueryTool();
 
       const result = await tool.handler({}, mockContext);
 
@@ -220,7 +124,7 @@ describe('getDefaultEsqlQueryTool', () => {
     it('handles non-Error thrown values', async () => {
       mockBuildDefaultEsqlQuery.mockRejectedValueOnce('unexpected string error');
 
-      const tool = createTool();
+      const tool = getDefaultEsqlQueryTool();
 
       const result = await tool.handler({}, mockContext);
 

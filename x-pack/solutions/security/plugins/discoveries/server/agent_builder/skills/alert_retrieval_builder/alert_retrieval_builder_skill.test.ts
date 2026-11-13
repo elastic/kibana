@@ -9,10 +9,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 
-import { createAlertRetrievalBuilderSkill } from './alert_retrieval_builder_skill';
+import { alertRetrievalBuilderSkill } from './alert_retrieval_builder_skill';
 import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from '../tools/get_default_esql_query_tool';
-
-const alertRetrievalBuilderSkill = createAlertRetrievalBuilderSkill();
 
 describe('alertRetrievalBuilderSkill', () => {
   it('passes validateSkillDefinition without error', async () => {
