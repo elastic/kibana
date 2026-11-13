@@ -34,8 +34,8 @@ export interface TableSkeletonProps {
   /** Read out in place of the table while it loads. */
   contentAriaLabel: string;
   /**
-   * Set on the skeleton, with `HeaderRow` and `Row` appended for the rows, so a caller's tests
-   * address its own skeleton.
+   * Set on the skeleton, with `HeaderRow` and `Row<index>` (zero-based) appended for the rows, so a
+   * caller's tests address its own skeleton.
    */
   dataTestSubj: string;
 }
@@ -67,7 +67,7 @@ export const TableSkeleton = ({
             </EuiFlexItem>
             <EuiHorizontalRule margin="none" />
             {Array.from({ length: rowCount }, (_, row) => (
-              <EuiFlexItem key={row} data-test-subj={`${dataTestSubj}Row`}>
+              <EuiFlexItem key={row} data-test-subj={`${dataTestSubj}Row${row}`}>
                 <TableSkeletonRow columns={columns} barHeight={euiTheme.size.base} />
               </EuiFlexItem>
             ))}

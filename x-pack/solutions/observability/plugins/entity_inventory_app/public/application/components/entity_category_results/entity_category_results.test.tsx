@@ -134,7 +134,7 @@ describe('EntityCategoryResults', () => {
     const headerRows = within(skeleton).getAllByTestId('entityInventoryTableSkeletonHeaderRow');
     expect(headerRows).toHaveLength(1);
     expect(headerRows[0].textContent).toBe('');
-    expect(within(skeleton).getAllByTestId('entityInventoryTableSkeletonRow')).toHaveLength(8);
+    expect(within(skeleton).getAllByTestId(/^entityInventoryTableSkeletonRow\d+$/)).toHaveLength(8);
     expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
 

@@ -33,7 +33,9 @@ describe('TableSkeleton', () => {
     const headerRows = within(skeleton).getAllByTestId('thingsSkeletonHeaderRow');
     expect(headerRows).toHaveLength(1);
     expect(headerRows[0].textContent).toBe('');
-    expect(within(skeleton).getAllByTestId('thingsSkeletonRow')).toHaveLength(3);
+    expect(within(skeleton).getAllByTestId(/^thingsSkeletonRow\d+$/)).toHaveLength(3);
+    expect(within(skeleton).getByTestId('thingsSkeletonRow0')).toBeInTheDocument();
+    expect(within(skeleton).getByTestId('thingsSkeletonRow2')).toBeInTheDocument();
   });
 
   it('draws a bar per column in every row', () => {
@@ -42,7 +44,7 @@ describe('TableSkeleton', () => {
     const skeleton = screen.getByTestId('thingsSkeleton');
     const rows = [
       ...within(skeleton).getAllByTestId('thingsSkeletonHeaderRow'),
-      ...within(skeleton).getAllByTestId('thingsSkeletonRow'),
+      ...within(skeleton).getAllByTestId(/^thingsSkeletonRow\d+$/),
     ];
     expect(rows).toHaveLength(3);
     rows.forEach((row) => {
