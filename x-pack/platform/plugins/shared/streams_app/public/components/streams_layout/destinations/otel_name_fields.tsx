@@ -145,6 +145,7 @@ const OtelNameInputs = ({
           css={datasetStyles}
           value={value.dataset}
           disabled={disabled}
+          isInvalid={Boolean(errorText)}
           onChange={(event) => onChange({ ...value, dataset: event.target.value })}
           onBlur={onBlur}
           placeholder={DATASET_PLACEHOLDER}
@@ -160,6 +161,7 @@ const OtelNameInputs = ({
           css={nameInputStyles}
           value={value.namespace}
           disabled={disabled}
+          isInvalid={Boolean(errorText)}
           onChange={(event) => onChange({ ...value, namespace: event.target.value })}
           onBlur={onBlur}
           placeholder={NAMESPACE_PLACEHOLDER}

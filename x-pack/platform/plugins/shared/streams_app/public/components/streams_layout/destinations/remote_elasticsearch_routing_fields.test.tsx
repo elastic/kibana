@@ -193,6 +193,17 @@ describe('RemoteElasticsearchRoutingFields', () => {
     expect(screen.getByText('Dataset and namespace cannot be "." or "..".')).toBeInTheDocument();
   });
 
+  it('marks both inputs of a signal with an error as invalid', () => {
+    renderRouting({
+      initial: { auto: false, staticNaming: 'perSignal' },
+      errors: { logsIndex: 'uppercase' },
+    });
+
+    expect(screen.getByTestId('streamsCreateDestination-logs-indexDataset')).toBeInvalid();
+    expect(screen.getByTestId('streamsCreateDestination-logs-indexNamespace')).toBeInvalid();
+    expect(screen.getByTestId('streamsCreateDestination-metrics-indexDataset')).toBeValid();
+  });
+
   it('shows the required error in place of the per-signal help', () => {
     renderRouting({
       initial: { auto: false, staticNaming: 'perSignal' },
