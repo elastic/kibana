@@ -4,9 +4,10 @@ Static check to prevent banned modules (such as `@elastic/eui`) from being impor
 
 ```sh
 node scripts/check_server_import_graph
+node scripts/check_server_import_graph --module react-dom --module @elastic/charts # ad-hoc: look for other modules
 ```
 
-It also runs as part of `node scripts/check` and as a CI quick check.
+It also runs as part of `node scripts/check` and as a CI quick check, both without flags, so the enforced set is always `BANNED_NODE_MODULES`. `--module` replaces that set for a single run, to see what it would take to ban another module.
 
 ## What it does
 

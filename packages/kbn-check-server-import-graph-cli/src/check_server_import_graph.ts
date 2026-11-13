@@ -27,7 +27,7 @@ import {
  * module name, so `@elastic/eui/lib/...` is caught while the pure `@elastic/eui-theme-*` packages
  * are not.
  */
-const BANNED_NODE_MODULES: ReadonlySet<string> = new Set(['@elastic/eui']);
+export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set(['@elastic/eui']);
 
 const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
 
@@ -53,7 +53,7 @@ const findEntryPaths = (resolver: ImportResolver): string[] => {
 
 const reportViolations = (log: ToolingLog, violations: Violation[]): void => {
   log.error(
-    `${violations.length} browser-only import(s) are reachable from the Kibana server entry points:`
+    `${violations.length} banned import(s) are reachable from the Kibana server entry points:`
   );
   for (const { importer, nodeModule, request, chain } of violations) {
     log.write('');
@@ -79,15 +79,18 @@ export interface CheckOptions {
   log: ToolingLog;
   /** Absolute paths to start from instead of every server entry point in the repo. */
   entryPaths?: string[];
+  /** Node modules to look for instead of `BANNED_NODE_MODULES`. */
+  bannedNodeModules?: ReadonlySet<string>;
 }
 
 /**
  * Walks the import graph from every server entry point and fails when a source file reachable
- * from it imports a browser-only node module.
+ * from it imports a banned node module.
  */
 export const checkServerImportGraph = async ({
   log,
   entryPaths: entryPathsOverride,
+  bannedNodeModules = BANNED_NODE_MODULES,
 }: CheckOptions): Promise<boolean> => {
   const resolver = ImportResolver.create(REPO_ROOT);
   const locator = new ImportLocator({ ignoreTypeOnly: true });
@@ -112,7 +115,7 @@ export const checkServerImportGraph = async ({
   const { violations, fileCount } = walkServerImportGraph({
     entryPaths,
     getImports,
-    bannedNodeModules: BANNED_NODE_MODULES,
+    bannedNodeModules,
   });
 
   if (violations.length > 0) {
@@ -122,7 +125,7 @@ export const checkServerImportGraph = async ({
 
   log.success(
     `${fileCount} source files reachable from ${entryPaths.length} server entry points; ` +
-      `no browser-only imports`
+      `no imports of ${[...bannedNodeModules].join(', ')}`
   );
   return true;
 };

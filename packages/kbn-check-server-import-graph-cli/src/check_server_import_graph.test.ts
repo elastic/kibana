@@ -17,11 +17,14 @@ import { checkServerImportGraph } from './check_server_import_graph';
 const fixture = (...segments: string[]): string =>
   Path.resolve(__dirname, '__fixtures__', ...segments);
 
-const run = async (entry: string): Promise<{ passed: boolean; output: string }> => {
+const run = async (
+  entry: string,
+  bannedNodeModules?: ReadonlySet<string>
+): Promise<{ passed: boolean; output: string }> => {
   const log = new ToolingLog();
   const writer = new ToolingLogCollectingWriter();
   log.setWriters([writer]);
-  const passed = await checkServerImportGraph({ log, entryPaths: [entry] });
+  const passed = await checkServerImportGraph({ log, entryPaths: [entry], bannedNodeModules });
   return { passed, output: writer.messages.join('') };
 };
 
@@ -30,7 +33,7 @@ describe('checkServerImportGraph', () => {
     const { passed, output } = await run(fixture('plugin', 'server', 'index.ts'));
 
     expect(passed).toBe(false);
-    expect(output).toContain('1 browser-only import(s)');
+    expect(output).toContain('1 banned import(s)');
     expect(output).toContain('imports @elastic/eui (`@elastic/eui/lib/services`)');
 
     const chain = [
@@ -44,6 +47,13 @@ describe('checkServerImportGraph', () => {
     );
     expect(positions).not.toContain(-1);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  });
+
+  it('looks for the given node modules instead of the default set', async () => {
+    const entry = fixture('plugin', 'server', 'index.ts');
+
+    expect((await run(entry, new Set(['lodash']))).passed).toBe(true);
+    expect((await run(entry, new Set(['lodash', '@elastic/eui']))).passed).toBe(false);
   });
 
   it('passes when @elastic/eui is only imported as a type', async () => {

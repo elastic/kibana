@@ -13,19 +13,30 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { checkServerImportGraph } from './src/check_server_import_graph';
 
 run(
-  async ({ log }) => {
-    const passed = await checkServerImportGraph({ log });
+  async ({ log, flagsReader }) => {
+    const modules = flagsReader.arrayOfStrings('module');
+    const passed = await checkServerImportGraph({
+      log,
+      bannedNodeModules: modules?.length ? new Set(modules) : undefined,
+    });
 
     if (!passed) {
       throw createFailError(
-        'Browser-only node modules are reachable from the Kibana server. See the errors above.'
+        'Banned node modules are reachable from the Kibana server. See the errors above.'
       );
     }
   },
   {
-    usage: 'node scripts/check_server_import_graph',
+    usage: 'node scripts/check_server_import_graph [--module <name>]...',
     description:
-      'Statically walks the import graph from every server entry point and fails when @elastic/eui ' +
-      'is reachable from it.',
+      'Statically walks the import graph from every server entry point and fails when a banned ' +
+      'node module (@elastic/eui by default) is reachable from it.',
+    flags: {
+      string: ['module'],
+      help: `
+        --module <name>  Node module to look for instead of the default banned set, for ad-hoc
+                         exploration. Can be passed multiple times.
+      `,
+    },
   }
 );
