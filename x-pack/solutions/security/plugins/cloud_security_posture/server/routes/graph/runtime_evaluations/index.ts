@@ -13,6 +13,7 @@ export {
   ENRICHMENT_PHASES,
 } from './enrichment_query';
 export type { BuildIntegrationRuntimeEvalsOptions, EnrichmentPhase } from './enrichment_query';
+export { isFlattenedRootAmbiguityError } from './flattened_subfields';
 
 export { aws_bedrockEvaluations } from './integrations/aws_bedrock';
 export { aws_bedrock_agentcoreEvaluations } from './integrations/aws_bedrock_agentcore';

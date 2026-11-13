@@ -110,8 +110,8 @@ version:
 | Key mapped as a regular field (data indexed without the package, dynamic mapping) | the value | null |
 | Not mapped at all | null | null |
 
-Neither read errors in any of these cases, including when one query covers indices with different
-mappings, so a wrong choice silently drops the actor or target. ES reads keys of flattened fields
+Neither read errors on an index with one of these mappings, so a wrong choice silently drops the
+actor or target. ES reads keys of flattened fields
 as columns from [elastic/elasticsearch#164665](https://github.com/elastic/elasticsearch/pull/164665),
 which is behind the `esql_flattened_subfields` feature flag (on in snapshot builds, off in
 releases), so dev stacks on a recent snapshot read the dotted path even on flattened mappings.
@@ -127,6 +127,20 @@ COALESCE(m365_defender.event.additional_fields.SourceAccountSid,
 literal, so each read names its root and key explicitly. A root whose name starts with a digit is
 quoted with backticks in both reads (`` `cisco_meraki.8021x_eap_success.vap` `` and
 `` FIELD_EXTRACT(`cisco_meraki.8021x_eap_success`, "vap") ``).
+
+When one query covers an index where the root is `flattened` and another where the key is mapped
+as a regular field (so the root is an object), ES 9.6 rejects `FIELD_EXTRACT` on that root:
+
+```
+verification_exception: Cannot use field [m365_defender.event.additional_fields] due to ambiguities
+being mapped as [2] incompatible types: [flattened] in [<index>], [object] in [<index>]
+```
+
+The dotted path alone doesn't trip this, because it names the key, not the root. `fetchEvents`
+catches this error for any root in `FLATTENED_SUBFIELD_READS` (`flattened_subfields.ts`) and reruns
+the query with the dotted path alone (`buildIntegrationRuntimeEvals({ useFieldExtract: false })`).
+The rerun reads the indices that map the key as a regular field and returns null for the
+`flattened` ones, instead of failing the whole graph.
 
 ---
 

@@ -7,6 +7,7 @@
 
 import { allIntegrationEvaluations } from './registry';
 import type { IntegrationEvaluations } from './types';
+import { withoutFieldExtract } from './flattened_subfields';
 import {
   formatCaseAssignment,
   mergeAssignments,
@@ -35,6 +36,11 @@ export interface BuildIntegrationRuntimeEvalsOptions {
    * Default: none skipped.
    */
   skipColumns?: readonly string[];
+  /**
+   * Read keys of flattened fields with `COALESCE(<root>.<key>, FIELD_EXTRACT(<root>, "<key>"))`.
+   * When false, only the dotted path is read. Default: true.
+   */
+  useFieldExtract?: boolean;
 }
 
 function defaultIntegrationIds(): string[] {
@@ -117,5 +123,6 @@ export function buildIntegrationRuntimeEvals(
     lines.push(`| EVAL\n${body}`);
   }
 
-  return `${lines.join('\n')}\n`;
+  const esql = `${lines.join('\n')}\n`;
+  return options.useFieldExtract === false ? withoutFieldExtract(esql) : esql;
 }
