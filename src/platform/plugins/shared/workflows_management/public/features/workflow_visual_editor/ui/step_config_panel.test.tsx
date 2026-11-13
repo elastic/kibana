@@ -19,118 +19,9 @@ import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './ste
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
 
-jest.mock('@kbn/code-editor', () => {
-  const MockReact = jest.requireActual('react');
-  return {
-    monaco: {
-      languages: {
-        getLanguages: () => [],
-        register: () => undefined,
-        setMonarchTokensProvider: () => undefined,
-        setLanguageConfiguration: () => undefined,
-      },
-    },
-    CodeEditor: (props: {
-      value: string;
-      languageId: string;
-      onChange?: (
-        v: string,
-        event?: { changes: Array<{ rangeOffset: number; text: string }> }
-      ) => void;
-      dataTestSubj?: string;
-      'aria-label'?: string;
-      placeholder?: string;
-      editorDidMount?: (editor: {
-        focus: () => void;
-        onKeyDown: (cb: (event: unknown) => void) => void;
-        onDidBlurEditorText: (cb: () => void) => void;
-        setSelection: (range: unknown) => void;
-        executeEdits: (
-          source: string,
-          edits: Array<{ range: { startColumn: number; endColumn: number }; text: string }>
-        ) => void;
-        getModel: () => {
-          getOffsetAt: (pos: { lineNumber: number; column: number }) => number;
-          getPositionAt: (offset: number) => { lineNumber: number; column: number };
-          getValueLength: () => number;
-        };
-        getPosition: () => { lineNumber: number; column: number };
-        setPosition: (pos: { lineNumber: number; column: number }) => void;
-        revealPosition: (pos: { lineNumber: number; column: number }) => void;
-        getValue: () => string;
-      }) => void;
-    }) => {
-      const textareaRef = (
-        MockReact.useRef as <T>(val: T | null) => React.MutableRefObject<T | null>
-      )<HTMLTextAreaElement>(null);
-      const blurRef = (MockReact.useRef as <T>(val: T | null) => React.MutableRefObject<T | null>)<
-        () => void
-      >(null);
-      MockReact.useEffect(() => {
-        props.editorDidMount?.({
-          focus: () => textareaRef.current?.focus(),
-          onKeyDown: () => undefined,
-          onDidBlurEditorText: (cb: () => void) => {
-            blurRef.current = cb;
-          },
-          setSelection: () => undefined,
-          // Like Monaco: apply the edit to the (single-line) text and report it as a change.
-          executeEdits: (
-            _source: string,
-            edits: Array<{
-              range: { startColumn: number; endColumn: number };
-              text: string;
-            }>
-          ) => {
-            const [{ range, text }] = edits;
-            const start = range.startColumn - 1;
-            const end = range.endColumn - 1;
-            const next = `${props.value.slice(0, start)}${text}${props.value.slice(end)}`;
-            props.onChange?.(next, { changes: [{ rangeOffset: start, text }] });
-          },
-          getValue: () => props.value,
-          getModel: () => ({
-            getOffsetAt: () => textareaRef.current?.selectionStart ?? props.value.length,
-            getPositionAt: (offset: number) => ({ lineNumber: 1, column: offset + 1 }),
-            getValueLength: () => props.value.length,
-          }),
-          getPosition: () => ({
-            lineNumber: 1,
-            column: (textareaRef.current?.selectionStart ?? props.value.length) + 1,
-          }),
-          setPosition: (pos: { lineNumber: number; column: number }) => {
-            const offset = Math.max(0, pos.column - 1);
-            textareaRef.current?.setSelectionRange(offset, offset);
-          },
-          revealPosition: () => undefined,
-        });
-      }, [props]);
-      return (
-        <textarea
-          ref={textareaRef}
-          data-test-subj={props.dataTestSubj ?? 'mocked-code-editor'}
-          data-language={props.languageId}
-          aria-label={props['aria-label']}
-          placeholder={props.placeholder}
-          value={props.value}
-          onBlur={() => blurRef.current?.()}
-          onChange={(e) => {
-            const next = e.target.value;
-            const caret = e.target.selectionStart ?? next.length;
-            props.onChange?.(next, {
-              changes: [
-                {
-                  rangeOffset: caret - (next.length - props.value.length),
-                  text: next.slice(Math.max(0, caret - 1), caret),
-                },
-              ],
-            });
-          }}
-        />
-      );
-    },
-  };
-});
+jest.mock('@kbn/code-editor', () =>
+  jest.requireActual('../test_utils/mock_code_editor').createCodeEditorModuleMock()
+);
 
 jest.mock('@kbn/monaco', () => ({
   XJSON_LANG_ID: 'xjson',
@@ -157,24 +48,9 @@ jest.mock('@kbn/esql-editor', () => {
       }),
   };
 });
-jest.mock('@kbn/workflows-ui', () => ({
-  workflowsEditorChromeOverrides: {},
-  ensureWorkflowGraphEuiIcons: jest.fn(),
-  loadTypeIconMasks: () => Promise.resolve({}),
-  resolveNodeChipStyle: () => ({
-    background: 'bg',
-    border: 'border',
-    iconColor: 'icon',
-    isBrand: false,
-  }),
-  stepSupportsErrorHandling: (stepType: string | undefined) =>
-    Boolean(
-      stepType && !['if', 'foreach', 'parallel', 'while', 'merge', 'atomic'].includes(stepType)
-    ),
-  // Loops take the panel section, though their canvas node has no fallback port.
-  stepSupportsErrorHandlingSettings: (stepType: string | undefined) =>
-    Boolean(stepType && !['if', 'parallel', 'merge', 'atomic'].includes(stepType)),
-}));
+jest.mock('@kbn/workflows-ui', () =>
+  jest.requireActual('../test_utils/mock_workflows_ui').createWorkflowsUiModuleMock()
+);
 jest.mock('../model/use_step_output_samples', () => ({
   useStepOutputSamples: () => ({ byStep: {}, isFullRunInProgress: false }),
 }));

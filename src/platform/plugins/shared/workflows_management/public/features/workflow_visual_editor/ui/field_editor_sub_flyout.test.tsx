@@ -12,13 +12,13 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import type { DataReferenceCatalog, DataReferenceItem } from '../lib/build_data_reference_catalog';
+import { mockCodeEditorState } from '../test_utils/mock_code_editor';
 
 jest.mock('@kbn/monaco', () => ({ XJSON_LANG_ID: 'xjson' }));
 
-jest.mock('@kbn/workflows-ui', () => ({
-  workflowsEditorChromeOverrides: {},
-  loadTypeIconMasks: () => Promise.resolve({}),
-}));
+jest.mock('@kbn/workflows-ui', () =>
+  jest.requireActual('../test_utils/mock_workflows_ui').createWorkflowsUiModuleMock()
+);
 
 jest.mock('./data_reference_catalog_tree', () => ({
   DataReferenceCatalogTree: ({ onInsert }: { onInsert: (token: string) => void }) => (
@@ -54,84 +54,12 @@ jest.mock('./reference_capable_field', () => ({
     }),
 }));
 
-/** Single-line stand-in for Monaco: a textarea whose `executeEdits` really edits the text. */
-const mockEditorProps: { dropColumn: number } = { dropColumn: 1 };
-interface MockCodeEditorProps {
-  value: string;
-  languageId: string;
-  dataTestSubj?: string;
-  onChange?: (v: string, event?: { changes: Array<{ rangeOffset: number; text: string }> }) => void;
-  editorDidMount?: (editor: unknown) => void;
-}
+jest.mock('@kbn/code-editor', () =>
+  jest.requireActual('../test_utils/mock_code_editor').createCodeEditorModuleMock()
+);
 
-jest.mock('@kbn/code-editor', () => {
-  const MockReact = jest.requireActual('react');
-  return {
-    monaco: {
-      languages: {
-        getLanguages: () => [],
-        register: () => undefined,
-        setMonarchTokensProvider: () => undefined,
-        setLanguageConfiguration: () => undefined,
-      },
-    },
-    CodeEditor: (props: MockCodeEditorProps) => {
-      const textareaRef = MockReact.useRef(null);
-      const valueRef = MockReact.useRef(props.value);
-      valueRef.current = props.value;
-      const callbacksRef = MockReact.useRef(props);
-      callbacksRef.current = {
-        ...callbacksRef.current,
-        editorDidMount: props.editorDidMount,
-        onChange: props.onChange,
-      };
-      // Mount once, like Monaco.
-      MockReact.useEffect(() => {
-        callbacksRef.current.editorDidMount?.({
-          focus: () => textareaRef.current?.focus(),
-          getModel: () => ({
-            getOffsetAt: (pos: { column: number }) => pos.column - 1,
-            getPositionAt: (offset: number) => ({ lineNumber: 1, column: offset + 1 }),
-            getValueLength: () => valueRef.current.length,
-          }),
-          getPosition: () => ({
-            lineNumber: 1,
-            column: (textareaRef.current?.selectionStart ?? valueRef.current.length) + 1,
-          }),
-          setPosition: (pos: { column: number }) =>
-            textareaRef.current?.setSelectionRange(pos.column - 1, pos.column - 1),
-          revealPosition: () => undefined,
-          getTargetAtClientPoint: () => ({
-            position: { lineNumber: 1, column: mockEditorProps.dropColumn },
-          }),
-          executeEdits: (
-            _source: string,
-            edits: Array<{ range: { startColumn: number; endColumn: number }; text: string }>
-          ) => {
-            const [{ range, text }] = edits;
-            const current = valueRef.current;
-            const start = range.startColumn - 1;
-            const next = `${current.slice(0, start)}${text}${current.slice(range.endColumn - 1)}`;
-            callbacksRef.current.onChange?.(next, { changes: [{ rangeOffset: start, text }] });
-          },
-        });
-      }, []);
-      return (
-        <textarea
-          ref={textareaRef}
-          data-test-subj={props.dataTestSubj ?? 'mocked-code-editor'}
-          data-language={props.languageId}
-          value={props.value}
-          onChange={(e) =>
-            props.onChange?.(e.target.value, {
-              changes: [{ rangeOffset: 0, text: e.target.value }],
-            })
-          }
-        />
-      );
-    },
-  };
-});
+/** The shared editor mock's knobs (`dropColumn`: where a drop lands). */
+const mockEditorProps = mockCodeEditorState;
 
 const item = (overrides: Partial<DataReferenceItem>): DataReferenceItem => ({
   path: 'p',

@@ -14,44 +14,13 @@ import type { ReferenceCapableBind } from './reference_capable_field';
 import { ReferenceTextInput } from './reference_text_input';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  workflowsEditorChromeOverrides: {},
-  loadTypeIconMasks: () => Promise.resolve({}),
-}));
+jest.mock('@kbn/workflows-ui', () =>
+  jest.requireActual('../test_utils/mock_workflows_ui').createWorkflowsUiModuleMock()
+);
 
-/** Like Monaco: `editorDidMount` runs once, and listeners keep the closures they were given. */
-jest.mock('@kbn/code-editor', () => {
-  const MockReact = jest.requireActual('react');
-  return {
-    CodeEditor: (props: {
-      value: string;
-      dataTestSubj?: string;
-      editorDidMount?: (editor: unknown) => void;
-    }) => {
-      const blurListener = MockReact.useRef(null);
-      const mount = MockReact.useRef(props.editorDidMount);
-      MockReact.useEffect(() => {
-        mount.current?.({
-          getModel: () => null,
-          getPosition: () => null,
-          focus: () => undefined,
-          onKeyDown: () => undefined,
-          onDidBlurEditorText: (listener: () => void) => {
-            blurListener.current = listener;
-          },
-        });
-      }, []);
-      return (
-        <textarea
-          data-test-subj={props.dataTestSubj}
-          value={props.value}
-          readOnly
-          onBlur={() => blurListener.current?.()}
-        />
-      );
-    },
-  };
-});
+jest.mock('@kbn/code-editor', () =>
+  jest.requireActual('../test_utils/mock_code_editor').createCodeEditorModuleMock()
+);
 
 const catalog: DataReferenceCatalog = { groups: [] };
 
