@@ -1000,7 +1000,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       void installAesopExplorerAgent({
         agentBuilder: plugins.agentBuilder,
         spaceId: DEFAULT_SPACE_ID,
-      }).catch((error: unknown) => {
+      }).catch((error) => {
         logger.warn('Failed to install the AESOP explorer agent', { error });
       });
     }

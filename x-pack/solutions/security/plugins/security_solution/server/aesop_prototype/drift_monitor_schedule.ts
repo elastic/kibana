@@ -17,7 +17,7 @@ import {
   type AesopDriftMonitorWorkflowTemplateValues,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server';
+import type { SecurityManagedWorkflowsClient } from '../workflows/managed_workflows';
 import {
   AESOP_DRIFT_MONITOR_INTERVAL_MINUTES,
   AESOP_DRIFT_MONITOR_LOOKBACK_MINUTES,
@@ -77,7 +77,7 @@ const legacyWorkflowIdSuffix = (skillId: string): string | undefined => {
 // installed or removed the current monitor. Monitors created before the
 // concrete-space change were written to the global space, so it is checked too.
 const removeLegacyMonitor = async (
-  client: PluginScopedManagedWorkflowsApi,
+  client: SecurityManagedWorkflowsClient,
   logger: Logger,
   spaceId: string,
   skillId: string
@@ -109,7 +109,7 @@ export const aesopDriftMonitorDocumentId = (skillId: string): string =>
   `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-${aesopDriftMonitorWorkflowIdSuffix(skillId)}`;
 
 export interface AesopDriftMonitorDeps {
-  getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
+  getManagedWorkflowsClient: () => Promise<SecurityManagedWorkflowsClient>;
   /** Optional at the plugin boundary so a deployment without workflows management cannot enable monitors. */
   workflowsManagement?: AesopDriftMonitorEnablementApi;
   logger: Logger;

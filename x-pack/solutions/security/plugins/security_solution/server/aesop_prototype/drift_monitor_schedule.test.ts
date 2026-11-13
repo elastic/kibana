@@ -8,12 +8,12 @@
 import { AESOP_DRIFT_MONITOR_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { loggerMock } from '@kbn/logging-mocks';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server';
 import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type { SecurityManagedWorkflowsClient } from '../workflows/managed_workflows';
 import {
   aesopDriftMonitorDocumentId,
   aesopDriftMonitorWorkflowIdSuffix,
@@ -133,7 +133,7 @@ const createClient = (legacyOwners: LegacyOwners = {}) => {
     install: jest.fn().mockResolvedValue(undefined),
     uninstall,
     getInstalledWorkflowState,
-  } as unknown as PluginScopedManagedWorkflowsApi;
+  } as unknown as SecurityManagedWorkflowsClient;
   return { client, uninstall };
 };
 

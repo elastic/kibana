@@ -183,7 +183,7 @@ export const initRoutes = (
       router,
       getStartServices,
       logger,
-      getEnablementApi,
+      getEnablementApi: getEnablementApi ?? (() => undefined),
     });
   }
 
