@@ -116,6 +116,17 @@ export const runScenario = async (
   }
 };
 
+/** Whether a flow meets the expectation of a scenario, without failing a test when it does not. */
+export const passesOn = async (scenario: Scenario, flow: SuggestFlow): Promise<boolean> => {
+  try {
+    assertExpectation(await runScenario(scenario, flow), scenario.expect);
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
 /** Declares one test per scenario and flow. */
 export const describeScenarios = (
   { command, scenarios }: ScenarioTable,

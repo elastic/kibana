@@ -32,3 +32,13 @@ export const limitScenarios: ScenarioTable = {
 
 `describeScenarios(table)` declares one test per row and per flow in `SUGGEST_FLOWS`. While
 two autocomplete flows exist, both are listed there and every row has to pass on both.
+
+## Parity with the new flow
+
+`parity.test.ts` runs every table through the grammar-driven flow (`language/autocomplete_v2`)
+and counts the rows that already match. No row fails that test: the counts are kept in a
+snapshot, so a change that moves them, up or down, shows in its diff. Update the snapshot with
+`node scripts/jest <path to parity.test.ts> -u`.
+
+Read the counts with care early on: a row that expects nothing, or only that some items are
+absent, matches a flow that offers little.
