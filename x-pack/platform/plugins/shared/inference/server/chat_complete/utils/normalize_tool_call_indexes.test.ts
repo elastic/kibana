@@ -52,6 +52,82 @@ describe('normalizeToolCallIndexes', () => {
     expect(indexesOf(events)).toEqual([0, 0, 0, 1, 1]);
   });
 
+  it('starts a tool call for an id-less chunk at a source index that has none, and continues it', async () => {
+    const events = await normalize(
+      toolCallChunk({ index: 0, name: 'toolA', args: '{"foo":' }),
+      toolCallChunk({ index: 0, args: '"bar"}' })
+    );
+
+    expect(indexesOf(events)).toEqual([0, 0]);
+  });
+
+  it('does not let an id-less tool call collide with the index of a later real toolCallId', async () => {
+    const events = await normalize(
+      toolCallChunk({ index: 0, name: 'toolA', args: '{}' }),
+      toolCallChunk({ index: 0, toolCallId: 'b', name: 'toolB' }),
+      toolCallChunk({ index: 0, args: '{}' })
+    );
+
+    expect(indexesOf(events)).toEqual([0, 1, 1]);
+  });
+
+  describe('generated tool call ids', () => {
+    const toolCallIdsOf = (
+      events: Array<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>
+    ) =>
+      events.flatMap((event) =>
+        event.type === ChatCompletionEventType.ChatCompletionChunk
+          ? event.tool_calls.map((toolCall) => toolCall.toolCallId)
+          : []
+      );
+
+    it('gives a tool call that starts without a toolCallId a non-empty id on its first chunk only', async () => {
+      const events = await normalize(
+        toolCallChunk({ index: 0, name: 'toolA', args: '{"foo":' }),
+        toolCallChunk({ index: 0, args: '"bar"}' })
+      );
+
+      expect(toolCallIdsOf(events)).toEqual(['generated_tool_call_0', '']);
+    });
+
+    it('gives distinct ids to id-less tool calls at different source indexes', async () => {
+      const events = await normalize(
+        toolCallChunk({ index: 0, name: 'toolA', args: '{}' }),
+        toolCallChunk({ index: 1, name: 'toolB', args: '{}' })
+      );
+
+      expect(toolCallIdsOf(events)).toEqual(['generated_tool_call_0', 'generated_tool_call_1']);
+    });
+
+    it('prefixes generated ids with the given generatedIdPrefix', async () => {
+      const events = await lastValueFrom(
+        of(toolCallChunk({ index: 0, name: 'toolA', args: '{}' })).pipe(
+          normalizeToolCallIndexes({ generatedIdPrefix: 'run_a' }),
+          toArray()
+        )
+      );
+
+      expect(toolCallIdsOf(events)).toEqual(['run_a_0']);
+    });
+
+    it('leaves provider ids untouched', async () => {
+      const events = await normalize(
+        toolCallChunk({ index: 0, toolCallId: 'a', name: 'toolA' }),
+        toolCallChunk({ index: 0, args: '{}' })
+      );
+
+      expect(toolCallIdsOf(events)).toEqual(['a', '']);
+    });
+
+    it('generates the same ids every time a stream is normalized', async () => {
+      const source = [toolCallChunk({ index: 0, name: 'toolA', args: '{}' })];
+
+      expect(toolCallIdsOf(await normalize(...source))).toEqual(
+        toolCallIdsOf(await normalize(...source))
+      );
+    });
+  });
+
   it('keeps indexes unchanged for providers that already emit distinct indexes', async () => {
     const events = await normalize(
       toolCallChunk({ index: 0, toolCallId: 'a', name: 'toolA' }),

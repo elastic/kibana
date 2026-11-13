@@ -418,24 +418,54 @@ describe('mergeChunks', () => {
     });
   });
 
-  it('throws an error when a tool call has no toolCallId and no previous chunk set it for that index', async () => {
-    expect(() => {
-      mergeChunks([
-        {
-          content: '',
-          type: ChatCompletionEventType.ChatCompletionChunk,
-          tool_calls: [
-            {
-              function: {
-                name: 'myFunction',
-                arguments: '{ "foo": "bar" }',
-              },
-              index: 0,
-              toolCallId: '', // Empty toolCallId without a previous chunk setting it
-            },
-          ],
-        },
+  describe('when the provider never sends a toolCallId', () => {
+    const chunk = (name: string, args: string, index = 0, toolCallId = '') => ({
+      content: '',
+      type: ChatCompletionEventType.ChatCompletionChunk as const,
+      tool_calls: [{ function: { name, arguments: args }, index, toolCallId }],
+    });
+
+    it('keeps a single id-less delta as one tool call', () => {
+      const message = mergeChunks([chunk('myFunction', '{ "foo": "bar" }')]);
+
+      expect(message.tool_calls).toEqual([
+        { function: { name: 'myFunction', arguments: '{ "foo": "bar" }' }, toolCallId: '' },
       ]);
-    }).toThrow('Tool call key is missing for index 0');
+    });
+
+    it('merges id-less continuation deltas into the tool call they started', () => {
+      const message = mergeChunks([
+        chunk('myFunction', ''),
+        chunk('', '{ "foo":'),
+        chunk('', ' "bar" }'),
+      ]);
+
+      expect(message.tool_calls).toEqual([
+        { function: { name: 'myFunction', arguments: '{ "foo": "bar" }' }, toolCallId: '' },
+      ]);
+    });
+
+    it('keeps id-less tool calls at different indexes separate', () => {
+      const message = mergeChunks([
+        chunk('func1', '{}', 0),
+        chunk('func2', '{}', 1),
+        chunk('', '', 0),
+      ]);
+
+      expect(message.tool_calls.map((call) => call.function.name)).toEqual(['func1', 'func2']);
+    });
+
+    it('keeps a tool call with a real id separate from an id-less one at the same index', () => {
+      const message = mergeChunks([
+        chunk('func1', '{ "a": 1 }'),
+        chunk('func2', '', 0, '002'),
+        chunk('', '{ "b": 2 }'),
+      ]);
+
+      expect(message.tool_calls).toEqual([
+        { function: { name: 'func1', arguments: '{ "a": 1 }' }, toolCallId: '' },
+        { function: { name: 'func2', arguments: '{ "b": 2 }' }, toolCallId: '002' },
+      ]);
+    });
   });
 });
