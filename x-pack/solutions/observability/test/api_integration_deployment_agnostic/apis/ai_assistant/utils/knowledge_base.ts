@@ -54,6 +54,25 @@ export async function getKnowledgeBaseStatus(
   });
 }
 
+// Waits until the re-indexing lock is released, which happens only after the re-index has deleted
+// its source index - its last step.
+export async function waitForKnowledgeBaseReIndexingToComplete(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const retry = getService('retry');
+  const log = getService('log');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
+  await retry.tryForTime(5 * 60 * 1000, async () => {
+    log.debug(`Waiting for knowledge base re-indexing to complete...`);
+    const { body, status } = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
+
+    expect(status).to.be(200);
+    expect(body.isReIndexing).to.be(false);
+    log.info(`Knowledge base re-indexing has completed.`);
+  });
+}
+
 export async function waitForKnowledgeBaseReady(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
