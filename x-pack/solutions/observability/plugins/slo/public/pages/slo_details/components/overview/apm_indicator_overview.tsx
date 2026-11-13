@@ -30,7 +30,7 @@ export function ApmIndicatorOverview({ slo }: Props) {
 
   const indicator = slo.indicator;
   if (
-    !is(apmTransactionDurationIndicatorSchema, indicator) ||
+    !is(apmTransactionDurationIndicatorSchema, indicator) &&
     !is(apmTransactionErrorRateIndicatorSchema, indicator)
   ) {
     return null;
