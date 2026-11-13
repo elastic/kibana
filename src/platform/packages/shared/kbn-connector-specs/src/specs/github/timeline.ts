@@ -18,6 +18,19 @@ const RawGitIdentitySchema = lazySchema(() =>
   z.looseObject({ name: tolerant(z.string()), date: tolerant(z.string()) })
 );
 
+/**
+ * A comment grouped under a `line-commented` or `commit-commented` entry. GitHub puts the
+ * timestamp, author, id and URL of those entries here, not on the entry itself.
+ */
+const RawGroupedCommentSchema = lazySchema(() =>
+  z.looseObject({
+    id: tolerant(z.number()),
+    created_at: tolerant(z.string()),
+    user: tolerant(RawUserSchema),
+    html_url: tolerant(z.string()),
+  })
+);
+
 const RawTimelineEventSchema = lazySchema(() =>
   z.looseObject({
     id: tolerant(z.number()),
@@ -39,6 +52,7 @@ const RawTimelineEventSchema = lazySchema(() =>
     requested_reviewer: tolerant(RawUserSchema),
     requested_team: tolerant(z.looseObject({ slug: tolerant(z.string()) })),
     rename: tolerant(z.looseObject({ from: tolerant(z.string()), to: tolerant(z.string()) })),
+    comments: tolerant(z.array(tolerant(RawGroupedCommentSchema))),
     source: tolerant(
       z.looseObject({
         issue: tolerant(
@@ -72,6 +86,11 @@ export interface TimelineEvent {
   commitId?: string;
   sha?: string;
   authorName?: string;
+  /**
+   * Set on `line-commented` and `commit-commented`, which group several comments in one entry.
+   * The other fields of such an entry describe its first comment.
+   */
+  commentCount?: number;
   rename?: { from: string; to: string };
   source?: { repo: string; number: number; isPullRequest: boolean; url: string };
 }
@@ -162,13 +181,23 @@ export const normalizeTimelineEvent = (raw: object): TimelineEvent | undefined =
     requested_team: requestedTeam,
     rename,
     source,
+    comments,
   } = parsed.data;
+  // line-commented and commit-commented carry no timestamp, author, id or URL of their own:
+  // GitHub nests them in comments[], so the first comment stands in for the entry.
+  const firstComment = comments?.find((comment) => comment != null);
 
   return withoutUndefined<TimelineEvent>({
-    id: id ?? undefined,
+    id: id ?? firstComment?.id ?? undefined,
     event,
-    createdAt: createdAt ?? submittedAt ?? committer?.date ?? author?.date ?? undefined,
-    actor: actor?.login ?? user?.login ?? undefined,
+    createdAt:
+      createdAt ??
+      submittedAt ??
+      committer?.date ??
+      author?.date ??
+      firstComment?.created_at ??
+      undefined,
+    actor: actor?.login ?? user?.login ?? firstComment?.user?.login ?? undefined,
     assignee: assignee?.login ?? undefined,
     label: label?.name ?? undefined,
     stateReason: stateReason ?? undefined,
@@ -176,10 +205,11 @@ export const normalizeTimelineEvent = (raw: object): TimelineEvent | undefined =
     requestedReviewer: requestedReviewer?.login ?? undefined,
     requestedTeam: requestedTeam?.slug ?? undefined,
     authorAssociation: authorAssociation ?? undefined,
-    url: url ?? undefined,
+    url: url ?? firstComment?.html_url ?? undefined,
     commitId: commitId ?? undefined,
     sha: sha ?? undefined,
     authorName: event === 'committed' ? author?.name ?? undefined : undefined,
+    commentCount: comments ? comments.length : undefined,
     rename: toRename(rename),
     source: event === 'cross-referenced' ? toSource(source) : undefined,
   });
@@ -193,9 +223,10 @@ export const toTimelinePage = (
     const event = normalizeTimelineEvent(raw);
     return event && (!eventTypes || eventTypes.includes(event.event)) ? [event] : [];
   });
-  const hasMore = typeof headers.link === 'string' && headers.link.includes('rel="next"');
+  const nextPage = pageOfLink(headers.link, 'next') ?? null;
+  const hasMore = nextPage !== null;
   // GitHub leaves rel="last" out on the last page itself, so a page with events and no next page
   // is the last one.
   const lastPage = pageOfLink(headers.link, 'last') ?? (!hasMore && data.length > 0 ? page : null);
-  return { events, page, nextPage: hasMore ? page + 1 : null, lastPage, hasMore };
+  return { events, page, nextPage, lastPage, hasMore };
 };

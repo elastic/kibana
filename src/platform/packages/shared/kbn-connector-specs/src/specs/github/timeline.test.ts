@@ -320,6 +320,115 @@ describe('normalizeTimelineEvent', () => {
     }
   );
 
+  describe('line-commented and commit-commented', () => {
+    const firstComment = {
+      id: 501,
+      created_at: '2026-03-02T10:00:00Z',
+      user: { login: 'octocat' },
+      html_url: 'https://github.com/elastic/kibana/pull/10#discussion_r501',
+      body: 'Not returned',
+    };
+    const secondComment = {
+      id: 502,
+      created_at: '2026-03-02T11:00:00Z',
+      user: { login: 'monalisa' },
+      html_url: 'https://github.com/elastic/kibana/pull/10#discussion_r502',
+      body: 'Not returned either',
+    };
+
+    it('takes the timestamp, author, id and URL of line-commented from its first comment', () => {
+      expect(
+        normalizeTimelineEvent({
+          event: 'line-commented',
+          node_id: 'LC_1',
+          comments: [firstComment, secondComment],
+        })
+      ).toStrictEqual({
+        id: 501,
+        event: 'line-commented',
+        createdAt: '2026-03-02T10:00:00Z',
+        actor: 'octocat',
+        url: 'https://github.com/elastic/kibana/pull/10#discussion_r501',
+        commentCount: 2,
+      });
+    });
+
+    it('does the same for commit-commented and keeps its commit id', () => {
+      expect(
+        normalizeTimelineEvent({
+          event: 'commit-commented',
+          node_id: 'CC_1',
+          commit_id: 'abc123',
+          comments: [firstComment],
+        })
+      ).toStrictEqual({
+        id: 501,
+        event: 'commit-commented',
+        createdAt: '2026-03-02T10:00:00Z',
+        actor: 'octocat',
+        url: 'https://github.com/elastic/kibana/pull/10#discussion_r501',
+        commitId: 'abc123',
+        commentCount: 1,
+      });
+    });
+
+    it('never returns the comment bodies', () => {
+      const event = normalizeTimelineEvent({
+        event: 'line-commented',
+        comments: [firstComment, secondComment],
+      });
+
+      expect(JSON.stringify(event)).not.toContain('Not returned');
+    });
+
+    it('keeps the fields of the entry itself when it has them', () => {
+      const event = normalizeTimelineEvent({
+        id: 7,
+        event: 'line-commented',
+        created_at: '2026-03-01T00:00:00Z',
+        actor: { login: 'monalisa' },
+        html_url: 'https://github.com/elastic/kibana/pull/10#event-7',
+        comments: [firstComment],
+      });
+
+      expect(event).toMatchObject({
+        id: 7,
+        createdAt: '2026-03-01T00:00:00Z',
+        actor: 'monalisa',
+        url: 'https://github.com/elastic/kibana/pull/10#event-7',
+        commentCount: 1,
+      });
+    });
+
+    it('reports zero comments and no borrowed fields for an empty group', () => {
+      expect(normalizeTimelineEvent({ event: 'line-commented', comments: [] })).toStrictEqual({
+        event: 'line-commented',
+        commentCount: 0,
+      });
+    });
+
+    it('skips a malformed comment and uses the next one', () => {
+      const event = normalizeTimelineEvent({
+        event: 'line-commented',
+        comments: ['not a comment', secondComment],
+      });
+
+      expect(event).toMatchObject({ id: 502, actor: 'monalisa', commentCount: 2 });
+    });
+
+    it('keeps the event when comments is not an array', () => {
+      expect(normalizeTimelineEvent({ event: 'line-commented', comments: 'nope' })).toStrictEqual({
+        event: 'line-commented',
+      });
+    });
+
+    it('sets no commentCount on events that have no comments array', () => {
+      expect(normalizeTimelineEvent({ id: 1, event: 'labeled' })).not.toHaveProperty(
+        'commentCount'
+      );
+    });
+  });
+
   describe('with a field of an unexpected type', () => {
     it('keeps the event and drops only that field', () => {
       expect(
@@ -464,9 +573,26 @@ describe('toTimelinePage', () => {
   });
 
   it('reports the next page when the Link header has rel="next"', () => {
-    const page = toTimelinePage({ data: events, headers: { link: NEXT_LINK } }, { page: 4 });
+    const page = toTimelinePage({ data: events, headers: { link: NEXT_LINK } }, { page: 1 });
 
-    expect(page).toMatchObject({ page: 4, nextPage: 5, hasMore: true });
+    expect(page).toMatchObject({ page: 1, nextPage: 2, hasMore: true });
+  });
+
+  it('takes the next page from the rel="next" link, not from the requested page', () => {
+    const link = '<https://api.github.com/repositories/1/issues/10/timeline?page=7>; rel="next"';
+    const page = toTimelinePage({ data: events, headers: { link } }, { page: 4 });
+
+    expect(page).toMatchObject({ page: 4, nextPage: 7, hasMore: true });
+  });
+
+  it.each([
+    '<https://api.github.com/repositories/1/issues/10/timeline>; rel="next"',
+    '<https://api.github.com/repositories/1/issues/10/timeline?page=abc>; rel="next"',
+    '<http://[>; rel="next"',
+  ])('reports no more pages for a rel="next" link without a usable page number: %s', (link) => {
+    const page = toTimelinePage({ data: events, headers: { link } }, { page: 1 });
+
+    expect(page).toMatchObject({ nextPage: null, hasMore: false });
   });
 
   it('reports no more pages when the Link header has no rel="next"', () => {
