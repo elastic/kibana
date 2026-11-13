@@ -85,6 +85,7 @@
     "@kbn/std",
     "@kbn/usage-collection-plugin",
     "@kbn/unsaved-changes-prompt",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/test"
   ]
 }

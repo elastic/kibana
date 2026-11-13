@@ -1,0 +1,66 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        forgetTombstoneRequestExample:
+          summary: "Forget memories"
+          description: "Example request to forget two memories of a user, keeping their revisions until retention removes them"
+          value:
+            user_id: jdoe
+            ids:
+              - 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+              - 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
+        forgetHardDeleteRequestExample:
+          summary: "Permanently delete memories"
+          description: "Example request to remove every revision of a memory of a user"
+          value:
+            user_id: jdoe
+            ids:
+              - 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+            mode: hard_delete
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          forgetTombstoneResponseExample:
+            summary: "Memories forgotten"
+            description: "One memory was forgotten, and the other does not exist for this user"
+            value:
+              mode: tombstone
+              results:
+                - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                  outcome: forgotten
+                - id: 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
+                  outcome: not_found
+          forgetHardDeleteResponseExample:
+            summary: "Memory permanently deleted"
+            description: "Every revision of the memory was removed"
+            value:
+              mode: hard_delete
+              results:
+                - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                  outcome: deleted
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "https://${KIBANA_URL}/api/context_engine/session_memory/_forget" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H "kbn-xsrf: true" \
+        -d '{
+          "user_id": "jdoe",
+          "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10", "0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44"]
+        }'
