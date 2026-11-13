@@ -16,6 +16,7 @@ import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
+  CheckRelocationCompletedState,
   CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
   CleanupUnknownAndExcluded,
@@ -39,6 +40,7 @@ import type {
   PrepareCompatibleMigration,
   RefreshSource,
   RefreshTarget,
+  ReleaseRelocationWaitGroupsState,
   ReindexSourceToTempClosePit,
   ReindexSourceToTempIndexBulk,
   ReindexSourceToTempOpenPit,
@@ -160,6 +162,16 @@ export const nextActionMap = (
     READY_TO_REINDEX_SYNC: () =>
       Actions.synchronizeMigrators({
         waitGroup: readyToReindex,
+      }),
+    CHECK_RELOCATION_COMPLETED: (state: CheckRelocationCompletedState) =>
+      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
+    RELEASE_RELOCATION_WAIT_GROUPS: (state: ReleaseRelocationWaitGroupsState) =>
+      Actions.releaseRelocationWaitGroups({
+        client,
+        tempIndex: state.tempIndex,
+        readyToReindex,
+        doneReindexing,
+        updateRelocationAliases,
       }),
     REINDEX_SOURCE_TO_TEMP_OPEN_PIT: (state: ReindexSourceToTempOpenPit) =>
       Actions.openPit({ client, index: state.sourceIndex.value }),

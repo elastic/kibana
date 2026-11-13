@@ -341,6 +341,16 @@ export interface ReadyToReindexSyncState extends PostInitState {
   readonly controlState: 'READY_TO_REINDEX_SYNC';
 }
 
+export interface CheckRelocationCompletedState extends PostInitState {
+  /** Re-read the aliases, another Kibana node may have finished the relocation */
+  readonly controlState: 'CHECK_RELOCATION_COMPLETED';
+}
+
+export interface ReleaseRelocationWaitGroupsState extends PostInitState {
+  /** The relocation is already published, unblock sibling migrators before updating the live index */
+  readonly controlState: 'RELEASE_RELOCATION_WAIT_GROUPS';
+}
+
 export interface ReindexSourceToTempOpenPit extends SourceExistsState {
   /** Open PIT to the source index */
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT';
@@ -570,6 +580,7 @@ export interface LegacyDeleteState extends LegacyBaseState {
 
 export type State = Readonly<
   | CalculateExcludeFiltersState
+  | CheckRelocationCompletedState
   | CheckTargetTypesMappingsState
   | CheckUnknownDocumentsState
   | CheckVersionIndexReadyActions
@@ -601,6 +612,7 @@ export type State = Readonly<
   | ReadyToReindexSyncState
   | RefreshSource
   | RefreshTarget
+  | ReleaseRelocationWaitGroupsState
   | ReindexCheckClusterRoutingAllocationState
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndexBulk

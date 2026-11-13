@@ -19,6 +19,8 @@ import {
 import type {
   BaseState,
   CalculateExcludeFiltersState,
+  CheckRelocationCompletedState,
+  ReleaseRelocationWaitGroupsState,
   UpdateSourceMappingsPropertiesState,
   CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
@@ -1771,8 +1773,33 @@ describe('migrations v2 model', () => {
           type: 'source_equals_target' as const,
           index,
         });
-        const newState = model(setWriteBlockState, res);
+        const versionIndexReadyActions = Option.some([{ add: { index, alias: '.kibana' } }]);
+        const newState = model(
+          { ...setWriteBlockState, versionIndexReadyActions },
+          res
+        ) as RefreshTarget;
         expect(newState.controlState).toEqual('REFRESH_TARGET');
+        expect(newState.versionIndexReadyActions).toEqual(versionIndexReadyActions);
+      });
+
+      test('SET_SOURCE_WRITE_BLOCK -> RELEASE_RELOCATION_WAIT_GROUPS if source index matches target index and the migrator is involved in a relocation', () => {
+        const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
+          type: 'source_equals_target' as const,
+          index: `.kibana_${setWriteBlockState.kibanaVersion}_001`,
+        });
+        const newState = model(
+          {
+            ...setWriteBlockState,
+            mustRelocateDocuments: true,
+            versionIndexReadyActions: Option.some([
+              { add: { index: '.kibana_7.11.0_001', alias: '.kibana' } },
+            ]),
+          },
+          res
+        ) as ReleaseRelocationWaitGroupsState;
+        expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
+        // the aliases are already published, this migrator must not update them again
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
     });
 
@@ -1904,33 +1931,13 @@ describe('migrations v2 model', () => {
         controlState: 'READY_TO_REINDEX_SYNC',
       };
 
-      describe('if the migrator source index did NOT exist', () => {
-        test('READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
-            type: 'synchronization_successful' as const,
-            data: [],
-          });
-          const newState = model(state, res);
-          expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
+      test('READY_TO_REINDEX_SYNC -> CHECK_RELOCATION_COMPLETED if synchronization succeeds', () => {
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+          type: 'synchronization_successful' as const,
+          data: [],
         });
-      });
-
-      describe('if the migrator source index did exist', () => {
-        test('READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
-            type: 'synchronization_successful' as const,
-            data: [],
-          });
-          const newState = model(
-            {
-              ...state,
-              sourceIndex: Option.fromNullable('.kibana'),
-              sourceIndexMappings: Option.fromNullable({} as IndexMapping),
-            },
-            res
-          );
-          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
-        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CHECK_RELOCATION_COMPLETED');
       });
 
       test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
@@ -1943,6 +1950,113 @@ describe('migrations v2 model', () => {
         expect(newState.reason).toMatchInlineSnapshot(
           `"An error occurred whilst waiting for other migrators to get to this step."`
         );
+      });
+    });
+
+    describe('CHECK_RELOCATION_COMPLETED', () => {
+      const state: CheckRelocationCompletedState = {
+        ...postInitState,
+        controlState: 'CHECK_RELOCATION_COMPLETED',
+        mustRelocateDocuments: true,
+      };
+      const stateWithSource: CheckRelocationCompletedState = {
+        ...state,
+        sourceIndex: Option.some('.kibana_7.10.0_001'),
+        sourceIndexMappings: Option.some({} as IndexMapping),
+      };
+      const indexWithAliases = (index: string, aliases: string[]) => ({
+        [index]: {
+          aliases: Object.fromEntries(aliases.map((alias) => [alias, {}])),
+          mappings: { properties: {} },
+          settings: {},
+        },
+      });
+      const relocationNotPublished: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right(
+        indexWithAliases('.kibana_7.10.0_001', ['.kibana'])
+      );
+      const liveIndexMappings: IndexMapping = {
+        properties: { dashboard: { properties: { title: { type: 'text' } } } },
+      };
+      const relocationPublished: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right({
+        '.kibana_7.11.0_001': {
+          ...indexWithAliases('.kibana_7.11.0_001', ['.kibana', '.kibana_7.11.0'])[
+            '.kibana_7.11.0_001'
+          ],
+          mappings: liveIndexMappings,
+        },
+      });
+
+      describe('if the relocation is not published yet', () => {
+        test('CHECK_RELOCATION_COMPLETED -> DONE_REINDEXING_SYNC if the migrator source index did NOT exist', () => {
+          const newState = model(state, relocationNotPublished);
+          expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
+        });
+
+        test('CHECK_RELOCATION_COMPLETED -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if the migrator source index did exist', () => {
+          const newState = model(stateWithSource, relocationNotPublished);
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        });
+
+        test('CHECK_RELOCATION_COMPLETED -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if the current alias points to multiple indices', () => {
+          const res: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right({
+            ...indexWithAliases('.kibana_7.10.0_001', ['.kibana']),
+            ...indexWithAliases('.kibana_7.11.0_001', ['.kibana', '.kibana_7.11.0']),
+          });
+          const newState = model(stateWithSource, res);
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        });
+      });
+
+      describe('if another instance already published the relocation', () => {
+        it.each([
+          ['did exist', stateWithSource],
+          ['did NOT exist', state],
+        ])(
+          'CHECK_RELOCATION_COMPLETED -> RELEASE_RELOCATION_WAIT_GROUPS if the migrator source index %s',
+          (_, currentState) => {
+            const newState = model(
+              {
+                ...currentState,
+                versionIndexReadyActions: Option.some([
+                  { add: { index: '.kibana_7.11.0_001', alias: '.kibana' } },
+                ]),
+              },
+              relocationPublished
+            ) as ReleaseRelocationWaitGroupsState;
+            expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
+            // the remaining steps operate on the live index, comparing against its mappings
+            expect(newState.sourceIndex).toEqual(Option.some('.kibana_7.11.0_001'));
+            expect(newState.sourceIndexMappings).toEqual(Option.some(liveIndexMappings));
+            expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+            // the aliases are already published, this migrator must not update them again
+            expect(newState.versionIndexReadyActions).toEqual(Option.none);
+          }
+        );
+      });
+
+      test('CHECK_RELOCATION_COMPLETED -> CHECK_RELOCATION_COMPLETED if the action fails with a retryable error', () => {
+        const res: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.left({
+          type: 'retryable_es_client_error',
+          message: 'search_phase_execution_exception',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CHECK_RELOCATION_COMPLETED');
+        expect(newState.retryCount).toEqual(1);
+      });
+    });
+
+    describe('RELEASE_RELOCATION_WAIT_GROUPS', () => {
+      test('RELEASE_RELOCATION_WAIT_GROUPS -> REFRESH_TARGET', () => {
+        const state: ReleaseRelocationWaitGroupsState = {
+          ...postInitState,
+          controlState: 'RELEASE_RELOCATION_WAIT_GROUPS',
+          mustRelocateDocuments: true,
+        };
+        const res: ResponseType<'RELEASE_RELOCATION_WAIT_GROUPS'> = Either.right(
+          'relocation_wait_groups_released'
+        );
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
       });
     });
 
@@ -3323,6 +3437,14 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('DONE');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+
+      test('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE if none versionIndexReadyActions, even if mustRelocateDocuments === true', () => {
+        const newState = model(
+          { ...сheckVersionIndexReadyActionsState, mustRelocateDocuments: true },
+          res
+        );
+        expect(newState.controlState).toEqual('DONE');
       });
     });
 

@@ -164,8 +164,9 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
         `[${kibanaSplitIndex}] INIT -> RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION.`,
         `[${kibanaSplitIndex}] RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_REINDEX_TEMP.`,
         `[${kibanaSplitIndex}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
+        `[${kibanaSplitIndex}] READY_TO_REINDEX_SYNC -> CHECK_RELOCATION_COMPLETED.`,
         // no docs to reindex, as source index did NOT exist
-        `[${kibanaSplitIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`,
+        `[${kibanaSplitIndex}] CHECK_RELOCATION_COMPLETED -> DONE_REINDEXING_SYNC.`,
       ],
       { ordered: true }
     );
@@ -181,7 +182,8 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
           `[${index}] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.`,
           `[${index}] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.`,
           `[${index}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
-          `[${index}] READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT.`,
+          `[${index}] READY_TO_REINDEX_SYNC -> CHECK_RELOCATION_COMPLETED.`,
+          `[${index}] CHECK_RELOCATION_COMPLETED -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT.`,
           `[${index}] REINDEX_SOURCE_TO_TEMP_OPEN_PIT -> REINDEX_SOURCE_TO_TEMP_READ.`,
           `[${index}] REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM.`,
           `[${index}] REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK.`,
