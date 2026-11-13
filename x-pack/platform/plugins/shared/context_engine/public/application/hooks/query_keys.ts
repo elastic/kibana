@@ -11,6 +11,7 @@ export const contextEngineQueryKeys = {
   aiIndex: {
     list: () => ['context_engine', 'ai_index', 'list'] as const,
     detail: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId] as const,
+    dreaming: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId, 'dreaming'] as const,
     listKi: (
       aiIndexId: string,
       size: number,

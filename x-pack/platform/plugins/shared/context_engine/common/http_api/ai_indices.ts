@@ -88,8 +88,8 @@ export interface AiIndexFeedbackAnalysis {
 export interface AiIndexProperties {
   description?: string;
   /**
-   * @deprecated Ignored. An AI index takes memories while its `dreaming` config is set up; see
-   * `isDreamingConfigured`. Still accepted so existing callers keep compiling and working.
+   * Set `false` on a managed registration to keep memories out of the AI index; see
+   * `takesMemories`. Ignored from API callers, whose AI indices always take memories.
    */
   memory_enabled?: boolean;
   dest: AiIndexDest;
@@ -97,11 +97,6 @@ export interface AiIndexProperties {
   sources: AiIndexSource[];
   traces: AiIndexTrace[];
   feedback_analysis?: AiIndexFeedbackAnalysis;
-  /**
-   * What the AI index learns from its memories, and how often. An AI index takes memories only
-   * while it is set up; see `isDreamingConfigured`.
-   */
-  dreaming?: AiIndexDreamingConfig;
 }
 
 export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces' | 'memory_enabled'> {
@@ -110,6 +105,14 @@ export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces' | 'mem
   date_created: string;
   date_modified: string;
   traces: AiIndexTraceWithQuery[];
+}
+
+/** An AI index as the server holds it: the public item plus the fields the public API leaves out. */
+export interface AiIndexItem extends AiIndexHttpItem {
+  /** What the AI index learns from its memories, and how often. Set through the internal dreaming route. */
+  dreaming?: AiIndexDreamingConfig;
+  /** For a managed AI index, the `memory_enabled` of its registration; see `takesMemories`. */
+  memory_enabled?: boolean;
 }
 
 export type GetAiIndexResponse = AiIndexHttpItem;

@@ -57,13 +57,23 @@ export const getAiIndex = (
     ...(signal ? { signal } : {}),
   });
 
+/** Fetches an AI index's dreaming config. */
+export const getAiIndexDreaming = (
+  http: HttpStart,
+  { aiIndexId, signal }: GetAiIndexArgs
+): Promise<GetAiIndexDreamingResponse> =>
+  http.get<GetAiIndexDreamingResponse>(buildPath(AI_INDEX_DREAMING_PATH, { aiIndexId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
+    ...(signal ? { signal } : {}),
+  });
+
 /** Replaces an AI index's dreaming config. Works on managed AI indices too. */
 export const setAiIndexDreaming = (
   http: HttpStart,
   { aiIndexId, config }: { aiIndexId: string; config: AiIndexDreamingConfig }
 ): Promise<GetAiIndexDreamingResponse> =>
   http.put<GetAiIndexDreamingResponse>(buildPath(AI_INDEX_DREAMING_PATH, { aiIndexId }), {
-    version: AI_INDEX_API_VERSION,
+    version: AI_INDEX_INTERNAL_API_VERSION,
     body: JSON.stringify(config),
   });
 

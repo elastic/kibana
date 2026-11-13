@@ -6,12 +6,12 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { AiIndexChangeNotifier } from '../ai_indices/changes';
 import { createDreamingChangeHandler } from './change_handler';
 import type { DreamingScheduleService } from './schedule';
 
-const aiIndex: AiIndexHttpItem = {
+const aiIndex: AiIndexItem = {
   id: 'support',
   managed: false,
   dest: { type: 'index', value: 'ai-index-idx-support' },
@@ -31,10 +31,19 @@ describe('createDreamingChangeHandler', () => {
     remove: jest.fn().mockResolvedValue(undefined),
   };
   const notifier = new AiIndexChangeNotifier(loggingSystemMock.createLogger());
-  notifier.register(createDreamingChangeHandler(() => scheduleService));
+  let dreamingAvailable: boolean;
+  notifier.register(
+    createDreamingChangeHandler(
+      () => scheduleService,
+      async () => dreamingAvailable
+    )
+  );
   const change = { aiIndexId: 'support', spaceId: 'default', request };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    dreamingAvailable = true;
+  });
 
   it('reconciles the workflow when the dreaming config changes', async () => {
     const current = { ...aiIndex, dreaming };
@@ -98,6 +107,31 @@ describe('createDreamingChangeHandler', () => {
 
     expect(scheduleService.remove).toHaveBeenCalledWith({
       aiIndexId: 'support',
+      spaceId: 'default',
+      request,
+    });
+  });
+
+  it('installs nothing while dreaming is unavailable, but still removes the workflow of a deleted AI index', async () => {
+    dreamingAvailable = false;
+    const current = { ...aiIndex, dreaming };
+
+    await notifier.notify({ ...change, previous: aiIndex, current, saved: ['dreaming'] });
+    await notifier.notify({ ...change, previous: current });
+
+    expect(scheduleService.reconcile).not.toHaveBeenCalled();
+    expect(scheduleService.remove).toHaveBeenCalledTimes(1);
+  });
+
+  it('still uninstalls the workflows when dreaming is switched off while unavailable', async () => {
+    dreamingAvailable = false;
+    const previous = { ...aiIndex, dreaming };
+    const current = { ...aiIndex, dreaming: { ...dreaming, enabled: false } };
+
+    await notifier.notify({ ...change, previous, current, saved: ['dreaming'] });
+
+    expect(scheduleService.reconcile).toHaveBeenCalledWith({
+      aiIndex: current,
       spaceId: 'default',
       request,
     });

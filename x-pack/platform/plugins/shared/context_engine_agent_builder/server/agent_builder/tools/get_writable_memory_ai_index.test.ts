@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
+import type { AiIndexItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -15,13 +15,13 @@ import { getWritableMemoryAiIndex } from './get_writable_memory_ai_index';
 describe('getWritableMemoryAiIndex', () => {
   const request = httpServerMock.createKibanaRequest();
   const get = jest.fn();
-  const globalSettingsGet = jest.fn();
   const coreStart = coreMock.createStart();
   const aiIndex = {
     id: 'support',
+    managed: false,
     dest: { type: 'index', value: 'ai-index-idx-support' },
-    dreaming: { enabled: false, facts: [{ type: 'preference' }] },
-  } as AiIndexHttpItem;
+  } as AiIndexItem;
+  let settings: Record<string, boolean>;
 
   const run = () =>
     getWritableMemoryAiIndex({
@@ -34,33 +34,39 @@ describe('getWritableMemoryAiIndex', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    globalSettingsGet.mockResolvedValue(true);
+    settings = { [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true };
     coreStart.uiSettings.globalAsScopedToClient = jest
       .fn()
-      .mockReturnValue({ get: globalSettingsGet });
+      .mockReturnValue({ get: async (id: string) => settings[id] });
     get.mockResolvedValue(aiIndex);
   });
 
-  it('returns an AI index when global memory is on and its dreaming is set up, even paused', async () => {
-    await expect(run()).resolves.toBe(aiIndex);
+  it('returns an AI index without dreaming set up when global memory is on', async () => {
+    const { dreaming, ...withoutDreaming } = aiIndex;
+    get.mockResolvedValue(withoutDreaming);
 
-    expect(globalSettingsGet).toHaveBeenCalledWith(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID);
+    await expect(run()).resolves.toEqual(withoutDreaming);
+
     expect(get).toHaveBeenCalledWith('support', 'space-1');
   });
 
   it('rejects writes when global memory is disabled', async () => {
-    globalSettingsGet.mockResolvedValue(false);
+    settings[CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID] = false;
 
     await expect(run()).rejects.toThrow('Context Engine memory is not enabled.');
   });
 
-  it('rejects writes when dreaming is not set up for the AI index', async () => {
-    const { dreaming, ...withoutDreaming } = aiIndex;
-    get.mockResolvedValue(withoutDreaming);
+  it('accepts writes to a managed AI index whose registration does not opt out', async () => {
+    const managed = { ...aiIndex, managed: true };
+    get.mockResolvedValue(managed);
 
-    await expect(run()).rejects.toThrow(
-      "AI index 'support' does not take memories: dreaming is not set up."
-    );
+    await expect(run()).resolves.toEqual(managed);
+  });
+
+  it('rejects writes to a managed AI index registered with memory_enabled false', async () => {
+    get.mockResolvedValue({ ...aiIndex, managed: true, memory_enabled: false });
+
+    await expect(run()).rejects.toThrow("AI index 'support' does not have memory enabled.");
   });
 
   it('rejects index-pattern destinations', async () => {

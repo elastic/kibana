@@ -22,7 +22,7 @@ import {
   dreamingTypesOf,
   type AiIndexDreamingConfig,
 } from '../../common/dreaming';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
 import type { AiIndexService } from '../ai_indices/service';
 import type { WorkflowEnablementApi } from '../feedback_analysis/schedule';
@@ -49,7 +49,7 @@ export interface DreamingScheduleService {
    * and removes them from one that does not.
    */
   reconcile(params: {
-    aiIndex: AiIndexHttpItem;
+    aiIndex: AiIndexItem;
     spaceId: string;
     request: KibanaRequest;
   }): Promise<void>;
@@ -82,7 +82,7 @@ export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }):
 
 /** The dreaming workflow template values for an AI index. */
 export const dreamingTemplateValuesFor = (
-  aiIndex: AiIndexHttpItem,
+  aiIndex: AiIndexItem,
   dreaming: AiIndexDreamingConfig,
   spaceId: string
 ): ContextEngineDreamingWorkflowTemplateValues => {

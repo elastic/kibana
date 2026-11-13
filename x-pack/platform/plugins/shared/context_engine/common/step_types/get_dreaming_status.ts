@@ -55,11 +55,11 @@ export const getDreamingStatusStepCommonDefinition: CommonStepDefinition<
       {
         defaultMessage:
           'Returns dream: false, with a reason, when Context Engine is off in the space, the ' +
-          'global Context Engine memory setting is off, or the AI index no longer has dreaming ' +
-          'turned on. With source traces, also when the AI index has no trace sources; with source ' +
-          'relationships, also when its dreaming config has no relationship types. A dreaming ' +
-          'run checks it first, so turning memory off stops scheduled runs before they read ' +
-          'memories or call a model.',
+          'global Context Engine memory setting is off, or the AI index no longer ' +
+          'has dreaming turned on. With source traces, also when the AI index has no trace ' +
+          'sources; with source relationships, also when its dreaming config has no relationship ' +
+          'types. A dreaming run checks it first, so turning memory off stops ' +
+          'scheduled runs before they read memories or call a model.',
       }
     ),
   },

@@ -11,7 +11,6 @@ import { DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS } from '../../common/step_types/r
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import { readTraceTranscripts } from '../dreaming/trace_rounds';
-import type { DreamingStepDependencies } from './helpers';
 import { getReadTraceTranscriptsStepDefinition } from './read_trace_transcripts';
 import { createMockStepContext } from './test_utils';
 
@@ -33,7 +32,7 @@ describe('readTraceTranscripts step', () => {
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => memoryEnabled,
         checkReadPrivilege: async () => canRead,
-      } as DreamingStepDependencies,
+      },
       { getCurrentDate: () => NOW }
     ).handler(createMockStepContext({ input: stepInput, esClient, spaceId: 'team-a' }));
 
@@ -91,12 +90,13 @@ describe('readTraceTranscripts step', () => {
     expect(jest.mocked(readTraceTranscripts).mock.calls[0][0].until).toBe(NOW.toISOString());
   });
 
-  it('reads nothing, keeping the cursor, without trace sources or while memory is off', async () => {
+  it('reads nothing, keeping the cursor, without trace sources or while memory or dreaming is off', async () => {
     get.mockResolvedValue({ id: 'support', traces: [] });
     const empty = {
       output: { memories: [], batches: [], resume_from: input.since, sources: [], skipped: 0 },
     };
     await expect(run()).resolves.toEqual(empty);
+    get.mockResolvedValue({ id: 'support', traces });
     memoryEnabled = false;
     await expect(run()).resolves.toEqual(empty);
     expect(readTraceTranscripts).not.toHaveBeenCalled();

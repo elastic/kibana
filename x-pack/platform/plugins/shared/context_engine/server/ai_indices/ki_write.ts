@@ -117,6 +117,8 @@ export interface SoftDeleteKiOptions {
   dest: AiIndexDest;
   kiId: string;
   writer: KiWriter;
+  /** Whether deleting a dreamed fact or entity also deletes the relationships that link it. */
+  deleteLinkedRelationships: boolean;
   backingIndex?: string;
   refresh?: boolean;
   abortSignal?: AbortSignal;
@@ -127,7 +129,16 @@ export const softDeleteKi = async (
   esClient: ElasticsearchClient,
   options: SoftDeleteKiOptions
 ): Promise<{ id: string; deletedRelationshipIds: string[] }> => {
-  const { aiIndexId, dest, kiId, writer, backingIndex, refresh = true, abortSignal } = options;
+  const {
+    aiIndexId,
+    dest,
+    kiId,
+    writer,
+    deleteLinkedRelationships,
+    backingIndex,
+    refresh = true,
+    abortSignal,
+  } = options;
 
   const revision = await getKiRevision({
     esClient,
@@ -163,7 +174,7 @@ export const softDeleteKi = async (
   // Runs for an already-deleted KI too, so a retry finishes a cleanup that failed partway.
   const deletedRelationshipIds: string[] = [];
   const { type } = revision.source;
-  if (typeof type === 'string' && isDreamedKiType(type)) {
+  if (deleteLinkedRelationships && typeof type === 'string' && isDreamedKiType(type)) {
     for (const relationshipId of await findLinkingRelationshipIds({
       esClient,
       dest,
@@ -176,6 +187,7 @@ export const softDeleteKi = async (
           dest,
           kiId: relationshipId,
           writer,
+          deleteLinkedRelationships: false,
           refresh,
           abortSignal,
         });

@@ -6,9 +6,16 @@
  */
 
 import {
+  CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import {
   dreamingBuildsAnything,
   dreamingTypesOf,
   isDreamedKiType,
+  isDreamingAutomation,
   isDreamingConfigured,
   validateDreamingTypes,
 } from './dreaming';
@@ -73,6 +80,26 @@ describe('isDreamedKiType', () => {
     expect(isDreamedKiType('entity.customer')).toBe(true);
     expect(isDreamedKiType('memory.session_fact')).toBe(false);
     expect(isDreamedKiType('runbook')).toBe(false);
+  });
+});
+
+describe('isDreamingAutomation', () => {
+  const workflow = (definitionId: string) => ({
+    type: 'workflow' as const,
+    value: `${definitionId}-my_index-0123456789ab`,
+  });
+
+  it('matches the workflows dreaming attaches to an AI index', () => {
+    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_DREAMING_WORKFLOW_ID))).toBe(true);
+    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID))).toBe(true);
+    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID))).toBe(true);
+  });
+
+  it('does not match other workflows', () => {
+    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID))).toBe(
+      false
+    );
+    expect(isDreamingAutomation({ type: 'workflow', value: 'my-dreaming-workflow' })).toBe(false);
   });
 });
 

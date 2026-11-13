@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
+import type { GetAiIndexDreamingResponse } from '../../../common/dreaming';
 import type { DreamingTemplateConfig } from '../../../common/dreaming_templates';
 import { setAiIndexDreaming } from '../api/ai_indices';
 import { getErrorMessage } from '../utils/get_error_message';
@@ -29,11 +30,16 @@ export const useApplyDreamingTemplate = () => {
   } = useKibana();
   const queryClient = useQueryClient();
 
-  const { mutateAsync, isLoading } = useMutation<unknown, Error, ApplyDreamingTemplateArgs>({
+  const { mutateAsync, isLoading } = useMutation<
+    GetAiIndexDreamingResponse,
+    Error,
+    ApplyDreamingTemplateArgs
+  >({
     mutationFn: ({ aiIndexId, config }) =>
       setAiIndexDreaming(http, { aiIndexId, config: { enabled: true, ...config } }),
-    onSuccess: (_, { aiIndexId }) => {
-      // The AI index carries its dreaming config, and its other panels save it back whole.
+    onSuccess: (data, { aiIndexId }) => {
+      queryClient.setQueryData(contextEngineQueryKeys.aiIndex.dreaming(aiIndexId), data);
+      // Saving dreaming attaches its workflows to the AI index's automations.
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.detail(aiIndexId) });
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
     },

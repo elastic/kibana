@@ -7,9 +7,9 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type {
+  DreamingKiStepDependencies,
   DreamingStepDependencies,
   FeedbackAnalysisStepDependencies,
-  KiStepDependencies,
 } from './helpers';
 import type { VerifyKi } from './verify_ki';
 import { getCreateKiStepDefinition } from './create_ki';
@@ -29,7 +29,7 @@ export const registerStepDefinitions = ({
   dreaming,
   verifyKi,
   ...deps
-}: KiStepDependencies & {
+}: DreamingKiStepDependencies & {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   feedbackAnalysis: FeedbackAnalysisStepDependencies;
   dreaming: DreamingStepDependencies;

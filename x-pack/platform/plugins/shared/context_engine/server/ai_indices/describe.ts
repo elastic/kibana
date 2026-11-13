@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
-import { RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES } from '../../common/memory';
+import type { AiIndexItem, KiTypeCount } from '../../common/http_api/ai_indices';
+import { RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES, takesMemories } from '../../common/memory';
 import {
   dreamingTypesOf,
   ENTITY_TYPE_PREFIX,
@@ -26,7 +26,7 @@ const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(RETRIEVAL_EXCLUDED_MEMOR
 
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
-  aiIndex: AiIndexHttpItem;
+  aiIndex: AiIndexItem;
   spaceId: string;
   includeMemory: boolean;
 }
@@ -38,7 +38,7 @@ const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): stri
     ...(aggregatable ? ['aggregatable'] : []),
   ].join(', ');
 
-const headerSection = ({ id, description, dest }: AiIndexHttpItem): string[] => [
+const headerSection = ({ id, description, dest }: AiIndexItem): string[] => [
   `AI-index registry ID: ${id}`,
   ...(description ? [description] : []),
   `Backing Elasticsearch target (use only in ES|QL queries): ${dest.value}`,
@@ -86,7 +86,7 @@ interface DreamedTypes {
 
 const NO_DREAMED_TYPES: DreamedTypes = { facts: [], entities: [] };
 
-const configuredDreamedTypes = ({ dreaming }: AiIndexHttpItem): DreamedTypes => {
+const configuredDreamedTypes = ({ dreaming }: AiIndexItem): DreamedTypes => {
   if (!dreaming || !isDreamingConfigured(dreaming)) {
     return NO_DREAMED_TYPES;
   }
@@ -154,22 +154,24 @@ const dreamedKindsText = ({ facts, entities }: DreamedTypes): string =>
   );
 
 const memorySection = (
-  aiIndex: AiIndexHttpItem,
+  aiIndex: AiIndexItem,
   target: string,
+  types: DreamedTypes,
   dreamedTypeCounts: KiTypeCount[]
 ): string[] => {
-  if (!isDreamingConfigured(aiIndex.dreaming)) {
+  if (!takesMemories(aiIndex)) {
     return [];
   }
 
-  const types = configuredDreamedTypes(aiIndex);
   const includeFacts = types.facts.length > 0;
   const dreamedKinds = dreamedKindsText(types);
   const queries = buildMemoryExampleQueries(target, { includeFacts });
 
   return [
     'Memory',
-    'This AI index takes memories: dreaming is set up for it.',
+    isDreamingConfigured(aiIndex.dreaming)
+      ? 'This AI index takes memories: dreaming is set up for it.'
+      : 'This AI index takes memories.',
     'Available memory types',
     'memory.session',
     'memory.session_fact',
@@ -190,7 +192,7 @@ const memorySection = (
 };
 
 const exampleQueriesSection = (
-  dest: AiIndexHttpItem['dest'],
+  dest: AiIndexItem['dest'],
   excludeMemory: boolean,
   dreamedPrefixes: readonly string[]
 ): string[] => [
@@ -241,7 +243,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts, dreamedPrefixes),
     tagCountsSection(tagCounts),
-    includeMemory ? memorySection(aiIndex, target, dreamedTypeCounts) : [],
+    includeMemory ? memorySection(aiIndex, target, dreamedTypes, dreamedTypeCounts) : [],
     exampleQueriesSection(aiIndex.dest, includeMemory, dreamedPrefixes),
   ]);
 };

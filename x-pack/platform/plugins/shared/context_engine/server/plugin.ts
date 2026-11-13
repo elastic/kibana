@@ -230,6 +230,17 @@ export class ContextEnginePlugin
       }
       return this.scheduleService;
     };
+    const isContextEngineEnabled = async (spaceId: string) => {
+      const [coreStart] = await coreSetup.getStartServices();
+      return isContextEngineEnabledInSpace({
+        savedObjects: coreStart.savedObjects,
+        uiSettings: coreStart.uiSettings,
+        spaceId,
+      });
+    };
+    const isDreamingAvailable = async (spaceId: string) =>
+      (await isContextEngineEnabled(spaceId)) && (await this.isGlobalMemoryEnabled());
+
     this.aiIndexChanges.register(createFeedbackAnalysisChangeHandler(getScheduleService));
     this.aiIndexChanges.register(
       createDreamingChangeHandler(() => {
@@ -237,17 +248,17 @@ export class ContextEnginePlugin
           throw new Error('Dreaming schedule service not available — plugin has not started');
         }
         return this.dreamingScheduleService;
-      })
+      }, isDreamingAvailable)
     );
 
-    const isMemoryEnabled = async (request: KibanaRequest) => {
+    const isGlobalSettingEnabled = async (request: KibanaRequest, settingId: string) => {
       const [coreStart] = await coreSetup.getStartServices();
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
       const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
-      return (
-        (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false
-      );
+      return (await globalUiSettings.get<boolean>(settingId)) ?? false;
     };
+    const isMemoryEnabled = (request: KibanaRequest) =>
+      isGlobalSettingEnabled(request, CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID);
 
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
@@ -283,15 +294,6 @@ export class ContextEnginePlugin
       analyticsService,
     });
 
-    const isContextEngineEnabled = async (spaceId: string) => {
-      const [coreStart] = await coreSetup.getStartServices();
-      return isContextEngineEnabledInSpace({
-        savedObjects: coreStart.savedObjects,
-        uiSettings: coreStart.uiSettings,
-        spaceId,
-      });
-    };
-
     const checkContextEnginePrivilege =
       (privilege: string) => async (request: KibanaRequest, spaceId: string) => {
         const [, startDeps] = await coreSetup.getStartServices();
@@ -314,6 +316,7 @@ export class ContextEnginePlugin
       logger: this.logger.get('context_steps'),
       getAiIndexService,
       isContextEngineEnabled,
+      isDreamingAvailable,
       checkWritePrivilege,
       verifyKi,
       feedbackAnalysis: {
@@ -422,6 +425,8 @@ export class ContextEnginePlugin
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
     const createImprovementsService = this.createImprovementsService;
 
+    const globalSettingsFor = (request: KibanaRequest) =>
+      coreStart.uiSettings.globalAsScopedToClient(coreStart.savedObjects.getScopedClient(request));
     this.createAiIndexDataReadService = ({ esClient, request }) =>
       new AiIndexDataReadService({
         esClient,
@@ -429,13 +434,10 @@ export class ContextEnginePlugin
         auditLogger: coreStart.security.audit.asScoped(request),
         aiIndexService,
         logger: this.logger,
-        isMemoryEnabled: async () => {
-          const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-          const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
-          return (
-            (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false
-          );
-        },
+        isMemoryEnabled: async () =>
+          (await globalSettingsFor(request).get<boolean>(
+            CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID
+          )) ?? false,
       });
     const createAiIndexDataReadService = this.createAiIndexDataReadService;
 
@@ -475,7 +477,6 @@ export class ContextEnginePlugin
       false;
     this.isGlobalMemoryEnabled = async () =>
       (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false;
-
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
       this.logger.warn(
         `Failed to schedule signal generator: ${err instanceof Error ? err.message : String(err)}`

@@ -12,10 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
+import { Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
-import { isDreamingConfigured } from '../../../common/dreaming';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
@@ -115,14 +114,13 @@ export const AiIndexDetailPage = () => {
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators, exact: true }) !== null;
   const isSettingsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
-  // Dreaming, the only setting so far, builds long-term memory, so it needs the memory feature.
-  const showSettingsTab = isMemoryEnabled || isSettingsTab;
+  // Dreaming is the only setting so far.
+  const showSettingsTab = isMemoryEnabled;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
   const [showCreatedCallout, setShowCreatedCallout] = useState(
     () => location.state?.aiIndexCreated === true
   );
-
   // Hide the callout as soon as the user adds a source.
   useEffect(() => {
     if (showCreatedCallout && aiIndex && aiIndex.sources.length > 0) {
@@ -312,7 +310,7 @@ export const AiIndexDetailPage = () => {
       {showCreatedCallout && (
         <AiIndexCreatedCallout
           onDismiss={() => setShowCreatedCallout(false)}
-          showMemory={isMemoryEnabled && isDreamingConfigured(aiIndex?.dreaming)}
+          showMemory={isMemoryEnabled}
         />
       )}
       {showOnboardingPanel && (
@@ -402,7 +400,11 @@ export const AiIndexDetailPage = () => {
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>
-        {aiIndex ? <DreamingPanel aiIndex={aiIndex} /> : null}
+        {!isMemoryEnabled ? (
+          <Redirect to={getAiIndexDetailPath(resolvedAiIndexId)} />
+        ) : aiIndex ? (
+          <DreamingPanel aiIndex={aiIndex} />
+        ) : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detail} exact>
         {overviewTabContent}

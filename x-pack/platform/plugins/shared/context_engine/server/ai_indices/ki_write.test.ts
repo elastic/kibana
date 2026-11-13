@@ -363,6 +363,7 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     });
 
     expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: [] });
@@ -394,6 +395,7 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
       backingIndex: pinnedBackingIndex,
     });
 
@@ -425,6 +427,7 @@ describe('softDeleteKi', () => {
       dest: dataStreamDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     });
 
     expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: [] });
@@ -457,6 +460,7 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     });
 
     expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: [] });
@@ -476,6 +480,7 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'missing-ki',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     }).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(KiNotFoundError);
@@ -528,6 +533,7 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
       refresh: false,
     });
 
@@ -549,10 +555,26 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     });
 
     expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: ['rel-1'] });
     expect((esClient.update as jest.Mock).mock.calls.map(([{ id }]) => id)).toEqual(['doc-rel-1']);
+  });
+
+  it('leaves the linked relationships alone when asked to', async () => {
+    const esClient = linkedEntityClient();
+
+    const result = await softDeleteKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      writer: deleteWriter,
+      deleteLinkedRelationships: false,
+    });
+
+    expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: [] });
+    expect((esClient.update as jest.Mock).mock.calls.map(([{ id }]) => id)).toEqual(['doc-ki-1']);
   });
 
   it('does not look up relationships for other KI types', async () => {
@@ -566,6 +588,7 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     });
 
     expect(esClient.search).toHaveBeenCalledTimes(1);

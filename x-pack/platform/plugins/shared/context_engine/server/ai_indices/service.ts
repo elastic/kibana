@@ -19,7 +19,7 @@ import {
 import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
-  AiIndexHttpItem,
+  AiIndexItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
 import type { AiIndexDreamingConfig } from '../../common/dreaming';
@@ -54,7 +54,7 @@ const withoutLegacyEdges = (dreaming: StoredDreamingConfig): AiIndexDreamingConf
 
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
 const toAiIndexDocument = (
-  { memory_enabled: _legacyMemoryEnabled, dreaming, ...source }: StoredAiIndexDocument,
+  { dreaming, ...source }: StoredAiIndexDocument,
   docId: string
 ): AiIndexDocument => ({
   ...source,
@@ -63,13 +63,14 @@ const toAiIndexDocument = (
   space: source.space ?? DEFAULT_SPACE_ID,
 });
 
-const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
+const toAiIndexItem = (document: AiIndexDocument): AiIndexItem => ({
   id: document.id,
   ...(document.description !== undefined && { description: document.description }),
   ...(document.feedback_analysis !== undefined && {
     feedback_analysis: document.feedback_analysis,
   }),
   ...(document.dreaming !== undefined && { dreaming: document.dreaming }),
+  ...(document.memory_enabled !== undefined && { memory_enabled: document.memory_enabled }),
   managed: document.managed ?? false,
   dest: document.dest,
   automations: document.automations,
@@ -86,6 +87,7 @@ const mergeManagedAiIndex = (
 ): AiIndexDocument => ({
   ...document,
   dest: registration.dest,
+  memory_enabled: registration.memory_enabled,
 });
 
 /** Properties without the ones the service accepts and ignores. */
@@ -93,6 +95,14 @@ const withoutIgnoredProperties = ({
   memory_enabled: _memoryEnabled,
   ...properties
 }: AiIndexProperties): AiIndexProperties => properties;
+
+/** What a whole-record write keeps from the document it replaces: the fields clients cannot set. */
+const keptFields = (
+  existing: AiIndexDocument | undefined
+): Pick<AiIndexDocument, 'dreaming' | 'memory_enabled'> => ({
+  ...(existing?.dreaming !== undefined && { dreaming: existing.dreaming }),
+  ...(existing?.memory_enabled !== undefined && { memory_enabled: existing.memory_enabled }),
+});
 
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
 
@@ -197,7 +207,13 @@ export class AiIndexService {
     return this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...withoutIgnoredProperties(properties), id: aiIndexId, space: spaceId, managed: false },
+      {
+        ...withoutIgnoredProperties(properties),
+        ...keptFields(existing?.document),
+        id: aiIndexId,
+        space: spaceId,
+        managed: false,
+      },
       existing
     );
   }
@@ -226,6 +242,7 @@ export class AiIndexService {
       spaceId,
       {
         ...withoutIgnoredProperties(properties),
+        ...keptFields(existing?.document),
         id: aiIndexId,
         space: spaceId,
         managed: true,
@@ -339,7 +356,7 @@ export class AiIndexService {
     return dreaming;
   }
 
-  async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
+  async get(aiIndexId: string, spaceId: string): Promise<AiIndexItem> {
     const existing = await this.findDocument(aiIndexId, spaceId);
     if (existing) {
       return this.toItem(existing.document);
@@ -457,7 +474,7 @@ export class AiIndexService {
     );
   }
 
-  async list(spaceId: string): Promise<AiIndexHttpItem[]> {
+  async list(spaceId: string): Promise<AiIndexItem[]> {
     const items = await this.searchSpace(spaceId);
     const missingManagedIds =
       this.managedBootstrap
@@ -507,7 +524,7 @@ export class AiIndexService {
     }
   }
 
-  private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
+  private async searchSpace(spaceId: string): Promise<AiIndexItem[]> {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
@@ -525,7 +542,7 @@ export class AiIndexService {
   }
 
   /** Managed documents are resolved against their registration on read; user-owned ones are returned as stored. */
-  private toItem(document: AiIndexDocument): AiIndexHttpItem {
+  private toItem(document: AiIndexDocument): AiIndexItem {
     const registration = document.managed
       ? this.managedBootstrap?.getRegistration(document.id)
       : undefined;

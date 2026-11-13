@@ -117,7 +117,7 @@ export type DreamingTypesConfig = Pick<
   'facts' | 'entities' | 'relationships'
 >;
 
-/** Response of `GET` and `PUT /api/context_engine/ai_index/{aiIndexId}/_dreaming`. */
+/** Response of `GET` and `PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming`. */
 export interface GetAiIndexDreamingResponse {
   dreaming: AiIndexDreamingConfig;
 }
@@ -146,11 +146,26 @@ export const dreamingTypesOf = ({
 };
 
 /**
- * Whether an AI index takes memories: its dreaming config is set up, on or off. `enabled` only
- * decides whether dreaming runs on its schedule.
+ * Whether an AI index's dreaming config is set up, on or off. `enabled` only decides whether
+ * dreaming runs on its schedule.
  */
 export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
   dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
+
+/**
+ * Ids of the dreaming workflows attached to an AI index as automations start with these. They copy
+ * the ids in `@kbn/workflows/managed`, which the browser can't import without the workflow YAML.
+ */
+const DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES: readonly string[] = [
+  'system-context-engine-dreaming-',
+  'system-context-engine-trace-dreaming-',
+  'system-context-engine-relationships-',
+];
+
+/** Whether an automation is one of the workflows dreaming attaches to an AI index. */
+export const isDreamingAutomation = ({ type, value }: { type: string; value: string }): boolean =>
+  type === 'workflow' &&
+  DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES.some((prefix) => value.startsWith(prefix));
 
 /** Whether a config builds anything at all: at least one fact or entity type. */
 export const dreamingBuildsAnything = (config: DreamingTypesConfig): boolean => {

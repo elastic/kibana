@@ -23,6 +23,7 @@ describe('registerStepDefinitions', () => {
       workflowsExtensions,
       getAiIndexService: () => ({} as AiIndexService),
       isContextEngineEnabled: async () => true,
+      isDreamingAvailable: async () => true,
       checkWritePrivilege: async () => true,
       ...telemetry,
       verifyKi: jest.fn(),

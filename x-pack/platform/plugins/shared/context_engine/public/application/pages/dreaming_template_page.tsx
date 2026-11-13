@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 import { buildDreamingTemplateConfig } from '../../../common/dreaming_templates';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import {
@@ -37,6 +37,7 @@ import {
 } from '../components/dreaming_config/dreaming_config_editor';
 import { useApplyDreamingTemplate } from '../hooks/use_apply_dreaming_template';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useDreamingTemplate, useDreamingTemplates } from '../hooks/use_dreaming_templates';
 import { useNavigation } from '../hooks/use_navigation';
 import {
@@ -135,6 +136,15 @@ const Pill = ({
  */
 export const DreamingTemplatePage = () => {
   const { id: aiIndexId } = useParams<{ id: string }>();
+  const isMemoryEnabled = useMemoryEnabled();
+  return isMemoryEnabled ? (
+    <DreamingTemplateSetup aiIndexId={aiIndexId} />
+  ) : (
+    <Redirect to={getAiIndexDetailPath(aiIndexId)} />
+  );
+};
+
+const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { templates, isLoading, error } = useDreamingTemplates();
   const [pickedId, setPickedId] = useState<string>();

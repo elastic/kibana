@@ -14,7 +14,7 @@ import {
   DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
   readTraceTranscriptsStepCommonDefinition,
 } from '../../common/step_types/read_trace_transcripts';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { batchByConversation } from '../dreaming/trace_batches';
 import { readTraceTranscripts } from '../dreaming/trace_rounds';
@@ -59,7 +59,7 @@ export const getReadTraceTranscriptsStepDefinition = (
         return { output: empty };
       }
 
-      let aiIndex: AiIndexHttpItem;
+      let aiIndex: AiIndexItem;
       try {
         aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
       } catch (error) {

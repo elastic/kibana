@@ -15,7 +15,7 @@ import {
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from '../ai_indices/service';
 import type { DreamingWorkflowsApi } from './schedule';
 import {
@@ -40,7 +40,7 @@ const dreaming = {
   relationships: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
 };
 
-const aiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
+const aiIndex = (overrides: Partial<AiIndexItem> = {}): AiIndexItem => ({
   id: 'support',
   managed: false,
   dest: { type: 'index', value: 'ai-index-idx-support' },
