@@ -1072,11 +1072,7 @@ describe('createEndpointLookupService', () => {
       }
     );
 
-    it('does not offer a Defend metadata id whose Fleet agent has no supported integration', async () => {
-      // `no-package` matches the hostname in Fleet but is filtered out (no
-      // response-action integration), while its metadata doc still matches.
-      // Offering it as an ambiguity candidate sends the model to retry with an
-      // id that `resolveByAgentId` answers `endpoint_not_found` for.
+    it('does not offer an unsupported Fleet agent that Defend has no metadata for', async () => {
       const { lookup } = buildService({
         listAgents: jest.fn().mockResolvedValue({
           agents: [
@@ -1084,15 +1080,7 @@ describe('createEndpointLookupService', () => {
             { id: 'real-endpoint', status: 'online', packages: ['endpoint'] },
           ],
         }),
-        getHostMetadataList: jest.fn().mockResolvedValue({
-          data: [
-            {
-              metadata: { elastic: { agent: { id: 'no-package' } } },
-              host_status: HostStatus.HEALTHY,
-            },
-          ],
-          total: 1,
-        }),
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       });
 
       const result = await lookup.resolveByHostName('shared-host');
@@ -1101,6 +1089,86 @@ describe('createEndpointLookupService', () => {
         kind: 'found',
         endpoint: expect.objectContaining({ agentId: 'real-endpoint' }),
       });
+    });
+
+    it.each([[[]], [['system']]])(
+      'resolves a Defend host by hostname when Fleet reports packages %j but Defend has its metadata',
+      async (packages) => {
+        const { lookup } = buildService({
+          resolutionMode: 'dispatch',
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'linux-agent', status: 'online', packages }],
+          }),
+          getHostMetadataList: jest.fn().mockResolvedValue({
+            data: [
+              {
+                metadata: { elastic: { agent: { id: 'linux-agent' } } },
+                host_status: HostStatus.HEALTHY,
+              },
+            ],
+            total: 1,
+          }),
+        });
+
+        const result = await lookup.resolveByHostName('ip-172-31-24-21');
+
+        expect(result).toEqual({
+          kind: 'found',
+          endpoint: expect.objectContaining({ agentId: 'linux-agent', agentType: 'endpoint' }),
+        });
+      }
+    );
+
+    it.each([['crowdstrike'], ['sentinel_one']])(
+      'resolves a Defend-vouched host to agentType endpoint when stale Fleet packages name %s and the lookup is scoped to Defend',
+      async (vendorPackage) => {
+        const { lookup } = buildService({
+          resolutionMode: 'dispatch',
+          agentTypes: ['endpoint'],
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'linux-agent', status: 'online', packages: [vendorPackage] }],
+          }),
+          getHostMetadataList: jest.fn().mockResolvedValue({
+            data: [
+              {
+                metadata: { elastic: { agent: { id: 'linux-agent' } } },
+                host_status: HostStatus.HEALTHY,
+              },
+            ],
+            total: 1,
+          }),
+        });
+
+        const result = await lookup.resolveByHostName('ip-172-31-24-21');
+
+        expect(result).toEqual({
+          kind: 'found',
+          endpoint: expect.objectContaining({ agentId: 'linux-agent', agentType: 'endpoint' }),
+        });
+      }
+    );
+
+    it('keeps a Defend-vouched host and a real endpoint ambiguous instead of guessing', async () => {
+      const { lookup } = buildService({
+        resolutionMode: 'dispatch',
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            { id: 'linux-agent', status: 'online', packages: [] },
+            { id: 'real-endpoint', status: 'online', packages: ['endpoint'] },
+          ],
+        }),
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { elastic: { agent: { id: 'linux-agent' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 1,
+        }),
+      });
+
+      expect((await lookup.resolveByHostName('shared-host')).kind).toBe('ambiguous');
     });
 
     it('still offers a metadata-only candidate Fleet has no record of', async () => {
@@ -1242,6 +1310,97 @@ describe('createEndpointLookupService', () => {
       );
 
       await expect(lookup.resolveByAgentId('agent-x')).rejects.toThrow('fleet unavailable');
+    });
+
+    it.each([[[]], [undefined]])(
+      'resolves an agent with Fleet packages %j as Defend when Defend holds its metadata',
+      async (packages) => {
+        const { lookup, getHostMetadataList } = buildByIdService(
+          { id: 'linux-agent', packages, status: 'online' },
+          undefined,
+          jest.fn().mockResolvedValue({
+            data: [
+              {
+                metadata: { elastic: { agent: { id: 'linux-agent' } } },
+                host_status: HostStatus.HEALTHY,
+              },
+            ],
+            total: 1,
+          })
+        );
+
+        const result = await lookup.resolveByAgentId('linux-agent');
+
+        expect(getHostMetadataList).toHaveBeenCalled();
+        expect(result).toEqual({
+          kind: 'found',
+          endpoint: expect.objectContaining({ agentId: 'linux-agent', agentType: 'endpoint' }),
+        });
+      }
+    );
+
+    it.each([['crowdstrike'], ['sentinel_one']])(
+      'resolves a Defend-vouched agent to agentType endpoint when stale Fleet packages name %s and the lookup is scoped to Defend',
+      async (vendorPackage) => {
+        const getAgent = jest
+          .fn()
+          .mockResolvedValue({ id: 'linux-agent', packages: [vendorPackage], status: 'online' });
+        const endpointAppContextService = {
+          getInternalFleetServices: jest.fn(() => ({
+            agent: { listAgents: jest.fn(), getAgent },
+            ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+          })),
+          getEndpointMetadataService: jest.fn(() => ({
+            getHostMetadataList: jest.fn().mockResolvedValue({
+              data: [
+                {
+                  metadata: { elastic: { agent: { id: 'linux-agent' } } },
+                  host_status: HostStatus.HEALTHY,
+                },
+              ],
+              total: 1,
+            }),
+          })),
+        } as unknown as EndpointAppContextService;
+        const lookup = createEndpointLookupService(endpointAppContextService, spaceId, undefined, {
+          agentTypes: ['endpoint'],
+          resolutionMode: 'dispatch',
+        });
+
+        expect(await lookup.resolveByAgentId('linux-agent')).toEqual({
+          kind: 'found',
+          endpoint: expect.objectContaining({ agentId: 'linux-agent', agentType: 'endpoint' }),
+        });
+      }
+    );
+
+    it('keeps the vendor agentType for a vendor-package agent on an unscoped read lookup', async () => {
+      const { lookup } = buildByIdService({
+        id: 'cs-agent',
+        packages: ['crowdstrike'],
+        status: 'online',
+      });
+
+      expect(await lookup.resolveByAgentId('cs-agent')).toEqual({
+        kind: 'found',
+        endpoint: expect.objectContaining({ agentType: 'crowdstrike' }),
+      });
+    });
+
+    it('still answers not_found when Defend has no metadata for an agent without packages', async () => {
+      const { lookup } = buildByIdService({ id: 'linux-agent', packages: [] });
+
+      expect(await lookup.resolveByAgentId('linux-agent')).toEqual({ kind: 'not_found' });
+    });
+
+    it('does not vouch for an agent whose Defend metadata read fails', async () => {
+      const { lookup } = buildByIdService(
+        { id: 'linux-agent', packages: [] },
+        undefined,
+        jest.fn().mockRejectedValue(new Error('es down'))
+      );
+
+      expect(await lookup.resolveByAgentId('linux-agent')).toEqual({ kind: 'not_found' });
     });
 
     it('answers not_found for an agent without a response-action integration', async () => {
