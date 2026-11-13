@@ -25,6 +25,7 @@ import {
 } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 
+import { findFilterableField } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -40,7 +41,6 @@ import type { DataControlApi, DataControlFieldFormatter } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
-import { getFieldByName, getFieldDisplayName, getFieldFormatter } from './utils/source_fields';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
@@ -182,7 +182,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         return;
       }
 
-      const field = getFieldByName(dataView, nextFieldName ?? '');
+      const field = findFilterableField(dataView, nextFieldName ?? '');
       if (!field) {
         setBlockingError(
           new Error(
@@ -198,9 +198,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
 
       field$.next(field);
       if (field) {
-        defaultFieldLabel$.next(getFieldDisplayName(field));
-        const formatter = getFieldFormatter(dataView, field);
-        if (formatter) fieldFormatter.next(formatter);
+        defaultFieldLabel$.next(field.displayName ?? field.name);
+        const formatter = dataView.getFormatterForField?.(field);
+        if (formatter) fieldFormatter.next((value: unknown) => formatter.convertToText(value));
       }
     });
 

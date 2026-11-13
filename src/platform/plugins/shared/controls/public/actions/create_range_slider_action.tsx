@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { findFilterableField } from '@kbn/data-source';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { FilterableField } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 
-import { getFieldByName } from '../controls/data_controls/utils/source_fields';
 import { RangeSliderEditorOptions } from '../controls/data_controls/range_slider/components/editor/range_slider_editor_options';
 import { dataViewsService } from '../services/kibana_services';
 import { RANGE_SLIDER_ACTION } from './constants';
@@ -36,7 +36,7 @@ export const createRangeSliderControlAction =
       isCompatible: async ({ state: { data_view_id: dataViewId, field_name: fieldName } }) => {
         if (!dataViewId || !fieldName) return false;
         const dataView = await dataViewsService.get(dataViewId);
-        const field = getFieldByName(dataView, fieldName);
+        const field = findFilterableField(dataView, fieldName);
         return Boolean(field && isFieldCompatible(field));
       },
       execute: async ({ embeddable, state, controlId }) => {

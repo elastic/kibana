@@ -60,7 +60,7 @@ describe('initializeDataControlManager', () => {
         ].find((field) => fieldName === field.name);
       },
       getFormatterForField: () => ({
-        getConverterFor: () => (value: unknown) => String(value),
+        convertToText: (value: unknown) => `formatted ${value}`,
       }),
     } as unknown as DataView;
   };
@@ -89,6 +89,10 @@ describe('initializeDataControlManager', () => {
         expect(dataViews).not.toBeUndefined();
         expect(dataViews!.length).toBe(1);
         expect(dataViews![0].id).toBe('myDataViewId');
+      });
+
+      test('should format the values of the field with the formatter of the data view', () => {
+        expect(dataControlManager!.api.fieldFormatter.value(5)).toBe('formatted 5');
       });
 
       test('should set default panel title', () => {

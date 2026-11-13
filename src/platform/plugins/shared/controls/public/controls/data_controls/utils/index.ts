@@ -8,4 +8,3 @@
  */
 
 export * from './filter_utils';
-export * from './source_fields';

@@ -21,12 +21,8 @@ import { ControlValuesSource } from '@kbn/controls-constants';
 import { max, min } from 'lodash';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { dataService } from '../../../services/kibana_services';
-import {
-  asDataView,
-  buildESQLPreFilter,
-  getFetchContextFilters,
-  getFetchContextTimeRange,
-} from '../utils';
+import { asDataView } from './utils/as_data_view';
+import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
 

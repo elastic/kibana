@@ -13,6 +13,7 @@ import type {
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
+import { getFilterableFieldSpec } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 
@@ -22,7 +23,6 @@ import type {
   OptionsListSuccessResponse,
   OptionsListUnifiedFetchBody,
 } from '../../../../common/options_list/types';
-import { getFieldSpec, getRuntimeFieldMap } from '../utils/source_fields';
 import {
   buildESQLPreFilter,
   buildOptionsListDashboardFilters,
@@ -124,11 +124,11 @@ export function buildOptionsListFetchBody({
       searchTechnique,
       selectedOptions,
       fieldName: field.name,
-      fieldSpec: getFieldSpec(field),
+      fieldSpec: getFilterableFieldSpec(field),
       size: requestSize,
       ignoreValidations,
       filters,
-      runtimeFieldMap: getRuntimeFieldMap(dataSource),
+      runtimeFieldMap: dataSource.toSpec?.(false).runtimeFieldMap,
       isReload: fetchContext.isReload,
       projectRouting: fetchContext.projectRouting,
     },

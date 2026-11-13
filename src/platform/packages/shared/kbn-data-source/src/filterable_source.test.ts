@@ -14,7 +14,11 @@ import { buildEsQuery, buildPhraseFilter } from '@kbn/es-query';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { registerEsqlSourceInDataViewsCache } from './cache_adapter';
 import type { FilterableSource } from './filterable_source';
-import { isEsqlFilterableSource } from './filterable_source';
+import {
+  findFilterableField,
+  getFilterableFieldSpec,
+  isEsqlFilterableSource,
+} from './filterable_source';
 import { DataViewSource } from './sources/data_view_source';
 import { EsqlSource } from './sources/esql_source';
 import { createMockDataViewsService } from './__mocks__/data_views_service.mock';
@@ -261,6 +265,50 @@ describe('toFilterableSource', () => {
 
       expect(filterable.kind).toBeUndefined();
       expect(isEsqlFilterableSource(filterable)).toBe(false);
+    });
+  });
+
+  describe('findFilterableField', () => {
+    const host = { name: 'host', type: 'string' };
+    const source = (overrides: Partial<FilterableSource> = {}): FilterableSource => ({
+      id: 'source-id',
+      title: 'logs-*',
+      fields: [host],
+      isTimeBased: () => false,
+      ...overrides,
+    });
+
+    it('reads the fields of a source that has no lookup of its own', () => {
+      expect(findFilterableField(source(), 'host')).toBe(host);
+      expect(findFilterableField(source(), 'missing')).toBeUndefined();
+    });
+
+    it('asks a source that has a lookup of its own, as a data view has', () => {
+      const lookup = jest.fn(() => host);
+
+      expect(findFilterableField(source({ fields: [], getFieldByName: lookup }), 'host')).toBe(
+        host
+      );
+      expect(lookup).toHaveBeenCalledWith('host');
+    });
+  });
+
+  describe('getFilterableFieldSpec', () => {
+    it('is the spec that the field has', () => {
+      const spec = { name: 'host', type: 'string', searchable: true, aggregatable: true };
+
+      expect(getFilterableFieldSpec({ name: 'host', type: 'string', toSpec: () => spec })).toBe(
+        spec
+      );
+    });
+
+    it('is a spec made of a field that has none, which needs both flags', () => {
+      expect(getFilterableFieldSpec({ name: 'host', type: 'string', aggregatable: true })).toEqual({
+        name: 'host',
+        type: 'string',
+        searchable: false,
+        aggregatable: true,
+      });
     });
   });
 });
