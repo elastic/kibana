@@ -93,7 +93,7 @@ export function resolveRehydrationTargets(
  */
 export function resolveOpenScopeInputIds(
   state: WorkflowExecutionState,
-  stackFrames: readonly StackFrame[] | undefined
+  stackFrames: StackFrame[] | undefined
 ): string[] {
   if (!stackFrames?.length) {
     return [];

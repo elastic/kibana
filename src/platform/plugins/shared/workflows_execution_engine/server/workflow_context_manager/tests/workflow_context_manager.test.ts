@@ -902,6 +902,57 @@ describe('WorkflowContextManager', () => {
       });
     });
 
+    it('reads a dynamic parallel branch item from snapshotted input.items', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'fan',
+          nestedScopes: [
+            {
+              nodeId: 'enterParallel_fan',
+              nodeType: 'enter-parallel',
+              scopeId: '1',
+            },
+          ],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'exec-1',
+        workflowDefinition: workflow,
+      } as EsWorkflowExecution);
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId: string) => {
+          if (stepExecutionId === 'fan_generated') {
+            return {
+              id: stepExecutionId,
+              stepId: 'fan',
+              stepType: 'parallel',
+              input: {
+                foreach: '{{ steps.list.output }}',
+                items: ['a', 'b'],
+              },
+              state: { total: 2, static: false },
+            };
+          }
+          return undefined;
+        });
+      (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockReturnValue([
+        'x',
+        'y',
+      ]);
+      (testContainer.templatingEngineMock.render as jest.Mock).mockReturnValue(['x', 'y']);
+
+      const context = testContainer.underTest.getContext();
+
+      expect(context.foreach).toEqual({
+        items: ['a', 'b'],
+        item: 'b',
+        index: 1,
+        total: 2,
+      });
+    });
+
     describe('nested foreach with inner expression {{foreach.item}}', () => {
       const outerItems = [
         ['innerA', 'innerB'],
@@ -2178,9 +2229,7 @@ describe('WorkflowContextManager', () => {
       const stackFrames: StackFrame[] = [
         {
           stepId: 'loop',
-          nestedScopes: [
-            { nodeId: 'enterForeach_loop', nodeType: 'enter-foreach', stepId: 'loop' },
-          ],
+          nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
         },
       ];
       const container = createTestContainer(workflow, { stackFrames });

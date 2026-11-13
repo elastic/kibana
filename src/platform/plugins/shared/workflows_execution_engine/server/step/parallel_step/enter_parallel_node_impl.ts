@@ -169,13 +169,24 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
    */
   private async initDynamicBranches(): Promise<ParallelBranchState[] | undefined> {
     const foreachConfig = this.node.configuration.foreach;
-    // Persist the expression as input so the context builder can re-evaluate the
-    // per-branch item without storing the whole list in state.
-    this.stepExecutionRuntime.setInput({
-      foreach: Array.isArray(foreachConfig) ? JSON.stringify(foreachConfig) : foreachConfig,
-    });
+    const foreachInput = Array.isArray(foreachConfig)
+      ? JSON.stringify(foreachConfig)
+      : foreachConfig;
 
-    const items = this.getItems();
+    let items: unknown[];
+    try {
+      items = this.getItems();
+    } catch (error) {
+      this.stepExecutionRuntime.setInput({ foreach: foreachInput });
+      throw error;
+    }
+
+    // Snapshot the evaluated list so a later branch reads foreach.item from
+    // input instead of re-evaluating the expression after a flush.
+    this.stepExecutionRuntime.setInput({
+      foreach: foreachInput,
+      items,
+    });
 
     if (items.length > DEFAULT_PARALLEL_MAX_FAN_OUT) {
       throw new Error(

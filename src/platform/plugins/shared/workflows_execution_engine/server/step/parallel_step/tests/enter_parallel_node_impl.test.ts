@@ -200,6 +200,7 @@ describe('EnterParallelNodeImpl', () => {
     expect(stepRuntime.startStep).toHaveBeenCalledTimes(1);
     expect(stepRuntime.setInput).toHaveBeenCalledWith({
       foreach: JSON.stringify(['a', 'b', 'c']),
+      items: ['a', 'b', 'c'],
     });
     expect(persistedState?.total).toBe(3);
   });
@@ -257,6 +258,11 @@ describe('EnterParallelNodeImpl', () => {
     expect(output.results.map((r) => r.key)).toEqual(['a', 'b', 'c']);
     // Persisted branch state carries the snapshot too.
     expect(persistedState?.branches.map((b) => b.key)).toEqual(['a', 'b', 'c']);
+    // The input list is the init resolution, so a later branch does not re-evaluate.
+    expect(stepRuntime.setInput).toHaveBeenCalledWith({
+      foreach: '{{ steps.list.output }}',
+      items: ['a', 'b', 'c'],
+    });
   });
 
   it('fail-fast: a failed branch fails the step (not complete) but still exposes the aggregate', async () => {
