@@ -10,6 +10,19 @@ import { knownNumbers, runReplyGates, splitSentences } from './gates';
 const known = knownNumbers('checkout failed 127 times, 1,250 requests, p99 50.5 ms');
 
 describe('runReplyGates', () => {
+  it('flags emojis in any reply type, but not ©, ® or ™', () => {
+    const reply =
+      '✅ Checkout recovered after the payment DNS fix.\n\n- 🔴 All 127 payment calls failed before it.\n- Next: alert on DNS errors ⚠️.';
+    expect(runReplyGates(reply, 'answer', known).failed).toContain('emojis: ✅ 🔴 ⚠');
+    expect(runReplyGates(reply, 'detail', known).metrics.emojis).toEqual(['✅', '🔴', '⚠']);
+    const marks = runReplyGates(
+      'Elastic® and Kibana™ recovered after the DNS fix.',
+      'answer',
+      known
+    );
+    expect(marks.metrics.emojis).toEqual([]);
+  });
+
   it('passes a short answer-first reply with grounded numbers', () => {
     const gates = runReplyGates(
       'No. Checkout never charged anyone: all 127 payment calls failed before reaching the provider.\n\n- About 1,250 requests were affected.\n- Next step: alert on payment DNS errors.',

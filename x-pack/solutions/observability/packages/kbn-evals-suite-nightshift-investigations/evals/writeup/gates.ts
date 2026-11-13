@@ -34,6 +34,8 @@ export interface ReplyGateMetrics {
   method: string[];
   /** Numbers of two or more digits that appear nowhere in what the agent saw. */
   ungroundedNumbers: string[];
+  /** Emojis in the reply; the prompt rules them out for every reply type. */
+  emojis: string[];
 }
 
 export interface ReplyGates {
@@ -81,6 +83,8 @@ const BULLET = /^\s*([-*•]|\d+[.)])\s+/;
 const HEADING = /^(#{1,6}\s|\*\*[^*\n]{2,40}:\*\*)/;
 const METHOD =
   /\bI(?:'ve| have)? (queried|ran|re-?checked|checked|pulled|looked|searched|grepped|counted|confirmed through)\b/gi;
+// Pictographs such as ✅, ⚠️ and 🔴. ©, ® and ™ are pictographic in Unicode but read as text.
+const EMOJI = /(?![©®™])\p{Extended_Pictographic}/gu;
 export const NUMBER = /\d[\d,]*(\.\d+)?/g;
 /** `6,600` and `6600` are the same number. */
 export const normalizeNumber = (n: string) => n.replace(/,/g, '');
@@ -164,6 +168,8 @@ export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>
     ),
   ];
 
+  const emojis = [...new Set(reply.match(EMOJI) ?? [])];
+
   const metrics: ReplyGateMetrics = {
     words: countWords(plain(lines.join('\n'))),
     leadWords: countWords(lead),
@@ -177,6 +183,7 @@ export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>
     attachmentUnshown,
     method,
     ungroundedNumbers,
+    emojis,
   };
   const limits = REPLY_GATE_LIMITS;
   const failed: string[] = [];
@@ -201,6 +208,7 @@ export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>
   if (tableRows > limits.maxTableRows) failed.push(`table of ${tableRows} rows in the reply`);
   // Saying how a result was produced is the answer to a method question.
   if (method.length && type !== 'method') failed.push(`method: ${method.join(', ')}`);
+  if (emojis.length) failed.push(`emojis: ${emojis.join(' ')}`);
   if (attachmentUnshown) failed.push("mentions an attachment it doesn't show");
   if (ungroundedNumbers.length) {
     failed.push(`ungrounded numbers: ${ungroundedNumbers.slice(0, 5).join(', ')}`);

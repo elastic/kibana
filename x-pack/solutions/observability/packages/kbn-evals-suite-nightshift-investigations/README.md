@@ -656,8 +656,8 @@ opens the conversation and an answer otherwise.
 
 The gates ([`gates.ts`](evals/writeup/gates.ts)) read the markdown the model wrote. Every reply
 needs a first sentence of 22 words or fewer, every number of two or more digits found in what the
-agent saw, no method narration ("I queried…") unless the question asked for the method, and no
-table over 12 rows (a longer list belongs in an attachment). A short reply also gets at most 100
+agent saw, no method narration ("I queried…") unless the question asked for the method, no
+emojis, and no table over 12 rows (a longer list belongs in an attachment). A short reply also gets at most 100
 words, at most 3 points (a wrap-up without points: at most 4 sentences), 90% or more of sentences at
 20 words or fewer, and no headings or bold labels. A long reply gets a word cap by type (method 300,
 list 200, detail 400, visual 150) and nothing else on its shape. Table rows count toward neither
