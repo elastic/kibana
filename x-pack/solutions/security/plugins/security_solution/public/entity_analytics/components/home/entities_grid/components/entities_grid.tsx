@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiDataGrid,
   EuiProgress,
@@ -43,6 +43,12 @@ import type { ReadAccess } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
 import { useGridLoadTelemetry } from '../hooks/use_grid_load_telemetry';
 import { RISK_SCORE_NORM_FIELD } from '../common';
+import { useInvalidateEntityGrid } from '../hooks/use_invalidate_entity_grid';
+import { RISK_VS_TYPICAL_FIELD } from '../queries/risk_vs_typical';
+import {
+  useBaselineDataMode,
+  useBaselineVersion,
+} from '../../../../baseline_prototype/baseline_prototype_state';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 
 const gridContainerCss = css`
@@ -156,10 +162,24 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   const { dataView } = useContext(DataViewContext);
   // EUI doesn't report leaving full screen when the grid unmounts (grouping, browser Back).
   useEffect(() => () => onFullScreenChange?.(false), [onFullScreenChange]);
+  const baselineVersion = useBaselineVersion();
+  const baselineDataMode = useBaselineDataMode();
+  const invalidateEntityGrid = useInvalidateEntityGrid();
+  // DESIGN PROTOTYPE, NOT FOR MERGE: the "Vs typical" column shows only while the prototype is on.
   const columns = useMemo(
-    () => getReadableColumns(rowsColumns, readAccess),
-    [rowsColumns, readAccess]
+    () =>
+      getReadableColumns(rowsColumns, readAccess).filter(
+        ({ id }) => id !== RISK_VS_TYPICAL_FIELD || baselineVersion !== 'off'
+      ),
+    [rowsColumns, readAccess, baselineVersion]
   );
+  // Computed values are cached per data mode, so a change of mode refetches the grid.
+  const previousDataMode = useRef(baselineDataMode);
+  useEffect(() => {
+    if (previousDataMode.current === baselineDataMode) return;
+    previousDataMode.current = baselineDataMode;
+    invalidateEntityGrid();
+  }, [baselineDataMode, invalidateEntityGrid]);
   const columnIds = useMemo(() => columns.map(({ id }) => id), [columns]);
   // A sort from the URL on a column the user can't read would still query its source.
   const isSortReadable = !isGridColumnId(sortField) || columnIds.includes(sortField);

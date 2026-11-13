@@ -10,7 +10,7 @@ import { assertNever } from '@kbn/std';
 import type { EuiThemeComputed, RenderCellValue } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
-import { ENTITY_TYPE_FIELD, getString } from '../common';
+import { ENTITY_TYPE_FIELD, getNumber, getString } from '../common';
 import type { Row, RowsMode } from '../common';
 import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from '../grid_columns';
 import { AlertCountCell } from './cells/alert_count_cell';
@@ -22,6 +22,8 @@ import { EntityTypeCell } from './cells/entity_type_cell';
 import { GroupSizeCell } from './cells/group_size_cell';
 import { alignEndCss } from './cells/styles';
 import { RiskScoreChangeCell } from './cells/risk_score_change_cell';
+import { RiskVsTypicalCell } from './cells/risk_vs_typical_cell';
+import { RISK_TYPICAL_FIELD } from '../queries/risk_vs_typical';
 import { RiskScoreValueCell } from './cells/risk_score_value_cell';
 import { SourceCell } from './cells/source_cell';
 import { WatchlistsCell } from './cells/watchlists_cell';
@@ -75,6 +77,7 @@ export const EntityGridRowsContext = createContext<EntityGridRows>({
 const END_ALIGNED_COLUMNS: ReadonlySet<string> = new Set([
   'group_size',
   'risk_score_change',
+  'risk_vs_typical',
   'anomaly_count',
   'case_count',
 ]);
@@ -134,6 +137,8 @@ const renderKnownEntityCell = (
       return <RiskScoreValueCell value={value} />;
     case 'risk_score_change':
       return <RiskScoreChangeCell value={value} />;
+    case 'risk_vs_typical':
+      return <RiskVsTypicalCell value={value} typical={getNumber(row, RISK_TYPICAL_FIELD)} />;
     case 'alert_count':
       return (
         <AlertCountCell

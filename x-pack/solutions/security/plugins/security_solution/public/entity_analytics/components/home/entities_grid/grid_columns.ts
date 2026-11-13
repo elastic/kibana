@@ -9,6 +9,7 @@ import type { EuiDataGridColumn, EuiDataGridColumnActions } from '@elastic/eui';
 import { alertCountQuerySpec, lastSeenAlertQuerySpec } from './queries/alerts';
 import { anomalyCountQuerySpec } from './queries/anomalies';
 import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
+import { riskVsTypicalQuerySpec } from './queries/risk_vs_typical';
 import { groupSizeQuerySpec } from './queries/group_size';
 import { caseCountQuerySpec } from './queries/cases';
 import { nativeSortQuerySpec } from './queries/native';
@@ -41,6 +42,13 @@ const COLUMNS = [
     initialWidth: 160,
     schema: 'numeric',
   },
+  // DESIGN PROTOTYPE, NOT FOR MERGE: shown only while the baseline prototype is on.
+  {
+    id: 'risk_vs_typical',
+    displayAsText: 'Vs typical',
+    initialWidth: 190,
+    schema: 'numeric',
+  },
   { id: 'asset.criticality', displayAsText: 'Asset criticality', initialWidth: 160 },
   { id: 'entity.source', displayAsText: 'Source', initialWidth: 170 },
   { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 180 },
@@ -61,6 +69,7 @@ export const QUERY_SPECS: Readonly<Partial<Record<GridColumnId, ColumnQuerySpec>
   'entity.EngineMetadata.Type': nativeSortQuerySpec,
   'entity.risk.calculated_score_norm': nativeSortQuerySpec,
   risk_score_change: riskScoreChangeQuerySpec,
+  risk_vs_typical: riskVsTypicalQuerySpec,
   'asset.criticality': nativeSortQuerySpec,
   alert_count: alertCountQuerySpec,
   last_seen_alert: lastSeenAlertQuerySpec,
@@ -129,7 +138,8 @@ export const INDIVIDUAL_ROWS_COLUMNS = getColumnsWithout('group_size');
 // Child rows (expanded under a resolved entity): neither rows-mode column applies.
 export const CHILD_ROWS_COLUMNS = getColumnsWithout(
   'group_size',
-  'entity.relationships.resolution.resolved_to'
+  'entity.relationships.resolution.resolved_to',
+  'risk_vs_typical'
 );
 
 /**
@@ -145,7 +155,7 @@ export interface ReadAccess {
 
 const SOURCE_COLUMNS: Readonly<Record<keyof ReadAccess, readonly GridColumnId[]>> = {
   alerts: ['alert_count', 'last_seen_alert'],
-  risk: ['risk_score_change'],
+  risk: ['risk_score_change', 'risk_vs_typical'],
   anomalies: ['anomaly_count'],
   cases: ['case_count'],
 };
