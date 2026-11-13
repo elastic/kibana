@@ -35,6 +35,13 @@ export const OUTCOME_FIELD = 'attributes.outcome';
  * exporter reports such a document twice, here and under its `failed_*` outcome.
  */
 export const FAILURE_STORE_OUTCOME = 'failure_store';
+/**
+ * Says what became of a `failure_store` row's document. `used`: it went to the failure store, and
+ * the exporter also counted it as a success. Any other value (`not_enabled`, `failed`): it did not,
+ * and the exporter also counted it under its `failed_*` outcome.
+ */
+export const FAILURE_STORE_FIELD = 'attributes.failure_store';
+export const FAILURE_STORE_USED = 'used';
 
 export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
 /**
@@ -42,6 +49,11 @@ export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
  * an Elasticsearch document. A failure of a whole request has none.
  */
 export const COLLECTION_NAME_FIELD = 'attributes.db.collection.name';
+/**
+ * The reason of a rejected document, as the Elasticsearch exporter reports it with its own error
+ * type, for example `security_exception`. A failure of a whole request has none.
+ */
+export const ERROR_TYPE_FIELD = 'attributes.error.type';
 /** Set on a rejected item only, so a stream with no failures yet has no such field. */
 export const HTTP_STATUS_CODE_FIELD = 'attributes.http.response.status_code';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
@@ -75,6 +87,7 @@ export const STATS_COLUMN = {
   authenticationRate: 'authentication_rate',
   authorizationRate: 'authorization_rate',
   collection: 'collection',
+  reason: 'reason',
   acceptedRate: 'accepted_rate',
   avgLatency: 'avg_latency',
   sumItems: 'sum_items',
@@ -82,11 +95,11 @@ export const STATS_COLUMN = {
 } as const;
 
 /**
- * The most collections one failure rate lists, the ones with the highest rates. A destination can
- * write to many collections, because a pattern built from record values can create many data
- * streams, and the response must stay small.
+ * The most causes one failure rate lists in its breakdown, the ones with the highest rates. A
+ * destination can write to many collections, because a pattern built from record values can create
+ * many data streams, and the response must stay small.
  */
-export const MAX_FAILURE_COLLECTIONS = 25;
+export const MAX_FAILURE_BREAKDOWN_ENTRIES = 25;
 
 /** The bucket count a series aims for, as Discover's auto interval does with a bar target. */
 export const SERIES_TARGET_BUCKETS = 50;
