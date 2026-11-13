@@ -25,6 +25,13 @@ export const ALERT_EVENTS_MAPPINGS: MappingsDefinition = {
         version: { type: 'long' },
       },
     },
+    // The inbound connector an imported alert arrived through.
+    connector: {
+      type: 'object',
+      properties: {
+        id: { type: 'keyword' },
+      },
+    },
     group_hash: { type: 'keyword' },
     data: { type: 'flattened' },
     status: { type: 'keyword' }, // breached | recovered | no_data
