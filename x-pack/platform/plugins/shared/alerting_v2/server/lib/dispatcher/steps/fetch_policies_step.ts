@@ -9,7 +9,7 @@ import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
+import { savedObjectNamespacesToSpaceId } from '../../saved_object_namespaces_to_space_id';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { DEFAULT_GROUPING } from '../constants';
 import { AlertTriage, PolicyCatalog } from '../state';

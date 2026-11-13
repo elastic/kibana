@@ -11,6 +11,7 @@ export * from './specs/abuseipdb/abuseipdb';
 export * from './specs/alienvault_otx/alienvault_otx';
 export * from './specs/atlassian/jira-cloud/jira';
 export * from './specs/atlassian/confluence_cloud/confluence';
+export * from './specs/aws/aws';
 export * from './specs/aws_lambda/aws_lambda';
 export * from './specs/bigquery/bigquery';
 export * from './specs/brave_search/brave_search';

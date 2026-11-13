@@ -12,7 +12,7 @@ import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAppendedTag } from '@kbn/palettes';
+import { getAppendedTag } from '@kbn/palettes-components';
 import { rainbowColors } from '../lib/rainbow_colors';
 import { computeGradientFinalColor } from '../lib/compute_gradient_final_color';
 import { PALETTES } from '../../../common/enums';

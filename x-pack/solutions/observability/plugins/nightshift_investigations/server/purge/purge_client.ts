@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { isResponseError } from '@kbn/es-errors';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { CORTEX_AI_INDEX_DEST } from '../../common/cortex';
+import { WIKI_AI_INDEX_DEST } from '../../common/wiki';
 import { DECISION_TREE_AI_INDEX_DEST } from '../../common/decision_trees';
 import { MEMORY_INDEX } from '../../common/memory';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
@@ -27,7 +27,7 @@ const SPACE_ID_FIELD = 'attributes.space_id';
 
 /**
  * Removes everything the investigator learned after a point in time, for one space. Use it after
- * a suspected prompt-injection run: the poisoned memory pages, Cortex pages, decision-tree
+ * a suspected prompt-injection run: the poisoned memory pages, Wiki pages, decision-tree
  * versions and investigation conversations all carry a write timestamp, so a cutoff drops the
  * whole blast radius without touching knowledge that predates the attack.
  *
@@ -131,9 +131,9 @@ export const createKnowledgePurgeClient = ({
   return {
     async preview(since) {
       const { investigations, capped } = await findInvestigations(since);
-      const [memoryPages, cortexPages, decisionTrees] = await Promise.all([
+      const [memoryPages, wikiPages, decisionTrees] = await Promise.all([
         countIndex(MEMORY_INDEX, since),
-        countIndex(CORTEX_AI_INDEX_DEST, since),
+        countIndex(WIKI_AI_INDEX_DEST, since),
         countIndex(DECISION_TREE_AI_INDEX_DEST, since),
       ]);
 
@@ -141,7 +141,7 @@ export const createKnowledgePurgeClient = ({
         since,
         counts: {
           memory_pages: memoryPages,
-          cortex_pages: cortexPages,
+          wiki_pages: wikiPages,
           decision_trees: decisionTrees,
           investigations: investigations.length,
         },
@@ -165,13 +165,13 @@ export const createKnowledgePurgeClient = ({
       };
 
       await run('memory_pages', () => deleteIndex(MEMORY_INDEX, since));
-      await run('cortex_pages', () => deleteIndex(CORTEX_AI_INDEX_DEST, since));
+      await run('wiki_pages', () => deleteIndex(WIKI_AI_INDEX_DEST, since));
       await run('decision_trees', () => deleteIndex(DECISION_TREE_AI_INDEX_DEST, since));
       await run('investigations', () => deleteInvestigations(since));
 
       logger.info(
         `Nightshift knowledge purge space=${spaceId} since=${since} ` +
-          `memory=${deleted.memory_pages} cortex=${deleted.cortex_pages} ` +
+          `memory=${deleted.memory_pages} wiki=${deleted.wiki_pages} ` +
           `trees=${deleted.decision_trees} investigations=${deleted.investigations} ` +
           `failures=${failures.length}`
       );

@@ -179,7 +179,8 @@ describe('DuplicateServiceModal namespace', () => {
       'Service [Duplicate]',
       expect.anything(),
       expect.anything(),
-      'staging'
+      'staging',
+      true
     );
   });
 
@@ -190,7 +191,8 @@ describe('DuplicateServiceModal namespace', () => {
       'Service [Duplicate]',
       expect.anything(),
       expect.anything(),
-      'global'
+      'global',
+      true
     );
   });
 
@@ -208,7 +210,13 @@ describe('DuplicateServiceModal namespace', () => {
     expect(screen.getByTestId('duplicateServiceModal-nameField')).toHaveValue('my copy');
 
     fireEvent.click(screen.getByTestId('duplicateServiceModal-addButton'));
-    expect(onAdd).toHaveBeenCalledWith('my copy', expect.anything(), expect.anything(), 'prod');
+    expect(onAdd).toHaveBeenCalledWith(
+      'my copy',
+      expect.anything(),
+      expect.anything(),
+      'prod',
+      true
+    );
   });
 
   it('disables Add while the namespace is invalid', () => {

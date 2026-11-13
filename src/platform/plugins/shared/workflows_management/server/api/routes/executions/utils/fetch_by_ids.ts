@@ -10,6 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type { DocumentSelection } from '../../../../../common/types/document_types';
+import { WorkflowTriggerForbiddenError } from '../../../workflow_trigger_forbidden_error';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 
 export interface FetchedSource {
@@ -32,6 +33,17 @@ export const assertWithinRunLimit = (count: number, plural: string): void => {
     );
   }
 };
+
+const FORBIDDEN_STATUS = 403;
+
+/**
+ * 4xx statuses that do not mean the selection is malformed: a 401 points at cluster credentials,
+ * a 403 is handled separately, and a timeout (408) or a rejection under load (429) is transient.
+ */
+const NOT_INPUT_ERROR_STATUSES: ReadonlySet<number> = new Set([401, FORBIDDEN_STATUS, 408, 429]);
+
+const isSelectionRejectedStatus = (status: number): boolean =>
+  status >= 400 && status < 500 && !NOT_INPUT_ERROR_STATUSES.has(status);
 
 const selectionKey = ({ _id, _index }: DocumentSelection) => `${_index}\u0000${_id}`;
 
@@ -138,11 +150,14 @@ export const fetchDocumentFieldsByIds = async ({
 
     const documents: FetchedFields[] = [];
     const found = new Set<string>();
-    const failures: string[] = [];
+    const failures: Array<{ description: string; status: number }> = [];
     responses.forEach((response, position) => {
       const [requestedIndex, requestedIds] = requestedIndices[position];
       if ('error' in response) {
-        failures.push(`${requestedIndex}: ${response.error.reason ?? response.error.type}`);
+        failures.push({
+          description: `${requestedIndex}: ${response.error.reason ?? response.error.type}`,
+          status: response.status,
+        });
         return;
       }
       // `_id` is optional on the client's hit type even though a concrete search hit always has one.
@@ -161,12 +176,24 @@ export const fetchDocumentFieldsByIds = async ({
       }
     });
 
-    // With every sub-search failed this is an Elasticsearch problem, not an empty selection.
+    // With every sub-search failed this is not an empty selection. A 403 from every one of them
+    // means the user may not search any index; one they cannot read is skipped by
+    // `ignore_unavailable` and reads as not found. A non-transient 4xx from every one of them
+    // means the selection itself is unusable (a missing remote cluster); anything else is an
+    // Elasticsearch problem the caller cannot fix.
     if (failures.length === requestedIndices.length) {
-      throw new Error(`Every index search failed (${failures.join('; ')})`);
+      const message = `Every index search failed (${failures
+        .map(({ description }) => description)
+        .join('; ')})`;
+      if (failures.every(({ status }) => status === FORBIDDEN_STATUS)) {
+        throw new WorkflowTriggerForbiddenError(message);
+      }
+      throw failures.every(({ status }) => isSelectionRejectedStatus(status))
+        ? new WorkflowTriggerInputError(message)
+        : new Error(message);
     }
-    for (const failure of failures) {
-      logger.warn(`Failed to search index ${failure}`);
+    for (const { description } of failures) {
+      logger.warn(`Failed to search index ${description}`);
     }
 
     for (const selection of selections) {
@@ -177,6 +204,12 @@ export const fetchDocumentFieldsByIds = async ({
 
     return documents;
   } catch (error) {
+    if (
+      error instanceof WorkflowTriggerInputError ||
+      error instanceof WorkflowTriggerForbiddenError
+    ) {
+      throw error;
+    }
     logger.error(
       `Failed to fetch documents: ${error instanceof Error ? error.message : String(error)}`
     );

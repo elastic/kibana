@@ -23,7 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { findFiberWithDebugSource, findSourceComponentName } from '@kbn/react-fiber';
 import type { ElementFiber } from '@kbn/react-fiber';
-import { isEscapeKey } from '../../../lib/keyboard_shortcut/keyboard_shortcut';
+import {
+  isCopyKeyboardShortcut,
+  isEscapeKey,
+} from '../../../lib/keyboard_shortcut/keyboard_shortcut';
 import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
@@ -73,6 +76,8 @@ export const InspectOverlay = ({
   const [grabStatus, setGrabStatus] = useState<GrabStatus>('idle');
   const [repoRoot, setRepoRoot] = useState<string | null>(null);
   const repoRootRequest = useRef<Promise<void> | null>(null);
+  /** The element under the cursor, so it can be grabbed with the keyboard too. */
+  const hoveredElement = useRef<HTMLElement | null>(null);
   const isGrabMode = mode === 'grab';
 
   /**
@@ -87,16 +92,6 @@ export const InspectOverlay = ({
       pointer-events: none;
     `,
     [euiTheme.colors.backgroundFilledText, euiTheme.levels.toast]
-  );
-
-  const handleKeydown = useCallback(
-    (event: KeyboardEvent) => {
-      if (isEscapeKey(event)) {
-        event.preventDefault();
-        setIsInspecting(false);
-      }
-    },
-    [setIsInspecting]
   );
 
   /**
@@ -118,19 +113,21 @@ export const InspectOverlay = ({
 
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      const hoveredElement = getElementFromPoint(event);
-      const elementFiber = hoveredElement ? findFiberWithDebugSource(hoveredElement) : null;
+      const element = getElementFromPoint(event);
+      const elementFiber = element ? findFiberWithDebugSource(element) : null;
 
       /** Nothing to inspect, e.g. the developer toolbar, so no highlight may linger over it. */
-      if (!hoveredElement || !elementFiber) {
+      if (!element || !elementFiber) {
+        hoveredElement.current = null;
         setTarget(null);
         setSourceComponent(null);
         setHighlightPosition(null);
         return;
       }
 
-      const { top, left, width, height } = hoveredElement.getBoundingClientRect();
+      const { top, left, width, height } = element.getBoundingClientRect();
 
+      hoveredElement.current = element;
       setTarget(elementFiber);
 
       const sourceComponentName = findSourceComponentName(elementFiber.fiber);
@@ -190,6 +187,33 @@ export const InspectOverlay = ({
     return () => window.clearTimeout(timeoutId);
   }, [grabStatus]);
 
+  /** Copies the context of an element to the clipboard and shows the outcome on the highlight. */
+  const copyGrabContext = useCallback(
+    (element: HTMLElement) => {
+      const context = buildGrabContext({ element, fiber: target?.fiber ?? null, repoRoot });
+
+      setGrabStatus(copyToClipboard(context) ? 'copied' : 'failed');
+    },
+    [target, repoRoot]
+  );
+
+  const handleKeydown = useCallback(
+    (event: KeyboardEvent) => {
+      if (isEscapeKey(event)) {
+        event.preventDefault();
+        setIsInspecting(false);
+        return;
+      }
+
+      /** ⌘ + C / Ctrl + C grabs the hovered element, so the cursor doesn't have to leave it. */
+      if (isGrabMode && hoveredElement.current && isCopyKeyboardShortcut(event)) {
+        event.preventDefault();
+        copyGrabContext(hoveredElement.current);
+      }
+    },
+    [isGrabMode, copyGrabContext, setIsInspecting]
+  );
+
   const handleClickAtPositionOfInspectedElement = useCallback(
     async (event: MouseEvent) => {
       const clickedElement = getElementFromPoint(event);
@@ -200,12 +224,7 @@ export const InspectOverlay = ({
       }
 
       if (isGrabMode) {
-        const context = buildGrabContext({
-          element: clickedElement,
-          fiber: target?.fiber ?? null,
-          repoRoot,
-        });
-        setGrabStatus(copyToClipboard(context) ? 'copied' : 'failed');
+        copyGrabContext(clickedElement);
         return;
       }
 
@@ -239,7 +258,7 @@ export const InspectOverlay = ({
       core,
       branch,
       isGrabMode,
-      repoRoot,
+      copyGrabContext,
       sourceComponent,
       target,
       setIsInspecting,

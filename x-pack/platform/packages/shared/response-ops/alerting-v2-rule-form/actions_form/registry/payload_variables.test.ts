@@ -56,6 +56,12 @@ describe('getContextVariables', () => {
   it('lists rule fields for any key of the rules map', () => {
     expect(getContextVariables(['inputs', 'payload', 'rules', 'rule-1'])).toEqual([
       { path: 'name', detail: 'string', documentation: 'Display name of the rule' },
+      {
+        path: 'grouping_fields',
+        detail: 'string[]',
+        documentation:
+          'Fields the rule groups its alerts by (the rule `grouping.fields`). Empty when the rule has no grouping. Dotted names are nested under `alert.data` (`host.name` is `alert.data.host.name`). (optional)',
+      },
     ]);
   });
 

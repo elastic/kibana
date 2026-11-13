@@ -326,6 +326,51 @@ describe('updateVendorApi', () => {
     ]);
   });
 
+  it('reports operations the auth type requests too few OAuth scopes for, until an overlay corrects them', async () => {
+    documents[SPEC_URL] = specYaml('1.0')
+      .replace(
+        `servers: [{ url: '${BASE}' }]`,
+        `servers: [{ url: '${BASE}' }]\nsecurity: [{ oauth: [items:all, items:admin] }]`
+      )
+      .replace(
+        'components:\n',
+        `components:\n  securitySchemes:\n    oauth:\n      type: oauth2\n      flows: { clientCredentials: { tokenUrl: '${BASE}/token', scopes: {} } }\n`
+      );
+    const scoped: ConnectorSpec = {
+      ...connector,
+      auth: {
+        types: [
+          {
+            type: 'oauth_client_credentials',
+            defaults: { tokenUrl: `${BASE}/token`, scope: 'items:read' },
+          },
+        ],
+      },
+    };
+
+    const { problems } = await update({ connector: scoped, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      "listItems: under auth type oauth_client_credentials, GET /items needs OAuth scopes the auth type doesn't request: Token was granted items:read, but the operation needs one of items:all items:admin; add one to the auth type's default \"scope\", or correct the spec's scopes in overlay.yaml",
+    ]);
+
+    await fs.writeFile(
+      path.join(directory, 'overlay.yaml'),
+      `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.security[?@.oauth]
+    remove: true
+  - target: $.security
+    update:
+      - oauth: [items:read]
+`
+    );
+
+    expect((await update({ connector: scoped })).problems).toEqual([]);
+  });
+
   it('reports an auth type that cannot be recorded as a problem, so no manifest lacks its operations', async () => {
     const twoAuthTypes: ConnectorSpec = { ...connector, auth: { types: ['none', 'unavailable'] } };
 
@@ -371,9 +416,37 @@ actions:
       { source: 'main', method: 'get', path: '/legacy' },
     ]);
     expect(Object.keys((await readJson('snapshots/main.openapi.json')).paths)).toEqual(['/items']);
-    expect(warnings).toEqual([
-      'overlay.yaml action 1 matches nothing in any source; the vendor may have fixed it',
-    ]);
+  });
+
+  describe('with an overlay action that matches nothing', () => {
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      warnings = [];
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths['/gone']
+    remove: true
+`
+      );
+    });
+
+    it('stays quiet offline, as the route may just be left out of the snapshot', async () => {
+      await update();
+
+      expect(warnings).toEqual([]);
+    });
+
+    it('warns with --refresh, as the vendor spec has been fetched', async () => {
+      await update({ refresh: true });
+
+      expect(warnings).toEqual([
+        'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
+      ]);
+    });
   });
 
   it('keeps the components that overlay updates reference in the snapshot', async () => {

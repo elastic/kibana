@@ -769,3 +769,69 @@ export const assertEsqlGroundedInReport = (
       : 'query filters on no value drawn from the report (no matching IOC or report literal in a filtering predicate)',
   };
 };
+
+/** A filter clause the mapper can match retained row values against (read-side only). */
+export interface HuntFilterClause {
+  column: string;
+  operator: '==' | 'in' | 'like';
+  literals: string[];
+}
+
+const columnArgOf = (fn: ESQLFunction): string | undefined => {
+  for (const arg of fn.args) {
+    if (Array.isArray(arg)) {
+      for (const nested of arg) {
+        const name = columnNameOf(nested);
+        if (name) return name;
+      }
+      continue;
+    }
+    const name = columnNameOf(arg);
+    if (name) return name;
+  }
+  return undefined;
+};
+
+const collectFilterClauses = (node: ESQLAstNode | ESQLAstNode[], out: HuntFilterClause[]): void => {
+  if (Array.isArray(node)) {
+    for (const child of node) collectFilterClauses(child, out);
+    return;
+  }
+  const fn = asFunction(node);
+  if (!fn) return;
+  const operator = fn.name.toLowerCase();
+  if (operator === 'and' || operator === 'or') {
+    for (const arg of fn.args) collectFilterClauses(arg, out);
+    return;
+  }
+  // rlike / match / : intentionally yield no literals; attribution cannot compare them to a value.
+  if (operator === '==' || operator === 'like') {
+    const column = columnArgOf(fn);
+    const literals = literalsOf(fn.args);
+    if (column && literals.length > 0) {
+      out.push({ column, operator, literals });
+    }
+    return;
+  }
+  if (operator === 'in') {
+    const column = columnArgOf(fn);
+    const literals = listValuesOf(fn.args);
+    if (column && literals && literals.length > 0) {
+      out.push({ column, operator: 'in', literals });
+    }
+  }
+};
+
+/**
+ * Flatten filter predicates into comparable clauses for hit attribution. Does not rewrite the
+ * query. Nested AND/OR are expanded; each `==` / `IN` / `LIKE` leaf becomes one clause.
+ */
+export const clausesOf = (query: string): HuntFilterClause[] => {
+  const { root, errors } = Parser.parse(query);
+  if (errors.length > 0) return [];
+  const out: HuntFilterClause[] = [];
+  for (const predicate of allFilterPredicates(root)) {
+    collectFilterClauses(predicate, out);
+  }
+  return out;
+};
