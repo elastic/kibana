@@ -68,13 +68,9 @@ const collect = async (rows: AsyncIterable<AgentInventoryRows>): Promise<AgentIn
 };
 
 /**
- * One scan: read the latest osquery inventory, then for each OS release in turn download its
- * advisory feed, match that release's hosts and write their findings. Releases are processed one
- * at a time because a parsed feed index takes a few hundred MB of heap.
- *
- * A failure on one release does not stop the others; the run throws at the end so Task Manager
- * records it. Hosts of a release that was not matched are left out of the write, so their open
- * findings are not marked fixed.
+ * Reads the latest inventory, then matches and writes one OS release at a time (a parsed feed
+ * takes a few hundred MB of heap). A failed release does not stop the others; the run throws at
+ * the end. Hosts of unmatched releases are left out of the write so their findings stay open.
  */
 export const runScan = async (
   { es, packRepository, logger, loadFeed: load = loadFeed, now = () => new Date() }: ScanDeps,
