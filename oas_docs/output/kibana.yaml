@@ -124,12 +124,24 @@ tags:
     description: |
       Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
     x-displayName: Data streams
-  - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+  - description: |
+      Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+
+      ## When to use this API
+
+      - Use this API for existing integrations and for partial updates, where you send only the properties to change.
+      - Use this API to manage individual fields and runtime fields, set the default data view, or swap references. The Data views v2 API doesn't support these tasks.
+      - To manage complete data view definitions as code, use the [Data views v2 API](../group/endpoint-data-views-v2).
     name: data views
     x-displayName: Data views
   - name: data-views-v2
     description: |
       Data view APIs enable you to manage data views, formerly known as Kibana index patterns. Use these endpoints to list, retrieve, create, replace, and delete data views with the as-code data view definition.
+
+      ## When to use this API
+
+      - Use this API to manage complete data view definitions as code. A `PUT` request creates the data view if it doesn't exist, or replaces its whole definition and removes any optional property you omit.
+      - For partial updates, or for integrations that use the existing format, use the [Data views API](../group/endpoint-data-views).
     x-displayName: Data views v2
   - name: Discover sessions
     description: |
@@ -21187,7 +21199,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_unified_attachment_response'
           description: |
-            Indicates a successful call. Returns the new attachment, or the existing one if the alert or event was already attached.
+            Indicates a successful call. Returns the new attachment. If some of the alert or event IDs are already attached to the case, they are skipped and the new attachment holds only the remaining IDs.
         '400':
           content:
             application/json:
@@ -21229,6 +21241,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The case was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409_attachment_already_attached'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Every alert or event ID in the request is already attached to the case.
       summary: Create a case attachment
       tags:
         - cases
@@ -23598,9 +23619,7 @@ paths:
 
         Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.
 
-        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.
-
-        The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-chat-message
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23728,7 +23747,7 @@ paths:
                     error: Not Found
                     message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
                     statusCode: 404
-          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist, an `agent_id` that the caller cannot use, or a disabled `agentBuilder:experimentalFeatures` advanced setting. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
+          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist or an `agent_id` that the caller cannot use. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
       summary: Send a message and get the answer
       tags:
         - agent builder
@@ -23751,7 +23770,7 @@ paths:
               "message": "What is Elasticsearch?",
               "agent_id": "elastic-ai-agent"
             }
-      x-state: Experimental; added in 9.6.0
+      x-state: Technical Preview; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -40107,6 +40126,10 @@ paths:
                           description: The ID of the proxy to use for this download source. See the proxies API for more information.
                           nullable: true
                           type: string
+                        reserve_diskspace:
+                          description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                          type: boolean
+                          x-state: Generally available; added in 9.6.0
                         secrets:
                           additionalProperties: false
                           type: object
@@ -40286,6 +40309,10 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                reserve_diskspace:
+                  description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                  type: boolean
+                  x-state: Generally available; added in 9.6.0
                 secrets:
                   additionalProperties: false
                   type: object
@@ -40406,6 +40433,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available; added in 9.6.0
                       secrets:
                         additionalProperties: false
                         type: object
@@ -40671,6 +40702,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available; added in 9.6.0
                       secrets:
                         additionalProperties: false
                         type: object
@@ -40856,6 +40891,10 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                reserve_diskspace:
+                  description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                  type: boolean
+                  x-state: Generally available; added in 9.6.0
                 secrets:
                   additionalProperties: false
                   type: object
@@ -40976,6 +41015,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available; added in 9.6.0
                       secrets:
                         additionalProperties: false
                         type: object
@@ -41888,7 +41931,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
+        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: (fleet-agent-policies-read AND integrations-read) OR fleet-setup.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - description: The ID of the agent policy
@@ -42006,7 +42049,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read.
+        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
         - description: The ID of the agent policy
@@ -44033,6 +44076,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of each agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, only return agents that are upgradeable
           in: query
           name: showUpgradeable
@@ -44315,6 +44365,19 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
+                        pending_restart:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            action_id:
+                              type: string
+                            created_at:
+                              type: string
+                            expiration:
+                              type: string
+                          required:
+                            - action_id
+                            - created_at
                         pipeline_config:
                           maxLength: 10000
                           type: string
@@ -44364,6 +44427,8 @@ paths:
                             - OPAMP
                           type: string
                         unenrolled_at:
+                          type: string
+                        unenrolled_reason:
                           type: string
                         unenrollment_started_at:
                           type: string
@@ -44747,6 +44812,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of the agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -44981,6 +45053,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -45030,6 +45115,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
@@ -45464,6 +45551,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -45513,6 +45613,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
@@ -46415,7 +46517,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy. It also fails with a 409 when the agent already has a pending restart action, unless `force` is set.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46432,6 +46534,24 @@ paths:
           schema:
             maxLength: 512
             type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              forceRestartAgentRequest:
+                value:
+                  force: true
+              restartAgentRequest:
+                value: {}
+            schema:
+              additionalProperties: false
+              default: null
+              nullable: true
+              type: object
+              properties:
+                force:
+                  description: Restart the agent even if it already has a pending restart action.
+                  type: boolean
       responses:
         '200':
           content:
@@ -46471,6 +46591,34 @@ paths:
                   - message
                   - attributes
           description: A bad request.
+        '409':
+          content:
+            application/json:
+              examples:
+                pendingRestartResponse:
+                  value:
+                    error: Conflict
+                    message: Agent agent-1 already has a pending restart action a1b2c3d4-e5f6-7890-abcd-ef1234567890. Use force to restart anyway.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: 'A conflict occurred: the agent already has a pending restart action.'
       summary: Restart an agent
       tags:
         - Elastic Agent actions
@@ -47869,7 +48017,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy, are on a version earlier than 9.6.0, or already have a pending restart action (unless `force` is set) are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47906,6 +48054,9 @@ paths:
                 batchSize:
                   minimum: 1
                   type: number
+                force:
+                  description: Restart agents even if they already have a pending restart action.
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -62673,24 +62824,21 @@ paths:
           source: |
             POST kbn:/api/links
             {
-              "summary": "Create a links library item",
-              "value": {
-                "title": "Important Resources",
-                "description": "A collection of important links",
-                "links": [
-                  {
-                    "label": "Overview",
-                    "type": "dashboardLink",
-                    "destination": "dashboard-abc-123"
-                  },
-                  {
-                    "label": "Elastic Documentation",
-                    "type": "externalLink",
-                    "destination": "https://www.elastic.co/docs"
-                  }
-                ],
-                "layout": "horizontal"
-              }
+              "title": "Important Resources",
+              "description": "A collection of important links",
+              "links": [
+                {
+                  "label": "Overview",
+                  "type": "dashboardLink",
+                  "destination": "dashboard-abc-123"
+                },
+                {
+                  "label": "Elastic Documentation",
+                  "type": "externalLink",
+                  "destination": "https://www.elastic.co/docs"
+                }
+              ],
+              "layout": "horizontal"
             }
       x-state: Experimental; added in 9.6.0
       x-metaTags:
@@ -83773,6 +83921,81 @@ paths:
             {
               "entityTypes": ["user", "host", "service", "generic"]
             }
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the API key of every Entity Store background task with one owned by the user making this request, for example after the user who installed the Entity Store is removed. The tasks keep their schedules and state, and no entity data is changed. The user needs the same privileges as the install endpoint. Tasks that could not be updated are listed in `failed`; call the endpoint again to retry them.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateApiKeyExample:
+                description: Re-grant the API key of every Entity Store task as the user making the request.
+                summary: Update the API key of the Entity Store tasks
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateApiKeyPartialExample:
+                  description: Call the endpoint again to retry the tasks listed in `failed`.
+                  summary: Some tasks could not be updated
+                  value:
+                    failed:
+                      - id: entity_store:v2:status_report_task:default
+                        message: Version conflict
+                        statusCode: 409
+                    ok: false
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                updateApiKeySuccessExample:
+                  description: Every Entity Store task now runs with an API key owned by the caller.
+                  summary: All tasks updated
+                  value:
+                    failed: []
+                    ok: true
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                      - entity_store:v2:status_report_task:default
+          description: Indicates that the request was processed. Check `ok` and `failed` to see whether every task was updated.
+      summary: Update the API key of the Entity Store tasks
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/update_api_key"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/update_api_key
+            {}
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -136614,7 +136837,7 @@ paths:
           schema:
             maxLength: 1024
             type: string
-        - description: If `true`, store the `namespace` as sent. Otherwise, a `default` namespace is replaced with one derived from the space ID.
+        - description: If `true`, store the `namespace` exactly as sent, skipping the space-derived fallback. If `false` or omitted, an explicit `namespace` is still stored as sent; only an omitted `namespace` is derived from the space ID.
           in: query
           name: preserve_namespace
           required: false
@@ -140532,12 +140755,14 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 4096
             type: string
         - description: Number of results per page.
           in: query
           name: size
           required: false
           schema:
+            maximum: 10000
             minimum: 1
             type: number
         - description: Page number.
@@ -140562,6 +140787,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 1000
             type: array
@@ -140571,6 +140797,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 1000
             type: array
@@ -141199,6 +141426,7 @@ paths:
           name: stepExecutionId
           required: false
           schema:
+            maxLength: 255
             type: string
         - description: Number of log entries per page.
           in: query
@@ -141222,6 +141450,7 @@ paths:
           name: sortField
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Sort order.
           in: query
@@ -142824,7 +143053,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read.
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read.
       operationId: post-workflows-workflow-id-clone
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -143053,6 +143282,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -143061,6 +143291,7 @@ paths:
           name: concurrencyGroupKey
           required: false
           schema:
+            maxLength: 1024
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Whether to exclude step-level execution data.
@@ -143074,6 +143305,7 @@ paths:
           name: finishedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
@@ -143081,6 +143313,7 @@ paths:
           name: finishedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Field to collapse execution results by.
@@ -143143,6 +143376,7 @@ paths:
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
@@ -143150,6 +143384,7 @@ paths:
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
       responses:
@@ -143274,6 +143509,7 @@ paths:
           name: stepId
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Include step input data.
           in: query
@@ -143307,12 +143543,14 @@ paths:
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).
           in: query
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
       responses:
         '200':
@@ -143441,6 +143679,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -143449,30 +143688,35 @@ paths:
           name: concurrencyGroupKey
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Datemath lower bound for filtering executions by startedAt.
           in: query
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering executions by startedAt.
           in: query
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath lower bound for filtering executions by finishedAt.
           in: query
           name: finishedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering executions by finishedAt.
           in: query
           name: finishedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Field to collapse execution results by.
           in: query
@@ -146007,7 +146251,7 @@ components:
               type: text
               required: false
           error: null
-          extractObservables: true
+          extractObservables: false
           id: 856ee650-6c82-11ee-a20a-6164169afa58
           mappings: []
           observableTypes: []
@@ -146394,6 +146638,12 @@ components:
         error: Conflict
         message: Template name "Security incident" already exists for owner "cases"
         statusCode: 409
+    Cases_response_409_attachment_already_attached:
+      summary: Every alert or event in the request is already attached to the case.
+      value:
+        error: Conflict
+        message: Every id in the request is already attached to case 293f1bfe-c4ab-4a0b-9a36-9fd4a1d7d2b1.
+        statusCode: 409
     Cases_response_409_attachment_version_conflict:
       summary: The attachment version is out of date.
       value:
@@ -146458,7 +146708,7 @@ components:
             type: text
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -146571,7 +146821,7 @@ components:
             type: toggle
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -153699,7 +153949,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
           type: boolean
         owner:
           $ref: '#/components/schemas/Cases_owner'
@@ -153726,7 +153976,7 @@ components:
       properties:
         extractObservables:
           description: |
-            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
+            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.
           example: true
           type: boolean
         syncAlerts:
@@ -153865,7 +154115,7 @@ components:
       properties:
         definition:
           description: |
-            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`. Observable extraction (`settings.extractObservables`) is available only for Security templates. For Stack and Observability templates, setting it to `true` returns a 400 error. An update that keeps an already stored `true` for the same owner is accepted.
           example: |
             name: Security incident
             severity: high
@@ -153993,7 +154243,7 @@ components:
     Cases_unified_attachment_data:
       additionalProperties: true
       description: |
-        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
+        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters). In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
       example:
         content: A new comment.
       nullable: true
@@ -154001,7 +154251,7 @@ components:
     Cases_unified_attachment_metadata:
       additionalProperties: true
       description: |
-        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
+        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`. In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
       nullable: true
       type: object
     Cases_unified_attachment_put_request:
@@ -154299,7 +154549,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
           type: boolean
         templates:
           $ref: '#/components/schemas/Cases_templates'
@@ -156780,7 +157030,7 @@ components:
           minLength: 1
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -156829,7 +157079,7 @@ components:
           nullable: true
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -158815,6 +159065,11 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -159104,6 +159359,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Experimental; added in 9.5.0
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -159118,6 +159378,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -160068,12 +160333,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -160101,12 +160364,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -160154,12 +160415,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -160768,72 +161027,76 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
-              - additionalProperties: false
-                type: object
-                properties:
-                  alignment:
-                    default: right
-                    description: Alignment of the columns.
-                    enum:
-                      - left
-                      - center
-                      - right
-                    type: string
-                  apply_color_to:
-                    anyOf:
-                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
-                        enum:
-                          - value
-                          - background
-                        type: string
-                      - enum:
-                          - badge
-                        type: string
-                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-                  color:
-                    anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-                  summary:
-                    additionalProperties: false
-                    description: Summary row configuration
+              - discriminator:
+                  propertyName: apply_color_to
+                oneOf:
+                  - additionalProperties: false
                     type: object
                     properties:
-                      label:
-                        description: Summary row label.
+                      alignment:
+                        default: right
+                        description: Alignment of the columns.
+                        enum:
+                          - left
+                          - center
+                          - right
                         type: string
-                      type:
+                      apply_color_to:
                         anyOf:
-                          - enum:
-                              - sum
+                          - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                            enum:
+                              - value
+                              - background
                             type: string
                           - enum:
-                              - avg
+                              - badge
                             type: string
-                          - enum:
-                              - count
+                        description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                      color:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                        default:
+                          type: auto
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                      summary:
+                        additionalProperties: false
+                        description: Summary row configuration
+                        type: object
+                        properties:
+                          label:
+                            description: Summary row label.
                             type: string
-                          - enum:
-                              - min
-                            type: string
-                          - enum:
-                              - max
-                            type: string
-                        description: Type of summary function to apply to the column.
-                    required:
-                      - type
-                  visible:
-                    default: true
-                    description: When `false`, hides the column from the datatable.
-                    type: boolean
-                  width:
-                    description: Column width in pixels.
-                    minimum: 0
-                    type: number
+                          type:
+                            anyOf:
+                              - enum:
+                                  - sum
+                                type: string
+                              - enum:
+                                  - avg
+                                type: string
+                              - enum:
+                                  - count
+                                type: string
+                              - enum:
+                                  - min
+                                type: string
+                              - enum:
+                                  - max
+                                type: string
+                            description: Type of summary function to apply to the column.
+                        required:
+                          - type
+                      visible:
+                        default: true
+                        description: When `false`, hides the column from the datatable.
+                        type: boolean
+                      width:
+                        description: Column width in pixels.
+                        minimum: 0
+                        type: number
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
@@ -161701,12 +161964,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -161734,12 +161995,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -161857,12 +162116,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -162911,6 +163168,14 @@ components:
                   type: object
                 proxy_url:
                   type: string
+                reserve_diskspace:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                  required:
+                    - enabled
                 secrets:
                   additionalProperties: true
                   type: object
@@ -165311,6 +165576,11 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -166444,7 +166714,7 @@ components:
             - enum:
                 - default
               type: string
-          description: Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).
+          description: Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit). Requests authenticated with an API key can't set `write_restricted`, because an API key doesn't map to a user. To set it, authenticate as a user.
       title: Access control
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-data:
@@ -171394,12 +171664,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -171427,12 +171695,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -171484,12 +171750,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -178866,12 +179130,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -178899,12 +179161,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -179022,12 +179282,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -180535,12 +180793,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -180568,12 +180824,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -180639,12 +180893,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -184591,6 +184843,11 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         packagePolicyIds:
           items:
             type: string
@@ -185372,66 +185629,74 @@ components:
         metrics:
           description: Array of metrics to display as columns in the datatable
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetric'
+            discriminator:
+              propertyName: apply_color_to
+            oneOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetric'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
         rows:
           description: Array of operations to split the datatable rows by
           items:
-            type: object
-            properties:
-              alignment:
-                default: left
-                description: Alignment of the rows.
-                enum:
-                  - left
-                  - center
-                  - right
-                type: string
-              apply_color_to:
-                anyOf:
-                  - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+            discriminator:
+              propertyName: apply_color_to
+            oneOf:
+              - type: object
+                properties:
+                  alignment:
+                    default: left
+                    description: Alignment of the rows.
                     enum:
-                      - value
-                      - background
+                      - left
+                      - center
+                      - right
                     type: string
-                  - enum:
-                      - badge
+                  apply_color_to:
+                    anyOf:
+                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
+                      - enum:
+                          - badge
+                        type: string
+                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                  click_filter:
+                    default: false
+                    description: When `true`, enables one-click filtering on cell values.
+                    type: boolean
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                  color:
+                    anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                    default:
+                      type: auto
+                    description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                  column:
+                    description: Column to use
                     type: string
-                description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-              click_filter:
-                default: false
-                description: When `true`, enables one-click filtering on cell values.
-                type: boolean
-              collapse_by:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
-              color:
-                anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
-                description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-              column:
-                description: Column to use
-                type: string
-              format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
-              label:
-                description: Label for the operation
-                type: string
-              visible:
-                default: true
-                description: When `false`, hides the column from the datatable.
-                type: boolean
-              width:
-                description: Column width in pixels.
-                minimum: 0
-                type: number
-            required:
-              - column
+                  format:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+                  label:
+                    description: Label for the operation
+                    type: string
+                  visible:
+                    default: true
+                    description: When `false`, hides the column from the datatable.
+                    type: boolean
+                  width:
+                    description: Column width in pixels.
+                    minimum: 0
+                    type: number
+                required:
+                  - column
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBar'
           maxItems: 50
           minItems: 1
           type: array
@@ -185551,6 +185816,458 @@ components:
         - column
       title: Datatable Metric (ES|QL)
       type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar:
+      discriminator:
+        mapping:
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient'
+      title: Datatable metric progress bar (ES|QL)
+      x-state: Added in 9.6.1
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          default: gradient
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
+          enum:
+            - gradient
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+      title: Datatable metric progress bar (ES|QL) (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (ES|QL) (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
+          enum:
+            - solid
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (ES|QL) (solid fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBar:
+      discriminator:
+        mapping:
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient'
+      title: Datatable row progress bar (ES|QL)
+      x-state: Added in 9.6.1
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          default: gradient
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
+          enum:
+            - gradient
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+      title: Datatable row progress bar (ES|QL) (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable row progress bar (ES|QL) (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
+          enum:
+            - solid
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable row progress bar (ES|QL) (solid fill)
+      type: object
     Kibana_HTTP_APIs_visDatatableMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
     Kibana_HTTP_APIs_visDatatableMetricCountMetric:
@@ -185616,72 +186333,76 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
-              - additionalProperties: false
-                type: object
-                properties:
-                  alignment:
-                    default: right
-                    description: Alignment of the columns.
-                    enum:
-                      - left
-                      - center
-                      - right
-                    type: string
-                  apply_color_to:
-                    anyOf:
-                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
-                        enum:
-                          - value
-                          - background
-                        type: string
-                      - enum:
-                          - badge
-                        type: string
-                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-                  color:
-                    anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-                  summary:
-                    additionalProperties: false
-                    description: Summary row configuration
+              - discriminator:
+                  propertyName: apply_color_to
+                oneOf:
+                  - additionalProperties: false
                     type: object
                     properties:
-                      label:
-                        description: Summary row label.
+                      alignment:
+                        default: right
+                        description: Alignment of the columns.
+                        enum:
+                          - left
+                          - center
+                          - right
                         type: string
-                      type:
+                      apply_color_to:
                         anyOf:
-                          - enum:
-                              - sum
+                          - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                            enum:
+                              - value
+                              - background
                             type: string
                           - enum:
-                              - avg
+                              - badge
                             type: string
-                          - enum:
-                              - count
+                        description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                      color:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                        default:
+                          type: auto
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                      summary:
+                        additionalProperties: false
+                        description: Summary row configuration
+                        type: object
+                        properties:
+                          label:
+                            description: Summary row label.
                             type: string
-                          - enum:
-                              - min
-                            type: string
-                          - enum:
-                              - max
-                            type: string
-                        description: Type of summary function to apply to the column.
-                    required:
-                      - type
-                  visible:
-                    default: true
-                    description: When `false`, hides the column from the datatable.
-                    type: boolean
-                  width:
-                    description: Column width in pixels.
-                    minimum: 0
-                    type: number
+                          type:
+                            anyOf:
+                              - enum:
+                                  - sum
+                                type: string
+                              - enum:
+                                  - avg
+                                type: string
+                              - enum:
+                                  - count
+                                type: string
+                              - enum:
+                                  - min
+                                type: string
+                              - enum:
+                                  - max
+                                type: string
+                            description: Type of summary function to apply to the column.
+                        required:
+                          - type
+                      visible:
+                        default: true
+                        description: When `false`, hides the column from the datatable.
+                        type: boolean
+                      width:
+                        description: Column width in pixels.
+                        minimum: 0
+                        type: number
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
@@ -185777,6 +186498,272 @@ components:
         - metrics
       title: Datatable (DSL)
       type: object
+    Kibana_HTTP_APIs_visDatatableProgressBar:
+      discriminator:
+        mapping:
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarGradient'
+      title: Datatable metric progress bar
+      x-state: Added in 9.6.1
+    Kibana_HTTP_APIs_visDatatableProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        fill_mode:
+          default: gradient
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
+          enum:
+            - gradient
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+      title: Datatable metric progress bar (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        fill_mode:
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
+          enum:
+            - solid
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (solid fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarValueRange:
+      description: The numeric span the progress bar represents
+      discriminator:
+        propertyName: type
+      oneOf:
+        - additionalProperties: false
+          description: The bar spans the minimum to the maximum of the loaded values.
+          type: object
+          properties:
+            type:
+              enum:
+                - auto
+              type: string
+          required:
+            - type
+        - additionalProperties: false
+          description: Custom explicit bounds.
+          type: object
+          properties:
+            max:
+              description: Value at which the bar is full.
+              type: number
+            min:
+              description: Value at which the bar is empty.
+              type: number
+            type:
+              enum:
+                - custom
+              type: string
+          required:
+            - type
+            - min
+            - max
+      title: Datatable progress bar value range
     Kibana_HTTP_APIs_visDatatableRowDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
     Kibana_HTTP_APIs_visDatatableRowFilters:
@@ -202479,6 +203466,7 @@ components:
         * `endpoint_event_filters`: Event filters list
         * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
         * `endpoint_blocklists`: Blocklist
+        * `endpoint_custom_yara_signatures`: Custom YARA signatures list
       example: simple_list
       format: nonempty
       minLength: 1
@@ -203688,6 +204676,10 @@ components:
             parameters:
               type: object
               properties:
+                force:
+                  description: Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+                  example: true
+                  type: boolean
                 path:
                   description: The full file path to retrieve from the endpoint.
                   maxLength: 4096
@@ -206510,6 +207502,7 @@ components:
         * `endpoint_event_filters`: Event filters list
         * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
         * `endpoint_blocklists`: Blocklist
+        * `endpoint_custom_yara_signatures`: Custom YARA signatures list
       example: simple_list
       format: nonempty
       minLength: 1

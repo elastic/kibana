@@ -22,6 +22,7 @@ import {
 } from '../test_ids';
 import type { EntityToAttach } from '../../../../cases/attachments/entity';
 import { useEntityCaseTakeActionItems } from '../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
+import { useInvalidateEntityGrid } from '../../home/entities_grid/hooks/use_invalidate_entity_grid';
 
 interface AnomalyRowActionsMenuProps {
   entityToAttach: EntityToAttach;
@@ -39,7 +40,10 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({
   const togglePopover = useCallback(() => setIsOpen((value) => !value), []);
 
   const { actions } = useAnomalyTableRowActions({ row, timeRange, closePopover });
-  const caseItems = useEntityCaseTakeActionItems(entityToAttach);
+  const invalidateEntityGrid = useInvalidateEntityGrid();
+  const caseItems = useEntityCaseTakeActionItems(entityToAttach, {
+    onSuccess: invalidateEntityGrid,
+  });
 
   const items = useMemo(
     () => [

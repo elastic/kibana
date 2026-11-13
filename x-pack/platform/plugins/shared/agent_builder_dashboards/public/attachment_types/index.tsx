@@ -104,6 +104,7 @@ export const registerDashboardAttachmentUiDefinition = ({
                 createDashboardAppIntegration$({
                   agentBuilder,
                   api,
+                  canWriteDashboards,
                   draftAttachmentId,
                   checkSavedDashboardExist,
                   getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),

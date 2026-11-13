@@ -21,14 +21,19 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  getErrorSource as getTaskManagerErrorSource,
+  isRetryableError,
+} from '@kbn/task-manager-plugin/server/task_running';
 import { isConnectorAuthorizationError } from '@kbn/connector-specs';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import type { ConnectorExecuteErrorType } from './connector_metrics';
 import {
+  DEFAULT_SUB_ACTION,
   getConnectorAuthType,
+  getConnectorExecuteOrigin,
   recordConnectorAuth,
   recordConnectorExecute,
 } from './connector_metrics';
@@ -452,6 +457,8 @@ export class ActionExecutor {
         if (this.connectorRateLimiter.isRateLimited(actionTypeId)) {
           recordConnectorExecute({
             connectorType: actionTypeId,
+            specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
+            origin: getConnectorExecuteOrigin(source?.type),
             errorType: 'rate_limited',
             errorSource: 'user',
           });
@@ -474,6 +481,8 @@ export class ActionExecutor {
           } catch (e) {
             recordConnectorExecute({
               connectorType: actionTypeId,
+              specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
+              origin: getConnectorExecuteOrigin(source?.type),
               errorType: 'disabled',
               errorSource: 'framework',
             });
@@ -594,6 +603,8 @@ export class ActionExecutor {
           eventLogger.logEvent(event);
           recordConnectorExecute({
             connectorType: actionTypeId,
+            specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
+            origin: getConnectorExecuteOrigin(source?.type),
             errorType: 'invalid',
             errorSource: err.result?.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
           });
@@ -666,7 +677,7 @@ export class ActionExecutor {
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
               error: err,
-              retry: true,
+              retry: isRetryableError(err) ?? true,
               errorSource,
             };
           }
@@ -683,8 +694,11 @@ export class ActionExecutor {
         const { subAction } = validatedParams;
         recordConnectorExecute({
           connectorType: actionTypeId,
+          specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
+          origin: getConnectorExecuteOrigin(source?.type),
           // Validated against the connector's params schema, so the value is bounded.
-          ...(typeof subAction === 'string' ? { subAction } : {}),
+          // Connectors without sub-actions have a single operation, reported as "default".
+          subAction: typeof subAction === 'string' ? subAction : DEFAULT_SUB_ACTION,
           ...(result.status === 'ok'
             ? {}
             : {

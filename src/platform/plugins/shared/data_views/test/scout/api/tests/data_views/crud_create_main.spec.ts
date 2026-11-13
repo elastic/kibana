@@ -171,6 +171,35 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'can create a data view with allowNoIndex targeting a non-existing remote cluster',
+      async ({ apiClient }) => {
+        const id = `test-id-${Date.now()}-${Math.random()}`;
+        const title = `non_existing_cluster:logs-${Date.now()}-*`;
+        createdIds.push(id);
+
+        const response = await apiClient.post(DATA_VIEW_PATH, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [SERVICE_KEY]: {
+              id,
+              title,
+              allowNoIndex: true,
+            },
+          },
+        });
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body[SERVICE_KEY].title).toBe(title);
+        expect(response.body[SERVICE_KEY].allowNoIndex).toBe(true);
+        expect(response.body[SERVICE_KEY].fields).toStrictEqual({});
+      }
+    );
+
     apiTest('can create data view with empty title', async ({ apiClient }) => {
       const response = await apiClient.post(DATA_VIEW_PATH, {
         headers: {

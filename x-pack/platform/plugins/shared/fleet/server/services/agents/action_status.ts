@@ -238,17 +238,51 @@ async function getActions(
       ...(filter.length > 0 ? { filter } : {}),
     },
   };
-  const res = await esClient.search<FleetServerAgentAction>({
-    index: AGENT_ACTIONS_INDEX,
-    ignore_unavailable: true,
-    from: 0,
-    size: getPerPage(options),
-    query: await addNamespaceFilteringToQuery(query, namespace),
-    sort: [{ '@timestamp': 'desc' }],
-  });
+  const limit = getPerPage(options);
+  const namespacedQuery = await addNamespaceFilteringToQuery(query, namespace);
+  // Version specific policy actions (reassigns to `<id>#sentinel` or `<id>#<version>`) are skipped
+  // below, and cannot be excluded in the query without an expensive query, so keep reading pages
+  // until the limit of other docs is reached. Otherwise they would crowd the other actions out of the
+  // limit, and the actions that are left out would be reported with fewer agents than they have.
+  const hits: Array<{ _source?: FleetServerAgentAction }> = [];
+  // Page through a point in time, so that documents indexed between searches cannot shift the
+  // offsets and return the same document on two pages.
+  let pitId = (
+    await esClient.openPointInTime({
+      index: AGENT_ACTIONS_INDEX,
+      keep_alive: '1m',
+      ignore_unavailable: true,
+    })
+  ).id;
+  try {
+    for (let from = 0; hits.length < limit && from + limit <= MAX_RESULT_WINDOW; ) {
+      const res = await esClient.search<FleetServerAgentAction>({
+        pit: { id: pitId, keep_alive: '1m' },
+        from,
+        size: limit,
+        query: namespacedQuery,
+        // The action id keeps the order stable between pages when documents share a timestamp.
+        sort: [{ '@timestamp': 'desc' }, { action_id: 'asc' }],
+      });
+      // Elasticsearch can return a new PIT id, which must be used from then on
+      pitId = res.pit_id ?? pitId;
+      const pageHits = res.hits.hits;
+      hits.push(
+        ...pageHits.filter((hit) => !hasVersionSuffix(hit._source?.data?.policy_id as string))
+      );
+      if (pageHits.length < limit) {
+        break;
+      }
+      from += limit;
+    }
+  } finally {
+    await esClient.closePointInTime({ id: pitId }).catch(() => {});
+  }
 
-  return Object.values(
-    res.hits.hits.reduce((acc, hit) => {
+  // Aggregate all the docs read, so that no chunk of a returned action is dropped, and cap the
+  // number of actions afterwards. They are in the order of the sort, newest first.
+  const actions = Object.values(
+    hits.reduce((acc, hit) => {
       if (!hit._source || !hit._source.action_id) {
         return acc;
       }
@@ -256,11 +290,6 @@ async function getActions(
       const source = hit._source!;
 
       const newPolicyId = source.data?.policy_id as string;
-
-      if (hasVersionSuffix(newPolicyId)) {
-        // skip version specific policy actions
-        return acc;
-      }
 
       if (!acc[source.action_id!]) {
         const isExpired =
@@ -295,6 +324,8 @@ async function getActions(
       return acc;
     }, {} as { [k: string]: ActionStatus })
   );
+
+  return actions.slice(0, limit);
 }
 
 export async function getCancelledActions(

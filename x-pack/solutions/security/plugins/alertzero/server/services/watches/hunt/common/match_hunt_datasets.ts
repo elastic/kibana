@@ -10,6 +10,18 @@ import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntIoc } from '@kbn/alertzero-common';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
+import { invokeHuntStructured } from './invoke_hunt_structured';
+import {
+  HUNT_DATASET_MATCH_DATASETS_MAX_CHARS,
+  HUNT_DATASET_MATCH_IOCS_MAX_CHARS,
+  HUNT_DATASET_MATCH_PRODUCT_MAX_CHARS,
+  HUNT_DATASET_MATCH_REPORT_TEXT_MAX_CHARS,
+  HUNT_DATASET_MATCH_TECHNIQUES_MAX_CHARS,
+  HUNT_DATASET_MATCH_TEMPLATE_ID,
+  HUNT_DATASET_MATCH_VENDOR_MAX_CHARS,
+  HUNT_PROMPT_TEMPLATE_VERSION,
+  clampHuntTemplateString,
+} from './hunt_prompt_templates';
 
 /** What a report contributes to scope matching. All optional. */
 export interface HuntScopeReportContext {
@@ -69,7 +81,7 @@ export const rankOptionsForModel = (
     [
       report.vendor ?? '',
       report.product ?? '',
-      report.text?.slice(0, MAX_PROMPT_TEXT_CHARS) ?? '',
+      report.text?.slice(0, HUNT_DATASET_MATCH_REPORT_TEXT_MAX_CHARS) ?? '',
       ...(report.iocs ?? []).slice(0, MAX_PROMPT_IOCS).map((ioc) => ioc.value),
     ].join(' ')
   );
@@ -83,7 +95,6 @@ export const rankOptionsForModel = (
     );
   return [...datasets.filter(mentioned), ...datasets.filter((dataset) => !mentioned(dataset))];
 };
-const MAX_PROMPT_TEXT_CHARS = 6000;
 
 /** Lower-cases and strips everything that is not `[a-z0-9]`, so 'Cisco ASA' and 'cisco_asa' compare equal. */
 export const normalizeVendorToken = (value: string): string =>
@@ -160,6 +171,7 @@ export const matchDatasetsDeterministic = ({
 };
 
 export interface ModelDatasetMatch {
+  status: 'matched';
   /** Datasets that cleared the threshold, in option-list order. */
   matches: DiscoveredDataset[];
   /** Lowest confidence among the accepted matches. */
@@ -167,6 +179,19 @@ export interface ModelDatasetMatch {
   /** Every accepted match with its own confidence, for logging. */
   scored: Array<{ dataset: string; confidence: number }>;
 }
+
+/**
+ * `empty` means the model answered and nothing usable came back (or there was
+ * nothing to choose from); `failed` means no answer was obtained, so the caller
+ * must not read it as "no datasets match".
+ */
+export type MatchDatasetsWithModelResult =
+  | ModelDatasetMatch
+  | { status: 'empty' }
+  | { status: 'failed'; message?: string };
+
+/** Keeps the failure detail short enough for a narrative; the full text stays in the warn log. */
+const MAX_FAILURE_MESSAGE_CHARS = 200;
 
 const datasetMatchSchema = lazySchema(() =>
   z.object({
@@ -220,7 +245,9 @@ const buildPrompt = (datasets: DiscoveredDataset[], report: HuntScopeReportConte
   }
 
   if (report.text) {
-    sections.push(`--- REPORT TEXT ---\n${report.text.slice(0, MAX_PROMPT_TEXT_CHARS)}`);
+    sections.push(
+      `--- REPORT TEXT ---\n${report.text.slice(0, HUNT_DATASET_MATCH_REPORT_TEXT_MAX_CHARS)}`
+    );
   }
 
   return sections.join('\n\n');
@@ -232,21 +259,25 @@ const buildPrompt = (datasets: DiscoveredDataset[], report: HuntScopeReportConte
  * same answer. Returned names are checked against the real option list (exact
  * match on `dataset`) so a hallucinated name never reaches the hunt, and every
  * item below `HUNT_DATASET_MATCH_MIN_CONFIDENCE` is dropped on its own.
- * Returns undefined, never throws, when there is nothing to choose from, the
- * call fails, or nothing real clears the threshold.
+ * Never throws. Returns `failed` when the call errors or the response is
+ * unusable, and `empty` when there is nothing to choose from or nothing real
+ * clears the threshold.
  */
 export const matchDatasetsWithModel = async ({
   model,
+  messagesFallback,
   datasets,
   report,
   logger,
 }: {
   model: ScopedModel;
+  /** Tier model used when the gateway rejects the pinned template. */
+  messagesFallback?: ScopedModel;
   datasets: DiscoveredDataset[];
   report: HuntScopeReportContext;
   logger?: Logger;
-}): Promise<ModelDatasetMatch | undefined> => {
-  if (datasets.length === 0) return undefined;
+}): Promise<MatchDatasetsWithModelResult> => {
+  if (datasets.length === 0) return { status: 'empty' };
 
   const ranked = rankOptionsForModel(datasets, report);
   const options =
@@ -257,15 +288,54 @@ export const matchDatasetsWithModel = async ({
     );
   }
 
-  let output: DatasetMatchOutput;
+  let output: DatasetMatchOutput | undefined;
   try {
-    const structured = model.chatModel.withStructuredOutput(datasetMatchSchema);
-    output = await structured.invoke(buildPrompt(options, report));
+    output = await invokeHuntStructured({
+      model,
+      messagesFallback,
+      schema: datasetMatchSchema,
+      prompt: buildPrompt(options, report),
+      logger,
+      template: {
+        id: HUNT_DATASET_MATCH_TEMPLATE_ID,
+        version: HUNT_PROMPT_TEMPLATE_VERSION,
+        variables: {
+          vendor: clampHuntTemplateString(report.vendor ?? '', HUNT_DATASET_MATCH_VENDOR_MAX_CHARS),
+          product: clampHuntTemplateString(
+            report.product ?? '',
+            HUNT_DATASET_MATCH_PRODUCT_MAX_CHARS
+          ),
+          datasets: clampHuntTemplateString(
+            options.map((dataset) => `${dataset.dataset} | ${dataset.index_pattern}`).join('\n'),
+            HUNT_DATASET_MATCH_DATASETS_MAX_CHARS
+          ),
+          techniques: clampHuntTemplateString(
+            (report.techniques ?? []).join(', '),
+            HUNT_DATASET_MATCH_TECHNIQUES_MAX_CHARS
+          ),
+          iocs: clampHuntTemplateString(
+            (report.iocs ?? [])
+              .slice(0, MAX_PROMPT_IOCS)
+              .map((ioc) => ioc.value)
+              .join(', '),
+            HUNT_DATASET_MATCH_IOCS_MAX_CHARS
+          ),
+          report_text: clampHuntTemplateString(
+            report.text ?? '',
+            HUNT_DATASET_MATCH_REPORT_TEXT_MAX_CHARS
+          ),
+        },
+      },
+    });
   } catch (err) {
-    logger?.warn(
-      `Hunt dataset model matching failed: ${err instanceof Error ? err.message : String(err)}`
-    );
-    return undefined;
+    const message = err instanceof Error ? err.message : String(err);
+    logger?.warn(`Hunt dataset model matching failed: ${message}`);
+    return { status: 'failed', message: message.slice(0, MAX_FAILURE_MESSAGE_CHARS) };
+  }
+
+  if (!output || !Array.isArray(output.datasets)) {
+    logger?.warn('Hunt dataset model matching returned no usable structured output');
+    return { status: 'failed', message: 'dataset match returned no usable structured output' };
   }
 
   const optionNames = new Set(options.map((dataset) => dataset.dataset));
@@ -301,7 +371,7 @@ export const matchDatasetsWithModel = async ({
     if (hallucinated === 0 && belowThreshold === 0) {
       logger?.debug('Hunt dataset model matching returned no datasets');
     }
-    return undefined;
+    return { status: 'empty' };
   }
 
   const scored = matches.flatMap((dataset) => {
@@ -312,5 +382,5 @@ export const matchDatasetsWithModel = async ({
   });
   const confidence = Math.min(...scored.map((item) => item.confidence));
 
-  return { matches, confidence, scored };
+  return { status: 'matched', matches, confidence, scored };
 };

@@ -16,7 +16,8 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
 import type { CasePostRequest } from '../../../common';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
+import type { CaseError } from '../../common/error';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
@@ -2433,6 +2434,158 @@ describe('create', () => {
 
       const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
       expect(createCaseCall.settings.extractObservables).toBe(true);
+    });
+  });
+
+  describe('extractObservables owner rule', () => {
+    const ownerRuleCasesClient = createCasesClientMock();
+    const blockedOwners = [GENERAL_CASES_OWNER, OBSERVABILITY_OWNER];
+
+    const createClientArgs = (spaceExtractObservables?: boolean) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      ownerRuleCasesClient.configure.get = jest.fn().mockResolvedValue(
+        spaceExtractObservables === undefined
+          ? []
+          : [
+              {
+                owner: theCase.owner,
+                customFields: [],
+                extractObservables: spaceExtractObservables,
+              },
+            ]
+      );
+      return clientArgs;
+    };
+
+    const getRejection = async (promise: Promise<unknown>): Promise<CaseError> => {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('Expected the create to be rejected');
+    };
+
+    it.each(blockedOwners)(
+      'rejects an explicit true with a 400 for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs();
+        const request = {
+          ...theCase,
+          owner,
+          settings: { syncAlerts: true, extractObservables: true },
+        };
+
+        const error = await getRejection(create(request, clientArgs, ownerRuleCasesClient));
+
+        expect(error.message).toContain(
+          `Setting extractObservables to true is not allowed for the "${owner}" owner`
+        );
+        expect(error.boomify().output.statusCode).toBe(400);
+        expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each(blockedOwners)(
+      'coerces a true from the space configuration to false for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs(true);
+
+        await create({ ...theCase, owner }, clientArgs, ownerRuleCasesClient);
+
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it.each(blockedOwners)(
+      'coerces a true from a template to false for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs();
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+          id: 'so-tpl',
+          type: 'cases-templates',
+          references: [],
+          attributes: {
+            templateId: 'tmpl-owner-rule',
+            name: 'Owner rule template',
+            owner,
+            definition: yamlStringify({
+              name: 'Owner rule template',
+              fields: [],
+              settings: { extractObservables: true },
+            }),
+            templateVersion: 1,
+            deletedAt: null,
+            isLatest: true,
+          },
+        } as never);
+
+        await create(
+          { ...theCase, owner, template: { id: 'tmpl-owner-rule', version: 1 } },
+          clientArgs,
+          ownerRuleCasesClient
+        );
+
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it.each(blockedOwners)('accepts an explicit false for the %s owner', async (owner) => {
+      const clientArgs = createClientArgs();
+      const request = {
+        ...theCase,
+        owner,
+        settings: { syncAlerts: true, extractObservables: false },
+      };
+
+      await create(request, clientArgs, ownerRuleCasesClient);
+
+      const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+      expect(attributes.settings.extractObservables).toBe(false);
+    });
+
+    it.each(blockedOwners)(
+      'stores false when the value is omitted for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs();
+
+        await create({ ...theCase, owner }, clientArgs, ownerRuleCasesClient);
+
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it('accepts an explicit true for the Security owner', async () => {
+      const clientArgs = createClientArgs();
+      const request = {
+        ...theCase,
+        owner: SECURITY_SOLUTION_OWNER,
+        settings: { syncAlerts: true, extractObservables: true },
+      };
+
+      await create(request, clientArgs, ownerRuleCasesClient);
+
+      const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+      expect(attributes.settings.extractObservables).toBe(true);
+    });
+
+    it('accepts an explicit true for an unknown owner', async () => {
+      const clientArgs = createClientArgs();
+      const request = {
+        ...theCase,
+        owner: 'securitySolutionFixture',
+        settings: { syncAlerts: true, extractObservables: true },
+      };
+
+      await create(request, clientArgs, ownerRuleCasesClient);
+
+      const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+      expect(attributes.settings.extractObservables).toBe(true);
     });
   });
 });

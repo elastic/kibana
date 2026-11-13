@@ -38,11 +38,10 @@ export class WorkflowExecutionPage {
   async gotoOverview(workflowId: string, executionId: string): Promise<void> {
     await this.page.gotoApp(`workflows/${workflowId}`, {
       params: { executionId, stepExecutionId: '__overview', tab: 'executions' },
+      readyWhen: this.page.testSubj
+        .locator('workflowExecutionOverview')
+        .or(this.page.testSubj.locator('workflowExecutionFlyout')),
     });
-    await this.page.testSubj
-      .locator('workflowExecutionOverview')
-      .or(this.page.testSubj.locator('workflowExecutionFlyout'))
-      .waitFor({ state: 'visible' });
   }
 
   /**

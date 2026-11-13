@@ -17,7 +17,7 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { inputsFormat } from '../../../common/constants';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION, inputsFormat } from '../../../common/constants';
 
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -200,7 +200,16 @@ export const DeleteOnePackagePolicyResponseSchema = schema.object(
 
 export const UpgradePackagePoliciesRequestSchema = {
   body: schema.object(
-    { packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }) },
+    {
+      packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
+    },
     { meta: { id: 'upgrade_package_policies_request' } }
   ),
 };

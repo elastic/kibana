@@ -111,6 +111,48 @@ apiTest.describe(
       ).toBe(false);
     });
 
+    apiTest(
+      'reports a resume identity failure to Task Manager as a user error',
+      async ({ apiClient }) => {
+        const { headers, accountId, otherAccountId, wait, pause, resume } = getContext();
+
+        apiTest.setTimeout(120_000);
+        // Task Manager resets these counters 30s after the last reset, so the test resets them
+        // right before resuming and reads them inside that window.
+        const getResumeTaskMetrics = async (reset = false) => {
+          const response = await apiClient.get(`api/task_manager/metrics?reset=${reset}`, {
+            headers,
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          const metrics = response.body.metrics?.task_run?.value?.by_type?.['workflow:resume'];
+          return {
+            total: Number(metrics?.total ?? 0),
+            frameworkErrors: Number(metrics?.framework_errors ?? 0),
+          };
+        };
+
+        const paused = await pause(apiClient);
+        const update = await apiClient.put(`api/workflows/workflow/${paused.id}`, {
+          headers,
+          body: { yaml: paused.yaml.replace(accountId, otherAccountId) },
+          responseType: 'json',
+        });
+        expect(update, JSON.stringify(update.body)).toHaveStatusCode(200);
+        await getResumeTaskMetrics(true);
+        await resume(apiClient, paused);
+        const execution = await wait(apiClient, paused.executionId, 'failed');
+        expect(execution.error?.type).toBe('ServiceAccountExecutionError');
+
+        await expect
+          .poll(async () => (await getResumeTaskMetrics()).total, { timeout: 20_000 })
+          .toBeGreaterThan(0);
+        // Identity failures are caused by account configuration, so they must not burn the
+        // Task Manager framework-error SLO.
+        expect((await getResumeTaskMetrics()).frameworkErrors).toBe(0);
+      }
+    );
+
     for (const continuation of ['timer', 'retry'] as const) {
       apiTest(
         `SA continuation audit: ${continuation} retains the bound identity`,

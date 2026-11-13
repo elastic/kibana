@@ -1017,13 +1017,16 @@ export class AttachmentGetter {
       };
     }
 
-    const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AggsResult>({
-      hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
-      hasReferenceOperator: 'OR',
-      type: CASE_COMMENT_SAVED_OBJECT,
-      perPage: 0,
-      aggs: AttachmentGetter.buildCommentStatsAggs(caseIds),
-    });
+    const [res, unifiedStatsByCase] = await Promise.all([
+      this.context.unsecuredSavedObjectsClient.find<unknown, AggsResult>({
+        hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
+        hasReferenceOperator: 'OR',
+        type: CASE_COMMENT_SAVED_OBJECT,
+        perPage: 0,
+        aggs: AttachmentGetter.buildCommentStatsAggs(caseIds),
+      }),
+      this.getUnifiedAttachmentStatsByCaseId(caseIds),
+    ]);
 
     const statsMap =
       res.aggregations?.references.caseIds.buckets.reduce((acc, idBucket) => {
@@ -1035,7 +1038,6 @@ export class AttachmentGetter {
         return acc;
       }, new Map<string, AttachmentTotals>()) ?? new Map();
 
-    const unifiedStatsByCase = await this.getUnifiedAttachmentStatsByCaseId(caseIds);
     for (const [caseId, unifiedStats] of unifiedStatsByCase) {
       const existing = statsMap.get(caseId);
       if (existing) {

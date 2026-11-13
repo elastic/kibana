@@ -422,7 +422,7 @@ describe('CreateDatasetWizardPage', () => {
     expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetUpdate);
   });
 
-  it('deletes the previous dataset when the name changes in edit mode', async () => {
+  it('makes the dataset name read-only in edit mode and saves under the original name', async () => {
     const initialDataSet: DataSetWithName = {
       name: 'logs-dataset',
       data_source: 'source-1',
@@ -431,11 +431,9 @@ describe('CreateDatasetWizardPage', () => {
       settings: { format: 'csv' },
     };
 
-    const { getByTestId, add, remove, reportUiCounter } = renderEditWizard(initialDataSet);
+    const { getByTestId, add, remove } = renderEditWizard(initialDataSet);
 
-    fireEvent.change(getByTestId('createDatasetName'), {
-      target: { value: 'renamed-dataset' },
-    });
+    expect(getByTestId('createDatasetName')).toHaveAttribute('readonly');
     await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
@@ -447,85 +445,15 @@ describe('CreateDatasetWizardPage', () => {
     await clickNext(getByTestId);
 
     await waitFor(() => {
-      expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
-      expect(remove).toHaveBeenCalledWith('logs-dataset');
+      expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs-dataset' }));
     });
-    expect(reportUiCounter).toHaveBeenCalledTimes(1);
-    expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasetUpdate);
+    expect(remove).not.toHaveBeenCalled();
   });
 
-  it('shows a delete error distinct from a save error when the previous dataset cannot be deleted', async () => {
-    const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
-    const add = jest.fn().mockResolvedValue(undefined);
-    const remove = jest.fn().mockRejectedValue(new Error('security_exception: unauthorized'));
-    const loadDataSets = jest.fn().mockResolvedValue(undefined);
-    const reportUiCounter = jest.fn();
-    const initialDataSet: DataSetWithName = {
-      name: 'logs-dataset',
-      data_source: 'source-1',
-      resource: 's3://bucket/*',
-      description: '',
-      settings: { format: 'csv' },
-    };
+  it('does not make the dataset name read-only when creating a dataset', () => {
+    const { getByTestId } = renderWizard();
 
-    const { getByTestId, queryByTestId, findByTestId } = render(
-      <EuiProvider>
-        <I18nProvider>
-          <MockAppHeaderProvider>
-            <Router history={history}>
-              <KibanaContextProvider
-                services={{
-                  docLinks: docLinksMock,
-                  datasetsClient: { add, delete: remove },
-                  dataSourcesClient: { add: jest.fn() },
-                  reportUiCounter,
-                }}
-              >
-                <CreateDatasetWizardPage
-                  dataSources={dataSources}
-                  existingDataSetNames={['logs-dataset']}
-                  loadDataSets={loadDataSets}
-                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
-                  initialDataSet={initialDataSet}
-                />
-              </KibanaContextProvider>
-            </Router>
-          </MockAppHeaderProvider>
-        </I18nProvider>
-      </EuiProvider>
-    );
-
-    fireEvent.change(getByTestId('createDatasetName'), {
-      target: { value: 'renamed-dataset' },
-    });
-    await clickNext(getByTestId);
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-    await clickNext(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-    const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
-    if (timestampPathInput) {
-      fireEvent.change(timestampPathInput, { target: { value: 'event_time' } });
-    }
-    await clickNext(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-    await clickNext(getByTestId);
-
-    const callout = await findByTestId('createDatasetWizardSaveError');
-    expect(callout).toHaveTextContent(createDatasetWizardStrings.deletePreviousErrorTitle);
-    expect(callout).not.toHaveTextContent(createDatasetWizardStrings.saveErrorTitle);
-    expect(callout).toHaveTextContent(
-      createDatasetWizardStrings.deletePreviousErrorText(
-        'renamed-dataset',
-        'logs-dataset',
-        'security_exception: unauthorized'
-      )
-    );
-    expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
-    expect(loadDataSets).not.toHaveBeenCalled();
-    expect(reportUiCounter).not.toHaveBeenCalled();
-    expect(history.location.pathname).toBe('/datasets/edit/logs-dataset');
+    expect(getByTestId('createDatasetName')).not.toHaveAttribute('readonly');
   });
 
   it('returns to the datasets list and reports a refresh failure after saving in a toast', async () => {

@@ -27,7 +27,7 @@ import { FF_MIGRATE_LEGACY_SECURITY_ASSETS, getErrorMessage } from '../../../com
 export const getLegacySecurityAssetsMigrationFlag = (
   featureFlags: FeatureFlagsStart
 ): Promise<boolean> =>
-  firstValueFrom(featureFlags.getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, true));
+  firstValueFrom(featureFlags.getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false));
 
 /** Subscribes to migration flag updates and schedules the idempotent migration when enabled. */
 export const subscribeToLegacySecurityAssetsMigrationFlag = ({
@@ -42,7 +42,7 @@ export const subscribeToLegacySecurityAssetsMigrationFlag = ({
   scheduleMigration: () => Promise<void>;
 }): void => {
   coreStart.featureFlags
-    .getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, true)
+    .getBooleanValue$(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false)
     .pipe(
       distinctUntilChanged(),
       filter(Boolean),

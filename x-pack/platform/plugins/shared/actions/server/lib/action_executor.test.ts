@@ -31,7 +31,11 @@ import {
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  createRetryableError,
+  createTaskRunError,
+  getErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running';
 import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
@@ -1649,6 +1653,30 @@ describe('Action Executor', () => {
       });
     });
 
+    test(`${label} returns retry false when executor throws a non-retryable error`, async () => {
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(createRetryableError(new Error('boom'), false));
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      const executorResult = executeUnsecure
+        ? await actionExecutor.executeUnsecured(executeUnsecuredParams)
+        : await actionExecutor.execute(executeParams);
+
+      expect(executorResult).toEqual(
+        expect.objectContaining({
+          status: 'error',
+          retry: false,
+          errorSource: TaskErrorSource.FRAMEWORK,
+          message: 'an error occurred while running the action',
+          serviceMessage: 'boom',
+        })
+      );
+    });
+
     test(`${label} logs warning captures source when executor throws error with error source`, async () => {
       const err = createTaskRunError(
         new Error('this action execution is intended to fail'),
@@ -2033,6 +2061,7 @@ describe('Connector metrics', () => {
     jest.spyOn(connectorExecuteCounter, 'add').mockImplementation(() => {});
     jest.spyOn(connectorExecuteDuration, 'record').mockImplementation(() => {});
     jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
+    connectorTypeRegistry.isSpecActionType.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -2057,12 +2086,33 @@ describe('Connector metrics', () => {
     expect(connectorExecuteCounter.add).toHaveBeenCalledTimes(1);
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: true,
     });
     expect(connectorExecuteDuration.record).toHaveBeenCalledWith(expect.any(Number), {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: true,
     });
+  });
+
+  test('flags a spec-based connector type', async () => {
+    mockConnector();
+    connectorTypeRegistry.isSpecActionType.mockReturnValueOnce(true);
+    (
+      connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+    ).mockResolvedValueOnce({ actionId: CONNECTOR_ID, status: 'ok' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ 'connector.spec_based': true })
+    );
   });
 
   test('records a failed execution with its error source', async () => {
@@ -2075,6 +2125,9 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: false,
       'error.type': 'other',
       'error.source': 'user',
@@ -2096,6 +2149,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'disabled',
       'error.source': 'framework',
@@ -2111,6 +2166,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'rate_limited',
       'error.source': 'user',
@@ -2125,6 +2182,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'invalid',
       'error.source': 'user',
@@ -2155,6 +2214,9 @@ describe('Connector metrics', () => {
     });
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: false,
       'error.type': 'auth_failed',
       'error.source': 'user',

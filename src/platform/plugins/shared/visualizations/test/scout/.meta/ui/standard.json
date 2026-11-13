@@ -1,0 +1,34 @@
+{
+  "sha1": "86242583711ef0fca970a0b0aa5f43499226d8f7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "cbd45179f71a977-964f32694b2a2d0",
+      "title": "Managed items in Visualize Library shows managed items as read-only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/tests/managed_content_library.spec.ts",
+        "line": 21,
+        "column": 33
+      }
+    },
+    {
+      "id": "09a7eb055da3af8-651c8d01c29eb88",
+      "title": "Visualizations managed content requires a copy when saving a managed visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/visualizations/test/scout/ui/tests/managed_content_save.spec.ts",
+        "line": 37,
+        "column": 28
+      }
+    }
+  ]
+}
