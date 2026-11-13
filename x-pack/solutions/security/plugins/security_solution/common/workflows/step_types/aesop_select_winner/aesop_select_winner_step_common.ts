@@ -68,7 +68,9 @@ export const aesopSelectWinnerOutputSchema = lazySchema(() =>
       .describe('True when the winner improves on the baseline significantly, or n is too small'),
     tie: z
       .boolean()
-      .describe('True when two or more arms that beat the baseline are within min_delta of the best'),
+      .describe(
+        'True when two or more arms that beat the baseline are within min_delta of the best'
+      ),
     tied_indexes: z
       .array(z.number().int())
       .describe('Indexes into comparison.comparisons of the tied arms, empty when there is no tie'),

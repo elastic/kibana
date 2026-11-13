@@ -530,15 +530,12 @@ describe('managedWorkflowDefinitions', () => {
       return definition.yamlTemplate({ ...templateValuesLookup[id], ...values });
     };
 
-    it.each([
-      ['{{ steps.x.output }}'],
-      ['${{ secrets.key }}'],
-      ['{% raw %}'],
-      ["a'b"],
-      ['a b'],
-    ])('refuses %j as an explorer connector id', (connectorId) => {
-      expect(() => renderById(AESOP_EXPLORER_WORKFLOW_ID, { connectorId })).toThrow();
-    });
+    it.each([['{{ steps.x.output }}'], ['${{ secrets.key }}'], ['{% raw %}'], ["a'b"], ['a b']])(
+      'refuses %j as an explorer connector id',
+      (connectorId) => {
+        expect(() => renderById(AESOP_EXPLORER_WORKFLOW_ID, { connectorId })).toThrow();
+      }
+    );
 
     it.each(['datasetId', 'abAgentId', 'investigationId'])(
       'refuses a template expression as the explorer %s',

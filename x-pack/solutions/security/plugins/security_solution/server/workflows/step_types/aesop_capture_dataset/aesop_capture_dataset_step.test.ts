@@ -50,7 +50,8 @@ describe('aesopCaptureDatasetStepDefinition', () => {
   it('creates the dataset when none exists yet', async () => {
     const callKibanaApi = jest.fn(async ({ method, path }: ApiCall) => {
       if (path.endsWith('/_search')) return { body: { results: [{ id: 'c1' }] } };
-      if (path === '/api/agent_builder/conversations/c1') return { body: conversation('c1', 'why open') };
+      if (path === '/api/agent_builder/conversations/c1')
+        return { body: conversation('c1', 'why open') };
       if (path.endsWith('/_resolve')) throw notFound();
       if (method === 'POST') {
         return { body: { dataset_id: 'new', added: 1, removed: 0, unchanged: 0 } };
@@ -105,8 +106,10 @@ describe('aesopCaptureDatasetStepDefinition', () => {
     };
     const callKibanaApi = jest.fn(async ({ method, path }: ApiCall) => {
       if (path.endsWith('/_search')) return { body: { results: [{ id: 'c1' }, { id: 'c2' }] } };
-      if (path === '/api/agent_builder/conversations/c1') return { body: conversation('c1', 'why open') };
-      if (path === '/api/agent_builder/conversations/c2') return { body: conversation('c2', 'list rules') };
+      if (path === '/api/agent_builder/conversations/c1')
+        return { body: conversation('c1', 'why open') };
+      if (path === '/api/agent_builder/conversations/c2')
+        return { body: conversation('c2', 'list rules') };
       if (path.endsWith('/_resolve')) return { body: { id: 'ds-1' } };
       if (path.endsWith('/ds-1')) return { body: { id: 'ds-1', examples: [existingExample] } };
       if (method === 'POST') {
@@ -128,7 +131,8 @@ describe('aesopCaptureDatasetStepDefinition', () => {
   it('does not upsert when every captured example is a duplicate', async () => {
     const callKibanaApi = jest.fn(async ({ path }: ApiCall) => {
       if (path.endsWith('/_search')) return { body: { results: [{ id: 'c1' }] } };
-      if (path === '/api/agent_builder/conversations/c1') return { body: conversation('c1', 'why open') };
+      if (path === '/api/agent_builder/conversations/c1')
+        return { body: conversation('c1', 'why open') };
       if (path.endsWith('/_resolve')) return { body: { id: 'ds-1' } };
       return { body: { id: 'ds-1', examples: [{ input: { message: 'why open' } }] } };
     });
