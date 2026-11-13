@@ -10,6 +10,11 @@ import { expect } from '@kbn/scout-security/ui';
 
 const FLYOUT_URL_PARAM = 'flyoutV2';
 
+// The ES cluster is shared by parallel workers and other configs in the lane, which index into
+// the default security patterns (auditbeat-*, logs-*, ...). The rule reads only this per-space
+// index so it produces exactly one alert, keeping the rule-name cell unique in the alerts table.
+const getSourceIndex = (spaceId: string) => `scout-alert-url-sync-source-${spaceId}`;
+
 spaceTest.describe(
   'Expandable flyout state sync',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -18,19 +23,32 @@ spaceTest.describe(
 
     spaceTest.setTimeout(5 * 60_000);
 
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, esClient, scoutSpace }) => {
+      const sourceIndex = getSourceIndex(scoutSpace.id);
+      await esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true });
+      await esClient.index({
+        index: sourceIndex,
+        document: { '@timestamp': new Date().toISOString(), event: { kind: 'event' } },
+        refresh: true,
+      });
+
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: [sourceIndex],
       });
       await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 120_000);
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices }) => {
+    spaceTest.afterEach(async ({ apiServices, esClient, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
+      await esClient.indices.delete({
+        index: getSourceIndex(scoutSpace.id),
+        ignore_unavailable: true,
+      });
     });
 
     spaceTest('should test flyout url sync', async ({ pageObjects, page }) => {
