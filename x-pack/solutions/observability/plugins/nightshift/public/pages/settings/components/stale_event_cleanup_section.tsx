@@ -22,8 +22,10 @@ export function StaleEventCleanupSection({ canManage }: { canManage: boolean }) 
       description={
         <p>
           {i18n.translate('xpack.nightshift.settings.staleEventCleanup.description', {
+            // The 48 hours is the server default: keep in sync with DEFAULT_STALE_RECOVERING_AFTER_HOURS
+            // in the significant_events plugin (server/lib/significant_events/events/constants.ts).
             defaultMessage:
-              'Close open significant events when none of their backing rules still exist. This cleanup runs automatically every day.',
+              'Close open significant events when none of their backing rules still exist, and events that stayed recovering with no new evidence for longer than 48 hours. This cleanup runs automatically every day.',
           })}
         </p>
       }

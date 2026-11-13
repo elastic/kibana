@@ -14,6 +14,7 @@ import type {
   CausalFeature,
 } from '@kbn/significant-events-schema';
 import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
+import { RECOVERY_TIMEOUT_ASSESSMENT_NOTE } from '../../../lib/significant_events/events/cleanup_stale_events';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
@@ -1559,6 +1560,7 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     it.each([
       ['blank', ''],
       ['the standard no-reason note', operatorFallbackAssessmentNote('inactive')],
+      ['the automatic close after a recovery timeout', RECOVERY_TIMEOUT_ASSESSMENT_NOTE],
     ])('does not hold a close whose only note is %s', async (_label, note) => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(

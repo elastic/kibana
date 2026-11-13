@@ -12,7 +12,11 @@ import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { RuleEventsClient } from './rule_events_client';
 import { asRuleEventsClient } from './rule_events_client.mock';
-import { cleanupStaleEvents, STALE_EVENT_ASSESSMENT_NOTE } from './cleanup_stale_events';
+import {
+  cleanupStaleEvents,
+  RECOVERY_TIMEOUT_ASSESSMENT_NOTE,
+  STALE_EVENT_ASSESSMENT_NOTE,
+} from './cleanup_stale_events';
 import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../common/workflows/triggers';
 
 const EVENT_TIMESTAMP = '2026-01-01T00:00:00.000Z';
@@ -36,7 +40,11 @@ const makeLogger = (): jest.Mocked<Logger> =>
     debug: jest.fn(),
   } as unknown as jest.Mocked<Logger>);
 
-const createEvent = (eventId: string, ruleIds: string[]): SignificantEventResponse =>
+const createEvent = (
+  eventId: string,
+  ruleIds: string[],
+  overrides: Partial<SignificantEventResponse> = {}
+): SignificantEventResponse =>
   ({
     '@timestamp': EVENT_TIMESTAMP,
     event_id: eventId,
@@ -45,6 +53,7 @@ const createEvent = (eventId: string, ruleIds: string[]): SignificantEventRespon
       type: 'detection',
       metadata: { rule_uuid: ruleId },
     })),
+    ...overrides,
   } as SignificantEventResponse);
 
 const groupHashOf = (eventId: string) => `group-${eventId}`;
@@ -104,6 +113,7 @@ describe('cleanupStaleEvents', () => {
     await expect(cleanupStaleEvents({ eventSearchClient, rulesClient })).resolves.toEqual({
       scanned: 3,
       closed: 1,
+      timedOut: 0,
       kept: 1,
       skipped: 1,
       failed: 0,
@@ -322,12 +332,217 @@ describe('cleanupStaleEvents', () => {
         {
           scanned: 2,
           closed: 1,
+          timedOut: 0,
           kept: 0,
           skipped: 0,
           failed: 1,
         }
       );
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('stale-1'));
+    });
+  });
+
+  describe('recovery timeout', () => {
+    const NOW = new Date('2026-01-10T00:00:00.000Z');
+    const CUTOFF = '2026-01-08T00:00:00.000Z';
+    const STALE_HOURS = 48;
+
+    const recovering = (
+      eventId: string,
+      ruleIds: string[],
+      timestamp: string = EVENT_TIMESTAMP
+    ): SignificantEventResponse =>
+      createEvent(eventId, ruleIds, { status: 'recovering', '@timestamp': timestamp });
+
+    const run = (
+      eventSearchClient: RuleEventsClient,
+      rulesClient: IRulesManagementClient,
+      overrides: { staleRecoveringAfterHours?: number; logger?: Logger } = {}
+    ) =>
+      cleanupStaleEvents({
+        eventSearchClient,
+        rulesClient,
+        staleRecoveringAfterHours: STALE_HOURS,
+        now: NOW,
+        ...overrides,
+      });
+
+    it('closes a timed-out recovering event with the timeout note, even without backing rule ids', async () => {
+      const withRule = recovering('with-rule', ['live-rule']);
+      const withoutRules = recovering('without-rules', []);
+      const eventSearchClient = createEventSearchClient([[withRule, withoutRules]]);
+      const rulesClient = createRulesClient(['live-rule']);
+
+      await expect(run(eventSearchClient, rulesClient)).resolves.toEqual({
+        scanned: 2,
+        closed: 2,
+        timedOut: 2,
+        kept: 0,
+        skipped: 0,
+        failed: 0,
+      });
+
+      expect(writtenIds(alertEventsClient)).toEqual(['with-rule', 'without-rules']);
+      alertEventsClient.createAlertEvent.mock.calls.forEach(([ruleEvent]) => {
+        expect(ruleEvent).toMatchObject({
+          alert_status: 'inactive',
+          data: expect.objectContaining({ assessment_note: RECOVERY_TIMEOUT_ASSESSMENT_NOTE }),
+        });
+      });
+    });
+
+    it('never closes an active event, nor a recovering one at or after the cutoff', async () => {
+      const eventSearchClient = createEventSearchClient([
+        [
+          createEvent('old-active', ['live-rule']),
+          recovering('at-cutoff', ['live-rule'], CUTOFF),
+          recovering('newer', ['live-rule'], '2026-01-09T00:00:00.000Z'),
+        ],
+      ]);
+
+      await expect(run(eventSearchClient, createRulesClient(['live-rule']))).resolves.toEqual({
+        scanned: 3,
+        closed: 0,
+        timedOut: 0,
+        kept: 3,
+        skipped: 0,
+        failed: 0,
+      });
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('closes a recovering event past the timeout whose rules are all deleted once, as a deleted rule', async () => {
+      const eventSearchClient = createEventSearchClient([
+        [recovering('stale-1', ['deleted-rule'])],
+      ]);
+
+      await expect(run(eventSearchClient, createRulesClient([]))).resolves.toEqual({
+        scanned: 1,
+        closed: 1,
+        timedOut: 0,
+        kept: 0,
+        skipped: 0,
+        failed: 0,
+      });
+      expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+      expect(alertEventsClient.createAlertEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fingerprint: 'stale-1',
+          data: expect.objectContaining({ assessment_note: STALE_EVENT_ASSESSMENT_NOTE }),
+        })
+      );
+    });
+
+    it('splits the counters between a timeout close and a deleted-rule close', async () => {
+      const eventSearchClient = createEventSearchClient([
+        [recovering('timed-out', ['live-rule']), createEvent('deleted', ['deleted-rule'])],
+      ]);
+
+      await expect(run(eventSearchClient, createRulesClient(['live-rule']))).resolves.toEqual({
+        scanned: 2,
+        closed: 2,
+        timedOut: 1,
+        kept: 0,
+        skipped: 0,
+        failed: 0,
+      });
+    });
+
+    it('does not time events out when no timeout is given', async () => {
+      const eventSearchClient = createEventSearchClient([
+        [recovering('old-recovering', ['live-rule']), recovering('no-rules', [])],
+      ]);
+
+      await expect(
+        cleanupStaleEvents({ eventSearchClient, rulesClient: createRulesClient(['live-rule']) })
+      ).resolves.toEqual({
+        scanned: 2,
+        closed: 0,
+        timedOut: 0,
+        kept: 1,
+        skipped: 1,
+        failed: 0,
+      });
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('writes nothing from a batch whose rule lookup fails, timeout candidates included', async () => {
+      const eventSearchClient = createEventSearchClient([
+        [recovering('with-rule', ['live-rule']), recovering('without-rules', [])],
+      ]);
+      const rulesClient = createRulesClient([]);
+      jest
+        .mocked(rulesClient.findExistingRuleIds)
+        .mockRejectedValueOnce(new Error('lookup failed'));
+
+      await expect(run(eventSearchClient, rulesClient)).rejects.toThrow('lookup failed');
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not look rules up for a batch without rule ids, and still closes its timed-out events', async () => {
+      const eventSearchClient = createEventSearchClient([[recovering('without-rules', [])]]);
+      const rulesClient = createRulesClient([]);
+      jest.mocked(rulesClient.findExistingRuleIds).mockRejectedValue(new Error('lookup failed'));
+
+      await expect(run(eventSearchClient, rulesClient)).resolves.toMatchObject({
+        closed: 1,
+        timedOut: 1,
+        failed: 0,
+      });
+      expect(rulesClient.findExistingRuleIds).not.toHaveBeenCalled();
+    });
+
+    it('keeps a timed-out event that another writer appended to since the scan', async () => {
+      const timedOut = recovering('without-rules', []);
+      const eventSearchClient = createEventSearchClient([[timedOut]]);
+      jest
+        .mocked(eventSearchClient.findLatestByEventId)
+        .mockResolvedValue({ ...timedOut, '@timestamp': '2099-01-01T00:00:00.000Z' });
+
+      await expect(run(eventSearchClient, createRulesClient([]))).resolves.toEqual({
+        scanned: 1,
+        closed: 0,
+        timedOut: 0,
+        kept: 1,
+        skipped: 0,
+        failed: 0,
+      });
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('counts a rejected timeout close as failed', async () => {
+      const eventSearchClient = createEventSearchClient([[recovering('without-rules', [])]]);
+      alertEventsClient = makeAlertEventsClient({
+        createAlertEvent: jest.fn().mockRejectedValue(new Error('write failed')),
+      });
+
+      await expect(run(eventSearchClient, createRulesClient([]))).resolves.toEqual({
+        scanned: 1,
+        closed: 0,
+        timedOut: 0,
+        kept: 0,
+        skipped: 0,
+        failed: 1,
+      });
+    });
+
+    it('notifies subscribed workflows that the event went from active to inactive', async () => {
+      const emitTrigger = jest.fn();
+      const eventSearchClient = createEventSearchClient(
+        [[recovering('timed-out', ['live-rule'])]],
+        emitTrigger
+      );
+
+      await run(eventSearchClient, createRulesClient(['live-rule']));
+
+      expect(emitTrigger).toHaveBeenCalledWith(
+        EVENT_STATUS_CHANGED_TRIGGER_ID,
+        expect.objectContaining({
+          event_id: 'timed-out',
+          previous_status: 'active',
+          status: 'inactive',
+        })
+      );
     });
   });
 });
