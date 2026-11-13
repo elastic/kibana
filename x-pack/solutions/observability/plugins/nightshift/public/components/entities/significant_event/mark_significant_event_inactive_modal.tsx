@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { MAX_TEXT_LENGTH, type SignificantEventCloseReason } from '@kbn/significant-events-schema';
+import {
+  MAX_DEACTIVATION_REASON_LENGTH,
+  type SignificantEventCloseReason,
+} from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
@@ -134,7 +137,7 @@ export const MarkSignificantEventInactiveModal = ({
             fullWidth
             value={assessmentNote}
             onChange={(event) => setAssessmentNote(event.target.value)}
-            maxLength={MAX_TEXT_LENGTH}
+            maxLength={MAX_DEACTIVATION_REASON_LENGTH}
             disabled={isUpdating}
             data-test-subj="nightshiftMarkSignificantEventInactiveReason"
           />
