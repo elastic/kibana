@@ -11,9 +11,6 @@ import { TOP_ROWS } from '../../../../common/top_rows';
 import { p75Of } from '../../../lib/helpers/aggregations';
 import {
   BROWSER_CSS_SELECTOR,
-  BROWSER_MOBILE,
-  BROWSER_NAME,
-  BROWSER_PLATFORM,
   BROWSER_TAG_NAME,
   EVENT_NAVIGATION_TIMING,
   EVENT_USER_ACTION_CLICK,
@@ -22,6 +19,7 @@ import {
 } from '../../../../common/otel_data';
 import {
   documentFilters,
+  filterFieldOf,
   filterRuntimeMappings,
   pageLoadFilters,
 } from '../../../lib/otel/overview_filters';
@@ -33,13 +31,11 @@ import {
 } from '../../../lib/otel/queries';
 import type { ApplicationSearchParams } from '../../application_tab_route';
 
-/** Device types: `browser.mobile` is `true` or `false`. */
-const DEVICE_TYPES = 2;
-
 /**
  * What users load and do in one application: top pages and breakdowns (navigation timings) and top
  * clicks, over the selected environment and the Overview's filters. The page filter narrows the
- * page loads only, as the clicks carry no page URL yet.
+ * page loads only, as the clicks carry no page URL yet. The breakdowns read the fields the filters
+ * and the Sessions read, so a row is a value the filter takes.
  */
 export const usageSearch = ({
   environment,
@@ -75,9 +71,9 @@ export const usageSearch = ({
                 terms: { field: URL_FULL, size: TOP_ROWS },
                 aggs: { loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END) },
               },
-              browsers: { terms: { field: BROWSER_NAME, size: TOP_ROWS } },
-              operatingSystems: { terms: { field: BROWSER_PLATFORM, size: TOP_ROWS } },
-              devices: { terms: { field: BROWSER_MOBILE, size: DEVICE_TYPES } },
+              browsers: { terms: { field: filterFieldOf('browser'), size: TOP_ROWS } },
+              operatingSystems: { terms: { field: filterFieldOf('os'), size: TOP_ROWS } },
+              devices: { terms: { field: filterFieldOf('device'), size: TOP_ROWS } },
             },
           },
           clicks: {

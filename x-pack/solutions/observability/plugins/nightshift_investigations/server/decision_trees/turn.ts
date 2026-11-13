@@ -24,17 +24,18 @@ export const buildReinforcementPrompt = ({
   learnings,
   connectorNames,
   turnKind,
+  causalConfirmed = false,
 }: {
   trees: DecisionTreeSummary[];
   learnings: LearningRecord[];
   connectorNames: string[];
   turnKind: DecisionTreeTurnKind;
+  /** A follow-up whose causal check confirmed the cause reinforces the causal path; any other extends. */
+  causalConfirmed?: boolean;
 }): string => {
   const script = selectTurnScript({
     turnKind,
-    // Nothing tells yet whether a follow-up confirmed the root cause, so a follow-up extends the
-    // tree and never reinforces a path as causal.
-    causalConfirmed: false,
+    causalConfirmed,
     // Callers pass only the trees this investigation used, never every tree in the index.
     hasExistingTrees: trees.length > 0,
     tools: DECISION_TREE_PROMPT_TOOLS,

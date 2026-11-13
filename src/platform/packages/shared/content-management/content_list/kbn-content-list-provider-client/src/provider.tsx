@@ -29,6 +29,8 @@ import {
   SENTINEL_KEYS,
   TAG_FILTER_ID,
   CREATED_BY_FILTER_ID,
+  contentListKeys,
+  contentListQueryClient,
 } from '@kbn/content-list-provider';
 import {
   SAVED_OBJECTS_PER_PAGE_ID,
@@ -171,6 +173,12 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
  * for `features.tags` that computes tag facets from the cached item set.
  * When `services.userProfiles` is provided, it constructs a
  * `FilterFacetConfig<UserProfileEntry>` for `features.userProfiles` the same way.
+ *
+ * Facet counts therefore describe the current cached snapshot rather than the
+ * whole collection: they are bounded by `savedObjects:listingLimit`, and —
+ * because tag filters are resolved server-side — narrowed by any active tag
+ * selection. With a tag selected, the other tags' counts show their overlap
+ * with it rather than their own totals.
  *
  * `core.uiSettings` is read once at mount to determine the default page size
  * from the `savedObjects:perPage` user setting. An explicit
@@ -478,6 +486,20 @@ const ContentListClientProviderInner = ({
 
   // Derive queryKeyScope the same way the base provider does.
   const queryKeyScope = rest.queryKeyScope ?? `${rest.id}-listing`;
+
+  // Facets are computed from the strategy's item snapshot, but each facet query
+  // key excludes its own filter — so selecting a tag changes the snapshot (the
+  // fetch is re-run server-side) without changing the key, leaving an open
+  // popover on stale counts. Invalidate on snapshot change so it refetches.
+  useEffect(
+    () =>
+      subscribe(() => {
+        contentListQueryClient.invalidateQueries({
+          queryKey: contentListKeys.allFilterFacets(queryKeyScope),
+        });
+      }),
+    [subscribe, queryKeyScope]
+  );
 
   // Clear the strategy cache before React Query invalidates — otherwise the
   // post-save refetch reuses stale items keyed by `searchQuery`.

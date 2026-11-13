@@ -13,13 +13,11 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { InvestigationIdentitySection } from './components/investigation_identity_section';
-import { RunLimitsSection } from './components/run_limits_section';
+import { InvestigationLimitsSection } from './components/investigation_limits_section';
 import { SettingsSaveBar } from './components/settings_save_bar';
 import { SettingsSection, SettingsSectionRow } from './components/settings_section';
-import { useRunLimitsForm } from './components/use_run_limits_form';
+import { useInvestigationLimitsForm } from './components/use_investigation_limits_form';
 import { SandboxAllowlistSection } from './components/sandbox_allowlist/sandbox_allowlist_section';
-
-const INVESTIGATION_RUN_LIMIT_GROUPS = ['investigation'] as const;
 
 export const InvestigationsSettingsTab = ({
   onCustomContextClick,
@@ -31,7 +29,7 @@ export const InvestigationsSettingsTab = ({
   canManageSandboxAllowlist?: boolean;
 }) => {
   const { appParams, application, http, overlays } = useKibana().services;
-  const runLimits = useRunLimitsForm({ groups: INVESTIGATION_RUN_LIMIT_GROUPS });
+  const runLimits = useInvestigationLimitsForm();
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: runLimits.isDirty,
@@ -58,15 +56,13 @@ export const InvestigationsSettingsTab = ({
         })}
         data-test-subj="nightshiftInvestigationProcessSection"
       >
-        <RunLimitsSection
-          groups={INVESTIGATION_RUN_LIMIT_GROUPS}
+        <InvestigationLimitsSection
           form={runLimits}
-          exhaustionCallouts="automations"
           description={i18n.translate(
             'xpack.nightshift.settings.investigationRunLimitsDescription',
             {
               defaultMessage:
-                'These limits apply only to automatic investigations; manual runs are not limited. When a limit is reached, new automatic investigations are blocked until it resets.',
+                'Daily limits on new investigations. When a limit is reached, the investigations it covers are blocked until it resets. Follow-ups on open investigations are never blocked.',
             }
           )}
           onSave={saveRunLimits}
@@ -85,7 +81,7 @@ export const InvestigationsSettingsTab = ({
                 <p>
                   {i18n.translate('xpack.nightshift.settings.customContextDescription', {
                     defaultMessage:
-                      'Notes that Nightshift adds to its system prompt for every investigation and chat in this space',
+                      'Notes that nightshift adds to its system prompt for every investigation and chat in this space',
                   })}
                 </p>
               }

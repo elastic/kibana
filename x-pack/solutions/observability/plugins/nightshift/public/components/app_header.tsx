@@ -12,9 +12,10 @@ import type { AppMenuConfig, AppMenuRunActionParams } from '@kbn/core-chrome-app
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { EXPLORE_LIVE_EXAMPLE_HREF } from '../common/live_example';
 
 const nightshiftPageTitle = i18n.translate('xpack.nightshift.pageTitle', {
-  defaultMessage: 'Nightshift',
+  defaultMessage: 'Elastic nightshift',
 });
 
 const automationsLabel = i18n.translate('xpack.nightshift.automationsLabel', {
@@ -115,6 +116,7 @@ export interface NightshiftAppHeaderProps {
   detectionsHref?: string;
   /** Renders "Investigate" (opens the start investigation modal) as the primary action when set. */
   onStartInvestigationClick?: () => void;
+  showExploreLiveExample?: boolean;
   tabs?: AppHeaderTab[];
   back?: AppHeaderBack;
 }
@@ -133,10 +135,12 @@ export function NightshiftAppHeader({
   onDetectionsClick,
   detectionsHref,
   onStartInvestigationClick,
+  showExploreLiveExample = false,
   tabs,
   back,
 }: NightshiftAppHeaderProps): React.ReactElement {
   const isLandingPage = page === 'landing';
+  const isAutomationsPage = page === 'automations';
   const isDetectionPage = page === 'detection';
   const menu = useMemo<AppMenuConfig>(
     () => ({
@@ -150,6 +154,18 @@ export function NightshiftAppHeader({
             applyEbtProps(startInvestigationEbtProps, params);
             onStartInvestigationClick();
           },
+        },
+      }),
+      ...(showExploreLiveExample && {
+        primaryActionItem: {
+          id: 'nightshiftExploreLiveExample',
+          label: i18n.translate('xpack.nightshift.onboarding.exploreLiveExampleButton', {
+            defaultMessage: 'Explore live example',
+          }),
+          iconType: 'external',
+          href: EXPLORE_LIVE_EXAMPLE_HREF,
+          target: '_blank',
+          testId: 'appHeaderExploreLiveExample',
         },
       }),
       items: [
@@ -174,7 +190,7 @@ export function NightshiftAppHeader({
               {
                 id: 'nightshiftDetections',
                 label: detectionsLabel,
-                iconType: 'visGauge' as const,
+                iconType: 'radar' as const,
                 href: detectionsHref,
                 run: (params?: AppMenuRunActionParams) => {
                   applyEbtProps(detectionsEbtProps, params);
@@ -218,7 +234,7 @@ export function NightshiftAppHeader({
             ]
           : []),
 
-        // Detections: Sources and Settings as buttons.
+        // Detections: Sources as a button.
         ...(isDetectionPage && onSourcesClick && sourcesHref
           ? [
               {
@@ -234,7 +250,8 @@ export function NightshiftAppHeader({
               },
             ]
           : []),
-        ...(isDetectionPage && onSettingsClick && settingsHref
+        // Detections and Automations: Settings as a button.
+        ...((isDetectionPage || isAutomationsPage) && onSettingsClick && settingsHref
           ? [
               {
                 id: 'nightshiftSettings',
@@ -256,6 +273,7 @@ export function NightshiftAppHeader({
     [
       automationsHref,
       detectionsHref,
+      isAutomationsPage,
       isDetectionPage,
       isLandingPage,
       knowledgeHref,
@@ -265,6 +283,7 @@ export function NightshiftAppHeader({
       onSourcesClick,
       onSettingsClick,
       onStartInvestigationClick,
+      showExploreLiveExample,
       settingsHref,
       sourcesHref,
     ]

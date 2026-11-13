@@ -24,7 +24,7 @@ import {
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
 import type { EventItem, AlertItem } from '../types';
-import { getLabelExpandItems } from '../../../../popovers/node_expand/get_label_expand_items';
+import { getEventExpandItems } from '../../../../popovers/node_expand/get_event_expand_items';
 import { emitFilterToggle, isFilterActiveForScope } from '../../../../filters/filter_store';
 
 const actionsButtonAriaLabel = i18n.translate(
@@ -63,7 +63,7 @@ export const EventActionsButton = ({ item, scopeId, onShowDocument }: EventActio
   }, [item, onShowDocument]);
 
   // Generate items fresh on each render to reflect current filter state
-  const items = getLabelExpandItems({
+  const items = getEventExpandItems({
     nodeLabel: item.action ?? '',
     onShowEventDetails: handleShowEventDetails,
     onClose: closePopover,

@@ -142,8 +142,8 @@ describe('buildEpisodeActionsQuery (integration)', () => {
 
     expect(await fetchEpisodeActions('deactivate-then-ack')).toEqual([
       expect.objectContaining({
-        last_deactivate_action: 'deactivate',
-        last_deactivate_actor: 'resolver',
+        last_lifecycle_action: 'deactivate',
+        last_lifecycle_actor: 'resolver',
         last_ack_action: 'ack',
         last_ack_actor: 'acker',
       }),

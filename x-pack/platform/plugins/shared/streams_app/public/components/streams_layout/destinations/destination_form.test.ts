@@ -202,6 +202,60 @@ describe('destination form', () => {
     ).toBeUndefined();
   });
 
+  it('rejects a name whose local API key credential is already referenced', () => {
+    const existingUnit: StreamsUnit.GetResponse = {
+      ...unitDefinition,
+      unit: {
+        ...unitDefinition.unit,
+        destinations: [
+          {
+            id: 'es-prod',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs'],
+            config: [
+              {
+                name: 'api_key',
+                value: { credential: 'streams-full-dev-api-key' },
+              },
+            ],
+          },
+          {
+            id: 'es-dev',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs'],
+            config: [
+              {
+                name: 'api_key',
+                value: { credential: 'streams-full-dev-api-key' },
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const formData = {
+      ...elasticsearchForm({}),
+      destinationName: 'Streams full dev',
+    };
+
+    expect(
+      getDestinationCreationFormErrors({ formData, unitDefinition: existingUnit }).destinationName
+    ).toBe('credentialConflict');
+    expect(canSubmitDestinationForm({ formData, unitDefinition: existingUnit })).toBe(false);
+  });
+
+  it('rejects a name whose local API key credential exceeds 256 characters', () => {
+    const formData = {
+      ...elasticsearchForm({}),
+      destinationName: 'a'.repeat(249),
+    };
+
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition }).destinationName).toBe(
+      'tooLong'
+    );
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+  });
+
   it('allows custom auto write patterns for the selected signals', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
@@ -641,6 +695,22 @@ describe('remote Elasticsearch', () => {
     expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
   });
 
+  it('accepts only a docs index in fixed', () => {
+    const formData = remoteForm({ auto: false, docsIndex: 'accounting-2026' });
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
+      destinationName: undefined,
+    });
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
+  });
+
+  it('validates the docs index with the remote rules', () => {
+    const formData = remoteForm({ auto: false, logsIndex: 'my-index', docsIndex: 'My-Docs' });
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition }).docsIndex).toBe(
+      'uppercase'
+    );
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+  });
+
   it('accepts full index names without a signal prefix in fixed', () => {
     const formData = remoteForm({ auto: false, logsIndex: 'my-index', tracesIndex: 'my-traces' });
     expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
@@ -665,7 +735,7 @@ describe('remote Elasticsearch', () => {
   });
 
   it('ignores index values left over in auto, which are not saved', () => {
-    const formData = remoteForm({ auto: true, logsIndex: 'MyIndex' });
+    const formData = remoteForm({ auto: true, logsIndex: 'MyIndex', docsIndex: 'My-Docs' });
     expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
       destinationName: undefined,
     });
@@ -719,6 +789,12 @@ describe('remote Elasticsearch', () => {
             type: REMOTE_ELASTICSEARCH_TYPE,
             supported_telemetry: ['traces'],
           },
+          {
+            id: 'archive',
+            name: 'Archive',
+            type: REMOTE_ELASTICSEARCH_TYPE,
+            supported_telemetry: ['docs'],
+          },
         ],
       },
     };
@@ -750,22 +826,49 @@ describe('remote Elasticsearch', () => {
         }).destinationName
       ).toBe('duplicate');
     });
+
+    it('checks docs, declared in auto and when its index is filled in fixed', () => {
+      expect(
+        getDestinationCreationFormErrors({
+          formData: remoteForm({}, 'Archive'),
+          unitDefinition: unit,
+        }).destinationName
+      ).toBe('duplicate');
+      expect(
+        getDestinationCreationFormErrors({
+          formData: remoteForm({ auto: false, logsIndex: 'my-index' }, 'Archive'),
+          unitDefinition: unit,
+        }).destinationName
+      ).toBeUndefined();
+      expect(
+        getDestinationCreationFormErrors({
+          formData: remoteForm({ auto: false, docsIndex: 'my-docs' }, 'Archive'),
+          unitDefinition: unit,
+        }).destinationName
+      ).toBe('duplicate');
+    });
   });
 
   it('reveals remote errors from the remote inputs', () => {
     const errors = getDestinationCreationFormErrors({
-      formData: remoteForm({ endpoint: '', apiKey: '', auto: false, logsIndex: 'MyIndex' }),
+      formData: remoteForm({
+        endpoint: '',
+        apiKey: '',
+        auto: false,
+        logsIndex: 'MyIndex',
+        docsIndex: 'My-Docs',
+      }),
       unitDefinition,
     });
     expect(
       getVisibleDestinationFormErrors({
         errors,
         touchedFields: {
-          remoteElasticsearch: { endpoint: true, logsIndex: true },
+          remoteElasticsearch: { endpoint: true, logsIndex: true, docsIndex: true },
           elasticsearch: { metricsIndex: true },
         },
         isSubmitted: false,
       })
-    ).toEqual({ endpoint: 'required', logsIndex: 'uppercase' });
+    ).toEqual({ endpoint: 'required', logsIndex: 'uppercase', docsIndex: 'uppercase' });
   });
 });

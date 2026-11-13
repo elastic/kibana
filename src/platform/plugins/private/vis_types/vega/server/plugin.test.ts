@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { VisTypeVegaPlugin } from './plugin';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 
 describe('VisTypeVegaPlugin (server)', () => {
   test('registers a server definition for vega', async () => {
@@ -33,12 +33,12 @@ describe('VisTypeVegaPlugin (server)', () => {
     );
   });
 
-  test('does not expose a schema when vega.standaloneEmbeddable is disabled', async () => {
+  test('does not expose a schema when vega.asCodeEnabled is disabled', async () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
-      of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? false : fallback)
+      of(key === VEGA_AS_CODE_ENABLED_FLAG ? false : fallback)
     );
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
@@ -51,12 +51,12 @@ describe('VisTypeVegaPlugin (server)', () => {
     expect(serverDefinition.getSchema(mockGetDrilldownsSchema)).toBeUndefined();
   });
 
-  test('exposes a schema when vega.standaloneEmbeddable is enabled', async () => {
+  test('exposes a by-value and by-reference schema when vega.asCodeEnabled is enabled', async () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
-      of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? true : fallback)
+      of(key === VEGA_AS_CODE_ENABLED_FLAG ? true : fallback)
     );
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
@@ -79,5 +79,9 @@ describe('VisTypeVegaPlugin (server)', () => {
     expect(() => schema!.parse({ spec: '' })).toThrow();
     expect(() => schema!.parse({ spec: { format: 'hjson', value: '' } })).toThrow();
     expect(() => schema!.parse({ spec: { format: 'json', value: 'not-an-object' } })).toThrow();
+
+    // The library item owns the query and filters.
+    const query = { language: 'kql', expression: 'bytes > 1000' };
+    expect(schema!.parse({ ref_id: 'library-item', query })).toEqual({ ref_id: 'library-item' });
   });
 });

@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingCore } from '../../../..';
 import { ScheduledReportsService } from '../../../../services/scheduled_reports';
@@ -72,7 +72,7 @@ export const registerInternalBulkEnableRoute = ({
 
         return res.ok({ body: results, headers: { 'content-type': 'application/json' } });
       } catch (err) {
-        if (err instanceof KibanaResponse) {
+        if (isKibanaResponse(err)) {
           return err;
         }
         throw err;

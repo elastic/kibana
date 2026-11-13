@@ -8,22 +8,34 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
+import type { InvestigationQuotasResponse } from '@kbn/nightshift-investigations-plugin/common';
 import { GlobalLimitCallout } from './global_limit_callout';
-import { isGlobalInvestigationLimitReached } from '../utils/filter_automations';
+import { getAutomationBlockingLimit } from '../utils/filter_automations';
 
 const quotas = ({
   enabled = true,
   limit = 3,
   used = 3,
+  totalLimit = 10,
+  totalUsed = 0,
 }: {
   enabled?: boolean;
-  limit?: number;
+  limit?: number | null;
   used?: number;
-}): RunQuotasResponse => ({
+  totalLimit?: number | null;
+  totalUsed?: number;
+}): InvestigationQuotasResponse => ({
   enabled,
-  limits: { detection: 0, ki_extraction: 0, investigation: limit },
-  counts: { detection: 0, ki_extraction: 0, investigation: used },
+  limits: {
+    automatic_investigation: limit,
+    manual_investigation: 5,
+    total_investigation: totalLimit,
+  },
+  counts: {
+    automatic_investigation: used,
+    manual_investigation: 0,
+    total_investigation: totalUsed,
+  },
   window: {
     start: '2026-09-03T00:00:00.000Z',
     resetsAt: '2026-09-04T00:00:00.000Z',
@@ -36,7 +48,11 @@ describe('GlobalLimitCallout', () => {
   it('renders the settings link when given an href', () => {
     render(
       <I18nProvider>
-        <GlobalLimitCallout limit={10} settingsHref="/app/nightshift/settings/investigations" />
+        <GlobalLimitCallout
+          group="automatic_investigation"
+          limit={10}
+          settingsHref="/app/nightshift/settings/investigations"
+        />
       </I18nProvider>
     );
     expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
@@ -46,15 +62,18 @@ describe('GlobalLimitCallout', () => {
   });
 });
 
-describe('isGlobalInvestigationLimitReached', () => {
+describe('getAutomationBlockingLimit', () => {
   it.each([
-    [undefined, false],
-    [quotas({ used: 2 }), false],
-    [quotas({ used: 3 }), true],
-    [quotas({ used: 5 }), true],
-    [quotas({ limit: 0, used: 5 }), false],
-    [quotas({ enabled: false }), true],
+    [undefined, undefined],
+    [quotas({ used: 2 }), undefined],
+    [quotas({ used: 3 }), 'automatic_investigation'],
+    [quotas({ used: 5 }), 'automatic_investigation'],
+    [quotas({ limit: null, used: 5 }), undefined],
+    [quotas({ enabled: false }), undefined],
+    [quotas({ used: 0, totalUsed: 10 }), 'total_investigation'],
+    [quotas({ used: 3, totalUsed: 10 }), 'total_investigation'],
+    [quotas({ used: 0, totalLimit: null, totalUsed: 50 }), undefined],
   ])('%j -> %s', (input, expected) => {
-    expect(isGlobalInvestigationLimitReached(input)).toBe(expected);
+    expect(getAutomationBlockingLimit(input)).toBe(expected);
   });
 });

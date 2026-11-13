@@ -38,14 +38,19 @@ let updateIsSaving = false;
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
   enabled: true,
+  investigationLimitsEnabled: true,
   limits: {
     detection: 100,
     investigation: 30,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: 20,
   },
   counts: {
     detection: 4,
     investigation: 3,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: 2,
   },
   window: {
@@ -70,12 +75,12 @@ const ALL_GROUPS = ['detection', 'investigation', 'ki_extraction'] as const;
 
 const TestRunLimits = ({
   groups = ALL_GROUPS,
-  exhaustionCallouts = 'automations',
+  sharedSwitch,
 }: {
   groups?: readonly RunQuotaGroup[];
-  exhaustionCallouts?: 'automations' | 'groups';
+  sharedSwitch?: boolean;
 }) => {
-  const form = useRunLimitsForm({ groups });
+  const form = useRunLimitsForm({ groups, sharedSwitch });
   const onSave = async () => {
     await form.requestSave();
   };
@@ -85,13 +90,7 @@ const TestRunLimits = ({
 
   return (
     <>
-      <RunLimitsSection
-        groups={groups}
-        form={form}
-        exhaustionCallouts={exhaustionCallouts}
-        onSave={onSave}
-        onConfirmSave={onConfirmSave}
-      />
+      <RunLimitsSection groups={groups} form={form} onSave={onSave} onConfirmSave={onConfirmSave} />
       <SettingsSaveBar
         hasChanges={form.isDirty}
         isSaving={form.isSaving}
@@ -106,7 +105,7 @@ const TestRunLimits = ({
 const setup = (
   data: RunQuotasResponse = response(),
   groups?: readonly RunQuotaGroup[],
-  exhaustionCallouts?: 'automations' | 'groups'
+  sharedSwitch?: boolean
 ) => {
   setQueryResponse(data);
   mockUseUpdateRunQuotas.mockReturnValue({ save, isSaving: updateIsSaving });
@@ -114,7 +113,7 @@ const setup = (
 
   return render(
     <I18nProvider>
-      <TestRunLimits groups={groups} exhaustionCallouts={exhaustionCallouts} />
+      <TestRunLimits groups={groups} sharedSwitch={sharedSwitch} />
     </I18nProvider>
   );
 };
@@ -143,11 +142,15 @@ describe('RunLimitsSection', () => {
         limits: {
           detection: 100,
           investigation: 30,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 20,
         },
         counts: {
           detection: 14,
           investigation: 6,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 25,
         },
       })
@@ -184,14 +187,182 @@ describe('RunLimitsSection', () => {
 
     expect(screen.getByTestId('nightshiftRunLimitsSection')).toHaveAccessibleName('Run limits');
     expect(screen.getAllByTestId(/^nightshiftRunLimitRow-/)).toHaveLength(1);
-    expect(screen.getByText('Investigation daily limit')).toBeInTheDocument();
+    expect(screen.getByText('Automatic investigations daily limit')).toBeInTheDocument();
     expect(screen.queryByText('Discovery daily limit')).not.toBeInTheDocument();
     expect(
       screen.queryByText('Knowledge indicators extraction daily limit')
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole('switch', { name: 'Enforce daily limits for Investigation' })
+      screen.getByRole('switch', { name: 'Enforce daily limits for Automatic investigations' })
     ).toBeInTheDocument();
+  });
+
+  it('turns every limit off and back on with one shared switch', async () => {
+    const groups = ['investigation', 'manual_investigation', 'total_investigation'] as const;
+    setup(
+      response({
+        limits: {
+          detection: 100,
+          investigation: 4,
+          manual_investigation: 6,
+          total_investigation: 9,
+          ki_extraction: 20,
+        },
+      }),
+      groups,
+      true
+    );
+
+    expect(screen.queryAllByTestId(/^nightshiftRunLimitEnabledSwitch-/)).toHaveLength(0);
+    const sharedSwitch = screen.getByTestId('nightshiftRunLimitsEnabledSwitch');
+    expect(sharedSwitch).toBeChecked();
+
+    fireEvent.click(sharedSwitch);
+    expect(screen.queryAllByTestId(/^nightshiftRunLimitInput-/)).toHaveLength(0);
+    fireEvent.click(sharedSwitch);
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(4);
+    expect(screen.getByTestId('nightshiftRunLimitInput-manual_investigation')).toHaveValue(6);
+    expect(screen.getByTestId('nightshiftRunLimitInput-total_investigation')).toHaveValue(9);
+
+    fireEvent.click(sharedSwitch);
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ investigationLimitsEnabled: false }));
+  });
+
+  it('shows the stored limits when the shared switch is turned on after a reload', () => {
+    setup(
+      response({
+        investigationLimitsEnabled: false,
+        limits: {
+          detection: 100,
+          investigation: 4,
+          manual_investigation: 6,
+          total_investigation: 9,
+          ki_extraction: 20,
+        },
+      }),
+      ['investigation', 'manual_investigation', 'total_investigation'],
+      true
+    );
+
+    const sharedSwitch = screen.getByTestId('nightshiftRunLimitsEnabledSwitch');
+    expect(sharedSwitch).not.toBeChecked();
+    fireEvent.click(sharedSwitch);
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(4);
+    expect(screen.getByTestId('nightshiftRunLimitInput-manual_investigation')).toHaveValue(6);
+    expect(screen.getByTestId('nightshiftRunLimitInput-total_investigation')).toHaveValue(9);
+  });
+
+  it('restores the previous limits after saving the shared switch off', async () => {
+    const groups = ['investigation', 'manual_investigation', 'total_investigation'] as const;
+    const limits = {
+      detection: 100,
+      investigation: 4,
+      manual_investigation: 6,
+      total_investigation: 9,
+      ki_extraction: 20,
+    };
+    setup(response({ limits }), groups, true);
+    save.mockResolvedValueOnce(response({ limits, investigationLimitsEnabled: false }));
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftRunLimitsEnabledSwitch')).not.toBeChecked()
+    );
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(4);
+    expect(screen.getByTestId('nightshiftRunLimitInput-manual_investigation')).toHaveValue(6);
+    expect(screen.getByTestId('nightshiftRunLimitInput-total_investigation')).toHaveValue(9);
+  });
+
+  it('edits a single unlimited limit under the shared switch, where empty means no limit', async () => {
+    setup(
+      response({
+        limits: {
+          detection: 100,
+          investigation: 0,
+          manual_investigation: 5,
+          total_investigation: 10,
+          ki_extraction: 20,
+        },
+      }),
+      ['investigation', 'manual_investigation', 'total_investigation'],
+      true
+    );
+
+    const automatic = screen.getByTestId('nightshiftRunLimitInput-investigation');
+    expect(automatic).toHaveValue(null);
+    expect(automatic).toHaveAttribute('placeholder', 'No limit');
+    fireEvent.change(automatic, { target: { value: '7' } });
+    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-manual_investigation'), {
+      target: { value: '' },
+    });
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith({
+        limits: { investigation: 7, manual_investigation: null },
+      })
+    );
+  });
+
+  it('keeps the inputs while the last finite limit is cleared under the shared switch', () => {
+    setup(
+      response({
+        limits: {
+          detection: 100,
+          investigation: 4,
+          manual_investigation: 0,
+          total_investigation: 0,
+          ki_extraction: 20,
+        },
+      }),
+      ['investigation', 'manual_investigation', 'total_investigation'],
+      true
+    );
+
+    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {
+      target: { value: '' },
+    });
+
+    expect(screen.getByTestId('nightshiftRunLimitsEnabledSwitch')).toBeChecked();
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(null);
+    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {
+      target: { value: '6' },
+    });
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(6);
+  });
+
+  it('brings back an unlimited limit as unlimited when the shared switch is turned back on', async () => {
+    const groups = ['investigation', 'manual_investigation', 'total_investigation'] as const;
+    const limits = {
+      detection: 100,
+      investigation: 0,
+      manual_investigation: 6,
+      total_investigation: 9,
+      ki_extraction: 20,
+    };
+    setup(response({ limits }), groups, true);
+    save.mockResolvedValueOnce(response({ limits, investigationLimitsEnabled: false }));
+    const values = () =>
+      groups.map(
+        (group) =>
+          (screen.getByTestId(`nightshiftRunLimitInput-${group}`) as HTMLInputElement).value
+      );
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    expect(values()).toEqual(['', '6', '9']);
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftRunLimitsEnabledSwitch')).not.toBeChecked()
+    );
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
+    expect(values()).toEqual(['', '6', '9']);
   });
 
   it('cancels run-limit changes through the shared save bar', () => {
@@ -212,32 +383,18 @@ describe('RunLimitsSection', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not show the exhaustion callout for groups hidden from the tab', () => {
-    setup(
-      response({
-        counts: {
-          detection: 100,
-          investigation: 3,
-          ki_extraction: 2,
-        },
-      }),
-      ['investigation']
-    );
-
-    expect(screen.queryByTestId('nightshiftRunLimitsBanner')).not.toBeInTheDocument();
-  });
-
   it('shows each reached detection callout above its limit', () => {
     setup(
       response({
         counts: {
           detection: 100,
           investigation: 3,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 20,
         },
       }),
-      ['detection', 'ki_extraction'],
-      'groups'
+      ['detection', 'ki_extraction']
     );
 
     const discoveryCallout = screen.getByTestId('nightshiftRunQuotaReached-detection');
@@ -258,7 +415,6 @@ describe('RunLimitsSection', () => {
         screen.getByTestId('nightshiftRunLimitRow-ki_extraction')
       )
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(screen.queryByTestId('nightshiftRunLimitsBanner')).not.toBeInTheDocument();
   });
 
   it('saves zero when a category is switched to unlimited', async () => {
@@ -293,6 +449,8 @@ describe('RunLimitsSection', () => {
         counts: {
           detection: 84,
           investigation: 3,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 2,
         },
       })
@@ -336,11 +494,15 @@ describe('RunLimitsSection', () => {
         limits: {
           detection: 0,
           investigation: 30,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 20,
         },
         counts: {
           detection: 15,
           investigation: 3,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 2,
         },
       })
@@ -352,64 +514,6 @@ describe('RunLimitsSection', () => {
 
     expect(await screen.findByText('Lower limits to values already reached?')).toBeInTheDocument();
     expect(save).not.toHaveBeenCalled();
-  });
-
-  it('keeps the active exhaustion banner while a raised limit is unsaved', () => {
-    setup(
-      response({
-        counts: {
-          detection: 100,
-          investigation: 3,
-          ki_extraction: 2,
-        },
-      })
-    );
-    expect(screen.getByTestId('nightshiftRunLimitsBanner')).toBeInTheDocument();
-
-    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-detection'), {
-      target: { value: '101' },
-    });
-
-    expect(screen.getByTestId('nightshiftRunLimitsBanner')).toBeInTheDocument();
-  });
-
-  it('opens the automations page from the exhaustion callout', () => {
-    setup(
-      response({
-        counts: {
-          detection: 100,
-          investigation: 3,
-          ki_extraction: 2,
-        },
-      })
-    );
-
-    const callout = screen.getByTestId('nightshiftRunLimitsBanner');
-    expect(callout).toHaveTextContent(
-      'Automations reached a daily run limit of 100 for this deployment'
-    );
-    expect(callout).toHaveTextContent(
-      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually'
-    );
-    fireEvent.click(screen.getByTestId('nightshiftRunLimitsOpenAutomations'));
-
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/automations');
-  });
-
-  it('hides the automations button when automations are unavailable', () => {
-    automationsAvailable = false;
-    setup(
-      response({
-        counts: {
-          detection: 100,
-          investigation: 3,
-          ki_extraction: 2,
-        },
-      })
-    );
-
-    expect(screen.getByTestId('nightshiftRunLimitsBanner')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftRunLimitsOpenAutomations')).not.toBeInTheDocument();
   });
 
   it('shows the UTC reset value supplied by the API window', () => {
@@ -428,6 +532,30 @@ describe('RunLimitsSection', () => {
     );
   });
 
+  it('takes a background update after an unlimited input was typed in and cleared again', () => {
+    const groups = ['investigation', 'manual_investigation', 'total_investigation'] as const;
+    const limits = {
+      detection: 100,
+      investigation: 4,
+      manual_investigation: 0,
+      total_investigation: 0,
+      ki_extraction: 20,
+    };
+    const { rerender } = setup(response({ limits }), groups, true);
+    const manual = () => screen.getByTestId('nightshiftRunLimitInput-manual_investigation');
+    fireEvent.change(manual(), { target: { value: '3' } });
+    fireEvent.change(manual(), { target: { value: '' } });
+
+    setQueryResponse(response({ limits: { ...limits, manual_investigation: 7 } }));
+    rerender(
+      <I18nProvider>
+        <TestRunLimits groups={groups} sharedSwitch />
+      </I18nProvider>
+    );
+
+    expect(manual()).toHaveValue(7);
+  });
+
   it('retains a dirty draft when the query receives a background update', () => {
     const { rerender } = setup();
     fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-detection'), {
@@ -439,11 +567,15 @@ describe('RunLimitsSection', () => {
         limits: {
           detection: 90,
           investigation: 30,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 20,
         },
         counts: {
           detection: 8,
           investigation: 3,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 2,
         },
       })
