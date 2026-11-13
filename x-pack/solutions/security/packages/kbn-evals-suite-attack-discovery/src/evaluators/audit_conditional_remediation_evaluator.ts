@@ -8,7 +8,7 @@ import type { Evaluator } from '@kbn/evals';
 import { getDiscoveryMarkdown } from '../audit_failure_classes/discovery_text';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import type { AuditReferenceResolver } from '../audit_failure_classes/registry';
-import { notApplicable, resolveAuditInputs } from './audit_evaluator_helpers';
+import { resolveScoredDiscoveries } from './audit_evaluator_helpers';
 
 export const AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME = 'ConditionalRemediation';
 
@@ -182,7 +182,9 @@ const MID_CLAUSE_FRAMES: readonly RegExp[] = [
 const MID_CLAUSE_CANCEL = new RegExp(`${NEGATION.source}|\\b(?:whether|if)\\b`, 'i');
 
 const VERIFY_VERB = '(?:confirm\\w*|verif\\w+|validat\\w+)';
-const SUSPECT_ADJECTIVE = '(?:malicious|unauthori[sz]ed|suspicious|compromised)';
+/** A finding against the activity, including the owner not recognizing it ("if the IP is unrecognized"). */
+const SUSPECT_ADJECTIVE =
+  '(?:malicious|unauthori[sz]ed|suspicious|compromised|unrecogni[sz]ed|unexpected|illegitimate|unapproved)';
 /**
  * A condition word counts only with a finding it waits on. Only if/once/unless/pending open a
  * condition (and "should" in SHOULD_PROVE_CUE, "only after/when" as an explicit gate); bare
@@ -377,23 +379,10 @@ export const createAuditConditionalRemediationEvaluator = (
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
-    const resolved = resolveAuditInputs({ metadata, output, resolveReference });
+    const resolved = resolveScoredDiscoveries({ metadata, output, resolveReference });
     if ('result' in resolved) return resolved.result;
 
-    const { gold, discoveries } = resolved;
-    if (discoveries.length === 0) {
-      return notApplicable('No discoveries to check for remediation advice.');
-    }
-
-    const confirmedIds = new Set(
-      gold.confirmedGroups.flatMap((group) => gold.alertGroups[group] ?? [])
-    );
-    const scored = discoveries.filter(
-      ({ alertIds }) => alertIds.length === 0 || alertIds.some((id) => !confirmedIds.has(id))
-    );
-    if (scored.length === 0) {
-      return notApplicable('Every discovery cites only confirmed-malicious alerts.');
-    }
+    const { scored } = resolved;
 
     const offending = scored.flatMap((discovery) =>
       findUnconditionalContainment(getDiscoveryMarkdown(discovery)).map(

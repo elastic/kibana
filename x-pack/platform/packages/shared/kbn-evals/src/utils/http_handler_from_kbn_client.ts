@@ -17,6 +17,9 @@ type HttpHandlerArgs =
   | [string, HttpFetchOptions?]
   | [HttpFetchOptionsWithPath];
 
+// `new Response(body, { status })` throws a TypeError when body is non-null on these statuses.
+const NULL_BODY_STATUSES = new Set([204, 205, 304]);
+
 /**
  * Creates a function that matches the HttpHandler interface from Core's
  * API, using the KbnClient from @kbn/kbn-client
@@ -127,11 +130,24 @@ export function httpHandlerFromKbnClient({
               signal: signal || undefined,
             }),
             body: undefined,
-            response: new Response(response.data as BodyInit, {
-              status: response.status,
-              statusText: response.statusText,
-              headers: response.headers,
-            }),
+            // `kbnClient.request` already parsed the body (`response.data`), but `new Response`
+            // stringifies a non-BodyInit value with `String()` — an object becomes the literal
+            // text "[object Object]", so `response.json()` below throws SyntaxError. Serialize
+            // it back to JSON (strings pass through unwrapped; null-body statuses must stay
+            // bodyless or the Response constructor throws) so the Response carries the body
+            // `asResponse` consumers expect.
+            response: new Response(
+              response.data == null || NULL_BODY_STATUSES.has(response.status)
+                ? null
+                : typeof response.data === 'string'
+                ? response.data
+                : JSON.stringify(response.data),
+              {
+                status: response.status,
+                statusText: response.statusText,
+                headers: response.headers,
+              }
+            ),
           };
         }
         return response.data as any;

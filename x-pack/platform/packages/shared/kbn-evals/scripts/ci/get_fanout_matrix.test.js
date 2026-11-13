@@ -187,6 +187,20 @@ describe('buildFanoutMatrix - fail-fast', () => {
     ).toThrow(/does-not-exist/);
   });
 
+  it('throws when a required group unions in a model with no connector, even though another requested model matched', () => {
+    expect(() =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo: {
+          requiredModelGroups: ['eis/not-provisioned'],
+        },
+        requestedModelGroups: ['eis/a'],
+        perSpec: false,
+        grepOverride: false,
+      })
+    ).toThrow(/not-provisioned/);
+  });
+
   it('throws when per-spec resolution leaves no step for the requested models', () => {
     expect(() =>
       run({
@@ -211,6 +225,42 @@ describe('buildFanoutMatrix - override / no-config parity', () => {
       { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY, QUERY_GEN] },
       { connectorId: 'eis-b', shardId: 's1', specFiles: [DISCOVERY, QUERY_GEN] },
       { connectorId: 'eis-c', shardId: 's1', specFiles: [DISCOVERY, QUERY_GEN] },
+    ]);
+  });
+
+  it('unions requiredModelGroups into the request so tier coverage survives a one-model ask', () => {
+    // On-demand runs pass EVAL_MODEL_GROUPS straight here (no eval_pipeline.ts label resolution),
+    // so this is the only place the "always include the AZ tier models" guarantee holds for them.
+    const rows = buildFanoutMatrix({
+      connectors: CONNECTORS,
+      suiteInfo: {
+        shards: [{ id: 's1', specFiles: [DISCOVERY] }],
+        requiredModelGroups: ['eis/a', 'eis/c'],
+      },
+      requestedModelGroups: ['eis/b'],
+      perSpec: false,
+      grepOverride: false,
+    });
+
+    expect(rows).toEqual([
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-b', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-c', shardId: 's1', specFiles: [DISCOVERY] },
+    ]);
+  });
+
+  it('runs the required tier models alone when EVAL_MODEL_GROUPS is empty', () => {
+    const rows = buildFanoutMatrix({
+      connectors: CONNECTORS,
+      suiteInfo: { requiredModelGroups: ['eis/a', 'eis/c'] },
+      requestedModelGroups: [],
+      perSpec: false,
+      grepOverride: false,
+    });
+
+    expect(rows).toEqual([
+      { connectorId: 'eis-a', shardId: '', specFiles: [] },
+      { connectorId: 'eis-c', shardId: '', specFiles: [] },
     ]);
   });
 

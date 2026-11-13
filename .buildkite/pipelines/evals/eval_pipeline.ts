@@ -38,6 +38,7 @@ export interface EvalsSuiteMetadataEntry {
   scoutDomain?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  requiredModelGroups?: string[];
   defaultJudge?: string;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
@@ -344,9 +345,13 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
       : [];
     const resolved = [...new Set([...explicitModelGroups, ...weeklyModels])];
     if (resolved.length > 0) {
-      return resolved;
+      // `requiredModelGroups` is always unioned in: the worker suite must run the AZ tier models it
+      // uses even when the requester asked for one specific model.
+      return [...new Set([...resolved, ...(suite.requiredModelGroups ?? [])])];
     }
-    return suite.defaultModelGroups ?? [];
+    return [
+      ...new Set([...(suite.defaultModelGroups ?? []), ...(suite.requiredModelGroups ?? [])]),
+    ];
   };
 
   const resolveJudge = (suite: EvalsSuiteMetadataEntry): EvalJudge => {
@@ -366,9 +371,11 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   }
 
   // Without models:* labels, skip (running all models is expensive) — except suites with
-  // `defaultModelGroups`, which use their pinned defaults.
+  // `defaultModelGroups` or `requiredModelGroups`, which use their pinned defaults.
   const suitesWithDefaults = selectedEvalSuites.filter(
-    (suite) => suite.defaultModelGroups && suite.defaultModelGroups.length > 0
+    (suite) =>
+      (suite.defaultModelGroups && suite.defaultModelGroups.length > 0) ||
+      (suite.requiredModelGroups && suite.requiredModelGroups.length > 0)
   );
   if (!hasGlobalModelSelection && suitesWithDefaults.length === 0) {
     return null;

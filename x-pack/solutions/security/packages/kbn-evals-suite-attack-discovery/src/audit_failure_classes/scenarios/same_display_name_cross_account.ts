@@ -120,11 +120,12 @@ const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, drafts);
  * is a Python script that chains defense evasion, persistence and exfiltration.
  *
  * The baseline render cannot tell the accounts apart (see `NON_IDENTIFYING_BASELINE_FIELDS`), so
- * a model that behaves correctly reports at most one three-alert story and cannot know which
- * account it belongs to. Baseline recall therefore accepts either group (`requiredAnyOf`); what
- * baseline measures is whether the model joins the two groups anyway (`ForbiddenJoin`). In both
- * enriched variants `user.id`, `cloud.account.id` and `user_agent.original` separate the groups,
- * and the production chain is the one that must be recovered. No group is a confirmed
+ * merging them there is not a mistake a model can avoid, and no pair is forbidden in baseline
+ * (`forbiddenCoCitation: []` in its override). Baseline recall accepts either group
+ * (`requiredAnyOf`), with no partner exclusion: it measures only that a story is reported. The
+ * separation is measured in both enriched variants, where `user.id`, `cloud.account.id` and
+ * `user_agent.original` separate the groups, the pair stays forbidden (`ForbiddenJoin`), and the
+ * production chain is the one that must be recovered. No group is a confirmed
  * compromise: StopLogging, CreateAccessKey and a bulk GetObject from a script call for
  * investigation, not for unconditional containment, so `confirmedGroups` is empty.
  */
@@ -141,7 +142,10 @@ export const sameDisplayNameCrossAccountScenario: AuditScenario = {
     expectedDiscoveries: 'atLeastOne',
     requiredGroup: 'prod-deploy-bot',
     variantOverrides: {
-      baseline: { requiredAnyOf: ['prod-deploy-bot', 'sandbox-deploy-bot'] },
+      baseline: {
+        requiredAnyOf: ['prod-deploy-bot', 'sandbox-deploy-bot'],
+        forbiddenCoCitation: [],
+      },
     },
     confirmedGroups: [],
   },

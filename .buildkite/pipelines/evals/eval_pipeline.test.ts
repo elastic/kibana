@@ -39,6 +39,13 @@ const SUITES = {
       defaultModelGroups: ['eis/anthropic-claude-4.5-haiku'],
     },
     {
+      id: 'tier-pinned',
+      name: 'Tier Pinned',
+      ciLabels: ['evals:tier-pinned'],
+      configPath: 'x-pack/tier-pinned/playwright.config.ts',
+      requiredModelGroups: ['eis/openai-gpt-6-sol', 'eis/anthropic-claude-5-opus'],
+    },
+    {
       id: 'nightshift-investigations',
       name: 'Nightshift Investigations',
       ciLabels: ['evals:nightshift-investigations'],
@@ -98,6 +105,30 @@ describe('eval_pipeline', () => {
     it('runs evals for a suite that pins defaultModelGroups even without a `models:*` label', () => {
       expect(shouldRunEvals('evals:smoke-tests')).toBe(true);
       expect(getEvalTriggerStep('evals:smoke-tests')).not.toBeNull();
+    });
+
+    it('runs evals for a suite that pins requiredModelGroups even without a `models:*` label', () => {
+      expect(shouldRunEvals('evals:tier-pinned')).toBe(true);
+      expect(getEvalTriggerStep('evals:tier-pinned')).not.toBeNull();
+    });
+
+    it('unions requiredModelGroups into an explicit `models:*` selection', () => {
+      // Negative control for the worker tier coverage: an operator requesting exactly one model
+      // must still get the suite's required tier models. `defaultModelGroups` alone would return
+      // just `eis/openai-gpt-5.4` here and silently drop the tier coverage.
+      const yaml = getEvalPipeline('evals:tier-pinned,models:eis/openai-gpt-5.4') as string;
+      const env = parseStep(yaml).steps[0].env;
+
+      expect(env.EVAL_MODEL_GROUPS).toBe(
+        'eis/openai-gpt-5.4,eis/openai-gpt-6-sol,eis/anthropic-claude-5-opus'
+      );
+    });
+
+    it('dedupes requiredModelGroups already present in the selection', () => {
+      const yaml = getEvalPipeline('evals:tier-pinned,models:eis/openai-gpt-6-sol') as string;
+      const env = parseStep(yaml).steps[0].env;
+
+      expect(env.EVAL_MODEL_GROUPS).toBe('eis/openai-gpt-6-sol,eis/anthropic-claude-5-opus');
     });
 
     it('runs evals when both `evals:*` and `models:*` labels are present', () => {
