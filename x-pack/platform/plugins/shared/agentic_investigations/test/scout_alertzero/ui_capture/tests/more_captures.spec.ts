@@ -181,7 +181,12 @@ test.describe('Conversation details flyout — more captures', { tag: tags.state
       createdAt: now,
       updatedAt: now,
     };
-    await esClient.index({ index: HYPOTHESES_INDEX, id: docId, document: stored, refresh: 'wait_for' });
+    await esClient.index({
+      index: HYPOTHESES_INDEX,
+      id: docId,
+      document: stored,
+      refresh: 'wait_for',
+    });
     const attached = await apiClient.post(
       `${AB_CONVERSATIONS_PATH}/${ids.investigationOpen}/attachments`,
       {
@@ -283,7 +288,10 @@ test.describe('Conversation details flyout — more captures', { tag: tags.state
         `/app/agent_builder/agents/elastic-ai-agent/conversations/${ids.investigationOpen}`
       )
     );
-    await page.getByRole('button', { name: /sharing/i }).first().click({ timeout: 30_000 });
+    await page
+      .getByRole('button', { name: /sharing/i })
+      .first()
+      .click({ timeout: 30_000 });
     await page.waitForTimeout(800);
     await shoot(page, '07-public-button-popover');
   });
