@@ -16,10 +16,19 @@ import {
   SESSIONS_WITH_ERRORS,
 } from '../../common/fixtures/sessions_data';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
+  test.beforeAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_ON_OVERRIDE);
+  });
+
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
+  });
+
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_RESET_OVERRIDE);
   });
 
   test('opens the Sessions tab of an EDOT Browser application, keeping the time range', async ({
