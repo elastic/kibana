@@ -8,27 +8,11 @@
  */
 
 import type { FlexPanelData } from '../grid_panel';
-import type { FlexLayoutData, FlexLayoutElementsInOrder } from '../types';
+import type { FlexLayoutData } from '../types';
 
-const comparePanel = (panelA: FlexPanelData, panelB: FlexPanelData, draggedId?: string) => {
-  if (panelA.order > panelB.order) return 1;
-  if (panelA.order < panelB.order) return -1;
+const comparePanels = (panelA: FlexPanelData, panelB: FlexPanelData) => panelA.order - panelB.order;
 
-  // if orders are the same. Is either panel being dragged?
-  if (panelA.id === draggedId) return -1;
-  if (panelB.id === draggedId) return 1;
-
-  // fall back
-  return 1;
-};
-
-export const getPanelKeysInOrder = (panels: FlexLayoutData, draggedId?: string): string[] =>
+export const getPanelKeysInOrder = (panels: FlexLayoutData): string[] =>
   Object.keys(panels).sort((panelKeyA, panelKeyB) =>
-    comparePanel(panels[panelKeyA], panels[panelKeyB], draggedId)
+    comparePanels(panels[panelKeyA], panels[panelKeyB])
   );
-
-export const getLayoutInOrder = (
-  layout: FlexLayoutData,
-  draggedId?: string
-): FlexLayoutElementsInOrder =>
-  getPanelKeysInOrder(layout, draggedId).map((id) => ({ id, type: layout[id].type }));

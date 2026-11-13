@@ -24,7 +24,7 @@ const getLayout = (
 ): FlexLayoutData => {
   const layout: FlexLayoutData = {};
   ['panel1', 'panel2', 'panel3'].forEach((id, order) => {
-    layout[id] = { type: 'panel', id, order, grow: false, width: PANEL_WIDTH, ...overrides[id] };
+    layout[id] = { id, order, grow: false, width: PANEL_WIDTH, ...overrides[id] };
   });
   return layout;
 };
@@ -185,7 +185,7 @@ describe('FlexLayout', () => {
       rerender({
         layout: {
           ...getLayout({ panel1: { order: 1 }, panel2: { order: 0 } }),
-          panel4: { type: 'panel', id: 'panel4', order: 2, grow: false, width: PANEL_WIDTH },
+          panel4: { id: 'panel4', order: 2, grow: false, width: PANEL_WIDTH },
         },
       });
       expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel1', 'panel3', 'panel4']);
@@ -561,8 +561,8 @@ describe('FlexLayout pointer resize with wrapping', () => {
     renderFlexLayout({
       gridSettings: { ...gridSettings, gutterSize: GUTTER, rowHeight: ROW_HEIGHT },
       layout: {
-        panel1: { type: 'panel', id: 'panel1', order: 0, grow: false, width: medium },
-        panel2: { type: 'panel', id: 'panel2', order: 1, grow: false, width: large },
+        panel1: { id: 'panel1', order: 0, grow: false, width: medium },
+        panel2: { id: 'panel2', order: 1, grow: false, width: large },
       },
     });
     expect(getPanel('panel2').getBoundingClientRect().left).toBe(0);
@@ -587,8 +587,8 @@ describe('FlexLayout pointer resize with wrapping', () => {
     renderFlexLayout({
       gridSettings: { ...gridSettings, gutterSize: GUTTER, rowHeight: ROW_HEIGHT },
       layout: {
-        panel1: { type: 'panel', id: 'panel1', order: 0, grow: false, width: medium },
-        panel2: { type: 'panel', id: 'panel2', order: 1, grow: false, width: medium },
+        panel1: { id: 'panel1', order: 0, grow: false, width: medium },
+        panel2: { id: 'panel2', order: 1, grow: false, width: medium },
       },
     });
 
@@ -605,8 +605,8 @@ describe('FlexLayout pointer resize with wrapping', () => {
     renderFlexLayout({
       gridSettings: { ...gridSettings, gutterSize: GUTTER, rowHeight: ROW_HEIGHT },
       layout: {
-        panel1: { type: 'panel', id: 'panel1', order: 0, grow: false, width: 500 },
-        panel2: { type: 'panel', id: 'panel2', order: 1, grow: false, width: 500 },
+        panel1: { id: 'panel1', order: 0, grow: false, width: 500 },
+        panel2: { id: 'panel2', order: 1, grow: false, width: 500 },
       },
     });
 
@@ -625,8 +625,8 @@ describe('FlexLayout pointer resize with wrapping', () => {
     renderFlexLayout({
       gridSettings: { ...gridSettings, gutterSize: GUTTER, rowHeight: ROW_HEIGHT },
       layout: {
-        panel1: { type: 'panel', id: 'panel1', order: 0, grow: false, width: 500 },
-        panel2: { type: 'panel', id: 'panel2', order: 1, grow: false, width: 700 },
+        panel1: { id: 'panel1', order: 0, grow: false, width: 500 },
+        panel2: { id: 'panel2', order: 1, grow: false, width: 700 },
       },
     });
     getHandle('panel2', 'resize').focus();

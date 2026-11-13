@@ -26,13 +26,9 @@ export interface FlexLayoutSettings {
   widthBreakpoints?: number[];
 }
 
-export type FlexLayoutPanel = FlexPanelData & { type: 'panel' };
-
 export interface FlexLayoutData {
-  [key: string]: FlexLayoutPanel;
+  [key: string]: FlexPanelData;
 }
-
-export type FlexLayoutElementsInOrder = Array<{ id: string }>;
 
 export interface FlexLayoutStateManager {
   gridLayout$: BehaviorSubject<FlexLayoutData>;

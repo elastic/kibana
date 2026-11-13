@@ -28,7 +28,7 @@ export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
     /** Change the cursor depending on if the panel can be resized in a specific direction */
     const resizeCursorSubscription = gridLayoutStateManager.layoutUpdated$.subscribe((layout) => {
       const panel = layout[panelId];
-      if (!panel || panel.type !== 'panel' || !buttonRef.current) return;
+      if (!panel || !buttonRef.current) return;
 
       const { minWidth, maxWidth } = {
         ...getDefaultResizeOptions(),

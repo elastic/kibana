@@ -25,8 +25,8 @@ const controlsLayout: ControlsLayout = {
 describe('controls <-> flex layout', () => {
   test('converts control widths to pixel widths', () => {
     expect(controlsLayoutToFlexLayout(controlsLayout)).toEqual({
-      a: { type: 'panel', id: 'a', order: 0, grow: true, width: CONTROL_WIDTH_PIXELS.small },
-      b: { type: 'panel', id: 'b', order: 1, grow: false, width: CONTROL_WIDTH_PIXELS.large },
+      a: { id: 'a', order: 0, grow: true, width: CONTROL_WIDTH_PIXELS.small },
+      b: { id: 'b', order: 1, grow: false, width: CONTROL_WIDTH_PIXELS.large },
     });
   });
 

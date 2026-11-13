@@ -45,7 +45,6 @@ export const getClosestControlWidth = (pixels: number): ControlWidth => {
 export const controlsLayoutToFlexLayout = ({ controls }: ControlsLayout): FlexLayoutData =>
   Object.entries(controls).reduce<FlexLayoutData>((flexLayout, [id, { order, width, grow }]) => {
     flexLayout[id] = {
-      type: 'panel',
       id,
       order,
       grow: Boolean(grow),

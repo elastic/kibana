@@ -20,10 +20,6 @@ import {
   startMouseInteraction,
   startTouchInteraction,
 } from '../../../grid/use_grid_layout_events/sensors';
-import {
-  hasPanelInteractionStartedWithKeyboard,
-  isLayoutInteractive,
-} from '../state_manager_selectors';
 import type { UserInteractionEvent } from '../../../grid/use_grid_layout_events/types';
 import {
   cancelAction,
@@ -85,7 +81,7 @@ export const useGridLayoutPanelEvents = ({
         );
       } else if (
         isKeyboardEvent(ev) &&
-        hasPanelInteractionStartedWithKeyboard(gridLayoutStateManager)
+        gridLayoutStateManager.activePanelEvent$.value?.sensorType === 'keyboard'
       ) {
         if (interactionType === 'drag') {
           moveKeyboardDragAction(ev, gridLayoutStateManager);
@@ -107,7 +103,7 @@ export const useGridLayoutPanelEvents = ({
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
-      if (!isLayoutInteractive(gridLayoutStateManager)) {
+      if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT') {
         return;
       }
       if (isMouseEvent(e)) {

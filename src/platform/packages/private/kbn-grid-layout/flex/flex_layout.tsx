@@ -19,12 +19,11 @@ import type {
   FlexLayoutData,
   FlexLayoutSettings,
   UseCustomDragHandle,
-  FlexLayoutElementsInOrder,
 } from './types';
 import type { GridLayoutContextType } from './use_grid_layout_context';
 import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { getLayoutInOrder } from './utils/panel_order';
+import { getPanelKeysInOrder } from './utils/panel_order';
 
 export type GridLayoutProps = {
   layout: FlexLayoutData;
@@ -50,7 +49,7 @@ export const FlexLayout = ({
     gridSettings,
     accessMode,
   });
-  const [elementsInOrder, setElementsInOrder] = useState<FlexLayoutElementsInOrder>([]);
+  const [panelIds, setPanelIds] = useState(() => getPanelKeysInOrder(layout));
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -82,7 +81,9 @@ export const FlexLayout = ({
      * This subscription sets the rendered elements in the order they should appear
      */
     const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((panels) => {
-      setElementsInOrder(getLayoutInOrder(panels));
+      const nextIds = getPanelKeysInOrder(panels);
+      // keep the same reference when the order is unchanged to avoid re-rendering during interactions
+      setPanelIds((currentIds) => (isEqual(currentIds, nextIds) ? currentIds : nextIds));
     });
 
     return () => {
@@ -113,9 +114,9 @@ export const FlexLayout = ({
         className={classNames('kbnFlex', { 'kbnFlex--static': accessMode === 'VIEW' }, className)}
         css={[styles.layout, styles.hasActivePanel]}
       >
-        {elementsInOrder.map((element) => {
-          return <GridPanel key={element.id} panelId={element.id} />;
-        })}
+        {panelIds.map((id) => (
+          <GridPanel key={id} panelId={id} />
+        ))}
         <GridPanelDragPreview />
       </div>
     </GridLayoutContext.Provider>
