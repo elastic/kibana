@@ -14,8 +14,14 @@ import {
   NIGHTSHIFT_ASSISTANT_AGENT_ID,
   NIGHTSHIFT_ASSISTANT_AGENT_TYPE_ID,
 } from '../agents/assistant';
+import { assertNightshiftSpace } from './assert_nightshift_space';
 
-/** Ensures the Nightshift assistant agent, the Nightshift agent users pick in the Agent Builder UI. */
+/**
+ * Ensures the Nightshift assistant agent, the Nightshift agent users pick in the Agent Builder UI.
+ *
+ * Only in the default space: Nightshift does not run elsewhere, so its agent must not show up in
+ * another space's Agent Builder.
+ */
 export const installAssistantAgent = async ({
   agentBuilder,
   spaceId,
@@ -25,6 +31,7 @@ export const installAssistantAgent = async ({
   spaceId: string;
   availability: AgentAvailabilityConfig;
 }): Promise<void> => {
+  assertNightshiftSpace(spaceId);
   await agentBuilder.agents.ensure({
     spaceId,
     availability,

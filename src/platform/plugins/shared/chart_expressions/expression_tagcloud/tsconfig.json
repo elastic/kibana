@@ -29,7 +29,9 @@
     "@kbn/charts-theme",
     "@kbn/ebt-tools",
     "@kbn/react-kibana-context-theme",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/visualizations-components",
+    "@kbn/palettes-components"
   ],
   "exclude": [
     "target/**/*",

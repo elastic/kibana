@@ -9,20 +9,11 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EventFieldsData } from '../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../common/mock';
-import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../flyout/network_details';
-import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
-import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from '../../../flyout/document_details/right/components/test_ids';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import type { OpenFlyoutLinkRenderer } from './open_flyout_link';
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
@@ -67,7 +58,6 @@ const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', 'fe80::4001:aff:fec8:32'];
 describe('TableFieldValueCell', () => {
   beforeAll(() => {
     jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   describe('common behavior', () => {
@@ -200,29 +190,9 @@ describe('TableFieldValueCell', () => {
       );
     });
 
-    it('should render link buttons for each of the host ip addresses', () => {
-      expect(screen.getAllByTestId(/securitySolutionFlyoutTablePreviewLinkField-/).length).toBe(
-        hostIpValues.length
-      );
-    });
-
     it('should render each of the expected values when `fieldFromBrowserField` is provided', () => {
       hostIpValues.forEach((value) => {
         expect(screen.getByText(value)).toBeInTheDocument();
-      });
-    });
-
-    it('should open preview', () => {
-      screen.getByTestId(`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-0`).click();
-
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: NetworkPreviewPanelKey,
-        params: {
-          ip: '127.0.0.1',
-          flowTarget: 'source',
-          scopeId: 'scopeId',
-          banner: NETWORK_PREVIEW_BANNER,
-        },
       });
     });
   });
@@ -261,10 +231,6 @@ describe('TableFieldValueCell', () => {
 
     it('wraps each value with the injected flyout link renderer', () => {
       expect(screen.getAllByTestId('flyout-link-host.ip').length).toBe(hostIpValues.length);
-    });
-
-    it('does not render the legacy expandable-flyout preview link', () => {
-      expect(screen.queryByTestId(/securitySolutionFlyoutTablePreviewLinkField-/)).toBeNull();
     });
   });
 });

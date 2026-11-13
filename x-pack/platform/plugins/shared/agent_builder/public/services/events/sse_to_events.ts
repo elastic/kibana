@@ -300,6 +300,7 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
         tool_id: event.data.tool_id,
         tool_call_group_id: event.data.tool_call_group_id,
         tool_origin: event.data.tool_origin,
+        intent: event.data.intent,
       })
     );
   }

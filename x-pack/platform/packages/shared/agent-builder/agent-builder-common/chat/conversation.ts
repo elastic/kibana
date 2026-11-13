@@ -7,7 +7,7 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import type { UserIdAndName, UserPrincipalType } from '../base/users';
-import type { ToolOrigin, ToolType } from '../tools/definition';
+import type { ToolDefinitionWithSchema, ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
@@ -187,6 +187,10 @@ export interface ToolCallWithResult {
    * re-run on resume. Use `isDynamicToolCall` rather than comparing the value.
    */
   invocation?: ToolCallInvocation;
+  /**
+   * Short description, provided by the model, of what the agent is doing with this call.
+   */
+  intent?: string;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -222,7 +226,10 @@ export interface ReasoningStepData {
   reasoning: string;
   /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
   transient?: boolean;
-  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  /**
+   * when reasoning is bound to a tool call, the corresponding tool call ID
+   * @deprecated No longer produced; kept for conversations stored before tool call intent.
+   */
   tool_call_id?: string;
   /** when reasoning is bound to a tool call group, the corresponding tool call group ID */
   tool_call_group_id?: string;
@@ -878,6 +885,8 @@ export interface BackgroundExecutionCompletedAt {
 export interface BackgroundExecutionState {
   /** The execution ID of the background sub-agent. */
   execution_id: string;
+  /** The id of the sub-agent running it, when known. */
+  agent_id?: string;
   /** Current status of the execution. */
   status: ExecutionStatus;
   /** The sub-agent's response, present when status is 'completed'. */
@@ -995,4 +1004,21 @@ export interface CompactionSummary {
    * `summarized_up_to` on write, for readers that predate it.
    */
   covered_round_ids?: string[];
+  /**
+   * Definitions of the dynamic tools registered when the summary was generated, re-injected after
+   * it since it hides the tool results that first carried them. Snapshotted rather than read
+   * live so the rendered notice stays identical until the next compaction: a tool loaded later
+   * is seen through its own tool result. Absent when no dynamic tool was registered.
+   */
+  dynamic_tools?: DynamicToolDefinition[];
+}
+
+/**
+ * A tool reachable through the `execute_dynamic_tool` meta-tool, as written into the transcript.
+ * `parameters` is the same JSON schema the provider receives for a natively bound tool.
+ */
+export interface DynamicToolDefinition {
+  tool_id: string;
+  description: string;
+  parameters: ToolDefinitionWithSchema['schema'];
 }

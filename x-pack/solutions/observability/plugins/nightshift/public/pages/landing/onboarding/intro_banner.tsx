@@ -7,11 +7,9 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiIcon,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -19,31 +17,41 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../hooks/use_kibana';
-import posterSrc from './assets/elky_story_poster.jpg';
+import { EXPLORE_LIVE_EXAMPLE_HREF } from '../../../common/live_example';
+import {
+  type IntroBannerDismissal,
+  useIntroBannerDismissal,
+} from '../../../components/use_intro_banner_dismissal';
+import { IntroBannerVideo } from './intro_banner_video';
 
-const EXPLORE_LIVE_EXAMPLE_HREF: string | undefined = undefined;
-
-const MEDIA_WIDTH_PX = 425;
+const MEDIA_WIDTH_PX = 368;
 const MEDIA_HEIGHT_PX = 239;
 const COPY_PADDING_INLINE_PX = 32;
-
-const getDismissedStorageKey = (basePath: string): string =>
-  `nightshift.onboarding.introBannerDismissed:${basePath || 'default'}`;
 
 const dismissLabel = i18n.translate('xpack.nightshift.onboarding.dismissIntroBanner', {
   defaultMessage: 'Dismiss intro banner',
 });
 
-export function OnboardingIntroBanner(): React.ReactElement | null {
-  const { euiTheme } = useEuiTheme();
-  const { http } = useKibana().services;
-  const [isDismissed = false, setIsDismissed] = useLocalStorage<boolean>(
-    getDismissedStorageKey(http.basePath.get()),
-    false
-  );
+export function OnboardingIntroBanner({
+  dismissal,
+}: {
+  dismissal?: IntroBannerDismissal;
+}): React.ReactElement | null {
+  return dismissal ? <IntroBanner dismissal={dismissal} /> : <StoredIntroBanner />;
+}
 
-  if (isDismissed) return null;
+const StoredIntroBanner = (): React.ReactElement => {
+  const dismissal = useIntroBannerDismissal();
+  return <IntroBanner dismissal={dismissal} />;
+};
+
+const IntroBanner = ({
+  dismissal,
+}: {
+  dismissal: IntroBannerDismissal;
+}): React.ReactElement | null => {
+  const { euiTheme } = useEuiTheme();
+  if (dismissal.isDismissed) return null;
 
   return (
     <EuiPanel
@@ -64,44 +72,7 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
           height: ${MEDIA_HEIGHT_PX}px;
         `}
       >
-        <img
-          src={posterSrc}
-          alt={i18n.translate('xpack.nightshift.onboarding.introMediaAriaLabel', {
-            defaultMessage: 'Elastic nightshift overview video',
-          })}
-          css={css`
-            display: block;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          `}
-          data-test-subj="nightshiftOnboardingIntroBannerPoster"
-        />
-        <div
-          aria-hidden={true}
-          css={css`
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          `}
-        >
-          <div
-            css={css`
-              align-items: center;
-              background: ${euiTheme.colors.backgroundBasePlain};
-              border-radius: 50%;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-              display: flex;
-              height: 48px;
-              justify-content: center;
-              width: 48px;
-            `}
-          >
-            <EuiIcon type="play" size="l" color="primary" aria-hidden={true} />
-          </div>
-        </div>
+        <IntroBannerVideo />
       </div>
       <div
         css={css`
@@ -116,7 +87,8 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.nightshift.onboarding.introTitle', {
-              defaultMessage: 'Elastic nightshift is an SRE coworker that is always there for you',
+              defaultMessage:
+                'Elastic nightshift AI SRE is a co-worker that is always there for you',
             })}
           </h2>
         </EuiTitle>
@@ -124,36 +96,33 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
           size="s"
           color="subdued"
           css={css`
-            margin-top: ${euiTheme.size.s};
+            margin-top: ${euiTheme.size.xs};
           `}
         >
           <p>
             {i18n.translate('xpack.nightshift.onboarding.introDescription', {
-              defaultMessage:
-                'Elastic nightshift helps you detect, investigate and resolve problems faster. Once you add data, it will start analyzing.',
+              defaultMessage: 'It helps you detect, investigate and resolve problems faster',
             })}
           </p>
         </EuiText>
-        {EXPLORE_LIVE_EXAMPLE_HREF && (
-          <div
-            css={css`
-              margin-top: ${euiTheme.size.m};
-            `}
+        <div
+          css={css`
+            margin-top: ${euiTheme.size.m};
+          `}
+        >
+          <EuiButton
+            size="s"
+            iconType="external"
+            iconSide="right"
+            href={EXPLORE_LIVE_EXAMPLE_HREF}
+            target="_blank"
+            data-test-subj="nightshiftOnboardingExploreLiveExample"
           >
-            <EuiButton
-              size="s"
-              iconType="external"
-              iconSide="right"
-              href={EXPLORE_LIVE_EXAMPLE_HREF}
-              target="_blank"
-              data-test-subj="nightshiftOnboardingExploreLiveExample"
-            >
-              {i18n.translate('xpack.nightshift.onboarding.exploreLiveExampleButton', {
-                defaultMessage: 'Explore live example',
-              })}
-            </EuiButton>
-          </div>
-        )}
+            {i18n.translate('xpack.nightshift.onboarding.exploreLiveExampleButton', {
+              defaultMessage: 'Explore live example',
+            })}
+          </EuiButton>
+        </div>
       </div>
       <div
         css={css`
@@ -168,11 +137,11 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
             color="text"
             iconType="cross"
             aria-label={dismissLabel}
-            onClick={() => setIsDismissed(true)}
+            onClick={dismissal.dismiss}
             data-test-subj="nightshiftOnboardingIntroBannerDismiss"
           />
         </EuiToolTip>
       </div>
     </EuiPanel>
   );
-}
+};

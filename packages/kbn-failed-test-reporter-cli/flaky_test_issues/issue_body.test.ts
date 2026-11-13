@@ -8,7 +8,7 @@
  */
 
 import type { FlakyTestBranchStats } from '@kbn/scout-reporting';
-import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
+import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   FLAKY_TEST_SUITE_METADATA_PREFIX,
   flakySuiteIssueTitle,
@@ -543,22 +543,48 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(renderFlakySuiteIssueBody(suite, { report, relatedIssues: [7, 8] })).toMatchSnapshot();
   });
 
-  it('names the closed issues it takes over from before the possibly related ones', () => {
+  it('names the issues it replaces next to their test in the tests table', () => {
     const { suite, report } = singleTestReport();
+    const { testId } = suite.tests[0];
     const body = renderFlakySuiteIssueBody(suite, {
       report,
-      relatedIssues: [9],
-      supersededIssues: [7, 8],
+      previousIssues: new Map([[testId, [7, 8]]]),
     });
 
-    const superseded = body.indexOf(
-      'Previously tracked in #7, #8, closed before the suite failed again.'
-    );
-    expect(superseded).toBeGreaterThan(-1);
-    expect(body.indexOf('Possibly related: #9.')).toBeGreaterThan(superseded);
-    expect(renderFlakySuiteIssueBody(suite, { report, supersededIssues: [] })).not.toContain(
+    expect(body).toContain('| Test | Flaky branches | Dashboard | Previously tracked in |');
+    expect(body).toMatch(/^\| creates default alert.* \| \[dashboard\]\(.*\) \| #7, #8 \|$/m);
+    expect(body).not.toContain('Previously tracked in #');
+    expect(
+      getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX)
+    ).toBeUndefined();
+    // no column when no test was tracked before
+    expect(renderFlakySuiteIssueBody(suite, { report, previousIssues: new Map() })).not.toContain(
       'Previously tracked'
     );
+  });
+
+  it('lists the issues of the tests the table has no room for in a line, before the possibly related ones', () => {
+    const tests = Array.from({ length: 16 }, (_, position) =>
+      flakyTest({ testId: `t${position}`, title: `test ${position}`, failedBuilds: 40 - position })
+    );
+    const report = flakyReport(tests);
+    const [suite] = groupIntoSuites(report.flaky);
+    const body = renderFlakySuiteIssueBody(suite, {
+      report,
+      relatedIssues: [10],
+      previousIssues: new Map([
+        ['t0', [7]],
+        ['t15', [9]],
+      ]),
+    });
+
+    expect(body).toContain('| #7 |');
+    const line = body.indexOf('Previously tracked in #9.');
+    expect(line).toBeGreaterThan(-1);
+    expect(body.indexOf('Possibly related: #10.')).toBeGreaterThan(line);
+    expect(
+      getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX)
+    ).toEqual([9]);
   });
 
   it('records the suite and the first report snapshot in the metadata', () => {
@@ -577,8 +603,17 @@ describe('renderFlakySuiteIssueBody', () => {
       'report.history': [
         { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
       ],
+      'report.shownTestIds': [suite.tests[0].testId],
     });
     expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
+  });
+
+  it('ends with how to skip the suite', () => {
+    const { suite, report } = singleTestReport();
+
+    expect(renderFlakySuiteIssueBody(suite, { report })).toMatch(
+      /\n\n> \[!TIP\]\n> Review the failures\. .*`\/skip` it, or skip the test case manually\.\n\n<!-- kibanaCiData/
+    );
   });
 
   it('records the branches to skip the suite on and the pipelines it failed on', () => {
@@ -722,6 +757,62 @@ describe('refreshing a suite issue', () => {
     expect(silent?.['report.commentedAt']).toBe('2026-09-08T09:04:41.000Z');
   });
 
+  it('adds the tests a comment shows to those the issue has shown, else keeps them as they are', () => {
+    const { suite, report } = multiTestReport();
+    const shown = { ...previous, 'report.shownTestIds': ['a', 'no-longer-flaky'] };
+    const refresh = (metadata: RecordedFlakySuiteIssueMetadata, comment: boolean) =>
+      readFlakySuiteIssueMetadata(
+        refreshFlakySuiteIssueMetadata(filedBody(metadata), suite, {
+          report,
+          previous: metadata,
+          comment,
+        })
+      )?.['report.shownTestIds'];
+
+    expect(refresh(shown, true)).toEqual(['a', 'b', 'c', 'no-longer-flaky']);
+    expect(refresh(shown, false)).toEqual(['a', 'no-longer-flaky']);
+    // an issue filed before they were recorded starts with the tests of its next comment
+    expect(refresh(previous, true)).toEqual(['a', 'b', 'c']);
+    expect(refresh(previous, false)).toBeUndefined();
+  });
+
+  it('records as shown only the tests the comment names, so one it left out is newly flaky later', () => {
+    const { suite, report } = multiTestReport();
+    // b and c are flaky only on main, which is skipped: the comment names only a
+    const skippedOnMain = {
+      ...suite,
+      tests: suite.tests.map((test) => ({
+        ...test,
+        byBranch: test.byBranch.map((stats) =>
+          stats.branch === 'main' ? { ...stats, skipped: true } : stats
+        ),
+      })),
+    };
+    const shown = { ...previous, 'report.shownTestIds': ['a'] };
+
+    const metadata = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(shown), skippedOnMain, {
+        report,
+        previous: shown,
+        comment: true,
+      })
+    );
+    expect(metadata?.['report.shownTestIds']).toEqual(['a']);
+
+    // main is no longer skipped: b and c are named for the first time
+    const later = renderFlakySuiteIssueComment(suite, {
+      report,
+      reopened: false,
+      previous: { ...shown, ...metadata },
+    });
+    expect(later).toContain(
+      '`reverts breakdown, interval, and visibility on a saved session` (newly flaky)'
+    );
+    expect(later).toContain(
+      '`persists hide/show of the histogram on a saved session` (newly flaky)'
+    );
+  });
+
   it('takes the report that filed the issue as the last one posted until a comment is recorded', () => {
     expect(lastPostedAt(previous)).toBe('2026-09-07T09:04:41.000Z');
     expect(lastPostedAt({ ...previous, 'report.commentedAt': '2026-09-08T09:04:41.000Z' })).toBe(
@@ -753,36 +844,286 @@ describe('refreshing a suite issue', () => {
     expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
   });
 
-  it("comments with the report's numbers for the suite, then how to skip it", () => {
+  it('names the branch in the first line when it is a single one, and the test even when it is alone', () => {
     const { suite, report } = singleTestReport();
 
-    const comment = renderFlakySuiteIssueComment(suite, { report, reopened: false });
-
-    expect(comment).toMatch(
-      /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \| Flaky branches \| Dashboard \|\n/
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toBe(
+      [
+        'Still flaky on `main`:',
+        '',
+        '- `creates default alert, triggers on down status, and recovers`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+      ].join('\n')
     );
-    for (const section of [
-      '#### Failures by Error Message',
-      '#### Status by Branch',
-      '#### Failures by Target',
-      '#### Failures by Pipeline',
-    ]) {
-      expect(comment).toContain(section);
-    }
-    // the suite's details and the metadata are the body's, which is left as filed
-    expect(comment).not.toContain('### Suite');
-    expect(comment).not.toContain('kibanaCiData');
-    expect(comment).toMatch(
-      /\n\n> \[!TIP\]\n> Review the failures\. .*`\/skip` it, or skip the test case manually\.$/
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toMatch(
+      /^Flaky again after this issue was closed, on `main`:\n\n- `creates default alert/
     );
-    expect(comment).toMatchSnapshot();
   });
 
-  it('says why the issue is reopened and counts the tests', () => {
+  it("names the branches on the test's line when there are several", () => {
     const { suite, report } = multiTestReport();
 
-    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toMatch(
-      /^This test suite appears to be flaky again after this issue was closed, with 3 flaky tests over 2–9 Sep 2026:\n\n\| Test \|/
+    expect(
+      renderFlakySuiteIssueComment(
+        { ...suite, tests: [suite.tests[0]] },
+        { report, reopened: false }
+      )
+    ).toBe(
+      [
+        'Still flaky:',
+        '',
+        '- `does not keep a hidden histogram after visiting Dashboard`: 10% of builds (20 / 200) on `main`, 5% of builds (3 / 64) on `9.2`, last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+      ].join('\n')
+    );
+  });
+
+  it('names on each line only the branches that test is flaky on, highest rate first', () => {
+    const failedOn = (branch: string, builds: number, failedBuilds: number, day: number) => ({
+      branch,
+      builds,
+      failedBuilds,
+      buildFailRate: failedBuilds / builds,
+      lastFailedAt: new Date(Date.UTC(2026, 8, day)),
+      lastFailedBuildUrl: `https://buildkite.com/elastic/kibana-on-merge/builds/${day}`,
+    });
+    const report = flakyReport([
+      // a single failure on 8.19 is not flaky there
+      flakyTest({
+        testId: 'a',
+        title: 'flaky on main',
+        byBranch: [failedOn('main', 400, 20, 9), failedOn('8.19', 60, 1, 7)],
+      }),
+      flakyTest({
+        testId: 'b',
+        title: 'flaky on 8.19',
+        byBranch: [
+          { branch: 'main', builds: 400, failedBuilds: 0, buildFailRate: 0 },
+          failedOn('8.19', 60, 5, 8),
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toBe(
+      [
+        '2 tests still flaky:',
+        '',
+        '- `flaky on main`: 5% of builds (20 / 400) on `main`, last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/9)',
+        '- `flaky on 8.19`: 8% of builds (5 / 60) on `8.19`, last failed [8 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/8)',
+      ].join('\n')
+    );
+  });
+
+  it('leaves out the branches every test of the suite is skipped on, and the tests that only failed there', () => {
+    const { suite, report } = multiTestReport();
+    const skippedOnMain = {
+      ...suite,
+      tests: suite.tests.map((test) => ({
+        ...test,
+        byBranch: test.byBranch.map((stats) =>
+          stats.branch === 'main' ? { ...stats, skipped: true } : stats
+        ),
+      })),
+    };
+
+    expect(renderFlakySuiteIssueComment(skippedOnMain, { report, reopened: false })).toBe(
+      [
+        'Still flaky on `9.2`:',
+        '',
+        '- `does not keep a hidden histogram after visiting Dashboard`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+      ].join('\n')
+    );
+  });
+
+  it("lists each test's own numbers on each branch, and says the suite is flaky again when the issue is reopened", () => {
+    const { suite, report } = multiTestReport();
+
+    // the clean 9.1 left out
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toBe(
+      [
+        '3 tests flaky again after this issue was closed:',
+        '',
+        '- `does not keep a hidden histogram after visiting Dashboard`: 10% of builds (20 / 200) on `main`, 5% of builds (3 / 64) on `9.2`, last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+        '- `reverts breakdown, interval, and visibility on a saved session`: 10% of builds (49 / 509) on `main`, last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+        '- `persists hide/show of the histogram on a saved session`: 10% of builds (49 / 509) on `main`, last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+      ].join('\n')
+    );
+  });
+
+  it('names the flaky tests the issue has not shown yet, and marks them as newly flaky', () => {
+    const single = singleTestReport();
+    const multi = multiTestReport();
+    const shown = (ids: string[]) => ({ ...previous, 'report.shownTestIds': ids });
+
+    expect(
+      renderFlakySuiteIssueComment(single.suite, {
+        report: single.report,
+        reopened: false,
+        previous: shown(['an-older-test']),
+      })
+    ).toBe(
+      [
+        'Still flaky on `main`:',
+        '',
+        '- `creates default alert, triggers on down status, and recovers` (newly flaky): 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+      ].join('\n')
+    );
+    const lines = renderFlakySuiteIssueComment(multi.suite, {
+      report: multi.report,
+      reopened: false,
+      previous: shown(['a']),
+    }).split('\n');
+    expect(lines[2]).toMatch(/^- `does not keep a hidden histogram after visiting Dashboard`: /);
+    expect(lines[3]).toMatch(
+      /^- `reverts breakdown, interval, and visibility on a saved session` \(newly flaky\): /
+    );
+    expect(lines[4]).toMatch(
+      /^- `persists hide\/show of the histogram on a saved session` \(newly flaky\): /
+    );
+  });
+
+  it('lists as many tests as the body does, then counts the rest', () => {
+    const { suite, report } = singleTestReport();
+    const [test] = suite.tests;
+    const many = {
+      ...suite,
+      tests: Array.from({ length: 17 }, (_, i) => ({
+        ...test,
+        testId: `t${i}`,
+        title: `test ${i}`,
+      })),
+    };
+
+    const comment = renderFlakySuiteIssueComment(many, {
+      report,
+      reopened: false,
+      previous: { ...previous, 'report.shownTestIds': [] },
+    });
+
+    expect(comment).toMatch(/\n- `test 14` \(newly flaky\): [^\n]+\n\nand 2 more tests\.$/);
+    expect(comment).not.toContain('`test 15`');
+  });
+
+  describe('on an issue no report has found flaky yet, such as a consistently failing one', () => {
+    const failing: RecordedFlakySuiteIssueMetadata = {
+      'suite.filePath': SUITE_PATH,
+      'suite.title': 'Default status alert',
+      'suite.framework': 'playwright',
+      'suite.testIds': ['broken-test'],
+      'report.history': [],
+    };
+
+    it('says the suite is now flaky and names every flaky test', () => {
+      const { suite, report } = singleTestReport();
+
+      expect(
+        renderFlakySuiteIssueComment(suite, { report, reopened: false, previous: failing })
+      ).toBe(
+        [
+          'Now flaky on `main`:',
+          '',
+          '- `creates default alert, triggers on down status, and recovers`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+        ].join('\n')
+      );
+      expect(
+        renderFlakySuiteIssueComment(suite, { report, reopened: true, previous: failing })
+      ).toMatch(/^Now flaky, after this issue was closed, on `main`:\n\n- `creates default alert/);
+    });
+
+    it('counts the report as the first one, and records the tests it named', () => {
+      const { suite, report } = singleTestReport();
+
+      const metadata = readFlakySuiteIssueMetadata(
+        refreshFlakySuiteIssueMetadata(filedBody(failing), suite, {
+          report,
+          previous: failing,
+          comment: true,
+        })
+      );
+
+      expect(metadata?.['report.count']).toBe(1);
+      expect(metadata?.['report.shownTestIds']).toEqual([flakyTest().testId]);
+      expect(metadata?.['suite.testIds']).toEqual([flakyTest().testId, 'broken-test']);
+    });
+  });
+
+  it('marks no test as newly flaky when the issue has shown them all, or does not record which it has shown', () => {
+    const { suite, report } = multiTestReport();
+
+    for (const shownTestIds of [['a', 'b', 'c'], undefined]) {
+      expect(
+        renderFlakySuiteIssueComment(suite, {
+          report,
+          reopened: false,
+          previous: { ...previous, 'report.shownTestIds': shownTestIds },
+        })
+      ).not.toContain('newly flaky');
+    }
+  });
+});
+
+describe('a suite flaky only in a pipeline judged on its own', () => {
+  const [pooled] = flakyTest().byBranch;
+  const fips = {
+    ...pooled,
+    pipeline: 'kibana-fips',
+    builds: 14,
+    failedBuilds: 4,
+    buildFailRate: 4 / 14,
+  };
+  const [localTarget] = flakyTest().byTarget;
+  const report = flakyReport([
+    flakyTest({
+      byBranch: [{ ...pooled, failedBuilds: 1, buildFailRate: 1 / 509 }, fips],
+      byTarget: [
+        { ...localTarget, failedBuilds: 1, buildFailRate: 1 / 509 },
+        {
+          ...localTarget,
+          pipeline: 'kibana-fips',
+          builds: 14,
+          failedBuilds: 4,
+          buildFailRate: 4 / 14,
+        },
+        {
+          mode: 'serverless-observability_complete',
+          type: 'cloud',
+          pipeline: 'appex-qa-serverless-kibana-scout-tests',
+          builds: 65,
+          failedBuilds: 0,
+          buildFailRate: 0,
+        },
+      ],
+      flakiestBranch: {
+        branch: 'main',
+        pipeline: 'kibana-fips',
+        builds: 14,
+        failedBuilds: 4,
+        buildFailRate: 4 / 14,
+      },
+    }),
+  ]);
+  const [suite] = groupIntoSuites(report.flaky, report.files);
+
+  it('names the pipeline where it is flaky, and records only the branch for /skip', () => {
+    const body = renderFlakySuiteIssueBody(suite, { report });
+
+    expect(body).toContain('**`main` in `kibana-fips` 29% (4 / 14)**');
+    expect(body).toContain('| `main` in `kibana-fips` | 🔴 Flaky | 4 / 14');
+    expect(body).toContain('| `main` | 🟠 Some failures | 1 / 509');
+    expect(readFlakySuiteIssueMetadata(body)?.['suite.branches']).toEqual(['main']);
+  });
+
+  it('gives the FIPS runs of a target their own row in the failures by target', () => {
+    const body = renderFlakySuiteIssueBody(suite, { report });
+
+    expect(body).toContain('| 🔴 `stateful-classic` | Local deployment (FIPS enabled) | 4 / 14');
+    expect(body).toContain('| 🔴 `stateful-classic` | Local deployment | 1 / 509');
+    // a Cloud target already says where it ran
+    expect(body).toContain('| ✅ `serverless-observability_complete` | MKI | 0 / 65');
+  });
+
+  it('says where it is still flaky in its comments', () => {
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toMatch(
+      /^Still flaky on `main` in `kibana-fips`:\n\n- `creates default alert[^`]*`: 29% of builds \(4 \/ 14\)/
     );
   });
 });

@@ -1,0 +1,33 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-common-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/palettes",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
+    "@kbn/coloring",
+    "@kbn/field-formats-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/ui-theme",
+    "@kbn/palettes-components",
+    "@kbn/test-jest-helpers",
+    "@kbn/visualization-utils",
+    "@kbn/i18n-react",
+  ]
+}

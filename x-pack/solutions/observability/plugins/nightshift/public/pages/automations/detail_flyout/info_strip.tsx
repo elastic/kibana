@@ -50,10 +50,7 @@ export const InfoStrip = ({
             <EuiText size="xs" color="subdued">
               {title}
             </EuiText>
-            <EuiText
-              size="s"
-              css={{ display: 'flex', alignItems: 'center', paddingBlockStart: euiTheme.size[gap] }}
-            >
+            <EuiText size="s" css={{ paddingBlockStart: euiTheme.size[gap] }}>
               {value}
             </EuiText>
           </>

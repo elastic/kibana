@@ -26,6 +26,7 @@ export type {
   LLmDescriptionHandlerParams,
   LlmDescriptionHandler,
   ModelProvider,
+  ModelSource,
   ScopedModel,
   ScopedRunner,
   ScopedRunToolFn,
@@ -228,11 +229,19 @@ export type {
   ConversationAddEventsRequest,
 } from './conversations';
 export type {
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,
 } from './callbacks';
-export { CallbackDeliveryError, isCallbackDeliveryError, throwIfNotDelivered } from './callbacks';
+export {
+  CallbackDeliveryError,
+  isCallbackDeliveryError,
+  parseRetryAfterMs,
+  throwIfNotDelivered,
+} from './callbacks';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,

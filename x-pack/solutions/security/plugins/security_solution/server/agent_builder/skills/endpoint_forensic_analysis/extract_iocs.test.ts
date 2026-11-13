@@ -14,10 +14,13 @@ import {
 import { investigationIocsAttachmentDataSchema } from '../../attachments/investigation_iocs';
 import {
   ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
-  endpointForensicAnalysisSkill,
+  createEndpointForensicAnalysisSkill,
 } from './endpoint_forensic_analysis_skill';
 
 const mockEsqlQuery = jest.fn();
+const endpointForensicAnalysisSkill = createEndpointForensicAnalysisSkill({
+  automaticTroubleshootingUniversalSkill: false,
+});
 const mockContext = {
   esClient: { asCurrentUser: { esql: { query: mockEsqlQuery } } },
 } as unknown as ToolHandlerContext;

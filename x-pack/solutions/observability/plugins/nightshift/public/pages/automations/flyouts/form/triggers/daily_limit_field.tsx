@@ -9,6 +9,8 @@ import React from 'react';
 import {
   EuiBadge,
   EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiSwitch,
   EuiSpacer,
@@ -16,7 +18,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { Sentence } from './pills/sentence';
+import { GlobalLimitCallout } from '../../../list/global_limit_callout';
+import { useGlobalLimit } from '../../../hooks/use_global_limit';
 import { triggerLabels } from './translations';
 import { isValidDailyLimit } from '../validation';
 import {
@@ -45,6 +48,11 @@ export const DailyLimitField = ({
   readOnly?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    blockingLimit,
+    limit: globalInvestigationLimit,
+    settingsHref: globalLimitSettingsHref,
+  } = useGlobalLimit();
   const isUnlimited = value === UNLIMITED_DAILY_LIMIT;
   const limit = Number(value);
   const tone =
@@ -68,76 +76,100 @@ export const DailyLimitField = ({
     <div css={!readOnly && { paddingInline: euiTheme.size.s, paddingBlockEnd: euiTheme.size.s }}>
       <EuiHorizontalRule margin="s" />
       {readOnly && <EuiSpacer size="xs" />}
-      <Sentence>
-        <EuiText size="s">
-          <strong>{triggerLabels.dailyLimit}</strong>
-        </EuiText>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <strong>{triggerLabels.dailyLimit}</strong>
+          </EuiText>
+        </EuiFlexItem>
         {readOnly ? (
-          <EuiBadge
-            data-test-subj="automationDailyLimit"
-            css={{ marginInlineStart: euiTheme.size.xs }}
-          >
-            {isUnlimited ? triggerLabels.noLimit : `${value} ${triggerLabels.perDay}`}
-          </EuiBadge>
+          <EuiFlexItem grow={false}>
+            <EuiBadge data-test-subj="automationDailyLimit">
+              {isUnlimited ? triggerLabels.noLimit : `${value} ${triggerLabels.perDay}`}
+            </EuiBadge>
+          </EuiFlexItem>
         ) : (
-          <div css={{ width: 180 }}>
-            <EuiFieldNumber
-              compressed
-              aria-label={triggerLabels.dailyLimit}
-              min={1}
-              max={MAX_DAILY_LIMIT}
-              step={1}
-              value={isUnlimited ? '' : value}
-              disabled={isUnlimited}
-              isInvalid={!isValidDailyLimit(value)}
-              append={triggerLabels.perDay}
-              onChange={(event) => onChange(event.target.value)}
-              fullWidth
-              data-test-subj="automationDailyLimit"
-            />
-          </div>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="success">{triggerLabels.recommended}</EuiBadge>
+          </EuiFlexItem>
         )}
-        {!readOnly && !isUnlimited && (
-          <EuiBadge color="success">{triggerLabels.recommended}</EuiBadge>
-        )}
-      </Sentence>
+      </EuiFlexGroup>
       {!readOnly && (
         <>
           <EuiSpacer size="s" />
-          <EuiSwitch
-            compressed
-            label={triggerLabels.noDailyLimit}
-            checked={isUnlimited}
-            onChange={(event) => onChange(event.target.checked ? UNLIMITED_DAILY_LIMIT : '20')}
-            data-test-subj="automationDailyLimitUnlimited"
-          />
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+            wrap
+            css={{ minBlockSize: 32 }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                label={triggerLabels.noDailyLimit}
+                checked={isUnlimited}
+                onChange={(event) => onChange(event.target.checked ? UNLIMITED_DAILY_LIMIT : '20')}
+                data-test-subj="automationDailyLimitUnlimited"
+              />
+            </EuiFlexItem>
+            {!isUnlimited && (
+              <EuiFlexItem grow={false} css={{ width: 180 }}>
+                <EuiFieldNumber
+                  compressed
+                  aria-label={triggerLabels.dailyLimit}
+                  min={1}
+                  max={MAX_DAILY_LIMIT}
+                  step={1}
+                  value={value}
+                  isInvalid={!isValidDailyLimit(value)}
+                  append={triggerLabels.perDay}
+                  onChange={(event) => onChange(event.target.value)}
+                  fullWidth
+                  data-test-subj="automationDailyLimit"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </>
       )}
-      <EuiSpacer size={readOnly ? 'xs' : 's'} />
+      <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         {isUnlimited ? triggerLabels.noDailyLimitHelp : helpText}
       </EuiText>
-      {usedToday !== undefined && tone === 'exceeded' && (
-        <KbnWarningCallout
-          announceOnMount={false}
-          size="s"
-          css={calloutCss}
-          title={triggerLabels.dailyLimitReached}
-          text={triggerLabels.getDailyLimitReachedBody(usedToday, limit)}
-          actionProps={raiseAction}
-          data-test-subj="automationDailyLimitReachedCallout"
-        />
-      )}
-      {usedToday !== undefined && tone === 'high' && (
-        <KbnWarningCallout
-          announceOnMount={false}
-          size="s"
-          css={calloutCss}
-          title={triggerLabels.dailyLimitApproaching}
-          text={triggerLabels.getDailyLimitApproachingBody(usedToday, limit)}
-          actionProps={raiseAction}
-          data-test-subj="automationDailyLimitApproachingCallout"
-        />
+      {usedToday !== undefined && blockingLimit && globalInvestigationLimit !== undefined ? (
+        <div css={calloutCss}>
+          <GlobalLimitCallout
+            group={blockingLimit}
+            limit={globalInvestigationLimit}
+            settingsHref={globalLimitSettingsHref}
+          />
+        </div>
+      ) : (
+        <>
+          {usedToday !== undefined && tone === 'exceeded' && (
+            <KbnWarningCallout
+              announceOnMount={false}
+              size="s"
+              css={calloutCss}
+              title={triggerLabels.dailyLimitReached}
+              text={triggerLabels.getDailyLimitReachedBody(usedToday, limit)}
+              actionProps={raiseAction}
+              data-test-subj="automationDailyLimitReachedCallout"
+            />
+          )}
+          {usedToday !== undefined && tone === 'high' && (
+            <KbnWarningCallout
+              announceOnMount={false}
+              size="s"
+              css={calloutCss}
+              title={triggerLabels.dailyLimitApproaching}
+              text={triggerLabels.getDailyLimitApproachingBody(usedToday, limit)}
+              actionProps={raiseAction}
+              data-test-subj="automationDailyLimitApproachingCallout"
+            />
+          )}
+        </>
       )}
       {!isUnlimited && limit > SOFT_DAILY_LIMIT && (
         <KbnWarningCallout

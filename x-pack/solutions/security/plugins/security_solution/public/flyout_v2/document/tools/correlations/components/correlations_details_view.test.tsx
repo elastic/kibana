@@ -63,12 +63,7 @@ const mockOnShowAlert = jest.fn();
 const renderCorrelationsDetailsView = () =>
   render(
     <TestProviders>
-      <CorrelationsDetailsView
-        hit={mockHit}
-        scopeId="test-scope"
-        onShowAlert={mockOnShowAlert}
-        useLegacyExpandableFlyout={false}
-      />
+      <CorrelationsDetailsView hit={mockHit} scopeId="test-scope" onShowAlert={mockOnShowAlert} />
     </TestProviders>
   );
 
