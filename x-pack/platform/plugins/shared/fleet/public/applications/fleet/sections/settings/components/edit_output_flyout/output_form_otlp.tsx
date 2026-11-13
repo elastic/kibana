@@ -251,7 +251,6 @@ const Protocol: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ i
   >
     <EuiRadioGroup
       name="otlpProtocol"
-      style={{ display: 'flex', gap: 30 }}
       data-test-subj="settingsOutputsFlyout.otlpProtocolInput"
       compressed
       disabled={inputs.otlpProtocolInput.props.disabled}
