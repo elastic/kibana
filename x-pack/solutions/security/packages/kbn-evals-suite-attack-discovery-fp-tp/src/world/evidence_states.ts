@@ -59,16 +59,21 @@ export const withMissingCitedAlert = (world: FpTpWorld): FpTpWorld => ({
 });
 
 /**
- * Adds `count` benign service starts on the host of the latest process event, after
- * every raw event in the world. The analysis reads one page of raw events sorted
- * oldest first, so the world's own events stay on that page, and the extra hits mark
- * it truncated, which blocks a `false_positive` verdict. Throws when the world has no
- * process event to place them on.
+ * Adds `count` benign service starts on the host of the latest process event. With the
+ * default `after` placement they sit after every raw event in the world, so the world's
+ * own events stay on the oldest-first page and only truncation is reported, which blocks
+ * a `false_positive` verdict. With `before` they sit just before the earliest event, and
+ * `count` exceeding the page means the fill occupies it entirely and evicts the world's
+ * own events — the dilution a widened alert window causes. `afterFirstStage` is the
+ * per-alert-branch form: the fill is anchored just after the EARLIEST raw event rather
+ * than the whole world's last event (the anchor comment below spells out the caveat).
+ * Throws when the world has no process event to place them on.
  */
 export const withTruncatingBenignEvents = (
   world: FpTpWorld,
   runMarker: string,
-  count: number = FP_TP_TRUNCATING_BENIGN_EVENT_COUNT
+  count: number = FP_TP_TRUNCATING_BENIGN_EVENT_COUNT,
+  placement: 'after' | 'before' | 'afterFirstStage' = 'after'
 ): FpTpWorld => {
   const template = [...world.events]
     .filter(hasProcessCategory)
@@ -76,7 +81,30 @@ export const withTruncatingBenignEvents = (
   if (template === undefined) {
     throw new Error('withTruncatingBenignEvents: the world has no process event to extend');
   }
-  const after = Math.max(...world.events.map(timestampOf));
+  const latestMs = Math.max(...world.events.map(timestampOf));
+  const earliestMs = Math.min(...world.events.map(timestampOf));
+  // `after` keeps the world's own events on the oldest-first page (only truncation is
+  // reported); `before` packs the fill into the minutes before the earliest event, so
+  // with a single shared window the fill occupies the whole page and evicts the
+  // world's own events. Under the per-alert branch design `before` and `afterFirstStage`
+  // both anchor at the earliest raw event, so the fill lands inside the FIRST cited alert's window only
+  // (its window reaches back to the chain's start) and that branch's own total flips
+  // `branches_truncated` — the per-branch form of the same dilution.
+  // `afterFirstStage` differs from `before` only in direction: under
+  // `withStageEventSpan` the stages are spread across days, so `after` would land
+  // the fill near the LAST stage and dilute the wrong branch. `afterFirstStage`
+  // places the fill AFTER the earliest raw event — the first stage's own events
+  // stay on the page and are kept; the gold inconclusive rests on that branch's
+  // total exceeding its cap (62 > 10), not on evicting the stage's events. The
+  // anchor is the earliest RAW EVENT, not the first alert: the fill is inside the
+  // first alert's ±2h window only while the chain keeps its first-stage events
+  // within that window of their alert (the default chain does).
+  const anchorMs = placement === 'after' ? latestMs : earliestMs;
+  const offsetMs = (position: number): number =>
+    placement === 'before'
+      ? -(count - position) * BENIGN_EVENT_SPACING_MS
+      : (position + 1) * BENIGN_EVENT_SPACING_MS;
+  const eventMs = (position: number): number => anchorMs + offsetMs(position);
 
   const benign = Array.from({ length: count }, (_, position): Ad2IndexedRawEvent => {
     const id = ad2SeedId(runMarker, 'process', 'benign-service', position);
@@ -88,7 +116,7 @@ export const withTruncatingBenignEvents = (
       id,
       source: {
         ...template.source,
-        '@timestamp': new Date(after + (position + 1) * BENIGN_EVENT_SPACING_MS).toISOString(),
+        '@timestamp': new Date(eventMs(position)).toISOString(),
         event: { ...asRecord(template.source.event), id },
         process: {
           name: 'svchost.exe',

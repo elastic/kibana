@@ -84,7 +84,7 @@ export const FP_TP_BOOTSTRAP_RULE_ID = 'fptp-seeder-bootstrap-nomatch';
  */
 export { FP_TP_INFERENCE_FEATURE_ID as FP_TP_REASONING_FEATURE_ID } from '../constants';
 
-/** Half-width of the raw-event window the analysis reads around the cited alerts' original time. */
+/** Half-width of the raw-event window each per-alert branch reads around its alert's original time. */
 export const FP_TP_RAW_EVENT_WINDOW_MS = 2 * 60 * 60 * 1000;
 
 /**
@@ -115,8 +115,18 @@ export const FP_TP_RAW_EVENT_INGEST_PIPELINE = 'alertzero-fp-tp-raw-events';
 export const FP_TP_RAW_EVENT_INDEX_TEMPLATE = 'alertzero-fp-tp-raw-events';
 
 /**
- * Raw events the analysis reads per run (`load_events` `size`). More hits than this
- * mark the page truncated, and `block_truncated_clear` turns a `false_positive` into
- * `inconclusive`.
+ * Legacy shared-page size, kept as the reference volume the truncation
+ * fixtures were authored against (`withTruncatingBenignEvents` adds
+ * PAGE_SIZE + 10 events). The workflow itself now reads
+ * `FP_TP_RAW_EVENT_BRANCH_SIZE` events per per-alert branch.
  */
 export const FP_TP_RAW_EVENT_PAGE_SIZE = 50;
+
+/**
+ * Raw events each per-alert branch of `load_events_per_alert` reads
+ * (`search_alert_window` `size`). A branch window with more hits than this is
+ * truncated and `block_truncated_clear` turns a `false_positive` into `inconclusive`.
+ * The `load_events` step's Liquid `branches_truncated` check hardcodes the same
+ * number; change both together.
+ */
+export const FP_TP_RAW_EVENT_BRANCH_SIZE = 10;
