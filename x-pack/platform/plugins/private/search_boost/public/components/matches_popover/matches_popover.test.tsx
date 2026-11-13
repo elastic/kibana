@@ -17,8 +17,11 @@ const renderPopover = (props: Partial<MatchesPopoverProps> = {}) =>
       button={<button type="button">{'Show matches'}</button>}
       isOpen
       closePopover={jest.fn()}
-      resourceType="index"
-      matches={[{ name: 'products' }, { name: 'users' }]}
+      type="indices"
+      matches={[
+        { name: 'products', isHidden: false },
+        { name: 'users', isHidden: false },
+      ]}
       {...props}
     />
   );
@@ -33,7 +36,7 @@ describe('MatchesPopover', () => {
   });
 
   it('shows the data streams title', () => {
-    renderPopover({ resourceType: 'dataStream' });
+    renderPopover({ type: 'data_streams' });
 
     expect(screen.getByText('Matching data streams')).toBeInTheDocument();
   });
@@ -41,9 +44,9 @@ describe('MatchesPopover', () => {
   it('counts outranked matches and marks them with an icon', () => {
     renderPopover({
       matches: [
-        { name: 'products', outrankedByRuleName: 'Product catalog' },
-        { name: 'archive', outrankedByRuleName: 'Product catalog' },
-        { name: 'users' },
+        { name: 'products', isHidden: false, outrankedByRuleName: 'Product catalog' },
+        { name: 'archive', isHidden: false, outrankedByRuleName: 'Product catalog' },
+        { name: 'users', isHidden: false },
       ],
     });
 
@@ -53,18 +56,32 @@ describe('MatchesPopover', () => {
     expect(screen.getAllByTestId('searchBoostMatchesPopoverOutrankedIcon')).toHaveLength(2);
   });
 
-  it('includes hidden matches in the count and lists them as additional', () => {
-    renderPopover({ hiddenCount: 3 });
+  it('counts hidden matches in the total but only lists visible ones', () => {
+    renderPopover({
+      matches: [
+        { name: 'products', isHidden: false },
+        { name: 'users', isHidden: false },
+        { name: '.hidden-1', isHidden: true },
+        { name: '.hidden-2', isHidden: true },
+        { name: '.hidden-3', isHidden: true },
+      ],
+    });
 
     expect(screen.getByTestId('searchBoostMatchesPopoverCount')).toHaveTextContent('5 matches');
+    expect(screen.getAllByTestId('searchBoostMatchesPopoverItem')).toHaveLength(2);
+    expect(screen.queryByText('.hidden-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('searchBoostMatchesPopoverHidden')).toHaveTextContent(
       '+3 hidden indices'
     );
   });
 
   it('omits the plus sign when only hidden matches exist', () => {
-    renderPopover({ resourceType: 'dataStream', matches: [], hiddenCount: 1 });
+    renderPopover({
+      type: 'data_streams',
+      matches: [{ name: '.hidden-1', isHidden: true }],
+    });
 
+    expect(screen.queryByTestId('searchBoostMatchesPopoverItem')).not.toBeInTheDocument();
     expect(screen.getByTestId('searchBoostMatchesPopoverHidden')).toHaveTextContent(
       '1 hidden data stream'
     );

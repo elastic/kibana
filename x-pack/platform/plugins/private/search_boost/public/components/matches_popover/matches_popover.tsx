@@ -19,42 +19,42 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { matchesPopoverStrings } from './matches_popover_i18n';
-
-export type MatchedResourceType = 'index' | 'dataStream';
-
-export interface MatchedResource {
-  name: string;
-  /** Name of the higher-ranked rule that applies to this resource instead. */
-  outrankedByRuleName?: string;
-}
+import type { BoostProfileType, BoostRuleMatch } from '../../../common/types';
+import {
+  MATCHING_DATA_STREAMS_TITLE,
+  MATCHING_INDICES_TITLE,
+  getAdditionalHiddenDataStreams,
+  getAdditionalHiddenIndices,
+  getHiddenDataStreams,
+  getHiddenIndices,
+  getMatchesCount,
+  getMatchesCountWithOutranked,
+  getOutrankedTooltip,
+} from '../../translations';
 
 export interface MatchesPopoverProps {
   /** The consumer's trigger; the popover anchors to it. */
   button: NonNullable<ReactNode>;
   isOpen: boolean;
   closePopover: () => void;
-  resourceType: MatchedResourceType;
-  /** Matches the user can see. */
-  matches: readonly MatchedResource[];
-  /** Matches the user can't see; they are counted but not listed. */
-  hiddenCount?: number;
+  type: BoostProfileType;
+  matches: ReadonlyArray<Pick<BoostRuleMatch, 'name' | 'isHidden' | 'outrankedByRuleName'>>;
 }
 
 const getHiddenLabel = (
-  resourceType: MatchedResourceType,
+  type: BoostProfileType,
   hiddenCount: number,
   hasVisibleMatches: boolean
 ): string => {
-  if (resourceType === 'index') {
+  if (type === 'indices') {
     return hasVisibleMatches
-      ? matchesPopoverStrings.additionalHiddenIndices(hiddenCount)
-      : matchesPopoverStrings.hiddenIndices(hiddenCount);
+      ? getAdditionalHiddenIndices(hiddenCount)
+      : getHiddenIndices(hiddenCount);
   }
 
   return hasVisibleMatches
-    ? matchesPopoverStrings.additionalHiddenDataStreams(hiddenCount)
-    : matchesPopoverStrings.hiddenDataStreams(hiddenCount);
+    ? getAdditionalHiddenDataStreams(hiddenCount)
+    : getHiddenDataStreams(hiddenCount);
 };
 
 const outrankedNameStyles = css`
@@ -65,19 +65,16 @@ export const MatchesPopover = ({
   button,
   isOpen,
   closePopover,
-  resourceType,
+  type,
   matches,
-  hiddenCount = 0,
 }: MatchesPopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'searchBoostMatchesPopoverTitle' });
 
-  const totalCount = matches.length + hiddenCount;
+  const visibleMatches = matches.filter(({ isHidden }) => !isHidden);
+  const hiddenCount = matches.length - visibleMatches.length;
   const outrankedCount = matches.filter(({ outrankedByRuleName }) => outrankedByRuleName).length;
-  const title =
-    resourceType === 'index'
-      ? matchesPopoverStrings.indicesTitle()
-      : matchesPopoverStrings.dataStreamsTitle();
+  const title = type === 'indices' ? MATCHING_INDICES_TITLE : MATCHING_DATA_STREAMS_TITLE;
 
   return (
     <EuiPopover
@@ -94,8 +91,8 @@ export const MatchesPopover = ({
         <span id={titleId}>{title}</span>
         <EuiText size="xs" color="subdued" data-test-subj="searchBoostMatchesPopoverCount">
           {outrankedCount > 0
-            ? matchesPopoverStrings.matchesCountWithOutranked(totalCount, outrankedCount)
-            : matchesPopoverStrings.matchesCount(totalCount)}
+            ? getMatchesCountWithOutranked(matches.length, outrankedCount)
+            : getMatchesCount(matches.length)}
         </EuiText>
       </EuiPopoverTitle>
       <div
@@ -106,7 +103,7 @@ export const MatchesPopover = ({
         `}
         data-test-subj="searchBoostMatchesPopoverList"
       >
-        {matches.map(({ name, outrankedByRuleName }) => (
+        {visibleMatches.map(({ name, outrankedByRuleName }) => (
           <EuiFlexGroup
             key={name}
             gutterSize="xs"
@@ -128,7 +125,7 @@ export const MatchesPopover = ({
                 <EuiIconTip
                   type="sortAscending"
                   color={euiTheme.colors.textDisabled}
-                  content={matchesPopoverStrings.outrankedTooltip(outrankedByRuleName)}
+                  content={getOutrankedTooltip(outrankedByRuleName)}
                   iconProps={{ 'data-test-subj': 'searchBoostMatchesPopoverOutrankedIcon' }}
                 />
               </EuiFlexItem>
@@ -137,7 +134,7 @@ export const MatchesPopover = ({
         ))}
         {hiddenCount > 0 ? (
           <EuiText size="s" data-test-subj="searchBoostMatchesPopoverHidden">
-            <em>{getHiddenLabel(resourceType, hiddenCount, matches.length > 0)}</em>
+            <em>{getHiddenLabel(type, hiddenCount, visibleMatches.length > 0)}</em>
           </EuiText>
         ) : null}
       </div>
