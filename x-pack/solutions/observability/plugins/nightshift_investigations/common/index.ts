@@ -239,6 +239,7 @@ export {
 export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_TAG,
   DECISION_TREE_DOC_TYPES,
   type DecisionTreeDocType,
   type DecisionTreeStatus,
@@ -305,3 +306,16 @@ export {
   type KnowledgePurgeResult,
   type KnowledgePurgeScope,
 } from './purge';
+
+export {
+  DEFAULT_INVESTIGATION_QUOTA_LIMITS,
+  DEFAULT_INVESTIGATION_QUOTA_SETTINGS,
+  INVESTIGATION_QUOTA_GROUPS,
+  isInvestigationQuotaReached,
+  type InvestigationQuotaCounts,
+  type InvestigationQuotaGroup,
+  type InvestigationQuotaLimits,
+  type InvestigationQuotaSettings,
+  type InvestigationQuotasResponse,
+  type InvestigationQuotasUpdate,
+} from './investigation_quotas';

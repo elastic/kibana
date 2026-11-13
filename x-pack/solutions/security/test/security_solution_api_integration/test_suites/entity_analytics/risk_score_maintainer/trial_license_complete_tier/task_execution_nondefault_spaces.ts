@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       beforeEach(async () => {
         // Clean stale state from any previous run (handles crashed/incomplete cleanup)
-        await cleanUpRiskScoreMaintainer({ log, es, namespace });
+        await cleanUpRiskScoreMaintainer({ log, es, namespace, supertest });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
 
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await cleanUpRiskScoreMaintainer({ log, es, namespace });
+        await cleanUpRiskScoreMaintainer({ log, es, namespace, supertest });
         await entityStoreUtils.cleanEngines();
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);

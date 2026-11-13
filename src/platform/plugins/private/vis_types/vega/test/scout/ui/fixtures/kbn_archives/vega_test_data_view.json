@@ -1,0 +1,12 @@
+{
+  "attributes": {
+    "name": "vega-test-index",
+    "title": "vega-test-index"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "vega-test-index-data-view",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "7.11.0"
+}

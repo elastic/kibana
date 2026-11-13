@@ -40,7 +40,8 @@ placeholder plus a primary-action rectangle; `buttonCount` is clamped to `APP_ME
 ```
 
 Collapsed breakpoints show only the overflow placeholder (the primary action lives inside that
-menu). Minimal shows overflow + primary. Expanded shows `buttonCount` icon placeholders + primary.
+menu). Minimal shows primary + overflow. Expanded shows `buttonCount - 1` icon placeholders, then
+primary, then overflow.
 
 ## Strict props
 

@@ -7,23 +7,52 @@
 
 import { useCallback, useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import type { CaseUI } from '@kbn/cases-plugin/common';
+import { SECURITY_ATTACK_ATTACHMENT_TYPE, type CaseUI } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 
-import type { AttackToAttach } from '..';
+import type { AttackAttachmentsResult, AttackToAttach } from '..';
 import { buildAttacksAttachments, MAX_ATTACKS_PER_ATTACH } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ATTACK_ALERTS_TRUNCATED, ATTACKS_TRUNCATED } from '../translations';
+import type { CaseAttachment } from '../utils';
+import { isAttackAttachment } from '../utils';
+import {
+  ATTACK_ALERTS_TRUNCATED,
+  ATTACKS_ALREADY_ATTACHED,
+  ATTACKS_TRUNCATED,
+} from '../translations';
 
 export interface AttackCaseAttachments {
   /** Builds the attachments for a case; kept pure as the case selector calls it every render. */
   getAttachments: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
-  /** Warns about anything that did not fit, once the attachments have been posted to `theCase`. */
-  onAttached: (theCase: CaseUI) => void;
+  /**
+   * Warns about anything that did not fit, or was already on the case, once the attachments have
+   * been posted to `theCase`. `createdAttachments` are the attachments the server created; without
+   * them, as for a new case or when the server added nothing, only what did not fit is reported.
+   */
+  onAttached: (theCase: CaseUI, createdAttachments?: readonly CaseAttachment[]) => void;
 }
+
+/** Counts the posted attacks the server did not create, as it drops those already on the case. */
+const countAlreadyAttachedAttacks = (
+  { attachments }: AttackAttachmentsResult,
+  createdAttachments: readonly CaseAttachment[]
+): number => {
+  const createdAttackIds = new Set(
+    createdAttachments.filter(isAttackAttachment).map(({ attachmentId }) => attachmentId)
+  );
+
+  return new Set(
+    attachments.flatMap((attachment) =>
+      attachment.type === SECURITY_ATTACK_ATTACHMENT_TYPE &&
+      !createdAttackIds.has(attachment.attachmentId)
+        ? [attachment.attachmentId]
+        : []
+    )
+  ).size;
+};
 
 /**
  * Builds attack attachments sized to the chosen case, or `undefined` when attacks cannot be
@@ -62,8 +91,14 @@ export const useAttackCaseAttachments = (
 
   // Rebuilding is pure, so it reports the same truncation the posted payload had.
   const onAttached = useCallback(
-    (theCase: CaseUI) => {
+    (theCase: CaseUI, createdAttachments?: readonly CaseAttachment[]) => {
       const result = build(theCase);
+
+      const alreadyAttachedCount =
+        createdAttachments != null ? countAlreadyAttachedAttacks(result, createdAttachments) : 0;
+      if (alreadyAttachedCount > 0) {
+        addWarning({ title: ATTACKS_ALREADY_ATTACHED(alreadyAttachedCount) });
+      }
 
       if (result.attacksTruncated) {
         addWarning({

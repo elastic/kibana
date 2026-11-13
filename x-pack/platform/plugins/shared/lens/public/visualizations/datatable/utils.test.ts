@@ -193,6 +193,38 @@ describe('datatable progress bar utils', () => {
       ]);
     });
 
+    it('keeps the last color when the open-ended last stop is serialized as 0', () => {
+      expect(
+        getProgressBarPaletteStops(
+          paletteService,
+          { min: 9899, max: 16837 },
+          { type: 'palette', name: 'custom', params: { rangeType: 'number' } },
+          ['#aaa', '#bbb', '#ccc'],
+          [12000, 14000, 0]
+        )
+      ).toEqual([
+        { color: '#aaa', stop: 9899 },
+        { color: '#bbb', stop: 12000 },
+        { color: '#ccc', stop: 14000 },
+      ]);
+    });
+
+    it('keeps the last color when the open-ended last stop is unset in the editor palette state', () => {
+      expect(
+        getProgressBarPaletteStops(
+          paletteService,
+          { min: 9899, max: 16837 },
+          { type: 'palette', name: 'custom', params: { rangeType: 'number' } },
+          ['#aaa', '#bbb', '#ccc'],
+          [{ stop: 12000 }, { stop: 14000 }, { stop: null as unknown as number }]
+        )
+      ).toEqual([
+        { color: '#aaa', stop: 9899 },
+        { color: '#bbb', stop: 12000 },
+        { color: '#ccc', stop: 14000 },
+      ]);
+    });
+
     it('maps percent stops across the active progress-bar domain', () => {
       expect(
         getProgressBarPaletteStops(

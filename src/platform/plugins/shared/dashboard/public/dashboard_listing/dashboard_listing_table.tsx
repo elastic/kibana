@@ -9,21 +9,14 @@
 
 import React from 'react';
 
-import {
-  TableListViewKibanaProvider,
-  TableListViewTable,
-} from '@kbn/content-management-table-list-view-table';
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
-import {
-  coreServices,
-  savedObjectsTaggingService,
-  serverlessService,
-} from '../services/kibana_services';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { ContentListClientProvider } from '@kbn/content-list-provider-client';
+import { coreServices } from '../services/kibana_services';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import type { DashboardListingProps } from './types';
+import { DashboardContentList } from './dashboard_content_list';
 
 export const DashboardListingTable = ({
   disableCreateDashboardButton,
@@ -32,49 +25,32 @@ export const DashboardListingTable = ({
   getDashboardUrl,
   useSessionStorageIntegration,
   urlStateEnabled,
-  showCreateDashboardButton = true,
 }: DashboardListingProps) => {
   useExecutionContext(coreServices.executionContext, {
     type: 'application',
     page: 'list',
   });
 
-  const {
-    unsavedDashboardIds,
-    refreshUnsavedDashboards,
-    tableListViewTableProps: { title: tableCaption, ...tableListViewTable },
-    contentInsightsClient,
-  } = useDashboardListingTable({
-    disableCreateDashboardButton,
-    goToDashboard,
-    getDashboardUrl,
-    urlStateEnabled,
-    useSessionStorageIntegration,
-    initialFilter,
-    showCreateDashboardButton,
-  });
+  const { contentListProviderProps, emptyState, unsavedDashboardIds, refreshUnsavedDashboards } =
+    useDashboardListingTable({
+      disableCreateDashboardButton,
+      goToDashboard,
+      getDashboardUrl,
+      urlStateEnabled,
+      useSessionStorageIntegration,
+      initialFilter,
+    });
 
   return (
     <I18nProvider>
-      <TableListViewKibanaProvider
-        core={coreServices}
-        savedObjectsTagging={savedObjectsTaggingService?.getTaggingApi()}
-        FormattedRelative={FormattedRelative}
-        contentInsightsClient={contentInsightsClient}
-        isKibanaVersioningEnabled={!serverlessService}
-      >
-        <>
-          <DashboardUnsavedListing
-            goToDashboard={goToDashboard}
-            unsavedDashboardIds={unsavedDashboardIds}
-            refreshUnsavedDashboards={refreshUnsavedDashboards}
-          />
-          <TableListViewTable<DashboardSavedObjectUserContent>
-            tableCaption={tableCaption}
-            {...tableListViewTable}
-          />
-        </>
-      </TableListViewKibanaProvider>
+      <ContentListClientProvider {...contentListProviderProps}>
+        <DashboardContentList
+          emptyState={emptyState}
+          goToDashboard={goToDashboard}
+          unsavedDashboardIds={unsavedDashboardIds}
+          refreshUnsavedDashboards={refreshUnsavedDashboards}
+        />
+      </ContentListClientProvider>
     </I18nProvider>
   );
 };

@@ -20,7 +20,6 @@ Registered from `register.ts`. Tool ids live in `tools/tool_ids.ts` under the
 | KI identification    | `ki_identification_start`, `ki_identification_cancel`, `ki_identification_status` |
 | Nightshift sources   | `source_list`, `source_get`, `source_create`, `source_update`, `source_delete`          |
 | Events               | `event_search`, `event_create`, `event_write`, `event_status_update`         |
-| Discovery            | `discovery_write`                                                            |
 
 `search_knowledge_indicators` is also consumed outside this plugin, by the
 `observability_agent_builder` investigation skill.

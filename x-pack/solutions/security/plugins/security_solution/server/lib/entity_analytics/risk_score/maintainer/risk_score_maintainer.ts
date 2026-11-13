@@ -100,12 +100,7 @@ interface InitializedRunContext {
 interface LoadedRunConfig {
   configuration: RiskEngineConfiguration;
   alertsIndex: string;
-  idBasedRiskScoringEnabled: boolean;
-  /**
-   * Gates the risk score maintainer's create-if-missing path (Phase 1 base scoring only).
-   * Requires both `idBasedRiskScoringEnabled` and the `riskScoreCreateMissingEntitiesEnabled`
-   * experimental feature flag, so creation can be enabled independently of dual-write.
-   */
+  /** Gates the risk score maintainer's create-if-missing path (Phase 1 base scoring only). */
   createMissingEntitiesEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
@@ -193,7 +188,6 @@ export const createRiskScoreMaintainer = ({
           }
 
           const runConfig = await loadRunConfiguration({
-            coreStart: runContext.coreStart,
             namespacedSoClient: runContext.namespacedSoClient,
             esClient: runContext.esClient,
             riskScoreDataClient: runContext.riskScoreDataClient,
@@ -226,7 +220,7 @@ export const createRiskScoreMaintainer = ({
               entityTypes: runConfig.entityTypes,
               esqlProfiling: runConfig.esqlProfiling,
               esqlProfilingInterval: runConfig.esqlProfilingInterval,
-              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+              idBasedRiskScoringEnabled: true,
             })
           );
           try {
@@ -234,7 +228,7 @@ export const createRiskScoreMaintainer = ({
             telemetryReporter.clearGlobalSkipReason();
             const phase0LookupStage = telemetryReporter.startPhase0LookupBuildStage({
               namespace: runContext.namespace,
-              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+              idBasedRiskScoringEnabled: true,
             });
             const phase0StartedAtMs = Date.now();
             try {
@@ -344,7 +338,7 @@ export const createRiskScoreMaintainer = ({
               durationMs: maintainerRunDurationMs,
               stage0Ms,
               entityTypesProcessed: runConfig.entityTypes.length,
-              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+              idBasedRiskScoringEnabled: true,
             });
             logger.info(
               'Risk score maintainer totals',
@@ -474,7 +468,7 @@ const checkRunPrerequisites = async ({
   telemetryReporter.reportGlobalSkipIfChanged({
     namespace,
     skipReason,
-    idBasedRiskScoringEnabled: false,
+    idBasedRiskScoringEnabled: true,
   });
   frameworkTelemetry.report(buildRiskScoreSkipEntityMaintainerRunSummary({ skipReason }));
   logger.debug('Risk score maintainer run skipped due to insufficient license or feature disabled');
@@ -482,7 +476,6 @@ const checkRunPrerequisites = async ({
 };
 
 const loadRunConfiguration = async ({
-  coreStart,
   namespacedSoClient,
   esClient,
   riskScoreDataClient,
@@ -491,7 +484,6 @@ const loadRunConfiguration = async ({
   entityAnalyticsConfig,
   experimentalFeatures,
 }: {
-  coreStart: CoreStart;
   namespacedSoClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
   riskScoreDataClient: RiskScoreDataClient;
@@ -505,10 +497,7 @@ const loadRunConfiguration = async ({
     getDefaultRiskEngineConfiguration({ namespace });
   const dataViewId = configuration.dataViewId ?? getAlertsIndex(namespace);
   const { index: alertsIndex } = await riskScoreDataClient.getRiskInputsIndex({ dataViewId });
-  const uiSettingsClient = coreStart.uiSettings.asScopedToClient(namespacedSoClient);
-  const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(uiSettingsClient);
-  const createMissingEntitiesEnabled =
-    idBasedRiskScoringEnabled && experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
+  const createMissingEntitiesEnabled = experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
   const watchlistConfigs = await fetchWatchlistConfigs({
     soClient: namespacedSoClient,
     esClient,
@@ -528,7 +517,6 @@ const loadRunConfiguration = async ({
   return {
     configuration,
     alertsIndex,
-    idBasedRiskScoringEnabled,
     createMissingEntitiesEnabled,
     watchlistConfigs,
     writer,
@@ -589,7 +577,7 @@ const executeEntityTypeRun = async ({
   const runTelemetry = telemetryReporter.forRun({
     namespace: runContext.namespace,
     entityType,
-    idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+    idBasedRiskScoringEnabled: true,
   });
   let skipRemainingStages = false;
   const checkAbortBetweenStages = () => {
@@ -642,7 +630,6 @@ const executeEntityTypeRun = async ({
           sampleSize: runConfig.sampleSize,
           watchlistConfigs: runConfig.watchlistConfigs,
           abortSignal,
-          idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
           createMissingEntities: runConfig.createMissingEntitiesEnabled,
           writer: runConfig.writer,
           // The run never reads these writes back; one refresh before reset-to-zero covers them.
@@ -734,7 +721,6 @@ const executeEntityTypeRun = async ({
             calculationRunId,
             watchlistConfigs: runConfig.watchlistConfigs,
             abortSignal,
-            idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             writer: runConfig.writer,
             alertFilters,
             entityStoreRefresh: false,
@@ -840,7 +826,6 @@ const executeEntityTypeRun = async ({
               spaceId: runContext.namespace,
               entityType,
               logger: runLogger,
-              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
               crudClient,
               watchlistConfigs: runConfig.watchlistConfigs,
               calculationRunId,
@@ -1005,7 +990,7 @@ const executeEntityTypeRun = async ({
       scoreDistributions: scoreDistributionsMs,
       prune: pruneMs,
     },
-    idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+    idBasedRiskScoringEnabled: true,
     namespace: runContext.namespace,
   });
   runLogger.info(

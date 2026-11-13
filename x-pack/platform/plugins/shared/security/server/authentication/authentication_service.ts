@@ -21,7 +21,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
-import { UIAM_ERROR_CODES } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, UIAM_ERROR_CODES } from '@kbn/core-security-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -251,6 +251,14 @@ export class AuthenticationService {
         );
         const resourceMetadataUrl = getProtectedResourceMetadataUrl(resource);
 
+        // Signal that a bearer token was sent but rejected, as opposed to missing.
+        // https://datatracker.ietf.org/doc/html/rfc6750#section-3.1
+        const hasBearerToken =
+          HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'bearer';
+        const challenge = `Bearer resource_metadata="${resourceMetadataUrl}"${
+          hasBearerToken ? ', error="invalid_token"' : ''
+        }`;
+
         return toolkit.render({
           body: JSON.stringify({
             jsonrpc: '2.0',
@@ -261,7 +269,7 @@ export class AuthenticationService {
             error: { code: ErrorCode.ConnectionClosed, message: 'Unauthorized' },
           }),
           headers: {
-            'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadataUrl}"`,
+            'WWW-Authenticate': challenge,
             'Content-Type': 'application/json',
           },
         });

@@ -114,20 +114,23 @@ export const TemplateForm = ({
     aliases: true,
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const indexTemplate = defaultValue ?? {
-    name: '',
-    indexPatterns: [],
-    dataStream: {},
-    indexMode: enableIndexMode ? STANDARD_INDEX_MODE : undefined,
-    template: {},
-    _kbnMeta: {
-      type: 'default',
-      hasDatastream: false,
-      isLegacy,
-    },
-    allowAutoCreate: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
-  };
+  const indexTemplate = useMemo<TemplateDeserialized>(
+    () =>
+      defaultValue ?? {
+        name: '',
+        indexPatterns: [],
+        dataStream: {},
+        indexMode: enableIndexMode ? STANDARD_INDEX_MODE : undefined,
+        template: {},
+        _kbnMeta: {
+          type: 'default',
+          hasDatastream: false,
+          isLegacy,
+        },
+        allowAutoCreate: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
+      },
+    [defaultValue, enableIndexMode, isLegacy]
+  );
 
   const {
     template: {

@@ -52,20 +52,33 @@ const findSLOQuerySchema = lazySchema(() =>
   z.object({
     filters: z
       .string()
+      .meta({ example: '{"bool":{"filter":[{"term":{"slo.tags":"production"}}]}}' })
       .optional()
       .describe('A JSON-encoded Elasticsearch query DSL filter to apply to the SLO summaries'),
-    kqlQuery: z.string().optional().describe('A valid kql query to filter the SLO with'),
+    kqlQuery: z
+      .string()
+      .meta({ example: 'slo.name: checkout*' })
+      .optional()
+      .describe('A valid kql query to filter the SLO with'),
     // Used for page-based pagination; kept as strings to preserve backward compatibility
     page: z
       .string()
+      .meta({ example: '1' })
       .optional()
       .describe('The page to use for pagination, must be greater or equal than 1'),
-    perPage: z.string().optional().describe('Number of SLOs returned by page'),
-    sortBy: sortBySchema.optional().describe('Sort by field'),
-    sortDirection: sortDirectionSchema.optional().describe('Sort order'),
-    hideStale: BooleanFromString.optional().describe(
-      'Hide stale SLOs from the list as defined by stale SLO threshold in SLO settings'
-    ),
+    perPage: z
+      .string()
+      .meta({ example: '25' })
+      .optional()
+      .describe('Number of SLOs returned by page'),
+    sortBy: sortBySchema
+      .meta({ example: 'error_budget_consumed' })
+      .optional()
+      .describe('Sort by field'),
+    sortDirection: sortDirectionSchema.meta({ example: 'desc' }).optional().describe('Sort order'),
+    hideStale: BooleanFromString.meta({ example: 'true' })
+      .optional()
+      .describe('Hide stale SLOs from the list as defined by stale SLO threshold in SLO settings'),
     // Used for cursor-based pagination; searchAfter is a JSON-encoded array
     searchAfter: searchAfterSchema
       .optional()
@@ -74,6 +87,7 @@ const findSLOQuerySchema = lazySchema(() =>
       ),
     size: z
       .string()
+      .meta({ example: '25' })
       .optional()
       .describe(
         'The page size to use for cursor-based pagination, must be greater or equal than 1'

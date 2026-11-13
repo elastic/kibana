@@ -56,6 +56,7 @@ const parityTests = {
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
   no_abort_signal_timeout: () => require('../no_abort_signal_timeout.test.js'),
   no_uncleared_race_timeout: () => require('../no_uncleared_race_timeout.test.js'),
+  no_browser_imports_in_server: () => require('../no_browser_imports_in_server.test.js'),
   no_conditional_saved_object_type_registration: () =>
     require('../no_conditional_saved_object_type_registration.test.js'),
   no_constructor_args_in_property_initializers: () =>
@@ -104,7 +105,11 @@ const parityTests = {
 
 // Rules that alias an existing ESLint `create` rule instead of being reimplemented with `createOnce`.
 // Oxlint runs them through its ESLint-compatible API, which re-runs `create` for every file.
-const CREATE_API_RULES = new Set(['no_deprecated_imports', 'security_imports_restriction']);
+const CREATE_API_RULES = new Set([
+  'no_browser_imports_in_server',
+  'no_deprecated_imports',
+  'security_imports_restriction',
+]);
 
 for (const [ruleName, rule] of Object.entries(oxlintPlugin.rules)) {
   const api = CREATE_API_RULES.has(ruleName) ? 'create' : 'createOnce';

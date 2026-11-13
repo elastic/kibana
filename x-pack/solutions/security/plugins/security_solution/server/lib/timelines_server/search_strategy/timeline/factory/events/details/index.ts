@@ -6,11 +6,11 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { TimelineEventsQueries } from '@kbn/timelines-plugin/common/api/search_strategy';
 import type {
+  TimelineEventsQueries,
   EventHit,
   TimelineEventsDetailsStrategyResponse,
-} from '@kbn/timelines-plugin/common/search_strategy';
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common/utils/get_timeline_fields_data_from_hit';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { TimelineFactory } from '../../types';

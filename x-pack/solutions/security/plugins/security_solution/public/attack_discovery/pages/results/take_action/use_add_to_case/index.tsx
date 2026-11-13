@@ -21,8 +21,17 @@ import * as i18n from './translations';
 interface Props {
   canUserCreateAndReadCases: () => boolean;
   onClick?: () => void;
-  /** Called once the attachments have been posted, with the case they were posted to. */
-  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
+  /**
+   * Called once the attachments have been posted, with the case they were posted to and, for an
+   * existing case, the attachments the server created.
+   */
+  onSuccess?: (
+    theCase: CaseUI,
+    isNewCase: boolean,
+    createdAttachments?: CaseUI['comments']
+  ) => void;
+  /** Called instead of `onSuccess` when the server added nothing to the chosen case. */
+  onNoAttachmentsAdded?: (theCase: CaseUI) => void;
   title: string;
 }
 
@@ -48,6 +57,7 @@ export const useAddToCase = ({
   canUserCreateAndReadCases,
   onClick,
   onSuccess,
+  onNoAttachmentsAdded,
   title,
 }: Props): {
   disabled: boolean;
@@ -70,8 +80,14 @@ export const useAddToCase = ({
     },
     onClose: onClick,
     onSuccess,
+    onNoAttachmentsAdded,
     successToaster: {
       content: i18n.ADD_TO_CASE_SUCCESS,
+    },
+    // Shown when the server drops every attachment as already attached.
+    noAttachmentsToaster: {
+      title: i18n.ALREADY_ATTACHED_TO_CASE_TITLE,
+      content: i18n.ALREADY_ATTACHED_TO_CASE_CONTENT,
     },
   });
 
