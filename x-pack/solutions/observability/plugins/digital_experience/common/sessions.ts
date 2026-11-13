@@ -13,8 +13,15 @@ export const SESSIONS_VERSION = 1;
 export const SESSIONS_MANAGED_BY = 'digital_experience';
 
 export const SESSIONS_SOURCE_INDICES = [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX] as const;
-export const SESSIONS_INDEX = `digital-experience-sessions-${SESSIONS_VERSION}`;
-export const SESSIONS_INDEX_PATTERN = 'digital-experience-sessions-*';
+const SESSIONS_INDEX_PREFIX = 'digital-experience-sessions-';
+/** Matches the session summaries of every platform; the documented index privileges name it. */
+export const ALL_SESSIONS_INDEX_PATTERN = `${SESSIONS_INDEX_PREFIX}*`;
+const BROWSER_SESSIONS_INDEX_PREFIX = `${SESSIONS_INDEX_PREFIX}browser-`;
+/** The browser session summaries. */
+export const SESSIONS_INDEX = `${BROWSER_SESSIONS_INDEX_PREFIX}${SESSIONS_VERSION}`;
+/** The browser session summaries of every version: what the readers and the template cover. */
+export const SESSIONS_INDEX_PATTERN = `${BROWSER_SESSIONS_INDEX_PREFIX}*`;
+/** Kept from before the browser prefix, so enabling replaces that template's overlapping pattern. */
 export const SESSIONS_INDEX_TEMPLATE_NAME = 'digital-experience-sessions';
 
 export const SESSIONS_LOOKBACK_DAYS = 30;

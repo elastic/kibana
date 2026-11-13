@@ -8,7 +8,7 @@
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { SESSIONS_INDEX_PATTERN, SESSIONS_SOURCE_INDICES } from '../../../../common/sessions';
+import { ALL_SESSIONS_INDEX_PATTERN, SESSIONS_SOURCE_INDICES } from '../../../../common/sessions';
 import { deleteSessionsData } from '../../common/fixtures/sessions_data';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
@@ -28,7 +28,7 @@ const FILTERED_READ_ROLE: KibanaRole = {
         query: '{"term":{"service.name":"checkout-web"}}',
       },
       {
-        names: [SESSIONS_INDEX_PATTERN],
+        names: [ALL_SESSIONS_INDEX_PATTERN],
         privileges: ['read', 'index', 'create_index', 'delete', 'delete_index'],
       },
     ],

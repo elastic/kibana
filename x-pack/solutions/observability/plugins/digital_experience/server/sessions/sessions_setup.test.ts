@@ -111,6 +111,23 @@ describe('sessions setup', () => {
       );
     });
 
+    it('checks the setup privileges on the browser sessions indices', async () => {
+      grantAll(esClient.asCurrentUser);
+
+      await getMissingSessionsPrivileges(esClient.asCurrentUser, { isServerless: false });
+
+      expect(esClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: expect.arrayContaining([
+            {
+              names: ['digital-experience-sessions-browser-*'],
+              privileges: ['read', 'index', 'create_index', 'delete', 'delete_index'],
+            },
+          ]),
+        })
+      );
+    });
+
     it('does not require read_security on stateful', async () => {
       grantAll(esClient.asCurrentUser);
 
@@ -187,6 +204,23 @@ describe('sessions setup', () => {
       expect(asCurrentUser.indices.create).toHaveBeenCalledWith({ index: SESSIONS_INDEX });
       expect(asInternalUser.indices.putIndexTemplate).not.toHaveBeenCalled();
       expect(asSecondaryAuthUser.indices.putIndexTemplate).not.toHaveBeenCalled();
+    });
+
+    // Setups enabled before the browser prefix have a template of this name on
+    // `digital-experience-sessions-*`. Keeping the name lets Elasticsearch replace it instead of
+    // refusing a second template whose patterns overlap it at the same priority.
+    it('puts the template under its earlier name, on the browser indices only', async () => {
+      await enableSessions(enableArgs());
+
+      expect(esClient.asCurrentUser.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'digital-experience-sessions',
+          index_patterns: ['digital-experience-sessions-browser-*'],
+        })
+      );
+      expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
+        index: 'digital-experience-sessions-browser-1',
+      });
     });
 
     it('creates the index after its template, so the template maps it', async () => {

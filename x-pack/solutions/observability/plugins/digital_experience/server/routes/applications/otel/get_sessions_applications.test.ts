@@ -212,7 +212,7 @@ describe('getSessionsApplications', () => {
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'digital-experience-sessions-*' }),
+      expect.objectContaining({ index: 'digital-experience-sessions-browser-*' }),
       { signal }
     );
   });

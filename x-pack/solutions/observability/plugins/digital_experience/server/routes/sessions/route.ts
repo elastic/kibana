@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import {
-  SESSIONS_INDEX_PATTERN,
+  ALL_SESSIONS_INDEX_PATTERN,
   SESSIONS_LIST_DEFAULT_PER_PAGE,
   SESSIONS_LIST_MAX_DURATION_MS,
   SESSIONS_LIST_MAX_FACET_LENGTHS,
@@ -46,7 +46,7 @@ const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.n
   defaultMessage:
     'Reading sessions requires the read index privilege on {sessionsIndex}, and on {sourceIndices} for the session timeline.',
   values: {
-    sessionsIndex: SESSIONS_INDEX_PATTERN,
+    sessionsIndex: ALL_SESSIONS_INDEX_PATTERN,
     sourceIndices: SESSIONS_SOURCE_INDICES.join(', '),
   },
 });

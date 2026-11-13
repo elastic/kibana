@@ -7,17 +7,30 @@
 
 import { CORE_WEB_VITALS } from '../../common/core_web_vitals';
 import {
+  SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_MANAGED_BY,
   SESSIONS_VERSION,
 } from '../../common/sessions';
+import { indexPatternCovers } from './sessions_setup';
 import { sessionsIndexMappings, sessionsIndexTemplate } from './sessions_spec';
+
+const templateCovers = (index: string): boolean =>
+  [sessionsIndexTemplate.index_patterns]
+    .flat()
+    .some((pattern) => pattern !== undefined && indexPatternCovers(pattern, index));
 
 describe('sessions index template', () => {
   it('covers the sessions indices of every version', () => {
     expect(sessionsIndexTemplate.name).toBe(SESSIONS_INDEX_TEMPLATE_NAME);
     expect(sessionsIndexTemplate.index_patterns).toEqual([SESSIONS_INDEX_PATTERN]);
+    expect(templateCovers(SESSIONS_INDEX)).toBe(true);
+    expect(templateCovers('digital-experience-sessions-browser-2')).toBe(true);
+  });
+
+  it('does not cover the session summaries of other platforms', () => {
+    expect(templateCovers('digital-experience-sessions-mobile-1')).toBe(false);
   });
 
   it('is marked managed and stamped with the version', () => {
