@@ -9,10 +9,27 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { FilterableSource } from '@kbn/data-source';
-import { dataService, dataViewsService } from '../../../services/kibana_services';
+import { dataViewsService } from '../../../services/kibana_services';
 import { hasNoResults } from './has_no_results';
 
-describe('hasNoResults', () => {
+const mockGetESQLSingleColumnValues = jest.fn();
+jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
+  const actual = jest.requireActual(
+    '../../../../common/options_list/get_esql_single_column_values'
+  );
+  return {
+    getESQLSingleColumnValues: Object.assign(
+      (...args: unknown[]) => mockGetESQLSingleColumnValues(...args),
+      {
+        isSuccess: actual.getESQLSingleColumnValues.isSuccess,
+        isNumericResult: actual.getESQLSingleColumnValues.isNumericResult,
+        hasNoResults: actual.getESQLSingleColumnValues.hasNoResults,
+      }
+    ),
+  };
+});
+
+describe('hasNoResults of a field of an ES|QL source', () => {
   const esqlSource: FilterableSource = {
     kind: 'esql',
     id: 'dataset-id',
@@ -25,42 +42,54 @@ describe('hasNoResults', () => {
     meta: { type: 'range', key: 'bytes', params: { gte: 1, lte: 5 } },
     query: { range: { bytes: { gte: 1, lte: 5 } } },
   } as unknown as Filter;
+  const params = () => ({
+    abortSignal: new AbortController().signal,
+    dataSource: esqlSource,
+    fieldName: 'bytes',
+    rangeFilter,
+    projectRouting: '_alias:*',
+  });
+  const column = { name: 'bytes', type: 'long' };
 
   beforeEach(() => {
-    dataService.search.esql = jest.fn();
+    mockGetESQLSingleColumnValues.mockReset();
     dataViewsService.get = jest.fn();
   });
 
-  it('is false when the FROM target of an ES|QL source has a document in the range', async () => {
-    (dataService.search.esql as jest.Mock).mockResolvedValue({ rawResponse: { values: [['a']] } });
-
-    const abortSignal = new AbortController().signal;
-    const result = await hasNoResults({
-      abortSignal,
-      dataSource: esqlSource,
-      rangeFilter,
+  it('is false when the FROM target has a value in the range, which the range filter asks for', async () => {
+    mockGetESQLSingleColumnValues.mockResolvedValue({
+      values: [3],
+      column,
+      indexPattern: 'logs-*',
     });
+    const request = params();
 
-    expect(result).toBe(false);
-    expect(dataService.search.esql).toHaveBeenCalledWith(
+    expect(await hasNoResults(request)).toBe(false);
+    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: 'FROM logs-* | LIMIT 1',
-        kibanaQueryContext: expect.objectContaining({ kibanaFilters: [rangeFilter] }),
-      }),
-      { abortSignal }
+        query: 'FROM logs-* | KEEP bytes | LIMIT 1',
+        signal: request.abortSignal,
+        projectRouting: '_alias:*',
+        filter: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([{ range: { bytes: { gte: 1, lte: 5 } } }]),
+          }),
+        }),
+      })
     );
     expect(dataViewsService.get).not.toHaveBeenCalled();
   });
 
-  it('is true when the range has no documents', async () => {
-    (dataService.search.esql as jest.Mock).mockResolvedValue({ rawResponse: { values: [] } });
+  it('is true when the range has no values', async () => {
+    mockGetESQLSingleColumnValues.mockResolvedValue({ values: [], column, indexPattern: 'logs-*' });
 
-    expect(
-      await hasNoResults({
-        abortSignal: new AbortController().signal,
-        dataSource: esqlSource,
-        rangeFilter,
-      })
-    ).toBe(true);
+    expect(await hasNoResults(params())).toBe(true);
+  });
+
+  it('fails with the error of a failed query', async () => {
+    const error = new Error('query failed');
+    mockGetESQLSingleColumnValues.mockResolvedValue({ errors: [error] });
+
+    await expect(hasNoResults(params())).rejects.toBe(error);
   });
 });

@@ -7,11 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { ControlValuesSource } from '@kbn/controls-constants';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
-import { dataService, dataViewsService } from '../../../services/kibana_services';
-import { getMinMax } from './min_max';
+import type { FetchContext } from '@kbn/presentation-publishing';
+import { dataViewsService } from '../../../services/kibana_services';
+import { minMax$ } from './min_max';
 
-describe('getMinMax', () => {
+const mockGetESQLSingleColumnValues = jest.fn();
+jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
+  const actual = jest.requireActual(
+    '../../../../common/options_list/get_esql_single_column_values'
+  );
+  return {
+    getESQLSingleColumnValues: Object.assign(
+      (...args: unknown[]) => mockGetESQLSingleColumnValues(...args),
+      {
+        isSuccess: actual.getESQLSingleColumnValues.isSuccess,
+        isNumericResult: actual.getESQLSingleColumnValues.isNumericResult,
+        hasNoResults: actual.getESQLSingleColumnValues.hasNoResults,
+      }
+    ),
+  };
+});
+
+describe('minMax$ of a field of an ES|QL source', () => {
   const field: FilterableField = { name: 'bytes', type: 'number', aggregatable: true };
   const esqlSource: FilterableSource = {
     kind: 'esql',
@@ -19,52 +39,52 @@ describe('getMinMax', () => {
     title: 'logs-*',
     fields: [field],
     getFieldByName: () => field,
-    timeFieldName: '@timestamp',
-    isTimeBased: () => true,
+    isTimeBased: () => false,
   };
-  const abortSignal = new AbortController().signal;
+  const column = { name: 'bytes', type: 'long' };
+
+  const run = () =>
+    firstValueFrom(
+      minMax$({
+        controlFetch$: of({ projectRouting: '_alias:*' } as FetchContext),
+        dataSources$: new BehaviorSubject([esqlSource]),
+        fieldName$: new BehaviorSubject<string | undefined>('bytes'),
+        useGlobalFilters$: new BehaviorSubject<boolean | undefined>(true),
+        esqlQuery$: new BehaviorSubject<string | undefined>(undefined),
+        valuesSource$: new BehaviorSubject<ControlValuesSource | undefined>(
+          ControlValuesSource.FIELD
+        ),
+        setIsLoading: jest.fn(),
+      }).minMax$
+    );
 
   beforeEach(() => {
-    dataService.search.esql = jest.fn();
+    mockGetESQLSingleColumnValues.mockReset();
     dataViewsService.get = jest.fn();
   });
 
-  it('asks the FROM target of an ES|QL source, with no data view', async () => {
-    (dataService.search.esql as jest.Mock).mockResolvedValue({
-      rawResponse: { values: [[3, 90]] },
+  it('takes the bounds from the values of a query on the FROM target, as for a query of the user', async () => {
+    mockGetESQLSingleColumnValues.mockResolvedValue({
+      values: [40, 5, 90],
+      column,
+      indexPattern: 'logs-*',
     });
 
-    const result = await getMinMax({
-      abortSignal,
-      dataSource: esqlSource,
-      field,
-      projectRouting: '_alias:*',
-      timeRange: { from: 'now-1h', to: 'now' },
-    });
-
-    expect(result).toEqual({ min: 3, max: 90 });
-    expect(dataService.search.esql).toHaveBeenCalledWith(
+    expect(await run()).toEqual({ min: 5, max: 90 });
+    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: 'FROM logs-* | STATS min = MIN(bytes), max = MAX(bytes)',
+        query: 'FROM logs-* | STATS BY bytes',
         projectRouting: '_alias:*',
-        kibanaQueryContext: expect.objectContaining({
-          timeRange: { from: 'now-1h', to: 'now' },
-          timeField: '@timestamp',
-        }),
-      }),
-      { abortSignal }
+        signal: expect.any(AbortSignal),
+      })
     );
     expect(dataViewsService.get).not.toHaveBeenCalled();
   });
 
-  it('has no bounds when the target has no values in the field', async () => {
-    (dataService.search.esql as jest.Mock).mockResolvedValue({
-      rawResponse: { values: [[null, null]] },
-    });
+  it('has the error of a failed query', async () => {
+    const error = new Error('query failed');
+    mockGetESQLSingleColumnValues.mockResolvedValue({ errors: [error] });
 
-    expect(await getMinMax({ abortSignal, dataSource: esqlSource, field })).toEqual({
-      min: undefined,
-      max: undefined,
-    });
+    expect(await run()).toEqual({ error, min: undefined, max: undefined });
   });
 });

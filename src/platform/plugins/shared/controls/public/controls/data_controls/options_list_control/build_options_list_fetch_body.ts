@@ -116,31 +116,32 @@ export function buildOptionsListFetchBody({
   ignoreValidations: boolean | undefined;
 }): BuildOptionsListFetchBodyResult {
   const dataSource = dataSources?.[0];
-  if (
-    valuesSource === ControlValuesSource.ESQL ||
-    (dataSource && isEsqlFilterableSource(dataSource))
-  ) {
-    const esql =
-      valuesSource === ControlValuesSource.ESQL
-        ? esqlQuery
-        : dataSource && field && getFieldValuesQuery(dataSource, field.name);
-    if (!esql) {
-      return { outcome: 'empty', response: { suggestions: [] } };
-    }
 
-    const body = buildEsqlFetchBody({
-      esql,
-      dataSource,
-      fetchContext,
-      useGlobalFilters,
-      sort,
-      searchString,
-      searchTechnique,
-      selectedOptions,
-      ignoreValidations,
-    });
+  const buildEsqlResult = (esql?: string): BuildOptionsListFetchBodyResult =>
+    esql
+      ? {
+          outcome: 'fetch',
+          showLoadingSuggestions: false,
+          body: buildEsqlFetchBody({
+            esql,
+            dataSource,
+            fetchContext,
+            useGlobalFilters,
+            sort,
+            searchString,
+            searchTechnique,
+            selectedOptions,
+            ignoreValidations,
+          }),
+        }
+      : { outcome: 'empty', response: { suggestions: [] } };
 
-    return { outcome: 'fetch', body, showLoadingSuggestions: false };
+  if (valuesSource === ControlValuesSource.ESQL) {
+    return buildEsqlResult(esqlQuery);
+  }
+
+  if (dataSource && isEsqlFilterableSource(dataSource)) {
+    return buildEsqlResult(field && getFieldValuesQuery(dataSource, field.name));
   }
 
   if (

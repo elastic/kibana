@@ -15,8 +15,11 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
+import { getESQLSingleColumnValues } from '../../../../common/options_list';
+import { getControlsTimezone } from '../../utils';
 import {
-  fetchEsqlSourceHasNoResults,
+  buildESQLPreFilter,
+  getHasValuesQuery,
   getFetchContextFilters,
   getFetchContextTimeRange,
 } from '../utils';
@@ -62,6 +65,7 @@ export function hasNoResults$({
         return await hasNoResults({
           abortSignal: abortController.signal,
           dataSource,
+          fieldName: api.fieldName$.value,
           rangeFilter,
           ...controlFetchContext,
           timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
@@ -91,6 +95,7 @@ export function hasNoResults$({
 interface HasNoResultsParams {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
+  fieldName?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
@@ -99,19 +104,41 @@ interface HasNoResultsParams {
 }
 
 export async function hasNoResults(params: HasNoResultsParams): Promise<boolean> {
-  const { abortSignal, dataSource, filters, query, rangeFilter, timeRange, projectRouting } =
-    params;
-  if (isEsqlFilterableSource(dataSource)) {
-    return fetchEsqlSourceHasNoResults({
-      abortSignal,
-      dataSource,
-      kibanaQueryContext: { timeRange, kibanaFilters: filters, kqlQuery: query },
-      rangeFilter,
-      projectRouting,
-    });
-  }
+  return isEsqlFilterableSource(params.dataSource)
+    ? esqlSourceHasNoResults(params)
+    : dataViewHasNoResults(params);
+}
 
-  return dataViewHasNoResults(params);
+async function esqlSourceHasNoResults({
+  abortSignal,
+  dataSource,
+  fieldName,
+  filters,
+  query,
+  rangeFilter,
+  timeRange,
+  projectRouting,
+}: HasNoResultsParams): Promise<boolean> {
+  const esql = getHasValuesQuery(dataSource, fieldName ?? '');
+  const result = await getESQLSingleColumnValues({
+    query: esql,
+    filter: buildESQLPreFilter({
+      fetchContext: { query, filters: [...(filters ?? []), rangeFilter] },
+      useGlobalFilters: true,
+      dataSource,
+      timeRange,
+      esqlQuery: esql,
+    }),
+    signal: abortSignal,
+    search: dataService.search.search,
+    esqlVariables: [],
+    timezone: getControlsTimezone(),
+    projectRouting,
+  });
+  if (!getESQLSingleColumnValues.isSuccess(result)) {
+    throw result.errors[0];
+  }
+  return getESQLSingleColumnValues.hasNoResults(result);
 }
 
 async function dataViewHasNoResults({

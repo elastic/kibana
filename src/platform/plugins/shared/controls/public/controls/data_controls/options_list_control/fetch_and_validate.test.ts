@@ -15,11 +15,18 @@ import { coreServices } from '../../../services/kibana_services';
 import { setStubKibanaServices } from '../../../services/mocks';
 import { fetchAndValidate$ } from './fetch_and_validate';
 
-const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
-}));
+const mockGetESQLSingleColumnValues = jest.fn();
+jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
+  const actual = jest.requireActual(
+    '../../../../common/options_list/get_esql_single_column_values'
+  );
+  return {
+    getESQLSingleColumnValues: Object.assign(
+      (...args: unknown[]) => mockGetESQLSingleColumnValues(...args),
+      { isSuccess: actual.getESQLSingleColumnValues.isSuccess }
+    ),
+  };
+});
 
 const phraseFilter = (field: string, value: string) =>
   ({
@@ -66,9 +73,11 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
 
   beforeEach(() => {
     fetchSpy = jest.spyOn(coreServices.http, 'fetch');
-    mockGetESQLResults.mockReset();
-    mockGetESQLResults.mockResolvedValue({
-      response: { columns: [{ name: 'host', type: 'keyword' }], values: [] },
+    mockGetESQLSingleColumnValues.mockReset();
+    mockGetESQLSingleColumnValues.mockResolvedValue({
+      values: [],
+      column: { name: 'host', type: 'keyword' },
+      indexPattern: 'logs',
     });
   });
 
@@ -98,15 +107,15 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     const subscription = suggestions$.subscribe(() => {});
 
     await new Promise((resolve) => setTimeout(resolve, 200));
-    expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
-    const firstBody = mockGetESQLResults.mock.calls[0][0];
+    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
+    const firstBody = mockGetESQLSingleColumnValues.mock.calls[0][0];
     expect(firstBody.filter).toBeUndefined();
 
     filters$.next([phraseFilter('host', 'mainframe')]);
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    expect(mockGetESQLResults).toHaveBeenCalledTimes(2);
-    const secondBody = mockGetESQLResults.mock.calls[1][0];
+    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(2);
+    const secondBody = mockGetESQLSingleColumnValues.mock.calls[1][0];
     expect(secondBody.filter).toBeDefined();
     expect(JSON.stringify(secondBody.filter)).toContain('mainframe');
 
@@ -131,8 +140,10 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
       },
     ]);
     api.field$.next(field);
-    mockGetESQLResults.mockResolvedValue({
-      response: { columns: [{ name: 'host', type: 'keyword' }], values: [['mainframe']] },
+    mockGetESQLSingleColumnValues.mockResolvedValue({
+      values: ['mainframe'],
+      column: { name: 'host', type: 'keyword' },
+      indexPattern: 'logs-*',
     });
     const emitted: unknown[] = [];
 
@@ -149,9 +160,9 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
+    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
       expect.objectContaining({
-        esqlQuery: 'FROM logs-* | STATS BY host',
+        query: 'FROM logs-* | STATS BY host',
         signal: expect.any(AbortSignal),
       })
     );
@@ -185,8 +196,8 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
-    const body = mockGetESQLResults.mock.calls[0][0];
+    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
+    const body = mockGetESQLSingleColumnValues.mock.calls[0][0];
     expect(body.projectRouting).toBe('_alias:*');
 
     subscription.unsubscribe();
@@ -228,15 +239,15 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     });
 
     it('should pass AbortSignal to the ES|QL request', () => {
-      expect(mockGetESQLResults).toHaveBeenCalled();
-      const { signal } = mockGetESQLResults.mock.calls[0][0];
+      expect(mockGetESQLSingleColumnValues).toHaveBeenCalled();
+      const { signal } = mockGetESQLSingleColumnValues.mock.calls[0][0];
       expect(signal).toBeInstanceOf(AbortSignal);
       expect(signal.aborted).toBe(false);
     });
 
     it('should abort previous request when new request starts', async () => {
-      expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
-      const firstSignal: AbortSignal = mockGetESQLResults.mock.calls[0][0].signal;
+      expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
+      const firstSignal: AbortSignal = mockGetESQLSingleColumnValues.mock.calls[0][0].signal;
       expect(firstSignal.aborted).toBe(false);
 
       filters$.next([phraseFilter('host', 'mainframe')]);
@@ -246,8 +257,8 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     }, 10000);
 
     it('cancelRequests() should abort in-flight request', () => {
-      expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
-      const signal: AbortSignal = mockGetESQLResults.mock.calls[0][0].signal;
+      expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
+      const signal: AbortSignal = mockGetESQLSingleColumnValues.mock.calls[0][0].signal;
       expect(signal.aborted).toBe(false);
 
       cancelRequests();

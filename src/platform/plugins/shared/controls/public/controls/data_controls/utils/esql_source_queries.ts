@@ -16,10 +16,5 @@ const getFromCommand = ({ title }: FilterableSource): string => `FROM ${formatEs
 export const getFieldValuesQuery = (source: FilterableSource, fieldName: string): string =>
   `${getFromCommand(source)} | STATS BY ${formatEsqlIdentifier(fieldName)}`;
 
-export const getFieldMinMaxQuery = (source: FilterableSource, fieldName: string): string => {
-  const field = formatEsqlIdentifier(fieldName);
-  return `${getFromCommand(source)} | STATS min = MIN(${field}), max = MAX(${field})`;
-};
-
-export const getHasDocumentsQuery = (source: FilterableSource): string =>
-  `${getFromCommand(source)} | LIMIT 1`;
+export const getHasValuesQuery = (source: FilterableSource, fieldName: string): string =>
+  `${getFromCommand(source)} | KEEP ${formatEsqlIdentifier(fieldName)} | LIMIT 1`;

@@ -10,36 +10,54 @@
 import { dataService } from '../../../services/kibana_services';
 import { fetchEsqlOptions } from './fetch_esql_options';
 
-const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
-}));
+const mockGetESQLSingleColumnValues = jest.fn();
+jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
+  const actual = jest.requireActual(
+    '../../../../common/options_list/get_esql_single_column_values'
+  );
+  return {
+    getESQLSingleColumnValues: Object.assign(
+      (...args: unknown[]) => mockGetESQLSingleColumnValues(...args),
+      { isSuccess: actual.getESQLSingleColumnValues.isSuccess }
+    ),
+  };
+});
 
 describe('fetchEsqlOptions', () => {
   const request = {
     kind: 'esql' as const,
     esql: 'FROM logs-* | STATS BY host',
-    filter: { bool: { filter: [{ prefix: { host: { value: 'ma', case_insensitive: true } } }] } },
+    filter: {
+      bool: {
+        filter: [{ match_phrase: { host: 'mainframe' } }],
+        must: [],
+        must_not: [],
+        should: [],
+      },
+    },
+    searchString: 'MA',
+    searchTechnique: 'prefix' as const,
     sort: { by: '_key' as const, direction: 'asc' as const },
     selectedOptions: ['gone'],
     projectRouting: '_alias:*',
   };
   const column = { name: 'host', type: 'keyword' };
 
-  beforeEach(() => mockGetESQLResults.mockReset());
+  beforeEach(() => mockGetESQLSingleColumnValues.mockReset());
 
   it('runs the query with the filter, the abort signal and the project routing', async () => {
-    mockGetESQLResults.mockResolvedValue({
-      response: { columns: [column], values: [['mainframe']] },
+    mockGetESQLSingleColumnValues.mockResolvedValue({
+      values: ['mainframe'],
+      column,
+      indexPattern: 'logs-*',
     });
     const { signal } = new AbortController();
 
     await fetchEsqlOptions(request, signal);
 
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
+    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
       expect.objectContaining({
-        esqlQuery: 'FROM logs-* | STATS BY host',
+        query: 'FROM logs-* | STATS BY host',
         filter: request.filter,
         signal,
         search: dataService.search.search,
@@ -48,9 +66,11 @@ describe('fetchEsqlOptions', () => {
     );
   });
 
-  it('returns the values as suggestions, sorted, and the selections that are not among them', async () => {
-    mockGetESQLResults.mockResolvedValue({
-      response: { columns: [column], values: [['mainframe'], ['macbook']] },
+  it('returns the values that match the search, sorted, and the selections that are not among them', async () => {
+    mockGetESQLSingleColumnValues.mockResolvedValue({
+      values: ['mainframe', 'macbook', 'other'],
+      column,
+      indexPattern: 'logs-*',
     });
 
     expect(await fetchEsqlOptions(request, new AbortController().signal)).toEqual({
@@ -63,7 +83,7 @@ describe('fetchEsqlOptions', () => {
 
   it('returns the error of a failed query', async () => {
     const error = new Error('query failed');
-    mockGetESQLResults.mockRejectedValue(error);
+    mockGetESQLSingleColumnValues.mockResolvedValue({ errors: [error] });
 
     expect(await fetchEsqlOptions(request, new AbortController().signal)).toEqual({ error });
   });

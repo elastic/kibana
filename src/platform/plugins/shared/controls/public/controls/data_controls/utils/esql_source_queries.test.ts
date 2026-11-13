@@ -8,11 +8,7 @@
  */
 
 import type { FilterableSource } from '@kbn/data-source';
-import {
-  getFieldMinMaxQuery,
-  getFieldValuesQuery,
-  getHasDocumentsQuery,
-} from './esql_source_queries';
+import { getFieldValuesQuery, getHasValuesQuery } from './esql_source_queries';
 
 describe('queries on the FROM target of an ES|QL source', () => {
   const source = (title: string): FilterableSource => ({
@@ -23,7 +19,8 @@ describe('queries on the FROM target of an ES|QL source', () => {
     getFieldByName: () => undefined,
     isTimeBased: () => false,
   });
-  const fromOf = (title: string) => getHasDocumentsQuery(source(title)).replace(' | LIMIT 1', '');
+  const fromOf = (title: string) =>
+    getHasValuesQuery(source(title), 'f').replace(' | KEEP f | LIMIT 1', '');
 
   it('starts from the sources of the source, quoted when they need it', () => {
     expect(fromOf('logs-*,my index')).toBe('FROM logs-*, "my index"');
@@ -33,8 +30,8 @@ describe('queries on the FROM target of an ES|QL source', () => {
     expect(getFieldValuesQuery(source('logs-*'), 'host.name')).toBe(
       'FROM logs-* | STATS BY `host.name`'
     );
-    expect(getFieldMinMaxQuery(source('logs-*'), 'bytes-in')).toBe(
-      'FROM logs-* | STATS min = MIN(`bytes-in`), max = MAX(`bytes-in`)'
+    expect(getHasValuesQuery(source('logs-*'), 'bytes-in')).toBe(
+      'FROM logs-* | KEEP `bytes-in` | LIMIT 1'
     );
   });
 });

@@ -31,7 +31,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import {
   buildESQLPreFilter,
-  fetchEsqlSourceMinMax,
+  getFieldValuesQuery,
   getFetchContextFilters,
   getFetchContextTimeRange,
 } from '../utils';
@@ -89,6 +89,15 @@ export function minMax$({
           return { max: undefined, min: undefined };
         }
 
+        // The values of a field of an ES|QL source come from a query on its FROM target, as the
+        // query that the user writes in the editor does.
+        const esql =
+          valuesSource === ControlValuesSource.ESQL
+            ? esqlQuery
+            : isEsqlFilterableSource(dataSource)
+            ? getFieldValuesQuery(dataSource, field.name)
+            : undefined;
+
         try {
           setIsLoading(true);
           const abortController = new AbortController();
@@ -98,23 +107,20 @@ export function minMax$({
             dataSource,
             field,
             ...controlFetchContext,
-            query:
-              valuesSource === ControlValuesSource.ESQL && esqlQuery !== undefined
-                ? { esql: esqlQuery }
-                : controlFetchContext.query,
+            query: esql !== undefined ? { esql } : controlFetchContext.query,
             timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
             filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
             // Pre-filter the ES|QL pipeline by the dashboard's fetch context. Built only from
             // the *dashboard* query/filters (not the per-row `query` above which may carry the
             // ES|QL itself), so it mirrors how field-based controls inherit the filter bar.
             esqlPreFilter:
-              valuesSource === ControlValuesSource.ESQL
+              esql !== undefined
                 ? buildESQLPreFilter({
                     fetchContext: controlFetchContext,
                     useGlobalFilters,
                     dataSource,
                     timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
-                    esqlQuery,
+                    esqlQuery: esql,
                   })
                 : undefined,
           });
@@ -157,27 +163,15 @@ interface MinMax {
 }
 
 export async function getMinMax(params: GetMinMaxParams): Promise<MinMax> {
-  const { abortSignal, dataSource, field, filters, query, timeRange, projectRouting } = params;
-  if (query && 'esql' in query) {
-    return getMinMaxOfEsqlQuery(query.esql, params);
-  }
-
-  if (isEsqlFilterableSource(dataSource)) {
-    return fetchEsqlSourceMinMax({
-      abortSignal,
-      dataSource,
-      field,
-      kibanaQueryContext: { timeRange, kibanaFilters: filters, kqlQuery: query },
-      projectRouting,
-    });
-  }
-
-  return getMinMaxOfDataView(params);
+  const { query } = params;
+  return query && 'esql' in query
+    ? getMinMaxOfEsqlQuery(query.esql, params)
+    : getMinMaxOfDataView(params);
 }
 
 async function getMinMaxOfEsqlQuery(
   esqlQuery: string,
-  { abortSignal, timeRange, esqlVariables, esqlPreFilter }: GetMinMaxParams
+  { abortSignal, timeRange, esqlVariables, esqlPreFilter, projectRouting }: GetMinMaxParams
 ): Promise<MinMax> {
   const result = await getESQLSingleColumnValues({
     query: esqlQuery,
@@ -187,6 +181,7 @@ async function getMinMaxOfEsqlQuery(
     search: dataService.search.search,
     esqlVariables: esqlVariables ?? [],
     timezone: getControlsTimezone(),
+    projectRouting,
   });
   if (getESQLSingleColumnValues.isNumericResult(result)) {
     return { min: min(result.values), max: max(result.values) };
