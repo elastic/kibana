@@ -9,13 +9,48 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import { EsqlQuery } from '@elastic/esql';
 import type { ICommand } from '../../commands/registry/registry';
-import { describeCommands, type CursorIR } from '../../esql_js_sim/grammar';
+import type { GetColumnsByTypeFn } from '../../commands/registry/types';
+import { locate, type CursorIR } from '../../esql_js_sim/grammar';
+import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
+import { getNesting, getQueryBeforeCursor } from './pipeline';
 import { getRegisteredCommand } from './command_metadata';
 import type { SuggestionContext } from './types';
 
 const isSame = (first: string[], second: string[]): boolean =>
   first.length === second.length && first.every((rule, index) => rule === second[index]);
+
+// A name no query contains, which the lexer reads as a name in every place a name can be.
+const PLACEHOLDER_NAME = 'esql_placeholder_name';
+const NAME_RULES: readonly string[] = ['qualifiedName', 'qualifiedNamePattern', 'identifier'];
+
+/** The columns of the query before the cursor, fetched on the first request only. */
+const createColumnsGetter = (
+  text: string,
+  ir: CursorIR,
+  callbacks: ESQLCallbacks | undefined
+): GetColumnsByTypeFn => {
+  let retriever: GetColumnsByTypeFn | undefined;
+
+  return async (...args) => {
+    if (!retriever) {
+      const query = getQueryBeforeCursor(text, ir);
+
+      if (!query) {
+        return [];
+      }
+
+      retriever = getColumnsByTypeRetriever(
+        EsqlQuery.fromSrc(query).ast,
+        query,
+        callbacks
+      ).getColumnsByType;
+    }
+
+    return retriever(...args);
+  };
+};
 
 /**
  * Gathers what the providers need about the editor and about the query before the cursor. It
@@ -27,13 +62,9 @@ export const createContext = async (
   callbacks: ESQLCallbacks | undefined
 ): Promise<SuggestionContext> => {
   const license = await callbacks?.getLicense?.();
-  const written = describeCommands(text.slice(0, ir.word?.start ?? ir.segment.end));
-  // Where a command starts, the commands around it are the ones the cursor is nested in.
-  const nesting =
-    ir.position === 'start_of_command' && ir.command
-      ? [...ir.enclosingCommands, ir.command]
-      : ir.enclosingCommands;
-  const registered = written.flatMap(({ rule, enclosingCommands }) => {
+  const caret = ir.word?.start ?? ir.segment.end;
+  const nesting = getNesting(ir);
+  const registered = ir.commands.flatMap(({ rule, enclosingCommands }) => {
     const command = getRegisteredCommand(rule);
 
     return command ? [{ command, enclosingCommands }] : [];
@@ -43,9 +74,20 @@ export const createContext = async (
     ({ command, enclosingCommands }) => !isHeader(command) && isSame(enclosingCommands, nesting)
   );
   const [source] = pipeline;
+  const afterNameText = `${text.slice(0, caret)}${PLACEHOLDER_NAME} `;
 
   return {
     callbacks,
+    ir,
+    afterName: locate(afterNameText, afterNameText.length),
+    getColumnsByType: createColumnsGetter(text, ir, callbacks),
+    usedNames: new Set(
+      ir.commands.flatMap(({ arguments: written }) =>
+        written
+          .filter(({ rule }) => rule !== undefined && NAME_RULES.includes(rule))
+          .map((argument) => argument.text.replace(/`/g, ''))
+      )
+    ),
     hasLicense: license ? (level: LicenseType) => license.hasAtLeast(level) : undefined,
     activeProduct: callbacks?.getActiveProduct?.(),
     precedingCommands: [

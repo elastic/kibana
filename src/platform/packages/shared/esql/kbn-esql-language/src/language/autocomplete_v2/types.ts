@@ -11,8 +11,9 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ICommand } from '../../commands/registry/registry';
+import type { GetColumnsByTypeFn } from '../../commands/registry/types';
 import type { ResolvedRole } from '../../esql_js_sim/definitions';
-import type { ExpectedArgument, Follower } from '../../esql_js_sim/grammar';
+import type { CursorIR, ExpectedArgument, Follower } from '../../esql_js_sim/grammar';
 
 /**
  * What the engine has to offer at the cursor, before anything is fetched or shown. A request
@@ -31,6 +32,20 @@ export type SuggestionRequest =
 /** What providers know beyond the request: the editor, and the query before the cursor. */
 export interface SuggestionContext {
   callbacks: ESQLCallbacks | undefined;
+  /** The cursor, as the grammar describes it. */
+  ir: CursorIR;
+  /**
+   * The cursor as it would be after a name typed here and a space. It tells what has to
+   * follow an argument, and so whether the item for it should move the cursor on.
+   */
+  afterName: CursorIR;
+  /**
+   * The columns the command at the cursor can read, as items. They are computed from the
+   * commands before it, and only when a provider asks.
+   */
+  getColumnsByType: GetColumnsByTypeFn;
+  /** Every name written in the query, to pick a new one that is not taken. */
+  usedNames: Set<string>;
   /** Whether the license reaches a level; undefined when the editor does not say. */
   hasLicense: ((license: LicenseType) => boolean) | undefined;
   activeProduct: PricingProduct | undefined;
