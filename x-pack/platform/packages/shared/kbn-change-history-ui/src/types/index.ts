@@ -8,7 +8,10 @@
 export type { ChangeHistoryScope } from './change_history_scope';
 export type { ChangeHistoryListItem } from './change_history_list_item';
 export type { ChangeHistoryListItemChanges } from './change_history_list_item_changes';
-export type { ChangeHistoryChangesSummaryRenderFn } from './change_history_changes_summary';
+export type {
+  ChangeHistoryChangesSummaryRenderFn,
+  ChangeHistoryChangesRenderFn,
+} from './change_history_changes_summary';
 export type { ChangeHistoryDetail } from './change_history_detail';
 export type {
   GetChangeParams,
@@ -24,7 +27,7 @@ export type {
   ChangeHistoryCompareEndpoints,
   ChangeHistoryComparisonType,
 } from './change_history_compare';
-export type { ChangeHistoryCompareRowOverride } from './change_history_compare_override';
+export type { ChangeHistoryCompareMode } from './change_history_compare_mode';
 export type { ChangeHistoryBadgeRenderFn } from './change_history_badge';
 export type { ChangeHistoryAdapter } from './change_history_adapter';
 export type {

@@ -19,7 +19,7 @@ import { useChangeHistoryConfig } from '../../provider/use_change_history_config
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
 import { useChangeHistoryCompare } from '../../hooks/use_change_history_compare';
 import { useChangeHistoryDiffTelemetry } from '../../hooks/use_change_history_diff_telemetry';
-import type { ChangeHistoryCompareRowOverride } from '../../types/change_history_compare_override';
+import type { ChangeHistoryCompareMode } from '../../types/change_history_compare_mode';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { getChangeHistoryErrorMessage } from '../../utils/get_change_history_error_message';
 import * as i18n from '../timeline/translations';
@@ -87,13 +87,13 @@ const PreviewPanelState = ({
 export interface ChangeHistoryPreviewPanelProps {
   selectedChangeId?: string;
   listItems?: ChangeHistoryListItem[];
-  compareOverride?: ChangeHistoryCompareRowOverride;
+  compareMode?: ChangeHistoryCompareMode;
 }
 
 export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
   selectedChangeId,
   listItems = [],
-  compareOverride,
+  compareMode,
 }) => {
   const previewFrameCss = usePreviewFrameStyles();
   const { adapter, objectId, renderPreview, supports } = useChangeHistoryConfig();
@@ -104,15 +104,25 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
     enabled: Boolean(selectedChangeId),
   });
 
-  const { compareSpec, isLoadingCompareContext } = useChangeHistoryCompare({
-    adapter,
-    objectId,
-    listItems,
-    selectedChange: change,
-    selectedChangeId,
-    compareOverride: supports.compare ? compareOverride : undefined,
-    enabled: supports.compare,
-  });
+  const activeCompareMode = supports.compare ? compareMode : undefined;
+
+  // keepPreviousData keeps the previous row's detail mounted while a new one loads. It must not
+  // be used as the selected change for comparisons until it matches the selection.
+  const isStaleChange = Boolean(change && change.id !== selectedChangeId);
+
+  const { compareSpec, isLoadingCompareContext: isLoadingCompareEndpoints } =
+    useChangeHistoryCompare({
+      adapter,
+      objectId,
+      listItems,
+      selectedChange: isStaleChange ? undefined : change,
+      selectedChangeId,
+      compareMode: activeCompareMode,
+      enabled: supports.compare,
+    });
+
+  const isLoadingCompareContext =
+    isLoadingCompareEndpoints || (isStaleChange && Boolean(activeCompareMode));
 
   const diffTelemetry = useChangeHistoryDiffTelemetry({
     compareSpec,
@@ -185,6 +195,7 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
             change,
             objectId,
             compareSpec,
+            compareMode: activeCompareMode,
             isLoadingCompareContext,
             diffTelemetry,
           })}

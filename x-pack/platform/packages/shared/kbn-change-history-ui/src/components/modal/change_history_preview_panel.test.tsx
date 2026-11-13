@@ -150,7 +150,7 @@ describe('ChangeHistoryPreviewPanel', () => {
     );
   });
 
-  it('forwards compareOverride to useChangeHistoryCompare', () => {
+  it('forwards compareMode to useChangeHistoryCompare', () => {
     mockUseChangeHistoryDetail.mockReturnValue({
       change: previousChange,
       isLoading: false,
@@ -165,15 +165,67 @@ describe('ChangeHistoryPreviewPanel', () => {
       <ChangeHistoryPreviewPanel
         selectedChangeId="evt-previous"
         listItems={listItems}
-        compareOverride={{ type: 'vs_row', rowChangeId: 'evt-current' }}
+        compareMode={{ type: 'vs_row', rowChangeId: 'evt-current' }}
       />,
       { wrapper: TestProvider }
     );
 
     expect(mockUseChangeHistoryCompare).toHaveBeenCalledWith(
       expect.objectContaining({
-        compareOverride: { type: 'vs_row', rowChangeId: 'evt-current' },
+        compareMode: { type: 'vs_row', rowChangeId: 'evt-current' },
       })
     );
+  });
+
+  describe('while the selected change is still loading (stale detail from keepPreviousData)', () => {
+    const compareMode = { type: 'vs_row', rowChangeId: 'evt-current' } as const;
+
+    beforeEach(() => {
+      // The detail hook still returns the previously selected row.
+      mockUseChangeHistoryDetail.mockReturnValue({
+        change: currentChange,
+        isLoading: false,
+        error: undefined,
+      });
+      mockUseChangeHistoryCompare.mockReturnValue({
+        compareSpec: undefined,
+        isLoadingCompareContext: false,
+      });
+    });
+
+    it('does not pass the stale change as selectedChange and reports compare context as loading', () => {
+      render(
+        <ChangeHistoryPreviewPanel
+          selectedChangeId="evt-previous"
+          listItems={listItems}
+          compareMode={compareMode}
+        />,
+        { wrapper: TestProvider }
+      );
+
+      expect(mockUseChangeHistoryCompare).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          selectedChange: undefined,
+          selectedChangeId: 'evt-previous',
+          compareMode,
+        })
+      );
+      expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({ isLoadingCompareContext: true })
+      );
+    });
+
+    it('does not report compare context as loading when no compare mode is active', () => {
+      render(<ChangeHistoryPreviewPanel selectedChangeId="evt-previous" listItems={listItems} />, {
+        wrapper: TestProvider,
+      });
+
+      expect(mockUseChangeHistoryCompare).toHaveBeenLastCalledWith(
+        expect.objectContaining({ selectedChange: undefined })
+      );
+      expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({ isLoadingCompareContext: false })
+      );
+    });
   });
 });

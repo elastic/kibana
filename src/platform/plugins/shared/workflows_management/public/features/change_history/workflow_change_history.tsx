@@ -13,6 +13,7 @@ import {
   ChangeHistoryModal,
   ChangeHistoryProvider,
 } from '@kbn/change-history-ui';
+import type { ChangeHistoryCompareMode } from '@kbn/change-history-ui';
 
 import { BACK_TO_WORKFLOW } from './translations';
 import {
@@ -36,6 +37,8 @@ export interface WorkflowChangeHistoryProviderProps {
   workflowName?: string;
   children: React.ReactNode;
 }
+
+const DEFAULT_COMPARE_MODE: ChangeHistoryCompareMode = { type: 'vs_previous' };
 
 export const WorkflowChangeHistoryProvider = ({
   workflowId,
@@ -70,6 +73,7 @@ export const WorkflowChangeHistoryProvider = ({
         previewBackLabel: BACK_TO_WORKFLOW,
         previewTitle: workflowName ?? workflowId,
       }}
+      defaultCompareMode={DEFAULT_COMPARE_MODE}
       features={{ restore: true, unsavedChanges: true }}
       permissions={{ canRestore }}
       scope={scope}

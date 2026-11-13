@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
@@ -35,9 +36,10 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
   selected,
   onClick,
 }: ChangeHistoryItemProps): JSX.Element {
-  const { renderBadge, renderChangesSummary, supports } = useChangeHistoryConfig();
+  const { renderBadge, renderChangesSummary, renderChanges, supports } = useChangeHistoryConfig();
   const modalSelection = useContext(ChangeHistoryModalSelectionContext);
   const { euiTheme } = useEuiTheme();
+  const actorId = useGeneratedHtmlId({ prefix: 'changeHistoryItemActor' });
   const timestamp = useMemo(() => new Date(item.timestamp), [item.timestamp]);
 
   const handleKeyDown = useCallback(
@@ -111,6 +113,17 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
       min-width: 0;
       flex: 1 1 auto;
       cursor: pointer;
+    `,
+    []
+  );
+
+  const selectButtonStyles = useMemo(
+    () => css`
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.textHeading};
 
       &:focus {
         outline: none;
@@ -129,12 +142,12 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap={false}>
+            {/* mouse clicks anywhere on the row select it; keyboard users select via the timestamp button, so the
+                changes control isn't nested inside a button */}
             <EuiFlexItem
               grow={true}
-              role="button"
-              tabIndex={0}
+              role="presentation"
               onClick={onClick}
-              onKeyDown={handleKeyDown}
               data-test-subj={`changeHistoryItem-${item.id}`}
               data-selected={selected ? true : undefined}
               css={selectableStyles}
@@ -166,14 +179,12 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                       >
                         <EuiText
                           size="xs"
+                          role="button"
                           tabIndex={0}
-                          css={css`
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            font-weight: ${euiTheme.font.weight.semiBold};
-                            color: ${euiTheme.colors.textHeading};
-                          `}
+                          aria-describedby={actorId}
+                          aria-current={selected ? true : undefined}
+                          onKeyDown={handleKeyDown}
+                          css={selectButtonStyles}
                         >
                           <ChangeHistoryListTimestamp value={timestamp} />
                         </EuiText>
@@ -182,6 +193,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
 
                     <EuiFlexItem grow={false}>
                       <EuiText
+                        id={actorId}
                         size="xs"
                         color="subdued"
                         css={css`
@@ -194,16 +206,33 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                         {item.changes ? (
                           <>
                             {' • '}
-                            {changesSummaryTooltip ? (
-                              <EuiToolTip position="top" content={changesSummaryTooltip}>
-                                <span tabIndex={0} data-test-subj="changeHistoryItemChanges">
-                                  {i18n.N_CHANGES(item.changes.count)}
-                                </span>
-                              </EuiToolTip>
+                            {renderChanges ? (
+                              renderChanges({
+                                item,
+                                changes: item.changes,
+                                summary: item.changes.summary,
+                                nChanges: i18n.N_CHANGES(item.changes.count),
+                                ...(supports.compare && modalSelection?.requestCompareToPrevious
+                                  ? {
+                                      requestCompareToPrevious: () =>
+                                        modalSelection.requestCompareToPrevious?.(item.id),
+                                    }
+                                  : {}),
+                              })
                             ) : (
-                              <span data-test-subj="changeHistoryItemChanges">
-                                {i18n.N_CHANGES(item.changes.count)}
-                              </span>
+                              <>
+                                {changesSummaryTooltip ? (
+                                  <EuiToolTip position="top" content={changesSummaryTooltip}>
+                                    <span tabIndex={0} data-test-subj="changeHistoryItemChanges">
+                                      {i18n.N_CHANGES(item.changes.count)}
+                                    </span>
+                                  </EuiToolTip>
+                                ) : (
+                                  <span data-test-subj="changeHistoryItemChanges">
+                                    {i18n.N_CHANGES(item.changes.count)}
+                                  </span>
+                                )}
+                              </>
                             )}
                           </>
                         ) : null}

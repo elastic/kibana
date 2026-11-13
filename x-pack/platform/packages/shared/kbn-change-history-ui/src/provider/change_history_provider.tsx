@@ -8,16 +8,21 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
-import type { ChangeHistoryChangesSummaryRenderFn } from '../types/change_history_changes_summary';
+import type {
+  ChangeHistoryChangesRenderFn,
+  ChangeHistoryChangesSummaryRenderFn,
+} from '../types/change_history_changes_summary';
 import type {
   ChangeHistoryFeatures,
   ChangeHistoryPermissions,
 } from '../types/change_history_features';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
+import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { createChangeHistoryTelemetryReporter } from '../telemetry/create_change_history_telemetry_reporter';
 import type { ChangeHistoryScope } from '../types/change_history_scope';
+import type { ChangeHistoryCompareMode } from '../types/change_history_compare_mode';
 import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
 import { ChangeHistoryConfigContext } from './change_history_config_context';
 import { ChangeHistoryModalContext } from './change_history_modal_context';
@@ -29,6 +34,11 @@ export interface ChangeHistoryProviderProps {
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
   renderChangesSummary?: ChangeHistoryChangesSummaryRenderFn;
+  renderChanges?: ChangeHistoryChangesRenderFn;
+  /** Called whenever the user selects a change in the timeline. */
+  onSelectChange?: (item: ChangeHistoryListItem) => void;
+  /** Compare mode applied when a change is selected. Without it, no comparison is loaded until the user requests one. */
+  defaultCompareMode?: ChangeHistoryCompareMode;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
@@ -43,6 +53,9 @@ export const ChangeHistoryProvider = ({
   objectId,
   adapter,
   renderPreview,
+  renderChanges,
+  onSelectChange,
+  defaultCompareMode,
   renderChangesSummary,
   renderBadge,
   labels,
@@ -94,6 +107,9 @@ export const ChangeHistoryProvider = ({
       objectId,
       adapter,
       renderPreview,
+      renderChanges,
+      onSelectChange,
+      defaultCompareMode,
       renderChangesSummary,
       renderBadge,
       labels: {
@@ -107,11 +123,14 @@ export const ChangeHistoryProvider = ({
     }),
     [
       adapter,
+      defaultCompareMode,
       labels.previewBackLabel,
       labels.previewTitle,
       listPageSize,
       objectId,
+      onSelectChange,
       renderBadge,
+      renderChanges,
       renderChangesSummary,
       renderPreview,
       scope,

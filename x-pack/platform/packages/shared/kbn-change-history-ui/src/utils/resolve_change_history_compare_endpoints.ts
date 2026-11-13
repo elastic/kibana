@@ -6,7 +6,7 @@
  */
 
 import type { ChangeHistoryCompareEndpoints } from '../types/change_history_compare';
-import type { ChangeHistoryCompareRowOverride } from '../types/change_history_compare_override';
+import type { ChangeHistoryCompareMode } from '../types/change_history_compare_mode';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import {
   findPreviousChangeId,
@@ -16,13 +16,13 @@ import {
 export const resolveChangeHistoryCompareEndpoints = (
   listItems: ChangeHistoryListItem[],
   selectedChangeId: string,
-  compareOverride?: ChangeHistoryCompareRowOverride
+  compareMode?: ChangeHistoryCompareMode
 ): ChangeHistoryCompareEndpoints | undefined => {
-  if (compareOverride?.type === 'vs_row') {
+  if (compareMode?.type === 'vs_row') {
     const pair = resolveChronologicalComparePair(
       listItems,
       selectedChangeId,
-      compareOverride.rowChangeId
+      compareMode.rowChangeId
     );
 
     if (!pair) {

@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryCompareSpec } from '../types/change_history_compare';
 import type { ChangeHistoryDetail } from '../types/change_history_detail';
-import type { ChangeHistoryCompareRowOverride } from '../types/change_history_compare_override';
+import type { ChangeHistoryCompareMode } from '../types/change_history_compare_mode';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import { resolveChangeHistoryCompareEndpoints } from '../utils/resolve_change_history_compare_endpoints';
 import { useChangeHistoryDetail } from './use_change_history_detail';
@@ -20,8 +20,8 @@ export interface UseChangeHistoryCompareArgs {
   listItems: ChangeHistoryListItem[];
   selectedChange?: ChangeHistoryDetail;
   selectedChangeId?: string;
-  compareOverride?: ChangeHistoryCompareRowOverride;
-  /** When false, compare resolution and detail loads are skipped. Defaults to true. */
+  compareMode?: ChangeHistoryCompareMode;
+  /** Compare resolution and detail loads are skipped until a compare mode is set. */
   enabled?: boolean;
 }
 
@@ -36,15 +36,15 @@ export const useChangeHistoryCompare = ({
   listItems,
   selectedChange,
   selectedChangeId,
-  compareOverride,
+  compareMode,
   enabled = true,
 }: UseChangeHistoryCompareArgs): UseChangeHistoryCompareResult => {
   const endpoints = useMemo(
     () =>
-      enabled && selectedChangeId
-        ? resolveChangeHistoryCompareEndpoints(listItems, selectedChangeId, compareOverride)
+      enabled && selectedChangeId && compareMode
+        ? resolveChangeHistoryCompareEndpoints(listItems, selectedChangeId, compareMode)
         : undefined,
-    [compareOverride, enabled, listItems, selectedChangeId]
+    [compareMode, enabled, listItems, selectedChangeId]
   );
 
   const baselineChangeId = endpoints?.baselineChangeId;
@@ -61,26 +61,49 @@ export const useChangeHistoryCompare = ({
     Boolean(selectedChangeId) &&
     targetChangeId !== selectedChangeId;
 
-  const { change: loadedBaselineChange, isLoading: isLoadingBaseline } = useChangeHistoryDetail({
+  const { change: loadedBaselineChange, isLoading: isFetchingBaseline } = useChangeHistoryDetail({
     adapter,
     objectId,
     changeId: baselineChangeId,
     enabled: shouldLoadBaseline,
   });
 
-  const { change: loadedTargetChange, isLoading: isLoadingTarget } = useChangeHistoryDetail({
+  const { change: loadedTargetChange, isLoading: isFetchingTarget } = useChangeHistoryDetail({
     adapter,
     objectId,
     changeId: targetChangeId,
     enabled: shouldLoadTarget,
   });
 
+  // keepPreviousData keeps `isLoading` false while a new id loads, so data for a different id
+  // also counts as loading.
+  const isLoadingBaseline =
+    isFetchingBaseline ||
+    (loadedBaselineChange !== undefined && loadedBaselineChange.id !== baselineChangeId);
+  const isLoadingTarget =
+    isFetchingTarget ||
+    (loadedTargetChange !== undefined && loadedTargetChange.id !== targetChangeId);
+
+  // keepPreviousData can leave a detail for a different id here; ignore it.
   const baselineChange =
-    baselineChangeId === selectedChangeId ? selectedChange : loadedBaselineChange;
-  const targetChange = targetChangeId === selectedChangeId ? selectedChange : loadedTargetChange;
+    baselineChangeId === selectedChangeId
+      ? selectedChange
+      : loadedBaselineChange?.id === baselineChangeId
+      ? loadedBaselineChange
+      : undefined;
+  const targetChange =
+    targetChangeId === selectedChangeId
+      ? selectedChange
+      : loadedTargetChange?.id === targetChangeId
+      ? loadedTargetChange
+      : undefined;
+
+  const isLoadingCompareContext =
+    (shouldLoadBaseline && isLoadingBaseline) || (shouldLoadTarget && isLoadingTarget);
 
   const compareSpec = useMemo((): ChangeHistoryCompareSpec | undefined => {
-    if (!endpoints || !baselineChange || !targetChange) {
+    // while loading, baseline/target may still hold the previous comparison's data
+    if (isLoadingCompareContext || !endpoints || !baselineChange || !targetChange) {
       return undefined;
     }
 
@@ -89,11 +112,7 @@ export const useChangeHistoryCompare = ({
       baseline: baselineChange,
       target: targetChange,
     };
-  }, [baselineChange, endpoints, targetChange]);
+  }, [baselineChange, endpoints, isLoadingCompareContext, targetChange]);
 
-  return {
-    compareSpec,
-    isLoadingCompareContext:
-      (shouldLoadBaseline && isLoadingBaseline) || (shouldLoadTarget && isLoadingTarget),
-  };
+  return { compareSpec, isLoadingCompareContext };
 };
