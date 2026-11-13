@@ -7,10 +7,11 @@
 
 import { getIndexForESQLQuery, getInitialESQLQuery, getESQLQueryColumns } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import type { LensSerializedState } from '@kbn/lens-common';
+import type { LensSerializedState, TextBasedPersistedState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { withTimeout } from '@kbn/std';
 import { createEsqlAdHocDataView } from '../data_views_service/create_esql_ad_hoc_data_view';
+import { withoutEsqlLayerDataViewSpecs } from '../data_views_service/esql_layer_data_view_specs';
 import { isESQLModeEnabled } from './initializers/utils';
 import type { LensEmbeddableStartServices } from './types';
 
@@ -139,7 +140,7 @@ async function buildESQLAttributesFromDataView(
     return;
   }
   const [firstSuggestion] = allSuggestions;
-  return getLensAttributesFromSuggestion({
+  const attributes = getLensAttributesFromSuggestion({
     filters: [],
     query: defaultEsqlQuery,
     suggestion: {
@@ -148,4 +149,16 @@ async function buildESQLAttributesFromDataView(
     },
     dataView,
   });
+  const { adHocDataViews, datasourceStates } = attributes.state;
+  return {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      adHocDataViews: withoutEsqlLayerDataViewSpecs(
+        adHocDataViews ?? {},
+        (datasourceStates.textBased as TextBasedPersistedState | undefined)?.layers,
+        []
+      ),
+    },
+  };
 }

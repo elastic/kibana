@@ -1,4 +1,5 @@
-@launchdarkly/js-client-sdk
+@openfeature/ofrep-web-provider
+cbor2
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm

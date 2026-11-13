@@ -28,7 +28,6 @@
       "savedSearch",
       "dataViewFieldEditor",
       "dataViewEditor",
-      "expressions",
       "unifiedDocViewer",
       "unifiedSearch",
       "contentManagement"
@@ -52,6 +51,7 @@
       "apmSourcesAccess",
       "fileUpload",
       "cps",
+      "licensing",
       "alertingVTwo",
       "feedback",
       "searchSessionsManagement"

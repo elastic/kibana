@@ -1057,4 +1057,69 @@ describe('openAIAdapter', () => {
       });
     });
   });
+
+  describe('forced tool choice', () => {
+    const tools = { set_title: { description: 'set the title' } };
+
+    const mockConnectorModel = (defaultModel: string) => {
+      executorMock.getConnector.mockReturnValue({
+        ...connector,
+        config: { defaultModel },
+      });
+    };
+
+    it('sends `auto` instead of a named function for a Claude model that rejects forced tool choice', () => {
+      mockConnectorModel('claude-sonnet-5-5');
+
+      openAIAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.tool_choice).toBe('auto');
+    });
+
+    it('keeps the named function for a Claude model that accepts forced tool choice', () => {
+      mockConnectorModel('claude-sonnet-4-6');
+
+      openAIAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
+      });
+    });
+
+    it('keeps the named function for a non-Claude model', () => {
+      mockConnectorModel('gpt-5');
+
+      openAIAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
+      });
+    });
+  });
 });

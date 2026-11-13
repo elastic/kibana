@@ -16,20 +16,17 @@ import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
-  TimelineEdges,
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
   TimelineEventsAllStrategyResponse,
-  TimelineItem,
-} from '@kbn/timelines-plugin/common';
-import type { EsHitRecord } from '@kbn/discover-utils';
-import type {
   EntityType,
   RunTimeMappings,
   TimelineFactoryQueryTypes,
   TimelineRequestSortField,
   TimelineStrategyResponseType,
-} from '@kbn/timelines-plugin/common/search_strategy';
+} from '@kbn/securitysolution-timeline-search-strategy';
+import type { TimelineEdges, TimelineItem } from '@kbn/securitysolution-timeline-common';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { dataTableActions, Direction } from '@kbn/securitysolution-data-table';
 import { DETECTIONS_TABLE_IDS } from '../../../detections/constants';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';

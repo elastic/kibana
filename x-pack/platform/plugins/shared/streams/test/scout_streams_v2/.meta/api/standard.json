@@ -1,0 +1,162 @@
+{
+  "sha1": "d11d0864b49fc172d6fae5e495b74ec27d50f743",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "014111256117186-3505fd1582afaa6",
+      "title": "Streams V2 privileges V2 read can read the unit but not manage it or use legacy routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 174,
+        "column": 49
+      }
+    },
+    {
+      "id": "014111256117186-3a5f457e6f2664e",
+      "title": "Streams V2 privileges V2 read grants the data stream stats routes the destination indices table uses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 183,
+        "column": 4
+      }
+    },
+    {
+      "id": "014111256117186-d6f4b67e079b9dc",
+      "title": "Streams V2 privileges legacy Streams all grants the legacy routes but no V2 route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 245,
+        "column": 9
+      }
+    },
+    {
+      "id": "014111256117186-10afd1a5fc2657c",
+      "title": "Streams V2 privileges V2 all without manage_own_api_key cannot mint a source key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 252,
+        "column": 35
+      }
+    },
+    {
+      "id": "014111256117186-b708b919cf59d16",
+      "title": "Streams V2 privileges V2 all with manage_own_api_key but no streams application privilege cannot mint a source key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 264,
+        "column": 27
+      }
+    },
+    {
+      "id": "014111256117186-d414117db5b963d",
+      "title": "Streams V2 privileges V2 manager mints, lists and revokes a source-scoped key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 272,
+        "column": 49
+      }
+    },
+    {
+      "id": "014111256117186-7a84dea464e41dd",
+      "title": "Streams V2 privileges V2 all with manage_own_api_key but no index privileges cannot mint a destination key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 335,
+        "column": 24
+      }
+    },
+    {
+      "id": "014111256117186-3c0594eeb09ae6e",
+      "title": "Streams V2 privileges V2 manager mints and revokes a destination key scoped to its write patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 349,
+        "column": 95
+      }
+    },
+    {
+      "id": "014111256117186-b775d5f2c2e5053",
+      "title": "Streams V2 privileges V2 all revokes a key another user minted without any API key privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 394,
+        "column": 13
+      }
+    },
+    {
+      "id": "014111256117186-6b8957468cb54da",
+      "title": "Streams V2 privileges api_keys in a PUT body is rejected and the registry is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 405,
+        "column": 4
+      }
+    },
+    {
+      "id": "014111256117186-23e7dce5f980211",
+      "title": "Streams V2 privileges V2 all in one space grants V2 routes in that space only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout_streams_v2/api/tests/v2_privileges.spec.ts",
+        "line": 448,
+        "column": 24
+      }
+    }
+  ]
+}

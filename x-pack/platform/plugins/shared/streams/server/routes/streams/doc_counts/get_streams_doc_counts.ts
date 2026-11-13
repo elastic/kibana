@@ -43,10 +43,12 @@ export async function getDocCountsForStreams(options: {
    * When omitted, doc counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName } = options;
+  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName, streamNames } = options;
 
-  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
   if (!streams.length) {
     return [];
   }
@@ -131,10 +133,12 @@ export async function getDegradedDocCountsForStreams(options: {
    * When omitted, degraded counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamName } = options;
+  const { esClient, streamName, streamNames } = options;
 
-  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];
@@ -221,21 +225,23 @@ export async function getIngestionDocCountsForStreams(options: {
   start: number;
   end: number;
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamsClient, start, end, streamName } = options;
+  const { esClient, streamsClient, start, end, streamName, streamNames } = options;
 
-  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];
   }
 
-  const streamNames = streams.map((stream) => stream.name);
+  const resolvedStreamNames = streams.map((stream) => stream.name);
   const privilegeChunks = await processAsyncInChunks<
     string,
     Record<string, { read_failure_store: boolean }>
   >({
-    items: streamNames,
+    items: resolvedStreamNames,
     processChunk: (chunk) => streamsClient.getPrivilegesPerStream(chunk),
   });
   const readFailureStoreByStream: Record<string, { read_failure_store: boolean }> = Object.assign(
@@ -351,10 +357,12 @@ export async function getFailedDocCountsForStreams(options: {
    * When omitted, failed counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, start, end, streamName } = options;
+  const { esClient, start, end, streamName, streamNames } = options;
 
-  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];

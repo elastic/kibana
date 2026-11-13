@@ -11,6 +11,7 @@ import {
   DEFAULT_NAMESPACE,
   deriveGroupPolicyName,
   getBareNamePackage,
+  getCreateDatasetTemplates,
   getSourcePolicyName,
   groupByPackage,
 } from './deploy_group_helpers';
@@ -88,6 +89,58 @@ describe('groupByPackage — namespaces', () => {
 
       const { createGroups, policyUpdates } = planPolicyUpdates(toDeploy, groups, {
         elb: 'policy-A',
+      });
+
+      expect(createGroups).toEqual([]);
+      expect(policyUpdates.map((u) => u.policyId)).toEqual(['policy-A']);
+    });
+  });
+
+  describe('global namespace', () => {
+    it('puts every original without a namespace of its own in the global one', () => {
+      const groups = groupByPackage(originals, [], {}, DEFAULT_NAMESPACE, 'prod');
+
+      expect(groups.map((g) => [g.groupId, g.namespace, g.instanceIds])).toEqual([
+        ['aws__prod', 'prod', ['elb', 's3']],
+      ]);
+    });
+
+    it('lets a duplicate keep its own namespace over the global one', () => {
+      const [, duplicate] = groupByPackage(
+        originals,
+        [original('elb__dup-1')],
+        { 'elb__dup-1': withNamespace('staging') },
+        DEFAULT_NAMESPACE,
+        'prod'
+      );
+
+      expect(duplicate.namespace).toBe('staging');
+    });
+
+    it('gives a duplicate without a namespace the global one', () => {
+      const [, duplicate] = groupByPackage(
+        originals,
+        [original('elb__dup-1')],
+        { 'elb__dup-1': withNamespace() },
+        DEFAULT_NAMESPACE,
+        'prod'
+      );
+
+      expect(duplicate.namespace).toBe('prod');
+    });
+
+    it('keeps the global namespace without a default namespace too', () => {
+      const [group] = groupByPackage(originals, [], {}, undefined, 'prod');
+
+      expect(group.namespace).toBe('prod');
+    });
+
+    it('still finds the policy of a tracked instance after the namespace changed', () => {
+      const groups = groupByPackage(originals, [], {}, DEFAULT_NAMESPACE, 'prod');
+
+      const { createGroups, policyUpdates } = planPolicyUpdates(groups, groups, {
+        elb: 'policy-A',
+        s3: 'policy-A',
       });
 
       expect(createGroups).toEqual([]);
@@ -290,5 +343,58 @@ describe('getSourcePolicyName', () => {
     expect(deriveGroupPolicyName(prodGroup, 'my-aws')).toBe(
       getSourcePolicyName('my-aws', 'aws', 'prod')
     );
+  });
+});
+
+describe('getCreateDatasetTemplates', () => {
+  const otelService = {
+    id: 'ec2',
+    packageName: 'aws_cloudwatch_input_otel',
+    dataStreams: ['ec2'],
+    defaultEnabled: true,
+    varDefsByDataStream: {
+      ec2: {
+        inputs: ['otelcol'],
+        defaultEnabledInputs: ['otelcol'],
+        varDefsByInput: {
+          otelcol: { 'data_stream.dataset': { name: 'data_stream.dataset', default: 'aws.ec2' } },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+  const ecsService = {
+    id: 'elb',
+    packageName: 'aws',
+    dataStreams: ['elb_logs'],
+    defaultEnabled: true,
+    varDefsByDataStream: { elb_logs: { inputs: ['aws-s3'], varDefsByInput: {} } },
+  } as unknown as AwsServiceMatrixEntry;
+
+  const group = (members: Array<[string, AwsServiceMatrixEntry]>) =>
+    ({
+      instanceIds: members.map(([id]) => id),
+      members: members.map(([id, service]) => ({
+        instance: { instanceId: id, serviceId: service.id, name: id, isDuplicate: false },
+        service,
+      })),
+    } as unknown as Parameters<typeof getCreateDatasetTemplates>[0]);
+  const optedOut = (createDatasetTemplates: boolean): ServiceVars => ({
+    enabledDataStreams: ['ec2'],
+    varsByDataStream: {},
+    createDatasetTemplates,
+  });
+
+  it('is on by default, so the request says so', () => {
+    expect(getCreateDatasetTemplates(group([['a', otelService]]), {})).toBe(true);
+  });
+
+  it('is off when the policy opted out', () => {
+    expect(getCreateDatasetTemplates(group([['a', otelService]]), { a: optedOut(false) })).toBe(
+      false
+    );
+  });
+
+  it('is left out for a policy the switch does not apply to', () => {
+    expect(getCreateDatasetTemplates(group([['a', ecsService]]), {})).toBeUndefined();
   });
 });

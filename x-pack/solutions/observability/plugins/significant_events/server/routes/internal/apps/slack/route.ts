@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { badGateway, conflict, forbidden, notFound } from '@hapi/boom';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { badGateway, conflict, forbidden, notFound, tooManyRequests } from '@hapi/boom';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import type {
+  SlackAppAvailableChannelsResponse,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
   SlackAppConfirmResponse,
@@ -56,16 +57,20 @@ const statusSlackAppRoute = createServerRoute({
     access: 'internal',
     summary: 'Get Elastic Slack App connection status',
     description:
-      'Returns whether the Elastic Slack App is available and its current connection state, advancing an in-progress install when the Relay reports completion.',
+      'Returns whether the Elastic Slack App is available and its current connection state. For callers who can manage the connection, it also advances an in-progress install when the Relay reports completion.',
   },
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+      extendedPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({}),
   handler: async ({ request, server }): Promise<SlackAppStatusResponse> => {
-    return new SlackAppService(server).getStatus(request);
+    const canAdvanceInstall =
+      request.authzResult?.[NIGHTSHIFT_API_PRIVILEGES.manage] === true &&
+      request.authzResult?.[NIGHTSHIFT_API_PRIVILEGES.configure] === true;
+    return new SlackAppService(server).getStatus(request, { canAdvanceInstall });
   },
 });
 
@@ -147,11 +152,38 @@ const bindingsSlackAppRoute = createServerRoute({
 
 function throwRelayError(error: RelayRequestError): never {
   const msg = error.relayMessage ?? error.message;
-  if (error.statusCode === 409) throw conflict(msg);
-  if (error.statusCode === 403) throw forbidden(msg);
-  if (error.statusCode === 404) throw notFound(msg);
-  throw badGateway(msg);
+  // Boom `data` becomes the response's `attributes.data`, where the UI reads `reason`.
+  const data = error.reason ? { reason: error.reason } : undefined;
+  if (error.statusCode === 409) throw conflict(msg, data ?? { reason: 'channel_taken' });
+  if (error.statusCode === 403) throw forbidden(msg, data);
+  if (error.statusCode === 404) throw notFound(msg, data);
+  if (error.statusCode === 429) throw tooManyRequests(msg, data);
+  throw badGateway(msg, data);
 }
+
+const availableChannelsSlackAppRoute = createServerRoute({
+  endpoint: 'GET /internal/significant_events/apps/slack/available_channels',
+  options: {
+    access: 'internal',
+    summary: 'List Slack channels that can be connected',
+    description:
+      'Returns the public channels the Elastic Slack App is in that no deployment has connected yet, as reported by the Relay. Private channels are never listed.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+    },
+  },
+  params: lazySchema(() => z.object({})),
+  handler: async ({ request, server }): Promise<SlackAppAvailableChannelsResponse> => {
+    try {
+      return await new SlackAppService(server).listAvailableChannels(request);
+    } catch (error) {
+      if (error instanceof RelayRequestError) throwRelayError(error);
+      throw error;
+    }
+  },
+});
 
 const bindChannelSlackAppRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/apps/slack/bindings/{channelId}/bind',
@@ -213,6 +245,7 @@ export const internalSlackAppRoutes = {
   ...confirmSlackAppRoute,
   ...disconnectSlackAppRoute,
   ...bindingsSlackAppRoute,
+  ...availableChannelsSlackAppRoute,
   ...bindChannelSlackAppRoute,
   ...unbindChannelSlackAppRoute,
 };

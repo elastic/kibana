@@ -107,7 +107,6 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-server",
-    "@kbn/intercepts-plugin",
     "@kbn/lens-plugin",
     "@kbn/mock-idp-utils",
     "@kbn/es",
@@ -141,7 +140,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/datemath",
     "@kbn/response-ops-rule-params",
-    "@kbn/serverless-common-settings",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/core-chrome-browser",
     "@kbn/licensing-types",
@@ -164,6 +162,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-common",
     "@kbn/alerting-v2-schemas",
-    "@kbn/core-chrome-browser-components"
+    "@kbn/core-chrome-browser-components",
+    "@kbn/content-list-common"
   ]
 }

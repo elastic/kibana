@@ -1568,4 +1568,291 @@ describe('WorkflowExecutionRepository', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('tryRevertResumeContext', () => {
+    const params = {
+      workflowExecutionId: 'exec-1',
+      spaceId: 'default',
+      resumedBy: 'analyst',
+      resumedAt: '2026-10-20T16:00:48.350Z',
+      previousContext: {
+        resumeInput: null,
+        resumedBy: 'earlier-analyst',
+        resumedAt: '2026-10-19T09:00:00.000Z',
+        pendingInteractiveResume: false,
+      },
+    };
+    const pendingDoc = (overrides: Record<string, unknown> = {}) => ({
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      context: {
+        inputs: { a: 1 },
+        resumeInput: { approved: false },
+        resumedBy: 'analyst',
+        resumedAt: '2026-10-20T16:00:48.350Z',
+        pendingInteractiveResume: true,
+        ...overrides,
+      },
+    });
+    /** Runs the updater against each document, as the bulk helper does across conflict retries. */
+    const mockBulkRunningUpdater = (result: 'updated' | 'noop', ...docs: unknown[]) =>
+      workflowExecutionsDataClient.bulk.mockImplementation(async ({ items }) => {
+        const [item] = items;
+        if (!isBulkUpdaterItem(item)) {
+          throw new Error('expected bulk updater item');
+        }
+        docs.forEach((doc) => item.updater(doc as never));
+        return asBulkResponse({
+          errors: false,
+          items: [{ id: 'exec-1', index: '.workflows-executions', result }],
+        });
+      });
+
+    it('restores the context values the response replaced', async () => {
+      mockBulkRunningUpdater('updated', pendingDoc());
+
+      await expect(repository.tryRevertResumeContext(params)).resolves.toBe('reverted');
+
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
+        refresh: false,
+        items: [
+          expect.objectContaining({
+            operation: 'update',
+            documentId: 'exec-1',
+            sourceFields: ['spaceId', 'status', 'context'],
+            retryOnConflict: 3,
+          }),
+        ],
+      });
+      const [item] = workflowExecutionsDataClient.bulk.mock.calls[0][0].items;
+      if (!isBulkUpdaterItem(item)) {
+        throw new Error('expected bulk updater item');
+      }
+      expect(item.updater(pendingDoc() as never)).toEqual({
+        context: {
+          resumeInput: null,
+          resumedBy: 'earlier-analyst',
+          resumedAt: '2026-10-19T09:00:00.000Z',
+          pendingInteractiveResume: false,
+        },
+      });
+    });
+
+    it('writes nulls for the values that were absent before the response', async () => {
+      mockBulkRunningUpdater('updated', pendingDoc());
+
+      await repository.tryRevertResumeContext({ ...params, previousContext: undefined });
+
+      const [item] = workflowExecutionsDataClient.bulk.mock.calls[0][0].items;
+      if (!isBulkUpdaterItem(item)) {
+        throw new Error('expected bulk updater item');
+      }
+      expect(item.updater(pendingDoc() as never)).toEqual({
+        context: {
+          resumeInput: null,
+          resumedBy: null,
+          resumedAt: null,
+          pendingInteractiveResume: null,
+        },
+      });
+    });
+
+    it.each([
+      ['not_pending', 'it is in another space', { ...pendingDoc(), spaceId: 'other' }, params],
+      [
+        'not_pending',
+        'the response was never written',
+        pendingDoc({ resumedAt: 'earlier', resumedBy: 'earlier-analyst' }),
+        params,
+      ],
+      ['not_pending', 'another responder wrote it', pendingDoc({ resumedBy: 'other' }), params],
+      ['consumed', 'a runner took the response', pendingDoc({ resumeInput: null }), params],
+      [
+        'consumed',
+        'a runner marked the response as taken',
+        pendingDoc({ resumeInputTakenFor: '2026-10-20T16:00:48.350Z' }),
+        params,
+      ],
+      [
+        'in_flight',
+        'a runner is processing the execution',
+        { ...pendingDoc(), status: ExecutionStatus.RUNNING },
+        params,
+      ],
+      [
+        'conflict',
+        'an earlier response was still pending',
+        pendingDoc(),
+        { ...params, previousContext: { resumeInput: { approved: true } } },
+      ],
+    ])('returns %s without writing when %s', async (expected, _, doc, revertParams) => {
+      mockBulkRunningUpdater('noop', doc);
+
+      await expect(repository.tryRevertResumeContext(revertParams)).resolves.toBe(expected);
+    });
+
+    it('reverts the response of a terminated execution that never consumed it', async () => {
+      mockBulkRunningUpdater('updated', { ...pendingDoc(), status: ExecutionStatus.CANCELLED });
+
+      await expect(repository.tryRevertResumeContext(params)).resolves.toBe('reverted');
+    });
+
+    it('lets the last updater run decide after a version conflict', async () => {
+      mockBulkRunningUpdater('noop', pendingDoc(), pendingDoc({ resumeInput: null }));
+
+      await expect(repository.tryRevertResumeContext(params)).resolves.toBe('consumed');
+    });
+
+    it.each([
+      ['document_missing_exception', 'not_found'],
+      ['version_conflict_engine_exception', 'conflict'],
+    ])('maps a %s item error to %s', async (type, expected) => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [{ id: 'exec-1', index: '.workflows-executions', error: { type, reason: type } }],
+        })
+      );
+
+      await expect(repository.tryRevertResumeContext(params)).resolves.toBe(expected);
+    });
+
+    it('throws on an unexpected item error', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            {
+              id: 'exec-1',
+              index: '.workflows-executions',
+              error: { type: 'es_rejected_execution_exception', reason: 'queue full' },
+            },
+          ],
+        })
+      );
+
+      await expect(repository.tryRevertResumeContext(params)).rejects.toThrow(
+        'Bulk updater write failed for exec-1'
+      );
+    });
+  });
+
+  describe('tryTakeResumeInput', () => {
+    const ref = {
+      workflowExecutionId: 'exec-1',
+      spaceId: 'default',
+      resumedBy: 'analyst',
+      resumedAt: '2026-10-20T16:00:48.350Z',
+    };
+    const storedDoc = (overrides: Record<string, unknown> = {}) => ({
+      spaceId: 'default',
+      context: {
+        resumeInput: { approved: false },
+        resumedBy: 'analyst',
+        resumedAt: '2026-10-20T16:00:48.350Z',
+        ...overrides,
+      },
+    });
+    const mockBulkRunningUpdater = (
+      result: 'updated' | 'noop',
+      ...docs: unknown[]
+    ): Array<unknown> => {
+      const patches: unknown[] = [];
+      workflowExecutionsDataClient.bulk.mockImplementation(async ({ items }) => {
+        const [item] = items;
+        if (!isBulkUpdaterItem(item)) {
+          throw new Error('expected bulk updater item');
+        }
+        patches.push(...docs.map((doc) => item.updater(doc as never)));
+        return asBulkResponse({
+          errors: false,
+          items: [{ id: 'exec-1', index: '.workflows-executions', result }],
+        });
+      });
+      return patches;
+    };
+
+    it('marks the stored response as taken', async () => {
+      const patches = mockBulkRunningUpdater('updated', storedDoc());
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(true);
+
+      expect(patches).toEqual([{ context: { resumeInputTakenFor: ref.resumedAt } }]);
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
+        refresh: false,
+        items: [
+          expect.objectContaining({
+            operation: 'update',
+            documentId: 'exec-1',
+            sourceFields: ['spaceId', 'context'],
+            retryOnConflict: 3,
+          }),
+        ],
+      });
+    });
+
+    it('treats a response an earlier run already marked as taken', async () => {
+      const patches = mockBulkRunningUpdater(
+        'noop',
+        storedDoc({ resumeInputTakenFor: ref.resumedAt })
+      );
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(true);
+
+      expect(patches).toEqual(['noop']);
+    });
+
+    it.each([
+      ['it was taken back', storedDoc({ resumeInput: null, resumedBy: null, resumedAt: null })],
+      ['it was already applied', storedDoc({ resumeInput: null })],
+      ['a newer response replaced it', storedDoc({ resumedAt: '2026-10-20T16:05:00.000Z' })],
+      ['it is in another space', { ...storedDoc(), spaceId: 'other' }],
+    ])('refuses the response when %s', async (_, doc) => {
+      mockBulkRunningUpdater('noop', doc);
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(false);
+    });
+
+    it('lets the last updater run decide after a version conflict', async () => {
+      mockBulkRunningUpdater('noop', storedDoc(), storedDoc({ resumeInput: null }));
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(false);
+    });
+
+    it('refuses when the execution is gone', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            {
+              id: 'exec-1',
+              index: '.workflows-executions',
+              error: { type: 'document_missing_exception', reason: 'missing' },
+            },
+          ],
+        })
+      );
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(false);
+    });
+
+    it('throws when version conflicts outlast the retries', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            {
+              id: 'exec-1',
+              index: '.workflows-executions',
+              error: { type: 'version_conflict_engine_exception', reason: 'conflict' },
+            },
+          ],
+        })
+      );
+
+      await expect(repository.tryTakeResumeInput(ref)).rejects.toThrow(
+        'Version conflict taking the resume input of workflow execution exec-1'
+      );
+    });
+  });
 });

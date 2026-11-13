@@ -123,7 +123,7 @@ Discover uses `DiscoverAppHeader` from `@kbn/app-header/discover` to place its U
 the title. This is a Discover-specific layout exception; other apps should use the structured
 `tabs` or `badges` props on `AppHeader`. The public header components discard undeclared props, so
 this internal title slot cannot be forced through a type suppression. When the tabs bar is present,
-it owns the bottom separator and title actions remain visible without hovering.
+it owns the bottom separator.
 
 ## Loading skeleton
 

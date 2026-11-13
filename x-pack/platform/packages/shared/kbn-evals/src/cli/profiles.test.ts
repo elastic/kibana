@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import Os from 'os';
 import { safeExec } from './utils';
 import {
+  probeHttp,
   readSuiteSecretFromDevVault,
   readVaultConfigFromDevVault,
   resetDevVaultConfigCache,
+  resolveDefaultJudgeConnectorId,
 } from './profiles';
 
 jest.mock('./utils', () => ({
@@ -144,5 +147,66 @@ describe('readSuiteSecretFromDevVault', () => {
     expect(readSuiteSecretFromDevVault('nightshift')).toBeUndefined();
     expect(loggedOutput()).toContain('does not match the suite config shape');
     expect(loggedOutput()).not.toContain('leaked-secret');
+  });
+});
+
+describe('resolveDefaultJudgeConnectorId', () => {
+  // A repo root without vault config files.
+  const repoRoot = Os.tmpdir();
+
+  beforeEach(() => {
+    resetDevVaultConfigCache();
+    mockedSafeExec.mockReset();
+    jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('uses evaluationConnectorId from the dev-vault profile', () => {
+    mockedSafeExec.mockReturnValue(encode(VALID_CONFIG));
+    expect(resolveDefaultJudgeConnectorId(repoRoot, 'dev-vault')).toBe('judge');
+  });
+
+  it('is undefined when the profile has no config', () => {
+    expect(resolveDefaultJudgeConnectorId(repoRoot, 'missing')).toBeUndefined();
+  });
+
+  it('is undefined when the profile value is a placeholder', () => {
+    mockedSafeExec.mockReturnValue(
+      encode({ ...VALID_CONFIG, evaluationConnectorId: 'REPLACE_ME' })
+    );
+    expect(resolveDefaultJudgeConnectorId(repoRoot, 'dev-vault')).toBeUndefined();
+  });
+});
+
+describe('probeHttp', () => {
+  const originalFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it('cancels the unread body once the headers arrive', async () => {
+    const cancel = jest.fn().mockResolvedValue(undefined);
+    globalThis.fetch = jest.fn().mockResolvedValue({ body: { cancel } }) as typeof fetch;
+
+    await expect(probeHttp('http://es.example')).resolves.toBe(true);
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('stays reachable when cancelling the body fails', async () => {
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      body: { cancel: jest.fn().mockRejectedValue(new Error('reset')) },
+    }) as typeof fetch;
+
+    await expect(probeHttp('http://es.example')).resolves.toBe(true);
+  });
+
+  it('returns false when the request fails', async () => {
+    globalThis.fetch = jest.fn().mockRejectedValue(new Error('offline')) as typeof fetch;
+
+    await expect(probeHttp('http://es.example')).resolves.toBe(false);
   });
 });

@@ -13,8 +13,10 @@ import {
   DEFAULT_NAMESPACE,
   PACKAGES,
   PRODUCTION_NAMESPACE,
+  buildDataStreamName,
   cleanUpAll,
   datasetNames,
+  deleteDataStreamIfExists,
   ensurePackageInstalled,
   getInitialTestLogs,
   getLogsForDataset,
@@ -32,6 +34,11 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let uninstallApache: () => Promise<void>;
+
+    const ownedDataStreams = [
+      ...datasetNames.map((dataset) => buildDataStreamName({ dataset })),
+      buildDataStreamName({ dataset: APACHE_ACCESS_DATASET, namespace: PRODUCTION_NAMESPACE }),
+    ];
 
     // Read-only data, so it is seeded once for the whole file. Failure-store
     // scenarios live in failure_store.spec.ts, which owns that cluster state.
@@ -60,13 +67,20 @@ test.describe(
       ]);
     });
 
+    // Admin: the size and last activity columns need the `monitor` index privilege, which neither
+    // `viewer` nor `editor` has.
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.datasetQuality.goto();
     });
 
-    test.afterAll(async ({ logsSynthtraceEsClient }) => {
-      await cleanUpAll([() => logsSynthtraceEsClient.clean(), () => uninstallApache()]);
+    test.afterAll(async ({ esClient, log }) => {
+      await cleanUpAll([
+        ...ownedDataStreams.map(
+          (dataStream) => () => deleteDataStreamIfExists(esClient, dataStream, log)
+        ),
+        () => uninstallApache(),
+      ]);
     });
 
     test('sorts by data set name and shows the namespace', async ({ pageObjects }) => {

@@ -27,7 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
-import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
+import {
+  getRequiredTextFields,
+  resolveFieldMeta,
+  resolveVarGroupSelections,
+  toTyped,
+} from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
 import { MAX_POLICY_NAME_LENGTH } from './integration_settings';
@@ -42,14 +47,19 @@ interface DuplicateServiceModalProps {
   sourceConfig: ServiceVars;
   /** Pre-filled name suggestion (e.g. "AWS CloudTrail [Duplicate]"). */
   suggestedName: string;
+  /** The suggestion for a namespace; the name follows it until the user types one. */
+  suggestName?: (namespace: string) => string;
   /** All existing instance names — used for collision detection. */
   existingNames: string[];
   globalRegion: string;
+  /** The namespace the duplicate starts with. */
+  globalNamespace?: string;
   onAdd: (
     name: string,
     varsByDataStream: Record<string, ServiceDataStreamVars>,
     enabledDataStreams: string[],
-    namespace: string
+    namespace: string,
+    createDatasetTemplates: boolean
   ) => void;
   onCancel: () => void;
 }
@@ -58,18 +68,26 @@ export function DuplicateServiceModal({
   service,
   sourceConfig,
   suggestedName,
+  suggestName,
   existingNames,
   globalRegion,
+  globalNamespace = '',
   onAdd,
   onCancel,
 }: DuplicateServiceModalProps) {
   const [name, setName] = useState(suggestedName);
   const [nameTouched, setNameTouched] = useState(false);
+  // Whether the user typed a name; until then it follows the namespace.
+  const [nameEdited, setNameEdited] = useState(false);
 
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...sourceConfig.varsByDataStream,
   }));
-  const [namespace, setNamespace] = useState(sourceConfig.namespace ?? '');
+  const [namespace, setNamespace] = useState(globalNamespace);
+  // The duplicate deploys in a policy of its own, so it takes its own template choice.
+  const [createDatasetTemplates, setCreateDatasetTemplates] = useState(
+    sourceConfig.createDatasetTemplates ?? true
+  );
   const showNamespace = supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
@@ -101,15 +119,21 @@ export function DuplicateServiceModal({
       ? dsInfo.defaultEnabledInputs
       : dsInfo?.inputs?.slice(0, 1) ?? [];
     const dsView = makeDsView(service, dsId);
-    return activeInputs.some((inp) =>
-      getRequiredTextFields(dsView, inp).some((f) => {
+    return activeInputs.some((inp) => {
+      // The copied (or changed) var_group selection decides which fields are required.
+      const selections = resolveVarGroupSelections(
+        dsView,
+        inp,
+        dsVars.varGroupSelectionsByInput?.[inp]
+      );
+      return getRequiredTextFields(dsView, inp, selections).some((f) => {
         const meta = resolveFieldMeta(dsView, inp, f);
         const raw = dsVars.varsByInput[inp]?.[f];
         const effective = meta ? toTyped(raw, meta) : raw ?? '';
         if (Array.isArray(effective)) return effective.length === 0;
         return typeof effective === 'string' && !effective.trim();
-      })
-    );
+      });
+    });
   });
 
   const canAdd = !nameInvalid && !anyRequiredEmpty && !isNamespaceInvalid;
@@ -140,7 +164,7 @@ export function DuplicateServiceModal({
       if (singleDs) return true;
       return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
     });
-    onAdd(trimmedName, draftByDs, enabledDataStreams, namespace);
+    onAdd(trimmedName, draftByDs, enabledDataStreams, namespace, createDatasetTemplates);
   };
 
   return (
@@ -184,6 +208,7 @@ export function DuplicateServiceModal({
             onChange={(e) => {
               setName(e.target.value);
               setNameTouched(true);
+              setNameEdited(true);
             }}
             onBlur={() => setNameTouched(true)}
             isInvalid={nameTouched && nameInvalid}
@@ -195,7 +220,14 @@ export function DuplicateServiceModal({
 
         {showNamespace && (
           <>
-            <InstanceNamespaceField namespace={namespace} onChange={setNamespace} />
+            <InstanceNamespaceField
+              emptyUsesGlobal
+              namespace={namespace}
+              onChange={(value) => {
+                setNamespace(value);
+                if (!nameEdited && suggestName) setName(suggestName(value));
+              }}
+            />
             <EuiSpacer size="m" />
           </>
         )}
@@ -223,6 +255,30 @@ export function DuplicateServiceModal({
               };
             })
           }
+          onVarGroupSelectionChange={(dsId, input, groupName, optionName) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = singleDs
+                ? dsInfo?.inputs ?? []
+                : dsInfo?.defaultEnabledInputs ?? [];
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  varGroupSelectionsByInput: {
+                    ...(existing.varGroupSelectionsByInput ?? {}),
+                    [input]: {
+                      ...(existing.varGroupSelectionsByInput?.[input] ?? {}),
+                      [groupName]: optionName,
+                    },
+                  },
+                },
+              };
+            })
+          }
+          createDatasetTemplates={createDatasetTemplates}
+          onCreateDatasetTemplatesChange={setCreateDatasetTemplates}
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];

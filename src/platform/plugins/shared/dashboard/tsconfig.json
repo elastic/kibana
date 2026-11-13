@@ -13,9 +13,10 @@
     "test/scout_oas_schema/**/*.json",
     "test/scout_anonymous_authc/**/*",
     "test/scout_search_sessions/**/*",
-    "test/scout_test_plugins/**/*",
+    "test/scout_test_plugins/**/*"
   ],
   "kbn_references": [
+    "@kbn/data-source",
     "@kbn/search-sessions-management-plugin",
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -61,7 +62,6 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/content-management-tabbed-table-list-view",
-    "@kbn/content-management-table-list-view-table",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/content-management-content-editor",
     "@kbn/serverless",
@@ -136,6 +136,14 @@
     "@kbn/ui-callout",
     "@kbn/zod-helpers",
     "@kbn/as-code-dashboard-schema",
+    "@kbn/change-history",
+    "@kbn/change-history-ui",
+    "@kbn/spaces-plugin",
+    "@kbn/core-http-server-mocks",
+    "@kbn/content-list-page",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/content-list",
+    "@kbn/content-list-provider-client"
   ],
   "exclude": ["target/**/*"]
 }

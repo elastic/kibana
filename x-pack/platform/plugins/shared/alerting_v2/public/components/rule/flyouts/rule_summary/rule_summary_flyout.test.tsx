@@ -14,7 +14,10 @@ import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
-import { AlertingV2RulesLocatorDefinition, createAlertingV2HostApp } from '../../../../locators';
+import {
+  AlertingV2RulesLocatorDefinition,
+  createAlertingV2HostApp,
+} from '../../../../../common/locators';
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
@@ -122,6 +125,7 @@ const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
 
 const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
   const props: RuleSummaryFlyoutProps = {
+    ruleId: 'rule-1',
     rule: baseRule,
     onClose: jest.fn(),
     onEdit: jest.fn(),
@@ -183,6 +187,48 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleSummaryFlyoutFooterCloseButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockRuleMetadata')).not.toBeInTheDocument();
+  });
+
+  describe('when the rule is loading', () => {
+    it('keeps the flyout open with a loading header and body', () => {
+      renderFlyout({ rule: undefined, isLoading: true });
+
+      expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutHeaderTitleLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryFlyoutNotFound')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('universalRulesBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeDisabled();
+    });
+
+    it('calls onClose when the flyout is closed', () => {
+      const { props } = renderFlyout({ rule: undefined, isLoading: true });
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(props.onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when the rule is not found', () => {
+    it('renders the not found prompt without header parts or actions', () => {
+      renderFlyout({ rule: undefined });
+
+      expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutNotFound')).toHaveTextContent('Rule not found');
+      expect(screen.queryByTestId('ruleSummaryFlyoutLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('flyoutHeaderTitleLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('universalRulesBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeDisabled();
+    });
+
+    it('calls onClose when the flyout is closed', () => {
+      const { props } = renderFlyout({ rule: undefined });
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(props.onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('omits action policies under Artifacts when the user cannot read them', () => {
@@ -332,9 +378,7 @@ describe('RuleSummaryFlyout', () => {
       renderFlyout();
       openMenu();
 
-      expect(rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' }, undefined, [
-        'rule-1',
-      ]);
+      expect(rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
       expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
         'href',
         '/mock-locator-url'
@@ -346,11 +390,11 @@ describe('RuleSummaryFlyout', () => {
       openMenu();
 
       const { rulesLocators } = mockLocators;
-      const useUrlCall = jest
-        .mocked(rulesLocators.useUrl)
+      const redirectCall = jest
+        .mocked(rulesLocators.getRedirectUrl)
         .mock.calls.find(([p]) => p.ruleId === 'rule-1');
       const location = await AlertingV2RulesLocatorDefinition.getLocation({
-        ...useUrlCall![0],
+        ...redirectCall![0],
         host: TEST_HOST.rules,
       });
       expect(location).toMatchObject({
@@ -362,17 +406,14 @@ describe('RuleSummaryFlyout', () => {
     it('forwards the raw rule id to the details locator', () => {
       const { rulesLocators } = mockLocators;
       renderFlyout({
+        ruleId: 'rule with spaces/and slash',
         rule: { ...baseRule, id: 'rule with spaces/and slash' },
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
-      expect(rulesLocators.useUrl).toHaveBeenCalledWith(
-        {
-          ruleId: 'rule with spaces/and slash',
-        },
-        undefined,
-        ['rule with spaces/and slash']
-      );
+      expect(rulesLocators.getRedirectUrl).toHaveBeenCalledWith({
+        ruleId: 'rule with spaces/and slash',
+      });
       expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
         'href',
         '/mock-locator-url'
@@ -381,16 +422,17 @@ describe('RuleSummaryFlyout', () => {
 
     it('rule id with special characters resolves to a properly encoded URL', async () => {
       renderFlyout({
+        ruleId: 'rule with spaces/and slash',
         rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
       const { rulesLocators } = mockLocators;
-      const useUrlCall = jest
-        .mocked(rulesLocators.useUrl)
+      const redirectCall = jest
+        .mocked(rulesLocators.getRedirectUrl)
         .mock.calls.find(([p]) => p.ruleId === 'rule with spaces/and slash');
       const location = await AlertingV2RulesLocatorDefinition.getLocation({
-        ...useUrlCall![0],
+        ...redirectCall![0],
         host: TEST_HOST.rules,
       });
       expect(location).toMatchObject({

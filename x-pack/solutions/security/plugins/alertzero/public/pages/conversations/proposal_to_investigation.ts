@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isProposalSettling, isTerminal } from '@kbn/proposals-common';
+import { isDecisionShown } from '@kbn/proposals-plugin/public';
 import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
@@ -61,6 +62,7 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  *                      is not an investigation status. The bucket gives the queue what it
  *                      needs: a settled proposal goes to `closed`. An approved proposal that
  *                      still runs stays in its category. `isProposalSettling` marks it.
+ * - `conversationStatus` the investigation's own status, read from the conversation.
  * - `severity`         lossy 4→3 collapse: `critical` → `'high'` so the danger icon fires.
  * - `proposalCreatedAt` / `proposalDecidedAt` the proposal's own timestamps. The decision time
  *                      dates the closed rows.
@@ -93,8 +95,10 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // Proposals do not carry worker execution IDs.
     worker_execution_ids: [],
     // status is deliberately omitted — see the data-gap note above.
+    conversationStatus: proposal.conversationStatus,
     pendingProposalCount: proposal.status === 'pending' ? 1 : 0,
     isProposalSettling: isProposalSettling(proposal),
+    isDecisionShown: isDecisionShown(proposal),
     recommendedAction: bucket,
     // severity collapse: 4-level impact → 3-level severity string.
     // 'critical' maps to 'high' so helpers.tsx's === 'high' check still fires.

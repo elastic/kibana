@@ -29,6 +29,7 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useIsDecliningProposal: jest.fn(),
   useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
   useIsReopeningProposal: jest.fn(() => false),
+  isDecisionShown: jest.fn(() => false),
 }));
 
 jest.mock('../../../user_profiles', () => ({
@@ -58,6 +59,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
 const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const addDanger = jest.fn();
+const basePath = { serverBasePath: '/kbn', prepend: (path: string) => `/kbn${path}` };
 
 const mockProposal: ProposalWithMetadata = {
   id: 'proposal-1',
@@ -144,9 +146,22 @@ describe('ProposedActionsSlot', () => {
             proposals: { decideProposals: true },
           },
         },
+        http: { basePath },
         notifications: { toasts: { addDanger } },
       },
     } as unknown as ReturnType<typeof useKibana>);
+  });
+
+  it('resolves in-app links in a proposal comment against the base path, so they survive server.basePath', () => {
+    mockConversationProposalsPage([
+      { ...mockProposal, comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)' },
+    ]);
+    renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+
+    expect(
+      within(screen.getByRole('dialog')).getByRole('link', { name: /Noisy rule/ })
+    ).toHaveAttribute('href', '/kbn/app/security/rules/id/abc');
   });
 
   it('keeps decisions read-only without Proposals Manage even with AlertZero All', () => {
@@ -158,6 +173,7 @@ describe('ProposedActionsSlot', () => {
             proposals: { decideProposals: false },
           },
         },
+        http: { basePath },
         notifications: { toasts: { addDanger } },
       },
     } as ReturnType<typeof useKibana>);
@@ -231,7 +247,8 @@ describe('ProposedActionsSlot', () => {
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-2'));
 
     const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+    // The badge's own label and the outcome banner's own title.
+    expect(within(dialog).getAllByText('Applied')).toHaveLength(2);
     expect(
       screen.queryByTestId('investigationFlyoutProposedAction-proposal-2-modal-confirm')
     ).not.toBeInTheDocument();
@@ -308,6 +325,26 @@ describe('ProposedActionsSlot', () => {
     expect(
       screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm')
     ).toBeInTheDocument();
+  });
+
+  it('keeps the modal open when a failed action is replaced by its retry proposal', () => {
+    mockConversationProposalsPage([{ ...mockProposal, rootProposalId: 'proposal-1' }]);
+    const { rerender } = renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    // The failed proposal is superseded, so the next fetch returns its retry under a new id.
+    mockConversationProposalsPage([
+      {
+        ...mockProposal,
+        id: 'proposal-3',
+        rootProposalId: 'proposal-1',
+        previousExecutionError: 'Suspend process failed.',
+      },
+    ]);
+    rerender(<ProposedActionsSlot conversationId="conversation-1" />);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('shows the reason form in the same modal instead of dismissing directly', () => {
