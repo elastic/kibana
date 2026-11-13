@@ -20,10 +20,9 @@ import {
   Settings,
   TooltipType,
   Tooltip,
+  niceTimeFormatter,
+  type XYChartElementEvent,
 } from '@elastic/charts';
-
-import type { XYChartElementEvent } from '@elastic/charts/dist/specs/settings';
-import { niceTimeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 
 import DateMath from '@kbn/datemath';

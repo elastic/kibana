@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import type { SeriesColorAccessor } from '@elastic/charts';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 

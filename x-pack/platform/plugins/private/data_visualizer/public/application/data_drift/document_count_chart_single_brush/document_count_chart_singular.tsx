@@ -15,10 +15,7 @@ import type {
   XYBrushEvent,
 } from '@elastic/charts';
 import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import type {
-  BarStyleAccessor,
-  RectAnnotationSpec,
-} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import type { BarStyleAccessor, RectAnnotationSpec } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 
 import { getTimeZone } from '@kbn/visualization-utils';

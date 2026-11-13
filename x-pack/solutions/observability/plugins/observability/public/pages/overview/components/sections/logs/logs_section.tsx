@@ -7,7 +7,7 @@
 
 import type { XYBrushEvent } from '@elastic/charts';
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
-import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
+import { timeFormatter } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';

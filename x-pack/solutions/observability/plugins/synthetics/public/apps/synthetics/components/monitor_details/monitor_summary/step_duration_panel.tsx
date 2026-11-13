@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import type { Position } from '@elastic/charts/dist/utils/common';
+import type { Position } from '@elastic/charts';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';

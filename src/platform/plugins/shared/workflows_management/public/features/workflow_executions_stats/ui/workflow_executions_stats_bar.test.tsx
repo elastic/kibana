@@ -40,7 +40,7 @@ jest.mock('@elastic/charts', () => ({
   },
 }));
 
-jest.mock('@elastic/charts/dist/utils/data/formatters', () => ({
+jest.mock('@elastic/charts', () => ({
   timeFormatter: () => jest.fn(),
 }));
 
