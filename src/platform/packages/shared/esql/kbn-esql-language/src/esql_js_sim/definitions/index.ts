@@ -8,4 +8,34 @@
  */
 
 // The public entry of the simulated `@elastic/esql-definitions` package. Kibana code imports only this file.
-export {};
+export {
+  ARGUMENT_ROLES,
+  DEFAULT_EXPRESSION_ROLE,
+  DEFAULT_ROLES,
+} from './signatures/argument_roles';
+export { COMMAND_FACTS, UNDESCRIBED_COMMANDS } from './signatures/command_facts';
+export { EXPRESSION_PARTS } from './signatures/expression_parts';
+export { INHERITED_FIELDS, resolveRole } from './signatures/resolve_role';
+export type {
+  ArgumentRole,
+  ColumnRole,
+  CommandFacts,
+  ConstantRole,
+  ConstantType,
+  DependentValueRole,
+  EntityRole,
+  EntityType,
+  ExpressionMode,
+  ExpressionPart,
+  ExpressionRole,
+  MapParameter,
+  MapRole,
+  NewNameRole,
+  OptionFacts,
+  OptionNameRole,
+  ParameterRole,
+  ResolvedRole,
+  RoleKind,
+  SublanguageRole,
+  ValueFormat,
+} from './signatures/types';

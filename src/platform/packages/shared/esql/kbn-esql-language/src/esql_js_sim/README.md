@@ -88,6 +88,45 @@ them to the path the table lists.
 `getCommandStarts()` gives the tokens that start each command. Kibana uses them to find the
 command it registered for a grammar rule, and so to tell a command it has not adopted yet.
 
+## Command signatures (`definitions/`)
+
+A signature says what each argument of a command is in the language. It is data: a role per
+call site, in a closed schema (`signatures/types.ts`).
+
+| Role | What the argument is |
+| --- | --- |
+| `column` | An existing column: accepted types, wildcards, listed once, matching a property of an entity. |
+| `new_name` | A name the query introduces: a column, a subquery, a qualifier. |
+| `entity` | A named thing outside the query: a source, an enrich policy, a lookup index, a setting. |
+| `constant` | A literal: its type, allowed values, default, format, range. |
+| `option_name` | The name of an option, with the options it conflicts with or requires. |
+| `map` | A map of named parameters. |
+| `expression` | An expression: its mode (scalar, aggregation, grouping, filter, constant, full text) and types. |
+| `dependent_value` | A value whose role depends on the name another argument gives. |
+| `parameter` | A `?name` placeholder for the whole argument. |
+| `sublanguage` | Text in another language, as a PromQL query. |
+
+- `ARGUMENT_ROLES`: the role of each argument, by call site. A role applies to everything
+  below its call site that has no role of its own.
+- `resolveRole(path, rule)`: the role at a place. The innermost role on the path applies. It
+  takes over the fields listed in `INHERITED_FIELDS` from a role of the same thing above it:
+  FROM's list says its sources may be subqueries, and each source inherits that.
+- `EXPRESSION_PARTS`: what each place inside an expression is, described once for every
+  command. The parameter of a lambda is a new name scoped to its lambda.
+- `COMMAND_FACTS`: what the grammar leaves open and Elasticsearch requires, as "STATS needs an
+  aggregation or a grouping".
+- `DEFAULT_ROLES`: what a rule usually is. A command that is new in the grammar is usable with
+  these before anyone describes it. `UNDESCRIBED_COMMANDS` lists the commands that still rely
+  on them.
+
+A role says only what validation could check. How an editor presents it stays in Kibana.
+
+`signatures.test.ts` fails when a role points at a call site the grammar does not have, when a
+reference between roles dangles, and when a position of a described command has no role.
+
+To describe a command that is new in the grammar: add a role for each position the failing
+test lists, and remove the command from `UNDESCRIBED_COMMANDS`.
+
 Regenerate the labels after an `@elastic/esql` upgrade (from the Kibana root):
 
 ```sh
