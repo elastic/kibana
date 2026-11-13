@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { DecideResult } from '@kbn/agent-builder-server';
 import type {
-  DecideResult,
   DecisionAnswer,
   DecisionChoiceQuestion,
   DecisionPredicateQuestion,
-} from '@kbn/agent-builder-server';
+} from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { createDecisionProviders, DecisionService } from './decision_service';
 import { BaseDecisionProvider } from './providers/base_decision_provider';
-import { EisDecisionProvider } from './providers/eis';
+import { DecisionModelProvider } from './providers/decision_model';
 import { FastModelDecisionProvider } from './providers/fast_model';
 import type {
   DecisionProviderId,
@@ -97,7 +98,7 @@ describe('DecisionService', () => {
   });
 
   it('returns a single answer for one question', async () => {
-    const provider = fakeProvider('eis', async () => answered(0.9));
+    const provider = fakeProvider('decision_model', async () => answered(0.9));
     const { decide } = setup([provider]);
 
     const result = await decide();
@@ -120,7 +121,7 @@ describe('DecisionService', () => {
       confidence: 0.8,
       probabilities: { observability: 0.8, other: 0.2 },
     } as const;
-    const provider = fakeProvider('eis', async () => ({
+    const provider = fakeProvider('decision_model', async () => ({
       inferenceId: 'model-1',
       answers: [{ type: 'predicate', probability: 0.6 }, choice],
     }));
@@ -144,7 +145,7 @@ describe('DecisionService', () => {
   });
 
   it('throws when called without questions', () => {
-    const { service, request } = setup([fakeProvider('eis')]);
+    const { service, request } = setup([fakeProvider('decision_model')]);
     expect(() => Reflect.apply(service.decide, service, [{ request, input }])).toThrow(
       'at least one question'
     );
@@ -152,7 +153,7 @@ describe('DecisionService', () => {
 
   it('records the provider and inference endpoint that answered on the decide span', async () => {
     const { decide } = setup([
-      fakeProvider('eis', async () => {
+      fakeProvider('decision_model', async () => {
         throw new Error('boom');
       }),
       fakeProvider('fast_model'),
@@ -169,7 +170,7 @@ describe('DecisionService', () => {
 
   it('records the status on the decide span when no provider answers', async () => {
     const { decide } = setup([
-      fakeProvider('eis', async () => {
+      fakeProvider('decision_model', async () => {
         throw new DecisionProviderUnavailableError('no endpoint');
       }),
     ]);
@@ -180,7 +181,7 @@ describe('DecisionService', () => {
   });
 
   it('uses the first provider that answers, in order', async () => {
-    const first = fakeProvider('eis', async () => answered(0.9));
+    const first = fakeProvider('decision_model', async () => answered(0.9));
     const second = fakeProvider('fast_model');
     const { decide } = setup([first, second]);
 
@@ -189,7 +190,7 @@ describe('DecisionService', () => {
   });
 
   it('falls through to the next provider on a retryable failure, and retries it next time', async () => {
-    const first = fakeProvider('eis', async () => {
+    const first = fakeProvider('decision_model', async () => {
       throw new Error('boom');
     });
     const second = fakeProvider('fast_model', async () => answered(0.3));
@@ -202,7 +203,7 @@ describe('DecisionService', () => {
   });
 
   it('skips a provider that reported it is unavailable', async () => {
-    const first = fakeProvider('eis', async () => {
+    const first = fakeProvider('decision_model', async () => {
       throw new DecisionProviderUnavailableError('no endpoint');
     });
     const second = fakeProvider('fast_model', async () => answered(0.7));
@@ -218,7 +219,7 @@ describe('DecisionService', () => {
   it('tries an unavailable provider again once its TTL expires', async () => {
     jest.useFakeTimers({ now: new Date('2026-11-05T10:00:00Z') });
 
-    const first = fakeProvider('eis', async () => answered(0.9));
+    const first = fakeProvider('decision_model', async () => answered(0.9));
     const second = fakeProvider('fast_model', async () => answered(0.7));
     const { decide } = setup([first, second]);
 
@@ -236,7 +237,7 @@ describe('DecisionService', () => {
     jest.useFakeTimers();
 
     let firstSignal: AbortSignal | undefined;
-    const first = fakeProvider('eis', ({ signal }) => {
+    const first = fakeProvider('decision_model', ({ signal }) => {
       firstSignal = signal;
       return never();
     });
@@ -276,7 +277,7 @@ describe('DecisionService', () => {
 
   it('stops the chain when the caller aborts', async () => {
     const controller = new AbortController();
-    const first = fakeProvider('eis', () => {
+    const first = fakeProvider('decision_model', () => {
       controller.abort();
       return never();
     });
@@ -291,7 +292,7 @@ describe('DecisionService', () => {
 
   it('fails without asking anyone when the caller already aborted', async () => {
     const controller = new AbortController();
-    const first = fakeProvider('eis');
+    const first = fakeProvider('decision_model');
     const { decide } = setup([first]);
 
     controller.abort();
@@ -304,7 +305,7 @@ describe('DecisionService', () => {
 
   it('returns unavailable when every provider is unavailable', async () => {
     const { decide } = setup([
-      fakeProvider('eis', async () => {
+      fakeProvider('decision_model', async () => {
         throw new DecisionProviderUnavailableError('no endpoint');
       }),
       fakeProvider('fast_model', async () => {
@@ -318,7 +319,7 @@ describe('DecisionService', () => {
   it('returns failed with the last error when every provider fails', async () => {
     const last = new Error('last');
     const { decide } = setup([
-      fakeProvider('eis', async () => {
+      fakeProvider('decision_model', async () => {
         throw new Error('first');
       }),
       fakeProvider('fast_model', async () => {
@@ -331,7 +332,7 @@ describe('DecisionService', () => {
 
   it('logs retryable failures at warn without the input text', async () => {
     const { decide, logger } = setup([
-      fakeProvider('eis', async () => {
+      fakeProvider('decision_model', async () => {
         throw new Error('boom');
       }),
       fakeProvider('fast_model', async () => answered(0.5)),
@@ -352,36 +353,36 @@ describe('DecisionService', () => {
 });
 
 describe('createDecisionProviders', () => {
-  const elasticsearch = elasticsearchServiceMock.createStart();
+  const inference = { getClient: jest.fn() } as unknown as InferenceServerStart;
   const createModelProvider = jest.fn();
 
   it('orders EIS, then the fast model', () => {
     const providers = createDecisionProviders({
-      elasticsearch,
+      inference,
       createModelProvider,
       config: {
-        eisTimeoutMs: 1000,
+        decisionModelTimeoutMs: 1000,
         fastModelTimeoutMs: 2000,
         unavailableTtlMs: 3600000,
       },
     });
 
-    expect(providers.map(({ id }) => id)).toEqual(['eis', 'fast_model']);
+    expect(providers.map(({ id }) => id)).toEqual(['decision_model', 'fast_model']);
   });
 
   it('creates EIS and fast model provider instances', () => {
-    const [eis, fastModel] = createDecisionProviders({
-      elasticsearch,
+    const [decisionModel, fastModel] = createDecisionProviders({
+      inference,
       createModelProvider,
       config: {
-        eisTimeoutMs: 1000,
+        decisionModelTimeoutMs: 1000,
         fastModelTimeoutMs: 2000,
         unavailableTtlMs: 3600000,
       },
     });
 
-    expect(eis).toBeInstanceOf(EisDecisionProvider);
+    expect(decisionModel).toBeInstanceOf(DecisionModelProvider);
     expect(fastModel).toBeInstanceOf(FastModelDecisionProvider);
-    expect([eis, fastModel].every((provider) => provider.isAvailable())).toBe(true);
+    expect([decisionModel, fastModel].every((provider) => provider.isAvailable())).toBe(true);
   });
 });

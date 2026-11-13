@@ -109,6 +109,21 @@ export {
   isOutputEvent,
   withoutOutputUpdateEvents,
 } from './src/output';
+export type {
+  DecideAPI,
+  DecideOptions,
+  DecideResponse,
+  DecisionAnswer,
+  DecisionAnswerFor,
+  DecisionAnswersFor,
+  DecisionChoiceAnswer,
+  DecisionChoiceQuestion,
+  DecisionPredicateAnswer,
+  DecisionPredicateQuestion,
+  DecisionQuestion,
+  DecisionScoreAnswer,
+  DecisionScoreQuestion,
+} from './src/decide';
 export {
   InferenceTaskEventType,
   type InferenceTaskEvent,

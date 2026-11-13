@@ -27,6 +27,7 @@ import type {
   BoundInferenceClient,
   BoundOptions,
   ChatCompleteOptions,
+  DecideAPI,
   FeatureChatCompleteAPI,
   InferenceClient,
   InferenceConnector,
@@ -69,9 +70,13 @@ export type ScopedFeatureEndpointResolver = (
 ) => ReturnType<FeatureEndpointResolver>;
 
 /**
- * An {@link InferenceClient} whose `chatComplete` also accepts a `featureId` instead of a `connectorId`.
+ * An {@link InferenceClient} whose `chatComplete` also accepts a `featureId` instead of a `connectorId`,
+ * and that can ask decision models with `decide`.
  */
-export type InferenceServerClient = InferenceClient & { chatComplete: FeatureChatCompleteAPI };
+export type InferenceServerClient = InferenceClient & {
+  chatComplete: FeatureChatCompleteAPI;
+  decide: DecideAPI;
+};
 
 /**
  * Setup contract of the inference plugin.

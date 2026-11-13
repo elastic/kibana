@@ -23,7 +23,7 @@ const answered: DecisionProviderResult = {
 };
 
 class TestProvider extends BaseDecisionProvider {
-  readonly id = 'eis';
+  readonly id = 'decision_model';
 
   readonly handler = jest.fn<Promise<DecisionProviderResult>, [DecisionProviderParams]>(
     async () => answered
