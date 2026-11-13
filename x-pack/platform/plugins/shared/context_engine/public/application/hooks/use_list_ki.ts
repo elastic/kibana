@@ -88,7 +88,7 @@ export const useListKi = ({
     const toastMessage = getErrorMessage(error);
     notifications.toasts.addError(error, {
       title: i18n.translate('xpack.contextEngine.listKi.loadErrorTitle', {
-        defaultMessage: 'Unable to load Knowledge Indicators',
+        defaultMessage: 'Unable to load Knowledge documents',
       }),
       ...(toastMessage ? { toastMessage } : {}),
     });

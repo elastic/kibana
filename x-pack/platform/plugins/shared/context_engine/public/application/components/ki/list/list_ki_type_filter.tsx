@@ -38,7 +38,7 @@ export const ListKiTypeFilter = ({
 
   const typeFilterLegend = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.listKi.typeFilterLegend',
-    { defaultMessage: 'Filter Knowledge Indicators by type' }
+    { defaultMessage: 'Filter Knowledge documents by type' }
   );
 
   const options = useMemo((): Array<ListKiFilterOption<string>> => {

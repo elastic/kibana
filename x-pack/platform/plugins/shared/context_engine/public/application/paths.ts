@@ -35,13 +35,6 @@ export const getKiDocQueryParams = (kiId: string, index: string): Record<string,
   ...(index.length > 0 ? { [KI_INDEX_QUERY_PARAM]: index } : {}),
 });
 
-/** Old Knowledge document page path. Only used by `KiPage`, removed with it. */
-export const getViewKiPath = (aiIndexId: string, kiId: string): string =>
-  `/ai_index/${aiIndexId}/ki/${encodeURIComponent(kiId)}`;
-
-export const getViewKiDocumentPath = (aiIndexId: string, kiId: string): string =>
-  `${getViewKiPath(aiIndexId, kiId)}/document`;
-
 /**
  * Best-effort decode for a KI id read from an old `/ki/:kiId` URL. `history` already runs
  * `decodeURI` once, so a malformed leftover `%` throws here; falling back to
