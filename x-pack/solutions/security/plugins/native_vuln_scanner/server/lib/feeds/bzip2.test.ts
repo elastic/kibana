@@ -25,6 +25,11 @@ describe('bunzip2Blocks', () => {
     expect(Buffer.concat(blocks).toString('utf8')).toBe(expected());
   });
 
+  it('ignores trailing bytes after the last stream', () => {
+    const padded = Buffer.concat([fixture, Buffer.alloc(16), Buffer.from('trailer')]);
+    expect(Buffer.concat([...bunzip2Blocks(padded)]).toString('utf8')).toBe(expected());
+  });
+
   it('rejects input without the bzip2 magic', () => {
     expect(() => [...bunzip2Blocks(Buffer.from('not bzip2 data'))]).toThrow();
   });

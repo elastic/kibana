@@ -20,6 +20,25 @@ export const sign = (n: number): Ordering => (n < 0 ? -1 : n > 0 ? 1 : 0);
 /** Largest epoch the keys encode; larger ones lose precision in JS and overflow in painless. */
 export const MAX_EPOCH = 999_999_999;
 
+/** Java's String.trim(): strips chars <= U+0020 only, so painless sees the same string. */
+export const trimVersion = (raw: string): string =>
+  raw.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '');
+
+/**
+ * Optional sign then leading ASCII digits, else 0. Mirrors the painless parseEpoch, including
+ * that it stops accumulating past {@link MAX_EPOCH} (callers reject anything above it).
+ */
+export const parseEpoch = (s: string): number => {
+  let i = 0;
+  const negative = s[0] === '-';
+  if (negative || s[0] === '+') i++;
+  let value = 0;
+  for (; isDigit(s[i]); i++) {
+    if (value <= MAX_EPOCH) value = value * 10 + (s.charCodeAt(i) - 48);
+  }
+  return negative ? -value : value;
+};
+
 // Leading zeros are stripped, then one length char (0x30 + digit count) precedes the digits, so
 // longer numbers sort higher and equal-length numbers sort by their digits.
 const MAX_DIGITS = 0x7e - 0x30;

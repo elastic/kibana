@@ -26,7 +26,7 @@ String encNum(String digits) {
   return String.valueOf((char) (48 + d.length())) + d;
 }
 
-// Number.parseInt(s, 10) || 0 in JS: optional sign, leading digits, else 0.
+// parseEpoch in common.ts: optional sign, leading digits, else 0.
 long parseEpoch(String s) {
   int i = 0;
   boolean neg = false;

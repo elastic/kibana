@@ -111,7 +111,9 @@ const DATA_SOURCE_NAME: Readonly<Record<AdvisorySource, string>> = {
 /** Vendor priority/impact label -> CNVM severity; `untriaged` and anything unknown -> UNKNOWN. */
 export const toSeverity = (...labels: Array<string | undefined>): FindingSeverity => {
   for (const label of labels) {
-    const severity = label && SEVERITY_BY_VENDOR_LABEL[label.trim().toLowerCase()];
+    const key = label?.trim().toLowerCase();
+    const severity =
+      key && Object.hasOwn(SEVERITY_BY_VENDOR_LABEL, key) && SEVERITY_BY_VENDOR_LABEL[key];
     if (severity) return severity;
   }
   return 'UNKNOWN';

@@ -17,6 +17,11 @@ const toUint32 = (n: number): number => (n < 0 ? n + 2 ** 32 : n);
  * to the event loop between blocks instead of blocking it for the whole feed. Block and stream
  * CRCs are verified; corrupt input throws.
  */
+const MAGIC = [0x42, 0x5a, 0x68]; // 'BZh'
+
+const startsStream = (input: Uint8Array, at: number): boolean =>
+  MAGIC.every((byte, i) => input[at + i] === byte);
+
 export function* bunzip2Blocks(input: Uint8Array): Generator<Buffer> {
   let pos = 0;
   const inputStream = {
@@ -69,8 +74,9 @@ export function* bunzip2Blocks(input: Uint8Array): Generator<Buffer> {
         `bzip2 stream CRC mismatch (got ${actual.toString(16)}, expected ${expected.toString(16)})`
       );
     }
-    // Streams are byte-aligned; skip the end-of-stream padding and continue with the next one.
-    if (inputStream.eof()) return;
+    // Streams are byte-aligned, so the next one starts at `pos`. Like bzip2(1), bytes after the
+    // last stream that are not another stream are ignored; every block CRC has already passed.
+    if (!startsStream(input, pos)) return;
     bunzip._start_bunzip(inputStream, outputStream);
   }
 }

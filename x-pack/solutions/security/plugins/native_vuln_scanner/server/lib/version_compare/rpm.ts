@@ -11,7 +11,16 @@
  * by a painless script; both must stay byte-identical.
  */
 
-import { encodeNumber, isAlpha, isDigit, MAX_EPOCH, sign, UnencodableVersionError } from './common';
+import {
+  encodeNumber,
+  isAlpha,
+  isDigit,
+  MAX_EPOCH,
+  parseEpoch,
+  sign,
+  trimVersion,
+  UnencodableVersionError,
+} from './common';
 import type { Ordering } from './common';
 
 export interface Evr {
@@ -22,9 +31,9 @@ export interface Evr {
 
 /** Accepts "E:V-R", "V-R" or "V". Missing epoch = 0; missing release = "". */
 export const parseEvr = (raw: string): Evr => {
-  const trimmed = raw.trim();
+  const trimmed = trimVersion(raw);
   const colon = trimmed.indexOf(':');
-  const epoch = colon >= 0 ? Number.parseInt(trimmed.slice(0, colon), 10) || 0 : 0;
+  const epoch = colon >= 0 ? parseEpoch(trimmed.slice(0, colon)) : 0;
   const rest = colon >= 0 ? trimmed.slice(colon + 1) : trimmed;
   const dash = rest.lastIndexOf('-');
   return dash >= 0

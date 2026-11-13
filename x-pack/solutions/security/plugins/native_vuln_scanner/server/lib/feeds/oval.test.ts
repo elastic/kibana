@@ -11,6 +11,7 @@ import {
   groupByLeaf,
   ovalPublicToIso,
   ovalTimestampToIso,
+  parseCvss,
   parseSlashCvss,
   readOval,
   UnsupportedCriteriaError,
@@ -195,5 +196,13 @@ describe('date and score helpers', () => {
     });
     expect(parseSlashCvss('4.3/AV:N/AC:M/Au:N/C:N/I:P/A:N', '2.0')?.version).toBe('2.0');
     expect(parseSlashCvss('n/a', '3.1')).toBeUndefined();
+    expect(parseSlashCvss('/CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H', '3.1')).toBeUndefined();
+  });
+
+  it('rejects a blank Ubuntu score instead of recording 0.0', () => {
+    const vector = 'CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H';
+    expect(parseCvss('', vector, '3.1')).toBeUndefined();
+    expect(parseCvss(' ', vector, '3.1')).toBeUndefined();
+    expect(parseCvss('0.0', vector, '3.1')?.score).toBe(0);
   });
 });

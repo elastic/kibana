@@ -282,7 +282,7 @@ export const parseCvss = (
   vector: string | undefined,
   fallbackVersion: string
 ): CvssScore | undefined => {
-  const n = score === undefined ? NaN : Number(score);
+  const n = score === undefined || score.trim() === '' ? NaN : Number(score);
   if (!Number.isFinite(n) || !vector) return undefined;
   const version = vector.match(/^CVSS:(\d+(?:\.\d+)?)\//)?.[1] ?? fallbackVersion;
   return { version, score: n, vector };

@@ -49,6 +49,8 @@ describe('toSeverity', () => {
     ['negligible', 'LOW'],
     ['critical', 'CRITICAL'],
     ['untriaged', 'UNKNOWN'],
+    ['constructor', 'UNKNOWN'],
+    [' toString ', 'UNKNOWN'],
     [undefined, 'UNKNOWN'],
   ])('maps %s to %s', (label, expected) => {
     expect(toSeverity(label)).toBe(expected);
