@@ -13,6 +13,7 @@ import { sessionsSearch } from './sessions_search_requests';
 const START = Date.parse('2021-01-18T12:00:00.000Z');
 const END = Date.parse('2021-01-18T13:00:00.000Z');
 const TIME_ZONE = 'America/New_York';
+const INTERVAL = getHistogramInterval(START, END);
 
 // The part of an aggregation the tests read; the client types it too loosely to navigate.
 interface Aggregation {
@@ -24,14 +25,16 @@ interface Aggregation {
 }
 
 const aggregationsOf = (environment?: string) =>
-  sessionsSearch({ start: START, end: END, environment, timeZone: TIME_ZONE })
+  sessionsSearch({ start: START, end: END, environment, interval: INTERVAL, timeZone: TIME_ZONE })
     .aggs as unknown as Record<string, Aggregation>;
 
 const inEnvironment = (environment?: string) => aggregationsOf(environment).inEnvironment;
 
 describe('sessionsSearch', () => {
   it('reads the sessions index without hits, failing rather than returning partial results', () => {
-    expect(sessionsSearch({ start: START, end: END, timeZone: TIME_ZONE })).toMatchObject({
+    expect(
+      sessionsSearch({ start: START, end: END, interval: INTERVAL, timeZone: TIME_ZONE })
+    ).toMatchObject({
       index: 'digital-experience-sessions-*',
       size: 0,
       track_total_hits: false,
@@ -41,7 +44,9 @@ describe('sessionsSearch', () => {
   });
 
   it('matches the sessions that overlap the time range', () => {
-    expect(sessionsSearch({ start: START, end: END, timeZone: TIME_ZONE }).query).toEqual({
+    expect(
+      sessionsSearch({ start: START, end: END, interval: INTERVAL, timeZone: TIME_ZONE }).query
+    ).toEqual({
       bool: {
         filter: [
           { range: { start_time: { lte: END, format: 'epoch_millis' } } },
@@ -88,11 +93,11 @@ describe('sessionsSearch', () => {
 
     expect(pageLoadsOverTime.date_histogram).toEqual({
       field: 'start_time',
-      fixed_interval: `${getHistogramInterval(START, END).value}s`,
+      fixed_interval: `${INTERVAL.value}s`,
       time_zone: TIME_ZONE,
       min_doc_count: 0,
       extended_bounds: { min: START, max: END },
-      hard_bounds: { min: START, max: END },
+      hard_bounds: { min: START },
     });
     expect(pageLoadsOverTime.aggs).toEqual({ pageLoads: { sum: { field: 'page_load_count' } } });
   });

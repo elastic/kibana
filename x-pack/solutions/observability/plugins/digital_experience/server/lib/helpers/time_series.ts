@@ -30,17 +30,23 @@ export const getHistogramInterval = (start: number, end: number): HistogramInter
 };
 
 /**
- * Counts over the time range, empty buckets included, so every source returns the same ones,
- * lined up with `timeZone`. The documents are bucketed by `field`, the event time by default.
+ * Counts over the time range in buckets of `interval` lined up with `timeZone`, empty ones
+ * included, so every source returns the same ones. The documents are bucketed by `field`, the
+ * event time by default.
  */
-export const dateHistogram = (
-  start: number,
-  end: number,
-  timeZone: string,
-  field = '@timestamp'
-): { date_histogram: estypes.AggregationsDateHistogramAggregation } => {
-  const { value, unit } = getHistogramInterval(start, end);
-
+export const dateHistogram = ({
+  start,
+  end,
+  interval: { value, unit },
+  timeZone,
+  field = '@timestamp',
+}: {
+  start: number;
+  end: number;
+  interval: HistogramInterval;
+  timeZone: string;
+  field?: string;
+}): { date_histogram: estypes.AggregationsDateHistogramAggregation } => {
   return {
     date_histogram: {
       field,

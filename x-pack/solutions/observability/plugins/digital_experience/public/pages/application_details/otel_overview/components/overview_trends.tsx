@@ -44,7 +44,10 @@ import type { HistogramInterval } from '../../../../../common/types/applications
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
 import type { QueriedRange } from '../../../../utils/time_range_query';
-import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
+import {
+  PartialBucketsEndzones,
+  getBucketEnd,
+} from '../../../../components/partial_buckets_endzones';
 import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
@@ -298,17 +301,23 @@ export function OverviewTrends({
   onTimeRangeSelect: TimeRangeSelect;
 }) {
   const { euiTheme } = useEuiTheme();
-  const { formatNumber } = useFormatters();
+  const { formatNumber, timeZone } = useFormatters();
   const [chartType, setChartType] = useTrendChartType();
 
   const hasPageLoads = points.some((point) => point.pageLoads > 0);
   const hasLoadTimes = points.some((point) => point.loadTimePercentileMs !== null);
 
-  // Both charts span the whole time range, whatever each one has data for.
+  // Both charts span the whole time range, whatever each one has data for. Bars' histogram mode
+  // runs on to the last bucket's end; areas stop at its start, so their domain is widened to it,
+  // which keeps both types on the same axis and the partial last bucket's shading in view.
+  const lastKey = points[points.length - 1]?.timestamp;
   const xDomain: DomainRange | undefined =
-    points.length > 0
-      ? { min: points[0].timestamp, max: points[points.length - 1].timestamp }
-      : undefined;
+    lastKey === undefined
+      ? undefined
+      : {
+          min: points[0].timestamp,
+          max: chartType === 'bar' ? lastKey : getBucketEnd(lastKey, interval, timeZone),
+        };
 
   const chartProps = { points, interval, range, chartType, xDomain, onTimeRangeSelect };
 

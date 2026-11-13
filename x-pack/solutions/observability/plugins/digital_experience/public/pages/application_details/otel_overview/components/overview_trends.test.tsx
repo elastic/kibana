@@ -17,9 +17,10 @@ import { OverviewTrends } from './overview_trends';
 
 const mockBrushEndListeners: BrushEndListener[] = [];
 const mockShadedZones: RectAnnotationProps['dataValues'][] = [];
+const mockXDomains: SettingsProps['xDomain'][] = [];
 
 // jsdom draws no canvas to drag over, so the test calls the listener each chart registers, and
-// reads the zones `Endzones` hands to the annotation.
+// reads the zones `Endzones` hands to the annotation and the domain each chart is drawn over.
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
   const { createElement } = jest.requireActual('react');
@@ -33,6 +34,7 @@ jest.mock('@elastic/charts', () => {
       if (props.onBrushEnd) {
         mockBrushEndListeners.push(props.onBrushEnd);
       }
+      mockXDomains.push(props.xDomain);
       return createElement(actual.Settings, props);
     },
   };
@@ -161,9 +163,14 @@ describe('OverviewTrends', () => {
     expect(screen.getByRole('button', { name: 'Bar' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it.each(['area', 'bar'])(
-    'shades the partial first and last buckets of both %s charts',
-    (chartType) => {
+  // The last bucket runs from 2_000 to 3_000, so the shading from 2_500 on is drawn only when the
+  // domain reaches past it: bars' histogram mode extends it, areas need it widened.
+  it.each([
+    ['area', { min: 1_000, max: 3_000 }],
+    ['bar', { min: 1_000, max: 2_000 }],
+  ])(
+    'shades the partial first and last buckets of both %s charts, inside their domain',
+    (chartType, xDomain) => {
       window.localStorage.setItem(
         'xpack.digitalExperience.overview.trendChartType',
         JSON.stringify(chartType)
@@ -174,6 +181,7 @@ describe('OverviewTrends', () => {
         [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
         [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
       ]);
+      expect(mockXDomains.slice(-2)).toEqual([xDomain, xDomain]);
     }
   );
 

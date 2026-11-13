@@ -16,7 +16,7 @@ const applicationsOf = (request: ReturnType<typeof logsSearch>) =>
   (request.aggs?.inEnvironment as { aggs: { applications: ApplicationsAggregation } }).aggs
     .applications;
 
-const PARAMS = { start: 10, end: 20, timeZone: 'UTC' };
+const PARAMS = { start: 10, end: 20, interval: { value: 1, unit: 's' as const }, timeZone: 'UTC' };
 
 const SPANS_PARAMS = { ...PARAMS, serviceNames: ['web', 'shop'] };
 
@@ -69,6 +69,7 @@ describe('logsSearch', () => {
     const { aggs } = logsSearch({
       start: 0,
       end: 60 * 60 * 1000,
+      interval: { value: 60, unit: 's' },
       timeZone: 'America/New_York',
     }).aggs?.inEnvironment as {
       aggs: Record<string, unknown>;

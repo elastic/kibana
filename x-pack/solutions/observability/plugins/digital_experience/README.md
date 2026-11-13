@@ -103,15 +103,17 @@ Numbers, percents, dates and the chart's time zone follow the Advanced Settings.
 
 The page loads chart and the Overview trends bucket by the time zone of Advanced Settings
 (`dateFormat:tz`, or the browser's for `Browser`). From 1 day up, the buckets are calendar days,
-weeks or months, so they start at local midnight and follow daylight saving changes; below that
-they are fixed intervals (up to 12 hours), aligned to the time zone but not to daylight saving
-changes. The first and last buckets, which cover only part of the selected range, are shaded as
-partial data.
+weeks or months, so they start at local midnight. Below that they are fixed intervals (up to 12
+hours) that keep their local alignment across daylight saving changes; the bucket holding a change
+is an hour shorter or longer. The first and last buckets, which cover only part of the selected
+range, are shaded as partial data.
 
-Both routes take an optional `timeZone` (an IANA name, at most 64 characters; `UTC` when left out)
-and return the bucket interval next to the buckets: `pageLoadsOverTime.interval` on the
-Applications route and `overview.trendInterval` on the Overview route. An unknown `timeZone` is a
-400.
+Both routes take an optional `timeZone` (at most 64 characters; `UTC` when left out): a name
+moment-timezone knows, or a `+HH:MM`/`-HH:MM` offset, which the browser sends when it can't name
+its time zone. Anything else is a 400. The four names Elasticsearch rejects (`EST`, `HST`, `MST`,
+`ROC`) are searched as the zones they link to. They return the bucket interval next to the buckets:
+`pageLoadsOverTime.interval` on the Applications route and `overview.trendInterval` on the Overview
+route.
 
 ### Application details (`/{serviceName}?source=otel|classic`)
 

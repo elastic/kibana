@@ -93,7 +93,13 @@ const setup = ({ logs, spans }: { logs?: unknown; spans?: unknown }) => {
   return esClient;
 };
 
-const PARAMS = { serviceName: 'shop', start: 10, end: 20, timeZone: 'UTC' };
+const PARAMS = {
+  serviceName: 'shop',
+  start: 10,
+  end: 20,
+  interval: { value: 1, unit: 's' as const },
+  timeZone: 'UTC',
+};
 
 describe('getOtelOverview', () => {
   it('maps the logs and spans of the application to its Overview', async () => {

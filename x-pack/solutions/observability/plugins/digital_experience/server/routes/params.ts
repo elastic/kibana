@@ -39,12 +39,30 @@ export const START_AFTER_END_ISSUE = {
   path: ['end'],
 };
 
-/** The IANA time zone the histogram buckets of a route line up with; `UTC` when left out. */
+// The offset `getUserTimeZone` falls back to when the browser can't name its time zone.
+const UTC_OFFSET = /^[+-]\d{2}:\d{2}$/;
+
+// The names moment-timezone (and so `dateFormat:tz`) offers that Elasticsearch rejects, as the
+// zones they link to.
+const ES_TIME_ZONE_OF: Readonly<Record<string, string>> = {
+  EST: 'America/Panama',
+  HST: 'Pacific/Honolulu',
+  MST: 'America/Phoenix',
+  ROC: 'Asia/Taipei',
+};
+
+/**
+ * The time zone the histogram buckets of a route line up with, as Elasticsearch names it: a
+ * moment-timezone name or a UTC offset.
+ */
 export const timeZoneShape = () => ({
   timeZone: z
     .string()
     .max(MAX_TIME_ZONE_LENGTH)
-    .refine((value) => moment.tz.zone(value) !== null, { message: 'Unknown time zone' })
+    .refine((value) => UTC_OFFSET.test(value) || moment.tz.zone(value) !== null, {
+      message: 'Unknown time zone',
+    })
+    .transform((value) => ES_TIME_ZONE_OF[value] ?? value)
     .default('UTC'),
 });
 

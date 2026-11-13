@@ -13,13 +13,13 @@ import type {
   ApplicationSummary,
   TimeSeriesPoint,
 } from '../../../common/types/applications';
-import { getApplications as getApplicationsInRange } from './get_applications';
+import { getApplications as getApplicationsWithInterval } from './get_applications';
 
-const HOUR = 60 * 60 * 1000;
+const INTERVAL = { value: 60, unit: 's' as const };
 
 const getApplications = (
-  params: Omit<Parameters<typeof getApplicationsInRange>[0], 'start' | 'end'>
-) => getApplicationsInRange({ start: 0, end: HOUR, ...params });
+  params: Omit<Parameters<typeof getApplicationsWithInterval>[0], 'interval'>
+) => getApplicationsWithInterval({ interval: INTERVAL, ...params });
 
 const app = (
   serviceName: string,
@@ -122,19 +122,8 @@ describe('getApplications', () => {
     expect(pageLoadsOverTime).toEqual({
       otel,
       classic,
-      interval: { value: 60, unit: 's' },
+      interval: INTERVAL,
     });
-  });
-
-  it('returns the calendar interval of the range', async () => {
-    const { pageLoadsOverTime } = await getApplicationsInRange({
-      start: 0,
-      end: 90 * 24 * HOUR,
-      getOtelApplications: async () => result([]),
-      logger,
-    });
-
-    expect(pageLoadsOverTime.interval).toEqual({ value: 1, unit: 'd' });
   });
 
   it('returns no page loads over time for a source that failed', async () => {

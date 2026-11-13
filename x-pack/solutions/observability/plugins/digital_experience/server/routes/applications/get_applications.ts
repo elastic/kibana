@@ -13,12 +13,12 @@ import type {
   ApplicationSource,
   ApplicationSummary,
   ApplicationsResponse,
+  HistogramInterval,
   PageLoadsOverTime,
   TimeSeriesPoint,
 } from '../../../common/types/applications';
 import { sortEnvironments } from '../../lib/helpers/environment';
 import { describeError, isAccessDenied } from '../../lib/helpers/errors';
-import { getHistogramInterval } from '../../lib/helpers/time_series';
 import type { SourceApplications } from './types';
 
 type ApplicationsFetcher = () => Promise<SourceApplications>;
@@ -54,15 +54,13 @@ const byPageLoadsThenName = (a: ApplicationSummary, b: ApplicationSummary): numb
  * the user can't read instead of failing, so partial index access returns fewer rows, unreported.
  */
 export const getApplications = async ({
-  start,
-  end,
+  interval,
   getOtelApplications,
   getClassicApplications,
   logger,
 }: {
-  /** The time range in epoch milliseconds; sets the interval of the page loads buckets. */
-  start: number;
-  end: number;
+  /** The width of the page loads buckets every source was searched with. */
+  interval: HistogramInterval;
   getOtelApplications: ApplicationsFetcher;
   /** Undefined when the Classic source is not available (serverless). */
   getClassicApplications?: ApplicationsFetcher;
@@ -82,7 +80,7 @@ export const getApplications = async ({
   const pageLoadsOverTime: PageLoadsOverTime = {
     otel: [],
     classic: [],
-    interval: getHistogramInterval(start, end),
+    interval,
   };
   // Only EDOT Browser has sessions, and only when its source read them from the sessions index.
   let sessionsOverTime: TimeSeriesPoint[] | null = null;

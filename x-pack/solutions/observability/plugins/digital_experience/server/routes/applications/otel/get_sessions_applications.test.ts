@@ -47,7 +47,7 @@ const setup = (aggregations: unknown) => {
   return esClient;
 };
 
-const PARAMS = { start: 1, end: 2, timeZone: 'UTC' };
+const PARAMS = { start: 1, end: 2, interval: { value: 1, unit: 's' as const }, timeZone: 'UTC' };
 
 describe('getSessionsApplications', () => {
   it('maps the sessions buckets to application summaries, with the samples and ratings summed', async () => {
@@ -209,6 +209,7 @@ describe('getSessionsApplications', () => {
       start: 1,
       end: 2,
       environment: 'production',
+      interval: { value: 1, unit: 's' },
       timeZone: 'UTC',
       signal,
     });
