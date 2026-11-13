@@ -13,7 +13,6 @@ export {
   shouldShowV1ObservabilityAlertsTable,
   canAccessAlertingV2Rules,
   areAlertingV2ImportsEnabled,
-  isAlertingV2ImportsAvailable,
   type AlertingV2CapabilityFeature,
   type AlertingV2CapabilityLevel,
 } from './is_alerting_v2_enabled';

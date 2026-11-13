@@ -121,8 +121,7 @@ export type ObservabilityAlertingLinkId =
   | 'rules-v2'
   | 'rule-library'
   | 'action-policies'
-  | 'execution-history'
-  | 'imports';
+  | 'execution-history';
 
 export type LinkId =
   | LogsLinkId

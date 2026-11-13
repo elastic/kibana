@@ -8,7 +8,6 @@
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createLocation } from 'history';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   getAlertsNavPanel,
   getObservabilityAlertsLinkTitle,
@@ -408,49 +407,6 @@ describe('getAlertsNavPanel', () => {
       expect(getSectionByTitle(core, 'Operations')?.children).toEqual([
         expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
       ]);
-    });
-
-    describe('import alerts', () => {
-      const setExperimentalFeatures = (enabled: boolean) => {
-        core.settings.client.get = <T>(key: string) =>
-          (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID && enabled) as T;
-      };
-
-      it('shows import alerts under Operations with v2 rules read and experimental features on', () => {
-        setExperimentalFeatures(true);
-        setCapabilities(core, { alerting_v2_rules: { read: true } });
-
-        expect(getSectionByTitle(core, 'Operations')?.children).toEqual([
-          { link: 'observabilityAlerting:imports' },
-        ]);
-      });
-
-      it('lists import alerts after execution history', () => {
-        setExperimentalFeatures(true);
-        setCapabilities(core, {
-          alerting_v2_rules: { read: true },
-          alerting_v2_execution_history: { read: true },
-        });
-
-        expect(getSectionByTitle(core, 'Operations')?.children).toEqual([
-          expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
-          { link: 'observabilityAlerting:imports' },
-        ]);
-      });
-
-      it('hides import alerts while experimental features are off', () => {
-        setExperimentalFeatures(false);
-        setCapabilities(core, { alerting_v2_rules: { read: true } });
-
-        expect(getSectionByTitle(core, 'Operations')).toBeUndefined();
-      });
-
-      it('hides import alerts from users without v2 rules read', () => {
-        setExperimentalFeatures(true);
-        setCapabilities(core, { alerting_v2_alerts: { read: true } });
-
-        expect(getSectionByTitle(core, 'Operations')).toBeUndefined();
-      });
     });
   });
 });
