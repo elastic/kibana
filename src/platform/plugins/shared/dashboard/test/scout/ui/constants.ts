@@ -93,3 +93,6 @@ export const LOGSTASH_DATA_VIEW_TITLE = 'logstash*';
 
 export const BWC_SHORT_URLS_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/bwc_short_urls.json';
+
+export const LOGS_SAMPLE_DATA_SET_ID = 'logs';
+export const LEGACY_DASHBOARD_ID = 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b';
