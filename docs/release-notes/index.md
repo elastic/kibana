@@ -339,7 +339,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 
 #### Cases [kibana-9.6.0-fixes-cases]
 * Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
-* Fix the **Read only** badge appearing on the case templates pages for users who have read access to Cases and the case templates management privilege [#291719]({{kib-pull}}291719).
+* Fix the **Read only** badge appearing on case template pages when you have Cases **Read** access and the privilege to manage case templates [#291719]({{kib-pull}}291719).
 * Fix the **Create case** button in the **Add to case** selector being available to users who can't create cases [#292761]({{kib-pull}}292761).
 * Fix default values of global fields not being applied to cases that you create through the API or workflow steps. Those cases had empty global fields [#283185]({{kib-pull}}283185).
 * Fix a template `$ref` field silently dropping its local display and validation overrides [#283072]({{kib-pull}}283072).
@@ -465,7 +465,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix updating an output or a {{fleet-server}} host through the API deleting stored secrets, such as an output's `ssl.key` or a Kafka password, when the request omits them or sends them as plain text. {{fleet}} now keeps the secrets that a request omits and stores plain-text values as secrets [#299235]({{kib-pull}}299235).
 * Fix the **Agent policies** page failing or timing out for agent policies with thousands of integration policies [#297979]({{kib-pull}}297979).
 * Fix downloading the agent policy as YAML failing with an `Unresolved alias` error when the policy repeats the same settings in more than one place [#280669]({{kib-pull}}280669).
-* Require the **Integrations** read privilege for the full agent policy APIs, and disable **View policy**, **View agent policy**, and the standalone enrollment option when you can't read integration policies [#301951]({{kib-pull}}301951).
+* Require the **Integrations** read privilege for the full agent policy APIs, and disable **View policy**, **View agent policy**, and the **Run standalone** option when you can't read integration policies [#301951]({{kib-pull}}301951).
 * Fix deleting an agent policy succeeding when {{fleet}} can't remove it from integration policies that other agent policies share. That left the integration policies pointing to a deleted agent policy and made the **Edit integration** page fail with `Agent policies not found`. The delete now fails with an error that lists each integration policy that failed. Removing the agent policy from shared integration policies also no longer depends on the Elastic Package Registry, so the delete no longer fails or takes minutes when the registry is unreachable [#300189]({{kib-pull}}300189), [#300384]({{kib-pull}}300384).
 * Fix bulk upgrades from the installed integrations page installing the bundled version instead of the latest version [#282829]({{kib-pull}}282829).
 * Reject {{fleet}} API requests that upgrade an integration or an integration policy across breaking changes with a `400` error, unless the request sets `acknowledge_breaking_changes: true` [#301973]({{kib-pull}}301973).
@@ -504,7 +504,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix lifecycle settings in Index Management appearing as effective for lookup-mode indices and data streams [#292309]({{kib-pull}}292309).
 * Fix transform actions failing with a generic `500` error when the {{es}} request timed out or failed at the transport level [#287592]({{kib-pull}}287592).
 * Fix deleting snapshots failing on long-running deletions of up to 30 minutes, and a snapshot that no longer exists blocking the deletion of others in the same request [#290071]({{kib-pull}}290071).
-* Fix creating and fetching data views with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving the data view [#299790]({{kib-pull}}299790).
+* Fix creating and fetching {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving it [#299790]({{kib-pull}}299790).
 * Fix the data view edit flyout discarding your edits when {{kib}} refreshes the data view fields while the flyout is open [#299603]({{kib-pull}}299603).
 * Fix several runtime field preview issues: the custom label now appears in the preview row, the preview row stays visible while documents load, and clearing the **Document ID** no longer leaves a stale error [#299810]({{kib-pull}}299810).
 * Keep the script in the runtime field editor when you change the field type to or from `composite` [#299025]({{kib-pull}}299025).
@@ -545,7 +545,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Prevent creating two ad hoc data views with the same custom ID. **Use without saving** is now disabled when you enter a custom data view ID [#292738]({{kib-pull}}292738).
 * Fix the Discover field list showing stale field type icons after an index is recreated with a different mapping type for an existing field [#301198]({{kib-pull}}301198).
 * Fix being unable to exit inline editing of a Discover panel on a dashboard when the panel has a search error, because the **Discard** button didn't appear [#289918]({{kib-pull}}289918).
-* Fix {{esql}} controls that you add while editing a Discover panel not appearing on the dashboard after you select **Save and return** [#301047]({{kib-pull}}301047).
+* Fix {{esql}} controls that you add while editing a Discover session panel from the library not appearing on the dashboard after you select **Save and return** [#301047]({{kib-pull}}301047).
 * Hide filter buttons in the data table for values that {{es}} ignored because they exceed `ignore_above`, since a filter on them can't match a document [#287807]({{kib-pull}}287807).
 * Fix search highlighting showing stray `@kibana-highlighted-field@` tag text when you search a multi-value field for a term such as `field` or `kibana` [#283345]({{kib-pull}}283345).
 * Keep focus on a field when you pin or unpin it in the document viewer **Table** tab, so focus follows the field to its new position [#220097]({{kib-pull}}220097).
@@ -607,7 +607,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix calls failing for legacy AI connector configurations when {{kib}} is restricted to the default LLM and the call uses the {{infer}} endpoint behind the default connector. Agent Builder now also uses feature-specific settings that an administrator configured before it uses the default connector [#293855]({{kib-pull}}293855).
 * Fix LLM model resolution failing when you don't have the Actions privilege and an {{infer}} endpoint is configured in model settings [#290533]({{kib-pull}}290533).
 * Fix users without the `searchInferenceEndpoints.read` privilege seeing every available LLM instead of only the LLMs allowed for the feature they use [#290457]({{kib-pull}}290457).
-* Fix the anomaly detection jobs tool failing with `Insufficient privileges to access feature` for every user, including superusers, when an agent runs it in an `ai.agent` workflow step or in Agent Builder chat [#301983]({{kib-pull}}301983).
+* Fix the Agent Builder anomaly detection jobs tool failing with `Insufficient privileges to access feature` for every user, including superusers, when an agent runs it in an `ai.agent` workflow step or in Agent Builder chat [#301983]({{kib-pull}}301983).
 * Block chat completion calls that use a non-default model when `genAiSettings:defaultAIConnectorOnly` is on. These calls now fail with a 400 error instead of succeeding [#288107]({{kib-pull}}288107).
 * Fix AI features failing or crashing when a prompt or response contains a model special token, such as `<|endoftext|>`, and fix 400 errors from Claude models caused by empty text content blocks [#283177]({{kib-pull}}283177).
 * Fix {{kib}} becoming unresponsive when an LLM response stream never ends or is very slow [#286849]({{kib-pull}}286849).
@@ -615,8 +615,8 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Agent Builder requests that use tools failing with an `INVALID_ARGUMENT` error when the Gemini connector sends them to Google Vertex AI [#300040]({{kib-pull}}300040).
 * Fix requests to Gemini models failing with a 400 error when an Agent Builder tool reuses a shared parameter definition, such as the time range in the dashboards tool [#295880]({{kib-pull}}295880).
 * Fix Agent Builder and Attack Discovery failing on Anthropic `chat_completion` endpoints because {{kib}} sent a `temperature` value that the model rejects [#281179]({{kib-pull}}281179).
-* Fix AI features failing with Claude models that reject forced tool use. {{kib}} now sends `tool_choice: auto` to these models, so the model decides whether to call a tool [#301398]({{kib-pull}}301398).
-* Fix Agent Builder running tools with empty parameters when a model provider, such as Amazon Bedrock, returns several tool calls in one response [#301775]({{kib-pull}}301775).
+* Fix AI features failing with Claude models that reject forced tool use, such as Claude Sonnet 5.5 and Opus 5.5. {{kib}} now sends `tool_choice: auto` to these models, so the model decides whether to call a tool [#301398]({{kib-pull}}301398).
+* Fix Agent Builder running tools with empty arguments when a model provider, such as Amazon Bedrock, returns several tool calls in one response [#301775]({{kib-pull}}301775).
 * Fix workflow auto-complete suggesting only connectors. It now also suggests {{infer}} endpoints that you set in feature settings [#292431]({{kib-pull}}292431).
 * Fix the product documentation installer shutting {{kib}} down when it downloads a corrupt or incomplete artifact [#291142]({{kib-pull}}291142).
 * Fix the index data visualizer not showing the anomaly detection and data frame analytics job creation cards when you open the page from a link to a data view or Discover session [#298432]({{kib-pull}}298432).
@@ -663,7 +663,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix overlapping and misaligned nodes in the graph view layout, such as nested `if` steps overlapping inside a `foreach`, `foreach` boxes about twice as wide as their steps, and branches that jog sideways [#281304]({{kib-pull}}281304), [#297799]({{kib-pull}}297799).
 * Fix the filter options in the executions view not loading when the execution index or the execution data stream doesn't exist [#298697]({{kib-pull}}298697).
 * Show **Waiting for input** and **Waiting for child workflow** as separate options in the executions filter, instead of several options that are all labeled **Waiting** [#285345]({{kib-pull}}285345).
-* Fix unsaved workflow tests appearing in the execution history of a saved workflow with the same ID [#293652]({{kib-pull}}293652).
+* Fix unsaved workflow test runs appearing in the execution history of a saved workflow with the same ID [#293652]({{kib-pull}}293652).
 * Fix large workflow executions failing to open or showing only their first 1,000 steps. {{kib}} now loads steps separately, loads up to 10,000 automatically, and shows **Show more** when more remain [#292678]({{kib-pull}}292678), [#288622]({{kib-pull}}288622).
 * Restore the actions that complete a waiting run in the execution flyout (**Provide action** or **Approve**/**Reject**), the **Action is required** badge in the executions list, and the link to the run when you select a `workflow.execute` step or a child-run step [#290910]({{kib-pull}}290910).
 * Open the inputs modal with the run's inputs filled in when you select **Re-run** in the execution flyout, instead of starting a new run immediately [#290872]({{kib-pull}}290872).
@@ -715,7 +715,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % Not on the 9.6 branch (backport:skip, merged to main on Oct 22 with a v9.6.0 label). The PR now carries release_note:fix. Still absent from build candidate 9.6.0-94472f7a.
 % * Fix workflow waits that time out not resuming on time [#302132]({{kib-pull}}302132).
 % Not on the 9.6 branch (no backport as of Nov 10). Draft from the PR title, so read the PR before you keep it.
-% * Fix the MCP connector reusing a connection after a timeout or a `5xx` error [#303531]({{kib-pull}}303531).
+% * Fix the MCP connector reusing a pooled connection after a timeout or a `5xx` error, and retrying after repeated failures. The `.mcp` connector now stops retrying an action after 3 consecutive connection failures within 5 minutes [#303531]({{kib-pull}}303531).
 % Not on the 9.6 branch (no backport as of Nov 10). Draft from the PR title, so read the PR before you keep it.
 
 % The {{esql}} Data Federation bullet in the {{esql}} editor section summarizes these entries. Add PR links there if you want them.
@@ -758,7 +758,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Support `??` parameters in PromQL [#281486]({{kib-pull}}281486).
 
 % Removed from 9.6.0: internal or not user-facing (test-only fix, internal Canvas route limit, dependency upgrade).
-% * Disable **Try {{esql}}** until the visualization state helpers resolve [#297237]({{kib-pull}}297237).
+% * Fix the **Try {{esql}}** button on the dashboard empty state doing nothing when you select it before the visualization editor finishes loading. The button is now disabled until it's ready [#297237]({{kib-pull}}297237).
 % * Limit the number of data table cells that the Canvas functions route creates [#287935]({{kib-pull}}287935).
 % * Upgrade `@elastic/charts` to 73.3.1 [#298033]({{kib-pull}}298033), [#296879]({{kib-pull}}296879), [#294108]({{kib-pull}}294108).
 
@@ -782,7 +782,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Reorder the Security solutions side navigation items for AlertZero [#300830]({{kib-pull}}300830).
 % * Enable the endpoint response actions skill in Agent Builder by default [#299402]({{kib-pull}}299402).
 % * Update the Entity Analytics skill description and content [#301628]({{kib-pull}}301628).
-% * Allow closing a case when it has reached the user action limit [#301378]({{kib-pull}}301378).
+% * Fix closing a case that reached the limit of 10,000 user actions [#301378]({{kib-pull}}301378).
 % * Resolve in-app proposal links against the {{kib}} base path [#300283]({{kib-pull}}300283).
 % * Keep a Hunt Watch report retryable when the dataset-match call fails [#302188]({{kib-pull}}302188).
 % * Resolve alerts when the Attack Discovery gate adds fewer than 10, and stop Attack Discovery generation when the model refuses with `content_filter` [#302303]({{kib-pull}}302303), [#302304]({{kib-pull}}302304).
@@ -812,7 +812,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix the APM waterfall silently re-rooting on truncated traces [#284971]({{kib-pull}}284971). Observability solution.
 % * Fix Synthetics monitor status alerts showing the location ID instead of the location name when a pending alert recovers [#300220]({{kib-pull}}300220). Observability solution.
 % * Fix the Synthetics monitor health API logging users out when a monitor is shared to all spaces [#302177]({{kib-pull}}302177). Observability solution.
-% * Fix the Metrics charts in Discover failing with an `Unknown column` error when an {{esql}} `TS` query filters on a metadata field [#302705]({{kib-pull}}302705). Observability solution (Metrics experience, Team:obs-signals-metrics). Consider it if you want it under Discover.
+% * Fix the Metrics charts in Discover failing with an `Unknown column` error when an {{esql}} `TS` query filters on a metadata field such as `_ignored` [#302705]({{kib-pull}}302705). Observability solution (Metrics experience, Team:obs-signals-metrics). Consider it if you want it under Discover.
 % * Include the run-tests and manage-rules sub-features in the Synthetics **All** privilege [#302481]({{kib-pull}}302481).
 % * Make the daily Synthetics private location clean up optional and faster [#294989]({{kib-pull}}294989).
 % * Make `error.id` optional in the APM trace error lookup so a trace doesn't return a `500` error [#302541]({{kib-pull}}302541).
