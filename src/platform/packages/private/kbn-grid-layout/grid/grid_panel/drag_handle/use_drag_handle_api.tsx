@@ -13,6 +13,8 @@ import { useGridLayoutContext } from '../../use_grid_layout_context';
 import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
 import type { UserInteractionEvent } from '../../use_grid_layout_events/types';
 
+const DRAG_HANDLE_CLASS = 'kbnGridPanel--dragHandle';
+
 export interface DragHandleApi {
   startDrag: (e: UserInteractionEvent) => void;
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
@@ -43,14 +45,25 @@ export const useDragHandleApi = ({
        */
       removeEventListenersRef.current?.();
 
+      const classObservers: MutationObserver[] = [];
+
       for (const handle of dragHandles) {
         if (handle === null) return;
         handle.addEventListener('mousedown', startDrag, { passive: true });
         handle.addEventListener('touchstart', startDrag, { passive: true });
         handle.addEventListener('keydown', startDrag);
-        handle.classList.add('kbnGridPanel--dragHandle');
+        handle.classList.add(DRAG_HANDLE_CLASS);
+        // React className updates drop the imperatively added class, so re-add it
+        const classObserver = new MutationObserver(() => {
+          if (!handle.classList.contains(DRAG_HANDLE_CLASS)) {
+            handle.classList.add(DRAG_HANDLE_CLASS);
+          }
+        });
+        classObserver.observe(handle, { attributes: true, attributeFilter: ['class'] });
+        classObservers.push(classObserver);
       }
       removeEventListenersRef.current = () => {
+        classObservers.forEach((observer) => observer.disconnect());
         for (const handle of dragHandles) {
           if (handle === null) return;
           handle.removeEventListener('mousedown', startDrag);
