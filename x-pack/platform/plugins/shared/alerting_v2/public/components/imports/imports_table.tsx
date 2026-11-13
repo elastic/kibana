@@ -13,6 +13,10 @@ import { ALERTING_V2_EPISODES_STATUS_ALL } from '@kbn/alerting-v2-constants';
 import { useAlertingLocators } from '../../application/locator_context';
 import type { ImportListItem } from '../../hooks/use_fetch_imports';
 import { EMPTY_VALUE } from '../../utils/rule_display';
+import {
+  IMPORT_ALERT_COUNT_DAYS,
+  IMPORT_ALERT_COUNT_TIME_RANGE,
+} from '../../queries/imports/import_alert_counts_query';
 
 const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
   '.inboundWebhook': i18n.translate('xpack.alertingV2.imports.list.type.customWebhook', {
@@ -35,7 +39,7 @@ interface ImportRow extends ImportListItem {
 export const getConnectorAlertsQuery = (connectorId: string): string =>
   `connector.id: "${connectorId.replace(/["\\]/g, '\\$&')}"`;
 
-/** The alert count, linked to the alerts list filtered to the connector once there are alerts. */
+/** The alert count, linked to the alerts list filtered to the connector and the same 30 days. */
 const AlertsCountLink = ({ connectorId, count }: { connectorId: string; count?: number }) => {
   const { episodesLocators } = useAlertingLocators();
   if (count === undefined) {
@@ -49,6 +53,7 @@ const AlertsCountLink = ({ connectorId, count }: { connectorId: string; count?: 
       queryString: getConnectorAlertsQuery(connectorId),
       status: ALERTING_V2_EPISODES_STATUS_ALL,
     },
+    timeRange: { ...IMPORT_ALERT_COUNT_TIME_RANGE },
   };
   return (
     <EuiLink
@@ -85,7 +90,8 @@ const columns: Array<EuiBasicTableColumn<ImportRow>> = [
   {
     field: 'alertSeriesCount',
     name: i18n.translate('xpack.alertingV2.imports.list.column.alerts', {
-      defaultMessage: 'Alerts',
+      defaultMessage: 'Alerts (last {days} days)',
+      values: { days: IMPORT_ALERT_COUNT_DAYS },
     }),
     dataType: 'number',
     sortable: true,
