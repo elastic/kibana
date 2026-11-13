@@ -12,6 +12,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import {
@@ -27,7 +28,7 @@ import {
 } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import {
-  createInvestigationMemoryTelemetry,
+  createInvestigationBackgroundTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
 import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
@@ -204,7 +205,10 @@ export const decisionTreePrepareStepDefinition = ({
                 inference: getInference?.(),
                 savedObjects: getSavedObjects?.(),
                 uiSettings: getUiSettings?.(),
-                telemetryMetadata: createInvestigationMemoryTelemetry(executionId ?? ''),
+                telemetryMetadata: createInvestigationBackgroundTelemetry(
+                  NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID,
+                  executionId ?? ''
+                ),
                 logger,
               });
               if (!model) {

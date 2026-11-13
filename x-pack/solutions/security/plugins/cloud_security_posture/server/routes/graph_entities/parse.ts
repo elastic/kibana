@@ -11,7 +11,7 @@ import type {
   EntitiesResponse,
 } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import type { EntityRecord } from './types';
-import { transformEntityTypeToIconAndShape, normalizeToArray } from '../graph/utils';
+import { getEntityTypeIcon, normalizeToArray } from '../graph/utils';
 
 /**
  * Parses entity records into EntityItem response.
@@ -35,7 +35,7 @@ export const parseEntityRecords = (
 
     if (record) {
       // Entity found - use data from query
-      const { icon } = transformEntityTypeToIconAndShape(record.ecsParentField ?? '');
+      const icon = getEntityTypeIcon(record.ecsParentField ?? '');
 
       return {
         id: entityId,

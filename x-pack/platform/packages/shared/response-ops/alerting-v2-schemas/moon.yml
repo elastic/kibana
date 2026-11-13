@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/zod'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/es-mappings'
 tags:
   - shared-common
   - package

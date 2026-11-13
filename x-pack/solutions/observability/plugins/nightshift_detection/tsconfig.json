@@ -1,0 +1,19 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "server/**/*", "scripts/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/cloud-plugin",
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-di",
+    "@kbn/core-di-server",
+    "@kbn/core-pricing-common",
+    "@kbn/core-plugins-server",
+    "@kbn/licensing-plugin",
+    "@kbn/nightshift-shared"
+  ]
+}

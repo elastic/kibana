@@ -10,6 +10,7 @@
 export { createEmulatorFetch } from './src/fetch/create_emulator_fetch';
 export { combineEmulators, emulatorCredential } from './src/fetch/combine_emulators';
 export type { CombinedEmulator } from './src/fetch/combine_emulators';
+export { issueAccessToken } from './src/openapi/token_endpoints';
 export { createCertificateAuthority } from './src/server/certificate_authority';
 export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
 export { createEmulatorProxy } from './src/server/create_emulator_proxy';
@@ -36,6 +37,13 @@ export type {
   EmulatorOptions,
   EmulatorSpec,
 } from './src/fetch/create_emulator_fetch';
+export { REDACTED } from './src/fetch/capture_call';
+export type {
+  CaptureOptions,
+  CapturedExchange,
+  CapturedMessage,
+  CapturedRequest,
+} from './src/fetch/capture_call';
 export type {
   EmulatorHttpOperation,
   EmulatorNamedOperation,

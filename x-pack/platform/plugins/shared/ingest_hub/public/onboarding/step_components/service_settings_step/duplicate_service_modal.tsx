@@ -58,7 +58,8 @@ interface DuplicateServiceModalProps {
     name: string,
     varsByDataStream: Record<string, ServiceDataStreamVars>,
     enabledDataStreams: string[],
-    namespace: string
+    namespace: string,
+    createDatasetTemplates: boolean
   ) => void;
   onCancel: () => void;
 }
@@ -83,6 +84,10 @@ export function DuplicateServiceModal({
     ...sourceConfig.varsByDataStream,
   }));
   const [namespace, setNamespace] = useState(globalNamespace);
+  // The duplicate deploys in a policy of its own, so it takes its own template choice.
+  const [createDatasetTemplates, setCreateDatasetTemplates] = useState(
+    sourceConfig.createDatasetTemplates ?? true
+  );
   const showNamespace = supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
@@ -159,7 +164,7 @@ export function DuplicateServiceModal({
       if (singleDs) return true;
       return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
     });
-    onAdd(trimmedName, draftByDs, enabledDataStreams, namespace);
+    onAdd(trimmedName, draftByDs, enabledDataStreams, namespace, createDatasetTemplates);
   };
 
   return (
@@ -272,6 +277,8 @@ export function DuplicateServiceModal({
               };
             })
           }
+          createDatasetTemplates={createDatasetTemplates}
+          onCreateDatasetTemplatesChange={setCreateDatasetTemplates}
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];

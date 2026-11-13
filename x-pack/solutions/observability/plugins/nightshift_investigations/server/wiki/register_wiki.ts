@@ -16,11 +16,13 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID } from '@kbn/nightshift-shared';
 import type { AuditedSandboxSession } from '../sandbox_audit';
 import {
-  createInvestigationMemoryTelemetry,
+  createInvestigationBackgroundTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
+import type { ModelUsageCollector } from '../lib/model_usage_collector';
 import { WIKI_AI_INDEX_DEST, WIKI_AI_INDEX_ID } from '../../common/wiki';
 import { SANDBOX_TOOL_IDS } from '../agents/investigation';
 import { usesKnowledge } from '../agents/agent_policy';
@@ -140,6 +142,7 @@ export const runWikiOptimize = async ({
   getSavedObjects,
   getUiSettings,
   logger,
+  modelUsage,
 }: {
   request: KibanaRequest;
   agentId?: string;
@@ -161,6 +164,7 @@ export const runWikiOptimize = async ({
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
+  modelUsage?: ModelUsageCollector;
 }): Promise<WikiOptimizeResult | undefined> => {
   // Only the Nightshift knowledge agents write to Wiki: their post-execution hook runs this
   // workflow, and other agents' rounds must not edit the wiki. An unidentified caller is refused
@@ -216,7 +220,11 @@ export const runWikiOptimize = async ({
     inference: getInference(),
     savedObjects: getSavedObjects(),
     uiSettings: getUiSettings(),
-    telemetryMetadata: createInvestigationMemoryTelemetry(interactionId),
+    telemetryMetadata: createInvestigationBackgroundTelemetry(
+      NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID,
+      interactionId
+    ),
+    modelUsage,
     logger,
   });
   if (!model) {

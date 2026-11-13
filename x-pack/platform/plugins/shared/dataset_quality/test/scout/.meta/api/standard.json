@@ -1,5 +1,5 @@
 {
-  "sha1": "00c15a16e30173170173fef707705be915e481c9",
+  "sha1": "f49266ab09d583893ee1361c608f75f9cf769148",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -387,8 +387,8 @@
       }
     },
     {
-      "id": "41ec8497fea4c2f-2e4bf3983db39c1",
-      "title": "Dataset quality - data stream total docs returns a 403 when the user does not have sufficient privileges",
+      "id": "41ec8497fea4c2f-7dba7e76d925111",
+      "title": "Dataset quality - data stream total docs returns no documents when the user cannot access any data streams",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -970,8 +970,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_multiple_types.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 13
+      }
+    },
+    {
+      "id": "707f589a7687e92-99c7c77db53977f",
+      "title": "Dataset quality - data stream stats across data stream types discovers every requested type but only calculates stats for selected types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_multiple_types.spec.ts",
+        "line": 132,
+        "column": 7
       }
     },
     {
@@ -986,8 +1002,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_admin.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 28
+      }
+    },
+    {
+      "id": "3fadf5b52047889-a5a6e944f6b621d",
+      "title": "Dataset quality - complement-pattern privileges returns accessible concrete streams without leaking excluded streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_complement_pattern.spec.ts",
+        "line": 60,
+        "column": 11
       }
     },
     {
@@ -1018,7 +1050,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_monitor.spec.ts",
-        "line": 63,
+        "line": 60,
         "column": 27
       }
     },
@@ -1034,7 +1066,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_monitor.spec.ts",
-        "line": 77,
+        "line": 74,
         "column": 27
       }
     },
@@ -1132,102 +1164,6 @@
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
         "line": 97,
         "column": 18
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-764ad3197a87f0a",
-      "title": "Dataset quality - types privileges returns no privileges with a single type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 42,
-        "column": 5
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-fcfe668b6b3d68e",
-      "title": "Dataset quality - types privileges returns no privileges with multiple types",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 54,
-        "column": 74
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-22848601b3cca4a",
-      "title": "Dataset quality - types privileges returns full privileges with a single type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 65,
-        "column": 5
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-cbe98b9c71b9baf",
-      "title": "Dataset quality - types privileges returns full privileges with multiple types",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 74,
-        "column": 7
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-5c054d590d77893",
-      "title": "Dataset quality - types privileges returns full privileges with all types",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 88,
-        "column": 12
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-a1215da7a825fff",
-      "title": "Dataset quality - types privileges returns the expected response structure",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 106,
-        "column": 12
       }
     },
     {

@@ -40,11 +40,12 @@ describe('endpoint configuration troubleshooting managed workflows', () => {
     expect(ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW.billable).toBe(false);
   });
 
-  it('emits only summaries, population and unauthorized from the find workflow', () => {
+  it('emits only summaries, population, unauthorized and missing saved-object IDs from the find workflow', () => {
     expect(stepByName(FIND, 'emit')?.with).toEqual({
       summaries: '${{ steps.find.output.summaries }}',
       population: '${{ steps.find.output.population }}',
       unauthorized: '${{ steps.find.output.unauthorized }}',
+      not_found_ids: '${{ steps.find.output.not_found_ids }}',
     });
   });
 

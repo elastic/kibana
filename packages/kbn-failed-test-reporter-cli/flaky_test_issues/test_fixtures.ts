@@ -163,6 +163,7 @@ export const flakyReport = (
 });
 
 export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }): GithubIssue => ({
+  id: 1000 + overrides.number,
   html_url: `https://github.com/elastic/kibana/issues/${overrides.number}`,
   node_id: `node-${overrides.number}`,
   title: `Issue #${overrides.number}`,

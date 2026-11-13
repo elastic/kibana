@@ -57,7 +57,6 @@ export const CorrelationsDetails = memo(
             scopeId={scopeId}
             onShowAlert={onShowAlert}
             onShowAttack={onShowAttack}
-            useLegacyExpandableFlyout={false}
           />
         </EuiFlyoutBody>
       </>

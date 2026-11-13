@@ -46,7 +46,7 @@ export type IdentityFields = Record<string, string>;
  * True when the document-derived identity map has at least one non-empty string value.
  * (An object reference alone is not enough — empty cards must not render.)
  */
-export const identityFieldsHaveUsableValues = (
+const identityFieldsHaveUsableValues = (
   fields: IdentityFields | Record<string, string> | undefined | null
 ): boolean => {
   if (fields == null) {

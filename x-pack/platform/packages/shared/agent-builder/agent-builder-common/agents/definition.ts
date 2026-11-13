@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
@@ -185,12 +184,6 @@ export interface AgentConfiguration {
   inference_feature_id?: string;
 
   /**
-   * Optional default reasoning level for this agent's runs. A `reasoning_level` passed to the
-   * converse API or workflow step overrides it.
-   */
-  reasoning_level?: ChatCompletionReasoningEffort;
-
-  /**
    * Destructive APIs pre-approved for every run of this agent.
    */
   approvals?: AgentApprovals;
@@ -221,6 +214,10 @@ export interface AgentCapabilities {
    * The generic attachment tools and the attachment instructions in the system prompt.
    */
   attachment_tools?: AgentCapabilityConfig;
+  /**
+   * The API tools: `discover_apis`, `describe_api`, `describe_api_type` and `execute_api`.
+   */
+  api_tools?: AgentCapabilityConfig;
 }
 
 /**
@@ -240,7 +237,7 @@ export interface AgentApprovals {
  */
 export type AgentConfigurationInput = Omit<
   AgentConfiguration,
-  'inference_feature_id' | 'reasoning_level' | 'capabilities'
+  'inference_feature_id' | 'capabilities'
 >;
 
 /**

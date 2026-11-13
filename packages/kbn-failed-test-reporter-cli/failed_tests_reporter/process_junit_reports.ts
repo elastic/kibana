@@ -45,6 +45,7 @@ export async function processJUnitReports(
     prependTitle,
     updateGithub,
     perTestIssues,
+    suiteIssueComments,
     indexInEs,
     reportUpdate,
     bkMeta,
@@ -112,16 +113,14 @@ export async function processJUnitReports(
       seenNewIssueKeys.add(key);
       considered.push(failure);
 
-      // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
+      // a test tracked by a suite issue gets its failures counted there, not on an issue of its own;
+      // the daily report and the consistent failure check comment on it, or this job without the check
       const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
       if (suiteIssue) {
         const { newBody, newCount } = await updateSuiteIssue(
-          buildUrl,
           suiteIssue,
           githubApi,
-          branch,
-          pipeline,
-          failure
+          suiteIssueComments ? { buildUrl, branch, pipeline, failure } : undefined
         );
         const url = suiteIssue.github.htmlUrl;
         // in dry-run nothing was written, so the next failure of the suite counts from the same body
@@ -138,6 +137,13 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated flaky suite issue: ${url} (fail count: ${newCount})`);
         }
+        continue;
+      }
+
+      // its per-test issue, if any, is left for the suite issue it gets to replace
+      if (!perTestIssues) {
+        pushMessage('No suite issue tracks this test yet');
+        failure.failureCount = 0;
         continue;
       }
 
@@ -161,12 +167,6 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
-        continue;
-      }
-
-      if (!perTestIssues) {
-        pushMessage('No failed-test issue tracks this test yet');
-        failure.failureCount = 0;
         continue;
       }
 
