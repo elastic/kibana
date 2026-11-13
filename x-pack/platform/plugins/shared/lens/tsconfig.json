@@ -163,7 +163,9 @@
     "@kbn/app-header",
     "@kbn/managed-content-badge",
     "@kbn/core-http-common",
-    "@kbn/core-chrome-browser-context-mocks"
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/coloring-components",
+    "@kbn/palettes-components"
   ],
   "exclude": ["target/**/*"]
 }
