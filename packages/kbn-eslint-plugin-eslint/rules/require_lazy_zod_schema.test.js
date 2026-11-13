@@ -337,7 +337,7 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
       errors: [
         {
           message:
-            'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted and keeps the built schema in memory.',
+            'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted. With Zod 4 it keeps the built schema in memory.',
         },
       ],
       output: dedent`

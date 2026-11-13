@@ -786,13 +786,13 @@ module.exports = {
     schema: [],
     messages: {
       eagerZodSchema:
-        'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted and keeps the built schema in memory.',
+        'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted. With Zod 4 it keeps the built schema in memory.',
       eagerDerivedZodSchema:
-        'Wrap this module-level Zod schema derivation in `lazySchema(() => ...)` to defer it until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted and keeps the built schema in memory.',
+        'Wrap this module-level Zod schema derivation in `lazySchema(() => ...)` to defer it until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted. With Zod 4 it keeps the built schema in memory.',
       schemaFactoryUsedAsSchema:
         'This function is used as a Zod schema. Use `lazySchema(() => ...)` to keep a schema value.',
       doubleLazyWrap:
-        'The outer `z.lazy` already defers and caches the schema. Build the schema directly inside `z.lazy(() => ...)` instead of wrapping a `lazySchema` proxy.',
+        'With Zod 4, the outer `z.lazy` already defers and caches the schema. Build the schema directly inside `z.lazy(() => ...)` instead of wrapping a `lazySchema` proxy.',
     },
   },
 
