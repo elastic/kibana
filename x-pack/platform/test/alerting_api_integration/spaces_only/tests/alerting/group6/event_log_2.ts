@@ -31,8 +31,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  // Failing: See https://github.com/elastic/kibana/issues/259686
-  describe.skip('eventLog', () => {
+  describe('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const runRuleAndEnsureCompletion = async ({
@@ -40,11 +39,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       ruleId,
       runs,
       totalAlertsGeneratedPerRun = [],
+      throttleMs,
     }: {
       spaceId: string;
       ruleId: string;
       runs: number;
       totalAlertsGeneratedPerRun?: number[];
+      throttleMs?: number;
     }) => {
       if (totalAlertsGeneratedPerRun.length && totalAlertsGeneratedPerRun.length !== runs) {
         throw new Error('Alerts per run has to be the same length as the number of runs');
@@ -58,6 +59,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           !!totalAlertsGeneratedPerRun[run] && currentRunAlerts !== prevRunAlerts;
         // Skip the first run since creating the rule runs it already
         if (run !== 0) {
+          // A forced run inside the previous run's throttle window skips the action, so its event never arrives
+          if (throttleMs) {
+            await setTimeoutAsync(throttleMs);
+          }
           await runSoon({
             id: ruleId,
             spaceId,
@@ -181,6 +186,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             ],
             ruleId: alertId,
             spaceId: space.id,
+            throttleMs: 1000,
           });
 
           // get the events we're expecting
@@ -650,9 +656,20 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
+          // A new alert's new-instance and active-instance events are logged in the same run and can share
+          // a timestamp. The event log only sorts by timestamp, so order those ties by the alert lifecycle.
+          const lifecycleOrder = ['new-instance', 'active-instance', 'recovered-instance'];
+          const getTime = (event: (typeof events)[number]) =>
+            new Date(event?.['@timestamp'] ?? 0).getTime();
+          const getLifecycleRank = (event: (typeof events)[number]) =>
+            lifecycleOrder.indexOf(event?.event?.action ?? '');
+          const orderedEvents = [...events].sort(
+            (a, b) => getTime(a) - getTime(b) || getLifecycleRank(a) - getLifecycleRank(b)
+          );
+
           let currentUuid: string | undefined;
           const seenUuids = new Set<string>();
-          for (const event of events) {
+          for (const event of orderedEvents) {
             const action = event?.event?.action;
             const uuid = event?.kibana?.alert?.uuid;
 
