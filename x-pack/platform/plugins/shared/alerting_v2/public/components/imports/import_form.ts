@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ID_MAX_LENGTH, SEVERITY_LEVELS } from '@kbn/alerting-v2-schemas';
+import { SEVERITY_LEVELS } from '@kbn/alerting-v2-schemas';
 
 export type ImportSeverity = (typeof SEVERITY_LEVELS)[number];
 
@@ -24,9 +24,7 @@ export const DEFAULT_IMPORT_FORM_STATE: ImportFormState = {
   fingerprintField: '',
 };
 
-// The name is also the source of the imported alerts, so it follows the source rules.
-const RESERVED_SOURCE_PREFIX = 'elastic';
-const MAX_NAME_LENGTH = ID_MAX_LENGTH;
+const MAX_NAME_LENGTH = 256;
 
 /** Dotted path of letters, digits, underscores and dashes, for example `labels.env`. */
 const FINGERPRINT_FIELD_PATTERN = /^[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)*$/;
@@ -51,11 +49,6 @@ export const validateName = (value: string): string | true => {
   if (trimmed === '') {
     return i18n.translate('xpack.alertingV2.imports.form.name.required', {
       defaultMessage: 'A name is required.',
-    });
-  }
-  if (trimmed.startsWith(RESERVED_SOURCE_PREFIX)) {
-    return i18n.translate('xpack.alertingV2.imports.form.name.reserved', {
-      defaultMessage: 'The name cannot start with "elastic". That prefix is reserved.',
     });
   }
   if (trimmed.length > MAX_NAME_LENGTH) {

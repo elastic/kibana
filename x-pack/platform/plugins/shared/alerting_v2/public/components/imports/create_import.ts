@@ -14,6 +14,8 @@ import { buildImportWorkflowYaml } from './build_import_workflow_yaml';
 import type { ImportFormState } from './import_form';
 
 const INBOUND_WEBHOOK_CONNECTOR_TYPE_ID = '.inboundWebhook';
+/** The `source` of every alert a custom webhook import creates, like `datadog` for Datadog. */
+export const CUSTOM_WEBHOOK_SOURCE = 'custom-webhook';
 const CONNECTOR_API_PATH = '/api/actions/connector';
 const INTERNAL_CONNECTOR_API_PATH = '/internal/actions/connector';
 
@@ -125,8 +127,7 @@ export const createImport = async ({
       yaml: buildImportWorkflowYaml({
         name,
         connectorId: connector.id,
-        // The import's name is the source shown on its alerts.
-        source: name,
+        source: CUSTOM_WEBHOOK_SOURCE,
         severity: values.defaultSeverity,
         ...(fingerprintField !== '' ? { fingerprintField } : {}),
       }),
