@@ -7,30 +7,57 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
 
 /**
- * AESOP prototype: answers "how is this skill used?" from Agent Builder traces.
- * Read-only: its only tool is ES|QL over the traces indices.
+ * AESOP prototype: finds skill candidates, either from security data (discovery) or from
+ * Agent Builder traces of existing skills (telemetry). Read-only: every tool it uses only reads.
  */
 export const aesopSkillExplorerSkill = defineSkillType({
   id: 'aesop-skill-explorer',
   name: 'aesop-skill-explorer',
   basePath: 'skills/security',
   description:
-    'Explores Agent Builder skill-usage telemetry (traces-agent_builder.otel-*) with read-only ' +
-    'ES|QL to summarize how a skill is used: invocation counts, tools called while it is loaded, ' +
-    'failure rates and trace ids. Use when optimizing or auditing a skill. Read-only.',
-  content: `# AESOP Skill Usage Explorer (prototype)
+    'Finds skill candidates with read-only tools. Discovery mode searches security data for ' +
+    'recurring analyst work no skill covers (new skills); telemetry mode reads Agent Builder ' +
+    'traces (traces-agent_builder.otel-*) to summarize how a skill is used: invocation counts, ' +
+    'tools called while it is loaded, failure rates and trace ids (variants). Read-only.',
+  content: `# AESOP Skill Explorer (prototype)
 
 ## When to Use This Skill
 
-Use this skill to explore how an Agent Builder skill is actually being used, from telemetry:
+Use this skill to find skill candidates in one of two modes:
+- Discovery: what recurring analyst work in the security data has no skill covering it?
+  Proposes new skills.
+- Telemetry: how is an existing Agent Builder skill actually used, and where does it fail?
+  Proposes variants of that skill.
+
+Telemetry questions:
 - How often is a skill invoked, and is usage rising or falling?
 - Which tools does the agent call while the skill is loaded?
 - What do failing or low-quality interactions look like (trace ids to hand to evaluation)?
 - Grounding a proposed skill variant in observed usage before A/B testing it.
 
-## Data Source
+## Step 0 (both modes): read the aesop AI index first
+
+Call ${contextEngineAiIndexTools.listAiIndices}, then ${contextEngineAiIndexTools.describeAiIndex}
+and ${contextEngineAiIndexTools.queryAiIndices} on the \`aesop\` index. It holds earlier findings,
+rejections and dismissals. Never re-propose a candidate that was rejected or dismissed; build on
+findings that were accepted.
+
+## Discovery Mode
+
+Look in the security data, not in traces:
+1. ${platformCoreTools.listIndices} and ${platformCoreTools.indexExplorer} to find the relevant
+   security indices (alerts, cases, endpoint and rule data).
+2. ${platformCoreTools.getIndexMapping} to learn the fields before querying.
+3. ${platformCoreTools.search} or ${platformCoreTools.executeEsql} to find recurring patterns:
+   repeated alert types, frequent case themes, steps analysts repeat by hand.
+4. For each pattern, check the existing skills' ids and descriptions: a candidate is only new if
+   no skill covers it.
+5. Report the document ids and counts that evidence each candidate, verbatim.
+
+## Telemetry Mode
 
 All queries read the Agent Builder traces data streams:
 \`FROM traces-agent_builder.otel-*\`
@@ -48,11 +75,11 @@ FROM traces-agent_builder.otel-*
 
 ## Read-Only
 
-This skill only runs ES|QL queries with ${platformCoreTools.executeEsql}. It never creates,
+This skill only reads: ES|QL, search, index discovery and AI-index queries. It never creates,
 updates or deletes anything: no rules, no cases, no saved objects, no workflow executions.
 If asked to modify a skill, explain that skill changes go through the AESOP A/B workflow.
 
-## Workflow
+## Telemetry Workflow
 
 1. Resolve the skill id from the user's request (the skill's id, not its display name).
 2. Count usage: load_skill spans matching the skill id, bucketed by day.
