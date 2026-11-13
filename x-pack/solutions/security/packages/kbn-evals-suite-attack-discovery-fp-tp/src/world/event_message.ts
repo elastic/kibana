@@ -24,11 +24,14 @@ export const withFieldMessage = (event: Ad2IndexedRawEvent): Ad2IndexedRawEvent 
   const parent = asRecord(process.parent);
   const destination = asRecord(event.source.destination);
   if (hasCategory(event.source, 'network')) {
+    const address = `${destination.ip}:${destination.port}`;
     return {
       ...event,
       source: {
         ...event.source,
-        message: `${process.name} connected to ${destination.domain} (${destination.ip}:${destination.port})`,
+        message: destination.domain
+          ? `${process.name} connected to ${destination.domain} (${address})`
+          : `${process.name} connected to ${address}`,
       },
     };
   }
