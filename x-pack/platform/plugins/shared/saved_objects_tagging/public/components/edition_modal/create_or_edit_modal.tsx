@@ -23,6 +23,8 @@ import {
   EuiTextArea,
   EuiSpacer,
   EuiText,
+  useEuiFontSize,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -66,6 +68,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   const optionalMessageId = useGeneratedHtmlId();
   const editTagModalTitleId = useGeneratedHtmlId();
   const ifMounted = useIfMounted();
+  const { euiTheme } = useEuiTheme();
+  const { lineHeight: errorTextLineHeight } = useEuiFontSize('xs');
   const [submitting, setSubmitting] = useState<boolean>(false);
   const lastNameValue = useRef(tag.name);
 
@@ -80,6 +84,10 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
     [initialTag, tag]
   );
   const nameHasBeenModified = tag.name !== lastNameValue.current;
+  // Matches EuiFormErrorText (xs padding plus one xs line), so a row keeps its height when its error appears.
+  const reservedErrorSpace = {
+    paddingBlockEnd: `calc(${euiTheme.size.xs} + ${errorTextLineHeight})`,
+  };
 
   const setName = useMemo(() => setField('name'), [setField]);
   const setColor = useMemo(() => setField('color'), [setField]);
@@ -139,6 +147,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             <EuiFlexItem grow={3}>
               <EuiFormRow
                 data-test-subj="createModalRow-name"
+                css={validation.errors.name ? undefined : reservedErrorSpace}
                 fullWidth={true}
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.name', {
                   defaultMessage: 'Name',
@@ -161,6 +170,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             <EuiFlexItem grow={2}>
               <EuiFormRow
                 data-test-subj="createModalRow-color"
+                css={validation.errors.color ? undefined : reservedErrorSpace}
                 fullWidth={true}
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.color', {
                   defaultMessage: 'Color',
@@ -186,41 +196,18 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   </EuiButtonEmpty>
                 }
               >
-                <EuiFieldText
-                  value={tag.color}
+                <EuiColorPicker
+                  color={tag.color}
                   fullWidth={true}
-                  onChange={(event) => setColor(event.target.value)}
-                  icon={{ type: 'swatchInput', side: 'left', color: previewTag.color }}
-                  append={
-                    <EuiColorPicker
-                      color={tag.color}
-                      onChange={(text) => setColor(text)}
-                      format="hex"
-                      button={
-                        <EuiButtonEmpty
-                          iconType="chevronSingleDown"
-                          color="text"
-                          size="s"
-                          aria-label={i18n.translate(
-                            'xpack.savedObjectsTagging.management.createModal.color.openPaletteAriaLabel',
-                            { defaultMessage: 'Open color palette' }
-                          )}
-                        />
-                      }
-                      data-test-subj="createModalColorPaletteButton"
-                    />
-                  }
+                  onChange={(text) => setColor(text)}
+                  format="hex"
                   isInvalid={!!validation.errors.color}
                   data-test-subj="createModalField-color"
                 />
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {/* Reserve the 18px validation message above the usual 8px field spacing. */}
-          <EuiSpacer
-            size={validation.errors.name || validation.errors.color ? 's' : 'l'}
-            css={validation.errors.name || validation.errors.color ? undefined : { height: '26px' }}
-          />
+          <EuiSpacer size="s" />
           <EuiFormRow
             data-test-subj="createModalRow-description"
             fullWidth={true}
