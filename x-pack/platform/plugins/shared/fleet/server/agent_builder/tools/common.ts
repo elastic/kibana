@@ -9,6 +9,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { errorResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 import { getAuthzFromRequest } from '../../services/security/security';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
@@ -43,4 +45,31 @@ export const checkOnboardingAccess = async (
     );
   }
   return undefined;
+};
+
+/**
+ * Fetches an execution and returns an error result unless it exists and belongs to the
+ * onboarding workflow, so these tools cannot read or resume other workflows' runs.
+ */
+export const getOnboardingExecution = async ({
+  workflowApi,
+  executionId,
+  spaceId,
+  request,
+  includeOutput,
+}: {
+  workflowApi: WorkflowApi;
+  executionId: string;
+  spaceId: string;
+  request: KibanaRequest;
+  includeOutput?: boolean;
+}): Promise<{ execution: WorkflowExecutionDto } | { error: ToolHandlerResult }> => {
+  const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
+    ...(includeOutput ? { includeOutput } : {}),
+    request,
+  });
+  if (!execution || execution.workflowId !== FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID) {
+    return { error: errorResult(`AWS onboarding execution '${executionId}' was not found.`) };
+  }
+  return { execution };
 };

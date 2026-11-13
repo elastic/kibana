@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 import { getAuthzFromRequest } from '../../services/security/security';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
@@ -29,7 +30,10 @@ describe('answer_aws_onboarding', () => {
   it('resumes the execution with the given answer and returns the new status', async () => {
     const workflowApi = {
       resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'user' }),
-      getWorkflowExecution: jest.fn().mockResolvedValue({ status: 'running' }),
+      getWorkflowExecution: jest.fn().mockResolvedValue({
+        status: 'running',
+        workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+      }),
     } as any;
 
     const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
@@ -47,5 +51,23 @@ describe('answer_aws_onboarding', () => {
       request
     );
     expect(results[0].data).toEqual({ status: 'running' });
+  });
+
+  it('returns an error result and does not resume when the execution belongs to another workflow', async () => {
+    const workflowApi = {
+      resumeWorkflowExecution: jest.fn(),
+      getWorkflowExecution: jest
+        .fn()
+        .mockResolvedValue({ status: 'waiting_for_input', workflowId: 'some-other-workflow' }),
+    } as any;
+
+    const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
+      { execution_id: 'exec-2', answer: { approved: true } },
+      { request, spaceId: 'default' } as any
+    );
+    const { results } = returned as unknown as { results: Array<{ type: string }> };
+
+    expect(results[0].type).toBe('error');
+    expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
   });
 });

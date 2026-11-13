@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
-import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
+import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -20,7 +20,7 @@ import type { AwsOnboardingStackStatusOutput } from '../../../common/workflows/s
 import type { AwsOnboardingCreatePoliciesOutput } from '../../../common/workflows/steps/create_policies';
 import type { AwsOnboardingHasDataOutput } from '../../../common/workflows/steps/has_data';
 
-import { checkOnboardingAccess } from './common';
+import { checkOnboardingAccess, getOnboardingExecution } from './common';
 import type { AwsOnboardingToolDeps } from './common';
 
 const stateSchema = lazySchema(() =>
@@ -54,13 +54,17 @@ export const createGetAwsOnboardingStateTool = ({
       return { results: [denied] };
     }
 
-    const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
-      includeOutput: true,
+    const found = await getOnboardingExecution({
+      workflowApi,
+      executionId,
+      spaceId,
       request,
+      includeOutput: true,
     });
-    if (!execution) {
-      return { results: [errorResult(`Execution '${executionId}' was not found.`)] };
+    if ('error' in found) {
+      return { results: [found.error] };
     }
+    const { execution } = found;
 
     const state = toWorkflowExecutionState(execution, executionId);
     if (execution.status === ExecutionStatus.COMPLETED) {

@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 
-import { checkOnboardingAccess } from './common';
+import { checkOnboardingAccess, getOnboardingExecution } from './common';
 import type { AwsOnboardingToolDeps } from './common';
 
 const answerSchema = lazySchema(() =>
@@ -39,6 +39,11 @@ export const createAnswerAwsOnboardingTool = ({
       return { results: [denied] };
     }
 
+    const found = await getOnboardingExecution({ workflowApi, executionId, spaceId, request });
+    if ('error' in found) {
+      return { results: [found.error] };
+    }
+
     try {
       await workflowApi.resumeWorkflowExecution(executionId, spaceId, answer, request);
     } catch (e) {
@@ -49,7 +54,9 @@ export const createAnswerAwsOnboardingTool = ({
       };
     }
 
-    const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, { request });
-    return { results: [otherResult({ status: execution?.status ?? 'unknown' })] };
+    const after = await getOnboardingExecution({ workflowApi, executionId, spaceId, request });
+    return {
+      results: ['error' in after ? after.error : otherResult({ status: after.execution.status })],
+    };
   },
 });

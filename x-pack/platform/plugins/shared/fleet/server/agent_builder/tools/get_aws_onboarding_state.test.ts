@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 import { getAuthzFromRequest } from '../../services/security/security';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
@@ -46,6 +47,7 @@ describe('get_aws_onboarding_state', () => {
   it('returns the waiting step and the latest discover and resolve outputs for a paused run', async () => {
     const { results } = await run({
       id: 'exec-1',
+      workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
       status: 'waiting_for_input',
       startedAt: '2026-11-13T00:00:00Z',
       workflowDefinition: {
@@ -98,6 +100,7 @@ describe('get_aws_onboarding_state', () => {
   it('returns only output and status for a completed run', async () => {
     const { results } = await run({
       id: 'exec-1',
+      workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
       status: 'completed',
       startedAt: '2026-11-13T00:00:00Z',
       workflowDefinition: { name: 'AWS Agentless Onboarding', steps: [] },

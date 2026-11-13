@@ -27,7 +27,7 @@ const AWS_ONBOARDING_CONTENT = [
   '   - For an input step, answer with the properties from `waiting.schema`, using only values the user gave you.',
   '5. After service discovery, present `discovered_services` as a checklist with each service name, whether it is matched and agentless, and its region. Ask which ones to onboard. Answer the `select_services` step with `{ "services": [<ids>], "region": "<region>" }`.',
   '6. Before asking for approval of the settings, present `resolved.policies` (service and policy name) and `resolved.suggested_identity_name`. Answer the identity name step with the name the user confirms, which may be the suggestion.',
-  '7. While the stack and policies are created, report `stack.status`, `policies` and `has_data`. Link the Workflows execution page so the user can follow progress: `/app/workflows/<workflow_id>?executionId=<execution_id>`.',
+  '7. While the stack and policies are created, report `stack.status`, `policies` and `has_data`. Link the Workflows execution page so the user can follow progress: `/app/workflows/<workflow_id>?tab=executions&executionId=<execution_id>`.',
   '8. When `status` is `completed`, tell the user their data is arriving and give `output.dashboard_path` as the link to the AWS dashboard.',
   '',
   '### Rules',
