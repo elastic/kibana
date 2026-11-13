@@ -786,10 +786,7 @@ export const fetchDecisionCandidates = async (
   analysisTagPrefix: string,
   windowStart: number,
   filters: TriageFilters,
-  {
-    after,
-    includeTaggedByShadow = false,
-  }: { after?: DecisionCursor; includeTaggedByShadow?: boolean } = {}
+  { after }: { after?: DecisionCursor } = {}
 ): Promise<DecisionCandidatesPage> => {
   const { body } = await callKibanaApi<{
     hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> };
@@ -824,13 +821,11 @@ export const fetchDecisionCandidates = async (
             // An alert a decision closed and an analyst reopened keeps this tag. It must not be
             // closed again: the analyst's act wins, and revoke still finds it by the tag.
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX } },
-            // In `on` the alerts shadow tagged are the ones to close, so they stay in.
-            ...(includeTaggedByShadow
-              ? []
-              : [
-                  { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
-                  { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
-                ]),
+            // A match already tagged stays out in every mode, so later pages move past it. In `on`
+            // only a cloud match held in shadow carries this tag; read again, it would stay at the
+            // front of the oldest-first search every sweep.
+            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
+            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
             ...excludedByFilters(filters),
           ],
         },

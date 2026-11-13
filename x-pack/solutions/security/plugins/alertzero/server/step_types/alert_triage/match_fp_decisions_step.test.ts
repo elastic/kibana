@@ -483,13 +483,21 @@ describe('triage match decisions step in on mode', () => {
     expect(paths.indexOf('tags')).toBeLessThan(paths.indexOf('status'));
   });
 
-  it('still matches the alerts that shadow tagged earlier', async () => {
+  it('leaves shadow-tagged alerts to the normal path, so a held cloud match is read only once', async () => {
+    // A held cloud match stays open and untriaged. Read again, it would come back at the front of
+    // the oldest-first search every sweep and could fill the page limit. Alerts shadow tagged
+    // before the switch to `on` go to analysis, as they would have in shadow.
     const { run, callKibanaApi } = setup({ mode: 'on', alerts: [] });
 
     await run();
 
     const search = callKibanaApi.mock.calls.find(([{ body }]) => body?.size !== 0)![0];
-    expect(JSON.stringify(search.body!.query)).not.toContain('az:would_close:');
+    expect(search.body!.query.bool.must_not).toEqual(
+      expect.arrayContaining([
+        { prefix: { 'kibana.alert.workflow_tags': 'az:would_close:' } },
+        { prefix: { 'kibana.alert.workflow_tags': 'az:would_skip:' } },
+      ])
+    );
   });
 
   it('never closes high, critical or unknown severity alerts', async () => {
