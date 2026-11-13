@@ -21,6 +21,7 @@ import {
   getAttackDiscoveryApiService,
   getCorrelationsApiService,
   getPrevalenceApiService,
+  getThreatIntelligenceApiService,
   getAnalyzerApiService,
   getNetworkApiService,
   getHostApiService,
@@ -107,6 +108,10 @@ export const spaceTest = securityParallelFixtures.extend<
         log,
       });
       extendedApiServices.prevalence = getPrevalenceApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
         esClient,
         log,
       });

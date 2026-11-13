@@ -8,7 +8,6 @@
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
-  agentToolEventInvestigationAttachEventType,
   agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
   eventStatusChangedEventType,
@@ -17,11 +16,7 @@ import {
 const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
 
 describe('EBT event types', () => {
-  it.each([
-    agentToolEventStatusUpdateEventType,
-    agentToolEventInvestigationAttachEventType,
-    eventStatusChangedEventType,
-  ])(
+  it.each([agentToolEventStatusUpdateEventType, eventStatusChangedEventType])(
     '$eventType requires the full alert identity on an event about an existing alert',
     ({ schema }) => {
       const { alert_source: source, fingerprint, space_id: spaceId } = schema;

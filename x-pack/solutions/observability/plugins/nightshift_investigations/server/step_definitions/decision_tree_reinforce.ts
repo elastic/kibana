@@ -275,7 +275,7 @@ export const decisionTreeReinforceStepDefinition = ({
                     request,
                     agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
                     interactive: { enabled: false },
-                    defaultConnectorId: connectorId || undefined,
+                    defaultModel: connectorId ? { connectorId } : undefined,
                     abortSignal: context.abortSignal,
                     telemetryMetadata: createInvestigationBackgroundTelemetry(
                       NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID,

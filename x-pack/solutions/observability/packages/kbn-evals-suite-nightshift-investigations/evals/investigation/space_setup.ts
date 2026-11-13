@@ -123,13 +123,13 @@ export const enableNightshiftSpace = async ({
     method: 'PUT',
     body: JSON.stringify(allowlist),
   });
-  // Eval investigations are manual starts, which Significant Events caps at 5 a day (10 for all
+  // Eval investigations are manual starts, which Nightshift caps at 5 a day (10 for all
   // investigations), so a larger dataset would be denied most of its runs. Each CI shard runs on
   // its own stack, so lifting the limits there affects nothing else.
-  await setupRequest('/internal/significant_events/run_quotas', {
+  await setupRequest('/internal/nightshift/investigation_quotas', {
     method: 'PUT',
     version: '1',
-    body: JSON.stringify({ investigationLimitsEnabled: false }),
+    body: JSON.stringify({ enabled: false }),
   });
   await expect
     .poll(

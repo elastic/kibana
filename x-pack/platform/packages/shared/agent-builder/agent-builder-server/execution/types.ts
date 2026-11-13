@@ -40,6 +40,8 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
+  /** Id of the inference feature the run uses - can't be used with connectorId */
+  inferenceFeatureId?: string;
   /** The input for this execution. */
   nextInput: ConverseInput;
   /** Whether to use structured output mode. */
