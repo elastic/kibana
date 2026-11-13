@@ -9,11 +9,11 @@
 
 import moment from 'moment';
 import {
-  calcAutoIntervalNear,
   isAbsoluteTimeShift,
   parseAbsoluteTimeShift,
   parseTimeShift,
 } from '@kbn/data-plugin/common';
+import { ianaTimeZone, pickDateRounding } from '@kbn/es-date-rounding';
 import type { DateRange } from '../types';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
@@ -34,18 +34,16 @@ function closestMultipleOfInterval(duration: number, interval: number) {
 }
 
 function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBars: number) {
-  // workout the interval (most probably matching the ES one)
-  const interval = calcAutoIntervalNear(
-    targetBars,
-    moment(dateRange.toDate).diff(moment(dateRange.fromDate))
-  );
+  const intervalMs = pickDateRounding(targetBars, {
+    from: moment(dateRange.fromDate).valueOf(),
+    to: moment(dateRange.toDate).valueOf(),
+    timeZone: ianaTimeZone('UTC'),
+  }).nominalMs;
   const duration = parseTimeShiftWrapper(timeShift, dateRange);
   if (typeof duration !== 'string') {
-    const roundingOffset = timeShift.startsWith('end') ? interval.asMilliseconds() : 0;
+    const roundingOffset = timeShift.startsWith('end') ? intervalMs : 0;
     return `${
-      (closestMultipleOfInterval(duration.asMilliseconds(), interval.asMilliseconds()) -
-        roundingOffset) /
-      1000
+      (closestMultipleOfInterval(duration.asMilliseconds(), intervalMs) - roundingOffset) / 1000
     }s`;
   }
 }

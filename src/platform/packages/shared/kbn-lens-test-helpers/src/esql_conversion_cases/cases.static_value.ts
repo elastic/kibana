@@ -28,7 +28,7 @@ export const buildStaticValueCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend) | EVAL static_value = 100`,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 100, ?_tstart, ?_tend) | EVAL static_value = 100`,
         columnNames: ['COUNT(*)', 'order_date', 'static_value'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],

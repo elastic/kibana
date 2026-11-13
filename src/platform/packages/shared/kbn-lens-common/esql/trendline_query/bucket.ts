@@ -16,13 +16,13 @@ import {
   isColumn,
 } from '@elastic/esql';
 import type { ESQLCommand, ESQLProperNode } from '@elastic/esql/types';
-import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '../constants';
+import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
 
 /**
  * Builds the BUCKET expression used for trendline time bucketing.
  *
- * Uses `AUTO_TARGET_NUMBER_OF_BUCKETS` (75) to match the bucket width that
- * Lens's form-based `auto` date_histogram produces when converting to ES|QL.
+ * `n` defaults to `histogram:barTarget` (100), the same target Lens form-based
+ * `auto` date_histogram uses when converting to ES|QL.
  *
  * Uses `esql.col()` to properly escape field names that contain special
  * characters (e.g. `order.date` → `` `order.date` ``).
@@ -32,11 +32,13 @@ import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '../constants';
  * the column name). This means the column name is already stable across time
  * range changes without needing an alias.
  */
-export const buildTrendlineBucketExpression = (timeField: string): string =>
-  `BUCKET(${esql.col(timeField)}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ?_tstart, ?_tend)`;
+export const buildTrendlineBucketExpression = (
+  timeField: string,
+  n: number = DEFAULT_HISTOGRAM_BAR_TARGET
+): string => `BUCKET(${esql.col(timeField)}, ${n}, ?_tstart, ?_tend)`;
 
-export const buildTrendlineTbucketExpression = (): string =>
-  `TBUCKET(${AUTO_TARGET_NUMBER_OF_BUCKETS})`;
+export const buildTrendlineTbucketExpression = (n: number = DEFAULT_HISTOGRAM_BAR_TARGET): string =>
+  `TBUCKET(${n})`;
 
 /** A time-bucketing grouping found in a STATS BY clause. */
 export interface TimeGrouping {

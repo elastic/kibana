@@ -8,6 +8,7 @@
  */
 
 export { UI_SETTINGS, DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service/src/constants';
+export { getAutoDateBucketTarget } from '@kbn/data-service';
 
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
 export const KIBANA_USER_QUERY_LANGUAGE_KEY = 'kibana.userQueryLanguage';
