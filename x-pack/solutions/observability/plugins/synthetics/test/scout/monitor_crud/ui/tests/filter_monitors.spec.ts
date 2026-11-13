@@ -12,13 +12,14 @@ import { test } from '../../../common/ui/fixtures';
 const FIRST_TAG = 'a';
 const SECOND_TAG = 'b';
 
-// Failing: See https://github.com/elastic/kibana/issues/257334
-test.describe.skip(
+test.describe(
   'FilterMonitors',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ syntheticsServices }) => {
       await syntheticsServices.cleanUp();
+      // Viewer cannot enable Synthetics; serverless overview then has no date picker.
+      await syntheticsServices.enable();
     });
 
     test.afterAll(async ({ syntheticsServices }) => {
@@ -49,14 +50,36 @@ test.describe.skip(
         await pageObjects.syntheticsApp.refreshOverview();
       });
 
+      // selectOption clicks once without checking the result, and a click that lands while
+      // the list re-renders is dropped. Retry until the option is actually checked.
       const selectTagOption = (tagName: string) =>
-        page.components.selectable('o11yFieldValueSelectionSelectable').selectOption(tagName);
+        expect(async () => {
+          await page.components
+            .selectable('o11yFieldValueSelectionSelectable')
+            .selectOption(tagName);
+          await expect(page.getByRole('option', { name: tagName })).toHaveAttribute(
+            'aria-checked',
+            'true',
+            { timeout: 2_000 }
+          );
+        }).toPass();
 
       await test.step('filter by tags with AND', async () => {
         await page.getByLabel('expands filter group for Tags filter').click();
 
         await selectTagOption(FIRST_TAG);
         await selectTagOption(SECOND_TAG);
+
+        // Both picks must still be checked before Apply, otherwise Apply submits
+        // only the surviving tag and "Showing 1 Monitor" passes for the wrong reason.
+        await expect(page.getByRole('option', { name: FIRST_TAG })).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
+        await expect(page.getByRole('option', { name: SECOND_TAG })).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
 
         await page.testSubj.click('tagsLogicalOperatorSwitch');
         await page.testSubj.click('o11yFieldValueSelectionApplyButton');
@@ -67,6 +90,16 @@ test.describe.skip(
 
       await test.step('filter by tags with OR', async () => {
         await page.getByLabel('expands filter group for Tags filter').click();
+        // Reopening must still show both AND selections. If suggestions omit a
+        // selected tag, Apply would drop it and OR would keep a single monitor.
+        await expect(page.getByRole('option', { name: FIRST_TAG })).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
+        await expect(page.getByRole('option', { name: SECOND_TAG })).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
         await page.testSubj.click('tagsLogicalOperatorSwitch');
         await page.testSubj.click('o11yFieldValueSelectionApplyButton');
         await expect(page.getByLabel('expands filter group for Tags filter')).toBeVisible();

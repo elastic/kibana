@@ -14,7 +14,8 @@ import {
   planRowLimit,
   summarizeResults,
 } from './output';
-import type { InventoryRow, PlanResult } from './types';
+import type { InventoryRow } from '../../../common';
+import type { PlanResult } from './types';
 
 describe('orderRows', () => {
   it('orders by last_seen descending as instants', () => {

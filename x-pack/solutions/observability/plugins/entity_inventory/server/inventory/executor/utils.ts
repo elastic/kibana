@@ -6,7 +6,7 @@
  */
 
 import { LAST_SEEN_COLUMN } from '../generator';
-import type { ESQLValue, InventoryRow } from './types';
+import type { ESQLValue, InventoryRow } from '../../../common';
 
 /** The row's `last_seen` as epoch milliseconds, or null when absent or unparseable. */
 export const lastSeenInstant = (row: InventoryRow): number | null => {

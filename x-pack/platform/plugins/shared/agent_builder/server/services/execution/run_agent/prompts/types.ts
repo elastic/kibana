@@ -57,6 +57,10 @@ export interface PromptFactoryParams {
   conversationTemplates: ConversationTemplatesService;
   /** Whether the run can write the conversation's metadata (`set_conversation_metadata` is registered). */
   conversationMetadataWritable: boolean;
+  /** Whether the agent's effective configuration assigns at least one connector. */
+  connectorsAssigned: boolean;
+  /** Whether `sml_search` is among the run's static tools. */
+  smlSearchSelected: boolean;
 }
 
 export interface HandoverParams {

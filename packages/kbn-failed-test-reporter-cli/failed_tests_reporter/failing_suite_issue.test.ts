@@ -75,14 +75,14 @@ describe('renderFailingSuiteIssueBody', () => {
     expect(body).toContain(
       '> [!IMPORTANT]\n' +
         '> 2 tests in [`esql.spec.ts`](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/discover/test/scout/ui/tests/esql.spec.ts) ' +
-        'failed every attempt of `kibana-on-merge` builds [#101](https://buildkite.com/elastic/kibana-on-merge/builds/101) ' +
-        'and [#102](https://buildkite.com/elastic/kibana-on-merge/builds/102) on `main`, ' +
+        'are consistently failing on `main`, in `kibana-on-merge` builds [#101](https://buildkite.com/elastic/kibana-on-merge/builds/101) ' +
+        'and [#102](https://buildkite.com/elastic/kibana-on-merge/builds/102), ' +
         'after passing in [#100](https://buildkite.com/elastic/kibana-on-merge/builds/100). ' +
         'This looks like a break rather than a flaky test; the changes between the last passing and the first failing build are ' +
         '[`1001001...1011011`](https://github.com/elastic/kibana/compare/100100100100100100100100100100...101101101101101101101101101101).'
     );
     expect(body).toContain(
-      'Tests that failed every attempt:\n' +
+      'Consistently failing tests:\n' +
         '- `Discover ES|QL mode shows results` · [history](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards'
     );
     expect(body).toContain('- `Discover ES|QL mode switches back to the data view` · [history](');
@@ -113,9 +113,9 @@ describe('renderFailingSuiteIssueBody', () => {
 
     expect(body).toContain(
       '> 1 test in [`esql.spec.ts`](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/discover/test/scout/ui/tests/esql.spec.ts) ' +
-        'failed every attempt of the last 4 `kibana-on-merge` builds on `main`, ' +
-        '[#101](https://buildkite.com/elastic/kibana-on-merge/builds/101) to [#104](https://buildkite.com/elastic/kibana-on-merge/builds/104), ' +
-        'with no earlier passing run on `main` on record. This looks like a break rather than a flaky test.'
+        'is consistently failing on `main`, in the last 4 `kibana-on-merge` builds ' +
+        '([#101](https://buildkite.com/elastic/kibana-on-merge/builds/101) to [#104](https://buildkite.com/elastic/kibana-on-merge/builds/104)), ' +
+        'with no earlier passing run on record. This looks like a break rather than a flaky test.'
     );
     expect(body).not.toContain('compare');
     expect(body).toContain('Last failure:\n\n```text\n');
@@ -166,6 +166,7 @@ describe('renderFailingSuiteIssueBody', () => {
   it('is matched as about the suite by the issue matcher, and as its file by other blocks', () => {
     const issue = describeIssue({
       number: 7,
+      id: 1007,
       html_url: 'https://github.com/elastic/kibana/issues/7',
       node_id: 'n7',
       title: failingSuiteIssueTitle(suite),

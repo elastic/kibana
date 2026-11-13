@@ -20,7 +20,7 @@ import type { Item } from '../../types';
 import { ViewsChart } from './views_chart';
 import { useServices } from '../../services';
 
-export const ViewsStats = ({ item }: { item: Item }) => {
+export const ViewsStats = ({ item }: { item: Pick<Item, 'id'> }) => {
   const contentInsightsClient = useServices()?.contentInsightsClient;
 
   if (!contentInsightsClient) {

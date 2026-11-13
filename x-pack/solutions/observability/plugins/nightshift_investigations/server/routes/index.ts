@@ -19,6 +19,7 @@ import { getSandboxConnectorsRoute } from './get_sandbox_connectors';
 import { getSandboxConnectorTypesRoute } from './get_sandbox_connector_types';
 import { sandboxAllowlistRoutes } from './sandbox_allowlist';
 import { customContextRoutes } from './custom_context';
+import { investigationQuotaRoutes } from './investigation_quotas';
 import { onboardingRoutes } from './onboarding';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
 import { listDecisionTreesRoute } from './list_decision_trees';
@@ -34,6 +35,7 @@ import {
   listAutomationRunsRoute,
   runAutomationRoute,
   getAutomationRunActivityRoute,
+  repairAutomationRoute,
 } from './automations';
 import { getMemoryAvailabilityRoute } from './get_memory_availability';
 import { listMemoryPagesRoute } from './list_memory_pages';
@@ -64,6 +66,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getSandboxConnectorTypesRoute,
   ...sandboxAllowlistRoutes,
   ...customContextRoutes,
+  ...investigationQuotaRoutes,
   ...onboardingRoutes,
   ...getDecisionTreesAvailabilityRoute,
   ...listDecisionTreesRoute,
@@ -78,6 +81,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...listAutomationRunsRoute,
   ...runAutomationRoute,
   ...getAutomationRunActivityRoute,
+  ...repairAutomationRoute,
   ...getMemoryAvailabilityRoute,
   ...listMemoryPagesRoute,
   ...getMemoryPageRoute,

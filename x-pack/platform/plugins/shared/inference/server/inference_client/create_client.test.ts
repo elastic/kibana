@@ -16,6 +16,7 @@ jest.mock('../../common/inference_client/bind_client');
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import { createRegexWorkerServiceMock } from '../test_utils';
+import type { InferenceServerClient } from '../types';
 
 const bindClientMock = bindClient as jest.MockedFn<typeof bindClient>;
 const createInferenceClientMock = createInferenceClient as jest.MockedFn<
@@ -171,6 +172,48 @@ describe('createClient', () => {
       await client.chatComplete({
         messages: [],
       });
+    });
+
+    it('binds a featureId so chatComplete is called with featureId and no connectorId', async () => {
+      const unboundClient: jest.Mocked<InferenceServerClient> = {
+        chatComplete: jest.fn().mockResolvedValue({ content: '', toolCalls: [] }),
+        output: jest.fn(),
+        prompt: jest.fn(),
+        on: jest.fn(),
+        bindTo: jest.fn(),
+        listConnectors: jest.fn(),
+        getConnectorById: jest.fn(),
+      };
+      createInferenceClientMock.mockReturnValue(unboundClient);
+      bindClientMock.mockImplementation(
+        jest.requireActual<typeof import('../../common/inference_client/bind_client')>(
+          '../../common/inference_client/bind_client'
+        ).bindClient
+      );
+
+      const client = createClient({
+        request,
+        actions,
+        logger,
+        bindTo: {
+          featureId: 'my_feature',
+        },
+        esClient: mockEsClient,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        endpointIdCache: new InferenceEndpointIdCache(),
+      });
+
+      await client.chatComplete({
+        messages: [],
+      });
+
+      expect(unboundClient.chatComplete).toHaveBeenCalledTimes(1);
+      expect(unboundClient.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'my_feature', messages: [] })
+      );
+      const [chatCompleteOptions] = unboundClient.chatComplete.mock.calls[0];
+      expect(chatCompleteOptions.connectorId).toBeUndefined();
     });
   });
 });
