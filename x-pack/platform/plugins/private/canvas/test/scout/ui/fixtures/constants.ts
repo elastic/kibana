@@ -16,8 +16,6 @@ export const KBN_ARCHIVES = {
   // `canvas_lens` index (see ES_ARCHIVES.CANVAS_LENS).
   LENS: `${SCOUT_FIXTURES}/kbn_archives/canvas_lens`,
   REPORTS: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/reports',
-  // A Vega library item with inline data, so it renders without index privileges.
-  VEGA: `${SCOUT_FIXTURES}/kbn_archives/canvas_vega`,
   SAVED_OBJECT_RESOLVE:
     'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/saved_object_resolve',
   DASHBOARD: 'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana',

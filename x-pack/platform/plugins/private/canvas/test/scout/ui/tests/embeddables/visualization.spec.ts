@@ -28,9 +28,9 @@ const EXTENDED_TIMEOUT = 20_000;
 test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
-    // Canvas is only accessible when at least one workpad exists.
+    // Canvas is only accessible when at least one workpad exists. This archive also holds the
+    // Vega library item, which uses inline data so it renders without index privileges.
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.VEGA);
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects: { canvas } }) => {
