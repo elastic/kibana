@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { combineLatest, filter, map, pairwise, skip, startWith, tap } from 'rxjs';
 
-import { euiBreakpoint, useEuiTheme } from '@elastic/eui';
+import { euiBreakpoint, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
@@ -37,22 +37,18 @@ export const Panel = React.memo(({ panelId }: PanelProps) => {
     const initialPanel = panel$.getValue();
     if (!initialPanel) return;
     return css`
-      position: relative;
       width: ${initialPanel.width}px;
       order: ${initialPanel.order + 1};
       flex-grow: ${initialPanel.grow ? '1' : '0'};
-      max-width: 100%;
-      ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-        /* flex-basis wins over the inline width set while dragging/resizing, so panels stack full-width */
-        flex: 1 0 100%;
-      }
       .kbnFlexPanel--dragHandle,
       .kbnFlexPanel--resizeHandle {
         touch-action: none; // prevent scrolling on touch devices
         scroll-margin-top: ${gridLayoutStateManager.gridSettings$.value.keyboardDragTopLimit}px;
       }
     `;
-  }, [panel$, gridLayoutStateManager.gridSettings$, euiThemeContext]);
+  }, [panel$, gridLayoutStateManager.gridSettings$]);
+
+  const panelStyles = useMemo(() => styles.panel(euiThemeContext), [euiThemeContext]);
 
   useEffect(() => {
     return () => {
@@ -83,11 +79,10 @@ export const Panel = React.memo(({ panelId }: PanelProps) => {
       .subscribe(([activePanel, panel]) => {
         const ref = panel && gridLayoutStateManager.panelRefs.current[panel.id];
         if (!panel || !ref) return;
-
         if (activePanel?.id === panel.id) {
           applyActivePanelStyles({ ref, activePanel, panel, zIndex: euiTheme.levels.modal });
         } else if (activePanel?.type !== 'resize') {
-          // siblings stay pinned (see above) until the resize ends
+          // siblings stay pinned (see tap above) until the resize ends
           clearActivePanelStyles(ref, panel);
         }
       });
@@ -110,7 +105,7 @@ export const Panel = React.memo(({ panelId }: PanelProps) => {
         gridLayoutStateManager.panelRefs.current[panelId] = element;
       }}
       role="listitem"
-      css={[initialStyles, styles.panel]}
+      css={[initialStyles, panelStyles]}
       className="kbnFlexPanel"
     >
       {!useCustomDragHandle && (
@@ -126,7 +121,14 @@ export const Panel = React.memo(({ panelId }: PanelProps) => {
 Panel.displayName = 'kbnFlexLayoutPanel';
 
 const styles = {
-  panel: css({
-    height: 'calc(var(--kbnFlexRowHeight) * 1px)',
-  }),
+  panel: (euiThemeContext: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      maxWidth: '100%',
+      height: 'calc(var(--kbnFlexRowHeight) * 1px)',
+      [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+        // flex-basis wins over the inline width set while dragging/resizing, so panels stack full-width
+        flex: '1 0 100%',
+      },
+    }),
 };
