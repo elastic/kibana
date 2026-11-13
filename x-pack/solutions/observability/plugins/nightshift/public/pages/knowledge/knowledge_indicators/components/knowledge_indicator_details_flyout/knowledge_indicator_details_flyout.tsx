@@ -57,6 +57,7 @@ import { durabilityMenuItem } from '../durability_menu_item';
 import { useBlocksNewActivity } from '../../../../../data/maintenance/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
+import { KnowledgeIndicatorSourceBadge } from '../knowledge_indicator_source_badge';
 import { getKnowledgeIndicatorSourceId } from '../../utils/get_knowledge_indicator_source_id';
 import { withViewedInstance } from '../../utils/with_viewed_instance';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
@@ -414,11 +415,14 @@ export function KnowledgeIndicatorDetailsFlyout({
                 </EuiFlexItem>
               </>
             )}
-            <EuiFlexItem>
+            <EuiFlexItem css={{ minWidth: 0 }}>
               <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="database" iconSide="left">
-                  {viewedSource?.title ?? viewedSourceId}
-                </EuiBadge>
+                <KnowledgeIndicatorSourceBadge
+                  knowledgeIndicator={viewedKnowledgeIndicator}
+                  sourceId={viewedSourceId}
+                  getSourceTitle={getSourceTitle}
+                  iconType="database"
+                />
               </FlyoutMetadataCard>
             </EuiFlexItem>
             <EuiFlexItem>

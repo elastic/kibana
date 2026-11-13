@@ -20,6 +20,7 @@ interface WorkflowStep {
     [key: string]: unknown;
   };
   steps?: WorkflowStep[];
+  else?: WorkflowStep[];
 }
 
 interface WorkflowInput {
@@ -37,7 +38,11 @@ const featuresIdentification = parse(FEATURES_IDENTIFICATION_YAML) as WorkflowDe
 const onboarding = parse(ONBOARDING_YAML) as WorkflowDefinition;
 
 const flattenSteps = (steps: WorkflowStep[]): WorkflowStep[] =>
-  steps.flatMap((step) => [step, ...(step.steps ? flattenSteps(step.steps) : [])]);
+  steps.flatMap((step) => [
+    step,
+    ...(step.steps ? flattenSteps(step.steps) : []),
+    ...(step.else ? flattenSteps(step.else) : []),
+  ]);
 
 const findStep = (definition: WorkflowDefinition, name: string): WorkflowStep => {
   const step = flattenSteps(definition.steps).find((candidate) => candidate.name === name);

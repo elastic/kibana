@@ -35,6 +35,7 @@ import { sourceToAnalysisTarget } from '../../../../lib/significant_events/sourc
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
 import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
+import { identifyMetricsEntities } from '../../../../lib/significant_events/metrics/identify_metrics_entities';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -406,6 +407,46 @@ const identifyComputedFeaturesRoute = createServerRoute({
   },
 });
 
+const identifyMetricsEntitiesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/metrics_entities',
+  options: {
+    access: 'internal',
+    summary: 'Extract and persist Kubernetes entities from a metrics source',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    })
+  ),
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    const { sourceId } = params.path;
+    const routeLogger = logger.get('features_identification', 'metrics_entities', sourceId);
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
+
+    return identifyMetricsEntities({
+      esClient: streamDataEsClient,
+      esql: source.esql,
+      sourceId: source.id,
+      kiClient,
+      logger: routeLogger,
+      signal: getRequestAbortSignal(request),
+    });
+  },
+});
+
 const shouldIdentifyRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/features/_should_identify',
   options: {
@@ -450,5 +491,6 @@ export const internalIdentifyKIFeaturesRoutes = {
   ...prepareInferredSamplingRoute,
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
+  ...identifyMetricsEntitiesRoute,
   ...shouldIdentifyRoute,
 };
