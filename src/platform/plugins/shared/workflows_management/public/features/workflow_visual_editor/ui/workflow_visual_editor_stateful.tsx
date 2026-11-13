@@ -115,6 +115,7 @@ import {
 import { collectStepsByName } from '../lib/collect_steps';
 import { getStepScope } from '../lib/get_step_scope';
 import { isStructuralFragmentChange } from '../lib/is_structural_fragment_change';
+import { resolveExternalStepFragment } from '../lib/resolve_external_step_fragment';
 import { buildDefaultStep, getStepConfigWarningReason } from '../lib/step_form_schema';
 import {
   appendTrigger,
@@ -378,6 +379,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const lastAppliedYamlRef = useRef<string | null>(null);
   /** Counter backing each step panel's `sessionId` (see PanelState). */
   const nextStepPanelSessionIdRef = useRef(0);
+  /** The open step as the YAML last had it after a change from outside the panel, for its session. */
+  const [syncedStepFragment, setSyncedStepFragment] = useState<
+    { readonly sessionId: number; readonly fragment: string } | undefined
+  >();
 
   useEffect(
     () =>
@@ -765,6 +770,24 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [applyMutation]
   );
 
+  // The YAML changed under the open step (an undo, an edit in the YAML tab): hand the panel the
+  // step as it now is, so its next edit builds on that instead of writing its old draft back.
+  useEffect(() => {
+    const current = panelRef.current;
+    if (current?.mode !== 'edit') return;
+    const fragment = resolveExternalStepFragment({
+      editorYaml: yamlString,
+      stepName: current.stepName,
+      lastAppliedYaml: lastAppliedYamlRef.current,
+      lastAppliedFragment: lastAppliedStepFragmentRef.current,
+    });
+    if (fragment === undefined) return;
+    // Adopted: the panel will report it back, and that echo must not be written again.
+    lastAppliedStepFragmentRef.current = fragment;
+    lastAppliedYamlRef.current = yamlString;
+    setSyncedStepFragment({ sessionId: current.sessionId, fragment });
+  }, [yamlString]);
+
   /**
    * Footer button: undoes the insert, restoring the pre-flyout graph (origin
    * 'insert'), or resets the step to its pre-flyout fragment (origin 'edit').
@@ -882,6 +905,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       // Baseline the live-apply dedup to the fragment we're opening with, so
       // the panel's first onFragmentChange (its own mount value) is a no-op.
       lastAppliedStepFragmentRef.current = fragment;
+      lastAppliedYamlRef.current = yamlStringRef.current;
       setPanel({
         mode: 'edit',
         origin: 'edit',
@@ -1319,6 +1343,9 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
                 stepType={panel.stepType}
                 actionLabel={panel.actionLabel}
                 initialFragment={panel.fragment}
+                syncedFragment={
+                  syncedStepFragment?.sessionId === panel.sessionId ? syncedStepFragment : undefined
+                }
                 connectors={connectors}
                 workflowDefinition={workflow}
                 resolveStepScope={resolveStepScope}

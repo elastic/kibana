@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { DataReferencePicker } from './data_reference_picker';
+import { useStableCallback } from './use_stable_callback';
 import {
   clearActiveDataReferenceInsertTarget,
   setActiveDataReferenceInsertTarget,
@@ -90,13 +91,10 @@ export function ListField({
     setIsPickerOpen(false);
     pickButtonRef.current?.focus();
   }, []);
-  const handleInsert = useCallback(
-    (token: string) => {
-      setIsPickerOpen(false);
-      onInsertReference?.(token);
-    },
-    [onInsertReference]
-  );
+  const handleInsert = useStableCallback((token: string) => {
+    setIsPickerOpen(false);
+    onInsertReference?.(token);
+  });
   useEffect(() => () => clearActiveDataReferenceInsertTarget(handleInsert), [handleInsert]);
 
   const tagsBox = (

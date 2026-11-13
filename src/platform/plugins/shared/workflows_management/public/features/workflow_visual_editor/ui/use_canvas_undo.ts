@@ -13,6 +13,13 @@ import type { monaco } from '@kbn/code-editor';
 import { sanitizeText } from '../../../shared/lib/sanitize_text';
 
 /**
+ * Where ⌘Z already means "undo here": inside any Monaco editor, or in a form control, whose own
+ * undo the browser runs. Anywhere else the key press is a canvas gesture.
+ */
+const OWN_UNDO_TARGETS =
+  '.monaco-editor, input, textarea, select, [contenteditable=""], [contenteditable="true"]';
+
+/**
  * ⌘Z / Ctrl+Z on the canvas delegates to the undo stack of the main Monaco editor (ADR-0005).
  *
  * While the graph is showing, that editor trails the store by the sync debounce. An undo then would
@@ -27,9 +34,9 @@ export const useCanvasUndo = (
     if (!editorRef) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return;
-      // Let Monaco handle it when focus is already inside the editor.
+      // Focus in an editor or a form control: that control's own undo applies, not the workflow's.
       const { target } = event;
-      if (target instanceof HTMLElement && target.closest('.monaco-editor')) {
+      if (target instanceof HTMLElement && target.closest(OWN_UNDO_TARGETS)) {
         return;
       }
       event.preventDefault();

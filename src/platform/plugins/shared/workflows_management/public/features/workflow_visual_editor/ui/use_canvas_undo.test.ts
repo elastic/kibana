@@ -142,4 +142,65 @@ describe('useCanvasUndo', () => {
     renderUndo(null, 'name: a\n');
     expect(press({ key: 'z', metaKey: true }).defaultPrevented).toBe(true);
   });
+
+  describe('when focus is in a form control outside the editor', () => {
+    const attach = (element: HTMLElement) => {
+      document.body.appendChild(element);
+      return element;
+    };
+
+    it.each([
+      ['an input', () => document.createElement('input')],
+      ['a textarea', () => document.createElement('textarea')],
+      ['a select', () => document.createElement('select')],
+      [
+        'a contenteditable element',
+        () => {
+          const element = document.createElement('div');
+          element.setAttribute('contenteditable', 'true');
+          return element;
+        },
+      ],
+    ])(
+      'leaves ⌘Z to the browser in %s, so it undoes that control and not the workflow',
+      (_l, make) => {
+        const { editor, trigger } = makeEditor('name: a\n');
+        renderUndo(editor, 'name: a\n');
+        const control = attach(make());
+
+        const event = press({ key: 'z', metaKey: true }, control);
+
+        expect(event.defaultPrevented).toBe(false);
+        expect(trigger).not.toHaveBeenCalled();
+        control.remove();
+      }
+    );
+
+    it('leaves ⌘Z to the browser inside a control nested in a form control wrapper', () => {
+      const { editor, trigger } = makeEditor('name: a\n');
+      renderUndo(editor, 'name: a\n');
+      const wrapper = attach(document.createElement('div'));
+      wrapper.setAttribute('contenteditable', 'true');
+      const inner = document.createElement('span');
+      wrapper.appendChild(inner);
+
+      const event = press({ key: 'z', metaKey: true }, inner);
+
+      expect(event.defaultPrevented).toBe(false);
+      expect(trigger).not.toHaveBeenCalled();
+      wrapper.remove();
+    });
+
+    it('still undoes the workflow when focus is on a plain element such as a button', () => {
+      const { editor, trigger } = makeEditor('name: a\n');
+      renderUndo(editor, 'name: a\n');
+      const button = attach(document.createElement('button'));
+
+      const event = press({ key: 'z', metaKey: true }, button);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(trigger).toHaveBeenCalledWith('graph-gesture', 'undo', null);
+      button.remove();
+    });
+  });
 });

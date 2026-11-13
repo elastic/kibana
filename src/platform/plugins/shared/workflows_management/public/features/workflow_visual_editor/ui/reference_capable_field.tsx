@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataReferencePicker } from './data_reference_picker';
+import { useStableCallback } from './use_stable_callback';
 import {
   clearActiveDataReferenceInsertTarget,
   setActiveDataReferenceInsertTarget,
@@ -136,39 +137,36 @@ export function ReferenceCapableField({
     [value.length]
   );
 
-  const handleInsert = useCallback(
-    (picked: string) => {
-      const bridge = selectionBridgeRef.current;
-      const input = inputRef.current;
-      const caret = bridge?.getCaret() ?? input?.selectionStart ?? value.length;
-      const range = replaceRangeRef.current ?? { start: caret, end: caret };
-      const token = tokenForInsert(picked, value, range.start, range.end, valueFormWhenWhole);
+  const handleInsert = useStableCallback((picked: string) => {
+    const bridge = selectionBridgeRef.current;
+    const input = inputRef.current;
+    const caret = bridge?.getCaret() ?? input?.selectionStart ?? value.length;
+    const range = replaceRangeRef.current ?? { start: caret, end: caret };
+    const token = tokenForInsert(picked, value, range.start, range.end, valueFormWhenWhole);
 
-      setIsOpen(false);
-      replaceRangeRef.current = null;
+    setIsOpen(false);
+    replaceRangeRef.current = null;
 
-      // Prefer undo-aware edits so Cmd/Ctrl+Z reverts the insertion.
-      if (bridge?.replaceText?.(range.start, range.end, token)) {
+    // Prefer undo-aware edits so Cmd/Ctrl+Z reverts the insertion.
+    if (bridge?.replaceText?.(range.start, range.end, token)) {
+      return;
+    }
+
+    if (input) {
+      input.focus();
+      input.setSelectionRange(range.start, range.end);
+      // insertText participates in the browser undo stack (unlike setting value).
+      if (document.execCommand('insertText', false, token)) {
         return;
       }
+    }
 
-      if (input) {
-        input.focus();
-        input.setSelectionRange(range.start, range.end);
-        // insertText participates in the browser undo stack (unlike setting value).
-        if (document.execCommand('insertText', false, token)) {
-          return;
-        }
-      }
-
-      const next = `${value.slice(0, range.start)}${token}${value.slice(range.end)}`;
-      onChange(next);
-      window.requestAnimationFrame(() => {
-        focusAndSetCaret(range.start + token.length);
-      });
-    },
-    [focusAndSetCaret, onChange, value, valueFormWhenWhole]
-  );
+    const next = `${value.slice(0, range.start)}${token}${value.slice(range.end)}`;
+    onChange(next);
+    window.requestAnimationFrame(() => {
+      focusAndSetCaret(range.start + token.length);
+    });
+  });
 
   // Stay registered across blur so click-to-insert from the execution flyout
   // (which steals focus) still targets the last-edited templatable field.

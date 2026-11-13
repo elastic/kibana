@@ -90,6 +90,7 @@ import {
   formatDataReferenceToken,
   formatValueReferenceToken,
 } from '../lib/build_data_reference_catalog';
+import { collectStepNames } from '../lib/collect_step_names';
 import { containsMapDirective, MAP_DIRECTIVE_KEY } from '../lib/contains_map_directive';
 import { isInParallelBody } from '../lib/is_in_parallel_body';
 import { fromTags, isTagValue, toTags } from '../lib/list_value';
@@ -130,6 +131,12 @@ export interface StepConfigPanelProps {
   readonly actionLabel?: string;
   /** Step YAML fragment (a mapping) the panel starts from. */
   readonly initialFragment: string;
+  /**
+   * The step as the YAML now has it after a change from outside the panel (an undo, an edit in
+   * the YAML tab). It replaces the draft; unlike a new `initialFragment` it does not reset the
+   * rest of the form. Pass a new object for every change, even one that repeats an earlier fragment.
+   */
+  readonly syncedFragment?: { readonly fragment: string };
   readonly connectors: readonly ConnectorContractUnion[];
   /** Full workflow definition — powers data-reference sources (triggers/steps/consts). */
   readonly workflowDefinition?: WorkflowYaml;
@@ -348,6 +355,7 @@ export function StepConfigPanel({
   onFragmentChange,
   onYamlEditorMount,
   runControls,
+  syncedFragment,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -414,33 +422,18 @@ export function StepConfigPanel({
     setShowDiscardConfirm(false);
   }, [initialFragment]);
 
+  useEffect(() => {
+    if (syncedFragment) setFragment(syncedFragment.fragment);
+  }, [syncedFragment]);
+
   const schema = useMemo(() => getStepFormSchema(stepType, connectors), [stepType, connectors]);
   // Name is edited in the header only — never as a form body field.
   const fields = useMemo(() => schema?.fields ?? [], [schema]);
 
-  const siblingStepNames = useMemo(() => {
-    const names = new Set<string>();
-    const walk = (steps: unknown) => {
-      if (!Array.isArray(steps)) return;
-      for (const step of steps) {
-        if (!step || typeof step !== 'object') continue;
-        const rec = step as Record<string, unknown>;
-        if (typeof rec.name === 'string' && rec.name.trim()) names.add(rec.name.trim());
-        if (Array.isArray(rec.steps)) walk(rec.steps);
-        if (Array.isArray(rec.else)) walk(rec.else);
-        if (Array.isArray(rec.fallback)) walk(rec.fallback);
-        if (Array.isArray(rec.cases)) {
-          for (const c of rec.cases) {
-            if (c && typeof c === 'object' && Array.isArray((c as { steps?: unknown }).steps)) {
-              walk((c as { steps: unknown[] }).steps);
-            }
-          }
-        }
-      }
-    };
-    walk(workflowDefinition?.steps);
-    return names;
-  }, [workflowDefinition]);
+  const siblingStepNames = useMemo(
+    () => collectStepNames(workflowDefinition?.steps),
+    [workflowDefinition]
+  );
 
   const currentStepName = useMemo(() => {
     const name = toJs(readFragmentValue(fragment, ['name']));

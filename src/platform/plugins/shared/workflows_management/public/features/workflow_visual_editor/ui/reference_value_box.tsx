@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { isReferenceValue } from '@kbn/workflows-yaml';
 import { DataReferencePicker } from './data_reference_picker';
 import { ReferenceChip } from './reference_chip';
+import { useStableCallback } from './use_stable_callback';
 import {
   clearActiveDataReferenceInsertTarget,
   setActiveDataReferenceInsertTarget,
@@ -89,22 +90,19 @@ export function ReferenceValueBox({
     pickButtonRef.current?.focus();
   }, []);
 
-  const handleInsert = useCallback(
-    (token: string) => {
-      const picked = parseWholeReference(token);
-      setIsOpen(false);
-      if (!picked) {
-        onChange(token);
-        return;
-      }
-      onChange(
-        form === 'value'
-          ? formatValueReferenceToken(picked.expression)
-          : formatDataReferenceToken(picked.expression)
-      );
-    },
-    [form, onChange]
-  );
+  const handleInsert = useStableCallback((token: string) => {
+    const picked = parseWholeReference(token);
+    setIsOpen(false);
+    if (!picked) {
+      onChange(token);
+      return;
+    }
+    onChange(
+      form === 'value'
+        ? formatValueReferenceToken(picked.expression)
+        : formatDataReferenceToken(picked.expression)
+    );
+  });
 
   useEffect(() => () => clearActiveDataReferenceInsertTarget(handleInsert), [handleInsert]);
 
