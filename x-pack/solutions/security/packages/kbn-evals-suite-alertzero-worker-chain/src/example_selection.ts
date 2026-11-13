@@ -86,10 +86,8 @@ export const deriveWorkerChainTimeoutMs = (env: Env = process.env): number => {
 
 /**
  * Fails fast, before any setup, when a Buildkite run could not finish inside
- * the step budget. PR labels never select this `localOnly` suite, but a direct
- * on-demand build can; its step does not forward `WORKER_CHAIN_EXAMPLES`, so it
- * takes every example and the derived timeout would otherwise sit far above the
- * step kill with nothing to say so.
+ * the step budget (see WORKER_CHAIN_CI_STEP_BUDGET_MS); otherwise the derived
+ * timeout would sit far above the step kill with nothing to say so.
  */
 export const assertWorkerChainFitsCiBudget = (env: Env = process.env): void => {
   if (env.BUILDKITE !== 'true') return;
