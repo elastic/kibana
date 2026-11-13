@@ -103,3 +103,4 @@ Follow existing patterns in the target area first; below are common defaults.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
 - Only comment exported functions with one concise sentence and non-trivial code paths.
+- Before writing a PR description, read the `AGENTS.md` files in the directories of the changed files and in their parent directories up to the repo root. Teams use them for PR description rules.
