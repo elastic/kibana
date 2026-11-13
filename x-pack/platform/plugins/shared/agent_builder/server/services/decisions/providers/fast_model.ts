@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import type { BaseMessageLike } from '@langchain/core/messages';
 import { EffortLevels } from '@kbn/agent-builder-common';
-import type { DecisionAnswer, DecisionQuestion } from '@kbn/agent-builder-server';
+import type {
+  DecisionAnswer,
+  DecisionQuestion,
+  ToolSchema,
+  ToolSchemaType,
+} from '@kbn/inference-common';
 import type { ModelProviderFactoryFn } from '../../execution/runner/model_provider';
 import type { BaseDecisionProviderOptions } from './base_decision_provider';
 import { BaseDecisionProvider } from './base_decision_provider';
-import { questionKey } from './question_keys';
 import type { DecisionProviderParams, DecisionProviderResult } from './types';
 import { DecisionProviderUnavailableError } from './types';
 
-/** The model provider's error when neither a fast nor a default model is configured. */
 const NO_CONNECTOR_MESSAGE = 'No connector available';
 
-/** Without these, the model answers 1.00 or 0.00 to everything, right or wrong. */
 const CALIBRATION_RULES = `## How to give probabilities
 - Probabilities say how likely each answer is to be right. They are used to decide whether to act on your answer, so a wrong answer with a high probability is worse than an honest middle value.
 - Use the whole range. Go above 0.9 only when no reasonable reader would answer differently.
@@ -31,9 +31,17 @@ interface RawAnswer {
   probabilities?: Record<string, number>;
 }
 
+/** The key a question is asked under in the prompt and the output schema. */
+const questionKey = (index: number): string => `question_${index + 1}`;
+
+const probability = (description: string): ToolSchemaType => ({
+  type: 'number',
+  description: `${description}, from 0 to 1`,
+});
+
 /**
- * Answers with Agent Builder's fast model (else its default model) through structured output.
- * The fallback for when no decision model is available or one fails.
+ * Answers with Agent Builder's fast model (else its default model), through the inference
+ * client's structured output. Slower and less calibrated than a decision model: the fallback.
  */
 export class FastModelDecisionProvider extends BaseDecisionProvider {
   readonly id = 'fast_model';
@@ -54,7 +62,7 @@ export class FastModelDecisionProvider extends BaseDecisionProvider {
     questions,
     signal,
   }: DecisionProviderParams): Promise<DecisionProviderResult> {
-    const { chatModel, connector } = await this.createModelProvider({ request })
+    const { inferenceClient, connector } = await this.createModelProvider({ request })
       .selectModel({ effortLevel: EffortLevels.low })
       .catch((error: Error) => {
         throw error.message === NO_CONNECTOR_MESSAGE
@@ -62,17 +70,9 @@ export class FastModelDecisionProvider extends BaseDecisionProvider {
           : error;
       });
 
-    const schema = z.object(
-      Object.fromEntries(
-        questions.map((question, index) => [questionKey(index), this.answerSchema(question)])
-      )
-    );
-    const structuredModel = chatModel.withStructuredOutput(schema, { name: 'decide' });
-
-    const prompt: BaseMessageLike[] = [
-      [
-        'system',
-        `You make quick decisions about an input for an automated system. Answer every question below about the input the user sends, by calling the 'decide' tool.
+    const { output } = await inferenceClient.output({
+      id: 'decide',
+      system: `You make quick decisions about an input for an automated system. Answer every question below about the input the user sends.
 
 ${CALIBRATION_RULES}
 
@@ -80,17 +80,16 @@ ${CALIBRATION_RULES}
 ${questions
   .map((question, index) => this.describeQuestion(questionKey(index), question))
   .join('\n')}`,
-      ],
-      ['user', input],
-    ];
-
-    const output: Record<string, RawAnswer | undefined> = await structuredModel.invoke(prompt, {
-      signal,
+      input,
+      schema: this.outputSchema(questions),
+      abortSignal: signal,
+      // A retry would not fit in the provider's timeout; the next provider is the retry.
+      retry: { onValidationError: false },
     });
 
     const answers = questions.map((question, index) => {
       const name = questionKey(index);
-      const raw = output?.[name];
+      const raw = (output as Record<string, RawAnswer | undefined> | undefined)?.[name];
 
       if (!raw) {
         throw new Error(`Fast model output has no answer for question [${name}]`);
@@ -102,35 +101,51 @@ ${questions
     return { inferenceId: `fast_model:${connector.connectorId}`, answers };
   }
 
-  private probability(description: string) {
-    return z.number().min(0).max(1).describe(description);
-  }
+  private outputSchema(questions: readonly DecisionQuestion[]): ToolSchema {
+    const keys = questions.map((_, index) => questionKey(index));
 
-  /** A probability per option, so the model weighs the options instead of rating its own pick. */
-  private perOption(options: string[]) {
-    return z.object({
-      probabilities: z.object(
-        Object.fromEntries(
-          options.map((option) => [
-            option,
-            this.probability(`Probability that "${option}" is the right answer`),
-          ])
-        )
+    return {
+      type: 'object',
+      properties: Object.fromEntries(
+        questions.map((question, index) => [keys[index], this.answerSchema(question)])
       ),
-    });
+      required: keys,
+    };
   }
 
-  private answerSchema(question: DecisionQuestion) {
+  private answerSchema(question: DecisionQuestion): ToolSchemaType {
     switch (question.type) {
       case 'predicate':
-        return z.object({
-          probability: this.probability('Probability that the answer is yes, from 0 to 1'),
-        });
+        return {
+          type: 'object',
+          properties: { probability: probability('Probability that the answer is yes') },
+          required: ['probability'],
+        };
       case 'choice':
         return this.perOption(Object.keys(question.choices));
       case 'score':
         return this.perOption(question.levels.map(({ label }) => label));
     }
+  }
+
+  /** A probability per option, so the model weighs the options instead of rating its own pick. */
+  private perOption(options: string[]): ToolSchemaType {
+    return {
+      type: 'object',
+      properties: {
+        probabilities: {
+          type: 'object',
+          properties: Object.fromEntries(
+            options.map((option) => [
+              option,
+              probability(`Probability that "${option}" is the right answer`),
+            ])
+          ),
+          required: options,
+        },
+      },
+      required: ['probabilities'],
+    };
   }
 
   private describeQuestion(name: string, question: DecisionQuestion): string {

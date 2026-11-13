@@ -7,7 +7,8 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { EffortLevels } from '@kbn/agent-builder-common';
-import type { DecisionQuestion, ModelProvider } from '@kbn/agent-builder-server';
+import type { ModelProvider } from '@kbn/agent-builder-server';
+import type { DecisionQuestion } from '@kbn/inference-common';
 import { FastModelDecisionProvider } from './fast_model';
 import { DecisionProviderUnavailableError, isDecisionProviderUnavailableError } from './types';
 
@@ -37,12 +38,11 @@ const setup = ({
   output?: Record<string, unknown>;
   selectError?: Error;
 } = {}) => {
-  const invoke = jest.fn().mockResolvedValue(output);
-  const withStructuredOutput = jest.fn().mockReturnValue({ invoke });
+  const outputApi = jest.fn().mockResolvedValue({ id: 'decide', content: '', output });
   const selectModel = selectError
     ? jest.fn().mockRejectedValue(selectError)
     : jest.fn().mockResolvedValue({
-        chatModel: { withStructuredOutput },
+        inferenceClient: { output: outputApi },
         connector: { connectorId: 'fast-connector' },
       });
   const createModelProvider = jest
@@ -59,49 +59,67 @@ const setup = ({
       questions: asked,
     });
 
-  return { run, invoke, withStructuredOutput, selectModel };
+  return { run, outputApi, selectModel };
 };
 
 describe('FastModelDecisionProvider', () => {
   it('asks the fast model with structured output', async () => {
-    const { run, selectModel, withStructuredOutput, invoke } = setup({
+    const { run, selectModel, outputApi } = setup({
       output: { question_1: { probability: 0.8 } },
     });
 
     await run([shouldRespond]);
 
     expect(selectModel).toHaveBeenCalledWith({ effortLevel: EffortLevels.low });
-    expect(withStructuredOutput).toHaveBeenCalledWith(expect.anything(), { name: 'decide' });
-    expect(invoke).toHaveBeenCalledWith(expect.any(Array), { signal: expect.any(AbortSignal) });
-    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('@agent can you help?');
+    expect(outputApi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'decide',
+        input: '@agent can you help?',
+        abortSignal: expect.any(AbortSignal),
+        retry: { onValidationError: false },
+      })
+    );
   });
 
   it('asks for calibrated probabilities', async () => {
-    const { run, invoke } = setup({ output: { question_1: { probability: 0.8 } } });
+    const { run, outputApi } = setup({ output: { question_1: { probability: 0.8 } } });
 
     await run([shouldRespond]);
 
-    const [[system]] = invoke.mock.calls[0];
+    const [{ system }] = outputApi.mock.calls[0];
 
-    expect(JSON.stringify(system)).toContain('Use the whole range');
-    expect(JSON.stringify(system)).toContain('- question_1 (yes or no): Should the agent respond?');
+    expect(system).toContain('Use the whole range');
+    expect(system).toContain('- question_1 (yes or no): Should the agent respond?');
   });
 
   it('asks for a probability per option on choice and score questions', async () => {
-    const { run, withStructuredOutput } = setup({
+    const { run, outputApi } = setup({
       output: {
         question_1: { probabilities: { a: 0.3, b: 0.7 } },
+        question_2: { probabilities: { low: 0.4, high: 0.6 } },
       },
     });
 
-    await run([pick]);
+    await run([pick, severity]);
 
-    const [schema] = withStructuredOutput.mock.calls[0];
+    const [{ schema }] = outputApi.mock.calls[0];
 
-    expect(
-      schema.parse({ question_1: { probabilities: { a: 0.3, b: 0.7 } } }).question_1.probabilities
-    ).toEqual({ a: 0.3, b: 0.7 });
-    expect(() => schema.parse({ question_1: { choice: 'a', confidence: 1 } })).toThrow();
+    expect(schema.required).toEqual(['question_1', 'question_2']);
+    expect(schema.properties.question_1).toEqual({
+      type: 'object',
+      properties: {
+        probabilities: {
+          type: 'object',
+          properties: {
+            a: expect.objectContaining({ type: 'number' }),
+            b: expect.objectContaining({ type: 'number' }),
+          },
+          required: ['a', 'b'],
+        },
+      },
+      required: ['probabilities'],
+    });
+    expect(schema.properties.question_2.properties.probabilities.required).toEqual(['low', 'high']);
   });
 
   it('answers with the most likely option and its probability as the confidence', async () => {

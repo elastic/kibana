@@ -25,6 +25,7 @@ import { bindClient } from '../../common/inference_client/bind_client';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { getConnectorList } from '../util/get_connector_list';
 import { createPromptApi } from '../prompt';
+import { createDecideApi } from '../decide';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import { createCallbackManager } from './callback_manager';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
@@ -104,6 +105,7 @@ export function createInferenceClient({
   const prompt = createPromptApi({
     callbackApi,
   });
+  const decide = createDecideApi({ esClient, logger });
 
   const eventEmitter = callbackManager.asEventEmitter();
 
@@ -112,6 +114,7 @@ export function createInferenceClient({
     chatComplete,
     output,
     prompt,
+    decide,
     listConnectors: async () => {
       return await getConnectorList({ actions, request, esClient, logger });
     },

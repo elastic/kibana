@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DecisionQuestion } from '@kbn/agent-builder-server';
+import type { DecisionQuestion } from '@kbn/inference-common';
 
 /** The key a question is sent under, from its position: providers need names, callers don't. */
 export const questionKey = (index: number): string => `question_${index + 1}`;

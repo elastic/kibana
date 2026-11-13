@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DecisionQuestion } from '@kbn/agent-builder-server';
-import decisionResponse from './__fixtures__/decision_response.json';
+import type { DecisionQuestion } from '@kbn/inference-common';
+import { decisionResponse } from './__fixtures__/decision_response';
 import { parseDecisionResponse } from './parse_decision_response';
 
 const predicate: DecisionQuestion = {

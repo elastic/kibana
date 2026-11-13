@@ -6,62 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-
-export interface DecisionPredicateQuestion {
-  type: 'predicate';
-  instructions: string;
-}
-
-export interface DecisionChoiceQuestion {
-  type: 'choice';
-  instructions: string;
-  choices: Record<string, string>;
-}
-
-export interface DecisionScoreQuestion {
-  type: 'score';
-  instructions: string;
-  levels: Array<{ label: string; description: string }>;
-}
-
-/** A question for a decision model, in the shape of the ES `decision` inference task. */
-export type DecisionQuestion =
-  | DecisionPredicateQuestion
-  | DecisionChoiceQuestion
-  | DecisionScoreQuestion;
-
-export interface DecisionPredicateAnswer {
-  type: 'predicate';
-  probability: number;
-}
-
-export interface DecisionChoiceAnswer {
-  type: 'choice';
-  choice: string;
-  confidence: number;
-  probabilities: Record<string, number>;
-}
-
-export interface DecisionScoreAnswer {
-  type: 'score';
-  score: number;
-  confidence: number;
-  probabilities: Record<string, number>;
-}
-
-/** A decision model's answer to one {@link DecisionQuestion}. */
-export type DecisionAnswer = DecisionPredicateAnswer | DecisionChoiceAnswer | DecisionScoreAnswer;
-
-/** The answer type for a question type. */
-export type DecisionAnswerFor<Q extends DecisionQuestion> = Extract<
-  DecisionAnswer,
-  { type: Q['type'] }
->;
-
-/** The answers to a list of questions, typed by position. */
-export type DecisionAnswersFor<Q extends readonly DecisionQuestion[]> = {
-  [I in keyof Q]: DecisionAnswerFor<Q[I]>;
-};
+import type {
+  DecisionAnswerFor,
+  DecisionAnswersFor,
+  DecisionQuestion,
+} from '@kbn/inference-common';
 
 export interface DecideParams {
   /** The request whose user the decision model is called as. */
@@ -81,10 +30,10 @@ export type DecideResult<T> =
   | { status: 'failed'; error: Error };
 
 /**
- * Decision models: fast, cheap answers to bounded questions.
+ * Quick decisions from a decision model, falling back to Agent Builder's fast model.
  */
 export interface DecisionsStart {
-  /** Asks the cluster's decision model one question about the input. */
+  /** Asks one question about the input. */
   decide<const Q extends DecisionQuestion>(
     params: DecideParams,
     question: Q

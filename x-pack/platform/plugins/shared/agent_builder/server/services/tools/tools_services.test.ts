@@ -46,7 +46,7 @@ describe('ToolsService', () => {
           },
           decisionModel: {
             triggerThreshold: 0.5,
-            eisTimeoutMs: 1000,
+            decisionModelTimeoutMs: 1000,
             fastModelTimeoutMs: 2000,
             unavailableTtlMs: 3600000,
           },
@@ -72,7 +72,7 @@ describe('ToolsService', () => {
           },
           decisionModel: {
             triggerThreshold: 0.5,
-            eisTimeoutMs: 1000,
+            decisionModelTimeoutMs: 1000,
             fastModelTimeoutMs: 2000,
             unavailableTtlMs: 3600000,
           },

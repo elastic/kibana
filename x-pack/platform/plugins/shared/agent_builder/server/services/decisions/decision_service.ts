@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { DecideParams, DecideResult, DecisionsStart } from '@kbn/agent-builder-server';
 import type {
-  DecideParams,
-  DecideResult,
   DecisionAnswer,
   DecisionAnswerFor,
   DecisionAnswersFor,
   DecisionQuestion,
-  DecisionsStart,
-} from '@kbn/agent-builder-server';
+} from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { AgentBuilderConfig } from '../../config';
 import type { ModelProviderFactoryFn } from '../execution/runner/model_provider';
-import { EisDecisionProvider } from './providers/eis';
+import { DecisionModelProvider } from './providers/decision_model';
 import { FastModelDecisionProvider } from './providers/fast_model';
 import type { DecisionProvider, DecisionProviderId } from './providers/types';
 import {
@@ -27,25 +26,25 @@ import {
 } from './providers/types';
 
 /**
- * The decision providers, in the order they are tried: the Elasticsearch `decision` task (EIS),
- * then Agent Builder's fast model as the fallback.
+ * The decision providers, in the order they are tried: a decision model through the inference
+ * client's `decide()`, then Agent Builder's fast model as the fallback.
  */
 export const createDecisionProviders = ({
-  config: { inferenceId, eisTimeoutMs, fastModelTimeoutMs, unavailableTtlMs },
-  elasticsearch,
+  config: { inferenceId, decisionModelTimeoutMs, fastModelTimeoutMs, unavailableTtlMs },
+  inference,
   createModelProvider,
 }: {
   config: Pick<
     AgentBuilderConfig['decisionModel'],
-    'inferenceId' | 'eisTimeoutMs' | 'fastModelTimeoutMs' | 'unavailableTtlMs'
+    'inferenceId' | 'decisionModelTimeoutMs' | 'fastModelTimeoutMs' | 'unavailableTtlMs'
   >;
-  elasticsearch: ElasticsearchServiceStart;
+  inference: InferenceServerStart;
   createModelProvider: ModelProviderFactoryFn;
 }): DecisionProvider[] => [
-  new EisDecisionProvider({
-    elasticsearch,
+  new DecisionModelProvider({
+    inference,
     inferenceId,
-    timeoutMs: eisTimeoutMs,
+    timeoutMs: decisionModelTimeoutMs,
     unavailableTtlMs,
   }),
   new FastModelDecisionProvider({

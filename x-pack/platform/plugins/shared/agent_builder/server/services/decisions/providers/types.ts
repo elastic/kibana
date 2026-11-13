@@ -6,9 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { DecisionAnswer, DecisionQuestion } from '@kbn/agent-builder-server';
+import type { DecisionAnswer, DecisionQuestion } from '@kbn/inference-common';
 
-export type DecisionProviderId = 'eis' | 'fast_model';
+export type DecisionProviderId = 'decision_model' | 'fast_model';
 
 export interface DecisionProviderParams {
   request: KibanaRequest;
