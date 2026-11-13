@@ -23,13 +23,27 @@ import { hasConfiguredVarValue } from '../../../../../../../common/services/var_
 import type { RegistryVarGroup } from '../../../../types';
 
 /**
+ * Options for computing policy effects.
+ */
+export interface PolicyUpdateOptions {
+  /**
+   * Skip effects that would turn a previously enabled capability off
+   * (currently the cloud-connector deactivation). Used when selections are
+   * persisted without an explicit user choice, so loading a page cannot
+   * silently remove e.g. `cloud_connector_id`; activation effects still apply.
+   */
+  skipDeactivation?: boolean;
+}
+
+/**
  * Handler function type for computing policy effects based on var_group selections.
  * Returns partial policy updates or null if no updates needed.
  */
 export type PolicyUpdateHandler = (
   packagePolicy: NewPackagePolicy,
   varGroupSelections: VarGroupSelection,
-  varGroups: RegistryVarGroup[]
+  varGroups: RegistryVarGroup[],
+  options?: PolicyUpdateOptions
 ) => Partial<NewPackagePolicy> | null;
 
 // Registry of effect handlers for extensibility
@@ -188,7 +202,8 @@ function clearInputStreamVars(
 export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
   packagePolicy,
   varGroupSelections,
-  varGroups
+  varGroups,
+  options
 ) => {
   const cloudConnectorOption = getCloudConnectorOption(varGroups, varGroupSelections);
   const supportFlagVar = packagePolicy.vars
@@ -214,8 +229,10 @@ export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
         ...buildSupportsCloudConnectorsVarsUpdate(packagePolicy.vars, true),
       };
     }
-  } else {
-    // Cloud connector not selected - clear the flags and cloud connector vars
+  } else if (!options?.skipDeactivation) {
+    // Cloud connector not selected - clear the flags and cloud connector vars.
+    // Skipped when persisting derived selections without an explicit user
+    // choice: loading the page must not silently turn the connector off.
     if (
       packagePolicy.supports_cloud_connector === true ||
       packagePolicy.cloud_connector_id !== undefined ||
@@ -314,7 +331,8 @@ export function buildStreamVarGroupVarsUpdate(
 export function buildVarGroupPolicyUpdates(
   packagePolicy: NewPackagePolicy,
   varGroupSelections: VarGroupSelection,
-  varGroups: RegistryVarGroup[] | undefined
+  varGroups: RegistryVarGroup[] | undefined,
+  options?: PolicyUpdateOptions
 ): Partial<NewPackagePolicy> | null {
   if (!varGroups || varGroups.length === 0) {
     return null;
@@ -324,7 +342,7 @@ export function buildVarGroupPolicyUpdates(
   let hasEffects = false;
 
   for (const handler of policyUpdateHandlers) {
-    const effects = handler(packagePolicy, varGroupSelections, varGroups);
+    const effects = handler(packagePolicy, varGroupSelections, varGroups, options);
     if (effects) {
       combinedEffects = { ...combinedEffects, ...effects };
       hasEffects = true;

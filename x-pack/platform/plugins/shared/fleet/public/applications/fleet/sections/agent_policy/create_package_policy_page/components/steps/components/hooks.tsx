@@ -117,10 +117,9 @@ interface UseVarGroupSelectionsParams {
   packagePolicy?: NewPackagePolicy;
   /**
    * Optional: current stream vars, for stream-level var_groups only. When
-   * provided, a selection change also clears the plain-text vars of the
+   * provided, a selection change also clears the populated vars of the
    * deselected options, so stale values don't stay in the policy and leak
-   * into the agent template. Package-level (and input-level) call sites do
-   * not pass this, so their behaviour is unchanged.
+   * into the agent template. Only the stream-level call site passes this.
    */
   streamVars?: PackagePolicyConfigRecord;
   /**
@@ -228,7 +227,7 @@ export function useVarGroupSelections({
           ? buildVarGroupPolicyUpdates(packagePolicy, newSelections, varGroups)
           : null;
 
-      // Stream-level var_groups only: clear the deselected options' plain-text vars
+      // Stream-level var_groups only: clear the deselected options' populated vars
       // so stale values don't leak into the agent template.
       let clearedStreamVars: PackagePolicyConfigRecord | undefined;
       if (streamVars && varGroups) {
@@ -255,12 +254,15 @@ export function useVarGroupSelections({
 
   // Persist the normalized selections when what the form shows differs from what is
   // stored: a stale saved selection was dropped, or derivation filled in a group the
-  // stored map does not cover (an empty or partial map). The same policy effects apply
-  // here as to a user selection. This lives after handleSelectionChange because the
-  // mount effect above is also touched by upstream; keeping this write in its own block
-  // avoids an adjacent-change merge conflict. (Reference equality cannot detect the
-  // missing-group case — sanitize returns the input unchanged when nothing was dropped —
-  // so compare the merged selections against the sanitized stored map instead.)
+  // stored map does not cover (an empty or partial map). Only the selections persist
+  // here, plus activation effects: effects that would turn something off are skipped,
+  // so opening the page cannot silently remove e.g. cloud_connector_id. An explicit
+  // user choice (handleSelectionChange above) still carries the full effects. This
+  // lives after handleSelectionChange because the mount effect above is also touched
+  // by upstream; keeping this write in its own block avoids an adjacent-change merge
+  // conflict. (Reference equality cannot detect the missing-group case — sanitize
+  // returns the input unchanged when nothing was dropped — so compare the merged
+  // selections against the sanitized stored map instead.)
   useEffect(() => {
     if (!varGroups || varGroups.length === 0) return;
     if (!savedSelections) return;
@@ -271,7 +273,9 @@ export function useVarGroupSelections({
     if (Object.keys(selections).length === 0) return;
     const policyEffects =
       packagePolicy && varGroups
-        ? buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups)
+        ? buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups, {
+            skipDeactivation: true,
+          })
         : null;
     onSelectionsChange({
       var_group_selections: selections,

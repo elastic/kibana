@@ -314,11 +314,11 @@ describe('useVarGroupSelections', () => {
     });
 
     it('should infer stream selections from stream vars, not package vars, on the edit page', () => {
-      // Follow-up from jillguyonnet 2026-11-10 (and the P3 review): the
-      // stream-level call site has no packagePolicy, so without varsForInference
-      // it could never infer — validation infers from the stream's vars while
-      // the form defaulted to the first visible option. Stream vars must be
-      // the evidence; package-level vars for a different group must not leak in.
+      // The stream-level call site has no packagePolicy, so without
+      // varsForInference it could never infer — validation infers from the
+      // stream's vars while the form defaulted to the first visible option.
+      // Stream vars must be the evidence; package-level vars for a different
+      // group must not leak in.
       const { result } = renderHook(() =>
         useVarGroupSelections({
           varGroups: mockStreamVarGroups,
@@ -382,12 +382,12 @@ describe('useVarGroupSelections', () => {
   });
 
   describe('stale saved selections', () => {
-    // Follow-up from the Libra P3 review (2026-11-10): a stored selection
-    // naming an option the package no longer declares was returned as-is,
-    // so shouldShowVar matched no option and hid every group-controlled
-    // field while validation required the inferred option's vars. The hook
-    // must normalize stale selections the same way validation does — treat
-    // them as missing so derive/inference runs and gets persisted.
+    // A stored selection naming an option the package no longer declares
+    // was returned as-is, so shouldShowVar matched no option and hid every
+    // group-controlled field while validation required the inferred
+    // option's vars. The hook must normalize stale selections the same way
+    // validation does — treat them as missing so derive/inference runs and
+    // gets persisted.
     const twoGroups: RegistryVarGroup[] = [...mockVarGroups, ...mockStreamVarGroups];
 
     it('should infer from populated vars on the edit page when the saved selection is stale', () => {
@@ -556,14 +556,13 @@ describe('useVarGroupSelections', () => {
       );
     });
 
-    it('should deactivate cloud connector when a stale selection is normalized to a non-cloud option', () => {
-      // Follow-up from the Libra P3 review (2026-11-11): when the saved
-      // cloud-connector option was removed by a package upgrade and
-      // normalization picks a non-cloud option, the mount write must carry
-      // the deactivation effects — otherwise the displayed authentication
-      // choice disagrees with the saved agent configuration
-      // (supports_cloud_connector / cloud_connector_id / support-flag var
-      // left enabled). The groups below no longer declare the
+    it('should persist the normalized selection without deactivating the cloud connector when a stale selection is normalized to a non-cloud option', () => {
+      // When the saved cloud-connector option was removed by a package
+      // upgrade and normalization picks a non-cloud option, the mount write
+      // persists the selections only: with no explicit user choice it must
+      // not deactivate the connector (supports_cloud_connector /
+      // cloud_connector_id / support-flag var stay as stored until the user
+      // changes the selector). The groups below no longer declare the
       // cloud-connector option, so the saved selection is stale.
       const noCloudConnectorGroups: RegistryVarGroup[] = [
         {
@@ -596,28 +595,22 @@ describe('useVarGroupSelections', () => {
       );
 
       expect(result.current.selections).toEqual({ auth_method: 'api_key' });
-      expect(mockOnSelectionsChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          var_group_selections: { auth_method: 'api_key' },
-          supports_cloud_connector: false,
-          vars: expect.objectContaining({
-            supports_cloud_connectors: { type: 'bool', value: false },
-          }),
-        })
-      );
-      // cloud_connector_id is explicitly cleared, not left set
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key' },
+      });
+      // No deactivation fields: the connector state is left untouched
       const call = mockOnSelectionsChange.mock.calls[0][0];
-      expect(call.cloud_connector_id).toBeUndefined();
-      expect('cloud_connector_id' in call).toBe(true);
+      expect('supports_cloud_connector' in call).toBe(false);
+      expect('cloud_connector_id' in call).toBe(false);
+      expect('vars' in call).toBe(false);
     });
   });
 
   describe('incomplete saved selections', () => {
-    // Follow-up from the Libra P3 review (2026-11-11): with an existing
-    // incomplete map (including {}), sanitization returns the original
-    // reference, so the old mount effect never persisted the derived
-    // selections for the missing groups. The selectors then show valid
-    // derived options without storing them, and validation — which for
+    // With an existing incomplete map (including {}), sanitization
+    // returns the original reference, so the old mount effect never
+    // persisted the derived selections for the missing groups. The
+    // selectors then show valid derived options without storing them, and
     // package-level groups only infers from populated vars — skips the
     // required fields of the group the form shows as selected, so an
     // incomplete policy can still be saved.
@@ -669,10 +662,11 @@ describe('useVarGroupSelections', () => {
       });
     });
 
-    it('should apply policy effects when persisting a derived selection for a missing group', () => {
+    it('should persist a derived selection for a missing group without deactivating the cloud connector', () => {
       // The stored policy still has cloud connector enabled, but the
       // derived option for the missing auth group is a non-cloud one — the
-      // mount write must deactivate it, as a user selection would.
+      // mount write persists the selections and leaves the connector state
+      // untouched, since no explicit user choice was made.
       const { result } = renderHook(() =>
         useVarGroupSelections({
           varGroups: twoGroups,
@@ -695,18 +689,12 @@ describe('useVarGroupSelections', () => {
         auth_method: 'api_key',
         log_group_source: 'log_group_name',
       });
-      expect(mockOnSelectionsChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          var_group_selections: {
-            auth_method: 'api_key',
-            log_group_source: 'log_group_name',
-          },
-          supports_cloud_connector: false,
-          vars: expect.objectContaining({
-            supports_cloud_connectors: { type: 'bool', value: false },
-          }),
-        })
-      );
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: {
+          auth_method: 'api_key',
+          log_group_source: 'log_group_name',
+        },
+      });
     });
   });
 

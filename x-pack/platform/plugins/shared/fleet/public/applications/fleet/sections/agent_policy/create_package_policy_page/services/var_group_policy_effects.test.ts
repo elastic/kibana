@@ -449,6 +449,61 @@ describe('var_group_policy_effects', () => {
         cloud_connector_id: undefined,
       });
     });
+
+    it('should deactivate the cloud connector when the selection does not pick it', () => {
+      const packagePolicy = createMockPackagePolicy({
+        supports_cloud_connector: true,
+        cloud_connector_id: 'conn-123',
+        vars: {
+          supports_cloud_connectors: { value: true, type: 'bool' },
+        },
+      });
+      const varGroups = createMockVarGroups();
+      const selections: VarGroupSelection = { auth_method: 'manual' };
+
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups);
+
+      expect(result).toEqual({
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+        vars: {
+          supports_cloud_connectors: { value: false, type: 'bool' },
+        },
+      });
+    });
+
+    it('should skip deactivation with skipDeactivation, leaving the connector state untouched', () => {
+      const packagePolicy = createMockPackagePolicy({
+        supports_cloud_connector: true,
+        cloud_connector_id: 'conn-123',
+        vars: {
+          supports_cloud_connectors: { value: true, type: 'bool' },
+        },
+      });
+      const varGroups = createMockVarGroups();
+      const selections: VarGroupSelection = { auth_method: 'manual' };
+
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups, {
+        skipDeactivation: true,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should still apply activation effects with skipDeactivation', () => {
+      const packagePolicy = createMockPackagePolicy();
+      const varGroups = createMockVarGroups();
+      const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups, {
+        skipDeactivation: true,
+      });
+
+      expect(result).toEqual({
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+      });
+    });
   });
 
   describe('buildStreamVarGroupVarsUpdate', () => {
@@ -492,10 +547,10 @@ describe('var_group_policy_effects', () => {
     });
 
     it('should unset deselected vars so a later switch-back still requires them', () => {
-      // Regression for #303689 follow-up (juliaElastic 2026-11-09): clearing to ''
-      // made validation treat the var as filled, so switching back to Log Group ARN
-      // showed the form as valid with an empty ARN. Unsetting the value keeps the
-      // entry (type and other metadata) while validation treats it as missing.
+      // Clearing to '' made validation treat the var as filled, so switching
+      // back to Log Group ARN showed the form as valid with an empty ARN.
+      // Unsetting the value keeps the entry (type and other metadata) while
+      // validation treats it as missing.
       const varGroup = createMockStreamVarGroups()[0];
       const streamVars = {
         log_group_arn: {
@@ -606,10 +661,10 @@ describe('var_group_policy_effects', () => {
     });
 
     it('should clear populated non-string values of deselected options', () => {
-      // Follow-up from jillguyonnet 2026-11-10: the leak this PR fixes is
-      // value-type-agnostic — a multi:true array (a list of log group names),
-      // a number, or a true boolean belonging to a deselected option still
-      // reaches the compiled agent template. Any populated value is cleared.
+      // The leak this PR fixes is value-type-agnostic — a multi:true array
+      // (a list of log group names), a number, or a true boolean belonging
+      // to a deselected option still reaches the compiled agent template.
+      // Any populated value is cleared.
       const varGroup: RegistryVarGroup = {
         name: 'log_group_source',
         title: 'Log Group Source',
@@ -730,7 +785,7 @@ describe('var_group_policy_effects', () => {
 
       const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups);
 
-      expect(customHandler).toHaveBeenCalledWith(packagePolicy, selections, varGroups);
+      expect(customHandler).toHaveBeenCalledWith(packagePolicy, selections, varGroups, undefined);
       expect(result).toMatchObject({ custom_field: 'test' });
     });
   });

@@ -203,7 +203,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       savedSelections: packagePolicyInputStream.var_group_selections,
       isAgentlessEnabled: isAgentless,
       onSelectionsChange: updatePackagePolicyInputStream,
-      // Clear the plain-text vars of deselected options on a stream-level
+      // Clear the populated vars of deselected options on a stream-level
       // selection change, so stale values don't leak into the agent template
       streamVars: packagePolicyInputStream.vars,
       // On the edit page, infer the selection from this stream's own vars so

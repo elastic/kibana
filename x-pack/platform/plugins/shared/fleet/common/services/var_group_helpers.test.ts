@@ -413,10 +413,9 @@ describe('var_group_helpers', () => {
     });
 
     it('should never infer an option hidden in the given deployment mode', () => {
-      // P3 follow-up (Libra review on #303689): validation and the form must
-      // agree on the default, and an option the form hides in this mode
-      // cannot be the one validation checks — even when its vars are the
-      // only populated ones.
+      // Validation and the form must agree on the default, and an option
+      // the form hides in this mode cannot be the one validation checks —
+      // even when its vars are the only populated ones.
       const group: RegistryVarGroup = {
         name: 'log_group_source',
         title: 'Log Group Source',

@@ -388,11 +388,11 @@ describe('PackagePolicyInputStreamConfig', () => {
     });
 
     it('should infer the selection from populated stream vars on the edit page', async () => {
-      // Follow-up from jillguyonnet 2026-11-10: without varsForInference the
-      // stream form could never infer — validation infers from the stream's
-      // vars while the form defaulted to the first visible option. A policy
-      // predating var_groups with OAuth vars populated must be presented as
-      // OAuth, not as the first option (API Key).
+      // Without varsForInference the stream form could never infer —
+      // validation infers from the stream's vars while the form defaulted
+      // to the first visible option. A policy predating var_groups with
+      // OAuth vars populated must be presented as OAuth, not as the first
+      // option (API Key).
       const policyWithOauthVars: NewPackagePolicyInputStream = {
         ...mockPackagePolicyInputStream,
         vars: {

@@ -2968,13 +2968,13 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
   });
 
   it('should not invent a default option for a package-level var_group with no selection and no evidence', () => {
-    // Follow-up from jillguyonnet 2026-11-10: before this PR a policy with
-    // var_groups and no stored var_group_selections had all group-controlled
-    // vars skipped. The first-visible fallback must not change that for
-    // package-level groups — API-created policies (e.g. Cloud Security
-    // Posture) and upgrades of pre-var_group policies saved fine with empty
-    // vars, and updatePackageInputs validates during upgrade before doUpgrade
-    // infers and persists selections, so an invented default could 400 them.
+    // Before this PR a policy with var_groups and no stored
+    // var_group_selections had all group-controlled vars skipped. The
+    // first-visible fallback must not change that for package-level groups:
+    // API-created policies (e.g. Cloud Security Posture) and upgrades of
+    // pre-var_group policies saved fine with empty vars, and
+    // updatePackageInputs validates during upgrade before doUpgrade infers
+    // and persists selections, so an invented default could 400 them.
     // With no populated vars there is nothing to infer from, so nothing is
     // treated as required. The vars are undefined (not empty strings, which
     // pass required validation by design) so the invented default in the
@@ -3001,11 +3001,11 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
   });
 
   it('should treat a stored package-level selection naming no existing option as missing', () => {
-    // Follow-up from juliaElastic 2026-11-10 15:54: a stored selection that
-    // names a removed/renamed option must not be authoritative — otherwise
-    // controlled vars are skipped and requiredness is bypassed. With no
-    // evidence to infer from, the group is left unselected (same as no
-    // stored selection for package-level groups).
+    // A stored selection that names a removed/renamed option must not be
+    // authoritative — otherwise controlled vars are skipped and
+    // requiredness is bypassed. With no evidence to infer from, the group
+    // is left unselected (same as no stored selection for package-level
+    // groups).
     const policyWithStaleSelection = {
       ...basePackagePolicy,
       var_group_selections: { auth_method: 'saml' },
@@ -3156,10 +3156,10 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
     result.inputs?.['aws-cloudwatch']?.streams?.['aws_mq.activemq_general_logs']?.vars;
 
   it('should require the default option var when no stream selection is stored', () => {
-    // Regression for #303689 follow-up (juliaElastic 2026-11-09): a fresh policy
-    // whose stream section was never expanded has no stored var_group_selections,
-    // yet the form displays the default (Log Group ARN) selection — validation
-    // must require the ARN instead of treating nothing as required.
+    // A fresh policy whose stream section was never expanded has no stored
+    // var_group_selections, yet the form displays the default (Log Group
+    // ARN) selection — validation must require the ARN instead of treating
+    // nothing as required.
     const result = validatePackagePolicy(
       makePolicy(emptyStreamVars()),
       packageInfoWithStreamVarGroups,
@@ -3182,9 +3182,9 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
   });
 
   it('should allow empty strings for stream var_group required vars (same as package-level)', () => {
-    // Empty strings still pass required validation by design; the #303689
-    // follow-up fixes the switch-back case at the clear layer instead, by
-    // unsetting deselected vars rather than empty-stringing them.
+    // Empty strings still pass required validation by design; the
+    // switch-back case is fixed at the clear layer instead, by unsetting
+    // deselected vars rather than empty-stringing them.
     const vars = emptyStreamVars();
     vars.log_group_arn = { type: 'text', value: '' };
     const result = validatePackagePolicy(
@@ -3253,10 +3253,10 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
   });
 
   it('should follow the first visible option when options[0] is hidden in default mode', () => {
-    // Follow-up from juliaElastic 2026-11-09: the form defaults to the first
-    // *visible* option after hide_in_deployment_modes filtering, so when
-    // options[0] (Log Group ARN) is hidden in default mode, validation must
-    // require the Name option's vars instead of the ARN.
+    // The form defaults to the first *visible* option after
+    // hide_in_deployment_modes filtering, so when options[0] (Log Group
+    // ARN) is hidden in default mode, validation must require the Name
+    // option's vars instead of the ARN.
     const groupWithHiddenFirstOption = {
       ...logGroupSourceGroup,
       options: [
@@ -3353,10 +3353,9 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
   });
 
   it('should infer the Name option from populated vars when no stream selection is stored', () => {
-    // P2 follow-up (Libra review on #303689): a valid simplified-API request
-    // carrying log_group_name + region_name but no var_group_selections must
-    // not be rejected with "Log Group ARN is required." — the populated vars
-    // identify the intended option.
+    // A valid simplified-API request carrying log_group_name + region_name
+    // but no var_group_selections must not be rejected with "Log Group ARN
+    // is required." — the populated vars identify the intended option.
     const vars = emptyStreamVars();
     vars.log_group_name = { type: 'text', value: 'my-group' };
     vars.region_name = { type: 'text', value: 'us-east-1' };
@@ -3394,11 +3393,11 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
   });
 
   it('should treat a stored stream selection naming no existing option as missing', () => {
-    // Follow-up from juliaElastic 2026-11-10 15:54: a stored selection that
-    // names a removed/renamed option must not be authoritative — otherwise
-    // controlled vars are skipped and requiredness is bypassed. With empty
-    // vars there is nothing to infer from, so the stream-level first-visible
-    // fallback applies and the ARN (the default option) is required.
+    // A stored selection that names a removed/renamed option must not be
+    // authoritative — otherwise controlled vars are skipped and
+    // requiredness is bypassed. With empty vars there is nothing to infer
+    // from, so the stream-level first-visible fallback applies and the ARN
+    // (the default option) is required.
     const result = validatePackagePolicy(
       makePolicy(emptyStreamVars(), { log_group_source: 'not_a_real_option' }),
       packageInfoWithStreamVarGroups,
@@ -3429,11 +3428,10 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
   });
 
   it('should not infer an option hidden in the policy deployment mode', () => {
-    // P3 follow-up (Libra review on #303689): inference must only consider
-    // options visible in the deployment mode, like the form does. Here the
-    // Name option is hidden in default mode, so its populated vars must not
-    // make validation check it — the stream-level first-visible fallback
-    // (Log Group ARN) applies instead.
+    // Inference must only consider options visible in the deployment mode,
+    // like the form does. Here the Name option is hidden in default mode,
+    // so its populated vars must not make validation check it — the
+    // stream-level first-visible fallback (Log Group ARN) applies instead.
     const groupWithHiddenNameOption = {
       ...logGroupSourceGroup,
       options: [
