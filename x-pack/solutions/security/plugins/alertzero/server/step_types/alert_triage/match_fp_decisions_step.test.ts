@@ -528,6 +528,23 @@ describe('triage match decisions step in on mode', () => {
     expect(closes()[0].signal_ids).toEqual(['a', 'b']);
   });
 
+  it('counts the closes of the last 24 hours against the daily cap', async () => {
+    const { run, callKibanaApi } = setup({
+      mode: 'on',
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    await run();
+
+    const countBody = callKibanaApi.mock.calls
+      .map(([{ body }]) => body as Record<string, any> | undefined)
+      .find((body) => body?.size === 0);
+    expect(
+      countBody?.query.bool.filter[1].range['kibana.alert.workflow_status_updated_at'].gte
+    ).toBe(new Date(NOW - 24 * 60 * 60 * 1000).toISOString());
+  });
+
   it('closes nothing for a decision whose daily count cannot be read', async () => {
     const { run, closes, tags } = setup({
       mode: 'on',

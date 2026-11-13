@@ -143,6 +143,8 @@ export const NOTE_CONCURRENCY = 20;
 export const MAX_REVOKE_PAGES = 10;
 /** Most alerts one decision may close in 24 hours. A starting value, to size from shadow data. */
 export const DECISION_DAILY_CLOSE_CAP = 500;
+/** The window `DECISION_DAILY_CLOSE_CAP` counts closes over, ending now. */
+export const DECISION_CAP_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /** Severities a decision may close. High and critical stay with a human unless a deployment opts in. */
 export const DECISION_AUTO_CLOSE_SEVERITIES: readonly string[] = ['low', 'medium'];
