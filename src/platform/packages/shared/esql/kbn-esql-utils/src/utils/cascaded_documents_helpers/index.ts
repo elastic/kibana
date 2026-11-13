@@ -46,7 +46,10 @@ import {
   isSupportedStatsFunction,
   type SupportedFieldTypes,
   type FieldValue,
+  type NodeAggregatedValues,
   type StatsCommandSummary,
+  buildValuesAggregateFilterExpressions,
+  combineFilterExpressionsWithAnd,
   getESQLQueryDataSourceCommand,
   getStatsCommandToOperateOn,
   getStatsCommandRuntimeFields,
@@ -55,6 +58,7 @@ import {
   getStatsGroupFieldType,
   removeBackticks,
   isSupportedFieldType,
+  isTimeseriesSourceQuery,
   requiresMatchPhrase,
   isCategorizeFunctionWithFunctionArgument,
 } from './utils';
@@ -285,6 +289,11 @@ export interface CascadeQueryArgs {
    * Mapping of node paths to their corresponding values, used to populate the query with literal values
    */
   nodePathMap: Record<string, string>;
+  /**
+   * Values displayed for the aggregates of the node we are generating a query for,
+   * used to constrain the documents fetched for cascade queries that omit the STATS command
+   */
+  nodeAggregatedValues?: NodeAggregatedValues;
 }
 
 /**
@@ -297,6 +306,7 @@ export const constructCascadeQuery = ({
   nodeType,
   nodePath,
   nodePathMap,
+  nodeAggregatedValues,
 }: CascadeQueryArgs): AggregateQuery | undefined => {
   const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
 
@@ -365,25 +375,31 @@ export const constructCascadeQuery = ({
     );
 
     const groupValueDefinition = getFieldDefinitionFromArg(groupValue.arg);
+
     if (isColumn(groupValueDefinition)) {
-      return handleStatsByColumnLeafOperation(
-        EditorESQLQuery,
+      return handleStatsByColumnLeafOperation({
+        editorQuery: EditorESQLQuery,
         operatingStatsCommandIndex,
-        groupValue,
-        dataView.fields,
+        operatingStatsCommandSummary: summarizedStatsCommand,
+        columnNode: groupValue,
+        dataViewFields: dataView.fields,
         esqlVariables,
-        nodePathMap[pathSegment]
-      );
+        operationValue: nodePathMap[pathSegment],
+        nodeAggregatedValues,
+      });
     } else if (isFunctionExpression(groupValueDefinition)) {
       switch (groupValueDefinition.name) {
         case 'categorize': {
-          return handleStatsByCategorizeLeafOperation(
-            EditorESQLQuery,
+          return handleStatsByCategorizeLeafOperation({
+            editorQuery: EditorESQLQuery,
             operatingStatsCommandIndex,
-            groupValue,
+            operatingStatsCommandSummary: summarizedStatsCommand,
+            categorizeCommandNode: groupValue,
+            dataViewFields: dataView.fields,
             esqlVariables,
-            nodePathMap
-          );
+            nodePathMap,
+            nodeAggregatedValues,
+          });
         }
         default: {
           throw new Error(
@@ -397,18 +413,42 @@ export const constructCascadeQuery = ({
   }
 };
 
+interface LeafOperationArgs {
+  editorQuery: EsqlQuery;
+  operatingStatsCommandIndex: number;
+  /**
+   * summary of the stats command driving the cascade experience, it declares the aggregates displayed for the node
+   */
+  operatingStatsCommandSummary: StatsCommandSummary;
+  dataViewFields: DataView['fields'];
+  esqlVariables: ESQLControlVariable[] | undefined;
+  nodeAggregatedValues: NodeAggregatedValues | undefined;
+}
+
+interface StatsByColumnLeafOperationArgs extends LeafOperationArgs {
+  columnNode: FieldSummary;
+  operationValue: unknown;
+}
+
+interface StatsByCategorizeLeafOperationArgs extends LeafOperationArgs {
+  categorizeCommandNode: FieldSummary;
+  nodePathMap: Record<string, string>;
+}
+
 /**
  * @description adds a where command with current value for a matched column option as a side-effect on the passed query,
  * helps us with fetching documents that match the value of a specified column on a stats operation in the data cascade experience.
  */
-function handleStatsByColumnLeafOperation(
-  editorQuery: EsqlQuery,
-  operatingStatsCommandIndex: number,
-  columnNode: FieldSummary,
-  dataViewFields: DataView['fields'],
-  esqlVariables: ESQLControlVariable[] | undefined,
-  operationValue: unknown
-): AggregateQuery {
+function handleStatsByColumnLeafOperation({
+  editorQuery,
+  operatingStatsCommandIndex,
+  operatingStatsCommandSummary,
+  columnNode,
+  dataViewFields,
+  esqlVariables,
+  operationValue,
+  nodeAggregatedValues,
+}: StatsByColumnLeafOperationArgs): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
   const columnDefinition = getFieldDefinitionFromArg(columnNode.arg);
@@ -424,12 +464,23 @@ function handleStatsByColumnLeafOperation(
     ))
   ) {
     if (typeof operationColumnNameParamValue === 'string') {
-      // we expect the operation column name parameter value to be a string, so we check for that and update the operation column name to the param value if it is
+      // We expect the operation column name parameter value to be a string,
+      // so we check for that guarding against a situation where we received a non-string value
+      // and only update the operation column name when this condition is met.
       operationColumnName = operationColumnNameParamValue;
     }
   }
 
   const shouldUseMatchPhrase = requiresMatchPhrase(operationColumnName, dataViewFields);
+
+  const supportsInlineStatsCommand = !(
+    // INLINE STATS is not supported for TS queries, and computing the aggregates of a TS query
+    // with FROM semantics yields values that contradict what the cascade row displays,
+    // so for such queries we omit the STATS command entirely, the same way we do when a match phrase is required
+    (shouldUseMatchPhrase || isTimeseriesSourceQuery(editorQuery))
+  );
+
+  let omittedStatsCommand = false;
 
   const commandsUpToOperatingStatsCommand = editorQuery.ast.commands.slice(
     0,
@@ -449,17 +500,17 @@ function handleStatsByColumnLeafOperation(
     ) {
       const hasAggregates = cmd.args.some(isFunctionExpression);
 
-      if (hasAggregates && !shouldUseMatchPhrase) {
-        // when we aren't using match phrase replace
-        // replace occurrence of stats command with inline stats
+      if (hasAggregates && supportsInlineStatsCommand) {
         mutate.generic.commands.insert(
           cascadeOperationQuery.ast,
           synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false }),
           0
         );
       } else {
-        // if the stats command does not have any aggregates, or will require a match phrase query,
-        // then we omit the STATS command to simply apply the where command to the query
+        // if the stats command does not have any aggregates, requires a match phrase query,
+        // or sources its data from a TS command, then we skip the inline stats treatment,
+        // omit the STATS command to simply apply the where command to the query
+        omittedStatsCommand = true;
         continue;
       }
     } else {
@@ -471,28 +522,43 @@ function handleStatsByColumnLeafOperation(
     }
   }
 
+  const columnFilterExpression =
+    operationValue === GROUP_NOT_SET_VALUE
+      ? Builder.expression.func.postfix('IS NULL', [
+          Builder.identifier({ name: operationColumnName }),
+        ])
+      : shouldUseMatchPhrase
+      ? Builder.expression.func.call('match_phrase', [
+          Builder.identifier({ name: operationColumnName }),
+          Builder.expression.literal.string(operationValue as string),
+        ])
+      : Builder.expression.func.binary('==', [
+          Builder.expression.column({
+            args: [Builder.identifier({ name: operationColumnName })],
+          }),
+          Number.isNaN(Number(operationValue)) ||
+          dataViewFields.getByName(operationColumnName)?.type === 'string'
+            ? Builder.expression.literal.string(operationValue as string)
+            : Builder.expression.literal.integer(Number(operationValue)),
+        ]);
+
   // build a where command with match expressions for the selected column
   const filterCommand = Builder.command({
     name: 'where',
     args: [
-      operationValue === GROUP_NOT_SET_VALUE
-        ? Builder.expression.func.postfix('IS NULL', [
-            Builder.identifier({ name: operationColumnName }),
-          ])
-        : shouldUseMatchPhrase
-        ? Builder.expression.func.call('match_phrase', [
-            Builder.identifier({ name: operationColumnName }),
-            Builder.expression.literal.string(operationValue as string),
-          ])
-        : Builder.expression.func.binary('==', [
-            Builder.expression.column({
-              args: [Builder.identifier({ name: operationColumnName })],
-            }),
-            Number.isNaN(Number(operationValue)) ||
-            dataViewFields.getByName(operationColumnName)?.type === 'string'
-              ? Builder.expression.literal.string(operationValue as string)
-              : Builder.expression.literal.integer(Number(operationValue)),
-          ]),
+      combineFilterExpressionsWithAnd([
+        columnFilterExpression,
+        // when the inline stats treatment is not applied we remove the stats command pre-existing on the command,
+        // hence we need to compensate by ensuring aggregates derived from functions that act as filters are accounted for
+        ...(omittedStatsCommand
+          ? buildValuesAggregateFilterExpressions({
+              statsSummary: operatingStatsCommandSummary,
+              nodeAggregatedValues,
+              dataViewFields,
+              esqlVariables,
+            })
+          : []),
+      ]),
     ],
   });
 
@@ -506,13 +572,16 @@ function handleStatsByColumnLeafOperation(
 /**
  * Handles the stats command for a leaf operation that contains a categorize function by modifying the query and adding necessary commands.
  */
-function handleStatsByCategorizeLeafOperation(
-  editorQuery: EsqlQuery,
-  operatingStatsCommandIndex: number,
-  categorizeCommandNode: FieldSummary,
-  esqlVariables: ESQLControlVariable[] | undefined,
-  nodePathMap: Record<string, string>
-): AggregateQuery {
+function handleStatsByCategorizeLeafOperation({
+  editorQuery,
+  operatingStatsCommandIndex,
+  operatingStatsCommandSummary,
+  categorizeCommandNode,
+  dataViewFields,
+  esqlVariables,
+  nodePathMap,
+  nodeAggregatedValues,
+}: StatsByCategorizeLeafOperationArgs): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
 
@@ -534,8 +603,9 @@ function handleStatsByCategorizeLeafOperation(
   });
 
   // we select the first argument because that's the field being categorized
-  // {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize | here}
+  // {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize here}
   const categorizedFieldDefinition = getFieldDefinitionFromArg(categorizeCommandNode.arg);
+
   const categorizedField = (
     categorizedFieldDefinition as ESQLFunction<'variadic-call', 'categorize'>
   ).args[0];
@@ -569,25 +639,37 @@ function handleStatsByCategorizeLeafOperation(
 
   const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.field)];
 
+  const categorizeMatchExpression = Builder.expression.func.call('match', [
+    // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
+    Builder.identifier({
+      name: categorizedFieldName.replace(/\.keyword\b/i, ''),
+    }),
+    Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
+    Builder.expression.map({
+      entries: [
+        Builder.expression.entry(
+          'auto_generate_synonyms_phrase_query',
+          Builder.expression.literal.boolean(false)
+        ),
+        Builder.expression.entry('fuzziness', Builder.expression.literal.integer(0)),
+        Builder.expression.entry('operator', Builder.expression.literal.string('AND')),
+      ],
+    }),
+  ]);
+
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
     name: 'where',
     args: [
-      Builder.expression.func.call('match', [
-        // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
-        Builder.identifier({
-          name: categorizedFieldName.replace(/\.keyword\b/i, ''),
-        }),
-        Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
-        Builder.expression.map({
-          entries: [
-            Builder.expression.entry(
-              'auto_generate_synonyms_phrase_query',
-              Builder.expression.literal.boolean(false)
-            ),
-            Builder.expression.entry('fuzziness', Builder.expression.literal.integer(0)),
-            Builder.expression.entry('operator', Builder.expression.literal.string('AND')),
-          ],
+      combineFilterExpressionsWithAnd([
+        categorizeMatchExpression,
+        // the resulting leaf operation query for a categorize function omits the STATS command,
+        // hence we need to account for the scenario where filtering aggregate function might have been applied.
+        ...buildValuesAggregateFilterExpressions({
+          statsSummary: operatingStatsCommandSummary,
+          nodeAggregatedValues,
+          dataViewFields,
+          esqlVariables,
         }),
       ]),
     ],
