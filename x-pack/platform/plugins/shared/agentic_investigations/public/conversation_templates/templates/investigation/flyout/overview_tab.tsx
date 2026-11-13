@@ -12,9 +12,9 @@ import {
   OverviewTab,
   conversationToInvestigation,
   type OverviewSections,
-  type ImpactEntityTarget,
   type OverviewSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
+import type { ImpactEntityTarget } from '@kbn/agentic-investigations-impact';
 import type { Investigation } from '../../../../../common';
 import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
