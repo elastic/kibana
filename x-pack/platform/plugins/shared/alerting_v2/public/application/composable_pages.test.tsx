@@ -79,6 +79,10 @@ jest.mock('../pages/execution_history_page/execution_history_page', () => ({
   ExecutionHistoryPage: () => <div data-test-subj="executionHistoryPage">history</div>,
 }));
 
+jest.mock('../pages/imports_page/imports_page', () => ({
+  ImportsPage: () => <div data-test-subj="importsPage">imports</div>,
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -151,6 +155,7 @@ describe('composable pages', () => {
   let AlertingV2EpisodesPage: React.ComponentType<InternalPageProps>;
   let AlertingV2ActionPoliciesPage: React.ComponentType<InternalPageProps>;
   let AlertingV2ExecutionHistoryPage: React.ComponentType<InternalPageProps>;
+  let AlertingV2ImportsPage: React.ComponentType<InternalPageProps>;
 
   beforeAll(async () => {
     const mod = await import('./composable_pages');
@@ -159,6 +164,7 @@ describe('composable pages', () => {
     AlertingV2EpisodesPage = mod.AlertingV2EpisodesPage;
     AlertingV2ActionPoliciesPage = mod.AlertingV2ActionPoliciesPage;
     AlertingV2ExecutionHistoryPage = mod.AlertingV2ExecutionHistoryPage;
+    AlertingV2ImportsPage = mod.AlertingV2ImportsPage;
   });
 
   describe('AlertingV2RulesPage', () => {
@@ -335,6 +341,19 @@ describe('composable pages', () => {
         <AlertingV2ExecutionHistoryPage {...defaultProps()} />
       );
       expect(screen.getByTestId('executionHistoryPage')).toBeInTheDocument();
+    });
+
+    it('ImportsPage renders when parent route matches', () => {
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+      expect(screen.getByTestId('importsPage')).toBeInTheDocument();
+    });
+
+    it('ImportsPage redirects away when experimental features are disabled', () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      mockAlertingV2ExperimentalFeaturesEnabled = true;
     });
   });
 });

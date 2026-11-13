@@ -7,6 +7,8 @@
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getAlertingClassicNavSection } from './get_alerting_classic_nav_section';
 
 const V2_CAPABILITIES = {
@@ -25,11 +27,19 @@ const setCapabilities = (core: CoreStart, capabilities: Record<string, unknown>)
 
 const setSettings = (
   core: CoreStart,
-  { v2Enabled, showV1Table }: { v2Enabled: boolean; showV1Table: boolean }
+  {
+    v2Enabled,
+    showV1Table,
+    experimentalFeatures = false,
+  }: { v2Enabled: boolean; showV1Table: boolean; experimentalFeatures?: boolean }
 ) => {
+  const spaceSettings: Record<string, boolean> = {
+    [ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID]: showV1Table,
+    [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: experimentalFeatures,
+  };
   core.settings.globalClient.isDeclared = () => true;
   core.settings.globalClient.get = <T>(_key: string) => v2Enabled as T;
-  core.settings.client.get = <T>(_key: string) => showV1Table as T;
+  core.settings.client.get = <T>(key: string) => (spaceSettings[key] ?? false) as T;
 };
 
 const getEntries = (core: CoreStart) =>
@@ -122,5 +132,23 @@ describe('getAlertingClassicNavSection', () => {
     setCapabilities(core, V2_CAPABILITIES);
 
     expect(getEntries(core).map(({ label }) => label)).not.toContain('Alerts (Classic)');
+  });
+
+  it('lists Import alerts last when experimental features are on', () => {
+    setSettings(core, { v2Enabled: true, showV1Table: false, experimentalFeatures: true });
+    setCapabilities(core, V2_CAPABILITIES);
+
+    expect(getEntries(core).at(-1)).toEqual({
+      label: 'Import alerts',
+      app: 'observabilityAlerting',
+      path: '/imports',
+    });
+  });
+
+  it('hides Import alerts from users without v2 rules read', () => {
+    setSettings(core, { v2Enabled: true, showV1Table: false, experimentalFeatures: true });
+    setCapabilities(core, { alerting_v2_alerts: { read: true } });
+
+    expect(getEntries(core).map(({ label }) => label)).not.toContain('Import alerts');
   });
 });

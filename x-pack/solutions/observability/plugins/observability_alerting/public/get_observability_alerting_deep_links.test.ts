@@ -10,6 +10,7 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
@@ -18,6 +19,7 @@ import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_
 
 const SEARCHABLE: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
 const ALERTS: AppDeepLinkLocations[] = [...SEARCHABLE, 'classicSideNav'];
+const SIDE_NAV_ONLY: AppDeepLinkLocations[] = ['projectSideNav'];
 
 const capabilities = (features: Record<string, Record<string, boolean>>): Capabilities =>
   ({
@@ -36,7 +38,7 @@ const findDeepLink = (caps: Capabilities | undefined, id: string) =>
   getObservabilityAlertingDeepLinks(caps).find((link) => link.id === id);
 
 describe('getObservabilityAlertingDeepLinks', () => {
-  it('marks every surface searchable when capabilities are omitted', () => {
+  it('marks every surface searchable, except Import alerts, when capabilities are omitted', () => {
     expect(visibleInById()).toEqual({
       [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: SEARCHABLE,
@@ -44,6 +46,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: SEARCHABLE,
+      [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: SIDE_NAV_ONLY,
     });
   });
 
@@ -55,6 +58,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
     });
   });
 
@@ -67,10 +71,11 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
       });
     });
 
-    it('offers Rules V2 and Rule Library but not Rules V1 to a v2 rules-read user', () => {
+    it('offers Rules V2, Rule Library and the Import alerts side nav entry to a v2 rules-read user', () => {
       expect(visibleInById(capabilities({ alerting_v2_rules: { read: true } }))).toEqual({
         [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
@@ -78,10 +83,11 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: SIDE_NAV_ONLY,
       });
     });
 
-    it('offers Rules V2 and Rule Library when the user has v2 rules write', () => {
+    it('offers Rules V2, Rule Library and the Import alerts side nav entry with v2 rules write', () => {
       expect(visibleInById(capabilities({ alerting_v2_rules: { all: true, read: true } }))).toEqual(
         {
           [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: [],
@@ -90,6 +96,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
           [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
           [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
           [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+          [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: SIDE_NAV_ONLY,
         }
       );
     });
@@ -117,6 +124,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
       });
     });
 
@@ -128,6 +136,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
       });
     });
 
@@ -139,6 +148,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
       });
     });
   });

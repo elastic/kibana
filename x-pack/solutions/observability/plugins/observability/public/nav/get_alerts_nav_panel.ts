@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   hasAlertingV2Capability,
   isAlertingV2Enabled,
+  isAlertingV2ImportsAvailable,
   shouldShowV1ObservabilityAlertsTable,
 } from '@kbn/alerting-v2-utils';
 import {
@@ -158,24 +159,25 @@ const getNotificationsSection = (core: CoreStart): PanelOpenerChildDefinition[] 
 };
 
 const getOperationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
-  if (!hasAlertingV2Capability(core, 'executionHistory')) {
-    return [];
+  const children: PanelOpenerChildDefinition[] = [];
+
+  if (hasAlertingV2Capability(core, 'executionHistory')) {
+    children.push({
+      link: obsAlertingLink('execution-history'),
+      badgeType: 'new',
+    });
   }
 
-  return maybeSection(
-    [
-      {
-        link: obsAlertingLink('execution-history'),
-        badgeType: 'new',
-      },
-    ],
-    {
-      title: i18n.translate('xpack.observability.nav.operations', {
-        defaultMessage: 'Operations',
-      }),
-      breadcrumbStatus: 'hidden',
-    }
-  );
+  if (isAlertingV2ImportsAvailable(core)) {
+    children.push({ link: obsAlertingLink('imports') });
+  }
+
+  return maybeSection(children, {
+    title: i18n.translate('xpack.observability.nav.operations', {
+      defaultMessage: 'Operations',
+    }),
+    breadcrumbStatus: 'hidden',
+  });
 };
 
 /**

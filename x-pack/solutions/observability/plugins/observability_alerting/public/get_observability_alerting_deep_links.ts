@@ -20,6 +20,8 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_IMPORTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
@@ -84,7 +86,8 @@ const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
       return v1;
     }
     case OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID:
-    case OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID: {
+    case OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID:
+    case OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID: {
       const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
       return v2;
     }
@@ -116,7 +119,7 @@ const getAccessibleVisibleIn = (
     return [...SEARCHABLE_VISIBLE_IN, 'classicSideNav'];
   }
 
-  return SEARCHABLE_VISIBLE_IN;
+  return link.visibleIn ?? SEARCHABLE_VISIBLE_IN;
 };
 
 /**
@@ -179,6 +182,17 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
       path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
       visibleIn: SEARCHABLE_VISIBLE_IN,
       keywords: ['alerting', 'history', 'executions'],
+    },
+    {
+      // Global search cannot read the experimental features setting that gates this page, so it
+      // is only offered in the side nav, which checks the setting.
+      id: OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID,
+      title: i18n.translate('xpack.observabilityAlerting.deepLinks.importsTitle', {
+        defaultMessage: 'Import alerts',
+      }),
+      path: OBSERVABILITY_ALERTING_IMPORTS_PATH,
+      visibleIn: PROJECT_SIDE_NAV_ONLY_VISIBLE_IN,
+      keywords: ['alerting', 'import', 'webhook'],
     },
   ];
 
