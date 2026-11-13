@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { omitBy, isUndefined } from 'lodash';
 import {
@@ -18,13 +18,12 @@ import {
   EuiLoadingLogo,
   EuiSpacer,
 } from '@elastic/eui';
-import { getEnvironmentLabel } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getDateISORange } from '@kbn/timerange';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/sessions';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
@@ -42,7 +41,12 @@ import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { SessionsFilters } from './components/sessions_filters';
 import { SessionsKpis } from './components/sessions_kpis';
-import { EnableSessionsPrompt } from './components/sessions_status_prompts';
+import {
+  EnableSessionsPrompt,
+  SessionsFreshness,
+  SessionsRetentionCallout,
+  SessionsStatusCallout,
+} from './components/sessions_status_prompts';
 import {
   SESSIONS_HIDDEN_BY_DEFAULT,
   SESSIONS_OPTIONAL_COLUMNS,
@@ -61,6 +65,9 @@ const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.sessions.hiddenColum
 const LOADING_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.loadingMessage', {
   defaultMessage: 'Loading sessions',
 });
+
+/** How often the status is checked again while sessions rebuild in the background. */
+const STATUS_REFRESH_MS = 30_000;
 
 const statusLoadingPrompt = (
   <EuiEmptyPrompt
@@ -112,6 +119,31 @@ const noSessionsPrompt = (
   />
 );
 
+/** The sessions index is being built after setup or an update, so it may still be empty. */
+const rebuildingPrompt = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceSessionsRebuilding"
+    icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+    titleSize="s"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.sessions.rebuildingTitle', {
+          defaultMessage: 'Building sessions',
+        })}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.digitalExperience.sessions.rebuildingDescription', {
+          defaultMessage:
+            'Sessions are being built from up to {days} days of data. This can take a while; they show up here as they are built.',
+          values: { days: SESSIONS_LOOKBACK_DAYS },
+        })}
+      </p>
+    }
+  />
+);
+
 const NoMatchingSessionsPrompt = ({ onClear }: { onClear: () => void }) => (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsNoMatches"
@@ -141,7 +173,18 @@ const NoMatchingSessionsPrompt = ({ onClear }: { onClear: () => void }) => (
   />
 );
 
-function SessionsList({ serviceName, source }: { serviceName: string; source: ApplicationSource }) {
+function SessionsList({
+  serviceName,
+  source,
+  status,
+  onRefreshStatus,
+}: {
+  serviceName: string;
+  source: ApplicationSource;
+  status: SessionsStatus;
+  onRefreshStatus: () => void;
+}) {
+  const { rebuilding } = status;
   const apiClient = useApiClient();
   const formatters = useFormatters();
   const { timeRange } = useTimeRange();
@@ -158,19 +201,20 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
     hiddenByDefault: SESSIONS_HIDDEN_BY_DEFAULT,
   });
 
-  // A new time range lists other sessions, so a later page may not exist anymore: start over. Not
-  // when Back or Forward (a POP) restores a range, as that URL's page goes with it.
+  // A new time range or environment lists other sessions, so a later page may not exist anymore:
+  // start over. Not when Back or Forward (a POP) restores them, as that URL's page goes with it.
   const history = useHistory();
-  const previousTimeRange = useRef(timeRange);
+  const previousScope = useRef({ timeRange, environment });
   useEffect(() => {
-    if (previousTimeRange.current === timeRange) {
+    const previous = previousScope.current;
+    if (previous.timeRange === timeRange && previous.environment === environment) {
       return;
     }
-    previousTimeRange.current = timeRange;
+    previousScope.current = { timeRange, environment };
     if (state.page > 0 && history.action !== 'POP') {
       update({ page: undefined }, true);
     }
-  }, [timeRange, state.page, update, history]);
+  }, [timeRange, environment, state.page, update, history]);
 
   const {
     value: response,
@@ -199,7 +243,9 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
                 os: state.os,
                 country: state.country,
                 entryPage: state.entryPage,
-                hasErrors: state.hasErrors ? 'true' : undefined,
+                environment,
+                withJsErrors: state.withJsErrors ? 'true' : undefined,
+                withFailedRequests: state.withFailedRequests ? 'true' : undefined,
                 minDurationMs: duration?.minDurationMs,
                 maxDurationMs: duration?.maxDurationMs,
                 sortField: state.sortField,
@@ -213,8 +259,24 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
         }
       );
     },
-    [apiClient, serviceName, timeRange, state],
+    [apiClient, serviceName, timeRange, environment, state],
     { unsetValueOnError: true }
+  );
+  // Refresh checks the status too, so a finished rebuild shows without reloading.
+  const refreshAll = useCallback(() => {
+    refresh();
+    onRefreshStatus();
+  }, [refresh, onRefreshStatus]);
+  // A finished rebuild has sessions the list was fetched without.
+  const wasRebuilding = useRef(rebuilding);
+  useEffect(() => {
+    if (wasRebuilding.current && !rebuilding) {
+      refresh();
+    }
+    wasRebuilding.current = rebuilding;
+  }, [rebuilding, refresh]);
+  const rangeStart = Date.parse(
+    getDateISORange({ from: timeRange.rangeFrom, to: timeRange.rangeTo }).startDate
   );
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
@@ -240,31 +302,24 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
     if (hasActiveFilters) {
       return <NoMatchingSessionsPrompt onClear={clearFilters} />;
     }
-    return noSessionsPrompt;
+    return rebuilding ? rebuildingPrompt : noSessionsPrompt;
   };
 
   return (
     <>
-      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <TimeRangePicker onRefresh={refresh} />
+          <SessionsFreshness status={status} formatters={formatters} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <TimeRangePicker onRefresh={refreshAll} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {environment && (
-        <>
-          <KbnInfoCallout
-            data-test-subj="digitalExperienceSessionsAllEnvironments"
-            size="s"
-            title={i18n.translate('xpack.digitalExperience.sessions.allEnvironmentsTitle', {
-              defaultMessage:
-                'Sessions include every environment: the {environment} filter does not apply to them yet.',
-              values: { environment: getEnvironmentLabel(environment) },
-            })}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <SessionsRetentionCallout
+        retentionDays={response?.retentionDays ?? status.retentionDays}
+        rangeStart={rangeStart}
+      />
       <SessionsKpis kpis={response?.kpis} isLoading={isLoading} formatters={formatters} />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
@@ -272,7 +327,8 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
           <SessionsFilters
             state={state}
             facets={response?.facets}
-            sessionsWithErrors={response?.kpis.sessionsWithErrors}
+            sessionsWithJsErrors={response?.kpis.sessionsWithJsErrors}
+            sessionsWithFailedRequests={response?.kpis.sessionsWithFailedRequests}
             hasActiveFilters={hasActiveFilters}
             isLoading={loading}
             formatters={formatters}
@@ -306,7 +362,10 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
   );
 }
 
-/** The Sessions tab of an application: sets sessions up when they aren't yet, and lists them. */
+/**
+ * The Sessions tab of an application: sets sessions up when they aren't yet, flags when they need
+ * attention, and lists the application's sessions.
+ */
 export function SessionsTab({
   serviceName,
   source,
@@ -317,6 +376,17 @@ export function SessionsTab({
   const { application } = useKibanaServices();
   const canManage = canManageSessions(application.capabilities);
   const { status, error, refresh, enable, enabling, enableError } = useSessionsStatus();
+  const enableProps = { canManage, onEnable: enable, enabling, enableError };
+
+  // A rebuild finishes in the background, so check back until it does.
+  const rebuilding = status?.rebuilding === true;
+  useEffect(() => {
+    if (!rebuilding) {
+      return;
+    }
+    const interval = setInterval(refresh, STATUS_REFRESH_MS);
+    return () => clearInterval(interval);
+  }, [rebuilding, refresh]);
 
   // A failed background refresh keeps the last status.
   if (error && !status) {
@@ -337,20 +407,19 @@ export function SessionsTab({
     return statusLoadingPrompt;
   }
   if (!status.installed) {
-    return (
-      <EnableSessionsPrompt
-        canManage={canManage}
-        onEnable={enable}
-        enabling={enabling}
-        enableError={enableError}
-      />
-    );
+    return <EnableSessionsPrompt {...enableProps} />;
   }
   return (
     <>
       {/* Clears the page header's tabs. */}
       <EuiSpacer size="m" />
-      <SessionsList serviceName={serviceName} source={source} />
+      <SessionsStatusCallout status={status} {...enableProps} />
+      <SessionsList
+        serviceName={serviceName}
+        source={source}
+        status={status}
+        onRefreshStatus={refresh}
+      />
     </>
   );
 }

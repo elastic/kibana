@@ -98,6 +98,7 @@ export const SESSIONS_EBT_ELEMENTS = {
   SESSION_RETRY: 'sessionRetry',
   SESSION_LINK: 'sessionLink',
   ERRORS_FILTER: 'sessionsErrorsFilter',
+  FAILED_REQUESTS_FILTER: 'sessionsFailedRequestsFilter',
   DURATION_FILTER: 'sessionsDurationFilter',
   BROWSER_FILTER: 'sessionsBrowserFilter',
   OS_FILTER: 'sessionsOsFilter',

@@ -16,9 +16,9 @@ import { DIGITAL_EXPERIENCE_DISABLED_TAGS, DIGITAL_EXPERIENCE_TAGS } from '../..
 globalTeardownHook(
   'Delete the mock OTel RUM data and sessions',
   { tag: DIGITAL_EXPERIENCE_TAGS },
-  async ({ esClient }) => {
+  async ({ esClient, kbnClient }) => {
     await deleteOtelRumData(esClient);
-    await deleteSessionsData(esClient);
+    await deleteSessionsData(esClient, kbnClient);
   }
 );
 

@@ -25,6 +25,7 @@ import { CORE_WEB_VITALS } from '../../../../common/core_web_vitals';
 import type { SessionTimelineEvent, SessionTimelineEventKind } from '../../../../common/sessions';
 import { WebVitalBadge, WebVitalBadges } from '../../../components/web_vital_badges';
 import type { Formatters } from '../../../hooks/use_formatters';
+import { UNKNOWN_PAGE } from '../../../labels';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import type { PageVisitEvents } from '../utils/session_timeline';
 import { formatOffset } from '../utils/session_timeline';
@@ -157,106 +158,112 @@ export function PageJourney({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="digitalExperiencePageJourney">
-      {visits.map(({ visit, events }, index) => (
-        <EuiFlexItem key={`${visit.startTime}-${index}`}>
-          <div ref={(element) => registerVisit(index, element)} css={visitCss}>
-            <EuiPanel
-              hasBorder
-              paddingSize="m"
-              data-test-subj="digitalExperiencePageVisit"
-              css={css({ borderLeft: `${euiTheme.size.xs} solid ${colors.get(visit.page)}` })}
-            >
-              <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false} wrap>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{index + 1}</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem css={css({ minWidth: 0 })}>
-                  <EuiTitle size="xxs">
-                    <h3
-                      className="eui-textTruncate"
-                      title={visit.url ?? visit.page}
-                      css={css({ fontFamily: euiTheme.font.familyCode })}
-                    >
-                      {visit.page}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate(
-                      'xpack.digitalExperience.sessionDetail.journey.visitTimeLabel',
-                      {
-                        defaultMessage: '{startTime} for {duration}',
-                        values: {
-                          startTime: formatDate(visit.startTime),
-                          duration: formatSessionDuration(visit.durationMs),
-                        },
-                      }
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow" iconType="clock">
-                    {i18n.translate('xpack.digitalExperience.sessionDetail.journey.shareLabel', {
-                      defaultMessage: '{share} of the session',
-                      values: {
-                        share: formatPercent(visit.durationMs / Math.max(1, sessionDurationMs)),
-                      },
-                    })}
-                  </EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow" iconType="clickLeft">
-                    {i18n.translate('xpack.digitalExperience.sessionDetail.journey.clicksLabel', {
-                      defaultMessage: '{count, plural, one {# click} other {# clicks}}',
-                      values: { count: visit.clickCount },
-                    })}
-                  </EuiBadge>
-                </EuiFlexItem>
-                {visit.errorCount > 0 && (
+      {visits.map(({ visit, events }, index) => {
+        const page = visit.page ?? UNKNOWN_PAGE;
+        return (
+          <EuiFlexItem key={`${visit.startTime}-${index}`}>
+            <div ref={(element) => registerVisit(index, element)} css={visitCss}>
+              <EuiPanel
+                hasBorder
+                paddingSize="m"
+                data-test-subj="digitalExperiencePageVisit"
+                css={css({ borderLeft: `${euiTheme.size.xs} solid ${colors.get(page)}` })}
+              >
+                <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false} wrap>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="danger" iconType="error">
-                      {i18n.translate('xpack.digitalExperience.sessionDetail.journey.errorsLabel', {
-                        defaultMessage: '{count, plural, one {# error} other {# errors}}',
-                        values: { count: visit.errorCount },
+                    <EuiBadge color="hollow">{index + 1}</EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem css={css({ minWidth: 0 })}>
+                    <EuiTitle size="xxs">
+                      <h3
+                        className="eui-textTruncate"
+                        title={visit.url ?? page}
+                        css={css({ fontFamily: euiTheme.font.familyCode })}
+                      >
+                        {page}
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate(
+                        'xpack.digitalExperience.sessionDetail.journey.visitTimeLabel',
+                        {
+                          defaultMessage: '{startTime} for {duration}',
+                          values: {
+                            startTime: formatDate(visit.startTime),
+                            duration: formatSessionDuration(visit.durationMs),
+                          },
+                        }
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" iconType="clock">
+                      {i18n.translate('xpack.digitalExperience.sessionDetail.journey.shareLabel', {
+                        defaultMessage: '{share} of the session',
+                        values: {
+                          share: formatPercent(visit.durationMs / Math.max(1, sessionDurationMs)),
+                        },
                       })}
                     </EuiBadge>
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" iconType="clickLeft">
+                      {i18n.translate('xpack.digitalExperience.sessionDetail.journey.clicksLabel', {
+                        defaultMessage: '{count, plural, one {# click} other {# clicks}}',
+                        values: { count: visit.clickCount },
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  {visit.errorCount > 0 && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="danger" iconType="error">
+                        {i18n.translate(
+                          'xpack.digitalExperience.sessionDetail.journey.errorsLabel',
+                          {
+                            defaultMessage: '{count, plural, one {# error} other {# errors}}',
+                            values: { count: visit.errorCount },
+                          }
+                        )}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <WebVitalBadges webVitals={visit.webVitals} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                {events.length > 0 && (
+                  <>
+                    <EuiSpacer size="m" />
+                    {/* Focusable, so keyboard users can scroll a long list of events too. */}
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="xs"
+                      css={eventsCss}
+                      tabIndex={0}
+                      role="region"
+                      aria-label={i18n.translate(
+                        'xpack.digitalExperience.sessionDetail.journey.eventsLabel',
+                        { defaultMessage: 'Events on {page}', values: { page } }
+                      )}
+                    >
+                      {events.map((event, eventIndex) => (
+                        <EuiFlexItem key={eventIndex} grow={false}>
+                          <EventRow event={event} />
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </>
                 )}
-                <EuiFlexItem grow={false}>
-                  <WebVitalBadges webVitals={visit.webVitals} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {events.length > 0 && (
-                <>
-                  <EuiSpacer size="m" />
-                  {/* Focusable, so keyboard users can scroll a long list of events too. */}
-                  <EuiFlexGroup
-                    direction="column"
-                    gutterSize="xs"
-                    css={eventsCss}
-                    tabIndex={0}
-                    role="region"
-                    aria-label={i18n.translate(
-                      'xpack.digitalExperience.sessionDetail.journey.eventsLabel',
-                      { defaultMessage: 'Events on {page}', values: { page: visit.page } }
-                    )}
-                  >
-                    {events.map((event, eventIndex) => (
-                      <EuiFlexItem key={eventIndex} grow={false}>
-                        <EventRow event={event} />
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                </>
-              )}
-            </EuiPanel>
-          </div>
-        </EuiFlexItem>
-      ))}
+              </EuiPanel>
+            </div>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 }

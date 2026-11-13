@@ -19,19 +19,27 @@ import {
   SESSIONS_LIST_MAX_PAGE,
   SESSIONS_LIST_MAX_PER_PAGE,
   SESSIONS_LIST_MAX_SEARCH_LENGTH,
+  SESSIONS_MAX_ID_LENGTH,
   SESSIONS_SOURCE_INDICES,
   SESSION_SORT_FIELDS,
   type SessionDetailResponse,
   type SessionListResponse,
   type SessionsStatus,
 } from '../../../common/sessions';
-import { getSession } from '../../sessions/get_session';
-import { listSessions } from '../../sessions/list_sessions';
-import { enableSessions, getSessionsStatus } from '../../sessions/sessions_setup';
-import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
-import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
+import {
+  NO_ENCRYPTION_KEY_MESSAGE,
+  SessionsEnableError,
+  enableSessions,
+  type SessionsEnableStep,
+} from '../../services/sessions/enable_sessions';
+import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
+import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
+import { getSessionsStatus } from '../../services/sessions/sessions_status';
+import { MAX_ENVIRONMENT_LENGTH } from '../../lib/constants';
 import { describeError } from '../../lib/helpers/errors';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
+import { getSession } from './get_session';
+import { listSessions } from './list_sessions';
 
 export const SESSIONS_STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
 export const SESSIONS_ENABLE_ENDPOINT = 'POST /internal/digital_experience/sessions/enable';
@@ -59,6 +67,30 @@ const ENABLE_FAILED_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.a
   defaultMessage: 'Could not enable sessions. Check the Kibana server logs for details.',
 });
 
+const NO_TASK_MANAGER_MESSAGE = i18n.translate(
+  'xpack.digitalExperience.sessions.api.noTaskManager',
+  {
+    defaultMessage:
+      'Sessions need the Task Manager plugin, which builds the session summaries in the background.',
+  }
+);
+
+const ENABLE_STEP_FAILED_MESSAGES: Record<SessionsEnableStep, string> = {
+  credentials: NO_ENCRYPTION_KEY_MESSAGE,
+  template: i18n.translate('xpack.digitalExperience.sessions.api.enableFailed.template', {
+    defaultMessage:
+      'Could not enable sessions: putting the sessions index template failed. Check the Kibana server logs for details, then try again.',
+  }),
+  index: i18n.translate('xpack.digitalExperience.sessions.api.enableFailed.index', {
+    defaultMessage:
+      'Could not enable sessions: creating the sessions index failed. Check the Kibana server logs for details, then try again.',
+  }),
+  task: i18n.translate('xpack.digitalExperience.sessions.api.enableFailed.task', {
+    defaultMessage:
+      'Could not enable sessions: scheduling the summaries task with an API key on your behalf failed. Check the Kibana server logs for details, then try again.',
+  }),
+};
+
 const sessionNotFoundMessage = (sessionId: string) =>
   i18n.translate('xpack.digitalExperience.sessions.api.sessionNotFound', {
     defaultMessage: 'Session [{sessionId}] not found',
@@ -77,7 +109,10 @@ const toReadError = (error: unknown, logger: Logger, what: string) => {
   return internal(LOAD_FAILED_MESSAGE);
 };
 
-/** Maps an enable failure to a client error; the setup errors explain themselves. */
+/**
+ * Maps an enable failure to a client error: the privilege checks explain themselves, and a failed
+ * step is named, with its details in the logs.
+ */
 const toEnableError = (error: unknown, logger: Logger) => {
   if (error instanceof SessionsPrivilegesError) {
     return forbidden(error.message, { missingPrivileges: error.missingPrivileges });
@@ -89,18 +124,38 @@ const toEnableError = (error: unknown, logger: Logger) => {
     });
   }
   logger.error(`Could not enable sessions: ${describeError(error)}`);
+  if (error instanceof SessionsEnableError) {
+    return internal(ENABLE_STEP_FAILED_MESSAGES[error.step], { step: error.step });
+  }
   return internal(ENABLE_FAILED_MESSAGE);
 };
 
 const statusRoute = createDigitalExperienceServerRoute({
   endpoint: SESSIONS_STATUS_ENDPOINT,
   options: { access: 'internal' },
-  security: { authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] } },
-  handler: async ({ context, logger }): Promise<SessionsStatus> => {
-    const { elasticsearch } = await context.core;
+  security: {
+    authz: {
+      requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read],
+      // Only users who can set sessions up also see who did, whose access the task runs with.
+      extendedPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
+    },
+  },
+  handler: async ({
+    request,
+    sessionsSettings,
+    getSessionsServices,
+    logger,
+  }): Promise<SessionsStatus> => {
+    const canManage =
+      request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
+    const { taskManager } = await getSessionsServices();
     try {
-      // Index metadata only; no session data is read with the internal user.
-      return await getSessionsStatus(elasticsearch.client.asInternalUser);
+      // The task and its state only; no session data is read with the internal user.
+      return await getSessionsStatus({
+        taskManager,
+        settings: sessionsSettings,
+        withDetails: canManage,
+      });
     } catch (error) {
       logger.error(`Could not read the sessions status: ${describeError(error)}`);
       throw internal(LOAD_FAILED_MESSAGE);
@@ -114,8 +169,19 @@ const enableRoute = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
   },
-  handler: async ({ context, isServerless, logger }): Promise<SessionsStatus> => {
+  handler: async ({
+    context,
+    request,
+    sessionsSettings,
+    getSessionsServices,
+    isServerless,
+    logger,
+  }): Promise<SessionsStatus> => {
     const { elasticsearch, security } = await context.core;
+    const { taskManager, canEncrypt } = await getSessionsServices();
+    if (!taskManager) {
+      throw internal(NO_TASK_MANAGER_MESSAGE);
+    }
     const enabledBy = security.authc.getCurrentUser()?.username ?? null;
     const audit = (outcome: 'success' | 'failure', error?: Error) =>
       security.audit.logger.log({
@@ -133,7 +199,15 @@ const enableRoute = createDigitalExperienceServerRoute({
       });
 
     try {
-      await enableSessions({ esClient: elasticsearch.client, isServerless });
+      await enableSessions({
+        esClient: elasticsearch.client,
+        request,
+        taskManager,
+        canEncrypt,
+        settings: sessionsSettings,
+        isServerless,
+        logger,
+      });
     } catch (error) {
       audit('failure', error);
       throw toEnableError(error, logger);
@@ -141,7 +215,12 @@ const enableRoute = createDigitalExperienceServerRoute({
     audit('success');
     logger.info(`Sessions enabled by [${enabledBy}]`);
     try {
-      return await getSessionsStatus(elasticsearch.client.asInternalUser);
+      // Only users who can set sessions up get here.
+      return await getSessionsStatus({
+        taskManager,
+        settings: sessionsSettings,
+        withDetails: true,
+      });
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');
     }
@@ -169,7 +248,10 @@ const listRoute = createDigitalExperienceServerRoute({
           os: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
           country: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
           entryPage: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
-          hasErrors: z.stringbool().optional(),
+          // All environments when left out, as in the applications list.
+          environment: z.string().min(1).max(MAX_ENVIRONMENT_LENGTH).optional(),
+          withJsErrors: z.stringbool().optional(),
+          withFailedRequests: z.stringbool().optional(),
           minDurationMs: durationMs(),
           maxDurationMs: durationMs(),
           sortField: z.enum(SESSION_SORT_FIELDS).default('start_time'),
@@ -197,14 +279,23 @@ const listRoute = createDigitalExperienceServerRoute({
   ),
   handler: async ({ context, params, logger }): Promise<SessionListResponse> => {
     const { elasticsearch } = await context.core;
-    const { browser, os, country, entryPage, hasErrors, minDurationMs, maxDurationMs, ...query } =
-      params.query;
+    const {
+      browser,
+      os,
+      country,
+      entryPage,
+      withJsErrors,
+      withFailedRequests,
+      minDurationMs,
+      maxDurationMs,
+      ...query
+    } = params.query;
     try {
       return await listSessions(elasticsearch.client.asCurrentUser, {
         ...query,
         serviceName: params.path.serviceName,
         facets: { browsers: browser, os, countries: country, entryPages: entryPage },
-        filters: { hasErrors, minDurationMs, maxDurationMs },
+        filters: { withJsErrors, withFailedRequests, minDurationMs, maxDurationMs },
       });
     } catch (error) {
       throw toReadError(error, logger, 'the sessions list');
@@ -218,7 +309,10 @@ const detailRoute = createDigitalExperienceServerRoute({
   security: { authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] } },
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: serviceName(), sessionId: z.string().min(1).max(256) }),
+      path: z.object({
+        serviceName: serviceName(),
+        sessionId: z.string().min(1).max(SESSIONS_MAX_ID_LENGTH),
+      }),
     })
   ),
   handler: async ({ context, params, logger }): Promise<SessionDetailResponse> => {

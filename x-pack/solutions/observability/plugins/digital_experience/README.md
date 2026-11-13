@@ -40,10 +40,11 @@ privileges like the app.
 
 - **Summary:** applications, sessions, page loads, JS errors per page load, failed HTTP requests and
   the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
-  source; the search narrows only the table. The sessions are the total of the EDOT Browser
-  applications, which only the sessions index counts, so it shows a dash while they are read from
-  the raw events (sessions not set up, a range past their lookback, no access to them) and for Classic
-  RUM, which has no sessions.
+  source; the search narrows only the table. The sessions are the total of the sessions that started
+  in the range, over the EDOT Browser applications, which only the sessions index counts, so it shows
+  a dash while they are read from the raw events (sessions not set up, a range past their lookback,
+  no access to them) and for Classic RUM, which has no sessions. It adds up to the same total as the
+  sessions in the chart.
 - **Partial data:** when one source fails to load, a warning above the summary names it.
 - **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
   is kept in local storage; drag over it to zoom into that range. The sessions are counted only
@@ -63,24 +64,29 @@ privileges like the app.
 **Where the EDOT Browser rows come from:** the sessions index (see [Sessions](#sessions)) when it can
 answer, which takes one cheap search over session summaries instead of aggregating every raw event,
 and the raw OTel events otherwise. The response has the same shape either way, and Classic RUM
-always reads its own indices. The sessions are read when all of these hold, which is checked on every
-request with the index's metadata, read as the internal user:
+always reads its own indices. The sessions are read when all of these hold, which is checked with the
+summaries task's state, read by Kibana and shared by the requests of the next 30 seconds, so a
+change of their status shows up within that time:
 
-- sessions are set up;
+- sessions are set up, the task's last run succeeded, it isn't lagging, and it has caught up since
+  sessions were enabled, so a build in progress is never shown as lower numbers;
 - the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
 - the user can read `digital-experience-sessions-*`, otherwise the raw events are read quietly;
 - the sessions hold at least one application, so applications that send no `session.id`, which the
-  sessions skip, still appear when no application sends one.
+  summaries skip, still appear when no application sends one.
 
 A failing sessions search falls back to the raw events too, with a warning in the server log. The
 counts (page loads, JS errors, HTTP requests, failed requests, web vital samples and their ratings)
-are the sums of what each session counted with the list's own filters, so both sources count the same
-events of a session, and the environments are the sessions'. What differs when the sessions are read:
+are the sums of what each session counted with the list's own event names, so both sources count the
+same events of a session, and the environments are the sessions'. What differs when the sessions are
+read:
 
-- **Time range:** a session that overlaps the range counts in full, with its events outside the range,
-  as in the Sessions tab. The page loads chart puts a session's page loads at its start, in the same
-  buckets, and leaves out the sessions that started before the range, so its shape differs and its
-  total is a little lower than the table's.
+- **Time range:** a session that overlaps the range counts in full in the page loads, errors and
+  requests, with its events outside the range, as its events can't be told apart. The sessions are
+  those that started in the range, in the stat, the table and the chart alike, so they agree, where
+  the Sessions tab counts every session that overlaps the range. The page loads chart puts a
+  session's page loads at its start, in the same buckets, and leaves out the sessions that started
+  before the range, so its shape differs and its total is a little lower than the table's.
 - **Percentiles:** the p75 of a web vital is the p75 of the sessions' own p75s, as the summaries keep
   no samples. It is exact when a session has at most one sample of that vital, and higher than the
   p75 of the samples otherwise: on 3 hours of the synthtrace EDOT Browser data, with about seven
@@ -88,10 +94,10 @@ events of a session, and the environments are the sessions'. What differs when t
   higher for CLS. The sample counts and the good, needs improvement and poor shares are sums over the
   sessions, so they only differ by the events below. The Overview, whose figures need samples, always
   reads the raw events.
-- **Freshness:** the sessions are as fresh as what builds them.
+- **Freshness:** the sessions are about `frequency` and the sync delay (a minute) behind the events.
 - **Access:** the sessions hold what the user who enabled them could read, not what the current user
   can read in the raw indices (see the security note under [Sessions](#sessions)).
-- **Events without `session.id`:** the sessions skip them, so they are not counted. In the
+- **Events without `session.id`:** the summaries skip them, so they are not counted. In the
   synthtrace data that is 8.7% of the HTTP requests and 3.8% of the exceptions (every page load and
   web vital carried one), so the JS errors and HTTP requests of the list are that much lower than
   from the raw events. An application that sends none is missing while others have sessions.
@@ -155,7 +161,7 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   Sessions list's **Entry page** facet is its page filter; it is a different question from the
   Overview's page (a session's first page against the URL of a page load), so it stays separate.
 - **Fields:** the raw documents have no field per dimension, so browser, OS, device and country read
-  the alternatives the sessions read (`SESSION_ATTRIBUTE_FIELDS` in
+  the alternatives the session summaries read (`SESSION_ATTRIBUTE_FIELDS` in
   `common/session_attribute_fields.ts`, shared by both) and take the first non-empty one, with a
   runtime field. The page is `attributes.url.full`.
 - **Scope:** browser, OS, device, country, app version and the KQL query narrow every panel of the Overview: the
@@ -182,97 +188,198 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 [Sessions](#sessions)).
 
 - **Status:** before sessions are set up, the tab shows a **Set up sessions** button to users with the
-  manage sessions privilege and tells everyone else whom to ask.
-- **KPIs:** sessions, sessions with errors, median duration, pages per session and bounce rate, over
-  the listed sessions, so they follow the search and filters.
-- **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **Has errors**,
-  duration ranges, and browser, OS, country and entry page facets with their counts.
+  **Set up session summaries** privilege and tells everyone else whom to ask. A failed setup names the
+  step that failed. Once set up, a callout flags an API key that no longer works (with a **Set up
+  sessions again** button for those users), a failing
+  run of the summaries task with its error, or summaries that are behind. A line next to the time
+  picker says up to when events are in. While the sessions index is first built, an empty list says
+  sessions are being built.
+- **KPIs:** sessions, sessions with JS errors, sessions with failed requests, median duration, page
+  views per session and bounce rate, over the listed sessions, so they follow the search and filters.
+- **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **JS errors**,
+  **Failed requests**, duration ranges, and browser, OS, country and entry page facets with their
+  counts. The environment picked in the app filters the sessions too.
 - **Table:** start time, user with browser and OS, journey (entry → number of pages in between →
-  exit), duration, pages, clicks and errors; sortable and paged on the server. A column selector,
-  kept in local storage, adds location, entry and exit page, device, session ID, last activity,
-  events, bounced, and LCP / INP / CLS colored by rating. The search, filters, sort and page are
-  kept in the URL, and links to a session carry them so its **Sessions** breadcrumb leads back to
-  the same list.
+  exit), duration, page views, clicks, JS errors and failed requests; sortable and paged on the
+  server. A column selector, kept in local storage, adds environment, location, entry and exit page,
+  device, session ID, last activity, events, bounced, and LCP / INP / CLS colored by rating. The
+  search, filters, sort and page are kept in the URL, and links to a session carry them so its
+  **Sessions** breadcrumb leads back to the same list. **Page views** count page loads and in-app
+  navigations, unlike the applications list's page loads, and say so on hover.
 - **Empty states:** with no sessions, how they get there; with none matching, a button to clear the
-  filters.
+  filters. A time range that starts before the 30 days sessions are kept says so.
 
 ### Session (`/{serviceName}/sessions/{sessionId}`)
 
-- **Summary:** duration, page views, clicks and errors; when, who, browser and OS, location, entry and
-  exit pages; and the session's Core Web Vitals.
+- **Summary:** duration, page views, page loads, clicks, JS errors and failed requests; when, who,
+  environment, browser and OS, location, entry and exit pages; and the session's Core Web Vitals.
 - **Timeline:** one bar for the session, with a segment per page visit as wide as the time spent on
   the page and a marker per error. Selecting a segment scrolls to that visit.
 - **Page journey:** a card per page visit with its time, share of the session, clicks, errors and web
   vitals, and its page views, clicks, errors and web vitals in order. Spans and logs are left out.
+  Every page view opens a visit, so loading the same URL again is a visit of its own with the web
+  vitals it measured, and the visits add up to the summary's `page_view_count`.
 - **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
 
 ## Sessions
 
-Sessions are summarized from the EDOT Browser data in `traces-*.otel-*,logs-*.otel-*` into
-`digital-experience-sessions-<version>`, one document per `service.name` + `session.id`: start/end
-time and duration, page views with entry/exit page and journey, click and error counts, p75 Core Web
-Vitals, and user, browser, OS and geo attributes. The Sessions tab, the session detail and the
-applications list read that index.
+A Task Manager task (`digital_experience:sessions-summaries`, every minute) summarizes EDOT Browser
+sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-<version>` with
+ES|QL, one document per `service.name` + `session.id`: start/end time and duration, page views with
+entry/exit page and journey, page loads, clicks, JS errors, HTTP requests and failed requests, p75
+Core Web Vitals with their samples by rating, and environment, user, browser, OS and geo attributes.
+Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and it
+skips events with an empty `service.name` or `session.id`.
 
-**Nothing in this plugin builds the summaries at the moment.** The Elasticsearch transform that did,
-with its destination pipeline and the health task and stored API key that kept it current, is
-removed, and a Task Manager task is to replace it. Enabling sessions only creates the index and its
-template, so the index stays empty until then. Unreleased setups that enabled sessions with the
-transform keep their transforms and index: delete the `digital-experience-sessions-*` transforms by
-hand.
+Each run:
 
-The document also holds what the applications list counts, so the list can read it instead of the
-raw events: the environment, `page_load_count` (`browser.navigation_timing` events),
-`js_error_count` (`exception` events), the HTTP request and failed request counts, and per Core Web
-Vital its samples and how many are good, need improvement or poor (`web_vital_samples`, which add up
-across sessions, unlike the p75). `page_view_count` and `error_count` keep the Sessions tab's
-definitions: they include soft navigations and `event.outcome: failure`, which the list leaves out.
-The mappings are in `server/sessions/sessions_spec.ts`.
+1. Takes the events since its checkpoint, up to a minute ago (the sync delay), in windows.
+2. Counts the sessions with an event in the window, and fetches their ids with one query per
+   100,000 of them. ES|QL returns at most 10,000 rows, but a row can hold any number of ids, so
+   each query aggregates the window once and returns the ids in 4,096 buckets of the SHA-256 of
+   their `session.id`, a row each; more sessions take ranges of that hash. Querying ranges of 5,000
+   instead made 28 queries for 137,000 sessions, 13s of Elasticsearch time against 0.6s. Hashing
+   keeps the ranges even whatever the ids look like (EDOT iOS writes them in uppercase). The task
+   relies on that default of
+   `esql.query.result_truncation_max_size`: a cluster that lowers it below 10,000 truncates the
+   responses without saying so, and the sessions past the cap are missing.
+3. Rebuilds the sessions, 5,000 at a time, from their events of the last 24 hours, the longest a
+   session lasts, with their ids as a literal `IN` list, which Elasticsearch looks up in the index:
+   an `IN (subquery)` scanned the whole lookback. One query aggregates per session and page URL,
+   then per session, for the counts, times, latest attributes, web vitals and journey. It keeps the
+   raw attribute fields of each group's latest event and cleans them into attributes once per
+   session, after the aggregation: cleaning every event's fields first took about 40% of the
+   query, and the same 5,000 sessions now take about 22% less time with identical rows.
+4. Turns the rows into summaries 500 at a time, letting the event loop run between chunks, as a
+   whole batch at once blocked a small Kibana for about half a second. Writes one summary per
+   session, keyed by a hash of `service.name` + `session.id`, and moves the checkpoint past the
+   window.
 
-A session bounced when it has exactly one page view. Sessions without a captured page view (only
-clicks or errors) aren't bounces, and the bounce rate is over sessions with at least one page view.
+A run starts no window after 45 seconds, and runs again right away while it is behind. On the first
+run after sessions are enabled, it starts from 30 days ago, at the start of that day in UTC, so it
+catches up window by window, oldest first, and status reports `rebuilding` until it has. A window
+grows while it holds few sessions and halves when it holds more than 320,000, so a run always
+finishes the windows it starts. Failures are kept in the task's state, not thrown, so the next run
+retries from the same checkpoint, and status shows the error. A summary Elasticsearch refuses
+outright, such as one with a value longer than its mapping takes, is left out with a warning
+instead, so a single session can't hold up the window and everything behind it. Events that arrive later than the sync
+delay after their `@timestamp` are only summarized when another event of their session arrives.
+
+Readers don't depend on how summaries are built. A new `SESSIONS_VERSION` makes the task rebuild
+every summary into the new index. The task stands down instead when its state comes from a newer
+`SESSIONS_VERSION`, after a rollback or while a rolling upgrade still has older nodes: that version
+owns the index and its template, so rebuilding as this one would overwrite them and restart the
+backfill.
+
+The journey lists distinct pages in first-view order (revisits are not repeated), from the first 30
+page-view URLs, and the exit page is the one viewed last. Each attribute group (environment, user,
+user agent, geo) comes from its own latest event that carries any of its fields, and each attribute
+from the first of its fields that has a value (`SESSION_ATTRIBUTE_FIELDS`). A session bounced when
+it never left the page it landed on, counted from the distinct pages it saw rather than its page
+views, as a browser can report more than one of those for the same page. Sessions without a captured
+page (only clicks or errors) aren't bounces, and the bounce rate is over sessions with at least one
+page view. `page_view_count` counts
+page loads and in-app navigations (`documentLoad`, `browser.navigation`); `page_load_count`,
+`js_error_count` and the HTTP request counts use the applications list's own definitions. The
+summary also keeps a lowercased `search` field (`wildcard`) of the session id, user, browser, OS,
+country, city and pages, which the list's search matches anywhere in.
+
+`has_replay` is mapped but never written yet. Session replay records one `elastic.replay.start`
+per recorded segment to `logs-rum.replay.otel-*`, which the task already reads as part of
+`logs-*.otel-*`, so it can set the field without a `SESSIONS_VERSION` bump and the rebuild one
+would cost. It is absent rather than `false` until something sets it, and readers expose it as
+`hasReplay`.
 
 ### Enabling sessions
 
 Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,
 which requires the `manage_digital_experience_sessions` API privilege. Only the **Sessions → Set up
-and update session summaries** sub-feature privilege grants it. It is not part of **All**, as
-sessions are set up with the user's data access for every reader, and it can only be granted in all
-spaces, as the index serves every space. The index template and the index are created **with the
-enabling user's credentials**, never as the Kibana internal user. The user also needs these
-Elasticsearch privileges; when any is missing the request fails with a 403 listing them, before
-anything is written:
+session summaries** sub-feature privilege grants it. It is not part of **All**, as setting sessions up
+runs the task with the user's data access for every reader, and it can only be granted in all
+spaces, as the task and index serve every space. The user also needs these Elasticsearch privileges;
+when any is missing the request fails with a 403 listing them, before anything is written:
 
-- Cluster: `manage_index_templates`, and on serverless also `read_security` (the predefined `admin`
-  role has it; custom roles may not)
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
-- `digital-experience-sessions-*`: `read`, `index`, `create_index`, `delete`, `delete_index`
+- `digital-experience-sessions-*`: `read`, `view_index_metadata`, `index`, `create_index`
+- On serverless, the cluster privilege `read_security` (the predefined `admin` role has it; custom
+  roles may not)
 
 The read on `traces-*.otel-*` and `logs-*.otel-*` must also be unrestricted: no document- or
-field-level security. Otherwise the summaries would only hold that user's slice of the data, so
-every other application's sessions (or fields) would silently be missing for everyone.
-`has_privileges` doesn't report these restrictions, so enabling also reads the user's index
-privileges and fails with a 403 naming the affected patterns. It reads them with
-`GET _security/user/_privileges`, which serverless only allows operator users; for everyone else
-there it reads the user's roles with `_security/_authenticate` and the Query Role API, hence
-`read_security`. A pattern is refused when a role's read that could apply to it has a `query` or
-field restriction, unless another role provably reads all of it: one role with unrestricted read on
-a pattern is enough, even if another role filters it. Roles that grant read through a regular
-expression, like serverless `editor`, pass when unfiltered, as `has_privileges` already checked the
-read, but never lift another role's filter. Elasticsearch can't report the privileges of an API key
-with its own role descriptors, nor of any API key on serverless, so such keys are refused too;
-enable sessions as a user.
+field-level security. Otherwise the task would only see that user's slice of the data, so every
+other application's sessions (or fields) would silently stop updating for everyone. `has_privileges`
+doesn't report these restrictions, so enabling also reads the user's index privileges and fails with
+a 403 naming the affected patterns. It reads them with `GET _security/user/_privileges`, which
+serverless only allows operator users; for everyone else there it reads the user's roles with
+`_security/_authenticate` and the Query Role API, hence `read_security`. A pattern is refused when a
+role's read that could apply to it has a `query` or field restriction, unless another role provably
+reads all of it: one role with unrestricted read on a pattern is enough, even if another role
+filters it. Roles that grant read through a regular expression, like serverless `editor`, pass when
+unfiltered, as `has_privileges` already checked the read, but never lift another role's filter.
+Elasticsearch can't report the privileges of an API key with its own role descriptors, nor of any API
+key on serverless, so such keys are refused too; enable sessions as a user.
 
-Every enable writes a `digital_experience_sessions_enable` audit event, successful or not. Enabling
-again is safe: it puts the template again and keeps the index. The index template is marked
-`managed`, so Index Management warns before anyone edits or deletes it there. There is no disable
-action in Digital Experience.
+After the checks, enabling runs these steps, and a failure answers 500 naming the step
+(`attributes.data.step`) with its details in the server log:
 
-The status route, `GET /internal/digital_experience/sessions/status`, reports whether sessions are
-set up: whether the index exists. It reads index metadata as the internal user.
+1. `credentials`: Kibana can store an API key, so `xpack.encryptedSavedObjects.encryptionKey` is set.
+2. `template`: puts the `digital-experience-sessions` index template, as Kibana's internal user.
+3. `index`: creates the sessions index, as the user.
+4. `task`: schedules the summaries task with an API key that Task Manager grants on the user's behalf,
+   and runs it right away.
 
-> **Security note:** the sessions index is meant to hold summaries of everything the enabling user
-> could read in the source indices, regardless of the document- and field-level security or index
+Every step is safe to repeat, and the steps before a failed one are harmless on their own, so
+enabling again retries from where it failed. Enabling again also gives the task a new key, granted
+on behalf of whoever enabled it last, and Task Manager invalidates the previous one. The task keeps
+its state, so its summaries are kept. The task never runs as the Kibana internal user: only the
+index template is the internal user's. Each enable writes a `digital_experience_sessions_enable`
+audit event, successful or not. Status reports who last enabled sessions, and why the last run
+failed, only to users who can set them up: Elasticsearch errors can name that user, their roles
+and indices, so the others get a generic message. A run in progress doesn't stop enabling again
+from replacing the key. Without Task Manager, sessions can't be enabled.
+
+Like any granted key, the task's key has the access the user had when it was granted, and no
+expiration. Anyone with `manage_api_key` or `manage_security`, or the enabling user with
+`manage_own_api_key`, can invalidate it. The task's runs then fail with a 401, which status reports
+as `apiKeyInvalid`. A user with the privilege then sets sessions up again from the Sessions tab,
+which grants a new key on their behalf. Nothing re-grants it by itself: the task reads what the user
+who set sessions up can read, so only an explicit action changes whose data the summaries hold.
+
+There is no disable action. Removing the task (`digital_experience:sessions-summaries`) with the
+Task Manager API stops it and invalidates its key.
+
+### Scaling and freshness
+
+Each run rebuilds every session that received new events from its whole history, so cost grows with
+active sessions × events per session. On the same data at about 3M sessions a day, a prototype of
+the same loop used 2 to 3 times less Elasticsearch CPU than the transform: about 23,000 changed
+sessions in 2.1 to 2.7 seconds a run against 7.2 to 9.6, and a 625,000 session backfill in 99 to
+126 seconds against 295. One setting trades cost for freshness, another speed for resources:
+
+```yaml
+xpack.digital_experience.sessions:
+  frequency: 1m   # 1s–1h. Longer means fewer rebuilds of each active session: cheaper, but staler.
+  concurrency: 2  # 1–8 summary queries at once. More keeps up with busier sites, for more resources.
+```
+
+- **`frequency`**: an active session is re-read and rewritten once per run. Going from `1m` to
+  `2m`–`5m` cuts the work roughly 2–5× for long sessions, and adds about the same time to the session
+  list's lag. Session detail reads raw events up to the longest a session lasts, so its timeline
+  stays current; its summary figures are as fresh as the last run. A changed `frequency` applies
+  after a restart, from the task's next run once it has caught up.
+- **`concurrency`**: a run rebuilds the changed sessions in queries of 5,000, this many at a time.
+  At 75× the scale of the load tests each query took about 2 seconds, so one at a time needed more
+  than the minute; each one more in flight costs Elasticsearch CPU and about 50 MB of Kibana memory
+  while a run is busy. It applies after a restart, which is also when the task's Task Manager cost
+  is set from it: an ordinary task up to the default, `Large` up to half the maximum and
+  `ExtraLarge` beyond, so a node budgets for the memory the queries actually hold.
+
+Status reports the summaries as lagging when their checkpoint is more than three runs plus the sync
+delay behind, and at least 5 minutes, once they have caught up; the task logs when a run starts
+failing, with its error, and when runs work again. If the task falls behind under peak traffic, it
+lags and then catches up; no data is lost.
+
+> **Security note:** the sessions index contains summaries of everything the enabling user could
+> read in the source indices, regardless of the document- and field-level security or index
 > privileges of the people who later read it. Enable sessions with a user whose source access is
 > appropriate for every reader of `digital-experience-sessions-*`.
 
@@ -285,12 +392,16 @@ readers also need `read` on `digital-experience-sessions-*` (and on the source i
 session detail timeline). Without it they answer 403 naming those privileges; other failures are
 logged and answer 500 without Elasticsearch details:
 
+- `GET /internal/digital_experience/sessions/status`: whether sessions are set up, the task's health,
+  lag and last error, whether it is still building, and how many days sessions are kept.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
-  OS, country, entry page), the `hasErrors` and `minDurationMs` / `maxDurationMs` filters, sorting,
-  pagination, and KPIs. Facets count their values without their own selection; the other filters
-  narrow every count.
+  OS, country, entry page), the `environment`, `withJsErrors`, `withFailedRequests` and
+  `minDurationMs` / `maxDurationMs` filters, sorting, pagination, KPIs, and how many days sessions
+  are kept (`retentionDays`). Facets count their values without their own selection; the other
+  filters narrow every count.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}`: summary,
-  event timeline, per-page journey, and web vitals
+  event timeline, per-page journey, and web vitals. The raw events are read from just before the
+  session's start up to the longest a session lasts, with only the fields the timeline shows.
 
 ## Code layout
 
@@ -298,8 +409,8 @@ logged and answer 500 without Elasticsearch details:
 - `server/routes/applications/`: the list's route, its merge step and one folder per source (`otel/`,
   `classic/`); `server/routes/overview/` is the EDOT Browser Overview's route. Helpers shared across
   features are in `server/lib/` (`helpers/`, and `otel/` for the OTel queries).
-- `server/sessions/`: the sessions index template, setup and status, and the list and detail
-  searches, with their routes in `server/routes/sessions/`.
+- `server/services/sessions/`: the session summaries: the task, its ES|QL queries, the index, status,
+  and enabling, with their routes and readers in `server/routes/sessions/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
   `session_detail/`) with its own components, hooks and utils; what several pages share is in
   `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.

@@ -11,6 +11,7 @@ import type {
   SessionTimelineEvent,
   SessionTimelineEventKind,
 } from '../../../../common/sessions';
+import { UNKNOWN_PAGE } from '../../../labels';
 
 /** Events the journey lists; spans and logs are left to traces and Discover. */
 export const JOURNEY_EVENT_KINDS: readonly SessionTimelineEventKind[] = [
@@ -102,7 +103,7 @@ export const layoutWaterfall = (
       const offsetPercent = percentOf(Number.isFinite(offsetMs) ? offsetMs : 0, totalMs);
       return {
         index,
-        page: visit.page,
+        page: visit.page ?? UNKNOWN_PAGE,
         offsetPercent,
         widthPercent: Math.min(100 - offsetPercent, percentOf(visit.durationMs, totalMs)),
       };
