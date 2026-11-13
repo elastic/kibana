@@ -33,9 +33,14 @@ import { css } from '@emotion/react';
 import type { RangeTypeLens } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
 import { isValidRange } from './ranges';
-import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
+import {
+  FROM_PLACEHOLDER,
+  TO_PLACEHOLDER,
+  TYPING_DEBOUNCE_TIME,
+  isValidRangeBound,
+} from './constants';
 import { LabelInput } from '../shared_components';
-import { isValidNumber } from '../helpers';
+
 import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();
@@ -45,8 +50,8 @@ type LocalRangeType = RangeTypeLens & { id: string };
 const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
   range.label ||
   formatter.convertToText({
-    gte: isValidNumber(range.from) ? range.from : -Infinity,
-    lt: isValidNumber(range.to) ? range.to : Infinity,
+    gte: isValidRangeBound(range.from) ? range.from : -Infinity,
+    lt: isValidRangeBound(range.to) ? range.to : Infinity,
   });
 
 export const RangePopover = ({
@@ -111,7 +116,7 @@ export const RangePopover = ({
               css={css`
                 width: 14ch; // Roughly 10 characters plus extra for the padding
               `}
-              value={isValidNumber(from) ? Number(from) : ''}
+              value={isValidRangeBound(from) ? Number(from) : ''}
               onChange={({ target }) => {
                 const newRange = {
                   ...tempRange,
@@ -144,7 +149,7 @@ export const RangePopover = ({
               css={css`
                 width: 14ch; // Roughly 10 characters plus extra for the padding
               `}
-              value={isValidNumber(to) ? Number(to) : ''}
+              value={isValidRangeBound(to) ? Number(to) : ''}
               inputRef={(node) => {
                 if (toRef && node) {
                   toRef.current = node;
