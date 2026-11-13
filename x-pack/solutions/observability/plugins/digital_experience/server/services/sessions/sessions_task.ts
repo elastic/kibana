@@ -15,6 +15,8 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import {
+  SESSIONS_DEFAULT_CONCURRENCY,
+  SESSIONS_MAX_CONCURRENCY,
   SESSIONS_TASK_ID,
   SESSIONS_TASK_TYPE,
   SESSIONS_VERSION,
@@ -218,6 +220,19 @@ export const withConfiguredInterval = (
     : { state: result.state, schedule: { interval: frequency } };
 
 /**
+ * What a run costs Task Manager, which budgets a node's capacity by it. Each summary query the
+ * task runs at once holds about 50 MB, so the default concurrency is an ordinary task and the
+ * supported maximum is the heaviest a node can claim. A task type's cost is fixed at
+ * registration, so it follows the configured concurrency rather than a single run's.
+ */
+export const taskCostOf = (concurrency: number): TaskCost => {
+  if (concurrency <= SESSIONS_DEFAULT_CONCURRENCY) {
+    return TaskCost.Normal;
+  }
+  return concurrency <= SESSIONS_MAX_CONCURRENCY / 2 ? TaskCost.Large : TaskCost.ExtraLarge;
+};
+
+/**
  * Registers the task that builds the session summaries with ES|QL. It runs with the API key Task
  * Manager granted on behalf of the user who enabled sessions, never as the internal user, so it
  * only summarizes what that user can read. Only the index template is the internal user's.
@@ -240,7 +255,7 @@ export const registerSessionsTask = ({
         'Summarizes the RUM sessions with new events into the Digital Experience sessions index.',
       // A run starts no window after 45s; this only stops one stuck on a query.
       timeout: '5m',
-      cost: TaskCost.Normal,
+      cost: taskCostOf(settings.concurrency),
       stateSchemaByVersion: { 1: { schema: stateSchemaV1, up: (state) => state } },
       createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
         run: async () => {

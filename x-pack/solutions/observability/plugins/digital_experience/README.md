@@ -369,7 +369,9 @@ xpack.digital_experience.sessions:
 - **`concurrency`**: a run rebuilds the changed sessions in queries of 5,000, this many at a time.
   At 75× the scale of the load tests each query took about 2 seconds, so one at a time needed more
   than the minute; each one more in flight costs Elasticsearch CPU and about 50 MB of Kibana memory
-  while a run is busy. It applies after a restart.
+  while a run is busy. It applies after a restart, which is also when the task's Task Manager cost
+  is set from it: an ordinary task up to the default, `Large` up to half the maximum and
+  `ExtraLarge` beyond, so a node budgets for the memory the queries actually hold.
 
 Status reports the summaries as lagging when their checkpoint is more than three runs plus the sync
 delay behind, and at least 5 minutes, once they have caught up; the task logs when a run starts

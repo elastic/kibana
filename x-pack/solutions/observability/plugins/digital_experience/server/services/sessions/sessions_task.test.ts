@@ -27,6 +27,7 @@ import {
   withConfiguredInterval,
   runSessionsTask,
   newerVersionMessage,
+  taskCostOf,
   scheduleSessionsTask,
   type RunSessionsTaskParams,
   type SessionsTaskState,
@@ -398,8 +399,20 @@ describe('registerSessionsTask', () => {
   it('registers a task that a stuck query cannot hold for long', () => {
     const { definition } = setup();
 
-    expect(definition).toEqual(expect.objectContaining({ timeout: '5m', cost: TaskCost.Normal }));
+    // Registered with a concurrency of 3, so it claims more of a node than an ordinary task.
+    expect(definition).toEqual(expect.objectContaining({ timeout: '5m', cost: TaskCost.Large }));
     expect(Object.keys(definition.stateSchemaByVersion ?? {})).toEqual(['1']);
+  });
+
+  it.each([
+    [1, TaskCost.Normal],
+    [2, TaskCost.Normal],
+    [3, TaskCost.Large],
+    [4, TaskCost.Large],
+    [5, TaskCost.ExtraLarge],
+    [8, TaskCost.ExtraLarge],
+  ])('costs Task Manager more as the summary queries run %s at a time', (concurrency, cost) => {
+    expect(taskCostOf(concurrency)).toBe(cost);
   });
 
   it('validates the state of version 1 and keeps it as it is', () => {
