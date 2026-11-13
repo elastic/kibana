@@ -8,6 +8,7 @@
  */
 
 import type { Readable } from 'stream';
+import { sortBy } from 'lodash';
 import { createListStream } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -27,11 +28,7 @@ import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import { sortObjects } from './sort_objects';
 import { SavedObjectsExportError } from './errors';
 import { collectExportedObjects } from './collect_exported_objects';
-import {
-  byIdAscComparator,
-  getPreservedOrderComparator,
-  type SavedObjectComparator,
-} from './utils';
+import { getObjKey } from './utils';
 import { EXPORT_ALL_TYPES_TOKEN } from './constants';
 
 /**
@@ -67,7 +64,7 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
     this.#log.debug(`Initiating export for types: [${options.types}]`);
     const objects = await this.fetchByTypes(options);
-    return this.processObjects(objects, byIdAscComparator, {
+    return this.processObjects(objects, ['id'], {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
       includeNamespaces: options.includeNamespaces,
@@ -82,8 +79,15 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
       throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
     }
     const objects = await this.fetchByObjects(options);
-    const comparator = getPreservedOrderComparator(objects);
-    return this.processObjects(objects, comparator, {
+    const positionByKey = new Map<string, number>();
+    objects.forEach((obj, index) => {
+      const key = getObjKey(obj);
+      if (!positionByKey.has(key)) {
+        positionByKey.set(key, index);
+      }
+    });
+    const byRequestedOrder = (obj: SavedObject) => positionByKey.get(getObjKey(obj)) ?? Infinity;
+    return this.processObjects(objects, [byRequestedOrder, 'id'], {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
       includeNamespaces: options.includeNamespaces,
@@ -94,7 +98,7 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
 
   private async processObjects(
     savedObjects: SavedObject[],
-    sortFunction: SavedObjectComparator,
+    sortIteratees: Array<keyof SavedObject | ((obj: SavedObject) => number)>,
     {
       request,
       excludeExportDetails = false,
@@ -119,8 +123,7 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
       logger: this.#log,
     });
 
-    // sort with the provided sort function then with the default export sorting
-    const exportedObjects = sortObjects(collectedObjects.sort(sortFunction));
+    const exportedObjects = sortObjects(sortBy(collectedObjects, sortIteratees));
 
     // redact attributes that should not be exported
     const redactedObjects = includeNamespaces
@@ -176,12 +179,10 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
       }
     }
 
-    // sorts server-side by _id, since it's only available in fielddata
-    return (
-      hits
-        // exclude the find-specific `score` property from the exported objects
-        .map(({ score, ...obj }) => obj)
-        .sort(byIdAscComparator)
+    // Elasticsearch can't sort on `_id`, so sort in memory
+    return sortBy(
+      hits.map(({ score, ...obj }) => obj),
+      'id'
     );
   }
 }

@@ -1261,6 +1261,52 @@ describe('getSortedObjectsForExport()', () => {
         `);
     });
 
+    test('preserves the order of the requested objects', async () => {
+      const objects = ['C', 'A', 'B'].map((id) => ({ id, type: 'dummy' }));
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: objects.map((obj) => ({ ...obj, attributes: {}, references: [] })),
+      });
+
+      const exportStream = await exporter.exportByObjects({
+        request,
+        objects,
+        excludeExportDetails: true,
+      });
+      const response = await readStreamToCompletion(exportStream);
+
+      expect(response.map((obj) => obj.id)).toEqual(['C', 'A', 'B']);
+    });
+
+    test('appends objects added during the export after the requested ones, sorted by id', async () => {
+      typeRegistry.registerType(
+        createType({
+          name: 'foo',
+          management: {
+            importableAndExportable: true,
+            onExport: (ctx, objs) => [
+              ...objs,
+              { id: 'addedB', type: 'bar', attributes: {}, references: [] },
+              { id: 'addedA', type: 'bar', attributes: {}, references: [] },
+            ],
+          },
+        })
+      );
+      exporter = createExporter();
+      const objects = ['C', 'A'].map((id) => ({ id, type: 'foo' }));
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: objects.map((obj) => ({ ...obj, attributes: {}, references: [] })),
+      });
+
+      const exportStream = await exporter.exportByObjects({
+        request,
+        objects,
+        excludeExportDetails: true,
+      });
+      const response = await readStreamToCompletion(exportStream);
+
+      expect(response.map((obj) => obj.id)).toEqual(['C', 'A', 'addedA', 'addedB']);
+    });
+
     test('throws when `bulkGet` returns any errored object', async () => {
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
