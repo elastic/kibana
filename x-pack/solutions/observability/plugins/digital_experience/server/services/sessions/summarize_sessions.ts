@@ -12,6 +12,7 @@ import { chunk } from 'lodash';
 import {
   SESSIONS_INDEX,
   SESSIONS_LOOKBACK_DAYS,
+  SESSIONS_MAX_ID_LENGTH,
   SESSIONS_MAX_SESSION_HOURS,
   SESSIONS_SYNC_DELAY_SECONDS,
 } from '../../../common/sessions';
@@ -182,7 +183,12 @@ const changedSessionIds = async (
   for (const range of hashRanges(Math.ceil(changedSessions / IDS_PER_QUERY))) {
     const rows = await runEsql(esClient, changedSessionIdsQuery(window, range), signal);
     // `concat`, as spreading 100,000 ids into `push` can overflow the call stack.
-    ids = ids.concat(...rows.map((row) => stringsOf(row[SESSION_IDS_COLUMN])));
+    ids = ids.concat(
+      ...rows.map((row) =>
+        // A longer id could be summarized but never opened, as the detail route refuses it.
+        stringsOf(row[SESSION_IDS_COLUMN]).filter(({ length }) => length <= SESSIONS_MAX_ID_LENGTH)
+      )
+    );
   }
   return ids;
 };

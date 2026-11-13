@@ -8,6 +8,8 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SESSIONS_INDEX_PATTERN } from '../../../common/sessions';
+import { TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
+import { BROWSER_SDK_LANGUAGE } from '../../../common/otel_data';
 import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../lib/otel/source_fields';
 import {
   SESSION_TIMELINE_SIZE,
@@ -240,6 +242,8 @@ describe('getSession', () => {
             filter: [
               { term: { [SOURCE_SESSION_ID_FIELD]: 'abc' } },
               { term: { [SOURCE_SERVICE_NAME_FIELD]: 'web' } },
+              // Browser events only, so a backend sharing the service name stays out.
+              { term: { [TELEMETRY_SDK_LANGUAGE]: BROWSER_SDK_LANGUAGE } },
               // From just before the summary starts to the longest a session lasts, so events
               // newer than the summary still show.
               {

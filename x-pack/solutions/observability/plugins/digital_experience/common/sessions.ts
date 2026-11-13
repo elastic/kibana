@@ -33,6 +33,11 @@ export const SESSIONS_SYNC_DELAY_SECONDS = 60;
 /** Sessions are built from, and kept for, this many days of events. */
 export const SESSIONS_LOOKBACK_DAYS = 30;
 /**
+ * Longest `session.id` that is summarized. The detail route takes ids up to this, so a longer one
+ * would be listed and then fail to open; it also bounds what a summary query inlines.
+ */
+export const SESSIONS_MAX_ID_LENGTH = 256;
+/**
  * The longest session: EDOT Browser ends one after 4 hours by default and 24 hours at most, so a
  * changed session is rebuilt from this far back.
  */

@@ -154,15 +154,21 @@ export function SessionsStatusCallout({
             defaultMessage: 'Sessions are not being updated',
           })}
           text={
-            // Only users who may see Elasticsearch details are told why; the rest get the logs.
+            // The message is filled in only for users who may see Elasticsearch details. The
+            // others are pointed at someone who can, not at logs they usually cannot read.
             status.lastError?.message
               ? i18n.translate('xpack.digitalExperience.sessions.status.degradedReason', {
                   defaultMessage: 'The task that builds sessions failed: {error}',
                   values: { error: status.lastError.message },
                 })
-              : i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
+              : canManage
+              ? i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
                   defaultMessage:
                     'The task that builds sessions failed, so new sessions are missing. Check the Kibana server logs.',
+                })
+              : i18n.translate('xpack.digitalExperience.sessions.status.degradedAskAdmin', {
+                  defaultMessage:
+                    'The task that builds sessions failed, so new sessions are missing. An administrator with the Set up session summaries privilege can see why.',
                 })
           }
         />

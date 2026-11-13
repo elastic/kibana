@@ -10,6 +10,7 @@ import {
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
   OTEL_EVENT_NAME,
+  TELEMETRY_SDK_LANGUAGE,
   URL_FULL,
 } from '@kbn/apm-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -17,6 +18,7 @@ import { dateRangeQuery, termQuery } from '@kbn/es-query';
 import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vitals';
 import {
   BROWSER_CSS_SELECTOR,
+  BROWSER_SDK_LANGUAGE,
   CLICK_EVENTS,
   EVENT_EXCEPTION,
   EVENT_WEB_VITAL,
@@ -323,6 +325,9 @@ export const getSession = async (
         filter: [
           ...termQuery(SOURCE_SESSION_ID_FIELD, sessionId),
           ...termQuery(SOURCE_SERVICE_NAME_FIELD, serviceName),
+          // Browser SDKs only, as the summary counts: a backend sharing the service name and
+          // passing the session id along would otherwise appear in the timeline.
+          ...termQuery(TELEMETRY_SDK_LANGUAGE, BROWSER_SDK_LANGUAGE),
           ...timelineTimeRange(startMs),
         ],
       },

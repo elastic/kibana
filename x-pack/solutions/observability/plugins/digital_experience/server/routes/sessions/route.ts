@@ -19,6 +19,7 @@ import {
   SESSIONS_LIST_MAX_PAGE,
   SESSIONS_LIST_MAX_PER_PAGE,
   SESSIONS_LIST_MAX_SEARCH_LENGTH,
+  SESSIONS_MAX_ID_LENGTH,
   SESSIONS_SOURCE_INDICES,
   SESSION_SORT_FIELDS,
   type SessionDetailResponse,
@@ -308,7 +309,10 @@ const detailRoute = createDigitalExperienceServerRoute({
   security: { authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] } },
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: serviceName(), sessionId: z.string().min(1).max(256) }),
+      path: z.object({
+        serviceName: serviceName(),
+        sessionId: z.string().min(1).max(SESSIONS_MAX_ID_LENGTH),
+      }),
     })
   ),
   handler: async ({ context, params, logger }): Promise<SessionDetailResponse> => {

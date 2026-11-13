@@ -100,10 +100,11 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
         js_error_count: numberOr(row.js_error_count, 0),
         http_request_count: numberOr(row.http_request_count, 0),
         http_failed_request_count: numberOr(row.http_failed_request_count, 0),
-        // Bounced when the visit never left the page it landed on. Counted from the pages seen,
-        // not the page views, as a browser can report several for one page. A session with no
+        // Bounced when the visit never left the page it landed on: the pages it saw, not the
+        // page views, which a browser can report several of for one page. The journey is capped
+        // at the first URLs, so the exit page, which is not, has the last word. A session with no
         // captured page isn't a bounce: there was none to leave.
-        bounced: journey.length === 1,
+        bounced: journey.length === 1 && exitPage === entryPage,
         entry_page: entryPage,
         exit_page: exitPage,
         journey,
