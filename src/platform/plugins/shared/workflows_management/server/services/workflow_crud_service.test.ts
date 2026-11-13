@@ -4728,6 +4728,10 @@ describe('workflow page lifecycle', () => {
     return stored;
   };
 
+  const pageTriggerDefinition = {
+    triggers: [{ type: 'page', title: 'Report' }],
+    steps: [],
+  } as unknown as WorkflowProperties['definition'];
   const noPageYaml = pageYaml.replace('  - type: page\n    title: Report', '  - type: manual');
 
   const setup = (depsOverrides: Partial<WorkflowCrudDeps> = {}) => {
@@ -4838,7 +4842,14 @@ describe('workflow page lifecycle', () => {
     client.search.mockResolvedValue({
       timed_out: false,
       _shards: { failed: 0 },
-      hits: { hits: [occSearchHit('wf-1', { created_at: '2024-01-01T00:00:00.000Z' })] },
+      hits: {
+        hits: [
+          occSearchHit('wf-1', {
+            created_at: '2024-01-01T00:00:00.000Z',
+            definition: pageTriggerDefinition,
+          }),
+        ],
+      },
     });
 
     await service.updateWorkflow('wf-1', { tags: ['t'] } as any, 'default', request);
@@ -4890,7 +4901,10 @@ describe('workflow page lifecycle', () => {
   describe('retires dropped pages before the write', () => {
     const storeLive = (client: ReturnType<typeof makeStorageClient>, overrides = {}) => {
       const stored = storeWrites(client);
-      stored.set('wf-1', makeSource({ yaml: pageYaml, ...overrides }));
+      stored.set(
+        'wf-1',
+        makeSource({ yaml: pageYaml, definition: pageTriggerDefinition, ...overrides })
+      );
       return stored;
     };
 
@@ -4958,6 +4972,25 @@ describe('workflow page lifecycle', () => {
         expect.objectContaining({ workflowId: 'wf-1', spaceId: 'default' })
       );
       expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+    });
+
+    it('skips the page work when neither definition has a page trigger', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client, { yaml: noPageYaml, definition: null });
+
+      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request);
+
+      expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
+      expect(pagesService.syncWorkflowPages).not.toHaveBeenCalled();
+    });
+
+    it('retires the pages kept by an invalid stored workflow', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client, { definition: null, valid: false });
+
+      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request);
+
+      expect(pagesService.retireRemovedPages).toHaveBeenCalled();
     });
 
     it('retires every old page when an import revives a soft-deleted workflow', async () => {

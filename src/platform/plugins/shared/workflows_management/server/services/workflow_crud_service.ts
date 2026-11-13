@@ -26,6 +26,7 @@ import {
   type CreateWorkflowCommand,
   type EsWorkflow,
   getWorkflowAccessDecisions,
+  isPageTrigger,
   NonTerminalExecutionStatuses,
   storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
@@ -157,6 +158,9 @@ export interface BulkCreateWorkflowsResult {
 type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
   workflowData: WorkflowProperties;
 };
+
+const hasPageTrigger = (definition: WorkflowYaml | null | undefined): boolean =>
+  Boolean(definition?.triggers.some(isPageTrigger));
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
@@ -735,7 +739,10 @@ export class WorkflowCrudService {
       logger: this.deps.logger,
     });
 
-    await this.syncWorkflowPages([id], workflowData.spaceId);
+    await this.syncWorkflowPages(
+      [{ id, definition: workflowData.definition }],
+      workflowData.spaceId
+    );
 
     return transformStorageDocumentToWorkflowDto(id, workflowData);
   }
@@ -940,7 +947,10 @@ export class WorkflowCrudService {
     }
 
     await this.syncWorkflowPages(
-      successfullyWritten.map((vw) => vw.id),
+      successfullyWritten.map(({ id, workflowData }) => ({
+        id,
+        definition: workflowData.definition,
+      })),
       spaceId
     );
 
@@ -1078,7 +1088,7 @@ export class WorkflowCrudService {
       shouldUpdateScheduler,
     });
 
-    await this.syncWorkflowPages([id], finalData.spaceId);
+    await this.syncWorkflowPages([{ id, definition: finalData.definition }], finalData.spaceId);
 
     return {
       response: {
@@ -1345,9 +1355,17 @@ export class WorkflowCrudService {
    * shortcut: a save that lands between this read and the sync can still lose its page until its
    * next save; a version guard on the sync closes that if it shows up.
    */
-  private async syncWorkflowPages(ids: string[], spaceId: string): Promise<void> {
+  /**
+   * Syncs the pages of the written workflows that have a page trigger. The others have no pages
+   * to sync: a save retires the pages it drops before its write.
+   */
+  private async syncWorkflowPages(
+    written: Array<{ id: string; definition: WorkflowProperties['definition'] }>,
+    spaceId: string
+  ): Promise<void> {
     const { pagesSystemClient } = this.deps;
-    if (!pagesSystemClient) return;
+    const ids = written.filter(({ definition }) => hasPageTrigger(definition)).map(({ id }) => id);
+    if (!pagesSystemClient || ids.length === 0) return;
     let workflows: WorkflowDetailDto[];
     try {
       // A workflow deleted or moved since the write is missing: the delete or the move handles it.
@@ -1384,11 +1402,14 @@ export class WorkflowCrudService {
   private async retireDroppedPages(
     workflowId: string,
     spaceId: string,
-    existing: Pick<WorkflowProperties, 'deleted_at'>,
+    existing: Pick<WorkflowProperties, 'deleted_at' | 'definition' | 'valid'>,
     next: Partial<Pick<WorkflowProperties, 'definition' | 'valid'>>
   ): Promise<void> {
     const { pagesSystemClient } = this.deps;
-    if (!pagesSystemClient) return;
+    // A valid stored definition without a page trigger has no pages to retire.
+    const mayHavePages =
+      Boolean(existing.deleted_at) || !existing.valid || hasPageTrigger(existing.definition);
+    if (!pagesSystemClient || !mayHavePages) return;
     if (existing.deleted_at) {
       await pagesSystemClient.retireWorkflowPages({ workflowIds: [workflowId], spaceId });
     } else if (next.valid) {
