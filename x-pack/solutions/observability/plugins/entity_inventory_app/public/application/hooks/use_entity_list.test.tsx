@@ -22,15 +22,20 @@ const createClientMock = (
   getEntities: jest.fn(client.getEntities),
 });
 
-const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
-  renderHook(() => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }), {
-    wrapper: ({ children }) => (
+const createWrapper =
+  (inventoryApi: EntityInventoryApiClient) =>
+  ({ children }: { children: React.ReactNode }) =>
+    (
       <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
         <EntityInventorySearchProvider entityCategory="hosts">
           {children}
         </EntityInventorySearchProvider>
       </KibanaContextProvider>
-    ),
+    );
+
+const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
+  renderHook(() => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }), {
+    wrapper: createWrapper(inventoryApi),
   });
 
 describe('useEntityList', () => {
@@ -99,5 +104,42 @@ describe('useEntityList', () => {
     act(() => result.current.result.refresh());
 
     await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+  });
+
+  it('reports loading from its first render, before the request has produced anything', () => {
+    const inventoryApi = createClientMock();
+    // Never settles, so every render of this test happens before a response.
+    inventoryApi.getEntities.mockImplementation(() => new Promise<never>(() => {}));
+    const loadingPerRender: boolean[] = [];
+
+    renderHook(
+      () => {
+        const result = useEntityList('host');
+        loadingPerRender.push(result.loading);
+        return result;
+      },
+      { wrapper: createWrapper(inventoryApi) }
+    );
+
+    expect(loadingPerRender[0]).toBe(true);
+    expect(loadingPerRender).not.toContain(false);
+  });
+
+  it('stops reporting loading once the request fails, and reports it again on retry', async () => {
+    const failWith = new Error('Request failed');
+    const inventoryApi = createClientMock();
+    // The retry never settles, so `loading` stays true for the assertion after it.
+    inventoryApi.getEntities
+      .mockRejectedValueOnce(failWith)
+      .mockImplementation(() => new Promise<never>(() => {}));
+    const { result } = renderUseEntityList(inventoryApi);
+
+    await waitFor(() => expect(result.current.result.error).toBe(failWith));
+    expect(result.current.result.loading).toBe(false);
+
+    act(() => result.current.result.refresh());
+
+    await waitFor(() => expect(result.current.result.loading).toBe(true));
+    expect(result.current.result.list).toBeUndefined();
   });
 });

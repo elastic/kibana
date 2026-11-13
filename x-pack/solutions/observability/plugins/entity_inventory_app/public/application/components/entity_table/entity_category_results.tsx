@@ -61,7 +61,7 @@ export const EntityCategoryResults = ({
       />
     );
   }
-  if (!types) {
+  if (loading || !types) {
     return <EntityTableLoading />;
   }
 

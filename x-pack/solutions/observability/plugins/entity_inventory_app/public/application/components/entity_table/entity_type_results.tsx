@@ -136,6 +136,7 @@ const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResults
   if (error && !loading) {
     return <EntityTableLoadError ebtDetail={type} message={error.message} onRetry={refresh} />;
   }
+
   if (!list) {
     return <EntityTableSkeleton />;
   }
