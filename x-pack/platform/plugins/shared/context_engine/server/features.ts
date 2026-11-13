@@ -48,5 +48,37 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [uiPrivileges.show],
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.contextEngine.featureRegistry.subFeatures.sessionMemory', {
+          defaultMessage: 'Session memory',
+        }),
+        description: i18n.translate(
+          'xpack.contextEngine.featureRegistry.subFeatures.sessionMemoryDescription',
+          {
+            defaultMessage:
+              'Not included in All. Grant only to trusted applications and service API keys that act on behalf of other users.',
+          }
+        ),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'manage_any_user_session_memory',
+                name: i18n.translate(
+                  'xpack.contextEngine.featureRegistry.subFeatures.manageAnyUserSessionMemory.privilege',
+                  { defaultMessage: 'Manage session memory for any user' }
+                ),
+                includeIn: 'none',
+                api: [apiPrivileges.manageAnyUserSessionMemory],
+                savedObject: { all: [], read: [] },
+                ui: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };
