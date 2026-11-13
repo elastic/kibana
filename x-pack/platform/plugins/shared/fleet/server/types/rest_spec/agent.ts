@@ -99,6 +99,10 @@ export const GetAgentsRequestSchema = {
         defaultValue: false,
         meta: { description: 'When true, include CPU and memory metrics in the response' },
       }),
+      withPendingRestart: schema.boolean({
+        defaultValue: false,
+        meta: { description: 'When true, include the pending restart action of each agent' },
+      }),
       showUpgradeable: schema.boolean({
         defaultValue: false,
         meta: { description: 'When true, only return agents that are upgradeable' },
@@ -288,6 +292,13 @@ export const AgentResponseSchema = schema.object({
       memory_size_byte_avg: schema.maybe(schema.number()),
     })
   ),
+  pending_restart: schema.maybe(
+    schema.object({
+      action_id: schema.string(),
+      created_at: schema.string(),
+      expiration: schema.maybe(schema.string()),
+    })
+  ),
   type: schema.oneOf([
     schema.literal('PERMANENT'),
     schema.literal('EPHEMERAL'),
@@ -298,6 +309,7 @@ export const AgentResponseSchema = schema.object({
   enrolled_at: schema.string(),
   unenrolled_at: schema.maybe(schema.string()),
   unenrollment_started_at: schema.maybe(schema.string()),
+  unenrolled_reason: schema.maybe(schema.string()),
   audit_unenrolled_reason: schema.maybe(schema.string()),
   upgraded_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   upgrade_started_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
@@ -437,6 +449,10 @@ export const GetOneAgentRequestSchema = {
     withMetrics: schema.boolean({
       defaultValue: false,
       meta: { description: 'When true, include CPU and memory metrics in the response' },
+    }),
+    withPendingRestart: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, include the pending restart action of the agent' },
     }),
   }),
 };
@@ -1056,6 +1072,17 @@ export const PostAgentRestartRequestSchema = {
       meta: { description: 'The agent ID to restart' },
     }),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.maybe(
+        schema.boolean({
+          meta: {
+            description: 'Restart the agent even if it already has a pending restart action.',
+          },
+        })
+      ),
+    })
+  ),
 };
 
 export const PostAgentRestartResponseSchema = ActionIdOrMessageSchema;
@@ -1065,6 +1092,13 @@ export const PostBulkAgentRestartRequestSchema = {
     agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number({ min: 1 })),
     includeInactive: schema.boolean({ defaultValue: false }),
+    force: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Restart agents even if they already have a pending restart action.',
+        },
+      })
+    ),
   }),
 };
 

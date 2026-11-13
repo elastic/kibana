@@ -238,7 +238,7 @@ export const useEntityFilterBarCounts = ({
           concreteEntityIndexName: concreteEntityIndexName as string,
           searchExpression,
         },
-        createEsqlRunner(dataServices.search, signal)
+        createEsqlRunner(dataServices.search, 'entity_filter_bar_counts', signal)
       ),
   });
 

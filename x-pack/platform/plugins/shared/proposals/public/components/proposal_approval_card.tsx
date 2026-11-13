@@ -19,6 +19,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isAwaitingDecision, PROPOSALS_UI_CAPABILITY_DECIDE } from '@kbn/proposals-common';
 import {
   useApproveProposal,
+  isDecisionShown,
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
@@ -89,8 +90,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const proposalQuery = useProposal(proposalId);
   const approveMutation = useApproveProposal();
   const dismissMutation = useDismissProposal();
-  const isApproving = useIsApprovingProposal(proposalId);
-  const isDeclining = useIsDecliningProposal(proposalId);
+  const decisionShown = isDecisionShown(proposalQuery.data);
+  const isApproving = useIsApprovingProposal(proposalId, decisionShown);
+  const isDeclining = useIsDecliningProposal(proposalId, decisionShown);
   const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
   const { data: currentUserProfile } = useCurrentUserProfile();
 
