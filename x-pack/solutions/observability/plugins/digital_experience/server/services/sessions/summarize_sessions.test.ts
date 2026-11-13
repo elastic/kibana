@@ -325,6 +325,22 @@ describe('summarizeSessions', () => {
     );
   });
 
+  it('fails the window when a 400 is the index, not the documents', async () => {
+    const esClient = setUp();
+    // A closed index answers 400 for every item; dropping them would lose the window silently.
+    esClient.bulk.mockResolvedValue({
+      errors: true,
+      took: 1,
+      items: [
+        { index: { status: 400, error: { type: 'index_closed_exception', reason: 'closed' } } },
+      ],
+    } as estypes.BulkResponse);
+
+    await expect(run(esClient)).rejects.toThrow(
+      'Writing session summaries failed: index_closed_exception: closed'
+    );
+  });
+
   it('keeps windows between a minute and a day', async () => {
     const esClient = setUp({ changed: () => 0 });
 

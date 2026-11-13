@@ -127,12 +127,24 @@ const countChangedSessions = async (
 };
 
 /**
- * Whether another run could get past this bulk failure. Elasticsearch answers 400 when it refuses
- * the document itself, such as a value no mapping accepts, and every retry hits that again, so
- * those are left out rather than stalling the window and every session behind it. Anything else,
- * such as a 403 once the key loses access or a 429 from a busy cluster, is worth retrying.
+ * Bulk failures that are the document's own: every retry hits them again, so those summaries are
+ * left out rather than stalling the window and every session behind it.
  */
-const isRetryable = (status: number | undefined): boolean => status !== 400;
+const DOCUMENT_ERRORS = new Set([
+  'document_parsing_exception',
+  'illegal_argument_exception',
+  'mapper_parsing_exception',
+  'strict_dynamic_mapping_exception',
+]);
+
+/**
+ * Whether another run could get past this bulk failure. Anything that is not the document's own is
+ * the index's or the cluster's and is worth retrying: a 403 once the key loses access, a 429 from a
+ * busy cluster, and the 400 a closed index answers for every item, which must not pass for a window
+ * of bad documents and take the checkpoint with it.
+ */
+const isRetryable = ({ status, error }: estypes.BulkResponseItem): boolean =>
+  status !== 400 || !DOCUMENT_ERRORS.has(error?.type ?? '');
 
 const writeSessions = async (
   esClient: ElasticsearchClient,
@@ -155,7 +167,7 @@ const writeSessions = async (
       continue;
     }
     const failures = response.items.flatMap((item) => (item.index?.error ? [item.index] : []));
-    const retryable = failures.find(({ status }) => isRetryable(status));
+    const retryable = failures.find(isRetryable);
     if (retryable) {
       const { type, reason } = retryable.error ?? {};
       throw new Error(`Writing session summaries failed: ${type ?? 'unknown'}: ${reason ?? ''}`);
