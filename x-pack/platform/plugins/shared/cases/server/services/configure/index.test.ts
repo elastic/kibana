@@ -740,77 +740,36 @@ describe('CaseConfigureService', () => {
           .calls[0][2] as SavedObjectsCreateOptions;
         expect(creationOptions.references).toEqual([]);
       });
+
+      it('stores the observable type settings next to the unchanged observable types', async () => {
+        const observableTypeSettings = [
+          { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+        ];
+        unsecuredSavedObjectsClient.create.mockReturnValue(
+          Promise.resolve({
+            attributes: createConfigPostParams(getNoneCaseConnector()),
+            id: '1',
+            type: CASE_CONFIGURE_SAVED_OBJECT,
+            references: [],
+          })
+        );
+
+        await service.post({
+          unsecuredSavedObjectsClient,
+          attributes: { ...createConfigPostParams(getNoneCaseConnector()), observableTypeSettings },
+          id: '1',
+        });
+
+        const attributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as ConfigurationPersistedAttributes;
+        expect(attributes.observableTypeSettings).toEqual(observableTypeSettings);
+        expect(attributes.observableTypes).toEqual(basicConfigFields.observableTypes);
+      });
     });
   });
 
   describe('transform the Elasticsearch model to the external model', () => {
     describe('patch', () => {
-      it('stores a built-in override entry without a label and returns it with the label', async () => {
-        const observableTypes = [
-          { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-        ];
-        unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({
-            id: '1',
-            type: CASE_CONFIGURE_SAVED_OBJECT,
-            references: [],
-            attributes: { observableTypes },
-          } as SavedObjectsUpdateResponse<ConfigurationPersistedAttributes>)
-        );
-
-        const res = await service.patch({
-          configurationId: '1',
-          unsecuredSavedObjectsClient,
-          updatedAttributes: { observableTypes },
-          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
-        });
-
-        const { observableTypes: storedObservableTypes } = unsecuredSavedObjectsClient.update.mock
-          .calls[0][2] as Partial<ConfigurationPersistedAttributes>;
-        expect(storedObservableTypes).toEqual(observableTypes);
-        expect(res.attributes.observableTypes).toEqual([
-          {
-            key: 'observable-type-agent-id',
-            label: 'Agent id',
-            paths: [{ path: 'agent.id', enabled: false }],
-          },
-        ]);
-      });
-
-      it('removes the label of a built-in entry and keeps the label of a custom type before it stores them', async () => {
-        unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({
-            id: '1',
-            type: CASE_CONFIGURE_SAVED_OBJECT,
-            references: [],
-            attributes: {},
-          } as SavedObjectsUpdateResponse<ConfigurationPersistedAttributes>)
-        );
-
-        await service.patch({
-          configurationId: '1',
-          unsecuredSavedObjectsClient,
-          updatedAttributes: {
-            observableTypes: [
-              {
-                key: 'observable-type-agent-id',
-                label: 'Agent id',
-                paths: [{ path: 'agent.id', enabled: false }],
-              },
-              { key: 'employee-id', label: 'Employee ID' },
-            ],
-          },
-          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
-        });
-
-        const { observableTypes } = unsecuredSavedObjectsClient.update.mock
-          .calls[0][2] as Partial<ConfigurationPersistedAttributes>;
-        expect(observableTypes).toEqual([
-          { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-          { key: 'employee-id', label: 'Employee ID' },
-        ]);
-      });
-
       it('returns an object with a none connector and without a reference', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
           Promise.resolve(createUpdateConfigSO(getNoneCaseConnector()))
@@ -1028,19 +987,20 @@ describe('CaseConfigureService', () => {
         expect(res.attributes.extractObservables).toBe(true);
       });
 
-      it('fills the label of a built-in override entry from the built-in type', async () => {
+      it('returns the stored observable type settings', async () => {
+        const observableTypeSettings = [
+          {
+            key: 'employee-id',
+            paths: [{ path: 'user.employee_id', enabled: true, excludedValues: ['E000000'] }],
+            valuePattern: '^E\\d{6}$',
+          },
+        ];
         unsecuredSavedObjectsClient.get.mockReturnValue(
           Promise.resolve({
             attributes: {
               ...basicConfigFields,
               connector: { type: ConnectorTypes.none, name: 'none', fields: null },
-              observableTypes: [
-                {
-                  key: 'observable-type-agent-id',
-                  paths: [{ path: 'agent.id', enabled: false }],
-                },
-                { key: 'employee-id', label: 'Employee ID', paths: [] },
-              ],
+              observableTypeSettings,
             },
             id: '1',
             type: CASE_CONFIGURE_SAVED_OBJECT,
@@ -1049,14 +1009,24 @@ describe('CaseConfigureService', () => {
         );
 
         const res = await service.get({ unsecuredSavedObjectsClient, configurationId: '1' });
-        expect(res.attributes.observableTypes).toEqual([
-          {
-            key: 'observable-type-agent-id',
-            label: 'Agent id',
-            paths: [{ path: 'agent.id', enabled: false }],
-          },
-          { key: 'employee-id', label: 'Employee ID', paths: [] },
-        ]);
+        expect(res.attributes.observableTypeSettings).toEqual(observableTypeSettings);
+      });
+
+      it('defaults the observable type settings to an empty list when the persisted SO lacks them', async () => {
+        unsecuredSavedObjectsClient.get.mockReturnValue(
+          Promise.resolve({
+            attributes: {
+              ...basicConfigFields,
+              connector: { type: ConnectorTypes.none, name: 'none', fields: null },
+            },
+            id: '1',
+            type: CASE_CONFIGURE_SAVED_OBJECT,
+            references: [],
+          } as unknown as SavedObject<ConfigurationPersistedAttributes>)
+        );
+
+        const res = await service.get({ unsecuredSavedObjectsClient, configurationId: '1' });
+        expect(res.attributes.observableTypeSettings).toEqual([]);
       });
 
       it('defaults to the none connector when the persisted connector is undefined', async () => {
