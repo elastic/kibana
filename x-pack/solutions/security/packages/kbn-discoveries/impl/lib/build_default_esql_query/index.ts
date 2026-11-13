@@ -76,14 +76,12 @@ const filterFieldsByIndex = async ({
  */
 const resolveKeepFields = async ({
   allowedFields,
-  anonymizationFieldsEsClient,
   esClient,
   index,
   logger,
   spaceId,
 }: {
   allowedFields: string[] | undefined;
-  anonymizationFieldsEsClient: ElasticsearchClient;
   esClient: ElasticsearchClient;
   index: string;
   logger: Logger;
@@ -91,7 +89,7 @@ const resolveKeepFields = async ({
 }): Promise<string[]> => {
   const userFields =
     allowedFields ??
-    (await fetchAnonymizationFields({ esClient: anonymizationFieldsEsClient, logger, spaceId }))
+    (await fetchAnonymizationFields({ esClient, logger, spaceId }))
       .filter((field) => field.allowed)
       .map((field) => field.field);
 
@@ -121,9 +119,6 @@ const resolveKeepFields = async ({
  *
  * @param esClient - Elasticsearch client. **Must be user-scoped (`asCurrentUser`)**
  *   to ensure queries respect the calling user's permissions.
- * @param anonymizationFieldsEsClient - Optional client used to read the space's anonymization
- *   fields, which are Kibana-owned configuration. Pass an internal user client so the caller
- *   needs no index privileges on them. Defaults to `esClient`.
  * @param logger - Logger instance
  * @param spaceId - Kibana space ID, used to construct the default alerts index
  *   pattern and to fetch anonymization fields
@@ -136,7 +131,6 @@ const resolveKeepFields = async ({
 export const buildDefaultEsqlQuery = async ({
   alertsIndexPattern,
   allowedFields,
-  anonymizationFieldsEsClient,
   esClient,
   logger,
   size = DEFAULT_SIZE,
@@ -144,7 +138,6 @@ export const buildDefaultEsqlQuery = async ({
 }: {
   alertsIndexPattern?: string;
   allowedFields?: string[];
-  anonymizationFieldsEsClient?: ElasticsearchClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   size?: number;
@@ -152,14 +145,7 @@ export const buildDefaultEsqlQuery = async ({
 }): Promise<string> => {
   const index = alertsIndexPattern ?? `.alerts-security.alerts-${spaceId}`;
 
-  const keepFields = await resolveKeepFields({
-    allowedFields,
-    anonymizationFieldsEsClient: anonymizationFieldsEsClient ?? esClient,
-    esClient,
-    index,
-    logger,
-    spaceId,
-  });
+  const keepFields = await resolveKeepFields({ allowedFields, esClient, index, logger, spaceId });
 
   return [
     `FROM ${index}`,

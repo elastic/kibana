@@ -288,6 +288,10 @@ export class ElasticAssistantPlugin
     // Register the Attack Discovery Schedule type
     plugins.alerting.registerType(
       getAttackDiscoveryScheduleType({
+        getInternalEsClient: () =>
+          core
+            .getStartServices()
+            .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
         getInference: () => this.inferencePlugin,
         getWorkflowExecutorFactory: () => this.workflowExecutorFactory,
         logger: this.logger,

@@ -42,7 +42,6 @@ export const handleGetDefaultEsqlQuery = async ({
   });
 
   const query = await buildDefaultEsqlQuery({
-    anonymizationFieldsEsClient: coreStart.elasticsearch.client.asInternalUser,
     esClient,
     logger,
     spaceId,

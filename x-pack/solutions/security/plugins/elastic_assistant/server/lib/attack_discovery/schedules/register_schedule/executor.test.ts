@@ -11,7 +11,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -86,6 +86,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
   const mockTelemetry = analyticsServiceMock.createAnalyticsServiceSetup();
   const mockInference = inferenceMock.createStartContract();
   const actionsClient = actionsClientMock.create();
+  const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const ruleExecutorServices = alertsMock.createRuleExecutorServices();
   const services = {
     ...ruleExecutorServices,
@@ -202,6 +203,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -218,6 +220,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -230,10 +233,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
     );
   });
 
-  it('should call `findDocuments` with the correct arguments', async () => {
+  it('should read the anonymization fields with the internal user, not the rule scoped client', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -243,18 +247,22 @@ describe('attackDiscoveryScheduleExecutor', () => {
     });
 
     expect(findDocuments).toHaveBeenCalledWith({
-      esClient: services.scopedClusterClient.asCurrentUser,
+      esClient: internalEsClient,
       page: 1,
       perPage: 1000,
       index: '.kibana-elastic-ai-assistant-anonymization-fields-test-space',
       logger: mockLogger,
     });
+    expect(findDocuments).not.toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: services.scopedClusterClient.asCurrentUser })
+    );
   });
 
   it('should call `generateAttackDiscoveries` with the correct arguments', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -301,6 +309,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(async () => {
       await attackDiscoveryScheduleExecutor({
+        getInternalEsClient: () => Promise.resolve(internalEsClient),
         getInference: () => mockInference,
         getWorkflowExecutorFactory: () => undefined,
         options,
@@ -324,6 +333,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -355,6 +365,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -375,6 +386,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -474,6 +486,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -499,6 +512,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     options.services.shouldStopExecution = () => true;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -515,6 +529,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -543,6 +558,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue([]);
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -561,6 +577,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     ]);
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -593,6 +610,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -625,6 +643,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     mockTransform.mockClear();
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -645,6 +664,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     mockTransform.mockClear();
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,
@@ -667,6 +687,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(
       attackDiscoveryScheduleExecutor({
+        getInternalEsClient: () => Promise.resolve(internalEsClient),
         getInference: () => mockInference,
         getWorkflowExecutorFactory: () => undefined,
         options,
@@ -696,6 +717,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(
       attackDiscoveryScheduleExecutor({
+        getInternalEsClient: () => Promise.resolve(internalEsClient),
         getInference: () => mockInference,
         getWorkflowExecutorFactory: () => undefined,
         logger: mockLogger,
@@ -721,6 +743,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(
       attackDiscoveryScheduleExecutor({
+        getInternalEsClient: () => Promise.resolve(internalEsClient),
         getInference: () => mockInference,
         getWorkflowExecutorFactory: () => undefined,
         logger: mockLogger,
@@ -751,6 +774,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      getInternalEsClient: () => Promise.resolve(internalEsClient),
       getInference: () => mockInference,
       getWorkflowExecutorFactory: () => undefined,
       options,

@@ -10,8 +10,6 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
 
 /**
  * Fetches anonymization fields from the AI Assistant index for the given space.
- * Pass an internal user client (`asInternalUser`): the index is Kibana-owned
- * configuration and the end user is not expected to hold privileges on it.
  * Returns an empty array when the index does not exist or the query fails.
  */
 export const fetchAnonymizationFields = async ({
