@@ -330,6 +330,9 @@ export class StorageIndexAdapter<
       this.esClient.indices.get({
         index: getIndexPattern(this.storage.name),
         allow_no_indices: true,
+        // Default expansion is `open`, which skips hidden indices. This listing is what
+        // `clean()` deletes, so a hidden backing index would otherwise be left in place.
+        expand_wildcards: ['open', 'hidden'],
       })
     );
   }

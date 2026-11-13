@@ -52,7 +52,7 @@ export const CORE_PRIVATE_IMPORTERS: ReadonlySet<string> = new Set([
   'src/platform/plugins/shared/newsfeed/public/sidebar/newsfeed_sidebar.test.tsx',
   'src/platform/test/functional/page_objects/solution_navigation.ts',
   'src/platform/test/functional/services/global_nav.ts',
-  'src/platform/test/plugin_functional/plugins/core_plugin_deep_links/public/plugin.tsx',
+  'src/platform/test_plugins/plugin_functional/core_plugin_deep_links/public/plugin.tsx',
   'x-pack/platform/plugins/private/intercepts/public/prompter/service/intercept_dialog_service.test.tsx',
   'x-pack/platform/plugins/private/reporting/public/management/components/create_scheduled_report_form.tsx',
   'x-pack/platform/plugins/private/reporting/public/management/components/edit_scheduled_report_flyout.tsx',
