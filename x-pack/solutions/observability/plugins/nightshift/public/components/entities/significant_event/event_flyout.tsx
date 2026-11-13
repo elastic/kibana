@@ -417,6 +417,7 @@ export function EventFlyout({
         size={size}
         type={type}
         ownFocus={type === 'overlay' ? false : undefined}
+        role="region"
         session="start"
         historyKey={EVENT_FLYOUT_HISTORY_KEY}
         resizable

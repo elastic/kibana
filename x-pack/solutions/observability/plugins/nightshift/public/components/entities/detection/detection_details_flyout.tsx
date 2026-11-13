@@ -119,6 +119,7 @@ export const DetectionDetailsFlyout = ({
     <FlyoutTemplate
       onClose={onClose}
       type="push"
+      role="region"
       session="start"
       size="s"
       resizable
