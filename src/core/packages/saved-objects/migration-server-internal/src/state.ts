@@ -347,7 +347,7 @@ export interface CheckRelocationCompletedState extends PostInitState {
 }
 
 export interface ReleaseRelocationWaitGroupsState extends PostInitState {
-  /** The relocation is already published, unblock sibling migrators and finish */
+  /** The relocation is already published, unblock sibling migrators before updating the live index */
   readonly controlState: 'RELEASE_RELOCATION_WAIT_GROUPS';
 }
 

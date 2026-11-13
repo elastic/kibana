@@ -808,6 +808,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'RELEASE_RELOCATION_WAIT_GROUPS',
+          versionIndexReadyActions: Option.none,
         };
       }
       // As part of a reindex-migration, we wanted to block the source index to prevent updates
@@ -915,12 +916,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       const aliases = getAliases(res.right);
-      if (
+      const liveIndex =
         Either.isRight(aliases) &&
         versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases.right)
-      ) {
+          ? aliases.right[stateP.currentAlias]
+          : undefined;
+      if (liveIndex) {
         // Another instance finished the relocation. Copying now would write onto the live index.
-        return { ...stateP, controlState: 'RELEASE_RELOCATION_WAIT_GROUPS' };
+        // The live index becomes our source, so that mapping checks compare against its mappings.
+        return {
+          ...stateP,
+          controlState: 'RELEASE_RELOCATION_WAIT_GROUPS',
+          sourceIndex: Option.some(liveIndex),
+          sourceIndexMappings: Option.some(res.right[liveIndex].mappings),
+          targetIndex: liveIndex,
+          versionIndexReadyActions: Option.none,
+        };
       }
       if (Option.isSome(stateP.sourceIndex) && Option.isSome(stateP.sourceIndexMappings)) {
         // this migrator's source index exist, reindex its entries
@@ -941,7 +952,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'RELEASE_RELOCATION_WAIT_GROUPS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'DONE' };
+      // Like any instance arriving after a completed migration, transform outdated documents
+      // and update the mappings of the live index, in case we have plugins the others don't.
+      // Without versionIndexReadyActions, this migrator will not update the aliases.
+      return { ...stateP, controlState: 'REFRESH_TARGET' };
     } else {
       throwBadResponse(stateP, res);
     }

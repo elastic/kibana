@@ -1782,8 +1782,19 @@ describe('migrations v2 model', () => {
           type: 'source_equals_target' as const,
           index: `.kibana_${setWriteBlockState.kibanaVersion}_001`,
         });
-        const newState = model({ ...setWriteBlockState, mustRelocateDocuments: true }, res);
+        const newState = model(
+          {
+            ...setWriteBlockState,
+            mustRelocateDocuments: true,
+            versionIndexReadyActions: Option.some([
+              { add: { index: '.kibana_7.11.0_001', alias: '.kibana' } },
+            ]),
+          },
+          res
+        ) as ReleaseRelocationWaitGroupsState;
         expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
+        // the aliases are already published, this migrator must not update them again
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
     });
 
@@ -1958,9 +1969,17 @@ describe('migrations v2 model', () => {
       const relocationNotPublished: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right(
         indexWithAliases('.kibana_7.10.0_001', ['.kibana'])
       );
-      const relocationPublished: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right(
-        indexWithAliases('.kibana_7.11.0_001', ['.kibana', '.kibana_7.11.0'])
-      );
+      const liveIndexMappings: IndexMapping = {
+        properties: { dashboard: { properties: { title: { type: 'text' } } } },
+      };
+      const relocationPublished: ResponseType<'CHECK_RELOCATION_COMPLETED'> = Either.right({
+        '.kibana_7.11.0_001': {
+          ...indexWithAliases('.kibana_7.11.0_001', ['.kibana', '.kibana_7.11.0'])[
+            '.kibana_7.11.0_001'
+          ],
+          mappings: liveIndexMappings,
+        },
+      });
 
       describe('if the relocation is not published yet', () => {
         test('CHECK_RELOCATION_COMPLETED -> DONE_REINDEXING_SYNC if the migrator source index did NOT exist', () => {
@@ -1984,15 +2003,30 @@ describe('migrations v2 model', () => {
       });
 
       describe('if another instance already published the relocation', () => {
-        test('CHECK_RELOCATION_COMPLETED -> RELEASE_RELOCATION_WAIT_GROUPS if the migrator source index did exist', () => {
-          const newState = model(stateWithSource, relocationPublished);
-          expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
-        });
-
-        test('CHECK_RELOCATION_COMPLETED -> RELEASE_RELOCATION_WAIT_GROUPS if the migrator source index did NOT exist', () => {
-          const newState = model(state, relocationPublished);
-          expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
-        });
+        it.each([
+          ['did exist', stateWithSource],
+          ['did NOT exist', state],
+        ])(
+          'CHECK_RELOCATION_COMPLETED -> RELEASE_RELOCATION_WAIT_GROUPS if the migrator source index %s',
+          (_, currentState) => {
+            const newState = model(
+              {
+                ...currentState,
+                versionIndexReadyActions: Option.some([
+                  { add: { index: '.kibana_7.11.0_001', alias: '.kibana' } },
+                ]),
+              },
+              relocationPublished
+            ) as ReleaseRelocationWaitGroupsState;
+            expect(newState.controlState).toEqual('RELEASE_RELOCATION_WAIT_GROUPS');
+            // the remaining steps operate on the live index, comparing against its mappings
+            expect(newState.sourceIndex).toEqual(Option.some('.kibana_7.11.0_001'));
+            expect(newState.sourceIndexMappings).toEqual(Option.some(liveIndexMappings));
+            expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+            // the aliases are already published, this migrator must not update them again
+            expect(newState.versionIndexReadyActions).toEqual(Option.none);
+          }
+        );
       });
 
       test('CHECK_RELOCATION_COMPLETED -> CHECK_RELOCATION_COMPLETED if the action fails with a retryable error', () => {
@@ -2007,7 +2041,7 @@ describe('migrations v2 model', () => {
     });
 
     describe('RELEASE_RELOCATION_WAIT_GROUPS', () => {
-      test('RELEASE_RELOCATION_WAIT_GROUPS -> DONE', () => {
+      test('RELEASE_RELOCATION_WAIT_GROUPS -> REFRESH_TARGET', () => {
         const state: ReleaseRelocationWaitGroupsState = {
           ...postInitState,
           controlState: 'RELEASE_RELOCATION_WAIT_GROUPS',
@@ -2017,7 +2051,7 @@ describe('migrations v2 model', () => {
           'relocation_wait_groups_released'
         );
         const newState = model(state, res);
-        expect(newState.controlState).toEqual('DONE');
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
       });
     });
 
@@ -3398,6 +3432,14 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('DONE');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+
+      test('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE if none versionIndexReadyActions, even if mustRelocateDocuments === true', () => {
+        const newState = model(
+          { ...сheckVersionIndexReadyActionsState, mustRelocateDocuments: true },
+          res
+        );
+        expect(newState.controlState).toEqual('DONE');
       });
     });
 
