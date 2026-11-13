@@ -6,6 +6,7 @@
  */
 
 import { getPackageInfo } from '../../services/epm/packages/get';
+import { FleetNotFoundError } from '../../errors';
 import { awsOnboardingDiscoveryService } from '../../services/aws_onboarding';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
 
@@ -109,6 +110,14 @@ describe('awsOnboardingDiscoverStepDefinition', () => {
         errors: [{ source: 'costExplorer', message: 'Cost Explorer not enabled' }],
       },
     });
+  });
+
+  it('returns a ValidationError when no onboarding credentials are stored', async () => {
+    discover.mockRejectedValue(new FleetNotFoundError('not configured'));
+
+    const result = await run();
+
+    expect(result).toEqual({ error: expect.objectContaining({ type: 'ValidationError' }) });
   });
 
   it('refuses to run while the feature flag is off', async () => {

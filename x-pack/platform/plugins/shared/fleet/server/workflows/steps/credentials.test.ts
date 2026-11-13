@@ -60,6 +60,7 @@ describe('awsOnboardingCredentialsStepDefinition', () => {
         account_id: '123456789012',
         discovery_ok: true,
         provisioning_ok: false,
+        error: 'provisioning: AccessDenied',
       },
     });
   });

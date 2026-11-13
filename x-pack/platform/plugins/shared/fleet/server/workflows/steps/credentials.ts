@@ -34,6 +34,12 @@ export const awsOnboardingCredentialsStepDefinition = createServerStepDefinition
 
     try {
       const { accountId, discovery, provisioning } = await awsOnboardingDiscoveryService.verify();
+      const failures = [
+        discovery.ok ? undefined : `discovery: ${discovery.error ?? 'failed'}`,
+        provisioning && !provisioning.ok
+          ? `provisioning: ${provisioning.error ?? 'failed'}`
+          : undefined,
+      ].filter((failure): failure is string => failure !== undefined);
       return {
         output: {
           configured: true,
@@ -41,6 +47,7 @@ export const awsOnboardingCredentialsStepDefinition = createServerStepDefinition
           account_id: accountId,
           discovery_ok: discovery.ok,
           ...(provisioning ? { provisioning_ok: provisioning.ok } : {}),
+          ...(failures.length > 0 ? { error: failures.join('; ') } : {}),
         },
       };
     } catch (error) {

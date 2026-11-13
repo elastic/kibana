@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExecutionError } from '@kbn/workflows/server';
+import { ExecutionError, yieldToEventLoop } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 
 import {
@@ -44,6 +44,10 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
     const selected: AwsServiceMatrixEntry[] = [];
     const rejected: string[] = [];
     for (const serviceId of requested) {
+      await yieldToEventLoop();
+      if (context.abortSignal.aborted) {
+        break;
+      }
       const entry = matrix.find(({ id }) => id === serviceId);
       if (entry && isAgentless(entry)) {
         selected.push(entry);
