@@ -6,7 +6,7 @@
  */
 
 import { getEbtProps } from '@kbn/ebt-click';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import type { KiListItem } from '../../../../../common/http_api/knowledge_indicators';
 import { resolveKiStatus } from '../../../utils/ki_expiry';
@@ -23,6 +23,21 @@ interface ListKiRowProps {
   onHover: (ki: KiListItem) => void;
 }
 
+/** Scrolls only the list box (not the page) so the row is visible. */
+const scrollRowIntoList = (row: HTMLElement) => {
+  const list = row.closest<HTMLElement>('[role="listbox"]');
+  if (!list || row.offsetParent !== list) {
+    return;
+  }
+  const rowTop = row.offsetTop;
+  const rowBottom = rowTop + row.offsetHeight;
+  if (rowTop < list.scrollTop) {
+    list.scrollTop = rowTop;
+  } else if (rowBottom > list.scrollTop + list.clientHeight) {
+    list.scrollTop = rowBottom - list.clientHeight;
+  }
+};
+
 export const ListKiRow = ({ ki, isSelected, onSelect, onHover }: ListKiRowProps) => {
   const styles = useListKiGroupsStyles();
   const {
@@ -33,9 +48,18 @@ export const ListKiRow = ({ ki, isSelected, onSelect, onHover }: ListKiRowProps)
     updated_at: updatedAt,
   } = ki;
   const status = resolveKiStatus(lifecycleStatus, expiresAt);
+  const rowRef = useRef<HTMLButtonElement>(null);
+
+  // A deep link or a filter can select a row below the visible part of the list.
+  useEffect(() => {
+    if (isSelected && rowRef.current) {
+      scrollRowIntoList(rowRef.current);
+    }
+  }, [isSelected]);
 
   return (
     <button
+      ref={rowRef}
       type="button"
       role="option"
       aria-selected={isSelected}

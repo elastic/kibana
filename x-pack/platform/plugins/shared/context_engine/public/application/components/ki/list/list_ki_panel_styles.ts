@@ -35,6 +35,8 @@ export const useListKiPanelStyles = () => {
         },
       }),
       list: css({
+        // Rows measure their offset from the list (scroll the selected row into view).
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: euiTheme.colors.backgroundBasePlain,
