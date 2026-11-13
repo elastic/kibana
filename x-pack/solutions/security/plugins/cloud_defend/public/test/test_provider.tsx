@@ -15,6 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { CloudDefendPluginStartDeps } from '../types';
 import './__mocks__/worker';
 import '@kbn/code-editor-mock/jest_helper';
@@ -43,9 +44,11 @@ export const TestProvider: FC<PropsWithChildren<Partial<CloudDefendAppDeps>>> = 
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <I18nProvider>
-            <Routes>
-              <Route path="*" render={() => <>{children}</>} />
-            </Routes>
+            <MockAppHeaderProvider>
+              <Routes>
+                <Route path="*" render={() => <>{children}</>} />
+              </Routes>
+            </MockAppHeaderProvider>
           </I18nProvider>
         </Router>
       </QueryClientProvider>
