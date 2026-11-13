@@ -6,7 +6,6 @@
  */
 
 export { dispatchConnectorEvents } from './dispatch_connector_events';
-export { computeIngestTokenHash } from './compute_ingest_token_hash';
 export { generateIngestToken } from './generate_ingest_token';
 export { resolveInboundEventsSpaceId } from './resolve_inbound_events_space_id';
 export {

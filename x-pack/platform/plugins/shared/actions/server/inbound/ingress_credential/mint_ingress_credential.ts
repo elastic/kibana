@@ -7,6 +7,7 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { computeTokenHmac } from '@kbn/crypto';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 
 import {
@@ -17,7 +18,6 @@ import {
   IngressCredentialAuditAction,
   ingressCredentialAuditEvent,
 } from '../../lib/ingress_credential_audit_events';
-import { computeIngestTokenHash } from '../compute_ingest_token_hash';
 import { generateIngestToken } from '../generate_ingest_token';
 import { deleteIngressCredentialForConnector } from './delete_ingress_credential';
 import { composeIngestToken } from './parse_ingest_token';
@@ -54,11 +54,7 @@ export const mintIngressCredential = async ({
       CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
       {
         connectorId,
-        ingestTokenHash: computeIngestTokenHash({
-          connectorId,
-          spaceId,
-          token: ingestToken,
-        }),
+        ingestTokenHash: computeTokenHmac(ingestToken, connectorId, spaceId),
         createdAt,
       },
       {

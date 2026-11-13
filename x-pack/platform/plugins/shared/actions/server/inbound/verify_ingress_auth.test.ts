@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { computeIngestTokenHash } from './compute_ingest_token_hash';
+import { computeTokenHmac } from '@kbn/crypto';
+
 import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../common/routes/events/apis/ingest';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 
@@ -78,7 +79,7 @@ describe('verifyIngestToken', () => {
   const token = 'super-secret-token';
 
   it('returns true for a matching hash', () => {
-    const ingestTokenHash = computeIngestTokenHash({ connectorId, spaceId, token });
+    const ingestTokenHash = computeTokenHmac(token, connectorId, spaceId);
     expect(
       verifyIngestToken({
         connectorId,
@@ -90,7 +91,7 @@ describe('verifyIngestToken', () => {
   });
 
   it('returns false for a wrong token', () => {
-    const ingestTokenHash = computeIngestTokenHash({ connectorId, spaceId, token });
+    const ingestTokenHash = computeTokenHmac(token, connectorId, spaceId);
     expect(
       verifyIngestToken({
         connectorId,
