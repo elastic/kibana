@@ -101,6 +101,19 @@ export function TracesLatencyMapView({
     [updateESQLQuery]
   );
 
+  // A selection left outside the picked time range matches nothing: the query would strand
+  // the user on the no-results screen, with the map gone. A range that no longer overlaps
+  // the selection at all clears it; a partial overlap keeps it, as results still exist.
+  const selectionOutOfRange = Boolean(
+    selection &&
+      source &&
+      (Date.parse(selection.to) <= Date.parse(source.timeRange.from) ||
+        Date.parse(selection.from) >= Date.parse(source.timeRange.to))
+  );
+  useEffect(() => {
+    if (selectionOutOfRange) commitSelection(undefined, undefined);
+  }, [selectionOutOfRange, commitSelection]);
+
   // The "Failed only" switch is a filter of the query itself, like the selection: the
   // documents table follows it, it survives a reload and a shared link carries it.
   const changeFailedOnly = useCallback(

@@ -108,6 +108,27 @@ describe('TracesLatencyMapView', () => {
     expect(updater(`FROM traces-apm*\n| WHERE ${selectionClause}`)).toBe('FROM traces-apm*');
   });
 
+  it('clears a selection the picked time range no longer overlaps, instead of showing nothing', () => {
+    // The selection is 10:00-10:05; the picked range starts at 11:00 - zero hits guaranteed.
+    const { actions } = renderView({
+      filters: ['service.name == "cart"', selectionClause],
+      timeFrom: '2026-10-26T11:00:00.000Z',
+      timeTo: '2026-10-26T12:00:00.000Z',
+    });
+    const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    expect(updater(`FROM traces-apm*\n| WHERE ${selectionClause}`)).toBe('FROM traces-apm*');
+  });
+
+  it('keeps a selection the picked time range still overlaps', () => {
+    // The range starts mid-selection: results still exist, so nothing is cleared.
+    const { actions } = renderView({
+      filters: ['service.name == "cart"', selectionClause],
+      timeFrom: '2026-10-26T10:03:00.000Z',
+      timeTo: '2026-10-26T11:00:00.000Z',
+    });
+    expect(actions.updateESQLQuery).not.toHaveBeenCalled();
+  });
+
   it('replaces a clause the rendered props have not caught up with yet', () => {
     // The commit before this one is in the query, but Discover has not pushed the new
     // fetch params: the updater must still find and replace it rather than stack clauses.
