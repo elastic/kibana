@@ -57,7 +57,7 @@ export const dataViewSavedObjectType: SavedObjectsType = {
       changes: [],
       schemas: {
         forwardCompatibility: SCHEMA_DATA_VIEW_V1.extends({}, { unknowns: 'ignore' }),
-        create: SCHEMA_DATA_VIEW_V1,
+        create: SCHEMA_DATA_VIEW_V1.extends({}, { unknowns: 'ignore' }),
       },
     },
   },
