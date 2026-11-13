@@ -8836,7 +8836,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Creates an action policy. You can supply your own `id`; if you omit it, Kibana generates one. If an action policy with that `id` already exists, the request fails with HTTP 409 and the existing policy is not changed. To create or replace an action policy at a specific ID, use PUT /api/alerting/v2/action_policies/{id}.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: post-alerting-v2-action-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -8955,6 +8955,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
+        '409':
+          content:
+            application/json:
+              examples:
+                actionPolicyAlreadyExists:
+                  summary: An action policy with the requested ID already exists
+                  value:
+                    code: ACTION_POLICY_ALREADY_EXISTS
+                    details:
+                      action_policy_id: action-policy-1
+                    error: Conflict
+                    message: Action policy with ID "action-policy-1" already exists
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an action policy with the given ID already exists.
         '500':
           content:
             application/json:
@@ -154471,6 +154486,12 @@ components:
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
           description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
+        id:
+          description: 'Optional action policy ID. If omitted, Kibana generates one. If an action policy with this ID already exists, the request fails with HTTP 409 and the existing policy is not changed. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+          maxLength: 150
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
+          type: string
         matcher:
           additionalProperties: false
           description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.

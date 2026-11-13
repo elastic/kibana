@@ -96,6 +96,55 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
     expect(response.body.snoozed_until).toBeUndefined();
   });
 
+  apiTest(
+    'create: returns 201 and persists the policy under a client-supplied id',
+    async ({ apiClient, apiServices }) => {
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { ...buildCreateActionPolicyData({ name: 'client-id-policy' }), id: 'client-id' },
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.id).toBe('client-id');
+
+      const persisted = await apiServices.alertingV2.actionPolicies.get('client-id');
+      expect(persisted.name).toBe('client-id-policy');
+    }
+  );
+
+  apiTest(
+    'create: returns 409 ACTION_POLICY_ALREADY_EXISTS for a colliding id and does not overwrite',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.actionPolicies.upsert(
+        'existing-id',
+        buildCreateActionPolicyData({ name: 'already-there' })
+      );
+
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { ...buildCreateActionPolicyData({ name: 'collision' }), id: 'existing-id' },
+      });
+
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('ACTION_POLICY_ALREADY_EXISTS');
+
+      const persisted = await apiServices.alertingV2.actionPolicies.get('existing-id');
+      expect(persisted.name).toBe('already-there');
+    }
+  );
+
+  apiTest('validation: rejects an invalid client-supplied id', async ({ apiClient }) => {
+    for (const id of ['', 'has spaces']) {
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { ...buildCreateActionPolicyData(), id },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  });
+
   apiTest('create: per_field grouping with time_interval strategy', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
