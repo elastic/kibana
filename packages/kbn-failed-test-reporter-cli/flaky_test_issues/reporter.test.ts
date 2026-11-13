@@ -605,20 +605,33 @@ describe('reportFlakySuiteIssues', () => {
       );
     });
 
-    it('does not comment again for a per-test issue its body already lists', async () => {
-      // a run that listed it and named it in a comment, but failed to close it
-      const filed = suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z'));
-      const body = updateIssueMetadata(
-        filed.body,
-        { 'suite.previousIssues': [43] },
-        FLAKY_TEST_SUITE_METADATA_PREFIX
-      );
-      const github = createGithubApi([{ ...filed, body }, scoutTestIssue(43, 'pw-1')]);
+    it('names a per-test issue in the next run when the comment naming it fails', async () => {
+      const github = createGithubApi([
+        suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z')),
+        scoutTestIssue(43, 'pw-1'),
+      ]);
+      github.addIssueComment.mockRejectedValueOnce(new Error('502 Bad Gateway'));
+      const report = flakyReport([trackedTest()]);
 
-      await run(github, { report: flakyReport([trackedTest()]), ...replacing });
+      await run(github, { report, ...replacing });
 
-      expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
-      expect(github.addIssueComment.mock.calls).toEqual([[43, replacedIssueComment(42)]]);
+      // the body already lists it, but the per-test issue is left open
+      const [[, { body }]] = github.editIssue.mock.calls;
+      expect(previousIssuesOf(body)).toEqual([43]);
+      expect(github.closeAsDuplicate).not.toHaveBeenCalled();
+
+      // the next day, no comment is due, but one names it before it is closed
+      const next = createGithubApi([suiteIssue(42, { body }), scoutTestIssue(43, 'pw-1')]);
+      await run(next, {
+        report: { ...report, generatedAt: new Date('2026-09-10T09:04:41.000Z') },
+        ...replacing,
+      });
+
+      expect(next.addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/\n\nPreviously tracked in #43\.$/)],
+        [43, replacedIssueComment(42)],
+      ]);
+      expect(next.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
     });
 
     it('leaves per-test issues alone without the option', async () => {

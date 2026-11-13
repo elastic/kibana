@@ -346,8 +346,9 @@ export const reportConsistentFailureIssues = async (
    * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
    * of the last post is read from GitHub as it is now, as other jobs of the build find the same
    * break, and recorded once the comment is posted: a comment that failed isn't taken as posted,
-   * and the next build posts it. The per-test issues `replacing` the body doesn't list yet join
-   * its "Previously tracked in" line, and the post names them, even within `POST_INTERVAL_MS`.
+   * and the next build posts it. The per-test issues `replacing` join the body's "Previously
+   * tracked in" line, and the post names them, even within `POST_INTERVAL_MS`: they are closed
+   * after it, so one still open was never named.
    */
   const postBreak = async (
     suite: FailingSuite,
@@ -359,10 +360,9 @@ export const reportConsistentFailureIssues = async (
     const postedAt = failingPostedAt(body);
     const last = postedAt[key];
     const reopen = issue.state === 'closed';
-    const { body: listed, added } = listReplacedIssues(body, replacing);
     if (
       !reopen &&
-      added.length === 0 &&
+      replacing.length === 0 &&
       last &&
       now.getTime() - new Date(last).getTime() < POST_INTERVAL_MS
     ) {
@@ -375,13 +375,13 @@ export const reportConsistentFailureIssues = async (
       return;
     }
     const newBody = updateIssueMetadata(
-      listed,
+      listReplacedIssues(body, replacing),
       { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
       FLAKY_TEST_SUITE_METADATA_PREFIX
     );
     await github.addIssueComment(
       issue.number,
-      withPreviouslyTracked(renderFailingSuiteComment(suite, build), added)
+      withPreviouslyTracked(renderFailingSuiteComment(suite, build), replacing)
     );
     await github.editIssue(issue.number, { body: newBody, ...(reopen ? { state: 'open' } : {}) });
     log.info(

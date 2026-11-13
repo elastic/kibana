@@ -95,34 +95,22 @@ const withPreviouslyTrackedLine = (body: string, numbers: readonly number[]): st
   )}${metadata}`;
 };
 
-export interface ListedReplacedIssues {
-  body: string;
-  /** The issues the body didn't list yet, which the comment posted with it names. */
-  added: number[];
-}
-
 /**
  * The body of a suite issue that replaces `numbers` after it was filed, with those it doesn't list
  * yet joining its "Previously tracked in" line. The tests table stays as filed.
  */
-export const listReplacedIssues = (
-  body: string,
-  numbers: readonly number[]
-): ListedReplacedIssues => {
+export const listReplacedIssues = (body: string, numbers: readonly number[]): string => {
   const listed = [...new Set([...recordedNumbers(body, PREVIOUS_ISSUES), ...numbersInLine(body)])];
   const added = numbers.filter((number) => !listed.includes(number));
   if (added.length === 0) {
-    return { body, added };
+    return body;
   }
   const previous = [...listed, ...added];
-  return {
-    body: updateIssueMetadata(
-      withPreviouslyTrackedLine(body, previous),
-      { [PREVIOUS_ISSUES]: previous },
-      FLAKY_TEST_SUITE_METADATA_PREFIX
-    ),
-    added,
-  };
+  return updateIssueMetadata(
+    withPreviouslyTrackedLine(body, previous),
+    { [PREVIOUS_ISSUES]: previous },
+    FLAKY_TEST_SUITE_METADATA_PREFIX
+  );
 };
 
 /** The comment, followed by the issues it names as previously tracking the suite. */

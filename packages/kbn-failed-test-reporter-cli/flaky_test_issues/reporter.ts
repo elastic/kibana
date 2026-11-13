@@ -600,8 +600,8 @@ export const reportFlakySuiteIssues = async (
    * next qualifying report comments instead. Recording it after the comment would take another
    * edit, and a failure there would mean a duplicate comment rather than a missed one. The
    * per-test issues of the suites refreshed join the body's "Previously tracked in" line, and the
-   * comment names them: new ones get a comment even when none is due, so the move doesn't wait out
-   * the cooldown. They are closed last, in favor of the issue as now open.
+   * comment names them, posted for them even when none is due. They are closed last, in favor of
+   * the issue as now open: one left open by a comment that failed is named by the next run.
    */
   const update = async (
     suite: FlakySuite,
@@ -612,12 +612,13 @@ export const reportFlakySuiteIssues = async (
     const recordEach = (action: (ref: SuiteRef) => FlakySuiteAction) =>
       members.forEach((member) => record(action(suiteRef(member))));
     const replacing = members.map((member) => issuesOf(perTestIssuesOf(member)));
-    const { body: listed, added } = listReplacedIssues(
-      issue.body,
-      distinctIssues(replacing.flat()).map(({ number }) => number)
-    );
-    const comment = due || added.length > 0;
-    const body = refreshFlakySuiteIssueMetadata(listed, suite, { report, previous, comment });
+    const replaced = distinctIssues(replacing.flat()).map(({ number }) => number);
+    const comment = due || replaced.length > 0;
+    const body = refreshFlakySuiteIssueMetadata(listReplacedIssues(issue.body, replaced), suite, {
+      report,
+      previous,
+      comment,
+    });
     try {
       await github.editIssue(issue.number, { body, ...(reopen ? { state: 'open' } : {}) });
       if (comment) {
@@ -625,7 +626,7 @@ export const reportFlakySuiteIssues = async (
           issue.number,
           withPreviouslyTracked(
             renderFlakySuiteIssueComment(suite, { report, reopened: reopen, previous }),
-            added
+            replaced
           )
         );
       }
