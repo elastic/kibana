@@ -26,8 +26,10 @@ import {
   validateOtlpDuration,
   validateOtlpEndpoint,
   validateOtlpHeaders,
+  validateOtlpHttpEndpoint,
+  validateOtlpHttpUrl,
+  validateOtlpProxyUrl,
   validateOtlpShortString,
-  validateOtlpUrl,
 } from './output_form_validators';
 
 type OtlpProtocol = OtlpExporterConfig['protocol'];
@@ -65,7 +67,12 @@ export function useOtlpInputs(
 
   const otlpEndpointInput = useInput(
     exporter?.endpoint ?? '',
-    validateIfSelected(validateOtlpEndpoint),
+    // an HTTP endpoint is a URL, which an endpoint kept from gRPC may not be
+    validateIfSelected(
+      otlpProtocolInput.value === otlpProtocol.HttpProtobuf
+        ? validateOtlpHttpEndpoint
+        : validateOtlpEndpoint
+    ),
     disabled
   );
   const otlpCompressionInput = useInput(
@@ -136,22 +143,22 @@ export function useOtlpInputs(
   );
   const otlpTracesEndpointInput = useInput(
     toInputValue(http?.traces_endpoint),
-    validateIfSelected(validateOtlpUrl),
+    validateIfSelected(validateOtlpHttpUrl),
     disabled
   );
   const otlpMetricsEndpointInput = useInput(
     toInputValue(http?.metrics_endpoint),
-    validateIfSelected(validateOtlpUrl),
+    validateIfSelected(validateOtlpHttpUrl),
     disabled
   );
   const otlpLogsEndpointInput = useInput(
     toInputValue(http?.logs_endpoint),
-    validateIfSelected(validateOtlpUrl),
+    validateIfSelected(validateOtlpHttpUrl),
     disabled
   );
   const otlpProfilesEndpointInput = useInput(
     toInputValue(http?.profiles_endpoint),
-    validateIfSelected(validateOtlpUrl),
+    validateIfSelected(validateOtlpHttpUrl),
     disabled
   );
   const otlpHttpReadBufferSizeInput = useInput(
@@ -166,7 +173,7 @@ export function useOtlpInputs(
   );
   const otlpProxyUrlInput = useInput(
     toInputValue(http?.proxy_url),
-    validateIfSelected(validateOtlpUrl),
+    validateIfSelected(validateOtlpProxyUrl),
     disabled
   );
   const otlpMaxIdleConnsInput = useInput(

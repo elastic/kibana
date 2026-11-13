@@ -34,8 +34,10 @@ import {
   validateOtlpDuration,
   validateOtlpEndpoint,
   validateOtlpHeaders,
+  validateOtlpHttpEndpoint,
+  validateOtlpHttpUrl,
+  validateOtlpProxyUrl,
   validateOtlpShortString,
-  validateOtlpUrl,
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
@@ -714,23 +716,53 @@ describe('OTLP validators', () => {
     });
   });
 
-  describe('validateOtlpUrl', () => {
-    it.each(['', 'https://collector.example.com:4318/v1/traces', 'http://proxy:3128'])(
+  describe('validateOtlpHttpUrl', () => {
+    it.each(['', 'https://collector.example.com:4318/v1/traces', 'http://collector:4318'])(
       'should accept %p',
       (value) => {
-        expect(validateOtlpUrl(value)).toBeUndefined();
+        expect(validateOtlpHttpUrl(value)).toBeUndefined();
       }
     );
 
-    it.each(['collector', 'https://collector example.com'])('should reject %p', (value) => {
-      expect(validateOtlpUrl(value)).toEqual([
+    it.each([
+      'collector',
+      'collector.example.com:4318/v1/traces',
+      'grpc://collector.example.com:4317',
+      'https://collector example.com',
+    ])('should reject %p', (value) => {
+      expect(validateOtlpHttpUrl(value)).toEqual([
         'Specify a URL such as https://collector.example.com:4318',
       ]);
     });
 
     it('should reject URLs longer than 2048 characters', () => {
-      expect(validateOtlpUrl(`https://${'a'.repeat(2048)}`)).toEqual([
+      expect(validateOtlpHttpUrl(`https://${'a'.repeat(2048)}`)).toEqual([
         'URL must be at most 2048 characters',
+      ]);
+    });
+  });
+
+  describe('validateOtlpProxyUrl', () => {
+    it.each(['', 'http://proxy:3128', 'https://proxy:3128', 'socks5://proxy:1080'])(
+      'should accept %p',
+      (value) => {
+        expect(validateOtlpProxyUrl(value)).toBeUndefined();
+      }
+    );
+
+    it.each(['proxy:3128', 'ftp://proxy:21'])('should reject %p', (value) => {
+      expect(validateOtlpProxyUrl(value)).toEqual([
+        'Specify a URL such as http://proxy.example.com:3128',
+      ]);
+    });
+  });
+
+  describe('validateOtlpHttpEndpoint', () => {
+    it('should require an HTTP or HTTPS URL', () => {
+      expect(validateOtlpHttpEndpoint('')).toEqual(['Endpoint is required']);
+      expect(validateOtlpHttpEndpoint(' https://collector.example.com:4318 ')).toBeUndefined();
+      expect(validateOtlpHttpEndpoint('collector.example.com:4317')).toEqual([
+        'Specify a URL such as https://collector.example.com:4318',
       ]);
     });
   });

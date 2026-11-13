@@ -787,12 +787,14 @@ export function validateOtlpCompressionLevel(value: string) {
   }
 }
 
-/** An optional absolute URL of at most 2048 characters, such as `https://collector:4318/v1/traces`. */
-export function validateOtlpUrl(value: string) {
-  const url = value?.trim() ?? '';
-  if (!url) {
-    return;
-  }
+const OTLP_HTTP_URL_SCHEMES = ['http:', 'https:'];
+// the proxy schemes that the Go HTTP client supports
+const OTLP_PROXY_URL_SCHEMES = ['http:', 'https:', 'socks5:', 'socks5h:'];
+const OTLP_HTTP_URL_EXAMPLE = 'https://collector.example.com:4318';
+const OTLP_PROXY_URL_EXAMPLE = 'http://proxy.example.com:3128';
+
+/** Validates a URL that is set: at most 2048 characters, with one of the schemes and a host. */
+function validateOtlpUrl(url: string, schemes: string[], example: string) {
   if (url.length > 2048) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpUrlTooLong', {
@@ -801,20 +803,44 @@ export function validateOtlpUrl(value: string) {
       }),
     ];
   }
-  let isValid = !/\s/.test(url);
-  try {
-    new URL(url); // eslint-disable-line no-new
-  } catch (e) {
-    isValid = false;
+  let isValid = false;
+  if (!/\s/.test(url)) {
+    try {
+      // a value such as `collector:4318` parses as an opaque URL with the `collector:` scheme
+      const { protocol, hostname } = new URL(url);
+      isValid = schemes.includes(protocol) && !!hostname;
+    } catch (e) {
+      isValid = false;
+    }
   }
   if (!isValid) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpUrlInvalid', {
         defaultMessage: 'Specify a URL such as {example}',
-        values: { example: 'https://collector.example.com:4318' },
+        values: { example },
       }),
     ];
   }
+}
+
+/** The endpoint of an HTTP output: required, and an HTTP or HTTPS URL. */
+export function validateOtlpHttpEndpoint(value: string) {
+  return (
+    validateOtlpEndpoint(value) ??
+    validateOtlpUrl(value.trim(), OTLP_HTTP_URL_SCHEMES, OTLP_HTTP_URL_EXAMPLE)
+  );
+}
+
+/** An optional HTTP or HTTPS URL, such as `https://collector:4318/v1/traces`. */
+export function validateOtlpHttpUrl(value: string) {
+  const url = value?.trim() ?? '';
+  return url ? validateOtlpUrl(url, OTLP_HTTP_URL_SCHEMES, OTLP_HTTP_URL_EXAMPLE) : undefined;
+}
+
+/** An optional proxy URL, such as `http://proxy:3128`. */
+export function validateOtlpProxyUrl(value: string) {
+  const url = value?.trim() ?? '';
+  return url ? validateOtlpUrl(url, OTLP_PROXY_URL_SCHEMES, OTLP_PROXY_URL_EXAMPLE) : undefined;
 }
 
 /** An optional string of at most 256 characters. */

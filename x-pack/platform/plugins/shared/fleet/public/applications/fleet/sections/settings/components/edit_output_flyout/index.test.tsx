@@ -2614,6 +2614,27 @@ describe('EditOutputFlyout', () => {
         expect(utils.getByTestId('saveApplySettingsBtn')).not.toBeDisabled();
       });
 
+      it('should require an HTTP endpoint after switching from gRPC to HTTP', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        selectProtocol(utils, 'HTTP/Protobuf');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText('Specify a URL such as https://collector.example.com:4318')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'https://collector.example.com:4318' },
+        });
+
+        expect(
+          utils.queryByText('Specify a URL such as https://collector.example.com:4318')
+        ).toBeNull();
+      });
+
       it('should send only the settings of the new protocol when switching from gRPC to HTTP', async () => {
         const { utils } = renderFlyout(otlpOutput);
         selectProtocol(utils, 'HTTP/Protobuf');
