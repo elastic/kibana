@@ -229,7 +229,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, config
       ? sharedI18nTexts.cloud.insufficientMemoryError(
           docLinks.links.reporting.cloudMinimumRequirements
         )
-      : info.getError();
+      : sharedI18nTexts.notRetriedError(info.error_code) ?? info.getError();
 
   return (
     <>

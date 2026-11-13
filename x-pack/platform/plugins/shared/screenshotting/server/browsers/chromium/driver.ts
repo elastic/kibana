@@ -94,6 +94,10 @@ export class HeadlessChromiumDriver {
   private interceptedCount = 0;
   private screenshottingErrorSubject = new Subject<Error>();
   readonly screenshottingError$ = this.screenshottingErrorSubject.asObservable();
+  private browserExitError?: Error;
+  private browserExitSubject = new Subject<Error>();
+  /** Emits once, when the browser closes or the page crashes while the page is in use. */
+  readonly browserExit$ = this.browserExitSubject.asObservable();
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
@@ -153,7 +157,18 @@ export class HeadlessChromiumDriver {
    * Let modules poll if Chrome is still running so they can short circuit if needed
    */
   isPageOpen() {
-    return !this.page.isClosed();
+    // Puppeteer only marks the page closed when its target is destroyed, which a crashed page or
+    // a dropped browser connection does not report.
+    return !this.browserExitError && !this.page.isClosed();
+  }
+
+  /** Records that the browser died, so work on the page fails as a closed browser. */
+  onBrowserExit(error: Error) {
+    if (this.browserExitError) {
+      return;
+    }
+    this.browserExitError = error;
+    this.browserExitSubject.next(error);
   }
 
   /**

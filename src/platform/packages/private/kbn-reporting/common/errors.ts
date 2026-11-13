@@ -105,7 +105,7 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
 
   public humanFriendlyMessage() {
     return i18n.translate('reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
-      defaultMessage: `Can't generate a PDF due to insufficient memory. Try making a smaller PDF and retrying this report.`,
+      defaultMessage: `Can't generate a PDF due to insufficient memory. The report was not retried because it would likely fail again. Try making a smaller PDF.`,
     });
   }
 }
@@ -127,6 +127,12 @@ export class BrowserUnexpectedlyClosedError extends ReportingError {
   static code = 'browser_unexpectedly_closed_error' as const;
   public get code(): string {
     return BrowserUnexpectedlyClosedError.code;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.browserUnexpectedlyClosedErrorMessage', {
+      defaultMessage: `Can't generate this report because the browser closed unexpectedly. The report was not retried because it would likely fail again. Try reducing the amount of data in the report.`,
+    });
   }
 }
 

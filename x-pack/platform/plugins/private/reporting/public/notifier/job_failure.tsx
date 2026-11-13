@@ -38,7 +38,7 @@ export const getFailureToast = (
             ? sharedI18nTexts.cloud.insufficientMemoryError(
                 docLinks.links.reporting.cloudMinimumRequirements
               )
-            : errorText}
+            : sharedI18nTexts.notRetriedError(job.errorCode) ?? errorText}
         </EuiCallOut>
 
         <EuiSpacer />
