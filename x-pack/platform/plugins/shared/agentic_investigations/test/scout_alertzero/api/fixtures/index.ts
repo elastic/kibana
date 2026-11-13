@@ -28,5 +28,7 @@ export {
 } from './constants';
 export { expectCreated, deleteConversations, spaceUrl, seedInvestigation } from './helpers';
 export type { SeedInvestigationOptions } from './helpers';
+export { createIdentities } from './identities';
+export type { IdentityFixture, TestIdentity } from './identities';
 export { seedSubject, cleanupSubjects } from './subject_index';
 export type { SeedSubjectOptions } from './subject_index';
