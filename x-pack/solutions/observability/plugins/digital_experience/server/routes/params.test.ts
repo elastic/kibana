@@ -62,6 +62,7 @@ describe('timeZoneShape', () => {
   it('accepts a UTC offset, which the browser sends when it cannot name its time zone', () => {
     expect(timeZoneQuery().safeParse({ timeZone: '+01:00' }).data?.timeZone).toBe('+01:00');
     expect(timeZoneQuery().safeParse({ timeZone: '-05:30' }).success).toBe(true);
+    expect(timeZoneQuery().safeParse({ timeZone: '+14:00' }).success).toBe(true);
   });
 
   it('names the zones Elasticsearch rejects by the zones they link to', () => {
@@ -69,9 +70,11 @@ describe('timeZoneShape', () => {
     expect(timeZoneQuery().safeParse({ timeZone: 'ROC' }).data?.timeZone).toBe('Asia/Taipei');
   });
 
-  it('rejects an unknown time zone or a malformed offset', () => {
+  it('rejects an unknown time zone or an impossible offset', () => {
     expect(timeZoneQuery().safeParse({ timeZone: 'Not/AZone' }).success).toBe(false);
     expect(timeZoneQuery().safeParse({ timeZone: '+1:00' }).success).toBe(false);
+    expect(timeZoneQuery().safeParse({ timeZone: '+15:00' }).success).toBe(false);
+    expect(timeZoneQuery().safeParse({ timeZone: '+99:99' }).success).toBe(false);
   });
 
   it('bounds the time zone to 64 characters', () => {
