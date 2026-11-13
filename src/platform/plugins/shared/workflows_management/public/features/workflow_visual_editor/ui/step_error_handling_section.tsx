@@ -20,13 +20,17 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import { isMap, parseDocument, type YAMLMap } from 'yaml';
 import { i18n } from '@kbn/i18n';
+import { parseStepFragment } from '../lib/parse_step_fragment';
 
 export interface FallbackStepChip {
   readonly name: string;
 }
 
 export interface StepErrorHandlingSectionProps {
+  /** The step's text, which every change is written back into. */
   readonly fragment: string;
+  /** The step's `on-failure` as plain data (already parsed from `fragment`), for what is shown. */
+  readonly onFailureValue: unknown;
   readonly indent: number;
   readonly onFragmentChange: (next: string) => void;
   /** The step is a loop: the engine runs retry / continue around the whole loop, not per iteration. */
@@ -36,13 +40,11 @@ export interface StepErrorHandlingSectionProps {
 const DEFAULT_MAX_ATTEMPTS = 3;
 const DEFAULT_DELAY = '5s';
 
-const toJs = (value: unknown): unknown =>
-  value !== null && typeof value === 'object' && 'toJSON' in (value as object)
-    ? (value as { toJSON: () => unknown }).toJSON()
-    : value;
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
 const readOnFailure = (
-  fragment: string
+  onFailure: unknown
 ): {
   retryEnabled: boolean;
   maxAttempts: number;
@@ -51,10 +53,8 @@ const readOnFailure = (
   fallbacks: FallbackStepChip[];
   configured: boolean;
 } => {
-  const doc = parseDocument(fragment);
-  const raw = isMap(doc.contents) ? doc.getIn(['on-failure'], false) : undefined;
-  const js = toJs(raw) as Record<string, unknown> | undefined;
-  if (!js || typeof js !== 'object') {
+  const js = isObject(onFailure) ? onFailure : undefined;
+  if (!js) {
     return {
       retryEnabled: false,
       maxAttempts: DEFAULT_MAX_ATTEMPTS,
@@ -93,7 +93,7 @@ const readOnFailure = (
 
 /** True when any on-failure setting is present on the fragment. */
 export const hasOnFailureConfigured = (fragment: string): boolean =>
-  readOnFailure(fragment).configured;
+  readOnFailure(parseStepFragment(fragment).read(['on-failure'])).configured;
 
 const mutateOnFailure = (
   fragment: string,
@@ -123,6 +123,7 @@ const mutateOnFailure = (
  */
 export function StepErrorHandlingSection({
   fragment,
+  onFailureValue,
   indent,
   onFragmentChange,
   isLoop = false,
@@ -130,7 +131,7 @@ export function StepErrorHandlingSection({
   const { euiTheme } = useEuiTheme();
   const retrySwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorRetry' });
   const continueSwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorContinue' });
-  const state = useMemo(() => readOnFailure(fragment), [fragment]);
+  const state = useMemo(() => readOnFailure(onFailureValue), [onFailureValue]);
 
   const setRetryEnabled = useCallback(
     (enabled: boolean) => {

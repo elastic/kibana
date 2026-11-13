@@ -36,7 +36,6 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
 import React, {
   createContext,
   useCallback,
@@ -79,6 +78,7 @@ import {
   useReferenceDecorations,
   useReferenceIconMasks,
 } from './use_reference_decorations';
+import { useStepFragment } from './use_step_fragment';
 import type { ValueSource } from './value_source_toggle';
 import { ValueSourceToggle } from './value_source_toggle';
 import { VariantField } from './variant_field';
@@ -94,6 +94,8 @@ import { collectStepNames } from '../lib/collect_step_names';
 import { containsMapDirective, MAP_DIRECTIVE_KEY } from '../lib/contains_map_directive';
 import { isInParallelBody } from '../lib/is_in_parallel_body';
 import { fromTags, isTagValue, toTags } from '../lib/list_value';
+import type { ParsedStepFragment } from '../lib/parse_step_fragment';
+import { isStepFragmentDirty } from '../lib/parse_step_fragment';
 import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
 import type { ReferenceForm } from '../lib/reference_value';
 import {
@@ -226,12 +228,6 @@ const monacoLanguageFor = (field: StepFormField): string => {
   }
 };
 
-const readFragmentValue = (fragment: string, path: readonly string[]): unknown => {
-  const doc = parseDocument(fragment);
-  if (!isMap(doc.contents)) return undefined;
-  return doc.getIn(path as string[], false);
-};
-
 /**
  * Writes one form-owned key back into the fragment. Only that key changes —
  * comments, unknown keys and Liquid expressions elsewhere are untouched.
@@ -266,11 +262,6 @@ const detectIndent = (yaml: string): number => {
   }
   return 2;
 };
-
-const toJs = (value: unknown): unknown =>
-  value !== null && typeof value === 'object' && 'toJSON' in (value as object)
-    ? (value as { toJSON: () => unknown }).toJSON()
-    : value;
 
 /** Stable id for field rows and draft-error maps. */
 const fieldId = (field: StepFormField): string => field.path.join('.');
@@ -310,24 +301,6 @@ function YamlOnlyValue({
     </>
   );
 }
-
-/**
- * True when the panel draft differs from the applied snapshot opened with.
- * Compares parsed YAML values (not focus / "touched" state).
- */
-const isDraftDirty = (draftYaml: string, appliedYaml: string): boolean => {
-  if (draftYaml === appliedYaml) return false;
-  try {
-    const draftDoc = parseDocument(draftYaml);
-    const appliedDoc = parseDocument(appliedYaml);
-    if (draftDoc.errors.length > 0 || appliedDoc.errors.length > 0) {
-      return draftYaml !== appliedYaml;
-    }
-    return !isEqual(draftDoc.toJS(), appliedDoc.toJS());
-  } catch {
-    return draftYaml !== appliedYaml;
-  }
-};
 
 /**
  * Settings accordion open state for the lifetime of this page. Survives panel
@@ -435,10 +408,14 @@ export function StepConfigPanel({
     [workflowDefinition]
   );
 
+  // The fragment is parsed once here; every read below goes through it.
+  const parsed = useStepFragment(fragment);
+  const initialParsed = useStepFragment(initialFragment);
+
   const currentStepName = useMemo(() => {
-    const name = toJs(readFragmentValue(fragment, ['name']));
+    const name = parsed.read(['name']);
     return typeof name === 'string' ? name : '';
-  }, [fragment]);
+  }, [parsed]);
 
   const referenceCatalog = useMemo(
     () =>
@@ -451,13 +428,6 @@ export function StepConfigPanel({
     [workflowDefinition, currentStepName, connectors, resolveStepScope]
   );
 
-  const parsed = useMemo(() => {
-    const doc = parseDocument(fragment);
-    const valid = doc.errors.length === 0 && isMap(doc.contents);
-    const js = valid ? (doc.toJS() as Record<string, unknown>) : undefined;
-    return { valid, js, error: doc.errors[0]?.message };
-  }, [fragment]);
-
   const handleFieldChange = useCallback(
     (field: StepFormField, value: unknown) =>
       setFragment((current) => writeFragmentValue(current, field, value, indent)),
@@ -466,7 +436,7 @@ export function StepConfigPanel({
 
   const expandedFieldValue = useMemo(() => {
     if (!expandedField) return '';
-    const raw = toJs(readFragmentValue(fragment, expandedField.path));
+    const raw = parsed.read(expandedField.path);
     if (raw === undefined || raw === null) return '';
     // Like the Data box, which hides a typed value kept while the switch sits on Data.
     if (
@@ -483,7 +453,7 @@ export function StepConfigPanel({
       return JSON.stringify(raw, null, 2);
     }
     return String(raw);
-  }, [expandedField, fragment]);
+  }, [expandedField, parsed]);
 
   const handleExpandedFieldChange = useCallback(
     (next: string) => {
@@ -596,6 +566,10 @@ export function StepConfigPanel({
   }, [draftErrors, committedStepName]);
 
   const canApplyDraft = parsed.valid && !hasBlockingDraftErrors;
+  const isDirty = useMemo(
+    () => isStepFragmentDirty(parsed, initialParsed),
+    [parsed, initialParsed]
+  );
 
   const closeLabel = i18n.translate('workflows.stepConfigPanel.close', {
     defaultMessage: 'Close',
@@ -647,7 +621,7 @@ export function StepConfigPanel({
       </EuiTitle>
       <StepFieldRow
         field={field}
-        value={toJs(readFragmentValue(fragment, field.path))}
+        value={parsed.read(field.path)}
         showValidation={showValidation}
         referenceCatalog={referenceCatalog}
         showOptionalMarker={false}
@@ -1037,7 +1011,7 @@ export function StepConfigPanel({
                     stepType={stepType}
                     fields={fields}
                     hasSchema={schema !== undefined}
-                    fragment={fragment}
+                    step={parsed}
                     showValidation={showValidation}
                     referenceCatalog={referenceCatalog}
                     onChange={handleFieldChange}
@@ -1108,6 +1082,7 @@ export function StepConfigPanel({
                         </EuiTitle>
                         <StepErrorHandlingSection
                           fragment={fragment}
+                          onFailureValue={parsed.read(['on-failure'])}
                           indent={indent}
                           onFragmentChange={setFragment}
                           isLoop={LoopStepTypes.some((type) => type === stepType)}
@@ -1153,7 +1128,7 @@ export function StepConfigPanel({
               <EuiButtonEmpty
                 iconType="undo"
                 onClick={onRevert}
-                isDisabled={!isDraftDirty(fragment, initialFragment)}
+                isDisabled={!isDirty}
                 data-test-subj="workflowStepConfigPanelResetNode"
               >
                 {i18n.translate('workflows.stepConfigPanel.resetNode', {
@@ -1229,7 +1204,7 @@ function StepForm({
   stepType,
   fields,
   hasSchema,
-  fragment,
+  step,
   showValidation,
   referenceCatalog,
   onChange,
@@ -1240,7 +1215,7 @@ function StepForm({
   fields: readonly StepFormField[];
   /** False when no connector/built-in schema was resolved for this step type. */
   hasSchema: boolean;
-  fragment: string;
+  step: ParsedStepFragment;
   showValidation: boolean;
   referenceCatalog: ReturnType<typeof buildDataReferenceCatalog>;
   onChange: (field: StepFormField, value: unknown) => void;
@@ -1274,7 +1249,7 @@ function StepForm({
   const [revealedOptionalIds, setRevealedOptionalIds] = useState<readonly string[]>(() => {
     const ids: string[] = [];
     for (const field of optionalFields) {
-      if (!isEmptyFieldValue(toJs(readFragmentValue(fragment, field.path)))) {
+      if (!isEmptyFieldValue(step.read(field.path))) {
         ids.push(fieldId(field));
       }
     }
@@ -1288,13 +1263,13 @@ function StepForm({
       for (const field of optionalFields) {
         const id = fieldId(field);
         if (prev.includes(id)) continue;
-        if (isEmptyFieldValue(toJs(readFragmentValue(fragment, field.path)))) continue;
+        if (isEmptyFieldValue(step.read(field.path))) continue;
         if (!next) next = [...prev];
         next.push(id);
       }
       return next ?? prev;
     });
-  }, [fragment, optionalFields]);
+  }, [step, optionalFields]);
 
   const revealedOptionalFields = useMemo(() => {
     const out: StepFormField[] = [];
@@ -1334,7 +1309,7 @@ function StepForm({
       return (
         <div key={fieldId(field)} className="workflowStepConfigFieldRow">
           <SwitchCasesField
-            value={toJs(readFragmentValue(fragment, field.path))}
+            value={step.read(field.path)}
             onChange={(next) => onChange(field, next)}
           />
         </div>
@@ -1345,7 +1320,7 @@ function StepForm({
       <StepFieldRow
         key={fieldId(field)}
         field={field}
-        value={toJs(readFragmentValue(fragment, field.path))}
+        value={step.read(field.path)}
         showValidation={showValidation}
         referenceCatalog={referenceCatalog}
         showOptionalMarker={options.showOptionalMarker ?? !field.required}

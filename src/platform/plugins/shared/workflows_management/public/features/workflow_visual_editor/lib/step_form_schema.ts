@@ -889,7 +889,7 @@ export const getStepFormSchema = (
   };
 };
 
-const readPath = (step: Record<string, unknown>, path: readonly string[]): unknown =>
+export const readPath = (step: Record<string, unknown>, path: readonly string[]): unknown =>
   path.reduce<unknown>(
     (acc, key) =>
       acc !== null && typeof acc === 'object' ? (acc as Record<string, unknown>)[key] : undefined,
