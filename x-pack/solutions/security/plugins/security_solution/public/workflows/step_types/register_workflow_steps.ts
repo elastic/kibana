@@ -108,4 +108,10 @@ export const registerWorkflowSteps = (
       (m) => m.matchAttackFingerprintsStepDefinition
     )
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./aesop_select_winner/aesop_select_winner_step').then(
+      (m) => m.aesopSelectWinnerStepDefinition
+    )
+  );
 };

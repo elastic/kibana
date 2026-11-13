@@ -29,6 +29,7 @@ import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step/get_alert_entities_step';
 import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints/match_attack_fingerprints_step';
+import { aesopSelectWinnerStepDefinition } from './aesop_select_winner/aesop_select_winner_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
@@ -40,7 +41,7 @@ describe('registerWorkflowSteps (public)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(21);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(22);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
   });
 
@@ -71,6 +72,7 @@ describe('registerWorkflowSteps (public)', () => {
       loader19,
       loader20,
       loader21,
+      loader22,
     ] = workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
@@ -94,5 +96,6 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader19()).resolves.toBe(patchRuleStepDefinition);
     await expect(loader20()).resolves.toBe(getAlertEntitiesStepDefinition);
     await expect(loader21()).resolves.toBe(matchAttackFingerprintsStepDefinition);
+    await expect(loader22()).resolves.toBe(aesopSelectWinnerStepDefinition);
   });
 });
