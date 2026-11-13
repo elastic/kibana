@@ -166,6 +166,15 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('Authorization: $CONNECTOR_HEADER_AUTHORIZATION');
     });
 
+    it('documents the sandbox egress proxy policy and curl -i diagnostic hint', async () => {
+      const { content } = await renderManifest();
+
+      expect(content).toContain('no direct DNS or internet access');
+      expect(content).toContain('egress proxy');
+      expect(content).toContain('Pass `connector_id`');
+      expect(content).toContain('run `curl -i`');
+    });
+
     it('does not advertise an in-sandbox connector callback CLI', async () => {
       const { content } = await renderManifest();
 
