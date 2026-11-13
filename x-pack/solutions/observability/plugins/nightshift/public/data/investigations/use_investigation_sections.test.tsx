@@ -145,6 +145,32 @@ describe('useInvestigationSections', () => {
     ]);
   });
 
+  it('does not filter running investigations by a window that ends now', () => {
+    renderHook(() => useInvestigationSections({ updatedAfter: '2026-11-07T12:00:00.000Z' }), {
+      wrapper: createWrapper(),
+    });
+
+    const [inProgressParams, ...finishedParams] = mockUseFetchInvestigations.mock.calls
+      .slice(0, 6)
+      .map(([{ updatedAfter, updatedBefore }]) => ({ updatedAfter, updatedBefore }));
+    expect(inProgressParams).toEqual({ updatedAfter: undefined, updatedBefore: undefined });
+    finishedParams.forEach((params) =>
+      expect(params).toEqual({ updatedAfter: '2026-11-07T12:00:00.000Z', updatedBefore: undefined })
+    );
+  });
+
+  it('filters running investigations by a window that ended in the past', () => {
+    const updatedWindow = {
+      updatedAfter: '2026-11-02T12:00:00.000Z',
+      updatedBefore: '2026-11-08T12:00:00.000Z',
+    };
+    renderHook(() => useInvestigationSections(updatedWindow), { wrapper: createWrapper() });
+
+    mockUseFetchInvestigations.mock.calls
+      .slice(0, 6)
+      .forEach(([params]) => expect(params).toEqual(expect.objectContaining(updatedWindow)));
+  });
+
   it('maps the shared severity counts onto the tiers for the tiles', async () => {
     const { result } = renderSections('checkout');
 

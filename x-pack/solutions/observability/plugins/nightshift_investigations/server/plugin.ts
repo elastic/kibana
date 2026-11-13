@@ -23,8 +23,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { LockManagerService } from '@kbn/lock-manager';
@@ -39,11 +37,7 @@ import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { createEnsureFailureSweep } from './lib/managed_workflows/ensure_failure_sweep';
 import { sweepInvestigationFailuresStepDefinition } from './step_definitions/sweep_investigation_failures';
-import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
-import { installOnlineEvalsWorkflow } from './lib/managed_workflows/install_online_evals_workflow';
-import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
-import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
-import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
+import { installStaticWorkflows } from './lib/managed_workflows/install_static_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import {
   createInvestigatorServiceAccountService,
@@ -68,9 +62,15 @@ import { triggerInvestigationStepDefinition } from './step_definitions/trigger_i
 import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
 import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
 import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
+import { scoreMemoryOnlineEvalsStepDefinition } from './step_definitions/score_memory_online_evals';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
-import { alertOutcomeJudges, wikiJudges, referenceFreeJudges } from './online_evals/judges';
+import {
+  alertOutcomeJudges,
+  memoryJudges,
+  referenceFreeJudges,
+  wikiJudges,
+} from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -238,7 +238,12 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('telemetry'),
     });
     this.telemetry = telemetry;
-    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges, ...wikiJudges]) {
+    for (const judge of [
+      ...referenceFreeJudges,
+      ...alertOutcomeJudges,
+      ...wikiJudges,
+      ...memoryJudges,
+    ]) {
       plugins.evals?.registerEvaluator(judge);
     }
 
@@ -536,6 +541,7 @@ export class NightshiftInvestigationsPlugin
           followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
         );
         const isOnlineEvalsPaused = createIsOnlineEvalsPaused(core.getStartServices);
+        const shouldIncludeExplanations = createShouldIncludeExplanations(core.getStartServices);
         plugins.workflowsExtensions.registerStepDefinition(
           classifyOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
@@ -561,7 +567,7 @@ export class NightshiftInvestigationsPlugin
               });
             },
             isPaused: isOnlineEvalsPaused,
-            shouldIncludeExplanations: createShouldIncludeExplanations(core.getStartServices),
+            shouldIncludeExplanations,
             telemetry,
           })
         );
@@ -707,6 +713,21 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
             telemetry,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          scoreMemoryOnlineEvalsStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getEvaluate: () => this.evals?.evaluate,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            isPaused: isOnlineEvalsPaused,
+            shouldIncludeExplanations,
+            telemetry,
+            logger: this.logger.get('online_evals'),
+            isEnabled: () => this.wikiEnabled || this.memoryEnabled || this.decisionTreesEnabled,
+            isWikiEnabled: () => this.wikiEnabled,
+            isDecisionTreesEnabled: () => this.decisionTreesEnabled,
           })
         );
       }
@@ -1109,24 +1130,15 @@ export class NightshiftInvestigationsPlugin
   private async installManagedWorkflows(
     managedWorkflowsClient: Promise<ManagedWorkflowsClient>
   ): Promise<void> {
-    const client = await managedWorkflowsClient;
     // Each space reaches the global investigation through an entry point bound to the Nightshift
     // service account, installed with the bound Slack thread workflow when an admin sets the space
     // up (see lib/service_account). Not installing the Slack thread's global copy here lets
     // ready() remove any left from earlier versions.
-    await installInvestigationWorkflow({ client });
-    await installOnlineEvalsWorkflow({ client });
-    await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    await installStaticWorkflows({
+      client: await managedWorkflowsClient,
+      wikiOrMemoryEnabled: this.wikiEnabled || this.memoryEnabled,
+      decisionTreesEnabled: this.decisionTreesEnabled,
     });
-    if (this.wikiEnabled || this.memoryEnabled || this.decisionTreesEnabled) {
-      await installSandboxMaterializeWorkspaceWorkflow({ client });
-      await installAgentOptimizationsWorkflow({ client });
-    }
-    if (this.decisionTreesEnabled) {
-      await installDecisionTreeWorkflows({ client });
-    }
-    await client.ready();
   }
 
   stop(): void {}

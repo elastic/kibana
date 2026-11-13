@@ -87,12 +87,12 @@ export interface EventEdge extends GraphEdge {
   sourceIps?: string[] | string;
   sourceCountryCodes?: string[] | string;
   /**
-   * Unique identifier for the label node based on document IDs.
-   * This ensures that label nodes are deduplicated by documents, not by actor-target pairs.
+   * Unique identifier for the event node based on document IDs.
+   * This ensures that event nodes are deduplicated by documents, not by actor-target pairs.
    * When a single document expands via MV_EXPAND into multiple rows with different entity types,
-   * they should share the same label node because they originate from the same document(s).
+   * they should share the same event node because they originate from the same document(s).
    */
-  labelNodeId: string;
+  eventNodeId: string;
   pinned?: string | null;
 }
 
@@ -124,7 +124,7 @@ export interface EventEsqlRow {
    * Per-target → source-document mapping, one entry per (target, doc) pair, encoded as
    * "<targetEntityId>\n<_id>". Lets regroupEvents attribute each target to the document(s)
    * that referenced it after the STATS pre-aggregation drops targetEntityId from the group key,
-   * so label nodes stay split by document just as they would be if grouping by targetEntityId.
+   * so event nodes stay split by document just as they would be if grouping by targetEntityId.
    */
   targetDocMap: string | string[];
 }

@@ -9,7 +9,7 @@ import { graphlib, layout } from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { getStackNodeStyle } from '../node/styles';
-import { isEntityNode, isConnectorNode, isStackNode, isStackedLabel } from '../utils';
+import { isEntityNode, isConnectorNode, isStackNode, isOutsideConnectorGroup } from '../utils';
 import {
   GRID_SIZE,
   STACK_NODE_VERTICAL_PADDING,
@@ -107,7 +107,7 @@ export const layoutGraph = (
     g,
     (nodeId: string) => {
       const node = nodesById[nodeId].data;
-      return node && isStackedLabel(node);
+      return node && isOutsideConnectorGroup(node);
     },
     nodesById
   );

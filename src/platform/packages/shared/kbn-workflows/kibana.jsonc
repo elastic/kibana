@@ -3,5 +3,27 @@
   "id": "@kbn/workflows",
   "owner": ["@elastic/workflows-eng"],
   "group": "platform",
-  "visibility": "shared"
+  "visibility": "shared",
+  "build": {
+    // Managed workflow YAML files are read from disk on demand (see `readManagedWorkflowYaml`),
+    // so they must be shipped as-is. YAML files that are still imported as modules must be
+    // negated here, otherwise they won't be converted to `.yaml.js` and their imports will break.
+    "noParse": [
+      "managed/definitions/**/*.yaml",
+      "!managed/definitions/alertzero/detection_rule_coverage.yaml",
+      "!managed/definitions/alertzero/detection_rule_tuning.yaml",
+      "!managed/definitions/alertzero/floor_alert_triage.yaml",
+      "!managed/definitions/alertzero/floor_attack_discovery.yaml",
+      "!managed/definitions/alertzero/forensics_endpoint_analysis.yaml",
+      "!managed/definitions/alertzero/hunt/hunt_continuous_threat_hunt.yaml",
+      "!managed/definitions/context_engine/feedback_analysis.yaml",
+      "!managed/definitions/nightshift_investigations/agent_optimize/agent_optimize_workflow.yaml",
+      "!managed/definitions/nightshift_investigations/decision_tree_hydrate/decision_tree_hydrate_workflow.yaml",
+      "!managed/definitions/nightshift_investigations/investigation/bound_investigation_workflow.yaml",
+      "!managed/definitions/nightshift_investigations/sandbox_materialize_workspace/sandbox_materialize_workspace_workflow.yaml",
+      "!managed/definitions/nightshift_investigations/slack_thread/slack_thread_workflow.yaml",
+      "!managed/definitions/significant_events/scheduled_detection.yaml",
+      "!managed/definitions/significant_events/scheduled_review.yaml"
+    ]
+  }
 }

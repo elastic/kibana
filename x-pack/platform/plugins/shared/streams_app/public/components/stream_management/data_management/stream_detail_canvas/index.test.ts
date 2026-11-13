@@ -34,14 +34,45 @@ const s3Destination: S3DestinationViewModel = {
 
 describe('buildConfiguredDestinationNode', () => {
   it('announces a disconnected S3 destination as having no source', () => {
-    const node = buildConfiguredDestinationNode(s3Destination, false, []);
+    const node = buildConfiguredDestinationNode(s3Destination, false, [], false);
 
     expect(node.ariaLabel).toBe('Destination: Archive, Logs, no source');
     expect(node.data.subtitle).toBe('No source');
   });
 
+  it('sets the saved source flag apart from the staged connection', () => {
+    expect(buildConfiguredDestinationNode(s3Destination, true, [], false).data.hasSavedSource).toBe(
+      false
+    );
+    expect(buildConfiguredDestinationNode(s3Destination, false, [], true).data.hasSavedSource).toBe(
+      true
+    );
+    expect(buildConfiguredDestinationNode(s3Destination, false, [], true).data.subtitle).toBe(
+      'No source'
+    );
+  });
+
+  it('sets the saved source flag on an Elasticsearch destination', () => {
+    const destination = {
+      id: 'es-app',
+      name: 'App',
+      type: 'elasticsearch' as const,
+      signals: ['logs' as const],
+      mode: 'static' as const,
+      indexBySignal: { logs: 'logs-app-default' },
+      writePatternsBySignal: {},
+    };
+
+    expect(buildConfiguredDestinationNode(destination, true, [], false).data.hasSavedSource).toBe(
+      false
+    );
+    expect(buildConfiguredDestinationNode(destination, false, [], true).data.hasSavedSource).toBe(
+      true
+    );
+  });
+
   it('announces a connected S3 destination without the no source suffix', () => {
-    const node = buildConfiguredDestinationNode(s3Destination, true, []);
+    const node = buildConfiguredDestinationNode(s3Destination, true, [], true);
 
     expect(node.ariaLabel).toBe('Destination: Archive, Logs');
     expect(node.data.subtitle).toBe('my-archive');
@@ -51,7 +82,8 @@ describe('buildConfiguredDestinationNode', () => {
     const node = buildConfiguredDestinationNode(
       { ...s3Destination, description: 'Long-term log archive' },
       true,
-      []
+      [],
+      true
     );
 
     expect(node.data.subtitle).toBe('Long-term log archive');
@@ -71,7 +103,8 @@ describe('buildConfiguredDestinationNode', () => {
         writePatternsBySignal: {},
       },
       true,
-      ['logs-app-default']
+      ['logs-app-default'],
+      true
     );
 
     expect(node.data.subtitle).toBe('Application logs');
@@ -81,7 +114,8 @@ describe('buildConfiguredDestinationNode', () => {
     const node = buildConfiguredDestinationNode(
       { ...s3Destination, description: 'Long-term log archive' },
       false,
-      []
+      [],
+      false
     );
 
     expect(node.data.subtitle).toBe('No source');
@@ -102,14 +136,14 @@ describe('buildConfiguredDestinationNode', () => {
     });
 
     it('announces a disconnected remote destination as having no source', () => {
-      const node = buildConfiguredDestinationNode(remoteDestination(), false, []);
+      const node = buildConfiguredDestinationNode(remoteDestination(), false, [], false);
 
       expect(node.ariaLabel).toBe('Destination: Backup, Logs, Traces, no source');
       expect(node.data.subtitle).toBe('No source');
     });
 
     it('shows the endpoint host for a connected remote destination', () => {
-      const node = buildConfiguredDestinationNode(remoteDestination(), true, []);
+      const node = buildConfiguredDestinationNode(remoteDestination(), true, [], true);
 
       expect(node.ariaLabel).toBe('Destination: Backup, Logs, Traces');
       expect(node.data.subtitle).toBe('my-cluster.es.example.com:9243');
@@ -119,7 +153,8 @@ describe('buildConfiguredDestinationNode', () => {
       const node = buildConfiguredDestinationNode(
         remoteDestination({ description: 'Long-term copy' }),
         true,
-        []
+        [],
+        true
       );
 
       expect(node.data.subtitle).toBe('Long-term copy');
@@ -128,14 +163,19 @@ describe('buildConfiguredDestinationNode', () => {
     it.each(['not a url', 'my-cluster:9200'])(
       'falls back to the full endpoint for %s',
       (endpoint) => {
-        const node = buildConfiguredDestinationNode(remoteDestination({ endpoint }), true, []);
+        const node = buildConfiguredDestinationNode(
+          remoteDestination({ endpoint }),
+          true,
+          [],
+          true
+        );
 
         expect(node.data.subtitle).toBe(endpoint);
       }
     );
 
     it('carries the endpoint and remote index names for search, but no local index count', () => {
-      const node = buildConfiguredDestinationNode(remoteDestination(), true, ['local-index']);
+      const node = buildConfiguredDestinationNode(remoteDestination(), true, ['local-index'], true);
 
       expect(node.ariaLabel).not.toMatch(/ind(ex|ices)/);
       expect(node.data.indexCount).toBeUndefined();
@@ -148,13 +188,18 @@ describe('buildConfiguredDestinationNode', () => {
 
   describe('destinationType', () => {
     it('is set to elasticsearch for an Elasticsearch destination', () => {
-      const node = buildConfiguredDestinationNode(elasticsearchDestination, true, ['logs-prod']);
+      const node = buildConfiguredDestinationNode(
+        elasticsearchDestination,
+        true,
+        ['logs-prod'],
+        true
+      );
 
       expect(node.data.destinationType).toBe('elasticsearch');
     });
 
     it('is set to s3 for an S3 destination', () => {
-      const node = buildConfiguredDestinationNode(s3Destination, true, []);
+      const node = buildConfiguredDestinationNode(s3Destination, true, [], true);
 
       expect(node.data.destinationType).toBe('s3');
     });
@@ -164,11 +209,17 @@ describe('buildConfiguredDestinationNode', () => {
   // data rebuilds the graph and runs the layout again.
   describe('node data', () => {
     it('holds configuration only, for an Elasticsearch destination', () => {
-      const node = buildConfiguredDestinationNode(elasticsearchDestination, true, ['logs-prod']);
+      const node = buildConfiguredDestinationNode(
+        elasticsearchDestination,
+        true,
+        ['logs-prod'],
+        true
+      );
 
       expect(Object.keys(node.data).sort()).toEqual([
         'destinationId',
         'destinationType',
+        'hasSavedSource',
         'indexCount',
         'signals',
         'streamName',
@@ -179,12 +230,13 @@ describe('buildConfiguredDestinationNode', () => {
     });
 
     it('holds configuration only, for an S3 destination', () => {
-      const node = buildConfiguredDestinationNode(s3Destination, true, []);
+      const node = buildConfiguredDestinationNode(s3Destination, true, [], true);
 
       expect(Object.keys(node.data).sort()).toEqual([
         'bucket',
         'destinationId',
         'destinationType',
+        'hasSavedSource',
         'signals',
         'subtitle',
         'title',
