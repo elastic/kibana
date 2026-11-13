@@ -12,7 +12,9 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
@@ -97,6 +99,10 @@ import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
+import {
+  createInvestigatorPromptsResolver,
+  createPromptsPackageInstaller,
+} from './prompts_package';
 import { registerFindingsRecorder } from './findings_recorder';
 import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
@@ -169,6 +175,8 @@ export class NightshiftInvestigationsPlugin
   private agenticInvestigations?: NightshiftInvestigationsStartDeps['agenticInvestigations'];
   private proposals?: NightshiftInvestigationsStartDeps['proposals'];
   private evals?: NightshiftInvestigationsStartDeps['evals'];
+  private fleet?: NightshiftInvestigationsStartDeps['fleet'];
+  private internalSavedObjectsClient?: SavedObjectsClientContract;
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
@@ -373,9 +381,20 @@ export class NightshiftInvestigationsPlugin
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('agent_types'),
       };
+      const promptsPackageLogger = this.logger.get('prompts_package');
       registerInvestigationAgentType(plugins.agentBuilder, {
         ...nightshiftAgentOptions,
         decisionTreesEnabled: this.decisionTreesEnabled,
+        getInvestigatorPrompts: config.prompts_package.enabled
+          ? createInvestigatorPromptsResolver({
+              getSavedObjectsClient: () => this.internalSavedObjectsClient,
+              onResolve: createPromptsPackageInstaller({
+                getFleet: () => this.fleet,
+                logger: promptsPackageLogger,
+              }),
+              logger: promptsPackageLogger,
+            })
+          : undefined,
       });
       if (plugins.agenticInvestigations && config.findings_recorder.enabled) {
         const getRecorderOutputRedactor = createSandboxOutputRedactorProvider({
@@ -844,6 +863,10 @@ export class NightshiftInvestigationsPlugin
     this.agenticInvestigations = plugins.agenticInvestigations;
     this.proposals = plugins.proposals;
     this.evals = plugins.evals;
+    this.fleet = plugins.fleet;
+    this.internalSavedObjectsClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
     this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;

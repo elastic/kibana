@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Prompt } from '@kbn/security-ai-prompts';
+import type { Prompt } from '@kbn/ai-prompts';
 
 /**
  * Attack Discovery prompts copied from elastic_assistant for independence.

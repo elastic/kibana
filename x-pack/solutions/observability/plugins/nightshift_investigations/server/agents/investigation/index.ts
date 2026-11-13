@@ -24,11 +24,9 @@ import {
 } from '@kbn/workflows/managed';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
-import instructions from './instructions/investigator.md.text';
-import decisionTreesSection from './instructions/decision_trees.text';
+import { BUNDLED_INVESTIGATOR_PROMPTS, type InvestigatorPrompts } from './prompts';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
-import knowledgeWikiSection from './instructions/knowledge_wiki.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -52,34 +50,26 @@ export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
   'inside a sandbox and, when Wiki is enabled, records what it learns in the nightshift Wiki.';
 
-const SEMANTIC_MEMORY_SECTION = `
-**USING MEMORIES**
-Memories are observations from past tasks — they help steer your investigation but reflect a point in time and may no longer be current.
-- Inspect this turn's Semantic Memory paths from <system_update>, or \`/workspace/memories/.index.json\` when present.
-- Independently verify memory claims against live connector APIs before including them in your reply.
-- Use them to guide where you look, but confirm the details are still accurate.
-- When you cannot confirm a memory claim, note it as a past observation (e.g. 'previously observed that…') so the user knows it needs confirmation.
-- Pay attention to memory age — old memories are more likely to be stale.
-`;
-
-const fillContextInstructions = ({
-  includeWiki,
-  includeDecisionTrees,
-  includeMemory,
-}: {
+interface ContextSections {
   includeWiki: boolean;
   includeDecisionTrees: boolean;
   includeMemory: boolean;
-}): string =>
-  instructions
-    .replace(
-      '{{knowledge_wiki_section}}',
-      includeWiki ? `\n${knowledgeWikiSection.trimEnd()}\n` : ''
+}
+
+const fillContextInstructions = (
+  prompts: InvestigatorPrompts,
+  { includeWiki, includeDecisionTrees, includeMemory }: ContextSections
+): string =>
+  // Replacer functions insert the sections verbatim: a replacement string would expand `$&` in them.
+  prompts.instructions
+    .replace('{{knowledge_wiki_section}}', () =>
+      includeWiki ? `\n${prompts.knowledgeWikiSection.trimEnd()}\n` : ''
     )
-    .replace('{{semantic_memory_section}}', includeMemory ? SEMANTIC_MEMORY_SECTION : '')
-    .replace(
-      '{{decision_trees_section}}',
-      includeDecisionTrees ? `${decisionTreesSection.trimEnd()}\n` : ''
+    .replace('{{semantic_memory_section}}', () =>
+      includeMemory ? `\n${prompts.semanticMemorySection.trimEnd()}\n` : ''
+    )
+    .replace('{{decision_trees_section}}', () =>
+      includeDecisionTrees ? `${prompts.decisionTreesSection.trimEnd()}\n` : ''
     );
 
 export interface InvestigationAgentTypeOptions {
@@ -100,6 +90,11 @@ export interface InvestigationAgentTypeOptions {
    * agents share the single allow list users edit on the investigator.
    */
   getInheritedConnectorIds?: (ctx: AgentConfigContext) => Promise<string[]>;
+  /**
+   * Resolves the investigator's prompts on every run, so a prompts package installed after
+   * startup applies to the next run. Must not reject. Without it the bundled prompts apply.
+   */
+  getInvestigatorPrompts?: () => Promise<InvestigatorPrompts>;
   logger?: Logger;
 }
 
@@ -166,7 +161,7 @@ const inheritConnectorIds = async ({
 /** Options of the Nightshift agent types that share the investigator's tools and hooks. */
 export type NightshiftAgentTypeOptions = Omit<
   InvestigationAgentTypeOptions,
-  'decisionTreesEnabled'
+  'decisionTreesEnabled' | 'getInvestigatorPrompts'
 >;
 
 /**
@@ -188,9 +183,12 @@ export const buildNightshiftAgentConfiguration = ({
   standalone = false,
   getCustomContextInstructions,
   getInheritedConnectorIds,
+  getInstructions,
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
+  /** Resolves the instructions on every run in place of `instructions`. Must not reject. */
+  getInstructions?: () => Promise<string>;
   standalone?: boolean;
   /** Only the investigator passes this; the other agent types never hydrate or reinforce trees. */
   decisionTreesEnabled?: boolean;
@@ -246,15 +244,21 @@ export const buildNightshiftAgentConfiguration = ({
   // The hooks are per space, so the configuration always resolves per request.
   return async (ctx) => {
     const baseConfiguration = configurationFor(hooksFor(ctx.spaceId));
-    const [resolvedInstructions, connectorIds] = await Promise.all([
-      getCustomContextInstructions
+    const resolveInstructions = async (): Promise<string> => {
+      const runInstructions = getInstructions
+        ? await getInstructions()
+        : baseConfiguration.instructions;
+      return getCustomContextInstructions
         ? appendCustomContext({
-            instructions: baseConfiguration.instructions,
+            instructions: runInstructions,
             ctx,
             getCustomContextInstructions,
             logger,
           })
-        : baseConfiguration.instructions,
+        : runInstructions;
+    };
+    const [resolvedInstructions, connectorIds] = await Promise.all([
+      resolveInstructions(),
       getInheritedConnectorIds
         ? inheritConnectorIds({
             connectorIds: baseConfiguration.connector_ids,
@@ -280,23 +284,30 @@ export const buildNightshiftAgentConfiguration = ({
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
+  getInvestigatorPrompts,
   ...options
-}: InvestigationAgentTypeOptions): AgentTypeDefinition => ({
-  id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
-  name: INVESTIGATION_AGENT_NAME,
-  description: INVESTIGATION_AGENT_DESCRIPTION,
-  avatar_icon: 'logoElastic',
-  baseConfiguration: buildNightshiftAgentConfiguration({
-    ...options,
-    decisionTreesEnabled,
-    standalone: true,
-    instructions: fillContextInstructions({
-      includeWiki: options.sandboxEnabled && options.wikiEnabled,
-      includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
-      includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),
+}: InvestigationAgentTypeOptions): AgentTypeDefinition => {
+  const sections: ContextSections = {
+    includeWiki: options.sandboxEnabled && options.wikiEnabled,
+    includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
+    includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),
+  };
+  return {
+    id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+    name: INVESTIGATION_AGENT_NAME,
+    description: INVESTIGATION_AGENT_DESCRIPTION,
+    avatar_icon: 'logoElastic',
+    baseConfiguration: buildNightshiftAgentConfiguration({
+      ...options,
+      decisionTreesEnabled,
+      standalone: true,
+      instructions: fillContextInstructions(BUNDLED_INVESTIGATOR_PROMPTS, sections),
+      getInstructions: getInvestigatorPrompts
+        ? async () => fillContextInstructions(await getInvestigatorPrompts(), sections)
+        : undefined,
     }),
-  }),
-});
+  };
+};
 
 export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,

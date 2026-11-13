@@ -18,6 +18,7 @@ import type {
 } from '@kbn/alerting-v2-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
@@ -108,6 +109,8 @@ export interface NightshiftInvestigationsStartDeps {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   /** Scores investigations online. Without it no round is scored. */
   evals?: EvalsPluginStart;
+  /** Installs the `nightshift_prompts` package. Without it the bundled prompts apply. */
+  fleet?: FleetStartContract;
   inference?: InferenceServerStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   sandbox?: SandboxPluginStart;

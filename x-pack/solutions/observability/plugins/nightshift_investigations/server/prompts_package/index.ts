@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/jest',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/security-ai-prompts'],
-};
+export {
+  NIGHTSHIFT_PROMPTS_PACKAGE_NAME,
+  PROMPTS_PACKAGE_CHECK_INTERVAL_MS,
+  createPromptsPackageInstaller,
+} from './ensure_prompts_package';
+export { createInvestigatorPromptsResolver } from './resolve_investigator_prompts';

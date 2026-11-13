@@ -260,6 +260,21 @@ There is no fallback to the global hooks. Setup installs the three entry points,
 
 The decision-tree reinforcement agent is shared: everyone can run it, so agent optimize can run it as the agent account, and only admins can change it. Agent Builder still hides it from UI listings, and its submit tool writes decision trees as the caller.
 
+## Investigator prompts
+
+The investigator's prompts can ship without a Kibana release, in the `nightshift_prompts` Fleet content package in [elastic/integrations](https://github.com/elastic/integrations). This uses the mechanism of the Security AI prompts package, through `@kbn/ai-prompts`.
+
+- **What ships.** The instructions in `server/agents/investigation/instructions/investigator.md.text` and the Wiki, Semantic Memory and decision-tree sections it embeds. Their ids are in `server/agents/investigation/prompts.ts`, all in the `nightshiftInvestigations` prompt group.
+- **How it reaches a deployment.** Every investigator run reads the installed prompts and, at most once an hour per Kibana node, asks Fleet to install or upgrade the package in the background. Fleet picks the newest version whose `conditions.kibana.version` matches this Kibana. A prompt the package does not ship, a read that fails, or a deployment without Fleet or registry access uses the prompt bundled with Kibana.
+- **Compatibility.** A published prompt runs on every Kibana its package version allows. A prompt that names a new tool, hook, or placeholder needs `conditions.kibana.version` to start at the first Kibana that has it.
+- **Turning it off.** `xpack.nightshift_investigations.prompts_package.enabled: false` stops the install and the read, so the bundled prompts apply. The evals set it, so they measure the prompts in the branch.
+
+To release prompt changes:
+
+1. Change the bundled prompts, run the evals, and merge.
+2. Run `node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/generate_nightshift_prompts.js`. It writes one saved object per prompt to `target/nightshift_prompts`.
+3. Copy the files into `packages/nightshift_prompts/kibana/security_ai_prompt` in elastic/integrations, bump the package version, set `conditions.kibana.version`, and open a PR. The steps for building and testing a package locally are in the `@kbn/ai-prompts` README.
+
 ## How investigations are stored and run
 
 An investigation is an Agent Builder conversation with the `investigation` template. The investigation id is the conversation id. The `agenticInvestigations` plugin owns everything around it:

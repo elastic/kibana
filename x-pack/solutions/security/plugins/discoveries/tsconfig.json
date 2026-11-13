@@ -48,7 +48,7 @@
     "@kbn/inference-plugin",
     "@kbn/utility-types",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/security-ai-prompts",
+    "@kbn/ai-prompts",
     "@kbn/core-http-server-mocks",
     "@kbn/security-solution-features",
     "@kbn/discoveries-schemas",

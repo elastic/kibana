@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/ai-prompts",
+  "version": "1.0.0",
+  "description": "Looks up AI prompts that Fleet packages install as saved objects, with bundled fallbacks",
+  "license": "Elastic License 2.0",
+  "private": true
+}

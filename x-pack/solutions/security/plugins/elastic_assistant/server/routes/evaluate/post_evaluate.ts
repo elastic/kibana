@@ -13,7 +13,7 @@ import { evaluate } from 'langsmith/evaluation';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { getPrompt } from '@kbn/security-ai-prompts';
+import { getPrompt } from '@kbn/ai-prompts';
 import type {
   ExecuteConnectorRequestBody,
   ContentReferencesStore,

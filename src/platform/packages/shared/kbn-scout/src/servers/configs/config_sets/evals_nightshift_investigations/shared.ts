@@ -93,6 +93,8 @@ const createInvestigationConfig = (
         '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
         ...knowledgeArgs(),
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
+        // Evals measure the prompts in the branch, not the ones published in nightshift_prompts.
+        '--xpack.nightshift_investigations.prompts_package.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(connectorsConfig ? [`--config=${connectorsConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',

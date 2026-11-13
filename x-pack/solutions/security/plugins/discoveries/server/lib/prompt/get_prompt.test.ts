@@ -6,9 +6,9 @@
  */
 
 import { getPrompt, getPromptsByGroupId } from './get_prompt';
-import * as securityAiPromptsModule from '@kbn/security-ai-prompts';
+import * as securityAiPromptsModule from '@kbn/ai-prompts';
 
-jest.mock('@kbn/security-ai-prompts');
+jest.mock('@kbn/ai-prompts');
 
 describe('get_prompt', () => {
   const mockGetPrompt = jest.fn();

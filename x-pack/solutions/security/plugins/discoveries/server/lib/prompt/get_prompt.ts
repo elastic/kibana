@@ -11,7 +11,7 @@ import {
   type GetPromptArgs,
   type GetPromptsByGroupIdArgs,
   type PromptArray,
-} from '@kbn/security-ai-prompts';
+} from '@kbn/ai-prompts';
 import { localPrompts } from './local_prompt_object';
 
 /**

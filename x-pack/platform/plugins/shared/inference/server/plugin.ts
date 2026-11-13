@@ -23,6 +23,7 @@ import {
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { RegexWorkerService, getAnonymizationUiSettings } from '@kbn/ai-anonymization-server';
+import { promptType } from '@kbn/ai-prompts';
 import {
   createClient as createInferenceClient,
   createClientWithoutRequest,
@@ -147,6 +148,8 @@ export class InferencePlugin
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
     coreSetup.uiSettings.register(getAnonymizationUiSettings());
+    // Fleet content packages from any solution install their AI prompts as this type.
+    coreSetup.savedObjects.registerType(promptType);
     // The settings page's pattern tester runs caller-supplied regexes, which is only safe on worker
     // threads, so it follows whether this plugin runs anonymization on them.
     pluginsSetup.aiAnonymizationSettings?.configurePatternTester({

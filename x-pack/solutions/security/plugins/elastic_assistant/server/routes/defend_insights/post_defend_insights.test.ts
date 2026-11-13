@@ -29,7 +29,7 @@ import {
 } from './helpers';
 import { postDefendInsightsRoute } from './post_defend_insights';
 
-jest.mock('@kbn/security-ai-prompts');
+jest.mock('@kbn/ai-prompts');
 jest.mock('./helpers');
 
 describe('postDefendInsightsRoute', () => {

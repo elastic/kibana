@@ -29,6 +29,7 @@ const createPlugin = (memoryEnabled = false) =>
       memory: { enabled: memoryEnabled },
       learning: { enabled: true },
       findings_recorder: { enabled: true },
+      prompts_package: { enabled: true },
     })
   );
 
@@ -47,6 +48,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         decision_trees: { enabled: false },
         memory: { enabled: false },
         learning: { enabled: true },
+        prompts_package: { enabled: true },
       })
     );
     plugin.setup(coreMock.createSetup(), {
@@ -183,6 +185,7 @@ describe('NightshiftInvestigationsPlugin start', () => {
         memory: { enabled: memory },
         learning: { enabled: true },
         findings_recorder: { enabled: false },
+        prompts_package: { enabled: true },
       })
     );
     plugin.setup(coreMock.createSetup(), { ...createSetupDeps(), sandbox: { isAvailable: true } });

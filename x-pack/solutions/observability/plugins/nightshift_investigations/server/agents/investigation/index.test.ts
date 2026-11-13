@@ -318,6 +318,29 @@ describe('Nightshift investigation agent type', () => {
       );
     });
   });
+
+  it('assembles every run from the prompts resolved for that run', async () => {
+    const getInvestigatorPrompts = jest.fn().mockResolvedValue({
+      instructions:
+        'Published {{knowledge_wiki_section}}{{semantic_memory_section}}{{decision_trees_section}}end',
+      knowledgeWikiSection: 'WIKI $& kept',
+      semanticMemorySection: 'MEMORY',
+      decisionTreesSection: 'TREES',
+    });
+    const type = getInvestigationAgentType({
+      sandboxEnabled: true,
+      wikiEnabled: true,
+      memoryEnabled: true,
+      getInvestigatorPrompts,
+      getCustomContextInstructions: jest.fn().mockResolvedValue('USER CONTEXT'),
+    });
+
+    await baseFor(type);
+    const base = await baseFor(type);
+
+    expect(getInvestigatorPrompts).toHaveBeenCalledTimes(2);
+    expect(base.instructions).toBe('Published \nWIKI $& kept\n\nMEMORY\nend\n\nUSER CONTEXT\n');
+  });
 });
 
 it('starts with no connectors: they come from the connectors users assign', async () => {

@@ -11,7 +11,7 @@ import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import type { MessageMetadata } from '@kbn/elastic-assistant-common';
 import { pruneContentReferences } from '@kbn/elastic-assistant-common';
-import { getPrompt } from '@kbn/security-ai-prompts';
+import { getPrompt } from '@kbn/ai-prompts';
 import { isEmpty } from 'lodash';
 import { generateChatTitle } from './nodes/generate_chat_title';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';

@@ -643,6 +643,9 @@ importers:
       '@kbn/ai-assistant-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/ai_assistant_management/selection
+      '@kbn/ai-prompts':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/ai-infra/ai-prompts
       '@kbn/ai-security-labs-content':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/ai-security-labs-content
@@ -3436,9 +3439,6 @@ importers:
       '@kbn/searchprofiler-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/searchprofiler
-      '@kbn/security-ai-prompts':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/security-ai-prompts
       '@kbn/security-api-key-management':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/security/api_key_management
@@ -9101,6 +9101,8 @@ importers:
 
   x-pack/platform/packages/shared/ai-infra/ai-anonymization-server: {}
 
+  x-pack/platform/packages/shared/ai-infra/ai-prompts: {}
+
   x-pack/platform/packages/shared/ai-infra/anonymization-common: {}
 
   x-pack/platform/packages/shared/ai-infra/anonymization-ui: {}
@@ -9942,8 +9944,6 @@ importers:
   x-pack/solutions/security/packages/kbn-securitysolution-utils: {}
 
   x-pack/solutions/security/packages/navigation: {}
-
-  x-pack/solutions/security/packages/security-ai-prompts: {}
 
   x-pack/solutions/security/packages/security-mitre-attack-common: {}
 

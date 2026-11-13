@@ -7,7 +7,6 @@
 
 import type { CoreSetup, Logger, SavedObjectsType } from '@kbn/core/server';
 
-import { promptType } from '@kbn/security-ai-prompts';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { exceptionListType } from '@kbn/lists-plugin/server/saved_objects';
 import { scriptsLibrarySavedObjectType } from './endpoint/lib/scripts_library';
@@ -63,7 +62,6 @@ const types = [
   watchlistEntitySourceType,
   leadGenerationConfigType,
   protectionUpdatesNoteType,
-  promptType,
   referenceDataSavedObjectType,
   trialCompanionNBASavedObjectType,
 ];

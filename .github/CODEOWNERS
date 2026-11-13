@@ -1084,6 +1084,7 @@ x-pack/platform/packages/shared/ai-assistant/common @elastic/search-ml-ux
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/ai-anonymization-common @elastic/security-investigations
 x-pack/platform/packages/shared/ai-infra/ai-anonymization-server @elastic/security-investigations
+x-pack/platform/packages/shared/ai-infra/ai-prompts @elastic/security-threat-hunting @elastic/nightshift
 x-pack/platform/packages/shared/ai-infra/anonymization-common @elastic/security-investigations
 x-pack/platform/packages/shared/ai-infra/anonymization-ui @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/search-ml-ux
@@ -1505,7 +1506,6 @@ x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/se
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
 x-pack/solutions/security/packages/navigation @elastic/security-investigations
-x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
 x-pack/solutions/security/packages/security-mitre-attack-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/security-mitre-attack-mocks @elastic/security-detection-engineering
 x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering

@@ -11,7 +11,7 @@ import {
   type GetPromptArgs,
   type PromptArray,
   type GetPromptsByGroupIdArgs,
-} from '@kbn/security-ai-prompts';
+} from '@kbn/ai-prompts';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { localPrompts } from './local_prompt_object';

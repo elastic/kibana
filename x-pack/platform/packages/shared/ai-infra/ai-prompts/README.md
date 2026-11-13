@@ -1,6 +1,24 @@
-# @kbn/security-ai-prompts
+# @kbn/ai-prompts
 
-Utility library for Security AI Prompt management.
+Utility library for AI prompts that ship in Fleet content packages, so prompt changes reach
+deployments without a Kibana release.
+
+A content package carries prompts as saved objects in its `kibana/security_ai_prompt` folder, and
+Fleet installs them as `security-ai-prompt` saved objects. The type keeps that name for every
+solution because the package spec and already installed objects depend on it. The `inference`
+plugin registers the type, so it exists in every solution.
+
+`getPrompt` and `getPromptsByGroupId` read the installed prompt for a `promptGroupId` and
+`promptId`, preferring an entry for the connector's provider and model, and fall back to the
+`localPrompts` bundled with Kibana when the package is not installed.
+
+| Package | `promptGroupId`s | Owner |
+| --- | --- | --- |
+| `security_ai_prompts` | Security Assistant, Attack Discovery, Defend Insights | `@elastic/security-generative-ai` |
+| `nightshift_prompts` | `nightshift-investigations` | `@elastic/nightshift` |
+
+The rest of this README describes the Security AI prompts workflow. Nightshift's workflow is in the
+`nightshift_investigations` plugin README.
 
 ## Update prompts in Kibana
 

@@ -47,6 +47,12 @@ const findingsRecorderConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
+const promptsPackageConfigSchema = schema.object({
+  // Governs the `nightshift_prompts` Fleet package: installing it and reading the investigator
+  // prompts it ships. Turn it off to run the prompts bundled with Kibana, as the evals do.
+  enabled: schema.boolean({ defaultValue: true }),
+});
+
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
   enabled: schema.boolean({ defaultValue: true }),
@@ -55,6 +61,7 @@ const configSchema = schema.object({
   memory: memoryConfigSchema,
   learning: learningConfigSchema,
   findings_recorder: findingsRecorderConfigSchema,
+  prompts_package: promptsPackageConfigSchema,
 });
 
 export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;

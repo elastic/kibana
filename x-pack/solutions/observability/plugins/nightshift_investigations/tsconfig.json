@@ -15,6 +15,8 @@
   "kbn_references": [
     "@kbn/dev-cli-runner",
     "@kbn/share-plugin",
+    "@kbn/ai-prompts",
+    "@kbn/fleet-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/nightshift-decision-trees",
     "@kbn/config",

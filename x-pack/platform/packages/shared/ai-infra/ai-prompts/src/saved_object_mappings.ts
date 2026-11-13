@@ -7,6 +7,8 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 
+// Shared by every solution's prompt package: the package spec's `security_ai_prompt` asset folder
+// installs this type, so the name cannot change.
 export const promptSavedObjectType = 'security-ai-prompt';
 export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
   dynamic: false,

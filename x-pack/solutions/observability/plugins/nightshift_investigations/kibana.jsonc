@@ -21,6 +21,7 @@
       "contextEngine",
       "encryptedSavedObjects",
       "evals",
+      "fleet",
       "inference",
       "proposals",
       "ruleRegistry",

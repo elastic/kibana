@@ -72,7 +72,7 @@ export interface InvokeGraphResult {
  * Orchestrates Attack Discovery graph execution with pre-retrieved alerts.
  *
  * Prompts are provided by the calling plugin (discoveries) using
- * its prompt management system (@kbn/security-ai-prompts with local fallbacks).
+ * its prompt management system (@kbn/ai-prompts with local fallbacks).
  *
  * This keeps the package independent of any specific prompt storage mechanism.
  */
