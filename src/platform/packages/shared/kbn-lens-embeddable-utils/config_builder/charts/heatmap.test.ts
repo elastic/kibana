@@ -271,3 +271,45 @@ test('shows axis labels when configured', async () => {
     })
   );
 });
+
+test('writes the breakdown format onto the ES|QL Y column', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'latency',
+      dataset: {
+        esql: 'TS metrics | STATS count = COUNT(latency) BY bucket, TBUCKET(100)',
+      },
+      breakdown: 'bucket',
+      breakdownFormat: {
+        format: 'duration',
+        fromUnit: 'milliseconds',
+        toUnit: 'humanizePrecise',
+        decimals: 0,
+        compactValues: true,
+      },
+      xAxis: 'TBUCKET(100)',
+      value: 'count',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.textBased?.layers.layer_0.columns ?? [];
+  const yColumn = columns.find((column) => column.columnId === 'y_metric_formula_accessor');
+  const valueColumn = columns.find((column) => column.columnId === 'metric_formula_accessor');
+
+  expect(yColumn?.meta).toEqual({ type: 'number' });
+  expect(yColumn?.params?.format).toEqual({
+    id: 'duration',
+    params: {
+      compact: true,
+      decimals: 0,
+      suffix: undefined,
+      fromUnit: 'milliseconds',
+      toUnit: 'humanizePrecise',
+    },
+  });
+  expect(valueColumn?.params).toBeUndefined();
+});

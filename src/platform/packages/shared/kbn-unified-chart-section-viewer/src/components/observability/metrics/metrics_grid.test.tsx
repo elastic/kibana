@@ -1412,6 +1412,14 @@ describe('MetricsGrid', () => {
             chartType: 'heatmap',
             title: histogramItem.metricName,
             ySort: 'desc',
+            value: 'count',
+            breakdownFormat: {
+              format: 'duration',
+              fromUnit: 'milliseconds',
+              toUnit: 'humanizePrecise',
+              decimals: 0,
+              compactValues: true,
+            },
             dataset: {
               esql: expect.stringMatching(/BUCKET\(latency\.exp, 10, 1, 9\)/),
             },
