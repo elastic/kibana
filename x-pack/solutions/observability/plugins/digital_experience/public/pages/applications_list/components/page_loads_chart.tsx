@@ -18,8 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import type { TimeSeriesPoint } from '../../../../common/types/applications';
+import type { HistogramInterval, TimeSeriesPoint } from '../../../../common/types/applications';
 import { ChartArea } from '../../../components/chart_area';
+import type { QueriedRange } from '../../../utils/time_range_query';
+import { PartialBucketsEndzones } from '../../../components/partial_buckets_endzones';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { PAGE_LOADS_LABEL, SESSIONS_LABEL, SESSIONS_UNAVAILABLE_LABEL } from '../../../labels';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
@@ -68,12 +70,18 @@ const useChartMetric = (): [ChartMetric, (metric: ChartMetric) => void] => {
 export function PageLoadsChart({
   pageLoads,
   sessions,
+  interval,
+  range,
   isLoading,
   onTimeRangeSelect,
 }: {
   pageLoads: TimeSeriesPoint[];
   /** The sessions that started in each bucket, `null` when they are not counted. */
   sessions: TimeSeriesPoint[] | null;
+  /** The width of every bucket, the same for both metrics. */
+  interval: HistogramInterval;
+  /** The queried time range; the edge buckets are shaded where they cover only part of it. */
+  range: QueriedRange | undefined;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
@@ -137,6 +145,12 @@ export function PageLoadsChart({
             onBrushEnd={onBrushTimeRange(onTimeRangeSelect)}
           />
           <Tooltip headerFormatter={({ value }) => formatDate(value)} />
+          <PartialBucketsEndzones
+            points={points}
+            interval={interval}
+            range={range}
+            timeZone={timeZone}
+          />
           <Axis id="time" position={Position.Bottom} />
           <Axis id="count" position={Position.Left} gridLine={{ visible: true }} ticks={4} />
           <BarSeries

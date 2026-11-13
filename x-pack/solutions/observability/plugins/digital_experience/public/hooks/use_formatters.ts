@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import numeral from '@elastic/numeral';
 import moment from 'moment-timezone';
+import { getUserTimeZone } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { useKibanaServices } from './use_kibana_services';
@@ -36,10 +37,8 @@ export const useFormatters = (): Formatters => {
       FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN
     );
     const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
-    const kibanaTimeZone = uiSettings.get<string>(UI_SETTINGS.DATEFORMAT_TZ);
-    // Elastic Charts only accepts IANA names, so `Browser` becomes the browser's own time zone.
-    const timeZone =
-      !kibanaTimeZone || kibanaTimeZone === 'Browser' ? moment.tz.guess() : kibanaTimeZone;
+    // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
+    const timeZone = getUserTimeZone((key) => uiSettings.get(key));
 
     return {
       formatNumber: (value) => numeral(value).format(numberPattern),

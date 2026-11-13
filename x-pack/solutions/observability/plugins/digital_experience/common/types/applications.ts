@@ -105,8 +105,16 @@ export interface TimeSeriesPoint {
   count: number;
 }
 
+/** The width of a histogram bucket: seconds, or a calendar day, week, month or year. */
+export interface HistogramInterval {
+  value: number;
+  unit: 's' | 'd' | 'w' | 'M' | 'y';
+}
+
 /** Both sources use the same buckets; a source that isn't queried has none. */
 export interface PageLoadsOverTime {
   otel: TimeSeriesPoint[];
   classic: TimeSeriesPoint[];
+  /** The width of every bucket. */
+  interval: HistogramInterval;
 }

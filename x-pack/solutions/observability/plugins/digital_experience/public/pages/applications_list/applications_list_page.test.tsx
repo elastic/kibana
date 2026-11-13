@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import moment from 'moment-timezone';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -118,13 +119,16 @@ const respondWith = (
   mockFetch.mockResolvedValue({ applications, environments, unavailableSources, sessionsOverTime });
 
 // `isServerless` leaves out the ux plugin, as serverless does.
-const renderPage = ({ isServerless = false } = {}) => {
+const renderPage = ({
+  isServerless = false,
+  timeZoneSetting = 'UTC',
+}: { isServerless?: boolean; timeZoneSetting?: string } = {}) => {
   jest.mocked(useKibanaServices).mockReturnValue({
     application: {
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
     http: {},
-    uiSettings: createUiSettingsMock(),
+    uiSettings: createUiSettingsMock({ 'dateFormat:tz': timeZoneSetting }),
     ux: isServerless ? undefined : {},
   } as unknown as ReturnType<typeof useKibanaServices>);
   // EUI's theme (for `EmptyCellValue`) and intl (for `FormattedRelative`), kept across rerenders.
@@ -164,8 +168,25 @@ describe('ApplicationsListPage', () => {
     ]);
     expect(mockFetch).toHaveBeenCalledWith('GET /internal/digital_experience/applications', {
       signal: expect.any(AbortSignal),
-      params: { query: { start: expect.any(String), end: expect.any(String) } },
+      params: { query: { start: expect.any(String), end: expect.any(String), timeZone: 'UTC' } },
     });
+  });
+
+  it.each([
+    ['an explicit time zone', 'America/New_York', 'America/New_York'],
+    ['the browser time zone', 'Browser', moment.tz.guess()],
+  ])('asks for buckets in %s', async (_, setting, expected) => {
+    respondWith([]);
+    renderPage({ timeZoneSetting: setting });
+
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith('GET /internal/digital_experience/applications', {
+        signal: expect.any(AbortSignal),
+        params: {
+          query: { start: expect.any(String), end: expect.any(String), timeZone: expected },
+        },
+      })
+    );
   });
 
   it('shows a source badge, the metrics and the vitals colored by rating', async () => {
@@ -305,7 +326,12 @@ describe('ApplicationsListPage', () => {
       expect(mockFetch).toHaveBeenCalledWith('GET /internal/digital_experience/applications', {
         signal: expect.any(AbortSignal),
         params: {
-          query: { start: expect.any(String), end: expect.any(String), environment: 'production' },
+          query: {
+            start: expect.any(String),
+            end: expect.any(String),
+            environment: 'production',
+            timeZone: 'UTC',
+          },
         },
       })
     );

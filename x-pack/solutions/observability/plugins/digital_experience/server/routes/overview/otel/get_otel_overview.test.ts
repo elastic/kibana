@@ -93,7 +93,7 @@ const setup = ({ logs, spans }: { logs?: unknown; spans?: unknown }) => {
   return esClient;
 };
 
-const PARAMS = { serviceName: 'shop', start: 10, end: 20 };
+const PARAMS = { serviceName: 'shop', start: 10, end: 20, timeZone: 'UTC' };
 
 describe('getOtelOverview', () => {
   it('maps the logs and spans of the application to its Overview', async () => {
@@ -135,6 +135,7 @@ describe('getOtelOverview', () => {
           },
         },
         trend: [],
+        trendInterval: { value: 1, unit: 's' },
       },
       environments: ['production'],
       filters: NO_FILTER_VALUES,
@@ -202,6 +203,7 @@ describe('getOtelOverview', () => {
           ttfb: NO_VITAL,
         },
         trend: [],
+        trendInterval: { value: 1, unit: 's' },
       },
       environments: [],
       filters: NO_FILTER_VALUES,

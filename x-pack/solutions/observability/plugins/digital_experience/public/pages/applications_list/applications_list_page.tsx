@@ -72,7 +72,7 @@ import {
   summarizeApplications,
 } from './utils/summarize_applications';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
-import { toTimeRangeQuery } from '../../utils/time_range_query';
+import { toQueriedRange, toTimeRangeQuery } from '../../utils/time_range_query';
 import {
   applicationColumnPreset,
   metricColumnPreset,
@@ -384,7 +384,11 @@ const HIDDEN_BY_DEFAULT: OptionalColumnId[] = ['fcp', 'ttfb', 'jsErrors'];
 
 const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.hiddenColumns';
 
-const NO_PAGE_LOADS: PageLoadsOverTime = { otel: [], classic: [] };
+const NO_PAGE_LOADS: PageLoadsOverTime = {
+  otel: [],
+  classic: [],
+  interval: { value: 1, unit: 's' },
+};
 
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
@@ -399,20 +403,27 @@ export function ApplicationsListPage() {
 
   const apiClient = useApiClient();
 
+  const { timeZone } = formatters;
+
   const {
-    value: response,
+    value: result,
     loading,
     error,
     refresh,
   } = useAbortableAsync(
-    async ({ signal }) =>
-      apiClient.fetch('GET /internal/digital_experience/applications', {
-        signal,
-        params: { query: toTimeRangeQuery(timeRange, environment) },
-      }),
-    [apiClient, timeRange, environment],
+    async ({ signal }) => {
+      const query = toTimeRangeQuery(timeRange, environment, timeZone);
+      const applicationsResponse = await apiClient.fetch(
+        'GET /internal/digital_experience/applications',
+        { signal, params: { query } }
+      );
+      return { response: applicationsResponse, queriedRange: toQueriedRange(query) };
+    },
+    [apiClient, timeRange, environment, timeZone],
     { unsetValueOnError: true }
   );
+  const response = result?.response;
+  const queriedRange = result?.queriedRange;
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
@@ -445,9 +456,10 @@ export function ApplicationsListPage() {
       ),
     [response, selectedSource]
   );
+  const pageLoadsOfResponse = response?.pageLoadsOverTime ?? NO_PAGE_LOADS;
   const pageLoadsOverTime = useMemo(
-    () => pageLoadsOfSources(response?.pageLoadsOverTime ?? NO_PAGE_LOADS, selectedSource),
-    [response, selectedSource]
+    () => pageLoadsOfSources(pageLoadsOfResponse, selectedSource),
+    [pageLoadsOfResponse, selectedSource]
   );
   const sessionsOverTime = useMemo(
     () => sessionsOfSource(response?.sessionsOverTime ?? null, selectedSource),
@@ -652,6 +664,8 @@ export function ApplicationsListPage() {
         <PageLoadsChart
           pageLoads={pageLoadsOverTime}
           sessions={sessionsOverTime}
+          interval={pageLoadsOfResponse.interval}
+          range={queriedRange}
           isLoading={isLoading}
           onTimeRangeSelect={setTimeRange}
         />

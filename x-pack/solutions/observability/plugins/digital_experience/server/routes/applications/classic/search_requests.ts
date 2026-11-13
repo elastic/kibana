@@ -42,6 +42,8 @@ export interface SearchParams {
   end: number;
   /** Only this environment's data when set. */
   environment?: string;
+  /** IANA time zone the histogram buckets line up with. */
+  timeZone: string;
 }
 
 const ENVIRONMENT_FIELDS = [SERVICE_ENVIRONMENT];
@@ -99,6 +101,7 @@ export const classicSearch = ({
   start,
   end,
   environment,
+  timeZone,
 }: SearchParams): APMEventESSearchRequest => ({
   apm: { events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.span] },
   track_total_hits: false,
@@ -146,7 +149,7 @@ export const classicSearch = ({
         },
         pageLoadsOverTime: {
           ...documentCount(pageLoadTransactions),
-          aggs: { histogram: dateHistogram(start, end) },
+          aggs: { histogram: dateHistogram(start, end, timeZone) },
         },
       },
     },

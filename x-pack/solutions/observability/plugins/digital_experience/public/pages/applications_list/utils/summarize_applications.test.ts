@@ -160,6 +160,7 @@ describe('pageLoadsOfSources', () => {
       { timestamp: 0, count: 3 },
       { timestamp: 60, count: 0 },
     ],
+    interval: { value: 60, unit: 's' as const },
   };
 
   it('adds up both sources by bucket when no source is selected', () => {

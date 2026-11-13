@@ -57,6 +57,7 @@ const setup = ({ start = NOW - DAY_MS, signal }: { start?: number; signal?: Abor
     start,
     end: NOW,
     environment: 'production',
+    timeZone: 'UTC',
     signal,
   });
   return { result, esClient, internalEsClient, logger };
@@ -93,6 +94,7 @@ describe('getOtelApplicationsFromBestSource', () => {
       start: NOW - DAY_MS,
       end: NOW,
       environment: 'production',
+      timeZone: 'UTC',
       signal,
     });
   });
@@ -164,6 +166,7 @@ describe('getOtelApplicationsFromBestSource', () => {
       start: NOW - DAY_MS,
       end: NOW,
       environment: 'production',
+      timeZone: 'UTC',
       signal: undefined,
     });
   });

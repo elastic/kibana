@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/traced-es-client'
   - '@kbn/calculate-auto'
+  - '@kbn/charts-plugin'
   - '@kbn/charts-theme'
   - '@kbn/core'
   - '@kbn/config-schema'

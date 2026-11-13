@@ -99,6 +99,20 @@ events of a session, and the environments are the sessions'. What differs when t
 
 Numbers, percents, dates and the chart's time zone follow the Advanced Settings.
 
+#### Chart buckets and time zones
+
+The page loads chart and the Overview trends bucket by the time zone of Advanced Settings
+(`dateFormat:tz`, or the browser's for `Browser`). From 1 day up, the buckets are calendar days,
+weeks or months, so they start at local midnight and follow daylight saving changes; below that
+they are fixed intervals (up to 12 hours), aligned to the time zone but not to daylight saving
+changes. The first and last buckets, which cover only part of the selected range, are shaded as
+partial data.
+
+Both routes take an optional `timeZone` (an IANA name, at most 64 characters; `UTC` when left out)
+and return the bucket interval next to the buckets: `pageLoadsOverTime.interval` on the
+Applications route and `overview.trendInterval` on the Overview route. An unknown `timeZone` is a
+400.
+
 ### Application details (`/{serviceName}?source=otel|classic`)
 
 Opened from the list. The Overview of a Classic RUM application renders the Classic RUM dashboard

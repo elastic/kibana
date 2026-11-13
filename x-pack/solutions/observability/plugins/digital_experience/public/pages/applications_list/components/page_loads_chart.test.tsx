@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import type { RectAnnotationProps } from '@elastic/charts';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { PageLoadsChart } from './page_loads_chart';
@@ -17,17 +18,24 @@ const STORAGE_KEY = 'xpack.digitalExperience.applications.chartMetric';
 // No bucket has a count, so the chart shows its empty message, which says which metric it is of.
 const NO_COUNTS = [{ timestamp: 0, count: 0 }];
 
+const HOUR = 60 * 60 * 1000;
+// Hourly buckets with page loads; the default range matches their edges.
+const HOURLY_COUNTS = [0, HOUR, 2 * HOUR].map((timestamp) => ({ timestamp, count: 4 }));
+
 const renderChart = ({
   pageLoads = NO_COUNTS,
   sessions = NO_COUNTS as typeof NO_COUNTS | null,
   isLoading = false,
+  range = { start: 0, end: 3 * HOUR },
 }: Partial<
-  Pick<Parameters<typeof PageLoadsChart>[0], 'pageLoads' | 'sessions' | 'isLoading'>
+  Pick<Parameters<typeof PageLoadsChart>[0], 'pageLoads' | 'sessions' | 'isLoading' | 'range'>
 > = {}) =>
   render(
     <PageLoadsChart
       pageLoads={pageLoads}
       sessions={sessions}
+      interval={{ value: 3600, unit: 's' }}
+      range={range}
       isLoading={isLoading}
       onTimeRangeSelect={jest.fn()}
     />,
@@ -40,10 +48,25 @@ const storedChoice = () => JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null
 const title = (name: 'Page loads' | 'Sessions') => screen.getByRole('heading', { name });
 const sessionsButton = () => screen.getByTestId('digitalExperienceChartMetric-sessions');
 
+const mockShadedZones: RectAnnotationProps['dataValues'][] = [];
+
+// jsdom draws no canvas, so the test reads the zones `Endzones` hands to the annotation.
+jest.mock('@elastic/charts', () => {
+  const actual = jest.requireActual('@elastic/charts');
+  return {
+    ...actual,
+    RectAnnotation: (props: RectAnnotationProps) => {
+      mockShadedZones.push(props.dataValues);
+      return null;
+    },
+  };
+});
+
 jest.mock('../../../hooks/use_kibana_services');
 
 beforeEach(() => {
   localStorage.clear();
+  mockShadedZones.length = 0;
   jest.mocked(useKibanaServices).mockReturnValue({
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
@@ -54,6 +77,21 @@ describe('PageLoadsChart', () => {
     renderChart();
 
     expect(screen.getByText('No page loads in the selected time range')).toBeInTheDocument();
+  });
+
+  it('shades the first and last buckets where they cover only part of the range', () => {
+    renderChart({ pageLoads: HOURLY_COUNTS, range: { start: HOUR / 2, end: 2.5 * HOUR } });
+
+    expect(mockShadedZones[mockShadedZones.length - 1]).toEqual([
+      { coordinates: { x1: HOUR / 2 } },
+      { coordinates: { x0: 2.5 * HOUR } },
+    ]);
+  });
+
+  it('shades nothing when the range matches the bucket edges', () => {
+    renderChart({ pageLoads: HOURLY_COUNTS });
+
+    expect(mockShadedZones[mockShadedZones.length - 1]).toEqual([]);
   });
 
   it('shows the loading state, not the empty message, while loading', () => {
@@ -127,6 +165,8 @@ describe('PageLoadsChart', () => {
         <PageLoadsChart
           pageLoads={NO_COUNTS}
           sessions={NO_COUNTS}
+          interval={{ value: 3600, unit: 's' }}
+          range={undefined}
           isLoading={false}
           onTimeRangeSelect={jest.fn()}
         />

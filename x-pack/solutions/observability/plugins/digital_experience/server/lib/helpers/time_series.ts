@@ -5,32 +5,52 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import moment from 'moment';
 import { calculateAuto } from '@kbn/calculate-auto';
-import type { TimeSeriesPoint } from '../../../common/types/applications';
+import type { HistogramInterval, TimeSeriesPoint } from '../../../common/types/applications';
 
 /** About this many buckets over the time range, rounded to a readable interval. */
 const TARGET_BUCKETS = 50;
 
-/** Interval of `dateHistogram` in seconds; the same range always gives the same interval. */
-export const getBucketSizeSeconds = (start: number, end: number): number =>
-  Math.max(
-    Math.round(calculateAuto.near(TARGET_BUCKETS, moment.duration(end - start))?.asSeconds() ?? 0),
-    1
+const CALENDAR_UNITS: ReadonlyArray<HistogramInterval['unit']> = ['d', 'w', 'M', 'y'];
+
+/** A calendar day, week, month or year when the auto interval is exactly one, seconds below. */
+export const getHistogramInterval = (start: number, end: number): HistogramInterval => {
+  const interval = calculateAuto.near(TARGET_BUCKETS, moment.duration(end - start));
+  const calendarUnit = CALENDAR_UNITS.find(
+    (unit) => interval?.asMilliseconds() === moment.duration(1, unit).asMilliseconds()
   );
 
+  if (calendarUnit) {
+    return { value: 1, unit: calendarUnit };
+  }
+
+  return { value: Math.max(Math.round(interval?.asSeconds() ?? 0), 1), unit: 's' };
+};
+
 /**
- * Counts over the time range, empty buckets included, so every source returns the same ones. The
- * documents are bucketed by `field`, the event time unless a source says otherwise.
+ * Counts over the time range, empty buckets included, so every source returns the same ones,
+ * lined up with `timeZone`. The documents are bucketed by `field`, the event time by default.
  */
-export const dateHistogram = (start: number, end: number, field = '@timestamp') => ({
-  date_histogram: {
-    field,
-    fixed_interval: `${getBucketSizeSeconds(start, end)}s`,
-    min_doc_count: 0,
-    extended_bounds: { min: start, max: end },
-  },
-});
+export const dateHistogram = (
+  start: number,
+  end: number,
+  timeZone: string,
+  field = '@timestamp'
+): { date_histogram: estypes.AggregationsDateHistogramAggregation } => {
+  const { value, unit } = getHistogramInterval(start, end);
+
+  return {
+    date_histogram: {
+      field,
+      ...(unit === 's' ? { fixed_interval: `${value}s` } : { calendar_interval: `1${unit}` }),
+      time_zone: timeZone,
+      min_doc_count: 0,
+      extended_bounds: { min: start, max: end },
+    },
+  };
+};
 
 export interface DateHistogramAggregation {
   buckets: Array<{ key: number; doc_count: number }>;

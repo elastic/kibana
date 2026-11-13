@@ -47,6 +47,8 @@ const setup = (aggregations: unknown) => {
   return esClient;
 };
 
+const PARAMS = { start: 1, end: 2, timeZone: 'UTC' };
+
 describe('getSessionsApplications', () => {
   it('maps the sessions buckets to application summaries, with the samples and ratings summed', async () => {
     const esClient = setup({
@@ -77,7 +79,7 @@ describe('getSessionsApplications', () => {
       },
     });
 
-    await expect(getSessionsApplications({ esClient, start: 1, end: 2 })).resolves.toMatchObject({
+    await expect(getSessionsApplications({ esClient, ...PARAMS })).resolves.toMatchObject({
       applications: [
         {
           serviceName: 'web',
@@ -124,7 +126,7 @@ describe('getSessionsApplications', () => {
       },
     });
 
-    const { applications } = await getSessionsApplications({ esClient, start: 1, end: 2 });
+    const { applications } = await getSessionsApplications({ esClient, ...PARAMS });
 
     expect(applications[0].jsErrors).toEqual({ count: 2, perPageLoad: null });
   });
@@ -136,7 +138,7 @@ describe('getSessionsApplications', () => {
       inEnvironment: { applications: { buckets: [] }, pageLoadsOverTime: { buckets: [] } },
     });
 
-    const { environments } = await getSessionsApplications({ esClient, start: 1, end: 2 });
+    const { environments } = await getSessionsApplications({ esClient, ...PARAMS });
 
     expect(environments).toEqual(['production', 'staging', ENVIRONMENT_NOT_DEFINED_VALUE]);
   });
@@ -156,7 +158,7 @@ describe('getSessionsApplications', () => {
       },
     });
 
-    const { pageLoadsOverTime } = await getSessionsApplications({ esClient, start: 1, end: 2 });
+    const { pageLoadsOverTime } = await getSessionsApplications({ esClient, ...PARAMS });
 
     expect(pageLoadsOverTime).toEqual([
       { timestamp: 1000, count: 7 },
@@ -179,7 +181,7 @@ describe('getSessionsApplications', () => {
       },
     });
 
-    const { sessionsOverTime } = await getSessionsApplications({ esClient, start: 1, end: 2 });
+    const { sessionsOverTime } = await getSessionsApplications({ esClient, ...PARAMS });
 
     expect(sessionsOverTime).toEqual([
       { timestamp: 1000, count: 5 },
@@ -190,7 +192,7 @@ describe('getSessionsApplications', () => {
   it('returns nothing without aggregations, e.g. when the index does not exist', async () => {
     const esClient = setup(undefined);
 
-    await expect(getSessionsApplications({ esClient, start: 1, end: 2 })).resolves.toEqual({
+    await expect(getSessionsApplications({ esClient, ...PARAMS })).resolves.toEqual({
       applications: [],
       environments: [],
       pageLoadsOverTime: [],
@@ -207,6 +209,7 @@ describe('getSessionsApplications', () => {
       start: 1,
       end: 2,
       environment: 'production',
+      timeZone: 'UTC',
       signal,
     });
 

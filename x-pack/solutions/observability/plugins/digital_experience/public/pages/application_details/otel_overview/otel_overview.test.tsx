@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import moment from 'moment-timezone';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -139,6 +140,7 @@ const response = (pageLoads: number): ApplicationOverviewResponse => ({
       ttfb: NO_VITAL,
     },
     trend: [{ timestamp: 1_000, pageLoads, loadTimePercentileMs: 2412.5 }],
+    trendInterval: { value: 60, unit: 's' },
   },
   environments: ['production', 'staging'],
   filters: {
@@ -222,6 +224,12 @@ const mockSearch = ({
   mockSearchParams();
 };
 
+const mockTimeZoneSetting = (timeZoneSetting: string) =>
+  jest.mocked(useKibanaServices).mockReturnValue({
+    http: {},
+    uiSettings: createUiSettingsMock({ 'dateFormat:tz': timeZoneSetting }),
+  } as unknown as ReturnType<typeof useKibanaServices>);
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockBrushEndListeners.length = 0;
@@ -246,11 +254,13 @@ const pageLoadsKpi = () => screen.getByTestId('digitalExperienceOverviewPageLoad
 const findPageLoads = (count: string) =>
   waitFor(() => expect(pageLoadsKpi()).toHaveTextContent(count));
 
+/** Only the Overview charts over time, so only its request carries the time zone, UTC by default. */
 const expectFetchedWith = (query: Record<string, string>, endpoint = OVERVIEW_ENDPOINT) => {
+  const expectedQuery = endpoint === OVERVIEW_ENDPOINT ? { timeZone: 'UTC', ...query } : query;
   return expect(fetch).toHaveBeenCalledWith(
     endpoint,
     expect.objectContaining({
-      params: { path: { serviceName: 'shop' }, query },
+      params: { path: { serviceName: 'shop' }, query: expectedQuery },
     })
   );
 };
@@ -269,7 +279,25 @@ describe('OtelOverview', () => {
   it('asks for the application and the time range, and for all environments by default', async () => {
     renderOverview();
 
-    await waitFor(() => expectFetchedWith({ start: timeRange.rangeFrom, end: timeRange.rangeTo }));
+    await waitFor(() =>
+      expectFetchedWith({ start: timeRange.rangeFrom, end: timeRange.rangeTo, timeZone: 'UTC' })
+    );
+  });
+
+  it.each([
+    ['an explicit time zone', 'America/New_York', 'America/New_York'],
+    ['the browser time zone', 'Browser', moment.tz.guess()],
+  ])('asks for buckets in %s', async (_, setting, expected) => {
+    mockTimeZoneSetting(setting);
+    renderOverview();
+
+    await waitFor(() =>
+      expectFetchedWith({
+        start: timeRange.rangeFrom,
+        end: timeRange.rangeTo,
+        timeZone: expected,
+      })
+    );
   });
 
   it('asks for the selected environment and lists the environments of the application', async () => {
@@ -281,6 +309,7 @@ describe('OtelOverview', () => {
         start: timeRange.rangeFrom,
         end: timeRange.rangeTo,
         environment: 'staging',
+        timeZone: 'UTC',
       })
     );
 
