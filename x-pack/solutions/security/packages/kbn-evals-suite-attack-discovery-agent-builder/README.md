@@ -109,6 +109,13 @@ not harness tweaks.
 Trajectory precision excludes `load_skill` calls — natural routing always pays that
 framework cost; the evaluator measures waste after the skill is loaded.
 
+On `missing-alert-retrieval`, `expectedSkills` lists only `attack-discovery-generator` on
+purpose. A run that also loads `attack-discovery-alert-retrieval-builder` still scores 1 on
+Skill Invoked, but **ForbiddenTools** scores it 0: with no alerts to find, building a
+retrieval query is wasted work. **WorkflowEvidence** scores that run separately and still
+passes it if it stops before generation and validation. A 0 there is a routing cost, not a
+wrong answer. Do not add the retrieval builder to `expectedSkills` to clear it.
+
 ## How to run
 
 Weekly gate (golden-path only):
