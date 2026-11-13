@@ -19,11 +19,14 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import {
   AgentExecutionMode,
+  isExecutionAbortedEvent,
+  isExecutionFailedEvent,
   isExecutionStartedEvent,
-  isExecutionTerminalEvent,
+  isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isRoundCompleteEvent,
   type ChatEvent,
+  type ExecutionTerminatedEvent,
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
@@ -35,11 +38,12 @@ import type { CallbackDeliveryService } from './callback_delivery_service';
  * Delivers the execution's events to its configured callback URL, resolving once every
  * delivery has finished. Never rejects; a no-op when the execution has no callback.
  *
- * The terminal round_complete event is deferred until the stream completes, so it is only
- * delivered after the conversation has been persisted. If the stream errors first (e.g. the
- * persistence write failed), round_complete is skipped and a failure callback is sent instead.
- * round_complete carries the response message ready to post on the round's surface, which is
- * never stored.
+ * The terminal events, execution_terminated then round_complete, are deferred until the stream
+ * completes, so they are only delivered after the conversation has been persisted. Both carry the
+ * same idempotency key, so a consumer acts on whichever it handles first. If the stream errors
+ * first (e.g. the persistence write failed), both are skipped and a failure callback is sent
+ * instead. round_complete carries the response message ready to post on the round's surface,
+ * which is never stored.
  */
 export const deliverCallbackEvents = ({
   execution,
@@ -78,7 +82,7 @@ export const deliverCallbackEvents = ({
   }
 
   const deliverEvent = (event: ChatEvent) => {
-    const isTerminal = isRoundCompleteEvent(event);
+    const isTerminal = isExecutionTerminatedEvent(event) || isRoundCompleteEvent(event);
     const delivery = callbackDeliveryService.makeCallbackRequest({
       payload: {
         execution_id: execution.executionId,
@@ -101,6 +105,7 @@ export const deliverCallbackEvents = ({
   };
 
   return new Promise<void>((resolve) => {
+    let executionTerminatedEvent: ExecutionTerminatedEvent | undefined;
     let roundCompleteEvent: RoundCompleteEvent | undefined;
 
     events$
@@ -109,13 +114,18 @@ export const deliverCallbackEvents = ({
           (event) =>
             !isMessageChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
-            // Terminal timeline events (terminated / failed / aborted) are never delivered as
-            // events: the completion payload and the failure callback are the terminal
-            // representations a callback consumer gets.
-            !isExecutionTerminalEvent(event)
+            // The failure callback is the only terminal representation of a failed or aborted run.
+            !isExecutionFailedEvent(event) &&
+            !isExecutionAbortedEvent(event)
         ),
         concatMap((event) => {
-          // Hold the terminal event back until the stream completes (persistence succeeded).
+          // Hold the terminal events back until the stream completes (persistence succeeded).
+          if (isExecutionTerminatedEvent(event)) {
+            executionTerminatedEvent = event;
+
+            return EMPTY;
+          }
+
           if (isRoundCompleteEvent(event)) {
             roundCompleteEvent = event;
 
@@ -124,9 +134,10 @@ export const deliverCallbackEvents = ({
 
           return deliverEvent(event);
         }),
-        // Deliver the buffered round_complete last, only on successful completion. On a stream
-        // error concatWith propagates it to catchError below, skipping this delivery.
+        // Deliver the buffered terminal events last, only on successful completion. On a stream
+        // error concatWith propagates it to catchError below, skipping these deliveries.
         concatWith(
+          defer(() => (executionTerminatedEvent ? deliverEvent(executionTerminatedEvent) : EMPTY)),
           defer(() => {
             if (!roundCompleteEvent) {
               return EMPTY;

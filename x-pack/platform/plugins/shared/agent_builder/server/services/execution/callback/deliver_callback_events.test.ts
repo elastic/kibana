@@ -229,7 +229,7 @@ describe('deliverCallbackEvents', () => {
     );
   });
 
-  it('filters out message_chunk + execution_started + execution_terminated events and delivers the rest', async () => {
+  it('filters out message_chunk + execution_started events and delivers the rest', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const reasoningEvent = createReasoningEvent('progress');
     const executionStartedEvent = createExecutionStartedEvent();
@@ -255,24 +255,22 @@ describe('deliverCallbackEvents', () => {
       ([{ payload }]) => (payload as { event: ChatEvent }).event
     );
 
-    expect(deliveredEvents).toEqual([reasoningEvent, roundCompleteEvent]);
+    expect(deliveredEvents).toEqual([reasoningEvent, executionTerminatedEvent, roundCompleteEvent]);
     expect(deliveredEvents.some((event) => event.type === ChatEventType.messageChunk)).toBe(false);
     expect(deliveredEvents.some((event) => event.type === TimelineEventType.executionStarted)).toBe(
       false
     );
-    expect(
-      deliveredEvents.some((event) => event.type === TimelineEventType.executionTerminated)
-    ).toBe(false);
   });
 
-  it('retries only round_complete events; other events are delivered at-most-once', async () => {
+  it('retries only the terminal events; other events are delivered at-most-once', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const progressEvent = createReasoningEvent('progress');
+    const executionTerminatedEvent = createExecutionTerminatedEvent();
     const roundCompleteEvent = createRoundCompleteEvent();
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
-      events$: of(progressEvent, roundCompleteEvent),
+      events$: of(progressEvent, roundCompleteEvent, executionTerminatedEvent),
       callbackDeliveryService: service,
       ...surfacesDeps,
       logger: loggerMock.create(),
@@ -290,12 +288,44 @@ describe('deliverCallbackEvents', () => {
       expect.objectContaining({
         payload: {
           execution_id: 'execution-1',
+          event: executionTerminatedEvent,
+          idempotency_key: 'execution-1',
+        },
+        retry: true,
+      })
+    );
+    expect(service.makeCallbackRequest).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        payload: {
+          execution_id: 'execution-1',
           event: roundCompleteEvent,
           idempotency_key: 'execution-1',
         },
         retry: true,
       })
     );
+  });
+
+  it('defers execution_terminated until the stream completes, delivering it before round_complete', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const roundCompleteEvent = createRoundCompleteEvent();
+    const executionTerminatedEvent = createExecutionTerminatedEvent();
+    const laterEvent = createReasoningEvent('after execution terminated');
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(roundCompleteEvent, executionTerminatedEvent, laterEvent),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const deliveredEvents = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as { event: ChatEvent }).event
+    );
+
+    expect(deliveredEvents).toEqual([laterEvent, executionTerminatedEvent, roundCompleteEvent]);
   });
 
   it('defers round_complete until the stream completes, delivering it after later events', async () => {
@@ -466,14 +496,15 @@ describe('deliverCallbackEvents', () => {
     );
   });
 
-  it('does not deliver round_complete when the stream errors after it, sending a failure instead', async () => {
+  it('does not deliver the terminal events when the stream errors after them, sending a failure instead', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const roundCompleteEvent = createRoundCompleteEvent();
+    const executionTerminatedEvent = createExecutionTerminatedEvent();
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
       events$: concat(
-        of(createReasoningEvent('progress'), roundCompleteEvent),
+        of(createReasoningEvent('progress'), roundCompleteEvent, executionTerminatedEvent),
         throwError(() => new Error('persistence boom'))
       ),
       callbackDeliveryService: service,
@@ -486,6 +517,7 @@ describe('deliverCallbackEvents', () => {
     );
 
     expect(deliveredEvents).not.toContain(roundCompleteEvent);
+    expect(deliveredEvents).not.toContain(executionTerminatedEvent);
     expect(service.makeCallbackRequest).toHaveBeenLastCalledWith({
       payload: {
         execution_id: 'execution-1',

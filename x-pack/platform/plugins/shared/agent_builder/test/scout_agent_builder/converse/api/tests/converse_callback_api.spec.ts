@@ -15,6 +15,7 @@ import {
   ConversationOriginType,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  isExecutionTerminatedEvent,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
@@ -214,12 +215,18 @@ apiTest.describe(
         expect(payload.execution_id).toBe(accepted.execution_id);
         expect(payload.event).toBeDefined();
 
-        // Only the retried round_complete event carries an idempotency key.
-        const expectedIdempotencyKey = isRoundCompleteEvent(payload.event)
-          ? accepted.execution_id
-          : undefined;
+        // Only the retried terminal events carry an idempotency key.
+        const expectedIdempotencyKey =
+          isExecutionTerminatedEvent(payload.event) || isRoundCompleteEvent(payload.event)
+            ? accepted.execution_id
+            : undefined;
         expect(payload.idempotency_key).toBe(expectedIdempotencyKey);
       }
+
+      // execution_terminated is delivered right before round_complete, which ends the round.
+      const [terminated, last] = getEvents(callbackRequests).slice(-2);
+      expect(isExecutionTerminatedEvent(terminated)).toBe(true);
+      expect(isRoundCompleteEvent(last)).toBe(true);
 
       const roundComplete = getRoundCompleteEvent(callbackRequests);
       expect(roundComplete.data.round.response.message).toBe(mockedLlmResponse);
