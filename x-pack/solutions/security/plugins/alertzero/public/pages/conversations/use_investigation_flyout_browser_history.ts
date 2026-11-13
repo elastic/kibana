@@ -74,9 +74,12 @@ export const useInvestigationFlyoutBrowserHistory = (conversationId?: string): v
     // The depth of the entry the browser is on, or heading to: `history.go` lands asynchronously.
     let entryStacked = readStacked(history.location);
 
+    // Scoped history cannot go back past the entry the app loaded on (`go` is then a no-op), so the
+    // current entry is corrected first: it must not keep claiming flyouts if it stays current.
     const goToStacked = (stacked: number) => {
       const delta = stacked - entryStacked;
       entryStacked = stacked;
+      history.replace(withStacked(history.location, stacked));
       history.go(delta);
     };
 

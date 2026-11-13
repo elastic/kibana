@@ -43,9 +43,14 @@ const setup = (
   initialEntries: Array<{ pathname: string; search: string; state?: unknown }> = [
     QUEUE,
     INVESTIGATION,
-  ]
+  ],
+  { canRewind = true }: { canRewind?: boolean } = {}
 ) => {
   const history = createMemoryHistory({ initialEntries, initialIndex: initialEntries.length - 1 });
+  if (!canRewind) {
+    // Like Kibana's scoped history after a reload: it cannot go back past the entry it loaded on.
+    jest.spyOn(history, 'go').mockImplementation(() => {});
+  }
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <Router history={history}>{children}</Router>
   );
@@ -203,6 +208,25 @@ describe('useInvestigationFlyoutBrowserHistory', () => {
 
     expect(history.index).toBe(1);
     expect(readStacked(history) ?? 0).toBe(0);
+  });
+
+  it('stops claiming stacked flyouts that are gone when the history cannot rewind', async () => {
+    const { history } = setup(
+      [QUEUE, INVESTIGATION, { ...INVESTIGATION, state: { [STACKED_FLYOUTS_STATE_KEY]: 1 } }],
+      { canRewind: false }
+    );
+
+    expect(history.index).toBe(2);
+    expect(readStacked(history)).toBe(0);
+
+    await openInGroup(INVESTIGATION_FLYOUT_ID);
+    await openInGroup('entityFlyout');
+    expect(history.index).toBe(3);
+
+    await actAsync(() => history.goBack());
+
+    expect(getSessionMainIds()).toEqual([INVESTIGATION_FLYOUT_ID]);
+    expect(history.index).toBe(2);
   });
 
   it('does not claim a stacked flyout that is gone when going Forward onto its entry', async () => {
