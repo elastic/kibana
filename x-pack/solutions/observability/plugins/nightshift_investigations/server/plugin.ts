@@ -392,6 +392,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             getAgenticInvestigations: () => this.agenticInvestigations,
+            telemetry,
             // The final pass proposes actions for a person to decide, as the investigator's
             // `proposals.create` tool did, and sees which ones the conversation already has.
             getProposals: () =>
@@ -692,6 +693,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
+            telemetry,
             logger: this.logger.get('wiki'),
             isEnabled: () => this.wikiEnabled,
           })
@@ -726,6 +728,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
