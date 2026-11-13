@@ -350,6 +350,7 @@ export type ClassicActionType<
 };
 
 export interface RawAction extends Record<string, unknown> {
+  specVersion?: string;
   actionTypeId: string;
   name: string;
   isMissingSecrets: boolean;

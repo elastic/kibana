@@ -1,9 +1,23 @@
 {
-  "sha1": "46c5d985a4ec35d7c13ea88eba31cb5c39030f29",
+  "sha1": "1e07f9ca5daa1c087d30842d79d00bbb0b43914a",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "bff6a9ee7d96cf9-fb301a593b8b2e6",
+      "title": "Ingest pipelines feature controls user with only read_pipeline can access ingest_pipelines management section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 57,
+        "column": 15
+      }
+    },
     {
       "id": "bff6a9ee7d96cf9-ff99aaa78ec522c",
       "title": "Ingest pipelines feature controls kibana admin without ingest privileges cannot access ingest_pipelines management section",
@@ -14,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 74,
+        "column": 5
       }
     },
     {
@@ -28,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 57,
-        "column": 14
+        "line": 85,
+        "column": 19
       }
     },
     {
@@ -42,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 71,
-        "column": 65
+        "line": 98,
+        "column": 34
       }
     },
     {
