@@ -505,6 +505,10 @@ Report documentation issues alongside code issues.
   Do not read the first row as a reason to make every error a result. An ordinary `GET` that 404s or 500s
   is an error, and should stay one; the row applies to an action whose non-2xx answer is part of what the
   caller asked for.
+- **Workflow visual builder coverage**: A PR that adds `'workflows'` to `supportedFeatureIds` must add a step
+  of the connector to the graph rebuild `connectors` fixture
+  (`src/platform/plugins/shared/workflows_management/test/scout/ui/fixtures/graph_rebuild/`). Flag the PR when
+  the fixture has no step of this connector, or when a `knownGaps` entry was added without a reason.
 
 ### Security
 
