@@ -725,7 +725,8 @@ describe('deployNewAgentPolicy', () => {
         });
         const stream = inputs['amazon_mq-aws-cloudwatch'].streams['aws_mq.activemq_audit_logs'];
         expect(stream.var_group_selections).toEqual({ log_group_source: 'log_group_arn' });
-        expect(stream.vars.log_group_arn).toBe('arn:aws:logs:x');
+        // log_group_arn is an ECF trigger var, so toTyped yields string[] (see the bucket_arn case above).
+        expect(stream.vars.log_group_arn).toEqual(['arn:aws:logs:x']);
         expect(stream.vars).not.toHaveProperty('log_group_name');
         expect(stream.vars).not.toHaveProperty('region_name');
       });
