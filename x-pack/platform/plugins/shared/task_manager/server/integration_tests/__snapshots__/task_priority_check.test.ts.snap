@@ -23,6 +23,10 @@ Array [
     "taskType": "alerting_v2:alert_actions_cleanup",
   },
   Object {
+    "priority": 1,
+    "taskType": "nightshiftInvestigations:detectionSnapshotTelemetry",
+  },
+  Object {
     "priority": 40,
     "taskType": "alerting:attack-discovery",
   },
