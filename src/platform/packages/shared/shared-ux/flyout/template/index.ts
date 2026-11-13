@@ -18,7 +18,6 @@ export type {
   FlyoutTemplateProps,
   FlyoutTemplateFrameProps,
   FlyoutHeaderProps,
-  FlyoutHeaderTitleElement,
   FlyoutHeaderBadgeProps,
   FlyoutHeaderInfoBlockProps,
   FlyoutHeaderMetaBlockProps,

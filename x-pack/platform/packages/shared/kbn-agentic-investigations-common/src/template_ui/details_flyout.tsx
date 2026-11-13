@@ -18,7 +18,6 @@ import type { EscalationModalRenderProps } from '../components/modals/investigat
 import { getHeaderBlocks, type HeaderBlockValues } from '../components/details/header_blocks';
 import { SEVERITY_COLORS, SEVERITY_LABELS } from '../components/details/severity';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
-import { TEMPLATE_UI_LABELS } from './translations';
 import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
 import {
   conversationToEscalationHeader,
@@ -249,7 +248,6 @@ export const useEscalationDetailsFlyout = (
       title: conversation.title,
       description: <EscalationSince createdAt={conversation.created_at} />,
       isLoading: isSyncing,
-      loadingLabel: TEMPLATE_UI_LABELS.syncing,
       infoBlocks: toInfoBlocks({
         status,
         statusNode: renderStatus?.({

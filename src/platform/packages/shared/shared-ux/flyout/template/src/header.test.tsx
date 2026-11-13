@@ -53,21 +53,6 @@ describe('FlyoutTemplate header title icon and description', () => {
     expect(title).toBeInTheDocument();
   });
 
-  it('renders the header title in the heading element set by titleElement', () => {
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert details" titleElement="h2" />
-        <FlyoutTemplate.Body>
-          <span>content</span>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-
-    const title = screen.getByRole('heading', { level: 2, name: 'Alert details' });
-    expect(title.id).toMatch(/^flyoutTemplateTitle/);
-    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
-  });
-
   it('assigns a generated id to the visible header title for flyout labeling', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" aria-label="Hidden override">
@@ -233,20 +218,6 @@ describe('FlyoutTemplate header title icon and description', () => {
     expect(spinner).toHaveAttribute('aria-label', 'Loading');
     expect(screen.getByRole('heading', { level: 3, name: 'Alert details' })).not.toContainElement(
       spinner
-    );
-  });
-
-  it('names the loading spinner with loadingLabel', () => {
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert details" isLoading loadingLabel="Syncing attachments" />
-        {body}
-      </FlyoutTemplate>
-    );
-
-    expect(screen.getByTestId('flyoutHeaderTitleLoading')).toHaveAttribute(
-      'aria-label',
-      'Syncing attachments'
     );
   });
 

@@ -226,9 +226,6 @@ describe('useEscalationDetailsFlyout', () => {
 
     expect(useEscalationSync).toHaveBeenCalledWith('escalation-1');
     expect(result.current.header.isLoading).toBe(true);
-    expect(result.current.header.loadingLabel).toBe(
-      'Syncing attachments from linked investigations'
-    );
     expect(result.current.footer).toBeUndefined();
   });
 

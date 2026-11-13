@@ -130,7 +130,6 @@ const DetailsTemplate = ({
         title={header.title}
         description={header.description}
         isLoading={header.isLoading}
-        loadingLabel={header.loadingLabel}
         data-test-subj={TEST_SUBJ.header}
       >
         {header.metaBlocks?.map((block, index) => (
