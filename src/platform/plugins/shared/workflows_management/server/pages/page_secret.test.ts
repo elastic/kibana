@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { computePageSecretHash, generatePageSecret, isPageSecretValid } from './page_secret';
+import {
+  computePageSecretHash,
+  generatePageSecret,
+  isPageSecretValid,
+  PAGE_SECRET_MAX_LENGTH,
+} from './page_secret';
 
 const ref = { workflowId: 'workflow-1', spaceId: 'default', pageId: 'default' };
 
@@ -35,6 +40,11 @@ describe('page secret', () => {
   ])('rejects the hash of another %s', (_, otherRef) => {
     const secret = generatePageSecret();
     expect(isPageSecretValid(otherRef, secret, computePageSecretHash(ref, secret))).toBe(false);
+  });
+
+  it('rejects a secret longer than a URL may carry, before the HMAC', () => {
+    const secret = 'a'.repeat(PAGE_SECRET_MAX_LENGTH + 1);
+    expect(isPageSecretValid(ref, secret, computePageSecretHash(ref, secret))).toBe(false);
   });
 
   it('rejects a malformed stored hash', () => {

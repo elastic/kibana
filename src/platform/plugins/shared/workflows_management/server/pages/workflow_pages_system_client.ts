@@ -10,6 +10,7 @@
 import { chunk, groupBy } from 'lodash';
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { nodeBuilder } from '@kbn/es-query';
 import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -22,8 +23,7 @@ import { getPageOrUndefined, isPageOnline, namespaceOf } from './utils';
 
 // A find returns at most 10,000 objects. 1,000 workflows leave room for stale pages.
 const FIND_WORKFLOW_IDS_PER_REQUEST = 1_000;
-const FIND_MAX_PAGES = 10_000;
-const ALL_SPACES = '*';
+const FIND_PER_PAGE = 10_000;
 
 /** The page ids a definition asks for. Global workflows never get a page. */
 const getWantedPageIds = (spaceId: string, definition: WorkflowYaml | null | undefined) =>
@@ -94,7 +94,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     const wanted = getWantedPageIds(spaceId, definition);
     // Workflow ids are unique across spaces, so a page of this workflow in another space is
     // left from a move into this space, such as a bulk overwrite, and must go.
-    const existing = await this.findWorkflowPages([workflowId], ALL_SPACES);
+    const existing = await this.findWorkflowPages([workflowId], ALL_NAMESPACES_STRING);
 
     const isCurrent = ({ attributes, namespaces }: SavedObject<WorkflowPageAttributes>) =>
       namespaces?.[0] === spaceId &&
@@ -202,7 +202,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
         await this.deps.savedObjectsClient.find<WorkflowPageAttributes>({
           type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
           namespaces: [spaceId],
-          perPage: FIND_MAX_PAGES,
+          perPage: FIND_PER_PAGE,
           filter: nodeBuilder.or(
             ids.map((workflowId) =>
               nodeBuilder.is(`${WORKFLOW_PAGE_SAVED_OBJECT_TYPE}.attributes.workflowId`, workflowId)

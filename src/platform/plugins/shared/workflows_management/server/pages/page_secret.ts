@@ -16,6 +16,12 @@ export interface WorkflowPageRef {
   pageId: string;
 }
 
+/**
+ * The longest secret a page URL may carry. Real secrets have 43 characters. The routes bound the
+ * URL with it, and the check rejects anything longer before the HMAC runs.
+ */
+export const PAGE_SECRET_MAX_LENGTH = 64;
+
 /** Makes a new secret: 256 random bits as 43 base64url characters. */
 export const generatePageSecret = (): string => randomBytes(32).toString('base64url');
 
@@ -34,6 +40,7 @@ export const isPageSecretValid = (
   secret: string,
   secretHash: string
 ): boolean => {
+  if (secret.length > PAGE_SECRET_MAX_LENGTH) return false;
   const expected = Buffer.from(computePageSecretHash(ref, secret), 'hex');
   const stored = Buffer.from(secretHash, 'hex');
   return expected.length === stored.length && timingSafeEqual(expected, stored);
