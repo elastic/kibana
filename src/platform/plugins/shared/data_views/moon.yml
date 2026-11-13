@@ -41,13 +41,13 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/crypto-browser'
   - '@kbn/core-http-browser'
-  - '@kbn/core-http-browser-internal'
   - '@kbn/logging-mocks'
   - '@kbn/doc-links'
   - '@kbn/core-deprecations-common'
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/as-code-data-views-schema'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod

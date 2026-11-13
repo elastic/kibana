@@ -6,12 +6,11 @@
  */
 
 /**
- * The eval dataset contract, shared by every eval. Individual datasets are declared by the eval
+ * Which evals and stored datasets a run selects. Individual datasets are declared by the eval
  * that scores them, under `evals/<name>/datasets.ts`.
  */
 
-export { selectDatasets } from './select_datasets';
 export { resolveEvalSelection, INVESTIGATION_DATASET_ID } from './eval_selection';
 export type { EvalSelection } from './eval_selection';
-export { toEvaluationDataset } from './to_evaluation_dataset';
-export type { Dataset } from './types';
+export { STORED_DATASETS, assertStoredDatasetTags, selectStoredDatasets } from './stored_datasets';
+export type { StoredDataset, StoredDatasetEval } from './stored_datasets';

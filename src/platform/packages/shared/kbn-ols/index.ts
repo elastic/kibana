@@ -19,7 +19,12 @@ export {
   type EntryLevel,
   type GeneralAccessLevel,
 } from './src/levels';
-export { PRINCIPAL_TYPES, type Principal, type PrincipalType } from './src/principals';
+export {
+  PRINCIPAL_TYPES,
+  type Principal,
+  type PrincipalType,
+  type StoredPrincipal,
+} from './src/principals';
 export {
   isReservedOperation,
   REQUIRED_OPERATIONS,
@@ -29,4 +34,40 @@ export {
   type AccessPolicy,
   type ReservedOperation,
 } from './src/policy';
-export type { Acl, AclEntry, AclState, StoredAcl, StoredAclEntry } from './src/acl';
+export {
+  ACL_FIELD,
+  getAclState,
+  normalizeAclSource,
+  toAclSource,
+  type Acl,
+  type AclEntry,
+  type AclGrant,
+  type AclState,
+  type StoredAcl,
+  type StoredAclEntry,
+} from './src/acl';
+export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/read_filter';
+export {
+  evaluateAcl,
+  generalAccessPermits,
+  isRestricted,
+  toObjectDecision,
+  type AclDecision,
+  type AclObjectDecision,
+  type EvaluateAclParams,
+} from './src/evaluation';
+export {
+  AclChangeError,
+  MAX_ACL_ENTRIES,
+  prepareAclChange,
+  prepareInitialAcl,
+  readEditableAcl,
+  type AclChange,
+  type AclChangeErrorCode,
+  type EditableAcl,
+  type EditableAclEntry,
+  type InitialAccess,
+  type PrepareAclChangeParams,
+  type PrepareInitialAclParams,
+  type PreparedAclChange,
+} from './src/changes';

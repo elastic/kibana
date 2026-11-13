@@ -10,19 +10,13 @@ import React from 'react';
 import styled from '@emotion/styled';
 import {
   type EuiThemeComputed,
-  type EuiIconProps,
   type EuiTextProps,
   type CommonProps,
   EuiButtonIcon,
-  EuiIcon,
   EuiText,
-  useEuiBackgroundColor,
   useEuiTheme,
-  transparentize,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { getSpanIcon } from './get_span_icon';
-import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+import type { EventNodeViewModel } from '..';
 import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
@@ -79,7 +73,7 @@ export const NODE_LABEL_WIDTH = 220;
 export const ENTITY_NODE_LABEL_WIDTH = 160;
 
 /**
- * The total height of a label node including the shape and details below, in pixels.
+ * The total height of a event node including the shape and details below, in pixels.
  * Required in layout_graph.ts
  */
 export const NODE_LABEL_TOTAL_HEIGHT = 72;
@@ -91,7 +85,7 @@ export const NODE_LABEL_TOTAL_HEIGHT = 72;
 export const NODE_LABEL_HEIGHT = 20;
 
 /**
- * The height of the details below a label node shape, in pixels.
+ * The height of the details below a event node shape, in pixels.
  * Required in layout_graph.ts
  */
 export const NODE_LABEL_DETAILS = NODE_LABEL_TOTAL_HEIGHT - NODE_LABEL_HEIGHT;
@@ -102,9 +96,7 @@ export const LABEL_PADDING_X = 8;
 
 export const LABEL_BORDER_RADIUS = 9999;
 
-type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
-
-export const LabelNodeContainer = styled.div`
+export const EventNodeContainer = styled.div`
   position: relative;
   top: ${(NODE_LABEL_HEIGHT - ACTUAL_LABEL_HEIGHT) / 2}px;
   text-wrap: nowrap;
@@ -143,7 +135,7 @@ export const LabelShape = styled(EuiText, {
   transition: border-color 0.2s ease;
 
   /* Change border colour on hover/focus for interactive nodes */
-  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
+  .react-flow__node:not(.non-interactive) ${EventNodeContainer}:hover & {
     border-color: ${HOVER_BORDER_COLOR};
   }
 
@@ -191,10 +183,10 @@ export const NodeContainer = styled.div`
 `;
 
 /**
- * Gets the background, border and text colors for label nodes based on color prop
+ * Gets the background, border and text colors for event nodes based on color prop
  */
 export const getLabelColors = (
-  color: LabelNodeViewModel['color'],
+  color: EventNodeViewModel['color'],
   euiTheme: EuiThemeComputed
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   if (color === 'danger') {
@@ -214,7 +206,7 @@ export const getLabelColors = (
 
 /**
  * Gets the background, border and text colors for relationship nodes.
- * Uses the same colors as event/label nodes for visual consistency.
+ * Uses the same colors as event nodes for visual consistency.
  */
 export const getRelationshipColors = (
   euiTheme: EuiThemeComputed
@@ -230,32 +222,6 @@ export const NodeShapeContainer = styled.div`
   position: relative;
   width: ${NODE_WIDTH}px;
   height: ${NODE_HEIGHT}px;
-`;
-
-export const NodeShapeSvg = styled.svg<{ shadow?: string; yPosDelta?: number }>`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 1;
-
-  ${({ yPosDelta }) => {
-    const delta = typeof yPosDelta === 'number' ? yPosDelta : 0;
-    return `transform: translate(-50%, calc(-50% + ${delta}px));`;
-  }}
-
-  ${({ shadow }) => `
-    /* Apply shadow when node is selected (only for interactive nodes) */
-    .react-flow__node:not(.non-interactive).selected & {
-      ${shadow};
-    }
-
-    /* Apply shadow when node is pressed but still not selected (only for interactive nodes) */
-    .react-flow__node:not(.non-interactive):active:not(.selected) & {
-      ${shadow};
-    }
-
-    /* After dragging node, it'll remain selected so shadow is visible until clicked outside */
-  `};
 `;
 
 interface ButtonContainerProps extends CommonProps {
@@ -311,7 +277,7 @@ export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerPro
 
   /* Only show hover effects for interactive nodes */
   .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover &,
-  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
+  .react-flow__node:not(.non-interactive) ${EventNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
@@ -323,54 +289,6 @@ export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerPro
     opacity: 1; /* Show on node focus */
   }
 `;
-
-export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
-  opacity: 0; /* Hidden by default */
-  transition: opacity 0.2s ease; /* Smooth transition */
-
-  /* Only show hover effects for interactive nodes */
-  .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover &,
-  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
-    opacity: 1; /* Show on hover */
-  }
-
-  .react-flow__node:not(.non-interactive)
-    ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled)
-    &,
-  .react-flow__node:not(.non-interactive)
-    ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled)
-    & {
-    opacity: 1; /* Show when expand button is toggled */
-  }
-
-  .react-flow__node:not(.non-interactive):focus:focus-visible & {
-    opacity: 1; /* Show on focus */
-  }
-`;
-
-interface NodeIconProps {
-  icon: string;
-  color?: EuiIconProps['color'];
-  x: string;
-  y: string;
-}
-
-export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
-  return (
-    <foreignObject x={x} y={y} width="50" height="50">
-      <div
-        css={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
-      >
-        <EuiIcon
-          type={getSpanIcon(icon) ?? icon}
-          size="l"
-          color={color ?? 'primary'}
-          aria-hidden={true}
-        />
-      </div>
-    </foreignObject>
-  );
-};
 
 export const ExpandButtonSize = 18;
 
@@ -399,11 +317,6 @@ export const RoundEuiButtonIcon = styled(EuiButtonIcon, {
 export const HandleStyleOverride: React.CSSProperties = {
   background: 'none',
   border: 'none',
-};
-
-export const useNodeFillColor = (color: NodeColor | undefined) => {
-  const fillColor = (color === 'danger' ? 'primary' : color) ?? 'primary';
-  return useEuiBackgroundColor(fillColor);
 };
 
 export const getStackNodeStyle = (size: {
@@ -455,38 +368,4 @@ export const RoundedBadge = ({
       {children}
     </ThemedRoundedBadge>
   );
-};
-
-export const ToolTipButton = (props: PropsWithChildren) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <button
-      {...props}
-      css={css`
-        appearance: none; /* Reset native button styles provided by browsers */
-
-        &:focus {
-          /* Tooltip injects its own outline that uses "currentColor" so we style it setting "color" */
-          color: ${euiTheme.colors.primary};
-        }
-      `}
-      type="button"
-    />
-  );
-};
-
-export const middleEntityNodeShapeStyle = (strokeColor: string) => {
-  return {
-    transform: 'scale(0.9) translateY(7px)',
-    transformOrigin: 'center',
-    stroke: transparentize(strokeColor, 0.5),
-  };
-};
-
-export const bottomEntityNodeShapeStyle = (strokeColor: string) => {
-  return {
-    transform: 'scale(0.8) translateY(16px)',
-    transformOrigin: 'center',
-    stroke: transparentize(strokeColor, 0.3),
-  };
 };

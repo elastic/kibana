@@ -122,7 +122,7 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
       title: 'Histogram',
       visualizationType: 'lnsXY',
     } as Parameters<typeof services.lens.EmbeddableComponent>[0]['attributes'];
-  }, [euiPalette, fetchParams, services]);
+  }, [euiPalette, fetchParams]);
 
   const [externalAttributes, setExternalAttributes] = useState<
     Parameters<typeof services.lens.EmbeddableComponent>[0]['attributes'] | null

@@ -31,7 +31,6 @@ import { useFetchRelatedAlertsByAncestry } from '../hooks/use_fetch_related_aler
 import { useFetchRelatedAlertsBySameSourceEvent } from '../hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedAlertsBySession } from '../hooks/use_fetch_related_alerts_by_session';
 import { useFetchRelatedCases } from '../hooks/use_fetch_related_cases';
-import { useNavigateToLeftPanel } from '../../../../flyout/document_details/shared/hooks/use_navigate_to_left_panel';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
@@ -50,7 +49,6 @@ jest.mock('../hooks/use_fetch_related_alerts_by_session');
 jest.mock('../hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../hooks/use_fetch_related_alerts_by_same_source_event');
 jest.mock('../hooks/use_fetch_related_cases');
-jest.mock('../../../../flyout/document_details/shared/hooks/use_navigate_to_left_panel');
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(CORRELATIONS_TEST_ID);
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(CORRELATIONS_TEST_ID);
@@ -126,7 +124,6 @@ describe('<CorrelationsOverview />', () => {
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
 
   it('should render wrapper component', () => {

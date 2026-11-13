@@ -21,6 +21,12 @@ export const NIGHTSHIFT_DISCOVERY_USAGE_ID = 'nightshift_discovery' as const;
 
 export const NIGHTSHIFT_INVESTIGATION_USAGE_ID = 'nightshift_investigation' as const;
 
+/** Semantic Memory optimize. Keeps the id it shared with Wiki and decision trees before they split off. */
 export const NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID = 'nightshift_investigation_memory' as const;
+
+export const NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID = 'nightshift_investigation_wiki' as const;
+
+export const NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID =
+  'nightshift_investigation_decision_tree' as const;
 
 export const NIGHTSHIFT_ONLINE_EVALS_USAGE_ID = 'nightshift_online_evals' as const;

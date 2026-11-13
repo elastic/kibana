@@ -7,6 +7,7 @@
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import {
+  CONFIDENCE_CONTRACT_RULE,
   DISCOVERY_SEVERITY_APPLICATION_RULE,
   SEVERITY_CONTRACT_RULE,
 } from '@kbn/significant-events-schema';
@@ -35,21 +36,26 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: `Apply the \`severity\` field contract in order — do not invent tier rules beyond it and its discovery application rule. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary.`,
+    text: `Apply the \`severity\` field contract in order — do not invent tier rules beyond it and its discovery application rule. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary. A tier needs the evidence these rules name: a count or share of log lines is volume, not impact.`,
   },
   {
     id: 'weak_signals_low_severity',
-    text: 'Unconfirmed signals — no confirmed failure evidence AND not statistically credible (high p_value) — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a low-volume but evidence-confirmed failure on a user-critical path can warrant high criticality, and a high-volume signal is not severe without confirmed impact. Do not lower criticality merely because a rule fired few times.',
+    text: 'Unconfirmed signals — no confirmed failure evidence — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a high volume of log lines is not impact by itself. A rule that fired few times is not lowered for that alone, and a failure confirmed on a user-critical path is rated on the evidence the severity rules name for its tier, not on how many detections fired.',
     score: 1,
   },
   {
     id: 'detection_metadata_not_severity',
-    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs, and the `severity_score` of the rule, are not severity inputs and may affect `confidence` only.',
+    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs, and the `severity_score` of the rule, are not severity inputs.',
     score: 2,
   },
   {
     id: 'under_escalation_is_fail',
-    text: 'Under-escalation is a FAIL. When grounding confirms a non-benign failure or material degradation, assign the highest tier the `severity` field contract supports for that confirmed mechanism and blocked or degraded work. Do not assign `medium` or `low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless the known-ongoing cap explicitly applies, a contained-failure cue lowers the tier per the discovery application rule, or impact is genuinely bounded/unconfirmed per the schema. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
+    text: 'Under-escalation is a FAIL: the descriptions support a higher tier under the severity rules above and the event is rated lower. Sparse topology, an internal component, cautious narrative wording or weak detection metadata are not reasons to rate lower. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
+    score: 2,
+  },
+  {
+    id: 'over_escalation_is_fail',
+    text: 'Over-escalation is a FAIL: the event is rated higher than the severity rules above support.',
     score: 2,
   },
 ];
@@ -57,15 +63,26 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
 const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'confidence_reflects_support',
-    text: 'Confidence follows the agent’s confidence rule: for a new event the base comes from the strongest detection’s `p_value` (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25), plus up to 0.10 for several `confirms` verdicts and aligned KI backing, minus 0.10 for outnumbering non-`confirms` verdicts, missing `causal_features` or a key query that is not `found`; a figure the descriptions state as not measured (share, duration) caps it at 0.65. A continuation starts from the matched active event’s stored confidence and adjusts it incrementally; it is not recalculated from `p_value`. Confidence is at most 0.30 with no `confirms` verdict and at most 0.85 in any case; a `dimensions`, examples or `breakdown` query that could not be run or was not sent counts toward neither cap. A low confidence that follows from a weak `p_value` is correct even when the finding is well supported; do not penalise it, and do not credit support the rule does not count.',
+    text: `Confidence follows the confidence contract:\n\n${CONFIDENCE_CONTRACT_RULE.trim()}\n\nGrade whether the number fits the evidence the descriptions carry.`,
   },
   {
-    id: 'no_ki_caps_confidence',
-    text: 'Failure findings with no KI match and no active failure evidence should not claim high confidence (kept at or below ~0.65 without KI backing). Exception: `refutes` discoveries — where queries returned healthy rows (`evidence.result: "found"` with a healthy signature) confirming the signal is a non-event — are confirmed non-events, not unconfirmed findings, so they may sit in the 0.65–0.75 range without KI backing and are exempt from this cap. `off_topic`, `inconclusive`, and `not_checked` findings are not exempt.',
+    id: 'confidence_basis_stated',
+    text: 'Sentence 3 of the assessment_note names evidence the descriptions actually carry (the failure, its timing and scope, contradictions between signals) and any support they do not show, and the confidence fits that basis.',
   },
   {
-    id: 'strong_corroboration_high_confidence',
-    text: 'Only strongly corroborated findings (multiple confirmed evidences plus aligned KI backing from the input topology or this cycle’s KI search, with no contradiction) may claim high confidence (>=0.85). The judge need not repeat KI search when the discovery already carries aligned causal_features or blast_radius.',
+    id: 'detection_metadata_not_confidence',
+    text: '`p_value`, `change_point_type`, and `recent_detection_count` are not inputs to confidence. A confirmed, well-supported finding is not given a low confidence score because its `p_value` is weak, and a weakly supported one is not given a high confidence score because its `p_value` is strong.',
+    score: 2,
+  },
+  {
+    id: 'kb_gap_not_a_penalty',
+    text: 'A missing knowledge-base edge, an empty `blast_radius` or a knowledge gap (a service or call target the rows name that no knowledge record covers) never lowers confidence, and lowers severity only where the severity rules say so. The rows outrank the knowledge base; the note records the gap as unverified in sentence 2.',
+    score: 2,
+  },
+  {
+    id: 'hypothesis_explains_only_whats_supported',
+    text: 'The symptom hypothesis explains only as far as the evidence supports: it names no cause beyond a failing component or dependency the rows or a topology edge show, says at most in one clause that a cause is not established, and keeps longer unknowns and disclaimers in the assessment note.',
+    score: 2,
   },
 ];
 
@@ -77,7 +94,7 @@ export const createSeverityCalibrationEvaluator = ({
 }): Evaluator =>
   createCalibrationEvaluator('severity_calibration', SEVERITY_CALIBRATION_CRITERIA, criteriaFn);
 
-/** LLM evaluator: scores whether `confidence` reflects evidence/KI backing, with the no-KI ceiling. */
+/** LLM evaluator: scores whether `confidence` is a credible summary of what the signal descriptions establish. */
 export const createConfidenceCalibrationEvaluator = ({
   criteriaFn,
 }: {

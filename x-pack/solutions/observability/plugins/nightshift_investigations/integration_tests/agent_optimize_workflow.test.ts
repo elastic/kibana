@@ -133,7 +133,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(agentParams.nextInput).toEqual({ message: 'reinforcement turn prompt' });
     expect(agentParams.conversation?.id).not.toBe(ELIGIBLE_ROUND_INPUTS.conversation_id);
     expect(telemetryMetadata).toMatchObject({
-      pluginId: 'nightshift_investigation_memory',
+      pluginId: 'nightshift_investigation_decision_tree',
       aggregateBy: 'nightshift',
       productSolution: 'observability',
       productFeature: 'nightshift',
@@ -185,7 +185,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(resolveNightshiftModelForRequest).toHaveBeenCalledWith(
       expect.objectContaining({ step: 'investigation', roundConnectorId: 'round-connector' })
     );
-    expect(roundFixture.agentRuns[0].defaultConnectorId).toBe('round-connector');
+    expect(roundFixture.agentRuns[0].defaultModel).toEqual({ connectorId: 'round-connector' });
   });
 
   // `${{ }}` keeps an array; Liquid `{{ }}` would stringify it to "[object Object]" and the
@@ -207,6 +207,73 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(jest.mocked(runMemoryOptimize).mock.calls[0][0]).toMatchObject({
       recalledIds: ['mem-1', 'mem-2'],
     });
+  });
+
+  it('forwards optimizer opened_ids and applied_writes into score_memory_online_evals', async () => {
+    const evaluate = jest.fn().mockResolvedValue([
+      {
+        status: 'ok',
+        evaluator: { name: 'nightshift_memory_read_judge', version: '1.0.0', kind: 'code' },
+        scores: [{ name: 'memory_read_utility', score: 0.5, label: 'RECALLED_OPENED' }],
+      },
+      {
+        status: 'ok',
+        evaluator: { name: 'nightshift_memory_write_judge', version: '1.0.0', kind: 'code' },
+        scores: [{ name: 'memory_write_quality_wiki', score: 1, label: 'wiki:1/1' }],
+      },
+    ]);
+    const scoringFixture = createNightshiftWorkflowFixture({ evaluate });
+    jest.mocked(runWikiOptimize).mockResolvedValue({
+      openedIds: ['wiki_service_checkout'],
+      appliedWrites: [
+        {
+          store: 'wiki',
+          item_id: 'wiki_service_checkout',
+          action: 'upsert',
+          version: 1,
+          after_content: '# Checkout',
+        },
+      ],
+    });
+    jest.mocked(runMemoryOptimize).mockResolvedValue({
+      ...memoryOptimizeSummary,
+      openedIds: ['mem-1'],
+      appliedWrites: [
+        {
+          store: 'semantic_memory',
+          item_id: 'memory_checkout-redis',
+          action: 'create',
+          after_content: 'Redis connection pool exhausted.',
+        },
+      ],
+    });
+
+    await scoringFixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
+
+    expect(scoringFixture.stepOutput('score_memory_online_evals')).toEqual({
+      scored: true,
+      evaluator_count: 2,
+      failed_count: 0,
+      skipped_count: 0,
+    });
+    expect(evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        evidence: expect.objectContaining({
+          reference_data: {
+            recalled_ids: ['mem-1', 'mem-2'],
+            opened_ids: ['wiki_service_checkout', 'mem-1'],
+            applied_writes: [
+              expect.objectContaining({ store: 'wiki', item_id: 'wiki_service_checkout' }),
+              expect.objectContaining({
+                store: 'semantic_memory',
+                item_id: 'memory_checkout-redis',
+              }),
+            ],
+          },
+        }),
+      })
+    );
+    expect(scoringFixture.reportOnlineEvalScore).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -256,8 +323,8 @@ describe('agent optimize workflow, a follow-up round', () => {
 
 describe('agent optimize workflow, rounds that must not reinforce', () => {
   // `prepare_turn` is the eligibility gate: it answers `skipped`, and both agent steps read that
-  // answer. The workflow still installs with Wiki or Memory alone, so this runs on installs that
-  // have no decision trees at all.
+  // answer. The workflow still installs with Wiki, Memory, or decision trees, so this runs on
+  // installs that have no decision trees at all.
   it.each([
     ['the decision-tree feature is off', { decisionTreesEnabled: false }, ELIGIBLE_ROUND_INPUTS],
     [

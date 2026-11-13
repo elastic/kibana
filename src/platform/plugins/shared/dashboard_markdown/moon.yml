@@ -37,12 +37,12 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/visualizations-common'
   - '@kbn/react-kibana-context-render'
   - '@kbn/as-code-utils'
   - '@kbn/usage-collection-plugin'
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/dashboard-markdown-schemas'
+  - '@kbn/visualizations-components'
 tags:
   - plugin
   - prod

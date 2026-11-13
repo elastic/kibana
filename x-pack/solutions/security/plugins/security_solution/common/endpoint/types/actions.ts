@@ -112,6 +112,20 @@ export interface ResponseActionGetFileOutputContent {
     type: string;
   }>;
   /**
+   * `true` when `contents` does not list every file in the zip (the list is capped when the
+   * response action retrieves many files). Only for Endpoint that support `get_file_multi_path`
+   */
+  contents_truncated?: boolean;
+  /**
+   * A summary of all the files processed. Only for Endpoint that support `get_file_multi_path`
+   */
+  totals?: {
+    files: number;
+    bytes: number;
+    /** The number of files by status */
+    counts: Record<string, number>;
+  };
+  /**
    * The relative API path to download the output file for this response action
    */
   downloadUri?: string;
@@ -304,7 +318,13 @@ export type ResponseActionParametersWithProcessData =
   | ResponseActionParametersWithProcessName;
 
 export interface ResponseActionGetFileParameters {
-  path: string;
+  /** The path of the file to retrieve. Mutually exclusive with `paths` */
+  path?: string;
+  /**
+   * The list of paths to retrieve. Mutually exclusive with `path`.
+   * Only for Endpoint that support the `get_file_multi_path` capability
+   */
+  paths?: string[];
   /**
    * Read a file that the OS has locked from a snapshot of its volume. Valid for `endpoint` agent
    * type only, and supported on Windows only (requires the `get_file_force` capability).

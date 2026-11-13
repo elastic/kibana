@@ -12,10 +12,12 @@ import { sloWithDataResponseSchema } from '../slo';
 const getSLOQuerySchema = lazySchema(() =>
   z.object({
     instanceId: allOrAnyString
+      .meta({ example: 'web-01' })
       .optional()
       .describe('the specific instanceId used by the summary calculation'),
     remoteName: z
       .string()
+      .meta({ example: 'my-remote-cluster' })
       .optional()
       .describe('The name of the remote cluster where the SLO is defined, for remote SLOs'),
   })
