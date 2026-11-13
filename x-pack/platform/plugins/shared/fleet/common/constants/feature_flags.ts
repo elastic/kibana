@@ -28,3 +28,6 @@ export const ENABLE_SENTINEL_POLICY_VERSION_FLAG = 'fleet.enableSentinelPolicyVe
 
 /** LaunchDarkly flag that gates the POC where Kibana creates Federated Identity stacks itself via the AWS SDK. Fallback is false. */
 export const AWS_MANAGED_ONBOARDING_FLAG = 'fleet.awsManagedOnboarding';
+
+/** LaunchDarkly flag that gates the agent-driven AWS onboarding (Elastic Workflow plus Agent Builder tools). Fallback is false. */
+export const AGENTIC_AWS_ONBOARDING_FLAG = 'fleet.agenticAwsOnboarding';

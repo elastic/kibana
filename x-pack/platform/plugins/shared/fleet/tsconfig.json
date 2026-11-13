@@ -152,6 +152,9 @@
     "@kbn/elastic-agent-condition-language",
     "@kbn/app-header",
     "@kbn/core-http-browser",
-    "@kbn/core-feature-flags-server"
+    "@kbn/core-feature-flags-server",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
+    "@kbn/agent-builder-plugin"
   ]
 }
