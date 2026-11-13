@@ -128,7 +128,6 @@ export const moveAction = (
       return getResizePreviewRect({
         activePanel,
         pointerPixel,
-        gridSettings,
         resizeOptions,
         usableWidth: containerWidth - gutterSize * 2,
       });
@@ -138,18 +137,9 @@ export const moveAction = (
   })();
 
   const requestedPanelData = { ...currentPanelData };
-  const numberOfRows = Math.floor(
-    ((gridLayoutRect?.bottom ?? 0) - (gridLayoutRect?.top ?? 0)) / (rowHeight + gutterSize / 2)
-  );
-
-  const getRow = (rect: { top: number; bottom: number }) => {
-    const gridTop = gridLayoutRect?.top ?? 0;
-    const localYCoordinate = rect.top - gridTop;
-    return Math.min(
-      Math.max(Math.ceil(localYCoordinate / (rowHeight + gutterSize / 2)), 1),
-      numberOfRows
-    );
-  };
+  const rowSize = rowHeight + gutterSize / 2;
+  const gridTop = gridLayoutRect?.top ?? 0;
+  const getRow = ({ top }: { top: number }) => Math.ceil((top - gridTop) / rowSize);
 
   if (isResize) {
     const targetWidth = previewRect.right - previewRect.left;

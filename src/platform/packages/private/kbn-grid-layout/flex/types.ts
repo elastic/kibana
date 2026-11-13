@@ -15,10 +15,9 @@ import type { ActivePanelEvent, FlexPanelData } from './grid_panel';
 /**
  * The settings for how the grid should be rendered
  */
-export interface GridSettings {
+export interface FlexLayoutSettings {
   gutterSize: number;
   rowHeight: number;
-  columnCount: number;
   keyboardDragTopLimit: number;
   /**
    * Optional panel widths (in pixels). When provided, a panel's width snaps to the closest
@@ -39,7 +38,7 @@ export interface FlexLayoutStateManager {
   gridLayout$: BehaviorSubject<FlexLayoutData>;
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
-  gridSettings$: BehaviorSubject<GridSettings>;
+  gridSettings$: BehaviorSubject<FlexLayoutSettings>;
 
   scrollContainer$: BehaviorSubject<ScrollContainer>;
 

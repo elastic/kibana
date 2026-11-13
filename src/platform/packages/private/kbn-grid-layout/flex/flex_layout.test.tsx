@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 
 import type { GridLayoutProps } from './flex_layout';
 import { FlexLayout } from './flex_layout';
-import type { FlexLayoutData, GridSettings } from './types';
+import type { FlexLayoutData, FlexLayoutSettings } from './types';
 import { MIN_RESIZE_WIDTH } from './use_grid_layout_events/panel/utils';
 
 const PANEL_WIDTH = 200;
@@ -29,10 +29,9 @@ const getLayout = (
   return layout;
 };
 
-const gridSettings: GridSettings = {
+const gridSettings: FlexLayoutSettings = {
   gutterSize: 50,
   rowHeight: 100,
-  columnCount: 1,
   keyboardDragTopLimit: 0,
 };
 

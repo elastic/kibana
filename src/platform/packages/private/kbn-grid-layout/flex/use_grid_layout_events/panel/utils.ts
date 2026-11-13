@@ -8,7 +8,7 @@
  */
 
 import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
-import type { FlexLayoutStateManager, GridSettings } from '../../types';
+import type { FlexLayoutStateManager } from '../../types';
 import {
   getSensorPosition,
   isKeyboardEvent,
@@ -30,58 +30,33 @@ export const MIN_RESIZE_WIDTH = 50;
 export const getDefaultResizeOptions = () => ({
   minWidth: MIN_RESIZE_WIDTH,
   maxWidth: Number.MAX_VALUE,
-  minHeight: 1,
-  maxHeight: Number.MAX_VALUE,
 });
-
-export const getRowCountInPixels = ({
-  rowCount,
-  gridSettings,
-}: {
-  rowCount: number;
-  gridSettings: GridSettings;
-}) => {
-  const safeRowCount = Math.min(rowCount, Number.MAX_VALUE); // Infinity * 0 = Nan which can cause problems.
-  return safeRowCount * gridSettings.rowHeight + (safeRowCount - 1) * gridSettings.gutterSize;
-};
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
   activePanel,
   pointerPixel,
-  gridSettings,
   resizeOptions,
   usableWidth,
 }: {
   pointerPixel: PointerPosition;
   activePanel: ActivePanelEvent;
-  gridSettings: GridSettings;
   resizeOptions: FlexPanelData['resizeOptions'];
   usableWidth: number;
 }) => {
-  const panelRect = activePanel.panelDiv.getBoundingClientRect();
+  const { top, bottom } = activePanel.panelDiv.getBoundingClientRect();
   // use the left edge from the resize start; the live `left` can change if the panel reflows rows
   const originLeft = activePanel.position.left;
-  const {
-    maxWidth,
-    minHeight,
-    maxHeight,
-    minWidth: requestedMinWidth,
-  } = {
+  const { maxWidth, minWidth: requestedMinWidth } = {
     ...getDefaultResizeOptions(),
     ...resizeOptions,
   };
   const minWidth = Math.max(requestedMinWidth, MIN_RESIZE_WIDTH);
   return {
     left: originLeft,
-    top: panelRect.top,
-    bottom: Math.max(
-      Math.min(
-        pointerPixel.clientY - activePanel.sensorOffsets.bottom, // actual height based on mouse position
-        panelRect.top + getRowCountInPixels({ rowCount: maxHeight, gridSettings }) // max height of panel
-      ),
-      panelRect.top + getRowCountInPixels({ rowCount: minHeight, gridSettings }) // min height of panel
-    ),
+    // panel height is fixed in a flex layout, so only the width changes
+    top,
+    bottom,
     right: Math.max(
       Math.min(
         pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position

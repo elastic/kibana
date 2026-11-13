@@ -17,7 +17,7 @@ import { GridPanel, GridPanelDragPreview } from './grid_panel';
 import type {
   GridAccessMode,
   FlexLayoutData,
-  GridSettings,
+  FlexLayoutSettings,
   UseCustomDragHandle,
   FlexLayoutElementsInOrder,
 } from './types';
@@ -28,7 +28,7 @@ import { getLayoutInOrder } from './utils/panel_order';
 
 export type GridLayoutProps = {
   layout: FlexLayoutData;
-  gridSettings: GridSettings;
+  gridSettings: FlexLayoutSettings;
   onLayoutChange: (newLayout: FlexLayoutData) => void;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion

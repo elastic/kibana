@@ -17,7 +17,12 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './grid_panel';
-import type { FlexLayoutData, FlexLayoutStateManager, GridAccessMode, GridSettings } from './types';
+import type {
+  FlexLayoutData,
+  FlexLayoutStateManager,
+  GridAccessMode,
+  FlexLayoutSettings,
+} from './types';
 
 export const useGridLayoutState = ({
   layout,
@@ -27,7 +32,7 @@ export const useGridLayoutState = ({
 }: {
   layout: FlexLayoutData;
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
-  gridSettings: GridSettings;
+  gridSettings: FlexLayoutSettings;
   accessMode: GridAccessMode;
 }): {
   gridLayoutStateManager: FlexLayoutStateManager;
@@ -45,7 +50,7 @@ export const useGridLayoutState = ({
   }, [accessMode, accessMode$]);
 
   const gridSettings$ = useMemo(
-    () => new BehaviorSubject<GridSettings>(gridSettings),
+    () => new BehaviorSubject<FlexLayoutSettings>(gridSettings),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );

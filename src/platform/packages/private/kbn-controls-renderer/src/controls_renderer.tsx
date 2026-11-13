@@ -15,7 +15,7 @@ import { distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
 
 import { FlexLayout } from '@kbn/grid-layout';
-import type { FlexLayoutData, GridSettings } from '@kbn/grid-layout';
+import type { FlexLayoutData, FlexLayoutSettings } from '@kbn/grid-layout';
 
 import { ControlPanel } from './components/control_panel';
 import type { ControlsLayout, ControlsRendererParentApi } from './types';
@@ -48,14 +48,13 @@ export const ControlsRenderer = ({
     [controlState]
   );
 
-  const gridSettings = useMemo<GridSettings>(
+  const gridSettings = useMemo<FlexLayoutSettings>(
     () => ({
       gutterSize: CONTROL_GUTTER_SIZE,
       rowHeight:
         parentApi.isCompressed && !parentApi.isCompressed()
           ? REGULAR_CONTROL_HEIGHT
           : COMPRESSED_CONTROL_HEIGHT,
-      columnCount: 1,
       keyboardDragTopLimit: 0,
       widthBreakpoints: Object.values(CONTROL_WIDTH_PIXELS),
     }),

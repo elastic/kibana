@@ -41,6 +41,7 @@ export const getClosestControlWidth = (pixels: number): ControlWidth => {
   );
 };
 
+/** converts the controls layout to a flex layout, mapping each control's `width` option to its pixel value */
 export const controlsLayoutToFlexLayout = ({ controls }: ControlsLayout): FlexLayoutData =>
   Object.entries(controls).reduce<FlexLayoutData>((flexLayout, [id, { order, width, grow }]) => {
     flexLayout[id] = {
@@ -53,7 +54,7 @@ export const controlsLayoutToFlexLayout = ({ controls }: ControlsLayout): FlexLa
     return flexLayout;
   }, {});
 
-/** Applies the order, width and grow of a flex layout onto the existing controls layout */
+/** applies the order, width and grow of a flex layout onto the existing controls layout */
 export const flexLayoutToControlsLayout = (
   flexLayout: FlexLayoutData,
   { controls }: ControlsLayout
