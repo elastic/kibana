@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin as PluginType, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  Logger,
+  PluginInitializerContext,
+  Plugin as PluginType,
+} from '@kbn/core/server';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -21,7 +26,11 @@ interface DigitalExperienceSetupDeps {
 }
 
 export class Plugin implements PluginType<void, void, DigitalExperienceSetupDeps> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
@@ -29,7 +38,7 @@ export class Plugin implements PluginType<void, void, DigitalExperienceSetupDeps
     const { buildFlavor } = this.initializerContext.env.packageInfo;
     registerRoutes({
       core,
-      logger: this.initializerContext.logger.get(),
+      logger: this.logger,
       repository: getGlobalDigitalExperienceServerRouteRepository(),
       dependencies: {
         plugins: { apmDataAccess: plugins.apmDataAccess },

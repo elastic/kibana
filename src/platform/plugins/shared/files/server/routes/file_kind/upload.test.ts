@@ -10,7 +10,7 @@
 import { Readable } from 'stream';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import type { FileServiceStart } from '../../file_service';
 

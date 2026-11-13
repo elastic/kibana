@@ -34,7 +34,7 @@ import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { eventSourceStreamIntoObservable } from '../../server/util/event_source_stream_into_observable';
 
-// eslint-disable-next-line spaced-comment
+// eslint-disable-next-line @kbn/compat/eslint-spaced-comment
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 export interface ScriptInferenceClient {

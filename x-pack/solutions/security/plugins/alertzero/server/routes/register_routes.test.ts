@@ -19,6 +19,8 @@ const setup = () => {
     router,
     logger: loggerMock.create(),
     getSpaceId: service,
+    getClusterClient: service,
+    isCpsEnabled: () => false,
     getWatchesService: service,
     getWorkersService: service,
     getConversationProposalsService: service,
@@ -28,6 +30,8 @@ const setup = () => {
     getHuntServices: service,
     getScanFailuresService: service,
     getThreatIntelSupplyService: service,
+    isServerless: false,
+    getWorkflowsManagement: service,
     reportTelemetryEvent: service,
   });
   const routes = (['get', 'post', 'put', 'patch', 'delete'] as const).flatMap((method) =>

@@ -32,12 +32,11 @@ import { useIndexMetadata } from './use_index_metadata';
 export function IndexInspectPage() {
   const {
     path: { indexName, tab },
-  } = useStreamsAppParams('/new-experience/indices/{indexName}/{tab}');
+    query: { unitId },
+  } = useStreamsAppParams('/v2/indices/{indexName}/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
-  const {
-    features: { canvas },
-  } = useStreamsPrivileges();
+  const { access } = useStreamsPrivileges();
   const { value: metadata, loading: metadataLoading } = useIndexMetadata(indexName);
   const exists = metadata?.exists ?? false;
   const targetKind = getIndexInspectTargetKind({ metadata, metadataLoading });
@@ -86,9 +85,9 @@ export function IndexInspectPage() {
           id: tabId,
           label: INDEX_INSPECT_TAB_LABELS[tabId],
           href: available
-            ? router.link('/new-experience/indices/{indexName}/{tab}', {
+            ? router.link('/v2/indices/{indexName}/{tab}', {
                 path: { indexName, tab: tabId },
-                query: { rangeFrom, rangeTo },
+                query: { rangeFrom, rangeTo, unitId },
               })
             : undefined,
           isSelected: selectedTab === tabId,
@@ -97,7 +96,7 @@ export function IndexInspectPage() {
           'data-test-subj': `streamsIndexInspectTab-${tabId}`,
         };
       }),
-    [indexName, rangeFrom, rangeTo, router, selectedTab, targetKind]
+    [indexName, rangeFrom, rangeTo, router, selectedTab, targetKind, unitId]
   );
 
   const menu = useMemo<AppHeaderMenu | undefined>(() => {
@@ -142,16 +141,13 @@ export function IndexInspectPage() {
     };
   }, [discoverLink, indexName, stackManagementLink]);
 
-  if (!canvas.enabled) {
+  if (!access.v2) {
     return <RedirectTo path="/" />;
   }
 
   if (tab !== selectedTab) {
     return (
-      <RedirectTo
-        path="/new-experience/indices/{indexName}/{tab}"
-        params={{ path: { tab: selectedTab } }}
-      />
+      <RedirectTo path="/v2/indices/{indexName}/{tab}" params={{ path: { tab: selectedTab } }} />
     );
   }
 
@@ -159,15 +155,24 @@ export function IndexInspectPage() {
     <>
       <StreamsAppHeader
         title={indexName}
-        back={{
-          href: router.link('/new-experience/{tab}', {
-            path: { tab: 'destinations' },
-            query: { rangeFrom, rangeTo },
-          }),
-          label: i18n.translate('xpack.streams.indexInspect.page.backToDestinations', {
-            defaultMessage: 'Destinations',
-          }),
-        }}
+        back={
+          unitId
+            ? {
+                href: router.link('/v2/unit/{unitId}/{tab}', {
+                  path: { unitId, tab: 'destinations' },
+                  query: { rangeFrom, rangeTo },
+                }),
+                label: i18n.translate('xpack.streams.indexInspect.page.backToDestinations', {
+                  defaultMessage: 'Destinations',
+                }),
+              }
+            : {
+                href: router.link('/v2'),
+                label: i18n.translate('xpack.streams.indexInspect.page.backToStreams', {
+                  defaultMessage: 'Streams',
+                }),
+              }
+        }
         badges={badges}
         tabs={tabs}
         menu={menu}

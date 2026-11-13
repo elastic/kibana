@@ -31,4 +31,6 @@ export type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountBoundWorkload,
+  ServiceAccountSummary,
 } from './src/service_accounts';
+export { UIAM_ERROR_CODES } from './src/uiam_error_codes';

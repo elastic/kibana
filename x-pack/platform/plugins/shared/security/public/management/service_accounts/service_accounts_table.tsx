@@ -47,8 +47,8 @@ export interface ServiceAccountsTableProps {
   onViewWorkloads?: (serviceAccount: ServiceAccountTableItem) => void;
 }
 
-const unavailableValue = (tabIndex?: number) => (
-  <EuiText color="subdued" size="s" tabIndex={tabIndex}>
+const unavailableValue = (tabIndex?: number, dataTestSubj?: string) => (
+  <EuiText color="subdued" size="s" tabIndex={tabIndex} data-test-subj={dataTestSubj}>
     &mdash;
   </EuiText>
 );
@@ -60,20 +60,29 @@ const getCreatorLabel = (creator?: ServiceAccountDirectoryCreator) => {
     });
   }
 
-  if (creator.displayName) {
-    return creator.displayName;
-  }
-
   switch (creator.type) {
     case 'user':
-      return creator.username;
-    case 'api_key':
-      return i18n.translate('xpack.security.management.serviceAccounts.table.createdByApiKey', {
-        defaultMessage: 'API key {apiKeyId}',
-        values: { apiKeyId: creator.apiKeyId },
-      });
+      return creator.displayName ?? creator.username;
+    case 'api_key': {
+      const apiKeyLabel =
+        creator.apiKeyName ??
+        i18n.translate('xpack.security.management.serviceAccounts.table.createdByApiKey', {
+          defaultMessage: 'API key {apiKeyId}',
+          values: { apiKeyId: creator.apiKeyId },
+        });
+      if (!creator.displayName) {
+        return apiKeyLabel;
+      }
+      return i18n.translate(
+        'xpack.security.management.serviceAccounts.table.createdByApiKeyWithOwner',
+        {
+          defaultMessage: '{apiKeyLabel} ({ownerName})',
+          values: { apiKeyLabel, ownerName: creator.displayName },
+        }
+      );
+    }
     case 'service_account':
-      return creator.serviceAccountId;
+      return creator.displayName ?? creator.serviceAccountId;
   }
 };
 
@@ -222,7 +231,7 @@ export const ServiceAccountsTable = ({
                   { defaultMessage: 'Unable to count the workloads bound to this account.' }
                 )}
               >
-                {unavailableValue(0)}
+                {unavailableValue(0, 'serviceAccountWorkloadCountUnavailable')}
               </EuiToolTip>
             );
           }

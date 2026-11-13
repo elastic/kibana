@@ -20,6 +20,7 @@ import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { timelineReducer as embeddedTimelineReducer } from '@kbn/timelines-plugin/public/store/timeline/reducer';
 import reduceReducers from 'reduce-reducers';
 import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
@@ -96,7 +97,10 @@ export const createStoreFactory = async (
 
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
-    startPlugins.timelines?.getTimelineReducer() ?? {},
+    // `embeddedTimelineReducer` only narrows the `timelineById` slice, which would over-constrain
+    // `reduceReducers`' inferred state. Cast it to the full timeline reducer type so inference stays
+    // aligned with the richer initial state and the sub-plugin reducer (the result is re-cast below).
+    embeddedTimelineReducer as unknown as typeof subPlugins.timelines.store.reducer.timeline,
     subPlugins.timelines.store.reducer.timeline
   ) as unknown as Reducer<TimelineState, AnyAction>;
 

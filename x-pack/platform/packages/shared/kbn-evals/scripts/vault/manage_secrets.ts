@@ -246,12 +246,16 @@ const runVaultKv = async (
   }
 };
 
-export const retrieveConfigFromVault = async (
-  target: VaultTarget,
+/**
+ * Reads the base64 JSON `config` field of any secret in `vault`. Parse errors get a fixed message,
+ * because a JSON parser's message can quote the secret.
+ */
+export const readVaultSecret = async (
+  vault: KbnEvalsVaultType,
+  vaultPath: string,
   /** An earlier KV v2 version to read, e.g. to roll back a bad upload. */
   version?: number
-) => {
-  const { vault, vaultPath, filePath, validate } = target;
+): Promise<unknown> => {
   const versionArgs = version === undefined ? [] : [`-version=${version}`];
   const stdout = await runVaultKv(vault, [
     'get',
@@ -259,9 +263,31 @@ export const retrieveConfigFromVault = async (
     ...versionArgs,
     vaultPath,
   ]);
+  try {
+    return JSON.parse(Buffer.from(stdout, 'base64').toString('utf-8').trim());
+  } catch {
+    throw new Error(`${vaultPath} in the ${vault} vault is not base64-encoded JSON`);
+  }
+};
 
-  const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
-  const validated = validate(JSON.parse(value));
+/** Writes `config` as the base64 JSON `config` field of a secret, through stdin. */
+export const writeVaultSecret = async (
+  vault: KbnEvalsVaultType,
+  vaultPath: string,
+  config: object
+): Promise<void> => {
+  const asB64 = Buffer.from(JSON.stringify(config)).toString('base64');
+  // `<field>=-` reads the value from stdin, keeping the config out of the process arguments.
+  await runVaultKv(vault, ['put', vaultPath, `${KBN_EVALS_CONFIG_FIELD}=-`], asB64);
+};
+
+export const retrieveConfigFromVault = async (
+  target: VaultTarget,
+  /** An earlier KV v2 version to read, e.g. to roll back a bad upload. */
+  version?: number
+) => {
+  const { vault, vaultPath, filePath, validate } = target;
+  const validated = validate(await readVaultSecret(vault, vaultPath, version));
   await Fs.promises.mkdir(Path.dirname(filePath), { recursive: true });
   // `mode` only applies when the file is created, so also tighten a copy that already exists.
   await writeFile(filePath, JSON.stringify(validated, null, 2), { mode: 0o600 });

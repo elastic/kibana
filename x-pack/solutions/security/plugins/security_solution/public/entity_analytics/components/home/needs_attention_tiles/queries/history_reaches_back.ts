@@ -5,12 +5,9 @@
  * 2.0.
  */
 
+import { ML_ANOMALY_INDICES } from '../../../../../../common/entity_analytics/anomalies/constants';
 import type { TimeRange } from '../../entities_grid/common';
-import {
-  ML_ANOMALY_INDICES,
-  buildAnomalyJobFilter,
-  getAlertsIndex,
-} from '../../entities_grid/queries/esql';
+import { buildAnomalyJobFilter, getAlertsIndex } from '../../entities_grid/queries/esql';
 import { buildPreviousPeriodStart } from './tile_period';
 
 /*

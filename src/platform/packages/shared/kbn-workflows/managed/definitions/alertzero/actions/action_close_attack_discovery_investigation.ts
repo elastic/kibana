@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML from './action_close_attack_discovery_investigation.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
@@ -22,10 +22,12 @@ export const ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID =
  * and that attack's alerts. Proposed by `forensics_close_investigation_gate.yaml`.
  */
 export const ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yaml: ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML,
+  version: 2,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'action_close_attack_discovery_investigation.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

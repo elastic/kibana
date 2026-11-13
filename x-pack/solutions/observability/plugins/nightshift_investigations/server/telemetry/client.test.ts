@@ -11,6 +11,8 @@ import {
   NIGHTSHIFT_SEMANTIC_MEMORY_MATERIALIZED_EVENT,
   NIGHTSHIFT_SEMANTIC_MEMORY_OPTIMIZED_EVENT,
 } from './events';
+import { NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT } from './online_eval_score_event';
+import { NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT } from './alert_entered_pipeline_event';
 
 describe('NightshiftTelemetryClient', () => {
   const logger = loggerMock.create();
@@ -26,7 +28,6 @@ describe('NightshiftTelemetryClient', () => {
   it('registers and reports the two aggregate Semantic Memory events', () => {
     const client = setupNightshiftTelemetry({ analytics: analytics as never, logger });
 
-    expect(analytics.registerEventType).toHaveBeenCalledTimes(2);
     expect(analytics.registerEventType).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: NIGHTSHIFT_SEMANTIC_MEMORY_MATERIALIZED_EVENT })
     );
@@ -59,6 +60,43 @@ describe('NightshiftTelemetryClient', () => {
       2,
       NIGHTSHIFT_SEMANTIC_MEMORY_OPTIMIZED_EVENT,
       expect.objectContaining({ useful_count: 1 })
+    );
+  });
+
+  it('registers and reports the online eval score event', () => {
+    const client = setupNightshiftTelemetry({ analytics: analytics as never, logger });
+
+    expect(analytics.registerEventType).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT })
+    );
+
+    const event = {
+      investigation_id: 'conv-1',
+      round_id: 'round-1',
+      workflow_execution_id: 'exec-1',
+      space_id: 'default',
+      evaluator_set: 'reference_free',
+      round_kind: 'initial' as const,
+      graded_report: 'first_round' as const,
+      scores: [{ evaluator_name: 'rca_quality', evaluator_version: '1.0.0', name: 'q', value: 1 }],
+      evaluator_count: 1,
+      failed_count: 0,
+      skipped_count: 0,
+      errors: [],
+      explanations_included: false,
+      investigation_started_at: '2026-10-28T10:00:00.000Z',
+      scoring_duration_ms: 1200,
+    };
+    client.reportOnlineEvalScore(event);
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT, event);
+  });
+
+  it('registers the alert entered pipeline event', () => {
+    setupNightshiftTelemetry({ analytics: analytics as never, logger });
+
+    expect(analytics.registerEventType).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT })
     );
   });
 

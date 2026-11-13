@@ -145,6 +145,90 @@ describe('AlertsDetailsTable', () => {
     expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1', 'Rule');
   });
 
+  describe('loading state', () => {
+    const defaultQueryAlertsImplementation = (useQueryAlerts as jest.Mock).getMockImplementation();
+
+    const mockQueryAlerts = (result: {
+      loading: boolean;
+      data: unknown;
+      refetch: jest.Mock | null;
+    }) =>
+      (useQueryAlerts as jest.Mock).mockReturnValue({
+        ...result,
+        setQuery: jest.fn(),
+        response: '',
+        request: '',
+      });
+
+    const isTableLoading = () => document.querySelector('.euiBasicTable-loading') !== null;
+
+    afterEach(() => {
+      (useQueryAlerts as jest.Mock).mockImplementation(defaultQueryAlertsImplementation);
+      (useUiSetting as jest.Mock).mockReturnValue(false);
+      (useEntityStoreEuidApi as jest.Mock).mockReturnValue({ euid: null });
+      (useEntityFromStore as jest.Mock).mockReturnValue({ entityRecord: null, isLoading: false });
+    });
+
+    it('shows a loading state instead of the empty message before the request starts', () => {
+      mockQueryAlerts({ loading: false, data: null, refetch: null });
+
+      const { getByText, queryByText } = renderTable(jest.fn());
+
+      expect(isTableLoading()).toBe(true);
+      expect(getByText('Loading alerts…')).toBeInTheDocument();
+      expect(queryByText('No items found')).not.toBeInTheDocument();
+    });
+
+    it('shows a loading state while the request is in flight', () => {
+      mockQueryAlerts({ loading: true, data: null, refetch: null });
+
+      const { queryByText } = renderTable(jest.fn());
+
+      expect(isTableLoading()).toBe(true);
+      expect(queryByText('No items found')).not.toBeInTheDocument();
+    });
+
+    it('shows a loading state while the entity store lookup is pending', () => {
+      mockEntityStoreEnabled();
+      (useEntityFromStore as jest.Mock).mockReturnValue({ entityRecord: null, isLoading: true });
+      mockQueryAlerts({ loading: false, data: null, refetch: null });
+
+      const { queryByText } = render(
+        <TestProviders>
+          <AlertsDetailsTable
+            field={EntityIdentifierFields.hostName}
+            value="my-host"
+            entityId="host:target"
+            entityType="host"
+            onShowAlert={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(isTableLoading()).toBe(true);
+      expect(queryByText('No items found')).not.toBeInTheDocument();
+    });
+
+    it('shows the empty message once the request finishes with no alerts', () => {
+      mockQueryAlerts({ loading: false, data: { hits: { hits: [] } }, refetch: jest.fn() });
+
+      const { getByText, queryByText } = renderTable(jest.fn());
+
+      expect(isTableLoading()).toBe(false);
+      expect(getByText('No items found')).toBeInTheDocument();
+      expect(queryByText('Loading alerts…')).not.toBeInTheDocument();
+    });
+
+    it('stops loading when the request fails', () => {
+      mockQueryAlerts({ loading: false, data: null, refetch: jest.fn() });
+
+      const { getByText } = renderTable(jest.fn());
+
+      expect(isTableLoading()).toBe(false);
+      expect(getByText('No items found')).toBeInTheDocument();
+    });
+  });
+
   describe('time range', () => {
     const renderWithScopeId = (scopeId?: string) =>
       render(
@@ -288,6 +372,54 @@ describe('AlertsDetailsTable', () => {
       );
       const { query } = (useQueryAlerts as jest.Mock).mock.calls[0][0];
       expect(JSON.stringify(query)).toContain(JSON.stringify(GROUP_FILTER));
+    });
+
+    it.each([
+      [EntityIdentifierFields.hostName, 'host'],
+      [EntityIdentifierFields.userName, 'user'],
+      [EntityIdentifierFields.serviceName, 'service'],
+    ])(
+      'infers the entity type from the %s field when entityType is not provided',
+      (field, type) => {
+        render(
+          <TestProviders>
+            <AlertsDetailsTable
+              field={field}
+              value="my-entity"
+              entityId={`${type}:target`}
+              onShowAlert={jest.fn()}
+            />
+          </TestProviders>
+        );
+
+        expect(useEntityFromStore).toHaveBeenCalledWith(
+          expect.objectContaining({ entityType: type })
+        );
+      }
+    );
+  });
+
+  describe('alerts page link filter', () => {
+    it.each([
+      [EntityIdentifierFields.hostName, 'Host name'],
+      [EntityIdentifierFields.userName, 'Username'],
+      [EntityIdentifierFields.serviceName, 'Service name'],
+    ])('uses the matching title and field name for %s', (field, title) => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <AlertsDetailsTable field={field} value="my-entity" onShowAlert={jest.fn()} />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('securitySolutionFlyoutInsightsAlertsCount'));
+
+      const openAlertsPageWithFilters = (useNavigateToAlertsPageWithFilters as jest.Mock)();
+      const [filters] = openAlertsPageWithFilters.mock.calls[0];
+      expect(filters[0]).toEqual({
+        title,
+        selected_options: ['my-entity'],
+        field_name: field,
+      });
     });
   });
 });

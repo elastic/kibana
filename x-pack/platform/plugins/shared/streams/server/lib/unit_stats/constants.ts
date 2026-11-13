@@ -15,7 +15,7 @@ import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
  */
 
 /** The stats queries and the existence probe both use the exact name. */
-export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
+export { UNIT_METRICS_STREAM } from '../../../common/constants';
 
 export const UNIT_STATS_DEFAULT_WINDOW_MS = 15 * 60 * 1000;
 
@@ -30,10 +30,23 @@ export const CONFIG_HASH_FIELD = 'resource.attributes.streams.config.hash';
 
 export const DIRECTION_FIELD = 'attributes.direction';
 export const OUTCOME_FIELD = 'attributes.outcome';
+/**
+ * The outcome of a document that an Elasticsearch destination redirected to the failure store. The
+ * exporter reports such a document twice, here and under its `failed_*` outcome.
+ */
+export const FAILURE_STORE_OUTCOME = 'failure_store';
 
 export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
 export const DESTINATION_DURATION_FIELD = 'metrics.streams.destination.duration';
+
+/**
+ * Source metrics come from the ingest collector, not from a unit collector. They have no scope
+ * attributes, so the `scope.attributes.streams.*` paths above match nothing for a source, and no
+ * config hash. The source id and the outcome are datapoint attributes.
+ */
+export const SOURCE_ID_FIELD = 'attributes.source.id';
+export const SOURCE_ITEMS_FIELD = 'metrics.streams.source.items';
 
 /** The telemetry calls a processor a step. */
 export const STEP_ID_FIELD = 'scope.attributes.streams.step.id';
@@ -52,6 +65,7 @@ export const STATS_COLUMN = {
   bucket: 'bucket',
   incomingRate: 'incoming_rate',
   failedRate: 'failed_rate',
+  acceptedRate: 'accepted_rate',
   avgLatency: 'avg_latency',
   sumItems: 'sum_items',
   avgDurationPerItem: 'avg_duration_per_item',

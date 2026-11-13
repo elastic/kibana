@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('per-spaces banners', { tag: tags.stateful.classic }, () => {
+// Runs on the custom `banners` server config set, which is local only.
+test.describe('per-spaces banners', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.spaces.create({
       id: 'another-space',

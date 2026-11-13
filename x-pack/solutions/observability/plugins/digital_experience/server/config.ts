@@ -9,12 +9,11 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-const digitalExperienceConfig = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
+const digitalExperienceConfig = schema.object({});
 
 export const config: PluginConfigDescriptor = {
   schema: digitalExperienceConfig,
+  deprecations: ({ unused }) => [unused('enabled', { level: 'warning' })],
 };
 
 export type DigitalExperienceConfig = TypeOf<typeof digitalExperienceConfig>;

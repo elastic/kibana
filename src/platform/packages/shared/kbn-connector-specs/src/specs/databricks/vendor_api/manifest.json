@@ -1,0 +1,205 @@
+{
+  "operations": {
+    "callTool": [],
+    "cancelRun": [
+      {
+        "method": "post",
+        "path": "/api/2.1/jobs/runs/cancel",
+        "source": "docs"
+      }
+    ],
+    "executeStatement": [],
+    "getAlert": [
+      {
+        "method": "get",
+        "path": "/api/2.0/sql/alerts/{id}",
+        "source": "docs"
+      }
+    ],
+    "getRun": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/api/2.1/jobs/runs/get",
+        "source": "docs"
+      }
+    ],
+    "getRunOutput": [
+      {
+        "method": "get",
+        "path": "/api/2.1/jobs/runs/get-output",
+        "source": "docs"
+      }
+    ],
+    "listAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "cursorParam": "page_token",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/2.0/sql/alerts",
+        "source": "docs"
+      }
+    ],
+    "listClusters": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "cursorParam": "page_token",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "clusters",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/2.1/clusters/list",
+        "source": "docs"
+      }
+    ],
+    "listRuns": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "cursorParam": "page_token",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "runs",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/2.1/jobs/runs/list",
+        "source": "docs"
+      }
+    ],
+    "listTools": [],
+    "listWarehouses": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "page_token",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "warehouses",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/2.0/sql/warehouses",
+        "source": "docs"
+      }
+    ],
+    "pollResponse": [],
+    "repairRun": [
+      {
+        "method": "post",
+        "path": "/api/2.1/jobs/runs/repair",
+        "source": "docs"
+      }
+    ],
+    "restartCluster": [
+      {
+        "method": "post",
+        "path": "/api/2.1/clusters/restart",
+        "source": "docs"
+      }
+    ],
+    "runJobNow": [
+      {
+        "method": "post",
+        "path": "/api/2.1/jobs/run-now",
+        "source": "docs"
+      }
+    ],
+    "runQuery": [],
+    "startCluster": [
+      {
+        "method": "post",
+        "path": "/api/2.1/clusters/start",
+        "source": "docs"
+      }
+    ],
+    "startWarehouse": [
+      {
+        "method": "post",
+        "path": "/api/2.0/sql/warehouses/{id}/start",
+        "source": "docs"
+      }
+    ],
+    "stopWarehouse": [
+      {
+        "method": "post",
+        "path": "/api/2.0/sql/warehouses/{id}/stop",
+        "source": "docs"
+      }
+    ]
+  },
+  "sources": {
+    "docs": {
+      "fetchedAt": "2026-11-01T17:22:23.920Z",
+      "format": "databricks-markdown",
+      "pages": [
+        "jobs/v2/",
+        "clusters/v2/",
+        "warehouses/v1/",
+        "alerts/v1/"
+      ],
+      "url": "https://docs.databricks.com/api/llms.txt"
+    }
+  },
+  "unmatched": {
+    "callTool": [
+      {
+        "method": "post",
+        "path": "/api/2.0/mcp/sql",
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+      }
+    ],
+    "executeStatement": [
+      {
+        "method": "post",
+        "path": "/api/2.0/mcp/sql",
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+      }
+    ],
+    "listTools": [
+      {
+        "method": "post",
+        "path": "/api/2.0/mcp/sql",
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+      }
+    ],
+    "pollResponse": [
+      {
+        "method": "post",
+        "path": "/api/2.0/mcp/sql",
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+      }
+    ],
+    "runQuery": [
+      {
+        "method": "post",
+        "path": "/api/2.0/mcp/sql",
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+      }
+    ]
+  }
+}

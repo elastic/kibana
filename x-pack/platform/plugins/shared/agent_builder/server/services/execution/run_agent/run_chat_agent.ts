@@ -13,27 +13,22 @@ import type {
   AttachmentTimelineEvent,
   BrowserApiToolMetadata,
   ChatAgentEvent,
-  ConversationRoundStep,
   MetadataFieldValue,
   PreExecutionWorkflowStepData,
   RoundInput,
   SubagentEntry,
-  TodosStep,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   AgentExecutionMode,
-  ConversationRoundStepType,
   EventActorType,
-  carriedOverTodos,
   timelineExecutionId,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
-import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
-import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import {
   addRoundCompleteEvent,
@@ -46,11 +41,6 @@ import {
   type PendingTurn,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
-import {
-  selectRelevantSkills,
-  buildRecentContext,
-  type RelevantSkillSelection,
-} from './utils/relevant_skills/select_relevant_skills';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
@@ -83,11 +73,7 @@ import { SubagentTracker } from './subagent_tracker';
 import type { StateUpdate } from './state';
 import {
   eventsForContext,
-  groupTimelineEntries,
-  isTimelineStandaloneEvent,
-  isTimelineRound,
   lastExecutionTerminal,
-  roundResponse,
   type ProcessedTimelineEvent,
 } from './utils/context_timeline';
 
@@ -117,6 +103,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversation,
     origin,
     author,
+    actor,
     agentConfiguration,
     runId = uuidv4(),
     agentId,
@@ -145,7 +132,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skillsStore,
     toolManager,
     experimentalFeatures,
-    todoStateManager,
     renderers,
     conversationClient,
     conversationAccess,
@@ -159,8 +145,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   ensureValidInput({ input: nextInput, timeline, allowResume: storesConversation });
 
   const pendingTurn = conversation && storesConversation ? getPendingTurn(conversation) : undefined;
-  // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
-  const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingTurn?.compatRound.started_at ?? startTime.toISOString();
 
   const roundId = providedRoundId ?? uuidv4();
@@ -225,7 +209,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   // Holds what LangGraph does not: the seed, the latest streamed state (for persistence when the
-  // stream throws) and the out-of-band tool events (progress, todos writes) LangGraph never sees.
+  // stream throws) and the out-of-band tool progress events LangGraph never sees.
   const tracker = new RunTracker({ graphName: chatAgentGraphName });
 
   // ReplaySubject so events emitted before subscription (e.g. compaction) are
@@ -242,6 +226,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     timeline,
     nextInputAuthor: pendingTurn?.compatRound.author ?? author,
+    nextInputActor: actor,
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
@@ -272,6 +257,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     abortSignal,
     nextInput: processedConversation.nextInput,
     agentId,
+    runAs: context.runAs,
     conversationId: conversation?.id,
     conversationAccess,
     roundExecutionIndex,
@@ -321,30 +307,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Closed on every exit so a late background append is refused rather than queued for nothing.
   try {
-    const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
-      relevantSkillsEnabled && !pendingTurn
-        ? selectRelevantSkills({
-            skills: filteredSkills,
-            context: {
-              userMessage: processedConversation.nextInput.message,
-              recentContext: buildRecentContext(
-                groupTimelineEntries(processedConversation.timeline).flatMap((entry) => {
-                  // Standalone events carry no user input to match skills against.
-                  if (isTimelineStandaloneEvent(entry)) {
-                    return [];
-                  }
-                  return isTimelineRound(entry)
-                    ? [{ input: entry.userMessage.data, response: roundResponse(entry) }]
-                    : [{ input: entry.userMessage.data }];
-                })
-              ),
-            },
-            modelProvider,
-            logger,
-            abortSignal,
-          })
-        : undefined;
-
     const { staticTools, dynamicTools } = await selectTools({
       conversation: processedConversation,
       previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
@@ -354,6 +316,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentConfiguration,
       aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
       aiIndicesEnabled: experimentalFeatures.aiIndices,
+      capabilities: resolvedConfiguration.capabilities,
       attachmentsService: attachments,
       request,
       spaceId: context.spaceId,
@@ -405,19 +368,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       subagentTracker,
       conversationExists: (id: string) => conversationClient.exists(id),
       agentConfiguration,
+      capabilities: resolvedConfiguration.capabilities,
     });
 
-    // Then add dynamic tools
-    await toolManager.addTools(
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger,
-      },
-      {
-        dynamic: true,
-      }
-    );
+    // Then add the dynamic tools
+    if (experimentalFeatures.dynamicTools) {
+      // tools loaded in previous rounds in the registry behind
+      // `execute_dynamic_tool` when the feature is on
+      await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools: dynamicTools });
+    } else {
+      // LRU bound tools with feature off
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: dynamicTools,
+          logger,
+        },
+        {
+          dynamic: true,
+        }
+      );
+    }
 
     const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
@@ -428,9 +399,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     const previousRound = getPreviousRoundInfo(processedConversation.timeline);
 
     processedConversation.subagentRosterFallback = subagentTracker.snapshot();
-
-    // On a resume the selection is already persisted as a `relevant_skills` step of the paused turn.
-    const relevantSkillsSelection = await relevantSkillsSelectionPromise;
 
     const imageResolver = createImageResolver({
       attachmentStateManager: context.attachmentStateManager,
@@ -473,7 +441,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       backgroundExecutionService,
       subagentTracker,
       toolExecutionBuffer: tracker,
-      todoStateManager,
       runAttachmentEvents,
       roundId,
       sessionId: conversation?.id ?? executionId,
@@ -488,6 +455,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         analyticsService: context.analyticsService,
         agentId,
         executionId,
+        toolManager,
       },
       cycleHooks,
     });
@@ -506,8 +474,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         compactionSummary,
         previousRound,
         preExecutionWorkflow,
-        relevantSkillsSelection,
-        initialTodos,
         initialAttachmentEvents: pendingTurn
           ? [
               ...inheritedAttachmentEvents(processedConversation.timeline, pendingTurn.id),
@@ -595,7 +561,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
             toolManager,
             compactionSummary: tracker.finalState().compactionSummary,
             backgroundExecutionService,
-            todoStateManager,
             subagents: subagentTracker.snapshot(),
           }),
         startTime,
@@ -636,6 +601,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         request,
         abortSignal,
         agentId,
+        runAs: context.runAs,
         round,
         conversationId: conversation?.id,
         conversationAccess,
@@ -659,50 +625,22 @@ const getConversationState = ({
   toolManager,
   backgroundExecutionService,
   compactionSummary,
-  todoStateManager,
   subagents,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
-  todoStateManager: TodoStateManager;
   subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
-  const todos = todoStateManager.get();
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
-    ...(todos !== undefined ? { todos } : {}),
     ...(subagents && Object.keys(subagents).length > 0 ? { subagents } : {}),
   };
-};
-
-/**
- * The steps a fresh run starts with: workflow / relevant-skills bookkeeping, then the todos
- * carried over from the previous round (the trailing singleton the first `todo_write` replaces).
- */
-const buildPreExecutionSteps = ({
-  preExecutionWorkflow,
-  relevantSkillsSelection,
-  initialTodos,
-}: {
-  preExecutionWorkflow?: PreExecutionWorkflowStepData;
-  relevantSkillsSelection?: RelevantSkillSelection;
-  initialTodos?: TodoItem[];
-}): ConversationRoundStep[] => {
-  const carried = carriedOverTodos(initialTodos);
-  const carriedStep: TodosStep[] =
-    carried !== undefined
-      ? [{ type: ConversationRoundStepType.updateTodos, todos: carried, carried_over: true }]
-      : [];
-  return [
-    ...createPreExecutionSteps({ preExecutionWorkflow, relevantSkillsSelection }),
-    ...carriedStep,
-  ];
 };
 
 const createInitializerCommand = ({
@@ -716,8 +654,6 @@ const createInitializerCommand = ({
   compactionSummary,
   previousRound,
   preExecutionWorkflow,
-  relevantSkillsSelection,
-  initialTodos,
   initialAttachmentEvents,
 }: {
   pendingTurn?: PendingTurn;
@@ -730,16 +666,10 @@ const createInitializerCommand = ({
   compactionSummary?: CompactionSummary;
   previousRound?: PreviousRoundInfo;
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
-  relevantSkillsSelection?: RelevantSkillSelection;
-  initialTodos?: TodoItem[];
   initialAttachmentEvents: AttachmentTimelineEvent[];
 }): Command => {
   if (!pendingTurn) {
-    const preExecutionSteps = buildPreExecutionSteps({
-      preExecutionWorkflow,
-      relevantSkillsSelection,
-      initialTodos,
-    });
+    const preExecutionSteps = createPreExecutionSteps({ preExecutionWorkflow });
     tracker.seed({ steps: preExecutionSteps, compactionSummary });
     const update: StateUpdate = {
       cycleLimit,
@@ -761,7 +691,7 @@ const createInitializerCommand = ({
     promptManager.delete(id);
   }
   // The graph starts from the inherited steps; they are excluded from the resume execution's
-  // persisted steps. The paused turn already carries its relevant-skills and todos steps.
+  // persisted steps. The paused turn already carries its relevant-skills step.
   tracker.seed({
     steps: init.steps,
     toolRenderState: init.toolRenderState,
@@ -786,9 +716,9 @@ const createInitializerCommand = ({
       ? { lastCallUsage: { inputTokens: lastCallInputTokens } }
       : {}),
   };
-  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop,
-  // through context management.
-  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.contextManagement;
+  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop
+  // through the background check, so a sub-agent that finished during the pause is reported.
+  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.checkBackgroundWork;
   return new Command({ update, goto });
 };
 

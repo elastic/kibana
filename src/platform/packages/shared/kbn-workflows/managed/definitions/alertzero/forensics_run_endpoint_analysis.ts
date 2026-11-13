@@ -11,8 +11,8 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './forensics_run_endpoint_analysis.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
   'system-security-forensics-run-endpoint-analysis';
@@ -22,10 +22,12 @@ export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
  * the per-space Endpoint analysis worker, which is the only scheduler authority.
  */
 export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 15,
-  yaml: FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
+  version: 17,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'forensics_run_endpoint_analysis.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

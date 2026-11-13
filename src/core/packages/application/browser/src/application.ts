@@ -69,7 +69,7 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'visibleIn' | 'tooltip' | 'defaultPath' | 'deepLinks'
+  'status' | 'visibleIn' | 'tooltip' | 'defaultPath' | 'deepLinks' | 'hideChrome'
 >;
 
 /**
@@ -166,6 +166,14 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    * Takes precedence over chrome service visibility settings.
    */
   chromeless?: boolean;
+
+  /**
+   * Hide the UI chrome while the application is mounted. Defaults to `false`.
+   * Unlike `chromeless`, the application stays listed in navigation and global search,
+   * and the value can be changed at runtime via {@link App.updater$}.
+   * Takes precedence over chrome service visibility settings.
+   */
+  hideChrome?: boolean;
 
   /**
    * A mount function called when the user navigates to this app's route.

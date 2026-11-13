@@ -1,5 +1,5 @@
 {
-  "sha1": "a30376149bb4fd49d4e31441506bd1d427c32c18",
+  "sha1": "dcb1c10cd4e6236b5e0031e49f77952b80f43e68",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -309,9 +309,25 @@
       }
     },
     {
+      "id": "2987e7e9e86616c-5d9ffe2ba2ee894",
+      "title": "Alerts page - rule summary flyout opens and closes the rule summary flyout from a v2 rule row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/episode_rule_summary_flyout.spec.ts",
+        "line": 66,
+        "column": 15
+      }
+    },
+    {
       "id": "f83cd5fa435511b-c97adf7c8cec960",
       "title": "Execution history — rule search filters the Rules tab by rule name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -321,7 +337,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/execution_history_rule_search.spec.ts",
         "line": 46,
-        "column": 7
+        "column": 16
       }
     },
     {

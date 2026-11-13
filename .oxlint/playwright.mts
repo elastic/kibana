@@ -72,7 +72,10 @@ export const playwrightOverrides: OxlintOverride[] = [
       'playwright/no-nested-step': 'error',
       'playwright/no-nth-methods': 'error',
       'playwright/no-page-pause': 'error',
-      'playwright/no-raw-locators': ['warn', { allowed: ['[data-test-subj'] }],
+      // `playwright/no-raw-locators` stays off: its `allowed` option only matches whole selectors
+      // (exact equality), so it can't exempt [data-test-subj...] prefixes and flags every
+      // `page.testSubj.locator(...)` call as a false positive. The custom
+      // `@kbn/eslint/scout_no_raw_locators` rule in scout.mts handles this correctly.
       'playwright/no-restricted-matchers': 'error',
       'playwright/no-slowed-test': 'error',
       'playwright/no-test-return-statement': 'error',
@@ -93,6 +96,8 @@ export const playwrightOverrides: OxlintOverride[] = [
       'playwright/require-to-throw-message': 'error',
       'playwright/require-top-level-describe': 'error',
       // Scout has its own runtime validator for test tags, so `playwright/valid-test-tags` stays off.
+      // `playwright/no-raw-locators` stays off: its `allowed` option only matches whole selectors, so it
+      // can't exempt test IDs and flags every `page.testSubj.locator(...)` call.
     },
   },
   {
@@ -100,6 +105,27 @@ export const playwrightOverrides: OxlintOverride[] = [
     files: PLAYWRIGHT_FILE_GLOBS.map((glob) => glob.replace(/\*\.ts$/, '*.spec.ts')),
     rules: {
       'playwright/no-export': 'error',
+    },
+  },
+];
+
+/**
+ * Playwright fixtures hand their value to tests through a `use` callback. Oxlint's
+ * `rules-of-hooks` treats any `use()` call as React 19's `use` hook (Kibana is on React 18), so it
+ * stays off for Playwright code, which has no React components. Applied after the team overrides,
+ * which turn the rule on for some of these folders.
+ */
+export const playwrightReactHooksOverrides: OxlintOverride[] = [
+  {
+    files: [
+      ...PLAYWRIGHT_FILE_GLOBS,
+      '**/kbn-evals*/**/*.ts',
+      '**/e2e/playwright/**/*.ts',
+      'src/platform/packages/shared/kbn-scout-synthtrace/src/**/*.ts',
+      'src/platform/plugins/private/interactive_setup/test/helpers/**/*.ts',
+    ],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
     },
   },
 ];

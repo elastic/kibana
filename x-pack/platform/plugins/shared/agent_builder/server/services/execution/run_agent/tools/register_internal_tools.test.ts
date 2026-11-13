@@ -11,7 +11,9 @@ import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_subagents';
 import { registerInternalTools, type RegisterInternalToolsParams } from './register_internal_tools';
 import { createSubagentTool } from './run_subagent';
+import { createSendMessageTool } from './send_message';
 import { createExecuteDynamicTool } from './execute_dynamic_tool';
+import type { ResolvedCapabilities } from '../types';
 
 jest.mock('../../../agents/utils/resolve_allowed_subagents', () => ({
   resolveAllowedSubagents: jest.fn(),
@@ -23,7 +25,7 @@ jest.mock('./run_subagent', () => ({
   createSubagentTool: jest.fn(() => ({ id: 'run_subagent' })),
 }));
 jest.mock('./send_message', () => ({
-  createSendMessageTool: () => ({ id: 'send_message_to_agent' }),
+  createSendMessageTool: jest.fn(() => ({ id: 'send_message_to_agent' })),
 }));
 jest.mock('./sleep', () => ({ createSleepTool: () => ({ id: 'sleep' }) }));
 jest.mock('./read_file', () => ({ createReadFileTool: () => ({ id: 'read_file' }) }));
@@ -60,19 +62,18 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
       aiIndices: false,
       sml: false,
       relevantSkills: false,
-      todos: false,
+      backgroundWake: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: false },
-    defaultConnectorId: 'connector-1',
+    defaultModel: { connectorId: 'connector-1' },
     subAgentExecutor: {},
     agentRegistry: {},
     filesystemService: {},
     bashService: undefined,
-    todoStateManager: {},
     selfClient: {},
     parentExecutionId: undefined,
     conversationAccess: 'readWrite',
@@ -81,7 +82,11 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
-const register = async (context: AgentHandlerContext, subagentIds: string[] = ['other-agent']) => {
+const register = async (
+  context: AgentHandlerContext,
+  subagentIds: string[] = ['other-agent'],
+  capabilities: ResolvedCapabilities = { attachmentTools: true, apiTools: true }
+) => {
   const params = {
     context,
     agentId: 'agent-1',
@@ -92,6 +97,7 @@ const register = async (context: AgentHandlerContext, subagentIds: string[] = ['
     subagentTracker: {},
     conversationExists: jest.fn(),
     agentConfiguration: { subagent_ids: subagentIds },
+    capabilities,
   } as unknown as RegisterInternalToolsParams;
   await registerInternalTools(params);
 };
@@ -166,6 +172,19 @@ describe('registerInternalTools - subagents', () => {
     );
   });
 
+  it("hands the parent's model source to run_subagent and send_message", async () => {
+    const { context } = createContext({ defaultModel: { featureId: 'parent_feature' } });
+
+    await register(context);
+
+    expect(createSubagentTool).toHaveBeenCalledWith(
+      expect.objectContaining({ parentModel: { featureId: 'parent_feature' } })
+    );
+    expect(createSendMessageTool).toHaveBeenCalledWith(
+      expect.objectContaining({ parentModel: { featureId: 'parent_feature' } })
+    );
+  });
+
   it.each([true, false])(
     'passes the API discovery setting (%s) to run_subagent',
     async (apiDiscovery) => {
@@ -175,6 +194,19 @@ describe('registerInternalTools - subagents', () => {
 
       expect(createSubagentTool).toHaveBeenCalledWith(
         expect.objectContaining({ discoveryEnabled: apiDiscovery })
+      );
+    }
+  );
+
+  it.each([true, false])(
+    'passes the background wake setting (%s) to run_subagent',
+    async (backgroundWake) => {
+      const { context } = createContext({ experimentalFeatures: { backgroundWake } });
+
+      await register(context);
+
+      expect(createSubagentTool).toHaveBeenCalledWith(
+        expect.objectContaining({ backgroundWakeEnabled: backgroundWake })
       );
     }
   );
@@ -201,7 +233,7 @@ describe('registerInternalTools - execute_dynamic_tool', () => {
         skills: false,
         aiIndices: false,
         relevantSkills: false,
-        todos: false,
+        backgroundWake: false,
         bash: false,
         apiDiscovery: false,
         dynamicTools: true,
