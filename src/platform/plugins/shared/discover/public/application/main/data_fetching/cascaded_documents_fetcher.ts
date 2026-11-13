@@ -54,6 +54,7 @@ export class CascadedDocumentsFetcher {
     nodeType,
     nodePath,
     nodePathMap,
+    nodeAggregatedValues,
     query,
     esqlVariables,
     dataView,
@@ -82,6 +83,7 @@ export class CascadedDocumentsFetcher {
         nodeType,
         nodePath,
         nodePathMap,
+        nodeAggregatedValues,
       });
 
       if (!cascadeQuery) {

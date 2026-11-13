@@ -207,6 +207,7 @@ export function useDataCascadeRowExpansionHandlers({
       nodeType: 'leaf',
       nodePath,
       nodePathMap,
+      nodeAggregatedValues: row.aggregatedValues,
       query: esqlQuery,
       esqlVariables,
       timeRange,

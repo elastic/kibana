@@ -93,6 +93,7 @@ const createFetchParams = (
     nodeType: 'leaf',
     nodePath: ['extension'],
     nodePathMap: { extension: 'png' },
+    nodeAggregatedValues: { 'values(tags)': ['info'] },
     query: { esql: 'from logs | stats count by extension' },
     esqlVariables: undefined,
     dataView: dataViewWithTimefieldMock,
@@ -156,6 +157,7 @@ describe('CascadedDocumentsFetcher', () => {
       nodeType: params.nodeType,
       nodePath: params.nodePath,
       nodePathMap: params.nodePathMap,
+      nodeAggregatedValues: params.nodeAggregatedValues,
     });
     expect(mockFetchEsql).toHaveBeenCalledWith(
       expect.objectContaining({

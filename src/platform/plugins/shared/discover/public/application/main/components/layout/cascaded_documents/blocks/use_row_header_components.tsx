@@ -54,6 +54,7 @@ import { useDiscoverServices } from '../../../../../../hooks/use_discover_servic
 interface RowContext {
   groupId: string;
   groupValue: string;
+  aggregatedValues: ESQLDataGroupNode['aggregatedValues'];
 }
 
 interface RowClickActionContext {
@@ -162,6 +163,7 @@ const contextRowActions: Array<
             nodeType: 'leaf',
             nodePath: [this.rowContext.groupId],
             nodePathMap: { [this.rowContext.groupId]: this.rowContext.groupValue },
+            nodeAggregatedValues: this.rowContext.aggregatedValues,
           }),
         },
       });
@@ -526,7 +528,11 @@ export function useEsqlDataCascadeRowHeaderComponents(
           iconType: 'boxesVertical',
           'aria-label': `${rowData.id}-cascade-row-actions`,
           'data-test-subj': `${rowData.id}-dscCascadeRowContextActionButton`,
-          onClick: togglePopover?.bind({ groupId, groupValue }),
+          onClick: togglePopover?.bind({
+            groupId,
+            groupValue,
+            aggregatedValues: rowData.aggregatedValues,
+          }),
         },
       ];
     },
