@@ -827,6 +827,118 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
+    it('sanitizes tool schemas for Gemini models served by EIS', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      // shape emitted by zod v4 for a discriminated union, as `withStructuredOutput` sends it
+      const schema = {
+        type: 'object' as const,
+        properties: {
+          change: {
+            oneOf: [
+              {
+                type: 'object',
+                properties: { change_type: { type: 'string', const: 'query' } },
+                required: ['change_type'],
+              },
+              {
+                type: 'object',
+                properties: { change_type: { type: 'string', const: 'schedule' } },
+                required: ['change_type'],
+              },
+            ],
+          },
+        } as Record<string, any>,
+      };
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          provider: 'elastic',
+          endpointModelId: 'google-gemini-3.8-flash',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            myTool: { description: 'my tool', schema },
+          },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: [
+              {
+                type: 'function',
+                function: {
+                  name: 'myTool',
+                  description: 'my tool',
+                  parameters: {
+                    type: 'object',
+                    properties: {
+                      change: {
+                        anyOf: [
+                          {
+                            type: 'object',
+                            properties: { change_type: { type: 'string', enum: ['query'] } },
+                            required: ['change_type'],
+                          },
+                          {
+                            type: 'object',
+                            properties: { change_type: { type: 'string', enum: ['schedule'] } },
+                            required: ['change_type'],
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          }),
+        })
+      );
+    });
+
+    it('leaves tool schemas untouched for non-Gemini models served by EIS', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      const schema = {
+        type: 'object' as const,
+        properties: {
+          changeType: { type: 'string', const: 'query' },
+        } as Record<string, any>,
+      };
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          provider: 'elastic',
+          endpointModelId: 'anthropic-claude-5.5-sonnet',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            myTool: { description: 'my tool', schema },
+          },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: [
+              {
+                type: 'function',
+                function: { name: 'myTool', description: 'my tool', parameters: schema },
+              },
+            ],
+          }),
+        })
+      );
+    });
+
     it('leaves tool schemas untouched for other providers', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
