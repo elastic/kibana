@@ -14,16 +14,12 @@ import {
   type CandidatesCollection,
   type RuleWithStartToken,
 } from '../code_completion/code_completion_core';
-import { getCalledRules } from '../grammar_labels/call_sites';
 import { guardModePops } from './guard_mode_pops';
 import { isWordToken } from '../cursor_ir/token_classes';
-import {
-  COMMAND_DISPATCH_RULES,
-  COMMAND_RULES,
-  NOT_COMMAND_RULES,
-  PIPE_ANCHOR_RULE,
-  PREFERRED_RULES,
-} from './grammar_rules';
+import { getCommandRuleNames } from './command_rules';
+import { COMMAND_RULES, PIPE_ANCHOR_RULE, PREFERRED_RULES } from './grammar_rules';
+
+export { getCommandRuleNames };
 import type { CommandSegment, CursorLocation, ExpectedRule } from './types';
 
 interface GrammarInfo {
@@ -85,20 +81,6 @@ const getGrammarInfo = (): GrammarInfo => {
   };
 
   return grammarInfo;
-};
-
-let commandRuleNames: string[] | undefined;
-
-/** The rule of each command, read from the grammar: the rules its dispatch rules call. */
-export const getCommandRuleNames = (): string[] => {
-  if (!commandRuleNames) {
-    const notCommands: readonly string[] = NOT_COMMAND_RULES;
-    commandRuleNames = [...new Set(COMMAND_DISPATCH_RULES.flatMap(getCalledRules))].filter(
-      (rule) => !notCommands.includes(rule)
-    );
-  }
-
-  return commandRuleNames;
 };
 
 /** Token type of an ES|QL grammar token name, e.g. `AS`; `-1` (EOF) is returned as `Token.EOF`. */
