@@ -14,6 +14,12 @@ const OUTPUT_ID = 'test-response-fields-output';
 const DOWNLOAD_SOURCE_ID = 'test-response-fields-download-source';
 const FLEET_SERVER_HOST_ID = 'test-response-fields-fleet-server-host';
 
+// Users who can read outputs and download sources but not Fleet settings
+const USERS_WITHOUT_SETTINGS_READ = [
+  testUsers.fleet_agent_policies_read_only,
+  testUsers.fleet_agent_policies_all_and_agents_all_only,
+];
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -156,16 +162,15 @@ export default function (providerContext: FtrProviderContext) {
         expectFullOutput(one.item);
       });
 
-      it('returns sanitized outputs to a user with only agent policies read', async () => {
-        const list = await getAs(testUsers.fleet_agent_policies_read_only, '/api/fleet/outputs');
-        expectSanitizedOutput(findItem(list.items, OUTPUT_ID));
+      for (const user of USERS_WITHOUT_SETTINGS_READ) {
+        it(`returns sanitized outputs to ${user.username}`, async () => {
+          const list = await getAs(user, '/api/fleet/outputs');
+          expectSanitizedOutput(findItem(list.items, OUTPUT_ID));
 
-        const one = await getAs(
-          testUsers.fleet_agent_policies_read_only,
-          `/api/fleet/outputs/${OUTPUT_ID}`
-        );
-        expectSanitizedOutput(one.item);
-      });
+          const one = await getAs(user, `/api/fleet/outputs/${OUTPUT_ID}`);
+          expectSanitizedOutput(one.item);
+        });
+      }
     });
 
     describe('agent download sources', () => {
@@ -183,19 +188,15 @@ export default function (providerContext: FtrProviderContext) {
         expectFullDownloadSource(one.item);
       });
 
-      it('returns sanitized download sources to a user with only agent policies read', async () => {
-        const list = await getAs(
-          testUsers.fleet_agent_policies_read_only,
-          '/api/fleet/agent_download_sources'
-        );
-        expectSanitizedDownloadSource(findItem(list.items, DOWNLOAD_SOURCE_ID));
+      for (const user of USERS_WITHOUT_SETTINGS_READ) {
+        it(`returns sanitized download sources to ${user.username}`, async () => {
+          const list = await getAs(user, '/api/fleet/agent_download_sources');
+          expectSanitizedDownloadSource(findItem(list.items, DOWNLOAD_SOURCE_ID));
 
-        const one = await getAs(
-          testUsers.fleet_agent_policies_read_only,
-          `/api/fleet/agent_download_sources/${DOWNLOAD_SOURCE_ID}`
-        );
-        expectSanitizedDownloadSource(one.item);
-      });
+          const one = await getAs(user, `/api/fleet/agent_download_sources/${DOWNLOAD_SOURCE_ID}`);
+          expectSanitizedDownloadSource(one.item);
+        });
+      }
     });
 
     describe('fleet server hosts', () => {
@@ -207,10 +208,15 @@ export default function (providerContext: FtrProviderContext) {
         expectFullFleetServerHost(findItem(list.items, FLEET_SERVER_HOST_ID));
       });
 
-      it('returns sanitized fleet server hosts to a user with only agents all', async () => {
-        const list = await getAs(testUsers.fleet_agents_all_only, '/api/fleet/fleet_server_hosts');
-        expectSanitizedFleetServerHost(findItem(list.items, FLEET_SERVER_HOST_ID));
-      });
+      for (const user of [
+        testUsers.fleet_agents_all_only,
+        testUsers.fleet_agent_policies_all_and_agents_all_only,
+      ]) {
+        it(`returns sanitized fleet server hosts to ${user.username}`, async () => {
+          const list = await getAs(user, '/api/fleet/fleet_server_hosts');
+          expectSanitizedFleetServerHost(findItem(list.items, FLEET_SERVER_HOST_ID));
+        });
+      }
     });
   });
 }
