@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyServices: string;
     readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
@@ -412,6 +413,9 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
+    readonly alertZero: {
+      readonly continuousThreatHunt: string;
+    };
   };
   readonly query: {
     readonly eql: string;

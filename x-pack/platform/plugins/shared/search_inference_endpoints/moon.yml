@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/utility-types'
   - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/management-settings-components-form'
   - '@kbn/licensing-plugin'
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/object-utils'
@@ -70,6 +71,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*

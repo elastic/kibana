@@ -306,6 +306,7 @@ EOF
         if [[ "$fanout_preemptible" == "true" ]]; then
           cat >>"$FANOUT_PIPELINE_FILE" <<EOF
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: "-1"
@@ -372,6 +373,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 
@@ -404,6 +406,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
         # Refresh baseline block + trigger (top-level — 2-space indent).
         # The trigger fires a fresh main eval run so the PR comment is updated
@@ -464,6 +467,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 

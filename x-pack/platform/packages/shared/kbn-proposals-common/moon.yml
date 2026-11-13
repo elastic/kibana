@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/proposals-common'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-solution'
+  defaultOwner: '@elastic/alertzero-common-layer'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/proposals-common'
   description: Moon project for @kbn/proposals-common
   channel: ''
-  owner: '@elastic/security-solution'
+  owner: '@elastic/alertzero-common-layer'
   sourceRoot: x-pack/platform/packages/shared/kbn-proposals-common
 dependsOn:
   - '@kbn/i18n'

@@ -21,9 +21,14 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   CASE_ATTACHMENT_SAVED_OBJECT,
 } from '../../../common/constants';
-import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants/owners';
+import {
+  GENERAL_CASES_OWNER,
+  SECURITY_SOLUTION_OWNER,
+  OBSERVABILITY_OWNER,
+} from '../../../common/constants/owners';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { CaseError } from '../../common/error';
 import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
@@ -4704,6 +4709,294 @@ describe('update', () => {
       expect(updatedAttributes.customFields).toEqual(
         expect.arrayContaining([{ key: 'priority', type: CustomFieldTypes.TEXT, value: null }])
       );
+    });
+  });
+
+  describe('extractObservables owner rule', () => {
+    const clientArgs = createCasesClientMockArgs();
+    const blockedOwners = [GENERAL_CASES_OWNER, OBSERVABILITY_OWNER];
+
+    const getStoredCase = ({
+      id = mockCases[0].id,
+      version = mockCases[0].version,
+      owner,
+      extractObservables,
+    }: {
+      id?: string;
+      version?: string;
+      owner: string;
+      extractObservables?: boolean;
+    }): CaseSavedObjectTransformed => ({
+      ...mockCases[0],
+      id,
+      version,
+      attributes: {
+        ...mockCases[0].attributes,
+        owner,
+        settings: {
+          syncAlerts: true,
+          ...(extractObservables === undefined ? {} : { extractObservables }),
+        },
+      },
+    });
+
+    const mockStoredCases = (storedCases: CaseSavedObjectTransformed[]) => {
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: storedCases });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: storedCases,
+      });
+    };
+
+    const getRejection = async (promise: Promise<unknown>): Promise<CaseError> => {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('Expected the update to be rejected');
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+    });
+
+    it.each(blockedOwners)(
+      'rejects a change from false to true with a 400 for the %s owner',
+      async (owner) => {
+        mockStoredCases([getStoredCase({ owner, extractObservables: false })]);
+
+        const error = await getRejection(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  settings: { syncAlerts: true, extractObservables: true },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientMock
+          )
+        );
+
+        expect(error.message).toContain(
+          `Setting extractObservables to true is not allowed for the "${owner}" owner`
+        );
+        expect(error.boomify().output.statusCode).toBe(400);
+        expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+      }
+    );
+
+    it('rejects true when the stored case has no extractObservables value', async () => {
+      mockStoredCases([getStoredCase({ owner: GENERAL_CASES_OWNER })]);
+
+      const error = await getRejection(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                settings: { syncAlerts: true, extractObservables: true },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      );
+
+      expect(error.boomify().output.statusCode).toBe(400);
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it.each(blockedOwners)(
+      'accepts an update that keeps a stored true for the %s owner',
+      async (owner) => {
+        mockStoredCases([getStoredCase({ owner, extractObservables: true })]);
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                // syncAlerts changes, so the settings object is sent, with the stored true.
+                settings: { syncAlerts: false, extractObservables: true },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it.each(blockedOwners)(
+      'accepts a change from true to false for the %s owner',
+      async (owner) => {
+        mockStoredCases([getStoredCase({ owner, extractObservables: true })]);
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                settings: { syncAlerts: true, extractObservables: false },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        const { updatedAttributes } =
+          clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0];
+        expect(updatedAttributes.settings?.extractObservables).toBe(false);
+      }
+    );
+
+    it.each(blockedOwners)(
+      'accepts an update that does not send extractObservables for the %s owner',
+      async (owner) => {
+        mockStoredCases([getStoredCase({ owner, extractObservables: false })]);
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                title: 'A new title',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('keeps the identical-fields 406 when true is sent for a stored true', async () => {
+      mockStoredCases([getStoredCase({ owner: GENERAL_CASES_OWNER, extractObservables: true })]);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                settings: { syncAlerts: true, extractObservables: true },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('All update fields are identical to current version.');
+    });
+
+    it('accepts a change from false to true for the Security owner', async () => {
+      mockStoredCases([
+        getStoredCase({ owner: SECURITY_SOLUTION_OWNER, extractObservables: false }),
+      ]);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              settings: { syncAlerts: true, extractObservables: true },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      const { updatedAttributes } =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0];
+      expect(updatedAttributes.settings?.extractObservables).toBe(true);
+    });
+
+    it('accepts a change from false to true for an unknown owner', async () => {
+      mockStoredCases([
+        getStoredCase({ owner: 'securitySolutionFixture', extractObservables: false }),
+      ]);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              settings: { syncAlerts: true, extractObservables: true },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects the whole request and writes no case when one case is rejected', async () => {
+      mockStoredCases([
+        getStoredCase({
+          id: mockCases[0].id,
+          owner: SECURITY_SOLUTION_OWNER,
+          extractObservables: false,
+        }),
+        getStoredCase({
+          id: mockCases[1].id,
+          version: mockCases[1].version,
+          owner: GENERAL_CASES_OWNER,
+          extractObservables: false,
+        }),
+      ]);
+
+      const error = await getRejection(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                settings: { syncAlerts: true, extractObservables: true },
+              },
+              {
+                id: mockCases[1].id,
+                version: mockCases[1].version ?? '',
+                settings: { syncAlerts: true, extractObservables: true },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      );
+
+      expect(error.boomify().output.statusCode).toBe(400);
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
     });
   });
 });

@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { isMissingIndexError } from '../../is_missing_index_error';
@@ -104,7 +105,11 @@ const fetchCount = async (
   countQuery: readonly string[],
   signal?: AbortSignal
 ): Promise<number> => {
-  const [countRow] = await createEsqlRunner(searchService, signal)(countQuery);
+  const [countRow] = await createEsqlRunner(
+    searchService,
+    'entities_grid_count',
+    signal
+  )(countQuery);
   return (countRow && getNumber(countRow, 'total')) ?? 0;
 };
 
@@ -118,7 +123,19 @@ const fetchRows = async (
   if (!fetchSortPage) throw new Error(`Column ${options.sortField} is not sortable`);
   const args = getQueryArgs(context, options);
   const rowsWithLookahead = await fetchSortPage(args, {
-    runQuery: createEsqlRunner(context.searchService, signal),
+    runQuery: createEsqlRunner(
+      context.searchService,
+      {
+        id: 'entities_grid_rows',
+        meta: {
+          rowsMode: options.rowsMode,
+          sortField: options.sortField,
+          sortDirection: options.sortDirection,
+          timeRange: options.timeRange,
+        },
+      },
+      signal
+    ),
   });
   return {
     rows: rowsWithLookahead.slice(0, args.pageSize),
@@ -130,6 +147,24 @@ type OverridesOptions = Pick<
   UseEntityGridDataOptions,
   'rowsMode' | 'entityExpression' | 'keyScope'
 >;
+
+/** What the grid has left to load, for the load telemetry. */
+export interface EntityGridLoadState {
+  isRowsPending: boolean;
+  isCountPending: boolean;
+  /** The rows asked for first (those in view) wait for their computed columns. */
+  isEnrichPending: boolean;
+  hasError: boolean;
+}
+
+/** A query that failed has settled; one that is disabled, or shows another key's data, has not. */
+const isQueryPending = ({
+  error,
+  isFetching,
+  isPreviousData,
+  data,
+}: Pick<UseQueryResult, 'error' | 'isFetching' | 'isPreviousData' | 'data'>): boolean =>
+  error == null && (isFetching || isPreviousData || data == null);
 
 const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
   options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
@@ -160,7 +195,7 @@ export const useResolvedEntityOverrides = (
           concreteEntityIndexName: ready.concreteEntityIndexName,
           ...conditions,
         },
-        createEsqlRunner(context.searchService, signal)
+        createEsqlRunner(context.searchService, 'entities_grid_resolved_entity_overrides', signal)
       );
     },
     { enabled: !!conditions && ready != null }
@@ -267,6 +302,13 @@ export const useEntityGridData = (
     enrichment.error,
   ].find((error) => error != null && !isMissingIndexError(error));
   useErrorToast(GRID_QUERY_ERROR_TITLE, gridError);
+  const loadState: EntityGridLoadState = {
+    isRowsPending: isQueryPending(rowsQuery),
+    isCountPending: isQueryPending(countQuery),
+    // The first chunk asked for settles it: chunks that scrolling asks for later don't count.
+    isEnrichPending: rows.length > 0 && !enrichment.hasEnrichedRows,
+    hasError: gridError != null || enrichment.hasFailedColumns,
+  };
 
   return {
     prefetch,
@@ -276,6 +318,7 @@ export const useEntityGridData = (
     total: countQuery.data,
     updatedAt: Math.max(rowsQuery.dataUpdatedAt, enrichment.dataUpdatedAt) || null,
     isAtLoadLimit: !!rowsQuery.data?.isAtLoadLimit,
+    loadState,
     isFetching:
       !!options.isSearchOverridesPending ||
       resolvedEntityFilterOverrides.isFetching ||

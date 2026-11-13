@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const pageObjects = getPageObjects(['common', 'findings', 'header']);
+  const pageObjects = getPageObjects(['findings']);
   const chance = new Chance();
 
   const cspmResourceId = chance.guid();
@@ -166,12 +166,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.add(data);
 
       await findings.navigateToLatestFindingsPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await findings.waitForFindingsTable(data.length);
     });
 
     after(async () => {
       await findings.navigateToLatestFindingsPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
       const groupSelector = await findings.groupSelector();
       await groupSelector.openDropDown();
       await groupSelector.setValue('None');
@@ -523,7 +522,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await findings.index.add([modifiedFinding]);
 
         await findings.navigateToLatestFindingsPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
 
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
@@ -531,11 +529,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
 
-        const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be(`${resourceGroupCount} resources`);
-
-        const unitCount = await grouping.getUnitCount();
-        expect(unitCount).to.be(`${findingsCount + 1} findings`);
+        await grouping.waitForCounts({
+          groupCount: `${resourceGroupCount} resources`,
+          unitCount: `${findingsCount + 1} findings`,
+        });
 
         await supertest
           .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -556,13 +553,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           .expect(200);
 
         await findings.navigateToLatestFindingsPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
 
-        const groupCountAfterMute = await grouping.getGroupCount();
-        expect(groupCountAfterMute).to.be(`${resourceGroupCount} resources`);
-
-        const unitCountAfterMute = await grouping.getUnitCount();
-        expect(unitCountAfterMute).to.be(`${findingsCount} findings`);
+        await grouping.waitForCounts({
+          groupCount: `${resourceGroupCount} resources`,
+          unitCount: `${findingsCount} findings`,
+        });
       });
     });
   });

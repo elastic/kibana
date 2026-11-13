@@ -242,6 +242,7 @@ describe('ClassicAlertDetailsFlyout', () => {
       order: 1,
       displayName: 'Test Action',
       iconType: 'star',
+      enforcesOwnPrivileges: false,
       isCompatible: jest.fn(() => true),
       execute: jest.fn(async () => {}),
     };

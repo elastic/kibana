@@ -56,6 +56,7 @@ const makeAction = (id: string, overrides?: Partial<EpisodeAction>): EpisodeActi
   order: 0,
   displayName: `Action ${id}`,
   iconType: 'check',
+  enforcesOwnPrivileges: false,
   isCompatible: () => true,
   execute: jest.fn().mockResolvedValue(undefined),
   ...overrides,
@@ -70,12 +71,8 @@ const mockOnSuccess = jest.fn();
  */
 interface TestWrapperProps {
   actions: EpisodeAction[];
-  viewDetailsHref?: string | null;
 }
-const TestWrapper = ({
-  actions,
-  viewDetailsHref = '/app/management/alertingV2/alerts/ep-1',
-}: TestWrapperProps) => {
+const TestWrapper = ({ actions }: TestWrapperProps) => {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -94,7 +91,7 @@ const TestWrapper = ({
           onClose={() => setIsOpen(false)}
           actions={actions}
           episodes={mockEpisodes}
-          viewDetailsHref={viewDetailsHref}
+          viewDetailsHref="/app/management/alertingV2/alerts/ep-1"
           onSuccess={mockOnSuccess}
         />
       )}
@@ -102,8 +99,7 @@ const TestWrapper = ({
   );
 };
 
-const renderMenu = (actions: EpisodeAction[], viewDetailsHref?: string | null) =>
-  render(<TestWrapper actions={actions} viewDetailsHref={viewDetailsHref} />);
+const renderMenu = (actions: EpisodeAction[]) => render(<TestWrapper actions={actions} />);
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -164,48 +160,6 @@ describe('EpisodeFooterActionMenu', () => {
       'alertingV2EpisodeTakeAction-viewDetails',
       'alertingV2EpisodeTakeAction-CUSTOM_WORKFLOW',
       'alertingV2EpisodeTakeAction-CUSTOM_NON_WORKFLOW',
-    ]);
-  });
-
-  it('places navigation actions directly under view details, ahead of workflow actions', () => {
-    renderMenu([
-      makeAction('ALERTING_V2_EDIT_EPISODE_TAGS'),
-      makeAction('ALERTING_V2_ACK_EPISODE'),
-      makeAction('CUSTOM_NAVIGATION', { isNavigationAction: true }),
-    ]);
-
-    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
-
-    const itemTestSubjects = screen
-      .getAllByRole('menuitem')
-      .map((item) => item.getAttribute('data-test-subj'));
-
-    expect(itemTestSubjects).toEqual([
-      'alertingV2EpisodeTakeAction-viewDetails',
-      'alertingV2EpisodeTakeAction-CUSTOM_NAVIGATION',
-      'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
-      'alertingV2EpisodeTakeAction-ALERTING_V2_EDIT_EPISODE_TAGS',
-    ]);
-  });
-
-  it('leads the menu with navigation actions when there is no view details link', () => {
-    renderMenu(
-      [
-        makeAction('ALERTING_V2_ACK_EPISODE'),
-        makeAction('CUSTOM_NAVIGATION', { isNavigationAction: true }),
-      ],
-      null
-    );
-
-    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
-
-    const itemTestSubjects = screen
-      .getAllByRole('menuitem')
-      .map((item) => item.getAttribute('data-test-subj'));
-
-    expect(itemTestSubjects).toEqual([
-      'alertingV2EpisodeTakeAction-CUSTOM_NAVIGATION',
-      'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
     ]);
   });
 

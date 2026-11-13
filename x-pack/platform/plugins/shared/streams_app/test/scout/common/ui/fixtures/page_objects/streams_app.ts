@@ -172,7 +172,9 @@ export class StreamsApp {
   }
 
   async gotoStreamMainPage() {
-    await this.page.gotoApp(`streams`);
+    await this.page.gotoApp(`streams`, {
+      readyWhen: this.page.testSubj.locator('streamsTable'),
+    });
   }
 
   async gotoStreamManagementTab(streamName: string, tabName: string) {
@@ -1009,7 +1011,10 @@ export class StreamsApp {
     // Clearing the toast list first keeps the Save button clickable and guarantees that a
     // toast awaited after the click belongs to this save rather than a previous one.
     await this.waitForEmptyGlobalToastList();
-    await this.page.getByRole('button', { name: 'Save changes' }).click();
+    const saveButton = this.page.getByRole('button', { name: 'Save changes' });
+    // Disabled while a simulation is in flight, which outlives the implicit `actionTimeout`.
+    await expect(saveButton).toBeEnabled({ timeout: 30_000 });
+    await saveButton.click();
   }
 
   /**

@@ -72,7 +72,10 @@ export const playwrightOverrides: OxlintOverride[] = [
       'playwright/no-nested-step': 'error',
       'playwright/no-nth-methods': 'error',
       'playwright/no-page-pause': 'error',
-      'playwright/no-raw-locators': ['warn', { allowed: ['[data-test-subj'] }],
+      // `playwright/no-raw-locators` stays off: its `allowed` option only matches whole selectors
+      // (exact equality), so it can't exempt [data-test-subj...] prefixes and flags every
+      // `page.testSubj.locator(...)` call as a false positive. The custom
+      // `@kbn/eslint/scout_no_raw_locators` rule in scout.mts handles this correctly.
       'playwright/no-restricted-matchers': 'error',
       'playwright/no-slowed-test': 'error',
       'playwright/no-test-return-statement': 'error',

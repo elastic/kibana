@@ -14,6 +14,7 @@ import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../../helpers/aggregati
 import type { Option } from '../../../helpers/create_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import type { CreateSLOForm } from '../../../types';
+import { HISTOGRAM_FIELD_TYPES } from '../../../constants';
 
 const fieldLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.fieldLabel', {
   defaultMessage: 'Field',
@@ -33,7 +34,7 @@ const fieldTooltip = (
   />
 );
 
-const NUMERIC_FIELD_TYPES = ['number', 'histogram'];
+const NUMERIC_FIELD_TYPES = ['number', ...HISTOGRAM_FIELD_TYPES];
 const CARDINALITY_FIELD_TYPES = ['number', 'string'];
 
 interface MetricInputProps {
