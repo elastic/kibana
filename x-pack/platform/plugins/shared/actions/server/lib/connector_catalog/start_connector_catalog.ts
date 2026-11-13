@@ -21,7 +21,7 @@ export interface ConnectorCatalogHandle {
   onFlagValue: (enabled: boolean) => void;
   /** Takes an error of the flag stream. Logs at warn and resolves ready. */
   onFlagError: (error: unknown) => void;
-  /** Clears the timer, aborts a running load, and makes later calls do nothing. */
+  /** Clears the deadline, aborts a running load, and makes later calls do nothing. */
   stop: () => void;
 }
 
@@ -36,17 +36,16 @@ interface StartConnectorCatalogDeps {
 /**
  * Reads the catalog and registers its types. Never writes, so a missing index stays missing.
  * Never rejects.
- * Stops at the timeout and aborts the pending requests, so a late result registers nothing.
- * When the controller is aborted from outside, it ends at once and quietly.
+ * Ends when the load is done or the controller is aborted. A late result registers nothing.
+ * An abort from outside (stop or deadline) ends it at once and quietly.
  */
 const runLoad = async (
-  { storage, actionTypeRegistry, buildType, logger, timeoutMs }: StartConnectorCatalogDeps,
+  { storage, actionTypeRegistry, buildType, logger }: StartConnectorCatalogDeps,
   controller: AbortController
 ): Promise<void> => {
   const { signal } = controller;
-  const loadTimeoutMs = timeoutMs ?? CATALOG_FIRST_LOAD_TIMEOUT_MS;
 
-  const load = async (): Promise<'done'> => {
+  const load = async (): Promise<void> => {
     const count = await loadCatalogConnectorTypes({
       storage,
       actionTypeRegistry,
@@ -57,39 +56,26 @@ const runLoad = async (
     if (!signal.aborted) {
       logger.info(`Registered ${count} connector type(s) from the connector catalog.`);
     }
-    return 'done';
   };
 
-  let timer: NodeJS.Timeout | undefined;
-  const timeout = new Promise<'timeout'>((resolve) => {
-    timer = setTimeout(() => resolve('timeout'), loadTimeoutMs);
-  });
-
   let onAbort: (() => void) | undefined;
-  const aborted = new Promise<'aborted'>((resolve) => {
+  const aborted = new Promise<void>((resolve) => {
     if (signal.aborted) {
-      resolve('aborted');
+      resolve();
       return;
     }
-    onAbort = () => resolve('aborted');
+    onAbort = () => resolve();
     signal.addEventListener('abort', onAbort, { once: true });
   });
 
   try {
-    const outcome = await Promise.race([load(), timeout, aborted]);
-    if (outcome === 'timeout') {
-      controller.abort();
-      logger.warn(
-        `The first connector catalog load timed out after ${loadTimeoutMs} ms. Only in-tree connector types are available.`
-      );
-    }
+    await Promise.race([load(), aborted]);
   } catch (error) {
     if (!signal.aborted) {
       controller.abort();
       logger.warn(`The first connector catalog load failed: ${getErrorMessage(error)}`);
     }
   } finally {
-    clearTimeout(timer);
     if (onAbort) {
       signal.removeEventListener('abort', onAbort);
     }
@@ -109,20 +95,30 @@ export const startConnectorCatalog = (deps: StartConnectorCatalogDeps): Connecto
     resolveReady = resolve;
   });
   let decided = false;
-  let loadRunning = false;
+  let loading = false;
 
-  // The flag provider can be slow or down, so ready must not depend on the first flag value.
-  const flagTimer = setTimeout(() => {
+  // 1 deadline for the whole first load, from this call. The flag provider can be slow or down,
+  // and a load can hang, so ready must not depend on either.
+  const deadline = setTimeout(() => {
+    if (loading) {
+      controller.abort();
+      logger.warn(
+        `The first connector catalog load timed out after ${timeoutMs} ms. Only in-tree connector types are available.`
+      );
+    } else if (!decided) {
+      logger.warn(
+        `The connector catalog flag was not available after ${timeoutMs} ms. Only in-tree connector types are available.`
+      );
+    }
     decided = true;
-    logger.warn(
-      `The connector catalog flag was not available after ${timeoutMs} ms. Only in-tree connector types are available.`
-    );
     resolveReady();
   }, timeoutMs);
 
-  const decide = () => {
+  const finish = () => {
     decided = true;
-    clearTimeout(flagTimer);
+    loading = false;
+    clearTimeout(deadline);
+    resolveReady();
   };
 
   return {
@@ -131,32 +127,24 @@ export const startConnectorCatalog = (deps: StartConnectorCatalogDeps): Connecto
       if (decided) {
         return;
       }
-      decide();
+      decided = true;
       if (!enabled) {
-        resolveReady();
+        finish();
         return;
       }
-      loadRunning = true;
-      void runLoad(deps, controller).then(() => {
-        loadRunning = false;
-        resolveReady();
-      });
+      loading = true;
+      void runLoad(deps, controller).then(finish);
     },
     onFlagError: (error) => {
       if (decided) {
         return;
       }
-      decide();
       logger.warn(`The connector catalog flag could not be read: ${getErrorMessage(error)}`);
-      resolveReady();
+      finish();
     },
     stop: () => {
-      decide();
       controller.abort();
-      // A running load resolves ready itself, after it cleared its timer.
-      if (!loadRunning) {
-        resolveReady();
-      }
+      finish();
     },
   };
 };
