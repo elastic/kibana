@@ -18,14 +18,13 @@ import {
   UNIT_STATS_DEFAULT_WINDOW_MS,
   UNIT_STATS_REQUEST_TIMEOUT_MS,
 } from './constants';
-import { getDestinationAuthFailures } from './destination_auth_failures';
+import { getDestinationAuthFailures, getNoAuthFailures } from './destination_auth_failures';
 import { toSearchError } from './errors/search_errors';
 import { mostActionableFailure, STATS_ERROR_CODE, UnitStatsError } from './errors/unit_stats_error';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
 import {
   joinDestinationRows,
   mapDestinationStatsRows,
-  noAuthFailures,
   noDestinationStats,
   withAuthFailures,
 } from './mappers/map_destination_stats_result';
@@ -281,12 +280,12 @@ export class UnitStatsClient {
 
       return {
         results: Object.fromEntries(
-          ids.map((id) => [
+          destinations.map(({ id, type }) => [
             id,
             {
               ...withAuthFailures(
                 results[id],
-                Object.hasOwn(failures, id) ? failures[id] : noAuthFailures()
+                Object.hasOwn(failures, id) ? failures[id] : getNoAuthFailures(type)
               ),
               ...(Object.hasOwn(failureErrors, id) ? { error: failureErrors[id] } : {}),
             },

@@ -7,7 +7,7 @@
 
 import type { ComposerQuery } from '@elastic/esql';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { getDestinationAuthFailures } from './destination_auth_failures';
+import { getDestinationAuthFailures, getNoAuthFailures } from './destination_auth_failures';
 import type { EsqlRow } from './mappers/esql_rows';
 import { noDestinationStats } from './mappers/map_destination_stats_result';
 import type { DestinationQueryRef } from './query_refs';
@@ -136,4 +136,27 @@ describe('getDestinationAuthFailures', () => {
     expect(result).toEqual({ failures: {}, failedGroups: [] });
     expect(runQuery).not.toHaveBeenCalled();
   });
+});
+
+describe('getNoAuthFailures', () => {
+  const noPercentage = { value: null, unit: '%' };
+  const noRate = (unit: string) => ({ value: null, unit, time_unit: 's' });
+
+  it('has no data in upload attempts, with a total of failures, for S3', () => {
+    expect(getNoAuthFailures('s3')).toEqual({
+      failed: { rate: noRate('{request}'), percentage: noPercentage },
+      authentication: { rate: noRate('{request}'), percentage: noPercentage },
+      authorization: { rate: noRate('{request}'), percentage: noPercentage },
+    });
+  });
+
+  it.each(['elasticsearch', 'remote_elasticsearch', 'debug', 'constructor'])(
+    'has no data in items, and no total of failures, for %s',
+    (type) => {
+      expect(getNoAuthFailures(type)).toEqual({
+        authentication: { rate: noRate('{item}'), percentage: noPercentage },
+        authorization: { rate: noRate('{item}'), percentage: noPercentage },
+      });
+    }
+  );
 });

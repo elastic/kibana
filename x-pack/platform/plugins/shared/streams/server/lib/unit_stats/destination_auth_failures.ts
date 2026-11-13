@@ -9,7 +9,11 @@ import type { ComposerQuery } from '@elastic/esql';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { getElasticsearchAuthFailures } from './elasticsearch_auth_failures';
 import type { EsqlRow } from './mappers/esql_rows';
-import type { AuthFailureStats } from './mappers/map_destination_stats_result';
+import {
+  noAuthFailures,
+  noS3AuthFailures,
+  type AuthFailureStats,
+} from './mappers/map_destination_stats_result';
 import type { StatsQueryBaseParams } from './query_builders/filters';
 import type { DestinationQueryRef } from './query_refs';
 import { getS3AuthFailures } from './s3_auth_failures';
@@ -35,16 +39,39 @@ export interface DestinationAuthFailures {
   failedGroups: FailedAuthFailuresGroup[];
 }
 
+/** How a destination type reports its failures, and what it shows when it could not. */
+interface AuthFailuresSource {
+  getFailures: GetAuthFailures;
+  noData: () => AuthFailureStats;
+}
+
+const ELASTICSEARCH_SOURCE: AuthFailuresSource = {
+  getFailures: getElasticsearchAuthFailures,
+  noData: noAuthFailures,
+};
+
+const S3_SOURCE: AuthFailuresSource = {
+  getFailures: getS3AuthFailures,
+  noData: noS3AuthFailures,
+};
+
 /**
  * How each destination type reports its authentication and authorization failures. A type that
  * is not here has none to report, so its destinations get no rates. A map, because a destination
  * type comes from the unit config and must not be read from `Object.prototype`.
  */
-const AUTH_FAILURES_BY_TYPE: ReadonlyMap<string, GetAuthFailures> = new Map([
-  ['elasticsearch', getElasticsearchAuthFailures],
-  ['remote_elasticsearch', getElasticsearchAuthFailures],
-  ['s3', getS3AuthFailures],
+const AUTH_FAILURES_BY_TYPE: ReadonlyMap<string, AuthFailuresSource> = new Map([
+  ['elasticsearch', ELASTICSEARCH_SOURCE],
+  ['remote_elasticsearch', ELASTICSEARCH_SOURCE],
+  ['s3', S3_SOURCE],
 ]);
+
+/**
+ * The failures of a destination of this type when none could be read: its provider failed, or left
+ * it out. The units are the ones its type reports in.
+ */
+export const getNoAuthFailures = (type: string): AuthFailureStats =>
+  (AUTH_FAILURES_BY_TYPE.get(type)?.noData ?? noAuthFailures)();
 
 /**
  * The authentication and authorization failures of destinations, by id. The destinations are
@@ -67,21 +94,18 @@ export const getDestinationAuthFailures = async ({
   destinations: DestinationQueryRef[];
   parentResults: Record<string, StreamsUnit.StatsDestinationResult>;
 }): Promise<DestinationAuthFailures> => {
-  const destinationsByProvider = new Map<GetAuthFailures, DestinationQueryRef[]>();
+  const destinationsBySource = new Map<AuthFailuresSource, DestinationQueryRef[]>();
   for (const destination of destinations) {
-    const provider = AUTH_FAILURES_BY_TYPE.get(destination.type);
-    if (provider) {
-      destinationsByProvider.set(provider, [
-        ...(destinationsByProvider.get(provider) ?? []),
-        destination,
-      ]);
+    const source = AUTH_FAILURES_BY_TYPE.get(destination.type);
+    if (source) {
+      destinationsBySource.set(source, [...(destinationsBySource.get(source) ?? []), destination]);
     }
   }
 
-  const groups = [...destinationsByProvider];
+  const groups = [...destinationsBySource];
   const settled = await Promise.allSettled(
-    groups.map(([provider, group]) =>
-      provider({ runQuery, baseParams, destinations: group, parentResults })
+    groups.map(([{ getFailures }, group]) =>
+      getFailures({ runQuery, baseParams, destinations: group, parentResults })
     )
   );
 

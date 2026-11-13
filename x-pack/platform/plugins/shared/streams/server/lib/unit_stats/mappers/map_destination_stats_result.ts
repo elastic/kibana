@@ -6,9 +6,9 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { ITEM_UNIT, SECONDS_UNIT, STATS_COLUMN } from '../constants';
+import { ITEM_UNIT, REQUEST_UNIT, SECONDS_UNIT, STATS_COLUMN } from '../constants';
 import { groupById, indexById, numberOrNull, type EsqlRow, type EsqlValue } from './esql_rows';
-import { toItemRate, toPercentage, toSeries, toValue } from './stats_values';
+import { toItemRate, toPercentage, toRate, toSeries, toValue } from './stats_values';
 
 type FailedStats = StreamsUnit.StatsDestinationResult['events']['failed'];
 
@@ -28,6 +28,17 @@ export type AuthFailureStats = Pick<FailedStats, 'authentication' | 'authorizati
 export const noAuthFailures = (): AuthFailureStats => ({
   authentication: { rate: toItemRate(null), percentage: toPercentage(null, null) },
   authorization: { rate: toItemRate(null), percentage: toPercentage(null, null) },
+});
+
+/**
+ * The same for an S3 destination, whose failures are upload attempts, not items. It also has the
+ * total of failures, which replaces the items-based one of the totals query: items fail late, so
+ * that rate must not stand in when the attempts could not be read.
+ */
+export const noS3AuthFailures = (): AuthFailureStats => ({
+  failed: { rate: toRate(null, REQUEST_UNIT), percentage: toPercentage(null, null) },
+  authentication: { rate: toRate(null, REQUEST_UNIT), percentage: toPercentage(null, null) },
+  authorization: { rate: toRate(null, REQUEST_UNIT), percentage: toPercentage(null, null) },
 });
 
 export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinationResult => ({

@@ -749,6 +749,12 @@ describe('UnitStatsClient.getStats', () => {
 
   describe('authentication and authorization failures of an S3 destination', () => {
     const requestRate = (value: number | null) => ({ value, unit: '{request}', time_unit: 's' });
+    const noS3Failed = {
+      rate: requestRate(null),
+      percentage: { value: null, unit: '%' },
+      authentication: { rate: requestRate(null), percentage: { value: null, unit: '%' } },
+      authorization: { rate: requestRate(null), percentage: { value: null, unit: '%' } },
+    };
     const s3Unit: StreamsUnit.Configuration = {
       ...unit,
       destinations: [
@@ -866,9 +872,9 @@ describe('UnitStatsClient.getStats', () => {
         s3Unit
       );
 
-      const { failed } = response.components.destinations['s3-test'].events;
-      expect(failed.authentication.rate.value).toBeNull();
-      expect(failed.authorization.rate.value).toBeNull();
+      // The totals query has an items-based failed rate for it, and it must not stand in for the
+      // upload attempts that were not found.
+      expect(response.components.destinations['s3-test'].events.failed).toEqual(noS3Failed);
     });
 
     it('keeps the other stats, puts the error on the destination, and logs a warn, when the S3 query fails', async () => {
@@ -885,7 +891,8 @@ describe('UnitStatsClient.getStats', () => {
       expect(s3.error).toEqual({ code: 'error', reason: expect.any(String) });
       expect(s3.events.incoming.rate.value).toBe(1);
       expect(s3.latency.average.value).toBe(0.2);
-      expect(s3.events.failed.authentication.rate.value).toBeNull();
+      // Its failures are no data in requests, not the late items-based rate of the totals query.
+      expect(s3.events.failed).toEqual(noS3Failed);
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('destination s3 authentication and authorization')
