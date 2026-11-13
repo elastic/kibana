@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+// Shares row and drop types used to find pets and per-cluster cattle across metrics datasets.
 import type { FeatureUpsert } from '@kbn/significant-events-schema';
 
-// Shares row and drop types used to find pets and per-cluster cattle across metrics datasets.
 export type EsqlScalar = string | number | boolean | null;
 export type EsqlCell = EsqlScalar | readonly EsqlScalar[];
 export type EsqlRow = Readonly<Record<string, EsqlCell>>;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+// Shares dataset and value helpers used to find pets and per-cluster cattle in Kubernetes and OTel metrics.
 import type { EsqlCell, EsqlRow } from './types';
 
-// Shares dataset and value helpers used to find pets and per-cluster cattle in Kubernetes and OTel metrics.
 export const KUBERNETES_POD_DATASETS = ['kubernetes.pod', 'kubeletstatsreceiver.otel'] as const;
 export const KUBERNETES_NODE_DATASETS = ['kubernetes.node', 'kubeletstatsreceiver.otel'] as const;
 export const KUBERNETES_CLUSTER_DATASETS = [

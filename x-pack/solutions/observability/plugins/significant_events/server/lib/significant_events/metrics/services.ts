@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Finds one service pet KI from APM service-summary and generic OTel datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -19,7 +20,6 @@ import {
   type EsqlRow,
 } from './entity_rows/types';
 
-// Finds one service pet KI from APM service-summary and generic OTel datasets.
 export const buildServiceQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN ("apm.service_summary.1m",

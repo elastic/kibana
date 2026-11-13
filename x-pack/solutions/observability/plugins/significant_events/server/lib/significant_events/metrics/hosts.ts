@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Finds standalone host pets in system and OTel hostmetrics data; node hosts enrich cluster cattle.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -24,7 +25,6 @@ import {
   buildInfrastructureConceptDescription,
 } from './kubernetes/concepts';
 
-// Finds standalone host pets in system and OTel hostmetrics data; node hosts enrich cluster cattle.
 export const buildSystemHostQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour AND STARTS_WITH(data_stream.dataset, "system.")
 | STATS last_seen = MAX(@timestamp), os = VALUES(host.os.name),

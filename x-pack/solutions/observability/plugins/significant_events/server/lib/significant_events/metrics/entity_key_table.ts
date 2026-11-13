@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Routes Kubernetes, system, hostmetrics, and APM datasets to pet or per-cluster cattle rows.
 import {
   KUBERNETES_CLUSTER_DATASETS,
   KUBERNETES_DATASET_FAMILIES,
@@ -25,7 +26,6 @@ import { buildNodeQuery, foldNodeRows } from './kubernetes/nodes';
 import { buildWorkloadQuery, foldWorkloadRows } from './kubernetes/workloads';
 import { buildServiceQuery, foldServiceRows } from './services';
 
-// Routes Kubernetes, system, hostmetrics, and APM datasets to pet or per-cluster cattle rows.
 export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
   {
     id: 'ecs.k8s_workload',

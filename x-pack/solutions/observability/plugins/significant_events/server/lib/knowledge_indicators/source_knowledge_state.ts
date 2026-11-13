@@ -30,13 +30,16 @@ interface SourceKnowledgeState {
 const stateSchema = schema.object({
   revision: schema.maybe(schema.string({ maxLength: 255 })),
   onboardingScheduled: schema.maybe(schema.boolean()),
-  onboardingReservedAt: schema.maybe(schema.number()),
   lease: schema.nullable(
     schema.object({
       owner: schema.string({ maxLength: 255 }),
       expiresAt: schema.number(),
     })
   ),
+});
+
+const stateSchemaV2 = stateSchema.extends({
+  onboardingReservedAt: schema.maybe(schema.number()),
 });
 
 /** Stores the applied query revision and serializes cleanup with final KI/rule writes. */
@@ -52,6 +55,13 @@ export const sourceKnowledgeStateSavedObjectType: SavedObjectsType = {
       schemas: {
         create: stateSchema,
         forwardCompatibility: stateSchema.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        create: stateSchemaV2,
+        forwardCompatibility: stateSchemaV2.extends({}, { unknowns: 'ignore' }),
       },
     },
   },

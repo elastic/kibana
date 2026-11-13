@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+// Describes per-cluster Kubernetes node and namespace cattle KIs; it reads no datasets.
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { quoteEsqlString } from '../entity_rows/helpers';
 
-// Describes per-cluster Kubernetes node and namespace cattle KIs; it reads no datasets.
 const roundToTwoSignificantDigits = (value: number): number =>
   value === 0 ? 0 : Number(value.toPrecision(2));
 

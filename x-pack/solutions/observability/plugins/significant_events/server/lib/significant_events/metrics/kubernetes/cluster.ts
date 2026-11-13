@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Finds one pet KI per cluster from Kubernetes pod, node, and OTel kubeletstats datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -25,7 +26,6 @@ import {
 } from '../entity_rows/types';
 import { buildKubernetesEntityId, KUBERNETES_ENTITY_STORE_TYPES } from './ids';
 
-// Finds one pet KI per cluster from Kubernetes pod, node, and OTel kubeletstats datasets.
 export const buildClusterQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_CLUSTER_DATASETS)})

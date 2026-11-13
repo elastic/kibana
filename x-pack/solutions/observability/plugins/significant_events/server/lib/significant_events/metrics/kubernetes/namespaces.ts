@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Finds one cattle group KI per cluster from Kubernetes pod and OTel kubeletstats datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -21,7 +22,6 @@ import {
 } from '../entity_rows/types';
 import { buildConceptListQuery, buildInfrastructureConceptDescription } from './concepts';
 
-// Finds one cattle group KI per cluster from Kubernetes pod and OTel kubeletstats datasets.
 export const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})

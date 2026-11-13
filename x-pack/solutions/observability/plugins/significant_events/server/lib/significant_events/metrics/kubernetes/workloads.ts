@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Finds one pet KI per long-lived workload from Kubernetes pod and OTel kubeletstats datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -29,7 +30,6 @@ import {
 } from '../entity_rows/types';
 import { buildKubernetesEntityId, getKubernetesEntityStoreType, type WorkloadKind } from './ids';
 
-// Finds one pet KI per long-lived workload from Kubernetes pod and OTel kubeletstats datasets.
 const workloadOwnerFields: Record<WorkloadKind, string> = {
   deployment: 'kubernetes.deployment.name',
   statefulset: 'kubernetes.statefulset.name',

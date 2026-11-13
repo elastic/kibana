@@ -88,7 +88,7 @@ const rowsFromResponse = (response: ESQLSearchResponse): EsqlRow[] =>
     }, {})
   );
 
-// NULLIFY lets each entity query read only the fields its datasets provide.
+// NULLIFY turns missing fields into null so one query works across ECS and OTel sources that lack some fields.
 const buildSourceQuery = (esql: string): string =>
   `SET unmapped_fields = "NULLIFY"; ${toFromSourceQuery(esql)}`;
 
