@@ -10,15 +10,15 @@ import type {
   ComparisonResult,
   HypothesisTest,
 } from '../schemas/experiments/compare_experiments_route.gen';
-import { resolveDirection } from './pairing';
-import type { PairedScore } from './pairing';
+import { buildSliceKey, resolveDirection } from './pairing';
+import type { PairedScore, RepetitionStats } from './pairing';
 import { runPairedTest } from './run_test';
 import { selectTest } from './select_test';
 
 function groupByDatasetAndEvaluator(pairs: PairedScore[]): PairedScore[][] {
   const groups = new Map<string, PairedScore[]>();
   for (const pair of pairs) {
-    const key = `${pair.datasetId}|${pair.evaluatorName}`;
+    const key = buildSliceKey(pair.datasetId, pair.evaluatorName);
     const group = groups.get(key);
     if (group) {
       group.push(pair);
@@ -29,7 +29,7 @@ function groupByDatasetAndEvaluator(pairs: PairedScore[]): PairedScore[][] {
   return [...groups.values()];
 }
 
-function compareSlice(group: PairedScore[]): ComparisonResult {
+function compareSlice(group: PairedScore[], repetitions: RepetitionStats): ComparisonResult {
   const target = group.map((pair) => pair.scoreTarget);
   const baseline = group.map((pair) => pair.scoreBaseline);
 
@@ -59,6 +59,7 @@ function compareSlice(group: PairedScore[]): ComparisonResult {
     sampleSize,
     meanTarget: mean(target),
     meanBaseline: mean(baseline),
+    ...repetitions,
     pValue: outcome.pValue,
     direction,
     metricType,
@@ -70,6 +71,11 @@ function compareSlice(group: PairedScore[]): ComparisonResult {
  * Run a paired statistical test per (dataset, evaluator) slice of the given pairs. The test is
  * chosen per slice by `selectTest` from the inferred metric type and the observed scores.
  */
-export function compareScores(pairs: PairedScore[]): ComparisonResult[] {
-  return groupByDatasetAndEvaluator(pairs).map(compareSlice);
+export function compareScores(
+  pairs: PairedScore[],
+  repetitions: Map<string, RepetitionStats>
+): ComparisonResult[] {
+  return groupByDatasetAndEvaluator(pairs).map((group) =>
+    compareSlice(group, repetitions.get(buildSliceKey(group[0].datasetId, group[0].evaluatorName))!)
+  );
 }

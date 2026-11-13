@@ -6,7 +6,7 @@
  */
 
 import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
-import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import type { Direction, ComparisonResult, RepetitionPolicy } from '@kbn/evals-common';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -78,6 +78,8 @@ export function formatMarkdownCompareReport({
   skippedMissingPairs = 0,
   skippedNullScores = 0,
   baselineBranch = 'main',
+  repetitionPolicy = 'mean',
+  rejectedSlices = [],
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
@@ -90,6 +92,8 @@ export function formatMarkdownCompareReport({
   skippedMissingPairs?: number;
   skippedNullScores?: number;
   baselineBranch?: string;
+  repetitionPolicy?: RepetitionPolicy;
+  rejectedSlices?: string[];
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
@@ -125,7 +129,12 @@ export function formatMarkdownCompareReport({
 
   lines.push(`Significance threshold: p < ${significanceThreshold}`);
   lines.push(
-    `Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
+    `Repetition policy: ${repetitionPolicy} (N counts ${
+      repetitionPolicy === 'pool' ? 'repetition pairs' : 'examples'
+    }; stability is the mean standard deviation across an example's repetitions).`
+  );
+  lines.push(
+    `Test per row is chosen from the scores: McNemar for pass/fail (averaged pass rates count as continuous), otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
   );
   lines.push('');
 
@@ -143,7 +152,7 @@ export function formatMarkdownCompareReport({
   if (skippedMissingPairs > 0 || skippedNullScores > 0) {
     const parts: string[] = [];
     if (skippedMissingPairs > 0) {
-      parts.push(`${skippedMissingPairs} unpaired (ran in only one experiment)`);
+      parts.push(`${skippedMissingPairs} unpaired`);
     }
     if (skippedNullScores > 0) {
       parts.push(`${skippedNullScores} null scores`);
@@ -152,6 +161,20 @@ export function formatMarkdownCompareReport({
       `> **Note**: ${parts.join(
         ', '
       )} skipped. Comparison may be incomplete — the baseline could be a partial run.`
+    );
+  }
+
+  if (rejectedSlices.length > 0) {
+    lines.push(
+      `> **Note**: Left out of the median comparison (score outside [0, 1]): ${rejectedSlices.join(
+        ', '
+      )}.`
+    );
+  }
+
+  if (sortedResults.some((r) => r.repetitionWarning)) {
+    lines.push(
+      '> **Warning**: in rows marked N*, some examples have a different number of valid repetitions in the two runs, or null scores.'
     );
   }
 
@@ -181,15 +204,15 @@ export function formatMarkdownCompareReport({
   const renderTable = (rows: ComparisonResult[]) => {
     const tableLines: string[] = [];
     tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value | Sig | Outcome |`
+      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value | Sig | Outcome | Stability (PR/${baselineBranch}) |`
     );
-    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
     rows.forEach((r) => {
       const delta = r.meanTarget - r.meanBaseline;
       const cols = [
         escapeTableCell(r.datasetName),
         escapeTableCell(r.evaluatorName),
-        String(r.sampleSize),
+        `${r.sampleSize}${r.repetitionWarning ? '*' : ''}`,
         formatNumber(r.meanTarget),
         formatNumber(r.meanBaseline),
         formatDifference(delta) + formatDiscordantPairs(r.hypothesisTest),
@@ -197,6 +220,7 @@ export function formatMarkdownCompareReport({
         formatPValue(r.pValue),
         formatSig(r.pValue, significanceThreshold),
         formatOutcome(delta, r.direction, r.pValue, significanceThreshold),
+        `${formatNumber(r.stabilityTarget)} / ${formatNumber(r.stabilityBaseline)}`,
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);
     });

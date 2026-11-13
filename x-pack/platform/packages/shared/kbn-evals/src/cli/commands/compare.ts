@@ -9,7 +9,7 @@ import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
-import { compareScores, pairScores } from '@kbn/evals-common';
+import { compareScores, pairScores, RepetitionPolicy } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
@@ -41,6 +41,7 @@ export const compareCmd: Command<void> = {
     --output           Append markdown output to a file instead of stdout
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
     --space-ids        Spaces the experiments were run in (same value as "evals run")
+    --repetition-policy  How repetitions of one example are compared: "mean" (default), "median" or "pool"
 
   Environment:
     EVAL_KBN_URL      Target Kibana URL (defaults to localhost)
@@ -56,6 +57,7 @@ export const compareCmd: Command<void> = {
       'output',
       'refresh-url',
       'space-ids',
+      'repetition-policy',
     ],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
@@ -65,6 +67,7 @@ export const compareCmd: Command<void> = {
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
       --space-ids        Spaces the experiments were run in
+      --repetition-policy  "mean" (default) and "median" test one pair per example; "pool" pairs every repetition
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -82,6 +85,14 @@ export const compareCmd: Command<void> = {
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
     }
+
+    const parsedPolicy = RepetitionPolicy.safeParse(
+      flagsReader.string('repetition-policy') ?? 'mean'
+    );
+    if (!parsedPolicy.success) {
+      throw createFlagError('--repetition-policy must be "mean", "median" or "pool".');
+    }
+    const repetitionPolicy = parsedPolicy.data;
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
@@ -266,20 +277,32 @@ export const compareCmd: Command<void> = {
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
-    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      filteredTargetScores,
-      filteredBaselineScores
-    );
+    const { pairs, skippedMissingPairs, skippedNullScores, rejectedSlices, repetitions } =
+      pairScores(filteredTargetScores, filteredBaselineScores, repetitionPolicy);
+
+    const rejectedNames = rejectedSlices.map((s) => `${s.datasetName} / ${s.evaluatorName}`);
+    if (pairs.length === 0 && rejectedSlices.length > 0) {
+      throw createFlagError(
+        `--repetition-policy median needs scores in [0, 1]. Every paired slice has a score outside that range: ${rejectedNames.join(
+          ', '
+        )}.`
+      );
+    }
 
     if (pairs.length === 0) {
       throw new Error('No paired scores found between the two experiments.');
     }
 
     log.info(
-      `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
+      `Built ${pairs.length} pairs with repetition policy "${repetitionPolicy}" (skipped ${skippedMissingPairs} unpaired, ${skippedNullScores} null scores).`
     );
+    if (rejectedSlices.length > 0) {
+      log.warning(
+        `Left out of the median comparison (score outside [0, 1]): ${rejectedNames.join(', ')}.`
+      );
+    }
 
-    const results = compareScores(pairs);
+    const results = compareScores(pairs, repetitions);
     if (results.length === 0) {
       log.warning('No comparison results returned.');
       return;
@@ -310,6 +333,8 @@ export const compareCmd: Command<void> = {
         skippedMissingPairs,
         skippedNullScores,
         baselineBranch: baselineBranch ?? undefined,
+        repetitionPolicy,
+        rejectedSlices: rejectedNames,
       });
 
       if (outputPath) {
@@ -323,6 +348,7 @@ export const compareCmd: Command<void> = {
         targetExperimentId,
         baselineExperimentId,
         results,
+        repetitionPolicy,
       });
 
       log.info(`\n\n${report.header.join('\n')}`);

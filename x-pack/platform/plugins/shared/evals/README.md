@@ -321,6 +321,19 @@ The plugin UI is organized into five navigation tabs:
 - **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
 - **Evaluators** — a catalog of every evaluator in the space, searchable and filterable by kind (LLM judge or code) and origin (built-in or user-defined), showing each one's version and required inputs. Selecting a name opens a read-only view of the stored definition, including the versions saved before it. Built-ins are read-only; user-defined judges can be created, edited, and deleted here by users holding `manage_evals`. The editor collects the judge's prompts, the trace evidence it needs, and its output scores, and can run the draft against a real trace ID before saving — the connector chosen for that test is not stored on the definition.
 
+#### Comparing experiments
+
+A comparison tests one pair per example and evaluator. When an example ran several times, each experiment's valid scores for it are first averaged (`repetition_policy=mean`, the default). N is then the number of examples, not of repetitions, because the repetitions of one example are not independent. The page and the `ai.evals.compareExperiments` workflow step always use the default.
+
+- `median` takes the median of the repetitions instead. It needs scores in [0, 1]. Slices with other scores are left out and listed in `pairing.rejectedSlices`, and the request fails with 400 when no slice is left. On pass/fail scores with an odd number of repetitions the median is a majority vote, so the row gets McNemar.
+- `pool` pairs every repetition by its index, as comparisons did before. Use it only when the repetitions are independent by design.
+
+Averaged pass/fail scores are fractions when the repetitions disagree, so those rows get Wilcoxon signed-rank or the paired t-test, never McNemar. The means are averages of the per-example scores, so they can differ from a plain average over all repetitions.
+
+Each row also reports, per experiment, the valid and the missing (null) repetitions, and the stability: the mean sample standard deviation of each paired example's valid repetitions, over the examples with at least two (0 when there are none). A row is flagged when an example has a different number of valid repetitions in the two experiments, or a null score.
+
+With one repetition per example the results are the same as with `pool`, with two exceptions: scores of one example with different repetition indexes are paired, and when an execution holds the same example twice (`type=execution`), the two scores are averaged.
+
 #### Score direction
 
 Each score a user-defined judge declares carries its own `direction`, so one judge can maximize groundedness while minimizing a hallucination rate:

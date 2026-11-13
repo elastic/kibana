@@ -19,6 +19,13 @@ const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult
   direction: 'maximize',
   metricType: 'continuous_bounded',
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
+  usedTarget: 10,
+  usedBaseline: 10,
+  missingTarget: 0,
+  missingBaseline: 0,
+  stabilityTarget: 0,
+  stabilityBaseline: 0,
+  repetitionWarning: false,
   ...overrides,
 });
 
@@ -34,6 +41,7 @@ describe('formatCompareReport', () => {
       'Target: experiment-1',
       'Baseline: experiment-2',
       'Significance threshold: p < 0.05',
+      'Repetition policy: mean',
     ]);
     expect(summary).toBe('Significant differences: 1/1');
     expect(significantCount).toBe(1);
@@ -136,6 +144,17 @@ describe('formatCompareReport', () => {
     expect(tableOutput).toContain('-0.50');
   });
 
+  it('warns about rows with uneven repetitions and marks their N', () => {
+    const { header, tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [makeResult({ repetitionWarning: true })],
+    });
+
+    expect(header[4]).toContain('Warning: in rows marked N*');
+    expect(tableOutput).toContain(' 10* ');
+  });
+
   it('handles empty results gracefully', () => {
     const { header, summary, tableOutput, significantCount } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -143,7 +162,7 @@ describe('formatCompareReport', () => {
       results: [],
     });
 
-    expect(header).toHaveLength(3);
+    expect(header).toHaveLength(4);
     expect(summary).toBe('Significant differences: 0/0');
     expect(tableOutput).toBe('');
     expect(significantCount).toBe(0);

@@ -37,6 +37,17 @@ paths:
             type: string
             maxLength: 1024
           description: Target experiment or execution ID (depends on type)
+        - name: repetition_policy
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RepetitionPolicy'
+            default: mean
+          description: >-
+            How repetitions of one example are compared. `mean` and `median`
+            reduce each example to one score per experiment and test one pair
+            per example. `pool` pairs every repetition by its index, which is
+            valid only when repetitions are independent by design.
       responses:
         '200':
           description: Successful response
@@ -52,12 +63,36 @@ paths:
                   pairing:
                     type: object
                     properties:
+                      repetitionPolicy:
+                        $ref: '#/components/schemas/RepetitionPolicy'
                       totalPairs:
                         type: integer
+                        description: >-
+                          Number of pairs tested over all slices: examples
+                          under `mean` and `median`, repetitions under `pool`
                       skippedMissingPairs:
                         type: integer
+                        description: >-
+                          Unpaired examples (repetitions under `pool`). A
+                          target example with only null scores counts in
+                          `skippedNullScores` instead.
                       skippedNullScores:
                         type: integer
+                      rejectedSlices:
+                        type: array
+                        description: >-
+                          Only for `median`: slices left out of `results`
+                          because a score is outside [0, 1].
+                        items:
+                          type: object
+                          properties:
+                            datasetName:
+                              type: string
+                            evaluatorName:
+                              type: string
+                          required:
+                            - datasetName
+                            - evaluatorName
                       truncatedBaseline:
                         type: boolean
                         description: Whether the baseline scores were truncated due to size limits
@@ -65,6 +100,7 @@ paths:
                         type: boolean
                         description: Whether the target scores were truncated due to size limits
                     required:
+                      - repetitionPolicy
                       - totalPairs
                       - skippedMissingPairs
                       - skippedNullScores
@@ -76,6 +112,13 @@ paths:
 
 components:
   schemas:
+    RepetitionPolicy:
+      type: string
+      enum:
+        - mean
+        - median
+        - pool
+
     StatisticalTestId:
       type: string
       enum:
@@ -151,13 +194,45 @@ components:
           maxLength: 256
         sampleSize:
           type: integer
-          description: Number of paired scores in this slice
+          description: >-
+            Number of pairs tested in this slice: examples under `mean` and
+            `median`, repetitions under `pool`
         meanBaseline:
           type: number
-          description: Mean score of the baseline experiment
+          description: Mean of the paired scores of the baseline experiment
         meanTarget:
           type: number
-          description: Mean score of the target experiment
+          description: Mean of the paired scores of the target experiment
+        usedBaseline:
+          type: integer
+          description: Valid repetition scores of the baseline experiment in this slice
+        usedTarget:
+          type: integer
+          description: Valid repetition scores of the target experiment in this slice
+        missingBaseline:
+          type: integer
+          description: Repetitions of the baseline experiment in this slice without a valid score
+        missingTarget:
+          type: integer
+          description: Repetitions of the target experiment in this slice without a valid score
+        stabilityBaseline:
+          type: number
+          description: >-
+            Mean of the sample standard deviations of each paired example's
+            valid baseline repetitions, over the examples with at least two.
+            0 when no example has two.
+        stabilityTarget:
+          type: number
+          description: >-
+            Mean of the sample standard deviations of each paired example's
+            valid target repetitions, over the examples with at least two.
+            0 when no example has two.
+        repetitionWarning:
+          type: boolean
+          description: >-
+            True when an example in this slice has a different number of valid
+            repetitions in the two experiments, or a repetition without a
+            valid score.
         pValue:
           type: number
           nullable: true
@@ -183,6 +258,13 @@ components:
         - sampleSize
         - meanBaseline
         - meanTarget
+        - usedBaseline
+        - usedTarget
+        - missingBaseline
+        - missingTarget
+        - stabilityBaseline
+        - stabilityTarget
+        - repetitionWarning
         - pValue
         - direction
         - metricType
