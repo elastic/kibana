@@ -72,6 +72,22 @@ argument the cursor is in and the places above it that the cursor is still insid
 
 A command the grammar has and Kibana has not registered is located like any other.
 
+## The table of positions
+
+`getGrammarPositions()` lists, for every command of the grammar, each place that takes
+something the user chooses: an argument (a name or a value), an expression, or a token with no
+fixed text. Each has its path of call sites from the command. What an expression contains is
+listed once, under `(expression)`, since it is the same for every command. The table is read
+from the grammar at runtime, so it follows the installed grammar with nothing to regenerate.
+
+The table is what the command signatures have to cover: every position of a command needs a
+meaning. `locate` reports only places the table has. A rule that contains itself (a map inside
+a map) makes `locate` report the same call sites once per level; `withoutRecursion(path)` folds
+them to the path the table lists.
+
+`getCommandStarts()` gives the tokens that start each command. Kibana uses them to find the
+command it registered for a grammar rule, and so to tell a command it has not adopted yet.
+
 Regenerate the labels after an `@elastic/esql` upgrade (from the Kibana root):
 
 ```sh
