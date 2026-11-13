@@ -16,7 +16,7 @@ import { z } from '@kbn/zod';
  * API collection belongs to exactly one framework; consumers that need several
  * frameworks query each one separately.
  */
-export const MITRE_FRAMEWORKS = ['enterprise', 'atlas'] as const;
+export const MITRE_FRAMEWORKS = ['enterprise', 'atlas', 'ics'] as const;
 export type MitreFramework = (typeof MITRE_FRAMEWORKS)[number];
 export type MitreEntityType = 'tactic' | 'technique' | 'subtechnique';
 

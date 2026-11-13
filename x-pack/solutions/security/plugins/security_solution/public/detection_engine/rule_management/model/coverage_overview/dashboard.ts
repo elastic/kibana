@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import type { CoverageOverviewMitreTactic } from './mitre_tactic';
 import type { CoverageOverviewRule } from './rule';
 
@@ -13,7 +14,11 @@ import type { CoverageOverviewRule } from './rule';
  * (e.g. removed or deprecated) tactic/technique/subtechnique ID.
  */
 export interface CoverageOverviewRuleWithInvalidMitre extends CoverageOverviewRule {
-  invalidMitreIds: string[];
+  /**
+   * The invalid ids per framework. An id is always paired with the framework of the threat entry
+   * that carries it, since Enterprise and ICS ids cannot be told apart by shape.
+   */
+  invalidMitreIdsByFramework: Partial<Record<MitreFramework, string[]>>;
 }
 
 /**

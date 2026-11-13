@@ -6,13 +6,13 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { getMitreFrameworkById } from '@kbn/security-mitre-attack-common';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import type {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
+import type { CoverageOverviewRule } from '../../../rule_management/model/coverage_overview/rule';
 
 export const extractSelected = <
   T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
@@ -32,22 +32,30 @@ export const populateSelected = <
     selected.includes(option.label) ? { ...option, checked: 'on' } : option
   );
 
+/** A rule paired with only the invalid MITRE IDs of one framework. */
+export interface CoverageOverviewRuleWithFrameworkInvalidMitreIds extends CoverageOverviewRule {
+  invalidMitreIds: string[];
+}
+
+export interface FrameworkInvalidlyMappedRules {
+  enabledRules: CoverageOverviewRuleWithFrameworkInvalidMitreIds[];
+  disabledRules: CoverageOverviewRuleWithFrameworkInvalidMitreIds[];
+}
+
 /**
- * Keeps only the invalid MITRE IDs that belong to the given framework and drops rules left with none.
+ * Keeps only the invalid MITRE IDs reported for the given framework and drops rules left with none.
  */
 export const filterInvalidlyMappedRulesByFramework = (
   invalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules'] | undefined,
   framework: MitreFramework
-): CoverageOverviewDashboard['invalidlyMappedRules'] => {
-  const filterRules = (rules: CoverageOverviewDashboard['invalidlyMappedRules']['enabledRules']) =>
-    rules
-      .map((rule) => ({
-        ...rule,
-        invalidMitreIds: rule.invalidMitreIds.filter(
-          (id) => getMitreFrameworkById(id) === framework
-        ),
-      }))
-      .filter((rule) => rule.invalidMitreIds.length > 0);
+): FrameworkInvalidlyMappedRules => {
+  const filterRules = (
+    rules: CoverageOverviewDashboard['invalidlyMappedRules']['enabledRules']
+  ): CoverageOverviewRuleWithFrameworkInvalidMitreIds[] =>
+    rules.flatMap(({ invalidMitreIdsByFramework, ...rule }) => {
+      const invalidMitreIds = invalidMitreIdsByFramework[framework] ?? [];
+      return invalidMitreIds.length > 0 ? [{ ...rule, invalidMitreIds }] : [];
+    });
 
   return {
     enabledRules: filterRules(invalidlyMappedRules?.enabledRules ?? []),

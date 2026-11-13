@@ -68,9 +68,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(omitInvalidMitreIds(body)).to.eql({
           coverage: {
-            T001: [rule1.id],
-            TA001: [rule1.id],
-            'T001.001': [rule1.id],
+            enterprise: {
+              T001: [rule1.id],
+              TA001: [rule1.id],
+              'T001.001': [rule1.id],
+            },
           },
           unmapped_rule_ids: [],
           rules_data: {
@@ -107,9 +109,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(omitInvalidMitreIds(body)).to.eql({
             coverage: {
-              T001: [rule1.id],
-              TA001: [rule1.id],
-              'T001.001': [rule1.id],
+              enterprise: {
+                T001: [rule1.id],
+                TA001: [rule1.id],
+                'T001.001': [rule1.id],
+              },
             },
             unmapped_rule_ids: [],
             rules_data: {
@@ -176,10 +180,83 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getCoverageOverview(supertest);
 
-          expect(body.coverage['AML.TA0000']).to.eql([rule1.id]);
-          expect(body.coverage['AML.T0044']).to.eql([rule1.id]);
-          expect(body.coverage['AML.T0024.002']).to.eql([rule1.id]);
+          expect(body.coverage.atlas['AML.TA0000']).to.eql([rule1.id]);
+          expect(body.coverage.atlas['AML.T0044']).to.eql([rule1.id]);
+          expect(body.coverage.atlas['AML.T0024.002']).to.eql([rule1.id]);
           expect(body.unmapped_rule_ids).to.eql([]);
+        });
+
+        it('returns an ICS-only rule under its ICS ids and not as unmapped', async () => {
+          const rule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              threat: [
+                {
+                  framework: 'MITRE ATT&CK ICS',
+                  tactic: {
+                    id: 'TA0107',
+                    name: 'Inhibit Response Function',
+                    reference: 'https://attack.mitre.org/tactics/TA0107/',
+                  },
+                  technique: [
+                    {
+                      id: 'T1691',
+                      name: 'Block Operational Technology Message',
+                      reference: 'https://attack.mitre.org/techniques/T1691/',
+                      subtechnique: [
+                        {
+                          id: 'T1691.001',
+                          name: 'Command Message',
+                          reference: 'https://attack.mitre.org/techniques/T1691/001/',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            })
+          );
+
+          const body = await getCoverageOverview(supertest);
+
+          expect(body.coverage.ics.TA0107).to.eql([rule1.id]);
+          expect(body.coverage.ics.T1691).to.eql([rule1.id]);
+          expect(body.coverage.ics['T1691.001']).to.eql([rule1.id]);
+          expect(body.unmapped_rule_ids).to.eql([]);
+          expect(body.invalid_mitre_ids).to.eql({});
+        });
+
+        it('keeps an Enterprise technique labelled as ICS under ics coverage and reports it as invalid', async () => {
+          const rule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              threat: [
+                {
+                  framework: 'MITRE ATT&CK ICS',
+                  tactic: {
+                    id: 'TA0107',
+                    name: 'Inhibit Response Function',
+                    reference: 'https://attack.mitre.org/tactics/TA0107/',
+                  },
+                  technique: [
+                    {
+                      id: 'T1059',
+                      name: 'Command and Scripting Interpreter',
+                      reference: 'https://attack.mitre.org/techniques/T1059/',
+                    },
+                  ],
+                },
+              ],
+            })
+          );
+
+          const body = await getCoverageOverview(supertest);
+
+          expect(body.invalid_mitre_ids[rule1.id]).to.eql({ ics: ['T1059'] });
+          expect(body.coverage.ics.T1059).to.eql([rule1.id]);
+          expect(body.coverage.enterprise).to.be(undefined);
         });
       });
 
@@ -203,9 +280,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T002: [expectedRule.id],
-                TA002: [expectedRule.id],
-                'T002.002': [expectedRule.id],
+                enterprise: {
+                  T002: [expectedRule.id],
+                  TA002: [expectedRule.id],
+                  'T002.002': [expectedRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -235,9 +314,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T002: [expectedRule.id],
-                TA002: [expectedRule.id],
-                'T002.002': [expectedRule.id],
+                enterprise: {
+                  T002: [expectedRule.id],
+                  TA002: [expectedRule.id],
+                  'T002.002': [expectedRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -267,9 +348,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T002: [expectedRule.id],
-                TA002: [expectedRule.id],
-                'T002.002': [expectedRule.id],
+                enterprise: {
+                  T002: [expectedRule.id],
+                  TA002: [expectedRule.id],
+                  'T002.002': [expectedRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -520,9 +603,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T001: [expectedRule.id],
-                TA001: [expectedRule.id],
-                'T001.001': [expectedRule.id],
+                enterprise: {
+                  T001: [expectedRule.id],
+                  TA001: [expectedRule.id],
+                  'T001.001': [expectedRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -556,9 +641,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T002: [expectedRule.id],
-                TA002: [expectedRule.id],
-                'T002.002': [expectedRule.id],
+                enterprise: {
+                  T002: [expectedRule.id],
+                  TA002: [expectedRule.id],
+                  'T002.002': [expectedRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -601,12 +688,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T001: [expectedRule1.id],
-                TA001: [expectedRule1.id],
-                'T001.001': [expectedRule1.id],
-                T002: [expectedRule2.id],
-                TA002: [expectedRule2.id],
-                'T002.002': [expectedRule2.id],
+                enterprise: {
+                  T001: [expectedRule1.id],
+                  TA001: [expectedRule1.id],
+                  'T001.001': [expectedRule1.id],
+                  T002: [expectedRule2.id],
+                  TA002: [expectedRule2.id],
+                  'T002.002': [expectedRule2.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -648,12 +737,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T001: [expectedRule1.id],
-                TA001: [expectedRule1.id],
-                'T001.001': [expectedRule1.id],
-                T002: [expectedRule2.id],
-                TA002: [expectedRule2.id],
-                'T002.002': [expectedRule2.id],
+                enterprise: {
+                  T001: [expectedRule1.id],
+                  TA001: [expectedRule1.id],
+                  'T001.001': [expectedRule1.id],
+                  T002: [expectedRule2.id],
+                  TA002: [expectedRule2.id],
+                  'T002.002': [expectedRule2.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -693,9 +784,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T002: [expectedRule.id],
-                TA002: [expectedRule.id],
-                'T002.002': [expectedRule.id],
+                enterprise: {
+                  T002: [expectedRule.id],
+                  TA002: [expectedRule.id],
+                  'T002.002': [expectedRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -737,9 +830,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T001: [expectedRule.id],
-                TA001: [expectedRule.id],
-                'T001.001': [expectedRule.id],
+                enterprise: {
+                  T001: [expectedRule.id],
+                  TA001: [expectedRule.id],
+                  'T001.001': [expectedRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -775,12 +870,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T001: [expectedPrebuiltRule.id],
-                TA001: [expectedPrebuiltRule.id],
-                'T001.001': [expectedPrebuiltRule.id],
-                T002: [expectedCustomRule.id],
-                TA002: [expectedCustomRule.id],
-                'T002.002': [expectedCustomRule.id],
+                enterprise: {
+                  T001: [expectedPrebuiltRule.id],
+                  TA001: [expectedPrebuiltRule.id],
+                  'T001.001': [expectedPrebuiltRule.id],
+                  T002: [expectedCustomRule.id],
+                  TA002: [expectedCustomRule.id],
+                  'T002.002': [expectedCustomRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -818,12 +915,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(omitInvalidMitreIds(body)).to.eql({
               coverage: {
-                T001: [expectedPrebuiltRule.id],
-                TA001: [expectedPrebuiltRule.id],
-                'T001.001': [expectedPrebuiltRule.id],
-                T002: [expectedCustomRule.id],
-                TA002: [expectedCustomRule.id],
-                'T002.002': [expectedCustomRule.id],
+                enterprise: {
+                  T001: [expectedPrebuiltRule.id],
+                  TA001: [expectedPrebuiltRule.id],
+                  'T001.001': [expectedPrebuiltRule.id],
+                  T002: [expectedCustomRule.id],
+                  TA002: [expectedCustomRule.id],
+                  'T002.002': [expectedCustomRule.id],
+                },
               },
               unmapped_rule_ids: [],
               rules_data: {
@@ -871,7 +970,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getCoverageOverview(supertest);
 
-          expect(body.invalid_mitre_ids[rule.id]).to.eql(['TA9999']);
+          expect(body.invalid_mitre_ids[rule.id]).to.eql({ enterprise: ['TA9999'] });
         });
 
         it('populates invalid_mitre_ids for rules with unknown technique IDs', async () => {
@@ -901,7 +1000,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getCoverageOverview(supertest);
 
-          expect(body.invalid_mitre_ids[rule.id]).to.eql(['T9999']);
+          expect(body.invalid_mitre_ids[rule.id]).to.eql({ enterprise: ['T9999'] });
         });
 
         it('does not add rules with valid MITRE IDs to invalid_mitre_ids', async () => {

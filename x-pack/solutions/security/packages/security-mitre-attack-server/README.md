@@ -1,7 +1,7 @@
 # @kbn/security-mitre-attack-server
 
 Server-only package holding the bundled MITRE data artifact (MITRE ATT&CK
-Enterprise and MITRE ATLAS) and the build script that generates it from the
+Enterprise, MITRE ATLAS and MITRE ATT&CK for ICS) and the build script that generates it from the
 upstream MITRE STIX bundles.
 
 ## Scope and lifespan
@@ -31,7 +31,7 @@ data.
 - `artifacts/mitre_artifact.json` is a flat JSON array of MITRE entities
   (tactics, techniques, and subtechniques) projected into the
   `@kbn/security-mitre-attack-common` schema. Every entity is self-describing:
-  it carries its own `framework` (`enterprise` or `atlas`) and
+  it carries its own `framework` (`enterprise`, `atlas` or `ics`) and
   `framework_version` fields, so additional frameworks or versions can be
   appended to the same file without any schema change. This file is generated
   output. Do not edit it by hand, always re-run the build script and commit the
@@ -71,17 +71,26 @@ the total.
 
 Frameworks are declared in `MITRE_FRAMEWORK_DEFINITIONS` in
 `src/build_artifact/build_artifact.ts`. Each definition names the framework, the
-STIX `source_name` / `kill_chain_name` that identifies its objects
-(`mitre-attack` or `mitre-atlas`), how a release tag maps to a bundle URL and a
-`framework_version`, and the list of pinned release tags.
+STIX `kill_chain_name` that identifies its techniques, the accepted
+`external_references[].source_name` values for an object's canonical MITRE entry,
+how a release tag maps to a bundle URL and a `framework_version`, and the list of
+pinned release tags.
 
-| Framework | Upstream | Pinned tags | `source_name` |
-|---|---|---|---|
-| `enterprise` | [mitre/cti](https://github.com/mitre/cti) `enterprise-attack.json` | `MITRE_CONTENT_VERSIONS` (e.g. `ATT&CK-v19.2`) | `mitre-attack` |
-| `atlas` | [mitre-atlas/atlas-data](https://github.com/mitre-atlas/atlas-data/releases) `stix-atlas.json` | `ATLAS_CONTENT_VERSIONS` (e.g. `v2026.08`) | `mitre-atlas` |
+| Framework | Upstream | Pinned tags | `kill_chain_name` | `source_name` |
+|---|---|---|---|---|
+| `enterprise` | [mitre/cti](https://github.com/mitre/cti) `enterprise-attack.json` | `MITRE_CONTENT_VERSIONS` (e.g. `ATT&CK-v19.2`) | `mitre-attack` | `mitre-attack` |
+| `atlas` | [mitre-atlas/atlas-data](https://github.com/mitre-atlas/atlas-data/releases) `stix-atlas.json` | `ATLAS_CONTENT_VERSIONS` (e.g. `v2026.08`) | `mitre-atlas` | `mitre-atlas` |
+| `ics` | [mitre/cti](https://github.com/mitre/cti) `ics-attack/ics-attack.json` | `ICS_CONTENT_VERSIONS` (e.g. `ATT&CK-v19.2`) | `mitre-ics-attack` | `mitre-attack`, `mitre-ics-attack` |
 
-The mappers only look at external references and kill chain phases whose source
-name matches the framework being built. This matters for ATLAS: many ATLAS
+ATT&CK for ICS shares the Enterprise release tags and is a STIX 2.0 bundle with a
+single `x-mitre-matrix`. Its techniques use the `mitre-ics-attack` kill chain, but
+the canonical external reference is `mitre-attack` on most objects and
+`mitre-ics-attack` on a few, so both are accepted. ICS ids (`T0xxx` plus a few
+`T1xxx`) look like Enterprise ids and cannot be told apart by shape, so consumers
+must always carry the framework explicitly.
+
+The mappers only look at external references and kill chain phases whose names
+match the framework being built. This matters for ATLAS: many ATLAS
 techniques also carry a secondary `mitre-attack` reference to the ATT&CK
 technique they correspond to, and that reference must never be used to resolve
 an ATLAS id or URL. Subtechnique parents are taken from the `subtechnique-of`
@@ -97,6 +106,8 @@ each run. Pins must stay aligned with the versions used by the
 rules:
 
 - ATT&CK tags come from https://github.com/mitre/cti/tags.
+- ICS tags are the same `ATT&CK-v*` tags as Enterprise; ICS versions are
+  normalized the same way (`ATT&CK-v19.2` -> `19.2`).
 - ATLAS tags come from https://github.com/mitre-atlas/atlas-data/releases and
   must match the ATLAS bundle vendored by detection-rules at
   `detection_rules/etc/atlas-v*.json.gz`.

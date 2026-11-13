@@ -19621,5 +19621,1872 @@
       "AML.TA0001"
     ],
     "technique_id": "AML.T0118"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0108",
+    "name": "Initial Access",
+    "reference": "https://attack.mitre.org/tactics/TA0108/",
+    "description": "The adversary is trying to get into your ICS environment.\n\nInitial Access consists of techniques that adversaries may use as entry vectors to gain an initial foothold within an ICS environment. These techniques include compromising operational technology assets, IT resources in the OT network, and external remote services and websites. They may also target third party entities and users with privileged access. In particular, these initial access footholds may include devices and communication mechanisms with access to and privileges in both the IT and OT environments. IT resources in the OT environment are also potentially vulnerable to the same attacks as enterprise IT systems. Trusted third parties of concern may include vendors, maintenance personnel, engineers, external integrators, and other outside entities involved in expected ICS operations. Vendor maintained assets may include physical devices, software, and operational equipment. Initial access techniques may also leverage outside devices, such as radios, controllers, or removable media, to remotely interfere with and possibly infect OT operations.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 0
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0104",
+    "name": "Execution",
+    "reference": "https://attack.mitre.org/tactics/TA0104/",
+    "description": "The adversary is trying to run code or manipulate system functions, parameters, and data in an unauthorized way.\n\nExecution consists of techniques that result in adversary-controlled code running on a local or remote system, device, or other asset. This execution may also rely on unknowing end users or the manipulation of device operating modes to run. Adversaries may infect remote targets with programmed executables or malicious project files that operate according to specified behavior and may alter expected device behavior in subtle ways. Commands for execution may also be issued from command-line interfaces, APIs, GUIs, or other available interfaces. Techniques that run malicious code may also be paired with techniques from other tactics, particularly to aid network [Discovery](https://attack.mitre.org/tactics/TA0102) and [Collection](https://attack.mitre.org/tactics/TA0100), impact operations, and inhibit response functions.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 1
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0110",
+    "name": "Persistence",
+    "reference": "https://attack.mitre.org/tactics/TA0110/",
+    "description": "The adversary is trying to maintain their foothold in your ICS environment.\n\nPersistence consists of techniques that adversaries use to maintain access to ICS systems and devices across restarts, changed credentials, and other interruptions that could cut off their access. Techniques used for persistence include any access, action, or configuration changes that allow them to secure their ongoing activity and keep their foothold on systems. This may include replacing or hijacking legitimate code, firmware, and other project files, or adding startup code and downloading programs onto devices.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 2
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0111",
+    "name": "Privilege Escalation",
+    "reference": "https://attack.mitre.org/tactics/TA0111/",
+    "description": "The adversary is trying to gain higher-level permissions.\n\nPrivilege Escalation consists of techniques that adversaries use to gain higher-level permissions on a system or network. Adversaries can often enter and explore a network with unprivileged access but require elevated permissions to follow through on their objectives. Common approaches are to take advantage of system weaknesses, misconfigurations, and vulnerabilities.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 3
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0103",
+    "name": "Evasion",
+    "reference": "https://attack.mitre.org/tactics/TA0103/",
+    "description": "The adversary is trying to avoid security defenses.\n\nEvasion consists of techniques that adversaries use to avoid technical defenses throughout their campaign. Techniques used for evasion include removal of indicators of compromise, spoofing communications, and exploiting software vulnerabilities. Adversaries may also leverage and abuse trusted devices and processes to hide their activity, possibly by masquerading as master devices or native software. Methods of defense evasion for this purpose are often more passive in nature.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 4
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0102",
+    "name": "Discovery",
+    "reference": "https://attack.mitre.org/tactics/TA0102/",
+    "description": "The adversary is locating information to assess and identify their targets in your environment.\n\nDiscovery consists of techniques that adversaries use to survey your ICS environment and gain knowledge about the internal network, control system devices, and how their processes interact. These techniques help adversaries observe the environment and determine next steps for target selection and Lateral Movement. They also allow adversaries to explore what they can control and gain insight on interactions between various control system processes. Discovery techniques are often an act of progression into the environment which enable the adversary to orient themselves before deciding how to act. Adversaries may use Discovery techniques that result in Collection, to help determine how available resources benefit their current objective. A combination of native device communications and functions, and custom tools are often used toward this post-compromise information-gathering objective.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 5
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0109",
+    "name": "Lateral Movement",
+    "reference": "https://attack.mitre.org/tactics/TA0109/",
+    "description": "The adversary is trying to move through your ICS environment.\n\nLateral Movement consists of techniques that adversaries use to enter and control remote systems on a network. These techniques abuse default credentials, known accounts, and vulnerable services, and may also leverage dual-homed devices and systems that reside on both the IT and OT networks. The adversary uses these techniques to pivot to their next point in the environment, positioning themselves to where they want to be or think they should be. Following through on their primary objective often requires [Discovery](https://attack.mitre.org/tactics/TA0102) of the network and [Collection](https://attack.mitre.org/tactics/TA0100) to develop awareness of unique ICS devices and processes, in order to find their target and subsequently gain access to it. Reaching this objective often involves pivoting through multiple systems, devices, and accounts. Adversaries may install their own remote tools to accomplish Lateral Movement or leverage default tools, programs, and manufacturer set or other legitimate credentials native to the network, which may be stealthier.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 6
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0100",
+    "name": "Collection",
+    "reference": "https://attack.mitre.org/tactics/TA0100/",
+    "description": "The adversary is trying to gather data of interest and domain knowledge on your ICS environment to inform their goal.\n\nCollection consists of techniques adversaries use to gather domain knowledge and obtain contextual feedback in an ICS environment. This tactic is often performed as part of [Discovery](https://attack.mitre.org/tactics/TA0102), to compile data on control systems and targets of interest that may be used to follow through on the adversary’s objective. Examples of these techniques include observing operation states, capturing screenshots, identifying unique device roles, and gathering system and diagram schematics. Collection of this data can play a key role in planning, executing, and even revising an ICS-targeted attack. Methods of collection depend on the categories of data being targeted, which can include protocol specific, device specific, and process specific configurations and functionality. Information collected may pertain to a combination of system, supervisory, device, and network related data, which conceptually fall under high, medium, and low levels of plan operations. For example, information repositories on plant data at a high level or device specific programs at a low level. Sensitive floor plans, vendor device manuals, and other references may also be at risk and exposed on the internet or otherwise publicly accessible.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 7
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0101",
+    "name": "Command and Control",
+    "reference": "https://attack.mitre.org/tactics/TA0101/",
+    "description": "The adversary is trying to communicate with and control compromised systems, controllers, and platforms with access to your ICS environment.\n\nCommand and Control consists of techniques that adversaries use to communicate with and send commands to compromised systems, devices, controllers, and platforms with specialized applications used in ICS environments. Examples of these specialized communication devices include human machine interfaces (HMIs), data historians, SCADA servers, and engineering workstations (EWS). Adversaries often seek to use commonly available resources and mimic expected network traffic to avoid detection and suspicion. For instance, commonly used ports and protocols in ICS environments, and even expected IT resources, depending on the target network. Command and Control may be established to varying degrees of stealth, often depending on the victim’s network structure and defenses.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 8
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0107",
+    "name": "Inhibit Response Function",
+    "reference": "https://attack.mitre.org/tactics/TA0107/",
+    "description": "The adversary is trying to prevent your safety, protection, quality assurance, and operator intervention functions from responding to a failure, hazard, or unsafe state.\n\nInhibit Response Function consists of techniques that adversaries use to hinder the safeguards put in place for processes and products. This may involve the inhibition of safety, protection, quality assurance, or operator intervention functions to disrupt safeguards that aim to prevent the loss of life, destruction of equipment, and disruption of production. These techniques aim to actively deter and prevent expected alarms and responses that arise due to statuses in the ICS environment. Adversaries may modify or update system logic, or even outright prevent responses with a denial-of-service. They may result in the prevention, destruction, manipulation, or modification of programs, logic, devices, and communications. As prevention functions are generally dormant, reporting and processing functions can appear fine, but may have been altered to prevent failure responses in dangerous scenarios. Unlike [Evasion](https://attack.mitre.org/tactics/TA0103), Inhibit Response Function techniques may be more intrusive, such as actively preventing responses to a known dangerous scenario. Adversaries may use these techniques to follow through with or provide cover for [Impact](https://attack.mitre.org/tactics/TA0105) techniques.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 9
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0106",
+    "name": "Impair Process Control",
+    "reference": "https://attack.mitre.org/tactics/TA0106/",
+    "description": "The adversary is trying to manipulate, disable, or damage physical control processes.\n\nImpair Process Control consists of techniques that adversaries use to disrupt control logic and cause determinantal effects to processes being controlled in the target environment. Targets of interest may include active procedures or parameters that manipulate the physical environment. These techniques can also include prevention or manipulation of reporting elements and control logic. If an adversary has modified process functionality, then they may also obfuscate the results, which are often self-revealing in their impact on the outcome of a product or the environment. The direct physical control these techniques exert may also threaten the safety of operators and downstream users, which can prompt response mechanisms. Adversaries may follow up with or use [Inhibit Response Function](https://attack.mitre.org/tactics/TA0107) techniques in tandem, to assist with the successful abuse of control processes to result in [Impact](https://attack.mitre.org/tactics/TA0105).",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 10
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "TA0105",
+    "name": "Impact",
+    "reference": "https://attack.mitre.org/tactics/TA0105/",
+    "description": "The adversary is trying to manipulate, interrupt, or destroy your ICS systems, data, and their surrounding environment.\n\nImpact consists of techniques that adversaries use to disrupt, compromise, destroy, and manipulate the integrity and availability of control system operations, processes, devices, and data. These techniques encompass the influence and effects resulting from adversarial efforts to attack the ICS environment or that tangentially impact it. Impact techniques can result in more instantaneous disruption to control processes and the operator, or may result in more long term damage or loss to the ICS environment and related operations. The adversary may leverage [Impair Process Control](https://attack.mitre.org/tactics/TA0106) techniques, which often manifest in more self-revealing impacts on operations, or [Impair Process Control](https://attack.mitre.org/tactics/TA0106) techniques to hinder safeguards and alarms in order to follow through with and provide cover for Impact. In some scenarios, control system processes can appear to function as expected, but may have been altered to benefit the adversary’s goal over the course of a longer duration. These techniques might be used by adversaries to follow through on their end goal or to provide cover for a confidentiality breach.\n\n[Loss of Productivity and Revenue](https://attack.mitre.org/techniques/T0828), [Theft of Operational Information](https://attack.mitre.org/techniques/T0882), and [Damage to Property](https://attack.mitre.org/techniques/T0879) are meant to encompass some of the more granular goals of adversaries in targeted and untargeted attacks. These techniques in and of themselves are not necessarily detectable, but the associated adversary behavior can potentially be mitigated and/or detected.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "tactic",
+    "position": 11
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0800",
+    "name": "Activate Firmware Update Mode",
+    "reference": "https://attack.mitre.org/techniques/T0800/",
+    "description": "Adversaries may activate firmware update mode on devices to prevent expected response functions from engaging in reaction to an emergency or process malfunction. For example, devices such as protection relays may have an operation mode designed for firmware installation. This mode may halt process monitoring and related functions to allow new firmware to be loaded. A device left in update mode may be placed in an inactive holding state if no firmware is provided to it. By entering and leaving a device in this mode, the adversary may deny its usual functionalities.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0801",
+    "name": "Monitor Process State",
+    "reference": "https://attack.mitre.org/techniques/T0801/",
+    "description": "Adversaries may gather information about the physical process state. This information may be used to gain more information about the process itself or used as a trigger for malicious actions. The sources of process state information may vary such as, OPC tags, historian data, specific PLC block information, or network traffic.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0802",
+    "name": "Automated Collection",
+    "reference": "https://attack.mitre.org/techniques/T0802/",
+    "description": "Adversaries may automate collection of industrial environment information using tools or scripts. This automated collection may leverage native control protocols and tools available in the control systems environment. For example, the OPC protocol may be used to enumerate and gather information. Access to a system or interface with these native protocols may allow collection and enumeration of other attached, communicating servers and devices.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0803",
+    "name": "Block Command Message",
+    "reference": "https://attack.mitre.org/techniques/T0803/",
+    "description": "Adversaries may block a command message from reaching its intended target to prevent command execution. In OT networks, command messages are sent to provide instructions to control system devices. A blocked command message can inhibit response functions from correcting a disruption or unsafe condition. (Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)  (Citation: Electricity Information Sharing and Analysis Center; SANS Industrial Control Systems March 2016)",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1691.001"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0804",
+    "name": "Block Reporting Message",
+    "reference": "https://attack.mitre.org/techniques/T0804/",
+    "description": "Adversaries may block or prevent a reporting message from reaching its intended target. In control systems, reporting messages contain telemetry data (e.g., I/O values) pertaining to the current state of equipment and the industrial process. By blocking these reporting messages, an adversary can potentially hide their actions from an operator.\n\nBlocking reporting messages in control systems that manage physical processes may contribute to system impact, causing inhibition of a response function. A control system may not be able to respond in a proper or timely manner to an event, such as a dangerous fault, if its corresponding reporting message is blocked. (Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)  (Citation: Electricity Information Sharing and Analysis Center; SANS Industrial Control Systems March 2016)",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1691.002"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0805",
+    "name": "Block Serial COM",
+    "reference": "https://attack.mitre.org/techniques/T0805/",
+    "description": "Adversaries may block access to serial COM to prevent instructions or configurations from reaching target devices. Serial Communication ports (COM) allow communication with control system devices. Devices can receive command and configuration messages over such serial COM. Devices also use serial COM to send command and reporting messages. Blocking device serial COM may also block command messages and block reporting messages. \n\nA serial to Ethernet converter is often connected to a serial COM to facilitate communication between serial and Ethernet devices. One approach to blocking a serial COM would be to create and hold open a TCP session with the Ethernet side of the converter. A serial to Ethernet converter may have a few ports open to facilitate multiple communications. For example, if there are three serial COM available -- 1, 2 and 3 --, the converter might be listening on the corresponding ports 20001, 20002, and 20003. If a TCP/IP connection is opened with one of these ports and held open, then the port will be unavailable for use by another party. One way the adversary could achieve this would be to initiate a TCP session with the serial to Ethernet converter at 10.0.0.1 via Telnet on serial port 1 with the following command: telnet 10.0.0.1 20001.",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1695.001"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0806",
+    "name": "Brute Force I/O",
+    "reference": "https://attack.mitre.org/techniques/T0806/",
+    "description": "Adversaries may repetitively or successively change I/O point values to perform an action. Brute Force I/O may be achieved by changing either a range of I/O point values or a single point value repeatedly to manipulate a process function. The adversary's goal and the information they have about the target environment will influence which of the options they choose. In the case of brute forcing a range of point values, the adversary may be able to achieve an impact without targeting a specific point. In the case where a single point is targeted, the adversary may be able to generate instability on the process function associated with that particular point. \n\nAdversaries may use Brute Force I/O to cause failures within various industrial processes. These failures could be the result of wear on equipment or damage to downstream equipment.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0106"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0807",
+    "name": "Command-Line Interface",
+    "reference": "https://attack.mitre.org/techniques/T0807/",
+    "description": "Adversaries may utilize command-line interfaces (CLIs) to interact with systems and execute commands. CLIs provide a means of interacting with computer systems and are a common feature across many types of platforms and devices within control systems environments. (Citation: Enterprise ATT&CK January 2018) Adversaries may also use CLIs to install and run new software, including malicious tools that may be installed over the course of an operation.\n\nCLIs are typically accessed locally, but can also be exposed via services, such as SSH, Telnet, and RDP.  Commands that are executed in the CLI execute with the current permissions level of the process running the terminal emulator, unless the command specifies a change in permissions context. Many controllers have CLI interfaces for management purposes.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0808",
+    "name": "Control Device Identification",
+    "reference": "https://attack.mitre.org/techniques/T0808/",
+    "description": "Adversaries may perform control device identification to determine the make and model of a target device. Management software and device APIs may be utilized by the adversary to gain this information. By identifying and obtaining device specifics, the adversary may be able to determine device vulnerabilities. This device information can also be used to understand device functionality and inform the decision to target the environment.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0809",
+    "name": "Data Destruction",
+    "reference": "https://attack.mitre.org/techniques/T0809/",
+    "description": "Adversaries may perform data destruction over the course of an operation. The adversary may drop or create malware, tools, or other non-native files on a target system to accomplish this, potentially leaving behind traces of malicious activities. Such non-native files and other data may be removed over the course of an intrusion to maintain a small footprint or as a standard part of the post-intrusion cleanup process. (Citation: Enterprise ATT&CK January 2018)\n\nData destruction may also be used to render operator interfaces unable to respond and to disrupt response functions from occurring as expected. An adversary may also destroy data backups that are vital to recovery after an incident.\n\nStandard file deletion commands are available on most operating system and device interfaces to perform cleanup, but adversaries may use other tools as well. Two examples are Windows Sysinternals SDelete and Active@ Killdisk.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0810",
+    "name": "Data Historian Compromise",
+    "reference": "https://attack.mitre.org/techniques/T0810/",
+    "description": "Adversaries may compromise and gain control of a data historian to gain a foothold into the control system environment. Access to a data historian may be used to learn stored database archival and analysis information on the control system. A dual-homed data historian may provide adversaries an interface from the IT environment to the OT environment. \n\nDragos has released an updated analysis on CrashOverride that outlines the attack from the ICS network breach to payload delivery and execution.  (Citation: Industroyer - Dragos - 201810) The report summarized that CrashOverride represents a new application of malware, but relied on standard intrusion techniques. In particular, new artifacts include references to a Microsoft Windows Server 2003 host, with a SQL Server. Within the ICS environment, such a database server can act as a data historian. Dragos noted a device with this role should be \"expected to have extensive connections\" within the ICS environment. Adversary activity leveraged database capabilities to perform reconnaissance, including directory queries and network connectivity checks.\n\nPermissions Required: Administrator\n\nContributors: Joe Slowik - Dragos",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0811",
+    "name": "Data from Information Repositories",
+    "reference": "https://attack.mitre.org/techniques/T0811/",
+    "description": "Adversaries may target and collect data from information repositories. This can include sensitive data such as specifications, schematics, or diagrams of control system layouts, devices, and processes. Examples of information repositories include reference databases in the process environment, as well as databases in the corporate network that might contain information about the ICS.(Citation: Cybersecurity & Infrastructure Security Agency March 2018)\n\nInformation collected from these systems may provide the adversary with a better understanding of the operational environment, vendors used, processes, or procedures of the ICS.\n\nIn a campaign between 2011 and 2013 against ONG organizations, Chinese state-sponsored actors searched document repositories for specific information such as, system manuals, remote terminal unit (RTU) sites, personnel lists, documents that included the string SCAD*, user credentials, and remote dial-up access information. (Citation: CISA AA21-201A Pipeline Intrusion July 2021)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0812",
+    "name": "Default Credentials",
+    "reference": "https://attack.mitre.org/techniques/T0812/",
+    "description": "Adversaries may leverage manufacturer or supplier set default credentials on control system devices. These default credentials may have administrative permissions and may be necessary for initial configuration of the device. It is general best practice to change the passwords for these accounts as soon as possible, but some manufacturers may have devices that have passwords or usernames that cannot be changed. (Citation: Keith Stouffer May 2015)\n\nDefault credentials are normally documented in an instruction manual that is either packaged with the device, published online through official means, or published online through unofficial means. Adversaries may leverage default credentials that have not been properly modified or disabled.",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1694.001"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0109"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0813",
+    "name": "Denial of Control",
+    "reference": "https://attack.mitre.org/techniques/T0813/",
+    "description": "Adversaries may cause a denial of control to temporarily prevent operators and engineers from interacting with process controls. An adversary may attempt to deny process control access to cause a temporary loss of communication with the control device or to prevent operator adjustment of process controls. An affected process may still be operating during the period of control loss, but not necessarily in a desired state. (Citation: Corero) (Citation: Michael J. Assante and Robert M. Lee) (Citation: Tyson Macaulay)\n\nIn the 2017 Dallas Siren incident operators were unable to disable the false alarms from the Office of Emergency Management headquarters. (Citation: Mark Loveless April 2017)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0814",
+    "name": "Denial of Service",
+    "reference": "https://attack.mitre.org/techniques/T0814/",
+    "description": "Adversaries may perform Denial-of-Service (DoS) attacks to disrupt expected device functionality. Examples of DoS attacks include overwhelming the target device with a high volume of requests in a short time period and sending the target device a request it does not know how to handle. Disrupting device state may temporarily render it unresponsive, possibly lasting until a reboot can occur. When placed in this state, devices may be unable to send and receive requests, and may not perform expected response functions in reaction to other events in the environment. \n\nSome ICS devices are particularly sensitive to DoS events, and may become unresponsive in reaction to even a simple ping sweep. Adversaries may also attempt to execute a Permanent Denial-of-Service (PDoS) against certain devices, such as in the case of the BrickerBot malware. (Citation: ICS-CERT April 2017) \n\nAdversaries may exploit a software vulnerability to cause a denial of service by taking advantage of a programming error in a program, service, or within the operating system software or kernel itself to execute adversary-controlled code. Vulnerabilities may exist in software that can be used to cause a denial of service condition. \n\nAdversaries may have prior knowledge about industrial protocols or control devices used in the environment through [Remote System Information Discovery](https://attack.mitre.org/techniques/T0888). There are examples of adversaries remotely causing a [Device Restart/Shutdown](https://attack.mitre.org/techniques/T0816) by exploiting a vulnerability that induces uncontrolled resource consumption. (Citation: ICS-CERT August 2018) (Citation: Common Weakness Enumeration January 2019) (Citation: MITRE March 2018) ",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0815",
+    "name": "Denial of View",
+    "reference": "https://attack.mitre.org/techniques/T0815/",
+    "description": "Adversaries may cause a denial of view in attempt to disrupt and prevent operator oversight on the status of an ICS environment. This may manifest itself as a temporary communication failure between a device and its control source, where the interface recovers and becomes available once the interference ceases. (Citation: Corero) (Citation: Michael J. Assante and Robert M. Lee) (Citation: Tyson Macaulay) \n\nAn adversary may attempt to deny operator visibility by preventing them from receiving status and reporting messages. Denying this view may temporarily block and prevent operators from noticing a change in state or anomalous behavior. The environment's data and processes may still be operational, but functioning in an unintended or adversarial manner. ",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0816",
+    "name": "Device Restart/Shutdown",
+    "reference": "https://attack.mitre.org/techniques/T0816/",
+    "description": "Adversaries may forcibly restart or shutdown a device in an ICS environment to disrupt and potentially negatively impact physical processes. Methods of device restart and shutdown exist in some devices as built-in, standard functionalities. These functionalities can be executed using interactive device web interfaces, CLIs, and network protocol commands.\n\nUnexpected restart or shutdown of control system devices may prevent expected response functions happening during critical states.\n\nA device restart can also be a sign of malicious device modifications, as many updates require a shutdown in order to take effect.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0817",
+    "name": "Drive-by Compromise",
+    "reference": "https://attack.mitre.org/techniques/T0817/",
+    "description": "Adversaries may gain access to a system during a drive-by compromise, when a user visits a website as part of a regular browsing session. With this technique, the user's web browser is targeted and exploited simply by visiting the compromised website. \n\nThe adversary may target a specific community, such as trusted third party suppliers or other industry specific groups, which often visit the target website. This kind of targeted attack relies on a common interest, and is known as a strategic web compromise or watering hole attack. \n\nThe National Cyber Awareness System (NCAS) has issued a Technical Alert (TA) regarding Russian government cyber activity targeting critical infrastructure sectors. (Citation: Cybersecurity & Infrastructure Security Agency March 2018) Analysis by DHS and FBI has noted two distinct categories of victims in the Dragonfly campaign on the Western energy sector: staging and intended targets. The adversary targeted the less secure networks of staging targets, including trusted third-party suppliers and related peripheral organizations. Initial access to the intended targets used watering hole attacks to target process control, ICS, and critical infrastructure related trade publications and informational websites.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0818",
+    "name": "Engineering Workstation Compromise",
+    "reference": "https://attack.mitre.org/techniques/T0818/",
+    "description": "Adversaries will compromise and gain control of an engineering workstation for Initial Access into the control system environment. Access to an engineering workstation may occur through or physical means, such as a Valid Accounts with privileged access or infection by removable media. A dual-homed engineering workstation may allow the adversary access into multiple networks. For example, unsegregated process control, safety system, or information system networks. An Engineering Workstation is designed as a reliable computing platform that configures, maintains, and diagnoses control system equipment and applications. Compromise of an engineering workstation may provide access to, and control of, other control system applications and equipment. In the Maroochy attack, the adversary utilized a computer, possibly stolen, with proprietary engineering software to communicate with a wastewater system.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0819",
+    "name": "Exploit Public-Facing Application",
+    "reference": "https://attack.mitre.org/techniques/T0819/",
+    "description": "Adversaries may leverage weaknesses to exploit internet-facing software for initial access into an industrial network. Internet-facing software may be user applications, underlying networking implementations, an assets operating system, weak defenses, etc. Targets of this technique may be intentionally exposed for the purpose of remote management and visibility.\n\nAn adversary may seek to target public-facing applications as they may provide direct access into an ICS environment or the ability to move into the ICS network. Publicly exposed applications may be found through online tools that scan the internet for open ports and services. Version numbers for the exposed application may provide adversaries an ability to target specific known vulnerabilities. Exposed control protocol or remote access ports found in Commonly Used Port may be of interest by adversaries.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0820",
+    "name": "Exploitation for Evasion",
+    "reference": "https://attack.mitre.org/techniques/T0820/",
+    "description": "Adversaries may exploit a software vulnerability to take advantage of a programming error in a program, service, or within the operating system software or kernel itself to evade detection. Vulnerabilities may exist in software that can be used to disable or circumvent security features.  \n\nAdversaries may have prior knowledge through [Remote System Information Discovery](https://attack.mitre.org/techniques/T0888) about security features implemented on control devices. These device security features will likely be targeted directly for exploitation. There are examples of firmware RAM/ROM consistency checks on control devices being targeted by adversaries to enable the installation of malicious [System Firmware](https://attack.mitre.org/techniques/T0857).",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0103"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0821",
+    "name": "Modify Controller Tasking",
+    "reference": "https://attack.mitre.org/techniques/T0821/",
+    "description": "Adversaries may modify the tasking of a controller to allow for the execution of their own programs. This can allow an adversary to manipulate the execution flow and behavior of a controller. \n\nAccording to 61131-3, the association of a Task with a Program Organization Unit (POU) defines a task association. (Citation: IEC February 2013) An adversary may modify these associations or create new ones to manipulate the execution flow of a controller. Modification of controller tasking can be accomplished using a Program Download in addition to other types of program modification such as online edit and program append.\n\nTasks have properties, such as interval, frequency and priority to meet the requirements of program execution. Some controller vendors implement tasks with implicit, pre-defined properties whereas others allow for these properties to be formulated explicitly. An adversary may associate their program with tasks that have a higher priority or execute associated programs more frequently. For instance, to ensure cyclic execution of their program on a Siemens controller, an adversary may add their program to the task, Organization Block 1 (OB1).",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0822",
+    "name": "External Remote Services",
+    "reference": "https://attack.mitre.org/techniques/T0822/",
+    "description": "Adversaries may leverage external remote services as a point of initial access into your network. These services allow users to connect to internal network resources from external locations. Examples are VPNs, Citrix, and other access mechanisms. Remote service gateways often manage connections and credential authentication for these services. (Citation: Daniel Oakley, Travis Smith, Tripwire)\n\nExternal remote services allow administration of a control system from outside the system. Often, vendors and internal engineering groups have access to external remote services to control system networks via the corporate network. In some cases, this access is enabled directly from the internet. While remote access enables ease of maintenance when a control system is in a remote area, compromise of remote access solutions is a liability. The adversary may use these services to gain access to and execute attacks against a control system network. Access to valid accounts is often a requirement. \n\nAs they look for an entry point into the control system network, adversaries may begin searching for existing point-to-point VPN implementations at trusted third party networks or through remote support employee connections where split tunneling is enabled. (Citation: Electricity Information Sharing and Analysis Center; SANS Industrial Control Systems March 2016)\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0823",
+    "name": "Graphical User Interface",
+    "reference": "https://attack.mitre.org/techniques/T0823/",
+    "description": "Adversaries may attempt to gain access to a machine via a Graphical User Interface (GUI) to enhance execution capabilities. Access to a GUI allows a user to interact with a computer in a more visual manner than a CLI. A GUI allows users to move a cursor and click on interface objects, with a mouse and keyboard as the main input devices, as opposed to just using the keyboard.\n\nIf physical access is not an option, then access might be possible via protocols such as VNC on Linux-based and Unix-based operating systems, and RDP on Windows operating systems. An adversary can use this access to execute programs and applications on the target machine.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0824",
+    "name": "I/O Module Discovery",
+    "reference": "https://attack.mitre.org/techniques/T0824/",
+    "description": "Adversaries may use input/output (I/O) module discovery to gather key information about a control system device. An I/O module is a device that allows the control system device to either receive or send signals to other devices. These signals can be analog or digital, and may support a number of different protocols. Devices are often able to use attachable I/O modules to increase the number of inputs and outputs that it can utilize. An adversary with access to a device can use native device functions to enumerate I/O modules that are connected to the device. Information regarding the I/O modules can aid the adversary in understanding related control processes.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0825",
+    "name": "Location Identification",
+    "reference": "https://attack.mitre.org/techniques/T0825/",
+    "description": "Adversaries may perform location identification using device data to inform operations and targeted impact for attacks. Location identification data can come in a number of forms, including geographic location, location relative to other control system devices, time zone, and current time. An adversary may use an embedded global positioning system (GPS) module in a device to figure out the physical coordinates of a device. NIST SP800-82 recommends that devices utilize GPS or another location determining mechanism to attach appropriate timestamps to log entries (Citation: Guidance - NIST SP800-82). While this assists in logging and event tracking, an adversary could use the underlying positioning mechanism to determine the general location of a device. An adversary can also infer the physical location of serially connected devices by using serial connection enumeration. \n\nAn adversary attempt to attack and cause Impact could potentially affect other control system devices in close proximity. Device local-time and time-zone settings can also provide adversaries a rough indicator of device location, when specific geographic identifiers cannot be determined from the system.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0826",
+    "name": "Loss of Availability",
+    "reference": "https://attack.mitre.org/techniques/T0826/",
+    "description": "Adversaries may attempt to disrupt essential components or systems to prevent owner and operator from delivering products or services. (Citation: Corero) (Citation: Michael J. Assante and Robert M. Lee) (Citation: Tyson Macaulay) \n\nAdversaries may leverage malware to delete or encrypt critical data on HMIs, workstations, or databases.\n\nIn the 2021 Colonial Pipeline ransomware incident, pipeline operations were temporally halted on May 7th and were not fully restarted until May 12th. (Citation: Colonial Pipeline Company May 2021)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0827",
+    "name": "Loss of Control",
+    "reference": "https://attack.mitre.org/techniques/T0827/",
+    "description": "Adversaries may seek to achieve a sustained loss of control or a runaway condition in which operators cannot issue any commands even if the malicious interference has subsided. (Citation: Corero) (Citation: Michael J. Assante and Robert M. Lee) (Citation: Tyson Macaulay)\n\nThe German Federal Office for Information Security (BSI) reported a targeted attack on a steel mill in its 2014 IT Security Report.(Citation: BSI State of IT Security 2014) These targeted attacks affected industrial operations and resulted in breakdowns of control system components and even entire installations. As a result of these breakdowns, massive impact resulted in damage and unsafe conditions from the uncontrolled shutdown of a blast furnace.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0828",
+    "name": "Loss of Productivity and Revenue",
+    "reference": "https://attack.mitre.org/techniques/T0828/",
+    "description": "Adversaries may cause loss of productivity and revenue through disruption and even damage to the availability and integrity of control system operations, devices, and related processes. This technique may manifest as a direct effect of an ICS-targeting attack or tangentially, due to an IT-targeting attack against non-segregated environments. \n\nIn cases where these operations or services are brought to a halt, the loss of productivity may eventually present an impact for the end-users or consumers of products and services. The disrupted supply-chain may result in supply shortages and increased prices, among other consequences. \n\nA ransomware attack on an Australian beverage company resulted in the shutdown of some manufacturing sites, including precautionary halts to protect key systems. (Citation: Paganini, Pierluigi June 2020) The company announced the potential for temporary shortages of their products following the attack. (Citation: Paganini, Pierluigi June 2020) (Citation: Lion Corporation June 2020) \n\nIn the 2021 Colonial Pipeline ransomware incident, the pipeline was unable to transport approximately 2.5 million barrels of fuel per day to the East Coast.  (Citation: Colonial Pipeline Company May 2021)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0829",
+    "name": "Loss of View",
+    "reference": "https://attack.mitre.org/techniques/T0829/",
+    "description": "Adversaries may cause a sustained or permanent loss of view where the ICS equipment will require local, hands-on operator intervention; for instance, a restart or manual operation. By causing a sustained reporting or visibility loss, the adversary can effectively hide the present state of operations. This loss of view can occur without affecting the physical processes themselves. (Citation: Corero) (Citation: Michael J. Assante and Robert M. Lee) (Citation: Tyson Macaulay)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0830",
+    "name": "Adversary-in-the-Middle",
+    "reference": "https://attack.mitre.org/techniques/T0830/",
+    "description": "Adversaries with privileged network access may seek to modify network traffic in real time using adversary-in-the-middle (AiTM) attacks. (Citation: Gabriel Sanchez October 2017) This type of attack allows the adversary to intercept traffic to and/or from a particular device on the network. If a AiTM attack is established, then the adversary has the ability to block, log, modify, or inject traffic into the communication stream. There are several ways to accomplish this attack, but some of the most-common are Address Resolution Protocol (ARP) poisoning and the use of a proxy. (Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)  \n\nAn AiTM attack may allow an adversary to perform the following attacks:  \n[Block Reporting Message](https://attack.mitre.org/techniques/T0804), [Spoof Reporting Message](https://attack.mitre.org/techniques/T0856), [Modify Parameter](https://attack.mitre.org/techniques/T0836), [Unauthorized Command Message](https://attack.mitre.org/techniques/T0855)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0831",
+    "name": "Manipulation of Control",
+    "reference": "https://attack.mitre.org/techniques/T0831/",
+    "description": "Adversaries may manipulate physical process control within the industrial environment. Methods of manipulating control can include changes to set point values, tags, or other parameters. Adversaries may manipulate control systems devices or possibly leverage their own, to communicate with and command physical control processes. The duration of manipulation may be temporary or longer sustained, depending on operator detection.   \n\nMethods of Manipulation of Control include: \n\n* Man-in-the-middle  \n* Spoof command message \n* Changing setpoints  \n\nA Polish student used a remote controller device to interface with the Lodz city tram system in Poland. (Citation: John Bill May 2017) (Citation: Shelley Smith February 2008) (Citation: Bruce Schneier January 2008) Using this remote, the student was able to capture and replay legitimate tram signals. As a consequence, four trams were derailed and twelve people injured due to resulting emergency stops. (Citation: Shelley Smith February 2008) The track controlling commands issued may have also resulted in tram collisions, a further risk to those on board and nearby the areas of impact. (Citation: Bruce Schneier January 2008)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0832",
+    "name": "Manipulation of View",
+    "reference": "https://attack.mitre.org/techniques/T0832/",
+    "description": "Adversaries may attempt to manipulate the information reported back to operators or controllers. This manipulation may be short term or sustained. During this time the process itself could be in a much different state than what is reported. (Citation: Corero) (Citation: Michael J. Assante and Robert M. Lee) (Citation: Tyson Macaulay) \n\nOperators may be fooled into doing something that is harmful to the system in a loss of view situation. With a manipulated view into the systems, operators may issue inappropriate control sequences that introduce faults or catastrophic failures into the system. Business analysis systems can also be provided with inaccurate data leading to bad management decisions.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0833",
+    "name": "Modify Control Logic",
+    "reference": "https://attack.mitre.org/techniques/T0833/",
+    "description": "Adversaries may place malicious code in a system, which can cause the system to malfunction by modifying its control logic. Control system devices use programming languages (e.g. relay ladder logic) to control physical processes by affecting actuators, which cause machines to operate, based on environment sensor readings. These devices often include the ability to perform remote control logic updates. \n\nProgram code is normally edited in a vendor-specific Integrated Development Environment (IDE) that relies on proprietary tools and features. These IDEs allow an engineer to perform host target development and may have the ability to run the code on the machine it is programmed for. The IDE will transmit the control logic to the testing device, and will perform the required device-specific functions to apply the changes and make them active.\n\nAn adversary may attempt to use this host target IDE to modify device control logic. Even though proprietary tools are often used to edit and update control logic, the process can usually be reverse-engineered and reproduced with open-source tools.\n\nAn adversary can de-calibrate a sensor by removing functions in control logic that account for sensor error. This can be used to change a control process without actually spoofing command messages to a controller or device. \n\nIt is believed this process happened in the lesser known over-pressurizer attacks build into Stuxnet. Pressure sensors are not perfect at translating pressure into an analog output signal, but their errors can be corrected by calibration. The pressure controller can be told what the “real” pressure is for given analog signals and then automatically linearize the measurement to what would be the “real” pressure. If the linearization is overwritten by malicious code on the S7-417 controller, analog pressure readings will be “corrected” during the attack by the pressure controller, which then interprets all analog pressure readings as perfectly normal pressure no matter how high or low their analog values are. The pressure controller then acts accordingly by never opening the stage exhaust valves. In the meantime, actual pressure keeps rising. (Citation: Stuxnet - Langner - 201311)\n\nIn the Maroochy Attack, Vitek Boden gained remote computer access to the control system and altered data so that whatever function should have occurred at affected pumping stations did not occur or occurred in a different way. The software program installed in the laptop was one developed by Hunter Watertech for its use in changing configurations in the PDS computers. This ultimately led to 800,000 liters of raw sewage being spilled out into the community. (Citation: Maroochy - MITRE - 200808)",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0106",
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0834",
+    "name": "Native API",
+    "reference": "https://attack.mitre.org/techniques/T0834/",
+    "description": "Adversaries may directly interact with the native OS application programming interface (API) to access system functions. Native APIs provide a controlled means of calling low-level OS services within the kernel, such as those involving hardware/devices, memory, and processes. (Citation: The MITRE Corporation May 2017) These native APIs are leveraged by the OS during system boot (when other system components are not yet initialized) as well as carrying out tasks and requests during routine operations. \n\nFunctionality provided by native APIs are often also exposed to user-mode applications via interfaces and libraries. For example, functions such as memcpy and direct operations on memory registers can be used to modify user and system memory space.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0835",
+    "name": "Manipulate I/O Image",
+    "reference": "https://attack.mitre.org/techniques/T0835/",
+    "description": "Adversaries may manipulate the I/O image of PLCs through various means to prevent them from functioning as expected. Methods of I/O image manipulation may include overriding the I/O table via direct memory manipulation or using the override function used for testing PLC programs. (Citation: Dr. Kelvin T. Erickson December 2010) During the scan cycle, a PLC reads the status of all inputs and stores them in an image table. (Citation: Nanjundaiah, Vaidyanath) The image table is the PLCs internal storage location where values of inputs/outputs for one scan are stored while it executes the user program. After the PLC has solved the entire logic program, it updates the output image table. The contents of this output image table are written to the corresponding output points in I/O Modules. \n\nOne of the unique characteristics of PLCs is their ability to override the status of a physical discrete input or to override the logic driving a physical output coil and force the output to a desired status.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0836",
+    "name": "Modify Parameter",
+    "reference": "https://attack.mitre.org/techniques/T0836/",
+    "description": "Adversaries may modify parameters used to instruct industrial control system devices. These devices operate via programs that dictate how and when to perform actions based on such parameters. Such parameters can determine the extent to which an action is performed and may specify additional options. For example, a program on a control system device dictating motor processes may take a parameter defining the total number of seconds to run that motor.      \n\nAn adversary can potentially modify these parameters to produce an outcome outside of what was intended by the operators. By modifying system and process critical parameters, the adversary may cause [Impact](https://attack.mitre.org/tactics/TA0105) to equipment and/or control processes. Modified parameters may be turned into dangerous, out-of-bounds, or unexpected values from typical operations. For example, specifying that a process run for more or less time than it should, or dictating an unusually high, low, or invalid value as a parameter.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0106"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0837",
+    "name": "Loss of Protection",
+    "reference": "https://attack.mitre.org/techniques/T0837/",
+    "description": "Adversaries may compromise protective system functions designed to prevent the effects of faults and abnormal conditions. This can result in equipment damage, prolonged process disruptions and hazards to personnel. \n\nMany faults and abnormal conditions in process control happen too quickly for a human operator to react to. Speed is critical in correcting these conditions to limit serious impacts such as Loss of Control and Property Damage. \n\nAdversaries may target and disable protective system functions as a prerequisite to subsequent attack execution or to allow for future faults and abnormal conditions to go unchecked. Detection of a Loss of Protection by operators can result in the shutdown of a process due to strict policies regarding protection systems. This can cause a Loss of Productivity and Revenue and may meet the technical goals of adversaries seeking to cause process disruptions.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0838",
+    "name": "Modify Alarm Settings",
+    "reference": "https://attack.mitre.org/techniques/T0838/",
+    "description": "Adversaries may modify alarm settings to prevent alerts that may inform operators of their presence or to prevent responses to dangerous and unintended scenarios. Reporting messages are a standard part of data acquisition in control systems. Reporting messages are used as a way to transmit system state information and acknowledgements that specific actions have occurred. These messages provide vital information for the management of a physical process, and keep operators, engineers, and administrators aware of the state of system devices and physical processes. \n\nIf an adversary is able to change the reporting settings, certain events could be prevented from being reported. This type of modification can also prevent operators or devices from performing actions to keep the system in a safe state. If critical reporting messages cannot trigger these actions then a [Impact](https://attack.mitre.org/tactics/TA0105) could occur. \n\nIn ICS environments, the adversary may have to use [Alarm Suppression](https://attack.mitre.org/techniques/T0878) or contend with multiple alarms and/or alarm propagation to achieve a specific goal to evade detection or prevent intended responses from occurring. (Citation: Jos Wetzels, Marina Krotofil 2019)  Methods of suppression often rely on modification of alarm settings, such as modifying in memory code to fixed values or tampering with assembly level instruction code. ",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0839",
+    "name": "Module Firmware",
+    "reference": "https://attack.mitre.org/techniques/T0839/",
+    "description": "Adversaries may install malicious or vulnerable firmware onto modular hardware devices. Control system devices often contain modular hardware devices. These devices may have their own set of firmware that is separate from the firmware of the main control system equipment.   \n\nThis technique is similar to [System Firmware](https://attack.mitre.org/techniques/T0857), but is conducted on other system components that may not have the same capabilities or level of integrity checking. Although it results in a device re-image, malicious device firmware may provide persistent access to remaining devices. (Citation: Daniel Peck,  Dale Peterson January 2009)  \n\nAn easy point of access for an adversary is the Ethernet card, which may have its own CPU, RAM, and operating system. The adversary may attack and likely exploit the computer on an Ethernet card. Exploitation of the Ethernet card computer may enable the adversary to accomplish additional attacks, such as the following: (Citation: Daniel Peck,  Dale Peterson January 2009)  \n\n* Delayed Attack - The adversary may stage an attack in advance and choose when to launch it, such as at a particularly damaging time.  \n* Brick the Ethernet Card - Malicious firmware may be programmed to result in an Ethernet card failure, requiring a factory return.  \n* Random Attack or Failure - The adversary may load malicious firmware onto multiple field devices. Execution of an attack and the time it occurs is generated by a pseudo-random number generator.   \n* A Field Device Worm - The adversary may choose to identify all field devices of the same model, with the end goal of performing a device-wide compromise.  \n* Attack Other Cards on the Field Device - Although it is not the most important module in a field device, the Ethernet card is most accessible to the adversary and malware. Compromise of the Ethernet card may provide a more direct route to compromising other modules, such as the CPU module.",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1693.002"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0106",
+      "TA0110"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0840",
+    "name": "Network Connection Enumeration",
+    "reference": "https://attack.mitre.org/techniques/T0840/",
+    "description": "Adversaries may perform network connection enumeration to discover information about device communication patterns. If an adversary can inspect the state of a network connection with tools, such as Netstat(Citation: Netstat), in conjunction with [System Firmware](https://attack.mitre.org/techniques/T0857), then they can determine the role of certain devices on the network  (Citation: MITRE). The adversary can also use [Network Sniffing](https://attack.mitre.org/techniques/T0842) to watch network traffic for details about the source, destination, protocol, and content.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0841",
+    "name": "Network Service Scanning",
+    "reference": "https://attack.mitre.org/techniques/T0841/",
+    "description": "Network Service Scanning is the process of discovering services on networked systems.  This can be achieved through a technique called port scanning or probing.  Port scanning interacts with the TCP/IP ports on a target system to determine whether ports are open, closed, or filtered by a firewall.  This does not reveal the service that is running behind the port, but since many common services are run on [https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml specific port numbers], the type of service can be assumed.  More in-depth testing includes interaction with the actual service to determine the service type and specific version.  One of the most-popular tools to use for Network Service Scanning is [https://nmap.org/ Nmap].\n\nAn adversary may attempt to gain information about a target device and its role on the network via Network Service Scanning techniques, such as port scanning.  Network Service Scanning is useful for determining potential vulnerabilities in services on target devices.  Network Service Scanning is closely tied to .\n\nScanning ports can be noisy on a network. In some attacks, adversaries probe for specific ports using custom tools. This was specifically seen in the Triton and PLC-Blaster attacks.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0842",
+    "name": "Network Sniffing",
+    "reference": "https://attack.mitre.org/techniques/T0842/",
+    "description": "Network sniffing is the practice of using a network interface on a computer system to monitor or capture information (Citation: Enterprise ATT&CK January 2018) regardless of whether it is the specified destination for the information. \n\nAn adversary may attempt to sniff the traffic to gain information about the target. This information can vary in the level of importance. Relatively unimportant information is general communications to and from machines.  Relatively important information would be login information. User credentials may be sent over an unencrypted protocol, such as Telnet, that can be captured and obtained through network packet analysis. \n\nIn addition, ARP and Domain Name Service (DNS) poisoning can be used to capture credentials to websites, proxies, and internal systems by redirecting traffic to an adversary.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0843",
+    "name": "Program Download",
+    "reference": "https://attack.mitre.org/techniques/T0843/",
+    "description": "Adversaries may perform a program download to transfer a user program to a controller. \n\nVariations of program download, such as online edit and program append, allow a controller to continue running during the transfer and reconfiguration process without interruption to process control. However, before starting a full program download (i.e., download all) a controller may need to go into a stop state. This can have negative consequences on the physical process, especially if the controller is not able to fulfill a time-sensitive action. Adversaries may choose to avoid a download all in favor of an online edit or program append to avoid disrupting the physical process. An adversary may need to use the technique Detect Operating Mode or Change Operating Mode to make sure the controller is in the proper mode to accept a program download.\n\nThe granularity of control to transfer a user program in whole or parts is dictated by the management protocol (e.g., S7CommPlus, TriStation) and underlying controller API. Thus, program download is a high-level term for the suite of vendor-specific API calls used to configure a controllers user program memory space.  \n\n[Modify Controller Tasking](https://attack.mitre.org/techniques/T0821) and [Modify Program](https://attack.mitre.org/techniques/T0889) represent the configuration changes that are transferred to a controller via a program download.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0109"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0844",
+    "name": "Program Organization Units",
+    "reference": "https://attack.mitre.org/techniques/T0844/",
+    "description": "Program Organizational Units (POUs) are block structures used within PLC programming to create programs and projects. (Citation: Guidance - IEC61131) POUs can be used to hold user programs written in IEC 61131-3 languages: Structured text, Instruction list, Function block, and Ladder logic. (Citation: Guidance - IEC61131) Application - 201203 They can also provide additional functionality, such as establishing connections between the PLC and other devices using TCON. (Citation: PLCBlaster - Spenneberg)\n  \nStuxnet uses a simple code-prepending infection technique to infect Organization Blocks (OB). For example, the following sequence of actions is performed when OB1 is infected  (Citation: Stuxnet - Symantec - 201102):\n*Increase the size of the original block.\n*Write malicious code to the beginning of the block.\n*Insert the original OB1 code after the malicious code.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104",
+      "TA0109"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0845",
+    "name": "Program Upload",
+    "reference": "https://attack.mitre.org/techniques/T0845/",
+    "description": "Adversaries may attempt to upload a program from a PLC to gather information about an industrial process. Uploading a program may allow them to acquire and study the underlying logic. Methods of program upload include vendor software, which enables the user to upload and read a program running on a PLC. This software can be used to upload the target program to a workstation, jump box, or an interfacing device.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0846",
+    "name": "Remote System Discovery",
+    "reference": "https://attack.mitre.org/techniques/T0846/",
+    "description": "Adversaries may attempt to get a listing of other systems by IP address, hostname, or other logical identifier on a network that may be used for subsequent Lateral Movement or Discovery techniques. Functionality could exist within adversary tools to enable this, but utilities available on the operating system or vendor software could also be used.(Citation: Enterprise ATT&CK January 2018)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0847",
+    "name": "Replication Through Removable Media",
+    "reference": "https://attack.mitre.org/techniques/T0847/",
+    "description": "Adversaries may move onto systems, such as those separated from the enterprise network, by copying malware to removable media which is inserted into the control systems environment. The adversary may rely on unknowing trusted third parties, such as suppliers or contractors with access privileges, to introduce the removable media. This technique enables initial access to target devices that never connect to untrusted networks, but are physically accessible.     \n\nOperators of the German nuclear power plant, Gundremmingen, discovered malware on a facility computer not connected to the internet. (Citation: Kernkraftwerk Gundremmingen April 2016) (Citation: Trend Micro April 2016) The malware included Conficker and W32.Ramnit, which were also found on eighteen removable disk drives in the facility. (Citation: Christoph Steitz, Eric Auchard April 2016) (Citation: Catalin Cimpanu April 2016) (Citation: Peter Dockrill April 2016) (Citation: Lee Mathews April 2016) (Citation: Sean Gallagher April 2016) (Citation: Dark Reading Staff April 2016) The plant has since checked for infection and cleaned up more than 1,000 computers. (Citation: BBC April 2016) An ESET researcher commented that internet disconnection does not guarantee system safety from infection or payload execution. (Citation: ESET April 2016)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0848",
+    "name": "Rogue Master",
+    "reference": "https://attack.mitre.org/techniques/T0848/",
+    "description": "Adversaries may setup a rogue master to leverage control server functions to communicate with outstations. A rogue master can be used to send legitimate control messages to other control system devices, affecting processes in unintended ways. It may also be used to disrupt network communications by capturing and receiving the network traffic meant for the actual master. Impersonating a master may also allow an adversary to avoid detection. \n\nIn the case of the 2017 Dallas Siren incident, adversaries used a rogue master to send command messages to the 156 distributed sirens across the city, either through a single rogue transmitter with a strong signal, or using many distributed repeaters. (Citation: Bastille April 2017) (Citation: Zack Whittaker April 2017)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0849",
+    "name": "Masquerading",
+    "reference": "https://attack.mitre.org/techniques/T0849/",
+    "description": "Adversaries may use masquerading to disguise a malicious application or executable as another file, to avoid operator and engineer suspicion. Possible disguises of these masquerading files can include commonly found programs, expected vendor executables and configuration files, and other commonplace application and naming conventions. By impersonating expected and vendor-relevant files and applications, operators and engineers may not notice the presence of the underlying malicious content and possibly end up running those masquerading as legitimate functions. \n\nApplications and other files commonly found on Windows systems or in engineering workstations have been impersonated before. This can be as simple as renaming a file to effectively disguise it in the ICS environment.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0103"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0850",
+    "name": "Role Identification",
+    "reference": "https://attack.mitre.org/techniques/T0850/",
+    "description": "Adversaries may perform role identification of devices involved with physical processes of interest in a target control system. Control systems devices often work in concert to control a physical process. Each device can have one or more roles that it performs within that control process. By collecting this role-based data, an adversary can construct a more targeted attack.\n\nFor example, a power generation plant may have unique devices such as one that monitors power output of a generator and another that controls the speed of a turbine. Examining devices roles allows the adversary to observe how the two devices work together to monitor and control a physical process. Understanding the role of a target device can inform the adversary's decision on what action to take, in order to cause Impact and influence or disrupt the integrity of operations. Furthermore, an adversary may be able to capture control system protocol traffic. By studying this traffic, the adversary may be able to determine which devices are outstations, and which are masters. Understanding of master devices and their role within control processes can enable the use of Rogue Master Device",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0851",
+    "name": "Rootkit",
+    "reference": "https://attack.mitre.org/techniques/T0851/",
+    "description": "Adversaries may deploy rootkits to hide the presence of programs, files, network connections, services, drivers, and other system components. Rootkits are programs that hide the existence of malware by intercepting and modifying operating-system API calls that supply system information. Rootkits or rootkit-enabling functionality may reside at the user or kernel level in the operating system, or lower. (Citation: Enterprise ATT&CK January 2018)   \n\nFirmware rootkits that affect the operating system yield nearly full control of the system. While firmware rootkits are normally developed for the main processing board, they can also be developed for the I/O that is attached to an asset. Compromise of this firmware allows the modification of all of the process variables and functions the module engages in. This may result in commands being disregarded and false information being fed to the main device. By tampering with device processes, an adversary may inhibit its expected response functions and possibly enable [Impact](https://attack.mitre.org/tactics/TA0105).",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0103",
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0852",
+    "name": "Screen Capture",
+    "reference": "https://attack.mitre.org/techniques/T0852/",
+    "description": "Adversaries may attempt to perform screen capture of devices in the control system environment. Screenshots may be taken of workstations, HMIs, or other devices that display environment-relevant process, device, reporting, alarm, or related data. These device displays may reveal information regarding the ICS process, layout, control, and related schematics. In particular, an HMI can provide a lot of important industrial process information. (Citation: ICS-CERT October 2017) Analysis of screen captures may provide the adversary with an understanding of intended operations and interactions between critical devices.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0853",
+    "name": "Scripting",
+    "reference": "https://attack.mitre.org/techniques/T0853/",
+    "description": "Adversaries may use scripting languages to execute arbitrary code in the form of a pre-written script or in the form of user-supplied code to an interpreter. Scripting languages are programming languages that differ from compiled languages, in that scripting languages use an interpreter, instead of a compiler. These interpreters read and compile part of the source code just before it is executed, as opposed to compilers, which compile each and every line of code to an executable file. Scripting allows software developers to run their code on any system where the interpreter exists. This way, they can distribute one package, instead of precompiling executables for many different systems. Scripting languages, such as Python, have their interpreters shipped as a default with many Linux distributions. \n\nIn addition to being a useful tool for developers and administrators, scripting language interpreters may be abused by the adversary to execute code in the target environment. Due to the nature of scripting languages, this allows for weaponized code to be deployed to a target easily, and leaves open the possibility of on-the-fly scripting to perform a task.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0854",
+    "name": "Serial Connection Enumeration",
+    "reference": "https://attack.mitre.org/techniques/T0854/",
+    "description": "Adversaries may perform serial connection enumeration to gather situational awareness after gaining access to devices in the OT network. Control systems devices often communicate to each other via various types of serial communication mediums. These serial communications are used to facilitate informational communication, as well as commands.  Serial Connection Enumeration differs from I/O Module Discovery, as I/O modules are auxiliary systems to the main system, and devices that are connected via serial connection are normally discrete systems.\n\nWhile IT and OT networks may work in tandem, the exact structure of the OT network may not be discernible from the IT network alone. After gaining access to a device on the OT network, an adversary may be able to enumerate the serial connections. From this perspective, the adversary can see the specific physical devices to which the compromised device is connected to. This gives the adversary greater situational awareness and can influence the actions that the adversary can take in an attack.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0855",
+    "name": "Unauthorized Command Message",
+    "reference": "https://attack.mitre.org/techniques/T0855/",
+    "description": "Adversaries may send unauthorized command messages to instruct control system assets to perform actions outside of their intended functionality, or without the logical preconditions to trigger their expected function. Command messages are used in ICS networks to give direct instructions to control systems devices. If an adversary can send an unauthorized command message to a control system, then it can instruct the control systems device to perform an action outside the normal bounds of the device's actions. An adversary could potentially instruct a control systems device to perform an action that will cause an [Impact](https://attack.mitre.org/tactics/TA0105). (Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)\n\nIn the Dallas Siren incident, adversaries were able to send command messages to activate tornado alarm systems across the city without an impending tornado or other disaster. (Citation: Zack Whittaker April 2017) (Citation: Benjamin Freed March 2019)",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1692.001"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0106"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0856",
+    "name": "Spoof Reporting Message",
+    "reference": "https://attack.mitre.org/techniques/T0856/",
+    "description": "Adversaries may spoof reporting messages in control system environments for evasion and to impair process control. In control systems, reporting messages contain telemetry data (e.g., I/O values) pertaining to the current state of equipment and the industrial process. Reporting messages are important for monitoring the normal operation of a system or identifying important events such as deviations from expected values. \n\nIf an adversary has the ability to Spoof Reporting Messages, they can impact the control system in many ways. The adversary can Spoof Reporting Messages that state that the process is operating normally, as a form of evasion. The adversary could also Spoof Reporting Messages to make the defenders and operators think that other errors are occurring in order to distract them from the actual source of a problem. (Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011) ",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1692.002"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0103",
+      "TA0106"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0857",
+    "name": "System Firmware",
+    "reference": "https://attack.mitre.org/techniques/T0857/",
+    "description": "System firmware on modern assets is often designed with an update feature. Older device firmware may be factory installed and require special reprograming equipment. When available, the firmware update feature enables vendors to remotely patch bugs and perform upgrades. Device firmware updates are often delegated to the user and may be done using a software update package. It may also be possible to perform this task over the network. \n\nAn adversary may exploit the firmware update feature on accessible devices to upload malicious or out-of-date firmware. Malicious modification of device firmware may provide an adversary with root access to a device, given firmware is one of the lowest programming abstraction layers. (Citation: Basnight, Zachry, et al.)",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1693.001"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107",
+      "TA0110"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0858",
+    "name": "Change Operating Mode",
+    "reference": "https://attack.mitre.org/techniques/T0858/",
+    "description": "Adversaries may change the operating mode of a controller to gain additional access to engineering functions such as Program Download.   Programmable controllers typically have several modes of operation that control the state of the user program and control access to the controllers API. Operating modes can be physically selected using a key switch on the face of the controller but may also be selected with calls to the controllers API. Operating modes and the mechanisms by which they are selected often vary by vendor and product line. Some commonly implemented operating modes are described below:  \n\n* Program - This mode must be enabled before changes can be made to a devices program. This allows program uploads and downloads between the device and an engineering workstation. Often the PLCs logic Is halted, and all outputs may be forced off. (Citation: N.A. October 2017)  \n* Run - Execution of the devices program occurs in this mode. Input and output (values, points, tags, elements, etc.) are monitored and used according to the programs logic. [Program Upload](https://attack.mitre.org/techniques/T0845) and [Program Download](https://attack.mitre.org/techniques/T0843) are disabled while in this mode. (Citation: Omron) (Citation: Machine Information Systems 2007)  (Citation: N.A. October 2017) (Citation: PLCgurus 2021)   \n* Remote - Allows for remote changes to a PLCs operation mode. (Citation: PLCgurus 2021)    \n* Stop - The PLC and program is stopped, while in this mode, outputs are forced off. (Citation: Machine Information Systems 2007)   \n* Reset - Conditions on the PLC are reset to their original states. Warm resets may retain some memory while cold resets will reset all I/O and data registers. (Citation: Machine Information Systems 2007)   \n* Test / Monitor mode - Similar to run mode, I/O is processed, although this mode allows for monitoring, force set, resets, and more generally tuning or debugging of the system. Often monitor mode may be used as a trial for initialization. (Citation: Omron)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0103",
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0859",
+    "name": "Valid Accounts",
+    "reference": "https://attack.mitre.org/techniques/T0859/",
+    "description": "Adversaries may steal the credentials of a specific user or service account using credential access techniques. In some cases, default credentials for control system devices may be publicly available. Compromised credentials may be used to bypass access controls placed on various resources on hosts and within the network, and may even be used for persistent access to remote systems. Compromised and default credentials may also grant an adversary increased privilege to specific systems and devices or access to restricted areas of the network. Adversaries may choose not to use malware or tools, in conjunction with the legitimate access those credentials provide, to make it harder to detect their presence or to control devices and send legitimate commands in an unintended way. \n\nAdversaries may also create accounts, sometimes using predefined account names and passwords, to provide a means of backup access for persistence. (Citation: Booz Allen Hamilton) \n\nThe overlap of credentials and permissions across a network of systems is of concern because the adversary may be able to pivot across accounts and systems to reach a high level of access (i.e., domain or enterprise administrator)  and possibly between the enterprise and operational technology environments. Adversaries may be able to leverage valid credentials from one system to gain access to another system.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0109",
+      "TA0110"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0860",
+    "name": "Wireless Compromise",
+    "reference": "https://attack.mitre.org/techniques/T0860/",
+    "description": "Adversaries may perform wireless compromise as a method of gaining communications and unauthorized access to a wireless network. Access to a wireless network may be gained through the compromise of a wireless device. (Citation: Alexander Bolshev, Gleb Cherbov July 2014) (Citation: Alexander Bolshev March 2014) Adversaries may also utilize radios and other wireless communication devices on the same frequency as the wireless network. Wireless compromise can be done as an initial access vector from a remote distance. \n\nA Polish student used a modified TV remote controller to gain access to and control over the Lodz city tram system in Poland. (Citation: John Bill May 2017) (Citation: Shelley Smith February 2008) The remote controller device allowed the student to interface with the trams network to modify track settings and override operator control. The adversary may have accomplished this by aligning the controller to the frequency and amplitude of IR control protocol signals. (Citation: Bruce Schneier January 2008) The controller then enabled initial access to the network, allowing the capture and replay of tram signals. (Citation: John Bill May 2017)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0861",
+    "name": "Point & Tag Identification",
+    "reference": "https://attack.mitre.org/techniques/T0861/",
+    "description": "Adversaries may collect point and tag values to gain a more comprehensive understanding of the process environment. Points may be values such as inputs, memory locations, outputs or other process specific variables. (Citation: Dennis L. Sloatman September 2016) Tags are the identifiers given to points for operator convenience. \n\nCollecting such tags provides valuable context to environmental points and enables an adversary to map inputs, outputs, and other values to their control processes. Understanding the points being collected may inform an adversary on which processes and values to keep track of over the course of an operation.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0862",
+    "name": "Supply Chain Compromise",
+    "reference": "https://attack.mitre.org/techniques/T0862/",
+    "description": "Adversaries may perform supply chain compromise to gain control systems environment access by means of infected products, software, and workflows. Supply chain compromise is the manipulation of products, such as devices or software, or their delivery mechanisms before receipt by the end consumer. Adversary compromise of these products and mechanisms is done for the goal of data or system compromise, once infected products are introduced to the target environment. \n\nSupply chain compromise can occur at all stages of the supply chain, from manipulation of development tools and environments to manipulation of developed products and tools distribution mechanisms. This may involve the compromise and replacement of legitimate software and patches, such as on third party or vendor websites. Targeting of supply chain compromise can be done in attempts to infiltrate the environments of a specific audience. In control systems environments with assets in both the IT and OT networks, it is possible a supply chain compromise affecting the IT environment could enable further access to the OT environment.   \n\nCounterfeit devices may be introduced to the global supply chain posing safety and cyber risks to asset owners and operators. These devices may not meet the safety, engineering and manufacturing requirements of regulatory bodies but may feature tagging indicating conformance with industry standards. Due to the lack of adherence to standards and overall lesser quality, the counterfeit products may pose a serious safety and operational risk. (Citation: Control Global May 2019) \n\nYokogawa identified instances in which their customers received counterfeit differential pressure transmitters using the Yokogawa logo. The counterfeit transmitters were nearly indistinguishable with a semblance of functionality and interface that mimics the genuine product. (Citation: Control Global May 2019) \n\nF-Secure Labs analyzed the approach the adversary used to compromise victim systems with Havex. (Citation: Daavid Hentunen, Antti Tikkanen June 2014) The adversary planted trojanized software installers available on legitimate ICS/SCADA vendor websites. After being downloaded, this software infected the host computer with a Remote Access Trojan (RAT).",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0863",
+    "name": "User Execution",
+    "reference": "https://attack.mitre.org/techniques/T0863/",
+    "description": "Adversaries may rely on a targeted organizations user interaction for the execution of malicious code. User interaction may consist of installing applications, opening email attachments, or granting higher permissions to documents. \n\nAdversaries may embed malicious code or visual basic code into files such as Microsoft Word and Excel documents or software installers. (Citation: Booz Allen Hamilton) Execution of this code requires that the user enable scripting or write access within the document. Embedded code may not always be noticeable to the user especially in cases of trojanized software. (Citation: Daavid Hentunen, Antti Tikkanen June 2014) \n\nA Chinese spearphishing campaign running from December 9, 2011 through February 29, 2012 delivered malware through spearphishing attachments which required user action to achieve execution. (Citation: CISA AA21-201A Pipeline Intrusion July 2021)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0864",
+    "name": "Transient Cyber Asset",
+    "reference": "https://attack.mitre.org/techniques/T0864/",
+    "description": "Adversaries may target devices that are transient across ICS networks and external networks. Normally, transient assets are brought into an environment by authorized personnel and do not remain in that environment on a permanent basis. (Citation: North American Electric Reliability Corporation June 2021) Transient assets are commonly needed to support management functions and may be more common in systems where a remotely managed asset is not feasible, external connections for remote access do not exist, or 3rd party contractor/vendor access is required. \n\nAdversaries may take advantage of transient assets in different ways. For instance, adversaries may target a transient asset when it is connected to an external network and then leverage its trusted access in another environment to launch an attack. They may also take advantage of installed applications and libraries that are used by legitimate end-users to interact with control system devices. \n\nTransient assets, in some cases, may not be deployed with a secure configuration leading to weaknesses that could allow an adversary to propagate malicious executable code, e.g., the transient asset may be infected by malware and when connected to an ICS environment the malware propagates onto other systems. ",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0865",
+    "name": "Spearphishing Attachment",
+    "reference": "https://attack.mitre.org/techniques/T0865/",
+    "description": "Adversaries may use a spearphishing attachment, a variant of spearphishing, as a form of a social engineering attack against specific targets. Spearphishing attachments are different from other forms of spearphishing in that they employ malware attached to an email. All forms of spearphishing are electronically delivered and target a specific individual, company, or industry. In this scenario, adversaries attach a file to the spearphishing email and usually rely upon [User Execution](https://attack.mitre.org/techniques/T0863) to gain execution and access. (Citation: Enterprise ATT&CK October 2019) \n\nA Chinese spearphishing campaign running from December 9, 2011 through February 29, 2012, targeted ONG organizations and their employees. The emails were constructed with a high level of sophistication to convince employees to open the malicious file attachments. (Citation: CISA AA21-201A Pipeline Intrusion July 2021)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0866",
+    "name": "Exploitation of Remote Services",
+    "reference": "https://attack.mitre.org/techniques/T0866/",
+    "description": "Adversaries may exploit a software vulnerability to take advantage of a programming error in a program, service, or within the operating system software or kernel itself to enable remote service abuse. A common goal for post-compromise exploitation of remote services is for initial access into and lateral movement throughout the ICS environment to enable access to targeted systems. (Citation: Enterprise ATT&CK)\n\nICS asset owners and operators have been affected by ransomware (or disruptive malware masquerading as ransomware) migrating from enterprise IT to ICS environments: WannaCry, NotPetya, and BadRabbit. In each of these cases, self-propagating (wormable) malware initially infected IT networks, but through exploit (particularly the SMBv1-targeting MS17-010 vulnerability) spread to industrial networks, producing significant impacts. (Citation: Joe Slowik April 2019)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108",
+      "TA0109"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0867",
+    "name": "Lateral Tool Transfer",
+    "reference": "https://attack.mitre.org/techniques/T0867/",
+    "description": "Adversaries may transfer tools or other files from one system to another to stage adversary tools or other files over the course of an operation. (Citation: Enterprise ATT&CK) Copying of files may also be performed laterally between internal victim systems to support Lateral Movement with remote Execution using inherent file sharing protocols such as file sharing over SMB to connected network shares. (Citation: Enterprise ATT&CK)\n\nIn control systems environments, malware may use SMB and other file sharing protocols to move laterally through industrial networks.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0109"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0868",
+    "name": "Detect Operating Mode",
+    "reference": "https://attack.mitre.org/techniques/T0868/",
+    "description": "Adversaries may gather information about a PLCs or controllers current operating mode. Operating modes dictate what change or maintenance functions can be manipulated and are often controlled by a key switch on the PLC (e.g.,  run, prog [program], and remote). Knowledge of these states may be valuable to an adversary to determine if they are able to reprogram the PLC. Operating modes and the mechanisms by which they are selected often vary by vendor and product line. Some commonly implemented operating modes are described below:  \n\n* Program - This mode must be enabled before changes can be made to a devices program. This allows program uploads and downloads between the device and an engineering workstation. Often the PLCs logic Is halted, and all outputs may be forced off. (Citation: N.A. October 2017)  \n* Run - Execution of the devices program occurs in this mode. Input and output (values, points, tags, elements, etc.) are monitored and used according to the programs logic.[Program Upload](https://attack.mitre.org/techniques/T0845) and [Program Download](https://attack.mitre.org/techniques/T0843) are disabled while in this mode. (Citation: Omron) (Citation: Machine Information Systems 2007)  (Citation: N.A. October 2017) (Citation: PLCgurus 2021)   \n* Remote - Allows for remote changes to a PLCs operation mode. (Citation: PLCgurus 2021)    \n* Stop - The PLC and program is stopped, while in this mode, outputs are forced off. (Citation: Machine Information Systems 2007)   \n* Reset - Conditions on the PLC are reset to their original states. Warm resets may retain some memory while cold resets will reset all I/O and data registers. (Citation: Machine Information Systems 2007)   \n* Test / Monitor mode - Similar to run mode, I/O is processed, although this mode allows for monitoring, force set, resets, and more generally tuning or debugging of the system. Often monitor mode may be used as a trial for initialization. (Citation: Omron)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0869",
+    "name": "Standard Application Layer Protocol",
+    "reference": "https://attack.mitre.org/techniques/T0869/",
+    "description": "Adversaries may establish command and control capabilities over commonly used application layer protocols such as HTTP(S), OPC, RDP, telnet, DNP3, and modbus. These protocols may be used to disguise adversary actions as benign network traffic. Standard protocols may be seen on their associated port or in some cases over a non-standard port.  Adversaries may use these protocols to reach out of the network for command and control, or in some cases to other infected devices within the network.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0101"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0870",
+    "name": "Detect Program State",
+    "reference": "https://attack.mitre.org/techniques/T0870/",
+    "description": "Adversaries may seek to gather information about the current state of a program on a PLC. State information reveals information about the program, including whether it's running, halted, stopped, or has generated an exception. This information may be leveraged as a verification of malicious program execution or to determine if a PLC is ready to download a new program.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0871",
+    "name": "Execution through API",
+    "reference": "https://attack.mitre.org/techniques/T0871/",
+    "description": "Adversaries may attempt to leverage Application Program Interfaces (APIs) used for communication between control software and the hardware. Specific functionality is often coded into APIs which can be called by software to engage specific functions on a device or other software.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0872",
+    "name": "Indicator Removal on Host",
+    "reference": "https://attack.mitre.org/techniques/T0872/",
+    "description": "Adversaries may attempt to remove indicators of their presence on a system in an effort to cover their tracks. In cases where an adversary may feel detection is imminent, they may try to overwrite, delete, or cover up changes they have made to the device.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0103"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0873",
+    "name": "Project File Infection",
+    "reference": "https://attack.mitre.org/techniques/T0873/",
+    "description": "Adversaries may attempt to infect project files with malicious code. These project files may consist of objects, program organization units, variables such as tags, documentation, and other configurations needed for PLC programs to function.(Citation: Beckhoff) Using built in functions of the engineering software, adversaries may be able to download an infected program to a PLC in the operating environment enabling further [Execution](https://attack.mitre.org/tactics/TA0104) and [Persistence](https://attack.mitre.org/tactics/TA0110) techniques.(Citation: PLCdev) \n\nAdversaries may export their own code into project files with conditions to execute at specific intervals.(Citation: Nicolas Falliere, Liam O Murchu, Eric Chien February 2011) Malicious programs allow adversaries control of all aspects of the process enabled by the PLC. Once the project file is downloaded to a PLC the workstation device may be disconnected with the infected project file still executing.(Citation: PLCdev)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0110"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0874",
+    "name": "Hooking",
+    "reference": "https://attack.mitre.org/techniques/T0874/",
+    "description": "Adversaries may hook into application programming interface (API) functions used by processes to redirect calls for execution and privilege escalation means. Windows processes often leverage these API functions to perform tasks that require reusable system resources. Windows API functions are typically stored in dynamic-link libraries (DLLs) as exported functions. (Citation: Enterprise ATT&CK)\n\nOne type of hooking seen in ICS involves redirecting calls to these functions via import address table (IAT) hooking. IAT hooking uses modifications to a process IAT, where pointers to imported API functions are stored. (Citation: Nicolas Falliere, Liam O Murchu, Eric Chien February 2011)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104",
+      "TA0111"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0875",
+    "name": "Change Program State",
+    "reference": "https://attack.mitre.org/techniques/T0875/",
+    "description": "Adversaries may attempt to change the state of the current program on a control device. Program state changes may be used to allow for another program to take over control or be loaded onto the device.",
+    "revoked": false,
+    "deprecated": true,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104",
+      "TA0106"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0877",
+    "name": "I/O Image",
+    "reference": "https://attack.mitre.org/techniques/T0877/",
+    "description": "Adversaries may seek to capture process values related to the inputs and outputs of a PLC. During the scan cycle, a PLC reads the status of all inputs and stores them in an image table. (Citation: Nanjundaiah, Vaidyanath) The image table is the PLCs internal storage location where values of inputs/outputs for one scan are stored while it executes the user program. After the PLC has solved the entire logic program, it updates the output image table. The contents of this output image table are written to the corresponding output points in I/O Modules.\n\nThe Input and Output Image tables described above make up the I/O Image on a PLC. This image is used by the user program instead of directly interacting with physical I/O. (Citation: Spenneberg, Ralf 2016) \n\nAdversaries may collect the I/O Image state of a PLC by utilizing a devices [Native API](https://attack.mitre.org/techniques/T0834) to access the memory regions directly. The collection of the PLCs I/O state could be used to replace values or inform future stages of an attack.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0878",
+    "name": "Alarm Suppression",
+    "reference": "https://attack.mitre.org/techniques/T0878/",
+    "description": "Adversaries may target protection function alarms to prevent them from notifying operators of critical conditions. Alarm messages may be a part of an overall reporting system and of particular interest for adversaries. Disruption of the alarm system does not imply the disruption of the reporting system as a whole.\n\nA Secura presentation on targeting OT notes a dual fold goal for adversaries attempting alarm suppression: prevent outgoing alarms from being raised and prevent incoming alarms from being responded to. (Citation: Jos Wetzels, Marina Krotofil 2019) The method of suppression may greatly depend on the type of alarm in question:  \n\n* An alarm raised by a protocol message \n* An alarm signaled with I/O \n* An alarm bit set in a flag (and read) \n\nIn ICS environments, the adversary may have to suppress or contend with multiple alarms and/or alarm propagation to achieve a specific goal to evade detection or prevent intended responses from occurring. (Citation: Jos Wetzels, Marina Krotofil 2019)  Methods of suppression may involve tampering or altering device displays and logs, modifying in memory code to fixed values, or even tampering with assembly level instruction code.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0879",
+    "name": "Damage to Property",
+    "reference": "https://attack.mitre.org/techniques/T0879/",
+    "description": "Adversaries may cause damage and destruction of property to infrastructure, equipment, and the surrounding environment when attacking control systems. This technique may result in device and operational equipment breakdown, or represent tangential damage from other techniques used in an attack. Depending on the severity of physical damage and disruption caused to control processes and systems, this technique may result in [Loss of Safety](https://attack.mitre.org/techniques/T0880). Operations that result in [Loss of Control](https://attack.mitre.org/techniques/T0827) may also cause damage to property, which may be directly or indirectly motivated by an adversary seeking to cause impact in the form of [Loss of Productivity and Revenue](https://attack.mitre.org/techniques/T0828). \n\n\nThe German Federal Office for Information Security (BSI) reported a targeted attack on a steel mill under an incidents affecting business section of its 2014 IT Security Report. (Citation: BSI State of IT Security 2014)  These targeted attacks affected industrial operations and resulted in breakdowns of control system components and even entire installations. As a result of these breakdowns, massive impact and damage resulted from the uncontrolled shutdown of a blast furnace. \n\nA Polish student used a remote controller device to interface with the Lodz city tram system in Poland. (Citation: John Bill May 2017) (Citation: Shelley Smith February 2008) (Citation: Bruce Schneier January 2008) Using this remote, the student was able to capture and replay legitimate tram signals. This resulted in damage to impacted trams, people, and the surrounding property. Reportedly, four trams were derailed and were forced to make emergency stops. (Citation: Shelley Smith February 2008) Commands issued by the student may have also resulted in tram collisions, causing harm to those on board and the environment outside. (Citation: Bruce Schneier January 2008)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0880",
+    "name": "Loss of Safety",
+    "reference": "https://attack.mitre.org/techniques/T0880/",
+    "description": "Adversaries may compromise safety system functions designed to maintain safe operation of a process when unacceptable or dangerous conditions occur. Safety systems are often composed of the same elements as control systems but have the sole purpose of ensuring the process fails in a predetermined safe manner. \n\nMany unsafe conditions in process control happen too quickly for a human operator to react to. Speed is critical in correcting these conditions to limit serious impacts such as Loss of Control and Property Damage. \n\nAdversaries may target and disable safety system functions as a prerequisite to subsequent attack execution or to allow for future unsafe conditionals to go unchecked. Detection of a Loss of Safety by operators can result in the shutdown of a process due to strict policies regarding safety systems. This can cause a Loss of Productivity and Revenue and may meet the technical goals of adversaries seeking to cause process disruptions.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0881",
+    "name": "Service Stop",
+    "reference": "https://attack.mitre.org/techniques/T0881/",
+    "description": "Adversaries may stop or disable services on a system to render those services unavailable to legitimate users. Stopping critical services can inhibit or stop response to an incident or aid in the adversary's overall objectives to cause damage to the environment. (Citation: Enterprise ATT&CK)  Services may not allow for modification of their data stores while running. Adversaries may stop services in order to conduct Data Destruction. (Citation: Enterprise ATT&CK)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0882",
+    "name": "Theft of Operational Information",
+    "reference": "https://attack.mitre.org/techniques/T0882/",
+    "description": "Adversaries may steal operational information on a production environment as a direct mission outcome for personal gain or to inform future operations. This information may include design documents, schedules, rotational data, or similar artifacts that provide insight on operations.    In the Bowman Dam incident, adversaries probed systems for operational data. (Citation: Mark Thompson March 2016) (Citation: Danny Yadron December 2015)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0105"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0883",
+    "name": "Internet Accessible Device",
+    "reference": "https://attack.mitre.org/techniques/T0883/",
+    "description": "Adversaries may gain access into industrial environments through systems exposed directly to the internet for remote access rather than through [External Remote Services](https://attack.mitre.org/techniques/T0822). Internet Accessible Devices are exposed to the internet unintentionally or intentionally without adequate protections. This may allow for adversaries to move directly into the control system network. Access onto these devices is accomplished without the use of exploits, these would be represented within the [Exploit Public-Facing Application](https://attack.mitre.org/techniques/T0819) technique.\n\nAdversaries may leverage built in functions for remote access which may not be protected or utilize minimal legacy protections that may be targeted. (Citation: NCCIC January 2014) These services may be discoverable through the use of online scanning tools. \n\nIn the case of the Bowman dam incident, adversaries leveraged access to the dam control network through a cellular modem. Access to the device was protected by password authentication, although the application was vulnerable to brute forcing. (Citation: NCCIC January 2014) (Citation: Danny Yadron December 2015) (Citation: Mark Thompson March 2016)\n\nIn Trend Micros manufacturing deception operations adversaries were detected leveraging direct internet access to an ICS environment through the exposure of operational protocols such as Siemens S7, Omron FINS, and EtherNet/IP, in addition to misconfigured VNC access. (Citation: Stephen Hilt, Federico Maggi, Charles Perine, Lord Remorin, Martin Rsler, and Rainer Vosseler)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0884",
+    "name": "Connection Proxy",
+    "reference": "https://attack.mitre.org/techniques/T0884/",
+    "description": "Adversaries may use a connection proxy to direct network traffic between systems or act as an intermediary for network communications.\n\nThe definition of a proxy can also be expanded to encompass trust relationships between networks in peer-to-peer, mesh, or trusted connections between networks consisting of hosts or systems that regularly communicate with each other.\n\nThe network may be within a single organization or across multiple organizations with trust relationships. Adversaries could use these types of relationships to manage command and control communications, to reduce the number of simultaneous outbound network connections, to provide resiliency in the face of connection loss, or to ride over existing trusted communications paths between victims to avoid suspicion. (Citation: Enterprise ATT&CK January 2018)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0101"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0885",
+    "name": "Commonly Used Port",
+    "reference": "https://attack.mitre.org/techniques/T0885/",
+    "description": "Adversaries may communicate over a commonly used port to bypass firewalls or network detection systems and to blend in with normal network activity, to avoid more detailed inspection. They may use the protocol associated with the port, or a completely different protocol. They may use commonly open ports, such as the examples provided below. \n \n * TCP:80 (HTTP) \n * TCP:443 (HTTPS) \n * TCP/UDP:53 (DNS) \n * TCP:1024-4999 (OPC on XP/Win2k3) \n * TCP:49152-65535 (OPC on Vista and later) \n * TCP:23 (TELNET) \n * UDP:161 (SNMP) \n * TCP:502 (MODBUS) \n * TCP:102 (S7comm/ISO-TSAP) \n * TCP:20000 (DNP3) \n * TCP:44818 (Ethernet/IP)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0101"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0886",
+    "name": "Remote Services",
+    "reference": "https://attack.mitre.org/techniques/T0886/",
+    "description": "Adversaries may leverage remote services to move between assets and network segments. These services are often used to allow operators to interact with systems remotely within the network, some examples are RDP, SMB, SSH, and other similar mechanisms. (Citation: Blake Johnson, Dan Caban, Marina Krotofil, Dan Scali, Nathan Brubaker, Christopher Glyer December 2017) (Citation: Dragos December 2017) (Citation: Joe Slowik April 2019) \n\nRemote services could be used to support remote access, data transmission, authentication, name resolution, and other remote functions. Further, remote services may be necessary to allow operators and administrators to configure systems within the network from their engineering or management workstations. An adversary may use this technique to access devices which may be dual-homed (Citation: Blake Johnson, Dan Caban, Marina Krotofil, Dan Scali, Nathan Brubaker, Christopher Glyer December 2017) to multiple network segments, and can be used for [Program Download](https://attack.mitre.org/techniques/T0843) or to execute attacks on control devices directly through [Valid Accounts](https://attack.mitre.org/techniques/T0859).\n\nSpecific remote services (RDP & VNC) may be a precursor to enable [Graphical User Interface](https://attack.mitre.org/techniques/T0823) execution on devices such as HMIs or engineering workstation software.\n\nBased on incident data, CISA and FBI assessed that Chinese state-sponsored actors also compromised various authorized remote access channels, including systems designed to transfer data and/or allow access between corporate and ICS networks.  (Citation: CISA AA21-201A Pipeline Intrusion July 2021)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0108",
+      "TA0109"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0887",
+    "name": "Wireless Sniffing",
+    "reference": "https://attack.mitre.org/techniques/T0887/",
+    "description": "Adversaries may seek to capture radio frequency (RF) communication used for remote control and reporting in distributed environments. RF communication frequencies vary between 3 kHz to 300 GHz, although are commonly between 300 MHz to 6 GHz. (Citation: Candell, R., Hany, M., Lee, K. B., Liu,Y., Quimby, J., Remley, K. April 2018)  The wavelength and frequency of the signal affect how the signal propagates through open air, obstacles (e.g. walls and trees) and the type of radio required to capture them. These characteristics are often standardized in the protocol and hardware and may have an effect on how the signal is captured. Some examples of wireless protocols that may be found in cyber-physical environments are: WirelessHART, Zigbee, WIA-FA, and 700 MHz Public Safety Spectrum. \n\nAdversaries may capture RF communications by using specialized hardware, such as software defined radio (SDR), handheld radio, or a computer with radio demodulator tuned to the communication frequency. (Citation: Bastille April 2017) Information transmitted over a wireless medium may be captured in-transit whether the sniffing device is the intended destination or not. This technique may be particularly useful to an adversary when the communications are not encrypted. (Citation: Gallagher, S. April 2017) \n\nIn the 2017 Dallas Siren incident, it is suspected that adversaries likely captured wireless command message broadcasts on a 700 MHz frequency during a regular test of the system. These messages were later replayed to trigger the alarm systems. (Citation: Gallagher, S. April 2017)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100",
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0888",
+    "name": "Remote System Information Discovery",
+    "reference": "https://attack.mitre.org/techniques/T0888/",
+    "description": "An adversary may attempt to get detailed information about remote systems and their peripherals, such as make/model, role, and configuration. Adversaries may use information from Remote System Information Discovery to aid in targeting and shaping follow-on behaviors. For example, the system's operational role and model information can dictate whether it is a relevant target for the adversary's operational objectives. In addition, the system's configuration may be used to scope subsequent technique usage. \n\nRequests for system information are typically implemented using automation and management protocols and are often automatically requested by vendor software during normal operation. This information may be used to tailor management actions, such as program download and system or module firmware. An adversary may leverage this same information by issuing calls directly to the system's API.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0102"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0889",
+    "name": "Modify Program",
+    "reference": "https://attack.mitre.org/techniques/T0889/",
+    "description": "Adversaries may modify or add a program on a controller to affect how it interacts with the physical process, peripheral devices and other hosts on the network. Modification to controller programs can be accomplished using a Program Download in addition to other types of program modification such as online edit and program append. \n\nProgram modification encompasses the addition and modification of instructions and logic contained in Program Organization Units (POU)  (Citation: IEC February 2013) and similar programming elements found on controllers. This can include, for example, adding new functions to a controller, modifying the logic in existing functions and making new calls from one function to another. \n\nSome programs may allow an adversary to interact directly with the native API of the controller to take advantage of obscure features or vulnerabilities.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0110"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0890",
+    "name": "Exploitation for Privilege Escalation",
+    "reference": "https://attack.mitre.org/techniques/T0890/",
+    "description": "Adversaries may exploit software vulnerabilities in an attempt to elevate privileges. Exploitation of a software vulnerability occurs when an adversary takes advantage of a programming error in a program, service, or within the operating system software or kernel itself to execute adversary-controlled code. Security constructs such as permission levels will often hinder access to information and use of certain techniques, so adversaries will likely need to perform privilege escalation to include use of software exploitation to circumvent those restrictions. (Citation: The MITRE Corporation) \n\nWhen initially gaining access to a system, an adversary may be operating within a lower privileged process which will prevent them from accessing certain resources on the system. Vulnerabilities may exist, usually in operating system components and software commonly running at higher permissions, that can be exploited to gain higher levels of access on the system. This could enable someone to move from unprivileged or user level permissions to SYSTEM or root permissions depending on the component that is vulnerable. This may be a necessary step for an adversary compromising an endpoint system that has been properly configured and limits other privilege escalation methods. (Citation: The MITRE Corporation)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0111"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0891",
+    "name": "Hardcoded Credentials",
+    "reference": "https://attack.mitre.org/techniques/T0891/",
+    "description": "Adversaries may leverage credentials that are hardcoded in software or firmware to gain an unauthorized interactive user session to an asset. Examples credentials that may be hardcoded in an asset include:\n\n* Username/Passwords\n* Cryptographic keys/Certificates\n* API tokens\n\nUnlike [Default Credentials](https://attack.mitre.org/techniques/T0812), these credentials are built into the system in a way that they either cannot be changed by the asset owner, or may be infeasible to change because of the impact it would cause to the control system operation. These credentials may be reused across whole product lines or device models and are often not published or known to the owner and operators of the asset. \n\nAdversaries may utilize these hardcoded credentials to move throughout the control system environment or provide reliable access for their tools to interact with industrial assets. \n",
+    "revoked": true,
+    "superseded_by_id": [
+      "T1694.002"
+    ],
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0109",
+      "TA0110"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0892",
+    "name": "Change Credential",
+    "reference": "https://attack.mitre.org/techniques/T0892/",
+    "description": "Adversaries may modify software and device credentials to prevent operator and responder access. Depending on the device, the modification or addition of this password could prevent any device configuration actions from being accomplished and may require a factory reset or replacement of hardware. These credentials are often built-in features provided by the device vendors as a means to restrict access to management interfaces.\n\nAn adversary with access to valid or hardcoded credentials could change the credential to prevent future authorized device access. Change Credential may be especially damaging when paired with other techniques such as Modify Program, Data Destruction, or Modify Controller Tasking. In these cases, a device’s configuration may be destroyed or include malicious actions for the process environment, which cannot not be removed through normal device configuration actions. \n\nAdditionally, recovery of the device and original configuration may be difficult depending on the features provided by the device. In some cases, these passwords cannot be removed onsite and may require that the device be sent back to the vendor for additional recovery steps.\n\n\nA chain of incidents occurred in Germany, where adversaries locked operators out of their building automation system (BAS) controllers by enabling a previously unset BCU key. (Citation: German BAS Lockout Dec 2021) \n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0893",
+    "name": "Data from Local System",
+    "reference": "https://attack.mitre.org/techniques/T0893/",
+    "description": "Adversaries may target and collect data from local system sources, such as file systems, configuration files, or local databases. This can include sensitive data such as specifications, schematics, or diagrams of control system layouts, devices, and processes.\n\nAdversaries may do this using [Command-Line Interface](https://attack.mitre.org/techniques/T0807) or [Scripting](https://attack.mitre.org/techniques/T0853) techniques to interact with the file system to gather information. Adversaries may also use [Automated Collection](https://attack.mitre.org/techniques/T0802) on the local system. ",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0100"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0894",
+    "name": "System Binary Proxy Execution",
+    "reference": "https://attack.mitre.org/techniques/T0894/",
+    "description": "Adversaries may bypass process and/or signature-based defenses by proxying execution of malicious content with signed, or otherwise trusted, binaries. Binaries used in this technique are often Microsoft-signed files, indicating that they have been either downloaded from Microsoft or are already native in the operating system. (Citation: LOLBAS Project) Binaries signed with trusted digital certificates can typically execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files or commands. Similarly, on Linux systems adversaries may abuse trusted binaries such as split to proxy execution of malicious commands. (Citation: split man page)(Citation: GTFO split)\n\nAdversaries may abuse application binaries installed on a system for proxy execution of malicious code or domain-specific commands. These commands could be used to target local resources on the device or networked devices within the environment through defined APIs ([Execution through API](https://attack.mitre.org/techniques/T0871)) or application-specific programming languages (e.g., MicroSCADA SCIL). Application binaries may be signed by the developer or generally trusted by the operators, analysts, and monitoring tools accustomed to the environment. These applications may be developed and/or directly provided by the device vendor to enable configuration, management, and operation of their devices without many alternatives. \n\nAdversaries may seek to target these trusted application binaries to execute or send commands without the development of custom malware. For example, adversaries may target a SCADA server binary which has the existing ability to send commands to substation devices, such as through IEC 104 command messages. Proxy execution may still require the development of custom tools to hook into the application binary’s execution.\n\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0103"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0895",
+    "name": "Autorun Image",
+    "reference": "https://attack.mitre.org/techniques/T0895/",
+    "description": "Adversaries may leverage AutoRun functionality or scripts to execute malicious code. Devices configured to enable AutoRun functionality or legacy operating systems may be susceptible to abuse of these features to run malicious code stored on various forms of removeable media (i.e., USB, Disk Images [.ISO]). Commonly, AutoRun or AutoPlay are disabled in many operating systems configurations to mitigate against this technique. If a device is configured to enable AutoRun or AutoPlay, adversaries may execute code on the device by mounting the removable media to the device, either through physical or virtual means. This may be especially relevant for virtual machine environments where disk images may be dynamically mapped to a guest system on a hypervisor.  \n\nAn example could include an adversary gaining access to a hypervisor through the management interface to modify a virtual machine’s hardware configuration. They could then deploy an iso image with a malicious AutoRun script to cause the virtual machine to automatically execute the code contained on the disk image. This would enable the execution of malicious code within a virtual machine without needing any prior remote access to that system.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1691",
+    "name": "Block Operational Technology Message",
+    "reference": "https://attack.mitre.org/techniques/T1691/",
+    "description": "Adversaries may block messages between systems and devices in an OT/ICS environment to disrupt processes. Messages typically fall into two categories: (1) reporting messages that contain telemetry data about the current state of systems, devices, and processes and (2) command messages that contain instructions to control systems, devices, and processes. Both types of messages are critical for the proper functioning of industrial control processes and failure of the messages to reach their intended destinations could inhibit response functions or create an unsafe condition that could have physical impacts.(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)(Citation: Electricity Information Sharing and Analysis Center; SANS Industrial Control Systems March 2016)\n\nAdversaries may block communications by either making modifications to software ([System Firmware](https://attack.mitre.org/techniques/T0857), [Module Firmware](https://attack.mitre.org/techniques/T0839), [Hooking](https://attack.mitre.org/techniques/T0874), and [Rootkit](https://attack.mitre.org/techniques/T0851)) and services ([Service Stop](https://attack.mitre.org/techniques/T0881), [Denial of Service](https://attack.mitre.org/techniques/T0814)) on systems and devices or by positioning themselves between systems and devices and intercepting and blocking the communications such as the case with an [Adversary-in-the-Middle](https://attack.mitre.org/techniques/T0830) attack.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1692",
+    "name": "Unauthorized Message",
+    "reference": "https://attack.mitre.org/techniques/T1692/",
+    "description": "Adversaries may send unauthorized messages to ICS systems and devices to evade defenses or manipulate processes. Unauthorized messages can be categorized as either reporting messages that contain telemetry data about the current state of systems, devices, and processes or as command messages which instruct systems and devices on how to operate. By injecting unauthorized messages, adversaries can make it appear as if everything is working correctly when it isn’t, trigger alarms to misdirect personnel or impact processes, and manipulate controls to disrupt processes.(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)\n\nAdversaries may send unauthorized messages in an ICS environment using software found within the environment (living-off-the-land, vendor-specific interfaces, etc.), custom tooling leveraging OT protocols and libraries, or by positioning themselves between systems and devices and injecting messages into the communications such as the case with an [Adversary-in-the-Middle](https://attack.mitre.org/techniques/T0830) attack.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0103",
+      "TA0106"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1693",
+    "name": "Modify Firmware",
+    "reference": "https://attack.mitre.org/techniques/T1693/",
+    "description": "Firmware is low-level software embedded in hardware that enables systems and devices to function properly and is commonly found in ICS environments. Adversaries may modify firmware on a system or device by installing malicious or vulnerable versions that enable them to achieve objectives such as [Persistence](https://attack.mitre.org/tactics/TA0110), [Impair Process Control](https://attack.mitre.org/tactics/TA0106), and [Inhibit Response Function](https://attack.mitre.org/tactics/TA0107). \n\nAdversaries may modify system and device firmware by using the built-in firmware update functionality which may support local or remote installation. The malicious or vulnerable firmware may be delivered via [Replication Through Removable Media](https://attack.mitre.org/techniques/T0847), [Supply Chain Compromise](https://attack.mitre.org/techniques/T0862), or [Remote Services](https://attack.mitre.org/techniques/T0886). Once installed, the malicious or vulnerable firmware could be used to provide [Rootkit](https://attack.mitre.org/techniques/T0851) and [Hooking](https://attack.mitre.org/techniques/T0874) functionality, [Exploitation for Privilege Escalation](https://attack.mitre.org/techniques/T0890), or [Denial of Service](https://attack.mitre.org/techniques/T0814).(Citation: Basnight, Zachry, et al.)\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0106",
+      "TA0107",
+      "TA0110"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1694",
+    "name": "Insecure Credentials",
+    "reference": "https://attack.mitre.org/techniques/T1694/",
+    "description": "Adversaries may target insecure credentials as a means to persist on a system or device or move laterally from one system or device to another. Insecure credentials may appear as default credentials which are pre-configured credentials on a system, device, or software that are well-known in documentation or hard-coded credentials which are built into the system, device, or software that cannot be changed or not easily changed because of the impact on control processes.(Citation: NIST SP 800-82r3)(Citation: ICS-ALERT-13-164-01)(Citation: OT IceFall)\n Adversaries often times use insecure credentials to evade detection as they are typically forgotten about by system and device owners.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0109",
+      "TA0110"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1695",
+    "name": "Block Communications",
+    "reference": "https://attack.mitre.org/techniques/T1695/",
+    "description": "Operational technology communications occur over serial COM, Ethernet, Wi-Fi, cellular (4G/5G), and satellite mediums. Adversaries may block communications to prevent reporting messages and command messages from reaching their intended target devices disrupting processes, operations, and causing cyber-physical impacts.(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)  \n\nAdversaries may block communications by either making modifications to software ([System Firmware](https://attack.mitre.org/techniques/T0857), [Module Firmware](https://attack.mitre.org/techniques/T0839), [Hooking](https://attack.mitre.org/techniques/T0874), and [Rootkit](https://attack.mitre.org/techniques/T0851)) and services ([Service Stop](https://attack.mitre.org/techniques/T0881), [Denial of Service](https://attack.mitre.org/techniques/T0814)) on systems and devices or by positioning themselves between systems and devices and intercepting and blocking the communications such as the case with an [Adversary-in-the-Middle](https://attack.mitre.org/techniques/T0830) attack.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0107"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0843.001",
+    "name": "Download All",
+    "reference": "https://attack.mitre.org/techniques/T0843/001/",
+    "description": "Adversaries may execute a full program download to a PLC to overwrite the entire PLC program and configuration to deploy a new project or make major changes. This typically requires stopping the PLC and adversely impacting control processes.\n\nThe ability to perform a full program download to the PLC typically relies on access to a workstation with the vendor-specific PLC programming software installed.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0109"
+    ],
+    "technique_id": "T0843"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0843.002",
+    "name": "Online Edit",
+    "reference": "https://attack.mitre.org/techniques/T0843/002/",
+    "description": "Adversaries may execute an online edit of a PLC to update parts of an existing program. It does not require stopping the PLC which allows it to continue running during transfer and reconfiguration without interruption to process control. Adversaries may leverage this approach to minimize downtime and evade detection. \n\nThe ability to perform an online edit to the PLC typically relies on access to a workstation with the vendor-specific PLC programming software installed.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0109"
+    ],
+    "technique_id": "T0843"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0843.003",
+    "name": "Program Append",
+    "reference": "https://attack.mitre.org/techniques/T0843/003/",
+    "description": "Adversaries may execute a program append to a PLC to update parts of an existing program. It may or may not require stopping the PLC which may allow it to continue running during transfer and reconfiguration without interruption to process control. Adversaries may leverage this approach to minimize downtime and evade detection. \n\nThe ability to perform a program append to the PLC typically relies on access to a workstation with the vendor-specific PLC programming software installed.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0109"
+    ],
+    "technique_id": "T0843"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0846.001",
+    "name": "Port Scan",
+    "reference": "https://attack.mitre.org/techniques/T0846/001/",
+    "description": "Adversaries may perform a port scan on a system, device, or network to identify live hosts, enumerate open ports and running services, identify operating systems, and map out the network.(Citation: NIST SP 800-82r3) The results of a port scan may inform adversary [Discovery](https://attack.mitre.org/tactics/TA0102), [Lateral Movement](https://attack.mitre.org/tactics/TA0109), and vulnerability exploitation decisions ([Exploitation for Evasion](https://attack.mitre.org/techniques/T0820), [Exploitation for Privilege Escalation](https://attack.mitre.org/techniques/T0890), [Exploitation of Remote Services](https://attack.mitre.org/techniques/T0866)). \n\nSome common tools for executing a port scan include `nmap`, `netcat`, and the Advanced Port Scanner.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0102"
+    ],
+    "technique_id": "T0846"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0846.002",
+    "name": "Broadcast Discovery",
+    "reference": "https://attack.mitre.org/techniques/T0846/002/",
+    "description": "Adversaries may perform broadcast discovery requests to enumerate systems and devices on a network. Broadcast discovery works by one system or device sending messages to all systems and devices on a network (or subnet) and then waiting for a response. If a response is received that means the system or device that responded is live and can communicate over that protocol. Adversaries may leverage different protocols supported on the network for sending broadcast messages. \n\nSome common OT protocols that have broadcast discovery mechanisms are Building Automation and Control Network (BACNet) Who-Is requests, Common Industrial Protocol (CIP) List Identity User Datagram Protocol (UDP) broadcast requests, and Siemens S7 broadcast identification requests.(Citation: Broadcasting BACnet)(Citation: Cisco Active Discovery)\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0102"
+    ],
+    "technique_id": "T0846"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0846.003",
+    "name": "Multicast Discovery",
+    "reference": "https://attack.mitre.org/techniques/T0846/003/",
+    "description": "Adversaries may perform multicast discovery requests which is when one system or device sends messages to all systems and devices in a pre-defined group on a network (or subnet) and then waits for a response. If a response is received that means the system or device that responded is live and can communicate over that protocol.  Multicast discovery tends to be stealthier than broadcast discovery because every system or device on the network (or subnet) is not being messaged. \n\nOne common OT protocol that has a multicast discovery mechanism is the Process Field Network (PROFINET) Discovery and Configuration Protocol (DCP) with its Identify All requests.(Citation: Cisco Active Discovery)\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0102"
+    ],
+    "technique_id": "T0846"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T0873.001",
+    "name": "Siemens Project File Format",
+    "reference": "https://attack.mitre.org/techniques/T0873/001/",
+    "description": "Adversaries may infect Siemens PLC project files (i.e., Step 7, WinCC, etc.) to achieve [Execution](https://attack.mitre.org/tactics/TA0104), [Persistence](https://attack.mitre.org/tactics/TA0110), and [Lateral Movement](https://attack.mitre.org/tactics/TA0109) objectives. Adversaries may modify an existing project file or bring their own project files into the environment.(Citation: Nicolas Falliere, Liam O Murchu, Eric Chien February 2011)\n\nThe ability for an adversary to deploy an infected project file relies on access to a workstation with Siemens PLC programming software installed on it from which a program download can be performed.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0110"
+    ],
+    "technique_id": "T0873"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1691.001",
+    "name": "Command Message",
+    "reference": "https://attack.mitre.org/techniques/T1691/001/",
+    "description": "Adversaries may block a command message from reaching its intended target to prevent command execution. In OT networks, command messages are sent to provide instructions to control system devices. A blocked command message can inhibit response functions from correcting a disruption or unsafe condition.(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)(Citation: Electricity Information Sharing and Analysis Center; SANS Industrial Control Systems March 2016)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0107"
+    ],
+    "technique_id": "T1691"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1691.002",
+    "name": "Reporting Message",
+    "reference": "https://attack.mitre.org/techniques/T1691/002/",
+    "description": "Adversaries may block or prevent a reporting message from reaching its intended target. In control systems, reporting messages contain telemetry data (e.g., I/O values) pertaining to the current state of equipment and the industrial process. By blocking these reporting messages, an adversary can potentially hide their actions from an operator.\n\nBlocking reporting messages in control systems that manage physical processes may contribute to system impact, causing inhibition of a response function. A control system may not be able to respond in a proper or timely manner to an event, such as a dangerous fault, if its corresponding reporting message is blocked.(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)(Citation: Electricity Information Sharing and Analysis Center; SANS Industrial Control Systems March 2016)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0107"
+    ],
+    "technique_id": "T1691"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1692.001",
+    "name": "Command Message",
+    "reference": "https://attack.mitre.org/techniques/T1692/001/",
+    "description": "Adversaries may send unauthorized command messages to instruct control system assets to perform actions outside of their intended functionality, or without the logical preconditions to trigger their expected function. Command messages are used in ICS networks to give direct instructions to control systems devices. If an adversary can send an unauthorized command message to a control system, then it can instruct the control systems device to perform an action outside the normal bounds of the device's actions. An adversary could potentially instruct a control systems device to perform an action that will cause an [Impact](https://attack.mitre.org/tactics/TA0105).(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)\n\nIn the Dallas Siren incident, adversaries were able to send command messages to activate tornado alarm systems across the city without an impending tornado or other disaster.(Citation: Zack Whittaker April 2017)(Citation: Benjamin Freed March 2019)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0103",
+      "TA0106"
+    ],
+    "technique_id": "T1692"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1692.002",
+    "name": "Reporting Message",
+    "reference": "https://attack.mitre.org/techniques/T1692/002/",
+    "description": "Adversaries may spoof reporting messages in control system environments for evasion and to impair process control. In control systems, reporting messages contain telemetry data (e.g., I/O values) pertaining to the current state of equipment and the industrial process. Reporting messages are important for monitoring the normal operation of a system or identifying important events such as deviations from expected values.\n\nIf an adversary has the ability to Spoof Reporting Messages, they can impact the control system in many ways. The adversary can Spoof Reporting Messages that state that the process is operating normally, as a form of evasion. The adversary could also Spoof Reporting Messages to make the defenders and operators think that other errors are occurring in order to distract them from the actual source of a problem.(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0103",
+      "TA0106"
+    ],
+    "technique_id": "T1692"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1693.001",
+    "name": "System Firmware",
+    "reference": "https://attack.mitre.org/techniques/T1693/001/",
+    "description": "System firmware on modern assets is often designed with an update feature. Older device firmware may be factory installed and require special reprograming equipment. When available, the firmware update feature enables vendors to remotely patch bugs and perform upgrades. Device firmware updates are often delegated to the user and may be done using a software update package. It may also be possible to perform this task over the network.\n\nAn adversary may exploit the firmware update feature on accessible devices to upload malicious or out-of-date firmware. Malicious modification of device firmware may provide an adversary with root access to a device, given firmware is one of the lowest programming abstraction layers.(Citation: Basnight, Zachry, et al.)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0106",
+      "TA0107",
+      "TA0110"
+    ],
+    "technique_id": "T1693"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1693.002",
+    "name": "Module Firmware",
+    "reference": "https://attack.mitre.org/techniques/T1693/002/",
+    "description": "Adversaries may install malicious or vulnerable firmware onto modular hardware devices. Control system devices often contain modular hardware devices. These devices may have their own set of firmware that is separate from the firmware of the main control system equipment.\n\nThis technique is similar to System Firmware, but is conducted on other system components that may not have the same capabilities or level of integrity checking. Although it results in a device re-image, malicious device firmware may provide persistent access to remaining devices.(Citation: Daniel Peck,  Dale Peterson January 2009)\n\nAn easy point of access for an adversary is the Ethernet card, which may have its own CPU, RAM, and operating system. The adversary may attack and likely exploit the computer on an Ethernet card. Exploitation of the Ethernet card computer may enable the adversary to accomplish additional attacks, such as the following:(Citation: Daniel Peck,  Dale Peterson January 2009)\n\n* Delayed Attack - The adversary may stage an attack in advance and choose when to launch it, such as at a particularly damaging time.\n* Brick the Ethernet Card - Malicious firmware may be programmed to result in an Ethernet card failure, requiring a factory return.\n* Random Attack or Failure - The adversary may load malicious firmware onto multiple field devices. Execution of an attack and the time it occurs is generated by a pseudo-random number generator.\n* A Field Device Worm - The adversary may choose to identify all field devices of the same model, with the end goal of performing a device-wide compromise.\n* Attack Other Cards on the Field Device - Although it is not the most important module in a field device, the Ethernet card is most accessible to the adversary and malware. Compromise of the Ethernet card may provide a more direct route to compromising other modules, such as the CPU module.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0106",
+      "TA0107",
+      "TA0110"
+    ],
+    "technique_id": "T1693"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1694.001",
+    "name": "Default Credentials",
+    "reference": "https://attack.mitre.org/techniques/T1694/001/",
+    "description": "Adversaries may leverage manufacturer or supplier set default credentials on control system devices. These default credentials may have administrative permissions and may be necessary for initial configuration of the device. It is general best practice to change the passwords for these accounts as soon as possible, but some manufacturers may have devices that have passwords or usernames that cannot be changed.(Citation: Keith Stouffer May 2015)\n\nDefault credentials are normally documented in an instruction manual that is either packaged with the device, published online through official means, or published online through unofficial means. Adversaries may leverage default credentials that have not been properly modified or disabled.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0109",
+      "TA0110"
+    ],
+    "technique_id": "T1694"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1694.002",
+    "name": "Hardcoded Credentials",
+    "reference": "https://attack.mitre.org/techniques/T1694/002/",
+    "description": "Adversaries may leverage credentials that are hardcoded in software or firmware to gain an unauthorized interactive user session to an asset. Examples credentials that may be hardcoded in an asset include:\n\n* Username/Passwords\n* Cryptographic keys/Certificates\n* API tokens\n\nUnlike [Default Credentials](https://attack.mitre.org/techniques/T0812), these credentials are built into the system in a way that they either cannot be changed by the asset owner, or may be infeasible to change because of the impact it would cause to the control system operation. These credentials may be reused across whole product lines or device models and are often not published or known to the owner and operators of the asset.(Citation: ICS-ALERT-13-164-01)(Citation: OT IceFall)\n\nAdversaries may utilize these hardcoded credentials to move throughout the control system environment or provide reliable access for their tools to interact with industrial assets.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0109",
+      "TA0110"
+    ],
+    "technique_id": "T1694"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1695.001",
+    "name": "Serial COM",
+    "reference": "https://attack.mitre.org/techniques/T1695/001/",
+    "description": "Adversaries may block access to serial COM to prevent instructions or configurations from reaching target devices. Serial Communication ports (COM) allow communication with control system devices. Devices can receive command and configuration messages over such serial COM. Devices also use serial COM to send command and reporting messages. Blocking device serial COM may also block command messages and block reporting messages.\n\nA serial to Ethernet converter is often connected to a serial COM to facilitate communication between serial and Ethernet devices. One approach to blocking a serial COM would be to create and hold open a TCP session with the Ethernet side of the converter. A serial to Ethernet converter may have a few ports open to facilitate multiple communications. For example, if there are three serial COM available -- 1, 2 and 3 --, the converter might be listening on the corresponding ports 20001, 20002, and 20003. If a TCP/IP connection is opened with one of these ports and held open, then the port will be unavailable for use by another party. One way the adversary could achieve this would be to initiate a TCP session with the serial to Ethernet converter at 10.0.0.1 via Telnet on serial port 1 with the following command: telnet 10.0.0.1 20001.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0107"
+    ],
+    "technique_id": "T1695"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1695.002",
+    "name": "Ethernet",
+    "reference": "https://attack.mitre.org/techniques/T1695/002/",
+    "description": "Adversaries may block access to Ethernet communications to prevent instructions or configurations messages from reaching target systems and devices. Ethernet connections allow for communications between IT and OT systems and devices. Blocking Ethernet communications may also block command and reporting messages.(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)\n\nAn adversary may block Ethernet communications by disabling network interfaces, [Service Stop](https://attack.mitre.org/techniques/T0881), or conducting an [Adversary-in-the-Middle](https://attack.mitre.org/techniques/T0830) attack and dropping the network traffic.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0107"
+    ],
+    "technique_id": "T1695"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "19.2",
+    "id": "T1695.003",
+    "name": "Wi-Fi",
+    "reference": "https://attack.mitre.org/techniques/T1695/003/",
+    "description": "Adversaries may block access to Wi-Fi communications to prevent messages from reaching target systems and devices. Wi-Fi connections allow for communications between IT and OT systems and devices. Blocking Wi-Fi communications may also block command and reporting messages.(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)\n\nAn adversary may block Wi-Fi communications by disabling network interfaces, [Service Stop](https://attack.mitre.org/techniques/T0881), conducting an [Adversary-in-the-Middle](https://attack.mitre.org/techniques/T0830) attack and dropping the network traffic, or by jamming the Wi-Fi signal.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0107"
+    ],
+    "technique_id": "T1695"
   }
 ]

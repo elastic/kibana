@@ -6,12 +6,18 @@
  */
 
 import { MITRE_FRAMEWORKS } from '@kbn/security-mitre-attack-common';
-import { getMockAtlasStixBundle, getMockStixBundle } from './stix_entities.mock';
+import {
+  getMockAtlasStixBundle,
+  getMockIcsStixBundle,
+  getMockStixBundle,
+} from './stix_entities.mock';
+import { ATLAS_STIX_SOURCE, ENTERPRISE_STIX_SOURCE, ICS_STIX_SOURCE } from './stix_sources';
 import {
   MITRE_FRAMEWORK_DEFINITIONS,
   buildMitreArtifact,
   mapBundleToMitreEntities,
   normalizeAtlasVersion,
+  toAttackFrameworkVersion,
 } from './build_artifact';
 import type { FrameworkDefinition } from './build_artifact';
 import { fetchStixBundle } from './fetch_stix_bundle';
@@ -22,6 +28,7 @@ const fetchStixBundleMock = fetchStixBundle as jest.MockedFunction<typeof fetchS
 
 const enterpriseBundle = getMockStixBundle();
 const atlasBundle = getMockAtlasStixBundle();
+const icsBundle = getMockIcsStixBundle();
 
 const ENTERPRISE_URL_PREFIX = 'https://raw.githubusercontent.com/mitre/cti/';
 const ATLAS_URL_PREFIX = 'https://github.com/mitre-atlas/atlas-data/releases/download/';
@@ -53,16 +60,28 @@ describe('MITRE_FRAMEWORK_DEFINITIONS', () => {
 
   it('builds the enterprise bundle URL from the mitre/cti tag', () => {
     const enterprise = getDefinition('enterprise', []);
-    expect(enterprise.sourceName).toBe('mitre-attack');
+    expect(enterprise.killChainName).toBe('mitre-attack');
+    expect(enterprise.sourceNames).toEqual(['mitre-attack']);
     expect(enterprise.bundleUrl('ATT&CK-v19.2')).toBe(
       `${ENTERPRISE_URL_PREFIX}ATT&CK-v19.2/enterprise-attack/enterprise-attack.json`
     );
     expect(enterprise.toFrameworkVersion('ATT&CK-v19.2')).toBe('19.2');
   });
 
+  it('builds the ics bundle URL from the mitre/cti tag with a separate kill chain and source names', () => {
+    const ics = getDefinition('ics', []);
+    expect(ics.killChainName).toBe('mitre-ics-attack');
+    expect(ics.sourceNames).toEqual(['mitre-attack', 'mitre-ics-attack']);
+    expect(ics.bundleUrl('ATT&CK-v19.2')).toBe(
+      `${ENTERPRISE_URL_PREFIX}ATT&CK-v19.2/ics-attack/ics-attack.json`
+    );
+    expect(ics.toFrameworkVersion('ATT&CK-v19.2')).toBe('19.2');
+  });
+
   it('builds the atlas bundle URL from the atlas-data release tag', () => {
     const atlas = getDefinition('atlas', []);
-    expect(atlas.sourceName).toBe('mitre-atlas');
+    expect(atlas.killChainName).toBe('mitre-atlas');
+    expect(atlas.sourceNames).toEqual(['mitre-atlas']);
     expect(atlas.bundleUrl('v2026.08')).toBe(`${ATLAS_URL_PREFIX}v2026.08/stix-atlas.json`);
     expect(atlas.toFrameworkVersion('v2026.08')).toBe('2026.8');
   });
@@ -92,7 +111,7 @@ describe('mapBundleToMitreEntities', () => {
       enterpriseBundle,
       'enterprise',
       '18.0',
-      'mitre-attack'
+      ENTERPRISE_STIX_SOURCE
     );
     expect(entities.length).toBeGreaterThan(0);
     for (const entity of entities) {
@@ -102,7 +121,7 @@ describe('mapBundleToMitreEntities', () => {
   });
 
   it('maps an ATLAS bundle through the mitre-atlas source name', () => {
-    const entities = mapBundleToMitreEntities(atlasBundle, 'atlas', '2026.8', 'mitre-atlas');
+    const entities = mapBundleToMitreEntities(atlasBundle, 'atlas', '2026.8', ATLAS_STIX_SOURCE);
     expect(entities.map((entity) => entity.id).sort()).toEqual([
       'AML.T0024',
       'AML.T0024.002',
@@ -115,10 +134,54 @@ describe('mapBundleToMitreEntities', () => {
   });
 });
 
+describe('toAttackFrameworkVersion', () => {
+  it('strips the ATT&CK-v prefix', () => {
+    expect(toAttackFrameworkVersion('ATT&CK-v19.2')).toBe('19.2');
+    expect(toAttackFrameworkVersion('ATT&CK-v20.0')).toBe('20.0');
+  });
+});
+
+describe('mapBundleToMitreEntities (ics)', () => {
+  it('maps an ICS bundle by the mitre-ics-attack kill chain, accepting either source_name', () => {
+    const entities = mapBundleToMitreEntities(icsBundle, 'ics', '19.2', ICS_STIX_SOURCE);
+    expect(entities.map((entity) => entity.id).sort()).toEqual([
+      'T0800',
+      'T1691',
+      'T1691.001',
+      'TA0100',
+    ]);
+    for (const entity of entities) {
+      expect(entity.framework).toBe('ics');
+      expect(entity.framework_version).toBe('19.2');
+    }
+  });
+
+  it('resolves ICS tactic ids and the subtechnique parent for T1xxx ids', () => {
+    const entities = mapBundleToMitreEntities(icsBundle, 'ics', '19.2', ICS_STIX_SOURCE);
+    const technique = entities.find((entity) => entity.id === 'T1691');
+    const subtechnique = entities.find((entity) => entity.id === 'T1691.001');
+    expect(technique?.type === 'technique' && technique.tactic_ids).toEqual(['TA0100']);
+    expect(subtechnique?.type === 'subtechnique' && subtechnique.technique_id).toBe('T1691');
+    expect(technique?.reference).toBe('https://attack.mitre.org/techniques/T1691/');
+  });
+
+  it('ignores the Enterprise kill chain when mapping ICS', () => {
+    const entities = mapBundleToMitreEntities(getMockStixBundle(), 'ics', '19.2', ICS_STIX_SOURCE);
+    // Enterprise tactics/techniques carry 'mitre-attack' references, so they are still
+    // recognized by source_name, but their 'mitre-attack' kill chain is not the ICS one.
+    for (const entity of entities) {
+      if (entity.type !== 'tactic') {
+        expect(entity.tactic_ids).toEqual([]);
+      }
+    }
+  });
+});
+
 describe('buildMitreArtifact', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     fetchStixBundleMock.mockImplementation(async (url) => {
+      if (url.includes('/ics-attack/')) return icsBundle;
       if (url.startsWith(ENTERPRISE_URL_PREFIX)) return enterpriseBundle;
       if (url.startsWith(ATLAS_URL_PREFIX)) return atlasBundle;
       throw new Error(`Unexpected bundle URL in test: ${url}`);
@@ -145,7 +208,7 @@ describe('buildMitreArtifact', () => {
       enterpriseBundle,
       'enterprise',
       '19.1',
-      'mitre-attack'
+      ENTERPRISE_STIX_SOURCE
     ).length;
     expect(entities).toHaveLength(singleVersionCount * 2);
   });
@@ -161,6 +224,18 @@ describe('buildMitreArtifact', () => {
       .sort();
 
     expect(versionsForTactic).toEqual(['18.0', '19.1']);
+  });
+
+  describe('with ics definition', () => {
+    it('fetches the ICS bundle and stamps entities with the ics framework', async () => {
+      const entities = await buildMitreArtifact([getDefinition('ics', ['ATT&CK-v19.2'])]);
+
+      expect(fetchStixBundleMock).toHaveBeenCalledWith(
+        `${ENTERPRISE_URL_PREFIX}ATT&CK-v19.2/ics-attack/ics-attack.json`
+      );
+      expect(entities.every((entity) => entity.framework === 'ics')).toBe(true);
+      expect(entities.every((entity) => entity.framework_version === '19.2')).toBe(true);
+    });
   });
 
   describe('with enterprise and atlas definitions', () => {

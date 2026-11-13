@@ -19,9 +19,13 @@ import {
   createAtlasMitreTactic,
   createAtlasMitreTechnique,
   createAtlasMitreSubtechnique,
+  createIcsMitreTactic,
+  createIcsMitreTechnique,
+  createIcsMitreSubtechnique,
   DEFAULT_MOCK_FRAMEWORK_VERSION,
   OLDER_MOCK_FRAMEWORK_VERSION,
   ATLAS_MOCK_FRAMEWORK_VERSION,
+  ICS_MOCK_FRAMEWORK_VERSION,
 } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -144,6 +148,47 @@ export default ({ getService }: FtrProviderContext) => {
           expect(entity.framework_version).to.eql(ATLAS_MOCK_FRAMEWORK_VERSION);
           expect(entity.reference.startsWith('https://atlas.mitre.org/')).to.eql(true);
         }
+      });
+
+      it('returns only ics entities when framework=ics is requested alongside seeded enterprise and atlas entities', async () => {
+        const icsTactic = createIcsMitreTactic();
+        const icsTechnique = createIcsMitreTechnique({ tactic_ids: [icsTactic.id] });
+        const icsSubtechnique = createIcsMitreSubtechnique({
+          technique_id: icsTechnique.id,
+          tactic_ids: [icsTactic.id],
+        });
+        await seedMitreEntities(es, [
+          createMitreTactic(),
+          createAtlasMitreTactic(),
+          icsTactic,
+          icsTechnique,
+          icsSubtechnique,
+        ]);
+
+        const { body, status } = await mitreAttackApi.getEntities({ framework: 'ics' });
+
+        expect(status).to.eql(200);
+        expect(body.framework).to.eql('ics');
+        expect(body.framework_version).to.eql(ICS_MOCK_FRAMEWORK_VERSION);
+        expect(body.tactics.map((t: { id: string }) => t.id)).to.eql([icsTactic.id]);
+        expect(body.techniques.map((t: { id: string }) => t.id)).to.eql([icsTechnique.id]);
+        expect(body.subtechniques.map((t: { id: string }) => t.id)).to.eql([icsSubtechnique.id]);
+        for (const entity of [...body.tactics, ...body.techniques, ...body.subtechniques]) {
+          expect(entity.framework).to.eql('ics');
+          expect(entity.framework_version).to.eql(ICS_MOCK_FRAMEWORK_VERSION);
+        }
+      });
+
+      it('returns 200 with empty buckets for framework=ics when only enterprise entities exist', async () => {
+        await seedMitreEntities(es, [createMitreTactic()]);
+
+        const { body, status } = await mitreAttackApi.getEntities({ framework: 'ics' });
+
+        expect(status).to.eql(200);
+        expect(body.framework).to.eql('ics');
+        expect(body.tactics).to.eql([]);
+        expect(body.techniques).to.eql([]);
+        expect(body.subtechniques).to.eql([]);
       });
 
       it('returns 200 with empty buckets for framework=atlas when only enterprise entities exist', async () => {

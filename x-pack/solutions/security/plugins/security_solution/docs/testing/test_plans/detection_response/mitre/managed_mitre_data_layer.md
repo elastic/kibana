@@ -4,9 +4,9 @@
 
 ## Summary <!-- omit from toc -->
 
-This is a test plan for the backend infrastructure of the Managed MITRE Data Source feature: Saved Object population, feature flag gating, the internal entities API, the server-side data client, multi-framework (ATT&CK Enterprise and ATLAS) and multi-version coexistence, and error handling.
+This is a test plan for the backend infrastructure of the Managed MITRE Data Source feature: Saved Object population, feature flag gating, the internal entities API, the server-side data client, multi-framework (ATT&CK Enterprise, ATLAS and ATT&CK for ICS) and multi-version coexistence, and error handling.
 
-Out of scope for this plan: `GET /internal/mitre/search` route scenarios, Fleet out-of-band delivery, AI tooling, semantic search, and removal of the legacy blob. ATLAS UI surfaces (coverage overview, threat picker) are covered by their own test plans.
+Out of scope for this plan: `GET /internal/mitre/search` route scenarios, Fleet out-of-band delivery, AI tooling, semantic search, and removal of the legacy blob. ATLAS and ICS UI surfaces (coverage overview, threat picker) are covered by their own test plans.
 
 ## Table of contents <!-- omit from toc -->
 
@@ -26,7 +26,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Bundled artifact](#bundled-artifact)
     - [**Scenario: The build script generates a valid artifact from the STIX bundle**](#scenario-the-build-script-generates-a-valid-artifact-from-the-stix-bundle)
     - [**Scenario: The build script correctly maps entities across multiple MITRE versions**](#scenario-the-build-script-correctly-maps-entities-across-multiple-mitre-versions)
-    - [**Scenario: The artifact carries both the Enterprise and the ATLAS frameworks**](#scenario-the-artifact-carries-both-the-enterprise-and-the-atlas-frameworks)
+    - [**Scenario: The artifact carries both the Enterprise, ATLAS and ICS frameworks**](#scenario-the-artifact-carries-the-enterprise-atlas-and-ics-frameworks)
   - [SO population lifecycle](#so-population-lifecycle)
     - [**Scenario: SO IDs are deterministic and match the expected format**](#scenario-so-ids-are-deterministic-and-match-the-expected-format)
     - [**Scenario: Population writes every framework and logs the entity count per framework**](#scenario-population-writes-every-framework-and-logs-the-entity-count-per-framework)
@@ -39,6 +39,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: The `types` parameter controls which entity buckets are populated**](#scenario-the-types-parameter-controls-which-entity-buckets-are-populated)
     - [**Scenario: `framework` defaults to "enterprise" when omitted**](#scenario-framework-defaults-to-enterprise-when-omitted)
     - [**Scenario: `framework=atlas` returns only ATLAS entities**](#scenario-frameworkatlas-returns-only-atlas-entities)
+    - [**Scenario: `framework=ics` returns only ICS entities**](#scenario-frameworkics-returns-only-ics-entities)
     - [**Scenario: `framework_version` omitted resolves to the latest version**](#scenario-framework_version-omitted-resolves-to-the-latest-version)
     - [**Scenario: `framework_version` omitted resolves independently per framework**](#scenario-framework_version-omitted-resolves-independently-per-framework)
     - [**Scenario: `framework_version` specified explicitly returns entities from that version**](#scenario-framework_version-specified-explicitly-returns-entities-from-that-version)
@@ -91,7 +92,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - Population must be idempotent: running on every restart must not duplicate entities (`bulkCreate` uses `overwrite: true`).
 - Population must not block or crash Kibana startup on failure, any errors must be caught and logged.
 - SO IDs must be deterministic (`{framework}:{framework_version}:{mitre_id}`) to allow multiple frameworks and versions to coexist without ID collisions.
-- Every entity, Saved Object and API response belongs to exactly one framework (`enterprise` or `atlas`). The latest version is resolved per framework; a newer version of one framework must never affect the version served for another.
+- Every entity, Saved Object and API response belongs to exactly one framework (`enterprise`, `atlas` or `ics`). The latest version is resolved per framework; a newer version of one framework must never affect the version served for another.
 - Reads must return empty results gracefully (no error) when population has not yet completed.
 - Routes must not be registered when the feature flag is off.
 - All API query parameters must be bounded: `framework_version` max 32 characters, `types` array max 3 elements.
@@ -128,7 +129,7 @@ And entities from different versions should be present as distinct entries in th
 And an entity ID present in both versions should appear twice with version-specific metadata
 ```
 
-#### **Scenario: The artifact carries both the Enterprise and the ATLAS frameworks**
+#### **Scenario: The artifact carries the Enterprise, ATLAS and ICS frameworks**
 
 **Automation**: 1 unit test, 1 integration test.
 
@@ -138,6 +139,9 @@ Then it should contain entities with framework "enterprise"
 And it should contain entities with framework "atlas"
 And every ATLAS entity ID should carry the "AML." prefix (e.g. AML.TA0000, AML.T0044, AML.T0024.002)
 And every ATLAS entity reference should point at https://atlas.mitre.org/
+And it should contain entities with framework "ics" (tactics TA01xx, techniques T0xxx and some T1xxx, subtechniques such as T0843.001 and T1691.001)
+And every ICS entity reference should point at https://attack.mitre.org/
+And an ICS entity ID may equal an Enterprise entity ID in the future, so the two must only ever be distinguished by their framework field
 And the artifact may carry several framework_version values per framework, and the entities API should resolve the latest version for each framework independently
 ```
 
@@ -159,10 +163,10 @@ And the total document count should match the number of entities in the bundled 
 **Automation**: 1 unit test, 1 integration test.
 
 ```Gherkin
-Given the bundled artifact carries both the enterprise and the atlas frameworks
+Given the bundled artifact carries the enterprise, atlas and ics frameworks
 When MitreAttackService.populate() completes
 Then mitre-attack-entity Saved Objects should exist for every framework in the artifact
-And the population log line should list the entity count per framework and version (e.g. "enterprise@19.2: N, atlas@2026.8: M")
+And the population log line should list the entity count per framework and version (e.g. "enterprise@19.2: N, atlas@2026.8: M, ics@19.2: K")
 And for each framework, the entities API called with that framework should return
   the artifact framework_version for that framework
   and active entity counts per bucket matching the artifact
@@ -263,6 +267,24 @@ And no enterprise entity should be present in any bucket
 
 Given the index contains only enterprise entities
 When the entities API is called with framework=atlas
+Then the response status should be 200
+And the tactics, techniques, and subtechniques buckets should all be empty
+```
+
+#### **Scenario: `framework=ics` returns only ICS entities**
+
+**Automation**: 2 integration tests.
+
+```Gherkin
+Given the index contains enterprise, atlas and ics entities
+When the entities API is called with framework=ics
+Then the response status should be 200
+And the response framework field should equal "ics"
+And every entity in every bucket should have framework equal to "ics"
+And no enterprise or atlas entity should be present in any bucket
+
+Given the index contains only enterprise entities
+When the entities API is called with framework=ics
 Then the response status should be 200
 And the tactics, techniques, and subtechniques buckets should all be empty
 ```
@@ -385,7 +407,7 @@ And the response body should describe a validation error for the <parameter> par
 
 | `<parameter>`       | `<reason>`                                                    |
 | ------------------- | ------------------------------------------------------------- |
-| `framework`         | value is not "enterprise" or "atlas"                          |
+| `framework`         | value is not "enterprise", "atlas" or "ics"                   |
 | `types`             | contains a value not in tactic / technique / subtechnique     |
 | `types`             | array contains more than 3 elements                           |
 | `types`             | empty string                                                  |

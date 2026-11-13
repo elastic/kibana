@@ -18,6 +18,9 @@ export const OLDER_MOCK_FRAMEWORK_VERSION = '98.0';
 // ATLAS fixtures use a version distinct from the enterprise ones so tests can
 // observe that the latest version resolves independently per framework.
 export const ATLAS_MOCK_FRAMEWORK_VERSION = '97.0';
+// ICS fixtures get their own version too, so the per-framework latest-version resolution
+// can be told apart from enterprise and atlas.
+export const ICS_MOCK_FRAMEWORK_VERSION = '96.0';
 
 /** Creates a MitreTactic with sensible defaults. Pass overrides to customize any field. */
 export const createMitreTactic = (overrides?: Partial<MitreTactic>): MitreTactic => ({
@@ -112,5 +115,49 @@ export const createAtlasMitreSubtechnique = (
     description: 'An ATLAS subtechnique used in tests.',
     tactic_ids: ['AML.TA9000'],
     technique_id: 'AML.T9000',
+    ...overrides,
+  });
+
+// MITRE ATT&CK for ICS fixtures. ICS ids look like Enterprise ids and its pages live on
+// attack.mitre.org; the 9100-range keeps them clearly synthetic.
+
+/** Creates an ICS MitreTactic (`TA9100`). Pass overrides to customize any field. */
+export const createIcsMitreTactic = (overrides?: Partial<MitreTactic>): MitreTactic =>
+  createMitreTactic({
+    framework: 'ics',
+    framework_version: ICS_MOCK_FRAMEWORK_VERSION,
+    id: 'TA9100',
+    name: 'Test ICS Tactic',
+    reference: 'https://attack.mitre.org/tactics/TA9100/',
+    description: 'An ICS tactic used in tests.',
+    ...overrides,
+  });
+
+/** Creates an ICS MitreTechnique (`T9100` under `TA9100`). Pass overrides to customize any field. */
+export const createIcsMitreTechnique = (overrides?: Partial<MitreTechnique>): MitreTechnique =>
+  createMitreTechnique({
+    framework: 'ics',
+    framework_version: ICS_MOCK_FRAMEWORK_VERSION,
+    id: 'T9100',
+    name: 'Test ICS Technique',
+    reference: 'https://attack.mitre.org/techniques/T9100/',
+    description: 'An ICS technique used in tests.',
+    tactic_ids: ['TA9100'],
+    ...overrides,
+  });
+
+/** Creates an ICS MitreSubtechnique (`T9100.001` under `T9100`). Pass overrides to customize any field. */
+export const createIcsMitreSubtechnique = (
+  overrides?: Partial<MitreSubtechnique>
+): MitreSubtechnique =>
+  createMitreSubtechnique({
+    framework: 'ics',
+    framework_version: ICS_MOCK_FRAMEWORK_VERSION,
+    id: 'T9100.001',
+    name: 'Test ICS Subtechnique',
+    reference: 'https://attack.mitre.org/techniques/T9100/001/',
+    description: 'An ICS subtechnique used in tests.',
+    tactic_ids: ['TA9100'],
+    technique_id: 'T9100',
     ...overrides,
   });

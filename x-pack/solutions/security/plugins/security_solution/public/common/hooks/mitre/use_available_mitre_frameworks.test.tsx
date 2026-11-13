@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { MITRE_FRAMEWORKS } from '@kbn/security-mitre-attack-common';
+import { MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS } from '@kbn/security-mitre-attack-common';
 import { useKibana } from '../../lib/kibana';
 import { useAvailableMitreFrameworks } from './use_available_mitre_frameworks';
 
@@ -20,7 +20,8 @@ describe('useAvailableMitreFrameworks', () => {
 
     const { result } = renderHook(() => useAvailableMitreFrameworks());
 
-    expect(result.current).toEqual(MITRE_FRAMEWORKS);
+    expect(result.current).toEqual(MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS);
+    expect(result.current).not.toContain('ics');
   });
 
   it('returns only enterprise when the managed source is disabled', () => {

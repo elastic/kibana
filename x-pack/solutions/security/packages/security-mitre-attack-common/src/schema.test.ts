@@ -103,8 +103,16 @@ describe('mitreEntitySchema', () => {
       expect(() => mitreEntitySchema.parse(withoutTechniqueId)).toThrow();
     });
 
+    it('accepts the ics framework', () => {
+      expect(mitreEntitySchema.parse({ ...baseTacticFixture, framework: 'ics' }).framework).toBe(
+        'ics'
+      );
+    });
+
     it('rejects an unknown framework value', () => {
-      expect(() => mitreEntitySchema.parse({ ...baseTacticFixture, framework: 'ics' })).toThrow();
+      expect(() =>
+        mitreEntitySchema.parse({ ...baseTacticFixture, framework: 'mobile' })
+      ).toThrow();
     });
   });
 });
