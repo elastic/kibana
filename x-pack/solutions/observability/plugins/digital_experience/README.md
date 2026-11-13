@@ -49,8 +49,10 @@ privileges like the app.
   `partiallyAvailableSources` and gets its own warning, as Elasticsearch skips the indices of a
   wildcard the user can't read instead of failing, so rows may be missing. The check resolves the
   index expression the source's search sends (exclusions included) as the internal user and as
-  the user, which Elasticsearch limits to what they can read, and warns when the user reaches less
-  data: indices, data streams (a backing index counts as its data stream) and alias targets.
+  the user, which Elasticsearch limits to what they can access, keeps the names the user holds
+  `read` on (`security.hasPrivileges`, as `view_index_metadata` also resolves names), and warns
+  when the user reaches less data: indices, data streams (a backing index counts as its data
+  stream) and alias targets.
   Unused defaults such as `apm-*` don't count, and a role narrower than the wildcard passes when it
   covers every existing index. Classic RUM leaves out the EDOT wildcards of the default APM
   indices, both sources leave out the Agent Builder OTel indices, as in APM Diagnostics, and remote
