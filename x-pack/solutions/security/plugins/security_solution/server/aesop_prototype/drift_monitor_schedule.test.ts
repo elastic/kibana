@@ -6,6 +6,8 @@
  */
 
 import { AESOP_DRIFT_MONITOR_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server';
 import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
@@ -15,6 +17,7 @@ import {
   aesopDriftMonitorWorkflowIdSuffix,
   buildTemplateValues,
   getAesopDriftMonitorTracingWarnings,
+  uninstallAesopDriftMonitor,
 } from './drift_monitor_schedule';
 
 describe('aesopDriftMonitorWorkflowIdSuffix', () => {
@@ -111,5 +114,34 @@ describe('getAesopDriftMonitorTracingWarnings', () => {
 
   it('warns about both settings when tracing is off', async () => {
     await expect(getAesopDriftMonitorTracingWarnings(withSettings({}))).resolves.toHaveLength(2);
+  });
+});
+
+describe('uninstallAesopDriftMonitor', () => {
+  const uninstall = async (skillId: string) => {
+    const uninstallMock = jest.fn().mockResolvedValue(undefined);
+    const client = { uninstall: uninstallMock } as unknown as PluginScopedManagedWorkflowsApi;
+    await uninstallAesopDriftMonitor(
+      {
+        getManagedWorkflowsClient: async () => client,
+        logger: loggerMock.create(),
+        spaceId: 'default',
+      },
+      { skillId }
+    );
+    return uninstallMock.mock.calls.map(([, options]) => options);
+  };
+
+  it('removes both the current and the legacy instance', async () => {
+    await expect(uninstall('Find.Rules')).resolves.toEqual([
+      { spaceId: 'default', workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix('Find.Rules') },
+      { spaceId: 'default', workflowIdSuffix: 'skill-find-rules' },
+    ]);
+  });
+
+  it('skips the legacy instance when the id has no slug', async () => {
+    await expect(uninstall('...')).resolves.toEqual([
+      { spaceId: 'default', workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix('...') },
+    ]);
   });
 });

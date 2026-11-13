@@ -32,13 +32,17 @@ export const AESOP_AB_COMPARE_WORKFLOW = {
 export interface AesopDriftMonitorWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   /** The skill whose deployed traffic the monitor grades. */
   skillId: string;
-  /** The skill's display name; agents usually load skills by name, so traces match on either. */
+  /** The skill's display name; load_skill resolves by name, so traces are matched on it. */
   skillName: string;
   /** How often the monitor runs. */
   intervalMinutes: number;
   /** How far back each run looks for traces to grade. */
   lookbackMinutes: number;
 }
+
+// The name is rendered raw into a single-quoted YAML const and double-quoted
+// ES|QL literals, so anything outside this set falls back to the skill id.
+const SAFE_SKILL_NAME = /^[A-Za-z0-9 ._-]+$/;
 
 const renderTemplate = (template: string, values: Record<string, string | number>): string =>
   Object.entries(values).reduce(
@@ -57,7 +61,7 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   yamlTemplate: ({ skillId, skillName, intervalMinutes, lookbackMinutes }) =>
     renderTemplate(AESOP_DRIFT_MONITOR_YAML, {
       __SKILL_ID__: skillId,
-      __SKILL_NAME__: skillName,
+      __SKILL_NAME__: SAFE_SKILL_NAME.test(skillName) ? skillName : skillId,
       __INTERVAL_MINUTES__: intervalMinutes,
       __LOOKBACK_MINUTES__: lookbackMinutes,
     }),

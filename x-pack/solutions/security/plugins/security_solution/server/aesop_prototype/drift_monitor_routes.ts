@@ -174,7 +174,8 @@ export const registerAesopDriftMonitorRoutes = ({
         version: AESOP_DRIFT_MONITOR_ROUTES_API_VERSION,
         validate: {
           request: {
-            params: schema.object({ skill_id: skillIdSchema }),
+            // Lenient so monitors enabled before the strict id grammar can still be removed.
+            params: schema.object({ skill_id: schema.string({ minLength: 1, maxLength: 128 }) }),
           },
         },
       },

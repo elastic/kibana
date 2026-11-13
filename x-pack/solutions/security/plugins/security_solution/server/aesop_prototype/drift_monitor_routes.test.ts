@@ -167,18 +167,32 @@ describe('registerAesopDriftMonitorRoutes', () => {
   );
 
   it.each(['Find-Security-Rules', 'foo.bar', '-triage', `x' OR "1"`, 'a'.repeat(65)])(
-    'rejects the skill id %j in the POST body and DELETE params',
+    'rejects the skill id %j in the POST body',
     (skillId) => {
       expect(
         validate('post', AESOP_DRIFT_MONITOR_ROUTE_PATH, 'body', { skill_id: skillId })
       ).toHaveProperty('error');
+    }
+  );
+
+  it.each(['Find-Security-Rules', 'foo.bar', 'a'.repeat(65)])(
+    'accepts the legacy skill id %j in DELETE params',
+    (skillId) => {
       expect(
         validate('delete', `${AESOP_DRIFT_MONITOR_ROUTE_PATH}/{skill_id}`, 'params', {
           skill_id: skillId,
         })
-      ).toHaveProperty('error');
+      ).toHaveProperty('value');
     }
   );
+
+  it.each(['', 'a'.repeat(129)])('rejects the skill id %j in DELETE params', (skillId) => {
+    expect(
+      validate('delete', `${AESOP_DRIFT_MONITOR_ROUTE_PATH}/{skill_id}`, 'params', {
+        skill_id: skillId,
+      })
+    ).toHaveProperty('error');
+  });
 
   it('uninstalls the monitor on DELETE', async () => {
     const handler = router.versioned.getRoute(
