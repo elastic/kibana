@@ -157,6 +157,8 @@ export {
   createSkillInvocationEvaluator,
   createChatCallsEvaluator,
   createToolCallsEvaluator,
+  createEstimatedCostEvaluator,
+  ESTIMATED_COST_EVALUATOR_NAME,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
