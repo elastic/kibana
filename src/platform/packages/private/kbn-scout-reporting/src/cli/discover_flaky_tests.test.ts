@@ -28,9 +28,16 @@ describe('judgedTogetherOf', () => {
     ).toEqual(['kibana-on-merge', 'kibana-security-solution-on-merge']);
   });
 
-  it('judges every pipeline together when the report reads none of the listed ones', () => {
-    // e.g. a schedule overriding the pipelines alone, inheriting the list
-    expect(judgedTogetherOf(['kibana-on-merge'], ['kibana-pull-request'], log)).toBeUndefined();
+  it('judges every pipeline on its own when the report reads none of the listed ones', () => {
+    // e.g. a schedule overriding the pipelines alone with FIPS and Cloud, inheriting the list:
+    // judged together, one environment could hide the flakiness of another
+    expect(
+      judgedTogetherOf(
+        ['kibana-on-merge'],
+        ['kibana-fips', 'appex-qa-serverless-kibana-scout-tests'],
+        log
+      )
+    ).toEqual([]);
   });
 
   it('judges every pipeline on its own when the flag lists none', () => {

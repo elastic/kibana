@@ -85,9 +85,10 @@ const readClassifications = (flagsReader: FlagsReader): FlakyTestClassification[
 
 /**
  * The pipelines of `pipelines` judged together, from those `--judgedTogether` lists: undefined,
- * every pipeline together, when the flag is unset or none of its pipelines is read; none, every
- * pipeline on its own. Pipelines the report doesn't read are left out, so a report that overrides
- * --pipelines alone, inheriting the list from the environment, still runs.
+ * every pipeline together, only when the flag is unset. Pipelines the report doesn't read are left
+ * out, so a report that overrides --pipelines alone, inheriting the list from the environment,
+ * still runs; when none is left, every pipeline is judged on its own, as pooling them could let
+ * one environment hide the flakiness of another.
  */
 export const judgedTogetherOf = (
   listed: readonly string[] | undefined,
@@ -102,7 +103,7 @@ export const judgedTogetherOf = (
   if (unread.length > 0) {
     log.info(`--judgedTogether: left out ${unread.join(', ')}, not in --pipelines`);
   }
-  return listed.length > 0 && read.length === 0 ? undefined : read;
+  return read;
 };
 
 export const discoverFlakyTests: Command<void> = {
