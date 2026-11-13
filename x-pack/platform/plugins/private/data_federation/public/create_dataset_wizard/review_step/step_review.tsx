@@ -34,7 +34,6 @@ import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { fieldTypeSelectStrings } from '../mapping_step/mapping_editor/field_type_select_i18n';
-import { DatasetPreview } from './dataset_preview';
 import { getSettingsReviewItems, type ReviewItem } from './review_settings_items';
 
 const displayValue = (value: string) => value.trim() || createDatasetWizardStrings.notSet;
@@ -255,13 +254,6 @@ export function StepReview({ dataSources }: { dataSources: DataSource[] }) {
     </>
   );
 
-  const previewTab = (
-    <>
-      <EuiSpacer size="l" />
-      <DatasetPreview />
-    </>
-  );
-
   return (
     <div data-test-subj="createDatasetWizardReviewStep">
       <EuiTitle size="m">
@@ -282,12 +274,6 @@ export function StepReview({ dataSources }: { dataSources: DataSource[] }) {
             name: createDatasetWizardStrings.reviewRequestTabLabel,
             content: requestTab,
             'data-test-subj': 'createDatasetWizardReviewRequestTabButton',
-          },
-          {
-            id: 'preview',
-            name: createDatasetWizardStrings.reviewPreviewTabLabel,
-            content: previewTab,
-            'data-test-subj': 'createDatasetWizardReviewPreviewTabButton',
           },
         ]}
       />

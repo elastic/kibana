@@ -70,9 +70,10 @@ const isMappingStepValid = ({ mappings }: CreateDatasetFormValues): boolean =>
 
 /**
  * The skippable steps (those between the first and last) whose rules pass for `values`, so a saved
- * dataset can be navigated freely without visiting each step first.
+ * dataset can be navigated freely without visiting each step first. The preview has no rules.
  */
 export const getValidStepIds = (values: CreateDatasetFormValues): DatasetWizardStepId[] => [
   ...(isSettingsStepValid(values) ? (['settings'] as const) : []),
   ...(isMappingStepValid(values) ? (['mapping'] as const) : []),
+  'preview',
 ];

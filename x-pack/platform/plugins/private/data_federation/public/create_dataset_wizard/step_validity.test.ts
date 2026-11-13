@@ -27,7 +27,7 @@ const buildValues = ({
 
 describe('getValidStepIds', () => {
   it('SHOULD include every skippable step WHEN all values are valid', () => {
-    expect(getValidStepIds(buildValues())).toEqual(['settings', 'mapping']);
+    expect(getValidStepIds(buildValues())).toEqual(['settings', 'mapping', 'preview']);
   });
 
   describe('WHEN an Additional settings rule fails', () => {
@@ -47,7 +47,7 @@ describe('getValidStepIds', () => {
         { error_mode: 'null_field', max_error_ratio: '2' },
       ],
     ])('SHOULD exclude the settings step for %s', (_label, settings) => {
-      expect(getValidStepIds(buildValues({ settings }))).toEqual(['mapping']);
+      expect(getValidStepIds(buildValues({ settings }))).toEqual(['mapping', 'preview']);
     });
   });
 
@@ -57,20 +57,24 @@ describe('getValidStepIds', () => {
       ['max errors without a budget error mode', { error_mode: 'fail_fast', max_errors: 'x' }],
       ['a partition path without template detection', { partition_detection: 'hive' }],
     ])('SHOULD include the settings step for %s', (_label, settings) => {
-      expect(getValidStepIds(buildValues({ settings }))).toEqual(['settings', 'mapping']);
+      expect(getValidStepIds(buildValues({ settings }))).toEqual([
+        'settings',
+        'mapping',
+        'preview',
+      ]);
     });
   });
 
   describe('WHEN a delimiter matches the default quote of only one format', () => {
     it('SHOULD include the settings step for TSV', () => {
       expect(getValidStepIds(buildValues({ settings: { format: 'tsv', delimiter: '"' } }))).toEqual(
-        ['settings', 'mapping']
+        ['settings', 'mapping', 'preview']
       );
     });
 
     it('SHOULD exclude the settings step for CSV', () => {
       expect(getValidStepIds(buildValues({ settings: { format: 'csv', delimiter: '"' } }))).toEqual(
-        ['mapping']
+        ['mapping', 'preview']
       );
     });
   });
@@ -93,7 +97,7 @@ describe('getValidStepIds', () => {
       ],
       ['a defined schema without mapped fields', { dynamic: false }],
     ])('SHOULD exclude the mapping step for %s', (_label, mappings) => {
-      expect(getValidStepIds(buildValues({ mappings }))).toEqual(['settings']);
+      expect(getValidStepIds(buildValues({ mappings }))).toEqual(['settings', 'preview']);
     });
   });
 });

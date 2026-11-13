@@ -65,7 +65,7 @@ describe('DatasetPreview', () => {
     mockResults([['hello']]);
     renderPreview();
 
-    expect(screen.getByTestId('createDatasetWizardReviewPreviewLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('createDatasetWizardPreviewLoading')).toBeInTheDocument();
     expect(await screen.findByTestId('mockEsqlDataGrid')).toHaveTextContent('1 rows');
 
     expect(getESQLResultsMock).toHaveBeenCalledWith(
@@ -88,9 +88,7 @@ describe('DatasetPreview', () => {
     mockResults([]);
     renderPreview();
 
-    expect(
-      await screen.findByTestId('createDatasetWizardReviewPreviewNoResults')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('createDatasetWizardPreviewNoResults')).toBeInTheDocument();
   });
 
   it('shows the error when the query fails', async () => {
@@ -100,7 +98,7 @@ describe('DatasetPreview', () => {
     );
     renderPreview();
 
-    expect(await screen.findByTestId('createDatasetWizardReviewPreviewError')).toHaveTextContent(
+    expect(await screen.findByTestId('createDatasetWizardPreviewError')).toHaveTextContent(
       'Unknown index [kibana_sample_data_ecommerce]'
     );
   });
