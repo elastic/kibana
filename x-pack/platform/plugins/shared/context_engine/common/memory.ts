@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import { RELATIONSHIP_KI_TYPE } from './dreaming';
-
 export const MEMORY_KI_TYPES = ['memory.session', 'memory.session_fact'] as const;
-
-/** The memory KI types left out of ordinary retrieval: memories, and dreamed relationships. */
-export const RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES: readonly string[] = [
-  ...MEMORY_KI_TYPES,
-  RELATIONSHIP_KI_TYPE,
-];
 
 /**
  * Whether an AI index takes memories while the global memory setting is on: always when it is not

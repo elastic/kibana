@@ -12,14 +12,8 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, spaceScoped, columnValues, type EsqlResponse } from '../fixtures';
 
-const {
-  AI_INDEX_COLLECTION_PATH,
-  AI_INDEX_QUERY_PATH,
-  API_HEADERS,
-  CONTEXT_ENGINE_READ,
-  INTERNAL_API_HEADERS,
-  aiIndexDreamingPath,
-} = testData;
+const { AI_INDEX_COLLECTION_PATH, AI_INDEX_QUERY_PATH, API_HEADERS, CONTEXT_ENGINE_READ } =
+  testData;
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
 const INDEX_A = `ai-index-idx-scout-describe-${RUN_ID}-a`;
@@ -75,17 +69,6 @@ const KI_DOCS = {
     description: 'A memory that ordinary KI counts and queries must exclude',
     content: 'Billing retries use exponential backoff.',
     tags: ['billing', 'memory-only'],
-  },
-  fact: {
-    type: 'fact.note',
-    title: 'Dreamed billing note',
-    content: 'Billing retries use exponential backoff.',
-    tags: ['billing', 'memory-only'],
-  },
-  entity: {
-    type: 'entity.customer',
-    title: 'Customer 825464',
-    tags: ['memory-only'],
   },
   other: {
     type: 'hidden',
@@ -173,14 +156,6 @@ const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; valu
   sources: [],
 });
 
-const MEMORY_DREAMING_CONFIG = {
-  enabled: false,
-  facts: [{ type: 'note', description: 'A detail worth keeping' }],
-  entities: {
-    nodes: [{ type: 'customer', description: 'A paying account', attributes: ['plan'] }],
-  },
-};
-
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
 // `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables only the
 // behavior it exercises.
@@ -253,13 +228,6 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       });
       expect(response).toHaveStatusCode(201);
     }
-
-    const dreamingResponse = await apiClient.put(aiIndexDreamingPath(SINGLE_AI_INDEX_ID), {
-      headers: { ...adminCredentials.apiKeyHeader, ...INTERNAL_API_HEADERS },
-      responseType: 'json',
-      body: MEMORY_DREAMING_CONFIG,
-    });
-    expect(dreamingResponse).toHaveStatusCode(200);
   });
 
   apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
@@ -340,7 +308,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest(
-    'describes memory capability and excludes stored and dreamed memory from ordinary counts',
+    'describes memory capability and excludes stored memory from ordinary counts',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
@@ -351,14 +319,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       const block = blockOf(response.body);
       expect(sectionLines(block, 'Memory')).toStrictEqual(
         expect.arrayContaining([
-          'This AI index takes memories: dreaming is set up for it.',
+          'Memory writes are enabled for this AI-index registry entry.',
           'memory.session',
           'memory.session_fact',
           'Use platform.context_engine.remember to write memory.',
           'Use platform.context_engine.forget with a memory id to tombstone memory.',
-          '"fact.note": 1 - A detail worth keeping',
-          '"entity.customer": 1 - A paying account (attributes: plan)',
-          'An entity by name, across entity types:',
         ])
       );
       expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
@@ -386,7 +351,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
         `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
           '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n' +
           '| WHERE expires_at IS NULL OR expires_at > NOW()\n' +
-          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND type != "memory.relationship" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")\n' +
+          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")\n' +
           '| FORK\n'
       )
     ).toBe(true);
