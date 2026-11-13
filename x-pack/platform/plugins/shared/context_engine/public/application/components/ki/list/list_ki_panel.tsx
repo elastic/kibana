@@ -8,6 +8,7 @@
 import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import { KiViewer } from '../view/ki_viewer';
 import { ListKiBody } from './list_ki_body';
 import { ListKiFiltersRow } from './list_ki_filters_row';
 import { useListKiPanel } from './use_list_ki_panel';
@@ -72,6 +73,15 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
         isRefetching={isRefetching}
         error={error}
         discoverHref={discoverHref}
+        viewer={
+          selectedKi ? (
+            <KiViewer
+              key={`${selectedKi.index}:${selectedKi.kiId}`}
+              aiIndexId={aiIndexId}
+              selectedKi={selectedKi}
+            />
+          ) : null
+        }
       />
     </EuiPanel>
   );

@@ -26,7 +26,7 @@ export const ViewKiRawJsonPanel = ({ document, isLoading = false }: ViewKiRawJso
   return (
     <EuiCodeBlock
       language="json"
-      fontSize="m"
+      fontSize="s"
       paddingSize="m"
       lineNumbers
       isCopyable
