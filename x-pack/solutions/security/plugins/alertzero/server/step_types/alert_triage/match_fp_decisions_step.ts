@@ -32,8 +32,10 @@ import {
   hashCandidates,
   matchDecisions,
   readActiveDecision,
+  type MatchCandidate,
   type StoredDecision,
 } from '../../alert_triage/fp_decisions';
+import { buildPatternKeys, describePatternKey } from '../../alert_triage/pattern_key';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
 import {
   closeStillOpenAlertsAsFalsePositive,
@@ -65,6 +67,34 @@ const MGET_CHUNK = 1000;
  */
 const MAX_PAGES = 10;
 
+/**
+ * The candidates whose matches `on` only tags, as shadow does. shortcut: a cloud key is the action
+ * plus the account, so one approval covers every actor of that action in the account; act on it
+ * once a guard limits the share of a rule one decision covers, sized from shadow data.
+ */
+const heldInShadowIds = (candidates: readonly MatchCandidate[]): Set<string> =>
+  new Set(
+    candidates
+      .filter(({ doc }) => {
+        const { strict } = buildPatternKeys(doc);
+        return strict !== undefined && describePatternKey(strict).kind === 'cloud';
+      })
+      .map(({ id }) => id)
+  );
+
+/** Splits each decision's alerts into those `on` acts on and those it holds in shadow. */
+const splitHeld = (byDecision: ReadonlyMap<string, string[]>, held: ReadonlySet<string>) => {
+  const act = new Map<string, string[]>();
+  const kept = new Map<string, string[]>();
+  for (const [id, alertIds] of byDecision) {
+    const actOn = alertIds.filter((alertId) => !held.has(alertId));
+    const hold = alertIds.filter((alertId) => held.has(alertId));
+    if (actOn.length > 0) act.set(id, actOn);
+    if (hold.length > 0) kept.set(id, hold);
+  }
+  return { act, held: kept };
+};
+
 const NOTHING = {
   candidates: 0,
   decisions_matched: 0,
@@ -75,6 +105,7 @@ const NOTHING = {
   capped: 0,
   close_failures: 0,
   excluded_by_severity: 0,
+  held_in_shadow: 0,
   tag_failures: 0,
   notes_missing: 0,
   deferred: 0,
@@ -93,7 +124,8 @@ const NOTHING = {
  * In `on` it acts. An approved match is tagged `az:closed_by_decision:<decision>` and closed as a
  * false positive, up to the decision's daily cap; the rest wait for the normal path. A dismissed
  * match is tagged `az:inconclusive` and `az:skipped_by_decision:<decision>`, so it is neither
- * analysed nor proposed. Neither calls a model.
+ * analysed nor proposed. Neither calls a model. A match on a `cloud` key is only tagged, as in
+ * shadow, and counted in `held_in_shadow`.
  *
  * It fails open. A step that cannot read the setting, the decisions or the alerts reports `failed`
  * and matches nothing, so every alert goes through analysis as before.
@@ -361,11 +393,17 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             });
 
             if (mode === 'on') {
+              const held = heldInShadowIds(found.candidates);
+              const skip = splitHeld(matches.wouldSkip, held);
+              const closing = splitHeld(matches.wouldClose, held);
               // A dismissed pattern is a verdict of its own: `az:inconclusive` takes the alert out of
               // the sweep and keeps it from a proposal, and the decision tag says why. It goes first:
               // it is one cheap call per decision, and when time runs out the closes are what wait.
-              await tagSkipped(matches.wouldSkip);
-              await close(matches.wouldClose);
+              await tagSkipped(skip.act);
+              await close(closing.act);
+              await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, closing.held);
+              await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, skip.held);
+              totals.held_in_shadow += count(closing.held) + count(skip.held);
             } else {
               await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, matches.wouldClose);
               await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, matches.wouldSkip);
