@@ -19,8 +19,6 @@ export {
   CreateTinesWorkflowMigrationWorkflowsRequestParams,
   CreateWorkflowMigrationRequestBody,
   CreateWorkflowMigrationResponse,
-  CreateWorkflowMigrationWorkflowsRequestBody,
-  CreateWorkflowMigrationWorkflowsRequestParams,
   DeleteWorkflowMigrationRequestParams,
   GetAllWorkflowMigrationStatsResponse,
   GetWorkflowMigrationRequestParams,

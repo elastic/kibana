@@ -31,7 +31,6 @@ import { registerSiemWorkflowMigrationsGetRoute } from './get';
 import { registerSiemWorkflowMigrationsRoutes } from '.';
 import { registerSiemWorkflowMigrationsStartRoute } from './start';
 import { registerSiemWorkflowMigrationsUpdateRoute } from './update';
-import { registerSiemWorkflowMigrationsCreateWorkflowsRoute } from './workflows/create';
 import { registerSiemWorkflowMigrationsGetWorkflowsRoute } from './workflows/get';
 import { registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute } from './workflows/tines/create';
 
@@ -73,7 +72,6 @@ describe('workflow migration routes', () => {
       SIEM_WORKFLOW_MIGRATION_TRANSLATION_STATS_PATH,
     ]);
     expect(registeredPaths(server, 'post')).toEqual([
-      SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
       SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
       SIEM_WORKFLOW_MIGRATION_START_PATH,
       SIEM_WORKFLOW_MIGRATION_STOP_PATH,
@@ -229,66 +227,6 @@ describe('workflow migration routes', () => {
         'mig-1'
       );
       expect(response.status).toEqual(500);
-    });
-
-    it('stores an original workflow with the vendor from the request', async () => {
-      const originalWorkflow = {
-        id: 'wf-1',
-        vendor: 'tines',
-        title: 'Receive alert',
-        description: 'Already normalized',
-        data: '{"name":"Receive alert"}',
-        format: 'json',
-      };
-      registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
-      const response = await invokeHandler(
-        'post',
-        SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-        requestMock.create({
-          method: 'post',
-          path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-          routePath: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-          params: { migration_id: 'mig-1' },
-          body: [originalWorkflow],
-        })
-      );
-
-      expect(clients.siemWorkflowMigrationsClient.data.items.create).toHaveBeenCalledWith([
-        { migration_id: 'mig-1', original_workflow: originalWorkflow },
-      ]);
-      expect(response.ok).toHaveBeenCalled();
-    });
-
-    it('does not store workflows when the original workflow list is empty', async () => {
-      registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
-      const response = await invokeHandler(
-        'post',
-        SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-        requestMock.create({
-          method: 'post',
-          path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-          routePath: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-          params: { migration_id: 'mig-1' },
-          body: [],
-        })
-      );
-
-      expect(clients.siemWorkflowMigrationsClient.data.items.create).not.toHaveBeenCalled();
-      expect(response.noContent).toHaveBeenCalled();
-    });
-
-    it('rejects a workflow body that is not an original workflow', () => {
-      registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
-      const result = server.validate(
-        requestMock.create({
-          method: 'post',
-          path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-          params: { migration_id: 'mig-1' },
-          body: [tinesStory],
-        })
-      );
-
-      expect(result.badRequest).toHaveBeenCalled();
     });
 
     it('stores a Tines story as a workflow document', async () => {

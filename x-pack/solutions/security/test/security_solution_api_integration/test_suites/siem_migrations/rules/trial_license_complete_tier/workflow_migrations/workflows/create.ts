@@ -28,25 +28,6 @@ export default ({ getService }: FtrProviderContext) => {
       migrationId = response.body.migration_id;
     });
 
-    it('stores an original workflow with the vendor from the request', async () => {
-      const originalWorkflow = {
-        id: 'wf-1',
-        vendor: 'tines' as const,
-        title: 'Already normalized',
-        data: '{"name":"Already normalized"}',
-        format: 'json' as const,
-      };
-
-      await workflowMigrationRoutes.addWorkflowsToMigration({
-        migrationId,
-        body: [originalWorkflow],
-      });
-
-      const indexed = await getWorkflowsPerMigrationFromES({ es, migrationId });
-      expect(indexed.hits.hits).toHaveLength(1);
-      expect(indexed.hits.hits[0]._source?.original_workflow).toMatchObject(originalWorkflow);
-    });
-
     it('stores each Tines story as a workflow', async () => {
       await workflowMigrationRoutes.addTinesWorkflowsToMigration({
         migrationId,
@@ -93,26 +74,6 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await workflowMigrationRoutes.addTinesWorkflowsToMigration({
         migrationId: 'non-existent-migration',
         body: [tinesStoryExport],
-        expectStatusCode: 404,
-      });
-
-      expect(body).toMatchObject({
-        message: 'No Migration found with id: non-existent-migration',
-      });
-    });
-
-    it('returns 404 when adding an original workflow to a missing migration', async () => {
-      const { body } = await workflowMigrationRoutes.addWorkflowsToMigration({
-        migrationId: 'non-existent-migration',
-        body: [
-          {
-            id: 'wf-1',
-            vendor: 'tines',
-            title: 'Already normalized',
-            data: '{}',
-            format: 'json',
-          },
-        ],
         expectStatusCode: 404,
       });
 

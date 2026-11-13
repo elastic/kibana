@@ -80,7 +80,7 @@ export const registerSiemWorkflowMigrationsGetWorkflowsRoute = (
             } catch (error) {
               logger.error(error);
               await siemMigrationAuditLogger.logGetMigrationItems({ migrationId, error });
-              return res.badRequest({ body: error.message });
+              return res.customError({ statusCode: 500, body: error.message });
             }
           }
         )

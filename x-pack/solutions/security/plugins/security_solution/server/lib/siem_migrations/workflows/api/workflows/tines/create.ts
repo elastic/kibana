@@ -32,6 +32,7 @@ export const registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute = (
       path: SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
       access: 'internal',
       security: { authz },
+      options: { body: { maxBytes: 25 * 1024 * 1024 } }, // raise payload limit to 25MB
     })
     .addVersion(
       {
@@ -80,7 +81,7 @@ export const registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute = (
               count: stories.length,
               error,
             });
-            return res.badRequest({ body: error.message });
+            return res.customError({ statusCode: 500, body: error.message });
           }
         })
       )

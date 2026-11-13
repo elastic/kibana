@@ -572,8 +572,6 @@ import type {
   CreateTinesWorkflowMigrationWorkflowsRequestBodyInput,
   CreateWorkflowMigrationRequestBodyInput,
   CreateWorkflowMigrationResponse,
-  CreateWorkflowMigrationWorkflowsRequestParamsInput,
-  CreateWorkflowMigrationWorkflowsRequestBodyInput,
   DeleteWorkflowMigrationRequestParamsInput,
   GetAllWorkflowMigrationStatsResponse,
   GetWorkflowMigrationRequestParamsInput,
@@ -1169,26 +1167,6 @@ For detailed information on Kibana actions and alerting, and additional API call
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-    * Adds original workflows to an existing migration. Each workflow already includes its vendor, so this route does not parse a vendor export. Use it when the caller has an OriginalWorkflow. An empty list stores nothing. A missing migration id returns 404.
-
-    */
-  async createWorkflowMigrationWorkflows(props: CreateWorkflowMigrationWorkflowsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowMigrationWorkflows`);
-    return this.kbnClient
-      .request({
-        path: replaceParams(
-          '/internal/siem_migrations/workflows/{migration_id}/workflows',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -4154,10 +4132,6 @@ export interface CreateWatchlistEntitySourceProps {
 }
 export interface CreateWorkflowMigrationProps {
   body: CreateWorkflowMigrationRequestBodyInput;
-}
-export interface CreateWorkflowMigrationWorkflowsProps {
-  params: CreateWorkflowMigrationWorkflowsRequestParamsInput;
-  body: CreateWorkflowMigrationWorkflowsRequestBodyInput;
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;

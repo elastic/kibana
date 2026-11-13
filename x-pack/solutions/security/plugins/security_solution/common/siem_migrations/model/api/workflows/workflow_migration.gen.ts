@@ -21,7 +21,6 @@ import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { MigrationTaskStats, MigrationTranslationStats, LangSmithOptions } from '../../common.gen';
 import {
   WorkflowMigration,
-  OriginalWorkflow,
   WorkflowMigrationWorkflow,
   UpdateWorkflowMigrationWorkflow,
 } from '../../workflow_migration.gen';
@@ -71,28 +70,6 @@ export const CreateWorkflowMigrationResponse = lazySchema(() =>
   })
 );
 export type CreateWorkflowMigrationResponse = z.infer<typeof CreateWorkflowMigrationResponse>;
-
-export const CreateWorkflowMigrationWorkflowsRequestParams = lazySchema(() =>
-  z.object({
-    migration_id: NonEmptyString,
-  })
-);
-export type CreateWorkflowMigrationWorkflowsRequestParams = z.infer<
-  typeof CreateWorkflowMigrationWorkflowsRequestParams
->;
-export type CreateWorkflowMigrationWorkflowsRequestParamsInput = z.input<
-  typeof CreateWorkflowMigrationWorkflowsRequestParams
->;
-
-export const CreateWorkflowMigrationWorkflowsRequestBody = lazySchema(() =>
-  z.array(OriginalWorkflow).max(1000)
-);
-export type CreateWorkflowMigrationWorkflowsRequestBody = z.infer<
-  typeof CreateWorkflowMigrationWorkflowsRequestBody
->;
-export type CreateWorkflowMigrationWorkflowsRequestBodyInput = z.input<
-  typeof CreateWorkflowMigrationWorkflowsRequestBody
->;
 
 export const DeleteWorkflowMigrationRequestParams = lazySchema(() =>
   z.object({

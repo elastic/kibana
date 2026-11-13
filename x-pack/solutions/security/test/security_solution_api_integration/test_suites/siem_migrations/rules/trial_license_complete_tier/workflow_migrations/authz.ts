@@ -54,19 +54,6 @@ export default ({ getService }: FtrProviderContext) => {
         expectStatusCode: 403,
       });
       await workflowMigrationRoutes.delete({ migrationId, expectStatusCode: 403 });
-      await workflowMigrationRoutes.addWorkflowsToMigration({
-        migrationId,
-        body: [
-          {
-            id: 'wf-1',
-            vendor: 'tines',
-            title: 'Denied',
-            data: '{}',
-            format: 'json',
-          },
-        ],
-        expectStatusCode: 403,
-      });
       await workflowMigrationRoutes.addTinesWorkflowsToMigration({
         migrationId,
         body: [tinesStoryExport],
