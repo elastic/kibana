@@ -14,7 +14,7 @@ project:
   title: '@kbn/check-server-import-graph-cli'
   description: Moon project for @kbn/check-server-import-graph-cli
   channel: ''
-  owner: '@elastic/kibana-operations'
+  owner: '@elastic/appex-sharedux'
   sourceRoot: packages/kbn-check-server-import-graph-cli
 dependsOn:
   - '@kbn/dev-cli-runner'
@@ -35,4 +35,5 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+    - '!src/__fixtures__/**/*'
 tasks: {}

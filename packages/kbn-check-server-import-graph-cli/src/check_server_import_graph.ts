@@ -75,14 +75,23 @@ const reportViolations = (log: ToolingLog, violations: Violation[]): void => {
   );
 };
 
+export interface CheckOptions {
+  log: ToolingLog;
+  /** Absolute paths to start from instead of every server entry point in the repo. */
+  entryPaths?: string[];
+}
+
 /**
  * Walks the import graph from every server entry point and fails when a source file reachable
  * from it imports a browser-only node module.
  */
-export const checkServerImportGraph = async ({ log }: { log: ToolingLog }): Promise<boolean> => {
+export const checkServerImportGraph = async ({
+  log,
+  entryPaths: entryPathsOverride,
+}: CheckOptions): Promise<boolean> => {
   const resolver = ImportResolver.create(REPO_ROOT);
   const locator = new ImportLocator({ ignoreTypeOnly: true });
-  const entryPaths = findEntryPaths(resolver);
+  const entryPaths = entryPathsOverride ?? findEntryPaths(resolver);
 
   const getImports = (file: string): ImportTarget[] => {
     const targets: ImportTarget[] = [];

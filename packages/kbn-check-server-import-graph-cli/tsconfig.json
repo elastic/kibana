@@ -11,7 +11,8 @@
     "**/*.ts",
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "src/__fixtures__/**/*"
   ],
   "kbn_references": [
     "@kbn/dev-cli-runner",

@@ -1,7 +1,7 @@
 {
   "type": "shared-server",
   "id": "@kbn/check-server-import-graph-cli",
-  "owner": "@elastic/kibana-operations",
+  "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "private",
   "devOnly": true
