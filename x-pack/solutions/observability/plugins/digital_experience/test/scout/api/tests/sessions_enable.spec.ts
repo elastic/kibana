@@ -12,6 +12,7 @@ import { SESSIONS_INDEX_PATTERN, SESSIONS_SOURCE_INDICES } from '../../../../com
 import { deleteSessionsData } from '../../common/fixtures/sessions_data';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const { COMMON_HEADERS, SESSIONS_ENABLE_PATH } = testData;
 
@@ -40,7 +41,12 @@ const FILTERED_READ_ROLE: KibanaRole = {
 // As an interactive user: on Serverless that is a UIAM user, who may not read their own
 // privileges, unlike the operator user behind `kbnClient`.
 apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
-  apiTest.afterAll(async ({ esClient }) => {
+  apiTest.beforeAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_ON_OVERRIDE);
+  });
+
+  apiTest.afterAll(async ({ apiServices, esClient }) => {
+    await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     await deleteSessionsData(esClient);
   });
 

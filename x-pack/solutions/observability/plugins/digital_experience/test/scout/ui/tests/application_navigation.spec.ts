@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS, TIME_RANGE } = testData;
 
@@ -19,9 +20,17 @@ test.describe(
   'Digital Experience application navigation',
   { tag: DIGITAL_EXPERIENCE_WITH_UX_TAGS },
   () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_ON_OVERRIDE);
+    });
+
     test.beforeEach(async ({ browserAuth, pageObjects: { digitalExperience } }) => {
       await browserAuth.loginAsViewer();
       await digitalExperience.gotoApplications();
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
     test('opens the Overview matching the source of the application, keeping the time range', async ({

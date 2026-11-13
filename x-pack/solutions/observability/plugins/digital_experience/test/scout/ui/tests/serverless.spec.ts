@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_SERVERLESS_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS } = testData;
 
@@ -17,8 +18,16 @@ test.describe(
   'Digital Experience on serverless',
   { tag: DIGITAL_EXPERIENCE_SERVERLESS_TAGS },
   () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_ON_OVERRIDE);
+    });
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsViewer();
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
     test('lists only EDOT Browser applications without requesting Classic RUM data', async ({
