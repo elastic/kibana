@@ -53,10 +53,13 @@ const contextWith = (...args: WrittenArgument[]): SuggestionContext => {
   const ir = { ...locate('', 0), written: args };
 
   return {
+    text: '',
+    offset: 0,
     ir,
     afterName: ir,
     callbacks: undefined,
     getColumnsByType: async () => [],
+    getColumnMap: async () => new Map(),
     usedNames: new Set(),
     hasLicense: undefined,
     activeProduct: undefined,

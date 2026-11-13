@@ -20,6 +20,7 @@ import { createContext } from './context';
 import { provideColumns, provideConstant, provideNewName } from './providers/arguments';
 import { provideCommandNames } from './providers/command_names';
 import { provideEntities } from './providers/entities';
+import { provideExpression, type ExpressionSuggestions } from './providers/expressions';
 import { dependentRoles, provideMap, provideOptionNames } from './providers/structured';
 import { provideEndOfCommand, provideToken } from './providers/tokens';
 import { resolve } from './resolve';
@@ -98,7 +99,22 @@ const provide = async (
       return provideEndOfCommand();
     case 'argument':
       return provideArgument(request, context);
+    // Expressions are provided first: they decide whether the command can go on.
+    case 'expression':
+      return [];
   }
+};
+
+/** Whether the request is for something of the command itself, outside these expressions. */
+const isOutside = (request: SuggestionRequest, entries: string[]): boolean => {
+  const path =
+    request.kind === 'token'
+      ? request.follower.path
+      : request.kind === 'argument'
+      ? request.argument.path
+      : [];
+
+  return !path.some((id) => entries.includes(id));
 };
 
 /** Keeps the first of the items that insert the same text. */
@@ -130,12 +146,26 @@ export const suggest = async (
   }
 
   // Inside a string only a value can be offered: no keyword and no command starts there.
+  // An expression has strings of its own, as the query of a search function.
   const requests = resolve(ir).filter(
-    ({ kind }) => ir.position !== 'inside_string' || kind === 'argument'
+    ({ kind }) => ir.position !== 'inside_string' || kind === 'argument' || kind === 'expression'
   );
-  const context = await createContext(fullText, ir, callbacks);
+  const context = await createContext(fullText, offset, ir, callbacks);
 
-  const items = await Promise.all(requests.map((request) => provide(request, context)));
+  const expressions: ExpressionSuggestions[] = await Promise.all(
+    requests.flatMap((request) =>
+      request.kind === 'expression' ? [provideExpression(request, context)] : []
+    )
+  );
+  // While an expression is unfinished the command cannot go on: only the expression can.
+  const unfinished = expressions
+    .filter(({ isUnfinished }) => isUnfinished)
+    .map(({ entry }) => entry);
+  const items = await Promise.all(
+    requests
+      .filter((request) => !unfinished.length || !isOutside(request, unfinished))
+      .map((request) => provide(request, context))
+  );
 
-  return present(items.flat());
+  return present([...expressions.flatMap((expression) => expression.items), ...items.flat()]);
 };

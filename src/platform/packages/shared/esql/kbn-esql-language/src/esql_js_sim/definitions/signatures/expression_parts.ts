@@ -34,3 +34,6 @@ export const EXPRESSION_PARTS: Readonly<Record<CallSiteId, ExpressionPart>> = {
     scope: 'functionExpression>lambda',
   },
 };
+
+/** The place of a function call in an expression: its name and its arguments in brackets. */
+export const FUNCTION_CALL: CallSiteId = 'primaryExpression>functionExpression';

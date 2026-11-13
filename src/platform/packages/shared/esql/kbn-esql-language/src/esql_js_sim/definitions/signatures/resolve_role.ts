@@ -47,8 +47,11 @@ const inherit = (own: ArgumentRole, enclosing: ArgumentRole[]): ArgumentRole => 
 
 let expressionEntries: Set<string> | undefined;
 
-/** Whether the path enters an expression, read from the table of positions. */
-const entersExpression = (path: CallSiteId[]): boolean => {
+/**
+ * The place where the path enters an expression, read from the table of positions: the call
+ * site of the whole expression, whatever is nested in it.
+ */
+export const getExpressionEntry = (path: CallSiteId[]): CallSiteId | undefined => {
   if (!expressionEntries) {
     expressionEntries = new Set(
       getGrammarPositions()
@@ -59,8 +62,10 @@ const entersExpression = (path: CallSiteId[]): boolean => {
 
   const entries = expressionEntries;
 
-  return path.some((id) => entries.has(id));
+  return path.find((id) => entries.has(id));
 };
+
+const entersExpression = (path: CallSiteId[]): boolean => getExpressionEntry(path) !== undefined;
 
 /**
  * The role that applies at a place of the grammar.
