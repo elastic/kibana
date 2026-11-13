@@ -176,31 +176,16 @@ describe('AttackDiscoveryRubric (empty reference)', () => {
     executeUntilValidMock.mockReset();
   });
 
-  it('returns a null score (not a structural zero) when the reference is empty', async () => {
+  // A stored empty array means "no discoveries were expected" and is still graded;
+  // only a missing expected output is unmeasured (see attack_discovery_rubric_evaluator.test.ts).
+  it('grades a stored-empty reference instead of returning null', async () => {
+    executeUntilValidMock.mockResolvedValueOnce(gradeResponse('N', 'no discoveries were expected'));
+
     const result = await run(rubricEvaluator(), generateApiOutput, { attackDiscoveries: [] });
 
-    expect(result.score).toBeNull();
-    expect(result.label).toBe('no_reference');
-  });
-
-  // Build 01a12766: openai-gpt-oss-120b returned one structurally empty insight
-  // shell and the rubric scored it 1/Y against the fabricated empty reference
-  // ("PASS (vacuously - no content to compare)"). An empty reference means the
-  // example carries no golden answer, so it must never pass an empty submission.
-  it('never reports an all-empty submission as a pass when the reference is empty', async () => {
-    executeUntilValidMock.mockResolvedValueOnce(
-      gradeResponse('Y', 'PASS (vacuously - no content to compare)')
-    );
-
-    const result = await run(
-      rubricEvaluator(),
-      { insights: [emptyInsightShell] },
-      { attackDiscoveries: [] }
-    );
-
-    expect(result.score).toBeNull();
-    expect(result.label).toBe('no_reference');
-    expect(executeUntilValidMock).not.toHaveBeenCalled();
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('N');
+    expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
   });
 
   it('never reports an all-empty submission as a pass when the example carries no expected output', async () => {
@@ -215,7 +200,7 @@ describe('AttackDiscoveryRubric (empty reference)', () => {
     );
 
     expect(result.score).toBeNull();
-    expect(result.label).toBe('no_reference');
+    expect(result.label).toBe('N/A');
     expect(executeUntilValidMock).not.toHaveBeenCalled();
   });
 
