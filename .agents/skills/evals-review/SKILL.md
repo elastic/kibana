@@ -1,5 +1,6 @@
 ---
 name: evals-review
+disable-model-invocation: true
 description: Review Security eval suite changes for coverage, evaluator soundness, and weekly CI readiness. Use when reviewing PRs that add or modify a kbn-evals-suite-* package, its datasets or evaluators, or its registration in evals.suites.json and llm_evals.yml.
 ---
 
