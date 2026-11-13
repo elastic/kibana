@@ -601,6 +601,28 @@ describe('createInvestigatorServiceAccountService', () => {
     });
   });
 
+  it('holds the lifecycle lock until every telemetry task removal settles', async () => {
+    const {
+      service,
+      lock,
+      listInstalledWorkflowStates,
+      removeSourceVolumeTask,
+      removeDetectionSnapshotTask,
+    } = setup();
+    listInstalledWorkflowStates.mockResolvedValue([]);
+    removeSourceVolumeTask.mockRejectedValue(new Error('task index unavailable'));
+    let heldWhenRemovalSettled: boolean | undefined;
+    const slowRemoval = new Promise<void>((resolve) => setImmediate(resolve)).then(() => {
+      heldWhenRemovalSettled = lock.held;
+    });
+    removeDetectionSnapshotTask.mockReturnValue(slowRemoval);
+
+    await service.disable(request, SPACE_ID);
+    await slowRemoval;
+
+    expect(heldWhenRemovalSettled).toBe(true);
+  });
+
   it('continues setup and teardown when the telemetry task cannot be changed', async () => {
     const {
       service,

@@ -113,9 +113,9 @@ export const createDetectionSnapshotSources = ({
   listExternalConnectorSources: async (spaceId) => {
     if (!actions) return [];
     const connectors = await actions.getUnsecuredActionsClient().getAll(asSpaceId(spaceId));
-    return connectors.flatMap(({ actionTypeId }) => {
+    return connectors.flatMap(({ actionTypeId, isInboundEventsEnabled }) => {
       const source = EXTERNAL_ALERT_SOURCE_BY_CONNECTOR_TYPE_ID[actionTypeId];
-      return source ? [source] : [];
+      return source && isInboundEventsEnabled ? [source] : [];
     });
   },
 
@@ -126,6 +126,8 @@ export const createDetectionSnapshotSources = ({
       index: ALERT_EVENTS_DATA_STREAM,
       size: 0,
       ignore_unavailable: true,
+      // A shard failure must fail the space rather than report an undercount.
+      allow_partial_search_results: false,
       query: {
         bool: {
           filter: [

@@ -545,20 +545,21 @@ export const createInvestigatorServiceAccountService = ({
     );
   };
 
-  const scheduleTelemetryTasks = async (request: KibanaRequest): Promise<void> => {
-    const results = await Promise.allSettled([
-      scheduleSourceVolumeTask(request),
-      scheduleDetectionSnapshotTask(request),
-    ]);
+  // Waits for every change before failing, so none outlives the lifecycle lock.
+  const settleAll = async (changes: Array<Promise<void>>): Promise<void> => {
+    const results = await Promise.allSettled(changes);
     const failure = results.find((result) => result.status === 'rejected');
     if (failure?.status === 'rejected') throw failure.reason;
   };
+
+  const scheduleTelemetryTasks = (request: KibanaRequest): Promise<void> =>
+    settleAll([scheduleSourceVolumeTask(request), scheduleDetectionSnapshotTask(request)]);
 
   const removeTelemetryTasksIfUnused = async (): Promise<void> => {
     if (await hasInstalledNightshiftSpace()) {
       return;
     }
-    await Promise.all([removeSourceVolumeTask(), removeDetectionSnapshotTask()]);
+    await settleAll([removeSourceVolumeTask(), removeDetectionSnapshotTask()]);
     logger.info('No space has nightshift set up; removed the telemetry tasks');
   };
 

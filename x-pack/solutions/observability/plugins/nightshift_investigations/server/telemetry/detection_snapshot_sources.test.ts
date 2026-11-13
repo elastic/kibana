@@ -64,9 +64,10 @@ describe('createDetectionSnapshotSources', () => {
   it('lists one alert source per connector that imports alerts', async () => {
     const { sources, getAll } = setup();
     getAll.mockResolvedValue([
-      { actionTypeId: '.datadog' },
-      { actionTypeId: '.slack2' },
-      { actionTypeId: '.datadog' },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.slack2', isInboundEventsEnabled: true },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: false },
     ]);
 
     await expect(sources.listExternalConnectorSources('default')).resolves.toEqual([
@@ -96,6 +97,7 @@ describe('createDetectionSnapshotSources', () => {
       { index: string; query: unknown; aggs: Record<string, unknown> }
     ];
     expect(index).toBe('.rule-events');
+    expect(esClient.search.mock.calls[0][0]).toMatchObject({ allow_partial_search_results: false });
     expect(query).toEqual({
       bool: {
         filter: [
