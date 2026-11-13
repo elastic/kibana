@@ -2896,11 +2896,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
         });
       });
 
-      it("leaves the agent's attribution alone, so ai.agent calls keep counting as Agent Builder", () => {
+      it('attributes ai.agent calls to the Alert Triage Worker under the Alertzero parent', () => {
         const agentStep = findStepByName(workflow.steps, AGENT_STEP) as Record<string, unknown>;
 
-        expect(agentStep).not.toHaveProperty('plugin-id');
-        expect(agentStep).not.toHaveProperty('aggregate-by');
+        expect(agentStep['plugin-id']).toBe('alertzero_alert_triage');
+        expect(agentStep['aggregate-by']).toBe('alertzero_parent');
       });
     });
 
