@@ -455,7 +455,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'active-cascade',
-          text: 'Sets status=active with severity=high for the cascade event: the frontend’s balance, transaction-history, payment and deposit calls are stated timing out or refused and are still happening, which meets high without a share. Critical would need a stated block of those operations or of a mandatory component, which the descriptions do not state.',
+          text: 'Sets status=active with severity=high for the cascade event: the frontend’s balance, transaction-history, payment and deposit calls are stated timing out or refused across hours, which meets high without a share. Critical would need a stated block of those operations or of a mandatory component, which the descriptions do not state.',
           score: 3,
         },
         {
@@ -508,12 +508,12 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=high because the frontend’s balance calls to balancereader are stated timing out or refused and are still happening: a caller’s call to a named dependency failing is enough for high without a share. Weak p_value and stationary change_point_type must not cap severity at medium or low, and the assessment note names the evidence the tier rests on.',
+          text: 'Sets severity=high because the frontend’s balance calls to balancereader are stated timing out or refused across hours: a sustained failing call to a named dependency is enough for high without a share. Weak p_value and stationary change_point_type must not cap severity at medium or low, and the assessment note names the evidence the tier rests on.',
           score: 3,
         },
         {
           id: 'weak-detection-confidence-from-evidence',
-          text: 'Sets confidence from the confirmed grounding evidence: it follows the checks the descriptions show (the failure itself, that it is still happening, where it fails), and is not lowered because p_value is weak or change_point_type is stationary.',
+          text: 'Sets confidence from the confirmed grounding evidence: it follows the checks the descriptions show (the failure itself, that the evidence agrees with itself, where it fails), and is not lowered because p_value is weak or change_point_type is stationary.',
           score: 2,
         },
         {
