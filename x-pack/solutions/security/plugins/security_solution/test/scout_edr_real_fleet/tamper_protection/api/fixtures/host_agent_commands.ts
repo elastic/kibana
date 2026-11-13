@@ -67,18 +67,48 @@ const runOnHost = async (
   return result;
 };
 
+const REDACTED = '[REDACTED]';
+
+/**
+ * The rethrown execa error carries the full command line, which includes the uninstall
+ * token, and it would end up in the CI logs. `stack` embeds the message, so it is redacted too.
+ */
+const redactToken = (error: unknown, token: string): unknown => {
+  if (!(error instanceof Error) || !token) {
+    return error;
+  }
+
+  const redactable = error as Error & {
+    shortMessage?: string;
+    command?: string;
+    escapedCommand?: string;
+  };
+  for (const field of ['message', 'shortMessage', 'command', 'escapedCommand', 'stack'] as const) {
+    const value = redactable[field];
+    if (typeof value === 'string') {
+      redactable[field] = value.replaceAll(token, REDACTED);
+    }
+  }
+
+  return redactable;
+};
+
 export const uninstallAgent = async (
   log: ScoutLogger,
   hostname: string,
   uninstallToken: string
 ): Promise<HostCommandResult> => {
-  const { exitCode, stdout, stderr } = await runOnHost(log, hostname, {
-    command: `sudo elastic-agent uninstall -f --uninstall-token ${uninstallToken}`,
-    label: 'elastic-agent uninstall',
-    timeoutMs: UNINSTALL_TIMEOUT_MS,
-  });
+  try {
+    const { exitCode, stdout, stderr } = await runOnHost(log, hostname, {
+      command: `sudo elastic-agent uninstall -f --uninstall-token ${uninstallToken}`,
+      label: 'elastic-agent uninstall',
+      timeoutMs: UNINSTALL_TIMEOUT_MS,
+    });
 
-  return { exitCode, output: `${stdout}\n${stderr}` };
+    return { exitCode, output: `${stdout}\n${stderr}` };
+  } catch (error) {
+    throw redactToken(error, uninstallToken);
+  }
 };
 
 /** `absent` when the install directory is missing or empty. */
