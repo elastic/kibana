@@ -30,7 +30,6 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-ai-components",
     "@kbn/core-chrome-browser",
-    "@kbn/core-chrome-browser-context",
     "@kbn/core-chrome-browser-hooks",
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/shared-ux-prompt-not-found",
