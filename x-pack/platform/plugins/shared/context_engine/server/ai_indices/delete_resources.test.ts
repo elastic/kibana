@@ -6,10 +6,10 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { MAX_AI_INDICES } from '../../common/constants';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { deleteBackingStoreResource } from './delete_resources';
+import { deleteAutomationResources, deleteBackingStoreResource } from './delete_resources';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { aiIndicesIndexName } from './storage';
 
@@ -249,5 +249,51 @@ describe('deleteBackingStoreResource', () => {
         },
       })
     );
+  });
+});
+
+describe('deleteAutomationResources', () => {
+  const logger = { warn: jest.fn() } as unknown as Logger;
+  const request = {} as KibanaRequest;
+
+  it('deletes user workflows and leaves managed ones to the plugin that installed them', async () => {
+    const workflowsManagementApi = {
+      deleteWorkflows: jest.fn().mockResolvedValue({ failures: [] }),
+    };
+
+    const errorsFound = await deleteAutomationResources({
+      automations: [
+        { type: 'workflow', value: 'nightly-refresh' },
+        { type: 'workflow', value: 'system-context-engine-dreaming-support-0123456789abcdef' },
+      ],
+      workflowsManagementApi,
+      spaceId: 'default',
+      request,
+      logger,
+      aiIndexId: 'support',
+    });
+
+    expect(errorsFound).toEqual([]);
+    expect(workflowsManagementApi.deleteWorkflows).toHaveBeenCalledWith(
+      ['nightly-refresh'],
+      'default',
+      request,
+      { force: true }
+    );
+  });
+
+  it('calls nothing when only managed workflows are attached', async () => {
+    const workflowsManagementApi = { deleteWorkflows: jest.fn() };
+
+    await deleteAutomationResources({
+      automations: [{ type: 'workflow', value: 'system-context-engine-dreaming-support-x' }],
+      workflowsManagementApi,
+      spaceId: 'default',
+      request,
+      logger,
+      aiIndexId: 'support',
+    });
+
+    expect(workflowsManagementApi.deleteWorkflows).not.toHaveBeenCalled();
   });
 });
