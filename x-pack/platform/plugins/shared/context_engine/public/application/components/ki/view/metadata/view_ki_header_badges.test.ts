@@ -50,7 +50,7 @@ describe('getViewKiHeaderBadges', () => {
 
     expect(resolveKiStatus('deleted', document.expires_at)).toBe('deleted');
     expect(badgeTestSubjs(badges)).toEqual(['contextViewKiTypeBadge', STATUS_BADGE_TEST_SUBJ]);
-    expect(statusBadge(badges)?.color).toBe('danger');
+    expect(statusBadge(badges)?.color).toBe('default');
   });
 
   it('includes status badge when lifecycle is verification_failed', () => {
@@ -58,7 +58,7 @@ describe('getViewKiHeaderBadges', () => {
     const badges = getViewKiHeaderBadges(document, 'verification_failed');
 
     expect(badgeTestSubjs(badges)).toEqual(['contextViewKiTypeBadge', STATUS_BADGE_TEST_SUBJ]);
-    expect(statusBadge(badges)?.color).toBe('warning');
+    expect(statusBadge(badges)?.color).toBe('danger');
     expect(statusBadge(badges)?.label).toBe('failed');
   });
 
@@ -68,7 +68,7 @@ describe('getViewKiHeaderBadges', () => {
 
     expect(resolveKiStatus(undefined, document.expires_at)).toBe('expired');
     expect(badgeTestSubjs(badges)).toEqual(['contextViewKiTypeBadge', STATUS_BADGE_TEST_SUBJ]);
-    expect(statusBadge(badges)?.color).toBe('warning');
+    expect(statusBadge(badges)?.color).toBe('default');
   });
 
   it('shows status badge without type when only expiry applies', () => {

@@ -31,7 +31,7 @@ describe('KiTypeDisplay', () => {
     expect(screen.getByTestId('kiTypeText')).toHaveTextContent('None');
   });
 
-  it('renders a hollow badge when type is set', () => {
+  it('renders a badge when type is set', () => {
     renderType({ as: 'badge', type: 'playbook', 'data-test-subj': 'kiTypeBadge' });
     expect(screen.getByTestId('kiTypeBadge')).toHaveTextContent('playbook');
   });

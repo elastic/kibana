@@ -10,11 +10,12 @@ import type { KiLifecycleStatus } from '../../../common/step_types/ki';
 
 export type KiStatus = KiLifecycleStatus | 'expired';
 
-export const KI_STATUS_BADGE_COLOR: Record<KiStatus, 'success' | 'danger' | 'warning'> = {
+/** Prototype: only Failed stands out, other statuses use the default badge. */
+export const KI_STATUS_BADGE_COLOR: Record<KiStatus, 'default' | 'success' | 'danger'> = {
   active: 'success',
-  deleted: 'danger',
-  verification_failed: 'warning',
-  expired: 'warning',
+  deleted: 'default',
+  verification_failed: 'danger',
+  expired: 'default',
 };
 
 export const KI_STATUS_LABEL: Record<KiStatus, string> = {

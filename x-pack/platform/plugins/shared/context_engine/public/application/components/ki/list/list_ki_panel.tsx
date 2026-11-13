@@ -9,7 +9,6 @@ import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { ListKiBody } from './list_ki_body';
-import { ListKiFooter } from './list_ki_footer';
 import { ListKiFiltersRow } from './list_ki_filters_row';
 import { useListKiPanel } from './use_list_ki_panel';
 import { useListKiPanelStyles } from './list_ki_panel_styles';
@@ -19,6 +18,7 @@ interface ListKiPanelProps {
   discoverHref?: string;
 }
 
+/** The Knowledge documents tab: filters row, then the grouped list next to the viewer. */
 export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
   const {
     aiIndexId,
@@ -31,13 +31,15 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
     searchText,
     onSearchTextChange,
     onSearchSubmit,
-    kis,
-    total,
-    size,
+    hasActiveFilters,
+    clearFilters,
+    groups,
+    showMore,
+    selectedKi,
+    selectKi,
     isLoading,
     isFetching,
     error,
-    loadMore,
   } = useListKiPanel(aiIndex);
 
   const styles = useListKiPanelStyles();
@@ -58,27 +60,19 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
         onTypeFilterChange={onTypeFilterChange}
       />
 
-      <div css={styles.split} data-test-subj="contextListKiSplit">
-        <div css={styles.list} data-test-subj="contextListKiList">
-          <ListKiBody
-            aiIndexId={aiIndexId}
-            kis={kis}
-            isLoading={isLoading}
-            isRefetching={isRefetching}
-            error={error}
-          />
-
-          <ListKiFooter
-            loadedCount={kis.length}
-            total={total}
-            size={size}
-            isLoading={isFetching}
-            discoverHref={discoverHref}
-            onLoadMore={loadMore}
-          />
-        </div>
-        <div css={styles.viewerColumn} data-test-subj="contextListKiViewerColumn" />
-      </div>
+      <ListKiBody
+        aiIndexId={aiIndexId}
+        groups={groups}
+        selectedKi={selectedKi}
+        onSelectKi={selectKi}
+        onShowMore={showMore}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={clearFilters}
+        isLoading={isLoading}
+        isRefetching={isRefetching}
+        error={error}
+        discoverHref={discoverHref}
+      />
     </EuiPanel>
   );
 };
