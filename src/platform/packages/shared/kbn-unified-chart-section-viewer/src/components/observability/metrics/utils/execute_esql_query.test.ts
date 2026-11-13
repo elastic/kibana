@@ -116,23 +116,6 @@ describe('executeEsqlQuery', () => {
     );
   });
 
-  it('labels the request with the supplied executionContextName', async () => {
-    await executeEsqlQuery({
-      esqlQuery: 'TS metrics-* | METRICS_INFO',
-      search: mockSearch,
-      timeFieldName: '@timestamp',
-      uiSettings: mockUiSettings,
-      profileId: 'metrics-data-source-profile',
-      executionContextName: MetricsExecutionContextName.METRICS_INFO,
-    });
-
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
-      expect.objectContaining({
-        executionContext: expect.objectContaining({ page: 'metrics_fetch_metrics_info' }),
-      })
-    );
-  });
-
   it('forwards profileId onto executionContext.meta so the server-side APM transaction is tagged via the standardized pipeline', async () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',

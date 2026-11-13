@@ -70,7 +70,6 @@ export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];
 export const FEATURE_FLAGS = {
   IS_EDIT_GRID_SETTINGS_ENABLED: 'discover.metricsExperienceEditGridSettingsEnabled',
   IS_SORTING_ENABLED: 'discover.metricsExperienceSortEnabled',
-  // Kept for the upcoming exemplars revamp. Nothing reads this yet.
   IS_EXEMPLARS_ENABLED: 'observability.metricsExemplarsEnabled',
   IS_HEATMAPS_ENABLED: 'observability.metricsHeatmapsEnabled',
 } as const;
