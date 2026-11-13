@@ -221,13 +221,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgrade9x: `${ENTERPRISE_SEARCH_DOCS}upgrading-to-9-x.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
-    searchHomepage: {
-      visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
-      notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
-      customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
-      elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
-      elasticCloud: `${ELASTIC_WEBSITE_URL}cloud/`,
-    },
     searchGettingStarted: {
       visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
       notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
@@ -486,6 +479,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       attackDiscovery: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery`,
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
       remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
+      valueReport: `${ELASTIC_DOCS}solutions/security/ai/ease/ease-value-report`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
@@ -569,7 +563,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
       alertZero: {
-        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/configure-worker-settings#configure-worker-settings-continuous-threat-hunt`,
+        overview: `${ELASTIC_DOCS}solutions/security/alertzero`,
+        setUp: `${ELASTIC_DOCS}solutions/security/alertzero/set-up-alertzero`,
+        proposedActions: `${ELASTIC_DOCS}solutions/security/alertzero/work-in-alertzero`,
+        escalations: `${ELASTIC_DOCS}solutions/security/alertzero/manage-escalations`,
+        watches: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers`,
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers#alertzero-hunt-watch`,
       },
     },
     query: {

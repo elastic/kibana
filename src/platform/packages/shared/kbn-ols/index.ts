@@ -29,4 +29,14 @@ export {
   type AccessPolicy,
   type ReservedOperation,
 } from './src/policy';
-export type { Acl, AclEntry, AclState, StoredAcl, StoredAclEntry } from './src/acl';
+export {
+  ACL_FIELD,
+  normalizeAclSource,
+  toAclSource,
+  type Acl,
+  type AclEntry,
+  type AclState,
+  type StoredAcl,
+  type StoredAclEntry,
+} from './src/acl';
+export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/read_filter';

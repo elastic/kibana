@@ -8,6 +8,7 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import {
   connectedDestinationLabels,
+  connectedDestinations,
   createRuntimeMetadata,
   createUnitSource,
   defaultSignalsForSourceType,
@@ -55,6 +56,108 @@ describe('source models', () => {
   it('labels each source with the destinations its pipelines forward to', () => {
     expect(connectedDestinationLabels(storedUnit)).toEqual({
       'otlp-input': ['es-prod'],
+    });
+  });
+
+  describe('connectedDestinations', () => {
+    const withPipelines = (
+      pipelines: StreamsUnit.GetResponse['unit']['pipelines'],
+      destinationIds = ['es-a', 'es-b']
+    ): StreamsUnit.GetResponse => ({
+      unit: {
+        sources: [{ id: 'otlp-input', type: 'otlp', supported_telemetry: ['logs'] }],
+        destinations: destinationIds.map((id) => ({
+          id,
+          name: ` Name of ${id} `,
+          type: 'debug',
+          supported_telemetry: ['logs'],
+        })),
+        pipelines,
+      },
+      ui_metadata: {},
+    });
+    const idsOf = (unit: StreamsUnit.GetResponse) =>
+      Object.values(connectedDestinations(unit))
+        .flat()
+        .map(({ id }) => id);
+
+    it('returns the id and the trimmed name of each destination a source feeds', () => {
+      expect(connectedDestinations(storedUnit)).toEqual({
+        'otlp-input': [{ id: 'es-prod', label: 'es-prod' }],
+      });
+      expect(
+        connectedDestinations(
+          withPipelines([
+            {
+              id: 'main',
+              supported_telemetry: ['logs'],
+              config: [
+                { name: 'sources', value: ['otlp-input'] },
+                { name: 'destinations', value: ['es-a'] },
+              ],
+            },
+          ])
+        )
+      ).toEqual({ 'otlp-input': [{ id: 'es-a', label: 'Name of es-a' }] });
+    });
+
+    it('leaves out a destination that no source feeds', () => {
+      const unit = withPipelines([
+        {
+          id: 'no-source',
+          supported_telemetry: ['logs'],
+          config: [{ name: 'destinations', value: ['es-a'] }],
+        },
+      ]);
+
+      expect(idsOf(unit)).toEqual([]);
+      expect(idsOf(withPipelines([]))).toEqual([]);
+    });
+
+    it('follows a route into a child pipeline and a route straight to a destination', () => {
+      const unit = withPipelines([
+        {
+          id: 'main',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['otlp-input'] },
+            {
+              name: 'routes',
+              value: [{ when: 'true', pipelines: ['child'] }, { destinations: ['es-b'] }],
+            },
+          ],
+        },
+        {
+          id: 'child',
+          supported_telemetry: ['logs'],
+          config: [{ name: 'destinations', value: ['es-a'] }],
+        },
+      ]);
+
+      expect(idsOf(unit).sort()).toEqual(['es-a', 'es-b']);
+    });
+
+    it('ignores a source id that the unit does not define', () => {
+      const unit = withPipelines([
+        {
+          id: 'main',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['unknown-source'] },
+            { name: 'destinations', value: ['es-a'] },
+          ],
+        },
+      ]);
+
+      expect(idsOf(unit)).toEqual([]);
+    });
+
+    it('keeps the result per unit object and builds it again for a changed unit', () => {
+      const changed = withUnitSources(storedUnit, []);
+
+      expect(connectedDestinations(storedUnit)).toBe(connectedDestinations(storedUnit));
+      expect(connectedDestinations(changed)).not.toBe(connectedDestinations(storedUnit));
+      expect(connectedDestinations(changed)).toEqual({});
     });
   });
 

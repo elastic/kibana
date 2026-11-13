@@ -35,7 +35,6 @@ const skipReasonSchema = lazySchema(() =>
     'paused',
     'no_round',
     'follow_up_not_scored',
-    'recovery_unresolved',
     'classification_failed',
   ])
 );
@@ -43,21 +42,15 @@ const skipReasonSchema = lazySchema(() =>
 type SkipReason = z.infer<typeof skipReasonSchema>;
 
 /**
- * Scores initial rounds, and recoveries unless they leave no confirmed root cause. Follow-ups
- * aren't scored yet: telling a follow-up that changes the root cause from a question or Slack
- * chatter comes with follow-up scoring.
+ * Scores initial rounds and every alert recovery. Follow-ups aren't scored yet: telling a
+ * follow-up that changes the root cause from a question or Slack chatter comes with follow-up
+ * scoring.
  */
-const getRoundSkipReason = ({
-  roundKind,
-  hasConfirmedCause,
-}: RoundResolution): SkipReason | undefined => {
+const getRoundSkipReason = ({ roundKind }: RoundResolution): SkipReason | undefined => {
+  // A recovery that leaves no confirmed cause is still scored: it may refute the first round's
+  // cause, or show the alert was benign. Each alert-outcome judge decides whether it applies.
   if (roundKind === 'follow_up') {
     return 'follow_up_not_scored';
-  }
-  // With no confirmed cause the alert-outcome judges have no ground truth. When the hypotheses
-  // can't be compared, the round is scored and the judges' not-applicable check decides.
-  if (roundKind === 'alert_recovery' && hasConfirmedCause === false) {
-    return 'recovery_unresolved';
   }
   return undefined;
 };
@@ -84,7 +77,7 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
     label: 'Classify an Investigation Round for Online Evals',
     category: StepCategory.Ai,
     description:
-      'Decides whether the round this investigation run created has anything to score: an initial round, or an alert recovery that leaves a confirmed root cause. Makes no LLM call, and never fails: a failure is reported as telemetry and the round is not scored.',
+      'Decides whether the round this investigation run created has anything to score: an initial round, or an alert recovery. Makes no LLM call, and never fails: a failure is reported as telemetry and the round is not scored.',
     inputSchema,
     outputSchema: z.object({
       should_score: z.boolean().describe('Whether to start the scoring workflow for this round.'),

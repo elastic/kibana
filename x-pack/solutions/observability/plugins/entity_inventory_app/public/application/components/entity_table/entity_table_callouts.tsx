@@ -16,25 +16,14 @@ import {
   TRUNCATION_BODY,
   getSourceErrorText,
   getTruncationTitle,
-  getTruncationTotalUnknownTitle,
   getUnavailableColumnText,
 } from './translations';
 
 /** Warns that only the most recently seen entities were returned. */
-export const EntityTableTruncationCallout = ({
-  returned,
-  total,
-}: {
-  returned: number;
-  total: number | null;
-}) => (
+export const EntityTableTruncationCallout = ({ returned }: { returned: number }) => (
   <KbnWarningCallout
     size="s"
-    title={
-      total === null
-        ? getTruncationTotalUnknownTitle({ returned })
-        : getTruncationTitle({ returned, total })
-    }
+    title={getTruncationTitle({ returned })}
     text={<p>{TRUNCATION_BODY}</p>}
     data-test-subj="entityInventoryTruncationCallout"
   />

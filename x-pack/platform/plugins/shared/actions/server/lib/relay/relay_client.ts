@@ -13,6 +13,8 @@ import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { request } from '../axios_utils';
 import { RelayRequestError } from './relay_error';
 import type {
+  RelayAvailableChannel,
+  RelayAvailableChannelsPage,
   RelayBinding,
   RelayBindingsPage,
   RelayCallbackResponse,
@@ -201,6 +203,27 @@ export class RelayClient implements RelayClientContract {
     );
 
     return { bindings, nextCursor: body?.next_cursor };
+  }
+
+  async listAvailableChannels(tenantKey: string): Promise<RelayAvailableChannelsPage> {
+    const path = `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/channels`;
+    const response = await this.get(`${path}?status=available`);
+    const body = response.data as
+      | { channels?: RelayAvailableChannel[]; truncated?: boolean }
+      | undefined;
+
+    if (!Array.isArray(body?.channels)) {
+      throw new RelayRequestError(
+        path,
+        response.status,
+        'Relay invalid response format missing expected `channels` array'
+      );
+    }
+
+    return {
+      channels: body.channels.map(({ scope_id, display_name }) => ({ scope_id, display_name })),
+      truncated: body.truncated === true,
+    };
   }
 
   /** Claim an unclaimed channel (put-if-absent). The caller must hold a registration for the tenant. */

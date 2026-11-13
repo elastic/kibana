@@ -7,7 +7,7 @@
 
 import { ENTITY_ID_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
-import type { ESQLValue, InventoryRow, MergeResult, PlanResult, TypedOutputColumn } from './types';
+import type { ESQLValue, InventoryRow, MergeResult, PlanResult } from './types';
 import { hasValue, isNewer, lastSeenInstant } from './utils';
 
 // Column names are authored data and may be `constructor` or `__proto__`, so the accumulator is a
@@ -20,20 +20,6 @@ interface EntityState {
   /** Attribute column to the `last_seen` of the row that supplied its value. */
   attributeSeen: Map<string, number | null>;
 }
-
-// Under `unmapped_fields="nullify"` a plan that does not map a column's field returns type `null`,
-// which says nothing about the column; a real type from a later plan wins over it.
-const NULL_TYPE = 'null';
-
-const typeColumns = (results: PlanResult[], columns: OutputColumn[]): TypedOutputColumn[] => {
-  const returned = results.flatMap((result) => result.columns);
-  return columns.map(({ name, kind }) => ({
-    name,
-    kind,
-    type:
-      returned.find((column) => column.name === name && column.type !== NULL_TYPE)?.type ?? null,
-  }));
-};
 
 const mergeInto = (
   state: EntityState,
@@ -102,7 +88,6 @@ export const mergeRows = (results: PlanResult[], columns: OutputColumn[]): Merge
 
   return {
     rows: [...entities.values()].map(({ row }) => Object.fromEntries(row)),
-    columns: typeColumns(orderedPlans, columns),
     provenance: Object.fromEntries(
       [...entities].map(([entityId, state]) => [entityId, Object.fromEntries(state.provenance)])
     ),

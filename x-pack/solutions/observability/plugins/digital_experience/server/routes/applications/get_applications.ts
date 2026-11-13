@@ -14,6 +14,7 @@ import type {
   ApplicationSummary,
   ApplicationsResponse,
   PageLoadsOverTime,
+  TimeSeriesPoint,
 } from '../../../common/types/applications';
 import { sortEnvironments } from '../../lib/helpers/environment';
 import { describeError, isAccessDenied } from '../../lib/helpers/errors';
@@ -73,10 +74,16 @@ export const getApplications = async ({
   const loaded: SourceApplications[] = [];
   const failures: SourceFailure[] = [];
   const pageLoadsOverTime: PageLoadsOverTime = { otel: [], classic: [] };
+  // Only EDOT Browser has sessions, and only when its source read them from the sessions index.
+  let sessionsOverTime: TimeSeriesPoint[] | null = null;
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
+      const { source } = sources[index];
       loaded.push(result.value);
-      pageLoadsOverTime[sources[index].source] = result.value.pageLoadsOverTime;
+      pageLoadsOverTime[source] = result.value.pageLoadsOverTime;
+      if (source === APPLICATION_SOURCE.otel) {
+        sessionsOverTime = result.value.sessionsOverTime;
+      }
     } else {
       failures.push({ source: sources[index].source, error: result.reason });
     }
@@ -92,6 +99,7 @@ export const getApplications = async ({
     applications: loaded.flatMap(({ applications }) => applications).sort(byPageLoadsThenName),
     environments: sortEnvironments(loaded.flatMap(({ environments }) => environments)),
     pageLoadsOverTime,
+    sessionsOverTime,
     unavailableSources: failures.map(({ source }) => source),
   };
 };

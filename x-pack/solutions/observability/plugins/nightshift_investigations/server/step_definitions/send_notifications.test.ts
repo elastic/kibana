@@ -57,11 +57,16 @@ const setup = (
     triggerType: 'manual',
     startedAt: '2026-10-07T00:00:00Z',
   }));
+  const getLifecycleCorrelation = jest.fn(async () => ({
+    event_id: 'significant-event-1',
+    source_workflow_execution_id: 'discovery-execution-1',
+  }));
   const emitter = jest.fn();
   const getInvestigationsClient = jest.fn(() => ({
     getInvestigationExecutionContext,
     ensureForFailure,
     getLifecycleSubject,
+    getLifecycleCorrelation,
     recordSlackThreadStatusMessage,
     claimSlackThread,
   })) as never;
@@ -391,8 +396,11 @@ describe('nightshift.handleInvestigationFailure step', () => {
       'nightshift-investigations.failed',
       expect.objectContaining({
         investigation_id: 'inv-1',
+        workflow_execution_id: 'exec-follow-up',
         status: 'failed',
         subject: { type: 'manual', id: 'question' },
+        event_id: 'significant-event-1',
+        source_workflow_execution_id: 'discovery-execution-1',
       })
     );
     expect(JSON.stringify(execute.mock.calls[0][0].params.subActionParams)).toContain(

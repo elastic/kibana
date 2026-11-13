@@ -234,6 +234,8 @@ test('starts the event loop watchdog with the feature flags start contract', asy
   expect(mockEventLoopWatchdogService.start).toHaveBeenCalledWith({
     featureFlags: expect.objectContaining({ getBooleanValue$: expect.any(Function) }),
   });
+  // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+  await server.stop();
 });
 
 test('fails setup when node roles are missing', async () => {
@@ -314,6 +316,8 @@ test('runs services on "start"', async () => {
   expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockInjectionService.start).toHaveBeenCalledTimes(1);
+  // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+  await server.stop();
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -522,6 +526,7 @@ describe('When preboot is disabled', () => {
 describe('self client UIAM attestation getter', () => {
   const ATTESTATION = 'attestation-for-outbound';
   const ATTESTATION_HEADERS = { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: ATTESTATION };
+  let server: Server | undefined;
 
   beforeEach(() => {
     // An earlier test leaves the node service mocked as a migrator-only node, which aborts `start`.
@@ -534,8 +539,14 @@ describe('self client UIAM attestation getter', () => {
     rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
   });
 
+  afterEach(async () => {
+    // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+    await server?.stop();
+    server = undefined;
+  });
+
   const startServerAndGetAttestationGetter = async () => {
-    const server = new Server(rawConfigService, env, logger);
+    server = new Server(rawConfigService, env, logger);
     await server.preboot();
     await server.setup();
     await server.start();
@@ -732,5 +743,7 @@ describe('self client own client authentication check', () => {
     expect(isOwn('kibana-shared-secret')).toBe(true);
     expect(isOwn('upstream-secret')).toBe(false);
     expect(uiam.isOwnClientAuthentication).toHaveBeenCalledWith('upstream-secret');
+    // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+    await server.stop();
   });
 });

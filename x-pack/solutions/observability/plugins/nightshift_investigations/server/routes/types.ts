@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
@@ -66,6 +66,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
+  getUserProfileService: () => Promise<CoreStart['userProfile']>;
   isUniversalAlertingAvailable: () => boolean;
   getWikiPageStore: GetWikiPageStore;
   isWikiEnabled: () => boolean;

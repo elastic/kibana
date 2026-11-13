@@ -53,7 +53,7 @@ Settings marked UI-readonly can only be turned on through `uiSettings.overrides`
 
 ## Access via URL
 
-With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges").
+With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges"). A user who also has Streams access gets a Classic Streams tab with the V1 list, and lands on it by default. Without Streams access the tab is hidden, the user lands on the Map, and `/app/streams/v2/unit/{unitId}/classic` redirects to the Map.
 
 ## Privileges
 
@@ -85,7 +85,7 @@ With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/
 | Request | Kibana API privilege | Kibana calls | The user's Elasticsearch privileges |
 | --- | --- | --- | --- |
 | `GET /internal/streams/unit/{id}` | `read_streams_v2` | The unit saved object, through an internal client | None |
-| `PUT /internal/streams/unit/{id}` | `manage_streams_v2` | The unit saved object, the distributor (Kibana's mTLS client certificate), and `DELETE /_security/api_key` as Kibana for removed components | None |
+| `PUT /internal/streams/unit/{id}` | `manage_streams_v2` | The unit saved object, the distributor (Kibana's mTLS client certificate), `DELETE /_security/api_key` as Kibana for removed components, and an empty `POST <endpoint>/_prometheus/api/v1/write` with the user's key for new or changed remote Elasticsearch destinations | None |
 | `GET /internal/streams/components` | `read_streams_v2` | The distributor | None |
 | `POST /internal/streams/components/_validate` | `manage_streams_v2` | The distributor | None |
 | `GET /internal/streams/unit/{id}/_resolve_indices` | `read_streams_v2` | `GET /_resolve/index/<destination targets>`, `GET /_data_stream/<names>`, `POST /_security/user/_has_privileges` | `view_index_metadata` on the destination targets (see "Destination targets"). Indices the user can't see are left out. |
@@ -267,7 +267,7 @@ Important consequences:
 - Only `unit_id` is mapped (`keyword`). The configuration saved object id is the unit id (`default` in v1). Do not add mappings unless you actually need to filter/sort on that field; mappings cannot be removed later.
 - `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest. `unit_id` and `sealed_credentials` are in AAD, so the cache stays readable but is authenticated: editing or swapping a cached blob makes `secrets` fail to decrypt, and the next save fails before anything is sent. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document, and do not `soClient.update` encrypted or AAD attributes. The one exception is `api_keys` (neither encrypted nor in AAD), which is updated on its own (see "API keys").
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
-- Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
+- Unit PUT order: remote Elasticsearch check → seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A rejected remote or a validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
 - `streams:republish-units` re-sends every stored unit every 30 minutes and re-seals after a key rotation. See "Republish and key rotation".
 - Without `xpack.streams.distributor.url`, unit PUT fails with a 503 ("streams-config-distributor URL is not configured"). There is no offline mode.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
@@ -276,9 +276,11 @@ Important consequences:
 
 Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<value>" }`), never inside `unit`. The unit references a credential by name with a config value of exactly `{ "credential": "<name>" }`, as the streams-spec credential contract defines. A plain string value is never a reference.
 
-Names follow the unit identifier grammar (`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, at most 256 characters). The same name is the reference, the key in `secrets`, and the `credentials[].name` sent to the distributor. The UI convention is `<nodeId>-<field>` with `_` turned into `-`, for example `s3-archive-secret-access-key`. That convention can collide (`a-b` + `c` and `a` + `b_c` both give `a-b-c`), so the UI must check before saving. Two nodes that reference the same name share one secret. The S3 destination modal is the first client sender: it writes `{ credential: <id>-access-key-id }` and `{ credential: <id>-secret-access-key }` into the node and sends both plaintext values in `secrets` on the same PUT.
+Names follow the unit identifier grammar (`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, at most 256 characters). The same name is the reference, the key in `secrets`, and the `credentials[].name` sent to the distributor. The UI convention is `<nodeId>-<field>` with `_` turned into `-`, for example `s3-archive-secret-access-key`. That convention can collide (`a-b` + `c` and `a` + `b_c` both give `a-b-c`), so the UI must check before saving. Two nodes that reference the same name share one secret. The S3 destination modal writes `{ credential: <id>-access-key-id }` and `{ credential: <id>-secret-access-key }` into the node and sends both plaintext values in `secrets` on the same PUT.
 
 The remote Elasticsearch destination modal does the same with one key: it writes `{ credential: <id>-api-key }` into the node and sends the user's key in `secrets`. Kibana never mints or revokes that key.
+
+The local Elasticsearch destination modal mints its API key, writes `{ credential: <id>-api-key }` into the node, and sends the encoded key in `secrets`. Kibana records and revokes that key as before.
 
 A JSON envelope that stores a secret references it from the node and sends the value next to the unit:
 
@@ -331,8 +333,6 @@ openssl rand 32 > "/tmp/streams-encryption-key/streams-encryption-key.$KID"
 
 Without a client certificate (a local fake distributor), set `xpack.cloud.serverless.project_id` explicitly in `kibana.dev.yml` (identifier grammar, at most 32 bytes). The UIAM dev path in `src/cli/serve/serve.js` defaults it to `abcdef12345678901234567890123456`, but not every local start goes through that path.
 
-The distributor's main branch ignores `credentials` on validate and cannot compile `{ credential }` references yet, so a local tilt run with a reference fails validation until the backend catches up (ingest-dev#9480).
-
 #### Republish and key rotation
 
 The task type `streams:republish-units` is always registered. When `xpack.streams.canvas.enabled` and `xpack.streams.distributor.url` are both set, it runs every 30 minutes and once after Kibana starts. Otherwise Kibana removes the scheduled task on start, and a run that still starts does nothing. For each stored unit it runs the same credential preparation as a save, with the stored secrets as input.
@@ -376,6 +376,15 @@ That revokes every API key in the unit's registry, then deletes the configuratio
 | `application/yaml` (also `text/yaml`, `application/x-yaml`) | The authored unit document itself (`sources` / `destinations` / `pipelines`). Do **not** wrap it in `{ unit: … }` and do **not** jsonify it first. YAML cannot set `ui_metadata` or `secrets`; stored map layout and secrets are kept (stale node metadata is still pruned). |
 
 A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, the PUT fails with 503 and nothing is stored. If the unit published but the canvas layout write failed, the response includes `ui_metadata_not_persisted: true`.
+
+Each new remote Elasticsearch destination, and each one whose endpoint or key changed, gets an empty `POST <endpoint>/_prometheus/api/v1/write` with its key before anything is stored. The PUT fails with 400 and stores nothing when:
+
+- the endpoint is not `https://` on a host ending in `.elastic.cloud`, `.elastic-cloud.com` or `.cloud.es.io`, or has credentials, a query or a fragment
+- the key is missing or has whitespace, control or non-ASCII characters
+- the save has more than 10 such remotes
+- the remote answers with a 4xx other than 408 or 429
+
+When the remote answers with 3xx, 5xx, 408 or 429, times out or can't be reached, the unit is saved and the response includes `remote_destinations_unverified: [{ destination_id, host, reason, status? }]`, with `reason` one of `unexpected_status`, `timeout` or `unreachable`.
 
 ### JSON envelope (Map)
 

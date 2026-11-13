@@ -20,6 +20,7 @@ import type {
 
 import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS } from './fake_requests';
+import { serviceAccountsMetrics } from './metrics';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import {
   UIAM_SERVICE_ACCOUNT_MAX_ROLES,
@@ -1206,7 +1207,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+        ).rejects.toMatchObject({ refusal: 'security_disabled', output: { statusCode: 403 } });
 
         expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
       });
@@ -1292,6 +1293,28 @@ describe('UiamServiceAccounts', () => {
           ).rejects.toMatchObject({ cause, retryable: false });
         }
       );
+
+      it('keeps the UIAM error code, so metrics can name the reason', async () => {
+        const cause = new Boom.Boom('rejected', { statusCode: 403 });
+        Object.assign(cause.output.payload, { error: { code: '0x3B8626' } });
+        mockUiam.exchangeServiceAccountToken.mockRejectedValue(cause);
+
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toMatchObject({ statusCode: 403, errorCode: '0x3B8626' });
+      });
+
+      it('measures the exchange as the initial mint of a UIAM account', async () => {
+        const measure = jest.spyOn(serviceAccountsMetrics, 'measureTokenExchange');
+
+        await serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' });
+
+        expect(measure).toHaveBeenCalledWith(
+          { backend: 'uiam', trigger: 'initial' },
+          expect.any(Function)
+        );
+        measure.mockRestore();
+      });
 
       it.each([
         'ECONNREFUSED',

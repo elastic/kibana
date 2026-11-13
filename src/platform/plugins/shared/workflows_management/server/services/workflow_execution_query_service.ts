@@ -281,6 +281,21 @@ export class WorkflowExecutionQueryService {
       sort,
       searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
+      // First page only. Later pages reuse this flag. List filters stay off this query.
+      namedExecutionQuery:
+        params.workflowId && !params.searchAfter?.length
+          ? {
+              bool: {
+                must: [
+                  { term: { workflowId: params.workflowId } },
+                  buildWorkflowExecutionsSpaceFilter(spaceId),
+                  ...(params.accessControlFilter ? [params.accessControlFilter] : []),
+                  { wildcard: { runName: { value: '?*' } } },
+                ],
+                must_not: [{ term: { deleted: true } }],
+              },
+            }
+          : undefined,
     });
   }
 
@@ -899,21 +914,29 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = (await this.deps.stepExecutionsDataClient.search({
-      query: {
-        bool: {
-          must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
-        },
-      },
-      size: 1,
-      track_total_hits: false,
-    })) as estypes.SearchResponse<EsWorkflowStepExecution>;
+    // Step writes use refresh:false. Search misses the doc until the next refresh, so an
+    // external resume link used immediately after the wait starts is rejected. getByIds
+    // reads the translog.
+    let stepExecution: EsWorkflowStepExecution | undefined;
+    try {
+      const { items } = await this.deps.stepExecutionsDataClient.getByIds([id]);
+      stepExecution = items[0]?.document;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return null;
+      }
+      throw error;
+    }
 
-    if (response.hits.hits.length === 0) {
+    if (
+      !stepExecution ||
+      stepExecution.workflowRunId !== executionId ||
+      stepExecution.spaceId !== spaceId
+    ) {
       return null;
     }
 
-    return response.hits.hits[0]._source ?? null;
+    return stepExecution;
   }
 
   /**

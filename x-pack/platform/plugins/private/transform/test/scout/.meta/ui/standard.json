@@ -1,5 +1,5 @@
 {
-  "sha1": "f9389c36603202a4a99b5ec7f769af10a16b99b3",
+  "sha1": "d110b701a82bd89031134272f8f96b8b02a9b859",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -391,8 +391,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_index_pattern_pivot.spec.ts",
-        "line": 178,
-        "column": 17
+        "line": 183,
+        "column": 9
       }
     },
     {
@@ -411,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_index_pattern_pivot.spec.ts",
-        "line": 178,
-        "column": 17
+        "line": 183,
+        "column": 9
       }
     },
     {
@@ -431,8 +431,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/creation/creation_index_pattern_pivot.spec.ts",
-        "line": 178,
-        "column": 17
+        "line": 183,
+        "column": 9
       }
     },
     {
@@ -651,8 +651,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/list/transform_list.spec.ts",
-        "line": 13,
-        "column": 8
+        "line": 23,
+        "column": 26
       }
     },
     {
@@ -671,8 +671,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/list/transform_list.spec.ts",
-        "line": 24,
-        "column": 13
+        "line": 33,
+        "column": 14
       }
     },
     {

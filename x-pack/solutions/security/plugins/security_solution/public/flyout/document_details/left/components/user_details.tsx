@@ -499,7 +499,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             indexPatterns={securityDefaultPatterns}
             jobNameById={jobNameById}
             scopeId={scopeId}
-            isFlyoutOpen={true}
             renderIpLink={renderIpLink}
             linkRenderer={LinkRenderer}
             riskScoreState={effectiveRiskScoreState}

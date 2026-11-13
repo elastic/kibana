@@ -9,7 +9,6 @@ import { k8sDeploymentFixture } from '../__fixtures__/definitions';
 import { buildColumns, resolveIdentityPlan } from '../generator';
 import type { OutputColumn, QueryPlan } from '../generator';
 import { mergeRows } from './merge';
-import type { ESQLColumn } from '@kbn/es-types';
 import type { InventoryRow, PlanResult } from './types';
 
 const columns: OutputColumn[] = [
@@ -27,16 +26,10 @@ const plan = (index: number, indexPattern = `pattern-${index}`): QueryPlan => ({
   attributes: [],
 });
 
-const result = (
-  index: number,
-  rows: InventoryRow[],
-  esqlColumns: ESQLColumn[] = [],
-  indexPattern?: string
-): PlanResult => ({
+const result = (index: number, rows: InventoryRow[], indexPattern?: string): PlanResult => ({
   plan: plan(index, indexPattern),
-  columns: esqlColumns,
+  columns: [],
   rows,
-  isPartial: false,
 });
 
 describe('mergeRows', () => {
@@ -179,14 +172,13 @@ describe('mergeRows', () => {
     ];
     const { provenance } = mergeRows(
       [
-        result(0, [{ 'entity.id': 'a', os: 'linux', last_seen: 2 }], [], 'metrics-a'),
+        result(0, [{ 'entity.id': 'a', os: 'linux', last_seen: 2 }], 'metrics-a'),
         result(
           1,
           [
             { 'entity.id': 'a', os: 'mac', arch: 'arm', last_seen: 1 },
             { 'entity.id': 'b', os: null, arch: 'x86', last_seen: 1 },
           ],
-          [],
           'metrics-b'
         ),
       ],
@@ -196,51 +188,6 @@ describe('mergeRows', () => {
       a: { os: 'metrics-a', arch: 'metrics-b' },
       b: { arch: 'metrics-b' },
     });
-  });
-
-  it('takes each column type from the first plan, in plan order, that returned it', () => {
-    const { columns: typed } = mergeRows(
-      [
-        result(
-          1,
-          [],
-          [
-            { name: 'entity.id', type: 'keyword' },
-            { name: 'os', type: 'text' },
-            { name: 'last_seen', type: 'date' },
-          ]
-        ),
-        result(
-          0,
-          [],
-          [
-            { name: 'entity.id', type: 'keyword' },
-            { name: 'last_seen', type: 'date_nanos' },
-          ]
-        ),
-      ],
-      columns
-    );
-    expect(typed).toEqual([
-      { name: 'entity.id', kind: 'id', type: 'keyword' },
-      { name: 'host.name', kind: 'identity', type: null },
-      { name: 'os', kind: 'attribute', type: 'text' },
-      { name: 'last_seen', kind: 'last_seen', type: 'date_nanos' },
-    ]);
-  });
-
-  it('skips a null column type for the first plan that returned a real one', () => {
-    const { columns: typed } = mergeRows(
-      [
-        result(0, [], [{ name: 'os', type: 'null' }]),
-        result(1, [], [{ name: 'os', type: 'keyword' }]),
-        result(2, [], [{ name: 'os', type: 'text' }]),
-        result(3, [], [{ name: 'last_seen', type: 'null' }]),
-      ],
-      columns
-    );
-    expect(typed.find(({ name }) => name === 'os')?.type).toBe('keyword');
-    expect(typed.find(({ name }) => name === 'last_seen')?.type).toBeNull();
   });
 
   it('drops and counts rows without an id', () => {
@@ -286,7 +233,6 @@ describe('mergeRows', () => {
               ['last_seen', 1],
             ]),
           ],
-          [],
           'metrics-a'
         ),
         result(
@@ -298,7 +244,6 @@ describe('mergeRows', () => {
               ['last_seen', 2],
             ]),
           ],
-          [],
           'metrics-b'
         ),
       ],
@@ -334,13 +279,11 @@ describe('mergeRows', () => {
           plan: plans[0],
           columns: [],
           rows: [{ 'entity.id': 'ns/d', cluster: 'c0', last_seen: 1 }],
-          isPartial: false,
         },
         {
           plan: plans[1],
           columns: [],
           rows: [{ 'entity.id': 'ns/d', cluster: 'c1', paused: false, last_seen: 2 }],
-          isPartial: false,
         },
       ],
       fixtureColumns

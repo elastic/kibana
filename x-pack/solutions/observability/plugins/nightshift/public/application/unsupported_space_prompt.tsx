@@ -57,7 +57,7 @@ export const UnsupportedSpacePrompt = () => {
             })}
           >
             {i18n.translate('xpack.nightshift.unsupportedSpace.goToDefaultSpace', {
-              defaultMessage: 'Open Nightshift in the default space',
+              defaultMessage: 'Open nightshift in the default space',
             })}
           </EuiButton>
         }

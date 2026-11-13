@@ -167,7 +167,7 @@ export const runWikiOptimize = async ({
   // rather than trusted — the optimize workflow has a manual trigger, so it can be run without an
   // agent id.
   if (!usesKnowledge(agentId)) {
-    logger.info('Wiki optimizer skipped — round was not produced by a Nightshift knowledge agent');
+    logger.info('Wiki optimizer skipped — round was not produced by a nightshift knowledge agent');
     return undefined;
   }
 

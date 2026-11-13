@@ -53,7 +53,7 @@ import type { RunningTaskSnapshot } from '../task_pool';
 import type { RunMemoryObservation } from '../lib/adaptive_capacity';
 import type { RunMemoryReporter } from './task_memory_reporter';
 import { createRunMemoryReporter, NOOP_RUN_MEMORY_REPORTER } from './task_memory_reporter';
-import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
+import { isFailedRunResult, TaskStatus, TaskCost } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import {
   createTaskRunError,
@@ -333,8 +333,7 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   public get cost(): number {
-    const instanceCost = getTaskCostFromInstance(this.instance.task.cost);
-    return instanceCost ?? this.definition?.cost ?? TaskCost.Normal;
+    return this.instance.task.cost ?? this.definition?.cost ?? TaskCost.Normal;
   }
 
   /**

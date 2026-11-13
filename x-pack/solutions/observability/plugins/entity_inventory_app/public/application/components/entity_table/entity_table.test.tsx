@@ -40,7 +40,7 @@ const StatefulEntityTable = (
   return <EntityTable {...props} preferences={preferences} onPreferencesChange={setPreferences} />;
 };
 
-const getFixture = (scenario: 'normal' | 'truncated' | 'countFailed'): InventoryListResponse => {
+const getFixture = (scenario: 'normal' | 'truncated'): InventoryListResponse => {
   const list = buildScenarioListResponse('host', scenario);
   if (!list) {
     throw new Error('Missing host fixture');
@@ -58,7 +58,6 @@ const hostRow = (overrides: InventoryRow): InventoryRow => ({
 const smallList = (rows: InventoryRow[]): InventoryListResponse => ({
   columns: HOST_COLUMNS,
   rows,
-  total: rows.length,
   truncated: false,
   errors: [],
   unavailableColumns: [],
@@ -138,7 +137,7 @@ describe('EntityTable', () => {
     expect(getCell(1, NAME_COLUMN_ID)).toHaveTextContent('web-002');
   });
 
-  it.each(['normal', 'truncated', 'countFailed'] as const)(
+  it.each(['normal', 'truncated'] as const)(
     'does not add a summary line to the toolbar for a %s list',
     (scenario) => {
       renderTable(getFixture(scenario));
@@ -195,7 +194,6 @@ describe('EntityTable', () => {
                 }),
                 row({ 'kubernetes.deployment.name': 'scheduler' }),
               ],
-              total: 3,
               truncated: false,
             }}
           />
@@ -237,7 +235,6 @@ describe('EntityTable', () => {
                 row({ 'k8s.deployment.name': 'frontend', 'k8s.namespace.name': 'payments' }),
                 row({ 'kubernetes.deployment.name': 'cart', 'kubernetes.namespace': 'checkout' }),
               ],
-              total: 2,
               truncated: false,
             }}
           />

@@ -228,33 +228,6 @@ describe('eventsWriteHandler', () => {
     expect(result.written).toBe(true);
   });
 
-  // An inactive stored event ensures severity+status differ from the active input,
-  // so the no-op guard does not fire and a write reaches createAlertEvent in both cases.
-  it.each([
-    [
-      'carries investigations lineage forward when present',
-      [
-        { workflow_execution_id: 'wf-1', started_at: '2024-01-01T00:00:00.000Z' },
-      ] as SignificantEvent['investigations'],
-    ],
-    ['leaves investigations undefined when absent', undefined],
-  ])('%s on re-open continuation', async (_, storedInvestigations) => {
-    const stored = makeStoredEvent('checkout__latency-abc12345', {
-      status: 'inactive',
-      investigations: storedInvestigations,
-    });
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    await eventsWriteHandler({
-      eventSearchClient: eventClient,
-      input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
-    });
-
-    expect(writtenDocs()[0].investigations).toEqual(storedInvestigations);
-  });
-
   describe('unchanged_outcome (no-op guard)', () => {
     it('returns EventsWriteNoOpResult when severity and status are unchanged for a snapshot candidate', async () => {
       // A signal-less candidate keeps its explicit severity ('high' from baseInput); the stored
@@ -492,30 +465,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
     expect(writtenDocs()).toHaveLength(1);
     expect(writtenDocs()[0].event_id).not.toBe('unknown-event-id');
-  });
-
-  it('copies investigations from the .rule-events lineage on continuation', async () => {
-    const eventId = 'known-canonical-event';
-    const canonicalInvestigations = [
-      { workflow_execution_id: 'wf-canonical', started_at: '2024-01-01T00:00:00.000Z' },
-    ] as SignificantEvent['investigations'];
-    const canonicalEvent = makeStoredEvent(eventId, {
-      investigations: canonicalInvestigations,
-      severity: 'medium',
-    });
-    const eventSearchClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [canonicalEvent] }),
-    });
-
-    const [result] = await eventsWriteBulkHandler({
-      eventSearchClient,
-      rejectUnknownEventIds: true,
-      inputs: [{ ...baseInput, event_id: eventId }],
-    });
-
-    expect(result).toMatchObject({ event_id: eventId, written: true });
-    expect(eventSearchClient.findByEventId).toHaveBeenCalledWith(eventId);
-    expect(writtenDocs()[0].investigations).toEqual(canonicalInvestigations);
   });
 });
 
@@ -1064,90 +1013,6 @@ describe('eventsWriteBulkHandler — agent-proposed severity', () => {
     await expect(
       write({ severity: undefined, signals: [failingSignal('rule-1')] })
     ).rejects.toThrow('needs a proposed severity');
-  });
-});
-
-describe('eventsWriteBulkHandler — investigation severity calibration', () => {
-  const completedInvestigation: NonNullable<SignificantEvent['investigations']>[number] = {
-    workflow_execution_id: 'workflow-1',
-    started_at: '2026-01-01T00:00:00.000Z',
-    completed_at: '2026-01-01T01:00:00.000Z',
-  };
-  const makeInvestigatedEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
-    makeStoredEvent('investigated-event', {
-      severity: 'medium',
-      signals: [makeDetectionSignal({ ruleUuid: 'rule-1' })],
-      investigations: [completedInvestigation],
-      ...overrides,
-    });
-
-  it('calibrates before the no-op check and skips a same-rule severity change', async () => {
-    const stored = makeInvestigatedEvent();
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    const [result] = await eventsWriteBulkHandler({
-      eventSearchClient: eventClient,
-      source: 'discovery',
-      inputs: [
-        {
-          ...baseInput,
-          event_id: stored.event_id,
-          severity: 'critical',
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-1' })],
-        },
-      ],
-    });
-
-    expect(result).toMatchObject({ written: false, reason: 'unchanged_outcome' });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('writes a new unconfirmed rule with the investigated severity', async () => {
-    const stored = makeInvestigatedEvent();
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    await eventsWriteBulkHandler({
-      eventSearchClient: eventClient,
-      source: 'discovery',
-      inputs: [
-        {
-          ...baseInput,
-          event_id: stored.event_id,
-          severity: 'critical',
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-2', verdict: 'inconclusive' })],
-        },
-      ],
-    });
-
-    expect(writtenDocs()[0].severity).toBe('medium');
-  });
-
-  it('accepts severity from a new confirmed rule', async () => {
-    const stored = makeInvestigatedEvent();
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-    });
-
-    const newConfirmedRule = makeDetectionSignal({ ruleUuid: 'rule-2' });
-
-    await eventsWriteBulkHandler({
-      eventSearchClient: eventClient,
-      source: 'discovery',
-      inputs: [
-        {
-          ...baseInput,
-          event_id: stored.event_id,
-          severity: 'critical',
-          signals: [newConfirmedRule],
-        },
-      ],
-    });
-
-    expect(writtenDocs()[0].severity).toBe('critical');
   });
 });
 

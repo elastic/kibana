@@ -309,7 +309,7 @@ describe('NightshiftPage', () => {
     renderPage();
     expect(navigateToApp).not.toHaveBeenCalled();
     await waitFor(() =>
-      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('nightshift')
     );
     expect(await screen.findByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
@@ -512,6 +512,25 @@ describe('NightshiftPage', () => {
       expect(await screen.findByTestId('automationsPageStub')).toBeInTheDocument();
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Automations');
       expect(screen.queryByTestId('nightshiftTabAutomations')).not.toBeInTheDocument();
+    });
+
+    it('shows Settings and marks Automations as the Settings origin', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/automations');
+
+      expect(await screen.findByTestId('automationsPageStub')).toBeInTheDocument();
+
+      const settingsLink = screen.getByTestId('nightshiftSettingsLink');
+      expect(settingsLink).toBeVisible();
+      expect(settingsLink).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings/investigations?origin=automations'
+      );
+
+      await act(async () => fireEvent.click(settingsLink));
+      expect(navigateToUrl).toHaveBeenLastCalledWith(
+        '/app/nightshift/settings/investigations?origin=automations'
+      );
     });
 
     it('keeps the automations page mounted for a detail route', async () => {

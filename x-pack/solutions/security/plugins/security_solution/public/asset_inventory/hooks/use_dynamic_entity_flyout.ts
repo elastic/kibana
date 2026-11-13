@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS,
   ASSET_INVENTORY_EXPAND_FLYOUT_ERROR,
@@ -16,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
-import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
 interface InventoryFlyoutProps {
   /** Raw _source from the asset document (required for EUID extraction) */
@@ -29,11 +27,9 @@ interface InventoryFlyoutProps {
 }
 
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
-  const { closeFlyout } = useExpandableFlyoutApi();
   const { openHostFlyout, openUserFlyout, openServiceFlyout, openGenericEntityFlyout } =
     useFlyoutApi();
   const { notifications } = useKibana().services;
-  useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
   const openDynamicFlyout = ({
     entityDocId,
@@ -119,12 +115,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS);
   };
 
-  const closeDynamicFlyout = () => {
-    closeFlyout();
-  };
-
   return {
     openDynamicFlyout,
-    closeDynamicFlyout,
   };
 };

@@ -24,6 +24,7 @@ import type {
   SeriesIdentifier,
   TooltipValue,
   PointerValue,
+  HeatmapCellDatum,
 } from '@elastic/charts';
 import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
@@ -58,6 +59,8 @@ import {
 import { defaultPaletteParams } from '../constants';
 import { ChartSplit } from './chart_split';
 import { getSplitDimensionAccessor, createSplitPoint } from '../utils/get_split_dimension_utils';
+
+type HeatmapChartDatum = Record<string, string | number>;
 
 declare global {
   interface Window {
@@ -113,7 +116,7 @@ function shiftAndNormalizeStops(
  * @returns The minimum interval in milliseconds, or undefined if cannot be computed
  */
 export function computeMinIntervalFromData(
-  data: Array<Record<string, string | number>>,
+  data: HeatmapChartDatum[],
   xAccessor: string | undefined
 ): number | undefined {
   if (!xAccessor || data.length < 2) {
@@ -162,7 +165,7 @@ export function computeMinIntervalFromData(
 function computeXScale(
   xScaleType: string | undefined,
   isTimeBasedSwimLane: boolean,
-  chartData: Array<Record<string, string | number>>,
+  chartData: HeatmapChartDatum[],
   xAxisColumn: DatatableColumn | undefined,
   dateHistogramMeta: { interval?: string } | undefined,
   parseEsInterval: (interval: string) => { type: string; unit: string; value: number } | null,
@@ -310,6 +313,14 @@ export function getDateFormatPattern(
   // Fallback to default date format
   return uiSettings.get('dateFormat');
 }
+
+const isHeatmapCellDatum = (datum: unknown): datum is HeatmapCellDatum =>
+  typeof datum === 'object' && datum !== null && 'originalIndex' in datum;
+
+// A y-axis label tooltip is one row whose datum is the category, not a cell.
+const isHeatmapYAxisLabelTooltip = (
+  items: Array<TooltipValue<HeatmapChartDatum, SeriesIdentifier>>
+): boolean => items.length === 1 && !isHeatmapCellDatum(items[0]?.datum);
 
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
@@ -519,13 +530,20 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const TooltipFooter = useMemo<
       | React.ComponentType<{
-          items: Array<TooltipValue<Record<string, string | number>, SeriesIdentifier>>;
-          header: PointerValue<Record<string, string | number>> | null;
+          items: Array<TooltipValue<HeatmapChartDatum, SeriesIdentifier>>;
+          header: PointerValue<HeatmapChartDatum> | null;
         }>
       | 'default'
     >(() => {
       if (!warningMessage) return 'default';
-      return () => <ChartTooltipFooterMessage message={warningMessage} />;
+      return ({ items }) => {
+        // @elastic/charts still mounts the footer wrapper when this returns null.
+        // The wrapper goes away once charts skips footers for disableActions tooltips.
+        if (isHeatmapYAxisLabelTooltip(items)) {
+          return null;
+        }
+        return <ChartTooltipFooterMessage message={warningMessage} />;
+      };
     }, [warningMessage]);
 
     const onElementClick = useCallback(
@@ -831,9 +849,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const yAxisTitle = args.gridConfig.yTitle ?? yAxisColumn?.name;
 
     const filterSelectedTooltipValues = (
-      tooltipSelectedValues: Array<
-        TooltipValue<Record<'x' | 'y', string | number>, SeriesIdentifier>
-      >
+      tooltipSelectedValues: Array<TooltipValue<HeatmapChartDatum, SeriesIdentifier>>
     ) => {
       const { datum } = tooltipSelectedValues[0];
       if (!datum) {
@@ -933,7 +949,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               splitColumnAccessor={splitChartColumnAccessor}
               splitRowAccessor={splitChartRowAccessor}
             />
-            <Tooltip<Record<string, string | number>, SeriesIdentifier>
+            <Tooltip<HeatmapChartDatum, SeriesIdentifier>
               actions={
                 hasTooltipActions
                   ? [

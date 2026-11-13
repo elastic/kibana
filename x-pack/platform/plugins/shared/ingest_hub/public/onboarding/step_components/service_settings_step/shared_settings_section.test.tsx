@@ -10,7 +10,18 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { docLinks: undefined } }),
+  useKibana: () => ({
+    services: {
+      docLinks: {
+        links: {
+          fleet: {
+            elasticAgentInputConditions: 'https://conditions',
+            datastreams: 'https://example.com/datastreams',
+          },
+        },
+      },
+    },
+  }),
 }));
 const mockUseOutputs = jest.fn();
 jest.mock('@kbn/fleet-plugin/public', () => ({
@@ -18,6 +29,9 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   PackagePolicyOutputSelect: jest.requireActual(
     '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select'
   ).PackagePolicyOutputSelect,
+  PackagePolicyConditionField: jest.requireActual(
+    '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_condition_field'
+  ).PackagePolicyConditionField,
   NamespaceComboBox: ({
     namespace,
     onNamespaceChange,
@@ -41,6 +55,7 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
   const onIntegrationNameChange = jest.fn();
   const onDescriptionChange = jest.fn();
   const onNamespaceChange = jest.fn();
+  const onDedicatedNamespaceTemplatesChange = jest.fn();
   render(
     <I18nProvider>
       <SharedSettingsSection
@@ -54,6 +69,8 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
         onGlobalRegionTouched={jest.fn()}
         namespace=""
         onNamespaceChange={onNamespaceChange}
+        dedicatedNamespaceTemplates={false}
+        onDedicatedNamespaceTemplatesChange={onDedicatedNamespaceTemplatesChange}
         {...props}
       />
     </I18nProvider>
@@ -62,6 +79,7 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
     onIntegrationNameChange,
     onDescriptionChange,
     onNamespaceChange,
+    onDedicatedNamespaceTemplatesChange,
   };
 };
 
@@ -173,6 +191,55 @@ describe('SharedSettingsSection', () => {
 
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
       expect(screen.getByTestId('sharedSettingsNamespace-note')).toBeInTheDocument();
+    });
+
+    describe('dedicated index templates switch', () => {
+      const SWITCH = 'sharedSettingsDedicatedNamespaceTemplates';
+
+      it('is off and disabled while there is no namespace', () => {
+        renderSection({ namespace: '' });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).not.toBeChecked();
+        expect(screen.getByTestId(SWITCH)).toBeDisabled();
+      });
+
+      it('is disabled while the namespace is invalid', () => {
+        renderSection({ namespace: 'Prod' });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).toBeDisabled();
+      });
+
+      it('reflects its value and reports changes once there is a namespace', () => {
+        const { onDedicatedNamespaceTemplatesChange } = renderSection({ namespace: 'prod' });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).toBeEnabled();
+        fireEvent.click(screen.getByTestId(SWITCH));
+
+        expect(onDedicatedNamespaceTemplatesChange).toHaveBeenCalledWith(true);
+      });
+
+      it('is off and disabled, with a note, when only ECF services are selected', () => {
+        renderSection({
+          namespace: 'prod',
+          dedicatedNamespaceTemplates: true,
+          isDedicatedTemplatesUnavailable: true,
+        });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).toBeDisabled();
+        expect(screen.getByTestId(SWITCH)).not.toBeChecked();
+        expect(screen.getByTestId(`${SWITCH}-unavailable`)).toBeInTheDocument();
+      });
+
+      it('shows as on when it is on', () => {
+        renderSection({ namespace: 'prod', dedicatedNamespaceTemplates: true });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).toBeChecked();
+      });
     });
 
     it('notes that a launched ECF stack has to be updated in AWS', () => {
@@ -377,6 +444,61 @@ describe('SharedSettingsSection', () => {
       renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
 
       expect(onChange).toHaveBeenCalledWith('');
+    });
+  });
+
+  describe('condition', () => {
+    it('is hidden unless the deployment is agent-based', () => {
+      renderSection();
+
+      expect(screen.queryByTestId('sharedSettingsCondition')).not.toBeInTheDocument();
+    });
+
+    it('is the last advanced setting, after the output', () => {
+      renderSection({
+        output: {
+          value: '',
+          onChange: jest.fn(),
+          packageName: 'aws',
+          inputTypes: ['aws-s3'],
+          areInputTypesLoaded: true,
+          isInheritedOutputDefault: true,
+        },
+        condition: { value: '', onChange: jest.fn() },
+      });
+
+      const fields = screen
+        .getByTestId('sharedAdvancedSettings')
+        .querySelectorAll('[data-test-subj^="sharedSettings"]');
+      expect(fields[fields.length - 1]).toBe(screen.getByTestId('sharedSettingsCondition'));
+      expect(screen.getByTestId('sharedSettingsOutput')).toBeInTheDocument();
+    });
+
+    it('reports edits', () => {
+      const onChange = jest.fn();
+      renderSection({ condition: { value: '', onChange } });
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+
+      fireEvent.change(screen.getByTestId('sharedSettingsCondition'), {
+        target: { value: '${host.platform} == "linux"' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith('${host.platform} == "linux"');
+    });
+
+    it('opens on its own, and cannot be collapsed, while the condition is invalid', () => {
+      renderSection({
+        condition: {
+          value: '${host.platform} ==',
+          onChange: jest.fn(),
+          errors: ['Line 1, column 20: syntax error'],
+        },
+      });
+
+      expect(screen.getByTestId('sharedSettingsCondition')).toBeVisible();
+      expect(screen.getByText('Line 1, column 20: syntax error')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      expect(screen.getByTestId('sharedSettingsCondition')).toBeVisible();
     });
   });
 });

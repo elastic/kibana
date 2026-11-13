@@ -10,8 +10,11 @@ import {
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
@@ -28,7 +31,10 @@ import {
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
+  discoveryCompletedSchema,
+  discoveryStartedSchema,
   discoveryTriggeredSchema,
+  eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,
@@ -69,6 +75,21 @@ const agentToolEventInvestigationAttachEventType = {
   schema: agentToolEventInvestigationAttachSchema,
 };
 
+const discoveryStartedEventType = {
+  eventType: SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
+  schema: discoveryStartedSchema,
+};
+
+const discoveryCompletedEventType = {
+  eventType: SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
+  schema: discoveryCompletedSchema,
+};
+
+const eventStatusChangedEventType = {
+  eventType: SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  schema: eventStatusChangedSchema,
+};
+
 const discoveryTriggeredEventType = {
   eventType: SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
   schema: discoveryTriggeredSchema,
@@ -103,7 +124,10 @@ export {
   agentToolEventWriteEventType,
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,
+  discoveryCompletedEventType,
+  discoveryStartedEventType,
   discoveryTriggeredEventType,
+  eventStatusChangedEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,

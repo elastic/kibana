@@ -18,6 +18,7 @@ import type {
   ConversationOrigin,
   ConversationRoundAuthor,
   ConversationRoundAuthorDecoration,
+  EventActor,
   ExecutionStatus,
   InteractivityConfig,
   InteractivityConfigInput,
@@ -52,6 +53,11 @@ export interface BaseExecutionParams {
    * execution's owner, so it must name the running parent, never a value from user or model input.
    */
   parentExecutionId?: string;
+  /**
+   * Set on a background sub-agent: how its parent gets the result when it finishes. `always`
+   * starts the parent conversation, `never` leaves the message for the parent's next run.
+   */
+  parentTriggerMode?: ChatTriggerMode;
   /**
    * Connector telemetry to attribute this execution's LLM calls to a specific feature
    * (sets `metadata.connectorTelemetry` on inference calls). When omitted, the default
@@ -113,6 +119,10 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
    * for interactive users. Never affects the actor's `id`, `username` or `type`.
    */
   author?: ConversationRoundAuthorDecoration;
+  /** Actor of the user message this request writes, when it is not the request principal. */
+  actor?: EventActor;
+  /** The background sub-agent the message reports; consumed in the same write, refused once reported. */
+  reportsBackgroundExecution?: string;
   /** Callback delivery configuration for this execution. */
   callback?: {
     /** URL to deliver the execution result to. */

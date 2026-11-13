@@ -11,6 +11,8 @@ interface MockData {
   useFetchGraphDataMock?: {
     log?: (...args: unknown[]) => void;
     isFetching?: boolean;
+    isError?: boolean;
+    error?: unknown;
     refresh?: () => void;
     data?: unknown;
   };

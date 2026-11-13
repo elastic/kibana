@@ -1,5 +1,5 @@
 {
-  "sha1": "8dcff1a54b22ba8b55e43f1da1dbd1dd84ba4a7f",
+  "sha1": "10ac2a8f25e5fe05312ec058d3f09d336dd16f45",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -240,8 +240,8 @@
       }
     },
     {
-      "id": "d88e0be806f054e-e78b5bb02dd2c12",
-      "title": "Streams layout renders every tab and lands on map",
+      "id": "d88e0be806f054e-da0f348f5b47639",
+      "title": "Streams layout renders every tab and lands on classic",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
@@ -249,13 +249,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 26,
-        "column": 42
+        "line": 27,
+        "column": 21
       }
     },
     {
-      "id": "d88e0be806f054e-a7b7220c5a14d4a",
-      "title": "Streams layout falls back to the map tab for an unknown tab",
+      "id": "d88e0be806f054e-b5de689ac43342c",
+      "title": "Streams layout falls back to the classic tab for an unknown tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
@@ -264,7 +264,21 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
         "line": 32,
-        "column": 70
+        "column": 82
+      }
+    },
+    {
+      "id": "d88e0be806f054e-da2aaf92231bb7e",
+      "title": "Streams layout the new experience callout opens the map and stays dismissed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
+        "line": 36,
+        "column": 13
       }
     },
     {
@@ -277,8 +291,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 35,
-        "column": 23
+        "line": 48,
+        "column": 8
       }
     },
     {
@@ -291,8 +305,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 42,
-        "column": 78
+        "line": 52,
+        "column": 19
       }
     },
     {
@@ -305,8 +319,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 179,
-        "column": 20
+        "line": 180,
+        "column": 18
       }
     },
     {
@@ -319,7 +333,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 186,
+        "line": 187,
         "column": 11
       }
     },
@@ -333,7 +347,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 193,
+        "line": 194,
         "column": 11
       }
     },
@@ -347,7 +361,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 207,
+        "line": 208,
         "column": 11
       }
     },
@@ -361,7 +375,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 229,
+        "line": 230,
         "column": 20
       }
     },
@@ -375,7 +389,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 247,
+        "line": 248,
         "column": 11
       }
     },
@@ -389,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 278,
+        "line": 279,
         "column": 11
       }
     },
@@ -403,7 +417,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 288,
+        "line": 289,
         "column": 23
       }
     },
@@ -417,7 +431,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
-        "line": 300,
+        "line": 301,
         "column": 16
       }
     },

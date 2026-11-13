@@ -64,7 +64,7 @@ export const checkSandboxAccess = async ({
   });
   return hasAllRequested
     ? { status: 'available' }
-    : unavailable('Nightshift tools require the Nightshift manage privilege in this space.');
+    : unavailable('Nightshift tools require the nightshift manage privilege in this space.');
 };
 
 export const createSandboxToolAvailability = ({

@@ -8,6 +8,7 @@
 import { resolve } from 'path';
 import type { Cookie } from 'tough-cookie';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import { adminTestUser } from '@kbn/test';
@@ -65,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('does not prevent basic login', async () => {
       const response = await supertest
         .post('/internal/security/login')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxx')
         .send({
           providerType: 'basic',
@@ -100,6 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body: user } = await supertest
           .get('/internal/security/me')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -138,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not extend cookie for system AND non-system API calls', async () => {
         const apiResponseOne = await supertest
           .get('/internal/security/me')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -275,6 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       const defaultResponse = await supertest
         .get('/internal/security/me')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);
 
