@@ -10,6 +10,7 @@
 import type { ESQLCallbacks } from '@kbn/esql-types';
 // The package entry is loaded first: its modules have to be evaluated in the package's order.
 import { suggest as currentSuggest } from '../../..';
+import { createCallbacks } from '../../__tests__/scenarios';
 import { esqlCommandRegistry } from '../../commands/registry';
 import { suggest } from './suggest';
 
@@ -149,6 +150,72 @@ describe('suggest (v2)', () => {
       const texts = await textsAt('FROM a | SORT b ');
 
       expect(new Set(texts).size).toBe(texts.length);
+    });
+  });
+
+  describe('columns', () => {
+    const world = (names: Record<string, string>) =>
+      createCallbacks({
+        columns: Object.entries(names).map(([name, type]) => ({ name, type, userDefined: false })),
+      });
+    const callbacks = world({ a: 'keyword', b: 'long', c: 'text' });
+
+    it('offers the columns of the query before the cursor', async () => {
+      expect((await textsAt('FROM x | KEEP ', callbacks)).sort()).toEqual(['a', 'b', 'c']);
+    });
+
+    it('offers only the columns of the types the argument accepts', async () => {
+      expect((await textsAt('FROM x | DISSECT ', callbacks)).sort()).toEqual(['a ', 'c ']);
+    });
+
+    it('leaves out a column that is already listed where each is listed once', async () => {
+      expect((await textsAt('FROM x | KEEP a, ', callbacks)).sort()).toEqual(['b', 'c']);
+      expect((await textsAt('FROM x | KEEP a, b', callbacks)).sort()).toEqual(['b', 'c']);
+    });
+
+    it('ends a column with a space unless a list separator can follow it', async () => {
+      // KEEP takes a list: the separator is offered on the name itself.
+      expect(await textsAt('FROM x | KEEP ', callbacks)).toContain('a');
+      // MV_EXPAND takes one column: the cursor moves on.
+      expect(await textsAt('FROM x | MV_EXPAND ', callbacks)).toContain('a ');
+    });
+
+    it('does not offer the columns again after a complete one', async () => {
+      expect((await textsAt('FROM x | KEEP a ', callbacks)).sort()).toEqual(['\n', ', ', '| ']);
+    });
+
+    it('reads the columns a command before the cursor defines', async () => {
+      expect(await textsAt('FROM x | EVAL d = 1 | KEEP ', callbacks)).toContain('d');
+    });
+
+    it('asks the editor for columns only where they are offered', async () => {
+      const spied = { ...callbacks, getColumnsFor: jest.fn(callbacks.getColumnsFor) };
+
+      await textsAt('FROM y | LIMIT 10 ', spied);
+      expect(spied.getColumnsFor).not.toHaveBeenCalled();
+
+      await textsAt('FROM y | KEEP ', spied);
+      expect(spied.getColumnsFor).toHaveBeenCalled();
+    });
+  });
+
+  describe('new names', () => {
+    it('offers a name with its assignment where the grammar assigns it', async () => {
+      expect(await textsAt('FROM x | RENAME ')).toContain('col0 = ');
+    });
+
+    it('offers nothing where any name can be typed', async () => {
+      expect(await textsAt('FROM x | RENAME a AS ')).toEqual([]);
+    });
+
+    it('picks a name the query does not use yet', async () => {
+      expect(await textsAt('FROM x | RENAME col0 = a, ')).toContain('col1 = ');
+    });
+  });
+
+  describe('constants', () => {
+    it('offers the values a constant can take', async () => {
+      expect(await textsAt('FROM x | FUSE ')).toEqual(expect.arrayContaining(['linear ', 'rrf ']));
     });
   });
 });
