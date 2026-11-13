@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
@@ -22,7 +23,7 @@ export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
 export interface VisualizationListItem {
   error?: string;
-  icon: string;
+  icon: IconType;
   id: string;
   stage?: VisualizationStage;
   savedObjectType: string;

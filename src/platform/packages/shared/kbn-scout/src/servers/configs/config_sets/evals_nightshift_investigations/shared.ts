@@ -36,6 +36,29 @@ const withSafeTracing = (tracing: ScoutServerConfig): ScoutServerConfig => {
   };
 };
 
+/**
+ * The suite's knowledge switches: `NIGHTSHIFT_KNOWLEDGE` as validated by its scout hook, plus the
+ * decision trees the hook turns on for the reinforcement micro-eval (`NIGHTSHIFT_DECISION_TREES`).
+ * Every system is set explicitly, because decision trees default on and do not require Wiki.
+ * Restored knowledge freezes learning so every example reads what the eval restored rather than
+ * what earlier examples wrote. The reinforcement eval keeps learning on: its live mode waits on the
+ * post-run hook that reinforces the trees.
+ */
+const knowledgeArgs = (): string[] => {
+  const selected = new Set((process.env.NIGHTSHIFT_KNOWLEDGE ?? '').split(',').filter(Boolean));
+  const reinforcement = process.env.NIGHTSHIFT_DECISION_TREES === 'true';
+  return [
+    `--xpack.nightshift_investigations.wiki.enabled=${selected.has('wiki')}`,
+    `--xpack.nightshift_investigations.memory.enabled=${selected.has('memory')}`,
+    `--xpack.nightshift_investigations.decision_trees.enabled=${
+      selected.has('decision-trees') || reinforcement
+    }`,
+    ...(selected.size > 0 && !reinforcement
+      ? ['--xpack.nightshift_investigations.learning.enabled=false']
+      : []),
+  ];
+};
+
 const createInvestigationConfig = (
   safeTracing: ScoutServerConfig,
   sandboxKibanaConfig: string
@@ -68,8 +91,7 @@ const createInvestigationConfig = (
         '--feature_flags.overrides.nightshift.enabled=true',
         // The suite judges investigations offline; online evals would run its judges again on every one.
         '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
-        '--xpack.nightshift_investigations.wiki.enabled=false',
-        '--xpack.nightshift_investigations.memory.enabled=false',
+        ...knowledgeArgs(),
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(connectorsConfig ? [`--config=${connectorsConfig}`] : []),

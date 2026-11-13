@@ -7,10 +7,28 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-plugin/common';
-import { getESQLAdHocDataview, getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import {
+  getESQLAdHocDataview,
+  getESQLQueryColumnsRaw,
+  hasGeohashPrecisionParam,
+  hasGeohexPrecisionParam,
+  hasGeotilePrecisionParam,
+} from '@kbn/esql-utils';
 import type { ESQLColumn } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getHttp, getIndexPatternService } from '../../../kibana_services';
+
+/**
+ * True when the ES|QL statement uses a geo precision system param, `?_geotile_precision`,
+ * `?_geohex_precision` or `?_geohash_precision`, which Maps fills from the map zoom and the source's grid resolution.
+ */
+export function hasGeoPrecisionParam(esql: string) {
+  return (
+    hasGeotilePrecisionParam(esql) ||
+    hasGeohexPrecisionParam(esql) ||
+    hasGeohashPrecisionParam(esql)
+  );
+}
 
 // ESQL_GEO_POINT_TYPE !== ES_GEO_FIELD_TYPE.GEO_POINT
 // ES_GEO_FIELD_TYPE.GEO_POINT is a field type from an Elasticsearch index mapping

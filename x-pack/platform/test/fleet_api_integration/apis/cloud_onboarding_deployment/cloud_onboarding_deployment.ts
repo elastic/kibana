@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { testUsers } from '../test_users';
+import { setupTestUsers, testUsers } from '../test_users';
 import { createAgentDoc } from '../agent_policy/cleanup_agent_policy_revisions';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -53,6 +53,7 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     before(async () => {
+      await setupTestUsers(getService('security'));
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await fleetAndAgents.setup();
@@ -247,6 +248,61 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         expect(fetched.item.integrationName).to.equal('my-aws');
         expect(fetched.item.description).to.equal('Production AWS');
+      });
+
+      it('should store and return dedicatedNamespaceTemplates', async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            namespace: 'prod',
+            dedicatedNamespaceTemplates: true,
+          })
+          .expect(200);
+
+        expect(body.item.namespace).to.equal('prod');
+        expect(body.item.dedicatedNamespaceTemplates).to.equal(true);
+        createdIds.push(body.item.id);
+
+        const { body: fetched } = await supertest
+          .get(`${BASE_URL}/${body.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(fetched.item.dedicatedNamespaceTemplates).to.equal(true);
+      });
+
+      it('should leave dedicatedNamespaceTemplates unset when it is not sent', async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+          })
+          .expect(200);
+
+        expect(body.item).not.to.have.property('dedicatedNamespaceTemplates');
+        createdIds.push(body.item.id);
+      });
+
+      it('should reject a dedicatedNamespaceTemplates that is not a boolean', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            dedicatedNamespaceTemplates: 'yes',
+          })
+          .expect(400);
       });
 
       it('should accept an integration name of exactly the limit (160)', async () => {
@@ -947,6 +1003,58 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item.serviceVars).to.eql(serviceVars);
+      });
+
+      describe('dedicatedNamespaceTemplates', () => {
+        it('should turn the switch on', async () => {
+          const { body } = await supertest
+            .put(`${BASE_URL}/${deploymentId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ namespace: 'prod', dedicatedNamespaceTemplates: true })
+            .expect(200);
+
+          expect(body.item.dedicatedNamespaceTemplates).to.equal(true);
+        });
+
+        it('should keep the stored value when an update does not mention it', async () => {
+          await supertest
+            .put(`${BASE_URL}/${deploymentId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ dedicatedNamespaceTemplates: true })
+            .expect(200);
+
+          const { body } = await supertest
+            .put(`${BASE_URL}/${deploymentId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ status: 'succeeded' })
+            .expect(200);
+
+          expect(body.item.dedicatedNamespaceTemplates).to.equal(true);
+        });
+
+        it('should turn the switch off with false', async () => {
+          await supertest
+            .put(`${BASE_URL}/${deploymentId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ dedicatedNamespaceTemplates: true })
+            .expect(200);
+
+          const { body } = await supertest
+            .put(`${BASE_URL}/${deploymentId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ dedicatedNamespaceTemplates: false })
+            .expect(200);
+
+          expect(body.item.dedicatedNamespaceTemplates).to.equal(false);
+        });
+
+        it('should reject a value that is not a boolean', async () => {
+          await supertest
+            .put(`${BASE_URL}/${deploymentId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ dedicatedNamespaceTemplates: 'yes' })
+            .expect(400);
+        });
       });
 
       it('should not lose concurrent updates to different fields', async () => {

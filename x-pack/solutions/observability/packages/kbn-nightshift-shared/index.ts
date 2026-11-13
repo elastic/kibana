@@ -126,6 +126,7 @@ export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/s
 export {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
@@ -146,6 +147,15 @@ export {
 } from './src/nightshift_usage_ids';
 
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
+
+export {
+  DEFAULT_RUN_QUOTA_TIME_ZONE,
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  dayKey,
+  resolveDailyWindow,
+  type RunQuotaWindow,
+} from './src/run_quota_window';
 
 export {
   isNightshiftSpaceGatedEndpoint,

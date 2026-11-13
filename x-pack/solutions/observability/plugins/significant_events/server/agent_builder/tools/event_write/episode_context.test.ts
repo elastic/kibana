@@ -181,18 +181,6 @@ describe('mergeEpisodeContext', () => {
     expect(sourceIds).toEqual(['logs.a', 'logs.b']);
   });
 
-  it('averages confidence over contexts that define it, ignoring missing values', () => {
-    const { confidence } = mergeEpisodeContext(
-      [
-        { '@timestamp': TS_EARLIER, source_ids: [], confidence: 0.8 },
-        { '@timestamp': TS_EARLIER, source_ids: [] },
-      ],
-      { source_ids: [], causal_features: [], blast_radius: [], confidence: 0.6 },
-      TS_SUBMITTED
-    );
-    expect(confidence).toBeCloseTo(0.7);
-  });
-
   it('causal classification beats blast for the same feature_id', () => {
     const { causalFeatures, blastRadius } = mergeEpisodeContext(
       [

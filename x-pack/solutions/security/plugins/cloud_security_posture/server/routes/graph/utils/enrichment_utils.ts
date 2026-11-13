@@ -18,7 +18,7 @@ import {
 
 /**
  * SHA-256 hash of a sorted, comma-joined id list. Used to derive a stable node id when
- * multiple entity ids collapse into a single graph node (group node, label node).
+ * multiple entity ids collapse into a single graph node (group node, event node).
  * Input is sorted internally so callers don't need to remember.
  */
 export const hashIds = (ids: string[]): string =>
