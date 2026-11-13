@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { IncomingHttpHeaders, Server } from 'http';
+import { createServer } from 'http';
+import type { AddressInfo } from 'net';
+import axios from 'axios';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { PluginStartContract } from '../plugin';
@@ -28,9 +32,16 @@ jest.mock('../plugin', () => {
   return { ...actual, ActionsPlugin: CapturingActionsPlugin };
 });
 
+// The shipped `.abuseipdb` type is registered in-tree, so the seeded copy needs its own id.
 const CATALOG_TYPE_ID = '.declarative-abuseipdb';
 const CONNECTOR_ID = 'catalog-spec-connector';
 const EVENT_LOG_INDEX = '.kibana-event-log-*';
+
+interface ReceivedRequest {
+  method?: string;
+  path: string;
+  headers: IncomingHttpHeaders;
+}
 
 interface ExecuteEventSource {
   event?: { outcome?: string };
@@ -41,6 +52,9 @@ describe('Connector catalog at start', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let actionsStart: PluginStartContract;
+  let mockApi: Server;
+  let savedAxiosDefaultsAdapter: typeof axios.defaults.adapter;
+  const receivedRequests: ReceivedRequest[] = [];
 
   const findSuccessfulExecuteEvents = async (): Promise<ExecuteEventSource[]> => {
     const esClient: ElasticsearchClient = esServer.es.getClient();
@@ -82,6 +96,20 @@ describe('Connector catalog at start', () => {
   };
 
   beforeAll(async () => {
+    // needed to prevent the dreaded Error: Cross origin http://localhost forbidden
+    // see: https://github.com/axios/axios/issues/1754#issuecomment-572778305
+    savedAxiosDefaultsAdapter = axios.defaults.adapter;
+    axios.defaults.adapter = 'http';
+
+    mockApi = createServer((request, response) => {
+      const { method, url = '', headers } = request;
+      receivedRequests.push({ method, path: url.split('?')[0], headers });
+      response.setHeader('content-type', 'application/json');
+      response.end(JSON.stringify({ data: { ipAddress: '8.8.8.8', abuseConfidenceScore: 0 } }));
+    });
+    await new Promise<void>((resolve) => mockApi.listen(0, '127.0.0.1', resolve));
+    const { port } = mockApi.address() as AddressInfo;
+
     const setupResult = await setupTestServers(
       {
         feature_flags: { overrides: { [ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG]: true } },
@@ -91,8 +119,8 @@ describe('Connector catalog at start', () => {
               [CONNECTOR_ID]: {
                 name: 'Catalog spec connector',
                 actionTypeId: CATALOG_TYPE_ID,
-                config: {},
-                secrets: { authType: 'none' },
+                config: { baseUrl: `http://127.0.0.1:${port}` },
+                secrets: { authType: 'api_key_header', Key: 'test-key' },
               },
             },
           },
@@ -105,7 +133,10 @@ describe('Connector catalog at start', () => {
           await storage.createDefinition({
             connectorId: CATALOG_TYPE_ID,
             version: '1.1.0',
-            yaml: loadFixture('abuseipdb-1.1.0.yaml'),
+            yaml: loadFixture('abuseipdb-1.1.0.yaml').replace(
+              'id: .abuseipdb',
+              `id: ${CATALOG_TYPE_ID}`
+            ),
             contentHash: 'sha256:abuseipdb',
             catalogVersion: '2026.11.1',
           });
@@ -126,6 +157,10 @@ describe('Connector catalog at start', () => {
   });
 
   afterAll(async () => {
+    axios.defaults.adapter = savedAxiosDefaultsAdapter;
+    if (mockApi) {
+      await new Promise((resolve) => mockApi.close(resolve));
+    }
     if (kibanaServer) {
       await kibanaServer.stop();
     }
@@ -144,7 +179,7 @@ describe('Connector catalog at start', () => {
       .bulkEnqueueExecution('functional_tester', [
         {
           id: CONNECTOR_ID,
-          params: { subAction: 'placeholder', subActionParams: {} },
+          params: { subAction: 'checkIp', subActionParams: { ipAddress: '8.8.8.8' } },
         },
       ]);
     expect(response.errors).toBe(false);
@@ -152,5 +187,11 @@ describe('Connector catalog at start', () => {
     const events = await waitFor(findSuccessfulExecuteEvents, (found) => found.length > 0);
 
     expect(events.length).toBeGreaterThan(0);
+
+    const checkIpRequests = receivedRequests.filter(
+      ({ method, path }) => method === 'GET' && path === '/api/v2/check'
+    );
+    expect(checkIpRequests.length).toBeGreaterThan(0);
+    expect(checkIpRequests[0].headers.key).toBe('test-key');
   });
 });

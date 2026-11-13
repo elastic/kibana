@@ -30,7 +30,7 @@ const abuseIpdbYaml = loadFixture('abuseipdb-1.1.0.yaml');
 
 const createYaml = (id: string, version: string): string =>
   abuseIpdbYaml
-    .replace('id: .declarative-abuseipdb', `id: ${id}`)
+    .replace('id: .abuseipdb', `id: ${id}`)
     .replace('version: 1.1.0', `version: ${version}`);
 
 const createDefinition = (

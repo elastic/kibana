@@ -37,7 +37,7 @@ describe('buildTypeFromStoredSpec', () => {
       actions
     );
 
-    expect(type.id).toBe('.declarative-abuseipdb');
+    expect(type.id).toBe('.abuseipdb');
     expect(type.name).toBe('AbuseIPDB (Declarative PoC)');
     expect(type.description).toBe(
       'IP reputation checking with optional verbose reports and abuse reporting'
@@ -53,6 +53,17 @@ describe('buildTypeFromStoredSpec', () => {
     const type = buildTypeFromStoredSpec(createDefinition(yaml), actions);
 
     expect(type.minimumLicenseRequired).toBe('enterprise');
+  });
+
+  it('builds the real actions from the YAML', () => {
+    const type = buildTypeFromStoredSpec(
+      createDefinition(loadFixture('abuseipdb-1.1.0.yaml')),
+      actions
+    );
+
+    const actionNames = Object.keys(type.spec?.actions ?? {});
+    expect(actionNames).toEqual(expect.arrayContaining(['checkIp', 'reportIp']));
+    expect(actionNames).not.toContain('placeholder');
   });
 
   it('marks the type as a spec source', () => {

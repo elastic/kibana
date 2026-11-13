@@ -686,7 +686,7 @@ describe('Actions Plugin', () => {
           _source: {
             type: 'manifest',
             raw: JSON.stringify({
-              connectors: [{ id: '.declarative-abuseipdb', version: '1.1.0' }],
+              connectors: [{ id: '.abuseipdb', version: '1.1.0' }],
             }),
           },
         });
@@ -696,7 +696,7 @@ describe('Actions Plugin', () => {
               found: true,
               _source: {
                 type: 'definition',
-                connectorId: '.declarative-abuseipdb',
+                connectorId: '.abuseipdb',
                 version: '1.1.0',
                 yaml: loadFixture('abuseipdb-1.1.0.yaml'),
                 contentHash: 'sha256:abuseipdb',
@@ -705,7 +705,7 @@ describe('Actions Plugin', () => {
             },
           ],
         });
-        await setupServerless(['.server-log', '.declarative-abuseipdb']);
+        await setupServerless(['.server-log', '.abuseipdb']);
 
         const pluginStart = plugin.start(coreStart, {
           ...pluginsStart,
@@ -719,7 +719,7 @@ describe('Actions Plugin', () => {
     });
 
     describe('connector catalog', () => {
-      const SPEC_TYPE_ID = '.declarative-abuseipdb';
+      const SPEC_TYPE_ID = '.abuseipdb';
       const flush = () => new Promise((resolve) => setImmediate(resolve));
 
       const manifestDoc = {
