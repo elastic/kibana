@@ -20,6 +20,16 @@ export const isImprovementStatus = (value: string): value is ImprovementStatus =
   (IMPROVEMENT_STATUSES as readonly string[]).includes(value);
 
 /**
+ * The statuses a reviewer has not settled. `failed` is open: the apply errored, so nothing was
+ * written and approving again after fixing the cause is the expected next step.
+ */
+export const OPEN_IMPROVEMENT_STATUSES: readonly ImprovementStatus[] = ['suggested', 'failed'];
+
+/** Whether the improvement is still awaiting a decision, and so can be approved or rejected. */
+export const isOpenImprovement = (status: ImprovementStatus): boolean =>
+  OPEN_IMPROVEMENT_STATUSES.includes(status);
+
+/**
  * How much history an AI index carries, without the documents. A run is told the shape of what
  * came before so it knows whether to look, and queries the index itself for the lineage of the
  * target it lands on.
@@ -72,7 +82,11 @@ export interface ImprovementResolution {
 export interface ImprovementProvenance {
   /** The analysis run that produced it. */
   agent_run_id: string;
-  /** Signals it was derived from. */
+  /**
+   * Signals it was derived from. Empty when the evidence was the index itself rather than an
+   * observed retrieval — an indicator its source contradicts, an automation producing nothing —
+   * which is all a run over a window with no signals has to go on.
+   */
   signal_ids: string[];
   /** Spaces those signals came from. */
   signal_spaces: string[];
@@ -125,6 +139,22 @@ export type ImprovementTransition = Extract<ImprovementStatus, 'applied' | 'reje
 export interface ListImprovementsResponse {
   items: Improvement[];
   total: number;
+}
+
+/** Response to approving or rejecting: the new head, so the caller need not re-list to redraw a row. */
+export interface MutateImprovementResponse {
+  improvement: Improvement;
+}
+
+/** Response to starting a run by hand. */
+export interface RunFeedbackAnalysisResponse {
+  /** The workflow execution that was started, for following the run. */
+  execution_id: string;
+}
+
+/** Body of a reject request. */
+export interface RejectImprovementRequest {
+  reason?: string;
 }
 
 /** What an analysis run posts when it finishes. */
