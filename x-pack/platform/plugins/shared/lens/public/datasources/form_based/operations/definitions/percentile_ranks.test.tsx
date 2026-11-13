@@ -133,6 +133,39 @@ describe('percentile ranks', () => {
         })
       ).toBeUndefined();
     });
+
+    it('should respect aggregation restrictions as an allow-list', () => {
+      const restrictedField = {
+        name: 'bytes',
+        displayName: 'bytes',
+        type: 'number',
+        esTypes: ['long'],
+        searchable: true,
+        aggregatable: true,
+      };
+
+      expect(
+        percentileRanksOperation.getPossibleOperationForField({
+          ...restrictedField,
+          aggregationRestrictions: {
+            percentile_ranks: { agg: 'percentile_ranks' },
+          },
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      });
+
+      expect(
+        percentileRanksOperation.getPossibleOperationForField({
+          ...restrictedField,
+          aggregationRestrictions: {
+            max: { agg: 'max' },
+          },
+        })
+      ).toBeUndefined();
+    });
   });
 
   describe('toEsAggsFn', () => {
