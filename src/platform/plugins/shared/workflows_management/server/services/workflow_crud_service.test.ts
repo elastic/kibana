@@ -4728,13 +4728,17 @@ describe('workflow page lifecycle', () => {
     return stored;
   };
 
-  const setup = () => {
+  const noPageYaml = pageYaml.replace('  - type: page\n    title: Report', '  - type: manual');
+
+  const setup = (depsOverrides: Partial<WorkflowCrudDeps> = {}) => {
     const pagesService = {
       syncWorkflowPages: jest.fn().mockResolvedValue(undefined),
+      retireRemovedPages: jest.fn().mockResolvedValue(undefined),
       retireWorkflowPages: jest.fn().mockResolvedValue(undefined),
     };
     const { deps, client } = makeDeps(undefined, {
       pagesSystemClient: pagesService as unknown as WorkflowCrudDeps['pagesSystemClient'],
+      ...depsOverrides,
     });
     return {
       service: new WorkflowCrudService(deps),
@@ -4883,58 +4887,111 @@ describe('workflow page lifecycle', () => {
     }
   );
 
-  it('retires the old pages before the sync when an import revives a soft-deleted workflow', async () => {
-    const { service, client, pagesService, request } = setup();
-    const stored = storeWrites(client);
-    stored.set(
-      'revived',
-      makeSource({ created_at: '2024-01-01T00:00:00.000Z', enabled: false, deleted_at: new Date() })
-    );
+  describe('retires dropped pages before the write', () => {
+    const storeLive = (client: ReturnType<typeof makeStorageClient>, overrides = {}) => {
+      const stored = storeWrites(client);
+      stored.set('wf-1', makeSource({ yaml: pageYaml, ...overrides }));
+      return stored;
+    };
 
-    await service.bulkCreateWorkflows([{ id: 'revived', yaml: pageYaml }], 'default', request, {
-      overwrite: true,
+    it('retires the pages a valid save drops, before the write', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client);
+
+      await service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request);
+
+      expect(pagesService.retireRemovedPages).toHaveBeenCalledWith({
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        definition: expect.objectContaining({ triggers: [{ type: 'manual' }] }),
+      });
+      expect(pagesService.retireRemovedPages.mock.invocationCallOrder[0]).toBeLessThan(
+        client.index.mock.invocationCallOrder[0]
+      );
     });
 
-    expect(pagesService.retireWorkflowPages).toHaveBeenCalledWith({
-      workflowIds: ['revived'],
-      spaceId: 'default',
-    });
-    expect(pagesService.retireWorkflowPages.mock.invocationCallOrder[0]).toBeLessThan(
-      pagesService.syncWorkflowPages.mock.invocationCallOrder[0]
-    );
-  });
+    it('fails the save and writes nothing when the retire fails', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client);
+      pagesService.retireRemovedPages.mockRejectedValue(new Error('retire failed'));
 
-  it('keeps the pages when an import over a soft-deleted workflow fails to write', async () => {
-    const { service, client, pagesService, request } = setup();
-    const stored = storeWrites(client);
-    stored.set(
-      'revived',
-      makeSource({ created_at: '2024-01-01T00:00:00.000Z', enabled: false, deleted_at: new Date() })
-    );
-    client.index.mockRejectedValue(new Error('write failed'));
-
-    const { failed } = await service.bulkCreateWorkflows(
-      [{ id: 'revived', yaml: pageYaml }],
-      'default',
-      request,
-      { overwrite: true }
-    );
-
-    expect(failed).toHaveLength(1);
-    expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
-  });
-
-  it('keeps the pages when an import overwrites a live workflow', async () => {
-    const { service, client, pagesService, request } = setup();
-    const stored = storeWrites(client);
-    stored.set('live', makeSource({ created_at: '2024-01-01T00:00:00.000Z' }));
-
-    await service.bulkCreateWorkflows([{ id: 'live', yaml: pageYaml }], 'default', request, {
-      overwrite: true,
+      await expect(
+        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request)
+      ).rejects.toThrow('retire failed');
+      expect(client.index).not.toHaveBeenCalled();
     });
 
-    expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
-    expect(pagesService.syncWorkflowPages).toHaveBeenCalled();
+    it('keeps the pages on an invalid save', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client);
+
+      await service.updateWorkflow('wf-1', { yaml: 'triggers: [' }, 'default', request);
+
+      expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
+      expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+    });
+
+    it('retires nothing for a user who cannot edit the workflow', async () => {
+      const core = coreMock.createStart();
+      core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+      const { service, client, pagesService, request } = setup({ getCoreStart: () => core });
+      storeLive(client, {
+        owner_id: 'owner',
+        access_control: { access_mode: 'private', entries: [] },
+      });
+
+      await expect(
+        service.updateWorkflow('wf-1', { yaml: noPageYaml }, 'default', request)
+      ).rejects.toThrow('You do not have access to this workflow.');
+      expect(pagesService.retireRemovedPages).not.toHaveBeenCalled();
+    });
+
+    it('retires the dropped pages when an import overwrites a live workflow', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client);
+
+      await service.bulkCreateWorkflows([{ id: 'wf-1', yaml: noPageYaml }], 'default', request, {
+        overwrite: true,
+      });
+
+      expect(pagesService.retireRemovedPages).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'wf-1', spaceId: 'default' })
+      );
+      expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+    });
+
+    it('retires every old page when an import revives a soft-deleted workflow', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client, { enabled: false, deleted_at: new Date() });
+
+      await service.bulkCreateWorkflows([{ id: 'wf-1', yaml: pageYaml }], 'default', request, {
+        overwrite: true,
+      });
+
+      expect(pagesService.retireWorkflowPages).toHaveBeenCalledWith({
+        workflowIds: ['wf-1'],
+        spaceId: 'default',
+      });
+      expect(pagesService.retireWorkflowPages.mock.invocationCallOrder[0]).toBeLessThan(
+        client.index.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('fails the import of a soft-deleted workflow and writes nothing when the retire fails', async () => {
+      const { service, client, pagesService, request } = setup();
+      storeLive(client, { enabled: false, deleted_at: new Date() });
+      pagesService.retireWorkflowPages.mockRejectedValue(new Error('retire failed'));
+
+      const { failed } = await service.bulkCreateWorkflows(
+        [{ id: 'wf-1', yaml: pageYaml }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+
+      expect(failed).toEqual([expect.objectContaining({ id: 'wf-1', error: 'retire failed' })]);
+      expect(client.index).not.toHaveBeenCalled();
+    });
   });
 
   it('retires the pages of a deleted workflow', async () => {

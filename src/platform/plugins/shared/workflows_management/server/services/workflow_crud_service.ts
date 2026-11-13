@@ -984,6 +984,23 @@ export class WorkflowCrudService {
           }
         : undefined;
 
+    if (yamlResult && this.deps.pagesSystemClient) {
+      // The retire runs before the write, so it needs its own edit check: mutate stays pure.
+      const existing = await this.getWorkflowDocumentSource(id, spaceId, {
+        includeDeleted: true,
+        includeGlobal: true,
+      });
+      if (existing) {
+        assertWorkflowOperation(
+          existing,
+          'edit',
+          profileId,
+          this.accessAuditContext(request, id, spaceId)
+        );
+        await this.retireDroppedPages(id, spaceId, existing, yamlResult.updatedDataPatch);
+      }
+    }
+
     let previousVersion: number | undefined;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
       request,
@@ -1358,6 +1375,29 @@ export class WorkflowCrudService {
       },
       { concurrency: 10 }
     );
+  }
+
+  /**
+   * Retires the pages a save drops, before the write: a failed retire fails the save, so a
+   * dropped page never stays live. An invalid save keeps its pages. A revive keeps none.
+   */
+  private async retireDroppedPages(
+    workflowId: string,
+    spaceId: string,
+    existing: Pick<WorkflowProperties, 'deleted_at'>,
+    next: Partial<Pick<WorkflowProperties, 'definition' | 'valid'>>
+  ): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient) return;
+    if (existing.deleted_at) {
+      await pagesSystemClient.retireWorkflowPages({ workflowIds: [workflowId], spaceId });
+    } else if (next.valid) {
+      await pagesSystemClient.retireRemovedPages({
+        workflowId,
+        spaceId,
+        definition: next.definition,
+      });
+    }
   }
 
   private async retireWorkflowPages(workflowIds: string[], spaceId: string): Promise<void> {
@@ -1796,27 +1836,25 @@ export class WorkflowCrudService {
       }
     }
 
-    // An import over a soft-deleted workflow keeps its created_at, so the sync would keep pages
-    // that a failed retire left behind. The import starts without them.
-    const revivedIds: string[] = [];
     if (inSpaceUpdateEntries.length > 0) {
       for (const entry of inSpaceUpdateEntries) {
         const prepared = entry.workflowData;
         try {
+          const occHit = occHitById.get(entry.id);
+          if (occHit) {
+            this.assertCanOverwrite(occHit._source, entry.id, spaceId, profileId, params.request);
+            await this.retireDroppedPages(entry.id, spaceId, occHit._source, prepared);
+          }
           let previousVersion: number | undefined;
-          // Set by the attempt that wrote, so a denied, failed, or retried write retires nothing.
-          let revived = false;
           const document = await this.readModifyWriteWorkflowDocument(entry.id, spaceId, {
             getOptions: bulkOverwriteGetOptions,
             request: params.request,
             mutate: (existing) => {
               previousVersion = existing.version;
               this.assertCanOverwrite(existing, entry.id, spaceId, profileId, params.request);
-              revived = Boolean(existing.deleted_at);
               return this.buildBulkOverwriteDocument(prepared, existing);
             },
           });
-          if (revived) revivedIds.push(entry.id);
           created.push(transformStorageDocumentToWorkflowDto(entry.id, document));
           successfullyWritten.push({ ...entry, workflowData: document });
           if (document.version !== previousVersion) {
@@ -1835,8 +1873,6 @@ export class WorkflowCrudService {
         }
       }
     }
-
-    await this.retireWorkflowPages(revivedIds, spaceId);
 
     if (crossSpaceOverwriteEntries.length > 0) {
       for (const { entry, occHit } of crossSpaceOverwriteEntries) {

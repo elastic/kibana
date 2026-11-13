@@ -48,6 +48,15 @@ export interface WorkflowPagesSystemClient {
     definition: WorkflowYaml | null | undefined;
     valid: boolean;
   }): Promise<void>;
+  /**
+   * Deletes the pages whose trigger the definition no longer has. Saves call it before the
+   * write, so a failed delete fails the save. Throws when a delete fails.
+   */
+  retireRemovedPages(params: {
+    workflowId: string;
+    spaceId: string;
+    definition: WorkflowYaml | null | undefined;
+  }): Promise<void>;
   /** Deletes every page of the given workflows. Workflow deletes call it. */
   retireWorkflowPages(params: { workflowIds: string[]; spaceId: string }): Promise<void>;
   /**
@@ -109,6 +118,16 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     await Promise.all(
       toCreate.map((pageId) => this.createPage({ workflowId, spaceId, pageId }, workflowCreatedAt))
     );
+  }
+
+  async retireRemovedPages({
+    workflowId,
+    spaceId,
+    definition,
+  }: Parameters<WorkflowPagesSystemClient['retireRemovedPages']>[0]): Promise<void> {
+    const wanted = getWantedPageIds(spaceId, definition);
+    const pages = await this.findWorkflowPages([workflowId], spaceId);
+    await this.deletePages(pages.filter(({ attributes }) => !wanted.has(attributes.pageId)));
   }
 
   async retireWorkflowPages({

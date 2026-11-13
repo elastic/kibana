@@ -196,6 +196,49 @@ describe('WorkflowPagesSystemClient', () => {
     });
   });
 
+  describe('retireRemovedPages', () => {
+    it('retires only the pages whose trigger the definition dropped', async () => {
+      const { client, sync, store } = setup();
+      await sync({
+        ...pageDefinition('kept'),
+        triggers: [...pageDefinition('kept').triggers, ...pageDefinition('dropped').triggers],
+      });
+
+      await client.retireRemovedPages({
+        workflowId: ref.workflowId,
+        spaceId: ref.spaceId,
+        definition: pageDefinition('kept'),
+      });
+
+      expect(getStoredPage(store, { ...ref, pageId: 'kept' })).toBeDefined();
+      expect(getStoredPage(store, { ...ref, pageId: 'dropped' })).toBeUndefined();
+    });
+
+    it('throws when a delete fails, so the save fails before its write', async () => {
+      const { client, savedObjectsClient, sync, storedPage } = setup();
+      await sync(pageDefinition());
+      jest.mocked(savedObjectsClient.bulkDelete).mockResolvedValueOnce({
+        statuses: [
+          {
+            id: getWorkflowPageSavedObjectId(ref),
+            type: 'workflow-page',
+            success: false,
+            error: { error: 'Internal Server Error', message: 'boom', statusCode: 500 },
+          },
+        ],
+      });
+
+      await expect(
+        client.retireRemovedPages({
+          workflowId: ref.workflowId,
+          spaceId: ref.spaceId,
+          definition: noPageDefinition,
+        })
+      ).rejects.toThrow('Failed to retire workflow pages');
+      expect(storedPage()).toBeDefined();
+    });
+  });
+
   describe('retireWorkflowPages', () => {
     it('searches 1,000 workflows per request', async () => {
       const { client, savedObjectsClient } = setup();
