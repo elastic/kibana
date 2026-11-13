@@ -10,12 +10,16 @@ import {
   getChartTypeSelectionPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
+import { getInlinePanelKindGuidance, getPanelTypeSelection } from '@kbn/dashboard-agent-authoring';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
 import { ENHANCE_GUIDANCE_PATH, enhanceGuidanceReference } from './enhance_guidance';
+import { panelConfigReferenceGuidance, panelConfigReferences } from './panel_config_references';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
+const panelTypeSelection = getPanelTypeSelection();
+const inlinePanelKindGuidance = getInlinePanelKindGuidance();
 
 const guidance = `## Dashboard Changes
 
@@ -44,24 +48,15 @@ Each visualization request is authored in a separate context. New-panel authors 
 
 - Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel.
 - Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A \`source: "request"\` would generate a **new**, different panel instead.
-- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
+- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels. ${panelConfigReferenceGuidance}
 
 ## Panel Type Selection
 
 Choose the first panel type that fits:
 
-1. **Lens** (\`renderer: "lens"\` or omitted) — metrics, time series, bar, line, pie, area, and data tables.
-2. **Vega** (\`renderer: "vega"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.
-3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — static text, links, or notes with no data.
-4. **Custom content** (\`renderer: "custom_content"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.
+${panelTypeSelection}
 
-## Custom Content Panels
-
-A custom content panel with live data does not need a query from you. Always set \`hasData\` when you create one, since there is no default: \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. \`hasData: false\` makes a static panel with no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
-
-To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
-
-To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
+${inlinePanelKindGuidance}
 
 Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
 
@@ -100,5 +95,5 @@ Controls are keyed by the \`id\` from the \`controls[]\` list in the tool result
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
-  referencedContent: [enhanceGuidanceReference],
+  referencedContent: [enhanceGuidanceReference, ...panelConfigReferences],
 };

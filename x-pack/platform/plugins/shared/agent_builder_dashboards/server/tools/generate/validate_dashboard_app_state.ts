@@ -11,7 +11,11 @@ import { getDashboardDataSchema } from '@kbn/as-code-dashboard-schema';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
-import type { DashboardValidationIssue, DashboardValidator } from '@kbn/dashboard-agent-authoring';
+import {
+  requiresRegisteredSchema,
+  type DashboardValidationIssue,
+  type DashboardValidator,
+} from '@kbn/dashboard-agent-authoring';
 
 // Panels are loose objects in the dashboard application schema, so embeddable schemas are not needed.
 const getDashboardAppStateSchema = once(() =>
@@ -54,8 +58,11 @@ const toValidationIssues = (issues: z.core.$ZodIssue[]): DashboardValidationIssu
 /**
  * Validates a dashboard the way the dashboard application validates it on save: dashboard fields
  * against the dashboard application schema, then each panel config against the schema of its type.
- * Panels of a type without a schema are not validated. Vega panels are skipped because the
- * attachment stores them in an interim shape that is converted before the dashboard is rendered.
+ * Panels of a type without a schema are not validated: Lens, for one, registers no schema while its
+ * as-code API is disabled. Panel kinds that set `schemaAlwaysRegistered` (ML, whose embeddables are
+ * registered only when anomaly detection is on) are the exception: a missing schema is reported as
+ * the type being unavailable. Vega panels are skipped because the attachment stores them in an
+ * interim shape that is converted before the dashboard is rendered.
  */
 export const createDashboardAppStateValidator = ({
   getTransforms,
@@ -65,12 +72,20 @@ export const createDashboardAppStateValidator = ({
       return [];
     }
     const transformType = type === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : type;
-    const configResult = getTransforms(transformType)?.schema?.safeParse(config);
-    return configResult?.success === false
-      ? toValidationIssues(configResult.error.issues).map(
+    const schema = getTransforms(transformType)?.schema;
+    if (!schema) {
+      return requiresRegisteredSchema(type)
+        ? [
+            `type: panel type "${type}" is not available in this deployment, so it cannot be added or edited. Do not retry it; tell the user it is unavailable.`,
+          ]
+        : [];
+    }
+    const configResult = schema.safeParse(config);
+    return configResult.success
+      ? []
+      : toValidationIssues(configResult.error.issues).map(
           ({ path, message }) => `${['config', ...path].map(String).join('.')}: ${message}`
-        )
-      : [];
+        );
   },
   validateDashboardFields: (dashboardData) => {
     const result = getDashboardAppStateSchema().safeParse(dashboardData);
