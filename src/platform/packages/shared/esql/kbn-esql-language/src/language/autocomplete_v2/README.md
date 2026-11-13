@@ -31,8 +31,13 @@ What the engine offers today:
   registered commands.
 - Keywords, the pipe, the separator of a list and the next line.
 - Arguments with the roles `column` (by type, each listed once where the role says so),
-  `new_name` (a free name with its assignment), `constant` (its allowed values) and `entity`.
-  The other roles are resolved and not provided yet.
+  `new_name` (a free name with its assignment), `constant` (its allowed values), `entity`,
+  `map` (the keys not used yet, and the values of the key before the cursor), `option_name`
+  (the options not used and not in conflict with a used one) and `dependent_value` (the role
+  the name gives it, listed in the signature or defined by the named entity). Expressions and
+  sublanguages are resolved and not provided yet.
+
+Inside an open string only a value is offered: the value of a map key or a constant.
 
 Entities come from `entities/registry.ts`: one definition per kind, each turning what the
 editor provides today into entities, in a scope. The scope is all a definition gets: the index

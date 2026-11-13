@@ -270,4 +270,99 @@ describe('suggest (v2)', () => {
       expect(await textsAt('SET ', callbacks)).toContain('unmapped_fields = ');
     });
   });
+
+  describe('maps', () => {
+    const callbacks = createCallbacks();
+    const sorted = async (query: string) => (await textsAt(query, callbacks)).sort();
+
+    it('offers the keys of the map', async () => {
+      expect(await sorted('FROM a | DENSE_VECTOR b WITH { ')).toEqual([
+        '"inference_id": "$0"',
+        '"timeout": "$0"',
+        '"type": "$0"',
+      ]);
+    });
+
+    it('offers a key by the type of its value', async () => {
+      expect(await sorted('FROM a | FUSE rrf WITH { ')).toEqual([
+        '"rank_constant": ',
+        '"weights": { $0 }',
+      ]);
+    });
+
+    it('leaves out a key that is already used', async () => {
+      expect(await sorted('FROM a | DENSE_VECTOR b WITH { "inference_id": "x", ')).toEqual([
+        '"timeout": "$0"',
+        '"type": "$0"',
+      ]);
+    });
+
+    it('offers the values a key lists, also inside the open string', async () => {
+      expect(await sorted('FROM a | DENSE_VECTOR b WITH { "type": ')).toEqual([
+        '"image"',
+        '"text"',
+      ]);
+      expect(await sorted('FROM a | DENSE_VECTOR b WITH { "type": "')).toEqual([
+        '"image"',
+        '"text"',
+      ]);
+    });
+
+    it('offers the default of a key that lists no value', async () => {
+      expect(await sorted('FROM a | DENSE_VECTOR b WITH { "timeout": "')).toEqual(['"30s"']);
+      expect(await sorted('FROM a | FUSE rrf WITH { "rank_constant": ')).toEqual(['60']);
+    });
+
+    it('offers the entities a key names, for the task its signature says', async () => {
+      expect(await sorted('FROM a | COMPLETION "p" WITH { "inference_id": "')).toEqual([
+        '"inference_1"',
+      ]);
+      // The default world has no endpoint for reranking.
+      expect(await sorted('FROM a | RERANK "q" ON b WITH { "inference_id": "')).toEqual([]);
+    });
+
+    it('offers nothing for a key the map does not have', async () => {
+      expect(await sorted('FROM a | COMPLETION "p" WITH { "other": "')).toEqual([]);
+    });
+
+    it('offers nothing inside a map that is the value of a key', async () => {
+      expect(await sorted('FROM a | FUSE linear WITH { "weights": { ')).toEqual([]);
+    });
+
+    describe('a key that applies only for some values of another argument', () => {
+      it('follows the value that is written', async () => {
+        expect(await sorted('FROM a | FUSE linear WITH { ')).toEqual([
+          '"normalizer": "$0"',
+          '"weights": { $0 }',
+        ]);
+      });
+
+      it('follows the default of the argument when it is not written', async () => {
+        expect(await sorted('FROM a | FUSE WITH { ')).toEqual([
+          '"rank_constant": ',
+          '"weights": { $0 }',
+        ]);
+      });
+    });
+  });
+
+  describe('option names', () => {
+    it('offers an option with its assignment', async () => {
+      expect(await textsAt('FROM a | DISSECT b "%{c}" ')).toContain('APPEND_SEPARATOR = ');
+    });
+  });
+
+  describe('a value that depends on a name', () => {
+    it('takes the roles the named entity defines for its value', async () => {
+      expect((await textsAt('SET approximation = ')).sort()).toEqual(['false', 'true']);
+      expect((await textsAt('SET approximation = { ')).sort()).toEqual([
+        '"confidence_level": ',
+        '"rows": ',
+      ]);
+    });
+
+    it('offers nothing for a name that defines nothing', async () => {
+      expect(await textsAt('SET unknown_setting = ')).toEqual([]);
+    });
+  });
 });
