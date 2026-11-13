@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  euiFontSize,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -96,8 +97,9 @@ const pinnedSectionCss = css`
   max-block-size: 40%;
 `;
 
-const sectionLabelCss = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+const sectionLabelCss = (euiThemeContext: UseEuiTheme) => css`
+  font-size: ${euiFontSize(euiThemeContext, 'xs').fontSize};
+  padding: ${euiThemeContext.euiTheme.size.xs} ${euiThemeContext.euiTheme.size.s};
 `;
 
 export const ConversationSidebarView: React.FC = () => {
@@ -243,8 +245,6 @@ export const ConversationSidebarView: React.FC = () => {
       data-test-subj="agentBuilderSidebar-conversation"
       className="eui-fullHeight"
     >
-      <EuiHorizontalRule margin="none" />
-
       <EuiFlexItem grow className="eui-fullHeight">
         <EuiFlexGroup
           direction="column"
@@ -267,15 +267,14 @@ export const ConversationSidebarView: React.FC = () => {
                 className="eui-fullHeight"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                  <EuiText size="s" color="subdued" css={sectionLabelCss}>
                     {customizeLabel}
                   </EuiText>
-                  <EuiSpacer size="xs" />
                   <SidebarNavList items={navItems} isActive={isActive} />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiSpacer size="m" />
+                  <EuiHorizontalRule margin="s" />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow className="eui-fullHeight">
@@ -291,10 +290,9 @@ export const ConversationSidebarView: React.FC = () => {
                       className="eui-fullHeight"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                        <EuiText size="s" color="subdued" css={sectionLabelCss}>
                           {pinnedLabel}
                         </EuiText>
-                        <EuiSpacer size="xs" />
                       </EuiFlexItem>
                       <EuiFlexItem
                         grow={false}
@@ -316,14 +314,13 @@ export const ConversationSidebarView: React.FC = () => {
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
-                        <EuiSpacer size="m" />
+                        <EuiSpacer size="l" />
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                        <EuiText size="s" color="subdued" css={sectionLabelCss}>
                           {chatsLabel}
                         </EuiText>
-                        <EuiSpacer size="s" />
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>

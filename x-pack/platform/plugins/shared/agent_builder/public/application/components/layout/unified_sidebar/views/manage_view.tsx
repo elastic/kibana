@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useRouteAccessConfig } from '../../../../hooks/use_route_access_config';
 import { getManageNavItems } from '../../../../route_config';
@@ -27,11 +27,10 @@ export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="agentBuilderSidebar-manage">
-      <EuiHorizontalRule margin="none" />
       <EuiFlexGroup
         direction="column"
         css={css`
-          padding: ${euiTheme.size.base};
+          padding: ${euiTheme.size.m};
         `}
       >
         <SidebarNavList items={navItems} isActive={isActive} />

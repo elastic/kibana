@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
@@ -38,7 +37,7 @@ import {
 import { InputPopoverButton, type ToolTipAnchorProps } from '../input_popover_button';
 import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
-import { isNearingEndOfLife, ModelRetirementIcon } from './model_badges';
+import { ModelRetirementIcon } from './model_badges';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
@@ -103,7 +102,6 @@ export interface ConnectorPopoverButtonProps extends ToolTipAnchorProps {
   disabled: boolean;
   hasAriaDisabled?: boolean;
   selectedConnectorName?: string;
-  isRetiring?: boolean;
 }
 
 const ConnectorPopoverButton: React.FC<ConnectorPopoverButtonProps> = ({
@@ -112,7 +110,6 @@ const ConnectorPopoverButton: React.FC<ConnectorPopoverButtonProps> = ({
   disabled,
   hasAriaDisabled,
   selectedConnectorName,
-  isRetiring,
   ...toolTipAnchorProps
 }) => {
   const connectorDisplayName = selectedConnectorName ?? defaultConnectorButtonLabel;
@@ -132,16 +129,7 @@ const ConnectorPopoverButton: React.FC<ConnectorPopoverButtonProps> = ({
         detail: 'connector',
       })}
     >
-      {isRetiring ? (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" size="s" color="warning" aria-hidden />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{connectorDisplayName}</EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        connectorDisplayName
-      )}
+      {connectorDisplayName}
     </InputPopoverButton>
   );
 };
@@ -315,7 +303,6 @@ const SelectableConnectorSelector: React.FC<{}> = () => {
   });
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
-  const isRetiring = isNearingEndOfLife(selectedConnector?.metadata);
 
   const previousDefaultRef = useRef<string | undefined>(undefined);
 
@@ -382,7 +369,6 @@ const SelectableConnectorSelector: React.FC<{}> = () => {
           onClick={togglePopover}
           disabled={isLoading || connectors.length === 0 || defaultConnectorOnly}
           selectedConnectorName={selectedConnector?.name}
-          isRetiring={isRetiring}
         />
       }
       isOpen={isPopoverOpen}

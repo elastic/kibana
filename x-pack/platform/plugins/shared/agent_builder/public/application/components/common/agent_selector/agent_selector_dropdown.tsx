@@ -18,6 +18,7 @@ import {
   EuiSelectable,
   EuiText,
   EuiTextTruncate,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiPopoverProps } from '@elastic/eui';
@@ -173,6 +174,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
     <EuiButtonEmpty
       size="s"
       iconType="chevronSingleDown"
+      iconSize="s"
       iconSide="right"
       flush="both"
       color="text"
@@ -186,17 +188,15 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
         action: AGENT_BUILDER_UI_EBT.action.navSidebar.AGENT_SELECTOR_OPEN,
       })}
     >
-      <EuiText size="m" color="inherit">
-        <strong>
-          {
-            <EuiTextTruncate
-              text={selectedAgent?.name ?? fallbackLabel ?? ''}
-              truncation="end"
-              width={180}
-            />
-          }
-        </strong>
-      </EuiText>
+      <EuiTitle size="xxs">
+        <span>
+          <EuiTextTruncate
+            text={selectedAgent?.name ?? fallbackLabel ?? ''}
+            truncation="end"
+            width={180}
+          />
+        </span>
+      </EuiTitle>
     </EuiButtonEmpty>
   );
 

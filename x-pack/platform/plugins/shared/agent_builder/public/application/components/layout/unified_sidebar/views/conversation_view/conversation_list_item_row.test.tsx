@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
+import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { ConversationListItemRow } from './conversation_list_item_row';
@@ -25,7 +26,20 @@ const mockUseConversationListMutations = jest.mocked(useConversationListMutation
 
 const conversationId = 'conversation-1';
 
-const renderRow = (permissions: Partial<ConversationPermissions>) => {
+const renderRow = (
+  permissions: Partial<ConversationPermissions>,
+  {
+    status,
+    read,
+    openMenu = true,
+    showActionsMenu,
+  }: {
+    status?: ConversationDisplayStatus;
+    read?: boolean;
+    openMenu?: boolean;
+    showActionsMenu?: boolean;
+  } = {}
+) => {
   render(
     <IntlProvider locale="en">
       <MemoryRouter>
@@ -33,9 +47,11 @@ const renderRow = (permissions: Partial<ConversationPermissions>) => {
           agentId="agent-1"
           conversationId={conversationId}
           title="My conversation"
-          icon="comment"
           isActive={false}
           routeConversationId={conversationId}
+          status={status}
+          read={read}
+          showActionsMenu={showActionsMenu}
           permissions={{
             rename: false,
             delete: false,
@@ -47,7 +63,9 @@ const renderRow = (permissions: Partial<ConversationPermissions>) => {
     </IntlProvider>
   );
 
-  fireEvent.click(screen.getByTestId(`agentBuilderSidebarConversationMenu-${conversationId}`));
+  if (openMenu) {
+    fireEvent.click(screen.getByTestId(`agentBuilderSidebarConversationMenu-${conversationId}`));
+  }
 };
 
 describe('ConversationListItemRow', () => {
@@ -95,5 +113,81 @@ describe('ConversationListItemRow', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByText('Mark as unread')).toBeInTheDocument();
     expect(screen.getByText('Pin')).toBeInTheDocument();
+  });
+
+  it('shows the status icon on the left of the title, inside the link', () => {
+    renderRow({}, { status: ConversationDisplayStatus.unread, openMenu: false });
+
+    const link = screen.getByTestId(`agentBuilderSidebarConversation-${conversationId}`);
+    const statusIcon = within(link).getByText('New');
+    const title = within(link).getByText('My conversation');
+
+    expect(statusIcon.compareDocumentPosition(title)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('renders no status icon when the conversation has no status', () => {
+    renderRow({}, { openMenu: false });
+
+    const link = screen.getByTestId(`agentBuilderSidebarConversation-${conversationId}`);
+
+    expect(
+      within(link).queryByText(/^(New|Working|Waiting for input|Error)$/)
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps the actions slot but hides the menu while the agent is responding', () => {
+    renderRow({ rename: true, delete: true }, { showActionsMenu: false, openMenu: false });
+
+    expect(
+      screen.queryByTestId(`agentBuilderSidebarConversationMenu-${conversationId}`)
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector('.agentBuilderSidebarConversationListRowActions')
+    ).toBeInTheDocument();
+  });
+
+  describe('actions menu', () => {
+    const isBefore = (first: HTMLElement, second: HTMLElement) =>
+      first.compareDocumentPosition(second) === Node.DOCUMENT_POSITION_FOLLOWING;
+
+    const iconOf = (label: string) =>
+      screen
+        .getByText(label)
+        .closest('button')
+        ?.querySelector('[data-euiicon-type]')
+        ?.getAttribute('data-euiicon-type');
+
+    it('lists Pin, Rename and the read action, then Delete after a separator', () => {
+      renderRow({ rename: true, delete: true });
+
+      const pin = screen.getByText('Pin');
+      const rename = screen.getByText('Rename');
+      const readAction = screen.getByText('Mark as unread');
+      const separator = screen.getByRole('separator');
+      const deleteAction = screen.getByText('Delete');
+
+      expect(isBefore(pin, rename)).toBe(true);
+      expect(isBefore(rename, readAction)).toBe(true);
+      expect(isBefore(readAction, separator)).toBe(true);
+      expect(isBefore(separator, deleteAction)).toBe(true);
+    });
+
+    it('omits the separator when delete is not permitted', () => {
+      renderRow({ rename: true, delete: false });
+
+      expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+    });
+
+    it('uses the eye icon for Mark as read', () => {
+      renderRow({}, { read: false });
+
+      expect(iconOf('Mark as read')).toBe('eye');
+    });
+
+    it('uses the crossed-out eye icon for Mark as unread', () => {
+      renderRow({}, { read: true });
+
+      expect(iconOf('Mark as unread')).toBe('eyeSlash');
+    });
   });
 });

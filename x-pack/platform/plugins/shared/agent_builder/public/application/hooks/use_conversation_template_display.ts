@@ -7,6 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import type { ConversationTemplatesService } from '../../services/conversation_templates';
+import { getTemplateDisplayName } from '../components/conversations/activity_log/to_activity_items';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useConversation } from './use_conversation';
 
@@ -40,5 +41,5 @@ export const useConversationTemplateDisplay = (): ConversationTemplateDisplay | 
   }
 
   const definition = conversationTemplatesService.getTemplateUIDefinition(templateId);
-  return { name: definition?.name ?? templateId, icon: definition?.icon };
+  return { name: getTemplateDisplayName(templateId, definition?.name), icon: definition?.icon };
 };

@@ -15,20 +15,15 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiTextTruncate,
+  EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { useInfiniteScroll } from '../../hooks/use_infinite_scroll';
-import {
-  createActiveConversationListItemStyles,
-  createConversationListItemStyles,
-} from './conversation_list_item_styles';
+import { ConversationSearchResult } from './conversation_search_result';
 import { NoConversationsPrompt } from './embeddable_conversation_header/no_conversations_prompt';
 
 const labels = {
@@ -37,11 +32,19 @@ const labels = {
   }),
   searchPlaceholder: i18n.translate(
     'xpack.agentBuilder.conversationSearchModal.searchPlaceholder',
-    { defaultMessage: 'Search chats' }
+    { defaultMessage: 'Search by title' }
   ),
+  recentChats: i18n.translate('xpack.agentBuilder.conversationSearchModal.recentChats', {
+    defaultMessage: 'Recent chats',
+  }),
+  results: i18n.translate('xpack.agentBuilder.conversationSearchModal.results', {
+    defaultMessage: 'Results',
+  }),
 };
 
-const MODAL_WIDTH = 480;
+const modalStyles = css`
+  width: 768px;
+`;
 const LIST_MAX_HEIGHT = 290;
 
 interface ConversationSearchModalProps {
@@ -102,13 +105,14 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   const conversations = isSearching ? searchResults : sortedConversations;
   const isLoading = isSearching ? isSearchLoading : isLoadingCached;
 
-  const itemStyles = createConversationListItemStyles(euiTheme);
-  const activeItemStyles = createActiveConversationListItemStyles(euiTheme);
-
   const listStyles = css`
     overflow-y: auto;
     max-height: ${LIST_MAX_HEIGHT}px;
     margin-top: ${euiTheme.size.m};
+  `;
+
+  const headingStyles = css`
+    padding: ${euiTheme.size.xs} 0;
   `;
 
   const renderList = () => {
@@ -128,28 +132,27 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
 
     return (
       <>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={headingStyles}
+          data-test-subj="agentBuilderConversationSearchListHeading"
+        >
+          {isSearching ? labels.results : labels.recentChats}
+        </EuiText>
         <EuiFlexGroup direction="column" gutterSize="xs">
-          {conversations.map((conversation) => {
-            const isActive = currentConversationId === conversation.id;
-            return (
-              <EuiFlexItem grow={false} key={conversation.id}>
-                <button
-                  css={isActive ? activeItemStyles : itemStyles}
-                  onClick={() => {
-                    onSelectConversation(conversation.id);
-                    onClose();
-                  }}
-                  data-test-subj={`agentBuilderConversationSearchResult-${conversation.id}`}
-                  {...getEbtProps({
-                    element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                    action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
-                  })}
-                >
-                  <EuiTextTruncate text={conversation.title || conversation.id} />
-                </button>
-              </EuiFlexItem>
-            );
-          })}
+          {conversations.map((conversation) => (
+            <EuiFlexItem grow={false} key={conversation.id}>
+              <ConversationSearchResult
+                conversation={conversation}
+                isActive={currentConversationId === conversation.id}
+                onSelect={(conversationId) => {
+                  onSelectConversation(conversationId);
+                  onClose();
+                }}
+              />
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
         {isSearching && (
           <>
@@ -172,7 +175,7 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
       aria-labelledby={modalTitleId}
       onClose={onClose}
       outsideClickCloses={true}
-      style={{ width: MODAL_WIDTH }}
+      css={modalStyles}
       data-test-subj="agentBuilderConversationSearchModal"
     >
       <EuiModalHeader>

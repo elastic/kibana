@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
+  euiFontSize,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -69,7 +70,8 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
   onItemClick,
   isDragging = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useInfiniteScroll({
     hasNextPage,
@@ -116,9 +118,10 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
                       ${isDragging
                         ? euiTheme.colors.borderBasePrimary
                         : euiTheme.colors.borderBasePlain};
-                    padding: ${euiTheme.size.s};
+                    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+                    font-size: ${euiFontSize(euiThemeContext, 'xs').fontSize};
                     text-align: center;
-                    min-height: ${euiTheme.size.xxl};
+                    min-height: ${euiTheme.size.xl};
                     background-color: ${isDragging ? backgroundColor : 'transparent'};
                     transition: background-color 0.15s, border-color 0.15s;
                   `,
