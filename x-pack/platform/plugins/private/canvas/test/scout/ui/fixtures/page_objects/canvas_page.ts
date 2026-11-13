@@ -373,11 +373,11 @@ export class CanvasPage {
     await this.page.testSubj.locator('lnsApp').waitFor({ state: 'hidden' });
   }
 
-  /** Click "Save and return" in the Visualize editor and wait for Canvas to take over again. */
-  async saveVisualizeAndReturn() {
-    const saveAndReturn = this.page.testSubj.locator('visualizesaveAndReturnButton');
-    await saveAndReturn.click({ timeout: 20_000 });
-    await saveAndReturn.waitFor({ state: 'hidden' });
+  /** Click "Apply and close" in the Vega editor flyout and wait for it to close. */
+  async applyVegaEditor() {
+    const applyAndClose = this.page.testSubj.locator('vegaEditorFlyoutSaveButton');
+    await applyAndClose.click();
+    await applyAndClose.waitFor({ state: 'hidden' });
   }
 
   /** Delete the currently selected element via the workpad edit menu. */

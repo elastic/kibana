@@ -33,7 +33,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'visChart',
   ]);
 
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardExpect = getService('dashboardExpect');
   const testSubjects = getService('testSubjects');
@@ -183,14 +182,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
       });
 
-      it('can add a markdown panel by value', async () => {
-        await dashboard.navigateToApp();
-        await dashboard.clickNewDashboard();
+      it('can add a Vega visualization by value', async () => {
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVega();
+        await visChart.waitForVisualizationRenderingStabilized();
+
+        await testSubjects.click('visualizeSaveButton');
+        await timeToVisualize.saveFromModal('Vega by value', { addToDashboard: 'new' });
+
         await dashboard.waitForRenderComplete();
-
-        await dashboardAddPanel.clickAddVega();
-
-        await visualize.saveVisualizationAndReturn();
         const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
       });

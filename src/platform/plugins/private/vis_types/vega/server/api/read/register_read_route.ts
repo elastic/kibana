@@ -15,7 +15,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { VEGA_API_PATH, VEGA_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig } from '../constants';
-import { isVegaApiEnabled } from '../is_vega_api_enabled';
 import { read } from './read';
 import { readRequestParamsSchema, readResponseBodySchema } from './schemas';
 
@@ -58,10 +57,6 @@ export const registerReadRoute = (
     },
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter }, async () => {
-        const { core } = await ctx.resolve(['core']);
-        if (!(await isVegaApiEnabled(core.featureFlags))) {
-          return res.notFound();
-        }
         try {
           const result = await read(ctx, req.params.id);
           return res.ok({ body: result });

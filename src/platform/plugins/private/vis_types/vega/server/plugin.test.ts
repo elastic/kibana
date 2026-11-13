@@ -7,24 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { VisTypeVegaPlugin } from './plugin';
-import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 
 describe('VisTypeVegaPlugin (server)', () => {
-  test('registers a server definition for vega', async () => {
-    const initializerContext = coreMock.createPluginInitializerContext();
-    const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
-    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+  test('registers a server definition for vega', () => {
     const embeddable = createEmbeddableSetupMock();
-
-    const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable });
-    await new Promise(process.nextTick);
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    plugin.setup(coreMock.createSetup(), { embeddable });
 
     expect(embeddable.registerEmbeddableServerDefinition).toHaveBeenCalledTimes(1);
     expect(embeddable.registerEmbeddableServerDefinition).toHaveBeenCalledWith(
@@ -33,37 +26,10 @@ describe('VisTypeVegaPlugin (server)', () => {
     );
   });
 
-  test('does not expose a schema when vega.asCodeEnabled is disabled', async () => {
-    const initializerContext = coreMock.createPluginInitializerContext();
-    const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
-      of(key === VEGA_AS_CODE_ENABLED_FLAG ? false : fallback)
-    );
-    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
-
+  test('exposes a by-value and by-reference schema', () => {
     const embeddable = createEmbeddableSetupMock();
-    const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable });
-    await new Promise(process.nextTick);
-
-    const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
-    expect(serverDefinition.getSchema(mockGetDrilldownsSchema)).toBeUndefined();
-  });
-
-  test('exposes a by-value and by-reference schema when vega.asCodeEnabled is enabled', async () => {
-    const initializerContext = coreMock.createPluginInitializerContext();
-    const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
-      of(key === VEGA_AS_CODE_ENABLED_FLAG ? true : fallback)
-    );
-    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
-
-    const embeddable = createEmbeddableSetupMock();
-    const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable });
-    await new Promise(process.nextTick);
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    plugin.setup(coreMock.createSetup(), { embeddable });
 
     const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
     const schema = serverDefinition.getSchema(mockGetDrilldownsSchema);
