@@ -318,7 +318,9 @@ async function fetchEntityFilteredDocuments({
       () =>
         `Skipped ${
           skippedFilters.length
-        } entity filters on fields [${index}] does not map:\n${JSON.stringify(skippedFilters)}`
+        } entity filters on fields that are unmapped or have conflicting types in [${index}]:\n${JSON.stringify(
+          skippedFilters
+        )}`
     );
   }
   if (queryableFilters.length === 0) {
