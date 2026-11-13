@@ -50,8 +50,16 @@ export const componentStyles = {
   editorPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
       height: '100%',
+      minHeight: 0,
+      display: 'flex',
+      flexDirection: 'column',
       overflow: 'hidden',
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      // Ensure the YAML editor column fills the flex panel so its sticky footer can pin.
+      '& > *': {
+        flex: 1,
+        minHeight: 0,
+      },
     }),
   previewPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
