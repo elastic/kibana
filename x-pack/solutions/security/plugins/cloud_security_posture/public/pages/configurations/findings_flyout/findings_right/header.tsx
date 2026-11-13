@@ -55,17 +55,19 @@ export const TruncatedCopyableText = ({ textToCopy }: { textToCopy: string }) =>
       >
         {textToCopy}
       </div>
-      <EuiCopy textToCopy={textToCopy}>
+      <EuiCopy
+        textToCopy={textToCopy}
+        beforeMessage={COPY_TO_CLIPBOARD_LABEL}
+        tooltipProps={{ disableScreenReaderOutput: true }}
+      >
         {(copy) => (
-          <EuiToolTip content={COPY_TO_CLIPBOARD_LABEL} disableScreenReaderOutput>
-            <EuiButtonIcon
-              color="text"
-              size="xs"
-              iconType="copy"
-              onClick={copy}
-              aria-label={COPY_TO_CLIPBOARD_LABEL}
-            />
-          </EuiToolTip>
+          <EuiButtonIcon
+            color="text"
+            size="xs"
+            iconType="copy"
+            onClick={copy}
+            aria-label={COPY_TO_CLIPBOARD_LABEL}
+          />
         )}
       </EuiCopy>
     </EuiText>

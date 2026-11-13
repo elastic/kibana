@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -68,17 +67,19 @@ const renderValue = (item: string) => (
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiCopy textToCopy={item}>
+      <EuiCopy
+        textToCopy={item}
+        beforeMessage={COPY_ARIA_LABEL}
+        tooltipProps={{ disableScreenReaderOutput: true }}
+      >
         {(copy) => (
-          <EuiToolTip content={COPY_ARIA_LABEL} disableScreenReaderOutput>
-            <EuiButtonIcon
-              aria-label={COPY_ARIA_LABEL}
-              color="text"
-              size="xs"
-              iconType="copy"
-              onClick={copy}
-            />
-          </EuiToolTip>
+          <EuiButtonIcon
+            aria-label={COPY_ARIA_LABEL}
+            color="text"
+            size="xs"
+            iconType="copy"
+            onClick={copy}
+          />
         )}
       </EuiCopy>
     </EuiFlexItem>
