@@ -72,7 +72,6 @@ export {
   type OnlineEvalsStepFailedEvent,
 } from './online_evals_step_failed_event';
 export {
-  MAX_CAUSAL_CHECK_EXPLANATION_LENGTH,
   NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT,
   decisionTreeCausalCheckEvent,
   type CausalCheckErrorCode,

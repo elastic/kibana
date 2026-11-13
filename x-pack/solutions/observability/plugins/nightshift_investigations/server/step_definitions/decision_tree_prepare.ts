@@ -36,12 +36,11 @@ import {
   resolveRound,
   withToolResults,
 } from '../investigation_round';
-import {
-  MAX_CAUSAL_CHECK_EXPLANATION_LENGTH,
-  type CausalCheckErrorCode,
-  type CausalCheckOutcome,
-  type DecisionTreeCausalCheckEvent,
-  type NightshiftTelemetryClient,
+import type {
+  CausalCheckErrorCode,
+  CausalCheckOutcome,
+  DecisionTreeCausalCheckEvent,
+  NightshiftTelemetryClient,
 } from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
@@ -95,20 +94,6 @@ const outcomeFromVerdict = (verdict: CausalCheckResult): CausalCheckOutcome => {
   return verdict.isFeedback ? 'unconfirmed_feedback' : 'not_feedback';
 };
 
-const truncateTelemetryText = (
-  value: string | undefined,
-  maxLength: number
-): string | undefined => {
-  const trimmed = value?.trim() ?? '';
-  if (trimmed.length === 0) {
-    return undefined;
-  }
-  const characters = Array.from(trimmed);
-  return characters.length <= maxLength
-    ? trimmed
-    : `${characters.slice(0, maxLength - 1).join('')}…`;
-};
-
 export const decisionTreePrepareStepDefinition = ({
   getAgentBuilder,
   getInference,
@@ -116,7 +101,6 @@ export const decisionTreePrepareStepDefinition = ({
   getUiSettings,
   logger,
   isEnabled,
-  shouldIncludeExplanations,
   telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
@@ -125,8 +109,6 @@ export const decisionTreePrepareStepDefinition = ({
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
-  /** The `nightshift.decisionTrees.includeExplanations` flag. */
-  shouldIncludeExplanations?: () => boolean;
   telemetry?: NightshiftTelemetryClient;
 }) =>
   createServerStepDefinition({
@@ -345,13 +327,6 @@ export const decisionTreePrepareStepDefinition = ({
         errorCode?: CausalCheckErrorCode;
         error?: Error;
       }): void => {
-        const includeExplanations = shouldIncludeExplanations?.() === true;
-        const causalSummary = includeExplanations
-          ? truncateTelemetryText(verdict?.causalSummary, MAX_CAUSAL_CHECK_EXPLANATION_LENGTH)
-          : undefined;
-        const learning = includeExplanations
-          ? truncateTelemetryText(verdict?.learning, MAX_CAUSAL_CHECK_EXPLANATION_LENGTH)
-          : undefined;
         const event: DecisionTreeCausalCheckEvent = {
           agent_id: agentId ?? 'unknown',
           conversation_id: conversationId,
@@ -363,8 +338,6 @@ export const decisionTreePrepareStepDefinition = ({
                 is_feedback: verdict.isFeedback,
                 causal_confirmed: verdict.causalConfirmed,
                 has_learning: verdict.learning.trim().length > 0,
-                ...(causalSummary ? { causal_summary: causalSummary } : {}),
-                ...(learning ? { learning } : {}),
               }
             : {}),
           tree_count: treeCount,
@@ -376,7 +349,6 @@ export const decisionTreePrepareStepDefinition = ({
           ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
           ...(errorCode ? { error_code: errorCode } : {}),
         };
-        const { causal_summary: _causalSummary, learning: _learning, ...logLabels } = event;
 
         span?.setAttribute('nightshift.causal_check.outcome', outcome);
         if (roundResolution) {
@@ -405,12 +377,12 @@ export const decisionTreePrepareStepDefinition = ({
 
         // The structured record goes to the Kibana logger: the workflow step logger drops `labels`
         // from console output, and the workflow-log datastream does not map them. Raw error
-        // messages and AI-written text stay off `logger` so server logs never carry customer data.
+        // messages stay on `context.logger` (customer ES) because inference errors can quote data.
         if (outcome === 'failed') {
           const summary = `Round "${roundId}" of "${conversationId}" causal check failed (${errorCode})`;
           logger.warn(summary, {
             tags: CAUSAL_CHECK_LOG_TAGS,
-            labels: logLabels,
+            labels: { ...event },
           });
           context.logger.warn(`${summary}: ${error?.message ?? 'unknown error'}`);
         } else {
@@ -421,7 +393,7 @@ export const decisionTreePrepareStepDefinition = ({
               : '') +
             (roundResolution ? ` recorder=${roundResolution.outcome}` : '') +
             ` trees=${treeCount}`;
-          logger.info(message, { tags: CAUSAL_CHECK_LOG_TAGS, labels: logLabels });
+          logger.info(message, { tags: CAUSAL_CHECK_LOG_TAGS, labels: { ...event } });
           context.logger.info(message);
         }
 

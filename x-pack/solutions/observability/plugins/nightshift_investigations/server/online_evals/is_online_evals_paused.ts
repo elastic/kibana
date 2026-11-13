@@ -7,7 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG } from '@kbn/nightshift-shared';
-import { followBooleanFlag } from '../lib/follow_boolean_flag';
+import { followBooleanFlag } from './follow_boolean_flag';
 
 /**
  * Follows the `nightshift.onlineEvals.paused` kill switch. Reads paused until start services

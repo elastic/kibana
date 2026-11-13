@@ -13,7 +13,6 @@ import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { NO_CAUSAL_VERDICT } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { createOptimizeModel } from '../lib/create_optimize_model';
-import { MAX_CAUSAL_CHECK_EXPLANATION_LENGTH } from '../telemetry';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import * as tracing from '../tracing';
 import { decisionTreePrepareStepDefinition } from './decision_tree_prepare';
@@ -74,18 +73,10 @@ describe('decisionTreePrepareStepDefinition', () => {
       stepType: 'nightshift.decisionTreePrepare',
     } as never);
 
-  const run = (
-    input: Record<string, unknown>,
-    executionId?: string,
-    abortSignal?: AbortSignal,
-    includeExplanations?: boolean
-  ) =>
+  const run = (input: Record<string, unknown>, executionId?: string, abortSignal?: AbortSignal) =>
     decisionTreePrepareStepDefinition({
       getAgentBuilder: () => agentBuilder as never,
       logger,
-      ...(includeExplanations !== undefined
-        ? { shouldIncludeExplanations: () => includeExplanations }
-        : {}),
       telemetry,
     }).handler(createContext(input, executionId, abortSignal));
 
@@ -429,9 +420,14 @@ describe('decisionTreePrepareStepDefinition', () => {
             duration_ms: expect.any(Number),
           })
         );
-        const defaultReported = reportDecisionTreeCausalCheck.mock.calls[0][0];
-        expect(defaultReported).not.toHaveProperty('causal_summary');
-        expect(defaultReported).not.toHaveProperty('learning');
+        const reported = reportDecisionTreeCausalCheck.mock.calls[0][0];
+        expect(reported).not.toHaveProperty('causal_summary');
+        expect(reported).not.toHaveProperty('learning');
+        const [, logMeta] = logger.info.mock.calls[0];
+        for (const sink of [reported, logMeta, setAttribute.mock.calls]) {
+          expect(JSON.stringify(sink)).not.toContain('Paygate edge timed out.');
+          expect(JSON.stringify(sink)).not.toContain('Check external payment gateway latency.');
+        }
         expect(logger.info).toHaveBeenCalledWith(
           expect.stringContaining('outcome=confirmed feedback=true confirmed=true recorder=found'),
           expect.objectContaining({
@@ -463,49 +459,6 @@ describe('decisionTreePrepareStepDefinition', () => {
           'nightshift.causal_check.duration_ms',
           expect.any(Number)
         );
-      });
-
-      it('includes truncated causal_summary and learning in EBT when shouldIncludeExplanations is true, while keeping prose off server log labels', async () => {
-        const longSummary = `🔥${'x'.repeat(MAX_CAUSAL_CHECK_EXPLANATION_LENGTH + 40)}`;
-        output.mockResolvedValue({
-          output: {
-            is_feedback_message: true,
-            causal_confirmed: false,
-            causal_summary: longSummary,
-            learning: 'Check egress proxy connection metrics before blaming the provider.',
-          },
-        });
-
-        await run(followUp, undefined, undefined, true);
-
-        const reported = reportDecisionTreeCausalCheck.mock.calls[0][0];
-        expect(Array.from(reported.causal_summary)).toHaveLength(
-          MAX_CAUSAL_CHECK_EXPLANATION_LENGTH
-        );
-        expect(reported.causal_summary.startsWith('🔥x')).toBe(true);
-        expect(reported.causal_summary.endsWith('…')).toBe(true);
-        expect(reported.learning).toBe(
-          'Check egress proxy connection metrics before blaming the provider.'
-        );
-        const [, logMeta] = logger.info.mock.calls[0];
-        expect(logMeta?.labels).not.toHaveProperty('causal_summary');
-        expect(logMeta?.labels).not.toHaveProperty('learning');
-
-        // Blank learning text stays omitted even when the flag is on.
-        output.mockResolvedValue({
-          output: {
-            is_feedback_message: false,
-            causal_confirmed: false,
-            causal_summary: 'Follow-up question only.',
-            learning: '   ',
-          },
-        });
-
-        await run(followUp, undefined, undefined, true);
-
-        const secondReported = reportDecisionTreeCausalCheck.mock.calls[1][0];
-        expect(secondReported.causal_summary).toBe('Follow-up question only.');
-        expect(secondReported).not.toHaveProperty('learning');
       });
 
       it('distinguishes unconfirmed_feedback from not_feedback', async () => {
