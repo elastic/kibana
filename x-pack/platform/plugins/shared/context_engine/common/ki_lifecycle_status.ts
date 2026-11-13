@@ -28,6 +28,16 @@ export const toOptionalKiLifecycleStatus = (value: unknown): KiLifecycleStatus |
   return value;
 };
 
+const isKiStatus = (value: string): value is KiStatus =>
+  (KI_STATUSES as readonly string[]).includes(value);
+
+export const toOptionalKiStatus = (value: unknown): KiStatus | undefined => {
+  if (typeof value !== 'string' || !isKiStatus(value)) {
+    return undefined;
+  }
+  return value;
+};
+
 export const readKiDocumentLifecycleStatus = (
   document: KiDocument
 ): KiLifecycleStatus | undefined =>

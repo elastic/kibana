@@ -114,7 +114,7 @@ describe('useListKi', () => {
       expect.any(String),
       expect.objectContaining({
         query: expect.not.objectContaining({
-          lifecycle_status: expect.anything(),
+          status: expect.anything(),
         }),
       })
     );
@@ -134,7 +134,7 @@ describe('useListKi', () => {
         '/internal/context_engine/ai_index/my-ai-index/kis',
         expect.objectContaining({
           query: expect.objectContaining({
-            lifecycle_status: ['deleted'],
+            status: ['deleted'],
           }),
         })
       );

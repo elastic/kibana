@@ -368,7 +368,7 @@ export const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
-  lifecycle_status: schema.maybe(kiListStatusesQuerySchema),
+  status: schema.maybe(kiListStatusesQuerySchema),
   sort: schema.oneOf(KI_LIST_SORTS.map((value) => schema.literal(value)) as [Type<KiListSort>], {
     defaultValue: DEFAULT_KI_LIST_SORT,
     meta: {

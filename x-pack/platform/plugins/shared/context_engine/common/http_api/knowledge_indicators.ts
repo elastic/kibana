@@ -6,6 +6,7 @@
  */
 
 import type { KiLifecycleStatus } from '../step_types/ki';
+import type { KiStatus } from '../ki_lifecycle_status';
 import type { KiTypeCount } from './ai_indices';
 import type { KiReferenceRelation } from '../step_types/ki';
 
@@ -17,6 +18,8 @@ export interface KiListItem {
   updated_at?: string;
   expires_at?: string;
   lifecycle_status?: KiLifecycleStatus;
+  /** `lifecycle_status`, or `expired` for active KIs past `expires_at`. */
+  status: KiStatus;
 }
 
 /** Unfiltered store stats. */

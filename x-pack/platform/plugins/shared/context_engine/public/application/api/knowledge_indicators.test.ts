@@ -53,7 +53,7 @@ describe('listKis', () => {
     });
   });
 
-  it('passes size, type, and lifecycle_status when provided', async () => {
+  it('passes size, type, and status when provided', async () => {
     const http = createHttp();
     http.get.mockResolvedValue(emptyListKisResponse);
 
@@ -69,7 +69,7 @@ describe('listKis', () => {
       query: {
         size: 50,
         type: 'playbook',
-        lifecycle_status: ['active', 'deleted', 'verification_failed'],
+        status: ['active', 'deleted', 'verification_failed'],
       },
     });
   });

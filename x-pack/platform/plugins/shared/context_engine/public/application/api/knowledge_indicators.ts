@@ -42,7 +42,7 @@ export const listKis = (
       ...(size !== undefined ? { size } : {}),
       ...(type !== undefined ? { type } : {}),
       ...(query !== undefined ? { query } : {}),
-      ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
+      ...(lifecycleStatus !== undefined ? { status: lifecycleStatus } : {}),
     },
     ...(signal ? { signal } : {}),
   });
