@@ -19,10 +19,16 @@ import {
   resolveAgentProfile,
   resolveExpectedToolId,
   resolveSuiteProfileEnv,
+  resolveWorkflowYamlExtractionMode,
   withProfileExpectedTools,
 } from './agent_profile';
 
 describe('agent_profile', () => {
+  it('grades parity workflows from the answer text only, like the external benchmark', () => {
+    expect(resolveWorkflowYamlExtractionMode('chrysalis-parity')).toBe('text_only');
+    expect(resolveWorkflowYamlExtractionMode('default')).toBe('text_then_attachment');
+  });
+
   it.each([undefined, '', 'default'])(
     'AGENT_PROFILE=%p resolves to the built-in Elastic AI Agent',
     (raw) => {

@@ -327,8 +327,17 @@ const parseWorkflow = (yaml: string): ParsedWorkflow => {
   }
 };
 
+/**
+ * Where the evaluator looks for the authored YAML. `text_only` reads the answer
+ * text alone, as the Chrysalis harness does: a workflow that is only rendered as
+ * an attachment scores `no_yaml` there.
+ */
+export type WorkflowYamlExtractionMode = 'text_only' | 'text_then_attachment';
+
 export interface WorkflowValidityDeps {
   fetch: HttpHandler;
+  /** Defaults to `text_then_attachment`. */
+  extractionMode?: WorkflowYamlExtractionMode;
   sleep?: (ms: number) => Promise<void>;
   now?: () => number;
   /**
@@ -363,6 +372,7 @@ export const createWorkflowValidityEvaluator = ({
   sleep = defaultSleep,
   now = Date.now,
   stubVerified,
+  extractionMode = 'text_then_attachment',
 }: WorkflowValidityDeps): Evaluator => ({
   name: WORKFLOW_VALIDITY_EVALUATOR_NAME,
   kind: 'CODE',
@@ -409,7 +419,10 @@ export const createWorkflowValidityEvaluator = ({
       };
     };
 
-    const yaml = extractWorkflowYaml(getAnswerText(output), attachmentsOf(output));
+    const yaml = extractWorkflowYaml(
+      getAnswerText(output),
+      extractionMode === 'text_only' ? [] : attachmentsOf(output)
+    );
     if (!yaml) {
       return finish();
     }

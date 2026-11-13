@@ -9,6 +9,7 @@ import {
   buildRunInputs,
   createWorkflowValidityEvaluator,
   extractWorkflowYaml,
+  type WorkflowYamlExtractionMode,
 } from './workflow_validity_evaluator';
 import { parse } from 'yaml';
 import { buildOutput } from '../__fixtures__/task_output_builders';
@@ -52,6 +53,7 @@ const setup = ({
   statusAfterCancel = 'cancelled',
   stubVerified = true,
   validateResult = { valid: true, errors: [] } as { valid: boolean; errors: string[] } | 'throw',
+  extractionMode,
 }: {
   workflow?: Record<string, unknown>;
   statuses?: string[];
@@ -64,6 +66,7 @@ const setup = ({
   statusAfterCancel?: string;
   stubVerified?: boolean;
   validateResult?: { valid: boolean; errors: string[] } | 'throw';
+  extractionMode?: WorkflowYamlExtractionMode;
 } = {}) => {
   const calls: Call[] = [];
   const sleeps: number[] = [];
@@ -120,6 +123,7 @@ const setup = ({
     },
     now: () => clock,
     stubVerified: () => stubVerified,
+    extractionMode,
   });
   return { evaluator, calls, fetch, sleeps };
 };
@@ -431,6 +435,32 @@ describe('WorkflowValidity', () => {
     );
     expect(result.score).toBe(1);
     expect(JSON.parse(calls[0].body as string)).toEqual({ yaml: YAML });
+  });
+
+  describe('text_only extraction', () => {
+    it('scores no_yaml when the YAML exists only as an attachment', async () => {
+      const { evaluator, calls } = setup({ extractionMode: 'text_only' });
+      const result = await run(
+        evaluator,
+        'rendered above',
+        { validateWorkflow: true },
+        { workflowAttachments: [{ id: 'a', version: 1, yaml: YAML }] }
+      );
+      expect(result.label).toBe('no_yaml');
+      expect(calls).toHaveLength(0);
+    });
+
+    it('still validates YAML from the answer text', async () => {
+      const { evaluator, calls } = setup({ extractionMode: 'text_only' });
+      const result = await run(
+        evaluator,
+        `\`\`\`yaml\n${YAML}\`\`\``,
+        { validateWorkflow: true },
+        { workflowAttachments: [{ id: 'a', version: 1, yaml: 'name: other\nsteps: []' }] }
+      );
+      expect(result.score).toBe(1);
+      expect(JSON.parse(calls[0].body as string)).toEqual({ yaml: YAML.trim() });
+    });
   });
 
   it('records settle_error, not cancel_error, when a status read fails while settling', async () => {

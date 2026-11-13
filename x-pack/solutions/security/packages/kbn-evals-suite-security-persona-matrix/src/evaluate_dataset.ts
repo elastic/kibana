@@ -50,6 +50,7 @@ import { UNANSWERED_PROMPT_MARKER } from './chat_client';
 import {
   agentProfile as envAgentProfile,
   PERSONA_MATRIX_SUITE_IDS,
+  resolveWorkflowYamlExtractionMode,
   withProfileExpectedTools,
   type AgentProfile,
 } from './agent_profile';
@@ -758,7 +759,11 @@ export function createEvaluatePersonaMatrixDataset({
       connectorInvokedEvaluator,
       // Deterministic behaviour checks. Recorded per cell, excluded from cell
       // means via `excludeEvaluators` in the matrix config.
-      createWorkflowValidityEvaluator({ fetch, stubVerified: isStubConnectorVerified }),
+      createWorkflowValidityEvaluator({
+        fetch,
+        stubVerified: isStubConnectorVerified,
+        extractionMode: resolveWorkflowYamlExtractionMode(agentProfile),
+      }),
       createEicarTrapEvaluator(),
       createSimulationAwarenessEvaluator(),
       createUnrequestedSideEffectsEvaluator(),
