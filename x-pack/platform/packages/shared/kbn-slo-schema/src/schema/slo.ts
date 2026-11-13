@@ -145,18 +145,22 @@ const baseSloSchema = z.object({
   updatedBy: z.string().describe('The user who last updated the SLO.').optional(),
 });
 
-const dashboardsWithIdSchema = z.object({
-  dashboards: z
-    .array(z.object({ id: z.string().describe('Dashboard saved-object ID') }))
-    .describe('Array of dashboard references')
-    .optional(),
-});
-const dashboardsWithRefIdSchema = z.object({
-  dashboards: z
-    .array(z.object({ refId: z.string().describe('Dashboard reference ID') }))
-    .describe('Array of dashboard references')
-    .optional(),
-});
+const dashboardsWithIdSchema = lazySchema(() =>
+  z.object({
+    dashboards: z
+      .array(z.object({ id: z.string().describe('Dashboard saved-object ID') }))
+      .describe('Array of dashboard references')
+      .optional(),
+  })
+);
+const dashboardsWithRefIdSchema = lazySchema(() =>
+  z.object({
+    dashboards: z
+      .array(z.object({ refId: z.string().describe('Dashboard reference ID') }))
+      .describe('Array of dashboard references')
+      .optional(),
+  })
+);
 
 const artifactsWithIdSchema = dashboardsWithIdSchema.meta({
   id: 'SLOArtifacts',

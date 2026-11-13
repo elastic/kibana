@@ -78,12 +78,14 @@ const querySchema = z.union([kqlQuerySchema, kqlWithFiltersSchema]);
 
 const indexSchema = z.string().describe('The index or index pattern to use');
 
-const dataViewIdSchema = z
-  .string()
-  .describe(
-    'The kibana data view ID to use, primarily used to include data view runtime mappings. ' +
-      'Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.'
-  );
+const dataViewIdSchema = lazySchema(() =>
+  z
+    .string()
+    .describe(
+      'The kibana data view ID to use, primarily used to include data view runtime mappings. ' +
+        'Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.'
+    )
+);
 
 const timestampFieldSchema = z.string().describe('The timestamp field used in the source indice.');
 
