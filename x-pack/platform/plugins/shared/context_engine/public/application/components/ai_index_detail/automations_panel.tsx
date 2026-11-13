@@ -32,8 +32,8 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
-import { useDreamingEnabled } from '../../hooks/use_dreaming_enabled';
 import { useKibana } from '../../hooks/use_kibana';
+import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
@@ -69,14 +69,14 @@ export const AutomationsPanel = ({
   } = useKibana();
   const { automations, isCreating, isBusy, deleteAutomation, createAndAttach } =
     useAutomationsEditor({ aiIndex, onSaved });
-  const isDreamingEnabled = useDreamingEnabled();
+  const isMemoryEnabled = useMemoryEnabled();
   // Hidden only here: the editor still saves the full list, so its dreaming workflows stay attached.
   const visibleAutomations = useMemo(
     () =>
-      isDreamingEnabled
+      isMemoryEnabled
         ? automations
         : automations.filter((automation) => !isDreamingAutomation(automation)),
-    [automations, isDreamingEnabled]
+    [automations, isMemoryEnabled]
   );
   const visibleWorkflowIds = useMemo(
     () =>

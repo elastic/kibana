@@ -37,7 +37,7 @@ import {
 } from '../components/dreaming_config/dreaming_config_editor';
 import { useApplyDreamingTemplate } from '../hooks/use_apply_dreaming_template';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
-import { useDreamingEnabled } from '../hooks/use_dreaming_enabled';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useDreamingTemplate, useDreamingTemplates } from '../hooks/use_dreaming_templates';
 import { useNavigation } from '../hooks/use_navigation';
 import {
@@ -136,8 +136,8 @@ const Pill = ({
  */
 export const DreamingTemplatePage = () => {
   const { id: aiIndexId } = useParams<{ id: string }>();
-  const isDreamingEnabled = useDreamingEnabled();
-  return isDreamingEnabled ? (
+  const isMemoryEnabled = useMemoryEnabled();
+  return isMemoryEnabled ? (
     <DreamingTemplateSetup aiIndexId={aiIndexId} />
   ) : (
     <Redirect to={getAiIndexDetailPath(aiIndexId)} />

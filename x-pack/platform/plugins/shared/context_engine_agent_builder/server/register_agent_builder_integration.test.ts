@@ -19,7 +19,6 @@ import {
   CONTEXT_ENGINE_SIGNALS_SKILL_ID,
 } from '../common/agent_builder_skills';
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
-import { CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -38,12 +37,10 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
   const setup = ({
     aiIndices,
     authorized = true,
-    dreamingEnabled = true,
   }: {
     aiIndices: unknown[];
     /** Outcome of the privilege check: granted, denied, or the error it rejects with. */
     authorized?: boolean | Error;
-    dreamingEnabled?: boolean;
   }) => {
     const checkPrivileges =
       authorized instanceof Error
@@ -60,15 +57,11 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     const getAiIndexDataReadService = jest.fn().mockReturnValue({ list });
     const asCurrentUser = {};
     const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
-    const globalSettingsGet = jest.fn().mockResolvedValue(dreamingEnabled);
     const coreSetup = {
       getStartServices: jest.fn().mockResolvedValue([
         {
           elasticsearch: { client: { asScoped } },
           savedObjects: { getScopedClient: jest.fn() },
-          uiSettings: {
-            globalAsScopedToClient: jest.fn().mockReturnValue({ get: globalSettingsGet }),
-          },
         },
         {
           contextEngine: { getAiIndexDataReadService },
@@ -111,7 +104,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       asCurrentUser,
       security,
       checkPrivileges,
-      globalSettingsGet,
     };
   };
 
@@ -135,11 +127,12 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
   });
 
-  it('registers a resolver mapping registry items to id, esqlTarget (dest.value), description and whether dreaming takes memories', async () => {
+  it('registers a resolver mapping registry items to id, esqlTarget (dest.value), description and whether it takes memories', async () => {
     const { resolver } = setup({
       aiIndices: [
         {
           id: 'my-custom',
+          managed: true,
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
           dreaming: { enabled: true, facts: [{ type: 'preference' }] },
@@ -157,9 +150,8 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     ]);
   });
 
-  it('falls back to the saved memory_enabled, then to not managed, while dreaming is globally off', async () => {
-    const { resolver, globalSettingsGet } = setup({
-      dreamingEnabled: false,
+  it('falls back to the saved memory_enabled, then to not managed, without dreaming set up', async () => {
+    const { resolver } = setup({
       aiIndices: [
         { id: 'custom', managed: false, dest: { type: 'index', value: 'idx-custom' } },
         { id: 'managed', managed: true, dest: { type: 'index', value: 'idx-managed' } },
@@ -177,7 +169,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       { id: 'managed', esqlTarget: 'idx-managed', memoryEnabled: false },
       { id: 'opted-out', esqlTarget: 'idx-opted-out', memoryEnabled: false },
     ]);
-    expect(globalSettingsGet).toHaveBeenCalledWith(CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID);
   });
 
   it('asks the service for the requested ids only, so just those are probed', async () => {
@@ -185,13 +176,14 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       aiIndices: [
         {
           id: 'wanted',
+          managed: false,
           dest: { type: 'index', value: 'idx-wanted' },
         },
       ],
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
-      { id: 'wanted', esqlTarget: 'idx-wanted', memoryEnabled: false },
+      { id: 'wanted', esqlTarget: 'idx-wanted', memoryEnabled: true },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
     expect(list).toHaveBeenCalledWith(['wanted', 'unknown']);

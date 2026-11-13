@@ -67,7 +67,7 @@ registerAiIndexRoutes({
   getAiIndexDataReadService: jest.fn(),
   getImprovementsService: jest.fn(),
   aiIndexChanges: { notify: jest.fn() },
-  isDreamingEnabled: async () => false,
+  isMemoryEnabled: async () => false,
   getActions: jest.fn(),
   getAgentBuilder: jest.fn(),
   getWorkflowsManagementApi: jest.fn(),

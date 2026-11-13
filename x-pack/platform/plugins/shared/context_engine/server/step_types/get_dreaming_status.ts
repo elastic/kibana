@@ -20,7 +20,6 @@ export const getDreamingStatusStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   isMemoryEnabled,
-  isDreamingEnabled,
   checkReadPrivilege,
 }: DreamingStepDependencies) =>
   createServerStepDefinition({
@@ -43,9 +42,6 @@ export const getDreamingStatusStepDefinition = ({
       }
       if (!(await isMemoryEnabled())) {
         return skip('The global Context Engine memory setting is off.');
-      }
-      if (!(await isDreamingEnabled())) {
-        return skip('The global Context Engine dreaming setting is off.');
       }
       try {
         const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);

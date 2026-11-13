@@ -6,10 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import {
-  CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID,
-  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -186,7 +183,7 @@ const MEMORY_DREAMING_CONFIG = {
 };
 
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
-// `uiSettings.overrides`. Memory and dreaming remain runtime-configurable so this suite enables
+// `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables
 // only the behavior it exercises.
 apiTest.describe('context engine AI index describe API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
@@ -198,7 +195,6 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   apiTest.beforeAll(async ({ requestAuth, esClient, apiClient, kbnClient }) => {
     await kbnClient.uiSettings.updateGlobal({
       [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
-      [CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID]: true,
     });
     await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
@@ -270,7 +266,6 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
     await kbnClient.uiSettings.updateGlobal({
       [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
-      [CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID]: false,
     });
     await kbnClient.uiSettings.waitForEventualCacheRefresh();
 

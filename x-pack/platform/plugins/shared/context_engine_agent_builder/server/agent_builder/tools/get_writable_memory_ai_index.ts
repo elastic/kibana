@@ -11,10 +11,7 @@ import type { AiIndexItem } from '@kbn/context-engine-plugin/common/http_api/ai_
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID,
-  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const getWritableMemoryAiIndex = async ({
   aiIndexId,
@@ -32,21 +29,16 @@ export const getWritableMemoryAiIndex = async ({
   const coreStart = await getCoreStart();
   const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
   const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
-  const [memoryEnabled, dreamingEnabled] = await Promise.all([
+  const [memoryEnabled, aiIndex] = await Promise.all([
     globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID),
-    globalUiSettings.get<boolean>(CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID),
+    (await getAiIndexService()).get(aiIndexId, spaceId),
   ]);
-  const aiIndex = await (await getAiIndexService()).get(aiIndexId, spaceId);
 
   if (!memoryEnabled) {
     throw new Error('Context Engine memory is not enabled.');
   }
-  if (!takesMemories(aiIndex, dreamingEnabled ?? false)) {
-    throw new Error(
-      dreamingEnabled
-        ? `AI index '${aiIndexId}' does not take memories: dreaming is not set up.`
-        : `AI index '${aiIndexId}' does not take memories.`
-    );
+  if (!takesMemories(aiIndex)) {
+    throw new Error(`AI index '${aiIndexId}' does not take memories.`);
   }
   if (isIndexPattern(aiIndex.dest.value)) {
     throw new Error(

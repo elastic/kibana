@@ -7,7 +7,6 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { takesMemories } from '@kbn/context-engine-plugin/common/dreaming';
-import { CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
@@ -45,22 +44,17 @@ export const registerContextEngineAgentBuilderIntegration = ({
     }
 
     // Same rule as the list route; only requested ids are probed.
-    const [aiIndices, dreamingEnabled] = await Promise.all([
-      contextEngine
-        .getAiIndexDataReadService({
-          esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
-          request,
-        })
-        .list(ids),
-      coreStart.uiSettings
-        .globalAsScopedToClient(coreStart.savedObjects.getScopedClient(request))
-        .get<boolean>(CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID),
-    ]);
+    const aiIndices = await contextEngine
+      .getAiIndexDataReadService({
+        esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        request,
+      })
+      .list(ids);
     return aiIndices.map((aiIndex) => ({
       id: aiIndex.id,
       esqlTarget: aiIndex.dest.value,
       description: aiIndex.description,
-      memoryEnabled: takesMemories(aiIndex, dreamingEnabled ?? false),
+      memoryEnabled: takesMemories(aiIndex),
     }));
   });
 

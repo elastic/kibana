@@ -42,7 +42,6 @@ describe('AiIndexDataReadService', () => {
   const aiIndexService = { get: jest.fn(), list: jest.fn() };
   const logger = loggingSystemMock.createLogger();
   const isMemoryEnabled = jest.fn().mockResolvedValue(true);
-  const isDreamingEnabled = jest.fn().mockResolvedValue(true);
   const service = new AiIndexDataReadService({
     esClient,
     spaceId: 'marketing',
@@ -50,7 +49,6 @@ describe('AiIndexDataReadService', () => {
     aiIndexService,
     logger,
     isMemoryEnabled,
-    isDreamingEnabled,
   });
 
   beforeEach(() => {
@@ -139,7 +137,6 @@ describe('AiIndexDataReadService', () => {
         aiIndex,
         spaceId: 'marketing',
         includeMemory: true,
-        dreamingEnabled: true,
       });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({

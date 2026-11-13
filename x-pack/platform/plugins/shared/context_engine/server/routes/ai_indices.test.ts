@@ -144,7 +144,6 @@ describe('ai indices routes', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let memoryFlagEnabled: boolean;
-  let dreamingFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let auditLogger: { log: jest.Mock };
@@ -227,7 +226,6 @@ describe('ai indices routes', () => {
     routes = {};
     featureFlagEnabled = true;
     memoryFlagEnabled = true;
-    dreamingFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
     actionsClient = actionsClientMock.create();
     actions = actionsMock.createStart();
@@ -316,7 +314,7 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       aiIndexChanges: createAiIndexChanges(),
-      isDreamingEnabled: async () => memoryFlagEnabled && dreamingFlagEnabled,
+      isMemoryEnabled: async () => memoryFlagEnabled,
       getActions: async () => actions,
       getAgentBuilder,
       getWorkflowsManagementApi: async () => workflowsManagementApi,
@@ -1590,8 +1588,8 @@ describe('ai indices routes', () => {
   });
 
   describe('DELETE /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
-    it('leaves linked relationships alone while dreaming is off', async () => {
-      dreamingFlagEnabled = false;
+    it('leaves linked relationships alone while memory is off', async () => {
+      memoryFlagEnabled = false;
       aiIndexService.get.mockResolvedValue(aiIndexItem);
 
       await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
@@ -2113,7 +2111,7 @@ describe('ai indices routes', () => {
           getAiIndexDataReadService: () => readService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           aiIndexChanges: createAiIndexChanges(),
-          isDreamingEnabled: async () => memoryFlagEnabled && dreamingFlagEnabled,
+          isMemoryEnabled: async () => memoryFlagEnabled,
           getActions: async () => actions,
           getAgentBuilder,
           getWorkflowsManagementApi: async () => undefined,
@@ -2600,11 +2598,8 @@ describe('ai indices routes', () => {
       expect(getRoute('PUT', AI_INDEX_DREAMING_PATH).config.access).toBe('internal');
     });
 
-    it.each([
-      ['memory', () => (memoryFlagEnabled = false)],
-      ['dreaming', () => (dreamingFlagEnabled = false)],
-    ])('returns 404 while the global %s setting is off', async (_setting, turnOff) => {
-      turnOff();
+    it('returns 404 while the global memory setting is off', async () => {
+      memoryFlagEnabled = false;
 
       await callRoute('GET', AI_INDEX_DREAMING_PATH, {
         params: { aiIndexId: 'customer_support' },
@@ -2615,7 +2610,7 @@ describe('ai indices routes', () => {
       });
 
       expect(response.notFound.mock.calls).toEqual(
-        Array(2).fill([{ body: { message: 'Context Engine dreaming is turned off.' } }])
+        Array(2).fill([{ body: { message: 'Context Engine memory is turned off.' } }])
       );
       expect(aiIndexService.get).not.toHaveBeenCalled();
       expect(aiIndexService.setDreaming).not.toHaveBeenCalled();

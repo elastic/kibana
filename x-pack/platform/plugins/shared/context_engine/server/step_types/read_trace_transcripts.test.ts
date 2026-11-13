@@ -23,7 +23,6 @@ describe('readTraceTranscripts step', () => {
   let get: jest.Mock;
   let canRead: boolean;
   let memoryEnabled: boolean;
-  let dreamingEnabled: boolean;
   const esClient = { search: jest.fn() };
 
   const run = (stepInput: Record<string, unknown> = input) =>
@@ -32,7 +31,6 @@ describe('readTraceTranscripts step', () => {
         getAiIndexService: () => ({ get } as unknown as AiIndexService),
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => memoryEnabled,
-        isDreamingEnabled: async () => dreamingEnabled,
         checkReadPrivilege: async () => canRead,
       },
       { getCurrentDate: () => NOW }
@@ -42,7 +40,6 @@ describe('readTraceTranscripts step', () => {
     jest.clearAllMocks();
     canRead = true;
     memoryEnabled = true;
-    dreamingEnabled = true;
     get = jest.fn().mockResolvedValue({ id: 'support', traces });
     jest.mocked(readTraceTranscripts).mockResolvedValue(read);
   });
@@ -101,9 +98,6 @@ describe('readTraceTranscripts step', () => {
     await expect(run()).resolves.toEqual(empty);
     get.mockResolvedValue({ id: 'support', traces });
     memoryEnabled = false;
-    await expect(run()).resolves.toEqual(empty);
-    memoryEnabled = true;
-    dreamingEnabled = false;
     await expect(run()).resolves.toEqual(empty);
     expect(readTraceTranscripts).not.toHaveBeenCalled();
   });

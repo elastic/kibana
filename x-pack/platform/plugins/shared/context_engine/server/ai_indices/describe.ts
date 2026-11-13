@@ -30,7 +30,6 @@ export interface DescribeAiIndexParams {
   aiIndex: AiIndexItem;
   spaceId: string;
   includeMemory: boolean;
-  dreamingEnabled: boolean;
 }
 
 const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): string =>
@@ -159,10 +158,9 @@ const memorySection = (
   aiIndex: AiIndexItem,
   target: string,
   types: DreamedTypes,
-  dreamedTypeCounts: KiTypeCount[],
-  dreamingEnabled: boolean
+  dreamedTypeCounts: KiTypeCount[]
 ): string[] => {
-  if (!takesMemories(aiIndex, dreamingEnabled)) {
+  if (!takesMemories(aiIndex)) {
     return [];
   }
 
@@ -172,7 +170,7 @@ const memorySection = (
 
   return [
     'Memory',
-    dreamingEnabled
+    isDreamingConfigured(aiIndex.dreaming)
       ? 'This AI index takes memories: dreaming is set up for it.'
       : 'This AI index takes memories.',
     'Available memory types',
@@ -223,15 +221,13 @@ export const describeAiIndex = async ({
   aiIndex,
   spaceId,
   includeMemory,
-  dreamingEnabled,
 }: DescribeAiIndexParams): Promise<string> => {
   const target = aiIndex.dest.value;
   const { fields, allFields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
     esClient,
     target,
   });
-  const dreamedTypes =
-    includeMemory && dreamingEnabled ? configuredDreamedTypes(aiIndex) : NO_DREAMED_TYPES;
+  const dreamedTypes = includeMemory ? configuredDreamedTypes(aiIndex) : NO_DREAMED_TYPES;
   const dreamedPrefixes = dreamedPrefixesOf(dreamedTypes);
   const { kiTypeCounts, tagCounts, dreamedTypeCounts } = await describeAiIndexAggregations({
     esClient,
@@ -248,9 +244,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts, dreamedPrefixes),
     tagCountsSection(tagCounts),
-    includeMemory
-      ? memorySection(aiIndex, target, dreamedTypes, dreamedTypeCounts, dreamingEnabled)
-      : [],
+    includeMemory ? memorySection(aiIndex, target, dreamedTypes, dreamedTypeCounts) : [],
     exampleQueriesSection(aiIndex.dest, includeMemory, dreamedPrefixes),
   ]);
 };

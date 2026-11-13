@@ -31,7 +31,6 @@ export const getReadTraceTranscriptsStepDefinition = (
     getAiIndexService,
     isContextEngineEnabled,
     isMemoryEnabled,
-    isDreamingEnabled,
     checkReadPrivilege,
   }: DreamingStepDependencies,
   { getCurrentDate = () => new Date() }: { getCurrentDate?: () => Date } = {}
@@ -56,11 +55,7 @@ export const getReadTraceTranscriptsStepDefinition = (
         });
       }
       const empty = { memories: [], batches: [], resume_from: since, sources: [], skipped: 0 };
-      if (
-        !(await isContextEngineEnabled(spaceId)) ||
-        !(await isMemoryEnabled()) ||
-        !(await isDreamingEnabled())
-      ) {
+      if (!(await isContextEngineEnabled(spaceId)) || !(await isMemoryEnabled())) {
         return { output: empty };
       }
 

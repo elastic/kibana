@@ -31,7 +31,6 @@ import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
-import { useDreamingEnabled } from '../hooks/use_dreaming_enabled';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
@@ -108,7 +107,6 @@ export const AiIndexDetailPage = () => {
   const { discoverHref, indexManagementHref } = useAiIndexDestLinks(aiIndex?.dest);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const isMemoryEnabled = useMemoryEnabled();
-  const isDreamingEnabled = useDreamingEnabled();
   const isSourcesTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
   const isKnowledgeIndicatorsTab =
@@ -116,14 +114,14 @@ export const AiIndexDetailPage = () => {
   const isSettingsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
   // Dreaming is the only setting so far.
-  const showSettingsTab = isDreamingEnabled;
+  const showSettingsTab = isMemoryEnabled;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
   const [showCreatedCallout, setShowCreatedCallout] = useState(
     () => location.state?.aiIndexCreated === true
   );
   const { dreaming } = useAiIndexDreaming(resolvedAiIndexId, {
-    enabled: isDreamingEnabled && showCreatedCallout,
+    enabled: isMemoryEnabled && showCreatedCallout,
   });
 
   // Hide the callout as soon as the user adds a source.
@@ -297,8 +295,7 @@ export const AiIndexDetailPage = () => {
         <AiIndexCreatedCallout
           onDismiss={() => setShowCreatedCallout(false)}
           showMemory={
-            isMemoryEnabled &&
-            takesMemories({ managed: aiIndex?.managed ?? false, dreaming }, isDreamingEnabled)
+            isMemoryEnabled && takesMemories({ managed: aiIndex?.managed ?? false, dreaming })
           }
         />
       )}
@@ -383,7 +380,7 @@ export const AiIndexDetailPage = () => {
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>
-        {!isDreamingEnabled ? (
+        {!isMemoryEnabled ? (
           <Redirect to={getAiIndexDetailPath(resolvedAiIndexId)} />
         ) : aiIndex ? (
           <DreamingPanel aiIndex={aiIndex} />

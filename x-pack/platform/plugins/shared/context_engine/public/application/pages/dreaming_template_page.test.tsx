@@ -18,10 +18,10 @@ import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDreamingTemplatePath } from '../paths';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
-import { useDreamingEnabled } from '../hooks/use_dreaming_enabled';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { DreamingTemplatePage } from './dreaming_template_page';
 
-jest.mock('../hooks/use_dreaming_enabled', () => ({ useDreamingEnabled: jest.fn() }));
+jest.mock('../hooks/use_memory_enabled', () => ({ useMemoryEnabled: jest.fn() }));
 
 const INDEX = {
   templates: [
@@ -111,11 +111,11 @@ const putBody = (services: ReturnType<typeof renderPage>) =>
 
 describe('DreamingTemplatePage', () => {
   beforeEach(() => {
-    jest.mocked(useDreamingEnabled).mockReturnValue(true);
+    jest.mocked(useMemoryEnabled).mockReturnValue(true);
   });
 
-  it('redirects to the AI index while dreaming is off', () => {
-    jest.mocked(useDreamingEnabled).mockReturnValue(false);
+  it('redirects to the AI index while memory is off', () => {
+    jest.mocked(useMemoryEnabled).mockReturnValue(false);
     const services = renderPage();
 
     expect(screen.getByTestId('aiIndexDetailRoute')).toBeInTheDocument();

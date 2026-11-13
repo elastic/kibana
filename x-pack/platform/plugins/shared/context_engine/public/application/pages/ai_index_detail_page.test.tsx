@@ -35,7 +35,6 @@ import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_p
 import { AiIndexDetailPage } from './ai_index_detail_page';
 import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
-import { useDreamingEnabled } from '../hooks/use_dreaming_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 
 const AI_INDEX_DETAIL_ROUTE_PATHS = [
@@ -124,10 +123,6 @@ jest.mock('../hooks/use_memory_enabled', () => ({
   useMemoryEnabled: jest.fn(() => true),
 }));
 
-jest.mock('../hooks/use_dreaming_enabled', () => ({
-  useDreamingEnabled: jest.fn(() => true),
-}));
-
 jest.mock('../hooks/use_ai_index_dreaming', () => ({
   useAiIndexDreaming: jest.fn(),
 }));
@@ -142,7 +137,6 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
 
 const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
-const mockUseDreamingEnabled = jest.mocked(useDreamingEnabled);
 const mockUseAiIndexDreaming = jest.mocked(useAiIndexDreaming);
 const preferenceDreaming = { enabled: true, facts: [{ type: 'preference' }] };
 
@@ -269,7 +263,6 @@ describe('AiIndexDetailPage', () => {
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
-    mockUseDreamingEnabled.mockReturnValue(true);
     mockUseAiIndexDreaming.mockReturnValue({ dreaming: undefined, isLoading: false });
   });
 
@@ -305,14 +298,12 @@ describe('AiIndexDetailPage', () => {
   });
 
   it.each([
-    ['the global memory setting is disabled', false, false, true, false],
-    ['dreaming is not set up for the AI index', true, true, false, false],
-    ['the AI index is managed and dreaming is globally off', true, false, false, true],
+    ['the global memory setting is disabled', false, true, false],
+    ['the AI index is managed and dreaming is not set up for it', true, false, true],
   ])(
     'hides memory wording when %s',
-    async (_scenario, globalMemoryEnabled, globalDreamingEnabled, dreamingSetUp, managed) => {
+    async (_scenario, globalMemoryEnabled, dreamingSetUp, managed) => {
       mockUseMemoryEnabled.mockReturnValue(globalMemoryEnabled);
-      mockUseDreamingEnabled.mockReturnValue(globalDreamingEnabled);
       mockUseAiIndexDreaming.mockReturnValue({
         dreaming: dreamingSetUp ? preferenceDreaming : undefined,
         isLoading: false,
@@ -328,8 +319,7 @@ describe('AiIndexDetailPage', () => {
     }
   );
 
-  it('mentions memory for an AI index that is not managed while dreaming is globally off', async () => {
-    mockUseDreamingEnabled.mockReturnValue(false);
+  it('mentions memory for an AI index that is not managed, without dreaming set up', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
 
@@ -338,6 +328,28 @@ describe('AiIndexDetailPage', () => {
     expect(await screen.findByTestId('contextAiIndexCreatedCallout')).toHaveTextContent(
       'or use it to store agent memory'
     );
+  });
+
+  it('mentions memory for a managed AI index once dreaming is set up', async () => {
+    mockUseAiIndexDreaming.mockReturnValue({ dreaming: preferenceDreaming, isLoading: false });
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, managed: true, sources: [] });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    expect(await screen.findByTestId('contextAiIndexCreatedCallout')).toHaveTextContent(
+      'or use it to store agent memory'
+    );
+  });
+
+  it('does not read the dreaming config while the global memory setting is disabled', async () => {
+    mockUseMemoryEnabled.mockReturnValue(false);
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAiIndexCreatedCallout');
     expect(mockUseAiIndexDreaming).toHaveBeenCalledWith(aiIndex.id, { enabled: false });
   });
 
@@ -460,7 +472,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
   });
 
-  it('opens the dreaming settings from the Settings tab when dreaming is globally enabled', async () => {
+  it('opens the dreaming settings from the Settings tab when memory is globally enabled', async () => {
     mockUseAiIndexDreaming.mockReturnValue({ dreaming: preferenceDreaming, isLoading: false });
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -477,8 +489,8 @@ describe('AiIndexDetailPage', () => {
     );
   });
 
-  it('redirects a Settings deep link to the overview when dreaming is globally disabled', async () => {
-    mockUseDreamingEnabled.mockReturnValue(false);
+  it('redirects a Settings deep link to the overview when memory is globally disabled', async () => {
+    mockUseMemoryEnabled.mockReturnValue(false);
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -492,8 +504,8 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextAiIndexDreamingPanel')).not.toBeInTheDocument();
   });
 
-  it('hides the Settings tab when dreaming is globally disabled', async () => {
-    mockUseDreamingEnabled.mockReturnValue(false);
+  it('hides the Settings tab when memory is globally disabled', async () => {
+    mockUseMemoryEnabled.mockReturnValue(false);
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 

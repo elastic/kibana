@@ -57,7 +57,6 @@ describe('describeAiIndex', () => {
     aiIndex,
     spaceId: 'marketing',
     includeMemory: false,
-    dreamingEnabled: true,
   };
 
   beforeEach(() => {
@@ -433,16 +432,9 @@ describe('describeAiIndex', () => {
     expect(response.endsWith(exampleQueriesBlock)).toBe(true);
   });
 
-  describe('while dreaming is off', () => {
-    const dreaming = { enabled: true, facts: [{ type: 'preference' }] };
-
+  describe('without dreaming set up', () => {
     it('renders memory capability for an AI index that is not managed, without dreamed types', async () => {
-      const response = await describeAiIndex({
-        ...params,
-        aiIndex: { ...aiIndex, dreaming },
-        includeMemory: true,
-        dreamingEnabled: false,
-      });
+      const response = await describeAiIndex({ ...params, includeMemory: true });
 
       expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
         expect.objectContaining({ dreamedPrefixes: [], dreamedTypes: [] })
@@ -460,7 +452,6 @@ describe('describeAiIndex', () => {
         ...params,
         aiIndex: { ...aiIndex, memory_enabled: false },
         includeMemory: true,
-        dreamingEnabled: false,
       });
 
       expect(response).not.toContain('\nMemory\n');
@@ -471,10 +462,25 @@ describe('describeAiIndex', () => {
         ...params,
         aiIndex: { ...aiIndex, managed: true },
         includeMemory: true,
-        dreamingEnabled: false,
       });
 
       expect(response).not.toContain('\nMemory\n');
     });
+  });
+
+  it('renders memory capability for a managed AI index once dreaming is set up', async () => {
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: {
+        ...aiIndex,
+        managed: true,
+        dreaming: { enabled: true, facts: [{ type: 'preference' }] },
+      },
+      includeMemory: true,
+    });
+
+    expect(response).toContain(
+      '\nMemory\nThis AI index takes memories: dreaming is set up for it.'
+    );
   });
 });
