@@ -14,6 +14,7 @@ import {
 } from '../../../common/step_types/alert_triage';
 import {
   DECISION_AUTO_CLOSE_SEVERITIES,
+  DECISION_CAP_WINDOW_MS,
   DECISION_DAILY_CLOSE_CAP,
   DECISION_MATCH_TOTAL_BUDGET_MS,
   DECISION_MATCH_WORK_BUDGET_MS,
@@ -294,7 +295,11 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                   Math.max(
                     0,
                     DECISION_DAILY_CLOSE_CAP -
-                      (await countClosedByDecision(contextManager, id, now - 24 * HOUR_MS))
+                      (await countClosedByDecision(
+                        contextManager,
+                        id,
+                        now - DECISION_CAP_WINDOW_MS
+                      ))
                   )
                 );
               }
