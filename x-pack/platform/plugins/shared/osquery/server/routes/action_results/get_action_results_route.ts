@@ -92,7 +92,7 @@ export const getActionResultsRoute = (
             );
 
             logger.debug(
-              `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
+              () => `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
             );
           }
 

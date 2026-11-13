@@ -97,7 +97,7 @@ export const getIntegrationNamespaces = async ({
     {} as Record<string, string[]>
   );
 
-  logger.debug(`Integration namespaces in use: ${JSON.stringify(response)}`);
+  logger.debug(() => `Integration namespaces in use: ${JSON.stringify(response)}`);
 
   return response;
 };

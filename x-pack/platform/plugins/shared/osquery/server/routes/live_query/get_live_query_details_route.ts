@@ -95,7 +95,7 @@ export const getLiveQueryDetailsRoute = (
             );
 
             logger.debug(
-              `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
+              () => `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
             );
           }
 
