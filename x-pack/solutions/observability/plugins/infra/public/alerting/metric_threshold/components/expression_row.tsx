@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
@@ -76,6 +77,7 @@ export const ExpressionRow = ({
   canDelete,
 }: PropsWithChildren<ExpressionRowProps>) => {
   const [isExpanded, toggle] = useToggle(true);
+  const expandedContentId = useGeneratedHtmlId({ prefix: 'expressionRowContent' });
   const { metricsView } = useMetricsDataViewContext();
 
   const {
@@ -213,18 +215,16 @@ export const ExpressionRow = ({
       <EuiFlexGroup gutterSize="xs" data-test-subj="metricThresholdExpressionRow">
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            content={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
-              defaultMessage: 'Expand row.',
-            })}
+            content={isExpanded ? collapseRowLabel : expandRowLabel}
             disableScreenReaderOutput
           >
             <EuiButtonIcon
               iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={toggle}
               data-test-subj="expandRow"
-              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
-                defaultMessage: 'Expand row.',
-              })}
+              aria-label={isExpanded ? collapseRowLabel : expandRowLabel}
+              aria-expanded={isExpanded}
+              aria-controls={isExpanded ? expandedContentId : undefined}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -387,7 +387,11 @@ export const ExpressionRow = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {isExpanded ? <div style={{ padding: '0 0 0 28px' }}>{children}</div> : null}
+      {isExpanded ? (
+        <div id={expandedContentId} style={{ padding: '0 0 0 28px' }}>
+          {children}
+        </div>
+      ) : null}
       <EuiSpacer size={'s'} />
     </>
   );
@@ -516,3 +520,11 @@ export const aggregationType: { [key: string]: AggregationType } = {
     validNormalizedTypes: ['number', 'histogram'],
   },
 };
+
+const expandRowLabel = i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+  defaultMessage: 'Expand row.',
+});
+
+const collapseRowLabel = i18n.translate('xpack.infra.metrics.alertFlyout.collapseRowLabel', {
+  defaultMessage: 'Collapse row.',
+});
