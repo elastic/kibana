@@ -131,7 +131,8 @@ export const TODOS_INDEX = 'persona-matrix-todos';
  * captured. This workflow reconstructs the tool's contract: a required
  * `todos` array of `{content, status}` objects (JSON-Schema trigger inputs,
  * the only format carrying arrays of objects), a verbatim copy of the original
- * tool description (model tool-selection keys on it), and an ack-only result.
+ * tool description (model tool-selection keys on it). The result is the raw
+ * index response; nothing reads it.
  * Writes land in TODOS_INDEX so planning divergence stays diagnosable without
  * affecting any evaluator (planning is not a side effect, see
  * `SIDE_EFFECT_TOOL_IDS`).

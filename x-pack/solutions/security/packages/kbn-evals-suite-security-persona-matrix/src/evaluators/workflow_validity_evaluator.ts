@@ -47,10 +47,10 @@ const CANCEL_SETTLE_INTERVAL_MS = 1_000;
 const DELETE_MAX_ATTEMPTS = 4;
 const DELETE_BACKOFF_MS = 1_000;
 
-// Mirrors `TerminalExecutionStatuses` in @kbn/workflows; inlined because this
-// package does not depend on it.
 // Enough for a connector params error; the full error stays on the execution.
 const EXECUTION_ERROR_MAX_CHARS = 500;
+// Mirrors `TerminalExecutionStatuses` in @kbn/workflows; inlined because this
+// package does not depend on it.
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled', 'timed_out', 'skipped']);
 
 /**
