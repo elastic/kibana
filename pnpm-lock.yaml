@@ -324,8 +324,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/langchain':
-        specifier: 1.0.190
-        version: 1.0.190(zod@3.25.76)
+        specifier: 1.0.207
+        version: 1.0.207(zod@3.25.76)
       '@appland/sql-parser':
         specifier: 1.5.1
         version: 1.5.1
@@ -3252,11 +3252,11 @@ importers:
         specifier: 4.10.4
         version: 4.10.4
       '@launchdarkly/node-server-sdk':
-        specifier: 9.13.7
-        version: 9.13.7(supports-color@8.1.1)
+        specifier: 9.16.0
+        version: 9.16.0(supports-color@8.1.1)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.6
-        version: 2.0.6(@launchdarkly/node-server-sdk@9.13.7(supports-color@8.1.1))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
+        specifier: 2.1.3
+        version: 2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@8.1.1))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -3408,8 +3408,8 @@ importers:
         specifier: 0.6.1
         version: 0.6.1
       ai:
-        specifier: 5.0.190
-        version: 5.0.190(zod@3.25.76)
+        specifier: 5.0.207
+        version: 5.0.207(zod@3.25.76)
       ajv:
         specifier: 8.20.0
         version: 8.20.0
@@ -8120,18 +8120,18 @@ packages:
   '@adobe/css-tools@4.4.0':
     resolution: {integrity: sha512-Ff9+ksdQQB3rMncgqDK78uLznstjyfIf2Arnh22pW8kBpLs6rpKDwgnZT46hin5Hl1WzazzK64DOrhSwYpS7bQ==}
 
-  '@ai-sdk/gateway@2.0.91':
-    resolution: {integrity: sha512-w0qAUeqOM0Qgppb1+QACNCz+LQnbHTWcyhEg4NtcCPtGzdE6/4yWjJV4faeigW+YltiB/kjPfJjF/fX3nr3BsA==}
+  '@ai-sdk/gateway@2.0.106':
+    resolution: {integrity: sha512-v/Gexph9XDp+hh5kzAZz6VRsInKl5iJ/OTdHMbXJSVBRvMN2PxCnY9yLhR0sy63Nadoy2+a/u1UDw7Q6mCBfPQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: 3.25.76
 
-  '@ai-sdk/langchain@1.0.190':
-    resolution: {integrity: sha512-FLz/uGXSJEsF1IRHDqE9Lf8QcSpDnr38/ANPY1c0Odaa2Z9Yzz5+WsrnLO0/cR/+h8U4anrQz6LiLw1dKfelIg==}
+  '@ai-sdk/langchain@1.0.207':
+    resolution: {integrity: sha512-keXQcqbQAV3y4NfvfSPJWfsaauueBJ1kU/eNxyZRsadHsvPqOgj9koMSkwozxkcHfrnvLT1xNZv5xrnZodt9aA==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/provider-utils@3.0.25':
-    resolution: {integrity: sha512-CvsRu+32Y8a167s+lrIBtsybvgTHp8j9y+6BeTvLeoW3Q+okw/b4CnNUFOLIXsRaKHQKAH+IHNJPYWywfpw0LA==}
+  '@ai-sdk/provider-utils@3.0.28':
+    resolution: {integrity: sha512-bXlX1WX7E50a2N+AJW+1a/x63m52aPhm+6xYe5THxWrx9vW9NR7E2Ay+1G1ndlCdMdYKo2Fnsd7kBhuyQPaphw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: 3.25.76
@@ -10444,31 +10444,34 @@ packages:
     peerDependencies:
       '@langchain/core': 1.2.3
 
+  '@launchdarkly/eventsource@0.2.2':
+    resolution: {integrity: sha512-HeM/SWPrgHwdLytYXhRMNvDB7XKWYY3xSFeo9nAZB3Ep8GhDKOC7uefKuAAKjlxRHyvtQpnm/UHgw3EBBRxNnA==}
+
   '@launchdarkly/js-client-sdk-common@1.32.2':
     resolution: {integrity: sha512-1m5cI3lVbuXmrP74Nz+1+ZUV8qEPGZzvUYpvoynowdweWX5EEuUK3vHtqC9umhSe2Z/Ujxy/vcmPgH3Q+5BHQA==}
 
   '@launchdarkly/js-client-sdk@4.10.4':
     resolution: {integrity: sha512-n1gvH/Or8/M2bR2HNqyLKrZ7x7lJOQx7WOaWnSibqf9hmtauE169HgtbtdMoUA9s22Z5MvSmNF6eBCJbetHlKA==}
 
-  '@launchdarkly/js-sdk-common@2.26.1':
-    resolution: {integrity: sha512-FY4gKzlU5bL44+EgUtP9E9uMBpa7aYgAJ+y0zKRTlf5HPd84XW4zy9vPPeLkCYIfgIn/KoxO3g+9o08qcLvcrw==}
-
   '@launchdarkly/js-sdk-common@2.27.0':
     resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
 
-  '@launchdarkly/js-server-sdk-common@2.21.5':
-    resolution: {integrity: sha512-4hKdGulMc6ZRiyVjxCEjXdA3/Syg2cJdtRdfhLaMQuWHe6Cc2obmM8afW7AIsFwpeWjvmHagoBewl9uV1N6CSw==}
+  '@launchdarkly/js-sdk-common@2.32.0':
+    resolution: {integrity: sha512-V2sd9W1ocskNtZNx2gmgym+j4YsmsawZE4kwUj631dO9SE6029SLCNY9wl3csS/8/Pe8qTxZv7pvbxh4mIWJqw==}
 
-  '@launchdarkly/node-server-sdk@9.13.7':
-    resolution: {integrity: sha512-GBzQbkpJVORjRd8AHbrTO3eTrQkOj+nEUQydvjU50TcqlD6/z43X9zqKYc9pBR2uD4nmmRlbART4K7gWBRQtkQ==}
+  '@launchdarkly/js-server-sdk-common@2.26.0':
+    resolution: {integrity: sha512-FqvrDgy2/dibITqjXz4mY9y6Jksj2ZQ6IoL98VOd7a5WPI2RW51iH39Ra6jVGENR8Vs1Tv0klCBiC3LwJIm9mQ==}
 
-  '@launchdarkly/openfeature-js-server-common@2.0.2':
-    resolution: {integrity: sha512-DPEhBA4vBkBc8yBEnwuEDF+KzZKfOvsdJaKmrtumxOVKPZxqieBxXEvXQH5e9AgglqyoSW9k4ggSwwkotSfD7g==}
+  '@launchdarkly/node-server-sdk@9.16.0':
+    resolution: {integrity: sha512-djgpihWJy/WqZjEKqTvZq8agi+ed6uBbKo18Z8RYDswuSKobweX4q7NVe1PjB6wjbxmsxGbi/wlsPhnrrZi0GQ==}
+
+  '@launchdarkly/openfeature-js-server-common@2.2.1':
+    resolution: {integrity: sha512-pdxqJbZi6Q2iKX4NbvQJ5hWGqXt0amr2525AMplvWbgX+v8TLH3DHdCLWQYyeWtjQib4WsYREa706ehVWhxxdg==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.6':
-    resolution: {integrity: sha512-npkcV+ZCboKzTWY9HXZyIohJoqjPhfRCcHkU3aUhH3sPb3rv6c6ZVnYPk7EzgwTx2ipgkLVomCk7fY7ObnfrDA==}
+  '@launchdarkly/openfeature-node-server@2.1.3':
+    resolution: {integrity: sha512-kCxs86pZXZsqErzq0jrrIlxG0ZsC2FufMU59YdXcY3f9XbwksHI97uRcqtoOeRJYK4AA5sJ2oJ2MO7c0+noqsw==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -13676,8 +13679,8 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ai@5.0.190:
-    resolution: {integrity: sha512-aDaixi6U7TgJoGYjefO35hxGkym9mbTrAY9b+xSq/DE7LonwNCHUuCFl1EwaZdt/eo8rCa5Td7kKga4p1LqL8Q==}
+  ai@5.0.207:
+    resolution: {integrity: sha512-QB94Dhq4r0eN6w3fy+Jez2aRcleyIH9Nxbrkmv+lj7CTU4BDHnKvCOnbFXo30XGs6x1TbaXPSRm3CTSZa0g5pg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: 3.25.76
@@ -18298,10 +18301,6 @@ packages:
 
   launch-editor@2.14.2:
     resolution: {integrity: sha512-NHJEb30MGBCkmZXLZwz25t37QR4aY03ZzPYUJXOJaOa92uWwExI9SBQUuIznBYc1xkD7cJNGX7oc3Nl3sq2kQQ==}
-
-  launchdarkly-eventsource@2.2.0:
-    resolution: {integrity: sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==}
-    engines: {node: '>=0.12.0'}
 
   lazy-ass@2.0.3:
     resolution: {integrity: sha512-/O3/DoQmI1XAhklDvF1dAjFf/epE8u3lzOZegQfLZ8G7Ud5bTRSZiFOpukHCu6jODrCA4gtIdwUCC7htxcDACA==}
@@ -23294,20 +23293,20 @@ snapshots:
 
   '@adobe/css-tools@4.4.0': {}
 
-  '@ai-sdk/gateway@2.0.91(zod@3.25.76)':
+  '@ai-sdk/gateway@2.0.106(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.3
-      '@ai-sdk/provider-utils': 3.0.25(zod@3.25.76)
+      '@ai-sdk/provider-utils': 3.0.28(zod@3.25.76)
       '@vercel/oidc': 3.1.0
       zod: 3.25.76
 
-  '@ai-sdk/langchain@1.0.190(zod@3.25.76)':
+  '@ai-sdk/langchain@1.0.207(zod@3.25.76)':
     dependencies:
-      ai: 5.0.190(zod@3.25.76)
+      ai: 5.0.207(zod@3.25.76)
     transitivePeerDependencies:
       - zod
 
-  '@ai-sdk/provider-utils@3.0.25(zod@3.25.76)':
+  '@ai-sdk/provider-utils@3.0.28(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.3
       '@standard-schema/spec': 1.1.0
@@ -26388,6 +26387,8 @@ snapshots:
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.0))(openai@4.85.1(supports-color@8.1.1)(ws@8.21.3)(zod@3.25.76))(ws@8.21.3)
       js-tiktoken: 1.0.15
 
+  '@launchdarkly/eventsource@0.2.2': {}
+
   '@launchdarkly/js-client-sdk-common@1.32.2':
     dependencies:
       '@launchdarkly/js-sdk-common': 2.27.0
@@ -26396,32 +26397,32 @@ snapshots:
     dependencies:
       '@launchdarkly/js-client-sdk-common': 1.32.2
 
-  '@launchdarkly/js-sdk-common@2.26.1': {}
-
   '@launchdarkly/js-sdk-common@2.27.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.21.5':
+  '@launchdarkly/js-sdk-common@2.32.0': {}
+
+  '@launchdarkly/js-server-sdk-common@2.26.0':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.26.1
+      '@launchdarkly/js-sdk-common': 2.32.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.13.7(supports-color@8.1.1)':
+  '@launchdarkly/node-server-sdk@9.16.0(supports-color@8.1.1)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.21.5
+      '@launchdarkly/eventsource': 0.2.2
+      '@launchdarkly/js-server-sdk-common': 2.26.0
       https-proxy-agent: 7.0.6(supports-color@8.1.1)
-      launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.0.2(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
+  '@launchdarkly/openfeature-js-server-common@2.2.1(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.26.1
+      '@launchdarkly/js-sdk-common': 2.32.0
       '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.6(@launchdarkly/node-server-sdk@9.13.7(supports-color@8.1.1))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
+  '@launchdarkly/openfeature-node-server@2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@8.1.1))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.13.7(supports-color@8.1.1)
-      '@launchdarkly/openfeature-js-server-common': 2.0.2(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
+      '@launchdarkly/node-server-sdk': 9.16.0(supports-color@8.1.1)
+      '@launchdarkly/openfeature-js-server-common': 2.2.1(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
   '@leichtgewicht/ip-codec@2.0.4': {}
@@ -30248,11 +30249,11 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@5.0.190(zod@3.25.76):
+  ai@5.0.207(zod@3.25.76):
     dependencies:
-      '@ai-sdk/gateway': 2.0.91(zod@3.25.76)
+      '@ai-sdk/gateway': 2.0.106(zod@3.25.76)
       '@ai-sdk/provider': 2.0.3
-      '@ai-sdk/provider-utils': 3.0.25(zod@3.25.76)
+      '@ai-sdk/provider-utils': 3.0.28(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
       zod: 3.25.76
 
@@ -35818,8 +35819,6 @@ snapshots:
     dependencies:
       picocolors: 1.1.1
       shell-quote: 1.11.0
-
-  launchdarkly-eventsource@2.2.0: {}
 
   lazy-ass@2.0.3: {}
 
