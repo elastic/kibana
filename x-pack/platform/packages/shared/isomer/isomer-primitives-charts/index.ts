@@ -53,6 +53,7 @@ export {
   type PrepareChartsOptions,
   type PreparedCharts,
   prepareCharts,
+  readArtifact,
 } from './src/engine/artifacts';
 export { composeEngines } from './src/engine/compose';
 export {

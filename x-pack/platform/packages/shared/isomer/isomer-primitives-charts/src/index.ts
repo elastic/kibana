@@ -39,7 +39,12 @@ export {
   type XySeries,
   resolveXy,
 } from './charts/xy_chart';
-export { type PrepareChartsOptions, type PreparedCharts, prepareCharts } from './engine/artifacts';
+export {
+  type PrepareChartsOptions,
+  type PreparedCharts,
+  prepareCharts,
+  readArtifact,
+} from './engine/artifacts';
 export { composeEngines } from './engine/compose';
 export {
   type ChartArtifact,

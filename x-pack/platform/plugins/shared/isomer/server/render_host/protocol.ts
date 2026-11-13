@@ -6,6 +6,7 @@
  */
 
 import type { Composition } from '@elastic/isomer-sdk';
+import type { TakumiPdfMetadata } from '@elastic/isomer-image-takumi';
 import type { MapGeometry } from '@kbn/isomer-primitives-maps';
 
 /**
@@ -24,11 +25,17 @@ export interface HostDrawOptions {
   /** Engine hints by chart node id. */
   chartHints?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
   scale?: number;
+  /** A PNG unless `pdf`. */
+  format?: 'png' | 'pdf';
+  /** Document properties for a PDF. */
+  metadata?: TakumiPdfMetadata;
 }
 
 export interface InitMessage {
   type: 'init';
   geometry: MapGeometry;
+  /** Where the process writes PDFs; `inline` keeps it on its own thread, which draws nothing else meanwhile. */
+  pdfThread?: 'worker' | 'inline';
 }
 
 export interface DrawMessage {
@@ -43,5 +50,5 @@ export type HostMessage = InitMessage | DrawMessage;
 export type HostReply =
   | { type: 'ready' }
   | { type: 'failed'; error: string }
-  | { type: 'drawn'; id: number; png: Uint8Array }
+  | { type: 'drawn'; id: number; bytes: Uint8Array }
   | { type: 'error'; id: number; error: string };

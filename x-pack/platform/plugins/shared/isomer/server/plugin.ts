@@ -21,6 +21,9 @@ import {
 import { createRuntime } from './create_runtime';
 import type { IsomerPluginConfig } from './config';
 import { createIsomerEms, type IsomerEms } from './ems';
+import { createRenderHost, type RenderHost } from './render_host/client';
+import { createRemoteRenderHost, withLocalFallback } from './render_host/remote';
+import { describeVocabulary } from './vocabulary';
 
 export type IsomerPluginSetup = Record<string, never>;
 
@@ -35,6 +38,13 @@ export interface IsomerPluginStart {
    * The first call starts the drawing thread. Rejects unless `xpack.isomer.charts.serverDraw` is on.
    */
   getDrawing: () => Promise<IsomerDrawing>;
+  /**
+   * Resolves the render host: PNGs and PDFs drawn in a forked process that owns the drawing engines, so Kibana's
+   * process keeps none of their memory. The process starts on the first drawing and exits when idle. With
+   * `xpack.isomer.renderService.url`, the Isomer render service draws instead, and the forked process is the
+   * fallback when the service is unavailable. Rejects when neither is configured.
+   */
+  getRenderHost: () => Promise<RenderHost>;
   /**
    * Elastic Maps Service for server drawing: boundary files loaded into the drawing's maps, and raster basemaps.
    * `undefined` when EMS is off (`map.includeElasticMapsService: false`, or no `mapsEms` plugin).
@@ -54,15 +64,19 @@ const WORLD_COUNTRIES = fromRoot(
 export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart> {
   private readonly logger: Logger;
   private readonly serverDraw: boolean;
+  private readonly renderService: IsomerPluginConfig['renderService'];
   private runtime?: Promise<KibanaIsomerRuntime>;
   private drawing?: Promise<ChartsDrawing>;
+  private renderHost?: Promise<RenderHost>;
   // The drawing's boundary files: EMS loads into it, so every render sees what any request loaded.
   private readonly geometry: MapGeometry = {};
   private ems?: IsomerEms;
 
   constructor(private readonly initializerContext: PluginInitializerContext<IsomerPluginConfig>) {
     this.logger = initializerContext.logger.get();
-    this.serverDraw = initializerContext.config.get().charts.serverDraw;
+    const { charts, renderService } = initializerContext.config.get();
+    this.serverDraw = charts.serverDraw;
+    this.renderService = renderService;
   }
 
   setup(core: CoreSetup, { mapsEms }: IsomerSetupDependencies = {}): IsomerPluginSetup {
@@ -85,13 +99,22 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
   }
 
   start(): IsomerPluginStart {
-    return { getRuntime: this.getRuntime, getDrawing: this.getDrawing, getEms: () => this.ems };
+    return {
+      getRuntime: this.getRuntime,
+      getDrawing: this.getDrawing,
+      getRenderHost: this.getRenderHost,
+      getEms: () => this.ems,
+    };
   }
 
   async stop() {
-    const drawing = this.drawing;
+    const { drawing, renderHost } = this;
     this.drawing = undefined;
-    await drawing?.then(({ close }) => close()).catch(() => undefined);
+    this.renderHost = undefined;
+    await Promise.all([
+      drawing?.then(({ close }) => close()).catch(() => undefined),
+      renderHost?.then(({ close }) => close()).catch(() => undefined),
+    ]);
   }
 
   /** Dev only: draws with per-request hints and chart size, for comparison with Lens. */
@@ -143,6 +166,34 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
       );
     return this.drawing;
   };
+
+  private readonly getRenderHost = (): Promise<RenderHost> => {
+    const { url, timeoutMs } = this.renderService;
+    if (!url && !this.serverDraw) {
+      return Promise.reject(
+        new Error(
+          'Server drawing is off: set xpack.isomer.charts.serverDraw or xpack.isomer.renderService.url'
+        )
+      );
+    }
+    this.renderHost ??= url ? this.startRemoteHost(url, timeoutMs) : this.startLocalHost();
+    return this.renderHost;
+  };
+
+  /** A forked render process; it gets the boundary files once, as it starts, and what EMS loads after stays here. */
+  private startLocalHost = (): Promise<RenderHost> =>
+    this.loadWorld().then(() => createRenderHost({ geometry: this.geometry, pdfThread: 'inline' }));
+
+  /** The render service, told which vocabulary this runtime composes in; the forked process when it is unavailable. */
+  private async startRemoteHost(url: string, timeoutMs: number): Promise<RenderHost> {
+    const { vocabulary } = describeVocabulary(await this.getRuntime());
+    const remote = createRemoteRenderHost({ url, vocabulary, timeoutMs, logger: this.logger });
+    if (!this.serverDraw) {
+      return remote;
+    }
+    let local: Promise<RenderHost> | undefined;
+    return withLocalFallback(remote, () => (local ??= this.startLocalHost()), this.logger);
+  }
 
   /** The world outlines the maps pack draws under every map without a basemap: EMS's, else the Maps fixture's. */
   private async loadWorld() {

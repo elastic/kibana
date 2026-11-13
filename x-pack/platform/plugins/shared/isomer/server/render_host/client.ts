@@ -12,6 +12,7 @@ import { clearTimeout, setTimeout } from 'node:timers';
 import type { Composition } from '@elastic/isomer-sdk';
 import type { MapGeometry } from '@kbn/isomer-primitives-maps';
 
+import { probeTarget } from '../memory_probe';
 import type { DrawMessage, HostDrawOptions, HostReply, InitMessage } from './protocol';
 
 const entry = join(__dirname, __filename.endsWith('.ts') ? 'main_src_harness.js' : 'main.js');
@@ -25,11 +26,15 @@ export interface RenderHostOptions {
   heapMb?: number;
   /** How long one PNG may take before the process is killed and the PNG rejected. Defaults to a minute. */
   jobTimeoutMs?: number;
+  /** Where the process writes PDFs; defaults to takumi's own worker thread. */
+  pdfThread?: 'worker' | 'inline';
 }
 
 export interface RenderHost {
-  /** Draws `composition` as a PNG in the render process, started if it is not running. One PNG at a time. */
-  drawPng(composition: Composition, options?: HostDrawOptions): Promise<Buffer>;
+  /** Draws `composition` as a PNG in the render process, started if it is not running. One drawing at a time. */
+  drawPng(composition: Composition, options?: Omit<HostDrawOptions, 'format'>): Promise<Buffer>;
+  /** Draws `composition` as a one-page PDF in the render process. */
+  drawPdf(composition: Composition, options?: Omit<HostDrawOptions, 'format'>): Promise<Buffer>;
   /** The running process's id, if one is running. */
   readonly pid: number | undefined;
   /** Stops the process; a draw after this rejects. */
@@ -50,6 +55,7 @@ export const createRenderHost = ({
   idleMs = 60_000,
   heapMb = 256,
   jobTimeoutMs = 60_000,
+  pdfThread,
 }: RenderHostOptions = {}): RenderHost => {
   let running: Running | undefined;
   let idle: NodeJS.Timeout | undefined;
@@ -66,7 +72,11 @@ export const createRenderHost = ({
 
   const start = (): Running => {
     const child = fork(entry, [], {
-      execArgv: ['--disallow-code-generation-from-strings', `--max-old-space-size=${heapMb}`],
+      execArgv: [
+        '--disallow-code-generation-from-strings',
+        `--max-old-space-size=${heapMb}`,
+        ...(probeTarget() ? ['--expose-gc'] : []),
+      ],
       serialization: 'advanced',
       stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
     });
@@ -89,7 +99,11 @@ export const createRenderHost = ({
         }
       });
     });
-    child.send({ type: 'init', geometry } satisfies InitMessage);
+    child.send({
+      type: 'init',
+      geometry,
+      ...(pdfThread ? { pdfThread } : {}),
+    } satisfies InitMessage);
     return { child, ready };
   };
 
@@ -121,7 +135,8 @@ export const createRenderHost = ({
           child.off('exit', onExit);
           child.off('message', onMessage);
           if (reply.type === 'drawn') {
-            resolve(Buffer.from(reply.png.buffer, reply.png.byteOffset, reply.png.byteLength));
+            const { bytes } = reply;
+            resolve(Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength));
           } else {
             reject(new Error(reply.error));
           }
@@ -138,12 +153,15 @@ export const createRenderHost = ({
     }
   };
 
+  const enqueue = (composition: Composition, options: HostDrawOptions) => {
+    const job = queue.then(() => draw(composition, options));
+    queue = job.catch(() => undefined);
+    return job;
+  };
+
   return {
-    drawPng: (composition, options = {}) => {
-      const job = queue.then(() => draw(composition, options));
-      queue = job.catch(() => undefined);
-      return job;
-    },
+    drawPng: (composition, options = {}) => enqueue(composition, { ...options, format: 'png' }),
+    drawPdf: (composition, options = {}) => enqueue(composition, { ...options, format: 'pdf' }),
     get pid() {
       return running?.child.pid;
     },
