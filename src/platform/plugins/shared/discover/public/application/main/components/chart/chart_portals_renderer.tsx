@@ -15,7 +15,6 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { isEqual } from 'lodash';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
@@ -31,6 +30,7 @@ import {
   type RuntimeStateManager,
   RuntimeStateProvider,
   selectTabRuntimeState,
+  setTabChartBreakdownFieldNames,
   internalStateActions,
   useInternalStateSelector,
   useInternalStateDispatch,
@@ -248,16 +248,8 @@ const CustomChartSectionWrapper = ({
 
   const runtimeStateManager = useRuntimeStateManager();
   const setBreakdownFieldNames = useCallback(
-    (fieldNames: string[] | undefined) => {
-      const { chartBreakdownFieldNames$ } = selectTabRuntimeState(
-        runtimeStateManager,
-        currentTabId
-      );
-
-      if (!isEqual(chartBreakdownFieldNames$.getValue(), fieldNames)) {
-        chartBreakdownFieldNames$.next(fieldNames);
-      }
-    },
+    (fieldNames: string[] | undefined) =>
+      setTabChartBreakdownFieldNames(runtimeStateManager, currentTabId, fieldNames),
     [runtimeStateManager, currentTabId]
   );
 

@@ -93,6 +93,7 @@ export {
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  setTabChartBreakdownFieldNames,
   selectDataSourceProfileId,
   selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
