@@ -7,7 +7,10 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../../common/step_types/triage_decisions_index';
-import { triageRevokeFpDecisionStepCommonDefinition } from '../../../common/step_types/alert_triage';
+import {
+  triageRevokeFpDecisionStepCommonDefinition,
+  type RevokeFpDecisionStatus,
+} from '../../../common/step_types/alert_triage';
 import {
   MAX_REVOKE_PAGES,
   TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
@@ -42,6 +45,10 @@ import {
  * run, so no alert of another space is touched. The decision is deleted whatever the
  * state of the Context Engine setting, because a decision left active would close the alerts again
  * once the setting is back on.
+ *
+ * The caller needs write access to the decisions index, which the worker's role has and users do
+ * not. Without it the step reports `denied` and touches nothing, because a user cannot tell a hidden
+ * decision from a missing one.
  */
 export const getTriageRevokeFpDecisionStepDefinition = () =>
   createServerStepDefinition({
@@ -50,7 +57,7 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
       const id = input.decision_id;
       const isApproval = id.startsWith(FP_DECISION_ID_PREFIX);
       let failures = 0;
-      let status: 'ok' | 'not_found' = 'ok';
+      let status: RevokeFpDecisionStatus = 'ok';
 
       const es = contextManager.getScopedEsClient();
       try {
@@ -75,7 +82,13 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
         }
       } catch (error) {
         if (statusCodeOf(error) === 404) {
-          status = 'not_found';
+          // Elasticsearch hides decisions from users, so a caller without write access reads a live
+          // decision as a 404. Releasing its alerts then would leave the decision active, and the next
+          // sweep would close or skip them again.
+          const { has_all_requested: canWrite } = await es.security.hasPrivileges({
+            index: [{ names: [TRIAGE_DECISIONS_AI_INDEX_DEST.value], privileges: ['index'] }],
+          });
+          status = canWrite ? 'not_found' : 'denied';
         } else {
           failures++;
           logger.warn(
@@ -84,8 +97,9 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
         }
       }
 
-      // A decision that could not be deleted would close its alerts again on the next sweep.
-      if (failures > 0)
+      // A decision that could not be deleted would close its alerts again on the next sweep. A
+      // caller that cannot write the decisions index changes nothing.
+      if (failures > 0 || status === 'denied')
         return { output: { status, alerts_reopened: 0, alerts_released: 0, failures } };
 
       const tag = `${

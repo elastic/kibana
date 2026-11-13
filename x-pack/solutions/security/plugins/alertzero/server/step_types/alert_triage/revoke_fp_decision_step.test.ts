@@ -23,6 +23,7 @@ const setup = ({
   statusTimedOut = false,
   keepTags = false,
   alerts = {},
+  canWriteDecisions = true,
 }: {
   decisionId?: string;
   tagged?: string[];
@@ -35,6 +36,8 @@ const setup = ({
   keepTags?: boolean;
   /** What an analyst did to a tagged alert since the decision closed it. Default: still closed as a false positive. */
   alerts?: Record<string, { status: string; reason?: string }>;
+  /** Whether the caller may write the decisions index: the worker's role can, a user's cannot. */
+  canWriteDecisions?: boolean;
 }) => {
   let left = [...tagged];
   const state = new Map(
@@ -71,13 +74,14 @@ const setup = ({
     if (updateError) throw updateError;
     return {};
   });
+  const hasPrivileges = jest.fn(async () => ({ has_all_requested: canWriteDecisions }));
   const run = () =>
     getTriageRevokeFpDecisionStepDefinition().handler({
       input: { decision_id: decisionId, space_id: 'default' },
       contextManager: {
         callKibanaApi,
         getFakeRequest: () => ({}),
-        getScopedEsClient: () => ({ get, update }),
+        getScopedEsClient: () => ({ get, update, security: { hasPrivileges } }),
       },
       logger: { warn: jest.fn() },
     } as unknown as StepHandlerContext<unknown, unknown>);
@@ -85,7 +89,7 @@ const setup = ({
     callKibanaApi.mock.calls
       .filter(([{ path }]) => path.endsWith(suffix))
       .map(([{ body }]) => body);
-  return { run, get, update, calls };
+  return { run, get, update, hasPrivileges, calls };
 };
 
 describe('triage revoke decision step', () => {
@@ -161,6 +165,38 @@ describe('triage revoke decision step', () => {
     const { output } = await run();
 
     expect(output).toEqual(expect.objectContaining({ status: 'not_found', alerts_reopened: 2 }));
+  });
+
+  it('changes nothing when a caller that cannot write the decisions index reads the decision as missing', async () => {
+    // Elasticsearch hides decisions from users, so a live decision reads as a 404 to an analyst.
+    // Releasing the alerts would leave the decision active, and the next sweep would act on them again.
+    const { run, update, hasPrivileges, calls } = setup({
+      getError: Object.assign(new Error('not found'), { statusCode: 404 }),
+      canWriteDecisions: false,
+    });
+
+    const { output } = await run();
+
+    expect(hasPrivileges).toHaveBeenCalledWith({
+      index: [{ names: [TRIAGE_DECISIONS_AI_INDEX_DEST.value], privileges: ['index'] }],
+    });
+    expect(update).not.toHaveBeenCalled();
+    expect(calls('/signals/search')).toEqual([]);
+    expect(calls('/signals/tags')).toEqual([]);
+    expect(output).toEqual({
+      status: 'denied',
+      alerts_reopened: 0,
+      alerts_released: 0,
+      failures: 0,
+    });
+  });
+
+  it('does not check access when the decision is read, so the worker pays nothing on the normal path', async () => {
+    const { run, hasPrivileges } = setup({});
+
+    await run();
+
+    expect(hasPrivileges).not.toHaveBeenCalled();
   });
 
   it('treats a decision of another space as missing: not deleted, only this space is cleaned', async () => {
