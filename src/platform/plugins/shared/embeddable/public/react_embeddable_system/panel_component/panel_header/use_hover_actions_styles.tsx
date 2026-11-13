@@ -24,13 +24,8 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       padding: var(--paddingAroundAction);
 
       border-radius: ${euiTheme.border.radius.control};
-      border: var(--internalBorderStyle);
-      border-width: ${euiTheme.border.width
-        .thin}; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
-      box-shadow: var(
-        --hoverActionsSingleWrapperBoxShadowStyle
-      ); /* Simulates a 2px border without affecting layout by using a box-shadow */
       background-color: ${euiTheme.colors.backgroundBasePlain};
+      ${euiShadow(euiThemeContext, 'xs')}
       grid-template-columns: max-content;
 
       & > * {
@@ -41,6 +36,11 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         border-radius: unset !important;
         background-color: transparent !important;
         height: unset !important;
+
+        // the floating border that euiShadow draws in dark mode
+        &::after {
+          display: none;
+        }
       }
     `;
 
@@ -80,6 +80,38 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         .dshDashboardViewportWrapper--isFullscreen .kbnGridPanel--expanded & {
           ${singleWrapperStyles}
           top: -${euiTheme.size.s} !important;
+        }
+
+        // When only the drag handle remains (panel focused for flyout edit), undo the combined
+        // wrapper so the handle is an individual pill at the default left inset. Skip overridden
+        // hover actions — those are inline-edit chrome, not a leftover combined wrapper.
+        // https://github.com/elastic/kibana/issues/278578
+        .dshDashboardGrid__item--hideHoverActions.dshDashboardGrid__item--focused
+          &:not(.embPanel__hoverActions--overridden) {
+          width: 100%;
+          right: auto;
+          padding: 0px ${euiTheme.size.m};
+          border: none;
+          box-shadow: none;
+          background-color: transparent;
+          border-radius: unset;
+          grid-template-columns: unset;
+
+          &::after {
+            display: none;
+          }
+
+          .embPanel--dragHandle {
+            padding: var(--paddingAroundAction) !important;
+            border-radius: ${euiTheme.border.radius.control} !important;
+            background-color: ${euiTheme.colors.backgroundBasePlain} !important;
+            height: ${euiTheme.size.xl} !important;
+            box-shadow: ${euiTheme.shadows.xs.down} !important;
+
+            &::after {
+              display: block;
+            }
+          }
         }
       }
     `;
