@@ -1,5 +1,5 @@
 {
-  "sha1": "c6db45bb8b103ed7c9aa4ee255aaa96b66d9105f",
+  "sha1": "244ff239ce1d2428fbb6616e5355f156cf876a8f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,6 +28,48 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/alert_flyout_results.spec.ts",
         "line": 55,
         "column": 35
+      }
+    },
+    {
+      "id": "d49b79f55796584-2e637d03cac3e7a",
+      "title": "Endpoint list sorting no column is sorted by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
+        "line": 50,
+        "column": 18
+      }
+    },
+    {
+      "id": "d49b79f55796584-fe8fd1775f6e55c",
+      "title": "Endpoint list sorting sorts by each column ascending then descending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
+        "line": 65,
+        "column": 29
+      }
+    },
+    {
+      "id": "d49b79f55796584-e506127c6201f5f",
+      "title": "Endpoint list sorting applies the sort passed in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
+        "line": 89,
+        "column": 13
       }
     },
     {
