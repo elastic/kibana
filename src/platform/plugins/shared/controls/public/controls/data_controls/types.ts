@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataControlState } from '@kbn/controls-schemas';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
 import type {
@@ -28,14 +27,14 @@ import type { HasCustomPrepend } from '../types';
 export type DataControlFieldFormatter = TextContextTypeConvert | ((toFormat: any) => string);
 
 export interface PublishesField {
-  field$: PublishingSubject<DataViewField | undefined>;
+  field$: PublishingSubject<FilterableField | undefined>;
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
 export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
-  PublishesDataSources<DataView> &
+  PublishesDataSources &
   PublishesBlockingError &
   PublishesField &
   PublishesDataLoading &
@@ -48,13 +47,13 @@ export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'
 
 export interface CustomOptionsComponentProps<State extends DataControlState = DataControlState> {
   initialState: Partial<State>;
-  field?: DataViewField;
+  field?: FilterableField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
 }
 
 interface DataControlField {
-  field: DataViewField;
+  field: FilterableField;
   compatibleControlTypes: string[];
 }
 

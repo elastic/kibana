@@ -8,12 +8,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { isEsqlFilterableSource } from '@kbn/data-source';
+import type { FilterableSource } from '@kbn/data-source';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
-import { dataService } from '../../../services/kibana_services';
+import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
@@ -44,9 +45,10 @@ export function hasNoResults$({
       }
     }),
     switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
-      const dataView = api.dataSources$?.value?.[0];
+      const dataSource = api.dataSources$?.value?.[0];
       const rangeFilter = rangeFilters?.[0];
-      if (!dataView || !rangeFilter || ignoreValidations) {
+      // an ES|QL source has no data view to search
+      if (!dataSource || isEsqlFilterableSource(dataSource) || !rangeFilter || ignoreValidations) {
         return false;
       }
 
@@ -56,7 +58,7 @@ export function hasNoResults$({
         prevRequestAbortController = abortController;
         return await hasNoResults({
           abortSignal: abortController.signal,
-          dataView,
+          dataSource,
           rangeFilter,
           ...controlFetchContext,
           timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
@@ -85,19 +87,21 @@ export function hasNoResults$({
 
 async function hasNoResults({
   abortSignal,
-  dataView,
+  dataSource,
   filters,
   query,
   rangeFilter,
   timeRange,
 }: {
   abortSignal: AbortSignal;
-  dataView: DataView;
+  dataSource: FilterableSource;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
 }): Promise<boolean> {
+  const dataView = await dataViewsService.get(dataSource.id ?? '');
+
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);

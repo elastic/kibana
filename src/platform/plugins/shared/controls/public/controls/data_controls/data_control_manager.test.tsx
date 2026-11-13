@@ -44,7 +44,7 @@ describe('initializeDataControlManager', () => {
   };
 
   dataViewsService.get = async (id: string): Promise<DataView> => {
-    if (id !== 'myDataViewId') {
+    if (id !== 'myDataViewId' && id !== 'noFormatterSourceId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
     return {
@@ -59,9 +59,13 @@ describe('initializeDataControlManager', () => {
           },
         ].find((field) => fieldName === field.name);
       },
-      getFormatterForField: () => ({
-        getConverterFor: () => (value: unknown) => String(value),
-      }),
+      ...(id === 'myDataViewId'
+        ? {
+            getFormatterForField: () => ({
+              convertToText: (value: unknown) => `formatted ${value}`,
+            }),
+          }
+        : {}),
     } as unknown as DataView;
   };
 
@@ -91,10 +95,42 @@ describe('initializeDataControlManager', () => {
         expect(dataViews![0].id).toBe('myDataViewId');
       });
 
+      test('should format the values of the field with the formatter of the data view', () => {
+        expect(dataControlManager!.api.fieldFormatter.value(5)).toBe('formatted 5');
+      });
+
       test('should set default panel title', () => {
         const defaultPanelTitle = dataControlManager!.api.defaultTitle$!.value;
         expect(defaultPanelTitle).not.toBeUndefined();
         expect(defaultPanelTitle).toBe('My field name');
+      });
+    });
+
+    describe('source without a formatter for its fields', () => {
+      let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
+      beforeAll((done) => {
+        initializeDataControlManager({
+          controlId: 'myControlId',
+          controlType: 'myControlType',
+          state: dataControlState,
+          editorStateManager: initializeStateManager({}, {}),
+          parentApi: {},
+          typeDisplayName: 'My Control Type',
+        }).then((controlManager) => {
+          dataControlManager = controlManager;
+          dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+            done();
+          });
+        });
+      });
+
+      test('should go back to the default formatter when the control changes to such a source', (done) => {
+        expect(dataControlManager!.api.fieldFormatter.value(5)).toBe('formatted 5');
+        dataControlManager!.api.fieldFormatter.pipe(skip(1), first()).subscribe(() => {
+          expect(dataControlManager!.api.fieldFormatter.value(5)).toBe('5');
+          done();
+        });
+        dataControlManager!.api.setDataViewId('noFormatterSourceId');
       });
     });
 

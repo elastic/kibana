@@ -22,6 +22,7 @@ import type {
   OptionsListFailureResponse,
   OptionsListSuccessResponse,
 } from '../../../../common/options_list/types';
+import { getEsqlSourceFieldQuery } from '../utils';
 import { buildOptionsListFetchBody } from './build_options_list_fetch_body';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
@@ -54,7 +55,7 @@ export function fetchAndValidate$({
   let abortController: AbortController | undefined;
 
   const suggestions$ = combineLatest({
-    dataViews: api.dataSources$,
+    dataSources: api.dataSources$,
     field: api.field$,
     esqlQuery: api.esqlQuery$,
     valuesSource: api.valuesSource$,
@@ -81,7 +82,7 @@ export function fetchAndValidate$({
     switchMap(
       async ([
         {
-          dataViews,
+          dataSources,
           field,
           fetchContext,
           useGlobalFilters,
@@ -98,10 +99,13 @@ export function fetchAndValidate$({
       ]) => {
         let built: ReturnType<typeof buildOptionsListFetchBody>;
         try {
+          const sourceQuery = getEsqlSourceFieldQuery(dataSources?.[0], field);
           built = buildOptionsListFetchBody({
-            valuesSource: valuesSource ?? ControlValuesSource.FIELD,
-            esqlQuery,
-            dataViews,
+            valuesSource: sourceQuery
+              ? ControlValuesSource.ESQL
+              : valuesSource ?? ControlValuesSource.FIELD,
+            esqlQuery: sourceQuery ?? esqlQuery,
+            dataSources,
             field,
             fetchContext,
             useGlobalFilters,

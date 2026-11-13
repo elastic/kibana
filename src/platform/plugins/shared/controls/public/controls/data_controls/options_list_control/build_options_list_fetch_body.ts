@@ -13,7 +13,8 @@ import type {
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { getFilterableFieldSpec } from '@kbn/data-source';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
@@ -42,7 +43,7 @@ export type BuildOptionsListFetchBodyResult =
 export function buildOptionsListFetchBody({
   valuesSource,
   esqlQuery,
-  dataViews,
+  dataSources,
   field,
   fetchContext,
   useGlobalFilters,
@@ -56,8 +57,8 @@ export function buildOptionsListFetchBody({
 }: {
   valuesSource: ControlValuesSource;
   esqlQuery?: string;
-  dataViews?: DataView[];
-  field?: DataViewField;
+  dataSources?: FilterableSource[];
+  field?: FilterableField;
   fetchContext: FetchContext;
   useGlobalFilters: boolean | undefined;
   searchString: string;
@@ -74,7 +75,7 @@ export function buildOptionsListFetchBody({
     }
 
     const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
-    const dataView = dataViews?.[0];
+    const dataSource = dataSources?.[0];
 
     const body: OptionsListESQLFetchBody = {
       kind: 'esql',
@@ -83,7 +84,7 @@ export function buildOptionsListFetchBody({
       filter: buildESQLPreFilter({
         fetchContext,
         useGlobalFilters,
-        dataView,
+        dataSource,
         timeRange,
         esqlQuery,
       }),
@@ -100,34 +101,34 @@ export function buildOptionsListFetchBody({
     return { outcome: 'fetch', body, showLoadingSuggestions: false };
   }
 
-  const dataView = dataViews?.[0];
+  const dataSource = dataSources?.[0];
   if (
-    !dataView ||
+    !dataSource ||
     !field ||
     !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
   ) {
     return { outcome: 'empty', response: { suggestions: [], totalCardinality: 0 } };
   }
 
-  const filters = buildOptionsListDashboardFilters(dataView, fetchContext, useGlobalFilters);
+  const filters = buildOptionsListDashboardFilters(dataSource, fetchContext, useGlobalFilters);
 
   return {
     outcome: 'fetch',
     showLoadingSuggestions: true,
     body: {
       kind: 'dsl',
-      index: dataView.getIndexPattern(),
+      index: dataSource.title,
       sort,
       searchString,
       runPastTimeout,
       searchTechnique,
       selectedOptions,
       fieldName: field.name,
-      fieldSpec: field.toSpec(),
+      fieldSpec: getFilterableFieldSpec(field),
       size: requestSize,
       ignoreValidations,
       filters,
-      runtimeFieldMap: dataView.toSpec?.(false).runtimeFieldMap,
+      runtimeFieldMap: dataSource.toSpec?.(false).runtimeFieldMap,
       isReload: fetchContext.isReload,
       projectRouting: fetchContext.projectRouting,
     },

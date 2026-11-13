@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -103,12 +103,12 @@ export const DataControlEditorStrings = {
         i18n.translate('controls.controlGroup.manageControl.valuesSourceToggleLabel', {
           defaultMessage: 'Pre-filter field values with a query',
         }),
-      getDefaultValuesQuery: (dataView: DataView | undefined, fieldName?: string) =>
-        dataView
+      getDefaultValuesQuery: (dataSource: FilterableSource | undefined, fieldName?: string) =>
+        dataSource
           ? i18n.translate('controls.controlGroup.manageControl.dataSource.defaultValuesQuery', {
               defaultMessage: defaultValuesQueryDefaultMessage,
               values: {
-                dataViewIndexPattern: dataView.getIndexPattern(),
+                dataViewIndexPattern: dataSource.title,
                 fieldName: fieldName ?? '<field-name>',
               },
             })

@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
   FetchContext,
@@ -20,8 +20,13 @@ import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { ControlValuesSource } from '@kbn/controls-constants';
 import { max, min } from 'lodash';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { dataService } from '../../../services/kibana_services';
-import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import { dataService, dataViewsService } from '../../../services/kibana_services';
+import {
+  buildESQLPreFilter,
+  getEsqlSourceFieldQuery,
+  getFetchContextFilters,
+  getFetchContextTimeRange,
+} from '../utils';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
 
@@ -35,7 +40,7 @@ export function minMax$({
   setIsLoading,
 }: {
   controlFetch$: Observable<FetchContext>;
-  dataSources$: PublishesDataSources<DataView>['dataSources$'];
+  dataSources$: PublishesDataSources['dataSources$'];
   fieldName$: PublishingSubject<string | undefined>;
   useGlobalFilters$: PublishingSubject<boolean | undefined>;
   esqlQuery$: PublishingSubject<string | undefined>;
@@ -64,18 +69,21 @@ export function minMax$({
     switchMap(
       async ([
         controlFetchContext,
-        dataViews,
+        dataSources,
         fieldName,
         useGlobalFilters,
         esqlQuery,
         valuesSource,
       ]) => {
-        const dataView = dataViews?.[0];
-        const dataViewField =
-          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        if (!dataView || !dataViewField) {
+        const dataSource = dataSources?.[0];
+        const field = dataSource && fieldName ? dataSource.getFieldByName(fieldName) : undefined;
+        if (!dataSource || !field) {
           return { max: undefined, min: undefined };
         }
+        // The values of a field of an ES|QL source come from a query, as for a query of the user
+        const esql =
+          getEsqlSourceFieldQuery(dataSource, field) ??
+          (valuesSource === ControlValuesSource.ESQL ? esqlQuery : undefined);
 
         try {
           setIsLoading(true);
@@ -83,26 +91,23 @@ export function minMax$({
           prevRequestAbortController = abortController;
           return await getMinMax({
             abortSignal: abortController.signal,
-            dataView,
-            field: dataViewField,
+            dataSource,
+            field,
             ...controlFetchContext,
-            query:
-              valuesSource === ControlValuesSource.ESQL && esqlQuery !== undefined
-                ? { esql: esqlQuery }
-                : controlFetchContext.query,
+            query: esql !== undefined ? { esql } : controlFetchContext.query,
             timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
             filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
             // Pre-filter the ES|QL pipeline by the dashboard's fetch context. Built only from
             // the *dashboard* query/filters (not the per-row `query` above which may carry the
             // ES|QL itself), so it mirrors how field-based controls inherit the filter bar.
             esqlPreFilter:
-              valuesSource === ControlValuesSource.ESQL
+              esql !== undefined
                 ? buildESQLPreFilter({
                     fetchContext: controlFetchContext,
                     useGlobalFilters,
-                    dataView,
+                    dataSource,
                     timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
-                    esqlQuery,
+                    esqlQuery: esql,
                   })
                 : undefined,
           });
@@ -129,7 +134,7 @@ export function minMax$({
 
 export async function getMinMax({
   abortSignal,
-  dataView,
+  dataSource,
   field,
   filters,
   query,
@@ -138,8 +143,8 @@ export async function getMinMax({
   esqlPreFilter,
 }: {
   abortSignal: AbortSignal;
-  dataView: DataView;
-  field: DataViewField;
+  dataSource: FilterableSource;
+  field: FilterableField;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
@@ -165,6 +170,8 @@ export async function getMinMax({
       throw error;
     }
   }
+
+  const dataView = await dataViewsService.get(dataSource.id ?? '');
 
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
