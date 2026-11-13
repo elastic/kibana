@@ -8,16 +8,17 @@
  */
 
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import {
   type Filter,
   buildExistsFilter,
   buildPhraseFilter,
   buildPhrasesFilter,
 } from '@kbn/es-query';
+import { getFieldByName } from '../../utils/source_fields';
 
 export const buildFilter = (
-  dataView: DataView,
+  dataView: FilterableSource,
   controlId: string,
   filterState: Pick<
     OptionsListDSLControlState,
@@ -29,7 +30,7 @@ export const buildFilter = (
     return undefined;
   }
   let newFilter: Filter | undefined;
-  const field = dataView.getFieldByName(fieldName);
+  const field = getFieldByName(dataView, fieldName);
   if (field) {
     if (filterState.exists_selected) {
       newFilter = buildExistsFilter(field, dataView);

@@ -8,17 +8,18 @@
  */
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 
+import { getFieldByName } from '../controls/data_controls/utils/source_fields';
 import { RangeSliderEditorOptions } from '../controls/data_controls/range_slider/components/editor/range_slider_editor_options';
 import { dataViewsService } from '../services/kibana_services';
 import { RANGE_SLIDER_ACTION } from './constants';
 import type { CreateControlTypeAction } from './control_panel_actions';
 import { createDataControlOfType } from './create_data_control_panel_action';
 
-const isFieldCompatible = (field: DataViewField) => {
-  return field.aggregatable && field.type === 'number';
+const isFieldCompatible = (field: FilterableField) => {
+  return Boolean(field.aggregatable) && field.type === 'number';
 };
 
 export const createRangeSliderControlAction =
@@ -35,7 +36,7 @@ export const createRangeSliderControlAction =
       isCompatible: async ({ state: { data_view_id: dataViewId, field_name: fieldName } }) => {
         if (!dataViewId || !fieldName) return false;
         const dataView = await dataViewsService.get(dataViewId);
-        const field = dataView.getFieldByName(fieldName);
+        const field = getFieldByName(dataView, fieldName);
         return Boolean(field && isFieldCompatible(field));
       },
       execute: async ({ embeddable, state, controlId }) => {

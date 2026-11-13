@@ -13,7 +13,7 @@ import type {
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
@@ -22,6 +22,7 @@ import type {
   OptionsListSuccessResponse,
   OptionsListUnifiedFetchBody,
 } from '../../../../common/options_list/types';
+import { getFieldSpec, getRuntimeFieldMap } from '../utils/source_fields';
 import {
   buildESQLPreFilter,
   buildOptionsListDashboardFilters,
@@ -56,8 +57,8 @@ export function buildOptionsListFetchBody({
 }: {
   valuesSource: ControlValuesSource;
   esqlQuery?: string;
-  dataViews?: DataView[];
-  field?: DataViewField;
+  dataViews?: FilterableSource[];
+  field?: FilterableField;
   fetchContext: FetchContext;
   useGlobalFilters: boolean | undefined;
   searchString: string;
@@ -116,18 +117,18 @@ export function buildOptionsListFetchBody({
     showLoadingSuggestions: true,
     body: {
       kind: 'dsl',
-      index: dataView.getIndexPattern(),
+      index: dataView.title,
       sort,
       searchString,
       runPastTimeout,
       searchTechnique,
       selectedOptions,
       fieldName: field.name,
-      fieldSpec: field.toSpec(),
+      fieldSpec: getFieldSpec(field),
       size: requestSize,
       ignoreValidations,
       filters,
-      runtimeFieldMap: dataView.toSpec?.(false).runtimeFieldMap,
+      runtimeFieldMap: getRuntimeFieldMap(dataView),
       isReload: fetchContext.isReload,
       projectRouting: fetchContext.projectRouting,
     },

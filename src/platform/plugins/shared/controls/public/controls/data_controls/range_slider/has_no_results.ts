@@ -14,7 +14,7 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import { asDataView, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function hasNoResults$({
@@ -44,7 +44,7 @@ export function hasNoResults$({
       }
     }),
     switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
-      const dataView = api.dataSources$?.value?.[0];
+      const dataView = asDataView(api.dataSources$?.value?.[0]);
       const rangeFilter = rangeFilters?.[0];
       if (!dataView || !rangeFilter || ignoreValidations) {
         return false;

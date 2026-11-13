@@ -25,7 +25,7 @@ import {
 } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 
-import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
@@ -40,6 +40,7 @@ import type { DataControlApi, DataControlFieldFormatter } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
+import { getFieldByName, getFieldDisplayName, getFieldFormatter } from './utils/source_fields';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
@@ -90,7 +91,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   parentApi: unknown;
   editorStateManager: ReturnType<typeof initializeStateManager<EditorState>>;
   willHaveInitialFilter?: boolean;
-  getInitialFilter?: (dataView: DataView) => Filter | undefined;
+  getInitialFilter?: (dataView: FilterableSource) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
   const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
     omit(state, 'title'), // this is handled via the label manager
@@ -110,15 +111,15 @@ export const initializeDataControlManager = async <EditorState extends object = 
     dataLoading$.next(loading);
   }
 
-  let resolveInitialDataViewReady: (dataView: DataView) => void;
+  let resolveInitialDataViewReady: (dataView: FilterableSource) => void;
   let rejectInitialDataViewReady: (error: Error) => void;
-  const initialDataViewPromise = new Promise<DataView>((resolve, reject) => {
+  const initialDataViewPromise = new Promise<FilterableSource>((resolve, reject) => {
     resolveInitialDataViewReady = resolve;
     rejectInitialDataViewReady = reject;
   });
 
-  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
-  const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
+  const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
+  const field$ = new BehaviorSubject<FilterableField | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
     String(toFormat)
   );
@@ -136,7 +137,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         }
       }),
       switchMap(async ([currentDataViewId]) => {
-        let dataView: DataView | undefined;
+        let dataView: FilterableSource | undefined;
         try {
           dataView = await dataViewsService.get(currentDataViewId ?? '');
           return { dataView };
@@ -181,7 +182,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         return;
       }
 
-      const field = dataView.getFieldByName(nextFieldName ?? '');
+      const field = getFieldByName(dataView, nextFieldName ?? '');
       if (!field) {
         setBlockingError(
           new Error(
@@ -196,11 +197,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
 
       field$.next(field);
-      if (field) defaultFieldLabel$.next(field.displayName);
-      const spec = field?.toSpec();
-      if (spec) {
-        const formatter = dataView.getFormatterForField(spec);
-        fieldFormatter.next((v: unknown) => formatter.convertToText(v));
+      if (field) {
+        defaultFieldLabel$.next(getFieldDisplayName(field));
+        const formatter = getFieldFormatter(dataView, field);
+        if (formatter) fieldFormatter.next(formatter);
       }
     });
 

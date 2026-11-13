@@ -21,7 +21,12 @@ import { ControlValuesSource } from '@kbn/controls-constants';
 import { max, min } from 'lodash';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { dataService } from '../../../services/kibana_services';
-import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import {
+  asDataView,
+  buildESQLPreFilter,
+  getFetchContextFilters,
+  getFetchContextTimeRange,
+} from '../utils';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
 
@@ -35,7 +40,7 @@ export function minMax$({
   setIsLoading,
 }: {
   controlFetch$: Observable<FetchContext>;
-  dataSources$: PublishesDataSources<DataView>['dataSources$'];
+  dataSources$: PublishesDataSources['dataSources$'];
   fieldName$: PublishingSubject<string | undefined>;
   useGlobalFilters$: PublishingSubject<boolean | undefined>;
   esqlQuery$: PublishingSubject<string | undefined>;
@@ -70,7 +75,7 @@ export function minMax$({
         esqlQuery,
         valuesSource,
       ]) => {
-        const dataView = dataViews?.[0];
+        const dataView = asDataView(dataViews?.[0]);
         const dataViewField =
           dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
         if (!dataView || !dataViewField) {

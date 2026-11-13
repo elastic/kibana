@@ -8,19 +8,20 @@
  */
 import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { DataControlState, OptionsListControlState } from '@kbn/controls-schemas';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 
+import { getFieldByName } from '../controls/data_controls/utils/source_fields';
 import { OptionsListEditorOptions } from '../controls/data_controls/options_list_control/components/options_list_editor_options';
 import { dataViewsService } from '../services/kibana_services';
 import { OPTIONS_LIST_ACTION } from './constants';
 import type { CreateControlTypeAction } from './control_panel_actions';
 import { createDataControlOfType } from './create_data_control_panel_action';
 
-const isFieldCompatible = (field: DataViewField) => {
+const isFieldCompatible = (field: FilterableField) => {
   return (
-    !field.spec.scripted &&
-    field.aggregatable &&
+    !field.scripted &&
+    Boolean(field.aggregatable) &&
     ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
   );
 };
@@ -43,9 +44,9 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       // ES|QL-source controls can sometimes pass a field name that omits a .keyword suffix, so try adding it before
       // declaring the field non-existent
       const field =
-        dataView.getFieldByName(fieldName) ??
+        getFieldByName(dataView, fieldName) ??
         (!fieldName.endsWith('.keyword')
-          ? dataView.getFieldByName(`${fieldName}.keyword`)
+          ? getFieldByName(dataView, `${fieldName}.keyword`)
           : undefined);
       return Boolean(field && isFieldCompatible(field));
     },

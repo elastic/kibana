@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { buildEsQuery, isOfQueryType } from '@kbn/es-query';
@@ -39,7 +39,7 @@ export const buildESQLPreFilter = ({
 }: {
   fetchContext: Pick<FetchContext, 'query' | 'filters'>;
   useGlobalFilters?: boolean;
-  dataView?: DataView;
+  dataView?: FilterableSource;
   timeRange?: TimeRange;
   esqlQuery?: string;
 }): { bool: BoolQuery } | undefined => {
@@ -73,7 +73,7 @@ export const getFetchContextTimeRange = (
 
 /** Dashboard-scoped DSL filters used by field-sourced options list aggregations. */
 export const buildOptionsListDashboardFilters = (
-  dataView: DataView,
+  dataView: FilterableSource,
   fetchContext: FetchContext,
   useGlobalFilters?: boolean
 ): Array<{ bool: BoolQuery }> => {

@@ -9,18 +9,18 @@
 
 import { type Filter, type RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
+import { getFieldByName } from '../../utils/source_fields';
 
 export const buildFilter = (
-  dataView: DataView,
+  dataView: FilterableSource,
   controlId: string,
   filterState: Pick<RangeSliderControlState, 'field_name' | 'value'> & { sectionId?: string }
 ) => {
   let rangeFilter: Filter | undefined;
-  const fieldName =
-    dataView && filterState.field_name
-      ? dataView.getFieldByName(filterState.field_name)
-      : undefined;
+  const fieldName = filterState.field_name
+    ? getFieldByName(dataView, filterState.field_name)
+    : undefined;
   const gte = parseFloat(filterState.value?.[0] ?? '');
   const lte = parseFloat(filterState.value?.[1] ?? '');
 
