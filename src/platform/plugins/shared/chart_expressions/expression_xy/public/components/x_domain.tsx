@@ -153,13 +153,18 @@ export const getXDomain = (
   }
 
   const xValues = getXValues(layers);
+  const firstX = xValues[0];
+  const lastX = xValues[xValues.length - 1];
 
   // The domain extent (min/max) comes from the precomputed domain from ES|QL and directly from the data for DSL/agg
   // responses (which already contain the full grid via extended_bounds + min_doc_count: 0).
-  const domainMin = computedDomain ? computedDomain.min : Math.min(xValues[0], baseDomain.min);
+  // Expand the precomputed extent to include actual values so a skewed domain cannot clip bars.
+  const domainMin = computedDomain
+    ? Math.min(computedDomain.min, firstX ?? computedDomain.min)
+    : Math.min(firstX, baseDomain.min);
   const domainMaxValue = computedDomain
-    ? computedDomain.max
-    : Math.max(baseDomain.max - baseDomain.minInterval, xValues[xValues.length - 1]);
+    ? Math.max(computedDomain.max, lastX ?? computedDomain.max)
+    : Math.max(baseDomain.max - baseDomain.minInterval, lastX);
   const domainMax = hasBars ? domainMaxValue : domainMaxValue + baseDomain.minInterval;
 
   const duration = moment.duration(baseDomain.minInterval);
