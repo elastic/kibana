@@ -147,13 +147,13 @@ const baseSloSchema = z.object({
 
 const dashboardsWithIdSchema = z.object({
   dashboards: z
-    .array(z.object({ id: z.string().describe('Dashboard saved-object id') }))
+    .array(z.object({ id: z.string().describe('Dashboard saved-object ID') }))
     .describe('Array of dashboard references')
     .optional(),
 });
 const dashboardsWithRefIdSchema = z.object({
   dashboards: z
-    .array(z.object({ refId: z.string().describe('Dashboard reference id') }))
+    .array(z.object({ refId: z.string().describe('Dashboard reference ID') }))
     .describe('Array of dashboard references')
     .optional(),
 });

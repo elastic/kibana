@@ -40,7 +40,7 @@ export function SLOCardItemInstanceBadge({ slo }: Props) {
               e.stopPropagation(); // stops propagation of metric onElementClick
             }}
             onClickAriaLabel={i18n.translate('xpack.slo.instances.seeAllBadge', {
-              defaultMessage: 'see all instance ids',
+              defaultMessage: 'see all instance IDs',
             })}
             data-test-subj="o11ySlosSeeAllInstanceIdsBadge"
           >

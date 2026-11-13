@@ -81,7 +81,7 @@ const indexSchema = z.string().describe('The index or index pattern to use');
 const dataViewIdSchema = z
   .string()
   .describe(
-    'The kibana data view id to use, primarily used to include data view runtime mappings. ' +
+    'The kibana data view ID to use, primarily used to include data view runtime mappings. ' +
       'Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.'
   );
 
