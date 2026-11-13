@@ -334,4 +334,33 @@ describe('config validation', () => {
 
     expect(() => configSchema.validate(config)).not.toThrow();
   });
+
+  test('runs tasks in this process by default', () => {
+    expect(configSchema.validate({}).task_execution).toBeUndefined();
+    expect(configSchema.validate({ task_execution: {} }).task_execution).toEqual({
+      mode: 'in_process',
+    });
+  });
+
+  test('accepts the child process and remote modes', () => {
+    expect(
+      configSchema.validate({ task_execution: { mode: 'child_process', bundle_dir: '/bundles' } })
+        .task_execution
+    ).toEqual({ mode: 'child_process', bundle_dir: '/bundles' });
+    expect(
+      configSchema.validate({
+        task_execution: { mode: 'remote', remote: { url: 'http://pod:4100', token: 'secret' } },
+      }).task_execution
+    ).toEqual({ mode: 'remote', remote: { url: 'http://pod:4100', token: 'secret' } });
+  });
+
+  test('requires the pod url in remote mode', () => {
+    expect(() => configSchema.validate({ task_execution: { mode: 'remote' } })).toThrow(
+      /task_execution.remote.url is required/
+    );
+  });
+
+  test('rejects an unknown mode', () => {
+    expect(() => configSchema.validate({ task_execution: { mode: 'lambda' } })).toThrow();
+  });
 });

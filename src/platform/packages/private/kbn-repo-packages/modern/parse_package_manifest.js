@@ -64,6 +64,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     optionalPlugins,
     requiredBundles,
     runtimePluginDependencies,
+    taskTypes,
     enabledOnAnonymousPages,
     type,
     __category__,
@@ -77,6 +78,9 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
   }
   if (typeof server !== 'boolean') {
     throw err('plugin.server', server, 'must be a boolean');
+  }
+  if (taskTypes !== undefined && !isArrOfStrings(taskTypes)) {
+    throw err(`plugin.taskTypes`, taskTypes, `must be an array of strings`);
   }
   if (extraPublicDirs !== undefined && !isArrOfStrings(extraPublicDirs)) {
     throw err(`plugin.extraPublicDirs`, extraPublicDirs, `must be an array of strings`);
@@ -165,6 +169,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     optionalPlugins,
     requiredBundles,
     runtimePluginDependencies,
+    taskTypes,
     enabledOnAnonymousPages,
     extraPublicDirs,
     [PLUGIN_CATEGORY]: __category__,

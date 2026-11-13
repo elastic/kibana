@@ -7,8 +7,11 @@
 
 import { errors } from '@elastic/elasticsearch';
 
+import Boom from '@hapi/boom';
 import {
   createTaskRunError,
+  deserializeTaskRunError,
+  serializeTaskRunError,
   getErrorSource,
   isUnrecoverableError,
   isUserError,
@@ -70,6 +73,24 @@ describe('Error Types', () => {
         statusCode: 404,
       });
       expect(getErrorSource(error)).toBe(undefined);
+    });
+  });
+
+  describe('status codes across a process boundary', () => {
+    it('keeps a Boom status code', () => {
+      const rebuilt = deserializeTaskRunError(serializeTaskRunError(Boom.notFound('gone')));
+      expect(rebuilt).toMatchObject({ statusCode: 404, output: { statusCode: 404 } });
+    });
+
+    it('keeps an Elasticsearch response status code', () => {
+      const error = Object.assign(new Error('no master'), { meta: { statusCode: 503 } });
+      expect(deserializeTaskRunError(serializeTaskRunError(error))).toMatchObject({
+        meta: { statusCode: 503 },
+      });
+    });
+
+    it('adds no status code to errors that never had one', () => {
+      expect(serializeTaskRunError(new Error('plain'))).not.toHaveProperty('statusCode');
     });
   });
 });

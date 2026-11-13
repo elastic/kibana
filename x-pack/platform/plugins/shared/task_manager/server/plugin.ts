@@ -27,10 +27,18 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InvalidateAPIKeysParams } from '@kbn/security-plugin-types-server';
-import {
-  registerDeleteInactiveNodesTaskDefinition,
-  scheduleDeleteInactiveNodesTaskDefinition,
-} from './kibana_discovery_service/delete_inactive_nodes_task';
+import { join } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { Logger as TaskLogger } from '@kbn/logging';
+import type { IElasticsearchConfig } from '@kbn/core-elasticsearch-server';
+import type { TaskProcessDispatch } from './task_process/remote_task_runner';
+import { serializeElasticsearchConfig } from './task_process/es_config';
+import { TaskProcessSupervisor } from './task_process/supervisor';
+import type { TaskTypeModule } from './task_type_module';
+import { toTaskDefinition } from './task_type_module';
+import { taskType as deleteInactiveNodesTaskType } from './task_types/delete_inactive_nodes.task';
+import { taskType as markRemovedTasksTaskType } from './task_types/mark_removed_tasks_as_unrecognized.task';
+import { scheduleDeleteInactiveNodesTaskDefinition } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskExecutionControlService } from './execution_control';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -74,10 +82,7 @@ import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
 import { calculateStartingCapacity } from './lib/create_managed_configuration';
-import {
-  registerMarkRemovedTasksAsUnrecognizedDefinition,
-  scheduleMarkRemovedTasksAsUnrecognizedDefinition,
-} from './removed_tasks/mark_removed_tasks_as_unrecognized';
+import { scheduleMarkRemovedTasksAsUnrecognizedDefinition } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 import { LicenseSubscriber } from './license_subscriber';
 import type {
@@ -101,6 +106,13 @@ export interface TaskManagerSetupContract {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+  /**
+   * Registers a task type module: one file that holds the definition and the runner, and that can
+   * also be bundled to run in a process of its own. The runner gets the host, which is Core here.
+   * @param module - What `defineTaskType` returned
+   * @param options.logger - The logger the runner gets; defaults to Task Manager's
+   */
+  registerTaskType: (module: TaskTypeModule, options?: { logger?: TaskLogger }) => void;
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
   registerTaskEventLogger: (logger: TaskEventLogger) => void;
 }
@@ -169,6 +181,11 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private executionControlService?: TaskExecutionControlService;
   private heapSizeLimit: number = 0;
+  private taskProcessDispatch?: TaskProcessDispatch;
+  private taskProcessSupervisor?: TaskProcessSupervisor;
+  /** The task types registered as modules: the ones that can run outside this process. */
+  private readonly moduleTaskTypes = new Set<string>();
+  private elasticsearchConfig?: IElasticsearchConfig;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
@@ -230,6 +247,37 @@ export class TaskManagerPlugin
       });
 
     setupSavedObjects(core.savedObjects);
+
+    // Child processes connect to Elasticsearch the way Kibana does.
+    core.elasticsearch.legacy.config$.subscribe((config) => {
+      this.elasticsearchConfig = config;
+    });
+    const registerTaskType: TaskManagerSetupContract['registerTaskType'] = (module, options) => {
+      this.moduleTaskTypes.add(module.type);
+      this.definitions.registerTaskDefinitions({
+        [module.type]: toTaskDefinition(module, async () => {
+          const [coreStart] = await core.getStartServices();
+          return {
+            logger: options?.logger ?? this.logger,
+            elasticsearch: coreStart.elasticsearch.client,
+            savedObjects: coreStart.savedObjects,
+          };
+        }),
+      });
+    };
+
+    const { mode = 'in_process', remote } = this.config.task_execution ?? {};
+    if (mode !== 'in_process') {
+      this.taskProcessDispatch = {
+        kibanaVersion: this.kibanaVersion,
+        getRoute: (taskType) => {
+          if (!this.moduleTaskTypes.has(taskType)) return undefined;
+          return mode === 'remote'
+            ? { url: remote!.url.replace(/\/$/, ''), token: remote!.token }
+            : this.taskProcessSupervisor?.getRoute(taskType);
+        },
+      };
+    }
 
     this.taskManagerId = this.initContext.env.instanceUuid;
 
@@ -318,7 +366,7 @@ export class TaskManagerPlugin
     }
 
     registerEventLogTelemetryTask(this.logger, core.getStartServices, this.definitions);
-    registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+    registerTaskType(deleteInactiveNodesTaskType);
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
       coreStartServices: core.getStartServices,
@@ -329,11 +377,7 @@ export class TaskManagerPlugin
       removalDelay: this.config.invalidate_api_key_task.removalDelay,
       taskTypeDictionary: this.definitions,
     });
-    registerMarkRemovedTasksAsUnrecognizedDefinition(
-      this.logger,
-      core.getStartServices,
-      this.definitions
-    );
+    registerTaskType(markRemovedTasksTaskType);
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -360,6 +404,7 @@ export class TaskManagerPlugin
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
+      registerTaskType,
       registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
         this.canEncryptSavedObjects = canEncrypt;
       },
@@ -483,6 +528,7 @@ export class TaskManagerPlugin
         kibanasPerPartition: this.config.kibanas_per_partition,
       });
 
+      this.startTaskProcessSupervisor();
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -498,6 +544,7 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
+        taskProcessDispatch: this.taskProcessDispatch,
         claimNudgeService: this.claimNudgeService,
       });
     }
@@ -577,7 +624,37 @@ export class TaskManagerPlugin
     return this.startContract;
   }
 
+  /**
+   * In `child_process` mode, lets task types with a bundle run in a process Kibana starts for each
+   * run, with Kibana's own Elasticsearch connection. Without it Kibana runs every task itself,
+   * which is always correct.
+   */
+  private startTaskProcessSupervisor() {
+    const { mode, bundle_dir: bundleDir } = this.config.task_execution ?? {};
+    if (mode !== 'child_process') return;
+    try {
+      this.taskProcessSupervisor = new TaskProcessSupervisor({
+        settings: {
+          bundle_dir:
+            bundleDir ??
+            join(
+              REPO_ROOT,
+              this.initContext.env.packageInfo.dist ? 'task_bundles' : 'target/task_bundles'
+            ),
+          kibanaVersion: this.kibanaVersion,
+          getElasticsearchConfig: () => serializeElasticsearchConfig(this.elasticsearchConfig!),
+        },
+        logger: this.logger,
+      });
+      this.taskProcessSupervisor.start();
+    } catch (error) {
+      this.taskProcessSupervisor = undefined;
+      this.logger.error(`Task processes could not start: ${error.message}`);
+    }
+  }
+
   public async stop() {
+    await this.taskProcessSupervisor?.stop();
     this.licenseSubscriber?.cleanup();
     this.claimNudgeService?.stop();
 

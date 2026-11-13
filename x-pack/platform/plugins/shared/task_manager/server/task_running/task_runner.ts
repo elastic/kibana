@@ -77,6 +77,8 @@ import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
 import { millisToNanos } from '../lib/millis_to_nanos';
+import { RemoteTaskRunner } from '../task_process/remote_task_runner';
+import type { TaskProcessDispatch } from '../task_process/remote_task_runner';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -145,6 +147,7 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  taskProcessDispatch?: TaskProcessDispatch;
 } & Pick<Middleware, 'beforeRun'>;
 
 export enum TaskRunResult {
@@ -206,6 +209,7 @@ export class TaskManagerRunner implements TaskRunner {
   private isCancelled = false;
   private scheduleAtRunStart?: IntervalSchedule | RruleSchedule;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
+  private readonly taskProcessDispatch?: TaskProcessDispatch;
   private taskRunEventCustomFields?: Record<string, unknown>;
 
   /**
@@ -234,6 +238,7 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    taskProcessDispatch,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -255,6 +260,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.taskProcessDispatch = taskProcessDispatch;
   }
 
   /**
@@ -532,13 +538,40 @@ export class TaskManagerRunner implements TaskRunner {
 
           const abortController = new AbortController();
 
-          this.task = definition.createTaskRunner({
-            taskInstance: sanitizedTaskInstance,
-            ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
-            signal: abortController.signal,
-            executionUuid: this.uuid,
-            setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
-          });
+          const runInThisProcess = () =>
+            definition.createTaskRunner({
+              taskInstance: sanitizedTaskInstance,
+              ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
+              signal: abortController.signal,
+              executionUuid: this.uuid,
+              setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+            });
+
+          // Service-account (`runAs`) tasks carry a closure that cannot cross a process boundary,
+          // so they always run in this process.
+          const route = runAs ? undefined : this.taskProcessDispatch?.getRoute(this.taskType);
+          if (route && this.taskProcessDispatch) {
+            this.task = new RemoteTaskRunner({
+              route,
+              request: {
+                taskType: this.taskType,
+                taskInstance: JSON.parse(JSON.stringify(sanitizedTaskInstance)),
+                executionUuid: this.uuid,
+                apiKey: apiKeyForRequest,
+                spaceId: modifiedContext.taskInstance.userScope?.spaceId,
+                uiamApiKeyExternal: modifiedContext.taskInstance.userScope?.uiamApiKeyExternal,
+                kibanaVersion: this.taskProcessDispatch.kibanaVersion,
+              },
+              timeoutMs: parseIntervalAsMillisecond(this.timeout),
+              signal: abortController.signal,
+              setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+              // A process that cannot be started, or does not serve this type, leaves the run to
+              // this process.
+              fallback: runInThisProcess,
+            });
+          } else {
+            this.task = runInThisProcess();
+          }
 
           const originalTaskCancel = this.task.cancel;
 
