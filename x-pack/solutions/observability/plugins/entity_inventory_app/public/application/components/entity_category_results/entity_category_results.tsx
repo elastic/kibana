@@ -8,13 +8,13 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityTypes } from '../../context/entity_types_context';
-import { EntitySection } from './entity_section';
-import { EntityTableTruncationCallout } from './entity_table_callouts';
+import { EntitySection } from '../entity_section/entity_section';
+import { EntityTableTruncationCallout } from './truncation_callout';
 import {
   EntityTableLoadError,
   EntityTableLoading,
   EntityTableTypeNotAvailable,
-} from './entity_table_states';
+} from '../entity_states/entity_states';
 
 /** Reported as the click detail of the retry after the type list failed to load. */
 const TYPES_EBT_DETAIL = 'types';

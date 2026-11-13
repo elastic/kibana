@@ -36,18 +36,17 @@ import {
   EMPTY_WITH_FAILURES_BODY,
   getEmptyTitle,
   getEmptyWithFailuresTitle,
-  getSourceErrorText,
   getTypeNotAvailableTitle,
-} from './translations';
+} from '../entity_states/translations';
+import { getSourceErrorText } from '../entity_section/translations';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
 
 // The callout is not memoized, so it renders exactly when the page renders while it is shown.
 const mockTruncationCalloutRender = jest.fn();
-jest.mock('./entity_table_callouts', () => {
-  const actual =
-    jest.requireActual<typeof import('./entity_table_callouts')>('./entity_table_callouts');
+jest.mock('./truncation_callout', () => {
+  const actual = jest.requireActual<typeof import('./truncation_callout')>('./truncation_callout');
   return {
     ...actual,
     EntityTableTruncationCallout: () => {

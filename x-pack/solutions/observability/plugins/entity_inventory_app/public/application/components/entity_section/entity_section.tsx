@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { InventoryType, SourceError } from '@kbn/entity-inventory-plugin/common';
 import { useEntityList } from '../../hooks/use_entity_list';
-import { EntityTable } from './entity_table';
+import { EntityTable } from '../entity_table/entity_table';
 import {
   ENTITY_COUNT_LABEL,
   SOURCE_ERRORS_TITLE,

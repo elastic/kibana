@@ -12,8 +12,8 @@ import { useEntityTablePreferences } from '../../context/entity_table_preference
 import type { UseEntityListResult } from '../../hooks/use_entity_list';
 import { TableSkeleton } from '../table_skeleton/table_skeleton';
 import { EntityDataGrid } from './entity_data_grid';
-import { EntityTableEmpty, EntityTableLoadError } from './entity_table_states';
-import { LOADING_ENTITIES_LABEL } from './translations';
+import { EntityTableEmpty, EntityTableLoadError } from '../entity_states/entity_states';
+import { LOADING_ENTITIES_LABEL } from '../entity_states/translations';
 
 export interface EntityTableProps {
   entityType: InventoryType;

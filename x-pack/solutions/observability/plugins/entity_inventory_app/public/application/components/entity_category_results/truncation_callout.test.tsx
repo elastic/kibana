@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
-import { EntityTableTruncationCallout } from './entity_table_callouts';
+import { EntityTableTruncationCallout } from './truncation_callout';
 
 describe('EntityTableTruncationCallout', () => {
   it('names the limit and asks to filter', () => {
