@@ -12,6 +12,7 @@ import {
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
 import type { Agent } from 'supertest';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
   GraphRequest,
@@ -3973,76 +3974,76 @@ export default function (providerContext: FtrProviderContext) {
       //      with COALESCE(<root>.<key>, FIELD_EXTRACT(<root>, "<key>")), so the test index maps the
       //      roots as flattened and keyAsFieldIndex maps a key as keyword.
       const testIndex = 'test-graph-type-mismatch';
+      const flattenedM365Root = 'm365_defender.event.additional_fields';
+      const testIndexProperties: Record<string, MappingProperty> = {
+        '@timestamp': { type: 'date' },
+        'event.id': { type: 'keyword' },
+        'event.action': { type: 'keyword' },
+        'event.dataset': { type: 'keyword' },
+        'event.kind': { type: 'keyword' },
+        'event.category': { type: 'keyword' },
+        'event.type': { type: 'keyword' },
+        'event.module': { type: 'keyword' },
+        'data_stream.dataset': { type: 'keyword' },
+        'user.name': { type: 'keyword' },
+        // Deliberately wrong type — user.id as long mimics PostgreSQL / AWS IAM.
+        // fetch_events_graph.ts casts it to keyword before enrichment runs.
+        'user.id': { type: 'long' },
+        'user.email': { type: 'keyword' },
+        'user.domain': { type: 'keyword' },
+        'user.target.id': { type: 'keyword' },
+        'user.target.name': { type: 'keyword' },
+        'user.target.email': { type: 'keyword' },
+        'user.target.domain': { type: 'keyword' },
+        'host.name': { type: 'keyword' },
+        'host.id': { type: 'keyword' },
+        'host.hostname': { type: 'keyword' },
+        'host.target.id': { type: 'keyword' },
+        'host.target.name': { type: 'keyword' },
+        'host.target.hostname': { type: 'keyword' },
+        'service.name': { type: 'keyword' },
+        'service.target.name': { type: 'keyword' },
+        'entity.id': { type: 'keyword' },
+        'entity.namespace': { type: 'keyword' },
+        'entity.target.id': { type: 'keyword' },
+        'cloud.provider': { type: 'keyword' },
+        // Integration CASE branch function arguments (TO_STRING, TO_BOOLEAN, TO_LOWER).
+        // All must have a non-null schema type; values are absent from the test document.
+        'source.ip': { type: 'ip' },
+        'destination.ip': { type: 'ip' },
+        'misp.event.orgc_id': { type: 'long' },
+        'greenhouse.audit.event.meta': { type: 'flattened' },
+        [flattenedM365Root]: { type: 'flattened' },
+        'snyk.audit_logs.content': { type: 'flattened' },
+        'cisco_meraki.8021x_eap_success': { type: 'flattened' },
+        'cisco_meraki.wpa_auth': { type: 'flattened' },
+        'cisco_meraki.splash_auth': { type: 'flattened' },
+        'gitlab.audit.target_id': { type: 'long' },
+        'jamf_pro.events.event.object_id': { type: 'long' },
+        'jamf_pro.events.event.policy_id': { type: 'long' },
+        'jamf_pro.events.event.jssid': { type: 'long' },
+        'jamf_pro.events.event.patch_policy_id': { type: 'long' },
+        'tanium.action_history.action.id': { type: 'long' },
+        'tanium.endpoint_config.item.id': { type: 'long' },
+        'citrix.cef_format': { type: 'boolean' },
+        'servicenow.event.applied.value': { type: 'boolean' },
+        'zscaler_zia.dns.request.action': { type: 'keyword' },
+        'zscaler_zia.tunnel.action.type': { type: 'keyword' },
+        'container.name': { type: 'keyword' },
+        'destination.domain': { type: 'keyword' },
+        'forgerock.objectId': { type: 'keyword' },
+        'forgerock.principal': { type: 'keyword' },
+        'infoblox_bloxone_ddi.dns_data.source': { type: 'keyword' },
+        'microsoft_intune.audit.properties.target_display_names': { type: 'keyword' },
+        'microsoft_intune.audit.properties.target_object_ids': { type: 'keyword' },
+        'url.domain': { type: 'keyword' },
+        'url.path': { type: 'keyword' },
+      };
 
       before(async () => {
         await es.indices.create({
           index: testIndex,
-          mappings: {
-            properties: {
-              '@timestamp': { type: 'date' },
-              'event.id': { type: 'keyword' },
-              'event.action': { type: 'keyword' },
-              'event.dataset': { type: 'keyword' },
-              'event.kind': { type: 'keyword' },
-              'event.category': { type: 'keyword' },
-              'event.type': { type: 'keyword' },
-              'event.module': { type: 'keyword' },
-              'data_stream.dataset': { type: 'keyword' },
-              'user.name': { type: 'keyword' },
-              // Deliberately wrong type — user.id as long mimics PostgreSQL / AWS IAM.
-              // fetch_events_graph.ts casts it to keyword before enrichment runs.
-              'user.id': { type: 'long' },
-              'user.email': { type: 'keyword' },
-              'user.domain': { type: 'keyword' },
-              'user.target.id': { type: 'keyword' },
-              'user.target.name': { type: 'keyword' },
-              'user.target.email': { type: 'keyword' },
-              'user.target.domain': { type: 'keyword' },
-              'host.name': { type: 'keyword' },
-              'host.id': { type: 'keyword' },
-              'host.hostname': { type: 'keyword' },
-              'host.target.id': { type: 'keyword' },
-              'host.target.name': { type: 'keyword' },
-              'host.target.hostname': { type: 'keyword' },
-              'service.name': { type: 'keyword' },
-              'service.target.name': { type: 'keyword' },
-              'entity.id': { type: 'keyword' },
-              'entity.namespace': { type: 'keyword' },
-              'entity.target.id': { type: 'keyword' },
-              'cloud.provider': { type: 'keyword' },
-              // Integration CASE branch function arguments (TO_STRING, TO_BOOLEAN, TO_LOWER).
-              // All must have a non-null schema type; values are absent from the test document.
-              'source.ip': { type: 'ip' },
-              'destination.ip': { type: 'ip' },
-              'misp.event.orgc_id': { type: 'long' },
-              'greenhouse.audit.event.meta': { type: 'flattened' },
-              'm365_defender.event.additional_fields': { type: 'flattened' },
-              'snyk.audit_logs.content': { type: 'flattened' },
-              'cisco_meraki.8021x_eap_success': { type: 'flattened' },
-              'cisco_meraki.wpa_auth': { type: 'flattened' },
-              'cisco_meraki.splash_auth': { type: 'flattened' },
-              'gitlab.audit.target_id': { type: 'long' },
-              'jamf_pro.events.event.object_id': { type: 'long' },
-              'jamf_pro.events.event.policy_id': { type: 'long' },
-              'jamf_pro.events.event.jssid': { type: 'long' },
-              'jamf_pro.events.event.patch_policy_id': { type: 'long' },
-              'tanium.action_history.action.id': { type: 'long' },
-              'tanium.endpoint_config.item.id': { type: 'long' },
-              'citrix.cef_format': { type: 'boolean' },
-              'servicenow.event.applied.value': { type: 'boolean' },
-              'zscaler_zia.dns.request.action': { type: 'keyword' },
-              'zscaler_zia.tunnel.action.type': { type: 'keyword' },
-              'container.name': { type: 'keyword' },
-              'destination.domain': { type: 'keyword' },
-              'forgerock.objectId': { type: 'keyword' },
-              'forgerock.principal': { type: 'keyword' },
-              'infoblox_bloxone_ddi.dns_data.source': { type: 'keyword' },
-              'microsoft_intune.audit.properties.target_display_names': { type: 'keyword' },
-              'microsoft_intune.audit.properties.target_object_ids': { type: 'keyword' },
-              'url.domain': { type: 'keyword' },
-              'url.path': { type: 'keyword' },
-            },
-          },
+          mappings: { properties: testIndexProperties },
         });
 
         await es.index({
@@ -4086,24 +4087,20 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       // An index created without the integration package maps the keys of the flattened roots as
-      // regular fields, which FIELD_EXTRACT does not read.
+      // regular fields, which FIELD_EXTRACT does not read. It reuses testIndex's mappings so the
+      // integration evaluations plan when it is queried on its own, except for the m365 root.
       const keyAsFieldIndex = 'test-graph-flattened-key-as-field';
+      const keyAsFieldIndexProperties: Record<string, MappingProperty> = {
+        ...Object.fromEntries(
+          Object.entries(testIndexProperties).filter(([field]) => field !== flattenedM365Root)
+        ),
+        [`${flattenedM365Root}.SourceAccountSid`]: { type: 'keyword' },
+      };
 
       before(async () => {
         await es.indices.create({
           index: keyAsFieldIndex,
-          mappings: {
-            properties: {
-              '@timestamp': { type: 'date' },
-              'event.id': { type: 'keyword' },
-              'event.action': { type: 'keyword' },
-              'event.dataset': { type: 'keyword' },
-              'data_stream.dataset': { type: 'keyword' },
-              'user.name': { type: 'keyword' },
-              'host.name': { type: 'keyword' },
-              'm365_defender.event.additional_fields.SourceAccountSid': { type: 'keyword' },
-            },
-          },
+          mappings: { properties: keyAsFieldIndexProperties },
         });
 
         await es.index({
