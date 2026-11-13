@@ -416,6 +416,7 @@ const ContentListTableComponent = ({
         responsiveBreakpoint={responsiveBreakpoint}
         tableLayout={tableLayout}
         data-test-subj={dataTestSubj}
+        aria-busy={isFetching}
       />
       {deleteModal}
     </>

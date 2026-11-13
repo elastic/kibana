@@ -27963,7 +27963,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict. Scripted fields are deprecated and can't be set through this API; sending `scripted_fields` fails with a `400`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: post-data-views-v2
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -28034,7 +28034,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -28174,7 +28174,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -28235,7 +28235,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`, and also removes any deprecated scripted fields the data view has. Scripted fields can't be set through this API; sending `scripted_fields` fails with a `400`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: put-data-views-v2-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -28314,7 +28314,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -28380,7 +28380,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -63826,24 +63826,21 @@ paths:
           source: |
             POST kbn:/api/links
             {
-              "summary": "Create a links library item",
-              "value": {
-                "title": "Important Resources",
-                "description": "A collection of important links",
-                "links": [
-                  {
-                    "label": "Overview",
-                    "type": "dashboardLink",
-                    "destination": "dashboard-abc-123"
-                  },
-                  {
-                    "label": "Elastic Documentation",
-                    "type": "externalLink",
-                    "destination": "https://www.elastic.co/docs"
-                  }
-                ],
-                "layout": "horizontal"
-              }
+              "title": "Important Resources",
+              "description": "A collection of important links",
+              "links": [
+                {
+                  "label": "Overview",
+                  "type": "dashboardLink",
+                  "destination": "dashboard-abc-123"
+                },
+                {
+                  "label": "Elastic Documentation",
+                  "type": "externalLink",
+                  "destination": "https://www.elastic.co/docs"
+                }
+              ],
+              "layout": "horizontal"
             }
       x-state: Experimental
       x-metaTags:
@@ -74619,7 +74616,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+        Stops risk scoring for the space. Removes the risk score data stream, the lookup index and its template, the risk engine configuration, and the risk score maintainer task, and clears risk fields stored on entity documents.
       operationId: CleanUpRiskEngine
       responses:
         '200':
@@ -74787,68 +74784,6 @@ paths:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse'
           description: Unexpected error
       summary: Configure the Risk Engine Saved Object
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/risk_score/engine/schedule_now:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/risk_score/engine/schedule_now</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
-      operationId: ScheduleRiskEngineNow
-      requestBody:
-        content:
-          application/json:
-            examples:
-              emptyRequest:
-                summary: No request body
-                value: {}
-            schema:
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                ScheduleRiskEngineNowResponse:
-                  summary: Successful schedule response
-                  value:
-                    success: true
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskEngineScheduleNowResponse'
-          description: Successful response
-        '400':
-          content:
-            application/json:
-              examples:
-                taskManagerUnavailable:
-                  summary: Task manager is unavailable
-                  value:
-                    message: Task Manager is unavailable, but is required by the risk engine. Please enable the taskManager plugin and try again.
-                    status_code: 400
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
-          description: Task manager is unavailable
-        default:
-          content:
-            application/json:
-              examples:
-                scheduleNowError:
-                  summary: Schedule now failed
-                  value:
-                    full_error: '{}'
-                    message: Internal server error
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse'
-          description: Unexpected error
-      summary: Run the risk scoring engine
       tags:
         - Security Entity Analytics API
       x-metaTags:
@@ -139737,7 +139672,7 @@ paths:
           schema:
             maxLength: 1024
             type: string
-        - description: If `true`, store the `namespace` as sent. Otherwise, a `default` namespace is replaced with one derived from the space ID.
+        - description: If `true`, store the `namespace` exactly as sent, skipping the space-derived fallback. If `false` or omitted, an explicit `namespace` is still stored as sent; only an omitted `namespace` is derived from the space ID.
           in: query
           name: preserve_namespace
           required: false
@@ -167158,7 +167093,7 @@ components:
             - enum:
                 - default
               type: string
-          description: Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).
+          description: Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit). Requests authenticated with an API key can't set `write_restricted`, because an API key doesn't map to a user. To set it, authenticate as a user.
       title: Access control
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-data:
@@ -171258,9 +171193,9 @@ components:
         - fields
       title: Saved composite runtime field
       type: object
-    Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema:
+    Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema:
       additionalProperties: false
-      description: Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.
+      description: A stored data view, including its deprecated scripted fields when it has any.
       properties:
         allow_hidden_indices:
           description: When `true`, allows the data view to match hidden indices.
@@ -171288,11 +171223,18 @@ components:
           minLength: 1
           title: Data view name
           type: string
+        scripted_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-scripted-field-schema'
+          deprecated: true
+          description: 'Deprecated scripted fields, keyed by field name. This property is read-only: it is only returned in responses, and sending it in a create or update request fails with a 400.'
+          title: Scripted fields
+          type: object
         time_field:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
       required:
         - index_pattern
-      title: Saved data view spec
+      title: Saved data view spec with scripted fields
       type: object
     Kibana_HTTP_APIs_kbn-saved-field-settings-entry:
       anyOf:
@@ -171336,6 +171278,40 @@ components:
       required:
         - type
       title: Saved runtime field
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-scripted-field-schema:
+      additionalProperties: false
+      description: A deprecated scripted field. Scripted fields are evaluated at query time by Elasticsearch and are read-only in this API.
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        lang:
+          description: 'The language of the script. Example: "painless".'
+          maxLength: 1000
+          minLength: 1
+          title: Script language
+          type: string
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+        script:
+          description: The script that computes the value of the scripted field. Scripted fields are deprecated; use runtime fields instead.
+          minLength: 1
+          title: Script
+          type: string
+        type:
+          description: The Kibana field type of the scripted field (e.g., "string", "number", "date", "boolean", "ip", "geo_point").
+          maxLength: 1000
+          minLength: 1
+          title: Type
+          type: string
+      required:
+        - type
+        - script
+      title: Saved scripted field
       type: object
     Kibana_HTTP_APIs_kbn-tags-attributes:
       additionalProperties: false
@@ -208789,21 +208765,6 @@ components:
         - uploaded
         - failedOperations
         - totalOperations
-    Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
-      type: object
-      properties:
-        full_error:
-          type: string
-        message:
-          type: string
-      required:
-        - message
-        - full_error
-    Security_Entity_Analytics_API_RiskEngineScheduleNowResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
     Security_Entity_Analytics_API_RiskScoreHistoryEntry:
       type: object
       properties:

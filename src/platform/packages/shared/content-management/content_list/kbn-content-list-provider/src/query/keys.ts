@@ -56,4 +56,17 @@ export const contentListKeys = {
    */
   filterFacets: (queryKeyScope: string, filterId: string, filters: ActiveFilters) =>
     [...contentListKeys.all(queryKeyScope), 'filterFacets', filterId, filters] as const,
+
+  /**
+   * Prefix matching every filter facet query in a scope, regardless of filter
+   * dimension or active filters.
+   *
+   * Providers whose facets are derived from a mutable item set invalidate this
+   * when that set changes — the per-dimension keys exclude their own filter, so
+   * they do not change when a selection narrows the underlying data.
+   *
+   * @param queryKeyScope - Stable scope identifier for cache isolation.
+   */
+  allFilterFacets: (queryKeyScope: string) =>
+    [...contentListKeys.all(queryKeyScope), 'filterFacets'] as const,
 };

@@ -31,13 +31,13 @@ const resolverTestPlugin = Package.fromManifest(
 );
 const browserPlugin = Package.fromManifest(
   repoRoot,
-  Path.resolve(repoRoot, 'src/platform/test/user_storage/plugins/user_storage_test/kibana.jsonc')
+  Path.resolve(repoRoot, 'src/platform/test_plugins/user_storage/kibana.jsonc')
 );
 const serverPlugin = Package.fromManifest(
   repoRoot,
   Path.resolve(
     repoRoot,
-    'x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client/kibana.jsonc'
+    'x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client/kibana.jsonc'
   )
 );
 

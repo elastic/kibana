@@ -39,7 +39,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...httpConfig.get('kbnTestServer'),
       serverArgs: [
         ...httpConfig.get('kbnTestServer.serverArgs'),
-        ...findTestPluginPaths(path.resolve(__dirname, '../../plugins')),
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../../../test_plugins/server_integration')
+        ),
       ],
       runOptions: {
         ...httpConfig.get('kbnTestServer.runOptions'),

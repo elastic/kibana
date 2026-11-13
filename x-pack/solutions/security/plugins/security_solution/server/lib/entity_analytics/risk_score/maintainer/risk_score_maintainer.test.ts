@@ -10,7 +10,6 @@ import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { createRiskScoreMaintainer, type RiskScoreMaintainerDeps } from './risk_score_maintainer';
 import { RiskScoreDataClient } from '../risk_score_data_client';
 import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
-import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { scoreBaseEntities } from './steps/score_base_entities';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { resetToZero } from './steps/reset_to_zero';
@@ -22,7 +21,6 @@ import { pruneLookupIndex } from './lookup/prune_lookup_index';
 jest.mock('../risk_score_data_client');
 jest.mock('../../risk_engine/utils/saved_object_configuration');
 jest.mock('../../utils/internal_saved_objects_client');
-jest.mock('../is_id_based_risk_scoring_enabled');
 jest.mock('./steps/score_base_entities');
 jest.mock('./steps/run_resolution_scoring_step');
 jest.mock('./steps/reset_to_zero');
@@ -108,7 +106,6 @@ describe('createRiskScoreMaintainer run', () => {
       identifierType: 'host',
       dataViewId: 'security-solution-default',
     } as Awaited<ReturnType<typeof getConfiguration>>);
-    jest.mocked(getIsIdBasedRiskScoringEnabled).mockResolvedValue(true);
     jest.mocked(fetchWatchlistConfigs).mockResolvedValue(new Map());
     jest.mocked(ensureLookupIndex).mockResolvedValue('lookup-index');
     jest.mocked(pruneLookupIndex).mockResolvedValue(0);
