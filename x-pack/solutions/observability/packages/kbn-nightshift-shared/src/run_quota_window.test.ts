@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { resolveDailyWindow } from './window';
+import { dayKey, resolveDailyWindow } from './run_quota_window';
 
 describe('resolveDailyWindow', () => {
   it('uses UTC day boundaries', () => {
@@ -14,5 +14,11 @@ describe('resolveDailyWindow', () => {
       resetsAt: '2026-09-01T00:00:00.000Z',
       timezone: 'UTC',
     });
+  });
+});
+
+describe('dayKey', () => {
+  it('is the UTC date the window starts on', () => {
+    expect(dayKey(resolveDailyWindow(new Date('2026-08-31T23:59:59.999Z')))).toBe('2026-08-31');
   });
 });

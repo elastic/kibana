@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { dayKey, resolveDailyWindow } from '@kbn/nightshift-shared';
 import {
   isRunQuotaReached,
   type InvestigationRunQuotaGroup,
@@ -12,7 +13,6 @@ import {
   type RunQuotaGroup,
 } from '../../../common/run_quotas';
 import { mutateRunQuotaLedger, readRunQuotaSettings } from './repository';
-import { dayKey, resolveDailyWindow } from './window';
 import type { RunQuotaSavedObjectsRepository } from './repository';
 
 export const consumeRunQuota = async ({
