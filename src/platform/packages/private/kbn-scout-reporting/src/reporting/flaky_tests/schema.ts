@@ -92,7 +92,10 @@ export const FlakyTestLatestRunSchema = FlakyTestBranchLatestRunSchema.extend({
 });
 export type FlakyTestLatestRun = z.infer<typeof FlakyTestLatestRunSchema>;
 
-/** Build counts of one test on one branch; the entry-level counts are the sum over branches. */
+/**
+ * Build counts of one test on one branch, breakages included; the entry-level counts are the sum
+ * over branches less the builds of its breakages.
+ */
 export const FlakyTestBranchStatsSchema = z.object({
   branch: z.string(),
   builds: z.number().int(),
@@ -175,9 +178,12 @@ export const FlakyTestEntrySchema = z.object({
   passes: z.number().int(),
   /** Executions that failed and then passed within the same run (Playwright retries only). */
   retryFlakes: z.number().int(),
-  /** Distinct Buildkite builds the test ran in. */
+  /**
+   * Distinct Buildkite builds the test ran in, less the builds of its breakages: failed builds in
+   * a row, too many to be chance, that a flaky test is kept despite.
+   */
   builds: z.number().int(),
-  /** Distinct Buildkite builds with at least one failed execution. */
+  /** Distinct Buildkite builds with at least one failed execution, less those of its breakages. */
   failedBuilds: z.number().int(),
   /** `failedBuilds / builds`. */
   buildFailRate: z.number(),
@@ -193,8 +199,9 @@ export const FlakyTestEntrySchema = z.object({
   firstFailedAt: z.coerce.date(),
   lastFailedAt: z.coerce.date(),
   /**
-   * The branch on which the test cleared the thresholds; the top-level rate above is diluted
-   * by the other branches. Absent in reports written before thresholds applied per branch.
+   * The branch on which the test cleared the thresholds, counted without its breakages; the
+   * top-level rate above is diluted by the other branches. Absent in reports written before
+   * thresholds applied per branch.
    */
   flakiestBranch: z.optional(FlakyTestFlakiestBranchSchema),
   /** Absent only if the test emitted no execution events in the window (should not happen). */

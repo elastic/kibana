@@ -8,7 +8,11 @@ Reads the JUnit and Scout reports of a CI job and files or updates one `failed-t
 failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job. With
 `--report-failing-suites` it also files one `Failing … suite` issue per test file whose tests
 started failing every attempt build after build, by the Scout test events, in `elastic/kibana` or
-the `--failing-suites-repo owner/name` given.
+the `--failing-suites-repo owner/name` given. A suite that already has an issue of its own, flaky
+or failing, gets a comment on it instead, with the builds the tests failed in and the commits
+since they last passed: at most once a day for each pipeline and branch while the break lasts
+(`failing.postedAt` in the issue's metadata), and right away when the issue is closed and was
+updated in the last 30 days, which reopens it.
 
 `REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening per-test issues: a failure that
 an issue already tracks, per-test or flaky suite, still bumps it, and one that none tracks is
@@ -30,10 +34,12 @@ Tests without an exact file path get no link.
 
 For every failure the reporter asks ci-stats which `failed-test` issue tracks the test, by name,
 file or Scout test id, and links it from the failure's HTML report, the Buildkite annotation and
-the Slack message. If that issue is a flaky suite issue (see below), the failure is recorded there
-as on a per-test issue: the count goes up, the issue is reopened if needed and a comment names the
-test and the build. The count is kept in the issue's `failed-test` metadata; the daily report's
-body and `flaky-test-suite` metadata are left alone.
+the Slack message. If that issue is a suite issue, flaky or failing (see below), only its count
+goes up, without a comment or a reopen: the daily report posts where the suite is still flaky and
+reopens it, and `--report-failing-suites` posts breaks. A job that doesn't run that check on the
+same repository, `elastic/kibana`, reopens the issue and comments on it as on a per-test issue,
+naming the test, as nothing else would post its breaks. The count is kept in the issue's
+`failed-test` metadata; the daily report's body and `flaky-test-suite` metadata are left alone.
 
 ## `node scripts/report_flaky_test_issues`
 
@@ -60,6 +66,22 @@ builds (default 10), failed in at least `minFailedBuilds` of them (default 2) an
 the window. Thresholds are checked per branch, so a clean branch cannot hide a flaky one; the
 branch a test qualified on is recorded as `flakiestBranch`. Tests that never passed in the window
 are consistently failing, not flaky, and are not reported.
+
+Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
+pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
+for a test failing at random as often. A test in a breakage up to its latest build is broken right
+now and is dropped from the report. A test whose breakages are over is checked against the
+thresholds again without their builds: it's dropped if it no longer clears them, and otherwise
+kept, counted and ranked without those builds. Each test dropped this way is logged with the
+breakage that dropped it, or the longest one, and each test kept with how many builds it lost.
+
+Tests that were fixed since are dropped too. On every branch the test qualifies on, its last failure
+was at least 24 hours before the end of the window, and it has passed enough builds since then
+that, failing as often as before, it would have failed at least 1.5 times on average. The failure
+rate leaves out the breakage builds, but a breakage still counts as its last failure, as the test
+may have changed to end it. For a test failing 8% of its builds, that's 19 builds. Only
+the pipelines, configs and targets where the test failed are counted, so a test can only look less
+fixed for it.
 
 Tests that have been skipped since are left out (`--no-omit-skipped-tests` keeps them): on every
 branch the test failed on, its latest run in every pipeline, config and target was a skip. A suite
@@ -97,19 +119,25 @@ itself). That repository is only read, never written to, and its closed issues a
 
 ### Keeping suite issues up to date
 
-When the daily report finds a suite flaky again, its own issue (one this command filed for that
-`describe` block, not a per-test or whole-file one) is refreshed. `--no-update-issues` turns this
-off.
+When the daily report finds a suite flaky again, its own issue (one about that `describe` block,
+flaky or consistently failing, not a per-test one) is refreshed. Without one, an open issue about
+the suite's whole file is, such as a consistently failing issue for tests in several blocks: CI
+failures of the suite's tests are already counted on it. The suites of a file that share such an
+issue are refreshed together, their tests named after their block, and the issue stays about the
+whole file. A closed one isn't reopened for a block: the block gets an issue of its own.
+`--no-update-issues` turns this off.
 
 - The body text stays as filed. Only the hidden metadata is updated (report count, history, last
   report); the test ids and branches recorded before are kept, so `/skip` still covers a branch
   the suite stopped failing on this week.
-- A short comment on where the suite is still flaky ("Still flaky on `main`: 4% of builds
-  (18 / 441), last failed […]", one line per branch when there are several) is posted when the
-  suite failed since the last one, or since the issue was filed, and at least
-  `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. It ends with a "Newly flaky:" list of the flaky tests the issue has not shown yet, in
-  its body or an earlier comment, one bullet each. How to skip the test is at the end of the body.
+- A short comment on where the suite is still flaky is posted when the suite failed since the
+  last one, or since the issue was filed, and at least `--comment-cooldown-days` later (default
+  3). Failures in between are covered by the next comment. It has one line per test that failed
+  there, even a single one, with the test's own numbers on each branch it's flaky on ("`sorts by
+  status`: 4% of builds (18 / 441), last failed […]"), and marks the tests the issue has not shown yet, in its
+  body or an earlier comment, as "(newly flaky)". On an issue no report has found flaky before, a
+  consistently failing one, the first comment says "Now flaky" and lists every flaky test. How to
+  skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.
