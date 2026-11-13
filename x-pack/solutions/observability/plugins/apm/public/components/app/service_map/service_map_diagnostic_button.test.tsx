@@ -17,10 +17,6 @@ jest.mock('./diagnostic_tool/diagnostic_flyout', () => ({
       <div data-test-subj="diagnosticFlyout" data-selection-id={selection?.id ?? ''} />
     ) : null,
 }));
-jest.mock('@xyflow/react', () => ({
-  Panel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
 const mockUseApmPluginContext = jest.requireMock(
   '../../../context/apm_plugin/use_apm_plugin_context'
 ).useApmPluginContext;

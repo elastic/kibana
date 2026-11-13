@@ -24,12 +24,10 @@ export function ServiceMapGroupingCountLine({ countLine }: { countLine?: string 
       data-test-subj="serviceMapGroupingCountLine"
       css={css`
         position: absolute;
-        top: 0;
+        bottom: ${euiTheme.size.m};
         left: 0;
-        right: 0;
         z-index: ${euiTheme.levels.content};
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
-        text-align: center;
         pointer-events: none;
       `}
     >

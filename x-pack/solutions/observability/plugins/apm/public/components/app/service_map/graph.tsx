@@ -981,6 +981,9 @@ function GraphInner({
                       highlightedServiceNames={highlightedServiceNames}
                     />
                   )}
+                  <ServiceMapDiagnosticButton
+                    selection={selectedServiceNodeForFlyout ?? undefined}
+                  />
                   <EuiPanel
                     hasBorder
                     hasShadow={false}
@@ -1005,7 +1008,6 @@ function GraphInner({
                 </Panel>
               )}
               {showControls && <ServiceMapMinimap />}
-              <ServiceMapDiagnosticButton selection={selectedServiceNodeForFlyout ?? undefined} />
             </ReactFlow>
             <MapPopover
               selectedNode={selectedNodeForPopover}
