@@ -91,6 +91,7 @@ export const WorkflowExecutionCollapseFields = [
   'status',
   'executedBy',
   'triggeredBy',
+  'workflowId',
 ] as const;
 export type WorkflowExecutionCollapseField = (typeof WorkflowExecutionCollapseFields)[number];
 

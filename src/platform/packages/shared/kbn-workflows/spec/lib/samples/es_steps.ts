@@ -358,6 +358,18 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
+    name: 'bulk-with-id-field',
+    type: 'elasticsearch.bulk',
+    with: {
+      index: 'test-index',
+      id_field: 'id',
+      operations: [
+        { id: '1', title: 'Document 1', content: 'Content for document 1' },
+        { id: '2', title: 'Document 2', content: 'Content for document 2' },
+      ],
+    },
+  },
+  {
     name: 'bulk-with-params',
     type: 'elasticsearch.bulk',
     with: {

@@ -123,6 +123,7 @@ If you provide a target in the request path, it is used for any actions that don
   paramsSchema: z.object({
     index: z.optional(types_indices),
     operations: bulkOperationsSchema,
+    id_field: z.optional(z.string()),
     ...getShapeAt(bulk2_request, 'query'),
   }),
   outputSchema: bulk_response,
