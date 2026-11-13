@@ -7,8 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ThemeProvider } from 'styled-components';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
 import { RulePanel } from '.';
 import { getStepsData } from '../../../detection_engine/common/helpers';
@@ -59,16 +57,13 @@ const flyoutHistory: FlyoutPanelHistory[] = [
   { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
 ];
 
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 const rule = { name: 'rule name', description: 'rule description' } as RuleResponse;
 const ERROR_MESSAGE = 'There was an error displaying data.';
 
 const renderRulePanel = (isPreviewMode = false) =>
   render(
     <TestProviders>
-      <ThemeProvider theme={mockTheme}>
-        <RulePanel ruleId={'ruleId'} isPreviewMode={isPreviewMode} />
-      </ThemeProvider>
+      <RulePanel ruleId={'ruleId'} isPreviewMode={isPreviewMode} />
     </TestProviders>
   );
 
