@@ -24,9 +24,55 @@ const ruleTester = new RuleTester({
 
 const EAGER = { messageId: 'eagerZodSchema' };
 const DERIVED = { messageId: 'eagerDerivedZodSchema' };
+const DOUBLE = { messageId: 'doubleLazyWrap' };
 
 ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
   valid: [
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const X = z.lazy(() => z.object({ a: z.string() }));
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        import { Node } from './node';
+        export const X = z.lazy(() => Node);
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const build = () => {
+          const Node = z.object({ a: z.string() });
+          return z.lazy(() => Node);
+        };
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const X = z.lazy(() => {
+          const base = z.object({ a: z.string() });
+          return base.clone();
+        });
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({ a: z.string() }));
+        export const X = lazySchema(() => z.object({ child: Base }));
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({ a: z.string() }));
+        export const X = z.lazy(() => z.array(Base));
+      `,
+    },
     {
       code: dedent`
         import { z } from '@kbn/zod';
@@ -205,6 +251,79 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
   ],
 
   invalid: [
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const lazyMap = lazySchema(() => z.object({ a: z.string() }));
+        const retainOnFirstUse = <T extends z.ZodType>(schema: T) => z.lazy(() => schema.clone());
+        const mapAttributesSchema = retainOnFirstUse(lazyMap);
+      `,
+      errors: [DOUBLE],
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({ a: z.string() }));
+        export const X = z.lazy(() => Base.clone());
+      `,
+      errors: [DOUBLE],
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({ a: z.string() }));
+        export const X = z.lazy(() => {
+          return Base.clone();
+        });
+      `,
+      errors: [DOUBLE],
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        import { Base } from './base';
+        export const X = z.lazy(() => Base.clone());
+      `,
+      errors: [DOUBLE],
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({ a: z.string() }));
+        export const X = z.lazy(() => Base);
+      `,
+      errors: [DOUBLE],
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = z.lazy(() => lazySchema(() => z.object({ a: z.string() })));
+      `,
+      errors: [DOUBLE],
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = lazySchema(() => z.lazy(() => z.object({ a: z.string() })));
+      `,
+      errors: [DOUBLE],
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const X = z.object({ a: z.string() });
+      `,
+      errors: [
+        {
+          message:
+            'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted and keeps the built schema in memory.',
+        },
+      ],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = lazySchema(() => z.object({ a: z.string() }));
+      `,
+    },
     {
       code: dedent`
         import { z } from '@kbn/zod/v4';
