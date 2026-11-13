@@ -146,7 +146,6 @@ export const flakyReport = (
   },
   scope: {
     pipelines: ['kibana-on-merge'],
-    separatePipelines: [],
     branches: [],
     frameworks: ['jest', 'ftr', 'cypress', 'playwright'],
     classifications: ['flaky'],

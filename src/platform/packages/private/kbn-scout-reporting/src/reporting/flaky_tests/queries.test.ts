@@ -385,12 +385,12 @@ describe('buildBranchCountsQuery', () => {
     expect(query).not.toContain('judged_pipeline');
   });
 
-  it('counts the builds of a pipeline judged on its own apart from the others', () => {
+  it('counts the builds of a pipeline that is not pooled apart from the pooled ones', () => {
     const query = buildBranchCountsQuery(
       {
         ...scope,
         pipelines: ['kibana-on-merge', 'kibana-fips'],
-        separatePipelines: ['kibana-fips'],
+        pooledPipelines: ['kibana-on-merge'],
       },
       ['jest'],
       ['j1'],
@@ -399,9 +399,18 @@ describe('buildBranchCountsQuery', () => {
 
     expect(query).toContain(
       'EVAL failed = CASE(test.status IN ("failed", "timedOut"), 1, 0), ' +
-        'judged_pipeline = CASE(buildkite.pipeline.slug IN ("kibana-fips"), buildkite.pipeline.slug, "")'
+        'judged_pipeline = CASE(buildkite.pipeline.slug IN ("kibana-on-merge"), "", buildkite.pipeline.slug)'
     );
     expect(query).toContain('BY test.id, buildkite.branch, judged_pipeline |');
+  });
+
+  it('judges every pipeline on its own when none is pooled', () => {
+    expect(
+      buildBranchCountsQuery({ ...scope, pooledPipelines: [] }, ['jest'], ['j1'], countThresholds)
+    ).toContain(
+      'EVAL failed = CASE(test.status IN ("failed", "timedOut"), 1, 0), ' +
+        'judged_pipeline = buildkite.pipeline.slug'
+    );
   });
 });
 
@@ -409,7 +418,7 @@ describe('judging pipelines on their own in the other per-branch queries', () =>
   const separate = {
     ...scope,
     pipelines: ['kibana-on-merge', 'kibana-fips'],
-    separatePipelines: ['kibana-fips'],
+    pooledPipelines: ['kibana-on-merge'],
   };
 
   it('groups the branch stats, the setups and the setup builds by the judged pipeline too', () => {

@@ -27,8 +27,8 @@ export interface FlakyTestQueryScope {
   from: Date;
   to: Date;
   pipelines: string[];
-  /** Pipelines judged on their own, per branch; absent or empty when all are judged together. */
-  separatePipelines?: string[];
+  /** Pipelines judged together, per branch, the others each on their own; absent: all pooled. */
+  pooledPipelines?: string[];
   /** Empty means no branch filter. */
   branches: string[];
 }
@@ -97,25 +97,22 @@ const scopeClauses = (scope: FlakyTestQueryScope): string[] => {
 };
 
 /**
- * What a test is judged by in the per-branch queries: the branch, and with pipelines judged on
- * their own, `judged_pipeline`, the run's pipeline when it is one of them and empty otherwise.
- * `eval` defines that column; both stay as they were without such pipelines.
+ * What a test is judged by in the per-branch queries: the branch, and with `pooledPipelines` set,
+ * `judged_pipeline`, empty for a run of a pooled pipeline and the run's pipeline otherwise.
+ * `eval` defines that column; both stay as they were when every pipeline is pooled.
  */
-const judgedBy = (scope: FlakyTestQueryScope): { eval: string[]; by: string } => {
-  const separate = scope.separatePipelines ?? [];
-  return separate.length > 0
-    ? {
-        eval: [
-          `judged_pipeline = CASE(buildkite.pipeline.slug IN (${inList(
-            separate
-          )}), buildkite.pipeline.slug, "")`,
-        ],
-        by: 'buildkite.branch, judged_pipeline',
-      }
-    : { eval: [], by: 'buildkite.branch' };
+const judgedBy = ({ pooledPipelines }: FlakyTestQueryScope): { eval: string[]; by: string } => {
+  if (pooledPipelines === undefined) {
+    return { eval: [], by: 'buildkite.branch' };
+  }
+  const judged =
+    pooledPipelines.length > 0
+      ? `CASE(buildkite.pipeline.slug IN (${inList(pooledPipelines)}), "", buildkite.pipeline.slug)`
+      : 'buildkite.pipeline.slug';
+  return { eval: [`judged_pipeline = ${judged}`], by: 'buildkite.branch, judged_pipeline' };
 };
 
-/** The pipeline a row is judged in, from `judged_pipeline`; undefined for the pooled ones. */
+/** The pipeline a row is judged in, from `judged_pipeline`; undefined for the pooled pipelines. */
 const judgedPipeline = (value: string | null | undefined): string | undefined => value || undefined;
 
 /**

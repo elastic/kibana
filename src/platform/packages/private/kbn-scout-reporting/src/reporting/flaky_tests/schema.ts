@@ -104,8 +104,8 @@ export const FlakyTestBranchStatsSchema = lazySchema(() =>
   z.object({
     branch: z.string(),
     /**
-     * The pipeline these counts are of, when it is judged on its own (`separatePipelines`); absent
-     * for the counts over the pipelines judged together. A branch can have one entry of each.
+     * The pipeline these counts are of, when it is judged on its own (not in `pooledPipelines`);
+     * absent for the counts over the pooled pipelines. A branch can have one entry of each.
      */
     pipeline: z.optional(z.string()),
     builds: z.int(),
@@ -294,11 +294,12 @@ export interface FlakyTestReportOptions {
   lookbackDays: number;
   pipelines: string[];
   /**
-   * Pipelines of `pipelines` judged on their own: the thresholds apply to their builds per branch,
-   * apart from the other pipelines, such as those running the tests in another environment (FIPS
-   * mode, Elastic Cloud). The others are judged together, per branch.
+   * Pipelines of `pipelines` whose builds are judged together, per branch, as they run the same
+   * tests in the same environment. Every other pipeline is judged per branch on its own, such as
+   * those running the tests in another environment (FIPS mode, Elastic Cloud), so that the pooled
+   * builds can't dilute them. Unset, every pipeline is pooled.
    */
-  separatePipelines: string[];
+  pooledPipelines?: string[];
   branches: string[];
   frameworks: TestFramework[];
   /** Which lists to compute; tests of an omitted classification are dropped before decoration. */
@@ -312,7 +313,6 @@ export interface FlakyTestReportOptions {
 export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'now'> = {
   lookbackDays: 7,
   pipelines: ['kibana-on-merge'],
-  separatePipelines: [],
   branches: [],
   frameworks: [...TEST_FRAMEWORKS],
   classifications: [...FLAKY_TEST_CLASSIFICATIONS],
@@ -337,10 +337,10 @@ export const FlakyTestReportSchema = lazySchema(() =>
     scope: z.object({
       pipelines: z.array(z.string()),
       /**
-       * Pipelines judged on their own (`FlakyTestReportOptions.separatePipelines`). Defaults so that
-       * reports written before the field existed still parse.
+       * Pipelines judged together (`FlakyTestReportOptions.pooledPipelines`), the others each on
+       * their own; absent when every pipeline is pooled.
        */
-      separatePipelines: z.array(z.string()).default([]),
+      pooledPipelines: z.optional(z.array(z.string())),
       /** Empty means no branch filter. */
       branches: z.array(z.string()),
       frameworks: z.array(TestFrameworkSchema),

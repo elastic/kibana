@@ -89,9 +89,9 @@ export const discoverFlakyTests: Command<void> = {
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
   The build thresholds apply per branch: a test qualifies when one branch clears all of them
-  on its own, so a clean branch cannot dilute a flaky one. The pipelines in --separatePipelines,
-  e.g. those running the tests in another environment, are judged per branch on their own, so
-  the builds of the other pipelines cannot dilute them either.
+  on its own, so a clean branch cannot dilute a flaky one. With --pooledPipelines, only those
+  pipelines' builds are counted together; every other pipeline, e.g. one running the tests in
+  another environment, is judged per branch on its own, so the pooled builds cannot dilute it.
 
   Examples:
     # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
@@ -100,8 +100,8 @@ export const discoverFlakyTests: Command<void> = {
     # Include PR builds and widen the window
     node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14
 
-    # Judge the FIPS pipeline apart from on-merge
-    node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-fips --separatePipelines kibana-fips
+    # Pool the on-merge pipelines, and judge the FIPS pipeline on its own
+    node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-security-solution-on-merge,kibana-fips --pooledPipelines kibana-on-merge,kibana-security-solution-on-merge
 
     # Only Jest and FTR, custom output path, summary suppressed
     node scripts/scout discover-flaky-tests --frameworks jest,ftr --outputPath target/flaky.json --quiet
@@ -119,7 +119,7 @@ export const discoverFlakyTests: Command<void> = {
       'esMaxRetries',
       'lookbackDays',
       'pipelines',
-      'separatePipelines',
+      'pooledPipelines',
       'branches',
       'frameworks',
       'classifications',
@@ -156,7 +156,7 @@ export const discoverFlakyTests: Command<void> = {
     --verifyTLSCerts     (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     --lookbackDays       (optional)  How many days to look back when aggregating [default: ${DEFAULT_LOOKBACK_DAYS}]
     --pipelines          (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEFAULT_PIPELINES}]
-    --separatePipelines  (optional)  Comma-separated pipelines of --pipelines judged per branch on their own, apart from the others
+    --pooledPipelines    (optional)  Comma-separated pipelines of --pipelines whose builds are counted together per branch; the others are each judged on their own [default: all pooled]
     --branches           (optional)  Comma-separated branches; no filter when omitted
     --frameworks         (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
     --classifications    (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
@@ -199,11 +199,15 @@ export const discoverFlakyTests: Command<void> = {
       throw createFlagError('--summaryWidth must be a positive integer');
     }
     const pipelines = readList(flagsReader, 'pipelines');
-    const separatePipelines = readList(flagsReader, 'separatePipelines');
-    const unread = separatePipelines.filter((pipeline) => !pipelines.includes(pipeline));
+    // unset, every pipeline is pooled; set, even to nothing, the others are each judged alone
+    const pooledPipelines =
+      flagsReader.arrayOfStrings('pooledPipelines') === undefined
+        ? undefined
+        : readList(flagsReader, 'pooledPipelines');
+    const unread = (pooledPipelines ?? []).filter((pipeline) => !pipelines.includes(pipeline));
     if (unread.length > 0) {
       throw createFlagError(
-        `--separatePipelines must be pipelines of --pipelines, ${unread.join(', ')} isn't`
+        `--pooledPipelines must be pipelines of --pipelines, ${unread.join(', ')} isn't`
       );
     }
 
@@ -224,7 +228,7 @@ export const discoverFlakyTests: Command<void> = {
       {
         lookbackDays,
         pipelines,
-        separatePipelines,
+        pooledPipelines,
         branches: readList(flagsReader, 'branches'),
         frameworks: frameworks.length > 0 ? frameworks : defaults.frameworks,
         classifications,
