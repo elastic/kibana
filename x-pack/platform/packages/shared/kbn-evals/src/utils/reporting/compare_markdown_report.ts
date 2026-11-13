@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
-import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
+import { getEffectDirection } from './effect_direction';
+import type { EffectDirection, WithEffectSign } from './effect_direction';
+import { countHolmFamily, getEffectivePValue } from './holm_correction';
+import type { CorrectableComparisonResult } from './holm_correction';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -30,15 +33,37 @@ function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
+const OUTCOME_LABELS: Record<EffectDirection, string> = {
+  improved: 'Improvement',
+  worse: 'Regression',
+  unchanged: '-',
+  mixed: 'Mixed',
+};
+
+export interface MarkdownRegressionGateOptions {
+  minPairs: number;
+  evaluators?: readonly string[];
+}
+
+const NOT_GATED_SUFFIX = ' (not gated)';
+
+const isGated = (
+  result: CorrectableComparisonResult,
+  gate: MarkdownRegressionGateOptions
+): boolean =>
+  result.sampleSize >= gate.minPairs &&
+  (!gate.evaluators || gate.evaluators.includes(result.evaluatorName));
+
 function formatOutcome(
-  delta: number,
-  direction: Direction,
-  pValue: number | null,
-  threshold: number
+  result: WithEffectSign<CorrectableComparisonResult>,
+  threshold: number,
+  gate: MarkdownRegressionGateOptions | undefined
 ): string {
+  const pValue = getEffectivePValue(result);
   if (pValue === null || !Number.isFinite(pValue) || pValue >= threshold) return '-';
-  if (direction === 'neutral') return '-';
-  return isImproved(delta, direction) ? 'Improvement' : 'Regression';
+  const direction = getEffectDirection(result);
+  const label = OUTCOME_LABELS[direction];
+  return direction === 'worse' && gate && !isGated(result, gate) ? label + NOT_GATED_SUFFIX : label;
 }
 
 function formatDifference(value: number): string {
@@ -78,10 +103,11 @@ export function formatMarkdownCompareReport({
   skippedMissingPairs = 0,
   skippedNullScores = 0,
   baselineBranch = 'main',
+  regressionGate,
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
-  results: ComparisonResult[];
+  results: Array<WithEffectSign<CorrectableComparisonResult>>;
   significanceThreshold?: number;
   comparePageUrl?: string;
   baselineTimestamp?: string;
@@ -90,18 +116,21 @@ export function formatMarkdownCompareReport({
   skippedMissingPairs?: number;
   skippedNullScores?: number;
   baselineBranch?: string;
+  /** When the regression gate runs, regressions it cannot trip on are marked "(not gated)". */
+  regressionGate?: MarkdownRegressionGateOptions;
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
       a.datasetName.localeCompare(b.datasetName) || a.evaluatorName.localeCompare(b.evaluatorName)
   );
 
-  const significantCount = sortedResults.filter(
-    (result) =>
-      result.pValue !== null &&
-      Number.isFinite(result.pValue) &&
-      result.pValue < significanceThreshold
-  ).length;
+  const isSignificant = (result: CorrectableComparisonResult): boolean => {
+    const pValue = getEffectivePValue(result);
+    return pValue !== null && Number.isFinite(pValue) && pValue < significanceThreshold;
+  };
+  const multiplicityCorrected = sortedResults.some((result) => result.adjustedPValue !== undefined);
+
+  const significantCount = sortedResults.filter(isSignificant).length;
 
   const lines: string[] = [];
 
@@ -123,7 +152,13 @@ export function formatMarkdownCompareReport({
     }
   }
 
-  lines.push(`Significance threshold: p < ${significanceThreshold}`);
+  lines.push(
+    multiplicityCorrected
+      ? `Significance threshold: Holm-Bonferroni adjusted p < ${significanceThreshold} (across ${countHolmFamily(
+          sortedResults
+        )} comparisons; raw p-values shown alongside)`
+      : `Significance threshold: p < ${significanceThreshold}`
+  );
   lines.push(
     `Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
   );
@@ -171,19 +206,20 @@ export function formatMarkdownCompareReport({
 
   lines.push('');
 
-  const significantResults = sortedResults.filter(
-    (r) => r.pValue !== null && Number.isFinite(r.pValue) && r.pValue < significanceThreshold
-  );
-  const nonSignificantResults = sortedResults.filter(
-    (r) => r.pValue === null || !Number.isFinite(r.pValue) || r.pValue >= significanceThreshold
-  );
+  const significantResults = sortedResults.filter(isSignificant);
+  const nonSignificantResults = sortedResults.filter((r) => !isSignificant(r));
 
-  const renderTable = (rows: ComparisonResult[]) => {
+  const renderTable = (rows: CorrectableComparisonResult[]) => {
     const tableLines: string[] = [];
+    const adjustedHeader = multiplicityCorrected ? ' Adj. p-value |' : '';
     tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value | Sig | Outcome |`
+      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value |${adjustedHeader} Sig | Outcome |`
     );
-    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    tableLines.push(
+      `| --- | --- | --- | --- | --- | --- | --- | --- |${
+        multiplicityCorrected ? ' --- |' : ''
+      } --- | --- |`
+    );
     rows.forEach((r) => {
       const delta = r.meanTarget - r.meanBaseline;
       const cols = [
@@ -195,8 +231,9 @@ export function formatMarkdownCompareReport({
         formatDifference(delta) + formatDiscordantPairs(r.hypothesisTest),
         getTestLabel(r.hypothesisTest.id),
         formatPValue(r.pValue),
-        formatSig(r.pValue, significanceThreshold),
-        formatOutcome(delta, r.direction, r.pValue, significanceThreshold),
+        ...(multiplicityCorrected ? [formatPValue(r.adjustedPValue ?? null)] : []),
+        formatSig(getEffectivePValue(r), significanceThreshold),
+        formatOutcome(r, significanceThreshold, regressionGate),
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);
     });
@@ -208,6 +245,15 @@ export function formatMarkdownCompareReport({
     lines.push('');
     lines.push(renderTable(significantResults));
     lines.push('');
+    const hasUngatedRegression = significantResults.some((result) =>
+      formatOutcome(result, significanceThreshold, regressionGate).endsWith(NOT_GATED_SUFFIX)
+    );
+    if (regressionGate && hasUngatedRegression) {
+      lines.push(
+        `_Regression (not gated)_: fewer than ${regressionGate.minPairs} pairs or outside \`--regression-evaluators\`, so it cannot fail the regression gate.`
+      );
+      lines.push('');
+    }
   }
 
   if (nonSignificantResults.length > 0) {

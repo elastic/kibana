@@ -6,8 +6,8 @@
  */
 
 import Fs from 'fs';
-import { createFlagError } from '@kbn/dev-cli-errors';
-import type { Command } from '@kbn/dev-cli-runner';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
+import type { Command, RunContext } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import { compareScores, pairScores } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
@@ -18,10 +18,24 @@ import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
+import { averageMatchedRepetitions } from '../../utils/reporting/average_repetitions';
+import { attachEffectSigns } from '../../utils/reporting/effect_direction';
+import { applyHolmCorrection } from '../../utils/reporting/holm_correction';
+import { retestWilcoxonWithExactTies } from '../../utils/reporting/wilcoxon_ties';
+import {
+  DEFAULT_REGRESSION_MIN_PAIRS,
+  evaluateRegressionGate,
+  formatRegressionGateReport,
+} from '../../utils/reporting/regression_gate';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
-export const compareCmd: Command<void> = {
+// Exit 1 stays with usage and unexpected errors (including ones the CLI runner raises before this
+// command runs), so a regression needs a code of its own.
+export const GATE_INCONCLUSIVE_EXIT_CODE = 2;
+export const GATE_REGRESSION_EXIT_CODE = 3;
+
+export const compareCmd = {
   name: 'compare',
   description: `
   Compare two evaluation experiments with a paired statistical test per dataset and evaluator.
@@ -42,6 +56,28 @@ export const compareCmd: Command<void> = {
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
     --space-ids        Spaces the experiments were run in (same value as "evals run")
 
+  Regression gate:
+    --fail-on-regression            Exit non-zero if any evaluator got significantly worse
+                                    (direction-aware; higher-is-better and lower-is-better
+                                    evaluators are both handled, neutral ones never trip).
+                                    Exit codes: 0 passed, 1 usage or unexpected error, 2
+                                    inconclusive or not evaluated (no baseline, no scores or
+                                    pairs, nothing checkable, no evaluator matched), 3
+                                    significant regression. Pairs per example: repetitions are
+                                    averaged over the count both runs share
+    --regression-evaluators         Comma-separated evaluator names that can trip the gate
+                                    (default: all). Names absent from the
+                                    comparison warn; if none match, the run fails.
+                                    Requires --fail-on-regression.
+    --min-pairs                     Minimum paired examples for an evaluator to be gated
+                                    (default: ${DEFAULT_REGRESSION_MIN_PAIRS}). Fewer pairs are reported as
+                                    "insufficient pairs" and cannot trip the gate.
+                                    Requires --fail-on-regression.
+    --multiplicity-correction       Holm-Bonferroni adjust p-values across all comparisons in the
+                                    run and show both raw and adjusted values. On by default with
+                                    --fail-on-regression; off otherwise, to match the evals UI.
+    --no-multiplicity-correction    Judge significance on raw p-values, also under the gate.
+
   Environment:
     EVAL_KBN_URL      Target Kibana URL (defaults to localhost)
     EVAL_KBN_API_KEY  API key for authenticating to the target Kibana
@@ -56,7 +92,13 @@ export const compareCmd: Command<void> = {
       'output',
       'refresh-url',
       'space-ids',
+      'regression-evaluators',
+      'min-pairs',
     ],
+    boolean: ['fail-on-regression', 'multiplicity-correction'],
+    // null survives getopts' boolean defaulting, so an absent flag stays distinguishable from
+    // --no-multiplicity-correction.
+    default: { 'fail-on-regression': false, 'multiplicity-correction': null },
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
       --suite            Suite ID filter for baseline lookup and score filtering
@@ -65,9 +107,14 @@ export const compareCmd: Command<void> = {
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
       --space-ids        Spaces the experiments were run in
+      --fail-on-regression            Exit 3 if any evaluator got significantly worse, 2 if the gate was inconclusive or not evaluated
+      --regression-evaluators         Comma-separated evaluator names that can trip the gate (default: all)
+      --min-pairs                     Minimum paired examples for an evaluator to be gated (default: ${DEFAULT_REGRESSION_MIN_PAIRS})
+      --multiplicity-correction       Holm-Bonferroni adjust p-values (default with --fail-on-regression)
+      --no-multiplicity-correction    Use raw p-values, also under --fail-on-regression
     `,
   },
-  run: async ({ log, flagsReader }) => {
+  run: async ({ log, flags, flagsReader }: RunContext) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
     const suiteId = flagsReader.string('suite');
@@ -75,12 +122,52 @@ export const compareCmd: Command<void> = {
     const kibanaUrl = flagsReader.string('kibana-url');
     const outputPath = flagsReader.string('output');
     const refreshUrl = flagsReader.string('refresh-url');
+    const failOnRegression = flagsReader.boolean('fail-on-regression');
+    const rawMultiplicityCorrection = flags['multiplicity-correction'];
+    const multiplicityCorrection =
+      typeof rawMultiplicityCorrection === 'boolean' ? rawMultiplicityCorrection : failOnRegression;
+    const rawRegressionEvaluators = flagsReader.string('regression-evaluators');
+    const regressionEvaluators = rawRegressionEvaluators
+      ?.split(',')
+      .map((name) => name.trim())
+      .filter(Boolean);
+    const rawMinPairs = flagsReader.string('min-pairs');
     // Scores are only readable from the spaces they were ingested into, so a
     // comparison has to be made from where the runs put them.
     const spaceIds = readSpaceIdsFlag(flagsReader) ?? getSpaceIdsFromEnv();
 
+    // "Nothing to compare" means the gate was not evaluated. Under --fail-on-regression that gets
+    // its own exit code; otherwise it stays the plain error it always was.
+    const nothingToCompare = (message: string): Error =>
+      failOnRegression
+        ? createFailError(`${message} --fail-on-regression: regression gate was NOT evaluated.`, {
+            exitCode: GATE_INCONCLUSIVE_EXIT_CODE,
+          })
+        : new Error(message);
+
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
+    }
+
+    // Both only shape the gate; accepting them without it would look like a gated run that is not.
+    if (!failOnRegression && (rawMinPairs !== undefined || rawRegressionEvaluators !== undefined)) {
+      throw createFlagError(
+        '--min-pairs and --regression-evaluators only apply with --fail-on-regression.'
+      );
+    }
+
+    // FlagsReader.number uses parseFloat, which would accept "10abc".
+    if (rawMinPairs !== undefined && !/^\s*\d+\s*$/.test(rawMinPairs)) {
+      throw createFlagError('--min-pairs must be a positive integer.');
+    }
+    const minPairs =
+      rawMinPairs === undefined ? DEFAULT_REGRESSION_MIN_PAIRS : Number(rawMinPairs.trim());
+    if (minPairs < 1 || !Number.isSafeInteger(minPairs)) {
+      throw createFlagError('--min-pairs must be a positive integer.');
+    }
+
+    if (rawRegressionEvaluators !== undefined && regressionEvaluators?.length === 0) {
+      throw createFlagError('--regression-evaluators must list at least one evaluator name.');
     }
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
@@ -138,6 +225,7 @@ export const compareCmd: Command<void> = {
         const resolved = await evalsClient.findLatestExperimentForBuild({
           suiteId,
           baseExecutionId: targetExperimentId,
+          throwOnError: failOnRegression,
         });
         if (resolved) {
           log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
@@ -164,12 +252,14 @@ export const compareCmd: Command<void> = {
         branch: baselineBranch,
         taskModelId,
         excludeExecutionId: targetExperimentId,
+        throwOnError: failOnRegression,
       });
 
       if (!baselineMetadata) {
-        log.warning(
-          `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.`
-        );
+        const message = `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.`;
+        // A missing baseline must not look like a clean pass in CI.
+        if (failOnRegression) throw nothingToCompare(message);
+        log.warning(message);
         return;
       }
 
@@ -197,6 +287,7 @@ export const compareCmd: Command<void> = {
           const resolved = await evalsClient.findLatestExperimentForBuild({
             suiteId,
             baseExecutionId: id,
+            throwOnError: failOnRegression,
           });
           if (resolved) {
             log.info(`Resolved experiment ${id} → ${resolved.executionId}`);
@@ -215,6 +306,7 @@ export const compareCmd: Command<void> = {
           const baselineBaseId = baselineExperimentId.includes('::')
             ? baselineExperimentId.split('::')[0]
             : baselineExperimentId;
+          // Only feeds the report header, so a failed lookup is logged by the client and skipped.
           baselineMetadata = await evalsClient.findLatestExperimentForBuild({
             suiteId,
             baseExecutionId: baselineBaseId,
@@ -226,17 +318,21 @@ export const compareCmd: Command<void> = {
     const targetFilter = suiteId ? { suiteId, executionId: targetExperimentId } : undefined;
     const baselineFilter = suiteId ? { suiteId, executionId: baselineExperimentId } : undefined;
 
+    // Under the gate a failed request has to stay an error (exit 1): read as "no baseline" or "no
+    // scores" it would turn an outage into an inconclusive gate. Without the gate the lookups keep
+    // their log-and-continue behaviour.
+    const readOptions = { throwOnError: failOnRegression };
     const [targetExperimentScores, baselineExperimentScores] = await Promise.all([
-      evalsClient.getExperimentScores(targetExperimentId, targetFilter),
-      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
+      evalsClient.getExperimentScores(targetExperimentId, targetFilter, readOptions),
+      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter, readOptions),
     ]);
 
     if (targetExperimentScores.length === 0) {
-      throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
+      throw nothingToCompare(`No scores found for experiment ID: ${targetExperimentId}`);
     }
 
     if (baselineExperimentScores.length === 0) {
-      throw new Error(`No scores found for experiment ID: ${baselineExperimentId}`);
+      throw nothingToCompare(`No scores found for experiment ID: ${baselineExperimentId}`);
     }
 
     const targetExperimentDatasets = new Map(
@@ -253,7 +349,7 @@ export const compareCmd: Command<void> = {
     );
 
     if (overlappingDatasetIds.length === 0) {
-      throw new Error('No overlapping datasets found between the two experiments.');
+      throw nothingToCompare('No overlapping datasets found between the two experiments.');
     }
 
     log.info(`Found ${overlappingDatasetIds.length} overlapping dataset(s).`);
@@ -266,24 +362,74 @@ export const compareCmd: Command<void> = {
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
-    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      filteredTargetScores,
-      filteredBaselineScores
-    );
+    // The gate pairs per example, not per repetition: repetitions of one example are not
+    // independent, and counting them as pairs would inflate n for --min-pairs and shrink every
+    // p-value. Without the gate, pairing stays per repetition so the report matches the evals UI and
+    // compare route, which still pair that way.
+    const averaged = failOnRegression
+      ? averageMatchedRepetitions(filteredTargetScores, filteredBaselineScores)
+      : undefined;
+    const { pairs, skippedMissingPairs, skippedNullScores } = averaged
+      ? pairScores(averaged.target, averaged.baseline)
+      : pairScores(filteredTargetScores, filteredBaselineScores);
 
     if (pairs.length === 0) {
-      throw new Error('No paired scores found between the two experiments.');
+      throw nothingToCompare('No paired scores found between the two experiments.');
     }
 
     log.info(
-      `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
+      `Paired ${pairs.length} ${
+        averaged ? 'example scores, repetitions averaged' : 'scores'
+      } (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
+    if (averaged && averaged.trimmedExamples > 0) {
+      log.warning(
+        `${averaged.trimmedExamples} example(s) had a different number of usable repetitions in the two runs; each was averaged over the count both runs have.`
+      );
+    }
 
-    const results = compareScores(pairs);
-    if (results.length === 0) {
+    // Averaged repetitions are fractions like 1/3 whose differences tie only up to roundoff, so the
+    // gated Wilcoxon rows are re-run with exact ties. The un-gated report keeps the shared result
+    // (as the UI does), while its outcome label is signed from rounded differences.
+    const comparisonResults = averaged
+      ? retestWilcoxonWithExactTies(compareScores(pairs), pairs)
+      : compareScores(pairs);
+    if (comparisonResults.length === 0) {
+      if (failOnRegression) throw nothingToCompare('No comparison results returned.');
       log.warning('No comparison results returned.');
       return;
     }
+
+    if (regressionEvaluators) {
+      const known = new Set(comparisonResults.map((result) => result.evaluatorName));
+      const unknown = regressionEvaluators.filter((name) => !known.has(name));
+      if (failOnRegression && unknown.length === regressionEvaluators.length) {
+        // Every name missing means the gate would check nothing and pass vacuously. The flag is
+        // well-formed, so this is a mismatch with the data (often a typo or the wrong suite).
+        throw createFailError(
+          `--regression-evaluators matches no evaluator in this comparison. Available: ${[...known]
+            .sort()
+            .join(', ')}`,
+          { exitCode: GATE_INCONCLUSIVE_EXIT_CODE }
+        );
+      }
+      if (unknown.length > 0) {
+        // Partial mismatch is only a warning: one list may be shared across suites with different evaluators.
+        log.warning(
+          `--regression-evaluators names evaluator(s) not present in this comparison: ${unknown.join(
+            ', '
+          )}. Available: ${[...known].sort().join(', ')}`
+        );
+      }
+    }
+
+    // Holm runs over every comparison in this run (all datasets x evaluators), so the family is
+    // the full set of hypotheses the report shows. Gate scoping does not shrink it: the gate is
+    // judged on the same adjusted p-values the report prints.
+    const results = attachEffectSigns(
+      multiplicityCorrection ? applyHolmCorrection(comparisonResults) : comparisonResults,
+      pairs
+    );
 
     if (format === 'markdown') {
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
@@ -310,6 +456,9 @@ export const compareCmd: Command<void> = {
         skippedMissingPairs,
         skippedNullScores,
         baselineBranch: baselineBranch ?? undefined,
+        regressionGate: failOnRegression
+          ? { minPairs, evaluators: regressionEvaluators }
+          : undefined,
       });
 
       if (outputPath) {
@@ -328,5 +477,22 @@ export const compareCmd: Command<void> = {
       log.info(`\n\n${report.header.join('\n')}`);
       log.info(`\n${report.summary}\n${report.tableOutput}`);
     }
+
+    if (failOnRegression) {
+      const decision = evaluateRegressionGate({
+        results,
+        minPairs,
+        evaluators: regressionEvaluators,
+      });
+      const gateReport = formatRegressionGateReport({ decision, minPairs });
+
+      if (decision.status === 'tripped') {
+        throw createFailError(gateReport, { exitCode: GATE_REGRESSION_EXIT_CODE });
+      }
+      if (decision.status === 'inconclusive') {
+        throw createFailError(gateReport, { exitCode: GATE_INCONCLUSIVE_EXIT_CODE });
+      }
+      log.info(gateReport);
+    }
   },
-};
+} satisfies Command<void>;

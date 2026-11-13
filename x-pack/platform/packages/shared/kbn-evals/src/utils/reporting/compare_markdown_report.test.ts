@@ -8,6 +8,7 @@
 import type { ComparisonResult } from '@kbn/evals-common';
 import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import { formatMarkdownCompareReport } from './compare_markdown_report';
+import { applyHolmCorrection } from './holm_correction';
 
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
@@ -275,6 +276,97 @@ describe('formatMarkdownCompareReport', () => {
       expect(dataRow).not.toContain('Regression');
     });
 
+    it('shows Mixed when the rank test and the mean disagree on the direction', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [{ ...makeResult({ meanTarget: 0.6, meanBaseline: 0.8 }), effectSign: 1 }],
+      });
+      const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
+      expect(dataRow).toContain('| Mixed |');
+      expect(dataRow).not.toContain('Regression');
+    });
+
+    it('never shows Mixed for a neutral evaluator', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [
+          {
+            ...makeResult({ meanTarget: 0.6, meanBaseline: 0.8, direction: 'neutral' }),
+            effectSign: 1,
+          },
+        ],
+      });
+      const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
+      expect(dataRow).not.toContain('Mixed');
+      expect(dataRow).toContain('| - |');
+    });
+  });
+
+  describe('regression gate annotations', () => {
+    const regressed = (overrides: Partial<ComparisonResult> = {}) =>
+      makeResult({ meanTarget: 0.6, meanBaseline: 0.8, pValue: 0.01, ...overrides });
+    const NOT_GATED_LEGEND = '_Regression (not gated)_: fewer than 10 pairs';
+    const rowFor = (output: string, evaluatorName: string) =>
+      output.split('\n').find((l) => l.includes(`| ${evaluatorName} |`));
+
+    it('marks a regression with fewer than --min-pairs pairs as not gated', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [
+          regressed({ evaluatorName: 'Small', sampleSize: 9 }),
+          regressed({ evaluatorName: 'Exact', sampleSize: 10 }),
+        ],
+        regressionGate: { minPairs: 10 },
+      });
+
+      expect(rowFor(output, 'Small')).toContain('| Regression (not gated) |');
+      expect(rowFor(output, 'Exact')).toContain('| Regression |');
+      expect(output).toContain(NOT_GATED_LEGEND);
+    });
+
+    it('marks a regression outside --regression-evaluators as not gated', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [
+          regressed({ evaluatorName: 'Gated' }),
+          regressed({ evaluatorName: 'Ignored' }),
+          makeResult({ evaluatorName: 'Better', sampleSize: 2, pValue: 0.01 }),
+        ],
+        regressionGate: { minPairs: 10, evaluators: ['Gated'] },
+      });
+
+      expect(rowFor(output, 'Gated')).toContain('| Regression |');
+      expect(rowFor(output, 'Ignored')).toContain('| Regression (not gated) |');
+      expect(rowFor(output, 'Better')).toContain('| Improvement |');
+      expect(output).toContain(NOT_GATED_LEGEND);
+    });
+
+    it('adds no legend when every regression is gated', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [regressed(), makeResult({ evaluatorName: 'Better', sampleSize: 2 })],
+        regressionGate: { minPairs: 10 },
+      });
+
+      expect(output).not.toContain('(not gated)');
+    });
+
+    it('leaves the outcome unannotated when the gate is not running', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [regressed({ sampleSize: 2 })],
+      });
+
+      expect(rowFor(output, 'Criteria')).toContain('| Regression |');
+      expect(output).not.toContain('(not gated)');
+    });
+
     it('shows - for non-significant results regardless of direction', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',
@@ -366,6 +458,51 @@ describe('formatMarkdownCompareReport', () => {
 
       expect(output).not.toContain('Warning');
       expect(output).toContain('yesterday');
+    });
+  });
+
+  describe('multiplicity correction', () => {
+    const manyResults = Array.from({ length: 10 }, (_, i) =>
+      makeResult({ evaluatorName: `Eval${i}`, pValue: i === 0 ? 0.03 : 0.9 })
+    );
+
+    it('shows raw and adjusted p-values and bases Sig on the adjusted one', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: applyHolmCorrection(manyResults),
+      });
+
+      expect(output).toContain('| p-value | Adj. p-value | Sig | Outcome |');
+      expect(output).toContain('Holm-Bonferroni adjusted p < 0.05');
+      expect(output).toContain('| 0.03 | 0.30 | No | - |');
+      expect(output).toContain('No significant regressions detected');
+      expect(output).not.toContain('**Significant changes**');
+    });
+
+    it('sizes the Holm family by rows with a finite p-value, not by every row', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: applyHolmCorrection([
+          makeResult({ evaluatorName: 'A', pValue: 0.01 }),
+          makeResult({ evaluatorName: 'B', pValue: 0.5 }),
+          makeResult({ evaluatorName: 'C', pValue: null }),
+        ]),
+      });
+
+      expect(output).toContain('across 2 comparisons;');
+    });
+
+    it('keeps the single-p-value layout when no correction was applied', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: manyResults,
+      });
+
+      expect(output).not.toContain('Adj. p-value');
+      expect(output).toContain('| 0.03 | Yes | Improvement |');
     });
   });
 });

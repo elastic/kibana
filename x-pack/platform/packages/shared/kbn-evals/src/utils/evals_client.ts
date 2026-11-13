@@ -69,6 +69,14 @@ interface GetExperimentFilters {
   executionId?: string;
 }
 
+interface ReadOptions {
+  /**
+   * Rethrow a failed request instead of logging it and returning an empty result, for callers
+   * that must tell "nothing found" apart from "could not ask".
+   */
+  throwOnError?: boolean;
+}
+
 export interface UpsertDatasetInput {
   name: string;
   description: string;
@@ -194,6 +202,9 @@ const buildExperimentQuery = (options?: GetExperimentFilters) => ({
 
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
 
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 export class EvalsClient {
   /** The spaces this run writes to, in the order they were listed. */
   private readonly spaceIds: string[];
@@ -276,7 +287,8 @@ export class EvalsClient {
 
   async getExperimentScores(
     experimentId: string,
-    options?: GetExperimentFilters
+    options?: GetExperimentFilters,
+    { throwOnError = false }: ReadOptions = {}
   ): Promise<EvaluationScoreDocument[]> {
     try {
       const response = await this.kbnClient.request({
@@ -297,11 +309,11 @@ export class EvalsClient {
 
       return parsed.scores;
     } catch (error: unknown) {
-      this.log.error(
-        `Failed to retrieve scores for experiment ID ${experimentId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      const message = `Failed to retrieve scores for experiment ID ${experimentId}: ${getErrorMessage(
+        error
+      )}`;
+      if (throwOnError) throw new Error(message, { cause: error });
+      this.log.error(message);
       return [];
     }
   }
@@ -464,11 +476,12 @@ export class EvalsClient {
     suiteId,
     branch,
     baseExecutionId,
+    throwOnError = false,
   }: {
     suiteId: string;
     branch?: string;
     baseExecutionId: string;
-  }): Promise<BaselineExperiment | undefined> {
+  } & ReadOptions): Promise<BaselineExperiment | undefined> {
     try {
       // metadata.ci.build_id stores the raw BUILDKITE_BUILD_ID without the "bk-" prefix.
       const rawBuildId = baseExecutionId.startsWith('bk-')
@@ -504,11 +517,11 @@ export class EvalsClient {
         gitBranch: match.git_branch ?? null,
       };
     } catch (error: unknown) {
-      this.log.error(
-        `Failed to find experiment for build ${baseExecutionId} on branch ${branch}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      const message = `Failed to find experiment for build ${baseExecutionId} on branch ${branch}: ${getErrorMessage(
+        error
+      )}`;
+      if (throwOnError) throw new Error(message, { cause: error });
+      this.log.error(message);
       return undefined;
     }
   }
@@ -518,12 +531,13 @@ export class EvalsClient {
     branch,
     taskModelId,
     excludeExecutionId,
+    throwOnError = false,
   }: {
     suiteId: string;
     branch: string;
     taskModelId?: string;
     excludeExecutionId?: string;
-  }): Promise<BaselineExperiment | undefined> {
+  } & ReadOptions): Promise<BaselineExperiment | undefined> {
     try {
       const response = await this.kbnClient.request({
         path: this.path(EVALS_EXPERIMENTS_URL),
@@ -554,11 +568,11 @@ export class EvalsClient {
         gitBranch: match.git_branch ?? null,
       };
     } catch (error: unknown) {
-      this.log.error(
-        `Failed to find baseline experiment for suite ${suiteId} on branch ${branch}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      const message = `Failed to find baseline experiment for suite ${suiteId} on branch ${branch}: ${getErrorMessage(
+        error
+      )}`;
+      if (throwOnError) throw new Error(message, { cause: error });
+      this.log.error(message);
       return undefined;
     }
   }

@@ -7,8 +7,10 @@
 
 import chalk from 'chalk';
 import { table } from 'table';
-import { isImproved } from '@kbn/evals-common';
-import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import { getEffectDirection } from './effect_direction';
+import type { EffectDirection, WithEffectSign } from './effect_direction';
+import { countHolmFamily, getEffectivePValue } from './holm_correction';
+import type { CorrectableComparisonResult } from './holm_correction';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -24,18 +26,23 @@ function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
-function formatDifference(value: number, direction: Direction): string {
+const DIFFERENCE_STYLES: Record<EffectDirection, (formatted: string) => string> = {
+  improved: (formatted) => chalk.green(formatted),
+  worse: (formatted) => chalk.red(formatted),
+  unchanged: (formatted) => formatted,
+  // The rank test and the mean disagree, so neither color would be honest.
+  mixed: (formatted) => chalk.yellow(`${formatted} (mixed)`),
+};
+
+function formatDifference(value: number, effect: EffectDirection, significant: boolean): string {
   if (!Number.isFinite(value)) {
     return chalk.gray('-');
   }
 
   const formatted = value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
-
-  if (value === 0 || direction === 'neutral') {
-    return formatted;
-  }
-
-  return isImproved(value, direction) ? chalk.green(formatted) : chalk.red(formatted);
+  // A disagreement between test and mean only matters once the test calls the row significant.
+  const style = effect === 'mixed' && !significant ? 'unchanged' : effect;
+  return DIFFERENCE_STYLES[style](formatted);
 }
 
 function buildTableConfig(columnCount: number): {
@@ -61,7 +68,7 @@ export function formatCompareReport({
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
-  results: ComparisonResult[];
+  results: Array<WithEffectSign<CorrectableComparisonResult>>;
   significanceThreshold?: number;
 }): {
   header: string[];
@@ -74,9 +81,17 @@ export function formatCompareReport({
       a.datasetName.localeCompare(b.datasetName) || a.evaluatorName.localeCompare(b.evaluatorName)
   );
 
-  const significantCount = sortedResults.filter(
-    (result) => result.pValue !== null && result.pValue < significanceThreshold
-  ).length;
+  const hasPValue = (result: CorrectableComparisonResult): boolean => {
+    const pValue = getEffectivePValue(result);
+    return pValue !== null && Number.isFinite(pValue);
+  };
+  const isSignificant = (result: CorrectableComparisonResult): boolean => {
+    const pValue = getEffectivePValue(result);
+    return pValue !== null && pValue < significanceThreshold;
+  };
+  const multiplicityCorrected = sortedResults.some((result) => result.adjustedPValue !== undefined);
+
+  const significantCount = sortedResults.filter(isSignificant).length;
 
   const tableHeaders = [
     'Evaluator',
@@ -86,19 +101,19 @@ export function formatCompareReport({
     'Diff',
     'Test',
     'p-value',
+    ...(multiplicityCorrected ? ['Adj. p-value'] : []),
     'Significant',
   ];
   const rowsByDataset = new Map<string, string[][]>();
 
   sortedResults.forEach((result) => {
     const delta = result.meanTarget - result.meanBaseline;
-    const isSignificant = result.pValue !== null && result.pValue < significanceThreshold;
-    const significanceLabel =
-      result.pValue === null
-        ? chalk.gray('n/a')
-        : isSignificant
-        ? chalk.bold.green('yes')
-        : chalk.gray('no');
+    const significant = isSignificant(result);
+    const significanceLabel = !hasPValue(result)
+      ? chalk.gray('n/a')
+      : significant
+      ? chalk.bold.green('yes')
+      : chalk.gray('no');
 
     const rows = rowsByDataset.get(result.datasetName) ?? [];
     rows.push([
@@ -106,9 +121,11 @@ export function formatCompareReport({
       result.sampleSize.toString(),
       formatNumber(result.meanTarget),
       formatNumber(result.meanBaseline),
-      formatDifference(delta, result.direction) + formatDiscordantPairs(result.hypothesisTest),
+      formatDifference(delta, getEffectDirection(result), significant) +
+        formatDiscordantPairs(result.hypothesisTest),
       getTestLabel(result.hypothesisTest.id),
       formatPValue(result.pValue),
+      ...(multiplicityCorrected ? [formatPValue(result.adjustedPValue ?? null)] : []),
       significanceLabel,
     ]);
     rowsByDataset.set(result.datasetName, rows);
@@ -117,7 +134,11 @@ export function formatCompareReport({
   const header = [
     `Target: ${targetExperimentId}`,
     `Baseline: ${baselineExperimentId}`,
-    `Significance threshold: p < ${significanceThreshold}`,
+    multiplicityCorrected
+      ? `Significance threshold: Holm-Bonferroni adjusted p < ${significanceThreshold} (across ${countHolmFamily(
+          sortedResults
+        )} comparisons)`
+      : `Significance threshold: p < ${significanceThreshold}`,
   ];
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;
   const tableOutput = [...rowsByDataset.entries()]
