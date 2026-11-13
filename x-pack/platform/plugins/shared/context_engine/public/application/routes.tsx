@@ -9,6 +9,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { ContextLandingPage } from './context_landing_page';
 import { AiIndexDetailPage } from './pages/ai_index_detail_page';
+import { AiIndexUnknownPathRedirect, UnknownPathRedirect } from './pages/unknown_path_redirect';
 import { CONTEXT_ENGINE_PATHS } from './paths';
 
 export const ContextEngineRoutes = () => (
@@ -23,5 +24,7 @@ export const ContextEngineRoutes = () => (
       component={AiIndexDetailPage}
     />
     <Route path={CONTEXT_ENGINE_PATHS.landing} exact component={ContextLandingPage} />
+    <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexUnknownPathRedirect} />
+    <Route component={UnknownPathRedirect} />
   </Routes>
 );
