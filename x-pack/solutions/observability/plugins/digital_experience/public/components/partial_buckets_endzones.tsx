@@ -6,23 +6,11 @@
  */
 
 import React from 'react';
-import moment from 'moment-timezone';
 import { useEuiTheme } from '@elastic/eui';
 import { Endzones } from '@kbn/charts-plugin/public';
 import type { HistogramInterval } from '../../common/types/applications';
 import type { QueriedRange } from '../utils/time_range_query';
-
-/** The interval of a chart without buckets, which shades nothing. */
-export const NO_BUCKETS_INTERVAL: HistogramInterval = { value: 1, unit: 's' };
-
-/** The end of the bucket starting at `key`, in `timeZone`, as a calendar month or day can vary. */
-export const getBucketEnd = (
-  key: number,
-  { value, unit }: HistogramInterval,
-  timeZone: string
-): number => {
-  return moment.tz(key, timeZone).add(value, unit).valueOf();
-};
+import { getBucketEnd } from '../utils/histogram_interval';
 
 /** Shades the first and last buckets of a chart where they cover only part of the queried range. */
 export function PartialBucketsEndzones({

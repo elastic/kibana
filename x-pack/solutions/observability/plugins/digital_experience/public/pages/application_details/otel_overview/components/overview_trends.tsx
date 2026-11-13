@@ -44,10 +44,8 @@ import type { HistogramInterval } from '../../../../../common/types/applications
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
 import type { QueriedRange } from '../../../../utils/time_range_query';
-import {
-  PartialBucketsEndzones,
-  getBucketEnd,
-} from '../../../../components/partial_buckets_endzones';
+import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
+import { getBucketEnd } from '../../../../utils/histogram_interval';
 import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,

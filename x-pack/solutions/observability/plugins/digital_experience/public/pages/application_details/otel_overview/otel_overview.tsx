@@ -25,7 +25,7 @@ import type {
 } from '../../../../common/types/overview';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
-import { NO_BUCKETS_INTERVAL } from '../../../components/partial_buckets_endzones';
+import { NO_BUCKETS_INTERVAL } from '../../../utils/histogram_interval';
 import type { QueriedRange } from '../../../utils/time_range_query';
 import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { ApplicationData, ApplicationRequest } from '../../../hooks/use_application_data';

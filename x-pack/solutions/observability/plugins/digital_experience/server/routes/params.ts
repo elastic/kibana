@@ -40,10 +40,10 @@ export const START_AFTER_END_ISSUE = {
 };
 
 // The offset `getUserTimeZone` falls back to when the browser can't name its time zone.
-const UTC_OFFSET = /^[+-]\d{2}:\d{2}$/;
+const UTC_OFFSET = /^[+-](0\d|1[0-4]):[0-5]\d$/;
 
-// The names moment-timezone (and so `dateFormat:tz`) offers that Elasticsearch rejects, as the
-// zones they link to.
+// Every `moment.tz.names()` entry (and so `dateFormat:tz` option) that an Elasticsearch 9.7
+// `date_histogram` rejects, as the zone it links to.
 const ES_TIME_ZONE_OF: Readonly<Record<string, string>> = {
   EST: 'America/Panama',
   HST: 'Pacific/Honolulu',
