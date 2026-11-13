@@ -9,7 +9,12 @@ import type { ComposerQuery } from '@elastic/esql';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { STATS_COLUMN } from './constants';
 import { groupById, indexById, numberOrNull, type EsqlRow } from './mappers/esql_rows';
-import { toFailureRate, toItemRate, type StatsFailureRate } from './mappers/stats_values';
+import {
+  toFailureRate,
+  toItemRate,
+  toPercentage,
+  type StatsFailureRate,
+} from './mappers/stats_values';
 import type { DestinationStatsQueryParams } from './query_builders/build_destination_stats_queries';
 import {
   buildElasticsearchAuthFailureBreakdownQuery,
@@ -28,9 +33,9 @@ const hasFailures = (row: EsqlRow): boolean =>
   (numberOrNull(row[STATS_COLUMN.authenticationRate]) ?? 0) > 0 ||
   (numberOrNull(row[STATS_COLUMN.authorizationRate]) ?? 0) > 0;
 
-const noFailuresFound = (): AuthFailures => ({
-  authentication: { rate: toItemRate(0) },
-  authorization: { rate: toItemRate(0) },
+const noFailuresFound = (attempts: number | null): AuthFailures => ({
+  authentication: { rate: toItemRate(0), percentage: toPercentage(0, attempts) },
+  authorization: { rate: toItemRate(0), percentage: toPercentage(0, attempts) },
 });
 
 /**
@@ -43,10 +48,12 @@ const noFailuresFound = (): AuthFailures => ({
 const queryAuthFailures = async ({
   runQuery,
   params,
+  attemptsOf,
   onFailure,
 }: {
   runQuery: (query: ComposerQuery) => Promise<EsqlRow[]>;
   params: DestinationStatsQueryParams;
+  attemptsOf: (id: string) => number | null;
   onFailure: (error: unknown, what: string) => void;
 }): Promise<Array<[string, AuthFailures]>> => {
   let rateRows: EsqlRow[];
@@ -83,11 +90,13 @@ const queryAuthFailures = async ({
       {
         authentication: toFailureRate({
           rate: numberOrNull(row[STATS_COLUMN.authenticationRate]),
+          attempts: attemptsOf(id),
           breakdownRows,
           column: STATS_COLUMN.authenticationRate,
         }),
         authorization: toFailureRate({
           rate: numberOrNull(row[STATS_COLUMN.authorizationRate]),
+          attempts: attemptsOf(id),
           breakdownRows,
           column: STATS_COLUMN.authorizationRate,
         }),
@@ -120,10 +129,15 @@ export const getElasticsearchAuthFailures = async ({
   // An id is user-defined, so `constructor` must not be read from `Object.prototype`.
   const failedRateOf = ({ id }: DestinationQueryRef): number | null =>
     Object.hasOwn(parentResults, id) ? parentResults[id].events.failed.rate.value : null;
+  // The failures are items, so what they are a share of is the incoming items.
+  const incomingRateOf = (id: string): number | null =>
+    Object.hasOwn(parentResults, id) ? parentResults[id].events.incoming.rate.value : null;
 
   const withoutFailures = destinations.flatMap(
     (destination): Array<[string, AuthFailures]> =>
-      failedRateOf(destination) === 0 ? [[destination.id, noFailuresFound()]] : []
+      failedRateOf(destination) === 0
+        ? [[destination.id, noFailuresFound(incomingRateOf(destination.id))]]
+        : []
   );
   const failing = destinations.filter((destination) => (failedRateOf(destination) ?? 0) > 0);
 
@@ -132,6 +146,7 @@ export const getElasticsearchAuthFailures = async ({
       ? await queryAuthFailures({
           runQuery,
           params: { ...baseParams, ids: failing.map(({ id }) => id) },
+          attemptsOf: incomingRateOf,
           onFailure,
         })
       : [];

@@ -71,12 +71,13 @@ const responses = {
       { name: 'id', type: 'keyword' },
       { name: 'reason', type: 'keyword' },
       { name: 'failed_rate', type: 'double' },
+      { name: 'attempts_rate', type: 'double' },
     ],
     values: [
-      ['s3-test', null, 0],
-      ['s3-test', 'SignatureDoesNotMatch', 0.146],
-      ['s3-test', 'InvalidAccessKeyId', 0.061],
-      ['s3-test', 'NoSuchBucket', 0.3],
+      ['s3-test', null, 0, 1],
+      ['s3-test', 'SignatureDoesNotMatch', 0.146, 1],
+      ['s3-test', 'InvalidAccessKeyId', 0.061, 1],
+      ['s3-test', 'NoSuchBucket', 0.3, 1],
     ],
   },
   destinationSums: {
@@ -224,15 +225,26 @@ describe('UnitStatsClient.getStats', () => {
         },
         failed: {
           rate: { value: 0, unit: '{item}', time_unit: 's' },
-          authentication: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
-          authorization: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+          percentage: { value: 0, unit: '%' },
+          authentication: {
+            rate: { value: 0, unit: '{item}', time_unit: 's' },
+            percentage: { value: 0, unit: '%' },
+          },
+          authorization: {
+            rate: { value: 0, unit: '{item}', time_unit: 's' },
+            percentage: { value: 0, unit: '%' },
+          },
         },
       },
     });
+    // `es-dev` has 4.2 items a second coming in, and its failures are shares of them.
     const { failed } = response.components.destinations['es-dev'].events;
     expect(failed.rate.value).toBe(2.4);
+    expect(failed.percentage).toEqual({ value: (2.4 / 4.2) * 100, unit: '%' });
     expect(failed.authentication.rate.value).toBe(0.5);
+    expect(failed.authentication.percentage).toEqual({ value: (0.5 / 4.2) * 100, unit: '%' });
     expect(failed.authorization.rate.value).toBe(1.9);
+    expect(failed.authorization.percentage).toEqual({ value: (1.9 / 4.2) * 100, unit: '%' });
     expect(response.components.processors['uppercase-message']).toEqual({
       instances: [
         {
@@ -508,6 +520,9 @@ describe('UnitStatsClient.getStats', () => {
 
   describe('authentication and authorization failures', () => {
     const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+    /** The share of the 4.2 items a second that `es-dev` receives. */
+    const share = (part: number) => ({ value: (part / 4.2) * 100, unit: '%' });
+    const percentage = (value: number | null) => ({ value, unit: '%' });
     const breakdownQueries = (esql: jest.Mock) =>
       statsQueries(esql).filter((query) => query.includes('INLINE STATS'));
     const authRatesQueries = (esql: jest.Mock) =>
@@ -523,23 +538,28 @@ describe('UnitStatsClient.getStats', () => {
 
       expect(response.components.destinations['es-dev'].events.failed).toEqual({
         rate: rate(2.4),
-        authentication: { rate: rate(0.5) },
+        percentage: share(2.4),
+        authentication: { rate: rate(0.5), percentage: share(0.5) },
         authorization: {
           rate: rate(1.9),
+          percentage: share(1.9),
           breakdown: [
             {
               collection: 'logs-generic.otel-default',
               reason: 'security_exception',
               rate: rate(1.9),
+              percentage: share(1.9),
             },
           ],
         },
       });
       expect(response.components.destinations['es-prod'].events.failed.authentication).toEqual({
         rate: rate(0),
+        percentage: percentage(0),
       });
       expect(response.components.destinations['es-prod'].events.failed.authorization).toEqual({
         rate: rate(0),
+        percentage: percentage(0),
       });
       expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
     });
@@ -572,8 +592,8 @@ describe('UnitStatsClient.getStats', () => {
       expect(breakdownQueries(esql)).toHaveLength(0);
       ['es-prod', 'es-dev'].forEach((id) => {
         const { failed } = response.components.destinations[id].events;
-        expect(failed.authentication).toEqual({ rate: rate(0) });
-        expect(failed.authorization).toEqual({ rate: rate(0) });
+        expect(failed.authentication).toEqual({ rate: rate(0), percentage: percentage(0) });
+        expect(failed.authorization).toEqual({ rate: rate(0), percentage: percentage(0) });
       });
     });
 
@@ -583,8 +603,8 @@ describe('UnitStatsClient.getStats', () => {
       const response = await run(esql);
 
       const { failed } = response.components.destinations.dbg.events;
-      expect(failed.authentication).toEqual({ rate: rate(null) });
-      expect(failed.authorization).toEqual({ rate: rate(null) });
+      expect(failed.authentication).toEqual({ rate: rate(null), percentage: percentage(null) });
+      expect(failed.authorization).toEqual({ rate: rate(null), percentage: percentage(null) });
       [...authRatesQueries(esql), ...breakdownQueries(esql)].forEach((query) =>
         expect(query).not.toContain('"dbg"')
       );
@@ -629,7 +649,10 @@ describe('UnitStatsClient.getStats', () => {
 
       const esDev = response.components.destinations['es-dev'];
       expect(esDev.error).toBeUndefined();
-      expect(esDev.events.failed.authorization).toEqual({ rate: rate(1.9) });
+      expect(esDev.events.failed.authorization).toEqual({
+        rate: rate(1.9),
+        percentage: share(1.9),
+      });
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('destination authentication and authorization breakdown')
@@ -646,8 +669,14 @@ describe('UnitStatsClient.getStats', () => {
       expect(esDev.error).toBeUndefined();
       expect(esDev.events.incoming.rate.value).toBe(4.2);
       expect(esDev.events.failed.rate).toEqual(rate(2.4));
-      expect(esDev.events.failed.authentication).toEqual({ rate: rate(null) });
-      expect(esDev.events.failed.authorization).toEqual({ rate: rate(null) });
+      expect(esDev.events.failed.authentication).toEqual({
+        rate: rate(null),
+        percentage: percentage(null),
+      });
+      expect(esDev.events.failed.authorization).toEqual({
+        rate: rate(null),
+        percentage: percentage(null),
+      });
       expect(breakdownQueries(esql)).toHaveLength(0);
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -695,15 +724,35 @@ describe('UnitStatsClient.getStats', () => {
     it('puts the class rates of the upload attempts in its result, in requests', async () => {
       const response = await run(s3Esql(), {}, s3Unit);
 
-      const { failed } = response.components.destinations['s3-test'].events;
+      // The attempts rate is 1 a second, so a share is the rate times 100.
+      const { failed, incoming } = response.components.destinations['s3-test'].events;
       expect(failed.authentication).toEqual({
         rate: requestRate(0.146 + 0.061),
+        percentage: { value: (0.146 + 0.061) * 100, unit: '%' },
         breakdown: [
-          { collection: null, reason: 'SignatureDoesNotMatch', rate: requestRate(0.146) },
-          { collection: null, reason: 'InvalidAccessKeyId', rate: requestRate(0.061) },
+          {
+            collection: null,
+            reason: 'SignatureDoesNotMatch',
+            rate: requestRate(0.146),
+            percentage: { value: 0.146 * 100, unit: '%' },
+          },
+          {
+            collection: null,
+            reason: 'InvalidAccessKeyId',
+            rate: requestRate(0.061),
+            percentage: { value: 0.061 * 100, unit: '%' },
+          },
         ],
       });
-      expect(failed.authorization).toEqual({ rate: requestRate(0) });
+      expect(failed.authorization).toEqual({
+        rate: requestRate(0),
+        percentage: { value: 0, unit: '%' },
+      });
+      // The total of failures is the upload attempts too, with the codes that have no class, so it
+      // agrees with its percentage and the classes. The incoming rate stays in items.
+      expect(failed.rate).toEqual(requestRate(0.146 + 0.061 + 0.3));
+      expect(failed.percentage).toEqual({ value: (0.146 + 0.061 + 0.3) * 100, unit: '%' });
+      expect(incoming.rate.unit).toBe('{item}');
       expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
     });
 

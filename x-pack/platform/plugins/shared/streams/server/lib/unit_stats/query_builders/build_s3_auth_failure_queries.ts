@@ -36,7 +36,11 @@ import {
  * its duration documents, before the failures are counted, so every code shares one denominator.
  *
  * One row for each destination and code, and a row with a null code for the destination's
- * successful uploads, whose rate is 0. A destination with no row has no duration data.
+ * successful uploads, whose failed rate is 0. A destination with no row has no duration data.
+ *
+ * `attempts_rate` is every attempt of the destination, successful or not, per second, the same on
+ * each of its rows. It is what a failed rate is a share of. A second `INLINE STATS` adds the
+ * attempts of all the codes, after the `STATS` has counted them for each code.
  */
 export const buildS3FailedUploadRatesQuery = (
   params: DestinationStatsQueryParams
@@ -46,6 +50,7 @@ export const buildS3FailedUploadRatesQuery = (
   const destinationId = normalizeColumn(DESTINATION_ID_FIELD);
   const errorType = normalizeColumn(ERROR_TYPE_FIELD);
   const failedRate = esql.col(STATS_COLUMN.failedRate);
+  const attemptsRate = esql.col(STATS_COLUMN.attemptsRate);
   const id = esql.col(STATS_COLUMN.id);
   const reason = esql.col(STATS_COLUMN.reason);
   const { end } = params.window;
@@ -54,9 +59,12 @@ export const buildS3FailedUploadRatesQuery = (
     .pipe`WHERE ${duration} IS NOT NULL`
     .pipe`INLINE STATS covered_from = MIN(start_timestamp) BY ${destinationId}`
     .pipe`STATS failed = COUNT(${duration}) WHERE ${outcome} == "failure",
+        attempts = COUNT(${duration}),
         covered_from = MIN(covered_from)
       BY ${id} = ${destinationId}, ${reason} = ${errorType}`
+    .pipe`INLINE STATS total_attempts = SUM(attempts) BY ${id}`
     .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, ${end}) / 1000.0`
-    .pipe`EVAL ${failedRate} = failed / window_seconds`.pipe`KEEP ${id}, ${reason}, ${failedRate}`
-    .pipe`LIMIT ${ESQL_MAX_ROWS}`;
+    .pipe`EVAL ${failedRate} = failed / window_seconds,
+        ${attemptsRate} = total_attempts / window_seconds`
+    .pipe`KEEP ${id}, ${reason}, ${failedRate}, ${attemptsRate}`.pipe`LIMIT ${ESQL_MAX_ROWS}`;
 };

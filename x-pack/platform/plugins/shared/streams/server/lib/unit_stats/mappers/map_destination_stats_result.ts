@@ -8,20 +8,26 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { ITEM_UNIT, SECONDS_UNIT, STATS_COLUMN } from '../constants';
 import { groupById, indexById, numberOrNull, type EsqlRow, type EsqlValue } from './esql_rows';
-import { toItemRate, toSeries, toValue } from './stats_values';
+import { toItemRate, toPercentage, toSeries, toValue } from './stats_values';
 
-type AuthFailureStats = Pick<
-  StreamsUnit.StatsDestinationResult['events']['failed'],
-  'authentication' | 'authorization'
->;
+type FailedStats = StreamsUnit.StatsDestinationResult['events']['failed'];
+
+/**
+ * What a destination type reports about its failures: the two classes, and optionally its own
+ * total of failures, for a type that counts them in another unit than the items of the totals
+ * query (S3 counts upload attempts).
+ */
+export type AuthFailureStats = Pick<FailedStats, 'authentication' | 'authorization'> & {
+  failed?: Pick<FailedStats, 'rate' | 'percentage'>;
+};
 
 /**
  * The authentication and authorization failures of a destination that has no data for them, or
  * whose type does not report them.
  */
 export const noAuthFailures = (): AuthFailureStats => ({
-  authentication: { rate: toItemRate(null) },
-  authorization: { rate: toItemRate(null) },
+  authentication: { rate: toItemRate(null), percentage: toPercentage(null, null) },
+  authorization: { rate: toItemRate(null), percentage: toPercentage(null, null) },
 });
 
 export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinationResult => ({
@@ -32,17 +38,24 @@ export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinati
       rate: toItemRate(null),
       series: { bucket_ms: bucketMs, points: [] },
     },
-    failed: { rate: toItemRate(null), ...noAuthFailures() },
+    failed: {
+      rate: toItemRate(null),
+      percentage: toPercentage(null, null),
+      ...noAuthFailures(),
+    },
   },
 });
 
-/** The result of a destination, with its authentication and authorization failures. */
+/**
+ * The result of a destination, with its authentication and authorization failures. The total of
+ * failures that its type reports, when it reports one, replaces the one of the totals query.
+ */
 export const withAuthFailures = (
   result: StreamsUnit.StatsDestinationResult,
-  authFailures: AuthFailureStats
+  { failed, ...classes }: AuthFailureStats
 ): StreamsUnit.StatsDestinationResult => ({
   ...result,
-  events: { ...result.events, failed: { ...result.events.failed, ...authFailures } },
+  events: { ...result.events, failed: { ...result.events.failed, ...failed, ...classes } },
 });
 
 /** What the two destination queries return for one destination. */
@@ -111,6 +124,10 @@ export const mapDestinationStatsRows = ({
             },
             failed: {
               rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])),
+              percentage: toPercentage(
+                numberOrNull(row[STATS_COLUMN.failedRate]),
+                numberOrNull(row[STATS_COLUMN.incomingRate])
+              ),
               ...noAuthFailures(),
             },
           },

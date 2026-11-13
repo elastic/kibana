@@ -24,14 +24,26 @@ const destination = (id: string): DestinationQueryRef => ({
 const destinations = [destination('es-prod'), destination('es-dev')];
 
 const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+/** The share of the incoming items that `part` is, when 10 items a second come in. */
+const pct = (part: number) => ({ value: (part / 10) * 100, unit: '%' });
+const noPct = { value: null, unit: '%' };
 
-/** The result of a destination so far, with the failed rate that the provider reads. */
-const resultWithFailedRate = (failedRate: number | null): StreamsUnit.StatsDestinationResult => {
+/**
+ * The result of a destination so far, with the failed rate and the incoming rate that the provider
+ * reads. 10 items a second come in unless a test says otherwise.
+ */
+const resultWithFailedRate = (
+  failedRate: number | null,
+  incomingRate: number | null = 10
+): StreamsUnit.StatsDestinationResult => {
   const { events, ...result } = noDestinationStats(60_000);
 
   return {
     ...result,
-    events: { ...events, failed: { ...events.failed, rate: toItemRate(failedRate) } },
+    events: {
+      incoming: { ...events.incoming, rate: toItemRate(incomingRate) },
+      failed: { ...events.failed, rate: toItemRate(failedRate) },
+    },
   };
 };
 
@@ -82,8 +94,14 @@ describe('getElasticsearchAuthFailures', () => {
     expect(runQuery).not.toHaveBeenCalled();
     expect(onFailure).not.toHaveBeenCalled();
     expect(result).toEqual({
-      'es-prod': { authentication: { rate: rate(0) }, authorization: { rate: rate(0) } },
-      'es-dev': { authentication: { rate: rate(0) }, authorization: { rate: rate(0) } },
+      'es-prod': {
+        authentication: { rate: rate(0), percentage: pct(0) },
+        authorization: { rate: rate(0), percentage: pct(0) },
+      },
+      'es-dev': {
+        authentication: { rate: rate(0), percentage: pct(0) },
+        authorization: { rate: rate(0), percentage: pct(0) },
+      },
     });
   });
 
@@ -100,6 +118,27 @@ describe('getElasticsearchAuthFailures', () => {
 
     expect(runQuery).not.toHaveBeenCalled();
     expect(result).toEqual({});
+  });
+
+  it('gives each share of the incoming items, and none when no items came in or the rate is unknown', async () => {
+    const runQuery = makeRunQuery({ rates: () => [failing], breakdown: () => [failingCause] });
+
+    const noIncoming = await getElasticsearchAuthFailures({
+      runQuery,
+      baseParams,
+      destinations,
+      parentResults: {
+        'es-prod': resultWithFailedRate(0, 0),
+        'es-dev': resultWithFailedRate(2.4, null),
+      },
+      onFailure: jest.fn(),
+    });
+
+    expect(noIncoming['es-prod'].authentication.percentage).toEqual(noPct);
+    expect(noIncoming['es-dev'].authorization.percentage).toEqual(noPct);
+    expect(noIncoming['es-dev'].authorization.breakdown?.[0].percentage).toEqual(noPct);
+    // The rates are still there.
+    expect(noIncoming['es-dev'].authorization.rate).toEqual(rate(1.9));
   });
 
   it('asks about the destinations that fail only, and gives the others no failures', async () => {
@@ -122,17 +161,23 @@ describe('getElasticsearchAuthFailures', () => {
       expect(query.print('basic')).not.toContain('"es-prod"');
     });
     expect(result['es-dev']).toEqual({
-      authentication: { rate: rate(0.5) },
+      authentication: { rate: rate(0.5), percentage: pct(0.5) },
       authorization: {
         rate: rate(1.9),
+        percentage: pct(1.9),
         breakdown: [
-          { collection: 'logs-a-default', reason: 'security_exception', rate: rate(1.9) },
+          {
+            collection: 'logs-a-default',
+            reason: 'security_exception',
+            rate: rate(1.9),
+            percentage: pct(1.9),
+          },
         ],
       },
     });
     expect(result['es-prod']).toEqual({
-      authentication: { rate: rate(0) },
-      authorization: { rate: rate(0) },
+      authentication: { rate: rate(0), percentage: pct(0) },
+      authorization: { rate: rate(0), percentage: pct(0) },
     });
   });
 
@@ -151,8 +196,8 @@ describe('getElasticsearchAuthFailures', () => {
 
     expect(runQuery).toHaveBeenCalledTimes(1);
     expect(result['es-dev']).toEqual({
-      authentication: { rate: rate(0) },
-      authorization: { rate: rate(0) },
+      authentication: { rate: rate(0), percentage: pct(0) },
+      authorization: { rate: rate(0), percentage: pct(0) },
     });
   });
 
@@ -180,8 +225,8 @@ describe('getElasticsearchAuthFailures', () => {
     });
 
     expect(result['es-dev']).toEqual({
-      authentication: { rate: rate(2) },
-      authorization: { rate: rate(0) },
+      authentication: { rate: rate(2), percentage: pct(2) },
+      authorization: { rate: rate(0), percentage: pct(0) },
     });
   });
 
@@ -200,8 +245,8 @@ describe('getElasticsearchAuthFailures', () => {
 
     expect(onFailure).toHaveBeenCalledWith(error, 'authentication and authorization breakdown');
     expect(result['es-dev']).toEqual({
-      authentication: { rate: rate(0.5) },
-      authorization: { rate: rate(1.9) },
+      authentication: { rate: rate(0.5), percentage: pct(0.5) },
+      authorization: { rate: rate(1.9), percentage: pct(1.9) },
     });
   });
 
@@ -262,8 +307,8 @@ describe('getElasticsearchAuthFailures', () => {
 
     expect(Object.hasOwn(failingResult, 'constructor')).toBe(true);
     expect(failingResult.constructor).toEqual({
-      authentication: { rate: rate(1) },
-      authorization: { rate: rate(0) },
+      authentication: { rate: rate(1), percentage: pct(1) },
+      authorization: { rate: rate(0), percentage: pct(0) },
     });
     expect(noResult).toEqual({});
   });

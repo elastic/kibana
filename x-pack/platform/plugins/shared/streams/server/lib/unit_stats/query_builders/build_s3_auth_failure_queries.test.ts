@@ -16,7 +16,7 @@ const head = `SET unmapped_fields = "nullify"; FROM ${UNIT_METRICS_STREAM} | WHE
 describe('buildS3FailedUploadRatesQuery', () => {
   it('divides the failed upload attempts of each error code by the time of the whole destination', () => {
     expect(buildS3FailedUploadRatesQuery(params).print('basic')).toBe(
-      `${head} | WHERE metrics.streams.destination.duration IS NOT NULL | INLINE STATS covered_from = MIN(start_timestamp) BY scope.attributes.streams.destination.id | STATS failed = COUNT(metrics.streams.destination.duration) WHERE attributes.outcome == "failure", covered_from = MIN(covered_from) BY id = scope.attributes.streams.destination.id, reason = attributes.error.type | EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, "${window.end}") / 1000.0 | EVAL failed_rate = failed / window_seconds | KEEP id, reason, failed_rate | LIMIT 10000`
+      `${head} | WHERE metrics.streams.destination.duration IS NOT NULL | INLINE STATS covered_from = MIN(start_timestamp) BY scope.attributes.streams.destination.id | STATS failed = COUNT(metrics.streams.destination.duration) WHERE attributes.outcome == "failure", attempts = COUNT(metrics.streams.destination.duration), covered_from = MIN(covered_from) BY id = scope.attributes.streams.destination.id, reason = attributes.error.type | INLINE STATS total_attempts = SUM(attempts) BY id | EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, "${window.end}") / 1000.0 | EVAL failed_rate = failed / window_seconds, attempts_rate = total_attempts / window_seconds | KEEP id, reason, failed_rate, attempts_rate | LIMIT 10000`
     );
   });
 
@@ -24,6 +24,15 @@ describe('buildS3FailedUploadRatesQuery', () => {
     const query = buildS3FailedUploadRatesQuery(params).print('basic');
 
     expect(query).toContain('COUNT(metrics.streams.destination.duration)');
+  });
+
+  it('counts every attempt of the destination, whatever its outcome, for the share the failures are', () => {
+    const query = buildS3FailedUploadRatesQuery(params).print('basic');
+
+    expect(query).toContain('attempts = COUNT(metrics.streams.destination.duration),');
+    expect(query).toContain('INLINE STATS total_attempts = SUM(attempts) BY id');
+    // The attempts are summed over the codes, after the `STATS` that groups by code.
+    expect(query.indexOf('SUM(attempts)')).toBeGreaterThan(query.indexOf('| STATS failed'));
   });
 
   it('reads the failures and their reason from the duration metric, not from the items', () => {
@@ -37,8 +46,10 @@ describe('buildS3FailedUploadRatesQuery', () => {
   it('finds the start of the destination before it counts the failures', () => {
     const query = buildS3FailedUploadRatesQuery(params).print('basic');
 
-    expect(query.indexOf('INLINE STATS')).toBeGreaterThan(-1);
-    expect(query.indexOf('INLINE STATS')).toBeLessThan(query.indexOf('| STATS failed'));
+    expect(query.indexOf('INLINE STATS covered_from')).toBeGreaterThan(-1);
+    expect(query.indexOf('INLINE STATS covered_from')).toBeLessThan(
+      query.indexOf('| STATS failed')
+    );
   });
 
   it('adds the hash filter only when the request pins one', () => {

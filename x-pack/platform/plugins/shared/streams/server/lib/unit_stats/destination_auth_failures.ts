@@ -7,8 +7,9 @@
 
 import type { ComposerQuery } from '@elastic/esql';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { getElasticsearchAuthFailures, type AuthFailures } from './elasticsearch_auth_failures';
+import { getElasticsearchAuthFailures } from './elasticsearch_auth_failures';
 import type { EsqlRow } from './mappers/esql_rows';
+import type { AuthFailureStats } from './mappers/map_destination_stats_result';
 import type { StatsQueryBaseParams } from './query_builders/filters';
 import type { DestinationQueryRef } from './query_refs';
 import { getS3AuthFailures } from './s3_auth_failures';
@@ -19,7 +20,7 @@ type GetAuthFailures = (args: {
   destinations: DestinationQueryRef[];
   parentResults: Record<string, StreamsUnit.StatsDestinationResult>;
   onFailure: (error: unknown, what: string) => void;
-}) => Promise<Record<string, AuthFailures>>;
+}) => Promise<Record<string, AuthFailureStats>>;
 
 /**
  * How each destination type reports its authentication and authorization failures. A type that
@@ -51,7 +52,7 @@ export const getDestinationAuthFailures = async ({
   destinations: DestinationQueryRef[];
   parentResults: Record<string, StreamsUnit.StatsDestinationResult>;
   onFailure: (error: unknown, what: string) => void;
-}): Promise<Record<string, AuthFailures>> => {
+}): Promise<Record<string, AuthFailureStats>> => {
   const destinationsByProvider = new Map<GetAuthFailures, DestinationQueryRef[]>();
   for (const destination of destinations) {
     const provider = AUTH_FAILURES_BY_TYPE.get(destination.type);

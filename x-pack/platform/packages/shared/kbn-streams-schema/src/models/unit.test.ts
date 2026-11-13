@@ -205,8 +205,15 @@ describe('streams unit stats response schema', () => {
       },
       failed: {
         rate: { value: null, unit: '{item}', time_unit: 's' },
-        authentication: { rate: { value: null, unit: '{item}', time_unit: 's' } },
-        authorization: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+        percentage: { value: null, unit: '%' },
+        authentication: {
+          rate: { value: null, unit: '{item}', time_unit: 's' },
+          percentage: { value: null, unit: '%' },
+        },
+        authorization: {
+          rate: { value: null, unit: '{item}', time_unit: 's' },
+          percentage: { value: null, unit: '%' },
+        },
       },
     },
   };
@@ -272,15 +279,18 @@ describe('streams unit stats response schema', () => {
         meta,
       }).success;
 
+    const percentage = (value: number | null) => ({ value, unit: '%' });
     const failedWith = (breakdown: object[]) => ({
       rate: rate(1.9),
-      authentication: { rate: rate(0) },
-      authorization: { rate: rate(1.9), breakdown },
+      percentage: percentage(40),
+      authentication: { rate: rate(0), percentage: percentage(0) },
+      authorization: { rate: rate(1.9), percentage: percentage(40), breakdown },
     });
     const cause = (collection: string | null, reason: string | null) => ({
       collection,
       reason,
       rate: rate(1.9),
+      percentage: percentage(40),
     });
 
     expect(parse(failedWith([cause('logs-generic.otel-default', 'security_exception')]))).toBe(
@@ -293,17 +303,37 @@ describe('streams unit stats response schema', () => {
     expect(
       parse({
         rate: rate(1.9),
-        authentication: { rate: rate(0) },
-        authorization: { rate: rate(1.9) },
+        percentage: percentage(40),
+        authentication: { rate: rate(0), percentage: percentage(0) },
+        authorization: { rate: rate(1.9), percentage: percentage(40) },
       })
     ).toBe(true);
+    // A percentage with no data is null, and it keeps its unit.
+    expect(parse({ ...failedWith([]), percentage: percentage(null) })).toBe(true);
     // The API always says that a collection or a reason is missing, with null.
-    expect(parse(failedWith([{ reason: 'AccessDenied', rate: rate(1.9) }]))).toBe(false);
-    expect(parse(failedWith([{ collection: 'logs-a-default', reason: 7, rate: rate(1.9) }]))).toBe(
-      false
-    );
+    expect(
+      parse(failedWith([{ reason: 'AccessDenied', rate: rate(1.9), percentage: percentage(40) }]))
+    ).toBe(false);
+    expect(
+      parse(
+        failedWith([
+          { collection: 'logs-a-default', reason: 7, rate: rate(1.9), percentage: percentage(40) },
+        ])
+      )
+    ).toBe(false);
     expect(parse(failedWith([{ collection: 'logs-a-default', reason: null }]))).toBe(false);
-    expect(parse({ rate: rate(0), authentication: { rate: rate(0) } })).toBe(false);
+    expect(
+      parse(failedWith([{ collection: 'logs-a-default', reason: null, rate: rate(1.9) }]))
+    ).toBe(false);
+    expect(parse({ ...failedWith([]), percentage: { value: 40 } })).toBe(false);
+    expect(parse({ ...failedWith([]), percentage: undefined })).toBe(false);
+    expect(
+      parse({
+        rate: rate(0),
+        percentage: percentage(0),
+        authentication: { rate: rate(0), percentage: percentage(0) },
+      })
+    ).toBe(false);
   });
 
   it('parses processor instances with a route position or none, and none when it has no data', () => {

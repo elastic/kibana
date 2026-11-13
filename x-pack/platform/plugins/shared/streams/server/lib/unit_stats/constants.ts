@@ -84,6 +84,7 @@ export const STATS_COLUMN = {
   bucket: 'bucket',
   incomingRate: 'incoming_rate',
   failedRate: 'failed_rate',
+  attemptsRate: 'attempts_rate',
   authenticationRate: 'authentication_rate',
   authorizationRate: 'authorization_rate',
   collection: 'collection',
@@ -119,4 +120,6 @@ export const ITEM_UNIT = '{item}';
 /** What an S3 failure rate counts: upload attempts, not items. */
 export const REQUEST_UNIT = '{request}';
 export const SECONDS_UNIT = 's';
+/** A share of attempts, 100 being all of them. */
+export const PERCENT_UNIT = '%';
 export const RATE_TIME_UNIT = 's';

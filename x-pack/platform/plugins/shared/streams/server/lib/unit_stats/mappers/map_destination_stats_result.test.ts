@@ -40,8 +40,15 @@ describe('mapDestinationStatsRows', () => {
         },
         failed: {
           rate: { value: 0, unit: '{item}', time_unit: 's' },
-          authentication: { rate: { value: null, unit: '{item}', time_unit: 's' } },
-          authorization: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+          percentage: { value: 0, unit: '%' },
+          authentication: {
+            rate: { value: null, unit: '{item}', time_unit: 's' },
+            percentage: { value: null, unit: '%' },
+          },
+          authorization: {
+            rate: { value: null, unit: '{item}', time_unit: 's' },
+            percentage: { value: null, unit: '%' },
+          },
         },
       },
     });
@@ -67,7 +74,21 @@ describe('mapDestinationStatsRows', () => {
     expect(result.latency.average).toEqual({ value: null, unit: 's' });
     expect(result.events.incoming.rate).toEqual({ value: null, unit: '{item}', time_unit: 's' });
     expect(result.events.failed.rate).toEqual({ value: null, unit: '{item}', time_unit: 's' });
+    expect(result.events.failed.percentage).toEqual({ value: null, unit: '%' });
     expect(result.events.incoming.total.value).toBe(510);
+  });
+
+  it('gives the share of the incoming items that failed, and none when nothing came in', () => {
+    const percentageOf = (incomingRate: number | null, failedRate: number | null) =>
+      mapDestinationStatsRows({
+        rows: { 'es-prod': { incoming_rate: incomingRate, failed_rate: failedRate, series } },
+        bucketMs,
+      })['es-prod'].events.failed.percentage;
+
+    expect(percentageOf(4, 1)).toEqual({ value: 25, unit: '%' });
+    expect(percentageOf(4, 0)).toEqual({ value: 0, unit: '%' });
+    expect(percentageOf(0, 0)).toEqual({ value: null, unit: '%' });
+    expect(percentageOf(null, 1)).toEqual({ value: null, unit: '%' });
   });
 
   it('leaves a destination with no rate row as no data for the rates', () => {
@@ -94,11 +115,20 @@ describe('withAuthFailures', () => {
     },
     bucketMs,
   })['es-prod'];
+  const percentage = (value: number | null) => ({ value, unit: '%' });
   const authFailures = {
-    authentication: { rate: rate(0.5) },
+    authentication: { rate: rate(0.5), percentage: percentage(10) },
     authorization: {
       rate: rate(1.9),
-      breakdown: [{ collection: 'logs-a-default', reason: 'security_exception', rate: rate(1.9) }],
+      percentage: percentage(40),
+      breakdown: [
+        {
+          collection: 'logs-a-default',
+          reason: 'security_exception',
+          rate: rate(1.9),
+          percentage: percentage(40),
+        },
+      ],
     },
   };
 
@@ -107,6 +137,18 @@ describe('withAuthFailures', () => {
 
     expect(result.events.failed.authentication).toEqual(authFailures.authentication);
     expect(result.events.failed.authorization).toEqual(authFailures.authorization);
+    expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
+  });
+
+  it('replaces the total of failures too, when the destination type reports its own', () => {
+    const requestRate = { value: 3, unit: '{request}', time_unit: 's' };
+    const failed = { rate: requestRate, percentage: percentage(60) };
+
+    const result = withAuthFailures(base, { ...authFailures, failed });
+
+    expect(result.events.failed.rate).toEqual(requestRate);
+    expect(result.events.failed.percentage).toEqual(percentage(60));
+    expect(result.events.incoming).toEqual(base.events.incoming);
     expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
   });
 

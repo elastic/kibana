@@ -9,6 +9,7 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import {
   ITEM_UNIT,
   MAX_FAILURE_BREAKDOWN_ENTRIES,
+  PERCENT_UNIT,
   RATE_TIME_UNIT,
   STATS_COLUMN,
 } from '../constants';
@@ -29,6 +30,15 @@ export const toRate = (value: number | null, unit: string): StatsRate => ({
   time_unit: RATE_TIME_UNIT,
 });
 
+/**
+ * The share of `whole` that `part` is, in percent. Both are rates of the same unit over the same
+ * time, so the share of the rates is the share of the counts. No data on either side, or a `whole`
+ * that is not above zero, has no share: null, never a division by zero. It is not capped at 100, so
+ * a part larger than its whole shows as a wrong number and not as a hidden one.
+ */
+export const toPercentage = (part: number | null, whole: number | null): StatsValue =>
+  toValue(part !== null && whole !== null && whole > 0 ? (part / whole) * 100 : null, PERCENT_UNIT);
+
 /** A rate of items per second. */
 export const toItemRate = (value: number | null): StatsRate => toRate(value, ITEM_UNIT);
 
@@ -40,15 +50,19 @@ export const toItemRate = (value: number | null): StatsRate => toRate(value, ITE
  * missing when no entry is left.
  *
  * The `unit` says what the rates count, items unless the destination type reports its failures
- * another way. Every rate of one failure rate has the same unit.
+ * another way. Every rate of one failure rate has the same unit. `attempts` is the rate of all that
+ * the destination attempted, in the same unit, and every percentage is the share of it: the class
+ * and each entry of the breakdown, so the entries add up to the class and not to 100.
  */
 export const toFailureRate = ({
   rate,
+  attempts,
   breakdownRows,
   column,
   unit = ITEM_UNIT,
 }: {
   rate: number | null;
+  attempts: number | null;
   breakdownRows: EsqlRow[];
   column: string;
   unit?: string;
@@ -68,11 +82,12 @@ export const toFailureRate = ({
       collection,
       reason,
       rate: toRate(causeRate, unit),
+      percentage: toPercentage(causeRate, attempts),
     }));
 
-  return breakdown.length > 0
-    ? { rate: toRate(rate, unit), breakdown }
-    : { rate: toRate(rate, unit) };
+  const failureRate = { rate: toRate(rate, unit), percentage: toPercentage(rate, attempts) };
+
+  return breakdown.length > 0 ? { ...failureRate, breakdown } : failureRate;
 };
 
 /**

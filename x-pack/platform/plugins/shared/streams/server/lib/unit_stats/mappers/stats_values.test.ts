@@ -6,7 +6,7 @@
  */
 
 import { MAX_FAILURE_BREAKDOWN_ENTRIES, REQUEST_UNIT, STATS_COLUMN } from '../constants';
-import { toFailureRate, toItemRate, toRate, toSeries, toValue } from './stats_values';
+import { toFailureRate, toItemRate, toPercentage, toRate, toSeries, toValue } from './stats_values';
 
 describe('toSeries', () => {
   const bucketMs = 60_000;
@@ -99,7 +99,29 @@ describe('toRate', () => {
   });
 });
 
+describe('toPercentage', () => {
+  it('is the share of the whole that the part is, in percent', () => {
+    expect(toPercentage(1, 4)).toEqual({ value: 25, unit: '%' });
+    expect(toPercentage(0, 4)).toEqual({ value: 0, unit: '%' });
+  });
+
+  it('has no value for no data on either side, and for a whole that is 0', () => {
+    expect(toPercentage(null, 4)).toEqual({ value: null, unit: '%' });
+    expect(toPercentage(1, null)).toEqual({ value: null, unit: '%' });
+    expect(toPercentage(0, 0)).toEqual({ value: null, unit: '%' });
+  });
+
+  it('does not cap a part that is larger than its whole', () => {
+    expect(toPercentage(5, 4).value).toBe(125);
+  });
+});
+
 describe('toFailureRate', () => {
+  /** Every rate is a share of 100 attempts a second, so a percentage is the rate itself. */
+  const pct = (value: number | null) => ({ value, unit: '%' });
+  const withAttempts = (
+    args: Omit<Parameters<typeof toFailureRate>[0], 'attempts'> & { attempts?: number | null }
+  ) => toFailureRate({ attempts: 100, ...args });
   const authorization = STATS_COLUMN.authorizationRate;
   const authentication = STATS_COLUMN.authenticationRate;
   const causeRow = (
@@ -114,18 +136,20 @@ describe('toFailureRate', () => {
   });
 
   it('has the rate and no breakdown for no rows', () => {
-    const failureRate = toFailureRate({ rate: 2, breakdownRows: [], column: authorization });
+    const failureRate = withAttempts({ rate: 2, breakdownRows: [], column: authorization });
 
-    expect(failureRate).toEqual({ rate: toItemRate(2) });
+    expect(failureRate).toEqual({ rate: toItemRate(2), percentage: pct(2) });
     expect(failureRate).not.toHaveProperty('breakdown');
   });
 
   it('keeps a rate of 0, and a null rate as no data', () => {
-    expect(toFailureRate({ rate: 0, breakdownRows: [], column: authorization })).toEqual({
+    expect(withAttempts({ rate: 0, breakdownRows: [], column: authorization })).toEqual({
       rate: toItemRate(0),
+      percentage: pct(0),
     });
-    expect(toFailureRate({ rate: null, breakdownRows: [], column: authorization })).toEqual({
+    expect(withAttempts({ rate: null, breakdownRows: [], column: authorization })).toEqual({
       rate: toItemRate(null),
+      percentage: pct(null),
     });
   });
 
@@ -135,11 +159,22 @@ describe('toFailureRate', () => {
       causeRow('logs-a-default', 'security_exception', { authorization: 1.5 }),
     ];
 
-    expect(toFailureRate({ rate: 2, breakdownRows, column: authorization })).toEqual({
+    expect(withAttempts({ rate: 2, breakdownRows, column: authorization })).toEqual({
       rate: toItemRate(2),
+      percentage: pct(2),
       breakdown: [
-        { collection: 'logs-a-default', reason: 'security_exception', rate: toItemRate(1.5) },
-        { collection: 'logs-b-default', reason: 'security_exception', rate: toItemRate(0.5) },
+        {
+          collection: 'logs-a-default',
+          reason: 'security_exception',
+          rate: toItemRate(1.5),
+          percentage: pct(1.5),
+        },
+        {
+          collection: 'logs-b-default',
+          reason: 'security_exception',
+          rate: toItemRate(0.5),
+          percentage: pct(0.5),
+        },
       ],
     });
   });
@@ -150,7 +185,7 @@ describe('toFailureRate', () => {
       causeRow('logs-a-default', 'index_not_found_exception', { authorization: 0.5 }),
     ];
 
-    const { breakdown } = toFailureRate({ rate: 1.5, breakdownRows, column: authorization });
+    const { breakdown } = withAttempts({ rate: 1.5, breakdownRows, column: authorization });
 
     expect(breakdown?.map(({ collection, reason }) => [collection, reason])).toEqual([
       ['logs-a-default', 'security_exception'],
@@ -164,9 +199,9 @@ describe('toFailureRate', () => {
       causeRow('logs-a-default', null, { authorization: 0.5 }),
     ];
 
-    expect(toFailureRate({ rate: 1.5, breakdownRows, column: authorization }).breakdown).toEqual([
-      { collection: null, reason: 'AccessDenied', rate: toItemRate(1) },
-      { collection: 'logs-a-default', reason: null, rate: toItemRate(0.5) },
+    expect(withAttempts({ rate: 1.5, breakdownRows, column: authorization }).breakdown).toEqual([
+      { collection: null, reason: 'AccessDenied', rate: toItemRate(1), percentage: pct(1) },
+      { collection: 'logs-a-default', reason: null, rate: toItemRate(0.5), percentage: pct(0.5) },
     ]);
   });
 
@@ -175,8 +210,13 @@ describe('toFailureRate', () => {
       causeRow('logs-a-default', 'security_exception', { authentication: 0.4, authorization: 1.5 }),
     ];
 
-    expect(toFailureRate({ rate: 0.4, breakdownRows, column: authentication }).breakdown).toEqual([
-      { collection: 'logs-a-default', reason: 'security_exception', rate: toItemRate(0.4) },
+    expect(withAttempts({ rate: 0.4, breakdownRows, column: authentication }).breakdown).toEqual([
+      {
+        collection: 'logs-a-default',
+        reason: 'security_exception',
+        rate: toItemRate(0.4),
+        percentage: pct(0.4),
+      },
     ]);
   });
 
@@ -190,7 +230,7 @@ describe('toFailureRate', () => {
       causeRow('logs-zero-default', 'security_exception', { authorization: 0 }),
     ];
 
-    const { breakdown } = toFailureRate({ rate: 1.5, breakdownRows, column: authorization });
+    const { breakdown } = withAttempts({ rate: 1.5, breakdownRows, column: authorization });
 
     expect(breakdown?.map(({ collection }) => collection)).toEqual(['logs-a-default']);
   });
@@ -198,7 +238,7 @@ describe('toFailureRate', () => {
   it('has no breakdown when every row is left out', () => {
     const breakdownRows = [causeRow('logs-a-default', 'security_exception', { authorization: 0 })];
 
-    expect(toFailureRate({ rate: 0, breakdownRows, column: authorization })).not.toHaveProperty(
+    expect(withAttempts({ rate: 0, breakdownRows, column: authorization })).not.toHaveProperty(
       'breakdown'
     );
   });
@@ -211,7 +251,7 @@ describe('toFailureRate', () => {
       causeRow(7, null, { authorization: 1 }),
     ];
 
-    const { breakdown } = toFailureRate({ rate: 3, breakdownRows, column: authorization });
+    const { breakdown } = withAttempts({ rate: 3, breakdownRows, column: authorization });
 
     expect(breakdown?.map(({ collection }) => collection)).toEqual(['logs-a-default']);
   });
@@ -220,10 +260,18 @@ describe('toFailureRate', () => {
     const breakdownRows = [causeRow(null, 'AccessDenied', { authorization: 0.5 })];
 
     expect(
-      toFailureRate({ rate: 2, breakdownRows, column: authorization, unit: REQUEST_UNIT })
+      withAttempts({ rate: 2, breakdownRows, column: authorization, unit: REQUEST_UNIT })
     ).toEqual({
       rate: toRate(2, REQUEST_UNIT),
-      breakdown: [{ collection: null, reason: 'AccessDenied', rate: toRate(0.5, REQUEST_UNIT) }],
+      percentage: pct(2),
+      breakdown: [
+        {
+          collection: null,
+          reason: 'AccessDenied',
+          rate: toRate(0.5, REQUEST_UNIT),
+          percentage: pct(0.5),
+        },
+      ],
     });
   });
 
@@ -233,7 +281,7 @@ describe('toFailureRate', () => {
       causeRow(`logs-c${index + 1}-default`, null, { authorization: index + 1 })
     );
 
-    const { breakdown = [] } = toFailureRate({
+    const { breakdown = [] } = withAttempts({
       rate: 1000,
       breakdownRows,
       column: authorization,
@@ -244,5 +292,54 @@ describe('toFailureRate', () => {
     expect(breakdown[breakdown.length - 1].collection).toBe(
       `logs-c${total - MAX_FAILURE_BREAKDOWN_ENTRIES + 1}-default`
     );
+  });
+
+  describe('percentages', () => {
+    it('are the share of the attempts, for the class and for each cause', () => {
+      const breakdownRows = [
+        causeRow('logs-a-default', 'security_exception', { authorization: 1 }),
+        causeRow(null, 'security_exception', { authorization: 0.5 }),
+      ];
+
+      const failureRate = withAttempts({
+        rate: 1.5,
+        attempts: 6,
+        breakdownRows,
+        column: authorization,
+      });
+
+      expect(failureRate.percentage).toEqual(pct(25));
+      expect(failureRate.breakdown?.map(({ percentage }) => percentage)).toEqual([
+        pct((1 / 6) * 100),
+        pct((0.5 / 6) * 100),
+      ]);
+    });
+
+    it('are null for no attempts, and for attempts that are 0 or unknown', () => {
+      const breakdownRows = [
+        causeRow('logs-a-default', 'security_exception', { authorization: 1 }),
+      ];
+
+      [0, null].forEach((attempts) => {
+        const failureRate = withAttempts({
+          rate: 1,
+          attempts,
+          breakdownRows,
+          column: authorization,
+        });
+
+        expect(failureRate.percentage).toEqual(pct(null));
+        expect(failureRate.breakdown?.[0].percentage).toEqual(pct(null));
+      });
+    });
+
+    it('are null for a rate with no data, and 0 for a rate of 0', () => {
+      expect(
+        withAttempts({ rate: null, breakdownRows: [], column: authorization }).percentage
+      ).toEqual(pct(null));
+      expect(
+        withAttempts({ rate: 0, breakdownRows: [], column: authorization }).percentage
+      ).toEqual(pct(0));
+    });
   });
 });

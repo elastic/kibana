@@ -15,11 +15,23 @@ const baseParams = { unitId: 'default', window };
 const destination = (id: string): DestinationQueryRef => ({ kind: 'destination', id, type: 's3' });
 
 const requestRate = (value: number | null) => ({ value, unit: '{request}', time_unit: 's' });
+/** The share of `whole` attempts per second that `part` is. */
+const share = (part: number, whole: number | null) => ({
+  value: whole === null || whole <= 0 ? null : (part / whole) * 100,
+  unit: '%',
+});
 
-const row = (id: string, reason: string | null, failedRate: number): EsqlRow => ({
+/** Every row of a destination has the attempts rate of the destination. */
+const row = (
+  id: string,
+  reason: string | null,
+  failedRate: number,
+  attemptsRate: number | null = 1
+): EsqlRow => ({
   id,
   reason,
   failed_rate: failedRate,
+  attempts_rate: attemptsRate,
 });
 
 const run = ({
@@ -47,52 +59,87 @@ describe('getS3AuthFailures', () => {
   it('sums the rates of the codes of each class, and lists the codes of the class', async () => {
     const { result } = run({
       rows: [
-        row('s3-test', null, 0),
-        row('s3-test', 'SignatureDoesNotMatch', 0.146),
-        row('s3-test', 'InvalidAccessKeyId', 0.061),
-        row('s3-test', 'AccessDenied', 0.5),
+        row('s3-test', null, 0, 2),
+        row('s3-test', 'SignatureDoesNotMatch', 0.146, 2),
+        row('s3-test', 'InvalidAccessKeyId', 0.061, 2),
+        row('s3-test', 'AccessDenied', 0.5, 2),
       ],
     });
 
     expect(await result).toEqual({
       's3-test': {
+        failed: {
+          rate: requestRate(0.146 + 0.061 + 0.5),
+          percentage: share(0.146 + 0.061 + 0.5, 2),
+        },
         authentication: {
           rate: requestRate(0.146 + 0.061),
+          percentage: share(0.146 + 0.061, 2),
           breakdown: [
-            { collection: null, reason: 'SignatureDoesNotMatch', rate: requestRate(0.146) },
-            { collection: null, reason: 'InvalidAccessKeyId', rate: requestRate(0.061) },
+            {
+              collection: null,
+              reason: 'SignatureDoesNotMatch',
+              rate: requestRate(0.146),
+              percentage: share(0.146, 2),
+            },
+            {
+              collection: null,
+              reason: 'InvalidAccessKeyId',
+              rate: requestRate(0.061),
+              percentage: share(0.061, 2),
+            },
           ],
         },
         authorization: {
           rate: requestRate(0.5),
-          breakdown: [{ collection: null, reason: 'AccessDenied', rate: requestRate(0.5) }],
+          percentage: share(0.5, 2),
+          breakdown: [
+            {
+              collection: null,
+              reason: 'AccessDenied',
+              rate: requestRate(0.5),
+              percentage: share(0.5, 2),
+            },
+          ],
         },
       },
     });
   });
 
-  it('gives a rate of 0 and no breakdown when the destination has duration data and no such failure', async () => {
+  it('gives a rate and a share of 0 and no breakdown when the destination has duration data and no failure', async () => {
     const { result } = run({ rows: [row('s3-test', null, 0)] });
 
     expect(await result).toEqual({
       's3-test': {
-        authentication: { rate: requestRate(0) },
-        authorization: { rate: requestRate(0) },
+        failed: { rate: requestRate(0), percentage: share(0, 1) },
+        authentication: { rate: requestRate(0), percentage: share(0, 1) },
+        authorization: { rate: requestRate(0), percentage: share(0, 1) },
       },
     });
   });
 
-  it('does not count the codes that have no class, in a rate or in a breakdown', async () => {
+  it('counts the codes that have no class in the total of failures, and not in a class or a breakdown', async () => {
     const { result } = run({
-      rows: [row('s3-test', 'NoSuchBucket', 1), row('s3-test', 'timeout', 2)],
+      rows: [row('s3-test', 'NoSuchBucket', 1, 4), row('s3-test', 'timeout', 2, 4)],
     });
 
     expect(await result).toEqual({
       's3-test': {
-        authentication: { rate: requestRate(0) },
-        authorization: { rate: requestRate(0) },
+        failed: { rate: requestRate(3), percentage: share(3, 4) },
+        authentication: { rate: requestRate(0), percentage: share(0, 4) },
+        authorization: { rate: requestRate(0), percentage: share(0, 4) },
       },
     });
+  });
+
+  it('has no share when the destination has no attempts rate', async () => {
+    const { result } = run({ rows: [row('s3-test', 'AccessDenied', 0.5, null)] });
+
+    const { failed, authorization } = (await result)['s3-test'];
+    expect(failed?.rate).toEqual(requestRate(0.5));
+    expect(failed?.percentage).toEqual({ value: null, unit: '%' });
+    expect(authorization.percentage).toEqual({ value: null, unit: '%' });
+    expect(authorization.breakdown?.[0].percentage).toEqual({ value: null, unit: '%' });
   });
 
   it('leaves out a destination with no rows, which has no data', async () => {
