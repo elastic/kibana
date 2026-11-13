@@ -7,15 +7,14 @@
 
 import React, { forwardRef } from 'react';
 import { EuiProgress } from '@elastic/eui';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { type MarkdownValueControl, type EditorBaseProps, type MarkdownEditorRef } from './types';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { type Owner } from '../../../common/constants/types';
 import { useImagePasteUpload } from './paste_upload';
 import { MarkdownEditor } from './editor';
-import { type EditorBaseProps, type MarkdownEditorRef } from './types';
 
 interface PastableMarkdownEditorProps extends EditorBaseProps {
-  field: FieldHook<string>;
+  field: MarkdownValueControl;
   caseId: string;
   owner: Owner;
 }
