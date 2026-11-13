@@ -10,9 +10,13 @@ import { createServer } from 'http';
 import type { AddressInfo } from 'net';
 import axios from 'axios';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { PluginStartContract } from '../plugin';
-import { CONNECTOR_CATALOG_INDEX, createConnectorCatalogStorage } from '../lib/connector_catalog';
+import {
+  CONNECTOR_TYPE_CATALOG_INDEX,
+  createConnectorCatalogStorage,
+} from '../lib/connector_catalog';
 import { loadFixture } from '../lib/declarative_connectors/__fixtures__/load_fixture';
 import { ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG } from '../../common';
 import { setupTestServers } from './lib';
@@ -128,8 +132,11 @@ describe('Connector catalog at start', () => {
       },
       {
         beforeKibanaStart: async (esClient) => {
-          const storage = createConnectorCatalogStorage({ esClient });
-          await storage.ensureIndex();
+          const storage = createConnectorCatalogStorage({
+            esClient,
+            logger: loggingSystemMock.createLogger(),
+          });
+          // The adapter creates the template and the index on the first write.
           await storage.createDefinition({
             connectorId: CATALOG_TYPE_ID,
             version: '1.1.0',
@@ -143,7 +150,7 @@ describe('Connector catalog at start', () => {
           await storage.replaceManifest({
             raw: JSON.stringify({ connectors: [{ id: CATALOG_TYPE_ID, version: '1.1.0' }] }),
           });
-          await esClient.indices.refresh({ index: CONNECTOR_CATALOG_INDEX });
+          await esClient.indices.refresh({ index: CONNECTOR_TYPE_CATALOG_INDEX });
         },
       }
     );

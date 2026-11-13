@@ -1229,6 +1229,7 @@ export class ActionsPlugin
     const handle = startConnectorCatalog({
       storage: createConnectorCatalogStorage({
         esClient: core.elasticsearch.client.asInternalUser,
+        logger,
       }),
       actionTypeRegistry: actionTypeRegistry!,
       buildType: (definition) => {

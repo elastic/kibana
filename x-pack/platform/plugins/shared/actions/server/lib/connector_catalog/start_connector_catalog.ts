@@ -26,7 +26,7 @@ export interface ConnectorCatalogHandle {
 }
 
 interface StartConnectorCatalogDeps {
-  storage: Pick<ConnectorCatalogStorage, 'ensureIndex' | 'getManifest' | 'getDefinitions'>;
+  storage: Pick<ConnectorCatalogStorage, 'getManifest' | 'getDefinitions'>;
   actionTypeRegistry: Pick<ActionTypeRegistry, 'has' | 'register'>;
   buildType: (definition: StoredCatalogDefinition) => CatalogActionType;
   logger: Logger;
@@ -34,7 +34,8 @@ interface StartConnectorCatalogDeps {
 }
 
 /**
- * Creates the index, then registers the catalog types. Never rejects.
+ * Reads the catalog and registers its types. Never writes, so a missing index stays missing.
+ * Never rejects.
  * Stops at the timeout and aborts the pending requests, so a late result registers nothing.
  * When the controller is aborted from outside, it ends at once and quietly.
  */
@@ -46,7 +47,6 @@ const runLoad = async (
   const loadTimeoutMs = timeoutMs ?? CATALOG_FIRST_LOAD_TIMEOUT_MS;
 
   const load = async (): Promise<'done'> => {
-    await storage.ensureIndex({ signal });
     const count = await loadCatalogConnectorTypes({
       storage,
       actionTypeRegistry,
@@ -98,7 +98,7 @@ const runLoad = async (
 
 /**
  * Runs the first catalog load 1 time, when the first flag value is on.
- * With the flag off, nothing is read or created. Later flag values do nothing.
+ * With the flag off, nothing is read or written. Later flag values do nothing.
  */
 export const startConnectorCatalog = (deps: StartConnectorCatalogDeps): ConnectorCatalogHandle => {
   const { logger, timeoutMs = CATALOG_FIRST_LOAD_TIMEOUT_MS } = deps;

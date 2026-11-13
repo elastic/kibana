@@ -25,10 +25,7 @@ const manifest = {
 
 describe('startConnectorCatalog', () => {
   const logger = loggingSystemMock.createLogger();
-  const storage: jest.Mocked<
-    Pick<ConnectorCatalogStorage, 'ensureIndex' | 'getManifest' | 'getDefinitions'>
-  > = {
-    ensureIndex: jest.fn(),
+  const storage: jest.Mocked<Pick<ConnectorCatalogStorage, 'getManifest' | 'getDefinitions'>> = {
     getManifest: jest.fn(),
     getDefinitions: jest.fn(),
   };
@@ -52,7 +49,6 @@ describe('startConnectorCatalog', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    storage.ensureIndex.mockResolvedValue(undefined);
     storage.getManifest.mockResolvedValue(manifest);
     storage.getDefinitions.mockResolvedValue([definition]);
     actionTypeRegistry.has.mockReturnValue(false);
@@ -75,31 +71,44 @@ describe('startConnectorCatalog', () => {
 
     await ready;
 
-    expect(storage.ensureIndex).not.toHaveBeenCalled();
+    expect(storage.getManifest).not.toHaveBeenCalled();
+    expect(storage.getDefinitions).not.toHaveBeenCalled();
     expect(storage.getManifest).not.toHaveBeenCalled();
     expect(storage.getDefinitions).not.toHaveBeenCalled();
     expect(actionTypeRegistry.register).not.toHaveBeenCalled();
   });
 
-  it('creates the index, then loads and logs the count at info', async () => {
+  it('loads and logs the count at info', async () => {
     await start();
 
-    expect(storage.ensureIndex).toHaveBeenCalledTimes(1);
-    expect(storage.ensureIndex.mock.invocationCallOrder[0]).toBeLessThan(
-      storage.getManifest.mock.invocationCallOrder[0]
-    );
+    expect(storage.getManifest).toHaveBeenCalledTimes(1);
     expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('1'));
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('logs at warn and resolves when the index create fails, without reading', async () => {
-    storage.ensureIndex.mockRejectedValue(new Error('create failed'));
+  it('never calls a write method of the storage', async () => {
+    const writableStorage = {
+      ...storage,
+      createDefinition: jest.fn(),
+      createAsset: jest.fn(),
+      replaceManifest: jest.fn(),
+    };
+    storage.getManifest.mockResolvedValue(undefined);
+    const handle = startConnectorCatalog({
+      storage: writableStorage,
+      actionTypeRegistry,
+      buildType,
+      logger,
+    });
+    handle.onFlagValue(true);
+    await handle.ready;
 
-    await expect(start()).resolves.toBeUndefined();
-
-    expect(storage.getManifest).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('create failed'));
+    expect(writableStorage.createDefinition).not.toHaveBeenCalled();
+    expect(writableStorage.createAsset).not.toHaveBeenCalled();
+    expect(writableStorage.replaceManifest).not.toHaveBeenCalled();
+    expect(actionTypeRegistry.register).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('logs at warn and resolves when a read is rejected', async () => {
@@ -117,7 +126,8 @@ describe('startConnectorCatalog', () => {
 
     await expect(ready).resolves.toBeUndefined();
 
-    expect(storage.ensureIndex).not.toHaveBeenCalled();
+    expect(storage.getManifest).not.toHaveBeenCalled();
+    expect(storage.getDefinitions).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('flag failed'));
   });
 
@@ -130,7 +140,8 @@ describe('startConnectorCatalog', () => {
       onFlagValue(true);
       await new Promise(process.nextTick);
 
-      expect(storage.ensureIndex).not.toHaveBeenCalled();
+      expect(storage.getManifest).not.toHaveBeenCalled();
+      expect(storage.getDefinitions).not.toHaveBeenCalled();
       expect(actionTypeRegistry.register).not.toHaveBeenCalled();
     });
 
@@ -142,7 +153,7 @@ describe('startConnectorCatalog', () => {
 
       await ready;
 
-      expect(storage.ensureIndex).toHaveBeenCalledTimes(1);
+      expect(storage.getManifest).toHaveBeenCalledTimes(1);
       expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
     });
 
@@ -163,7 +174,8 @@ describe('startConnectorCatalog', () => {
       await new Promise(process.nextTick);
 
       await expect(ready).resolves.toBeUndefined();
-      expect(storage.ensureIndex).not.toHaveBeenCalled();
+      expect(storage.getManifest).not.toHaveBeenCalled();
+      expect(storage.getDefinitions).not.toHaveBeenCalled();
     });
 
     it('resolves ready at the timeout when the flag never emits', async () => {
@@ -179,7 +191,8 @@ describe('startConnectorCatalog', () => {
 
       expect(onResolved).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('flag'));
-      expect(storage.ensureIndex).not.toHaveBeenCalled();
+      expect(storage.getManifest).not.toHaveBeenCalled();
+      expect(storage.getDefinitions).not.toHaveBeenCalled();
     });
 
     it('ignores a flag value that arrives after the flag timeout', async () => {
@@ -191,7 +204,8 @@ describe('startConnectorCatalog', () => {
       onFlagValue(true);
       await jest.advanceTimersByTimeAsync(0);
 
-      expect(storage.ensureIndex).not.toHaveBeenCalled();
+      expect(storage.getManifest).not.toHaveBeenCalled();
+      expect(storage.getDefinitions).not.toHaveBeenCalled();
       expect(actionTypeRegistry.register).not.toHaveBeenCalled();
     });
   });

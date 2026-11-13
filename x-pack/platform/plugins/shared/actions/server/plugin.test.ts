@@ -47,7 +47,8 @@ import {
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
 import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
-import { CONNECTOR_CATALOG_INDEX } from './lib/connector_catalog';
+import { errors } from '@elastic/elasticsearch';
+import { CONNECTOR_TYPE_CATALOG_INDEX } from './lib/connector_catalog';
 
 function getConfig(overrides = {}) {
   return {
@@ -675,7 +676,7 @@ describe('Actions Plugin', () => {
       const flush = () => new Promise((resolve) => setImmediate(resolve));
 
       const manifestDoc = {
-        _index: CONNECTOR_CATALOG_INDEX,
+        _index: CONNECTOR_TYPE_CATALOG_INDEX,
         _id: 'manifest',
         found: true,
         _source: {
@@ -688,16 +689,11 @@ describe('Actions Plugin', () => {
 
       const seedCatalog = () => {
         const esClient = getEsClient();
-        esClient.indices.create.mockResolvedValue({
-          acknowledged: true,
-          shards_acknowledged: true,
-          index: CONNECTOR_CATALOG_INDEX,
-        });
         esClient.get.mockResolvedValue(manifestDoc);
         esClient.mget.mockResolvedValue({
           docs: [
             {
-              _index: CONNECTOR_CATALOG_INDEX,
+              _index: CONNECTOR_TYPE_CATALOG_INDEX,
               _id: `definition:${SPEC_TYPE_ID}@1.1.0`,
               found: true,
               _source: {
@@ -751,7 +747,7 @@ describe('Actions Plugin', () => {
           );
           expect(catalogFlagCalls).toHaveLength(1);
 
-          resolveGet({ _index: CONNECTOR_CATALOG_INDEX, _id: 'manifest', found: false });
+          resolveGet({ _index: CONNECTOR_TYPE_CATALOG_INDEX, _id: 'manifest', found: false });
           await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
         });
 
@@ -783,6 +779,28 @@ describe('Actions Plugin', () => {
           registerSpy.mockRestore();
         });
 
+        it('registers 0 types and writes nothing when the catalog index is missing', async () => {
+          seedCatalog();
+          const missing = new errors.ResponseError({
+            statusCode: 404,
+            body: { found: false },
+            headers: {},
+            warnings: [],
+            meta: {} as never,
+          });
+          getEsClient().get.mockRejectedValue(missing);
+          await setupPlugin();
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+          expect(getEsClient().mget).not.toHaveBeenCalled();
+          expect(getEsClient().index).not.toHaveBeenCalled();
+          expect(getEsClient().indices.create).not.toHaveBeenCalled();
+          expect(getEsClient().indices.putIndexTemplate).not.toHaveBeenCalled();
+        });
+
         it('resolves whenCatalogReady() when the read fails', async () => {
           seedCatalog();
           getEsClient().get.mockRejectedValue(new Error('read failed'));
@@ -803,9 +821,12 @@ describe('Actions Plugin', () => {
           const pluginStart = plugin.start(coreStart, pluginsStart);
           await pluginStart.whenCatalogReady();
 
-          expect(getEsClient().indices.create).not.toHaveBeenCalled();
-          expect(getEsClient().get).not.toHaveBeenCalled();
-          expect(getEsClient().mget).not.toHaveBeenCalled();
+          const esClient = getEsClient();
+          expect(esClient.get).not.toHaveBeenCalled();
+          expect(esClient.mget).not.toHaveBeenCalled();
+          expect(esClient.index).not.toHaveBeenCalled();
+          expect(esClient.indices.create).not.toHaveBeenCalled();
+          expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
         });
       });
