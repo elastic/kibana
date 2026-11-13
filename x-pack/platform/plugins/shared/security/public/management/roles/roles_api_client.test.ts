@@ -7,8 +7,9 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
+import { RoleValidator } from './edit_role/validate_role';
 import { RolesAPIClient } from './roles_api_client';
-import type { Role } from '../../../common';
+import type { Role, RoleRemoteClusterPrivilege } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 
 describe('RolesAPIClient', () => {
@@ -46,6 +47,43 @@ describe('RolesAPIClient', () => {
         },
         kibana: [],
       });
+    });
+
+    it('omits blank remote cluster entries and preserves complete entries', async () => {
+      const populated: RoleRemoteClusterPrivilege = {
+        clusters: ['remote-*'],
+        privileges: ['monitor_enrich'],
+      };
+      const role: Role = {
+        name: 'remote-role',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+          remote_cluster: [{ clusters: [], privileges: [] }, populated],
+        },
+        kibana: [],
+      };
+      expect(new RoleValidator({ shouldValidate: true }).validateForSave(role).isInvalid).toBe(
+        false
+      );
+      expect((await saveRole(role)).elasticsearch.remote_cluster).toEqual([populated]);
+      expect(role.elasticsearch.remote_cluster).toHaveLength(2);
+    });
+
+    it.each<RoleRemoteClusterPrivilege>([
+      { clusters: ['remote-*'], privileges: [] },
+      { clusters: [], privileges: ['monitor_enrich'] },
+    ])('rejects partially populated remote cluster entries: %j', async (entry) => {
+      const role: Role = {
+        name: 'remote-role',
+        elasticsearch: { cluster: [], indices: [], run_as: [], remote_cluster: [entry] },
+        kibana: [],
+      };
+      expect(new RoleValidator({ shouldValidate: true }).validateForSave(role).isInvalid).toBe(
+        true
+      );
+      expect((await saveRole(role)).elasticsearch.remote_cluster).toEqual([entry]);
     });
 
     it('removes placeholder query entries', async () => {

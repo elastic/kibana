@@ -27,7 +27,7 @@ test('it renders without crashing', () => {
         privileges: [],
         query: '',
         field_security: {
-          grant: [],
+          grant: ['*'],
         },
       }}
       formIndex={0}
@@ -47,6 +47,8 @@ test('it renders without crashing', () => {
 
 test('it allows for custom index privileges', () => {
   const onChange = jest.fn();
+  const indicesAPIClient = indicesAPIClientMock.create();
+  indicesAPIClient.getFields.mockResolvedValue([]);
   const wrapper = mountWithIntl(
     <IndexPrivilegeForm
       indexType="indices"
@@ -60,7 +62,7 @@ test('it allows for custom index privileges', () => {
       }}
       formIndex={0}
       indexPatterns={[]}
-      indicesAPIClient={indicesAPIClientMock.create()}
+      indicesAPIClient={indicesAPIClient}
       availableIndexPrivileges={['all', 'read', 'write', 'index']}
       isRoleReadOnly={false}
       allowDocumentLevelSecurity={true}
