@@ -127,7 +127,7 @@ export const registerAesopExplorerRoutes = ({
           logger.warn('Failed to enable the AESOP explorer', { error });
           return response.customError({
             statusCode: 500,
-            body: { message: (error as Error).message },
+            body: { message: error instanceof Error ? error.message : String(error) },
           });
         }
       }
@@ -156,7 +156,7 @@ export const registerAesopExplorerRoutes = ({
           logger.warn('Failed to uninstall the AESOP explorer', { error });
           return response.customError({
             statusCode: 500,
-            body: { message: (error as Error).message },
+            body: { message: error instanceof Error ? error.message : String(error) },
           });
         }
       }

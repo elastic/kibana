@@ -166,7 +166,7 @@ export const registerAesopDriftMonitorRoutes = ({
           logger.warn('Failed to enable the AESOP drift monitor', { error });
           return response.customError({
             statusCode: 500,
-            body: { message: (error as Error).message },
+            body: { message: error instanceof Error ? error.message : String(error) },
           });
         }
       }
@@ -206,7 +206,7 @@ export const registerAesopDriftMonitorRoutes = ({
           logger.warn('Failed to uninstall the AESOP drift monitor', { error });
           return response.customError({
             statusCode: 500,
-            body: { message: (error as Error).message },
+            body: { message: error instanceof Error ? error.message : String(error) },
           });
         }
       }
