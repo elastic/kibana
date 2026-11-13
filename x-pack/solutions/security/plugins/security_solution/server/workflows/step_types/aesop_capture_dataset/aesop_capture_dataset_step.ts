@@ -16,7 +16,8 @@ import { conversationToExamples, dedupeExamples } from './capture_dataset';
 
 const INTERNAL_VERSION_HEADERS = { 'elastic-api-version': '1' };
 const CONVERSATIONS_SEARCH_PATH = '/internal/agent_builder/conversations/_search';
-const CONVERSATION_PATH = '/internal/agent_builder/conversations';
+const PUBLIC_VERSION_HEADERS = { 'elastic-api-version': '2023-10-31' };
+const CONVERSATION_PATH = '/api/agent_builder/conversations';
 const DATASETS_PATH = '/internal/evals/datasets';
 
 interface ExistingDataset {
@@ -83,6 +84,7 @@ export const aesopCaptureDatasetStepDefinition = createServerStepDefinition({
         const conversation = await callKibanaApi<CapturedConversation>({
           method: 'GET',
           path: `${CONVERSATION_PATH}/${encodeURIComponent(hit.id)}`,
+          headers: PUBLIC_VERSION_HEADERS,
         });
         conversationsRead += 1;
         captured.push(...conversationToExamples(conversation.body));
