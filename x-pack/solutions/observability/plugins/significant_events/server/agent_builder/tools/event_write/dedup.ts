@@ -165,16 +165,15 @@ export const fetchInactiveEventsForReuse = async ({
 
 /**
  * The rules an event holds for matching a candidate. A candidate with confirmed rules compares only
- * confirmed rules, except against a closed series: that holds every rule it ended with. A series
- * closed while recovering stores only `refutes` verdicts, and a recurrence of its rule must still
- * reopen it.
+ * confirmed rules, except against a closed series that holds none: a series closed while recovering
+ * stores only `refutes` verdicts, so it holds every rule it ended with, and a recurrence of any of
+ * them must still reopen it.
  */
-const heldRuleUuids = (candidate: DedupCandidate, ev: SignificantEvent): string[] =>
-  extractRuleUuids(
-    candidate.confirmedOnly && ev.status !== ALERT_EPISODE_STATUS.INACTIVE
-      ? confirmedSignals(ev.signals)
-      : ev.signals
-  );
+const heldRuleUuids = (candidate: DedupCandidate, ev: SignificantEvent): string[] => {
+  const confirmed = extractRuleUuids(confirmedSignals(ev.signals));
+  const holdsNoConfirmed = ev.status === ALERT_EPISODE_STATUS.INACTIVE && confirmed.length === 0;
+  return candidate.confirmedOnly && !holdsNoConfirmed ? confirmed : extractRuleUuids(ev.signals);
+};
 
 /**
  * Returns true when the candidate's dedup rule set is entirely contained in the event's rule set,
@@ -269,7 +268,8 @@ interface CoveringSeries {
 /**
  * The closed series that cover a dedup candidate, newest first: they share a source with it and
  * hold every one of its confirmed rules (the coverage rule live dedup uses, applied to inactive
- * series, which hold every rule they ended with: see `heldRuleUuids`). It expects `series` already paired with their latest episode (see `seriesWithHeads`).
+ * series; see `heldRuleUuids` for which rules a closed series holds). It expects `series` already
+ * paired with their latest episode (see `seriesWithHeads`).
  */
 const coveringInactiveSeries = ({
   candidate,
