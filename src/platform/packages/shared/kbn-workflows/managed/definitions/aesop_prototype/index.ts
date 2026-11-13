@@ -60,6 +60,9 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   // YAML, so installed instances only re-render on a version bump.
   version: 7,
   billable: false,
+  // When the name is missing (instances stored before skillName existed, or an
+  // enable that could not resolve it) the monitor matches on the id, so it only
+  // finds traces when name equals id. Re-enabling stores the current name.
   yamlTemplate: ({ skillId, skillName, intervalMinutes, lookbackMinutes }) =>
     renderTemplate(AESOP_DRIFT_MONITOR_YAML, {
       __SKILL_ID__: skillId,
