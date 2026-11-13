@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout-security';
+import { APP_LOAD_TIMEOUT_MS, type ScoutPage } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
 import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_endpoint_hosts';
@@ -18,22 +18,32 @@ const SORTABLE_COLUMNS = Object.values(EndpointSortableField).filter(
   (field) => field !== EndpointSortableField.ENROLLED_AT
 );
 
-/** Waits for the next endpoint list response; with `sort`, only one requested with that sort. */
+/**
+ * Waits for the next endpoint list response; with `sort`, only one requested with that sort.
+ * `onPageLoad` gives it the same budget as `endpointList.goto()`: on a cold load the first list
+ * response arrived after the default 10s action timeout in CI.
+ */
 const waitForEndpointList = (
   page: ScoutPage,
-  sort?: { field: string; direction: 'asc' | 'desc' }
+  {
+    sort,
+    onPageLoad = false,
+  }: { sort?: { field: string; direction: 'asc' | 'desc' }; onPageLoad?: boolean } = {}
 ): ReturnType<ScoutPage['waitForResponse']> =>
-  page.waitForResponse((response) => {
-    const url = new URL(response.url());
-    if (!url.pathname.endsWith(HOST_METADATA_LIST_ROUTE)) {
-      return false;
-    }
-    return (
-      !sort ||
-      (url.searchParams.get('sortField') === sort.field &&
-        url.searchParams.get('sortDirection') === sort.direction)
-    );
-  });
+  page.waitForResponse(
+    (response) => {
+      const url = new URL(response.url());
+      if (!url.pathname.endsWith(HOST_METADATA_LIST_ROUTE)) {
+        return false;
+      }
+      return (
+        !sort ||
+        (url.searchParams.get('sortField') === sort.field &&
+          url.searchParams.get('sortDirection') === sort.direction)
+      );
+    },
+    onPageLoad ? { timeout: APP_LOAD_TIMEOUT_MS } : undefined
+  );
 
 spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () => {
   let seeded: SeededEndpointHosts | undefined;
@@ -61,7 +71,7 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
 
   spaceTest('no column is sorted by default', async ({ page, pageObjects }) => {
     const { endpointList } = pageObjects;
-    const listResponse = waitForEndpointList(page);
+    const listResponse = waitForEndpointList(page, { onPageLoad: true });
     await endpointList.goto();
 
     const response = await listResponse;
@@ -93,7 +103,7 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
           ['asc', 'ascending'],
           ['desc', 'descending'],
         ] as const) {
-          const listResponse = waitForEndpointList(page, { field, direction });
+          const listResponse = waitForEndpointList(page, { sort: { field, direction } });
           await header.click();
           expect((await listResponse).status()).toBe(200);
           await expect(header).toHaveAttribute('aria-sort', ariaSort);
@@ -105,7 +115,7 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
   spaceTest('applies the sort passed in the URL', async ({ page, pageObjects }) => {
     const { endpointList } = pageObjects;
     const sort = { field: EndpointSortableField.HOST_STATUS, direction: 'desc' } as const;
-    const listResponse = waitForEndpointList(page, sort);
+    const listResponse = waitForEndpointList(page, { sort, onPageLoad: true });
     await endpointList.goto({ sortField: sort.field, sortDirection: sort.direction });
 
     expect((await listResponse).status()).toBe(200);
