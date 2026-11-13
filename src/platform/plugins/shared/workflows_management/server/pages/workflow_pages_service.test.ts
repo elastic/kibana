@@ -29,7 +29,7 @@ import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_erro
 const key = { workflowId: pageRef.workflowId, pageId: pageRef.pageId };
 
 /** An authz fake that grants the given API actions. */
-const createAuthz = (granted: WorkflowsManagementApiActions[]) => {
+const createAuthz = (granted: WorkflowsManagementApiActions[], useRbac = true) => {
   const atSpace = jest.fn(async (_spaceId: string, { kibana }: { kibana: string[] }) => ({
     hasAllRequested: kibana.every((privilege) => granted.includes(privilege.slice(4) as never)),
     username: 'alice',
@@ -42,6 +42,7 @@ const createAuthz = (granted: WorkflowsManagementApiActions[]) => {
     },
   }));
   const authz = {
+    mode: { useRbacForRequest: () => useRbac },
     actions: { api: { get: (operation: string) => `api:${operation}` } },
     checkPrivilegesWithRequest: jest.fn(() => ({ atSpace })),
   } as unknown as SecurityPluginStart['authz'];
@@ -151,8 +152,11 @@ describe('WorkflowPagesService', () => {
       expect(hasPrivileges).toHaveBeenCalledWith({ cluster: ['manage_security'] });
     });
 
-    it('grants every page operation when security is off', async () => {
-      const { start, assertWorkflowAccess } = setup({ authz: undefined });
+    it.each([
+      ['security is off', undefined],
+      ['the request does not use RBAC', createAuthz([], false).authz],
+    ])('grants every page operation when %s', async (_, authz) => {
+      const { start, assertWorkflowAccess } = setup({ authz });
       const client = await start.getClient({ request: httpServerMock.createKibanaRequest() });
 
       await client.setEnabled(key, false).catch(() => undefined);
@@ -160,8 +164,11 @@ describe('WorkflowPagesService', () => {
       expect(assertWorkflowAccess).toHaveBeenCalled();
     });
 
-    it('refuses to publish when security is off, with a clear error', async () => {
-      const { start, core } = setup({ authz: undefined });
+    it.each([
+      ['security is off', undefined],
+      ['the request does not use RBAC', createAuthz([], false).authz],
+    ])('refuses to publish when %s, with a clear error', async (_, authz) => {
+      const { start, core } = setup({ authz });
       const client = await start.getClient({ request: httpServerMock.createKibanaRequest() });
 
       await expect(client.setAccess(key, { level: 'secret_link' })).rejects.toBeInstanceOf(

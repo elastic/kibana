@@ -80,7 +80,7 @@ export class WorkflowPagesService {
       request: KibanaRequest,
       spaceId: string
     ): Promise<Record<WorkflowPageOperation, boolean>> => {
-      if (!authz) {
+      if (!authz?.mode.useRbacForRequest(request)) {
         return { readPage: true, managePage: true };
       }
       const toAction = (privilege: string) => authz.actions.api.get(privilege);
@@ -118,7 +118,7 @@ export class WorkflowPagesService {
           assertWorkflowAccess,
           // Publishing has the same gate as binding the service account that runs the page.
           assertCanPublish: async () => {
-            if (!authz) {
+            if (!authz?.mode.useRbacForRequest(request)) {
               throw new WorkflowPagesUnavailableError(
                 'Publishing a workflow page needs security: the page runs as a service account.'
               );
