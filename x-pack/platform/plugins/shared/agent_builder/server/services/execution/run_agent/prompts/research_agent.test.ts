@@ -53,6 +53,8 @@ describe('getResearchAgentPrompt', () => {
       },
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
+      connectorsAssigned: false,
+      smlSearchSelected: false,
       toolManager: {} as any,
       resultTransformer: jest.fn(),
       renderers: [],
@@ -312,6 +314,8 @@ describe('getResearchAgentPrompt', () => {
           bash: false,
           skills: false,
         },
+        connectorsAssigned: true,
+        smlSearchSelected: true,
       })
     );
     const system = asText(messages[0]);
@@ -340,6 +344,8 @@ describe('getResearchAgentPrompt', () => {
           bash: false,
           skills: false,
         },
+        connectorsAssigned: true,
+        smlSearchSelected: true,
       })
     );
     const system = asText(messages[0]);
@@ -347,6 +353,75 @@ describe('getResearchAgentPrompt', () => {
 
     expect(discovery).toContain('use `sml_search` with `types: ["connector"]`');
     expect(discovery).not.toContain('`elastic` AI Index');
+  });
+
+  describe('connector sections', () => {
+    const renderSystem = async ({
+      connectorsAssigned,
+      smlSearchSelected,
+      sml,
+    }: {
+      connectorsAssigned: boolean;
+      smlSearchSelected: boolean;
+      sml: boolean;
+    }) =>
+      asText(
+        (
+          await getResearchAgentPrompt(
+            makeParams({
+              experimentalFeatures: { aiIndices: false, sml, bash: false, skills: false },
+              connectorsAssigned,
+              smlSearchSelected,
+            })
+          )
+        )[0]
+      );
+
+    it('omits both sections but keeps the # references sml_attach line when no connectors are assigned', async () => {
+      const system = await renderSystem({
+        connectorsAssigned: false,
+        smlSearchSelected: true,
+        sml: true,
+      });
+
+      expect(system).not.toContain('## CONNECTOR DISCOVERY');
+      expect(system).not.toContain('## CONNECTOR ACTION HINTS');
+      expect(system).toContain('call `sml_attach`');
+    });
+
+    it('renders both sections when connectors are assigned and sml_search is selected', async () => {
+      const system = await renderSystem({
+        connectorsAssigned: true,
+        smlSearchSelected: true,
+        sml: true,
+      });
+
+      expect(system).toContain('## CONNECTOR DISCOVERY');
+      expect(system).toContain('## CONNECTOR ACTION HINTS');
+    });
+
+    it('renders only the action hints when sml_search is not selected', async () => {
+      const system = await renderSystem({
+        connectorsAssigned: true,
+        smlSearchSelected: false,
+        sml: true,
+      });
+
+      expect(system).not.toContain('## CONNECTOR DISCOVERY');
+      expect(system).toContain('## CONNECTOR ACTION HINTS');
+    });
+
+    it('renders only the action hints when SML is off', async () => {
+      const system = await renderSystem({
+        connectorsAssigned: true,
+        smlSearchSelected: true,
+        sml: false,
+      });
+
+      expect(system).not.toContain('## CONNECTOR DISCOVERY');
+      expect(system).not.toContain('call `sml_attach`');
+      expect(system).toContain('## CONNECTOR ACTION HINTS');
+    });
   });
 
   it('renders every catalog entry, including custom AI Indices', async () => {
