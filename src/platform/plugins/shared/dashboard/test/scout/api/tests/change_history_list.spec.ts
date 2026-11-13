@@ -27,6 +27,9 @@ interface HistoryItem {
 
 const HISTORY_PATH = 'internal/dashboard/change_history';
 
+/** Upper bound for how long a create or update history event may take to become searchable */
+const HISTORY_SEARCHABLE_TIMEOUT = 30_000;
+
 apiTest.describe('dashboard change history - list', { tag: tags.stateful.classic }, () => {
   const runId = randomUUID();
   const spaceId = `history-list-${runId}`;
@@ -51,11 +54,6 @@ apiTest.describe('dashboard change history - list', { tag: tags.stateful.classic
       );
       expect(saved).toHaveStatusCode(index === 0 ? 201 : 200);
     }
-
-    // History events are written without waiting for a refresh, so wait until they are searchable
-    await expect
-      .poll(async () => (await listHistory(apiClient)).body.total, { timeout: 30_000 })
-      .toBe(titles.length);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -71,10 +69,30 @@ apiTest.describe('dashboard change history - list', { tag: tags.stateful.classic
   const listHistory = async (apiClient: ApiClient, query = '') =>
     apiClient.get(`s/${spaceId}/${HISTORY_PATH}/${dashboardId}${query}`, await requestOptions());
 
+  // Create and update events are indexed without waiting for a refresh, and consecutive searches can
+  // be served by shard copies sitting at different refresh points, so a total observed by one
+  // request says nothing about the next one: assert on the response that saw the whole history
+  const listHistoryOnceComplete = async (apiClient: ApiClient, query = '') => {
+    let complete: Awaited<ReturnType<typeof listHistory>> | undefined;
+    await expect
+      .poll(
+        async () => {
+          complete = await listHistory(apiClient, query);
+          return complete.body.total;
+        },
+        { timeout: HISTORY_SEARCHABLE_TIMEOUT }
+      )
+      .toBe(titles.length);
+    if (!complete) {
+      throw new Error('expect.poll resolved without reading the change history');
+    }
+    return complete;
+  };
+
   apiTest(
     'lists every version, newest first, with the current one flagged',
     async ({ apiClient }) => {
-      const response = await listHistory(apiClient);
+      const response = await listHistoryOnceComplete(apiClient);
       expect(response).toHaveStatusCode(200);
 
       const { total, items } = response.body as { total: number; items: HistoryItem[] };
@@ -96,10 +114,10 @@ apiTest.describe('dashboard change history - list', { tag: tags.stateful.classic
   );
 
   apiTest('pages through history with page and per_page', async ({ apiClient }) => {
-    const first = await listHistory(apiClient, '?page=1&per_page=2');
-    const second = await listHistory(apiClient, '?page=2&per_page=2');
-    const last = await listHistory(apiClient, '?page=3&per_page=2');
-    const beyond = await listHistory(apiClient, '?page=4&per_page=2');
+    const first = await listHistoryOnceComplete(apiClient, '?page=1&per_page=2');
+    const second = await listHistoryOnceComplete(apiClient, '?page=2&per_page=2');
+    const last = await listHistoryOnceComplete(apiClient, '?page=3&per_page=2');
+    const beyond = await listHistoryOnceComplete(apiClient, '?page=4&per_page=2');
 
     for (const response of [first, second, last, beyond]) {
       expect(response).toHaveStatusCode(200);

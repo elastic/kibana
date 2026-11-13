@@ -17,6 +17,9 @@ type ApiClient = ApiClientFixture;
 
 const HISTORY_PATH = 'internal/dashboard/change_history';
 
+/** Upper bound for how long a create or update history event may take to become searchable */
+const HISTORY_SEARCHABLE_TIMEOUT = 30_000;
+
 const spacePrefix = (spaceId: string) => `s/${spaceId}/`;
 
 const dashboardRole = (spaces: string[], privilege: 'all' | 'read') => ({
@@ -123,27 +126,46 @@ apiTest.describe(
         responseType: 'json',
       });
 
-    // History events are written without waiting for a refresh, so wait until they are searchable
+    // Create and update events are indexed without waiting for a refresh, and consecutive searches
+    // can be served by shard copies sitting at different refresh points, so a total observed by one
+    // request says nothing about the next one: assert on the response that saw the whole history
+    const listHistoryOnceComplete = async (
+      apiClient: ApiClient,
+      spaceId: string,
+      total: number,
+      auth: Role = editorBothSpaces,
+      id: string = dashboardId
+    ) => {
+      let complete: Awaited<ReturnType<typeof listHistory>> | undefined;
+      await expect
+        .poll(
+          async () => {
+            complete = await listHistory(apiClient, spaceId, auth, id);
+            return complete.body.total;
+          },
+          { timeout: HISTORY_SEARCHABLE_TIMEOUT }
+        )
+        .toBe(total);
+      if (!complete) {
+        throw new Error('expect.poll resolved without reading the change history');
+      }
+      return complete;
+    };
+
     const waitForVersions = async (
       apiClient: ApiClient,
       spaceId: string,
       total: number,
       id: string = dashboardId
-    ) => {
-      await expect
-        .poll(
-          async () => (await listHistory(apiClient, spaceId, editorBothSpaces, id)).body.total,
-          { timeout: 30_000 }
-        )
-        .toBe(total);
-      return (await listHistory(apiClient, spaceId, editorBothSpaces, id)).body.items as Array<{
+    ) =>
+      (await listHistoryOnceComplete(apiClient, spaceId, total, editorBothSpaces, id)).body
+        .items as Array<{
         id: string;
         action: string;
         isCurrent: boolean;
         comment?: string;
         metadata: { version: number };
       }>;
-    };
 
     // Creates a dashboard with one version per title, so each test owns its history
     const seedVersions = async (
@@ -313,20 +335,8 @@ apiTest.describe(
           body: { title: 'Read only 2' },
           responseType: 'json',
         });
-        let items: Array<{ id: string }> = [];
-        await expect
-          .poll(
-            async () => {
-              const res = await apiClient.get(path, {
-                headers: await headers(editorBothSpaces),
-                responseType: 'json',
-              });
-              items = res.body.items;
-              return res.body.total;
-            },
-            { timeout: 30_000 }
-          )
-          .toBe(2);
+        const items = (await listHistoryOnceComplete(apiClient, spaceA, 2, editorBothSpaces, id))
+          .body.items as Array<{ id: string }>;
         const oldest = items[items.length - 1];
 
         const list = await apiClient.get(path, {
@@ -350,10 +360,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(saved.body.data.title).toBe('Read only 2');
-        const afterList = await apiClient.get(path, {
-          headers: await headers(editorBothSpaces),
-          responseType: 'json',
-        });
+        const afterList = await listHistoryOnceComplete(apiClient, spaceA, 2, editorBothSpaces, id);
         expect(afterList.body.total).toBe(2);
       }
     );
@@ -411,8 +418,8 @@ apiTest.describe(
         expect((await getDashboard(apiClient, spaceA, dashboardIdA)).body.data.title).toBe(
           'Space A title'
         );
-        expect((await listHistory(apiClient, spaceB, ...asB)).body.total).toBe(2);
-        expect((await listHistory(apiClient, spaceA, ...asA)).body.total).toBe(2);
+        expect((await listHistoryOnceComplete(apiClient, spaceB, 2, ...asB)).body.total).toBe(2);
+        expect((await listHistoryOnceComplete(apiClient, spaceA, 2, ...asA)).body.total).toBe(2);
 
         // a legitimate restore in space B only touches space B
         const restoredB = await restore(apiClient, spaceB, itemsB[1].id, ...asB);
@@ -422,7 +429,7 @@ apiTest.describe(
         expect((await getDashboard(apiClient, spaceA, dashboardIdA)).body.data.title).toBe(
           'Space A title'
         );
-        expect((await listHistory(apiClient, spaceA, ...asA)).body.total).toBe(2);
+        expect((await listHistoryOnceComplete(apiClient, spaceA, 2, ...asA)).body.total).toBe(2);
       }
     );
 
@@ -449,15 +456,9 @@ apiTest.describe(
         expect(await saveDashboard(apiClient, spaceB, 'Space B only', ...asB)).toHaveStatusCode(
           201
         );
-        // wait for B's own event; a leak of A's retained events would show up before or with it
-        await expect
-          .poll(async () => (await listHistory(apiClient, spaceB, ...asB)).body.total, {
-            timeout: 30_000,
-          })
-          .toBeGreaterThanOrEqual(1);
-
-        // B only lists its own history, never A's retained snapshots
-        const listB = await listHistory(apiClient, spaceB, ...asB);
+        // B only lists its own history, never A's retained snapshots: a leak of A's retained events
+        // would push the total past B's single event
+        const listB = await listHistoryOnceComplete(apiClient, spaceB, 1, ...asB);
         expect(listB).toHaveStatusCode(200);
         expect(listB.body.total).toBe(1);
         const itemsB = listB.body.items as Array<{ id: string; metadata: { version: number } }>;
