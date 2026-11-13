@@ -30,6 +30,7 @@ import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_r
 import { digitalExperienceRouter } from '../../routes';
 import { createUiSettingsMock } from '../../test_utils/ui_settings_mock';
 import { SessionDetailPage } from './session_detail_page';
+import { clusterFeatures } from './utils/sessions_map';
 
 jest.mock('../../breadcrumbs/use_route_breadcrumb');
 jest.mock('../../hooks/use_kibana_services');
@@ -846,13 +847,14 @@ describe('SessionDetailPage', () => {
       mapProps = {};
       mapCenter$.next({});
       mockDetail.mockResolvedValue(detail());
-      mockLocations.mockResolvedValue({
+      // A new response for each load, as the API gives.
+      mockLocations.mockImplementation(async () => ({
         clusters: [cluster],
         total: 14,
         located: 12,
         bounds: { west: 4.9, south: 52.37, east: 4.9, north: 52.37 },
         center: { lat: 52.37, lon: 4.9 },
-      });
+      }));
     });
 
     it('only shows the list without the Maps plugin', async () => {
@@ -879,7 +881,7 @@ describe('SessionDetailPage', () => {
       });
       expect(layerIdsOf(mapProps)).toEqual([
         'basemap',
-        'digitalExperienceSessionClusters',
+        expect.stringMatching(/^digitalExperienceSessionClusters_/),
         'digitalExperienceSelectedSession',
       ]);
       expect(mapProps.mapCenter).toEqual({
@@ -905,9 +907,10 @@ describe('SessionDetailPage', () => {
           <EuiProvider>
             {renderTooltip({
               features: [
+                // The bubble carries its cluster; what the page loaded since doesn't matter.
                 {
-                  layerId: 'digitalExperienceSessionClusters',
-                  mbProperties: { cluster_key: cluster.key },
+                  layerId: (mapProps.layerList as Array<{ id: string }>)[1].id,
+                  mbProperties: clusterFeatures([cluster]).features[0].properties,
                   actions: [],
                 },
               ],
@@ -993,6 +996,51 @@ describe('SessionDetailPage', () => {
 
         fireEvent.click(screen.getByTestId('digitalExperienceSessionsMapSearchAsMoved'));
         expect(new URLSearchParams(history.location.search).get('bounds')).toBeNull();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('draws the clusters anew only when they change, instead of reloading what the map shows', async () => {
+      jest.useFakeTimers({ doNotFake: ['queueMicrotask'] });
+      try {
+        await showMap();
+        const clustersLayerIdOf = () => (mapProps.layerList as Array<{ id: string }>)[1].id;
+        const firstLayerId = clustersLayerIdOf();
+        const loadCount = () => mockLocations.mock.calls.length;
+        const loadsAfterFirstView = loadCount();
+        const move = (mapCenter: { lat: number; lon: number; zoom: number }) => {
+          act(() => {
+            mapCenter$.next({ mapCenter });
+          });
+          act(() => {
+            jest.advanceTimersByTime(500);
+          });
+        };
+        act(() => {
+          (mapProps.onApiAvailable as (api: unknown) => void)({ latestState$: mapCenter$ });
+        });
+
+        // The map settles with a hair of jitter, which is the same view: nothing to load again.
+        move({ lat: 52.37, lon: 4.9, zoom: 4 });
+        await waitFor(() => expect(loadCount()).toBe(loadsAfterFirstView + 1));
+        const loadsAfterMove = loadCount();
+        move({ lat: 52.3700001, lon: 4.9000001, zoom: 4 });
+        move({ lat: 52.37, lon: 4.9, zoom: 4 });
+        expect(loadCount()).toBe(loadsAfterMove);
+        // Unchanged clusters keep their layer, so the Maps plugin doesn't redraw them.
+        expect(clustersLayerIdOf()).toBe(firstLayerId);
+
+        // Clusters that did change get a layer of their own, which the Maps plugin draws anew.
+        mockLocations.mockImplementation(async () => ({
+          clusters: [{ ...cluster, key: '5/16/11', count: 3 }],
+          total: 14,
+          located: 12,
+          bounds: { west: 4.9, south: 52.37, east: 4.9, north: 52.37 },
+          center: { lat: 52.37, lon: 4.9 },
+        }));
+        move({ lat: 40.71, lon: -74.01, zoom: 4 });
+        await waitFor(() => expect(clustersLayerIdOf()).not.toBe(firstLayerId));
       } finally {
         jest.useRealTimers();
       }

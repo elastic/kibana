@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeatureCollection } from 'geojson';
+import type { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import type { LayerDescriptor, VectorLayerDescriptor } from '@kbn/maps-plugin/common';
 import {
@@ -112,21 +112,113 @@ export const fitView = (
 /** The map zoom whose clusters the server builds: whole levels, so small zooms don't refetch. */
 export const clusterZoom = (zoom: number): number => Math.max(0, Math.floor(zoom));
 
-export const CLUSTER_KEY_PROPERTY = 'cluster_key';
 export const CLUSTER_COUNT_PROPERTY = 'session_count';
 
-/** The clusters as points, with their key, to find them back in a tooltip, and their size. */
+/**
+ * Each cluster rides on its bubble as flat properties, the only kind a map feature keeps, so the
+ * tooltip reads the cluster the user points at, whatever the page loaded since.
+ */
+const CLUSTER_PROPERTIES = {
+  key: 'cluster_key',
+  count: CLUSTER_COUNT_PROPERTY,
+  lat: 'cluster_lat',
+  lon: 'cluster_lon',
+  west: 'cluster_west',
+  south: 'cluster_south',
+  east: 'cluster_east',
+  north: 'cluster_north',
+  city: 'cluster_city',
+  countryIso: 'cluster_country_iso',
+  cityCount: 'cluster_city_count',
+} as const;
+
+const CLUSTER_FIELDS: Array<{ name: string; type: 'string' | 'number' }> = [
+  { name: CLUSTER_PROPERTIES.key, type: 'string' },
+  { name: CLUSTER_PROPERTIES.count, type: 'number' },
+  { name: CLUSTER_PROPERTIES.lat, type: 'number' },
+  { name: CLUSTER_PROPERTIES.lon, type: 'number' },
+  { name: CLUSTER_PROPERTIES.west, type: 'number' },
+  { name: CLUSTER_PROPERTIES.south, type: 'number' },
+  { name: CLUSTER_PROPERTIES.east, type: 'number' },
+  { name: CLUSTER_PROPERTIES.north, type: 'number' },
+  { name: CLUSTER_PROPERTIES.city, type: 'string' },
+  { name: CLUSTER_PROPERTIES.countryIso, type: 'string' },
+  { name: CLUSTER_PROPERTIES.cityCount, type: 'number' },
+];
+
+/** The clusters as points that carry their cluster. */
 export const clusterFeatures = (clusters: SessionLocationCluster[]): FeatureCollection => ({
   type: 'FeatureCollection',
-  features: clusters.map(({ key, location, count }) => ({
+  features: clusters.map(({ key, location, count, bounds, city, countryIso, cityCount }) => ({
     type: 'Feature',
     id: key,
     geometry: { type: 'Point', coordinates: [location.lon, location.lat] },
-    properties: { [CLUSTER_KEY_PROPERTY]: key, [CLUSTER_COUNT_PROPERTY]: count },
+    properties: {
+      [CLUSTER_PROPERTIES.key]: key,
+      [CLUSTER_PROPERTIES.count]: count,
+      [CLUSTER_PROPERTIES.lat]: location.lat,
+      [CLUSTER_PROPERTIES.lon]: location.lon,
+      [CLUSTER_PROPERTIES.west]: bounds.west,
+      [CLUSTER_PROPERTIES.south]: bounds.south,
+      [CLUSTER_PROPERTIES.east]: bounds.east,
+      [CLUSTER_PROPERTIES.north]: bounds.north,
+      [CLUSTER_PROPERTIES.city]: city,
+      [CLUSTER_PROPERTIES.countryIso]: countryIso,
+      [CLUSTER_PROPERTIES.cityCount]: cityCount,
+    },
   })),
 });
 
+/** The cluster a bubble carries, from the properties the map gives back for it. */
+export const clusterOfFeature = (
+  properties: GeoJsonProperties | undefined
+): SessionLocationCluster | null => {
+  const numberOf = (name: string): number | null => {
+    const value = properties?.[name];
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  };
+  const stringOf = (name: string): string | null => {
+    const value = properties?.[name];
+    return typeof value === 'string' && value !== '' ? value : null;
+  };
+  const key = stringOf(CLUSTER_PROPERTIES.key);
+  const count = numberOf(CLUSTER_PROPERTIES.count);
+  const lat = numberOf(CLUSTER_PROPERTIES.lat);
+  const lon = numberOf(CLUSTER_PROPERTIES.lon);
+  const west = numberOf(CLUSTER_PROPERTIES.west);
+  const south = numberOf(CLUSTER_PROPERTIES.south);
+  const east = numberOf(CLUSTER_PROPERTIES.east);
+  const north = numberOf(CLUSTER_PROPERTIES.north);
+  if (
+    key === null ||
+    count === null ||
+    lat === null ||
+    lon === null ||
+    west === null ||
+    south === null ||
+    east === null ||
+    north === null
+  ) {
+    return null;
+  }
+  return {
+    key,
+    count,
+    location: { lat, lon },
+    bounds: { west, south, east, north },
+    city: stringOf(CLUSTER_PROPERTIES.city),
+    countryIso: stringOf(CLUSTER_PROPERTIES.countryIso),
+    cityCount: numberOf(CLUSTER_PROPERTIES.cityCount) ?? 0,
+  };
+};
+
 export const CLUSTERS_LAYER_ID = 'digitalExperienceSessionClusters';
+/**
+ * The clusters' layer takes a new id for each load: the Maps plugin never reloads the features of
+ * an in-memory layer it already drew, as they depend on no time, query or map extent.
+ */
+export const clustersLayerId = (loadId: string): string => `${CLUSTERS_LAYER_ID}_${loadId}`;
+export const isClustersLayer = (layerId: string): boolean => layerId.startsWith(CLUSTERS_LAYER_ID);
 export const SELECTED_LAYER_ID = 'digitalExperienceSelectedSession';
 
 export interface ClusterLayerColors {
@@ -196,16 +288,14 @@ const countField = { name: CLUSTER_COUNT_PROPERTY, origin: FIELD_ORIGIN.SOURCE }
  */
 export const clustersLayer = (
   clusters: SessionLocationCluster[],
-  colors: ClusterLayerColors
+  colors: ClusterLayerColors,
+  loadId: string
 ): VectorLayerDescriptor =>
   pointLayer({
-    id: CLUSTERS_LAYER_ID,
+    id: clustersLayerId(loadId),
     name: CLUSTERS_LAYER_NAME,
     featureCollection: clusterFeatures(clusters),
-    fields: [
-      { name: CLUSTER_KEY_PROPERTY, type: 'string' },
-      { name: CLUSTER_COUNT_PROPERTY, type: 'number' },
-    ],
+    fields: CLUSTER_FIELDS,
     disableTooltips: false,
     style: {
       type: LAYER_STYLE_TYPE.VECTOR,
@@ -286,16 +376,19 @@ export const selectedSessionLayer = (
 export const sessionsMapLayers = ({
   basemap,
   clusters,
+  loadId,
   selectedLocation,
   colors,
 }: {
   basemap: LayerDescriptor | null;
   clusters: SessionLocationCluster[];
+  /** Tells this load of the clusters from the ones before it. */
+  loadId: string;
   selectedLocation: GeoLocation | null;
   colors: ClusterLayerColors;
 }): LayerDescriptor[] => [
   ...(basemap ? [basemap] : []),
-  clustersLayer(clusters, colors),
+  clustersLayer(clusters, colors, loadId),
   ...(selectedLocation ? [selectedSessionLayer(selectedLocation, colors)] : []),
 ];
 

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { omit } from 'lodash';
+import { omit, uniqueId } from 'lodash';
 import type { Subscription } from 'rxjs';
 import { css } from '@emotion/react';
 import {
@@ -30,14 +30,15 @@ import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import { useApiClient, type DigitalExperienceApiClient } from '../../../hooks/use_api_client';
 import { useEnvironment } from '../../../hooks/use_environment';
+import { useEqualValue } from '../../../hooks/use_equal_value';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { sessionsListRequestQuery } from '../../sessions/hooks/sessions_list_request';
 import type { SessionsListState } from '../../sessions/hooks/use_sessions_list_query';
 import {
-  CLUSTERS_LAYER_ID,
-  CLUSTER_KEY_PROPERTY,
+  clusterOfFeature,
+  isClustersLayer,
   WORLD_VIEW,
   clusterZoom,
   fitView,
@@ -144,9 +145,13 @@ export function SessionsMap({
     [width, height]
   );
 
+  // The map shows its whole view, so the area the list is narrowed to isn't part of its query:
+  // narrowing the list from the map must not load the clusters again. The query is only built
+  // when one of them changes, as it resolves a relative time range to the time it is built at.
+  const filterState = useEqualValue({ ...state, bounds: undefined });
   const filtersQuery = useMemo(
-    () => filtersQueryOf(sessionsListRequestQuery({ timeRange, environment, state })),
-    [timeRange, environment, state]
+    () => filtersQueryOf(sessionsListRequestQuery({ timeRange, environment, state: filterState })),
+    [timeRange, environment, filterState]
   );
 
   // Where the map looks, as it reports it, and the part of it the clusters are loaded for.
@@ -154,12 +159,16 @@ export function SessionsMap({
   const [loadedView, setLoadedView] = useState<{ zoom: number; viewport?: string }>({ zoom: 0 });
   useDebounce(
     () => {
-      if (view && size) {
-        setLoadedView({
-          zoom: clusterZoom(view.zoom),
-          viewport: formatGeoBounds(viewBounds(view, size)),
-        });
+      if (!view || !size) {
+        return;
       }
+      const zoom = clusterZoom(view.zoom);
+      const viewport = formatGeoBounds(viewBounds(view, size));
+      // The same view keeps the same state, so a move that changes neither loads nothing: the
+      // clusters it would load are the ones the map already draws.
+      setLoadedView((current) =>
+        current.zoom === zoom && current.viewport === viewport ? current : { zoom, viewport }
+      );
     },
     MOVE_DEBOUNCE_MS,
     [view, width, height]
@@ -238,7 +247,8 @@ export function SessionsMap({
     }
   };
 
-  const clusters = locations?.clusters;
+  // Clusters that come back unchanged keep their layer, so the map doesn't redraw what it shows.
+  const clusters = useEqualValue(locations?.clusters);
   const colors = useMemo(
     () => ({
       fill: euiTheme.colors.primary,
@@ -249,11 +259,13 @@ export function SessionsMap({
     [euiTheme]
   );
   // The Maps embeddable sets its layers again whenever the list changes, so it only changes with them.
+  // Each new list gets a new clusters layer id, which makes the Maps plugin draw the clusters anew.
   const layerList = useMemo(
     () =>
       sessionsMapLayers({
         basemap: basemap ?? null,
         clusters: clusters ?? [],
+        loadId: uniqueId(),
         selectedLocation,
         colors,
       }),
@@ -262,7 +274,6 @@ export function SessionsMap({
 
   // The Maps embeddable takes its tooltip renderer once, so it reads the latest of what it needs.
   const latest = useRef({
-    clusters,
     apiClient,
     serviceName,
     sessionId,
@@ -274,7 +285,6 @@ export function SessionsMap({
     onShowList,
   });
   latest.current = {
-    clusters,
     apiClient,
     serviceName,
     sessionId,
@@ -289,11 +299,11 @@ export function SessionsMap({
     () =>
       ({ features, isLocked, closeTooltip }: RenderTooltipContentParams) => {
         const current = latest.current;
-        const key = features
-          .filter(({ layerId }) => layerId === CLUSTERS_LAYER_ID)
-          .map(({ mbProperties }) => mbProperties?.[CLUSTER_KEY_PROPERTY])
-          .find((value): value is string => typeof value === 'string');
-        const cluster = current.clusters?.find((candidate) => candidate.key === key);
+        // The cluster the user points at, from its bubble: the page may have loaded others since.
+        const cluster = features
+          .filter(({ layerId }) => isClustersLayer(layerId))
+          .map(({ mbProperties }) => clusterOfFeature(mbProperties))
+          .find((candidate): candidate is SessionLocationCluster => candidate !== null);
         if (!cluster) {
           return <></>;
         }

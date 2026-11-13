@@ -8,11 +8,12 @@
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import type { SessionLocationCluster } from '../../../../common/sessions';
 import {
-  CLUSTERS_LAYER_ID,
   CLUSTER_COUNT_PROPERTY,
-  CLUSTER_KEY_PROPERTY,
   SELECTED_LAYER_ID,
   clusterFeatures,
+  clusterOfFeature,
+  clustersLayerId,
+  isClustersLayer,
   clusterTitle,
   clusterZoom,
   fitView,
@@ -112,17 +113,27 @@ describe('sessions map utils', () => {
     expect(clusterZoom(-1)).toBe(0);
   });
 
-  it('turns clusters into points with their key and count', () => {
-    expect(clusterFeatures([cluster()])).toEqual({
-      type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          id: '5/16/10',
-          geometry: { type: 'Point', coordinates: [4.9041, 52.3676] },
-          properties: { [CLUSTER_KEY_PROPERTY]: '5/16/10', [CLUSTER_COUNT_PROPERTY]: 12 },
-        },
-      ],
+  describe('clusterFeatures and clusterOfFeature', () => {
+    it('turns each cluster into a point that carries it', () => {
+      const { features } = clusterFeatures([cluster()]);
+      expect(features).toHaveLength(1);
+      expect(features[0]).toMatchObject({
+        id: '5/16/10',
+        geometry: { type: 'Point', coordinates: [4.9041, 52.3676] },
+        properties: { [CLUSTER_COUNT_PROPERTY]: 12 },
+      });
+      // The tooltip reads the cluster back from the bubble the user points at.
+      expect(clusterOfFeature(features[0].properties)).toEqual(cluster());
+    });
+
+    it('reads back a cluster without a city or country', () => {
+      const mixed = cluster({ city: null, countryIso: null, cityCount: 3 });
+      expect(clusterOfFeature(clusterFeatures([mixed]).features[0].properties)).toEqual(mixed);
+    });
+
+    it('has no cluster for a feature of another layer', () => {
+      expect(clusterOfFeature({})).toBeNull();
+      expect(clusterOfFeature(undefined)).toBeNull();
     });
   });
 
@@ -134,26 +145,43 @@ describe('sessions map utils', () => {
       const layers = sessionsMapLayers({
         basemap,
         clusters: [cluster()],
+        loadId: '1',
         selectedLocation: { lat: 52.3676, lon: 4.9041 },
         colors,
       });
-      expect(idsOf(layers)).toEqual(['basemap', CLUSTERS_LAYER_ID, SELECTED_LAYER_ID]);
+      expect(idsOf(layers)).toEqual(['basemap', clustersLayerId('1'), SELECTED_LAYER_ID]);
     });
 
     it('draws no basemap without one, and no ring without a location', () => {
       const layers = sessionsMapLayers({
         basemap: null,
         clusters: [],
+        loadId: '1',
         selectedLocation: null,
         colors,
       });
-      expect(idsOf(layers)).toEqual([CLUSTERS_LAYER_ID]);
+      expect(idsOf(layers)).toEqual([clustersLayerId('1')]);
+    });
+
+    it('gives the clusters a new layer for each load, as the Maps plugin keeps the features it drew', () => {
+      const layerOf = (loadId: string) =>
+        sessionsMapLayers({
+          basemap: null,
+          clusters: [],
+          loadId,
+          selectedLocation: null,
+          colors,
+        })[0];
+      expect(layerOf('1').id).not.toBe(layerOf('2').id);
+      expect(isClustersLayer(layerOf('2').id)).toBe(true);
+      expect(isClustersLayer(SELECTED_LAYER_ID)).toBe(false);
     });
 
     it('sizes and labels the clusters by their count', () => {
       const [layer] = sessionsMapLayers({
         basemap: null,
         clusters: [cluster()],
+        loadId: '1',
         selectedLocation: null,
         colors,
       });
