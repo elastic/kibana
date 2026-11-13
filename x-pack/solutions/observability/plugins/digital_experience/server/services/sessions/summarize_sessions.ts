@@ -15,6 +15,7 @@ import {
   SESSIONS_MAX_SESSION_HOURS,
   SESSIONS_SYNC_DELAY_SECONDS,
 } from '../../../common/sessions';
+import { stringsOf } from '../../lib/helpers/values';
 import { hashRanges } from './hash_ranges';
 import type { SessionDocument } from './sessions_index';
 import {
@@ -170,12 +171,6 @@ const writeSessions = async (
   }
 };
 
-/** The ids of a bucket row: ES|QL returns a single value as is, and several as an array. */
-const bucketIds = (value: EsqlRow[string] | undefined): string[] =>
-  (Array.isArray(value) ? value : [value]).filter(
-    (id): id is string => typeof id === 'string' && id.length > 0
-  );
-
 /** The ids of the sessions with an event in the window, `IDS_PER_QUERY` hash range at a time. */
 const changedSessionIds = async (
   esClient: ElasticsearchClient,
@@ -187,7 +182,7 @@ const changedSessionIds = async (
   for (const range of hashRanges(Math.ceil(changedSessions / IDS_PER_QUERY))) {
     const rows = await runEsql(esClient, changedSessionIdsQuery(window, range), signal);
     // `concat`, as spreading 100,000 ids into `push` can overflow the call stack.
-    ids = ids.concat(...rows.map((row) => bucketIds(row[SESSION_IDS_COLUMN])));
+    ids = ids.concat(...rows.map((row) => stringsOf(row[SESSION_IDS_COLUMN])));
   }
   return ids;
 };

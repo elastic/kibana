@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/calculate-auto'
   - '@kbn/charts-theme'
   - '@kbn/core'
+  - '@kbn/core-security-server'
   - '@kbn/config-schema'
   - '@kbn/css-utils'
   - '@kbn/data-plugin'

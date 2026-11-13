@@ -7,8 +7,9 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { CoreSetup, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { isResponseError } from '@kbn/es-errors';
-import { TaskCost } from '@kbn/task-manager-plugin/server';
+import { TaskCost, decodeStoredApiKey } from '@kbn/task-manager-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -81,17 +82,16 @@ const API_KEY_ID = /^[\w-]{1,128}$/;
 
 /**
  * The id of the Elasticsearch API key a task's request authenticates with: Task Manager sends it
- * as `ApiKey base64(id:key)`. `null` for any other credential, such as a UIAM key.
+ * as `ApiKey base64(id:key)`. `null` for any other credential, such as a UIAM key, whose raw
+ * secret has no id to decode.
  */
 export const apiKeyIdOf = (request: KibanaRequest): string | null => {
-  const { authorization } = request.headers;
-  const header = Array.isArray(authorization) ? authorization[0] : authorization;
-  const [scheme, encoded] = header?.split(' ') ?? [];
-  if (scheme !== 'ApiKey' || !encoded) {
+  const header = HTTPAuthorizationHeader.parseFromRequest(request);
+  if (header?.scheme.toLowerCase() !== 'apikey') {
     return null;
   }
-  const [id] = Buffer.from(encoded, 'base64').toString('utf8').split(':');
-  return API_KEY_ID.test(id) ? id : null;
+  const { id, secret } = decodeStoredApiKey(header.credentials);
+  return secret && API_KEY_ID.test(id) ? id : null;
 };
 
 const logErrorChange = (logger: Logger, previous: SessionsTaskState, message: string) => {

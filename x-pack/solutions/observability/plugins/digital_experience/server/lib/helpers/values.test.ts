@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { numberOr, stringOrNull, totalHitsOf } from './values';
+import { numberOr, stringOrNull, stringsOf, totalHitsOf } from './values';
 
 describe('numberOr', () => {
   it.each([0, -1, 1.5])('keeps the finite number %p', (value) => {
@@ -39,6 +39,24 @@ describe('stringOrNull', () => {
 
   it.each(['', null, undefined, 0, 42, {}])('answers null for %p', (value) => {
     expect(stringOrNull(value)).toBeNull();
+  });
+});
+
+describe('stringsOf', () => {
+  it('keeps a single value as a list, as ES|QL returns one that way', () => {
+    expect(stringsOf('/cart')).toEqual(['/cart']);
+  });
+
+  it('keeps the strings of a list, in order', () => {
+    expect(stringsOf(['/', '/products', '/cart'])).toEqual(['/', '/products', '/cart']);
+  });
+
+  it('drops the empty strings, which name no page or session', () => {
+    expect(stringsOf(['', '/cart', ''])).toEqual(['/cart']);
+  });
+
+  it.each([null, undefined, 42, {}])('answers nothing for %p', (value) => {
+    expect(stringsOf(value)).toEqual([]);
   });
 });
 

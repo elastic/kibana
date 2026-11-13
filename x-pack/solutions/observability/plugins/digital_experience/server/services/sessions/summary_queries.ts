@@ -46,7 +46,11 @@ import {
 } from '../../lib/otel/source_fields';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 
-/** ES|QL returns at most this many rows, whatever the `LIMIT`. */
+/**
+ * Rows an ES|QL response holds, whatever the `LIMIT`: the default of the cluster's
+ * `esql.query.result_truncation_max_size`. A batch whose response reaches it is split and asked
+ * again, so a cluster that raised the setting only splits later than it has to.
+ */
 export const ESQL_MAX_ROWS = 10_000;
 
 /** The window of new events whose sessions are rebuilt. */
