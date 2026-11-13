@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { registerPageManagementRoutes } from './page_management_routes';
 import type { PageRequest, PageResponse, PageSubmissionDeps } from '../../../pages/page_submission';
 import {
   getPageForm,
@@ -55,14 +56,11 @@ const respond = (response: KibanaResponseFactory, { statusCode, html, location }
       : EXTERNAL_RESUME_HTML_HEADERS,
   });
 
-/** Registers the public page routes. Only with `workflowsManagement.pages.enabled`. */
-export function registerPageRoutes({
-  router,
-  workflowsService,
-  spaces,
-  audit,
-  logger,
-}: RouteDependencies) {
+/** Registers the page routes. Only with `workflowsManagement.pages.enabled`. */
+export function registerPageRoutes(routeDeps: RouteDependencies) {
+  const { router, workflowsService, spaces, audit, logger } = routeDeps;
+  registerPageManagementRoutes(routeDeps);
+
   const deps: PageSubmissionDeps = {
     arePagesEnabled: () => workflowsService.arePagesEnabled(),
     resolveWorkflowPage: (ref, secret) => workflowsService.resolveWorkflowPage(ref, secret),
