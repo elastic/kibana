@@ -98,6 +98,16 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
+          {shouldShowAutoOpsEnabledBanner && (
+            <>
+              <AutoOpsEnabledCallout
+                autoOpsUrl={cloudConnectStatus.autoOpsServiceUrl}
+                docsUrl={cloudConnectStatus.autoOpsDocsUrl}
+                style={{ margin: `0 ${euiTheme.size.l}` }}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" aria-hidden={true} />}
             title={

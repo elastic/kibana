@@ -18,6 +18,8 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     instanceSizeMb: 1234,
     isCloudEnabled: true,
     isEce: undefined,
+    isFedrampHigh: undefined,
+    isElasticCloudHosted: undefined,
     isElasticStaffOwned: true,
     organizationId: 'organization-id',
     trialEndDate: new Date('2020-10-01T14:13:12Z'),

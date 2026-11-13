@@ -62,6 +62,21 @@ describe('registerCloudDeploymentIdAnalyticsContext', () => {
     });
   });
 
+  test('it registers the context provider and emits isFedrampHigh and isElasticCloudHosted', async () => {
+    registerCloudDeploymentMetadataAnalyticsContext(analytics, {
+      id: 'cloud_id',
+      isFedrampHigh: true,
+      isElasticCloudHosted: true,
+    });
+    expect(analytics.registerContextProvider).toHaveBeenCalledTimes(1);
+    const [{ context$ }] = analytics.registerContextProvider.mock.calls[0];
+    await expect(firstValueFrom(context$)).resolves.toEqual({
+      cloudId: 'cloud_id',
+      isFedrampHigh: true,
+      isElasticCloudHosted: true,
+    });
+  });
+
   describe('cloudInTrial', () => {
     test('when cloudTrialEndDate is available', async () => {
       const cloudTrialEndDate = new Date(Date.now() + 1_000).toISOString(); // create a date 1 second in the future.
