@@ -7,9 +7,11 @@
 
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
+import { useQueryClient } from '@kbn/react-query';
 import { useRunWorkflow } from '@kbn/workflows-ui';
 import { getErrorMessage } from '../utils/get_error_message';
 import { getWorkflowExecutionPath } from '../utils/get_workflow_execution_path';
+import { latestWorkflowExecutionQueryKey } from './use_latest_workflow_execution';
 import { useKibana } from './use_kibana';
 
 export interface UseRunAutomationResult {
@@ -17,13 +19,22 @@ export interface UseRunAutomationResult {
   isLoading: boolean;
 }
 
-export const useRunAutomation = (): UseRunAutomationResult => {
+export interface UseRunAutomationOptions {
+  onStarted?: (executionId: string) => void;
+}
+
+export const useRunAutomation = ({
+  onStarted,
+}: UseRunAutomationOptions = {}): UseRunAutomationResult => {
   const {
     services: { application, notifications },
   } = useKibana();
+  const queryClient = useQueryClient();
 
   const { mutate, isLoading } = useRunWorkflow({
     onSuccess: (data, { id: automationId }) => {
+      queryClient.invalidateQueries({ queryKey: latestWorkflowExecutionQueryKey(automationId) });
+      onStarted?.(data.workflowExecutionId);
       const executionHref = application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: getWorkflowExecutionPath(automationId, data.workflowExecutionId),
       });

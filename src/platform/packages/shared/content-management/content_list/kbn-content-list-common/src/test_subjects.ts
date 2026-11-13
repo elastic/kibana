@@ -71,6 +71,16 @@ export const getContentListTagOptionSubj = (name: string): string =>
   `tag-searchbar-option-${name.replace(' ', '_')}`;
 
 /**
+ * Subject for an option in a user-field filter popover (e.g. Created by), keyed
+ * by *username* rather than the profile UID the option carries, so tests can
+ * address it without knowing the UID and without matching on the avatar's
+ * rendered label (which resolves to a full name when the profile has one).
+ * Sentinel options (no creator, managed) are keyed by their filter key.
+ */
+export const getContentListUserOptionSubj = (fieldName: string, key: string): string =>
+  `${fieldName}-option-${key}`;
+
+/**
  * Subjects the toolbar composes from its root `data-test-subj`. Defaults to
  * {@link CONTENT_LIST_TEST_SUBJECTS.toolbar}; pass a custom root when the
  * toolbar is rendered with an overridden `data-test-subj`.

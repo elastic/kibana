@@ -100,7 +100,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     spaceId,
     runAs: runAs?.serviceAccountId,
     deployment,
-    defaultConnectorId: manager.deps.defaultConnectorId,
+    defaultModel: manager.deps.defaultModel,
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(

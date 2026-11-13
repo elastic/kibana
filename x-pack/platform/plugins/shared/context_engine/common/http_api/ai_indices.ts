@@ -6,6 +6,7 @@
  */
 
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { AiIndexDreamingConfig } from '../dreaming';
 import type { ImprovementAction } from './improvement_actions';
 
 /** The type of backing store an AI index is attached to. */
@@ -86,6 +87,10 @@ export interface AiIndexFeedbackAnalysis {
 
 export interface AiIndexProperties {
   description?: string;
+  /**
+   * Set `true` on a managed registration for the AI index to take memories; see
+   * `takesMemories`. Ignored from API callers, whose AI indices always take memories.
+   */
   memory_enabled?: boolean;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
@@ -94,13 +99,20 @@ export interface AiIndexProperties {
   feedback_analysis?: AiIndexFeedbackAnalysis;
 }
 
-export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
+export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces' | 'memory_enabled'> {
   id: string;
   managed: boolean;
-  memory_enabled: boolean;
   date_created: string;
   date_modified: string;
   traces: AiIndexTraceWithQuery[];
+}
+
+/** An AI index as the server holds it: the public item plus the fields the public API leaves out. */
+export interface AiIndexItem extends AiIndexHttpItem {
+  /** What the AI index learns from its memories, and how often. Set through the internal dreaming route. */
+  dreaming?: AiIndexDreamingConfig;
+  /** For a managed AI index, the `memory_enabled` of its registration; see `takesMemories`. */
+  memory_enabled?: boolean;
 }
 
 export type GetAiIndexResponse = AiIndexHttpItem;

@@ -50,7 +50,6 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/reporting-common'
   - '@kbn/std'
-  - '@kbn/core-http-router-server-internal'
   - '@kbn/reporting-public'
   - '@kbn/reporting-server'
   - '@kbn/reporting-export-types-csv'

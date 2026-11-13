@@ -41,8 +41,3 @@ export const SEARCH_BAR_PLACEHOLDERS: Readonly<Record<EntityInventoryEntityCateg
     defaultMessage: 'Search resources — e.g. cluster:prod* AND namespace:payments',
   }),
 };
-
-export const ENTITY_LIST_PLACEHOLDER = i18n.translate(
-  'xpack.entityInventoryApp.pageShell.entityListPlaceholder',
-  { defaultMessage: 'Entity list coming soon' }
-);

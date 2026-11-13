@@ -152,6 +152,10 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
     debugTable: false,
     enableRowSelection,
     enableRowRangeSelection: false,
+    // The expanded state is owned by the store and changed explicitly. TanStack otherwise resets it whenever
+    // `data` changes identity, which happens when a group node's children are loaded and would collapse the
+    // row that was just expanded.
+    autoResetExpanded: false,
     getRowCanExpand,
     onRowSelectionChange,
     onExpandedChange: onExpandedChangeHandler,

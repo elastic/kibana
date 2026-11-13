@@ -81,15 +81,21 @@ find during Task 7's live chat test or after the PR is open.
 `create-connector` runs in a forked context and can't ask the user anything, so agree on the actions
 first. Unless the user already named them, propose a set as "Choose the actions" in `create-connector`
 describes, one line per action (name, vendor operation, scope, the question it answers) with the notable
-operations left out, and confirm it with `AskUserQuestion`. When building a batch, confirm every
-connector's set in one round rather than stopping before each. If the user asked not to be interrupted,
-go ahead with the proposals; the PR's `## Actions` section then says they are unconfirmed.
+operations left out, and confirm it with `AskUserQuestion`. In the same confirmation, agree the inbound
+events: when the vendor pushes webhooks or the connector should be bi-directional, propose the event keys as "Choose the inbound events" in
+`create-connector` describes. A connector that only calls the vendor gets no events; say so. On the
+first PR for a new type, those keys are recorded for the follow-up and are not declared on the spec.
+`events` ship with `'workflows'` once the type is on every Production-NonCanary version, because
+workflow triggers do not check `supportedFeatureIds`. When
+building a batch, confirm every connector's set in one round rather than stopping before each. If the
+user asked not to be interrupted, go ahead with the proposals; the PR's `## Actions` section then says
+they are unconfirmed.
 
-Invoke the `create-connector` skill with `$ARGUMENTS` and the agreed actions:
+Invoke the `create-connector` skill with `$ARGUMENTS` and the agreed actions and events:
 
 ```
 Skill: create-connector
-Args: $ARGUMENTS actions: <action names, each with its vendor operation>
+Args: $ARGUMENTS actions: <action names, each with its vendor operation> events: <event keys for the follow-up, or none. The first PR does not declare them>
 ```
 
 This runs in a forked context and will generate:
