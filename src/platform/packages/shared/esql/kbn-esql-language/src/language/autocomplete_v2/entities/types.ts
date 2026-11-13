@@ -8,7 +8,12 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { EntityItem, EntityScope, EntityType } from '../../../esql_js_sim/definitions';
+import type {
+  ArgumentRole,
+  EntityItem,
+  EntityScope,
+  EntityType,
+} from '../../../esql_js_sim/definitions';
 
 /** What the editor provides. Listing entities is the only thing the engine asks of it. */
 export type EntityCallbacks = ESQLCallbacks;
@@ -27,6 +32,11 @@ export interface EntityDefinition {
   exists?: (name: string, items: EntityItem[]) => boolean;
   /** The entities an entity groups, as the data streams of an integration. */
   children?: (item: EntityItem) => EntityItem[];
+  /**
+   * For an entity that defines what its value can be, as a setting does: the roles a value of
+   * the named entity can have.
+   */
+  valueRoles?: (name: string) => ArgumentRole[];
 }
 
 /** One definition per kind of entity. A kind without a definition does not compile. */

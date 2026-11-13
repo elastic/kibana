@@ -8,6 +8,7 @@
  */
 
 import { settings } from '../../../commands/definitions/generated/settings';
+import { parseMapParams } from '../../../commands/definitions/utils/maps';
 import {
   METADATA_FIELD_NAMES,
   SERVERLESS_METADATA_FIELD_NAMES,
@@ -117,5 +118,29 @@ export const ENTITIES: EntityRegistry = {
           hidden: ignoreAsSuggestion,
           description,
         })),
+    valueRoles: (name) => {
+      const setting = settings.find((candidate) => candidate.name === name);
+      const types: readonly string[] = setting?.type ?? [];
+      const { mapParams } = (setting ?? {}) as { mapParams?: string };
+
+      return [
+        ...(types.includes('boolean')
+          ? [{ kind: 'constant', valueType: 'boolean', allowedValues: ['false', 'true'] } as const]
+          : []),
+        ...(mapParams
+          ? [
+              {
+                kind: 'map',
+                parameters: Object.fromEntries(
+                  Object.entries(parseMapParams(mapParams)).map(([key, { rawType, values }]) => [
+                    key,
+                    { type: rawType, ...(values.length && { values }) },
+                  ])
+                ),
+              } as const,
+            ]
+          : []),
+      ];
+    },
   },
 };
