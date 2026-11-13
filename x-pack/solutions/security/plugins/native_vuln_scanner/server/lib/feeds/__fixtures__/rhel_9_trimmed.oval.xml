@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="utf-8"?>
+<oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:unix-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#unix" xmlns:red-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:ind-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+<generator>
+<oval:product_name>Red Hat OVAL Patch Definition Merger</oval:product_name>
+<oval:product_version>3</oval:product_version>
+<oval:schema_version>5.10</oval:schema_version>
+<oval:timestamp>2026-11-12T19:21:30</oval:timestamp>
+<oval:content_version>1794511290</oval:content_version>
+</generator>
+<definitions>
+<definition class="patch" id="oval:com.redhat.rhsa:def:202619367" version="636">
+ <metadata>
+  <title>RHSA-2026:19367: giflib update (Important)</title>
+  <affected family="unix">
+   <platform>Red Hat Enterprise Linux 9</platform>
+  </affected>
+  <reference ref_id="RHSA-2026:19367" ref_url="https://access.redhat.com/errata/RHSA-2026:19367" source="RHSA"/>
+  <reference ref_id="CVE-2026-23868" ref_url="https://access.redhat.com/security/cve/CVE-2026-23868" source="CVE"/>
+  <description>Please update</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Important</severity>
+   <rights>Copyright 2026 Red Hat, Inc.</rights>
+   <issued date="2026-05-19"/>
+   <updated date="2026-05-19"/>
+   <cve cvss3="7.0/CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H" cwe="CWE-825" href="https://access.redhat.com/security/cve/CVE-2026-23868" impact="important" public="20260310:1853">CVE-2026-23868</cve>
+   <bugzilla href="https://bugzilla.redhat.com/2446207" id="2446207">giflib: Giflib: Double-free vulnerability leading to memory corruption</bugzilla>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::baseos</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::extensions</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::supplementary</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::appstream</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::baseos</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::crb</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::extensions</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::highavailability</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::nfv</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::realtime</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.rhba:tst:20223945012"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 9 is installed" test_ref="oval:com.redhat.rhba:tst:20223945011"/>
+   <criteria operator="OR">
+    <criteria operator="AND">
+     <criterion comment="giflib is earlier than 0:5.2.1-10.el9_8.1" test_ref="oval:com.redhat.rhsa:tst:202619367001"/>
+     <criterion comment="giflib is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:202619367002"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="giflib-devel is earlier than 0:5.2.1-10.el9_8.1" test_ref="oval:com.redhat.rhsa:tst:202619367003"/>
+     <criterion comment="giflib-devel is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:202619367004"/>
+    </criteria>
+   </criteria>
+  </criteria>
+ </criteria>
+</definition>
+<definition class="patch" id="oval:com.redhat.rhsa:def:20232654" version="638">
+ <metadata>
+  <title>RHSA-2023:2654: nodejs:18 security, bug fix, and enhancement update (Moderate)</title>
+  <affected family="unix">
+   <platform>Red Hat Enterprise Linux 9</platform>
+  </affected>
+  <reference ref_id="RHSA-2023:2654" ref_url="https://access.redhat.com/errata/RHSA-2023:2654" source="RHSA"/>
+  <reference ref_id="CVE-2021-35065" ref_url="https://access.redhat.com/security/cve/CVE-2021-35065" source="CVE"/>
+  <reference ref_id="CVE-2022-25881" ref_url="https://access.redhat.com/security/cve/CVE-2022-25881" source="CVE"/>
+  <reference ref_id="CVE-2022-4904" ref_url="https://access.redhat.com/security/cve/CVE-2022-4904" source="CVE"/>
+  <reference ref_id="CVE-2023-23918" ref_url="https://access.redhat.com/security/cve/CVE-2023-23918" source="CVE"/>
+  <reference ref_id="CVE-2023-23919" ref_url="https://access.redhat.com/security/cve/CVE-2023-23919" source="CVE"/>
+  <reference ref_id="CVE-2023-23920" ref_url="https://access.redhat.com/security/cve/CVE-2023-23920" source="CVE"/>
+  <reference ref_id="CVE-2023-23936" ref_url="https://access.redhat.com/security/cve/CVE-2023-23936" source="CVE"/>
+  <reference ref_id="CVE-2023-24807" ref_url="https://access.redhat.com/security/cve/CVE-2023-24807" source="CVE"/>
+  <description>Node.js is a software development platform for building fast and scalable network applications in the JavaScript programming language. 
+
+The following packages have been upgraded to a later upstream version: nodejs (18.14.2).
+
+Security Fix(es):
+
+* glob-parent: Regular Expression Denial of Service (CVE-2021-35065)
+
+* c-ares: buffer overflow in config_sortlist() due to missing string length check (CVE-2022-4904)
+
+* http-cache-semantics: Regular Expression Denial of Service (ReDoS) vulnerability (CVE-2022-25881)
+
+* Node.js: Permissions policies can be bypassed via process.mainModule (CVE-2023-23918)
+
+* Node.js: OpenSSL error handling issues in nodejs crypto library (CVE-2023-23919)
+
+* Node.js: Fetch API did not protect against CRLF injection in host headers (CVE-2023-23936)
+
+* Node.js: insecure loading of ICU data through ICU_DATA environment variable (CVE-2023-23920)
+
+* Node.js: Regular Expression Denial of Service in Headers fetch API (CVE-2023-24807)
+
+For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Moderate</severity>
+   <rights>Copyright 2023 Red Hat, Inc.</rights>
+   <issued date="2023-05-09"/>
+   <updated date="2023-05-09"/>
+   <cve cvss3="7.5/CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H" cwe="CWE-400" href="https://access.redhat.com/security/cve/CVE-2021-35065" impact="moderate" public="20221226">CVE-2021-35065</cve>
+   <cve cvss3="7.5/CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H" cwe="CWE-1333" href="https://access.redhat.com/security/cve/CVE-2022-25881" impact="moderate" public="20230131">CVE-2022-25881</cve>
+   <cve cvss3="8.6/CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H" cwe="CWE-805" href="https://access.redhat.com/security/cve/CVE-2022-4904" impact="moderate" public="20221213">CVE-2022-4904</cve>
+   <cve cvss3="7.5/CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N" cwe="CWE-863" href="https://access.redhat.com/security/cve/CVE-2023-23918" impact="moderate" public="20230216">CVE-2023-23918</cve>
+   <cve cvss3="7.5/CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H" href="https://access.redhat.com/security/cve/CVE-2023-23919" impact="moderate" public="20230216">CVE-2023-23919</cve>
+   <cve cvss3="4.2/CVSS:3.1/AV:L/AC:L/PR:H/UI:R/S:U/C:N/I:H/A:N" cwe="CWE-426" href="https://access.redhat.com/security/cve/CVE-2023-23920" impact="low" public="20230216">CVE-2023-23920</cve>
+   <cve cvss3="6.5/CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N" cwe="CWE-93" href="https://access.redhat.com/security/cve/CVE-2023-23936" impact="moderate" public="20230216">CVE-2023-23936</cve>
+   <cve cvss3="7.5/CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H" cwe="CWE-1333" href="https://access.redhat.com/security/cve/CVE-2023-24807" impact="low" public="20230216">CVE-2023-24807</cve>
+   <bugzilla href="https://bugzilla.redhat.com/2156324" id="2156324">glob-parent: Regular Expression Denial of Service</bugzilla>
+   <bugzilla href="https://bugzilla.redhat.com/2165824" id="2165824">http-cache-semantics: Regular Expression Denial of Service (ReDoS) vulnerability</bugzilla>
+   <bugzilla href="https://bugzilla.redhat.com/2168631" id="2168631">c-ares: buffer overflow in config_sortlist() due to missing string length check</bugzilla>
+   <bugzilla href="https://bugzilla.redhat.com/2171935" id="2171935">Node.js: Permissions policies can be bypassed via process.mainModule</bugzilla>
+   <bugzilla href="https://bugzilla.redhat.com/2172170" id="2172170">Node.js: OpenSSL error handling issues in nodejs crypto library</bugzilla>
+   <bugzilla href="https://bugzilla.redhat.com/2172190" id="2172190">Node.js: Fetch API did not protect against CRLF injection in host headers</bugzilla>
+   <bugzilla href="https://bugzilla.redhat.com/2172204" id="2172204">Node.js: Regular Expression Denial of Service in Headers fetch API</bugzilla>
+   <bugzilla href="https://bugzilla.redhat.com/2172217" id="2172217">Node.js: insecure loading of ICU data through ICU_DATA environment variable</bugzilla>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::baseos</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::extensions</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::supplementary</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::appstream</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::baseos</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::crb</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::extensions</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::highavailability</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::nfv</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::realtime</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.rhba:tst:20223945012"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 9 is installed" test_ref="oval:com.redhat.rhba:tst:20223945011"/>
+   <criteria operator="OR">
+    <criteria operator="AND">
+     <criterion comment="Module nodejs:18 is enabled" test_ref="oval:com.redhat.rhsa:tst:20228832017"/>
+     <criteria operator="OR">
+      <criteria operator="AND">
+       <criterion comment="nodejs is earlier than 1:18.14.2-2.module+el9.2.0.z+18497+a402347c" test_ref="oval:com.redhat.rhsa:tst:20232654001"/>
+       <criterion comment="nodejs is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:20226595002"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="nodejs-devel is earlier than 1:18.14.2-2.module+el9.2.0.z+18497+a402347c" test_ref="oval:com.redhat.rhsa:tst:20232654003"/>
+       <criterion comment="nodejs-devel is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:20228832004"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="nodejs-docs is earlier than 1:18.14.2-2.module+el9.2.0.z+18497+a402347c" test_ref="oval:com.redhat.rhsa:tst:20232654005"/>
+       <criterion comment="nodejs-docs is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:20226595004"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="nodejs-full-i18n is earlier than 1:18.14.2-2.module+el9.2.0.z+18497+a402347c" test_ref="oval:com.redhat.rhsa:tst:20232654007"/>
+       <criterion comment="nodejs-full-i18n is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:20226595006"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="nodejs-nodemon is earlier than 0:2.0.20-2.module+el9.2.0.z+18497+a402347c" test_ref="oval:com.redhat.rhsa:tst:20232654009"/>
+       <criterion comment="nodejs-nodemon is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:20226595012"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="nodejs-packaging is earlier than 0:2021.06-4.module+el9.1.0+15718+e52ec601" test_ref="oval:com.redhat.rhsa:tst:20228832011"/>
+       <criterion comment="nodejs-packaging is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:20228832012"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="nodejs-packaging-bundler is earlier than 0:2021.06-4.module+el9.1.0+15718+e52ec601" test_ref="oval:com.redhat.rhsa:tst:20228832013"/>
+       <criterion comment="nodejs-packaging-bundler is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:20228832014"/>
+      </criteria>
+      <criteria operator="AND">
+       <criterion comment="npm is earlier than 1:9.5.0-1.18.14.2.2.module+el9.2.0.z+18497+a402347c" test_ref="oval:com.redhat.rhsa:tst:20232654015"/>
+       <criterion comment="npm is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:20226595010"/>
+      </criteria>
+     </criteria>
+    </criteria>
+   </criteria>
+  </criteria>
+ </criteria>
+</definition>
+<definition class="patch" id="oval:com.redhat.rhsa:def:20231703" version="638">
+ <metadata>
+  <title>RHSA-2023:1703: kernel security and bug fix update (Important)</title>
+  <affected family="unix">
+   <platform>Red Hat Enterprise Linux 9</platform>
+  </affected>
+  <reference ref_id="RHSA-2023:1703" ref_url="https://access.redhat.com/errata/RHSA-2023:1703" source="RHSA"/>
+  <reference ref_id="CVE-2023-0386" ref_url="https://access.redhat.com/security/cve/CVE-2023-0386" source="CVE"/>
+  <description>The kernel packages contain the Linux kernel, the core of any Linux operating system.
+
+Security Fix(es):
+
+* kernel: FUSE filesystem low-privileged user privileges escalation (CVE-2023-0386)
+
+For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.
+
+Bug Fix(es):
+
+* Update intel_idle for Eaglestream/Sapphire Rapids support (BZ#2168361)
+
+* RHEL9: An application stopped on robust futex used via pthread_mutex_lock() (BZ#2168836)</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Important</severity>
+   <rights>Copyright 2023 Red Hat, Inc.</rights>
+   <issued date="2023-04-11"/>
+   <updated date="2023-04-11"/>
+   <cve cvss3="7.0/CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H" cwe="CWE-282" href="https://access.redhat.com/security/cve/CVE-2023-0386" impact="important" public="20230124:1000">CVE-2023-0386</cve>
+   <bugzilla href="https://bugzilla.redhat.com/2159505" id="2159505">kernel: FUSE filesystem low-privileged user privileges escalation</bugzilla>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::baseos</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::extensions</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::supplementary</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::appstream</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::baseos</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::crb</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::extensions</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::highavailability</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::nfv</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::realtime</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.rhba:tst:20223945012"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 9 is installed" test_ref="oval:com.redhat.rhba:tst:20223945011"/>
+   <criteria operator="OR">
+    <criterion comment="kernel earlier than 0:5.14.0-162.23.1.el9_1 is currently running" test_ref="oval:com.redhat.rhsa:tst:20231691025"/>
+    <criterion comment="kernel earlier than 0:5.14.0-162.23.1.el9_1 is set to boot up on next boot" test_ref="oval:com.redhat.rhsa:tst:20231691026"/>
+   </criteria>
+   <criteria operator="OR">
+    <criteria operator="AND">
+     <criterion comment="bpftool is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703001"/>
+     <criterion comment="bpftool is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983002"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703003"/>
+     <criterion comment="kernel is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983004"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-abi-stablelists is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703005"/>
+     <criterion comment="kernel-abi-stablelists is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983034"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-core is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703007"/>
+     <criterion comment="kernel-core is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983036"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-debug is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703009"/>
+     <criterion comment="kernel-debug is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983040"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-debug-core is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703011"/>
+     <criterion comment="kernel-debug-core is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983042"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-debug-devel is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703013"/>
+     <criterion comment="kernel-debug-devel is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983044"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-debug-devel-matched is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703015"/>
+     <criterion comment="kernel-debug-devel-matched is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983046"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-debug-modules is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703017"/>
+     <criterion comment="kernel-debug-modules is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983048"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-debug-modules-extra is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703019"/>
+     <criterion comment="kernel-debug-modules-extra is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983052"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-devel is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703021"/>
+     <criterion comment="kernel-devel is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983056"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-devel-matched is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703023"/>
+     <criterion comment="kernel-devel-matched is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983058"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-doc is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703025"/>
+     <criterion comment="kernel-doc is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983060"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-modules is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703027"/>
+     <criterion comment="kernel-modules is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983064"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-modules-extra is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703029"/>
+     <criterion comment="kernel-modules-extra is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983068"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-tools is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703031"/>
+     <criterion comment="kernel-tools is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983098"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-tools-libs is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703033"/>
+     <criterion comment="kernel-tools-libs is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983100"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-tools-libs-devel is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703035"/>
+     <criterion comment="kernel-tools-libs-devel is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983102"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-zfcpdump is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703037"/>
+     <criterion comment="kernel-zfcpdump is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983106"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-zfcpdump-core is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703039"/>
+     <criterion comment="kernel-zfcpdump-core is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983108"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-zfcpdump-devel is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703041"/>
+     <criterion comment="kernel-zfcpdump-devel is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983110"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-zfcpdump-devel-matched is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703043"/>
+     <criterion comment="kernel-zfcpdump-devel-matched is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983112"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-zfcpdump-modules is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703045"/>
+     <criterion comment="kernel-zfcpdump-modules is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983114"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="kernel-zfcpdump-modules-extra is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703047"/>
+     <criterion comment="kernel-zfcpdump-modules-extra is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983118"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="perf is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703049"/>
+     <criterion comment="perf is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983122"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="python3-perf is earlier than 0:5.14.0-162.23.1.el9_1" test_ref="oval:com.redhat.rhsa:tst:20231703051"/>
+     <criterion comment="python3-perf is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983124"/>
+    </criteria>
+   </criteria>
+  </criteria>
+ </criteria>
+</definition>
+<definition class="patch" id="oval:com.redhat.rhsa:def:202647981" version="637">
+ <metadata>
+  <title>RHSA-2026:47981: kpatch-patch security update (Important)</title>
+  <affected family="unix">
+   <platform>Red Hat Enterprise Linux 9</platform>
+  </affected>
+  <reference ref_id="RHSA-2026:47981" ref_url="https://access.redhat.com/errata/RHSA-2026:47981" source="RHSA"/>
+  <reference ref_id="CVE-2026-64600" ref_url="https://access.redhat.com/security/cve/CVE-2026-64600" source="CVE"/>
+  <description>This is a kernel live patch module which can be loaded by the kpatch command line utility to modify the code of a running kernel.  This patch module is targeted for kernel-5.14.0-687.10.1.el9_8.
+
+Security Fix(es):
+
+* kernel: XFS data corruption using reflink (CVE-2026-64600)
+
+For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Important</severity>
+   <rights>Copyright 2026 Red Hat, Inc.</rights>
+   <issued date="2026-07-29"/>
+   <updated date="2026-07-29"/>
+   <cve cvss3="7.8/CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H" cwe="CWE-362" href="https://access.redhat.com/security/cve/CVE-2026-64600" impact="important" public="20260714">CVE-2026-64600</cve>
+   <bugzilla href="https://bugzilla.redhat.com/2498915" id="2498915">kernel: XFS data corruption using reflink</bugzilla>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::baseos</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::extensions</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::supplementary</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::appstream</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::baseos</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::crb</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::extensions</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::highavailability</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::nfv</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::realtime</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.rhba:tst:20223945012"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 9 is installed" test_ref="oval:com.redhat.rhba:tst:20223945011"/>
+   <criteria operator="OR">
+    <criterion comment="kernel version 0:5.14.0-687.10.1.el9_8 is currently running" test_ref="oval:com.redhat.rhsa:tst:202628741006"/>
+    <criterion comment="kernel version 0:5.14.0-687.10.1.el9_8 is set to boot up on next boot" test_ref="oval:com.redhat.rhsa:tst:202628741007"/>
+   </criteria>
+   <criteria operator="AND">
+    <criterion comment="kernel version equals 0:5.14.0-687.10.1.el9_8" test_ref="oval:com.redhat.rhsa:tst:202628741001"/>
+    <criterion comment="kernel is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20243983004"/>
+    <criteria operator="OR">
+     <criterion comment="kpatch-patch not installed for 0:5.14.0-687.10.1.el9_8" test_ref="oval:com.redhat.rhsa:tst:202628741003"/>
+     <criteria operator="AND">
+      <criterion comment="kpatch-patch-5_14_0-687_10_1 is earlier than 0:1-5.el9_8" test_ref="oval:com.redhat.rhsa:tst:202647981004"/>
+      <criterion comment="kpatch-patch-5_14_0-687_10_1 is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhsa:tst:202628741005"/>
+     </criteria>
+    </criteria>
+   </criteria>
+  </criteria>
+ </criteria>
+</definition>
+<definition class="patch" id="oval:com.redhat.rhba:def:20242274" version="637">
+ <metadata>
+  <title>RHBA-2024:2274: git-lfs bug fix and enhancement update (Moderate)</title>
+  <affected family="unix">
+   <platform>Red Hat Enterprise Linux 9</platform>
+  </affected>
+  <reference ref_id="RHBA-2024:2274" ref_url="https://access.redhat.com/errata/RHBA-2024:2274" source="RHSA"/>
+  <reference ref_id="CVE-2023-29406" ref_url="https://access.redhat.com/security/cve/CVE-2023-29406" source="CVE"/>
+  <description>For detailed information on changes in this release, see the Red Hat Enterprise Linux 9.4 Release Notes linked from the References section.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Moderate</severity>
+   <rights>Copyright 2024 Red Hat, Inc.</rights>
+   <issued date="2024-04-30"/>
+   <updated date="2024-04-30"/>
+   <cve cvss3="6.5/CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:N" cwe="CWE-113" href="https://access.redhat.com/security/cve/CVE-2023-29406" impact="moderate" public="20230711">CVE-2023-29406</cve>
+   <bugzilla href="https://bugzilla.redhat.com/2222167" id="2222167">golang: net/http: insufficient sanitization of Host header</bugzilla>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::baseos</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::extensions</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::supplementary</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::appstream</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::baseos</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::crb</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::extensions</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::highavailability</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::nfv</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::realtime</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.rhba:tst:20223945012"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 9 is installed" test_ref="oval:com.redhat.rhba:tst:20223945011"/>
+   <criterion comment="git-lfs is earlier than 0:3.4.1-1.el9" test_ref="oval:com.redhat.rhba:tst:20242274001"/>
+   <criterion comment="git-lfs is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.rhba:tst:20242274002"/>
+  </criteria>
+ </criteria>
+</definition>
+</definitions>
+<tests>
+<red-def:rpminfo_test check="at least one" comment="giflib is earlier than 0:5.2.1-10.el9_8.1" id="oval:com.redhat.rhsa:tst:202619367001" version="636">
+ <red-def:object object_ref="oval:com.redhat.rhsa:obj:202619367001"/>
+ <red-def:state state_ref="oval:com.redhat.rhsa:ste:202619367001"/>
+</red-def:rpminfo_test>
+<red-def:rpminfo_test check="at least one" comment="giflib-devel is earlier than 0:5.2.1-10.el9_8.1" id="oval:com.redhat.rhsa:tst:202619367003" version="636">
+ <red-def:object object_ref="oval:com.redhat.rhsa:obj:202619367002"/>
+ <red-def:state state_ref="oval:com.redhat.rhsa:ste:202619367001"/>
+</red-def:rpminfo_test>
+<red-def:rpminfo_test check="at least one" comment="git-lfs is earlier than 0:3.4.1-1.el9" id="oval:com.redhat.rhba:tst:20242274001" version="637">
+ <red-def:object object_ref="oval:com.redhat.rhba:obj:20242274001"/>
+ <red-def:state state_ref="oval:com.redhat.rhba:ste:20242274001"/>
+</red-def:rpminfo_test>
+</tests>
+<states>
+<red-def:rpminfo_state id="oval:com.redhat.rhsa:ste:202619367001" version="636">
+ <red-def:arch datatype="string" operation="pattern match">aarch64|i686|ppc64le|s390x|x86_64</red-def:arch>
+ <red-def:evr datatype="evr_string" operation="less than">0:5.2.1-10.el9_8.1</red-def:evr>
+</red-def:rpminfo_state>
+<red-def:rpminfo_state id="oval:com.redhat.rhba:ste:20242274001" version="637">
+ <red-def:arch datatype="string" operation="pattern match">aarch64|ppc64le|s390x|x86_64</red-def:arch>
+ <red-def:evr datatype="evr_string" operation="less than">0:3.4.1-1.el9</red-def:evr>
+</red-def:rpminfo_state>
+</states>
+</oval_definitions>

@@ -2153,6 +2153,15 @@
       "enabled": true
     },
     {
+      "groupName": "native vulnerability scanner feed parsing",
+      "matchDepNames": ["saxes", "seek-bzip"],
+      "reviewers": ["team:security-defend-workflows"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Defend Workflows"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "@appland/sql-parser",
       "matchDepNames": ["@appland/sql-parser"],
       "reviewers": ["team:security-defend-workflows"],

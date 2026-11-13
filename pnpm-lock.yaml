@@ -4925,9 +4925,15 @@ importers:
       safe-stable-stringify:
         specifier: 2.5.0
         version: 2.5.0
+      saxes:
+        specifier: 6.0.0
+        version: 6.0.0
       seedrandom:
         specifier: 3.0.5
         version: 3.0.5
+      seek-bzip:
+        specifier: 2.0.0
+        version: 2.0.0
       semver:
         specifier: 7.8.5
         version: 7.8.5
