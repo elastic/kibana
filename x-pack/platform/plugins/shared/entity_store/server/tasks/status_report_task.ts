@@ -538,9 +538,11 @@ async function runTask({
     typeof taskInstance.state.logCoverageTargetDocs === 'number'
       ? taskInstance.state.logCoverageTargetDocs
       : DEFAULT_LOG_COVERAGE_TARGET_DOCS;
+  // The per-type config exists only for installed engines. Without the user engine, fall back to the
+  // store-wide config so the probe still honors the configured additional and excluded patterns.
   const userExtractionConfig =
     statusResult && 'logsExtractionConfigByType' in statusResult
-      ? statusResult.logsExtractionConfigByType.user
+      ? statusResult.logsExtractionConfigByType.user ?? statusResult.logsExtractionConfig
       : undefined;
   // User extraction reads logs through the space-routed client on Serverless, so the probe does too.
   const logsEsClient = isServerless
