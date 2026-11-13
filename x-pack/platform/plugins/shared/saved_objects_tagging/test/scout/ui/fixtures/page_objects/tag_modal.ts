@@ -17,7 +17,6 @@ export interface TagFormFields {
 export class TagModal {
   readonly form: Locator;
   readonly nameInput: Locator;
-  readonly colorPaletteButton: Locator;
   readonly colorInput: Locator;
   readonly descriptionInput: Locator;
   readonly confirmButton: Locator;
@@ -26,8 +25,7 @@ export class TagModal {
   constructor(private readonly page: ScoutPage) {
     this.form = page.testSubj.locator('tagModalForm');
     this.nameInput = page.testSubj.locator('createModalField-name');
-    this.colorPaletteButton = page.testSubj.locator('~createModalColorPaletteButton');
-    this.colorInput = page.testSubj.locator('createModalField-color');
+    this.colorInput = page.testSubj.locator('~createModalField-color');
     this.descriptionInput = page.testSubj.locator('createModalField-description');
     this.confirmButton = page.testSubj.locator('createModalConfirmButton');
     this.cancelButton = page.testSubj.locator('createModalCancelButton');
@@ -38,16 +36,18 @@ export class TagModal {
     await this.form.waitFor({ state: 'visible' });
   }
 
-  async openColorPalette() {
-    await this.colorPaletteButton.click();
-  }
-
   async fillForm(fields: TagFormFields) {
     if (fields.name !== undefined) {
       await this.nameInput.fill(fields.name);
     }
     if (fields.color !== undefined) {
+      await this.colorInput.click();
       await this.colorInput.fill(fields.color);
+      const saturationPopover = this.page.testSubj.locator('euiSaturation');
+      await saturationPopover.waitFor({ state: 'visible' });
+      // ENTER closes the color picker so it doesn't intercept clicks on later fields.
+      await this.page.keyboard.press('Enter');
+      await saturationPopover.waitFor({ state: 'hidden' });
     }
     if (fields.description !== undefined) {
       await this.descriptionInput.fill(fields.description);
