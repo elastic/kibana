@@ -10,7 +10,11 @@
 import { z } from '@kbn/zod';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
+import {
+  DEFAULT_OBJECT_FIT,
+  IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS,
+  MAX_IMAGE_URL_LENGTH,
+} from '../common';
 
 const imageFileSrcSchema = z
   .object({
@@ -25,7 +29,10 @@ const imageFileSrcSchema = z
 const imageUrlSrcSchema = z
   .object({
     type: z.literal('url'),
-    url: z.string().meta({ description: 'URL of the image' }),
+    url: z.string().max(MAX_IMAGE_URL_LENGTH).meta({
+      description:
+        'URL of the image. Either an http(s) URL or a base64 encoded png, jpeg, gif or webp data URL',
+    }),
   })
   .strict()
   .meta({
