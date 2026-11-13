@@ -23,9 +23,9 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
   const onIsEnabledChange = (event: EuiSwitchEvent) => {
     // @ts-expect-error
     props.onChange({
-      fieldMetaOptions: {
+      field_meta_options: {
         ...props.fieldMetaOptions,
-        isEnabled: event.target.checked,
+        is_enabled: event.target.checked,
       },
     });
   };
@@ -38,7 +38,7 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
             label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.categoricalLabel', {
               defaultMessage: 'Get categories from data set',
             })}
-            checked={props.fieldMetaOptions.isEnabled}
+            checked={props.fieldMetaOptions.is_enabled}
             onChange={onIsEnabledChange}
             disabled={!props.supportsFieldMetaFromLocalData}
             compressed

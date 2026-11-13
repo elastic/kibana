@@ -55,11 +55,11 @@ function createLayerMock(numFields: number, supportedShapeTypes: VECTOR_SHAPE_TY
   } as unknown as IVectorLayer;
 }
 
-const vectorStyleDescriptor = {
+const vectorStyleDescriptor: VectorStyleDescriptor = {
   type: LAYER_STYLE_TYPE.VECTOR,
   properties: getDefaultStaticProperties(),
-  isTimeAware: true,
-} as VectorStyleDescriptor;
+  is_time_aware: true,
+};
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
   {} as unknown as IVectorSource,

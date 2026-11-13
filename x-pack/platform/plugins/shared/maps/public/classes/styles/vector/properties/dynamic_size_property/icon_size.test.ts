@@ -38,7 +38,7 @@ describe('getMbSizeExpression - circle', () => {
       },
     } as unknown as IField;
     const iconSize = new DynamicSizeProperty(
-      { minSize: 8, maxSize: 32, fieldMetaOptions: { isEnabled: true } },
+      { min_size: 8, max_size: 32, field_meta_options: { is_enabled: true } },
       VECTOR_STYLES.ICON_SIZE,
       field,
       {} as unknown as IVectorLayer,
@@ -108,7 +108,7 @@ describe('getMbSizeExpression - circle', () => {
       },
     } as unknown as IField;
     const iconSize = new DynamicSizeProperty(
-      { minSize: 8, maxSize: 32, fieldMetaOptions: { isEnabled: true } },
+      { min_size: 8, max_size: 32, field_meta_options: { is_enabled: true } },
       VECTOR_STYLES.ICON_SIZE,
       field,
       {} as unknown as IVectorLayer,
@@ -176,7 +176,7 @@ describe('getMbSizeExpression - icon', () => {
       },
     } as unknown as IField;
     const iconSize = new DynamicSizeProperty(
-      { minSize: 8, maxSize: 32, fieldMetaOptions: { isEnabled: true } },
+      { min_size: 8, max_size: 32, field_meta_options: { is_enabled: true } },
       VECTOR_STYLES.ICON_SIZE,
       field,
       {} as unknown as IVectorLayer,

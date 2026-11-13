@@ -5,11 +5,11 @@ exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = 
   dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
     Object {
-      "isEnabled": true,
+      "is_enabled": true,
     }
   }
   onChange={[Function]}
-  styleName="lineColor"
+  styleName="line_color"
   supportedDataMappingFunctions={
     Array [
       "INTERPOLATE",
@@ -65,7 +65,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
         isLinesOnly={false}
         isPointsOnly={true}
         label="US_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -76,7 +76,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
         isLinesOnly={false}
         isPointsOnly={true}
         label="CN_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -130,7 +130,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
         isLinesOnly={false}
         isPointsOnly={true}
         label="< 10_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -141,7 +141,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
         isLinesOnly={false}
         isPointsOnly={true}
         label=">= 10_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -193,7 +193,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="< 13_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -204,7 +204,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="13_format up to 25_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -215,7 +215,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="25_format up to 38_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -226,7 +226,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="38_format up to 50_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -237,7 +237,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="50_format up to 63_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -248,7 +248,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="63_format up to 75_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -259,7 +259,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="75_format up to 88_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -270,7 +270,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label=">= 88_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -322,7 +322,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="< 50th: 5572_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -333,7 +333,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="50th: 5572_format up to 75th: 8079_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -344,7 +344,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="75th: 8079_format up to 90th: 9607_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -355,7 +355,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="90th: 9607_format up to 95th: 10439_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -366,7 +366,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label="95th: 10439_format up to 99th: 16857_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -377,7 +377,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         isLinesOnly={false}
         isPointsOnly={true}
         label=">= 99th: 16857_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -429,7 +429,7 @@ exports[`renderLegendDetailRow ordinal Should render single band when interpolat
         isLinesOnly={false}
         isPointsOnly={true}
         label="100_format"
-        styleName="lineColor"
+        styleName="line_color"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

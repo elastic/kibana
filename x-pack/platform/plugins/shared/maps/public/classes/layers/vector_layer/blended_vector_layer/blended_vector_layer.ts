@@ -113,7 +113,7 @@ function getClusterStyleDescriptor(
         },
       },
     },
-    isTimeAware: true,
+    is_time_aware: true,
   };
   documentStyle
     .getAllStyleProperties()

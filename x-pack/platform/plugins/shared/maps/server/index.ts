@@ -25,6 +25,7 @@ export type {
   Attribution,
   StoredEMSVectorTileLayer,
   StoredHeatmapLayer,
+  StoredLayer,
   StoredLayerGroup,
   StoredRasterLayer,
   StoredVectorLayer,

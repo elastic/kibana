@@ -21,7 +21,7 @@ const green = '#00FF00';
 const purple = '#800080';
 const defaultColor = '#FFFFFF';
 const fieldMetaOptions = {
-  isEnabled: true,
+  is_enabled: true,
 };
 const field = {
   name: 'myField',
@@ -45,7 +45,7 @@ describe('dynamic', () => {
     const colorStyleProperty = {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        fieldMetaOptions,
+        field_meta_options: fieldMetaOptions,
       } as ColorDynamicOptions,
     } as ColorDynamicStylePropertyDescriptor;
     expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe(defaultColor);
@@ -59,7 +59,7 @@ describe('dynamic', () => {
           options: {
             type: COLOR_MAP_TYPE.CATEGORICAL,
             field,
-            fieldMetaOptions,
+            field_meta_options: fieldMetaOptions,
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
         expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe(defaultColor);
@@ -70,9 +70,9 @@ describe('dynamic', () => {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             type: COLOR_MAP_TYPE.CATEGORICAL,
-            colorCategory: 'palette_0',
+            color_category: 'palette_0',
             field,
-            fieldMetaOptions,
+            field_meta_options: fieldMetaOptions,
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
         expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe(
@@ -87,10 +87,10 @@ describe('dynamic', () => {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             type: COLOR_MAP_TYPE.CATEGORICAL,
-            colorCategory: 'palette_0',
+            color_category: 'palette_0',
             field,
-            fieldMetaOptions,
-            useCustomColorPalette: true,
+            field_meta_options: fieldMetaOptions,
+            use_custom_color_palette: true,
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
         expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe(defaultColor);
@@ -101,11 +101,11 @@ describe('dynamic', () => {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             type: COLOR_MAP_TYPE.CATEGORICAL,
-            colorCategory: 'palette_0',
+            color_category: 'palette_0',
             field,
-            fieldMetaOptions,
-            useCustomColorPalette: true,
-            customColorPalette: [{ stop: 'myCategory1', color: blue }],
+            field_meta_options: fieldMetaOptions,
+            use_custom_color_palette: true,
+            custom_color_palette: [{ stop: 'myCategory1', color: blue }],
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
         expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe(blue);
@@ -121,7 +121,7 @@ describe('dynamic', () => {
           options: {
             type: COLOR_MAP_TYPE.ORDINAL,
             field,
-            fieldMetaOptions,
+            field_meta_options: fieldMetaOptions,
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
         expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe(defaultColor);
@@ -134,7 +134,7 @@ describe('dynamic', () => {
             type: COLOR_MAP_TYPE.ORDINAL,
             color: 'Blues',
             field,
-            fieldMetaOptions,
+            field_meta_options: fieldMetaOptions,
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
         expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe('#9bc2ff');
@@ -148,8 +148,8 @@ describe('dynamic', () => {
           options: {
             type: COLOR_MAP_TYPE.ORDINAL,
             field,
-            fieldMetaOptions,
-            useCustomColorRamp: true,
+            field_meta_options: fieldMetaOptions,
+            use_custom_color_ramp: true,
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
         expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe(defaultColor);
@@ -161,9 +161,9 @@ describe('dynamic', () => {
           options: {
             type: COLOR_MAP_TYPE.ORDINAL,
             field,
-            fieldMetaOptions,
-            useCustomColorRamp: true,
-            customColorRamp: [
+            field_meta_options: fieldMetaOptions,
+            use_custom_color_ramp: true,
+            custom_color_ramp: [
               { stop: 0, color: blue },
               { stop: 5, color: green },
               { stop: 10, color: yellow },
@@ -179,9 +179,9 @@ describe('dynamic', () => {
           options: {
             type: COLOR_MAP_TYPE.ORDINAL,
             field,
-            fieldMetaOptions,
-            useCustomColorRamp: true,
-            customColorRamp: [
+            field_meta_options: fieldMetaOptions,
+            use_custom_color_ramp: true,
+            custom_color_ramp: [
               { stop: 0, color: blue },
               { stop: 3, color: purple },
               { stop: 6, color: green },

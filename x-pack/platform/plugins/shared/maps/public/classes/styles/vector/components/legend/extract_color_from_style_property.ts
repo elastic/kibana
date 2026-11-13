@@ -32,27 +32,27 @@ export function extractColorFromStyleProperty(
   }
 
   if (dynamicOptions.type === COLOR_MAP_TYPE.CATEGORICAL) {
-    if (dynamicOptions.useCustomColorPalette) {
-      return dynamicOptions.customColorPalette && dynamicOptions.customColorPalette.length
-        ? dynamicOptions.customColorPalette[0].color
+    if (dynamicOptions.use_custom_color_palette) {
+      return dynamicOptions.custom_color_palette && dynamicOptions.custom_color_palette.length
+        ? dynamicOptions.custom_color_palette[0].color
         : defaultColor;
     }
 
-    if (!dynamicOptions.colorCategory) {
+    if (!dynamicOptions.color_category) {
       return defaultColor;
     }
 
-    const palette = getColorPalette(dynamicOptions.colorCategory);
+    const palette = getColorPalette(dynamicOptions.color_category);
     return palette ? palette[0] : defaultColor;
   } else {
     // return middle of gradient for dynamic style property
-    if (dynamicOptions.useCustomColorRamp) {
-      if (!dynamicOptions.customColorRamp || !dynamicOptions.customColorRamp.length) {
+    if (dynamicOptions.use_custom_color_ramp) {
+      if (!dynamicOptions.custom_color_ramp || !dynamicOptions.custom_color_ramp.length) {
         return defaultColor;
       }
       // favor the lowest color in even arrays
-      const middleIndex = Math.floor((dynamicOptions.customColorRamp.length - 1) / 2);
-      return dynamicOptions.customColorRamp[middleIndex].color;
+      const middleIndex = Math.floor((dynamicOptions.custom_color_ramp.length - 1) / 2);
+      return dynamicOptions.custom_color_ramp[middleIndex].color;
     }
 
     if (!dynamicOptions.color) {

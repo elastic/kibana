@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   DEFAULT_ICON,
   ICON_SOURCE,
@@ -46,34 +46,40 @@ export const symbolizeAsSchema = z
 
 const iconSource = z.union([z.literal(ICON_SOURCE.CUSTOM), z.literal(ICON_SOURCE.MAKI)]).optional();
 
-export const iconStop = z
-  .object({
-    stop: z.string().nullable().default(null),
-    icon: z.string(),
-    iconSource,
-  })
-  .strict();
+export const iconStop = lazySchema(() =>
+  z
+    .object({
+      stop: z.string().nullable().default(null),
+      icon: z.string(),
+      icon_source: iconSource,
+    })
+    .strict()
+);
 
-export const iconDynamicOptions = z
-  .object({
-    iconPaletteId: z.string().nullable().default(null),
-    customIconStops: z.array(iconStop).optional(),
-    useCustomIconMap: z.boolean().optional(),
-    field: styleFieldSchema.optional(),
-    fieldMetaOptions: fieldMetaOptionsSchema,
-  })
-  .strict();
+export const iconDynamicOptions = lazySchema(() =>
+  z
+    .object({
+      icon_palette_id: z.string().nullable().default(null),
+      custom_icon_stops: z.array(iconStop).optional(),
+      use_custom_icon_map: z.boolean().optional(),
+      field: styleFieldSchema.optional(),
+      field_meta_options: fieldMetaOptionsSchema,
+    })
+    .strict()
+);
 
-export const iconStaticOptions = z
-  .object({
-    value: z.string().meta({
-      description: 'icon id',
-    }),
-    label: z.string().optional(),
-    svg: z.string().optional(),
-    iconSource: iconSource.optional(),
-  })
-  .strict();
+export const iconStaticOptions = lazySchema(() =>
+  z
+    .object({
+      value: z.string().meta({
+        description: 'icon id',
+      }),
+      label: z.string().optional(),
+      svg: z.string().optional(),
+      icon_source: iconSource.optional(),
+    })
+    .strict()
+);
 
 export const iconSchema = z
   .union([
@@ -100,12 +106,14 @@ export const iconSchema = z
     description: 'Configure to set Point feature icon',
   });
 
-export const orientationDynamicOptions = z
-  .object({
-    field: styleFieldSchema.optional(),
-    fieldMetaOptions: fieldMetaOptionsSchema,
-  })
-  .strict();
+export const orientationDynamicOptions = lazySchema(() =>
+  z
+    .object({
+      field: styleFieldSchema.optional(),
+      field_meta_options: fieldMetaOptionsSchema,
+    })
+    .strict()
+);
 
 export const orientationStaticOptions = z
   .object({
@@ -139,15 +147,17 @@ export const orientationSchema = z
       'Configure to rotate the icon clockwise. Ignored when Point features are symbolized as circle markers',
   });
 
-export const sizeDynamicOptions = z
-  .object({
-    minSize: z.number(),
-    maxSize: z.number(),
-    field: styleFieldSchema.optional(),
-    fieldMetaOptions: fieldMetaOptionsSchema,
-    invert: z.boolean().optional(),
-  })
-  .strict();
+export const sizeDynamicOptions = lazySchema(() =>
+  z
+    .object({
+      min_size: z.number(),
+      max_size: z.number(),
+      field: styleFieldSchema.optional(),
+      field_meta_options: fieldMetaOptionsSchema,
+      invert: z.boolean().optional(),
+    })
+    .strict()
+);
 
 export const sizeStaticOptions = z
   .object({

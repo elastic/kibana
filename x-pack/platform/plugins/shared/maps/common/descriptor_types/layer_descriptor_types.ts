@@ -12,6 +12,7 @@ import type { Feature } from 'geojson';
 import type {
   StoredEMSVectorTileLayer,
   StoredHeatmapLayer,
+  StoredLayer,
   StoredLayerGroup,
   StoredRasterLayer,
   StoredVectorLayer,
@@ -56,12 +57,7 @@ export type TileError = {
 export interface RuntimeLayerState {
   __dataRequests?: DataRequestDescriptor[];
   __isPreviewLayer?: boolean;
-  __trackedLayerDescriptor?:
-    | StoredEMSVectorTileLayer
-    | StoredHeatmapLayer
-    | StoredLayerGroup
-    | StoredRasterLayer
-    | StoredVectorLayer;
+  __trackedLayerDescriptor?: StoredLayer;
   __areTilesLoaded?: boolean;
   __tileMetaFeatures?: TileMetaFeature[];
   __tileErrors?: TileError[];
