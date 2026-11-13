@@ -24,7 +24,6 @@ export const alertEventSchema = lazySchema(() =>
     '@timestamp': z.string(),
     scheduled_timestamp: z.string().optional(),
     rule: z.object({ id: z.string().optional(), version: z.number().optional() }).optional(),
-    connector: z.object({ id: z.string() }).optional(),
     group_hash: z.string(),
     data: z.record(z.string(), z.unknown()),
     status: alertEventStatusSchema,

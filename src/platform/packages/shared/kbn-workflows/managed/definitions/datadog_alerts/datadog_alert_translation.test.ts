@@ -47,7 +47,6 @@ describe('Datadog alert translation managed workflow', () => {
             type: 'alerting.create_alert',
             with: expect.objectContaining({
               source: 'datadog',
-              connector_id: '{{ event.connectorId }}',
               fingerprint: '{{ event.body.monitor_id }}:{{ event.body.scopes }}',
               alert_status:
                 '{% assign transition_prefix = event.body.alert_transition | slice: 0, 9 %}{% if transition_prefix == "Recovered" %}inactive{% else %}active{% endif %}',
