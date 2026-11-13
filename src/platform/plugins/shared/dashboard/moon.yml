@@ -137,7 +137,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
   - '@kbn/as-code-dashboard-schema'
-  - '@kbn/dashboard-grid-constants'
+  - '@kbn/dashboard-constants'
   - '@kbn/change-history'
   - '@kbn/change-history-ui'
   - '@kbn/spaces-plugin'

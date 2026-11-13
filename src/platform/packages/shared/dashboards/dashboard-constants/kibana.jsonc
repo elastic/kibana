@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/dashboard-grid-constants",
+  "id": "@kbn/dashboard-constants",
   "owner": "@elastic/kibana-dashboards",
   "group": "platform",
   "visibility": "shared"

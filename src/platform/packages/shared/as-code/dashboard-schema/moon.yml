@@ -18,7 +18,7 @@ project:
   sourceRoot: src/platform/packages/shared/as-code/dashboard-schema
 dependsOn:
   - '@kbn/zod'
-  - '@kbn/dashboard-grid-constants'
+  - '@kbn/dashboard-constants'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-filters-schema'
   - '@kbn/data-service-server'

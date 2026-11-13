@@ -16,7 +16,7 @@ import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_MARGIN_SIZE,
   DASHBOARD_GRID_ROW_HEIGHT,
-} from '@kbn/dashboard-grid-constants';
+} from '@kbn/dashboard-constants';
 
 import type { ActivePanelEvent } from '../grid_panel';
 import type { ActiveSectionEvent } from '../grid_section';

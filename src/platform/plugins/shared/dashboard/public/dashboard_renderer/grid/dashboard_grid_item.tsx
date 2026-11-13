@@ -16,7 +16,7 @@ import { apiCanCancelRequests, useBatchedPublishingSubjects } from '@kbn/present
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { DASHBOARD_GRID_MARGIN_SIZE } from '@kbn/dashboard-grid-constants';
+import { DASHBOARD_GRID_MARGIN_SIZE } from '@kbn/dashboard-constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { printViewportVisStyles } from '../print_styles';

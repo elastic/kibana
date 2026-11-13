@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  DASHBOARD_GRID_MARGIN_SIZE,
-  DASHBOARD_GRID_ROW_HEIGHT,
-} from '@kbn/dashboard-grid-constants';
+import { DASHBOARD_GRID_MARGIN_SIZE, DASHBOARD_GRID_ROW_HEIGHT } from '@kbn/dashboard-constants';
 import { euiLightVars } from '@kbn/ui-theme';
 
 /** What the title bar takes from the panel, which sets its height to `euiTheme.size.xl`; a panel without a title has no bar. */

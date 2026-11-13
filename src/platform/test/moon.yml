@@ -67,7 +67,7 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-chrome-browser-components'
   - '@kbn/monaco'
-  - '@kbn/dashboard-grid-constants'
+  - '@kbn/dashboard-constants'
 tags:
   - test-helper
   - package

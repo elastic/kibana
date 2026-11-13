@@ -10,7 +10,7 @@
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import expect from '@kbn/expect';
 import { asyncMap } from '@kbn/std';
-import { DASHBOARD_GRID_MARGIN_SIZE } from '@kbn/dashboard-grid-constants';
+import { DASHBOARD_GRID_MARGIN_SIZE } from '@kbn/dashboard-constants';
 import { FtrService } from '../../ftr_provider_context';
 
 const ACTION_SHOW_CONFIG_PANEL_SUBJ = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';

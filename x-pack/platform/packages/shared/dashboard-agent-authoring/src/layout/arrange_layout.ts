@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { DEFAULT_DASHBOARD_OPTIONS } from '@kbn/as-code-dashboard-schema';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-grid-constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-constants';
 import {
   isSection,
   type AttachmentPanel,

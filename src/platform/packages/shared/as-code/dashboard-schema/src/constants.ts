@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-grid-constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-constants';
 
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;

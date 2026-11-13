@@ -24,7 +24,7 @@ import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_MARGIN_SIZE,
   DASHBOARD_GRID_ROW_HEIGHT,
-} from '@kbn/dashboard-grid-constants';
+} from '@kbn/dashboard-constants';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';

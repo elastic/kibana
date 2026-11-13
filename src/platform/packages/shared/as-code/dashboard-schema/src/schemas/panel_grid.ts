@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-grid-constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-constants';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../constants';
 
 export const panelGridSchema = z

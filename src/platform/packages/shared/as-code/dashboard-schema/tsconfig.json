@@ -11,7 +11,7 @@
   ],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/dashboard-grid-constants",
+    "@kbn/dashboard-constants",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-filters-schema",
     "@kbn/data-service-server",
