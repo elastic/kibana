@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  value !== null && typeof value === 'object' && !Array.isArray(value);
+import { isPlainObject } from './is_plain_object';
 
 /** The step lists nested in a step: loop/if bodies, switch cases and parallel branches. */
 const nestedBodies = (step: Record<string, unknown>): unknown[] => [
   step.steps,
   step.else,
-  ...(Array.isArray(step.cases) ? step.cases.map((c) => isRecord(c) && c.steps) : []),
-  ...(Array.isArray(step.branches) ? step.branches.map((b) => isRecord(b) && b.steps) : []),
+  ...(Array.isArray(step.cases) ? step.cases.map((c) => isPlainObject(c) && c.steps) : []),
+  ...(Array.isArray(step.branches) ? step.branches.map((b) => isPlainObject(b) && b.steps) : []),
 ];
 
 /**
@@ -26,13 +25,14 @@ const nestedBodies = (step: Record<string, unknown>): unknown[] => [
 export const isInParallelBody = (steps: unknown, stepName: string): boolean => {
   if (!Array.isArray(steps)) return false;
   return steps.some((step) => {
-    if (!isRecord(step)) return false;
+    if (!isPlainObject(step)) return false;
     const bodies = nestedBodies(step);
     if (
       step.type === 'parallel' &&
       bodies.some(
         (body) =>
-          Array.isArray(body) && body.some((child) => isRecord(child) && child.name === stepName)
+          Array.isArray(body) &&
+          body.some((child) => isPlainObject(child) && child.name === stepName)
       )
     ) {
       return true;

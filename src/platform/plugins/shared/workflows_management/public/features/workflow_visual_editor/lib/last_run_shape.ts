@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isPlainObject } from './is_plain_object';
 
 export interface StepOutputReference {
   readonly stepName: string;
@@ -25,16 +26,13 @@ export const parseStepOutputReference = (expression: string): StepOutputReferenc
   return { stepName, path: rest ? rest.slice(1).split('.') : [] };
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 const resolvePath = (output: unknown, path: readonly string[]): { value: unknown } | undefined => {
   let current = output;
   for (const segment of path) {
     if (Array.isArray(current) && /^\d+$/.test(segment)) {
       if (Number(segment) >= current.length) return undefined;
       current = current[Number(segment)];
-    } else if (isRecord(current) && Object.hasOwn(current, segment)) {
+    } else if (isPlainObject(current) && Object.hasOwn(current, segment)) {
       current = current[segment];
     } else {
       return undefined;
@@ -60,7 +58,7 @@ export const describeLastRunShape = (
       values: { count: value.length },
     });
   }
-  if (isRecord(value)) {
+  if (isPlainObject(value)) {
     return i18n.translate('workflows.stepConfigPanel.lastRunShape.record', {
       defaultMessage: 'record, {count, plural, one {# field} other {# fields}}',
       values: { count: Object.keys(value).length },

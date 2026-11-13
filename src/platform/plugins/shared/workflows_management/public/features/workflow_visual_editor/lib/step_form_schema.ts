@@ -890,6 +890,9 @@ export const getStepFormSchema = (
   };
 };
 
+/** Stable id for field rows and draft-error maps. */
+export const fieldId = (field: StepFormField): string => field.path.join('.');
+
 export const readPath = (step: Record<string, unknown>, path: readonly string[]): unknown =>
   path.reduce<unknown>(
     (acc, key) =>

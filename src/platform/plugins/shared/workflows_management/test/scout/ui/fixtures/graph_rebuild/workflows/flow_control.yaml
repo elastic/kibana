@@ -1,0 +1,83 @@
+name: Rebuild flow control
+description: if/else, foreach, while and switch bodies, nested, with a step-level condition and timeout.
+tags:
+  - scout
+  - graph-rebuild
+consts:
+  flag: true
+  mode: fast
+  items:
+    - a
+    - b
+    - c
+triggers:
+  - type: manual
+steps:
+  - name: gate
+    type: if
+    condition: "consts.flag : true"
+    steps:
+      - name: log_then
+        type: console
+        with:
+          message: "then branch"
+    else:
+      - name: log_else
+        type: console
+        with:
+          message: "else branch"
+  - name: each_item
+    type: foreach
+    foreach: "{{ consts.items }}"
+    steps:
+      - name: log_item
+        type: console
+        with:
+          message: "Item {{ foreach.item }}"
+      - name: later_items
+        type: if
+        condition: "foreach.index > 0"
+        steps:
+          - name: log_later
+            type: console
+            with:
+              message: "Not the first item"
+  - name: keep_trying
+    type: while
+    condition: "while.iteration < 3"
+    steps:
+      - name: log_attempt
+        type: console
+        with:
+          message: "Attempt {{ while.iteration }}"
+  - name: route
+    type: switch
+    expression: "{{ consts.mode }}"
+    cases:
+      - match: fast
+        steps:
+          - name: log_fast
+            type: console
+            with:
+              message: "fast path"
+      - match: slow
+        steps:
+          - name: log_slow
+            type: console
+            with:
+              message: "slow path"
+    default:
+      - name: log_default
+        type: console
+        with:
+          message: "default path"
+  - name: guarded_log
+    type: console
+    if: "consts.flag : true"
+    timeout: 30s
+    with:
+      message: "guarded by if and timeout"
+  - name: after_all
+    type: console
+    with:
+      message: "done"

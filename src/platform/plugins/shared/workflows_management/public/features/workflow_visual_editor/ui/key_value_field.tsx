@@ -21,6 +21,7 @@ import { ReferenceCapableField } from './reference_capable_field';
 import { ReferenceTextInput } from './reference_text_input';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { coerceSingleWord } from '../lib/coerce_single_word';
+import { isPlainObject } from '../lib/is_plain_object';
 import { normalizeReferenceForm } from '../lib/reference_value';
 
 interface Row {
@@ -58,10 +59,7 @@ export interface KeyValueFieldProps {
   readonly renderJsonValue: (props: KeyValueJsonCellProps) => React.ReactElement;
 }
 
-const toRecord = (value: unknown): Record<string, unknown> =>
-  value !== null && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
+const toRecord = (value: unknown): Record<string, unknown> => (isPlainObject(value) ? value : {});
 
 /** The map the rows stand for: rows without a name, and repeats of a name, are not written. */
 const toRecordFromRows = (rows: readonly Row[]): Record<string, unknown> => {
@@ -75,11 +73,25 @@ const toRecordFromRows = (rows: readonly Row[]): Record<string, unknown> => {
   return record;
 };
 
+/**
+ * A name that was already a row keeps that row's id, so when the map changes from outside the
+ * rows that are still there stay mounted, with their focus and state; only a new name gets a new id.
+ */
 const rowsFromRecord = (
   record: Record<string, unknown>,
-  nextId: React.MutableRefObject<number>
-): Row[] =>
-  Object.entries(record).map(([key, entry]) => ({ id: nextId.current++, key, value: entry }));
+  nextId: React.MutableRefObject<number>,
+  previous: readonly Row[] = []
+): Row[] => {
+  const idsByKey = new Map<string, number>();
+  previous.forEach(({ id, key }) => {
+    if (key !== '' && !idsByKey.has(key)) idsByKey.set(key, id);
+  });
+  return Object.entries(record).map(([key, entry]) => ({
+    id: idsByKey.get(key) ?? nextId.current++,
+    key,
+    value: entry,
+  }));
+};
 
 const sameRecord = (a: Record<string, unknown>, b: Record<string, unknown>): boolean =>
   JSON.stringify(a) === JSON.stringify(b);
@@ -237,7 +249,7 @@ export function KeyValueField({
   // The map changed from outside (YAML view, undo): follow it, unless it is just our own write.
   useEffect(() => {
     if (!sameRecord(toRecordFromRows(rowsRef.current), toRecord(value))) {
-      setRows(rowsFromRecord(toRecord(value), nextId));
+      setRows(rowsFromRecord(toRecord(value), nextId, rowsRef.current));
     }
   }, [value]);
 

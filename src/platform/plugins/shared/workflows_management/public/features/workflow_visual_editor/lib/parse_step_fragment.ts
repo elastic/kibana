@@ -9,6 +9,7 @@
 
 import { isEqual } from 'lodash';
 import { isMap, parseDocument } from 'yaml';
+import { isPlainObject } from './is_plain_object';
 import { readPath } from './step_form_schema';
 
 /** A step YAML fragment, parsed once: everything the panel reads from it comes from here. */
@@ -31,14 +32,11 @@ export interface ParsedStepFragment {
   readonly read: (path: readonly string[]) => unknown;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 export const parseStepFragment = (text: string): ParsedStepFragment => {
   const doc = parseDocument(text);
   const hasErrors = doc.errors.length > 0;
   const data: unknown = doc.toJS();
-  const mapping = isMap(doc.contents) && isRecord(data) ? data : undefined;
+  const mapping = isMap(doc.contents) && isPlainObject(data) ? data : undefined;
   const valid = !hasErrors && mapping !== undefined;
   return {
     text,

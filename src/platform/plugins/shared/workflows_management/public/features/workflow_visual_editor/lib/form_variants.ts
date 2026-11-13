@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isPlainObject } from './is_plain_object';
 import type { FormVariant } from './step_form_schema';
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  value !== null && typeof value === 'object' && !Array.isArray(value);
 
 const hasDiscriminator = (variant: FormVariant, value: Record<string, unknown>): boolean =>
   variant.discriminator !== undefined &&

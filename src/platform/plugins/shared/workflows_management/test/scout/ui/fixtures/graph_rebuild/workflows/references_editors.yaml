@@ -1,0 +1,79 @@
+name: Rebuild references and editors
+description: Values that need more than typing text, references to earlier steps and inputs, code editors, key/value rows, JSON and multi-line text.
+tags:
+  - scout
+  - graph-rebuild
+consts:
+  dedupe: true
+  tags:
+    - a
+    - b
+    - a
+triggers:
+  - type: manual
+    inputs:
+      - name: size
+        type: number
+        default: 10
+steps:
+  - name: search_logs
+    type: elasticsearch.search
+    with:
+      index: logs-*
+      size: 5
+      query:
+        bool:
+          filter:
+            - term:
+                level: error
+  - name: search_more
+    type: elasticsearch.search
+    with:
+      index: logs-*
+      size: "${{ event.inputs.size }}"
+  - name: esql_history
+    type: elasticsearch.esql.query
+    with:
+      query: FROM logs-* | WHERE host.name == "web-1" | STATS errors = COUNT() BY service.name | LIMIT 100
+      format: json
+  - name: notify
+    type: kibana.request
+    with:
+      method: POST
+      path: /api/cases
+      headers:
+        kbn-xsrf: "true"
+        Content-Type: application/json
+      body:
+        title: "Errors for {{ steps.esql_history.output.values[0][0] }}"
+  - name: store_report
+    type: elasticsearch.index
+    with:
+      index: scout-reports
+      id: "report-{{ execution.id }}"
+      document:
+        hits: "{{ steps.search_logs.output.hits.hits | json }}"
+        total: "${{ steps.search_logs.output.hits.total.value }}"
+  - name: log_multiline
+    type: console
+    with:
+      message: |
+        first line
+        second line
+  - name: unique_tags
+    type: data.dedupe
+    items: "${{ consts.tags }}"
+    strategy: keep_last
+    with:
+      keys:
+        - a
+        - b
+  - name: joined
+    type: data.concat
+    arrays:
+      - "${{ consts.tags }}"
+      - "${{ consts.tags }}"
+    with:
+      dedupe: "${{ consts.dedupe }}"
+      # The form always writes the schema default, so the fixture states it.
+      flatten: false

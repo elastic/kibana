@@ -1,0 +1,31 @@
+name: Rebuild connector steps
+description: Steps that run on a connector, picked by id, typed by id, and inside a loop.
+tags:
+  - scout
+  - graph-rebuild
+consts:
+  channels:
+    - ops
+    - dev
+triggers:
+  - type: manual
+steps:
+  - name: notify_start
+    type: slack
+    connector-id: __SLACK_CONNECTOR_ID__
+    with:
+      message: "starting"
+  - name: notify_each
+    type: foreach
+    foreach: "{{ consts.channels }}"
+    steps:
+      - name: notify_channel
+        type: slack
+        connector-id: __SLACK_CONNECTOR_ID__
+        with:
+          message: "channel {{ foreach.item }}"
+  - name: notify_unknown
+    type: slack
+    connector-id: not_existing
+    with:
+      message: "an id no connector has"

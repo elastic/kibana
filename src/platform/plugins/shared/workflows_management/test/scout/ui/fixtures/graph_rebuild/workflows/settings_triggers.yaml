@@ -1,0 +1,45 @@
+name: Rebuild settings and triggers
+description: |
+  Workflow-level settings: description, tags, constants of each type, and one of
+  each trigger the graph can add.
+tags:
+  - scout
+  - graph-rebuild
+consts:
+  index_name: scout-rebuild
+  max_items: 5
+  dry_run: true
+  labels:
+    - alpha
+    - beta
+  options:
+    size: 10
+triggers:
+  - type: manual
+    inputs:
+      - name: query
+        type: string
+        description: Free text to search for
+        required: true
+      - name: limit
+        type: number
+        default: 10
+      - name: mode
+        type: string
+        enum:
+          - fast
+          - thorough
+      - name: verbose
+        type: boolean
+        default: false
+      - name: ids
+        type: array
+  - type: scheduled
+    with:
+      every: 1h
+  - type: alert
+steps:
+  - name: log_settings
+    type: console
+    with:
+      message: "Index {{ consts.index_name }}, limit {{ event.inputs.limit }}"
