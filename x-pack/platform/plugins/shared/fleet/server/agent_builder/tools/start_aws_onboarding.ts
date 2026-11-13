@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z, lazySchema } from '@kbn/zod/v4';
+import { ToolType } from '@kbn/agent-builder-common';
+import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+
+import { checkOnboardingAccess } from './common';
+import type { AwsOnboardingToolDeps } from './common';
+
+const startSchema = lazySchema(() =>
+  z.object({
+    region: z.string().describe('AWS region used to discover services, for example us-east-1.'),
+    namespace: z
+      .string()
+      .optional()
+      .describe('Data stream namespace for the created policies. Omit to use the default.'),
+  })
+);
+
+export const createStartAwsOnboardingTool = ({
+  workflowApi,
+}: AwsOnboardingToolDeps): BuiltinSkillBoundedTool<typeof startSchema> => ({
+  id: 'start_aws_onboarding',
+  type: ToolType.builtin,
+  description:
+    'Start the fully managed AWS agentless onboarding workflow for the current user and return its execution id. The run pauses for user input and approvals, so call get_aws_onboarding_state afterwards.',
+  schema: startSchema,
+  confirmation: { askUser: 'never' },
+  handler: async ({ region, namespace }, { request, spaceId }) => {
+    const denied = await checkOnboardingAccess(request, 'write');
+    if (denied) {
+      return { results: [denied] };
+    }
+
+    const result = await executeWorkflow({
+      workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+      workflowParams: { region, ...(namespace ? { namespace } : {}) },
+      request,
+      spaceId,
+      workflowApi,
+      waitForCompletion: false,
+    });
+
+    if (!result.success) {
+      return { results: [errorResult(`Failed to start AWS onboarding: ${result.error}`)] };
+    }
+    return {
+      results: [
+        otherResult({
+          execution_id: result.execution.execution_id,
+          workflow_id: result.execution.workflow_id,
+        }),
+      ],
+    };
+  },
+});

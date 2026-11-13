@@ -156,6 +156,10 @@
     "@kbn/workflows",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
-    "@kbn/agent-builder-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/agent-builder-tools-base",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server"
   ]
 }

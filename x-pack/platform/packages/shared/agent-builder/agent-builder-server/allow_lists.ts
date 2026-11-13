@@ -326,6 +326,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'skill-management',
   'connector-authoring',
   'connector-discovery',
+
+  // Fleet
+  'fleet-aws-onboarding',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

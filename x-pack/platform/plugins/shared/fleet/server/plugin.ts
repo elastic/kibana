@@ -113,6 +113,7 @@ import {
   registerAwsOnboardingWorkflowOwner,
 } from './workflows/managed_workflows';
 import { registerAwsOnboardingSteps } from './workflows/steps';
+import { registerAwsOnboardingSkill } from './agent_builder';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
@@ -729,6 +730,12 @@ export class FleetPlugin
     if (deps.workflowsExtensions) {
       registerAwsOnboardingSteps(deps.workflowsExtensions);
       registerAwsOnboardingWorkflowOwner(deps.workflowsExtensions);
+    }
+    if (deps.agentBuilder && deps.workflowsManagement) {
+      registerAwsOnboardingSkill({
+        agentBuilder: deps.agentBuilder,
+        workflowsManagement: deps.workflowsManagement,
+      });
     }
 
     this.telemetryEventsSender.setup(deps.telemetry);
