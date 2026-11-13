@@ -89,6 +89,7 @@ describe('createSignificantEventsClients', () => {
         severity: 'medium',
         confidence: 0.8,
       },
+      origin: { actor: 'agent_tool' },
     });
 
     expect(createAlertEvent).toHaveBeenCalledWith(

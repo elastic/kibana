@@ -20,7 +20,7 @@ import {
   getDocument,
   getEffectiveEuidRanking,
   getFieldValue,
-  getFirstFieldValue,
+  getFirstNonEmptyFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
   getSourceFieldNames,
@@ -242,7 +242,11 @@ export function getEuidDslFilterBasedOnEntityRecord(
   );
 
   const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
-  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveRanking, getFirstFieldValue);
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(
+    doc,
+    effectiveRanking,
+    getFirstNonEmptyFieldValue
+  );
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;
   }

@@ -30,6 +30,7 @@ export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
   '@kbn/eslint/no_wrapped_error_in_logger': 'error',
   '@kbn/eslint/no_npx_playwright': 'error',
+  '@kbn/eslint/no_redundant_link_navigation': 'warn',
   '@kbn/eslint/no_feature_flag_snapshot': [
     'error',
     {
@@ -140,6 +141,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-lens-common/**/*',
       'src/platform/packages/shared/kbn-lens-common-2/**/*',
       'src/platform/packages/shared/kbn-coloring/**/*',
+      'src/platform/packages/shared/kbn-coloring-components/**/*',
       'src/platform/packages/shared/kbn-chart-icons/**/*',
       'src/platform/packages/shared/kbn-event-annotation-common/**/*',
       'src/platform/packages/shared/kbn-event-annotation-components/**/*',

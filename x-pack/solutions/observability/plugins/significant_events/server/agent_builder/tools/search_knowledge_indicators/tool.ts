@@ -135,7 +135,7 @@ export function createSearchKnowledgeIndicatorsTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Search Knowledge Indicators (KIs) for Nightshift sources.
+      Search Knowledge Indicators (KIs) for nightshift sources.
 
       KIs include:
       - Feature-based indicators

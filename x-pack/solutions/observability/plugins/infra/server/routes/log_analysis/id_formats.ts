@@ -42,7 +42,11 @@ export const initGetLogAnalysisIdFormatsRoute = ({ framework }: InfraBackendLibs
           const infraMlContext = await assertHasInfraMlPlugins(requestContext);
           const mlAnomalyDetectors = (await infraMlContext.infra).mlAnomalyDetectors;
 
-          const idFormatByJobType = await resolveIdFormats(logViewId, spaceId, mlAnomalyDetectors);
+          const idFormatByJobType = await resolveIdFormats({
+            spaceId,
+            logViewId,
+            mlAnomalyDetectors,
+          });
 
           return response.ok({
             body: getLogAnalysisIdFormatsSuccessResponsePayloadRT.encode({

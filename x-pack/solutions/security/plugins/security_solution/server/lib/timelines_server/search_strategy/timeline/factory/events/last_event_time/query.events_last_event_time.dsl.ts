@@ -6,8 +6,8 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { TimelineEventsLastEventTimeRequestOptions } from '@kbn/timelines-plugin/common/api/search_strategy/timeline/timeline';
-import { LastEventIndexKey } from '@kbn/timelines-plugin/common/api/search_strategy/timeline/timeline';
+import type { TimelineEventsLastEventTimeRequestOptions } from '@kbn/securitysolution-timeline-search-strategy';
+import { LastEventIndexKey } from '@kbn/securitysolution-timeline-search-strategy';
 
 import { assertUnreachable } from '@kbn/timelines-plugin/common/utility_types';
 

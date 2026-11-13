@@ -99,9 +99,7 @@ export function getFieldValue(doc: any, field: string): string | undefined {
 }
 
 /**
- * The field's first value. `includes` reads it this way until #20578 changes it, and entity
- * records are filtered on it: a record collects values from several events, so its first value
- * is the one its EUID was built from, not the lowest.
+ * The field's first value. `includes` reads it this way until #20578 changes it.
  */
 export function getFirstFieldValue(doc: any, field: string): string | undefined {
   const flattenedValue = doc[field];
@@ -111,6 +109,17 @@ export function getFirstFieldValue(doc: any, field: string): string | undefined 
     return first !== undefined && first !== null ? String(first) : undefined;
   }
   return getFieldValue(doc, field);
+}
+
+/**
+ * The first non-empty value of a field. Entity records are filtered on it. The lowest value is not
+ * safe there: an AWS user's EUID is built from `user.entity.id`, which the record does not store,
+ * and its `user.id` also holds session ids that can sort below the one the EUID came from.
+ */
+export function getFirstNonEmptyFieldValue(doc: any, field: string): string | undefined {
+  const flattenedValue = doc[field];
+  const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
+  return Array.isArray(fieldInObject) ? getFieldValues(doc, field)[0] : getFieldValue(doc, field);
 }
 
 export function getCompositionFields(composition: EuidAttribute[]): string[] {

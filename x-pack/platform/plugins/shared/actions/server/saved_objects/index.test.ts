@@ -158,7 +158,7 @@ describe('setupSavedObjects - isExportable', () => {
 });
 
 describe('setupSavedObjects - encrypted action type', () => {
-  it('registers V3 encryption for secrets and last-saver identity keys', () => {
+  it('registers V4 encryption with the optional spec version in AAD', () => {
     const savedObjectsSetup = {
       registerType: jest.fn(),
     } as unknown as jest.Mocked<SavedObjectsServiceSetup>;
@@ -178,7 +178,12 @@ describe('setupSavedObjects - encrypted action type', () => {
       expect.objectContaining({
         type: 'action',
         attributesToEncrypt: new Set(['secrets', 'apiKey', 'uiamApiKey']),
-        attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
+        attributesToIncludeInAAD: new Set([
+          'actionTypeId',
+          'isMissingSecrets',
+          'config',
+          'specVersion',
+        ]),
       })
     );
   });

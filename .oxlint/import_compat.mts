@@ -36,6 +36,7 @@ const DEV_DIRECTORIES = [
   'storybook',
   'scripts',
   'test',
+  'test_plugins',
   'test-d',
   'test_utils',
   'test_utilities',

@@ -36,6 +36,9 @@ export interface FetchInvestigationsParams {
   inProgress: boolean;
   severities?: InvestigationSeverityFilterValue[];
   query?: string;
+  /** Only investigations last modified within this window (ISO 8601). */
+  updatedAfter?: string;
+  updatedBefore?: string;
   /**
    * Poll interval in ms, or `false` to never poll. A refetch re-requests every page this
    * section has loaded, so only sections that stay shallow should poll.
@@ -45,7 +48,13 @@ export interface FetchInvestigationsParams {
 
 export interface FetchInvestigationsResult {
   investigations: InvestigationSummary[];
+  /**
+   * Count the section UI should show: loaded rows for the capped in-progress page,
+   * otherwise the API pagination total.
+   */
   total: number;
+  /** API pagination total — for in-progress this can exceed the loaded page. */
+  matchTotal: number;
   hasMore: boolean;
   isInitialLoading: boolean;
   isFetchingNextPage: boolean;
@@ -86,6 +95,8 @@ export const useFetchInvestigations = ({
   inProgress,
   severities,
   query,
+  updatedAfter,
+  updatedBefore,
   refetchInterval = false,
 }: FetchInvestigationsParams): FetchInvestigationsResult => {
   const { http, agenticInvestigations } = useKibana().services;
@@ -101,24 +112,36 @@ export const useFetchInvestigations = ({
     isPreviousData,
     refetch,
   } = useInfiniteQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', inProgress, severities, query],
+    queryKey: [
+      ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+      'section',
+      inProgress,
+      severities,
+      query,
+      updatedAfter,
+      updatedBefore,
+    ],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null,
     queryFn: async ({ pageParam, signal }) =>
       http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: inProgress,
+          // Home sections and tiles are open-only; closed finished work is out of scope here.
+          status: 'open',
           ...(inProgress
-            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES, status: 'open' }
+            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES }
             : {
                 page: typeof pageParam === 'number' ? pageParam : 1,
                 per_page: INVESTIGATIONS_PAGE_SIZE,
               }),
           ...(severities?.length ? { severity: severities } : {}),
           ...(query ? { query } : {}),
+          ...(updatedAfter ? { updated_after: updatedAfter } : {}),
+          ...(updatedBefore ? { updated_before: updatedBefore } : {}),
         },
         signal,
       }),
@@ -136,9 +159,9 @@ export const useFetchInvestigations = ({
   // The API applies `in_progress`, so every section holds only what belongs in it.
   const investigations = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
 
-  const listedTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
-  // The in-progress section loads one capped page, so it reports what it can show.
-  const total = inProgress ? investigations.length : listedTotal;
+  const matchTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  // The in-progress section loads one capped page, so its display total is what it can show.
+  const total = inProgress ? investigations.length : matchTotal;
 
   const handleFetchNextPage = useCallback(() => {
     void fetchNextPage();
@@ -152,6 +175,7 @@ export const useFetchInvestigations = ({
     () => ({
       investigations,
       total,
+      matchTotal,
       hasMore: hasNextPage ?? false,
       isInitialLoading,
       isFetchingNextPage,
@@ -164,6 +188,7 @@ export const useFetchInvestigations = ({
     [
       investigations,
       total,
+      matchTotal,
       hasNextPage,
       isInitialLoading,
       isFetchingNextPage,
