@@ -19,13 +19,18 @@ describe('createSubAgentExecutor', () => {
   let executeAgent: jest.Mock;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
-  const createExecutor = (interactivity: InteractivityConfig, workflowExecutionId?: string) => {
+  const createExecutor = (
+    interactivity: InteractivityConfig,
+    workflowExecutionId?: string,
+    rootExecutionId?: string
+  ) => {
     const executionService = { executeAgent } as unknown as AgentExecutionService;
     return createSubAgentExecutor({
       request,
       getExecutionService: () => executionService,
       interactivity,
       workflowExecutionId,
+      rootExecutionId,
     });
   };
 
@@ -140,6 +145,13 @@ describe('createSubAgentExecutor', () => {
       const calls = await runAll(createExecutor({ enabled: false }));
 
       calls.forEach((params) => expect(params).not.toHaveProperty('workflowExecutionId'));
+      calls.forEach((params) => expect(params).not.toHaveProperty('rootExecutionId'));
+    });
+
+    it("passes the parent's root execution to every sub-agent", async () => {
+      const calls = await runAll(createExecutor({ enabled: false }, undefined, 'root-exec'));
+
+      calls.forEach((params) => expect(params.rootExecutionId).toBe('root-exec'));
     });
   });
 

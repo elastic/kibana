@@ -51,6 +51,8 @@ export interface RunAgentParams {
    * the sub-agents the run spawns so their rounds join to the same workflow run.
    */
   workflowExecutionId?: string;
+  /** Root execution inherited from the parent run; see `AgentExecutionParams`. */
+  rootExecutionId?: string;
   /**
    * ID of the agent to call.
    */

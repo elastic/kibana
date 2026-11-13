@@ -61,6 +61,7 @@ export const executeAgent$ = ({
   roundId,
   conversationAccess,
   workflowExecutionId,
+  rootExecutionId,
 }: {
   agentId: string;
   executionId: string;
@@ -92,6 +93,7 @@ export const executeAgent$ = ({
   roundId?: string;
   conversationAccess?: ExecutionConversationAccess;
   workflowExecutionId?: string;
+  rootExecutionId?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -111,6 +113,7 @@ export const executeAgent$ = ({
       projectRouting,
       conversationAccess,
       workflowExecutionId,
+      rootExecutionId,
       agentParams: {
         nextInput,
         conversation,

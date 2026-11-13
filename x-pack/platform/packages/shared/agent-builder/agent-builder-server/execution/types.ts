@@ -82,6 +82,12 @@ export interface BaseExecutionParams {
    * sub-agent's). Set by the workflow step from its own context; no route accepts it.
    */
   workflowExecutionId?: string;
+  /**
+   * Id of the top execution of the run tree this execution belongs to, inherited by the sub-agents
+   * it spawns and the parent runs they wake. Unset on a root, which uses its own id. Set server
+   * side only; no route accepts it.
+   */
+  rootExecutionId?: string;
 }
 
 /**

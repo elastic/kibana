@@ -11,7 +11,11 @@ import { asAgentBuilderExecutionSource } from '@kbn/actions-plugin/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { createErrorResult, resolveAllowedConnectorIds } from '@kbn/agent-builder-server';
+import {
+  createErrorResult,
+  getToolRunContext,
+  resolveAllowedConnectorIds,
+} from '@kbn/agent-builder-server';
 import {
   connectorsSpecs,
   isSelectedActionEnabled,
@@ -210,7 +214,10 @@ When a result has hasMore true, call again with its nextCursor to read the next 
     const result = await actionsClient.execute({
       actionId: id,
       params: { subAction, subActionParams: params },
-      source: asAgentBuilderExecutionSource({ toolId: context.callContext.toolId }),
+      source: asAgentBuilderExecutionSource({
+        toolId: context.callContext.toolId,
+        runContext: getToolRunContext(context),
+      }),
     });
     if (result.status === 'error') {
       return errorResult(

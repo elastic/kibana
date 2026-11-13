@@ -177,6 +177,7 @@ describe('wakeParent', () => {
       params: {
         agentId: 'parent-agent',
         ...chosenForParent,
+        rootExecutionId: 'parent-1',
         conversationId: 'conversation-1',
         nextInput: { message: describeFinishedChild(finishedChild) },
         actor: { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' },
@@ -184,6 +185,16 @@ describe('wakeParent', () => {
         triggerMode: ChatTriggerMode.Always,
       },
     });
+  });
+
+  it('keeps the root execution of the run that spawned the child when that run was itself a sub-agent', async () => {
+    get = executionById({
+      ...parentRun,
+      agentParams: { ...parentRun.agentParams, rootExecutionId: 'root-1' },
+    } as AgentExecution);
+
+    await expect(wake()).resolves.toBe('woken');
+    expect(maybeExecuteAgent.mock.calls[0][0].params.rootExecutionId).toBe('root-1');
   });
 
   it('leaves the agent defaults in place when the run that spawned the child chose nothing', async () => {
