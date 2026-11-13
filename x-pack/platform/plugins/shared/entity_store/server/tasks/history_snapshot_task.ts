@@ -123,10 +123,14 @@ async function runHistorySnapshotTask({
   }
 
   // A cycle that spanned several runs would otherwise push the next cycle back by its duration.
+  // Keep the cycle start as the anchor. A cycle that overran its interval skips to the next
+  // occurrence after now: an hourly cycle that started at 08:00 and ended at 09:20 runs at 10:00.
   if (previousRun && currentInterval) {
-    const nextRunAt = Date.parse(previousRun.cycleStartedAt) + parseDurationToMs(currentInterval);
-    if (nextRunAt > Date.now()) {
-      return { state, runAt: new Date(nextRunAt) };
+    const intervalMs = parseDurationToMs(currentInterval);
+    if (intervalMs > 0) {
+      const cycleStart = Date.parse(previousRun.cycleStartedAt);
+      const elapsedIntervals = Math.max(0, Math.floor((Date.now() - cycleStart) / intervalMs));
+      return { state, runAt: new Date(cycleStart + (elapsedIntervals + 1) * intervalMs) };
     }
   }
 

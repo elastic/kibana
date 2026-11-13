@@ -194,6 +194,26 @@ export class HistorySnapshotClient {
       this.logger.error(`Failed to reschedule history snapshot task: ${message}`);
       throw err;
     }
+    await this.resumePausedCycle(taskId);
+  }
+
+  /**
+   * A new interval replaces the short continuation delay of a cycle that is paused between runs.
+   * Run the task now so the cycle is not postponed by up to the new interval.
+   */
+  private async resumePausedCycle(taskId: string): Promise<void> {
+    try {
+      const task = await this.taskManager.get(taskId);
+      if (task.state?.run) {
+        await this.taskManager.runSoon(taskId);
+      }
+    } catch (err) {
+      this.logger.warn(
+        `History snapshot: failed to resume the paused cycle after rescheduling: ${getErrorMessage(
+          err
+        )}`
+      );
+    }
   }
 
   public async disable(
@@ -417,6 +437,17 @@ export class HistorySnapshotClient {
       run = next;
       onRunChange(next);
     };
+    // A disable that arrives during the run cannot see an Elasticsearch task that is not in the task
+    // state yet, so check before each step that starts or keeps one.
+    const stopIfDisabled = async (): Promise<RunHistorySnapshotResult | undefined> => {
+      const { historySnapshot } = await this.globalStateClient.findOrThrow();
+      if (historySnapshot?.status === 'started') {
+        return undefined;
+      }
+      this.logger.info('History snapshot was disabled during the run, cancelling it');
+      await this.cancelRun(run);
+      return { ok: true, skipped: true };
+    };
 
     while (true) {
       const poll = await pollTaskUntil<ReindexResponse | UpdateByQueryResponse>({
@@ -430,10 +461,13 @@ export class HistorySnapshotClient {
       });
 
       if (poll.status === 'pending') {
-        return { ok: true, inProgress: true, run };
+        const stopped = await stopIfDisabled();
+        return stopped ?? { ok: true, inProgress: true, run };
       }
 
       if (poll.status === 'missing') {
+        const stopped = await stopIfDisabled();
+        if (stopped) return stopped;
         this.logger.warn(
           `History snapshot ${run.phase} task ${run.esTaskId} no longer exists; starting it again`
         );
@@ -458,6 +492,8 @@ export class HistorySnapshotClient {
         if (docCount === 0) {
           return this.completeCycle(run.historySnapshotIndex, 0, 0);
         }
+        const stopped = await stopIfDisabled();
+        if (stopped) return stopped;
         setRun(await this.startPhase({ ...run, phase: 'reset', docCount }, abortSignal));
         continue;
       }
