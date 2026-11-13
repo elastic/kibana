@@ -193,6 +193,7 @@ export const DataGrid = <TRow extends object>({
     (event: React.FocusEvent<HTMLDivElement>) => {
       if (
         event.target === event.currentTarget &&
+        event.currentTarget.matches(':focus-visible') &&
         focus.activeCell &&
         rowIds.includes(focus.activeCell.rowId) &&
         columnIds.includes(focus.activeCell.columnId)

@@ -15,6 +15,7 @@ import {
   cleanupDataGridTestState,
   columns,
   expectFocus,
+  focusVisibleTestHarness,
   focusElement,
   renderGrid,
   resetDataGridTestState,
@@ -291,6 +292,39 @@ describe('DataGrid keyboard and logical focus', () => {
       await apiRef.current?.scrollToCell({ rowId: 'row-1', columnId: 'name' });
     });
     await expectFocus('Name 1');
+  });
+
+  it('restores an off-screen active cell only when the grid receives keyboard focus', async () => {
+    const apiRef = createRef<DataGridApi>();
+    renderGrid({ apiRef });
+    const activeCell = screen.getByRole('gridcell', { name: 'Name 0' });
+    focusElement(activeCell);
+    if (!apiRef.current) {
+      throw new Error('Expected a data grid API.');
+    }
+
+    await act(async () => {
+      await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
+    });
+    const grid = screen.getByRole('grid');
+    expect(grid.getAttribute('tabindex')).toBe('0');
+    expect(screen.queryByRole('gridcell', { name: 'Name 0' })).toBeNull();
+
+    focusVisibleTestHarness.set(false);
+    focusElement(grid);
+    expect(document.activeElement).toBe(grid);
+    expect(screen.queryByRole('gridcell', { name: 'Name 0' })).toBeNull();
+    expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenCalledTimes(1);
+
+    const outsideButton = document.createElement('button');
+    document.body.append(outsideButton);
+    focusElement(outsideButton);
+    focusVisibleTestHarness.set(true);
+    focusElement(grid);
+
+    await expectFocus('Name 0');
+    expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(0, 'auto');
+    outsideButton.remove();
   });
 
   it('preserves logical row and column identity through reordering', async () => {

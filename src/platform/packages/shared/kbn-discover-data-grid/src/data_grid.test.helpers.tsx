@@ -26,6 +26,8 @@ const mockScrollToOffset = jest.fn();
 let mockScrollOffsetAvailable = true;
 let mockDelayVirtualMount = false;
 let mockPendingVirtualScrolls: Array<() => void> = [];
+let mockIsFocusVisible = true;
+const nativeElementMatches = HTMLElement.prototype.matches;
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual<typeof import('@elastic/eui')>('@elastic/eui');
@@ -102,6 +104,22 @@ jest.mock('@tanstack/react-virtual', () => {
 
 export const mockUseTable = jest.mocked(useTable);
 export const mockUseVirtualizer = jest.mocked(useVirtualizer);
+
+export const focusVisibleTestHarness = {
+  set: (isFocusVisible: boolean): void => {
+    mockIsFocusVisible = isFocusVisible;
+  },
+  reset: (): void => {
+    mockIsFocusVisible = true;
+    jest
+      .spyOn(HTMLElement.prototype, 'matches')
+      .mockImplementation(function matches(this: HTMLElement, selectors: string): boolean {
+        return selectors === ':focus-visible'
+          ? mockIsFocusVisible
+          : nativeElementMatches.call(this, selectors);
+      });
+  },
+};
 
 export const virtualizerTestHarness = {
   measureElement: mockMeasureElement,
@@ -239,6 +257,7 @@ export const runFocusCommand = async (
 
 export const resetDataGridTestState = (): void => {
   jest.clearAllMocks();
+  focusVisibleTestHarness.reset();
   virtualizerTestHarness.reset();
 };
 
