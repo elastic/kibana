@@ -130,4 +130,20 @@ describe('esql-compile', () => {
     expect(requestMock).not.toHaveBeenCalled();
     expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
   });
+
+  it('compiles an inline tool-argument query without the following argument values', async () => {
+    const { esClient, requestMock } = createEsClient();
+    await esqlCompileEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: {
+        input: { message: 'query' },
+        steps: [{ tool_id: 'x', arguments: { query: 'FROM logs-* | LIMIT 1', note: 'tagged' } }],
+        response: { message: 'done' },
+      },
+      log,
+    });
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({ body: { query: 'FROM logs-* | LIMIT 1 | LIMIT 0' } })
+    );
+  });
 });

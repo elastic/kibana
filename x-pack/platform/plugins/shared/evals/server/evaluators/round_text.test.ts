@@ -19,7 +19,7 @@ describe('collectRoundText', () => {
         ],
         response: { message: 'final answer' },
       })
-    ).toBe('final answer\nq: 1\nraw args');
+    ).toBe('final answer\n\nq: 1\n\nraw args');
   });
 
   it('drops a BOM leading any part but keeps one inside it', () => {
@@ -29,7 +29,7 @@ describe('collectRoundText', () => {
         steps: [{ tool_id: 'a', arguments: '\uFEFFargs' }],
         response: { message: '\uFEFFanswer\uFEFFtail' },
       })
-    ).toBe('answer\uFEFFtail\nargs');
+    ).toBe('answer\uFEFFtail\n\nargs');
   });
 
   it('flattens nested and JSON-string arguments, keeping real newlines', () => {
@@ -42,6 +42,8 @@ describe('collectRoundText', () => {
         ],
         response: { message: 'done' },
       })
-    ).toBe('done\nquery: FROM a\n| LIMIT 1\nopts.tags: x\nopts.tags: y\nquery: FROM b\n| LIMIT 1');
+    ).toBe(
+      'done\n\nquery: FROM a\n| LIMIT 1\n\nopts.tags: x\n\nopts.tags: y\n\nquery: FROM b\n| LIMIT 1'
+    );
   });
 });

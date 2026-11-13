@@ -38,7 +38,9 @@ const ZERO_WIDTH_PATTERN = new RegExp(
 // suffix is anchored by the boundary below, so `elastic.co.evil.com` and
 // `github.com.attacker.net` still match.
 const ALLOWED_HOSTS = String.raw`localhost|127\.0\.0\.1|(?:[\w-]+\.)*(?:elastic\.co|elastic-cloud\.com|github\.com)`;
-const HOST_END = String.raw`(?:[/:?#\s,;)'"\]>]|\.(?![\w-])|$)`;
+// A colon after the host only counts as a port, so `elastic.co:x@evil.com`
+// (userinfo, real host evil.com) is still flagged.
+const HOST_END = String.raw`(?::\d+)?(?:[/?#\s,;)'"\]>]|\.(?![\w-])|$)`;
 
 // Agent-authored output can be fed into downstream agent contexts, so
 // anything that overrides role, hides instructions, or redirects the agent

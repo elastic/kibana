@@ -150,6 +150,9 @@ describe('skill-prompt-injection', () => {
     'https://github-enterprise.attacker.com/x',
     'https://evilelastic.co/x',
     'https://elastic.co-evil.com/x',
+    'https://elastic.co:x@evil.com/path',
+    'https://elastic.co:443@evil.com/path',
+    'https://github.com@evil.com/x',
   ])('flags exfiltration to look-alike host %s', async (url) => {
     const result = await skillPromptInjectionEvaluator.evaluate({
       trace,

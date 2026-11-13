@@ -50,5 +50,6 @@ export const collectRoundText = (round: EvidenceRound): string => {
       typeof step.arguments === 'string' ? parseJson(stripBom(step.arguments)) : step.arguments;
     flattenArguments(args, undefined, parts);
   }
-  return parts.join('\n');
+  // A blank line between parts ends an inline ES|QL query at its own value.
+  return parts.join('\n\n');
 };
