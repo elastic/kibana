@@ -109,7 +109,10 @@ export const registerStepDefinitions = ({
   );
   workflowsExtensions.registerStepDefinition(getTriageJoinProposalStepDefinition(groupingDeps));
   workflowsExtensions.registerStepDefinition(
-    getTriageStoreFpDecisionsStepDefinition({ isContextEngineEnabled })
+    getTriageStoreFpDecisionsStepDefinition({
+      isContextEngineEnabled,
+      getMode: getDecisionAutoCloseMode,
+    })
   );
   workflowsExtensions.registerStepDefinition(
     getTriageMatchFpDecisionsStepDefinition({

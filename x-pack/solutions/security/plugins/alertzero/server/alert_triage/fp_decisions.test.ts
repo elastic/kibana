@@ -17,6 +17,7 @@ import {
   matchDecisions,
   readActiveDecision,
   selectDecisionKeys,
+  toDecisionAutoCloseMode,
   type StrictKeyGroup,
 } from './fp_decisions';
 
@@ -418,5 +419,17 @@ describe('matchDecisions', () => {
     });
 
     expect(wouldClose.size).toBe(0);
+  });
+});
+
+describe('toDecisionAutoCloseMode', () => {
+  it.each(['shadow', 'on', 'off'] as const)('reads %s as itself', (mode) => {
+    expect(toDecisionAutoCloseMode(mode)).toBe(mode);
+  });
+
+  // Customers can turn AlertZero on, so a missing or mistyped flag must not start tagging or
+  // closing alerts: only an exact `shadow` or `on` turns decisions on.
+  it.each(['', 'On', 'SHADOW', 'true', 'enabled'])('reads %p as off', (value) => {
+    expect(toDecisionAutoCloseMode(value)).toBe('off');
   });
 });

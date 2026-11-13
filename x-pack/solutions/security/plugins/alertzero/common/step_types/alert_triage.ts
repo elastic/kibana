@@ -424,6 +424,7 @@ export const triageRetagProposalAlertsStepCommonDefinition: CommonStepDefinition
 
 export const STORE_FP_DECISIONS_SKIP_REASONS = [
   'none',
+  'off',
   'supervised',
   'disabled',
   'denied',

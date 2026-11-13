@@ -32,6 +32,7 @@ import {
   TRIAGE_GROUPING_FLAG,
   type DecisionAutoCloseMode,
 } from './alert_triage/constants';
+import { toDecisionAutoCloseMode } from './alert_triage/fp_decisions';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -133,7 +134,7 @@ export class AlertZeroPlugin
   private coreStart?: CoreStart;
   private triageGroupingEnabled = true;
   private triageGroupingFlagSubscription?: Subscription;
-  private decisionAutoCloseMode: DecisionAutoCloseMode = 'shadow';
+  private decisionAutoCloseMode: DecisionAutoCloseMode = 'off';
   private decisionAutoCloseFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
@@ -369,12 +370,12 @@ export class AlertZeroPlugin
       .subscribe((enabled) => {
         this.triageGroupingEnabled = enabled;
       });
-    // The switch for matching decisions in the sweep. Only `off` and `on` are read: any other value,
-    // and a missing flag provider, give shadow, which closes nothing.
+    // The switch for storing and matching decisions. It is `off` unless a deployment sets `shadow`
+    // or `on`, until the follow-ups that `on` needs have landed.
     this.decisionAutoCloseFlagSubscription = core.featureFlags
-      .getStringValue$<string>(TRIAGE_DECISION_AUTO_CLOSE_FLAG, 'shadow')
+      .getStringValue$<string>(TRIAGE_DECISION_AUTO_CLOSE_FLAG, 'off')
       .subscribe((mode) => {
-        this.decisionAutoCloseMode = mode === 'off' || mode === 'on' ? mode : 'shadow';
+        this.decisionAutoCloseMode = toDecisionAutoCloseMode(mode);
       });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
