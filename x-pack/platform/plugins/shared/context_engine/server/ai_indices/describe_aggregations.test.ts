@@ -14,7 +14,7 @@ import {
   MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
 } from '../../common/constants';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { buildAiIndexReadFilter, buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import type { AiIndexField } from './types';
 
@@ -115,6 +115,18 @@ describe('describeAiIndexAggregations', () => {
     for (const query of queries()) {
       expect(Parser.parse(query).errors).toEqual([]);
     }
+  });
+
+  it('scopes the counts to the user when given', async () => {
+    await describeAiIndexAggregations({
+      ...params,
+      userId: 'alice',
+      fields: [field('type', true), field('tags', true)],
+    });
+
+    const filter = buildAiIndexReadFilter({ spaceId: 'team-a', userId: 'alice' });
+    expect(esqlQuery).toHaveBeenNthCalledWith(1, expect.objectContaining({ filter }));
+    expect(esqlQuery).toHaveBeenNthCalledWith(2, expect.objectContaining({ filter }));
   });
 
   it('collapses a data stream to the newest revision before counting', async () => {

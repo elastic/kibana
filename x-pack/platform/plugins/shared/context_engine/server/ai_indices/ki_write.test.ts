@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { KiPartialFields } from '../../common/step_types/ki';
 import { kiIdQuery, REVISION_TIE_WINDOW } from './ki_get';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from './ki_write';
 import { KiConflictError, KiDeletedError, KiNotFoundError, KiValidationError } from './errors';
@@ -322,6 +323,70 @@ describe('updateKi', () => {
       expect.objectContaining({ id: 'ki-1', if_seq_no: 9, if_primary_term: 1 }),
       expect.anything()
     );
+  });
+
+  it('rejects a user_id change', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn(),
+    } as unknown as ElasticsearchClient;
+
+    const thrown = await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { content: 'Updated', user_id: 'bob' } as KiPartialFields,
+      writer: apiWriter,
+    }).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(KiValidationError);
+    expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('ignores a null user_id', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { content: 'Updated', user_id: null } as unknown as KiPartialFields,
+      writer: apiWriter,
+    });
+
+    expect((esClient.update as jest.Mock).mock.calls[0][0].doc).not.toHaveProperty('user_id');
+  });
+
+  it('accepts the stored user_id', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    const result = await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { content: 'Updated', user_id: 'alice' } as KiPartialFields,
+      writer: apiWriter,
+    });
+
+    expect(result).toEqual({ id: 'ki-1', result: 'updated' });
   });
 
   it('throws ValidationError when the KI is ambiguous across backing indices and no index is pinned', async () => {

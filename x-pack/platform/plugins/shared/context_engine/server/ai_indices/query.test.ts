@@ -15,9 +15,10 @@ import {
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
   MAX_AI_INDEX_QUERY_PARAMS,
   MAX_AI_INDEX_QUERY_RESPONSE_BYTES,
+  MAX_AI_INDEX_USER_ID_LENGTH,
 } from '../../common/constants';
 import type { QueryAiIndicesRequest } from '../../common/http_api/ai_indices';
-import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { buildAiIndexReadFilter, buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './errors';
 import { queryAiIndices } from './query';
 
@@ -50,6 +51,19 @@ describe('queryAiIndices', () => {
         allow_partial_results: true,
       },
       { maxResponseSize: MAX_AI_INDEX_QUERY_RESPONSE_BYTES }
+    );
+  });
+
+  it('adds the user filter when user_id is given', async () => {
+    await queryAiIndices({
+      esClient,
+      spaceId: 'marketing',
+      query: 'FROM ai-index-idx-a',
+      user_id: 'alice',
+    });
+
+    expect(lastRequest().filter).toEqual(
+      buildAiIndexReadFilter({ spaceId: 'marketing', userId: 'alice' })
     );
   });
 
@@ -133,6 +147,14 @@ describe('queryAiIndices', () => {
       await expect(run({ query: '' })).rejects.toBeInstanceOf(InvalidAiIndexQueryError);
       await expect(
         run({ query: 'a'.repeat(MAX_AI_INDEX_QUERY_LENGTH + 1) })
+      ).rejects.toBeInstanceOf(InvalidAiIndexQueryError);
+      expect(esqlQuery).not.toHaveBeenCalled();
+    });
+
+    it('rejects an empty or oversized user_id', async () => {
+      await expect(run({ user_id: '' })).rejects.toBeInstanceOf(InvalidAiIndexQueryError);
+      await expect(
+        run({ user_id: 'u'.repeat(MAX_AI_INDEX_USER_ID_LENGTH + 1) })
       ).rejects.toBeInstanceOf(InvalidAiIndexQueryError);
       expect(esqlQuery).not.toHaveBeenCalled();
     });
