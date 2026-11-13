@@ -27,6 +27,7 @@ import { makeDsView } from '../../aws_service_matrix';
 import { shouldDefaultCollectS3Logs } from './field_config';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { isServiceConfigIncomplete } from './use_service_settings';
+import type { DatasetTemplatesPolicy } from './dataset_templates';
 import { ServiceFieldsForm } from './service_fields_form';
 import {
   InstanceNamespaceField,
@@ -77,11 +78,15 @@ interface ServiceSettingsFlyoutProps {
   globalNamespace?: string;
   /** Whether the instance is already deployed, which changes what a new namespace means. */
   isDeployed?: boolean;
+  /** The template choice of the policy the service deploys in, shared with its other services. */
+  datasetTemplatesPolicy?: DatasetTemplatesPolicy;
   onApply: (
     varsByDataStream: Record<string, ServiceDataStreamVars>,
     enabledDataStreams: string[],
     /** The duplicate's namespace; absent for an original. */
-    namespace?: string
+    namespace?: string,
+    /** The template choice, only when the user changed it. */
+    createDatasetTemplates?: boolean
   ) => void;
   onClose: () => void;
 }
@@ -93,6 +98,7 @@ export function ServiceSettingsFlyout({
   isDuplicate = false,
   globalNamespace = '',
   isDeployed = false,
+  datasetTemplatesPolicy,
   onApply,
   onClose,
 }: ServiceSettingsFlyoutProps) {
@@ -107,6 +113,10 @@ export function ServiceSettingsFlyout({
   // An empty namespace follows the global one, so it stays empty and the global value is only the
   // placeholder: saving other settings must not pin the duplicate to today's global namespace.
   const [namespace, setNamespace] = useState(config.namespace ?? '');
+  // The policy takes one template value, so the switch shows it whichever service opens the flyout.
+  const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean | undefined>(
+    undefined
+  );
   const showNamespace = isDuplicate && supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
@@ -129,11 +139,17 @@ export function ServiceSettingsFlyout({
   });
 
   const handleApply = () => {
-    onApply(
+    const applied = [
       withCollectS3Defaults(service, draftByDs),
       enabledDataStreams,
-      showNamespace ? namespace : undefined
-    );
+      showNamespace ? namespace : undefined,
+    ] as const;
+    // The template choice only goes along when the user changed it.
+    if (createDatasetTemplates === undefined) {
+      onApply(...applied);
+    } else {
+      onApply(...applied, createDatasetTemplates);
+    }
   };
 
   return (
@@ -199,6 +215,37 @@ export function ServiceSettingsFlyout({
               });
             })
           }
+          onVarGroupSelectionChange={(dsId, input, groupName, optionName) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const existing = prev[dsId] ?? {
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
+                varsByInput: {},
+              };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  varGroupSelectionsByInput: {
+                    ...(existing.varGroupSelectionsByInput ?? {}),
+                    [input]: {
+                      ...(existing.varGroupSelectionsByInput?.[input] ?? {}),
+                      [groupName]: optionName,
+                    },
+                  },
+                },
+              };
+            })
+          }
+          isDeployed={isDeployed}
+          datasetTemplatesSharedWith={datasetTemplatesPolicy?.sharedWith}
+          createDatasetTemplates={
+            createDatasetTemplates ??
+            datasetTemplatesPolicy?.enabled ??
+            config.createDatasetTemplates ??
+            true
+          }
+          onCreateDatasetTemplatesChange={setCreateDatasetTemplates}
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];

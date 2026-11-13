@@ -70,6 +70,9 @@ Build cloud Docker images that can be used for testing deployments on Elastic Cl
 #### `ci:build-docker-fips`
 Build Docker Wolfi image with FIPS enabled.
 
+#### `ci:build-fips-provider`
+Build the OpenSSL FIPS provider into the Linux distributions. PR builds skip it unless they have `ci:build-os-packages` or `ci:build-all-platforms`, or change how the provider is built.
+
 #### `ci:build-os-packages`
 Build Docker images, and Debian and RPM packages.
 

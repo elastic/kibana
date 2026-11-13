@@ -19,6 +19,7 @@ export const SLACK_FILE_PUBLIC_EVENT_KEY = 'file_public' as const;
 export const SLACK_CHANNEL_CREATED_EVENT_KEY = 'channel_created' as const;
 export const SLACK_TEAM_JOIN_EVENT_KEY = 'team_join' as const;
 export const SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY = 'member_joined_channel' as const;
+export const SLACK_SLASH_COMMAND_EVENT_KEY = 'slash_command' as const;
 
 export const SLACK_MESSAGE_EVENT_ID = buildEventId(
   SLACK_CONNECTOR_TYPE_ID,
@@ -52,3 +53,21 @@ export const SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID = buildEventId(
   SLACK_CONNECTOR_TYPE_ID,
   SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY
 );
+export const SLACK_SLASH_COMMAND_EVENT_ID = buildEventId(
+  SLACK_CONNECTOR_TYPE_ID,
+  SLACK_SLASH_COMMAND_EVENT_KEY
+);
+
+/**
+ * HITL interactive resume (block_actions). Keep action_id strings in sync with
+ * `@kbn/workflows` `HITL_SLACK_ACTION_*` constants.
+ */
+export const SLACK_HITL_ACTION_EVENT_KEY = 'hitl_action' as const;
+export const SLACK_HITL_ACTION_EVENT_ID = buildEventId(
+  SLACK_CONNECTOR_TYPE_ID,
+  SLACK_HITL_ACTION_EVENT_KEY
+);
+
+export const SLACK_HITL_ACTION_APPROVE = 'workflows.hitl.approve' as const;
+export const SLACK_HITL_ACTION_REJECT = 'workflows.hitl.reject' as const;
+export const SLACK_HITL_ACTION_SUBMIT = 'workflows.hitl.submit' as const;

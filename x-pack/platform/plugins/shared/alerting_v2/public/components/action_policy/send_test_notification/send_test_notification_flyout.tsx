@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EuiFlyoutProps } from '@elastic/eui';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { normalizeMatcher } from '@kbn/alerting-v2-utils';
 import { FlyoutTemplate } from '@kbn/flyout-template';
@@ -14,8 +13,10 @@ import React, { useState } from 'react';
 import { usePreviewTestNotification } from '../../../hooks/use_preview_test_notification';
 import { useSendTestNotification } from '../../../hooks/use_send_test_notification';
 import { DestinationTestCard } from './destination_test_card';
+import { PayloadEditor } from './payload_editor';
 import { SendTestResultsFlyout } from './send_test_results_flyout';
 import * as labels from './translations';
+import { validatePayload } from './validate_payload';
 
 interface Props {
   policy: ActionPolicyResponse;
@@ -27,12 +28,7 @@ interface Props {
 const { Header, Body, Footer } = FlyoutTemplate;
 
 export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Props) => {
-  const {
-    data: preview,
-    isLoading,
-    error,
-    reload: reloadPreview,
-  } = usePreviewTestNotification(policy.id);
+  const { data: preview, isLoading, error } = usePreviewTestNotification(policy.id);
   const {
     mutate: sendTestNotification,
     data: sendResponse,
@@ -40,6 +36,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     reset: resetSend,
   } = useSendTestNotification(policy.id);
   const [deselectedIds, setDeselectedIds] = useState<ReadonlySet<string>>(new Set());
+  const [editedPayload, setEditedPayload] = useState<string>();
   const [ownHistoryKey] = useState(() => Symbol('sendTestNotificationFlyout'));
   const flyoutHistoryKey = historyKey ?? ownHistoryKey;
 
@@ -47,7 +44,12 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
   const selectedIds = destinations
     .filter(({ id, executable }) => executable && !deselectedIds.has(id))
     .map(({ id }) => id);
-  const payload = preview?.groups[0];
+  const generatedPayload = preview?.groups[0];
+  const generatedPayloadText = generatedPayload ? JSON.stringify(generatedPayload, null, 2) : '';
+  const payloadText = editedPayload ?? generatedPayloadText;
+  const { payload, errors: payloadErrors } = generatedPayload
+    ? validatePayload(payloadText)
+    : { payload: undefined, errors: [] };
   const hasKqlMatcher = Boolean(normalizeMatcher(policy.matcher)?.expression);
 
   const toggleDestination = (id: string) =>
@@ -60,19 +62,10 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     });
 
   const send = () => {
-    if (!preview) {
+    if (!payload) {
       return;
     }
-    sendTestNotification({ seed: preview.seed, destinationIds: selectedIds });
-  };
-
-  const closeResults: EuiFlyoutProps['onClose'] = (_event, meta) => {
-    resetSend();
-    if (meta?.reason === 'navigation-cascade') {
-      return;
-    }
-    setDeselectedIds(new Set());
-    reloadPreview();
+    sendTestNotification({ payload, destinationIds: selectedIds });
   };
 
   return (
@@ -118,17 +111,14 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
             title={labels.PAYLOAD_TITLE}
             data-test-subj="sendTestNotificationPayload"
           >
-            {payload ? (
-              <EuiCodeBlock
-                language="json"
-                fontSize="s"
-                paddingSize="m"
-                overflowHeight={480}
-                isCopyable
-                data-test-subj="sendTestNotificationPayloadCode"
-              >
-                {JSON.stringify(payload, null, 2)}
-              </EuiCodeBlock>
+            {generatedPayload ? (
+              <PayloadEditor
+                value={payloadText}
+                generatedValue={generatedPayloadText}
+                errors={payloadErrors}
+                onChange={setEditedPayload}
+                onReset={() => setEditedPayload(undefined)}
+              />
             ) : (
               <EuiText size="s" color="subdued">
                 <p>{labels.NO_PAYLOAD}</p>
@@ -176,7 +166,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           destinations={destinations}
           sendResponse={sendResponse}
           historyKey={flyoutHistoryKey}
-          onClose={closeResults}
+          onClose={resetSend}
         />
       )}
     </>

@@ -10,6 +10,7 @@ import {
   registerUninstall,
   registerStop,
   registerStart,
+  registerUpdateApiKey,
   registerStatus,
   registerForceLogExtraction,
   registerStartMaintainer,
@@ -56,6 +57,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerCRUDGet(router);
   registerCRUDDelete(router);
   registerStart(router);
+  registerUpdateApiKey(router);
   registerUpdate(router);
   registerEngineConfig(router);
   registerInternalStart(router);

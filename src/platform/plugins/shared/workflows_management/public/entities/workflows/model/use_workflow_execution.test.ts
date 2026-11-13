@@ -11,7 +11,10 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useWorkflowExecution } from './use_workflow_execution';
-import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
+import {
+  createQueryClientWrapper,
+  createTestQueryClient,
+} from '../../../shared/test_utils/query_client_wrapper';
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsApi: jest.fn(),

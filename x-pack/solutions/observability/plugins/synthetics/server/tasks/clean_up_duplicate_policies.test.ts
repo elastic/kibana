@@ -11,11 +11,25 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { SyntheticsServerSetup } from '../types';
 import {
   DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
+  PACKAGE_POLICY_SCAN_PAGE_SIZE,
   bumpAgentPolicyRevisions,
   deletePackagePolicies,
   findLeftoverPackagePolicies,
 } from './clean_up_duplicate_policies';
 import { getFilterForTestNowRun } from './test_now_run_filter';
+import { getPrivateLocations } from '../synthetics_service/get_private_locations';
+
+jest.mock('../synthetics_service/get_private_locations', () => ({
+  getPrivateLocations: jest.fn(),
+}));
+
+const getPrivateLocationsMock = getPrivateLocations as jest.MockedFunction<
+  typeof getPrivateLocations
+>;
+
+beforeEach(() => {
+  getPrivateLocationsMock.mockReset().mockResolvedValue([]);
+});
 
 interface MonitorFixture {
   id: string;
@@ -247,6 +261,23 @@ describe('findLeftoverPackagePolicies', () => {
       expect.objectContaining({ kuery: getFilterForTestNowRun(true), spaceIds: ['*'] })
     );
   });
+
+  it('reads policies and monitors in large id-only pages', async () => {
+    const { server, soClient, fetchAllItemIds } = makeServer();
+
+    await findLeftoverPackagePolicies(server, soClient);
+
+    expect(fetchAllItemIds).toHaveBeenCalledWith(
+      soClient,
+      expect.objectContaining({ perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE })
+    );
+    expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: ['id', 'locations', 'origin'],
+        perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE,
+      })
+    );
+  });
 });
 
 describe('deletePackagePolicies', () => {
@@ -331,6 +362,48 @@ describe('deletePackagePolicies', () => {
     );
 
     expect(bumpRevisionMock.mock.calls.map((call) => call[2])).toEqual(['agent-a']);
+  });
+
+  it('bumps every private location agent policy when a batch fails after deleting part of it', async () => {
+    getPrivateLocationsMock.mockResolvedValue([
+      { id: 'loc-1', agentPolicyId: 'agent-b' },
+      { id: 'loc-2', agentPolicyId: 'agent-c' },
+    ] as Awaited<ReturnType<typeof getPrivateLocations>>);
+    const deleteMock = jest
+      .fn()
+      .mockImplementationOnce((_so, _es, batch: string[]) =>
+        Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])))
+      )
+      .mockRejectedValueOnce(new Error('secret clean up failed'));
+    const { server, soClient, esClient, bumpRevisionMock } = makeServer({ deleteMock });
+    const ids = Array.from(
+      { length: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 50 },
+      (_, i) => `p-${i}`
+    );
+
+    await expect(deletePackagePolicies(ids, soClient, esClient, server)).rejects.toThrow(
+      'secret clean up failed'
+    );
+
+    expect(getPrivateLocationsMock).toHaveBeenCalledWith(soClient, '*');
+    expect(bumpRevisionMock.mock.calls.map((call) => call[2])).toEqual([
+      'agent-a',
+      'agent-b',
+      'agent-c',
+    ]);
+  });
+
+  it('still rethrows the delete failure when private locations cannot be read', async () => {
+    getPrivateLocationsMock.mockRejectedValue(new Error('so unavailable'));
+    const deleteMock = jest.fn().mockRejectedValue(new Error('fleet unavailable'));
+    const { server, soClient, esClient, logger, bumpRevisionMock } = makeServer({ deleteMock });
+
+    await expect(deletePackagePolicies(['p-1'], soClient, esClient, server)).rejects.toThrow(
+      'fleet unavailable'
+    );
+
+    expect(logger.error).toHaveBeenCalled();
+    expect(bumpRevisionMock).not.toHaveBeenCalled();
   });
 
   it('bumps only agent policies whose package policies were actually deleted', async () => {

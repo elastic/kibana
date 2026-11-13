@@ -4,13 +4,15 @@ Security Watch investigation queue and catalog behind the `securitySolution:enab
 
 ## Enablement
 
+### Deployment defaults
+
+In stateful deployments (including ECH) AlertZero and its runtime dependencies are **on by default**, so no `kibana.yml` changes are needed. Users turn AlertZero on per space with `securitySolution:enableAlertZero` (below) and then go through onboarding.
+
+In serverless, `xpack.alertzero.enabled`, `xpack.proposals.enabled` and `xpack.agenticInvestigations.enabled` default to `false`. `config/serverless.security.complete.yml` turns all three on, so AlertZero is available only in the Security **Complete** tier.
+
 ### Runtime dependencies
 
-AlertZero's upgrade and access-denied screens can load when Agent Builder, Proposals, or Agentic Investigations is disabled. These plugins are optional dependencies of the shell, but all three are required to run the feature. For example, enable Agentic Investigations with:
-
-```yaml
-xpack.agenticInvestigations.enabled: true
-```
+AlertZero's upgrade and access-denied screens can load when Agent Builder, Proposals, or Agentic Investigations is disabled. These plugins are optional dependencies of the shell, but all three are required to run the feature. Their enablement flags are `xpack.agentBuilder.enabled`, `xpack.proposals.enabled` and `xpack.agenticInvestigations.enabled`.
 
 When a runtime dependency is absent, AlertZero does not register its managed-workflow owner or start feature services. Eligible users see an unavailable screen and the APIs return 503. An insufficient subscription still shows the appropriate upgrade gate first.
 
@@ -37,13 +39,13 @@ The Agent Builder conversation template UI for investigations and escalations (t
 
 ### `xpack.alertzero.enabled` — the deployment kill switch
 
-A plugin config flag, defaulting to `false`. It is *not* the user-facing toggle; it is a deployment-level gate that must be on for AlertZero to register anything. Turning it on or off requires a restart:
+A plugin config flag, defaulting to `true` in stateful deployments and `false` in serverless. It is *not* the user-facing toggle; it is a deployment-level gate that must be on for AlertZero to register anything. Turning it on or off requires a restart. To turn AlertZero off for a whole deployment:
 
 ```yaml
-xpack.alertzero.enabled: true
+xpack.alertzero.enabled: false
 ```
 
-- **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
+- **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `true` in stateful, `false` in serverless). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
 
 AlertZero reads live data only. To work on the UI without waiting for Workers to produce proposals, seed the queue with `scripts/seed_proposal_attachments.sh`, which writes real proposal documents and Agent Builder conversations into your local stack.
 
@@ -205,7 +207,7 @@ Managed Worker definitions:
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
 
-Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on enable or a settings save with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Each Worker is a `yamlTemplate` whose template values mirror the settings API (shared fields flat, Worker-specific fields under `extras`) and are re-used during definition upgrades. Persisted values are validated against the Worker's current declaration on every read and write. Stored documents are never rewritten without a user request; instead the read path and every Worker's `yamlTemplate` run stored values through the same `upgradeStoredWorkerSettings` (`managed/definitions/alertzero/worker_settings_defaults.ts`). A schedule or extras key the document does not have yet is filled from the current default, extras a Worker no longer declares are ignored, and a stored autonomy level the Worker no longer allows is lowered to the nearest allowed level below it (never raised). So the settings page and the running workflow agree; installed copies pick up a change when the definition version moves and `ready()` re-renders them. Any other value that is already stored is left as-is, including when it is out of range. Renames and other breaking shape changes have no compatibility path (see [Pre-customer state](#pre-customer-state)).
+Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on enable or a settings save with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Each Worker is a `yamlTemplate` whose template values mirror the settings API (shared fields flat, Worker-specific fields under `extras`) and are re-used during definition upgrades. Persisted values are validated against the Worker's current declaration on every read and write. Stored documents are never rewritten without a user request; instead the read path and every Worker's `yamlTemplate` run stored values through the same `upgradeStoredWorkerSettings` (`managed/definitions/alertzero/worker_settings_defaults.ts`). A schedule or extras key the document does not have yet is filled from the current default, extras a Worker no longer declares are ignored, and a stored autonomy level the Worker no longer allows is lowered to the nearest allowed level below it (never raised). So the settings page and the running workflow agree; installed copies pick up a change when `ready()` re-renders them and their rendered YAML or definition version moved. Any other value that is already stored is left as-is, including when it is out of range. Renames and other breaking shape changes have no compatibility path (see [Pre-customer state](#pre-customer-state)).
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs:
 
@@ -225,7 +227,7 @@ Two different version fields:
 | YAML `version: "1"` | Top of each Worker `*.yaml` | Workflow document schema / format version (stays `"1"` until the YAML language changes). |
 | Definition `version: N` | The Worker's module under `managed/definitions/alertzero/` | **Managed reconciliation counter** for `@kbn/workflows/managed`. Bump when you need install/`ready()` to re-apply the definition (`versionStrategy: 'auto'`). |
 
-Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. A change to a render helper in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts` needs a definition version bump too; no test catches a missing one.
+Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. A change to a render helper in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts` reaches installed copies without a bump, because the platform hashes each document's rendered YAML; no test requires one.
 
 ### Central AlertZero Worker registry guide
 
@@ -343,7 +345,7 @@ Every configured space stores its own copy of a Worker's settings, and that copy
 - **Unclassified schema features.** A failure saying "Unclassified … Teach the Worker settings contract check about it" means the schema uses a JSON Schema construct the classifier does not know. Ask the Common Worker Layer team to extend `test_helpers/settings_contract.ts`; do not work around it.
 - **Validation the contract cannot compare.** A failure saying "Cannot establish settings compatibility at …" means a stored or saved setting goes through a refinement (`.refine`, `.superRefine`, `.check`), a transform, a preprocess or a pipe. JSON Schema drops those, so a change to them would pass unnoticed. It is not a breaking change and cannot be accepted: express the constraint as a bound, an enum or a pattern, or ask the Common Worker Layer team to teach the contract to compare it.
 
-Installed copies re-render only when a Worker's definition `version` moves. `managed_workflow_definitions.test.ts` fails until you bump it whenever the Worker's YAML or its defaults in `worker_settings_defaults.ts` change: its fingerprint row covers both. A YAML-only edit touches nothing in the settings contract.
+Installed copies re-render when the YAML a Worker renders for them or its definition `version` changes. `managed_workflow_definitions.test.ts` fails until you bump it whenever the Worker's YAML or its defaults in `worker_settings_defaults.ts` change: its fingerprint row covers both. A YAML-only edit touches nothing in the settings contract.
 
 | Change | Result | What to do |
 |---|---|---|
@@ -351,7 +353,7 @@ Installed copies re-render only when a Worker's definition `version` moves. `man
 | New schedule on an existing Worker | Safe | As above. Task Manager picks up the schedule on the next save or enable in each space. |
 | Changed default | Safe | Bump the definition version (enforced) and run the update command. It reaches fresh installs and every stored document that does not hold the field; a stored value always wins. |
 | YAML edit | Not a settings change | Bump the definition version (enforced). |
-| Render-helper edit (`src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts`) | Not a settings change | Bump the definition version yourself; no test catches a missing bump. |
+| Render-helper edit (`src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts`) | Not a settings change | Installed copies re-render on their own; no test requires a definition version bump. |
 | Removed autonomy level that has a lower allowed level (for example `supervised` when `assisted` stays) | Safe | Bump the definition version (enforced) and run the update command. Stored documents holding the removed level read and render as the nearest allowed level; a trigger that depends on the level changes on the next save or enable in each space. |
 | Removed `extras` from a Worker | Safe | Bump the definition version (enforced) and run the update command. Stored extras are ignored on read and render. |
 | Renamed, removed or retyped setting; tightened bound; removed allowed value (autonomy: the lowest allowed level); new setting without a default, including a required key inside a nested object; removed Worker; settings version bump; a `WorkerSettings` or `WorkerSettingsWrite` change that rejects documents or saves that used to pass | Breaking | Prefer keeping the stored key and changing only the label. Otherwise, before customers, a coordinated reset recorded with `ACCEPT_WORKER_SETTINGS_BREAKING_CHANGE=<issue-url>` in update mode; after that, a migration ([security-team#19312](https://github.com/elastic/security-team/issues/19312)). |

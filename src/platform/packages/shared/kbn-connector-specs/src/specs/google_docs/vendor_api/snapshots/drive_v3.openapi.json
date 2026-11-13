@@ -1,0 +1,1027 @@
+{
+  "components": {
+    "schemas": {
+      "ClientEncryptionDetails": {
+        "properties": {
+          "decryptionMetadata": {
+            "$ref": "#/components/schemas/DecryptionMetadata"
+          },
+          "encryptionState": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ContentRestriction": {
+        "properties": {
+          "ownerRestricted": {
+            "type": "boolean"
+          },
+          "readOnly": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "restrictingUser": {
+            "$ref": "#/components/schemas/User"
+          },
+          "restrictionTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "systemRestricted": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DecryptionMetadata": {
+        "properties": {
+          "aes256GcmChunkSize": {
+            "type": "string"
+          },
+          "encryptionResourceKeyHash": {
+            "type": "string"
+          },
+          "jwt": {
+            "type": "string"
+          },
+          "kaclsId": {
+            "format": "int64",
+            "type": "string"
+          },
+          "kaclsName": {
+            "type": "string"
+          },
+          "keyFormat": {
+            "type": "string"
+          },
+          "wrappedKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DownloadRestriction": {
+        "properties": {
+          "restrictedForReaders": {
+            "type": "boolean"
+          },
+          "restrictedForWriters": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "DownloadRestrictionsMetadata": {
+        "properties": {
+          "effectiveDownloadRestrictionWithContext": {
+            "$ref": "#/components/schemas/DownloadRestriction"
+          },
+          "itemDownloadRestriction": {
+            "$ref": "#/components/schemas/DownloadRestriction"
+          }
+        },
+        "type": "object"
+      },
+      "File": {
+        "properties": {
+          "appProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "capabilities": {
+            "properties": {
+              "canAcceptOwnership": {
+                "type": "boolean"
+              },
+              "canAccessViaGenAi": {
+                "type": "boolean"
+              },
+              "canAddChildren": {
+                "type": "boolean"
+              },
+              "canAddFolderFromAnotherDrive": {
+                "type": "boolean"
+              },
+              "canAddMyDriveParent": {
+                "type": "boolean"
+              },
+              "canChangeCopyRequiresWriterPermission": {
+                "type": "boolean"
+              },
+              "canChangeItemDownloadRestriction": {
+                "type": "boolean"
+              },
+              "canChangeSecurityUpdateEnabled": {
+                "type": "boolean"
+              },
+              "canChangeViewersCanCopyContent": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canComment": {
+                "type": "boolean"
+              },
+              "canCopy": {
+                "type": "boolean"
+              },
+              "canDelete": {
+                "type": "boolean"
+              },
+              "canDeleteChildren": {
+                "type": "boolean"
+              },
+              "canDisableInheritedPermissions": {
+                "type": "boolean"
+              },
+              "canDownload": {
+                "type": "boolean"
+              },
+              "canEdit": {
+                "type": "boolean"
+              },
+              "canEnableInheritedPermissions": {
+                "type": "boolean"
+              },
+              "canListChildren": {
+                "type": "boolean"
+              },
+              "canModifyContent": {
+                "type": "boolean"
+              },
+              "canModifyContentRestriction": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canModifyEditorContentRestriction": {
+                "type": "boolean"
+              },
+              "canModifyLabels": {
+                "type": "boolean"
+              },
+              "canModifyOwnerContentRestriction": {
+                "type": "boolean"
+              },
+              "canMoveChildrenOutOfDrive": {
+                "type": "boolean"
+              },
+              "canMoveChildrenOutOfTeamDrive": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canMoveChildrenWithinDrive": {
+                "type": "boolean"
+              },
+              "canMoveChildrenWithinTeamDrive": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canMoveItemIntoTeamDrive": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canMoveItemOutOfDrive": {
+                "type": "boolean"
+              },
+              "canMoveItemOutOfTeamDrive": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canMoveItemWithinDrive": {
+                "type": "boolean"
+              },
+              "canMoveItemWithinTeamDrive": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canMoveTeamDriveItem": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canReadDrive": {
+                "type": "boolean"
+              },
+              "canReadLabels": {
+                "type": "boolean"
+              },
+              "canReadRevisions": {
+                "type": "boolean"
+              },
+              "canReadTeamDrive": {
+                "deprecated": true,
+                "type": "boolean"
+              },
+              "canRemoveChildren": {
+                "type": "boolean"
+              },
+              "canRemoveContentRestriction": {
+                "type": "boolean"
+              },
+              "canRemoveMyDriveParent": {
+                "type": "boolean"
+              },
+              "canRename": {
+                "type": "boolean"
+              },
+              "canShare": {
+                "type": "boolean"
+              },
+              "canStartApproval": {
+                "type": "boolean"
+              },
+              "canTrash": {
+                "type": "boolean"
+              },
+              "canTrashChildren": {
+                "type": "boolean"
+              },
+              "canUntrash": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "clientEncryptionDetails": {
+            "$ref": "#/components/schemas/ClientEncryptionDetails"
+          },
+          "contentHints": {
+            "properties": {
+              "indexableText": {
+                "type": "string"
+              },
+              "thumbnail": {
+                "properties": {
+                  "image": {
+                    "format": "byte",
+                    "type": "string"
+                  },
+                  "mimeType": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "contentRestrictions": {
+            "items": {
+              "$ref": "#/components/schemas/ContentRestriction"
+            },
+            "type": "array"
+          },
+          "copyRequiresWriterPermission": {
+            "type": "boolean"
+          },
+          "createdTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "downloadRestrictions": {
+            "$ref": "#/components/schemas/DownloadRestrictionsMetadata"
+          },
+          "driveId": {
+            "type": "string"
+          },
+          "explicitlyTrashed": {
+            "type": "boolean"
+          },
+          "exportLinks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "fileExtension": {
+            "type": "string"
+          },
+          "folderColorRgb": {
+            "type": "string"
+          },
+          "fullFileExtension": {
+            "type": "string"
+          },
+          "hasAugmentedPermissions": {
+            "type": "boolean"
+          },
+          "hasThumbnail": {
+            "type": "boolean"
+          },
+          "headRevisionId": {
+            "type": "string"
+          },
+          "iconLink": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "imageMediaMetadata": {
+            "properties": {
+              "aperture": {
+                "format": "float",
+                "type": "number"
+              },
+              "cameraMake": {
+                "type": "string"
+              },
+              "cameraModel": {
+                "type": "string"
+              },
+              "colorSpace": {
+                "type": "string"
+              },
+              "exposureBias": {
+                "format": "float",
+                "type": "number"
+              },
+              "exposureMode": {
+                "type": "string"
+              },
+              "exposureTime": {
+                "format": "float",
+                "type": "number"
+              },
+              "flashUsed": {
+                "type": "boolean"
+              },
+              "focalLength": {
+                "format": "float",
+                "type": "number"
+              },
+              "height": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "isoSpeed": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "lens": {
+                "type": "string"
+              },
+              "location": {
+                "properties": {
+                  "altitude": {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  "latitude": {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  "longitude": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              },
+              "maxApertureValue": {
+                "format": "float",
+                "type": "number"
+              },
+              "meteringMode": {
+                "type": "string"
+              },
+              "rotation": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "sensor": {
+                "type": "string"
+              },
+              "subjectDistance": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "time": {
+                "type": "string"
+              },
+              "whiteBalance": {
+                "type": "string"
+              },
+              "width": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "inheritedPermissionsDisabled": {
+            "type": "boolean"
+          },
+          "isAppAuthorized": {
+            "type": "boolean"
+          },
+          "kind": {
+            "default": "drive#file",
+            "type": "string"
+          },
+          "labelInfo": {
+            "properties": {
+              "labels": {
+                "items": {
+                  "$ref": "#/components/schemas/Label"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "lastModifyingUser": {
+            "$ref": "#/components/schemas/User"
+          },
+          "linkShareMetadata": {
+            "properties": {
+              "securityUpdateEligible": {
+                "type": "boolean"
+              },
+              "securityUpdateEnabled": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "md5Checksum": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "modifiedByMe": {
+            "type": "boolean"
+          },
+          "modifiedByMeTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "modifiedTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalFilename": {
+            "type": "string"
+          },
+          "ownedByMe": {
+            "type": "boolean"
+          },
+          "owners": {
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
+            "type": "array"
+          },
+          "parents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "permissionIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "permissions": {
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            },
+            "type": "array"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "quotaBytesUsed": {
+            "format": "int64",
+            "type": "string"
+          },
+          "resourceKey": {
+            "type": "string"
+          },
+          "sha1Checksum": {
+            "type": "string"
+          },
+          "sha256Checksum": {
+            "type": "string"
+          },
+          "shared": {
+            "type": "boolean"
+          },
+          "sharedWithMeTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sharingUser": {
+            "$ref": "#/components/schemas/User"
+          },
+          "shortcutDetails": {
+            "properties": {
+              "targetId": {
+                "type": "string"
+              },
+              "targetMimeType": {
+                "type": "string"
+              },
+              "targetResourceKey": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "size": {
+            "format": "int64",
+            "type": "string"
+          },
+          "spaces": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "starred": {
+            "type": "boolean"
+          },
+          "teamDriveId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "thumbnailLink": {
+            "type": "string"
+          },
+          "thumbnailVersion": {
+            "format": "int64",
+            "type": "string"
+          },
+          "trashed": {
+            "type": "boolean"
+          },
+          "trashedTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "trashingUser": {
+            "$ref": "#/components/schemas/User"
+          },
+          "version": {
+            "format": "int64",
+            "type": "string"
+          },
+          "videoMediaMetadata": {
+            "properties": {
+              "durationMillis": {
+                "format": "int64",
+                "type": "string"
+              },
+              "height": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "width": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "viewedByMe": {
+            "type": "boolean"
+          },
+          "viewedByMeTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "viewersCanCopyContent": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "webContentLink": {
+            "type": "string"
+          },
+          "webViewLink": {
+            "type": "string"
+          },
+          "writersCanShare": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Label": {
+        "properties": {
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LabelField"
+            },
+            "type": "object"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "revisionId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LabelField": {
+        "properties": {
+          "dateString": {
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "integer": {
+            "items": {
+              "format": "int64",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "selection": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "text": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "user": {
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
+            "type": "array"
+          },
+          "valueType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Permission": {
+        "properties": {
+          "allowFileDiscovery": {
+            "type": "boolean"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "domain": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "emailAddress": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "expirationTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inheritedPermissionsDisabled": {
+            "type": "boolean"
+          },
+          "kind": {
+            "default": "drive#permission",
+            "type": "string"
+          },
+          "pendingOwner": {
+            "type": "boolean"
+          },
+          "permissionDetails": {
+            "items": {
+              "properties": {
+                "inherited": {
+                  "type": "boolean"
+                },
+                "inheritedFrom": {
+                  "readOnly": true,
+                  "type": "string"
+                },
+                "permissionType": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "photoLink": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "teamDrivePermissionDetails": {
+            "deprecated": true,
+            "items": {
+              "properties": {
+                "inherited": {
+                  "deprecated": true,
+                  "type": "boolean"
+                },
+                "inheritedFrom": {
+                  "deprecated": true,
+                  "type": "string"
+                },
+                "role": {
+                  "deprecated": true,
+                  "type": "string"
+                },
+                "teamDrivePermissionType": {
+                  "deprecated": true,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          },
+          "view": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "User": {
+        "properties": {
+          "displayName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "emailAddress": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "kind": {
+            "default": "drive#user",
+            "readOnly": true,
+            "type": "string"
+          },
+          "me": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "permissionId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "photoLink": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/drive": "See, edit, create, and delete all of your Google Drive files",
+              "https://www.googleapis.com/auth/drive.appdata": "See, create, and delete its own configuration data in your Google Drive",
+              "https://www.googleapis.com/auth/drive.apps.readonly": "View your Google Drive apps",
+              "https://www.googleapis.com/auth/drive.file": "See, edit, create, and delete only the specific Google Drive files you use with this app",
+              "https://www.googleapis.com/auth/drive.meet.readonly": "See and download your Google Drive files that were created or edited by Google Meet.",
+              "https://www.googleapis.com/auth/drive.metadata": "View and manage metadata of files in your Google Drive",
+              "https://www.googleapis.com/auth/drive.metadata.readonly": "See information about your Google Drive files",
+              "https://www.googleapis.com/auth/drive.photos.readonly": "View the photos, videos and albums in your Google Photos",
+              "https://www.googleapis.com/auth/drive.readonly": "See and download all your Google Drive files",
+              "https://www.googleapis.com/auth/drive.scripts": "Modify your Google Apps Script scripts' behavior"
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Google Drive API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/files/{fileId}": {
+      "get": {
+        "operationId": "drive.files.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fileId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "supportsTeamDrives",
+            "schema": {
+              "default": "false",
+              "deprecated": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeLabels",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "supportsAllDrives",
+            "schema": {
+              "default": "false",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "acknowledgeAbuse",
+            "schema": {
+              "default": "false",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includePermissionsForView",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive",
+              "https://www.googleapis.com/auth/drive.appdata",
+              "https://www.googleapis.com/auth/drive.file",
+              "https://www.googleapis.com/auth/drive.meet.readonly",
+              "https://www.googleapis.com/auth/drive.metadata",
+              "https://www.googleapis.com/auth/drive.metadata.readonly",
+              "https://www.googleapis.com/auth/drive.photos.readonly",
+              "https://www.googleapis.com/auth/drive.readonly"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://www.googleapis.com/drive/v3"
+    }
+  ]
+}
