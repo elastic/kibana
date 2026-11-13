@@ -249,6 +249,26 @@ export const CONSOLE_COMMANDS = {
             defaultMessage: 'The full file path to be retrieved',
           }
         ),
+        /** Used when the argument can be used more than once (Elastic Defend Endpoint) */
+        aboutMultiple: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgAboutMultiple',
+          {
+            defaultMessage:
+              'The full file path to be retrieved. Use this argument multiple times to retrieve more than one file',
+          }
+        ),
+        multipleNotSupported: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgMultipleNotSupported',
+          {
+            defaultMessage:
+              'This version of the Endpoint does not support retrieving multiple paths. Upgrade your Agent in Fleet to use this parameter.',
+          }
+        ),
+        tooManyPaths: (maxPaths: number) =>
+          i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.pathArgTooMany', {
+            defaultMessage: 'Argument can be used at most {maxPaths} times',
+            values: { maxPaths },
+          }),
       },
       force: {
         about: i18n.translate(
