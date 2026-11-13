@@ -521,6 +521,49 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
+  describe('AESOP template ids', () => {
+    const renderById = (id: string, values: Record<string, unknown>): string => {
+      const definition = managedWorkflowDefinitions.find((candidate) => candidate.id === id);
+      if (!definition || !hasYamlTemplate(definition)) {
+        throw new Error(`Missing yamlTemplate definition '${id}'`);
+      }
+      return definition.yamlTemplate({ ...templateValuesLookup[id], ...values });
+    };
+
+    it.each([
+      ['{{ steps.x.output }}'],
+      ['${{ secrets.key }}'],
+      ['{% raw %}'],
+      ["a'b"],
+      ['a b'],
+    ])('refuses %j as an explorer connector id', (connectorId) => {
+      expect(() => renderById(AESOP_EXPLORER_WORKFLOW_ID, { connectorId })).toThrow();
+    });
+
+    it.each(['datasetId', 'abAgentId', 'investigationId'])(
+      'refuses a template expression as the explorer %s',
+      (field) => {
+        expect(() => renderById(AESOP_EXPLORER_WORKFLOW_ID, { [field]: '{{ x }}' })).toThrow();
+      }
+    );
+
+    it.each(['skillId', 'investigationId'])(
+      'refuses a template expression as the drift monitor %s',
+      (field) => {
+        expect(() => renderById(AESOP_DRIFT_MONITOR_WORKFLOW_ID, { [field]: '{{ x }}' })).toThrow();
+      }
+    );
+
+    it('renders UUIDs and model ids unchanged', () => {
+      const yaml = renderById(AESOP_EXPLORER_WORKFLOW_ID, {
+        connectorId: 'eis-anthropic-claude-5-sonnet',
+        investigationId: '3f2b8c1e-9d4a-4f6b-8a1c-2d7e5f9b0a11',
+      });
+      expect(yaml).toContain("'eis-anthropic-claude-5-sonnet'");
+      expect(yaml).toContain("'3f2b8c1e-9d4a-4f6b-8a1c-2d7e5f9b0a11'");
+    });
+  });
+
   // An installed document's definition hash is the hash of the YAML its values render, so a render
   // that varies between calls (a timestamp, a random or v4 uuid) moves the hash on every
   // reconciliation and the document reinstalls each time. Values that are stable in one process

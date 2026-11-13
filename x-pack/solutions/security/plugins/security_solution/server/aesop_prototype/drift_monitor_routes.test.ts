@@ -211,6 +211,18 @@ describe('registerAesopDriftMonitorRoutes', () => {
     }
   );
 
+  it.each(['{{ steps.x.output }}', '${{ secrets.key }}', "inv'1", 'a b'])(
+    'rejects the investigation id %j in the POST body',
+    (investigationId) => {
+      expect(
+        validate('post', AESOP_DRIFT_MONITOR_ROUTE_PATH, 'body', {
+          skill_id: 'triage',
+          investigation_id: investigationId,
+        })
+      ).toHaveProperty('error');
+    }
+  );
+
   it.each(['Find-Security-Rules', 'foo.bar', 'a'.repeat(65)])(
     'accepts the legacy skill id %j in DELETE params',
     (skillId) => {

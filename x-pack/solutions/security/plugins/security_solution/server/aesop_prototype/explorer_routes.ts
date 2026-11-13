@@ -40,7 +40,16 @@ const LICENSE_ERROR_MESSAGE = i18n.translate(
 
 const modeSchema = schema.oneOf([schema.literal('discovery'), schema.literal('telemetry')]);
 
-const idSchema = schema.string({ minLength: 1, maxLength: 512 });
+// These ids are rendered into the explorer workflow's YAML, which the engine
+// evaluates as Liquid, so template delimiters, quotes and whitespace are refused.
+const SAFE_ID = /^[A-Za-z0-9._:-]+$/;
+
+const validateSafeId = (value: string): string | undefined =>
+  SAFE_ID.test(value)
+    ? undefined
+    : 'must only contain letters, digits, periods, underscores, colons and hyphens';
+
+const idSchema = schema.string({ minLength: 1, maxLength: 512, validate: validateSafeId });
 
 const bodySchema = schema.object({
   mode: modeSchema,
@@ -54,6 +63,7 @@ const bodySchema = schema.object({
   ab_agent_id: schema.string({
     minLength: 1,
     maxLength: 512,
+    validate: validateSafeId,
     defaultValue: AESOP_EXPLORER_AGENT_ID,
   }),
   investigation_id: idSchema,

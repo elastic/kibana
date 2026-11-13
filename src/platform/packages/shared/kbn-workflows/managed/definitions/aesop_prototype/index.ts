@@ -53,7 +53,20 @@ export interface AesopDriftMonitorWorkflowTemplateValues extends ManagedWorkflow
 // name never takes the fallback.
 const SAFE_SKILL_NAME = /^[A-Za-z0-9 ._-]+$/;
 
-const toYamlSingleQuoted = (value: string): string => value.replace(/'/g, "''");
+// Ids are rendered into single-quoted YAML scalars that the workflow engine
+// later evaluates as Liquid, so `{{`, `{%`, quotes and whitespace must never
+// reach the template. The routes validate the same set; this re-check covers
+// instances re-rendered from stored values.
+const SAFE_TEMPLATE_ID = /^[A-Za-z0-9._:-]*$/;
+
+const toTemplateId = (name: string, value: string): string => {
+  if (!SAFE_TEMPLATE_ID.test(value)) {
+    throw new Error(
+      `${name} may only contain letters, digits, periods, underscores, colons and hyphens`
+    );
+  }
+  return value;
+};
 
 // Instances stored before the threshold existed re-render with this value.
 const DEFAULT_DRIFT_THRESHOLD = 0.8;
@@ -84,7 +97,7 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW = {
     investigationId,
   }) =>
     renderTemplate(AESOP_DRIFT_MONITOR_YAML, {
-      __SKILL_ID__: skillId,
+      __SKILL_ID__: toTemplateId('skillId', skillId),
       // Instances stored before skillName existed re-render without it.
       __SKILL_NAME__: skillName && SAFE_SKILL_NAME.test(skillName) ? skillName : skillId,
       __INTERVAL_MINUTES__: intervalMinutes,
@@ -92,7 +105,7 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW = {
       __DRIFT_THRESHOLD__: Number.isFinite(driftThreshold)
         ? Number(driftThreshold)
         : DEFAULT_DRIFT_THRESHOLD,
-      __INVESTIGATION_ID__: toYamlSingleQuoted(investigationId ?? ''),
+      __INVESTIGATION_ID__: toTemplateId('investigationId', investigationId ?? ''),
     }),
   management: {
     lifecycle: 'dynamic',
@@ -118,8 +131,6 @@ export interface AesopExplorerWorkflowTemplateValues extends ManagedWorkflowTemp
   investigationId: string;
 }
 
-// Rendered into single-quoted YAML scalars, so a quote is doubled.
-
 /** AESOP prototype: per-space explorer that proposes skill candidates to the A/B compare; enabling an instance schedules it. */
 export const AESOP_EXPLORER_WORKFLOW = {
   id: AESOP_EXPLORER_WORKFLOW_ID,
@@ -132,10 +143,10 @@ export const AESOP_EXPLORER_WORKFLOW = {
     renderTemplate(AESOP_EXPLORER_YAML, {
       __MODE__: mode === 'telemetry' ? 'telemetry' : 'discovery',
       __INTERVAL_MINUTES__: intervalMinutes,
-      __CONNECTOR_ID__: toYamlSingleQuoted(connectorId),
-      __DATASET_ID__: toYamlSingleQuoted(datasetId),
-      __AB_AGENT_ID__: toYamlSingleQuoted(abAgentId),
-      __INVESTIGATION_ID__: toYamlSingleQuoted(investigationId),
+      __CONNECTOR_ID__: toTemplateId('connectorId', connectorId),
+      __DATASET_ID__: toTemplateId('datasetId', datasetId),
+      __AB_AGENT_ID__: toTemplateId('abAgentId', abAgentId),
+      __INVESTIGATION_ID__: toTemplateId('investigationId', investigationId),
     }),
   management: {
     lifecycle: 'dynamic',

@@ -161,6 +161,16 @@ describe('registerAesopExplorerRoutes', () => {
     expect(mockResponse.forbidden).toHaveBeenCalled();
   });
 
+  it('accepts UUID and model-style ids', () => {
+    expect(
+      validate('post', AESOP_EXPLORER_ROUTE_PATH, 'body', {
+        ...validBody,
+        connector_id: 'eis-anthropic-claude-5-sonnet',
+        investigation_id: '3f2b8c1e-9d4a-4f6b-8a1c-2d7e5f9b0a11',
+      })
+    ).toHaveProperty('value');
+  });
+
   it.each(['discovery', 'telemetry'])('accepts the mode %j', (mode) => {
     expect(
       validate('post', AESOP_EXPLORER_ROUTE_PATH, 'body', { ...validBody, mode })
@@ -172,6 +182,10 @@ describe('registerAesopExplorerRoutes', () => {
     ['a missing connector', { connector_id: undefined }],
     ['an empty dataset id', { dataset_id: '' }],
     ['an oversized investigation id', { investigation_id: 'a'.repeat(513) }],
+    ['a template expression as the connector id', { connector_id: '{{ steps.x.output }}' }],
+    ['a secrets expression as the dataset id', { dataset_id: '${{ secrets.key }}' }],
+    ['a template tag as the agent id', { ab_agent_id: '{% raw %}' }],
+    ['a quote in the investigation id', { investigation_id: "inv'1" }],
     ['an interval below the minimum', { interval_minutes: 1 }],
   ])('rejects %s', (_label, override) => {
     expect(

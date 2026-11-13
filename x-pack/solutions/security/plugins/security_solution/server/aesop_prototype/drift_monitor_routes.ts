@@ -57,7 +57,15 @@ const bodySchema = schema.object({
   interval_minutes: schema.number({ min: 5, max: 1440, defaultValue: 60 }),
   lookback_minutes: schema.number({ min: 5, max: 10080, defaultValue: 120 }),
   drift_threshold: schema.number({ min: 0, max: 1, defaultValue: AESOP_DRIFT_MONITOR_THRESHOLD }),
-  investigation_id: schema.maybe(schema.string({ maxLength: 512 })),
+  investigation_id: schema.maybe(
+    schema.string({
+      maxLength: 512,
+      validate: (value) =>
+        /^[A-Za-z0-9._:-]*$/.test(value)
+          ? undefined
+          : 'investigation_id must only contain letters, digits, periods, underscores, colons and hyphens',
+    })
+  ),
 });
 
 export const registerAesopDriftMonitorRoutes = ({
