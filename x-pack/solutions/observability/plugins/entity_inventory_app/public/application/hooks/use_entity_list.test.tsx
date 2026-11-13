@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../inventory_api/client';
@@ -23,16 +25,24 @@ const createClientMock = (
   getEntities: jest.fn(client.getEntities),
 });
 
-const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
-  renderHook(() => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }), {
-    wrapper: ({ children }) => (
-      <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-        <EntityInventorySearchProvider entityCategory="hosts">
-          {children}
-        </EntityInventorySearchProvider>
-      </KibanaContextProvider>
-    ),
-  });
+const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') => {
+  const history = createMemoryHistory();
+
+  return renderHook(
+    () => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }),
+    {
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+          <Router history={history}>
+            <EntityInventorySearchProvider entityCategory="hosts">
+              {children}
+            </EntityInventorySearchProvider>
+          </Router>
+        </KibanaContextProvider>
+      ),
+    }
+  );
+};
 
 describe('useEntityList', () => {
   it('lists the entities of the type over the committed range resolved to absolute bounds', async () => {
@@ -82,6 +92,23 @@ describe('useEntityList', () => {
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(60 * 60 * 1000);
   });
 
+  it('lists again when the same search is submitted again', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    const submission = { dateRange: { from: 'now-1h', to: 'now' } };
+
+    act(() => {
+      result.current.search.submit(submission);
+    });
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    act(() => {
+      result.current.search.submit(submission);
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(3));
+  });
+
   it('lists again on refresh', async () => {
     const inventoryApi = createClientMock();
     const { result } = renderUseEntityList(inventoryApi);
@@ -90,5 +117,46 @@ describe('useEntityList', () => {
     act(() => result.current.result.refresh());
 
     await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+  });
+
+  it('sends no document filter when nothing narrows the list', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    const [[, request]] = inventoryApi.getEntities.mock.calls;
+    expect(request).not.toHaveProperty('documentFilter');
+  });
+
+  it('lists again with the dropdown selections as a document filter', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    act(() => {
+      result.current.search.setFilterControls({ attributes: { 'os.type': ['linux'] } });
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    const [, request] = inventoryApi.getEntities.mock.calls[1];
+    expect(request.documentFilter?.bool.filter).toEqual([{ terms: { 'os.type': ['linux'] } }]);
+  });
+
+  it('lists again with the submitted query in the document filter', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    act(() => {
+      result.current.search.submit({
+        dateRange: { from: 'now-15m', to: 'now' },
+        query: { language: 'kuery', query: 'host.name: web-1' },
+      });
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    const [, request] = inventoryApi.getEntities.mock.calls[1];
+    expect(JSON.stringify(request.documentFilter)).toContain('web-1');
   });
 });

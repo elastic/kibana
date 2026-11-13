@@ -6,7 +6,7 @@
  */
 
 import { upperFirst } from 'lodash';
-import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
+import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
 
 export const getCategoryLabel = (category: string): string => upperFirst(category);
 

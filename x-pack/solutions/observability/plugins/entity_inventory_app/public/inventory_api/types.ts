@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BoolQuery } from '@kbn/es-query';
+
 /*
  * Mirror of the entity inventory `types` and `_list` route contract (observability-dev#6304).
  * Delete these in favour of a type-only import from `@kbn/entity-inventory-plugin/common`
@@ -48,11 +50,16 @@ export interface InventoryUnavailableColumn {
   field: string;
 }
 
+export interface InventoryDocumentFilter {
+  bool: BoolQuery;
+}
+
 /** Body of a `_list` request; `from` and `to` are absolute ISO instants. */
 export interface InventoryListRequest {
   from: string;
   to: string;
   limit?: number;
+  documentFilter?: InventoryDocumentFilter;
 }
 
 /**

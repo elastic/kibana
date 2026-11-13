@@ -7,7 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { getEntityInventoryTypes } from '../../mock_inventory_api/get_types';
-import { typesFixture } from './__fixtures__/types';
+import { typesFixture } from '../__fixtures__/types';
 import { useEntityInventoryTypes } from './use_entity_inventory_types';
 
 jest.mock('../../mock_inventory_api/get_types');

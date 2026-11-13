@@ -8,10 +8,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { typesFixture as types } from './__fixtures__/types';
+import { typesFixture as types } from '../../__fixtures__/types';
 import { EntityInventoryFilterControls } from './entity_inventory_filter_controls';
 
-jest.mock('./use_attribute_values', () => ({
+jest.mock('../hooks/use_attribute_values', () => ({
   useAttributeValues: () => ({ values: ['one', 'two'], invalidSelections: [], isLoading: false }),
 }));
 

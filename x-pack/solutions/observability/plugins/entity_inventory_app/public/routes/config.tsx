@@ -13,7 +13,7 @@ import type { PathsOf, RouteMap } from '@kbn/typed-react-router-config';
 import { EntityInventoryPageShell } from '../application/components/page_shell';
 import { ENTITY_TYPE_BY_CATEGORY } from '../application/components/entity_table/entity_type_config';
 import { EntityTypeResults } from '../application/components/entity_table/entity_type_results';
-import { EntityInventoryPageFilterControls } from '../application/filters/page_filter_controls';
+import { EntityInventoryPageFilterControls } from '../application/filters/components/page_filter_controls';
 import { ENTITY_LIST_PLACEHOLDER } from '../application/translations';
 import type { EntityInventoryEntityCategory } from '../types';
 

@@ -6,28 +6,32 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { EntityInventoryEntityCategory } from '../../types';
-import { EntityInventorySearchProvider } from '../context/search_context';
-import { typesFixture as mockTypes } from './__fixtures__/types';
+import type { EntityInventoryEntityCategory } from '../../../types';
+import { EntityInventorySearchProvider } from '../../context/search_context';
+import { typesFixture as mockTypes } from '../../__fixtures__/types';
 import { EntityInventoryPageFilterControls } from './page_filter_controls';
 
-jest.mock('./use_entity_inventory_types', () => ({
+jest.mock('../../hooks/use_entity_inventory_types', () => ({
   useEntityInventoryTypes: () => ({ types: mockTypes }),
 }));
-jest.mock('./use_attribute_values', () => ({
+jest.mock('../hooks/use_attribute_values', () => ({
   useAttributeValues: () => ({ values: ['one', 'two'], invalidSelections: [], isLoading: false }),
 }));
 
 const renderControls = (entityCategory: EntityInventoryEntityCategory) =>
   render(
     <KibanaContextProvider services={coreMock.createStart()}>
-      <EntityInventorySearchProvider entityCategory={entityCategory}>
-        <EntityInventoryPageFilterControls />
-      </EntityInventorySearchProvider>
+      <Router history={createMemoryHistory()}>
+        <EntityInventorySearchProvider entityCategory={entityCategory}>
+          <EntityInventoryPageFilterControls />
+        </EntityInventorySearchProvider>
+      </Router>
     </KibanaContextProvider>
   );
 

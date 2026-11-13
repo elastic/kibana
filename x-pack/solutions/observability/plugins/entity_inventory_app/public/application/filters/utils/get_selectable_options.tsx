@@ -10,7 +10,7 @@ import { uniqBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { FilterOption } from './get_filter_controls';
-import { INVALID_OPTION_TOOLTIP } from './translations';
+import { INVALID_OPTION_TOOLTIP } from '../translations';
 
 export const ALL_OPTION_KEY = '__all__';
 

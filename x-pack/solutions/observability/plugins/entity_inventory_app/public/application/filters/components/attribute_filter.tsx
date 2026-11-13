@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { ENTITY_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
-import type { EntityInventoryAttributeValuesParams } from '../../inventory_api_types';
+import { ENTITY_INVENTORY_EBT_ELEMENTS } from '../../../ebt_constants';
+import type { EntityInventoryAttributeValuesParams } from '../../../inventory_api_types';
 import { FilterSelect } from './filter_select';
-import { VALUES_ERROR_MESSAGE } from './translations';
-import { useAttributeValues } from './use_attribute_values';
+import { VALUES_ERROR_MESSAGE } from '../translations';
+import { useAttributeValues } from '../hooks/use_attribute_values';
 
 interface AttributeFilterProps {
   attribute: string;

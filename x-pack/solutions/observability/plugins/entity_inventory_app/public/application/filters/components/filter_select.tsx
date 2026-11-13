@@ -18,10 +18,14 @@ import {
 import type { EuiSelectableProps } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
-import { ENTITY_INVENTORY_EBT_ACTIONS } from '../../ebt_constants';
-import type { FilterOption } from './get_filter_controls';
-import { ALL_OPTION_KEY, getOptionLabel, getSelectableOptions } from './get_selectable_options';
-import { EMPTY_MESSAGE, SEARCH_PLACEHOLDER } from './translations';
+import { ENTITY_INVENTORY_EBT_ACTIONS } from '../../../ebt_constants';
+import type { FilterOption } from '../utils/get_filter_controls';
+import {
+  ALL_OPTION_KEY,
+  getOptionLabel,
+  getSelectableOptions,
+} from '../utils/get_selectable_options';
+import { EMPTY_MESSAGE, SEARCH_PLACEHOLDER } from '../translations';
 
 const NO_EMPTY_MESSAGE = <></>;
 

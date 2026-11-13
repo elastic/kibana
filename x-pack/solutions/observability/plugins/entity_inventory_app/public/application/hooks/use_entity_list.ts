@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { ENTITY_INVENTORY_LIST_LIMIT } from '../../inventory_api/client';
 import type { InventoryEntityType, InventoryListResponse } from '../../inventory_api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntityInventorySearch } from '../context/search_context';
+import { buildDocumentFilter } from '../utils/build_document_filter';
 import { toAbsoluteTimeRange } from '../utils/to_absolute_time_range';
 
 /** Thrown when the requested entity type is not registered. */
@@ -31,17 +34,31 @@ export interface UseEntityListResult {
 /** Loads the type description and the entities of `entityType` for the committed time range. */
 export const useEntityList = (entityType: string): UseEntityListResult => {
   const {
-    services: { inventoryApi },
+    services: { inventoryApi, uiSettings },
   } = useKibana();
-  // The query and filters are not applied until search lands (#6327).
-  const { dateRange } = useEntityInventorySearch();
+  const { dateRange, query, filters, filterControls, refreshToken } = useEntityInventorySearch();
+
+  const search = useMemo(
+    () => ({
+      dateRange,
+      documentFilter: buildDocumentFilter({
+        query,
+        filters,
+        attributes: filterControls.attributes,
+        esQueryConfig: getEsQueryConfig(uiSettings),
+      }),
+      refreshToken,
+    }),
+    [dateRange, query, filters, filterControls.attributes, uiSettings, refreshToken]
+  );
 
   const { value, loading, error, refresh } = useAbortableAsync(
     async ({ signal }) => {
+      const { dateRange: committedRange, documentFilter } = search;
       // Resolved here so a relative range is measured from when the request is sent.
-      const range = toAbsoluteTimeRange(dateRange);
+      const range = toAbsoluteTimeRange(committedRange);
       if (!range) {
-        throw new Error(`Invalid time range: ${dateRange.from} to ${dateRange.to}`);
+        throw new Error(`Invalid time range: ${committedRange.from} to ${committedRange.to}`);
       }
 
       // Both requests start together. The type lookup is judged first, so an unknown type is
@@ -50,7 +67,11 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
         inventoryApi.getTypes({ signal }),
         inventoryApi.getEntities(
           entityType,
-          { ...range, limit: ENTITY_INVENTORY_LIST_LIMIT },
+          {
+            ...range,
+            limit: ENTITY_INVENTORY_LIST_LIMIT,
+            ...(documentFilter && { documentFilter }),
+          },
           { signal }
         ),
       ]);
@@ -66,7 +87,7 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
       }
       return { entityType: description, list: listResult.value };
     },
-    [inventoryApi, entityType, dateRange],
+    [inventoryApi, entityType, search],
     { clearValueOnNext: false }
   );
 

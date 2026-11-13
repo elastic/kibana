@@ -6,14 +6,14 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { getEntityInventoryAttributeValues } from '../../mock_inventory_api/get_attribute_values';
+import { getEntityInventoryAttributeValues } from '../../../mock_inventory_api/get_attribute_values';
 import type {
   EntityInventoryAttributeValuesParams,
   EntityInventoryAttributeValuesResponse,
-} from '../../inventory_api_types';
+} from '../../../inventory_api_types';
 import { useAttributeValues } from './use_attribute_values';
 
-jest.mock('../../mock_inventory_api/get_attribute_values');
+jest.mock('../../../mock_inventory_api/get_attribute_values');
 
 const mockGetValues = getEntityInventoryAttributeValues as jest.MockedFunction<
   typeof getEntityInventoryAttributeValues

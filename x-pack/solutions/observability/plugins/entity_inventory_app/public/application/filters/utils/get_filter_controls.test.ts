@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
-import { typesFixture as types } from './__fixtures__/types';
+import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
+import { typesFixture as types } from '../../__fixtures__/types';
 import { getCategories, getFilterControls, getTypesInScope } from './get_filter_controls';
 import type { FilterOption } from './get_filter_controls';
 
