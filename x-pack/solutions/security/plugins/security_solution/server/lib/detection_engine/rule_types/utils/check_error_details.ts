@@ -22,29 +22,15 @@ const USER_ERRORS_EXCEPTIONS = [
 // expensive query, a large time range, a cluster too small for the rule schedule), which the rule
 // owner can fix and Kibana cannot. These messages identify an Elasticsearch request from the rule
 // executor that did not complete before the rule timed out, so they are classified as user errors.
-//
-// The abort messages are produced by the Alerting Framework's scoped cluster client wrappers
-// (x-pack/platform/plugins/shared/alerting/server/lib/wrap_scoped_cluster_client.ts and
-// wrap_search_source_client.ts) when Task Manager cancels the run while a request is in flight.
-// They are plain strings there rather than exported constants, so the tests in
-// check_error_details.test.ts pin the exact text and will fail if the framework changes it.
-//
-// `Request timed out` is the Elasticsearch client's TimeoutError. The rule's scoped cluster client
-// uses the rule timeout as its request timeout, so this fires when a rule search outlives the rule
-// timeout before Task Manager cancels the run. The executors log it both with a prefix
-// (esql/esql_request.ts, utils/single_search_after.ts) and bare (the message returned to
-// create_security_rule_type_wrapper.ts), and the run is only a user error if every entry is, so the
-// bare text has to match. Other clients used during a run (e.g. the rule registry client writing
-// alerts) can emit the same text on the global `elasticsearch.requestTimeout`; those cases are
-// accepted as user errors here and left to the cross-project user error spike monitoring.
 const TIMEOUT_REASON_SUBSTRINGS = [
-  // wrap_scoped_cluster_client.ts, esql / eql / search wrappers
+  // Thrown by the Alerting Framework's scoped cluster client wrappers when Task Manager cancels the run
   'ES|QL search has been aborted due to cancelled execution',
   'EQL search has been aborted due to cancelled execution',
   'Search has been aborted due to cancelled execution',
-  // esql/esql_request.ts, executor noticed the cancellation between two poll requests
+  // Thrown by esql/esql_request.ts when it notices the cancellation between two poll requests
   'Rule execution cancelled due to timeout',
-  // ES client TimeoutError, raised when a rule search outlives the rule timeout
+  // ES client TimeoutError. Matched bare because the rule type wrapper logs it without a prefix,
+  // and a run is only a user error when every logged error is.
   'Request timed out',
 ];
 

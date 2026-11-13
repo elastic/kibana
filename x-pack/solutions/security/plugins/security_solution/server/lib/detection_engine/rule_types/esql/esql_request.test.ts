@@ -7,6 +7,7 @@
 
 import { performEsqlRequest } from './esql_request';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 const columns = [
   { name: '_id', type: 'keyword' as const },
@@ -137,19 +138,47 @@ describe('performEsqlRequest', () => {
     asyncQueryMock.mockResolvedValue(mockSubmitResponse);
     asyncQueryGetMock.mockResolvedValue(mockSubmitResponse);
     shouldStopExecution.mockReturnValue(true);
+    const ruleExecutionLogger = { error: jest.fn(), debug: jest.fn() };
 
     const waitForPerformEsql = performEsqlRequest({
       esClient,
       requestBody,
       requestQueryParams,
       shouldStopExecution,
+      ruleExecutionLogger: ruleExecutionLogger as unknown as IRuleExecutionLogForExecutors,
     }).catch((error) => {
       expect(error.message).toBe('Rule execution cancelled due to timeout');
     });
 
     await jest.advanceTimersByTimeAsync(15000);
     await waitForPerformEsql;
-    expect.assertions(1);
+    expect(ruleExecutionLogger.error).toHaveBeenCalledWith(
+      'Error while performing ES|QL search: Rule execution cancelled due to timeout'
+    );
+    expect.assertions(2);
+  });
+
+  it('logs the abort error with its prefix and rethrows it when the framework cancels the request', async () => {
+    // Thrown by the Alerting Framework's scoped cluster client when Task Manager cancels the run
+    asyncQueryMock.mockRejectedValueOnce(
+      new Error('ES|QL search has been aborted due to cancelled execution')
+    );
+    const ruleExecutionLogger = { error: jest.fn(), debug: jest.fn() };
+
+    await expect(
+      performEsqlRequest({
+        esClient,
+        requestBody,
+        requestQueryParams,
+        shouldStopExecution,
+        ruleExecutionLogger: ruleExecutionLogger as unknown as IRuleExecutionLogForExecutors,
+      })
+    ).rejects.toThrow('ES|QL search has been aborted due to cancelled execution');
+
+    expect(ruleExecutionLogger.error).toHaveBeenCalledWith(
+      'Error while performing ES|QL search: ES|QL search has been aborted due to cancelled execution'
+    );
+    expect(asyncQueryDeleteMock).not.toHaveBeenCalled();
   });
 
   it('deletes query if error happens during polling', async () => {

@@ -40,6 +40,7 @@ import type { BuildReasonMessage } from './reason_formatters';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
 import { getNoReadableShardsWarning } from './no_readable_shards';
+import { checkErrorDetails } from './check_error_details';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
@@ -1178,9 +1179,12 @@ describe('searchAfterAndBulkCreate', () => {
 
     expect(success).toEqual(false);
     expect(errors).toEqual(['Error: Search has been aborted due to cancelled execution']);
-    expect(sharedParams.ruleExecutionLogger.error).toHaveBeenCalledWith(
-      'cycle 0: Error extracting/processing events or creating alerts\nError: Error: Search has been aborted due to cancelled execution'
-    );
+    const loggedMessage =
+      'cycle 0: Error extracting/processing events or creating alerts\nError: Error: Search has been aborted due to cancelled execution';
+    expect(sharedParams.ruleExecutionLogger.error).toHaveBeenCalledWith(loggedMessage);
+    // searchAfterAndBulkCreate does not flag user errors itself; the rule execution log client
+    // classifies every logged message on close, so the logged text must be recognizable there.
+    expect(checkErrorDetails(new Error(loggedMessage))).toEqual({ isUserError: true });
   });
 
   test('should warn and stop when the search resolved to no shards', async () => {

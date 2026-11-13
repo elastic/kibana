@@ -136,6 +136,31 @@ describe('esqlExecutor', () => {
       expect(result).not.toHaveProperty('userError');
       expect(result).toHaveProperty('errors', ['Unknown Error']);
     });
+
+    it.each([
+      // Thrown by the Alerting Framework's scoped cluster client when Task Manager cancels the run
+      'ES|QL search has been aborted due to cancelled execution',
+      // Thrown by performEsqlRequest when it notices the cancellation between two poll requests
+      'Rule execution cancelled due to timeout',
+      // ES client TimeoutError when the search outlives the rule timeout
+      'Request timed out',
+    ])(
+      'should return result with user error equal true when the search fails with "%s"',
+      async (message) => {
+        (
+          ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+        ).mockRejectedValue(new Error(message));
+
+        const result = await esqlExecutor(mockedArguments);
+
+        expect(result).toHaveProperty('userError', true);
+        expect(result).toHaveProperty('success', false);
+        expect(result).toHaveProperty('errors', [message]);
+        expect(sharedParams.ruleExecutionLogger.error).toHaveBeenCalledWith(
+          `Error while performing ES|QL search: ${message}`
+        );
+      }
+    );
   });
 
   describe('rule state', () => {

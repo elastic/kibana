@@ -200,7 +200,8 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
   describe('rule timeout errors', () => {
     // These strings are copied verbatim from the Alerting Framework
     // (x-pack/platform/plugins/shared/alerting/server/lib/wrap_scoped_cluster_client.ts) and from the
-    // ES|QL executor. They are intentionally exact so that a change to the text upstream fails here.
+    // ES|QL executor. They are not exported there, so these tests cannot catch a change upstream;
+    // they only pin what this classifier currently matches.
     it.each([
       'ES|QL search has been aborted due to cancelled execution',
       'EQL search has been aborted due to cancelled execution',
