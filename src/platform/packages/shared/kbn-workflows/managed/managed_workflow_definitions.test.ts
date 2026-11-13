@@ -523,11 +523,16 @@ describe('managedWorkflowDefinitions', () => {
 
   describe('AESOP template ids', () => {
     const renderById = (id: string, values: Record<string, unknown>): string => {
-      const definition = managedWorkflowDefinitions.find((candidate) => candidate.id === id);
+      const definitions: readonly ManagedWorkflowDefinition[] = managedWorkflowDefinitions;
+      const definition = definitions.find((candidate) => candidate.id === id);
       if (!definition || !hasYamlTemplate(definition)) {
         throw new Error(`Missing yamlTemplate definition '${id}'`);
       }
-      return definition.yamlTemplate({ ...templateValuesLookup[id], ...values });
+      const representativeValues = templateValuesLookup[id];
+      if (!representativeValues) {
+        throw new Error(`Missing representative template values for '${id}'`);
+      }
+      return definition.yamlTemplate({ ...representativeValues, ...values });
     };
 
     it.each([['{{ steps.x.output }}'], ['${{ secrets.key }}'], ['{% raw %}'], ["a'b"], ['a b']])(
