@@ -16,8 +16,8 @@ export type {
 export { loadApi } from './load_api';
 export { partitionDestructiveApis } from './destructive_apis';
 export type { DestructiveApiPartition } from './destructive_apis';
-export { listApisForTarget } from './list_apis';
-export type { ApiSummary } from './list_apis';
+export { DISCOVER_RESULT_LIMIT, searchApisForTarget } from './search_apis';
+export type { ApiSummary } from './search_apis';
 export { EXPANDABLE_KEY, toDescribedDefinition, toDescribedSchema } from './describe_schema';
 export type { DescribedSchema } from './describe_schema';
 export { prepareApiRequest } from './prepare_request';

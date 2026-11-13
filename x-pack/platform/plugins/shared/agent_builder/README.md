@@ -87,7 +87,7 @@ Agents reach the Elasticsearch and Kibana HTTP APIs through a set of internal to
 - `describe_api`: the parameter schema, method, and path of one operation.
 - `describe_api_type`: the full definition of a shared type `describe_api` only stubbed.
 - `execute_api`: the call itself, on behalf of the current user.
-- `discover_apis` (gated by `agentBuilder:apiDiscovery`): a searchable listing of every operation a target exposes.
+- `discover_apis` (gated by `agentBuilder:apiDiscovery`): a relevance-ranked search over the operations a target exposes.
 
 ### Registering a tool
 
