@@ -476,9 +476,10 @@ describe('Detection Coverage review', () => {
       expect(message).toContain('closed this investigation');
     });
 
-    // A resumed review finds the earlier review's `coverage-rule` under the same fixed
+    // A resumed review of the same rule finds the earlier review's copy under the same
     // id, so the add fails and the update after it writes the rule as it is now. The
-    // refresh after an enable accepts either writer.
+    // update runs only on that conflict, and the refresh after an enable accepts
+    // either writer.
     it('updates the rule attachment on a resumed review and refreshes whichever copy exists', () => {
       const attach = stepByName('attach_rule');
       const resume = stepByName('resume_rule_attachment');
@@ -489,7 +490,10 @@ describe('Detection Coverage review', () => {
       expect(resume?.type).toBe('ai.attachment.update');
       expect(resume?.if).toContain('steps.find_or_create_investigation.output.created != true');
       expect(resume?.if).toContain('steps.attach_rule.error != null');
-      expect(resume?.with?.attachment_id).toBe('coverage-rule');
+      expect(resume?.if).toContain("steps.attach_rule.error.message contains 'already exists'");
+      expect(resume?.with?.attachment_id).toBe(
+        'coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}'
+      );
       expect(JSON.stringify(resume?.with)).toContain('steps.resolve_rule.output | json');
       expect(stepIndex('attach_rule') + 1).toBe(stepIndex('resume_rule_attachment'));
 
@@ -513,11 +517,15 @@ describe('Detection Coverage review', () => {
       expect(JSON.stringify(withOf('compose_evidence'))).toContain('steps.gap.output.evidence');
     });
 
-    it('attaches the matched rule by reference under a fixed attachment id', () => {
+    // The id carries the rule signature: a review that matches another rule adds a
+    // card of its own instead of overwriting a copy whose origin it cannot change.
+    it('attaches the matched rule by reference under an id that carries the rule signature', () => {
       const attach = stepByName('attach_rule');
       expect(attach?.type).toBe('ai.attachment.add');
       expect(attach?.with?.type).toBe('security.rule');
-      expect(attach?.with?.id).toBe('coverage-rule');
+      expect(attach?.with?.id).toBe(
+        'coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}'
+      );
       expect(attach?.with?.origin).toBe(
         '{{ steps.coverage_check.output.structured_output.rule_id }}'
       );
@@ -539,15 +547,34 @@ describe('Detection Coverage review', () => {
       );
 
       expect(refresh?.type).toBe('ai.attachment.update');
-      expect(refresh?.with?.attachment_id).toBe('coverage-rule');
+      expect(refresh?.with?.attachment_id).toBe(
+        'coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}'
+      );
       expect(JSON.stringify(refresh?.with)).toContain('steps.refetch_rule.output | json');
       expect(refresh?.if).toContain('steps.refetch_rule.output.id != null');
 
       // A prebuilt rule has no saved object until installed, so it is attached afterwards.
       expect(attachInstalled?.type).toBe('ai.attachment.add');
       expect(attachInstalled?.if).toContain("steps.propose_install.output.status == 'succeeded'");
-      expect(attachInstalled?.with?.id).toBe('coverage-rule');
+      expect(attachInstalled?.with?.id).toBe(
+        'coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}'
+      );
       expect(attachInstalled?.with?.render_inline).toBe(true);
+
+      // A reinstalled rule can meet the copy an earlier review attached under the same id.
+      const resumeInstalled = stepByName('resume_installed_rule_attachment');
+      expect(resumeInstalled?.type).toBe('ai.attachment.update');
+      expect(resumeInstalled?.if).toContain(
+        "steps.attach_installed_rule.error.message contains 'already exists'"
+      );
+      expect(resumeInstalled?.with?.attachment_id).toBe(
+        'coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}'
+      );
+      expect(JSON.stringify(resumeInstalled?.with)).toContain('steps.refetch_rule.output | json');
+      expect(resumeInstalled?.with?.description).toBe(attachInstalled?.with?.description);
+      expect(stepIndex('attach_installed_rule') + 1).toBe(
+        stepIndex('resume_installed_rule_attachment')
+      );
     });
 
     it('closes the investigation on a decision and leaves it open without one', () => {
@@ -1087,6 +1114,7 @@ describe('Detection Coverage review', () => {
       'refetch_rule',
       'refresh_rule_attachment',
       'attach_installed_rule',
+      'resume_installed_rule_attachment',
       'close_investigation_resolved',
       'close_investigation_dismissed',
       'mark_declined',

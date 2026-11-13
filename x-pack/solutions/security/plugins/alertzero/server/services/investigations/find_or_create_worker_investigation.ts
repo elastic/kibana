@@ -12,6 +12,7 @@ import {
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
+import type { ConversationWithPermissions } from '@kbn/agent-builder-server';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import type { FindOrCreateWorkerInvestigationResponse } from '@kbn/alertzero-common';
 import { buildWorkerInvestigationConversationId } from './worker_investigation_id';
@@ -32,7 +33,7 @@ export interface FindOrCreateWorkerInvestigationConversationClient {
     templateId: string;
     accessControl: { access_mode: ConversationAccessControlMode; entries: never[] };
     metadata?: Record<string, MetadataFieldValue>;
-  }) => Promise<unknown>;
+  }) => Promise<ConversationWithPermissions>;
   get: (conversationId: string) => Promise<{ metadata?: Record<string, MetadataFieldValue> }>;
   patchMetadata: (
     conversationId: string,

@@ -1433,6 +1433,7 @@ describe('detection rule workflows', () => {
         expect(resume.type).toBe('ai.attachment.update');
         expect(resume.if).toContain('steps.find_or_create_investigation.output.created != true');
         expect(resume.if).toContain(`steps.${addName}.error != null`);
+        expect(resume.if).toContain(`steps.${addName}.error.message contains 'already exists'`);
         expect(resume.with?.attachment_id).toBe(attachmentId);
         expect(resume.with?.data).toEqual(add.with?.data);
         expect(resume.with?.description).toBe(add.with?.description);

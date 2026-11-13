@@ -186,7 +186,7 @@ steps:
       body:
         workerId: system-security-detection-rule-tuning
         subjectId: "{{ inputs.rule_uuid }}"
-        title: "Rule tuning: {{ steps.fetch_rule.output.name }}"
+        title: "Rule tuning: {{ steps.fetch_rule.output.name | truncate: 480 }}"
         description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
         workflowExecutionId: "{{ execution.id }}"
 
@@ -238,7 +238,8 @@ steps:
     type: ai.attachment.update
     if: >-
       ${{ steps.find_or_create_investigation.output.created != true
-        and steps.attach_rule.error != null }}
+        and steps.attach_rule.error != null
+        and steps.attach_rule.error.message contains 'already exists' }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       attachment_id: "tuned-rule"
@@ -272,7 +273,8 @@ steps:
     type: ai.attachment.update
     if: >-
       ${{ steps.find_or_create_investigation.output.created != true
-        and steps.attach_alerts.error != null }}
+        and steps.attach_alerts.error != null
+        and steps.attach_alerts.error.message contains 'already exists' }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       attachment_id: fp-alerts
