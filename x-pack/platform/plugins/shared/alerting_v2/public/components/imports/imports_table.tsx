@@ -6,9 +6,11 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFieldSearch, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
+import { EuiFieldSearch, EuiInMemoryTable, EuiLink, EuiSpacer } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALERTING_V2_EPISODES_STATUS_ALL } from '@kbn/alerting-v2-constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import type { ImportListItem } from '../../hooks/use_fetch_imports';
 import { EMPTY_VALUE } from '../../utils/rule_display';
 
@@ -28,6 +30,39 @@ const getConnectorTypeLabel = (connectorTypeId: string): string =>
 interface ImportRow extends ImportListItem {
   alertSeriesCount?: number;
 }
+
+/** KQL for the alerts list that matches the alerts one connector created. */
+export const getConnectorAlertsQuery = (connectorId: string): string =>
+  `connector.id: "${connectorId.replace(/["\\]/g, '\\$&')}"`;
+
+/** The alert count, linked to the alerts list filtered to the connector once there are alerts. */
+const AlertsCountLink = ({ connectorId, count }: { connectorId: string; count?: number }) => {
+  const { episodesLocators } = useAlertingLocators();
+  if (count === undefined) {
+    return <span data-test-subj="importsAlertsCount">{EMPTY_VALUE}</span>;
+  }
+  if (count === 0) {
+    return <span data-test-subj="importsAlertsCount">{count}</span>;
+  }
+  const params = {
+    filters: {
+      queryString: getConnectorAlertsQuery(connectorId),
+      status: ALERTING_V2_EPISODES_STATUS_ALL,
+    },
+  };
+  return (
+    <EuiLink
+      href={episodesLocators.getRedirectUrl(params)}
+      onClick={(event: React.MouseEvent) => {
+        event.preventDefault();
+        episodesLocators.navigateSync(params);
+      }}
+      data-test-subj="importsAlertsCount"
+    >
+      {count}
+    </EuiLink>
+  );
+};
 
 const columns: Array<EuiBasicTableColumn<ImportRow>> = [
   {
@@ -54,8 +89,8 @@ const columns: Array<EuiBasicTableColumn<ImportRow>> = [
     }),
     dataType: 'number',
     sortable: true,
-    render: (alertSeriesCount: ImportRow['alertSeriesCount']) => (
-      <span data-test-subj="importsAlertsCount">{alertSeriesCount ?? EMPTY_VALUE}</span>
+    render: (alertSeriesCount: ImportRow['alertSeriesCount'], { connectorId }: ImportRow) => (
+      <AlertsCountLink connectorId={connectorId} count={alertSeriesCount} />
     ),
   },
 ];
