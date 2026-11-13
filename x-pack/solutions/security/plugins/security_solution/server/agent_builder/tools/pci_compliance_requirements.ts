@@ -47,6 +47,23 @@ const TIME_WINDOW = '@timestamp >= ?_tstart AND @timestamp <= ?_tend';
 const coverageQuery = (indexPattern: string, whereClause: string): string =>
   `FROM ${indexPattern} | WHERE ${TIME_WINDOW} AND ${whereClause} | STATS matching_events = COUNT(*) | LIMIT 1`;
 
+/**
+ * Requirement ids that predate PCI DSS v4.0.1 and name the same control the catalog now carries
+ * under a different id. v4.0.1 renumbered the v3.2.1 requirement 4.1 ("strong cryptography for
+ * cardholder data during transmission over open, public networks") to 4.2.1, and callers keep
+ * citing the old number. Keys are the legacy ids, values are the v4.0.1 ids they resolve to.
+ */
+export const PCI_LEGACY_REQUIREMENT_ID_ALIASES: Record<string, string> = {
+  '4.1': '4.2.1',
+};
+
+/**
+ * Canonical PCI DSS v4.0.1 requirement id for a legacy id. Returns the input unchanged when it is
+ * not a known alias, so callers keep validating the result against {@link PCI_REQUIREMENTS}.
+ */
+export const resolveLegacyRequirementId = (requirement: string): string =>
+  PCI_LEGACY_REQUIREMENT_ID_ALIASES[requirement] ?? requirement;
+
 export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
   // ── Top-level coverage checks (requirements 1–12) ──────────────────────
 
@@ -617,13 +634,14 @@ export const getDefaultTimeRange = (): { from: string; to: string } => {
 };
 
 export const normalizeRequirementId = (requirement: string): string | null => {
-  if (requirement === 'all') {
-    return requirement;
+  const canonical = resolveLegacyRequirementId(requirement);
+  if (canonical === 'all') {
+    return canonical;
   }
-  if (PCI_REQUIREMENTS[requirement]) {
-    return requirement;
+  if (PCI_REQUIREMENTS[canonical]) {
+    return canonical;
   }
-  const baseRequirement = requirement.split('.')[0];
+  const baseRequirement = canonical.split('.')[0];
   return PCI_REQUIREMENTS[baseRequirement] ? baseRequirement : null;
 };
 
