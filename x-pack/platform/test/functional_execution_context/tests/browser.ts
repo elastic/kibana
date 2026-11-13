@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.home.addSampleDataSet('flights');
+      await PageObjects.home.addSampleDataSetFromUi('flights');
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.removeSampleDataSet('flights');
+      await PageObjects.home.removeSampleDataSetFromUi('flights');
     });
 
     describe('discover app', () => {

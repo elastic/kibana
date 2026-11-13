@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('install eCommerce sample data', async function installECommerceData() {
-      await PageObjects.home.addSampleDataSet('ecommerce');
+      await PageObjects.home.addSampleDataSetFromUi('ecommerce');
       await PageObjects.common.sleep(5000);
       // verify it's installed by finding the remove link
       await testSubjects.find('removeSampleDataSetecommerce');

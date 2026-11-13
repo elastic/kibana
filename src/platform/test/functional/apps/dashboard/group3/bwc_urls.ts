@@ -12,14 +12,13 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, dashboardControls, header, home } = getPageObjects([
-    'common',
+  const { dashboard, dashboardControls, header } = getPageObjects([
     'dashboard',
     'dashboardControls',
     'header',
-    'home',
   ]);
   const kibanaServer = getService('kibanaServer');
+  const sampleData = getService('sampleData');
   const browser = getService('browser');
   const deployment = getService('deployment');
   const find = getService('find');
@@ -50,11 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('bwc urls', () => {
     let baseUrl: string;
     before(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await header.waitUntilLoadingHasFinished();
-      await home.addSampleDataSet('logs');
+      await sampleData.testResources.installKibanaSampleData('logs');
 
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/bwc_short_urls'
@@ -75,11 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await header.waitUntilLoadingHasFinished();
-      await home.removeSampleDataSet('logs');
+      await sampleData.testResources.removeKibanaSampleData('logs');
 
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/bwc_short_urls'

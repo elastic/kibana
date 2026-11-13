@@ -9,22 +9,18 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
+  const sampleData = getService('sampleData');
 
   describe('a11y tests', function () {
     describe('using flights sample data', function () {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.home.addSampleDataSet('flights');
+        await sampleData.testResources.installKibanaSampleData('flights');
       });
 
       after(async () => {
-        await supertest.delete('/api/sample_data/flights').set('kbn-xsrf', 'true').expect(204);
+        await sampleData.testResources.removeKibanaSampleData('flights');
         await kibanaServer.uiSettings.unset('defaultIndex');
         await kibanaServer.savedObjects.clean({
           types: ['search', 'index-pattern', 'visualization', 'dashboard'],
