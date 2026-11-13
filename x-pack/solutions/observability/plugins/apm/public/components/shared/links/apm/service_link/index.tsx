@@ -65,7 +65,7 @@ export function ServiceLink({
             iconType="warning"
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
-              <MaxGroupsMessage serviceOverflowCount={serviceOverflowCount} />
+              <MaxGroupsMessage type="services" serviceOverflowCount={serviceOverflowCount} />
             </EuiText>
           </PopoverTooltip>
         </EuiFlexItem>
