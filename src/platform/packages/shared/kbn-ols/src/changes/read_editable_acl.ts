@@ -48,12 +48,6 @@ export interface EditableAclEntry extends AclGrant {
 }
 
 /**
- * Whether a stored ID can name a principal. An empty ID matches nobody, and a request can't
- * contain one, so it's read as if it weren't stored.
- */
-const isPrincipalId = (id: string) => id.length > 0;
-
-/**
  * Reads an object's current access from its stored ACL, so that it can be shown, edited, or written
  * back in the shapes Kibana writes. It applies the rules for reading a stored ACL: an entry that
  * grants to several IDs becomes one entry for each ID, an entry without exactly one known kind or
@@ -66,7 +60,7 @@ const isPrincipalId = (id: string) => id.length > 0;
  */
 export const readEditableAcl = (policy: AccessPolicy, acl: StoredAcl): EditableAcl => {
   const ownerKind = getPrincipalKind(acl.owner.type);
-  const ownerIds = acl.owner.id.filter(isPrincipalId);
+  const ownerIds = acl.owner.id.filter((id) => id !== '');
   const owner =
     ownerKind && ownerIds.length === 1 ? { type: ownerKind, id: ownerIds[0] } : undefined;
 
@@ -78,7 +72,7 @@ export const readEditableAcl = (policy: AccessPolicy, acl: StoredAcl): EditableA
       continue;
     }
 
-    for (const id of entry.id.filter(isPrincipalId)) {
+    for (const id of entry.id.filter((entryId) => entryId !== '')) {
       const key = getPrincipalKey({ type: kind, id });
       const existing = entries.get(key);
       if (!existing || compareLevels(access, existing.access) > 0) {
