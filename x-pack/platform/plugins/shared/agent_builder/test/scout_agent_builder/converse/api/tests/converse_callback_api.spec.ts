@@ -163,6 +163,15 @@ apiTest.describe(
       return roundComplete;
     };
 
+    const getExecutionTerminatedEvent = (requests: CallbackTestServerRequest[]) => {
+      for (const event of getEvents(requests)) {
+        if (isExecutionTerminatedEvent(event)) {
+          return event;
+        }
+      }
+      throw new Error('No execution_terminated event was delivered to the callback');
+    };
+
     const getExecutionId = (requests: CallbackTestServerRequest[]): string =>
       (requests[0].body as ChatCallbackEventResponse).execution_id;
 
@@ -357,6 +366,10 @@ apiTest.describe(
         expect(blocks).toContain(attachmentContent);
         expect(blocks).toContain('Anything else?');
         expect(blocks).not.toContain('render_attachment');
+
+        // execution_terminated carries the same payload, rendered from the stored conversation.
+        const terminated = getExecutionTerminatedEvent(callbackRequests);
+        expect(terminated.surface_payload).toStrictEqual(roundComplete.surface_payload);
       }
     );
 

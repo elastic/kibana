@@ -15,6 +15,7 @@ import {
   AgentExecutionMode,
   ExecutionStatus,
   isRequestAbortedError,
+  type Conversation,
 } from '@kbn/agent-builder-common';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
@@ -176,6 +177,7 @@ class TaskHandlerImpl implements TaskHandler {
         execution,
         events$,
         request,
+        readConversation: () => this.readConversation({ execution, request }),
         callbackDeliveryService: this.deps.callbackDeliveryService,
         surfacesService: this.deps.surfacesService,
         logger: this.logger,
@@ -291,6 +293,33 @@ class TaskHandlerImpl implements TaskHandler {
    * Releases the conversation an execution aborted before it started still holds: its run never
    * reaches a terminal write, which is where a run releases it.
    */
+  /** Reads the stored conversation of a conversation execution, as the execution's owner. */
+  private async readConversation({
+    execution,
+    request,
+  }: {
+    execution: AgentExecution;
+    request: KibanaRequest;
+  }): Promise<Conversation | undefined> {
+    if (execution.executionMode !== AgentExecutionMode.conversation || !execution.owner) {
+      return undefined;
+    }
+
+    const { conversationId, storeConversation } = execution.agentParams;
+
+    if (!conversationId || storeConversation === false) {
+      return undefined;
+    }
+
+    const conversationClient = await this.deps.conversationService.getScopedClientAsUser({
+      request,
+      user: { ...execution.owner, isAdmin: false },
+      ...(execution.runAs ? { runAs: execution.runAs.serviceAccountId } : {}),
+    });
+
+    return conversationClient.get(conversationId);
+  }
+
   private async releaseAbortedExecution({
     execution,
     fakeRequest,

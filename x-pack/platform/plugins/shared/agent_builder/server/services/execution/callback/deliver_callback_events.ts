@@ -28,17 +28,22 @@ import {
   isRoundCompleteEvent,
   isToolCallStep,
   type ChatCallbackEvent,
+  type ChatCallbackExecutionTerminatedEvent,
   type ChatCallbackToolCall,
   type ChatEvent,
+  type Conversation,
   type ConversationRoundStep,
   type ExecutionTerminatedEvent,
   type RoundCompleteEvent,
-  type SurfacePayload,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { SurfacesService } from '../../surfaces';
+import { executionSteps } from '../run_agent/utils/context_timeline';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
+
+/** The fields added to execution_terminated at callback delivery. */
+type CallbackFields = Pick<ChatCallbackExecutionTerminatedEvent, 'surface_payload' | 'tool_calls'>;
 
 /** The tool calls among the steps, summarized for a callback: no params or results. */
 const toCallbackToolCalls = (steps: ConversationRoundStep[]): ChatCallbackToolCall[] =>
@@ -59,13 +64,17 @@ const toCallbackToolCalls = (steps: ConversationRoundStep[]): ChatCallbackToolCa
  * completes, so they are only delivered after the conversation has been persisted. Both carry the
  * same idempotency key, so a consumer acts on whichever it handles first. If the stream errors
  * first (e.g. the persistence write failed), both are skipped and a failure callback is sent
- * instead. Both carry the response message ready to post on the round's surface, which is never
- * stored; execution_terminated also carries a summary of the round's tool calls.
+ * instead.
+ *
+ * The stored conversation is then read back to build execution_terminated's callback fields: the
+ * response message ready to post on the surface (also added to round_complete), and a summary of
+ * the execution's tool calls. Neither is stored.
  */
 export const deliverCallbackEvents = ({
   execution,
   events$,
   request,
+  readConversation,
   callbackDeliveryService,
   surfacesService,
   logger,
@@ -73,6 +82,8 @@ export const deliverCallbackEvents = ({
   execution: AgentExecution;
   events$: Observable<ChatEvent>;
   request: KibanaRequest;
+  /** Reads the execution's stored conversation, or resolves to nothing when it is not stored. */
+  readConversation: () => Promise<Conversation | undefined>;
   callbackDeliveryService: CallbackDeliveryService;
   surfacesService: SurfacesService;
   logger: Logger;
@@ -121,6 +132,47 @@ export const deliverCallbackEvents = ({
     );
   };
 
+  /** execution_terminated's callback fields, built from the event and the stored conversation. */
+  const buildCallbackFields = async ({
+    execution_id: terminatedExecutionId,
+    data: { outcome },
+  }: ExecutionTerminatedEvent): Promise<CallbackFields> => {
+    let conversation: Conversation | undefined;
+
+    try {
+      conversation = await readConversation();
+    } catch (error) {
+      logger.warn(
+        `Failed to read the conversation of execution ${execution.executionId} for its callback: ${error.message}`
+      );
+    }
+
+    if (!conversation) {
+      return {};
+    }
+
+    const { events = [], attachments = [] } = conversation;
+    const steps = executionSteps(
+      events.filter((event) => event.execution_id === terminatedExecutionId)
+    );
+
+    // The response message ready to post on the execution's surface, such as Slack.
+    const surfacePayload =
+      outcome.type === 'responded'
+        ? await surfacesService.renderPayload(
+            { message: outcome.response.message, attachments },
+            {
+              originType: execution.agentParams.origin?.type,
+              agentId: execution.agentId,
+              request,
+              spaceId: execution.spaceId,
+            }
+          )
+        : undefined;
+
+    return { surface_payload: surfacePayload, tool_calls: toCallbackToolCalls(steps) };
+  };
+
   return new Promise<void>((resolve) => {
     let executionTerminatedEvent: ExecutionTerminatedEvent | undefined;
     let roundCompleteEvent: RoundCompleteEvent | undefined;
@@ -154,32 +206,23 @@ export const deliverCallbackEvents = ({
         // Deliver the buffered terminal events last, only on successful completion. On a stream
         // error concatWith propagates it to catchError below, skipping these deliveries.
         concatWith(
-          defer(() => {
-            // The response message ready to post on the round's surface, such as Slack.
-            const surfacePayload: Promise<SurfacePayload | undefined> = roundCompleteEvent
-              ? surfacesService.renderPayload(roundCompleteEvent, {
-                  originType: execution.agentParams.origin?.type,
-                  agentId: execution.agentId,
-                  request,
-                  spaceId: execution.spaceId,
-                })
-              : Promise.resolve(undefined);
-
-            return from(surfacePayload);
-          }).pipe(
-            concatMap((surfacePayload) =>
+          defer(() =>
+            from(
+              executionTerminatedEvent
+                ? buildCallbackFields(executionTerminatedEvent)
+                : Promise.resolve<CallbackFields>({})
+            )
+          ).pipe(
+            concatMap((callbackFields) =>
               concat(
                 executionTerminatedEvent
-                  ? deliverEvent({
-                      ...executionTerminatedEvent,
-                      surface_payload: surfacePayload,
-                      ...(roundCompleteEvent
-                        ? { tool_calls: toCallbackToolCalls(roundCompleteEvent.data.round.steps) }
-                        : {}),
-                    })
+                  ? deliverEvent({ ...executionTerminatedEvent, ...callbackFields })
                   : EMPTY,
                 roundCompleteEvent
-                  ? deliverEvent({ ...roundCompleteEvent, surface_payload: surfacePayload })
+                  ? deliverEvent({
+                      ...roundCompleteEvent,
+                      surface_payload: callbackFields.surface_payload,
+                    })
                   : EMPTY
               )
             )
