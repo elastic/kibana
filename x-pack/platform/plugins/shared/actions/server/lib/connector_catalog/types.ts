@@ -35,7 +35,6 @@ export interface CatalogRequestOptions {
 }
 
 export interface ConnectorCatalogStorage {
-  ensureIndex(options?: CatalogRequestOptions): Promise<void>;
   getManifest(options?: CatalogRequestOptions): Promise<StoredCatalogManifest | undefined>;
   getDefinitions(
     refs: CatalogDefinitionRef[],

@@ -7,7 +7,7 @@
 
 import type { CatalogDefinitionRef } from './types';
 
-export const CONNECTOR_CATALOG_INDEX = '.kibana_connector_catalog';
+export const CONNECTOR_TYPE_CATALOG_INDEX = '.kibana_connector_type_catalog';
 export const CATALOG_MANIFEST_DOC_ID = 'manifest';
 
 export const getCatalogDefinitionDocId = ({ id, version }: CatalogDefinitionRef): string =>

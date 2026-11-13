@@ -8,7 +8,7 @@
 export { createConnectorCatalogStorage } from './connector_catalog_storage';
 export {
   CATALOG_MANIFEST_DOC_ID,
-  CONNECTOR_CATALOG_INDEX,
+  CONNECTOR_TYPE_CATALOG_INDEX,
   getCatalogAssetDocId,
   getCatalogDefinitionDocId,
 } from './constants';
