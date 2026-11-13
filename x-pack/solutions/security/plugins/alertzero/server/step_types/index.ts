@@ -33,6 +33,7 @@ import {
 } from './alert_triage/group_proposals_step';
 import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
 import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
+import { optimizeRuleTuningWikiStepDefinition } from './optimize_rule_tuning_wiki_step';
 
 export const registerStepDefinitions = ({
   workflowsExtensions,
@@ -109,7 +110,7 @@ export { getResolveProposalsStepDefinition } from './resolve_proposals';
 
 export { OPT_IN_TIMEOUT_MS as REPORT_STEP_OPT_IN_TIMEOUT_MS } from './report_worker_outcome/report_worker_outcome_step';
 
-/** Registers the `alertzero.reportWorkerOutcome` step during plugin setup. */
+/** Registers AlertZero-owned workflow steps during plugin setup. */
 export const registerAlertZeroStepDefinitions = ({
   workflowsExtensions,
   ...deps
@@ -117,4 +118,5 @@ export const registerAlertZeroStepDefinitions = ({
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }): void => {
   workflowsExtensions.registerStepDefinition(getReportWorkerOutcomeStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(optimizeRuleTuningWikiStepDefinition);
 };

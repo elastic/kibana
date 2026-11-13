@@ -97,9 +97,9 @@ export const materializeWiki = async ({
   // Archived means the optimizer retired the fact as stale, so materializing it would feed the
   // model knowledge we already decided not to trust.
   const pages = allPages.filter((page) => page.status !== 'archived');
-  const fullPages = (await Promise.all(pages.map(async (summary) => store.get(summary.id)))).filter(
-    (page): page is WikiPage => page !== undefined
-  );
+  const fullPages = (
+    await Promise.all(pages.map(async (summary) => store.get(summary.id)))
+  ).filter((page): page is WikiPage => page !== undefined) as WikiPage[];
 
   await session.mkdirs([
     WIKI_WORKSPACE_ROOT,

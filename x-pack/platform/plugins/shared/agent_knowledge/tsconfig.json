@@ -1,0 +1,30 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/features-plugin",
+    "@kbn/i18n",
+    "@kbn/logging-mocks",
+    "@kbn/security-plugin-types-server",
+    "@kbn/spaces-plugin",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/zod",
+    "@kbn/agent-knowledge-common",
+    "@kbn/context-engine-plugin",
+    "@kbn/core-security-server",
+    "@kbn/core-analytics-server"
+  ],
+  "exclude": ["target/**/*"]
+}

@@ -59,6 +59,8 @@
     "@kbn/connector-specs",
     "@kbn/alerting-plugin",
     "@kbn/sandbox-plugin",
+    "@kbn/agent-knowledge-common",
+    "@kbn/agent-knowledge-plugin",
     "@kbn/context-engine-plugin",
     "@kbn/inference-common",
     "@kbn/inference-plugin",

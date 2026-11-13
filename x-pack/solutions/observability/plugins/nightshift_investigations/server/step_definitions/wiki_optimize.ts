@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentKnowledgePluginStart } from '@kbn/agent-knowledge-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -32,6 +33,7 @@ export { withToolResults };
 
 export const wikiOptimizeStepDefinition = ({
   getAgentBuilder,
+  getAgentKnowledge,
   getInference,
   getSavedObjects,
   getUiSettings,
@@ -40,6 +42,7 @@ export const wikiOptimizeStepDefinition = ({
   isEnabled,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  getAgentKnowledge?: () => AgentKnowledgePluginStart | undefined;
   getInference: () => InferenceServerStart | undefined;
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
@@ -140,6 +143,7 @@ export const wikiOptimizeStepDefinition = ({
                 getInference,
                 getSavedObjects,
                 getUiSettings,
+                agentKnowledge: getAgentKnowledge?.(),
               }),
             OPTIMIZE_TIMEOUT_MS,
             `Wiki optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`

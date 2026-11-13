@@ -82,6 +82,7 @@ import { decisionTreePrepareStepDefinition } from './step_definitions/decision_t
 import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createWikiStore, registerWikiAiIndex } from './wiki/register_wiki';
+import { registerNightshiftWikiTypePack } from './wiki/register_type_pack';
 import { registerMemoryAiIndex } from './memory/register_memory';
 import { registerWikiTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
@@ -160,6 +161,7 @@ export class NightshiftInvestigationsPlugin
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
+  private agentKnowledge?: NightshiftInvestigationsStartDeps['agentKnowledge'];
   private agenticInvestigations?: NightshiftInvestigationsStartDeps['agenticInvestigations'];
   private proposals?: NightshiftInvestigationsStartDeps['proposals'];
   private evals?: NightshiftInvestigationsStartDeps['evals'];
@@ -246,6 +248,7 @@ export class NightshiftInvestigationsPlugin
     this.memoryEnabled = this.ctx.config.get().memory.enabled;
     if (this.wikiEnabled) {
       registerWikiAiIndex(plugins.contextEngine, this.logger.get('wiki'));
+      registerNightshiftWikiTypePack(plugins.agentKnowledge, this.logger.get('wiki'));
       registerWikiTelemetryEvents(core.analytics);
     }
     if (this.memoryEnabled) {
@@ -630,6 +633,7 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart: getGatedSandboxStart,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
+            getAgentKnowledge: () => this.agentKnowledge,
             analytics: core.analytics,
             logger: this.logger.get('wiki'),
             isEnabled: () => this.wikiEnabled,
@@ -666,6 +670,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           wikiOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getAgentKnowledge: () => this.agentKnowledge,
             getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
@@ -738,6 +743,7 @@ export class NightshiftInvestigationsPlugin
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('wiki'),
               spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+              agentKnowledge: this.agentKnowledge,
             });
           },
           isDecisionTreesEnabled: () => this.decisionTreesEnabled,
@@ -811,6 +817,7 @@ export class NightshiftInvestigationsPlugin
     this.spaces = plugins.spaces;
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
+    this.agentKnowledge = plugins.agentKnowledge;
     this.agenticInvestigations = plugins.agenticInvestigations;
     this.proposals = plugins.proposals;
     this.evals = plugins.evals;

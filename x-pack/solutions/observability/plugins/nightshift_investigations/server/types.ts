@@ -18,6 +18,10 @@ import type {
 } from '@kbn/alerting-v2-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type {
+  AgentKnowledgePluginSetup,
+  AgentKnowledgePluginStart,
+} from '@kbn/agent-knowledge-plugin/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
@@ -90,6 +94,8 @@ export interface NightshiftInvestigationsSetupDeps {
    */
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   cloud?: CloudSetup;
+  /** Shared Wiki kernel; registers Nightshift type pack when present. */
+  agentKnowledge?: AgentKnowledgePluginSetup;
   /** Provides the `proposals.create` tool the investigation agent proposes actions with. */
   proposals?: ProposalsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
@@ -105,6 +111,7 @@ export interface NightshiftInvestigationsStartDeps {
   isomer: IsomerPluginStart;
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agentKnowledge?: AgentKnowledgePluginStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
   alertingVTwo?: AlertingV2ServerStart;
   nightshiftSources: NightshiftSourcesServerStart;

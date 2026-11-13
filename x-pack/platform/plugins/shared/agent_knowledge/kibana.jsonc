@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-knowledge-plugin",
+  "owner": ["@elastic/nightshift", "@elastic/alertzero-common-layer"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Shared Wiki kernel: typed, corroborated pages on Context Engine AI indices for Nightshift and AlertZero. Does not own semantic memory — consumers use Context Engine memory for tentative facts.",
+  "plugin": {
+    "id": "agentKnowledge",
+    "configPath": ["xpack", "agentKnowledge"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["features", "workflowsExtensions"],
+    "optionalPlugins": ["contextEngine", "security", "spaces"]
+  }
+}

@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
+import type { AgentKnowledgePluginStart } from '@kbn/agent-knowledge-plugin/server';
 import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateWikiWorkspace } from '../wiki/register_wiki';
 import { WIKI_WORKSPACE_ROOT } from '../wiki/materialize';
@@ -25,6 +26,7 @@ export const wikiHydrateStepDefinition = ({
   getSandboxStart,
   getSavedObjects,
   getUiSettings,
+  getAgentKnowledge,
   analytics,
   logger,
   isEnabled,
@@ -32,6 +34,7 @@ export const wikiHydrateStepDefinition = ({
   getSandboxStart: () => NightshiftSandboxStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
+  getAgentKnowledge?: () => AgentKnowledgePluginStart | undefined;
   analytics: AnalyticsServiceSetup;
   logger: Logger;
   isEnabled?: () => boolean;
@@ -151,6 +154,7 @@ export const wikiHydrateStepDefinition = ({
                   analytics,
                   conversationId: resolvedConversationId,
                   logger,
+                  agentKnowledge: getAgentKnowledge?.(),
                 }),
               HYDRATE_TIMEOUT_MS,
               `Wiki hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`

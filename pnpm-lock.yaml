@@ -603,6 +603,12 @@ importers:
       '@kbn/agent-builder-workflows-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agent_builder_workflows
+      '@kbn/agent-knowledge-common':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-agent-knowledge-common
+      '@kbn/agent-knowledge-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/agent_knowledge
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
@@ -9096,6 +9102,8 @@ importers:
 
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
+  x-pack/platform/packages/shared/kbn-agent-knowledge-common: {}
+
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
 
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
@@ -9425,6 +9433,8 @@ importers:
   x-pack/platform/plugins/shared/agent_builder_visualizations: {}
 
   x-pack/platform/plugins/shared/agent_builder_workflows: {}
+
+  x-pack/platform/plugins/shared/agent_knowledge: {}
 
   x-pack/platform/plugins/shared/agentic_investigations: {}
 

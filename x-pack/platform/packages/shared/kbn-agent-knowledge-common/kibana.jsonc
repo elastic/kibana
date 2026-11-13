@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/agent-knowledge-common",
+  "owner": ["@elastic/nightshift", "@elastic/alertzero-common-layer"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Shared contracts for the agent knowledge wiki kernel used by Nightshift and AlertZero."
+}

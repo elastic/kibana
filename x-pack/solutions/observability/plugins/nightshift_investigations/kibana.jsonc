@@ -13,6 +13,7 @@
     "requiredPlugins": ["nightshiftSources", "share", "isomer"],
     "optionalPlugins": [
       "actions",
+      "agentKnowledge",
       "alerting",
       "alertingVTwo",
       "agentBuilder",

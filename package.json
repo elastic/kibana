@@ -225,6 +225,8 @@
     "@kbn/agent-builder-visualizations-server": "workspace:*",
     "@kbn/agent-builder-workflow-gen": "workspace:*",
     "@kbn/agent-builder-workflows-plugin": "workspace:*",
+    "@kbn/agent-knowledge-common": "workspace:*",
+    "@kbn/agent-knowledge-plugin": "workspace:*",
     "@kbn/agentic-investigations-common": "workspace:*",
     "@kbn/agentic-investigations-plugin": "workspace:*",
     "@kbn/ai-anonymization-common": "workspace:*",

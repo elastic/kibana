@@ -13,6 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentKnowledgePluginStart } from '@kbn/agent-knowledge-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -33,20 +34,25 @@ import {
 import { createWikiTelemetry } from '../telemetry';
 import { materializeWiki } from './materialize';
 import { createLlmProposeWikiEdits, optimizeWiki } from './optimize';
-import { createWikiPageStore, type WikiPageStore } from './page_store';
+import type { WikiPageStore } from './page_store';
 import { classifyWikiRound, shouldOptimizeRound } from './round_kind';
+import { resolveWikiPageStore } from './wiki_kernel_adapter';
 
 export const createWikiStore = ({
   esClient,
   logger,
   spaceId,
   signal,
+  agentKnowledge,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
   signal?: AbortSignal;
-}): WikiPageStore => createWikiPageStore({ esClient, logger, spaceId, signal });
+  /** When set, uses the shared agentKnowledge wiki service (same store implementation). */
+  agentKnowledge?: AgentKnowledgePluginStart;
+}): WikiPageStore =>
+  resolveWikiPageStore({ agentKnowledge, esClient, logger, spaceId, signal });
 
 export const registerWikiAiIndex = (
   contextEngine: ContextEnginePluginSetup | undefined,
@@ -87,6 +93,7 @@ export const hydrateWikiWorkspace = async ({
   analytics,
   conversationId,
   logger,
+  agentKnowledge,
 }: {
   session: AuditedSandboxSession;
   esClient: ElasticsearchClient;
@@ -95,8 +102,11 @@ export const hydrateWikiWorkspace = async ({
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
   logger: Logger;
+  agentKnowledge?: AgentKnowledgePluginStart;
 }): Promise<{ hydratedIds: string[] } | void> => {
-  const store = createWikiStore({ esClient, logger, spaceId, signal });
+  // Sandbox path adapters stay in Nightshift (`materializeWiki`); the store comes from the
+  // shared wiki kernel via agentKnowledge when available.
+  const store = createWikiStore({ esClient, logger, spaceId, signal, agentKnowledge });
   const telemetry = createWikiTelemetry({ analytics, conversationId, logger });
   const materialize = () => materializeWiki({ session, store, telemetry, logger });
 
@@ -140,6 +150,7 @@ export const runWikiOptimize = async ({
   getSavedObjects,
   getUiSettings,
   logger,
+  agentKnowledge,
 }: {
   request: KibanaRequest;
   agentId?: string;
@@ -161,6 +172,7 @@ export const runWikiOptimize = async ({
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
+  agentKnowledge?: AgentKnowledgePluginStart;
 }): Promise<WikiOptimizeResult | undefined> => {
   // Only the Nightshift knowledge agents write to Wiki: their post-execution hook runs this
   // workflow, and other agents' rounds must not edit the wiki. An unidentified caller is refused
@@ -224,7 +236,8 @@ export const runWikiOptimize = async ({
   }
 
   const resolvedRoundId = loadedRound.roundId || roundId;
-  const store = createWikiStore({ esClient, logger, spaceId, signal });
+  // Optimizer prompts stay product-owned; writes go through the shared wiki store.
+  const store = createWikiStore({ esClient, logger, spaceId, signal, agentKnowledge });
   const appliedWrites = await optimizeWiki({
     store,
     proposeEdits: createLlmProposeWikiEdits({ inferenceClient: model.inferenceClient }),

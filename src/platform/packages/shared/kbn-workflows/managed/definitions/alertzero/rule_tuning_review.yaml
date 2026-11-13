@@ -115,6 +115,9 @@ consts:
   # Temporary: service accounts have no display name, so the chat would show the raw account
   # id. Remove once they carry one (elastic/security-team#20422).
   author_name: "Rule Tuning worker"
+  # Shared Wiki + CE memory AI index (see @kbn/agent-knowledge-common).
+  wiki_ai_index_id: alertzero-wiki
+  wiki_ai_index_dest: ai-index-idx-alertzero-wiki
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
   # consts in rule_tuning_worker.yaml.
   analysis_window_days: 7
@@ -361,6 +364,40 @@ steps:
                   approved: false
                   applied: false
 
+  # Standing wiki pages for this rule / its data sources. Empty-safe when the
+  # shared wiki plugin or index is unavailable — diagnosis still runs.
+  - name: recall_rule_wiki
+    type: agentKnowledge.recall
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true }}
+    on-failure:
+      continue: true
+    with:
+      ai_index_id: "{{ consts.wiki_ai_index_id }}"
+      entity_types:
+        - detection_rule
+        - data_source
+      query: "{{ steps.fetch_rule.output.name }}"
+      limit: 10
+
+  # Tentative CE session facts on the same AI index. Verify before trusting;
+  # wiki pages above are the standing reference after an approved gate.
+  - name: recall_rule_memory
+    type: elasticsearch.esql.query
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true }}
+    on-failure:
+      continue: true
+    with:
+      allow_partial_results: true
+      query: |-
+        FROM {{ consts.wiki_ai_index_dest }}
+        | WHERE type == "memory.session_fact"
+        | SORT @timestamp DESC
+        | LIMIT 10
+
   - name: diagnose_rule
     type: ai.agent
     agent-id: alertzero-thin-agent
@@ -411,6 +448,16 @@ steps:
         (closed by analysts, or classified by Alert Triage and possibly still open) during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
         {%- if inputs.fp_count > inputs.alert_ids.size %} (newest {{ inputs.alert_ids.size }} of {{ inputs.fp_count }}){%- endif %}:
         ["{{ inputs.alert_ids | join: '", "' }}"]
+
+        ## Wiki context (standing reference)
+        {{ steps.recall_rule_wiki.output.context_markdown | default: "_No wiki pages recalled._" }}
+
+        ## Tentative memories (verify before trusting)
+        {%- if steps.recall_rule_memory.error == null and steps.recall_rule_memory.output.values != blank and steps.recall_rule_memory.output.values.size > 0 %}
+        {{ steps.recall_rule_memory.output.values | json }}
+        {%- else %}
+        _No session memories recalled._
+        {%- endif %}
 
         Retrieve exactly these alerts with the investigate-rule.get_alerts_by_ids
         tool, passing the rule's investigation_fields as additional_fields, and use
@@ -1639,6 +1686,47 @@ steps:
       render_inline: true
     on-failure:
       continue: true
+
+  # Wiki writes only after the proposal gate resolves. Standing truth goes on the
+  # detection_rule page; CE session memories stay tentative and are not required
+  # once the wiki page absorbs an approved fact.
+  - name: resolve_wiki_gate_outcome
+    type: data.set
+    with:
+      outcome: |-
+        {%- if steps.record_proposal_action_decision.output.approved == true -%}
+        approved
+        {%- elsif steps.record_proposal_action_decision.output.dismissed == true -%}
+        rejected
+        {%- else -%}
+        expired
+        {%- endif -%}
+
+  - name: optimize_rule_wiki
+    type: alertzero.optimizeRuleTuningWiki
+    if: >-
+      ${{ steps.diagnose_rule.error == null
+        and steps.diagnose_rule.output.structured_output != null }}
+    on-failure:
+      continue: true
+    with:
+      rule_name: "{{ steps.fetch_rule.output.name }}"
+      rule_id: "{{ steps.fetch_rule.output.rule_id }}"
+      diagnosis: "${{ steps.diagnose_rule.output.structured_output }}"
+      gate_outcome: "{{ steps.resolve_wiki_gate_outcome.output.outcome }}"
+
+  - name: record_rule_wiki
+    type: agentKnowledge.record
+    if: >-
+      ${{ steps.optimize_rule_wiki.error == null
+        and steps.optimize_rule_wiki.output.edits != null
+        and steps.optimize_rule_wiki.output.edits.size > 0 }}
+    on-failure:
+      continue: true
+    with:
+      ai_index_id: "{{ consts.wiki_ai_index_id }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      edits: "${{ steps.optimize_rule_wiki.output.edits }}"
 
   - name: mark_alerts_dismissed
     type: security.setAlertTags

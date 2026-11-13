@@ -75,6 +75,8 @@
     "@kbn/proposals-ui",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/core-chrome-browser-mocks",
+    "@kbn/agent-knowledge-common",
+    "@kbn/agent-knowledge-plugin",
     "@kbn/context-engine-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/unsaved-changes-prompt",

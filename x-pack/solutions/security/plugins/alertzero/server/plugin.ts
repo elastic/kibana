@@ -54,6 +54,8 @@ import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
 import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
+import { registerWikiAiIndex } from './context_engine/register_wiki_ai_index';
+import { registerAlertZeroWikiTypePack } from './wiki/register_type_pack';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
@@ -173,6 +175,7 @@ export class AlertZeroPlugin
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
     {
       agentBuilder,
+      agentKnowledge,
       proposals,
       agenticInvestigations,
       contextEngine,
@@ -201,7 +204,9 @@ export class AlertZeroPlugin
     registerOwner({ workflowsExtensions });
     if (contextEngine) {
       registerInvestigationsAiIndex({ contextEngine });
+      registerWikiAiIndex({ contextEngine, logger: this.logger.get('wiki') });
     }
+    registerAlertZeroWikiTypePack(agentKnowledge, this.logger.get('wiki'));
     // Outside the optional-plugin guard below: the browser offers this step whenever AlertZero is
     // enabled, and an unregistered step type fails the run before `on-failure: continue` applies.
     // The handler reports only for a managed Worker, which needs those plugins.

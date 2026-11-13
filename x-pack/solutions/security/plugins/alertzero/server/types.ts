@@ -15,6 +15,10 @@ import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type {
+  AgentKnowledgePluginSetup,
+  AgentKnowledgePluginStart,
+} from '@kbn/agent-knowledge-plugin/server';
+import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
@@ -90,6 +94,7 @@ export interface AlertZeroSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  agentKnowledge?: AgentKnowledgePluginSetup;
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
@@ -102,6 +107,7 @@ export interface AlertZeroStartDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agentKnowledge?: AgentKnowledgePluginStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
   proposals?: ProposalsPluginStart;
   /**
