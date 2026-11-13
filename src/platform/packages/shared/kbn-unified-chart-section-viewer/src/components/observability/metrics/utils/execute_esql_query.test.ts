@@ -118,17 +118,17 @@ describe('executeEsqlQuery', () => {
 
   it('labels the request with the supplied executionContextName', async () => {
     await executeEsqlQuery({
-      esqlQuery: 'FROM exemplars-*.otel-* | STATS BY metric_name',
+      esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
       timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
-      executionContextName: MetricsExecutionContextName.EXEMPLARS,
+      executionContextName: MetricsExecutionContextName.METRICS_INFO,
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
-        executionContext: expect.objectContaining({ page: 'metrics_fetch_exemplars' }),
+        executionContext: expect.objectContaining({ page: 'metrics_fetch_metrics_info' }),
       })
     );
   });
