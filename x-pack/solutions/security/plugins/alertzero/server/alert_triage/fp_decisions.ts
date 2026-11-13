@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TRIAGE_STRICT_KEY_TAG_PREFIX } from './constants';
+import { TRIAGE_STRICT_KEY_TAG_PREFIX, type DecisionAutoCloseMode } from './constants';
 import { hashKey } from './key_tags';
 import { buildPatternKeys, describePatternKey, getField } from './pattern_key';
 
@@ -17,6 +17,13 @@ import { buildPatternKeys, describePatternKey, getField } from './pattern_key';
  * A decision is keyed by the strict pattern key and never by the wide one, so it matches later
  * alerts exactly and not "everything in this folder".
  */
+
+/**
+ * The mode from the `alertzero.triageDecisionAutoClose` flag. Only `shadow` and `on` turn decisions
+ * on; any other value, and a missing flag provider, read as `off`.
+ */
+export const toDecisionAutoCloseMode = (value: string): DecisionAutoCloseMode =>
+  value === 'shadow' || value === 'on' ? value : 'off';
 
 export const FP_DECISION_KI_TYPE = 'security.fp_decision';
 export const FP_DECISION_ID_PREFIX = 'fp-decision-';

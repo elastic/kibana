@@ -52,7 +52,7 @@ import {
 
 export interface MatchFpDecisionsStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
-  /** The kill switch. Anything but `off` is shadow, so a mistyped value cannot close alerts. */
+  /** The flag mode. A missing or mistyped value reads as `off`, so it cannot tag or close alerts. */
   getMode: () => Promise<DecisionAutoCloseMode>;
 }
 

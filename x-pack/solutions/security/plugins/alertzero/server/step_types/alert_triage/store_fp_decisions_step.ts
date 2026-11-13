@@ -12,6 +12,7 @@ import {
   triageStoreFpDecisionsStepCommonDefinition,
   type StoreFpDecisionsSkipReason,
 } from '../../../common/step_types/alert_triage';
+import type { DecisionAutoCloseMode } from '../../alert_triage/constants';
 import {
   FP_DECISION_BLOCKING_VERDICT_TAGS,
   FP_DECISION_MIN_ALERTS,
@@ -31,6 +32,8 @@ import {
 
 export interface StoreFpDecisionsStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
+  /** The flag mode. In `off` nothing is stored, so `off` means no decision work at all. */
+  getMode: () => Promise<DecisionAutoCloseMode>;
 }
 
 const NOTHING = {
@@ -56,6 +59,7 @@ const NOTHING = {
  */
 export const getTriageStoreFpDecisionsStepDefinition = ({
   isContextEngineEnabled,
+  getMode,
 }: StoreFpDecisionsStepDependencies) =>
   createServerStepDefinition({
     ...triageStoreFpDecisionsStepCommonDefinition,
@@ -66,6 +70,8 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
       ) => ({
         output: { skip_reason: skipReason, ...NOTHING, ...counts },
       });
+
+      if ((await getMode()) === 'off') return result('off');
 
       // A supervised approval is automatic: nobody saw the pattern, so nobody approved it.
       if (input.outcome === 'approved' && input.autonomy === 'supervised') {

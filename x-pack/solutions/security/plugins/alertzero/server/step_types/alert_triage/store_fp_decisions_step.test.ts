@@ -40,6 +40,7 @@ const setup = ({
   bulkResponse = { errors: false, items: [] as unknown[] },
   searchFails = false,
   closedAsOther = [],
+  mode = 'shadow',
 }: {
   alerts: Array<{ _id: string; _source: Record<string, unknown> }>;
   keysWithVerdicts?: string[];
@@ -48,6 +49,7 @@ const setup = ({
   searchFails?: boolean;
   /** Ids of alerts an analyst closed with a reason other than false positive. */
   closedAsOther?: string[];
+  mode?: 'off' | 'shadow' | 'on';
 }) => {
   const callKibanaApi = jest.fn(async ({ body }: { body: { aggs?: unknown; query?: unknown } }) => {
     if (body.aggs) {
@@ -70,6 +72,7 @@ const setup = ({
   const run = (input: Record<string, unknown>) =>
     getTriageStoreFpDecisionsStepDefinition({
       isContextEngineEnabled,
+      getMode: async () => mode,
     }).handler({
       input: {
         outcome: 'approved',
@@ -213,6 +216,30 @@ describe('triage store decisions step', () => {
     expect(output).toEqual(expect.objectContaining({ skip_reason: 'supervised', written: 0 }));
     expect(bulk).not.toHaveBeenCalled();
     expect(callKibanaApi).not.toHaveBeenCalled();
+  });
+
+  it('stores nothing while the flag is off, so off means no decision work at all', async () => {
+    // Customers can turn AlertZero and Context Engine on. Until the follow-ups that `on` needs
+    // have landed, the flag defaults to `off`, and that must also stop decisions being written.
+    const { run, bulk, callKibanaApi, isContextEngineEnabled } = setup({
+      alerts: alertsOf([['a.exe', 3]]),
+      mode: 'off',
+    });
+
+    const { output } = await run({});
+
+    expect(output).toEqual(expect.objectContaining({ skip_reason: 'off', written: 0 }));
+    expect(bulk).not.toHaveBeenCalled();
+    expect(callKibanaApi).not.toHaveBeenCalled();
+    expect(isContextEngineEnabled).not.toHaveBeenCalled();
+  });
+
+  it.each(['shadow', 'on'] as const)('stores decisions in %s', async (mode) => {
+    const { run, bulk } = setup({ alerts: alertsOf([['a.exe', 3]]), mode });
+
+    await run({});
+
+    expect(bulk).toHaveBeenCalledTimes(1);
   });
 
   it('stores nothing while the Context Engine is off, without reading any alert', async () => {
