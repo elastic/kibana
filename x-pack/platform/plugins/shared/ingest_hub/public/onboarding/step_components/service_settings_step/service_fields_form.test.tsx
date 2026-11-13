@@ -350,6 +350,7 @@ describe('ServiceFieldsForm — stream-level var_groups', () => {
   const MQ_VIEW: AwsServiceMatrixEntry = {
     id: 'amazon_mq',
     name: 'Amazon MQ',
+    category: 'application_integration',
     signalTypes: ['logs'],
     dataStreams: ['activemq_audit_logs'],
     packageName: 'aws_mq',

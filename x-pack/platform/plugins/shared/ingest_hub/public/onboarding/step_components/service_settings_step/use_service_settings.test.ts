@@ -169,7 +169,6 @@ describe('useServiceSettings — incompleteInstances', () => {
 
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
-    act(() => result.current.setIntegrationName('my-aws'));
     // The default option (ARN) is unfilled.
     expect(result.current.incompleteInstances.map((i) => i.instanceId)).toContain('svc_a');
 
