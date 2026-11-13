@@ -6,12 +6,14 @@
  */
 
 import { tags } from '@kbn/scout-oblt';
-import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ServiceMapResponse } from '@kbn/apm-types';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-types';
 import {
   apiTest,
+  COMMON_HEADERS,
+  getServiceMap,
+  toSourceQuery,
   testData,
   SERVICE_MAP_STATS_BACKEND,
   SERVICE_MAP_STATS_END_DATE,
@@ -20,38 +22,11 @@ import {
   SERVICE_MAP_STATS_WORKER,
 } from '../../fixtures';
 
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'scout',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
-  Accept: 'application/json',
+const STATS_QUERY = {
+  start: SERVICE_MAP_STATS_START_DATE,
+  end: SERVICE_MAP_STATS_END_DATE,
+  environment: testData.ENVIRONMENT_ALL,
 };
-
-const getServiceMap = (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>,
-  query: Record<string, string> = {}
-) =>
-  apiClient.get(
-    `internal/apm/service-map?${new URLSearchParams({
-      start: SERVICE_MAP_STATS_START_DATE,
-      end: SERVICE_MAP_STATS_END_DATE,
-      environment: testData.ENVIRONMENT_ALL,
-      kuery: '',
-      ...query,
-    }).toString()}`,
-    { headers, responseType: 'json' }
-  );
-
-const toSourceQuery = (
-  documentType: ApmDocumentType,
-  rollupInterval: RollupInterval,
-  useDurationSummary: boolean
-): Record<string, string> => ({
-  documentType,
-  rollupInterval,
-  useDurationSummary: String(useDurationSummary),
-});
 
 const ALL_SERVICES = [
   SERVICE_MAP_STATS_BACKEND,
@@ -83,7 +58,7 @@ apiTest.describe(
     });
 
     apiTest('returns the services without stats', async ({ apiClient }) => {
-      const response = await getServiceMap(apiClient, headers);
+      const response = await getServiceMap(apiClient, { headers, query: STATS_QUERY });
 
       expect(response).toHaveStatusCode(200);
       expect(getServiceNames(response.body)).toStrictEqual(ALL_SERVICES);
@@ -91,11 +66,17 @@ apiTest.describe(
     });
 
     apiTest('ignores a data source sent anyway', async ({ apiClient }) => {
-      const response = await getServiceMap(
-        apiClient,
+      const response = await getServiceMap(apiClient, {
         headers,
-        toSourceQuery(ApmDocumentType.ServiceTransactionMetric, RollupInterval.OneMinute, true)
-      );
+        query: {
+          ...STATS_QUERY,
+          ...toSourceQuery({
+            documentType: ApmDocumentType.ServiceTransactionMetric,
+            rollupInterval: RollupInterval.OneMinute,
+            useDurationSummary: true,
+          }),
+        },
+      });
 
       expect(response).toHaveStatusCode(200);
       expect(getServiceNames(response.body)).toStrictEqual(ALL_SERVICES);

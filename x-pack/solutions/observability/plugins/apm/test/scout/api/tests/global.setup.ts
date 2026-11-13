@@ -9,10 +9,13 @@ import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/s
 import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import { ingestApmMetricsFixtures } from '../../shared';
 import {
-  serviceMapStats,
+  SERVICE_MAP_GROUPING_END_DATE,
+  SERVICE_MAP_GROUPING_START_DATE,
   SERVICE_MAP_STATS_END_DATE,
   SERVICE_MAP_STATS_START_DATE,
-} from '../fixtures/synthtrace/service_map_stats';
+} from '../fixtures/constants';
+import { serviceMapGrouping } from '../fixtures/synthtrace/service_map_grouping';
+import { serviceMapStats } from '../fixtures/synthtrace/service_map_stats';
 
 const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
 
@@ -31,6 +34,14 @@ globalSetupHook(
       })
     );
     log.info('Service map stats data indexed');
+
+    await apmSynthtraceEsClient.index(
+      serviceMapGrouping({
+        from: new Date(SERVICE_MAP_GROUPING_START_DATE).getTime(),
+        to: new Date(SERVICE_MAP_GROUPING_END_DATE).getTime(),
+      })
+    );
+    log.info('Service map grouping data indexed');
 
     log.info(`APM data ingestion took ${Date.now() - startTime} ms`);
   }
