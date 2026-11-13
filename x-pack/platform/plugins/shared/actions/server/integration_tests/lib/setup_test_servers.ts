@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -33,7 +34,15 @@ async function waitForLicense(root: ReturnType<typeof createRootWithCorePlugins>
   throw new Error(`Timed out waiting for license to become available (last status ${lastStatus})`);
 }
 
-export async function setupTestServers(settings = {}) {
+interface SetupTestServersOptions {
+  /** Runs after Elasticsearch starts and before Kibana starts. */
+  beforeKibanaStart?: (esClient: ElasticsearchClient) => Promise<void>;
+}
+
+export async function setupTestServers(
+  settings = {},
+  { beforeKibanaStart }: SetupTestServersOptions = {}
+) {
   const { startES } = createTestServers({
     adjustTimeout: (t) => jest.setTimeout(t),
     settings: {
@@ -48,6 +57,7 @@ export async function setupTestServers(settings = {}) {
   const root = createRootWithCorePlugins(settings, { oss: false });
 
   try {
+    await beforeKibanaStart?.(esServer.es.getClient());
     await root.preboot();
     const coreSetup = await root.setup();
     const coreStart = await root.start();

@@ -139,6 +139,12 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
+import {
+  buildTypeFromStoredSpec,
+  createConnectorCatalogStorage,
+  startConnectorCatalog,
+  type ConnectorCatalogHandle,
+} from './lib/connector_catalog';
 
 export interface PluginSetupContract {
   registerType<
@@ -267,6 +273,9 @@ export interface PluginStartContract {
     request: KibanaRequest,
     connectorIds: string[]
   ) => Promise<Set<string>>;
+
+  /** Resolves when the first connector catalog load is done, failed, or timed out. Never rejects. */
+  whenCatalogReady(): Promise<void>;
 }
 
 export interface ActionsPluginsSetup {
@@ -333,6 +342,12 @@ export class ActionsPlugin
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
   private connectorCatalogFeatureFlagSubscription?: Subscription;
+  private setupContract?: PluginSetupContract;
+  private connectorCatalog?: ConnectorCatalogHandle;
+  private resolveCatalogReady: () => void = () => {};
+  private readonly catalogReady: Promise<void> = new Promise<void>((resolve) => {
+    this.resolveCatalogReady = resolve;
+  });
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -541,7 +556,7 @@ export class ActionsPlugin
       inboundEvents,
     });
 
-    return {
+    const setupContract: PluginSetupContract = {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -626,6 +641,8 @@ export class ActionsPlugin
         this.connectorEventEmitter = emitter;
       },
     };
+    this.setupContract = setupContract;
+    return setupContract;
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
@@ -636,11 +653,14 @@ export class ActionsPlugin
       );
     }
 
+    // The handle must exist first, because the first flag value can arrive synchronously.
+    const connectorCatalog = this.startConnectorCatalog(core);
     this.connectorCatalogFeatureFlagSubscription = core.featureFlags
       .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
-      .subscribe((isConnectorCatalogEnabled: boolean) => {
-        return isConnectorCatalogEnabled;
-        // TODO: implement the connector catalog logic
+      .subscribe({
+        next: (isConnectorCatalogEnabled: boolean) =>
+          connectorCatalog.onFlagValue(isConnectorCatalogEnabled),
+        error: (error: unknown) => connectorCatalog.onFlagError(error),
       });
 
     const {
@@ -945,6 +965,7 @@ export class ActionsPlugin
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
       getRelayClient: () => this.relayClient,
+      whenCatalogReady: () => this.catalogReady,
       getUsableUserOAuthConnectorIds: async (request: KibanaRequest, connectorIds: string[]) => {
         throwIfCannotEncrypt();
         const profileUid = await getCurrentUserProfileId(request);
@@ -1202,6 +1223,27 @@ export class ActionsPlugin
     };
   };
 
+  /** Creates the catalog handle. The flag subscription in `start()` drives it. */
+  private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
+    const { setupContract, actionTypeRegistry, logger } = this;
+    const handle = startConnectorCatalog({
+      storage: createConnectorCatalogStorage({
+        esClient: core.elasticsearch.client.asInternalUser,
+      }),
+      actionTypeRegistry: actionTypeRegistry!,
+      buildType: (definition) => {
+        if (!setupContract) {
+          throw new Error('The actions plugin setup contract is not available.');
+        }
+        return buildTypeFromStoredSpec(definition, setupContract);
+      },
+      logger,
+    });
+    this.connectorCatalog = handle;
+    void handle.ready.then(this.resolveCatalogReady);
+    return handle;
+  }
+
   private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
     if (
       !!plugins.serverless &&
@@ -1274,6 +1316,7 @@ export class ActionsPlugin
   public stop() {
     this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
     this.connectorCatalogFeatureFlagSubscription = undefined;
+    this.connectorCatalog?.stop();
     if (this.licenseState) {
       this.licenseState.clean();
     }
