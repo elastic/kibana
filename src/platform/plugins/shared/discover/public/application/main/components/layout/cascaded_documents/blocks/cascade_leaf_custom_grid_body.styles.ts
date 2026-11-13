@@ -10,45 +10,38 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
+export const cascadeToolbarPortalNodeTestSubjAttribute = 'discoverCascadeToolbarPortalNode';
+
 export const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme']) => ({
   wrapper: css({
+    display: 'flex',
+    flexDirection: 'column',
     overflow: 'hidden',
     position: 'relative',
     height: '100%',
     contain: 'content',
-    '& .euiDataGridHeader': {
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    },
-    '& .euiDataGridRow': {
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    },
-    '.unifiedDataTableToolbar:has(+ .euiDataGrid__content &)': {
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    },
-    '.unifiedDataTableToolbar:has(+ .euiDataGrid__content &) .unifiedDataTableToolbarControlGroup':
-      {
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
-      },
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+  }),
+  headerViewport: css({
+    flexShrink: 0,
+    overflow: 'hidden',
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
   }),
   virtualizerContainer: css({
     width: '100%',
     height: '100%',
-    overflowY: 'auto',
+    overflow: 'auto',
     position: 'relative',
     scrollbarWidth: 'thin',
   }),
   virtualizerInner: css({
     position: 'absolute',
-    top: 0,
     left: 0,
     width: '100%',
     overflowAnchor: 'none',
-    // Promote to GPU layer for smoother transform animations
-    willChange: 'transform',
-
-    '& > .euiDataGridRow:last-child .euiDataGridRowCell:not(.euiDataGridFooterCell)': {
-      borderBlockEnd: 'none',
-    },
   }),
-  displayFlex: css({ display: 'flex' }),
+  row: css({
+    display: 'flex',
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+  }),
 });

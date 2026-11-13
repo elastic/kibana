@@ -4280,8 +4280,6 @@
     "discover.dataCascade.grouping.function": "<bold>{selectedColumn}:</bold> <badge></badge>",
     "discover.dataCascade.header.groupBySelectorAriaLabel": "Selecione os grupos para agrupar por",
     "discover.dataCascade.header.layoutSwitchLabel": "Agrupar por",
-    "discover.dataCascade.header.techPreviewLabel": "Resultados agrupados (prévia técnica)",
-    "discover.dataCascade.header.techPreviewTooltip": "Os resultados são agrupados ao executar um Stats BY",
     "discover.dataCascade.inspector.cascadeQueryDescription": "Esta solicitação consulta o Elasticsearch para buscar os documentos correspondentes ao valor da linha em cascata expandida.",
     "discover.dataCascade.inspector.cascadeQueryTitle": "Consulta de Dados de Linha em Cascata",
     "discover.dataCascade.row.action.copyToClipboard": "Copiar para a área de transferência",
