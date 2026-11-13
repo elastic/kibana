@@ -163,13 +163,26 @@ describe('triage revoke decision step', () => {
     expect(output).toEqual(expect.objectContaining({ status: 'not_found', alerts_reopened: 2 }));
   });
 
-  it('does not touch a decision of another space, nor any alert', async () => {
-    const { run, update, calls } = setup({ storedSpace: 'other' });
+  it('treats a decision of another space as missing: not deleted, only this space is cleaned', async () => {
+    // The id hashes the space and the search is space-scoped, so no alert here carries its tag.
+    const { run, update, calls } = setup({ storedSpace: 'other', tagged: [] });
 
     const { output } = await run();
 
     expect(update).not.toHaveBeenCalled();
-    expect(calls('/signals/search')).toEqual([]);
+    expect(calls('/signals/search')).toEqual([
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { term: { 'kibana.alert.workflow_tags': `az:closed_by_decision:${APPROVAL}` } },
+            ],
+          },
+        },
+      }),
+    ]);
+    expect(calls('/signals/status')).toEqual([]);
+    expect(calls('/signals/tags')).toEqual([]);
     expect(output).toEqual({
       status: 'not_found',
       alerts_reopened: 0,

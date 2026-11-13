@@ -36,8 +36,10 @@ import {
  * is counted in `failures`, and the tag still marks what is left. A run that reaches the page limit
  * with alerts left counts as a failure too, so run it again until `failures` is 0.
  *
- * The decision must belong to the space of the run: a decision of another space reads as
- * `not_found`, and the step touches neither it nor any alert. The decision is deleted whatever the
+ * The decision must belong to the space of the run. A decision of another space is not deleted and
+ * reads as `not_found`, the same as a missing one: in both cases the alerts of this space that carry
+ * the tag are put back. The id hashes the space and the alert search is scoped to the space of the
+ * run, so no alert of another space is touched. The decision is deleted whatever the
  * state of the Context Engine setting, because a decision left active would close the alerts again
  * once the setting is back on.
  */
@@ -58,18 +60,19 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
           _source: ['attributes.space_id'],
         });
         if (existing._source?.attributes?.space_id !== input.space_id) {
+          // Reads as a missing decision, so the caller cannot learn that the id exists elsewhere.
           status = 'not_found';
-          return { output: { status, alerts_reopened: 0, alerts_released: 0, failures } };
+        } else {
+          await es.update({
+            index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
+            id,
+            doc: {
+              updated_at: new Date().toISOString(),
+              governance: { lifecycle: { status: 'deleted' } },
+            },
+            refresh: true,
+          });
         }
-        await es.update({
-          index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
-          id,
-          doc: {
-            updated_at: new Date().toISOString(),
-            governance: { lifecycle: { status: 'deleted' } },
-          },
-          refresh: true,
-        });
       } catch (error) {
         if (statusCodeOf(error) === 404) {
           status = 'not_found';
