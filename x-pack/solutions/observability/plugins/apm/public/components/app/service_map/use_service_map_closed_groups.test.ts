@@ -20,6 +20,11 @@ jest.mock('../../../hooks/use_service_map_grouping_enabled', () => ({
   useServiceMapGroupingEnabled: jest.fn(),
 }));
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({ search: '' }),
+}));
+
 const mockedUseServiceMapGroupingEnabled = jest.mocked(useServiceMapGroupingEnabled);
 
 function serviceNode(id: string): ServiceMapNode {
@@ -47,15 +52,35 @@ describe('useServiceMapClosedGroups', () => {
   const nodes = [serviceNode('a'), serviceNode('b')];
   const edges = [edge('a', 'b')];
 
+  /** Would collapse a+b into one square when the flag is on. */
+  const collapsibleGrouping: ServiceMapGrouping = {
+    services: ['a', 'b'],
+    automatic: 'namePrefix',
+    strategies: [
+      {
+        source: 'namePrefix',
+        passes: true,
+        groups: [
+          { id: 'namePrefix:app', kind: 'attribute', attribute: 'namePrefix', value: 'app' },
+        ],
+        assignment: [0, 0],
+      },
+    ],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('passes through when the grouping flag is off', () => {
+  it('does not collapse when the grouping flag is off, even if serviceGrouping is present', () => {
     mockedUseServiceMapGroupingEnabled.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      useServiceMapClosedGroups({ nodes, edges, serviceGrouping: undefined })
+      useServiceMapClosedGroups({
+        nodes,
+        edges,
+        serviceGrouping: collapsibleGrouping,
+      })
     );
 
     expect(result.current.nodes).toBe(nodes);
@@ -104,23 +129,13 @@ describe('useServiceMapClosedGroups', () => {
 
   it('returns a count line when at least one closed group is drawn', () => {
     mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
-    const grouping: ServiceMapGrouping = {
-      services: ['a', 'b'],
-      automatic: 'namePrefix',
-      strategies: [
-        {
-          source: 'namePrefix',
-          passes: true,
-          groups: [
-            { id: 'namePrefix:app', kind: 'attribute', attribute: 'namePrefix', value: 'app' },
-          ],
-          assignment: [0, 0],
-        },
-      ],
-    };
 
     const { result } = renderHook(() =>
-      useServiceMapClosedGroups({ nodes, edges, serviceGrouping: grouping })
+      useServiceMapClosedGroups({
+        nodes,
+        edges,
+        serviceGrouping: collapsibleGrouping,
+      })
     );
 
     expect(result.current.countLine).toBe('2 services in 1 group, by name prefix');
