@@ -38163,7 +38163,6 @@
     "xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfo": "Esta visualização é compatível com dados da integração Kubernetes.",
     "xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfoAlerting": "Esta regra de alerta oferece suporte a dados da integração Kubernetes.",
     "xpack.infra.supportedDataTooltipLink.label": "Quais dados são compatíveis?",
-    "xpack.infra.table.collapseRowLabel": "Recolher",
     "xpack.infra.table.expandRowLabel": "Expandir",
     "xpack.infra.tableView.columnName.avg": "Média.",
     "xpack.infra.tableView.columnName.last1m": "Último 1 min.",

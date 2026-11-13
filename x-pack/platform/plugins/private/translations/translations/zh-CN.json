@@ -38136,7 +38136,6 @@
     "xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfo": "此视图支持来自 Kubernetes 集成的数据。",
     "xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfoAlerting": "此警报规则支持来自 Kubernetes 集成的数据。",
     "xpack.infra.supportedDataTooltipLink.label": "支持哪些数据？",
-    "xpack.infra.table.collapseRowLabel": "折叠",
     "xpack.infra.table.expandRowLabel": "展开",
     "xpack.infra.tableView.columnName.avg": "平均",
     "xpack.infra.tableView.columnName.last1m": "过去 1 分钟",
