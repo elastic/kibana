@@ -232,6 +232,30 @@ describe('#security', () => {
       });
     });
   });
+
+  describe('#authz', () => {
+    test('only creates one instance', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const authz1 = context.security.authz;
+      const authz2 = context.security.authz;
+
+      expect(authz1).toBe(authz2);
+    });
+
+    test('calls coreStart.security.authz.uiam.canViewBillingDetails with the context request', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      coreStart.security.authz.uiam?.canViewBillingDetails.mockResolvedValue(true);
+
+      await expect(context.security.authz.uiam?.canViewBillingDetails()).resolves.toBe(true);
+      expect(coreStart.security.authz.uiam?.canViewBillingDetails).toHaveBeenCalledWith(request);
+    });
+  });
 });
 
 describe('#userProfile', () => {

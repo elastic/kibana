@@ -6,6 +6,7 @@
  */
 
 import { type DiagnosticResult, errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 
 import { schema } from '@kbn/config-schema';
 import type {
@@ -1066,6 +1067,39 @@ export function initRoutes(
         logger.error(`Failed to create a system identity token: ${err}`, err);
         return response.customError({
           statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
+  // Asks Core's security contract what the request's own credentials may do in Cloud, so tests
+  // can observe UIAM's decision for each kind of user.
+  router.get(
+    {
+      path: '/test_endpoints/uiam/access',
+      validate: false,
+      security: {
+        authz: { enabled: false, reason: 'Test endpoint relaying UIAM access checks' },
+      },
+    },
+    async (context, request, response) => {
+      const { security } = await context.core;
+      const { uiam } = security.authz;
+      if (!uiam) {
+        return response.badRequest({ body: { message: 'UIAM authorization is not available' } });
+      }
+
+      try {
+        const [canViewBillingDetails, canInviteOrganizationMembers] = await Promise.all([
+          uiam.canViewBillingDetails(),
+          uiam.canInviteOrganizationMembers(),
+        ]);
+        return response.ok({ body: { canViewBillingDetails, canInviteOrganizationMembers } });
+      } catch (err) {
+        logger.error(`Failed to check access with UIAM: ${err}`, err);
+        return response.customError({
+          statusCode: Boom.isBoom(err) ? err.output.statusCode : 500,
           body: { message: err.message },
         });
       }
