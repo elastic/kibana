@@ -122,8 +122,8 @@ its issue anyway. Once that issue is filed or refreshed, the open per-test issue
 tests are closed as its duplicates (`replaced` in the summary). A new issue names each next to
 its test, in the tests table's "Previously tracked in" column, or in a "Previously tracked in #N"
 line for the tests the table has no room for. An existing issue lists them in that line, at the
-end of its text, and the comment of the refresh names them, or the next comment does
-(`suite.previousIssues` and `report.newPreviousIssues` in its hidden data). Each per-test issue
+end of its text (`suite.previousIssues` in its hidden data), and the comment of the refresh names
+them: one is posted for them even when `--comment-cooldown-days` isn't up. Each per-test issue
 gets a comment: "Now tracked in #M, together with the other tests of its suite. New failures will
 be reported there, so this issue is closed as a duplicate." It is
 closed before the comment is posted, as the failed-test Slack alert and investigator skip
@@ -132,7 +132,8 @@ failure. An issue labelled `skipped-test` is left open and linked as possibly re
 tracks a skip. The consistent failure check of `report_failed_tests` replaces the per-test
 issues of the tests it finds broken the same way, on a job with
 `REPORT_FAILED_TESTS_PER_TEST_ISSUES=false`: a new issue names them next to each test of its list,
-and an existing issue lists them in its line, named by the 🔴 comment, or the next one.
+and an existing issue lists them in its line, named by the 🔴 comment, posted for them even when
+the break was posted less than a day ago.
 
 While issues are filed in a sandbox, the issues of `elastic/kibana` count too (`--tracking-repo`,
 default `elastic/kibana`; empty disables it, and it is skipped when it names `--github-repo`
@@ -153,7 +154,8 @@ whole file. A closed one isn't reopened for a block: the block gets an issue of 
   the suite stopped failing on this week.
 - A short comment on where the suite is still flaky is posted when the suite failed since the
   last one, or since the issue was filed, and at least `--comment-cooldown-days` later (default
-  3). Failures in between are covered by the next comment. It has one line per test that failed
+  3), or right away when it replaces per-test issues (above). Failures in between are covered by
+  the next comment. It has one line per test that failed
   there, even a single one, with the test's own numbers on each branch it's flaky on ("`sorts by
   status`: 4% of builds (18 / 441), last failed […]"), and marks the tests the issue has not shown yet, in its
   body or an earlier comment, as "(newly flaky)". On an issue no report has found flaky before, a

@@ -95,10 +95,10 @@ export interface ReportFlakySuiteIssuesOptions {
    */
   commentCooldownDays: number;
   /**
-   * Hand the open per-test issues of `githubRepo` over to suite issues, once CI no longer updates
+   * Replace the open per-test issues of `githubRepo` with suite issues, once CI no longer updates
    * them: they stop counting as tracking their test, and those about a suite's flaky tests are
-   * closed as duplicates of the suite's issue once it is filed or refreshed. Issues labelled
-   * `skipped-test` are left open.
+   * closed as duplicates of the suite's issue once it is filed or refreshed, a refresh naming them
+   * in a comment right away. Issues labelled `skipped-test` are left open.
    */
   replacePerTestIssues: boolean;
   dryRun: boolean;
@@ -145,7 +145,10 @@ export type FlakySuiteAction = SuiteRef &
         /** Per-test issues about its tests closed as its duplicates (`replacePerTestIssues`). */
         replaced?: IssueRef[];
       }
-    /** The suite's own issue recorded this report; `commented` with its numbers on new failures. */
+    /**
+     * The suite's own issue recorded this report; `commented` with its numbers on new failures, or
+     * to name the per-test issues it replaced.
+     */
     | {
         action: 'updated';
         issue: IssueRef;
@@ -596,24 +599,25 @@ export const reportFlakySuiteIssues = async (
    * comment. A comment that then fails is not retried: the metadata already records it, so the
    * next qualifying report comments instead. Recording it after the comment would take another
    * edit, and a failure there would mean a duplicate comment rather than a missed one. The
-   * per-test issues of the suites refreshed join the body's "Previously tracked in" line, the
-   * comment names them, or the next one does, and they are closed last, in favor of the issue as now
-   * open.
+   * per-test issues of the suites refreshed join the body's "Previously tracked in" line, and the
+   * comment names them: new ones get a comment even when none is due, so the move doesn't wait out
+   * the cooldown. They are closed last, in favor of the issue as now open.
    */
   const update = async (
     suite: FlakySuite,
     issue: GithubIssue,
-    { previous, comment, reopen }: Refresh,
+    { previous, comment: due, reopen }: Refresh,
     members: readonly FlakySuite[] = [suite]
   ) => {
     const recordEach = (action: (ref: SuiteRef) => FlakySuiteAction) =>
       members.forEach((member) => record(action(suiteRef(member))));
     const replacing = members.map((member) => issuesOf(perTestIssuesOf(member)));
-    const { body, announced } = listReplacedIssues(
-      refreshFlakySuiteIssueMetadata(issue.body, suite, { report, previous, comment }),
-      distinctIssues(replacing.flat()).map(({ number }) => number),
-      comment
+    const { body: listed, added } = listReplacedIssues(
+      issue.body,
+      distinctIssues(replacing.flat()).map(({ number }) => number)
     );
+    const comment = due || added.length > 0;
+    const body = refreshFlakySuiteIssueMetadata(listed, suite, { report, previous, comment });
     try {
       await github.editIssue(issue.number, { body, ...(reopen ? { state: 'open' } : {}) });
       if (comment) {
@@ -621,7 +625,7 @@ export const reportFlakySuiteIssues = async (
           issue.number,
           withPreviouslyTracked(
             renderFlakySuiteIssueComment(suite, { report, reopened: reopen, previous }),
-            announced
+            added
           )
         );
       }

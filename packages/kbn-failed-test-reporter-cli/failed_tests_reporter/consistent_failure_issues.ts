@@ -85,7 +85,7 @@ export interface ConsistentFailureIssuesOptions {
   repo: string;
   build: CurrentBuild;
   /**
-   * Hand the open per-test issues of the broken tests over to the suite's issue, for a pipeline
+   * Replace the open per-test issues of the broken tests with the suite's issue, for a pipeline
    * that no longer opens or updates them: they don't keep the suite from getting an issue, and are
    * closed as its duplicates. Issues labelled `skipped-test` are left open.
    */
@@ -346,8 +346,8 @@ export const reportConsistentFailureIssues = async (
    * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
    * of the last post is read from GitHub as it is now, as other jobs of the build find the same
    * break, and recorded once the comment is posted: a comment that failed isn't taken as posted,
-   * and the next build posts it. The per-test issues `replacing` join the body's "Previously
-   * tracked in" line, and the comment names them, or the next one does.
+   * and the next build posts it. The per-test issues `replacing` the body doesn't list yet join
+   * its "Previously tracked in" line, and the post names them, even within `POST_INTERVAL_MS`.
    */
   const postBreak = async (
     suite: FailingSuite,
@@ -359,28 +359,29 @@ export const reportConsistentFailureIssues = async (
     const postedAt = failingPostedAt(body);
     const last = postedAt[key];
     const reopen = issue.state === 'closed';
-    if (!reopen && last && now.getTime() - new Date(last).getTime() < POST_INTERVAL_MS) {
+    const { body: listed, added } = listReplacedIssues(body, replacing);
+    if (
+      !reopen &&
+      added.length === 0 &&
+      last &&
+      now.getTime() - new Date(last).getTime() < POST_INTERVAL_MS
+    ) {
       log.info(
         `Skip, the break on ${key} was posted on #${issue.number} at ${last}: ${describeSuite(
           suite
         )}`
       );
-      const taken = listReplacedIssues(body, replacing, false);
-      if (taken.body !== body) {
-        await github.editIssue(issue.number, { body: taken.body });
-      }
       summary.tracked.push(ref);
       return;
     }
-    const { body: taken, announced } = listReplacedIssues(body, replacing, true);
     const newBody = updateIssueMetadata(
-      taken,
+      listed,
       { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
       FLAKY_TEST_SUITE_METADATA_PREFIX
     );
     await github.addIssueComment(
       issue.number,
-      withPreviouslyTracked(renderFailingSuiteComment(suite, build), announced)
+      withPreviouslyTracked(renderFailingSuiteComment(suite, build), added)
     );
     await github.editIssue(issue.number, { body: newBody, ...(reopen ? { state: 'open' } : {}) });
     log.info(

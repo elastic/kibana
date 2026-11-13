@@ -205,13 +205,9 @@ const failingSuiteIssue = (postedAt: Date, overrides: Partial<GithubIssue> = {})
   );
 };
 
-/** The issues a suite issue's body lists as previously tracking it, and those no comment named. */
-const previousIssuesOf = (body: string) => {
-  const read = (key: string): number[] | undefined =>
-    getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
-  const unannounced = read('report.newPreviousIssues');
-  return { listed: read('suite.previousIssues'), ...(unannounced ? { unannounced } : {}) };
-};
+/** The issues a suite issue's body lists as previously tracking it. */
+const previousIssuesOf = (body: string): number[] | undefined =>
+  getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
 
 const NOW = new Date('2026-10-16T10:00:00.000Z');
 const HOUR_MS = 60 * 60 * 1000;
@@ -539,29 +535,20 @@ describe('reportConsistentFailureIssues', () => {
       });
 
       expect(createIssue).not.toHaveBeenCalled();
-      // the break was posted 2 hours ago: the only comment is the one closing the per-test issue
-      expect(addIssueComment.mock.calls).toEqual([[3, replacedIssueComment(42)]]);
+      // the break was posted 2 hours ago, but the move is named right away
+      expect(addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/^🔴 .*\n\nPreviously tracked in #3\.$/s)],
+        [3, replacedIssueComment(42)],
+      ]);
       expect(closeAsDuplicate).toHaveBeenCalledWith(3, 1042);
-      expect(summary.tracked).toEqual([{ filePath: SPEC, url: existing.html_url }]);
+      expect(summary.commented).toEqual([
+        { filePath: SPEC, url: existing.html_url, reopened: false },
+      ]);
+      expect(summary.tracked).toEqual([]);
       expect(summary.replaced).toEqual(['https://github.com/elastic/appex-qa-ai/issues/3']);
-      // the body lists it, and the next post names it
       const [[, { body }]] = editIssue.mock.calls;
       expect(body).toContain('\n\nPreviously tracked in #3.\n\n<!-- kibanaCiData');
-      expect(previousIssuesOf(body)).toEqual({ listed: [3], unannounced: [3] });
-
-      const nextDay = mockGithub([{ ...existing, body }]);
-      await report({
-        es: mockEs(brokenSince('test-1', 101, 102)).es,
-        github: nextDay.github,
-        failures: [scoutFailure('test-1', 'shows results')],
-        replacePerTestIssues: true,
-        now: new Date(NOW.getTime() + 25 * HOUR_MS),
-      });
-      const [[number, comment]] = nextDay.addIssueComment.mock.calls;
-      expect(number).toBe(42);
-      expect(comment).toMatch(/^🔴 .*\n\nPreviously tracked in #3\.$/s);
-      const [[, { body: posted }]] = nextDay.editIssue.mock.calls;
-      expect(previousIssuesOf(posted)).toEqual({ listed: [3] });
+      expect(previousIssuesOf(body)).toEqual([3]);
     });
 
     it('names the per-test issues it replaces in the break it posts', async () => {
@@ -585,7 +572,7 @@ describe('reportConsistentFailureIssues', () => {
       ]);
       const [[, { body }]] = editIssue.mock.calls;
       expect(body).toContain('Previously tracked in #3.');
-      expect(previousIssuesOf(body)).toEqual({ listed: [3] });
+      expect(previousIssuesOf(body)).toEqual([3]);
     });
 
     it('leaves the per-test issue of a skipped test open and out of the count', async () => {

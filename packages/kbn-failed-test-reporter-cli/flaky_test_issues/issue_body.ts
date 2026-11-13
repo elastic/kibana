@@ -124,8 +124,6 @@ export interface FlakySuiteIssueMetadata {
    * lists them.
    */
   'suite.previousIssues'?: number[];
-  /** Those of `suite.previousIssues` no comment has named yet; the next comment names them. */
-  'report.newPreviousIssues'?: number[];
 }
 
 /** What an issue body records; older issues lack some of it. */

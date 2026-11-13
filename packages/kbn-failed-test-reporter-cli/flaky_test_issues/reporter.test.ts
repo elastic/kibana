@@ -130,13 +130,9 @@ const fileMention = (number: number) =>
 const trackedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
   flakyTest({ testId: 'pw-1', ...overrides });
 
-/** The issues a suite issue's body lists as previously tracking it, and those no comment named. */
-const previousIssuesOf = (body: string) => {
-  const read = (key: string): number[] | undefined =>
-    getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
-  const unannounced = read('report.newPreviousIssues');
-  return { listed: read('suite.previousIssues'), ...(unannounced ? { unannounced } : {}) };
-};
+/** The issues a suite issue's body lists as previously tracking it. */
+const previousIssuesOf = (body: string): number[] | undefined =>
+  getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
 
 const expectNoWrites = (github: ReturnType<typeof createGithubApi>) => {
   expect(github.createIssue).not.toHaveBeenCalled();
@@ -565,7 +561,7 @@ describe('reportFlakySuiteIssues', () => {
       ]);
     });
 
-    it('hands the per-test issues of its tests over to the suite issue it refreshes', async () => {
+    it('replaces the per-test issues of its tests with the suite issue it refreshes', async () => {
       const github = createGithubApi([suiteIssue(42), scoutTestIssue(43, 'pw-1')]);
 
       const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
@@ -575,7 +571,7 @@ describe('reportFlakySuiteIssues', () => {
       // the body lists it below its text, the comment of this refresh names it
       const [[, { body }]] = github.editIssue.mock.calls;
       expect(body).toContain('\n\nPreviously tracked in #43.\n\n<!-- kibanaCiData');
-      expect(previousIssuesOf(body)).toEqual({ listed: [43] });
+      expect(previousIssuesOf(body)).toEqual([43]);
       expect(github.addIssueComment.mock.calls).toEqual([
         [42, expect.stringMatching(/\n\nPreviously tracked in #43\.$/)],
         [43, replacedIssueComment(42)],
@@ -587,33 +583,42 @@ describe('reportFlakySuiteIssues', () => {
       });
     });
 
-    it('names a per-test issue it replaces between comments in the next comment', async () => {
+    it('names a per-test issue it replaces in a comment right away, even when none is due', async () => {
       // filed the day before: no comment is due yet
       const github = createGithubApi([
         suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z')),
         scoutTestIssue(43, 'pw-1'),
       ]);
-      const report = flakyReport([trackedTest()]);
 
-      await run(github, { report, ...replacing });
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
 
+      expect(github.addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/\n\nPreviously tracked in #43\.$/)],
+        [43, replacedIssueComment(42)],
+      ]);
+      expect(summary.actions[0]).toMatchObject({ action: 'updated', commented: true });
+      // the comment restarts the cooldown
       const [[, { body }]] = github.editIssue.mock.calls;
-      expect(body).toContain('Previously tracked in #43.');
-      expect(previousIssuesOf(body)).toEqual({ listed: [43], unannounced: [43] });
+      expect(previousIssuesOf(body)).toEqual([43]);
+      expect(readFlakySuiteIssueMetadata(body)?.['report.commentedAt']).toBe(
+        GENERATED_AT.toISOString()
+      );
+    });
+
+    it('does not comment again for a per-test issue its body already lists', async () => {
+      // a run that listed it and named it in a comment, but failed to close it
+      const filed = suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z'));
+      const body = updateIssueMetadata(
+        filed.body,
+        { 'suite.previousIssues': [43] },
+        FLAKY_TEST_SUITE_METADATA_PREFIX
+      );
+      const github = createGithubApi([{ ...filed, body }, scoutTestIssue(43, 'pw-1')]);
+
+      await run(github, { report: flakyReport([trackedTest()]), ...replacing });
+
+      expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
       expect(github.addIssueComment.mock.calls).toEqual([[43, replacedIssueComment(42)]]);
-
-      // three days later the comment is due, and names it
-      const later = createGithubApi([suiteIssue(42, { body })]);
-      await run(later, {
-        report: { ...report, generatedAt: new Date('2026-09-12T09:04:41.000Z') },
-        ...replacing,
-      });
-
-      const [[number, comment]] = later.addIssueComment.mock.calls;
-      expect(number).toBe(42);
-      expect(comment).toMatch(/\n\nPreviously tracked in #43\.$/);
-      const [[, { body: commented }]] = later.editIssue.mock.calls;
-      expect(previousIssuesOf(commented)).toEqual({ listed: [43] });
     });
 
     it('leaves per-test issues alone without the option', async () => {

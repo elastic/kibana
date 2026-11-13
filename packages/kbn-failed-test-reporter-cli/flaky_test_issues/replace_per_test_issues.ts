@@ -67,7 +67,6 @@ export const distinctIssues = (issues: readonly GithubIssue[]): GithubIssue[] =>
 ];
 
 const PREVIOUS_ISSUES: keyof FlakySuiteIssueMetadata = 'suite.previousIssues';
-const NEW_PREVIOUS_ISSUES: keyof FlakySuiteIssueMetadata = 'report.newPreviousIssues';
 const PREVIOUSLY_TRACKED_LINE = /\n\nPreviously tracked in #[^\n]*/g;
 const METADATA_START = '\n\n<!-- kibanaCiData = ';
 
@@ -98,39 +97,31 @@ const withPreviouslyTrackedLine = (body: string, numbers: readonly number[]): st
 
 export interface ListedReplacedIssues {
   body: string;
-  /** The issues the comment posted with this body names as previously tracking the suite. */
-  announced: number[];
+  /** The issues the body didn't list yet, which the comment posted with it names. */
+  added: number[];
 }
 
 /**
- * The body of a suite issue that replaces `numbers` after it was filed: those it doesn't list yet
- * join its "Previously tracked in" line, and the issues the next comment names. With `commenting`,
- * the comment posted along with the body names them, and those replaced since the last comment.
- * The tests table stays as filed.
+ * The body of a suite issue that replaces `numbers` after it was filed, with those it doesn't list
+ * yet joining its "Previously tracked in" line. The tests table stays as filed.
  */
 export const listReplacedIssues = (
   body: string,
-  numbers: readonly number[],
-  commenting: boolean
+  numbers: readonly number[]
 ): ListedReplacedIssues => {
   const listed = [...new Set([...recordedNumbers(body, PREVIOUS_ISSUES), ...numbersInLine(body)])];
   const added = numbers.filter((number) => !listed.includes(number));
-  const unannounced = [...recordedNumbers(body, NEW_PREVIOUS_ISSUES), ...added];
-  if (added.length === 0 && (!commenting || unannounced.length === 0)) {
-    return { body, announced: [] };
+  if (added.length === 0) {
+    return { body, added };
   }
   const previous = [...listed, ...added];
   return {
     body: updateIssueMetadata(
-      added.length > 0 ? withPreviouslyTrackedLine(body, previous) : body,
-      {
-        [PREVIOUS_ISSUES]: previous,
-        // undefined drops the key from the JSON once a comment names them
-        [NEW_PREVIOUS_ISSUES]: commenting ? undefined : unannounced,
-      },
+      withPreviouslyTrackedLine(body, previous),
+      { [PREVIOUS_ISSUES]: previous },
       FLAKY_TEST_SUITE_METADATA_PREFIX
     ),
-    announced: commenting ? unannounced : [],
+    added,
   };
 };
 
