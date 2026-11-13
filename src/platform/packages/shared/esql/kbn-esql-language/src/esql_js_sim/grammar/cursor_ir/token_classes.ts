@@ -9,7 +9,10 @@
 
 import { Parser } from '@elastic/esql';
 import { Token } from 'antlr4';
+import { startsCommand } from '../cursor_location/command_rules';
+import { PREFERRED_RULES } from '../cursor_location/grammar_rules';
 import { guardModePops } from '../cursor_location/guard_mode_pops';
+import { getCalledRules } from '../grammar_labels/call_sites';
 import type { TokenClass } from './types';
 
 interface Vocabulary {
@@ -23,6 +26,7 @@ const BRACKETS = ['(', ')', '[', ']', '{', '}'];
 const OPENERS = ['(', '[', '{'];
 const CLOSERS = [')', ']', '}'];
 const WORD = /^[a-z][a-z_ ]*$/;
+const valueRules: readonly string[] = PREFERRED_RULES;
 
 let vocabulary: Vocabulary | undefined;
 
@@ -109,10 +113,26 @@ const getVocabulary = (): Vocabulary => {
     parser as unknown as { atn: { ruleToStartState: Array<{ isPrecedenceRule: boolean }> } }
   ).atn;
 
+  // A value is what an expression is made of. The grammar also parses a pipeline and a branch
+  // with precedence, but those hold commands: no value is reached in them without entering one.
+  const reachesValue = (rule: string, seen: Set<string> = new Set()): boolean => {
+    if (valueRules.includes(rule)) {
+      return true;
+    }
+    if (seen.has(rule) || startsCommand(rule)) {
+      return false;
+    }
+    seen.add(rule);
+
+    return getCalledRules(rule).some((called) => reachesValue(called, seen));
+  };
+
   vocabulary = {
     texts,
     precedenceRules: new Set(
-      ruleNames.filter((_, index) => ruleToStartState[index].isPrecedenceRule)
+      ruleNames.filter(
+        (rule, index) => ruleToStartState[index].isPrecedenceRule && reachesValue(rule)
+      )
     ),
   };
 

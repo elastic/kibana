@@ -25,6 +25,13 @@ export type {
   WrittenArgument,
   WrittenCommand,
 } from './cursor_ir/types';
+export {
+  EXPRESSION_POSITIONS,
+  getCommandStarts,
+  getGrammarPositions,
+  withoutRecursion,
+} from './grammar_positions/grammar_positions';
+export type { CommandStart, GrammarPosition } from './grammar_positions/grammar_positions';
 export { GRAMMAR_LABELS } from './grammar_labels/grammar_labels.generated';
 export { getCalledRules, getCallSites } from './grammar_labels/call_sites';
 export { RULE_END, RULE_START } from './grammar_labels/types';

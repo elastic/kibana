@@ -9,7 +9,7 @@
 
 import { Parser } from '@elastic/esql';
 import { esqlCommandRegistry } from '../../commands/registry';
-import { locate } from '../../esql_js_sim/grammar';
+import { getGrammarPositions, locate, withoutRecursion } from '../../esql_js_sim/grammar';
 
 // The examples of the registered commands are the corpus of real queries the package has.
 const examples = esqlCommandRegistry
@@ -42,6 +42,41 @@ describe('locate on the command examples', () => {
         expect(() => locate(example, offset)).not.toThrow();
       }
     }
+  });
+
+  // The table of positions is what the command signatures classify. If `locate` reported a
+  // place the table does not have, that place could never get a meaning.
+  it('expects only arguments and values that the table of positions has', () => {
+    const table = new Set(
+      getGrammarPositions().map(({ command, path }) => `${command}|${path.join('/')}`)
+    );
+    // A place inside an expression continues the path of the expression it is in.
+    const isListed = (command: string | undefined, located: string[]): boolean => {
+      const path = withoutRecursion(located);
+
+      return path.some((_, index) => table.has(`${command}|${path.slice(0, index + 1).join('/')}`));
+    };
+    const missing = new Set<string>();
+
+    for (const example of examples) {
+      for (const offset of tokenBoundaries(example)) {
+        const { arguments: expected, followers } = locate(example, offset);
+        const places = [
+          ...expected.map(({ command, path }) => ({ command, path })),
+          ...followers
+            .filter((follower) => follower.class === 'value' && follower.id)
+            .map(({ command, path, id }) => ({ command, path: [...path, id ?? ''] })),
+        ];
+
+        for (const { command, path } of places) {
+          if (!isListed(command, path)) {
+            missing.add(`${command}: ${path.join(' / ')}`);
+          }
+        }
+      }
+    }
+
+    expect([...missing].sort()).toEqual([]);
   });
 
   it('finds every example valid at its end', () => {

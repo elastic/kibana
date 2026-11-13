@@ -12,3 +12,13 @@ cursor and from the command signatures in `../../esql_js_sim`. Rules, enforced b
 - No command name and no grammar rule name of a command (`whereCommand`) as a string.
 - A provider override is the only exception. It is keyed by an argument, never by a command,
   it is listed in `overrides.ts`, and the list may grow only with an owner and an issue.
+
+What is here so far:
+
+- `command_metadata.ts`: `getRegisteredCommand(commandRule)`, the one function through which
+  the engine reads what Kibana registered for a command. It is undefined for a command that
+  is in the grammar and that Kibana has not adopted.
+- `command_metadata.test.ts`: the snapshot of every position of the registered commands, and
+  the list of commands Kibana has not registered. A grammar upgrade shows up as a change here.
+- `locate_examples.test.ts`: runs `locate` at every token boundary of the registered command
+  examples.
