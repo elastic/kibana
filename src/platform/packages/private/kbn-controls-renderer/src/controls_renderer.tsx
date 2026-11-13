@@ -107,7 +107,7 @@ export const ControlsRenderer = ({
   }
 
   return (
-    <div data-test-subj="controls-group-wrapper">
+    <div data-test-subj="controls-group-wrapper" css={controlsGroupStyles.wrapper}>
       <FlexLayout
         layout={flexLayout}
         gridSettings={gridSettings}
@@ -123,6 +123,10 @@ export const ControlsRenderer = ({
 };
 
 const controlsGroupStyles = {
+  // the wrapper only exists to carry the test subject; it must not affect consumers' layout
+  wrapper: css`
+    display: contents;
+  `,
   controlsGroup: ({ euiTheme }: UseEuiTheme) =>
     css`
       --controlsActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
