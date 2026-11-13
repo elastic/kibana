@@ -2372,8 +2372,8 @@ describe('executeDashboardUpsert', () => {
       expect(result.created).toEqual(['total-requests']);
     });
 
-    it('reports the height of a panel that resolved with one, but not of a panel the validator drops', async () => {
-      const resolvePanelContent = jest.fn(async (request: { nlQuery?: string }) => ({
+    it('reports the height that a resolved panel declared', async () => {
+      const resolvePanelContent = jest.fn(async () => ({
         type: 'success' as const,
         panelContent: { type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } },
         heightHint: 352,
@@ -2386,6 +2386,25 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(result.panelHeightHints).toEqual([{ panelId: 'card', heightPx: 352 }]);
+    });
+
+    it('drops the height of a panel whose edit the validator reverts', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Dashboard', panels: [createLensPanel('panel-1')] },
+        upsert: { panels: [{ id: 'panel-1', content: metricRequest('make it invalid') }] },
+        logger,
+        resolvePanelContent: jest.fn(async () => ({
+          type: 'success' as const,
+          panelContent: {
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric', unrecognizedKey: true },
+          },
+          heightHint: 352,
+        })),
+        validator,
+      });
+
+      expect(result.panelHeightHints).toEqual([]);
     });
 
     it('reverts an invalid edit of a panel moved into a new section and keeps the move', async () => {

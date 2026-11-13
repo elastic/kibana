@@ -110,7 +110,8 @@ const getHeightRowsById = (
       if (panel?.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
         return [];
       }
-      const hasTitleBar = !hidesTitles && typeof panel.config.title === 'string';
+      const hasTitleBar =
+        !hidesTitles && panel.config.hide_title !== true && typeof panel.config.title === 'string';
       return [[panelId, getGridRowsForHeight(heightPx, { hasTitleBar, useMargins })]];
     })
   );

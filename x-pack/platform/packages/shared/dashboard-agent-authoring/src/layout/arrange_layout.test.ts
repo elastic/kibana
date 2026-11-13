@@ -368,6 +368,25 @@ describe('arrangeDashboardLayout', () => {
       }
     );
 
+    it('adds no title bar for a panel that hides its own title', async () => {
+      const panels = [
+        {
+          ...createCustomContentPanel('<p>same</p>', 'Flights'),
+          config: { template: '<p>same</p>', title: 'Flights', hide_title: true },
+        },
+      ];
+
+      await arrangeDashboardLayout({
+        originalPanels: panels,
+        dashboardData: { title: 'Dashboard', panels },
+        heightHints: [{ panelId: 'card', heightPx: 352 }],
+        arrangeLayout,
+        logger,
+      });
+
+      expect(getSentPanels()[0]).toEqual(expect.objectContaining({ heightRows: 13 }));
+    });
+
     it('sizes rows by the bare row height when the dashboard has no margins', async () => {
       const panels = [createCustomContentPanel('<p>same</p>')];
 
