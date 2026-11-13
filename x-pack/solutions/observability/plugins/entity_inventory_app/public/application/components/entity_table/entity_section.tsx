@@ -13,20 +13,14 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
-  EuiProgress,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { InventoryType, SourceError } from '@kbn/entity-inventory-plugin/common';
-import { useEntityTablePreferences } from '../../context/entity_table_preferences_context';
-import type { UseEntityListResult } from '../../hooks/use_entity_list';
 import { useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
-import { TableSkeleton } from '../table_skeleton/table_skeleton';
-import { EntityTableEmpty, EntityTableLoadError } from './entity_table_states';
 import {
-  LOADING_ENTITIES_LABEL,
   ENTITY_COUNT_LABEL,
   SOURCE_ERRORS_TITLE,
   getEntityCountValue,
@@ -52,22 +46,12 @@ const SourceErrorsIndicator = ({ errors }: { errors: readonly SourceError[] }) =
   />
 );
 
-export interface EntityTypeResultsProps {
+export interface EntitySectionProps {
   entityType: InventoryType;
   onTruncatedChange: (truncated: boolean) => void;
 }
 
-/**
- * One entity type as a collapsible section: its name from the `types` entry, the number of listed
- * entities once its `_list` response arrives, and its results below. Each section loads and fails
- * on its own.
- *
- * The section frame renders in every state, so a load or a failure never takes the name and the
- * accordion off the page. `EntityTypeListResults` below picks the skeleton, the error, the empty
- * prompt or the table from the same `listResult`; what this component reads of it is the count
- * badge and the truncation flag, which belong in the header.
- */
-export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeResultsProps) => {
+export const EntitySection = ({ entityType, onTruncatedChange }: EntitySectionProps) => {
   const { type, name } = entityType;
   const accordionId = useGeneratedHtmlId({ prefix: 'entityInventoryTypeSection' });
   const listResult = useEntityList(type);
@@ -120,62 +104,8 @@ export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeR
         }
         paddingSize="s"
       >
-        <EntityTypeListResults entityType={entityType} listResult={listResult} />
+        <EntityTable entityType={entityType} listResult={listResult} />
       </EuiAccordion>
     </EuiPanel>
-  );
-};
-
-interface EntityTypeListResultsProps {
-  entityType: InventoryType;
-  listResult: UseEntityListResult;
-}
-
-/** The list of one type with its loading, error, empty and partial states. */
-const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResultsProps) => {
-  const { type, name } = entityType;
-  const { data: list, loading, error, refresh } = listResult;
-  // The column, sort and page size choices are kept per type above the routes, in
-  // `EntityTablePreferencesProvider`, so an empty range, a failed load or another page does not
-  // discard them.
-  const { preferences, onPreferencesChange } = useEntityTablePreferences(type);
-
-  // A failed reload replaces the results of the last range rather than leaving them up as current.
-  if (error && !loading) {
-    return <EntityTableLoadError ebtDetail={type} message={error.message} onRetry={refresh} />;
-  }
-
-  const { rows, errors } = list;
-  const isEmpty = rows.length === 0;
-
-  if (loading && isEmpty) {
-    return (
-      <TableSkeleton
-        contentAriaLabel={LOADING_ENTITIES_LABEL}
-        dataTestSubj="entityInventoryTableSkeleton"
-      />
-    );
-  }
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {loading && (
-        <EuiFlexItem grow={false}>
-          <EuiProgress size="xs" color="accent" data-test-subj="entityInventoryTableReloading" />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        {isEmpty ? (
-          <EntityTableEmpty typeName={name} isIncomplete={errors.length > 0} />
-        ) : (
-          <EntityTable
-            entityType={entityType}
-            list={list}
-            preferences={preferences}
-            onPreferencesChange={onPreferencesChange}
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };

@@ -17,7 +17,7 @@ import type { FixtureScenario } from '../../../__fixtures__/inventory_scenarios'
 import { createAppServicesMock } from '../../../mocks';
 import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
 import { EntityInventorySearchProvider } from '../../context/search_context';
-import { EntityTypeResults } from './entity_type_results';
+import { EntitySection } from './entity_section';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
@@ -38,7 +38,7 @@ const renderSection = ({
         <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
           <EntityTablePreferencesProvider>
             <EntityInventorySearchProvider entityCategory="hosts">
-              <EntityTypeResults entityType={entityType} onTruncatedChange={onTruncatedChange} />
+              <EntitySection entityType={entityType} onTruncatedChange={onTruncatedChange} />
             </EntityInventorySearchProvider>
           </EntityTablePreferencesProvider>
         </KibanaContextProvider>
@@ -49,7 +49,7 @@ const renderSection = ({
   return { rerenderSection: () => rerender(section), unmount };
 };
 
-describe('EntityTypeResults', () => {
+describe('EntitySection', () => {
   describe('truncation reporting', () => {
     it('reports the truncated list once, and not again on every render of the page', async () => {
       const onTruncatedChange = jest.fn();

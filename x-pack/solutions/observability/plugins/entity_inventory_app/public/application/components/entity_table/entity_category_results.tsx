@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityTypes } from '../../context/entity_types_context';
-import { EntityTypeResults } from './entity_type_results';
+import { EntitySection } from './entity_section';
 import { EntityTableTruncationCallout } from './entity_table_callouts';
 import {
   EntityTableLoadError,
@@ -62,7 +62,7 @@ export const EntityCategoryResults = ({ entityTypeIdPrefix }: EntityCategoryResu
       )}
       {pageTypes.map((entityType) => (
         <EuiFlexItem key={entityType.type} grow={false}>
-          <EntityTypeResults entityType={entityType} onTruncatedChange={setIsTruncated} />
+          <EntitySection entityType={entityType} onTruncatedChange={setIsTruncated} />
         </EuiFlexItem>
       ))}
       {isPrefixUnmatched && (

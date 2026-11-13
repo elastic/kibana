@@ -5,193 +5,61 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type {
-  EuiDataGridColumn,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridStyle,
-  EuiDataGridToolBarVisibilityOptions,
-} from '@elastic/eui';
-import { EuiButtonEmpty, EuiDataGrid, EuiPanel } from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
-import { UI_SETTINGS } from '@kbn/data-service';
-import type {
-  InventoryType,
-  ListResponse,
-  OutputColumnKind,
-} from '@kbn/entity-inventory-plugin/common';
-import {
-  ENTITY_INVENTORY_EBT_ACTIONS,
-  ENTITY_INVENTORY_EBT_ELEMENTS,
-} from '../../../ebt_constants';
-import { useKibana } from '../../../hooks/use_kibana';
-import { sortEntityRows } from '../../utils/sort_entity_rows';
-import { EntityCell } from './entity_table_cells';
-import { RESET_TO_DEFAULT_LABEL, getTableAriaLabel } from './translations';
-import type { EntityTablePreferences } from './use_entity_table_state';
-import { PAGE_SIZE_OPTIONS, useEntityTableState } from './use_entity_table_state';
-
-/** Row rules only and a shaded header, as in the design's list tables. */
-const GRID_STYLE: EuiDataGridStyle = {
-  border: 'horizontal',
-  header: 'shade',
-  stripes: false,
-  fontSize: 'm',
-  cellPadding: 'm',
-};
-
-/** Wide enough for the full timestamp, which the grid would otherwise truncate. */
-const LAST_SEEN_COLUMN_WIDTH = 230;
-
-const getInitialColumnWidth = (kind: OutputColumnKind): number | undefined =>
-  kind === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined;
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
+import { useEntityTablePreferences } from '../../context/entity_table_preferences_context';
+import type { UseEntityListResult } from '../../hooks/use_entity_list';
+import { TableSkeleton } from '../table_skeleton/table_skeleton';
+import { EntityDataGrid } from './entity_data_grid';
+import { EntityTableEmpty, EntityTableLoadError } from './entity_table_states';
+import { LOADING_ENTITIES_LABEL } from './translations';
 
 export interface EntityTableProps {
   entityType: InventoryType;
-  list: ListResponse;
-  /** The column, sort and page size choices; the caller keeps them while the table is unmounted. */
-  preferences: EntityTablePreferences;
-  onPreferencesChange: (preferences: EntityTablePreferences) => void;
+  listResult: UseEntityListResult;
 }
 
-/**
- * One entity type's results as a data grid, with the columns of the response in response order,
- * except the entity id column, which is not shown.
- * Sorting and pagination run over the loaded rows.
- */
-export const EntityTable = ({
-  entityType,
-  list,
-  preferences,
-  onPreferencesChange,
-}: EntityTableProps) => {
-  const {
-    services: { uiSettings },
-  } = useKibana();
-  const { type, name: typeName } = entityType;
-  const dateFormat: string = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
+export const EntityTable = ({ entityType, listResult }: EntityTableProps) => {
+  const { type, name } = entityType;
+  const { data: list, loading, error, refresh } = listResult;
+  const { preferences, onPreferencesChange } = useEntityTablePreferences(type);
 
-  const shownColumns = useMemo(
-    () => list.columns.filter(({ kind }) => kind !== 'id'),
-    [list.columns]
-  );
-  const defaultVisibleColumns = useMemo(() => shownColumns.map(({ name }) => name), [shownColumns]);
-  const {
-    visibleColumns,
-    setVisibleColumns,
-    sortingColumns,
-    onSort,
-    pageIndex,
-    setPageIndex,
-    pageSize,
-    onChangeItemsPerPage,
-    reset,
-  } = useEntityTableState({
-    defaultVisibleColumns,
-    rows: list.rows,
-    preferences,
-    onPreferencesChange,
-  });
+  if (error && !loading) {
+    return <EntityTableLoadError ebtDetail={type} message={error.message} onRetry={refresh} />;
+  }
 
-  const columnKinds = useMemo(
-    () => new Map(shownColumns.map(({ name, kind }) => [name, kind])),
-    [shownColumns]
-  );
-  const columns = useMemo<EuiDataGridColumn[]>(
-    () =>
-      shownColumns.map((column) => ({
-        id: column.name,
-        isSortable: true,
-        initialWidth: getInitialColumnWidth(column.kind),
-      })),
-    [shownColumns]
-  );
-  // A kept choice can name a column that a later response of the type does not have.
-  const knownVisibleColumns = useMemo(
-    () => visibleColumns.filter((id) => columnKinds.has(id)),
-    [visibleColumns, columnKinds]
-  );
+  const { rows, errors } = list;
+  const isEmpty = rows.length === 0;
 
-  const knownSortingColumns = useMemo(
-    () => sortingColumns.filter(({ id }) => columnKinds.has(id)),
-    [sortingColumns, columnKinds]
-  );
-
-  const sortedRows = useMemo(
-    () => sortEntityRows(list.rows, knownSortingColumns),
-    [list.rows, knownSortingColumns]
-  );
-
-  const renderCellValue = useCallback(
-    ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      const row = sortedRows[rowIndex];
-      if (!row) {
-        return null;
-      }
-      return (
-        <EntityCell
-          value={row[columnId]}
-          kind={columnKinds.get(columnId)}
-          dateFormat={dateFormat}
-        />
-      );
-    },
-    [sortedRows, columnKinds, dateFormat]
-  );
-
-  const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(
-    () => ({
-      showColumnSelector: { allowHide: true, allowReorder: true },
-      showSortSelector: true,
-      showDisplaySelector: false,
-      showFullScreenSelector: false,
-      additionalControls: {
-        right: (
-          <EuiButtonEmpty
-            size="xs"
-            color="text"
-            iconType="undo"
-            onClick={reset}
-            data-test-subj="entityInventoryTableReset"
-            {...getEbtProps({
-              action: ENTITY_INVENTORY_EBT_ACTIONS.RESET_TABLE,
-              element: ENTITY_INVENTORY_EBT_ELEMENTS.ENTITY_TABLE,
-              detail: type,
-            })}
-          >
-            {RESET_TO_DEFAULT_LABEL}
-          </EuiButtonEmpty>
-        ),
-      },
-    }),
-    [type, reset]
-  );
+  if (loading && isEmpty) {
+    return (
+      <TableSkeleton
+        contentAriaLabel={LOADING_ENTITIES_LABEL}
+        dataTestSubj="entityInventoryTableSkeleton"
+      />
+    );
+  }
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="s"
-      data-test-subj="entityInventoryTable"
-      data-entity-type={type}
-    >
-      <EuiDataGrid
-        aria-label={getTableAriaLabel(typeName)}
-        columns={columns}
-        columnVisibility={{ visibleColumns: knownVisibleColumns, setVisibleColumns }}
-        gridStyle={GRID_STYLE}
-        rowCount={sortedRows.length}
-        renderCellValue={renderCellValue}
-        sorting={{ columns: knownSortingColumns, onSort }}
-        pagination={{
-          pageIndex,
-          pageSize,
-          pageSizeOptions: PAGE_SIZE_OPTIONS,
-          onChangePage: setPageIndex,
-          onChangeItemsPerPage,
-        }}
-        toolbarVisibility={toolbarVisibility}
-      />
-    </EuiPanel>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {loading && (
+        <EuiFlexItem grow={false}>
+          <EuiProgress size="xs" color="accent" data-test-subj="entityInventoryTableReloading" />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        {isEmpty ? (
+          <EntityTableEmpty typeName={name} isIncomplete={errors.length > 0} />
+        ) : (
+          <EntityDataGrid
+            entityType={entityType}
+            list={list}
+            preferences={preferences}
+            onPreferencesChange={onPreferencesChange}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
