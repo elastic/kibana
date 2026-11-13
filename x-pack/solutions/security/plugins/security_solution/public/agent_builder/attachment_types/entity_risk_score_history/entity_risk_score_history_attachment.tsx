@@ -40,8 +40,6 @@ const OPEN_RISK_HISTORY_LABEL = i18n.translate(
   { defaultMessage: 'Open full risk history' }
 );
 
-const AGENT_BUILDER_RISK_HISTORY_SCOPE = 'agent-builder-risk-history' as const;
-
 const LazyEntityRiskScoreHistoryInlineContent = React.lazy(() =>
   import('./entity_risk_score_history_inline_content').then((module) => ({
     default: module.EntityRiskScoreHistoryInlineContent,
@@ -63,14 +61,12 @@ const buildRiskHistoryFlyout = (
 
   const left = buildEntityLeftPanel({
     identifier,
-    scopeId: AGENT_BUILDER_RISK_HISTORY_SCOPE,
     path: {
       tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
       ...(data.scoreType === 'resolution'
         ? { subTab: RiskScoreLeftPanelSubTab.RESOLUTION }
         : { subTab: RiskScoreLeftPanelSubTab.ENTITY }),
     },
-    isRiskScoreExist: true,
   });
   if (!left) {
     return null;

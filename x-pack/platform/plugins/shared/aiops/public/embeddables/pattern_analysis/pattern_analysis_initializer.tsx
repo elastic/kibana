@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -46,6 +45,7 @@ import {
   toStoredMinimumTimeRange,
   toUiMinimumTimeRange,
 } from '../../../common/embeddables/pattern_analysis/normalize_legacy_state';
+import { getPatternAnalysisDefaultTitle } from './default_title';
 
 interface PatternAnalysisFormInput {
   fieldName?: string;
@@ -101,17 +101,9 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
       minimum_time_range: toStoredMinimumTimeRange(formInput.minimumTimeRangeOption),
       random_sampler_mode: formInput.randomSamplerMode,
       random_sampler_probability: formInput.randomSamplerProbability,
-      title:
-        isPopulatedObject(formInput) && formInput.fieldName
-          ? i18n.translate('xpack.aiops.embeddablePatternAnalysis.attachmentTitle', {
-              defaultMessage: 'Pattern analysis: {fieldName}',
-              values: {
-                fieldName: formInput.fieldName,
-              },
-            })
-          : '',
+      title: initialInput?.title?.trim() || getPatternAnalysisDefaultTitle(formInput.fieldName),
     };
-  }, [dataViewId, formInput]);
+  }, [dataViewId, formInput, initialInput?.title]);
 
   useEffect(
     function previewChanges() {

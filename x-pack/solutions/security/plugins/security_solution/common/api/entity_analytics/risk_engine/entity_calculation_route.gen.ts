@@ -49,37 +49,3 @@ export const RiskScoresEntityCalculationResponse = lazySchema(() =>
 export type RiskScoresEntityCalculationResponse = z.infer<
   typeof RiskScoresEntityCalculationResponse
 >;
-
-export const DeprecatedTriggerRiskScoreCalculationRequestBody = lazySchema(
-  () => RiskScoresEntityCalculationRequest
-);
-export type DeprecatedTriggerRiskScoreCalculationRequestBody = z.infer<
-  typeof DeprecatedTriggerRiskScoreCalculationRequestBody
->;
-export type DeprecatedTriggerRiskScoreCalculationRequestBodyInput = z.input<
-  typeof DeprecatedTriggerRiskScoreCalculationRequestBody
->;
-
-export const DeprecatedTriggerRiskScoreCalculationResponse = lazySchema(
-  () => RiskScoresEntityCalculationResponse
-);
-export type DeprecatedTriggerRiskScoreCalculationResponse = z.infer<
-  typeof DeprecatedTriggerRiskScoreCalculationResponse
->;
-
-export const TriggerRiskScoreCalculationRequestBody = lazySchema(
-  () => RiskScoresEntityCalculationRequest
-);
-export type TriggerRiskScoreCalculationRequestBody = z.infer<
-  typeof TriggerRiskScoreCalculationRequestBody
->;
-export type TriggerRiskScoreCalculationRequestBodyInput = z.input<
-  typeof TriggerRiskScoreCalculationRequestBody
->;
-
-export const TriggerRiskScoreCalculationResponse = lazySchema(
-  () => RiskScoresEntityCalculationResponse
-);
-export type TriggerRiskScoreCalculationResponse = z.infer<
-  typeof TriggerRiskScoreCalculationResponse
->;

@@ -53,6 +53,8 @@ export class FeatureSettingsPage {
   readonly deprecatedModelsCallout: Locator;
   readonly eolModelsCallout: Locator;
 
+  readonly toastList: Locator;
+
   constructor(private readonly page: ScoutPage) {
     // Header
     this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
@@ -104,6 +106,8 @@ export class FeatureSettingsPage {
     // Deprecation / EOL callouts
     this.deprecatedModelsCallout = this.page.testSubj.locator('deprecatedModelsCallout');
     this.eolModelsCallout = this.page.testSubj.locator('eolModelsCallout');
+
+    this.toastList = this.page.testSubj.locator('globalToastList');
   }
 
   // --- Navigation ---
@@ -172,6 +176,21 @@ export class FeatureSettingsPage {
 
   public globalDefaultLockedRow(featureId: string): Locator {
     return this.page.testSubj.locator(`global-default-row-${featureId}`);
+  }
+
+  public addEffortButton(endpointId: string): Locator {
+    return this.page.testSubj.locator(`add-effort-${endpointId}`);
+  }
+
+  public effortBadge(endpointId: string): Locator {
+    return this.page.testSubj.locator(`effort-badge-${endpointId}`);
+  }
+
+  /** Hovers the model row to reveal "+ Effort", then picks the level in the popover. */
+  public async setEffort(endpointId: string, level: string): Promise<void> {
+    await this.endpointRow(endpointId).hover();
+    await this.addEffortButton(endpointId).click();
+    await this.page.testSubj.locator(`reasoningEffort-${level}`).click();
   }
 
   // --- Composite actions ---

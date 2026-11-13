@@ -11,6 +11,7 @@ import path from 'node:path';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
 import {
   SCOUT_FLAKY_TESTS_PATH,
   SCOUT_REPORTER_ES_API_KEY,
@@ -82,6 +83,29 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] =>
 const readClassifications = (flagsReader: FlagsReader): FlakyTestClassification[] =>
   readEnumList(flagsReader, 'classifications', FLAKY_TEST_CLASSIFICATIONS);
 
+/**
+ * The pipelines of `pipelines` judged together, from those `--judgedTogether` lists: undefined,
+ * every pipeline together, only when the flag is unset. Pipelines the report doesn't read are left
+ * out, so a report that overrides --pipelines alone, inheriting the list from the environment,
+ * still runs; when none is left, every pipeline is judged on its own, as pooling them could let
+ * one environment hide the flakiness of another.
+ */
+export const judgedTogetherOf = (
+  listed: readonly string[] | undefined,
+  pipelines: readonly string[],
+  log: ToolingLog
+): string[] | undefined => {
+  if (listed === undefined) {
+    return undefined;
+  }
+  const read = listed.filter((pipeline) => pipelines.includes(pipeline));
+  const unread = listed.filter((pipeline) => !pipelines.includes(pipeline));
+  if (unread.length > 0) {
+    log.info(`--judgedTogether: left out ${unread.join(', ')}, not in --pipelines`);
+  }
+  return read;
+};
+
 export const discoverFlakyTests: Command<void> = {
   name: 'discover-flaky-tests',
   description: `
@@ -89,7 +113,9 @@ export const discoverFlakyTests: Command<void> = {
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
   The build thresholds apply per branch: a test qualifies when one branch clears all of them
-  on its own, so a clean branch cannot dilute a flaky one.
+  on its own, so a clean branch cannot dilute a flaky one. With --judgedTogether, only those
+  pipelines' builds are counted together; every other pipeline, e.g. one running the tests in
+  another environment, is judged per branch on its own, so their builds cannot dilute it.
 
   Examples:
     # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
@@ -97,6 +123,9 @@ export const discoverFlakyTests: Command<void> = {
 
     # Include PR builds and widen the window
     node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14
+
+    # Judge the on-merge pipelines together, and the FIPS pipeline on its own
+    node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-security-solution-on-merge,kibana-fips --judgedTogether kibana-on-merge,kibana-security-solution-on-merge
 
     # Only Jest and FTR, custom output path, summary suppressed
     node scripts/scout discover-flaky-tests --frameworks jest,ftr --outputPath target/flaky.json --quiet
@@ -114,6 +143,7 @@ export const discoverFlakyTests: Command<void> = {
       'esMaxRetries',
       'lookbackDays',
       'pipelines',
+      'judgedTogether',
       'branches',
       'frameworks',
       'classifications',
@@ -150,6 +180,7 @@ export const discoverFlakyTests: Command<void> = {
     --verifyTLSCerts     (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     --lookbackDays       (optional)  How many days to look back when aggregating [default: ${DEFAULT_LOOKBACK_DAYS}]
     --pipelines          (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEFAULT_PIPELINES}]
+    --judgedTogether     (optional)  Comma-separated pipelines whose builds are counted together per branch; the others of --pipelines are each judged on their own, and those not in --pipelines are ignored [default: all together]
     --branches           (optional)  Comma-separated branches; no filter when omitted
     --frameworks         (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
     --classifications    (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
@@ -191,6 +222,14 @@ export const discoverFlakyTests: Command<void> = {
     if (!Number.isInteger(summaryWidth) || summaryWidth < 1) {
       throw createFlagError('--summaryWidth must be a positive integer');
     }
+    const pipelines = readList(flagsReader, 'pipelines');
+    const judgedTogether = judgedTogetherOf(
+      flagsReader.arrayOfStrings('judgedTogether') === undefined
+        ? undefined
+        : readList(flagsReader, 'judgedTogether'),
+      pipelines,
+      log
+    );
 
     log.info(`Connecting to Elasticsearch at ${esURL}`);
     const es = await getValidatedESClient(
@@ -208,7 +247,8 @@ export const discoverFlakyTests: Command<void> = {
       es,
       {
         lookbackDays,
-        pipelines: readList(flagsReader, 'pipelines'),
+        pipelines,
+        judgedTogether,
         branches: readList(flagsReader, 'branches'),
         frameworks: frameworks.length > 0 ? frameworks : defaults.frameworks,
         classifications,

@@ -70,6 +70,7 @@ export const navigateToCaseViaToaster = () => {
 export const selectExistingCase = () => {
   cy.get(SELECT_EXISTING_CASES_MODAL).within(() => {
     cy.get(SELECT_CASE_TABLE_ROW).its('length').should('be.gte', 0);
-    cy.get(SELECT_EXISTING_CASE).should('exist').contains('Select').click();
+    // the Select button stays disabled until the "already attached" check for the indicator loads
+    cy.contains(SELECT_EXISTING_CASE, 'Select').should('be.enabled').click();
   });
 };

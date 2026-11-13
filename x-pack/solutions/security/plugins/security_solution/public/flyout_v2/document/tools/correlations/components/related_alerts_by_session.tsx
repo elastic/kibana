@@ -29,10 +29,6 @@ export interface RelatedAlertsBySessionProps {
    * Callback to open the alert preview
    */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
-  /**
-   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
-   */
-  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -43,7 +39,6 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
   scopeId,
   eventId,
   onShowAlert,
-  useLegacyExpandableFlyout,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
@@ -53,12 +48,10 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
   const columns = useMemo(
     () =>
       getColumns({
-        scopeId,
         dataTestSubj: CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
         onShowAlert,
-        useLegacyExpandableFlyout,
       }),
-    [scopeId, onShowAlert, useLegacyExpandableFlyout]
+    [onShowAlert]
   );
 
   if (error) {

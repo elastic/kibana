@@ -33,7 +33,7 @@ import {
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools/react';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   ruleDetailsRoute as commonRuleDetailsRoute,
@@ -1068,7 +1068,6 @@ export const RulesList = ({
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
-            cps={cps}
             showClassicBadge={kibanaServices.showClassicBadge}
           />
         )}

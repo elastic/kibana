@@ -34,8 +34,19 @@ jest.mock('../pages/landing/app', () => ({
 jest.mock('../pages/automations/automations_page', () => ({
   AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
 }));
+let mockIntroBannerVisible: boolean | undefined;
 jest.mock('../pages/landing/onboarding/onboarding', () => ({
-  NightshiftOnboarding: () => <div data-test-subj="nightshiftOnboardingStub" />,
+  NightshiftOnboarding: ({
+    onIntroBannerVisibilityChange,
+  }: {
+    onIntroBannerVisibilityChange?: (visible: boolean | undefined) => void;
+  }) => {
+    React.useEffect(() => {
+      onIntroBannerVisibilityChange?.(mockIntroBannerVisible);
+      return () => onIntroBannerVisibilityChange?.(undefined);
+    }, [onIntroBannerVisibilityChange]);
+    return <div data-test-subj="nightshiftOnboardingStub" />;
+  },
 }));
 jest.mock('../pages/landing/onboarding/use_onboarding_visibility');
 jest.mock('../pages/knowledge/page', () => {
@@ -148,6 +159,7 @@ function renderPage(initialPath = '/') {
 describe('NightshiftPage', () => {
   beforeEach(() => {
     mockSpaceBasePath = `/s/nightshift-page-test-${nextTestSpace++}`;
+    mockIntroBannerVisible = undefined;
     navigateToApp.mockClear();
     navigateToUrl.mockClear();
     featureFlags.useBooleanValue.mockReturnValue(true);
@@ -215,6 +227,26 @@ describe('NightshiftPage', () => {
 
       expect(await screen.findByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+    });
+
+    it('offers the live example before setup only once the banner is known to be hidden', async () => {
+      withInvestigations();
+      mockServiceAccount = {
+        isLoading: false,
+        isSuccess: true,
+        data: { installed: false, enabled: null, serviceAccountsEnabled: true },
+      };
+      const loading = renderPage();
+      await screen.findByTestId('nightshiftOnboardingStub');
+      expect(screen.queryByTestId('appHeaderExploreLiveExample')).not.toBeInTheDocument();
+      loading.unmount();
+
+      mockIntroBannerVisible = false;
+      renderPage();
+      expect(await screen.findByTestId('appHeaderExploreLiveExample')).toHaveAttribute(
+        'href',
+        'https://ela.st/nightshift-try-it'
+      );
     });
 
     it('shows the app once the space is set up', async () => {
@@ -568,6 +600,33 @@ describe('NightshiftPage', () => {
           forceOnboarding: false,
         })
       );
+    });
+
+    it('replaces early header actions through First automation and removes the live example when onboarding ends', async () => {
+      withInvestigationsClient();
+      mockIntroBannerVisible = false;
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        latestInvestigation: { id: 'inv-1' },
+        dismiss: jest.fn(),
+      });
+      const { history, rerender } = renderPage();
+      expect(await screen.findByTestId('appHeaderExploreLiveExample')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftDetectionsPrimaryAction')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+      ).not.toBeInTheDocument();
+
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: false,
+        dismiss: jest.fn(),
+      });
+      rerender(renderPageContent(history));
+      expect(screen.queryByTestId('appHeaderExploreLiveExample')).not.toBeInTheDocument();
+      expect(await screen.findByTestId('nightshiftAutomationsPrimaryAction')).toBeInTheDocument();
     });
 
     it('hides the detection setup banner across app remounts in the same space', async () => {

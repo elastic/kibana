@@ -181,7 +181,7 @@ describe('createSendMessageTool', () => {
         parentExecutionId: 'parent-exec',
         conversationId: 'child-convo',
         prompt: 'follow up',
-        connectorId: 'conn-x',
+        modelSource: { connectorId: 'conn-x' },
       })
     );
     expect(result.results[0].type).toBe(ToolResultType.other);
@@ -409,7 +409,42 @@ describe('createSendMessageTool', () => {
 
     expect(modelProvider.selectModel).not.toHaveBeenCalled();
     expect(sendToSubAgent).toHaveBeenCalledWith(
-      expect.objectContaining({ agentId: 'solution-agent', connectorId: undefined })
+      expect.objectContaining({ agentId: 'solution-agent', modelSource: undefined })
+    );
+  });
+
+  it("forwards the parent's featureId to the sub-agent executor as inferenceFeatureId", async () => {
+    const events$ = roundCompleteEvents({ response: { message: 'ok' } });
+    const sendToSubAgent = jest.fn().mockResolvedValue({
+      executionId: 'sub-exec',
+      events$: events$.asObservable(),
+    });
+    const subagentTracker = new SubagentTracker({
+      researcher: { conversation_id: 'child-convo', agent_id: 'test-agent' },
+    });
+    const tool = createSendMessageTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec',
+      parentModel: { featureId: 'parent_feature' },
+      subAgentExecutor: {
+        executeSubAgent: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent,
+        getExecution: jest.fn(),
+      },
+      subagentTracker,
+      allowedIds: new Set(['test-agent']),
+    });
+
+    const { context, modelProvider } = createMockContext();
+    await callHandler(tool, { to: 'researcher', prompt: 'hi' }, context);
+
+    expect(modelProvider.selectModel).not.toHaveBeenCalled();
+    expect(sendToSubAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentId: 'test-agent',
+        modelSource: { featureId: 'parent_feature' },
+      })
     );
   });
 

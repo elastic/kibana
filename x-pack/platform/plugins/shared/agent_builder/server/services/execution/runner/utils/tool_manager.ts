@@ -206,7 +206,7 @@ export class ToolManager implements IToolManager {
       }
     }
 
-    return internalToolIds;
+    return [...internalToolIds, ...this.dynamicToolRegistry.ids()];
   }
 
   private getMaxToolTokens(tool: ExecutableTool, dynamicToolId?: string): number {

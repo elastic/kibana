@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
 import type {
+  FleetRequestHandler,
   GetOneDownloadSourcesRequestSchema,
   PutDownloadSourcesRequestSchema,
   PostDownloadSourcesRequestSchema,
@@ -26,6 +27,7 @@ import type {
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
 import { throwIfSslPathInvalid } from '../utils/ssl_utils';
+import { sanitizeDownloadSource } from '../utils/sanitize_settings_objects';
 
 // Support clearing auth via PUT requests
 export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
@@ -94,11 +96,18 @@ export function validateDownloadSource(downloadSource: DownloadSourceWithNullabl
   }
 }
 
-export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {
+export const getDownloadSourcesHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  const fleetContext = await context.fleet;
   const downloadSources = await downloadSourceService.list();
 
   const body: GetDownloadSourceResponse = {
-    items: downloadSources.items,
+    items: fleetContext.authz.fleet.readSettings
+      ? downloadSources.items
+      : downloadSources.items.map(sanitizeDownloadSource),
     page: downloadSources.page,
     perPage: downloadSources.perPage,
     total: downloadSources.total,
@@ -107,14 +116,17 @@ export const getDownloadSourcesHandler: RequestHandler = async (context, request
   return response.ok({ body });
 };
 
-export const getOneDownloadSourcesHandler: RequestHandler<
+export const getOneDownloadSourcesHandler: FleetRequestHandler<
   TypeOf<typeof GetOneDownloadSourcesRequestSchema.params>
 > = async (context, request, response) => {
   try {
+    const fleetContext = await context.fleet;
     const downloadSource = await downloadSourceService.get(request.params.sourceId);
 
     const body: GetOneDownloadSourceResponse = {
-      item: downloadSource,
+      item: fleetContext.authz.fleet.readSettings
+        ? downloadSource
+        : sanitizeDownloadSource(downloadSource),
     };
 
     return response.ok({ body });

@@ -23,4 +23,4 @@ export {
   RUN_QUOTA_SETTINGS_SO_TYPE,
 } from './saved_objects';
 export type { RunQuotaLedgerAttributes, RunQuotaSettingsAttributes } from './saved_objects';
-export { dayKey, resolveDailyWindow } from './window';
+export { dayKey, resolveDailyWindow } from '@kbn/nightshift-shared';
