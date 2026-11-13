@@ -50,9 +50,7 @@ mappings:
         example: summary
 observableTypes:
   type: array
-  description: >
-    Custom observable type configuration details, and the changes to the built-in observable types.
-    An entry for a built-in type has its built-in label and only the fields that differ from the defaults.
+  description: Custom observable type configuration details.
   items:
     type: object
     properties:
@@ -64,13 +62,23 @@ observableTypes:
         type: string
         description: The observable type label.
         example: My observable type
-      valuePattern:
+observableTypeSettings:
+  type: array
+  description: >
+    The auto-extraction settings of the built-in and custom observable types.
+    A type without an entry uses its default settings.
+  items:
+    type: object
+    properties:
+      key:
         type: string
-        description: A regular expression. Auto-extraction keeps only the values that match it.
-        example: ^E\d{6}$
+        description: The key of a built-in or custom observable type.
+        example: employee-id
       paths:
         type: array
-        description: The alert fields that auto-extraction reads for this type.
+        description: >
+          The alert fields that auto-extraction reads for this type.
+          For a built-in type, these entries change or add to the default fields.
         items:
           type: object
           properties:
@@ -89,6 +97,10 @@ observableTypes:
                 type: string
               example:
                 - E000000
+      valuePattern:
+        type: string
+        description: A regular expression. Auto-extraction keeps only the values that match it.
+        example: ^E\d{6}$
 extractObservables:
   type: boolean
   description: >

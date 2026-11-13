@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { getValidatorForObservableType } from '../../common/observables/validators';
-import { MAX_CUSTOM_OBSERVABLE_TYPES, OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
+import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 import { type CasesClient } from './client';
 import { getAvailableObservableTypesMap } from './observable_types';
 
@@ -39,30 +39,14 @@ export const validateDuplicatedKeysInRequest = ({
   }
 };
 
-const BUILTIN_LABELS_BY_KEY = new Map<string, string>(
-  OBSERVABLE_TYPES_BUILTIN.map(({ key, label }) => [key, label])
-);
-
-/**
- * An override of a built-in type has no label, or the label that a read fills in.
- * A client can send the label of a read back. The write path removes it.
- */
-const isBuiltinOverride = ({ key, label }: { key: string; label?: string }): boolean =>
-  BUILTIN_LABELS_BY_KEY.has(key) &&
-  (label === undefined || label === BUILTIN_LABELS_BY_KEY.get(key));
-
 /**
  * Throws an error if the request has observable types with duplicated labels.
  */
 export const validateDuplicatedObservableTypesInRequest = ({
-  requestFields: allRequestFields = [],
+  requestFields = [],
 }: {
-  requestFields?: Array<{ label?: string; key: string }>;
+  requestFields?: Array<{ label: string; key: string }>;
 }) => {
-  const requestFields = allRequestFields.filter(
-    (item): item is { label: string; key: string } =>
-      item.label !== undefined && !isBuiltinOverride(item)
-  );
   const extractLabelFromItem = (item: { label: string }) => item.label.toLowerCase();
   const extractKeyFromItem = (item: { key: string }) => item.key.toLowerCase();
 
@@ -109,35 +93,35 @@ const isValidPattern = (pattern: string): boolean => {
 };
 
 /**
- * Throws an error if an observable type entry has invalid paths, a value pattern on a built-in
- * type, or no label on a type that is not built in.
+ * Throws an error if an observable type settings entry has no built-in or custom type, repeats a key or a path,
+ * or has a value pattern that is on a built-in type or does not compile.
  */
-export const validateObservableTypePathsInRequest = ({
-  requestFields = [],
+export const validateObservableTypeSettingsInRequest = ({
+  observableTypes = [],
+  observableTypeSettings = [],
 }: {
-  requestFields?: Array<{
+  observableTypes?: Array<{ key: string }>;
+  observableTypeSettings?: Array<{
     key: string;
-    label?: string;
     paths?: Array<{ path: string }>;
     valuePattern?: string;
   }>;
 }) => {
-  const builtinKeys = new Set(BUILTIN_LABELS_BY_KEY.keys());
-  const overrideKeys = new Set<string>();
+  const builtinKeys = new Set(OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key));
+  const customKeys = new Set(observableTypes.map(({ key }) => key));
+  const settingsKeys = new Set<string>();
   const errors: string[] = [];
 
-  requestFields.forEach(({ key, label, paths = [], valuePattern }) => {
+  observableTypeSettings.forEach(({ key, paths = [], valuePattern }) => {
     const isBuiltin = builtinKeys.has(key);
 
-    if (!isBuiltin && label === undefined) {
-      errors.push(`custom observable type ${key} needs a label`);
+    if (settingsKeys.has(key)) {
+      errors.push(`observable type ${key} has more than one settings entry`);
     }
+    settingsKeys.add(key);
 
-    if (isBuiltinOverride({ key, label })) {
-      if (overrideKeys.has(key)) {
-        errors.push(`built-in observable type ${key} has more than one entry`);
-      }
-      overrideKeys.add(key);
+    if (!isBuiltin && !customKeys.has(key)) {
+      errors.push(`observable type ${key} does not exist`);
     }
 
     if (isBuiltin && valuePattern !== undefined) {
@@ -154,16 +138,25 @@ export const validateObservableTypePathsInRequest = ({
     }
   });
 
-  const customTypesCount = requestFields.filter(
-    (entry) => entry.label !== undefined && !isBuiltinOverride(entry)
-  ).length;
-  if (customTypesCount > MAX_CUSTOM_OBSERVABLE_TYPES) {
-    errors.push(`the maximum of custom observable types is ${MAX_CUSTOM_OBSERVABLE_TYPES}`);
-  }
-
   if (errors.length > 0) {
-    throw Boom.badRequest(`Invalid observable types in request: ${errors.join(', ')}`);
+    throw Boom.badRequest(`Invalid observable type settings in request: ${errors.join(', ')}`);
   }
+};
+
+/**
+ * Removes the settings entries of custom types that are not in the given observable types.
+ */
+export const pruneObservableTypeSettings = <T extends { key: string }>({
+  observableTypes,
+  observableTypeSettings,
+}: {
+  observableTypes: Array<{ key: string }>;
+  observableTypeSettings: T[];
+}): T[] => {
+  const builtinKeys = new Set(OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key));
+  const customKeys = new Set(observableTypes.map(({ key }) => key));
+
+  return observableTypeSettings.filter(({ key }) => builtinKeys.has(key) || customKeys.has(key));
 };
 
 /**

@@ -1,76 +1,25 @@
 type: array
 description: >
-  The custom observable types, and the changes to the built-in observable types.
-  An entry with a label is a custom type.
-  An entry without a label changes the fields of the built-in type with the same key.
-  The configuration stores only the fields that differ from the defaults of the built-in type.
+  The custom observable types.
+  To change how auto-extraction reads a type, use `observableTypeSettings`.
 minItems: 0
-maxItems: 19
+maxItems: 10
 items:
   type: object
   required:
     - key
+    - label
   properties:
     key:
       type: string
-      description: >
-        The observable type key.
-        For a built-in type, use the key of that type, for example `observable-type-agent-id`.
+      description: The observable type key.
       minLength: 1
       maxLength: 36
       pattern: ^[a-z0-9_-]+$
       example: employee-id
     label:
       type: string
-      description: >
-        The observable type label. It is required for a custom type.
-        A built-in type has no label in a request.
+      description: The observable type label.
       minLength: 1
       maxLength: 50
       example: Employee ID
-    valuePattern:
-      type: string
-      description: >
-        A regular expression. Auto-extraction keeps only the values that match it.
-        It applies only to a custom type, and to values of at most 1024 characters.
-        A request with an expression that does not compile returns a 400 error.
-      minLength: 1
-      maxLength: 256
-      example: ^E\d{6}$
-    paths:
-      type: array
-      description: >
-        The alert fields that auto-extraction reads for this type.
-        For a built-in type, send only the fields that you turn off, add, or give excluded values.
-        A field name can appear one time in an entry.
-      minItems: 0
-      maxItems: 50
-      items:
-        type: object
-        required:
-          - path
-          - enabled
-        properties:
-          path:
-            type: string
-            description: The name of the alert field.
-            minLength: 1
-            maxLength: 256
-            example: user.employee_id
-          enabled:
-            type: boolean
-            description: When `false`, auto-extraction skips this field.
-            example: true
-          excludedValues:
-            type: array
-            description: >
-              Values of this field that auto-extraction skips.
-              The match is exact and case-sensitive.
-            minItems: 0
-            maxItems: 50
-            items:
-              type: string
-              minLength: 1
-              maxLength: 256
-            example:
-              - E000000

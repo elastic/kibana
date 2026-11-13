@@ -351,37 +351,56 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    describe('observable type fields', () => {
-      const override = {
+    describe('observable type settings', () => {
+      const customType = { key: 'employee-id', label: 'Employee ID' };
+      const builtinSettings = {
         key: OBSERVABLE_TYPE_AGENT_ID.key,
         paths: [{ path: 'agent.id', enabled: false, excludedValues: ['static-id'] }],
       };
-      const customType = {
+      const customSettings = {
         key: 'employee-id',
-        label: 'Employee ID',
         valuePattern: '^E\\d{6}$',
         paths: [{ path: 'user.employee_id', enabled: true }],
       };
+      const observableTypeSettings = [builtinSettings, customSettings];
 
-      it('should patch a configuration with an override and a custom type with fields', async () => {
+      it('should patch a configuration with the settings of a built-in and a custom type', async () => {
         const configuration = await createConfiguration(supertest);
 
         const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
           version: configuration.version,
-          observableTypes: [override, customType],
+          observableTypes: [customType],
+          observableTypeSettings,
         });
 
-        const expected = [{ ...override, label: OBSERVABLE_TYPE_AGENT_ID.label }, customType];
-        expect(updatedConfiguration.observableTypes).to.eql(expected);
+        expect(updatedConfiguration.observableTypes).to.eql([customType]);
+        expect(updatedConfiguration.observableTypeSettings).to.eql(observableTypeSettings);
 
         const [persisted] = await getConfiguration({ supertest });
-        expect(persisted.observableTypes).to.eql(expected);
+        expect(persisted.observableTypes).to.eql([customType]);
+        expect(persisted.observableTypeSettings).to.eql(observableTypeSettings);
       });
 
-      it('should keep the fields when another attribute is patched', async () => {
+      it('should validate the settings against the stored custom types', async () => {
         const configuration = await createConfiguration(
           supertest,
-          getConfigurationRequest({ overrides: { observableTypes: [override, customType] } })
+          getConfigurationRequest({ overrides: { observableTypes: [customType] } })
+        );
+
+        const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+          version: configuration.version,
+          observableTypeSettings: [customSettings],
+        });
+
+        expect(updatedConfiguration.observableTypeSettings).to.eql([customSettings]);
+      });
+
+      it('should keep the settings when another attribute is patched', async () => {
+        const configuration = await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: { observableTypes: [customType], observableTypeSettings },
+          })
         );
 
         await updateConfiguration(supertest, configuration.id, {
@@ -390,48 +409,47 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const [persisted] = await getConfiguration({ supertest });
-        expect(persisted.observableTypes).to.eql([
-          { ...override, label: OBSERVABLE_TYPE_AGENT_ID.label },
-          customType,
-        ]);
+        expect(persisted.observableTypeSettings).to.eql(observableTypeSettings);
       });
 
-      it('should remove the fields of an override when the request does not send it again', async () => {
+      it('should remove the settings of a custom type that the request deletes', async () => {
         const configuration = await createConfiguration(
           supertest,
-          getConfigurationRequest({ overrides: { observableTypes: [override, customType] } })
+          getConfigurationRequest({
+            overrides: { observableTypes: [customType], observableTypeSettings },
+          })
         );
 
         const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
           version: configuration.version,
-          observableTypes: [customType],
+          observableTypes: [],
         });
 
-        expect(updatedConfiguration.observableTypes).to.eql([customType]);
+        expect(updatedConfiguration.observableTypes).to.eql([]);
+        expect(updatedConfiguration.observableTypeSettings).to.eql([builtinSettings]);
       });
 
       const rejectedRequests: Array<[string, Record<string, unknown>[]]> = [
-        ['a custom type without a label', [{ key: 'employee-id' }]],
+        ['a key that is not a built-in or a custom type', [{ key: 'unknown-type' }]],
         [
           'a value pattern on a built-in type',
           [{ key: OBSERVABLE_TYPE_AGENT_ID.key, valuePattern: '^a$' }],
         ],
-        ['a value pattern that does not compile', [{ ...customType, valuePattern: '(' }]],
         [
           'duplicated fields in one entry',
           [
             {
-              ...customType,
+              key: OBSERVABLE_TYPE_AGENT_ID.key,
               paths: [
-                { path: 'user.employee_id', enabled: true },
-                { path: 'user.employee_id', enabled: false },
+                { path: 'agent.id', enabled: true },
+                { path: 'agent.id', enabled: false },
               ],
             },
           ],
         ],
       ];
 
-      for (const [name, observableTypes] of rejectedRequests) {
+      for (const [name, settings] of rejectedRequests) {
         it(`should not patch a configuration with ${name}`, async () => {
           const configuration = await createConfiguration(supertest);
 
@@ -440,7 +458,8 @@ export default ({ getService }: FtrProviderContext): void => {
             configuration.id,
             {
               version: configuration.version,
-              observableTypes: observableTypes as ConfigurationPatchRequest['observableTypes'],
+              observableTypeSettings:
+                settings as ConfigurationPatchRequest['observableTypeSettings'],
             },
             400
           );

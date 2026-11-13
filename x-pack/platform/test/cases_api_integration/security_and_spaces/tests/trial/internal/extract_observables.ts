@@ -271,8 +271,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('with observable type fields in the configuration', () => {
-      const observableTypes = [
+    describe('with observable type settings in the configuration', () => {
+      const observableTypes = [{ key: 'employee-id', label: 'Employee ID' }];
+      const observableTypeSettings = [
         // Turn off the default agent.id field.
         { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [{ path: 'agent.id', enabled: false }] },
         // Skip one value on one default field of the IPv4 type.
@@ -283,7 +284,6 @@ export default ({ getService }: FtrProviderContext): void => {
         // A custom type with its own field and value pattern.
         {
           key: 'employee-id',
-          label: 'Employee ID',
           valuePattern: '^E\\d{6}$',
           paths: [{ path: 'user.employee_id', enabled: true }],
         },
@@ -314,7 +314,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('follows the toggles, the excluded values, and the value patterns', async () => {
         await createConfiguration(
           supertest,
-          getConfigurationRequest({ overrides: { observableTypes } })
+          getConfigurationRequest({ overrides: { observableTypes, observableTypeSettings } })
         );
 
         const refreshedCase = await attachAlert('ext-alert-fields');
@@ -327,7 +327,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('does not extract a value that does not match the pattern of a custom type', async () => {
         await createConfiguration(
           supertest,
-          getConfigurationRequest({ overrides: { observableTypes } })
+          getConfigurationRequest({ overrides: { observableTypes, observableTypeSettings } })
         );
 
         const refreshedCase = await attachAlert('ext-alert-bad-employee-id');
@@ -335,7 +335,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(refreshedCase.observables).to.eql([]);
       });
 
-      it('extracts the default fields when the configuration has no observable types', async () => {
+      it('extracts the default fields when the configuration has no observable type settings', async () => {
         await createConfiguration(supertest, getConfigurationRequest());
 
         const refreshedCase = await attachAlert('ext-alert-fields');
