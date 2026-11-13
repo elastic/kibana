@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
+  AESOP_AB_COMPARE_WORKFLOW_ID,
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
@@ -48,6 +49,7 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import AESOP_AB_COMPARE_YAML from './definitions/aesop_prototype/aesop_ab_compare.yaml';
 import AESOP_DRIFT_MONITOR_YAML from './definitions/aesop_prototype/aesop_drift_monitor.yaml';
 import ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML from './definitions/alertzero/actions/action_close_attack_discovery_investigation.yaml';
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
@@ -301,6 +303,7 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
+  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '2:bececc44'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '7:b49d3235'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',

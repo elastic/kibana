@@ -1,34 +1,41 @@
 version: '1'
 name: 'AESOP A/B Skill Compare (prototype)'
 description: >-
-  AESOP prototype: A/B tests a candidate skill variant against the live skill
-  through the evals plugin, compares the two experiments, proposes deploying
-  the variant, and on approval PUTs the new content onto the live skill.
+  AESOP prototype: A/B tests up to three candidate skill variants against a
+  no-skill baseline (and the live skill, when one exists) through the evals
+  plugin, picks a winner, and proposes deploying it. On approval it creates or
+  updates the skill; a rejected or dismissed candidate is recorded as a
+  knowledge indicator so the explorer does not propose it again.
 enabled: true
 tags:
   - security
   - aesop_prototype
 settings:
-  # The whole run — both arms, the compare and the parked approval gate —
-  # must fit inside one workflow timeout, or the gate is cancelled under the
+  # The whole run (every arm, the compare and the parked approval gate) must
+  # fit inside one workflow timeout, or the gate is cancelled under the
   # analyst. 72h decision window plus evaluation headroom.
   timeout: '96h'
   concurrency:
-    key: 'aesop-ab-{{ inputs.skill_id }}'
+    # A run that proposes a new skill has no skill id yet, so it keys on its
+    # own execution id and never collides.
+    key: 'aesop-ab-{{ inputs.skill_id | default: execution.id }}'
     strategy: drop
     max: 1
 consts:
-  # LiquidJS has no array literal, so `| default: []` does not produce one.
-  EMPTY_ARRAY: []
+  AI_INDEX_ID: aesop
+  # Deterministic evaluators: an arm below 1 on any of these is rejected.
+  CODE_EVALUATORS: ['skill-secret-scanner', 'skill-prompt-injection', 'skill-pii', 'esql-compile', 'skill-index-resolves']
 outputs:
   - name: baseline_experiment_id
     type: string
-  - name: variant_experiment_id
+  - name: winner_experiment_id
     type: string
   - name: decision
     type: string
   - name: deployed
     type: boolean
+  - name: skill_id
+    type: string
   - name: skip_reason
     type: string
 triggers:
@@ -37,35 +44,44 @@ triggers:
       properties:
         skill_id:
           type: string
-          minLength: 1
           maxLength: 128
           description: >-
-            Id of the live skill being optimized. The variant is created from
-            it and the winner is written back to it.
+            Id of the live skill being optimized. When set, the live skill is
+            an extra arm and the winner is written back to it. Leave empty to
+            propose a new skill instead.
+        new_skill_name:
+          type: string
+          maxLength: 64
+          description: Name of the new skill, used only when skill_id is empty.
         dataset_id:
           type: string
           minLength: 1
           maxLength: 128
-          description: Evals dataset id both arms run against.
+          description: Evals dataset id every arm runs against.
         connector_id:
           type: string
           minLength: 1
           maxLength: 128
-          description: Model connector both arms (and the judge) run through.
+          description: Model connector every arm (and the judge) runs through.
         agent_id:
           type: string
           minLength: 1
           maxLength: 128
           description: >-
-            Agent the two arms converse with. The AESOP task provider pins each
-            arm's skill through configuration_overrides.skill_ids, so both arms
-            run the same agent and differ only in the skill.
-        variant_content:
-          type: string
-          maxLength: 100000
+            Agent the arms converse with. The AESOP task provider pins each
+            arm's skill through configuration_overrides.skill_ids, so every arm
+            runs the same agent and differs only in the skill.
+        variants:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            type: string
+            minLength: 1
+            maxLength: 60000
           description: >-
-            New instructions (markdown) for the candidate variant. Required:
-            an empty variant has nothing to A/B.
+            Candidate instructions (markdown), one per variant. Each is
+            compared with a no-skill baseline.
         repetitions:
           type: integer
           minimum: 1
@@ -85,54 +101,37 @@ triggers:
           description: >-
             Investigation (conversation) the A/B proposal is recorded on, so
             the analyst sees the decision next to the evidence.
-      required: [skill_id, dataset_id, connector_id, agent_id, variant_content, investigation_id]
+      required: [dataset_id, connector_id, agent_id, variants, investigation_id]
       additionalProperties: false
 steps:
   # ----------------------------------------------------------------------
-  # Variant. Create the candidate as a user skill (POST), so the variant's
-  # instructions live in the skills registry like any user skill and the
-  # AESOP task provider can pin it by id. Deleted in cleanup below.
+  # State. Everything the later steps read lives in variables: data.set is
+  # the only step type that survives a human-gate park. LiquidJS has no
+  # array literal, so the empty lists are made here.
   # ----------------------------------------------------------------------
-  - name: create_variant
-    type: kibana.request
-    timeout: '30s'
-    with:
-      method: POST
-      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills'
-      headers:
-        kbn-xsrf: 'true'
-        elastic-api-version: '2023-10-31'
-        Content-Type: application/json
-      # The skills API requires a caller-chosen id (lowercase, <=64 chars) and
-      # caps the name at 64 chars; key both on the execution id so they stay
-      # within bounds whatever the live skill id is, and never collide.
-      body:
-        id: 'aesop-variant-{{ execution.id }}'
-        name: 'AESOP variant {{ execution.id }}'
-        description: >-
-          AESOP prototype candidate variant of {{ inputs.skill_id }}. Created
-          by the A/B compare workflow; safe to delete when no run is active.
-        content: '{{ inputs.variant_content }}'
-    on-failure:
-      continue: true
-
-  - name: resolve_variant
+  - name: init_state
     type: data.set
     with:
-      ok: >-
-        ${{ steps.create_variant.error == null
-          and steps.create_variant.output.id != null
-          and steps.create_variant.output.id != '' }}
-      variant_skill_id: "${{ steps.create_variant.output.id | default: '' }}"
+      has_live_skill: "${{ inputs.skill_id != blank }}"
+      target_skill_id: >-
+        {% if inputs.skill_id != blank %}{{ inputs.skill_id }}{% else %}aesop-new-{{ execution.id }}{% endif %}
+      target_skill_name: "{{ inputs.new_skill_name | default: 'AESOP skill' }}"
+      baseline_scored: false
+      experiment_ids: []
+      arm_variant_indexes: []
+      arm_count: 0
+      can_compare: false
+      winner_variant: ''
+      winner_content: ''
+      deploy_candidate: false
+      reject_reason: ''
+      deployed: false
 
   # ----------------------------------------------------------------------
-  # Baseline arm: evaluate the live skill. The evaluator list is built once
-  # here (five CODE evaluators + the built-in judge `correctness`) because
-  # Liquid cannot build an array conditionally at each call site.
+  # Baseline arm: no skill at all. Every other arm is judged against it.
   # ----------------------------------------------------------------------
   - name: baseline_start
     type: ai.evals.startExperiment
-    if: '${{ steps.resolve_variant.output.ok == true }}'
     with:
       task_model:
         id: '{{ inputs.connector_id }}'
@@ -142,13 +141,13 @@ steps:
 
   - name: baseline_run
     type: ai.evals.evaluateDataset
-    if: '${{ steps.resolve_variant.output.ok == true and steps.baseline_start.error == null }}'
+    if: '${{ steps.baseline_start.error == null }}'
     with:
       connector_id: '{{ inputs.connector_id }}'
       agent_id: '{{ inputs.agent_id }}'
       task_ref: 'security.aesopVariant'
       params:
-        skill_id: '{{ inputs.skill_id }}'
+        no_skill: true
       experiment_id: '${{ steps.baseline_start.output.experiment_id }}'
       execution_id: '${{ steps.baseline_start.output.execution_id }}'
       suite_id: 'aesop-prototype'
@@ -166,13 +165,23 @@ steps:
     on-failure:
       continue: true
 
+  # An arm with no ingested scores has no experiment to compare (the compare
+  # API 404s), so it is left out of the list instead of failing the compare.
+  - name: record_baseline
+    type: data.set
+    if: '${{ (steps.baseline_run.output.scores_ingested | default: 0) > 0 }}'
+    with:
+      baseline_scored: true
+      experiment_ids: ['{{ steps.baseline_start.output.experiment_id }}']
+
   # ----------------------------------------------------------------------
-  # Variant arm: fresh experiment, same dataset, same evaluators, the
-  # variant skill pinned.
+  # Live-skill arm, only when there is a live skill. Its marker in
+  # arm_variant_indexes is `live`, so the winner can be told apart from a
+  # variant.
   # ----------------------------------------------------------------------
-  - name: variant_start
+  - name: live_start
     type: ai.evals.startExperiment
-    if: '${{ steps.resolve_variant.output.ok == true }}'
+    if: '${{ variables.has_live_skill == true and variables.baseline_scored == true }}'
     with:
       task_model:
         id: '{{ inputs.connector_id }}'
@@ -180,17 +189,17 @@ steps:
     on-failure:
       continue: true
 
-  - name: variant_run
+  - name: live_run
     type: ai.evals.evaluateDataset
-    if: '${{ steps.resolve_variant.output.ok == true and steps.variant_start.error == null }}'
+    if: '${{ variables.has_live_skill == true and variables.baseline_scored == true and steps.live_start.error == null }}'
     with:
       connector_id: '{{ inputs.connector_id }}'
       agent_id: '{{ inputs.agent_id }}'
       task_ref: 'security.aesopVariant'
       params:
-        skill_id: '{{ steps.resolve_variant.output.variant_skill_id }}'
-      experiment_id: '${{ steps.variant_start.output.experiment_id }}'
-      execution_id: '${{ steps.variant_start.output.execution_id }}'
+        skill_id: '{{ inputs.skill_id }}'
+      experiment_id: '${{ steps.live_start.output.experiment_id }}'
+      execution_id: '${{ steps.live_start.output.execution_id }}'
       suite_id: 'aesop-prototype'
       dataset_ids: ['{{ inputs.dataset_id }}']
       evaluators:
@@ -206,45 +215,214 @@ steps:
     on-failure:
       continue: true
 
-  # An arm with no ingested scores has no experiment to compare (the compare
-  # API 404s), so skip straight to cleanup instead of proposing a blind deploy.
-  - name: resolve_arms
+  - name: wrap_live_arm
     type: data.set
-    if: '${{ steps.resolve_variant.output.ok == true }}'
+    if: '${{ (steps.live_run.output.scores_ingested | default: 0) > 0 }}'
     with:
-      scored: >-
-        ${{ (steps.baseline_run.output.scores_ingested | default: 0) > 0
-          and (steps.variant_run.output.scores_ingested | default: 0) > 0 }}
+      new_ids: "${{ steps.live_start.output.experiment_id | split: ',' }}"
+      new_markers: ['live']
+
+  - name: record_live_arm
+    type: data.set
+    if: '${{ (steps.live_run.output.scores_ingested | default: 0) > 0 }}'
+    with:
+      experiment_ids: "${{ variables.experiment_ids | concat: variables.new_ids }}"
+      arm_variant_indexes: "${{ variables.arm_variant_indexes | concat: variables.new_markers }}"
 
   # ----------------------------------------------------------------------
-  # Compare. compareExperiments returns an opaque comparison blob; the
-  # proposal comment renders it as JSON so the analyst reads the delta.
+  # Variant arms. Each candidate is created as a user skill (POST), so its
+  # instructions live in the skills registry like any user skill and the
+  # AESOP task provider can pin it by id. The ids are derived from the
+  # execution id and the variant index (lowercase, <=64 chars), so the
+  # cleanup below can delete them without a list. The arms run one after
+  # another: each already runs `concurrency` examples in parallel.
   # ----------------------------------------------------------------------
+  - name: run_variants
+    type: foreach
+    if: '${{ variables.baseline_scored == true }}'
+    foreach: '${{ inputs.variants | json }}'
+    steps:
+      - name: create_variant
+        type: kibana.request
+        timeout: '30s'
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills'
+          headers:
+            kbn-xsrf: 'true'
+            elastic-api-version: '2023-10-31'
+            Content-Type: application/json
+          body:
+            id: 'aesop-variant-{{ execution.id }}-{{ foreach.index }}'
+            name: 'AESOP variant {{ execution.id }} {{ foreach.index }}'
+            description: >-
+              AESOP prototype candidate variant {{ foreach.index }}. Created by
+              the A/B compare workflow; safe to delete when no run is active.
+            content: '{{ foreach.item }}'
+        on-failure:
+          continue: true
+
+      - name: resolve_variant
+        type: data.set
+        with:
+          ok: >-
+            ${{ steps.create_variant.error == null
+              and steps.create_variant.output.id != null
+              and steps.create_variant.output.id != '' }}
+
+      - name: variant_start
+        type: ai.evals.startExperiment
+        if: '${{ steps.resolve_variant.output.ok == true }}'
+        with:
+          task_model:
+            id: '{{ inputs.connector_id }}'
+          suite_id: 'aesop-prototype'
+        on-failure:
+          continue: true
+
+      - name: variant_run
+        type: ai.evals.evaluateDataset
+        if: '${{ steps.resolve_variant.output.ok == true and steps.variant_start.error == null }}'
+        with:
+          connector_id: '{{ inputs.connector_id }}'
+          agent_id: '{{ inputs.agent_id }}'
+          task_ref: 'security.aesopVariant'
+          params:
+            skill_id: '{{ steps.create_variant.output.id }}'
+          experiment_id: '${{ steps.variant_start.output.experiment_id }}'
+          execution_id: '${{ steps.variant_start.output.execution_id }}'
+          suite_id: 'aesop-prototype'
+          dataset_ids: ['{{ inputs.dataset_id }}']
+          evaluators:
+            - name: skill-secret-scanner
+            - name: skill-prompt-injection
+            - name: skill-pii
+            - name: esql-compile
+            - name: skill-index-resolves
+            - name: correctness
+              connector_id: '{{ inputs.connector_id }}'
+          repetitions: '${{ inputs.repetitions }}'
+          concurrency: '${{ inputs.concurrency }}'
+        on-failure:
+          continue: true
+
+      - name: wrap_variant_arm
+        type: data.set
+        if: '${{ (steps.variant_run.output.scores_ingested | default: 0) > 0 }}'
+        with:
+          new_ids: "${{ steps.variant_start.output.experiment_id | split: ',' }}"
+          new_markers: ['{{ foreach.index }}']
+
+      - name: record_variant_arm
+        type: data.set
+        if: '${{ (steps.variant_run.output.scores_ingested | default: 0) > 0 }}'
+        with:
+          experiment_ids: "${{ variables.experiment_ids | concat: variables.new_ids }}"
+          arm_variant_indexes: "${{ variables.arm_variant_indexes | concat: variables.new_markers }}"
+
+  # ----------------------------------------------------------------------
+  # Compare every arm against the baseline, then pick the winner.
+  # compareExperiments returns an opaque comparison blob; the proposal
+  # renders it as JSON so the analyst reads the matrix.
+  # ----------------------------------------------------------------------
+  - name: count_arms
+    type: data.set
+    with:
+      arm_count: '${{ variables.arm_variant_indexes | size }}'
+
+  - name: resolve_can_compare
+    type: data.set
+    with:
+      can_compare: '${{ variables.baseline_scored == true and variables.arm_count > 0 }}'
+
   - name: compare
     type: ai.evals.compareExperiments
-    if: '${{ steps.resolve_arms.output.scored == true }}'
+    if: '${{ variables.can_compare == true }}'
     with:
-      experiment_ids:
-        - '${{ steps.baseline_start.output.experiment_id }}'
-        - '${{ steps.variant_start.output.experiment_id }}'
+      experiment_ids: '${{ variables.experiment_ids }}'
+    on-failure:
+      continue: true
+
+  - name: winner
+    type: security.aesopSelectWinner
+    if: '${{ variables.can_compare == true and steps.compare.error == null }}'
+    with:
+      comparison: '${{ steps.compare.output.comparison }}'
+      primary_evaluator: correctness
+      code_evaluators: '${{ consts.CODE_EVALUATORS }}'
     on-failure:
       continue: true
 
   - name: resolve_comparison
     type: data.set
-    if: '${{ steps.resolve_arms.output.scored == true and steps.compare.error == null }}'
+    if: '${{ variables.can_compare == true and steps.compare.error == null and steps.winner.error == null }}'
     with:
       comparison_json: '${{ steps.compare.output.comparison | json }}'
+      has_winner: '${{ steps.winner.output.winner_index >= 0 }}'
+      compared: true
+
+  # The marker at the winner's position says which arm it was: `live` or the
+  # index of a variant.
+  - name: resolve_winner
+    type: data.set
+    if: '${{ steps.resolve_comparison.output.has_winner == true }}'
+    with:
+      winner_variant: '${{ variables.arm_variant_indexes[steps.winner.output.winner_index] }}'
+
+  - name: resolve_winner_content
+    type: data.set
+    if: '${{ steps.resolve_comparison.output.has_winner == true and variables.winner_variant != "live" }}'
+    with:
+      winner_content: '{{ inputs.variants[variables.winner_variant] }}'
+
+  # A variant is deployed only when it won, beat the no-skill baseline, and is
+  # not the live skill itself. Anything else is a rejection.
+  - name: resolve_deploy_candidate
+    type: data.set
+    if: '${{ steps.resolve_comparison.output.compared == true }}'
+    with:
+      deploy_candidate: >-
+        ${{ steps.resolve_comparison.output.has_winner == true
+          and variables.winner_variant != 'live'
+          and steps.winner.output.beats_baseline == true }}
+      reject_reason: >-
+        {% if steps.resolve_comparison.output.has_winner != true %}No variant won. {% elsif variables.winner_variant == 'live' %}The live skill outperformed every variant. {% elsif steps.winner.output.beats_baseline != true %}The best variant did not beat the no-skill baseline. {% endif %}{{ steps.winner.output.reasons | join: ' ' }}
+
+  # ----------------------------------------------------------------------
+  # Rejection: no deployable winner. Record why, so the explorer reads it
+  # before proposing the same thing again. The variants are stored in the KI
+  # content for the same reason.
+  # ----------------------------------------------------------------------
+  - name: write_rejection_ki
+    type: context-engine.createKi
+    if: '${{ steps.resolve_comparison.output.compared == true and variables.deploy_candidate != true }}'
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+      ki_id: 'rejection-{{ execution.id }}'
+      ki:
+        type: aesop.rejection
+        title: "AESOP rejected the candidates for {{ variables.target_skill_id }}"
+        description: '{{ variables.reject_reason | truncate: 1500 }}'
+        content: '{{ inputs.variants | json | truncate: 60000, "" }}'
+        tags:
+          - aesop
+          - aesop:rejected
+        attributes:
+          skill_id: '{{ variables.target_skill_id }}'
+          source: ab_compare
+          reason: '{{ variables.reject_reason | truncate: 5000 }}'
+          rejected: '{{ steps.winner.output.rejected | json | truncate: 8000 }}'
+          dataset_id: '{{ inputs.dataset_id }}'
+          workflow_execution_id: '{{ execution.id }}'
     on-failure:
       continue: true
 
   # ----------------------------------------------------------------------
-  # Approval gate. Propose deploying the variant; on approval PUT the new
-  # content onto the live skill.
+  # Approval gate. Propose the winner with the matrix and its content.
   # ----------------------------------------------------------------------
   - name: propose_deploy
     type: workflow.execute
-    if: '${{ steps.resolve_arms.output.scored == true and steps.compare.error == null and steps.resolve_comparison.error == null }}'
+    if: '${{ variables.deploy_candidate == true }}'
     # Straight to the proposals gate in default run-as mode, not through the
     # AlertZero bridge: the bridge delegates with `run-as-mode: inherit`, which
     # needs a parent running as a bound service account, and this run executes
@@ -255,25 +433,28 @@ steps:
       inputs:
         origin: alertzero
         conversationId: '{{ inputs.investigation_id }}'
-        title: 'AESOP: deploy variant of {{ inputs.skill_id }}'
+        title: "AESOP: {% if variables.has_live_skill == true %}update {{ variables.target_skill_id }}{% else %}create the skill {{ variables.target_skill_name }}{% endif %}"
         comment: |-
-          **AESOP: deploy the candidate variant of `{{ inputs.skill_id }}`?**
+          **AESOP: {% if variables.has_live_skill == true %}deploy the winning variant of `{{ variables.target_skill_id }}`{% else %}create the new skill `{{ variables.target_skill_name }}`{% endif %}?**
 
-          **A/B comparison** (variant `${{ steps.variant_start.output.experiment_id }}` vs baseline `${{ steps.baseline_start.output.experiment_id }}`):
+          Winner: experiment `{{ steps.winner.output.winner_target_id }}`, variant {{ variables.winner_variant }} of {{ inputs.variants.size }}, against the no-skill baseline `{{ steps.baseline_start.output.experiment_id }}`.
+          {{ steps.winner.output.reasons | join: ' ' }}
+
+          **A/B matrix** (baseline, {% if variables.has_live_skill == true %}live skill, {% endif %}every variant that scored):
 
           ```json
           ${{ steps.resolve_comparison.output.comparison_json }}
           ```
 
-          **Variant content**
+          **Winner content**
           ```markdown
-          {{ inputs.variant_content }}
+          {{ variables.winner_content }}
           ```
 
           **Evaluators:** skill-secret-scanner, skill-prompt-injection, skill-pii, esql-compile, skill-index-resolves, correctness (judge)
 
           **On approval**
-          If you approve, the agent PUTs the variant content onto `{{ inputs.skill_id }}` under your identity, deletes the scratch variant skill, and enables the skill's drift monitor (online evaluation of live traffic). If you dismiss, the agent deletes the scratch variant skill and leaves the live skill untouched.
+          {% if variables.has_live_skill == true %}If you approve, the agent stores the current content of `{{ variables.target_skill_id }}` (so a drift rollback can restore it), PUTs the winner onto it under your identity, and enables the skill's drift monitor.{% else %}If you approve, the agent creates the skill under your identity and enables its drift monitor.{% endif %} Scratch variant skills are deleted either way. If you dismiss, the decision and your reason are recorded and nothing is deployed.
         impact: medium
         confidence: medium
         autoApprove: false
@@ -281,21 +462,147 @@ steps:
     on-failure:
       continue: true
 
-  - name: deploy_variant
+  - name: resolve_decision
+    type: data.set
+    with:
+      approved: '${{ steps.propose_deploy.output.decision == "approved" }}'
+      dismissed: '${{ steps.propose_deploy.output.decision == "dismissed" }}'
+
+  # ----------------------------------------------------------------------
+  # Dismissal: record the analyst's reason and rationale.
+  # ----------------------------------------------------------------------
+  - name: get_dismissal
+    type: proposals.getProposal
+    if: '${{ steps.resolve_decision.output.dismissed == true and steps.propose_deploy.output.proposalId != blank }}'
+    with:
+      proposalId: '{{ steps.propose_deploy.output.proposalId }}'
+    on-failure:
+      continue: true
+
+  - name: write_dismissal_ki
+    type: context-engine.createKi
+    if: '${{ steps.resolve_decision.output.dismissed == true }}'
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+      ki_id: 'rejection-{{ execution.id }}'
+      ki:
+        type: aesop.rejection
+        title: 'AESOP winner dismissed for {{ variables.target_skill_id }}'
+        description: >-
+          An analyst dismissed the winning variant: {{ steps.get_dismissal.output.dismissReason | default: 'no reason recorded' }}.
+        content: '{{ variables.winner_content | truncate: 60000, "" }}'
+        tags:
+          - aesop
+          - aesop:dismissed
+        attributes:
+          skill_id: '{{ variables.target_skill_id }}'
+          source: ab_compare
+          dismissReason: "{{ steps.get_dismissal.output.dismissReason | default: '' }}"
+          rationale: "{{ steps.get_dismissal.output.rationale | default: '' | truncate: 5000 }}"
+          dataset_id: '{{ inputs.dataset_id }}'
+          workflow_execution_id: '{{ execution.id }}'
+    on-failure:
+      continue: true
+
+  # ----------------------------------------------------------------------
+  # Approval, update of a live skill: read the current content, store it as a
+  # KI keyed by the skill id, and only then PUT the winner. The PUT is gated on
+  # the KI write: without the prior content a rollback has nothing to restore.
+  # ----------------------------------------------------------------------
+  - name: get_prior_skill
     type: kibana.request
-    if: '${{ steps.propose_deploy.output.decision == "approved" }}'
+    if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill == true }}'
+    timeout: '30s'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ variables.target_skill_id }}'
+      headers:
+        elastic-api-version: '2023-10-31'
+    on-failure:
+      continue: true
+
+  # A KI holds at most 65536 characters; a longer prior skill could not be
+  # restored whole, so the deploy is refused instead of storing a truncation.
+  - name: resolve_prior_skill
+    type: data.set
+    if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill == true }}'
+    with:
+      prior_ok: >-
+        ${{ steps.get_prior_skill.error == null
+          and steps.get_prior_skill.output.content != null
+          and (steps.get_prior_skill.output.content | size) <= 65000 }}
+
+  - name: store_prior_content
+    type: context-engine.createKi
+    if: '${{ steps.resolve_prior_skill.output.prior_ok == true }}'
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+      ki_id: 'skill-prior-{{ variables.target_skill_id }}'
+      refresh: true
+      ki:
+        type: aesop.prior_skill_content
+        title: 'Content of {{ variables.target_skill_id }} before AESOP replaced it'
+        description: >-
+          The skill content that was live before workflow execution {{ execution.id }} deployed the winning variant. A drift rollback restores it.
+        content: '{{ steps.get_prior_skill.output.content }}'
+        tags:
+          - aesop
+          - aesop:prior
+        attributes:
+          skill_id: '{{ variables.target_skill_id }}'
+          replaced_by_execution: '{{ execution.id }}'
+    on-failure:
+      continue: true
+
+  - name: update_skill
+    type: kibana.request
+    if: '${{ steps.resolve_prior_skill.output.prior_ok == true and steps.store_prior_content.error == null }}'
     timeout: '30s'
     with:
       method: PUT
-      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ inputs.skill_id }}'
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ variables.target_skill_id }}'
       headers:
         kbn-xsrf: 'true'
         elastic-api-version: '2023-10-31'
         Content-Type: application/json
       body:
-        content: '{{ inputs.variant_content }}'
+        content: '{{ variables.winner_content }}'
     on-failure:
       continue: true
+
+  # ----------------------------------------------------------------------
+  # Approval, new skill: create it under the approver's identity.
+  # ----------------------------------------------------------------------
+  - name: create_skill
+    type: kibana.request
+    if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill != true }}'
+    timeout: '30s'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills'
+      headers:
+        kbn-xsrf: 'true'
+        elastic-api-version: '2023-10-31'
+        Content-Type: application/json
+      body:
+        id: '{{ variables.target_skill_id }}'
+        name: '{{ variables.target_skill_name }}'
+        description: 'Created by the AESOP A/B compare workflow ({{ execution.id }}).'
+        content: '{{ variables.winner_content }}'
+    on-failure:
+      continue: true
+
+  - name: mark_updated
+    type: data.set
+    if: '${{ steps.update_skill.output != null and steps.update_skill.error == null }}'
+    with:
+      deployed: true
+
+  - name: mark_created
+    type: data.set
+    if: '${{ steps.create_skill.output != null and steps.create_skill.error == null }}'
+    with:
+      deployed: true
 
   # ----------------------------------------------------------------------
   # Post-deploy: install + enable the per-skill drift monitor through the
@@ -305,7 +612,7 @@ steps:
   # ----------------------------------------------------------------------
   - name: enable_drift_monitor
     type: kibana.request
-    if: '${{ steps.deploy_variant.error == null and steps.propose_deploy.output.decision == "approved" }}'
+    if: '${{ variables.deployed == true }}'
     timeout: '30s'
     with:
       method: POST
@@ -316,39 +623,43 @@ steps:
         elastic-api-version: '1'
         x-elastic-internal-origin: 'Kibana'
       body:
-        skill_id: '{{ inputs.skill_id }}'
+        skill_id: '{{ variables.target_skill_id }}'
     on-failure:
       continue: true
 
   # ----------------------------------------------------------------------
-  # Cleanup. The variant skill is a scratch artifact: delete it on dismiss
-  # and after deploy alike, so the registry only ever holds it while a run
-  # is active. Runs whenever the variant was created: every step between
-  # create_variant and here continues on failure, so an arm, compare or
-  # proposal error still reaches this step instead of leaking the variant.
-  # A run that times out or is cancelled never gets here; the variant then
-  # outlives the run until it is deleted by hand (no sweeper in the prototype).
+  # Cleanup. The variant skills are scratch artifacts: delete them on every
+  # path (rejection, dismissal, deploy), so the registry only ever holds them
+  # while a run is active. Every step above continues on failure, so an arm,
+  # compare or proposal error still reaches this step. The ids are derived,
+  # so a variant that was never created just 404s. A run that times out or is
+  # cancelled never gets here; its variants then outlive it until deleted by
+  # hand (no sweeper in the prototype).
   # ----------------------------------------------------------------------
-  - name: cleanup_variant
-    type: kibana.request
-    if: '${{ steps.resolve_variant.output.ok == true }}'
-    timeout: '30s'
-    with:
-      method: DELETE
-      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ steps.resolve_variant.output.variant_skill_id }}'
-      headers:
-        kbn-xsrf: 'true'
-        elastic-api-version: '2023-10-31'
-    on-failure:
-      continue: true
+  - name: cleanup_variants
+    type: foreach
+    foreach: '${{ inputs.variants | json }}'
+    steps:
+      - name: cleanup_variant
+        type: kibana.request
+        timeout: '30s'
+        with:
+          method: DELETE
+          path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/aesop-variant-{{ execution.id }}-{{ foreach.index }}'
+          headers:
+            kbn-xsrf: 'true'
+            elastic-api-version: '2023-10-31'
+        on-failure:
+          continue: true
 
   - name: emit_result
     type: workflow.output
     status: completed
     with:
       baseline_experiment_id: '${{ steps.baseline_start.output.experiment_id }}'
-      variant_experiment_id: '${{ steps.variant_start.output.experiment_id }}'
-      decision: '${{ steps.propose_deploy.output.decision }}'
-      deployed: '${{ steps.deploy_variant.error == null and steps.propose_deploy.output.decision == "approved" }}'
+      winner_experiment_id: "${{ steps.winner.output.winner_target_id | default: '' }}"
+      decision: "${{ steps.propose_deploy.output.decision | default: '' }}"
+      deployed: '${{ variables.deployed }}'
+      skill_id: '{{ variables.target_skill_id }}'
       skip_reason: >-
-        {% if steps.resolve_variant.output.ok != true %}The variant skill could not be created: {{ steps.create_variant.error.message }}{% elsif steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.variant_start.error != null %}The variant experiment could not be started: {{ steps.variant_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif steps.variant_run.error != null %}The variant arm failed: {{ steps.variant_run.error.message }}{% elsif steps.resolve_arms.output.scored != true %}An A/B arm produced no scores (baseline: {{ steps.baseline_run.output.scores_ingested | default: 0 }}, variant: {{ steps.variant_run.output.scores_ingested | default: 0 }}); nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.resolve_comparison.error != null %}The A/B comparison could not be rendered: {{ steps.resolve_comparison.error.message }}{% elsif steps.propose_deploy.error != null %}The deploy proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.deploy_variant.error != null %}Deploy failed after approval: {{ steps.deploy_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.cleanup_variant.error != null %}Deployed, but the scratch variant skill was not deleted: {{ steps.cleanup_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.deploy_candidate != true %}Rejected: {{ variables.reject_reason }}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

@@ -15,11 +15,11 @@ export const AESOP_AB_COMPARE_WORKFLOW_ID = 'system-security-aesop-ab-compare';
 
 export const AESOP_DRIFT_MONITOR_WORKFLOW_ID = 'system-security-aesop-drift-monitor';
 
-/** AESOP prototype: A/B a skill variant through evals and deploy it on approval. */
+/** AESOP prototype: A/B up to three skill variants against a no-skill baseline and deploy the winner on approval. */
 export const AESOP_AB_COMPARE_WORKFLOW = {
   id: AESOP_AB_COMPARE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: AESOP_AB_COMPARE_YAML,
   management: {
