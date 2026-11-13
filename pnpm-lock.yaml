@@ -296,6 +296,7 @@ overrides:
   nwsapi: 2.2.2
   react-focus-lock: 2.9.5
   react-focus-on: 3.9.1
+  refractor>prismjs: 1.30.0
   vega-crossfilter: 5.1.0
   vega-dataflow: 6.1.0
   vega-expression: 6.1.0
@@ -22321,8 +22322,8 @@ packages:
     resolution: {integrity: sha512-X5i1y9/8VuBMb9WU8zubTiLKnJG4lcKvL7eaCEVc/jpTe3aS74gCcBM6Yd1vvUDoTCXm4Y15obNS/16yB0FTaQ==}
     engines: {node: '>=10'}
 
-  prismjs@1.27.0:
-    resolution: {integrity: sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==}
+  prismjs@1.30.0:
+    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
     engines: {node: '>=6'}
 
   process-nextick-args@1.0.7:
@@ -40474,7 +40475,7 @@ snapshots:
     dependencies:
       parse-ms: 2.1.0
 
-  prismjs@1.27.0: {}
+  prismjs@1.30.0: {}
 
   process-nextick-args@1.0.7: {}
 
@@ -41276,7 +41277,7 @@ snapshots:
     dependencies:
       hastscript: 6.0.0
       parse-entities: 2.0.0
-      prismjs: 1.27.0
+      prismjs: 1.30.0
 
   regenerate-unicode-properties@10.3.0:
     dependencies:
