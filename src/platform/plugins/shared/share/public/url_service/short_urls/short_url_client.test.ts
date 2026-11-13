@@ -435,3 +435,17 @@ describe('createWithLocator()', () => {
     expect(sentBody.params.timeRange.to).toBe('now');
   });
 });
+
+describe('encoded path parameters', () => {
+  test.each(['get', 'resolve', 'delete'] as const)(
+    '%s encodes its path parameter',
+    async (method) => {
+      const { service, http } = setup();
+      await service.shortUrls.get(null)[method]('../a?b#c%/café');
+      const prefix = method === 'resolve' ? '/api/short_url/_slug/' : '/api/short_url/';
+      expect(http.fetch).toHaveBeenCalledWith(`${prefix}..%2Fa%3Fb%23c%25%2Fcaf%C3%A9`, {
+        method: method === 'delete' ? 'DELETE' : 'GET',
+      });
+    }
+  );
+});

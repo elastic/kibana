@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
@@ -20,6 +21,7 @@ import {
   type IntervalSchedule,
   type RruleSchedule,
   type ScheduleOptions,
+  type TaskCredential,
   type TaskInstanceWithDeprecatedFields,
   type TaskInstanceWithId,
 } from './task';
@@ -32,6 +34,7 @@ import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import { getExecutionId } from './lib/get_execution_id';
+import { credentialMatchesRunAs } from './lib/service_account_credential';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import {
   taskManagerClaimNudgeTelemetry,
@@ -54,6 +57,9 @@ const scheduleOptionsToStoreApiKeyOptions = (
   if (options.cloneApiKey === true) {
     storeOpts.cloneApiKey = true;
   }
+  if (options.refreshApiKey !== undefined) {
+    storeOpts.refreshApiKey = options.refreshApiKey;
+  }
   if (options.regenerateApiKey !== undefined) {
     storeOpts.regenerateApiKey = options.regenerateApiKey;
   }
@@ -63,6 +69,22 @@ const scheduleOptionsToStoreApiKeyOptions = (
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 const BULK_ACTION_SIZE = 100;
+
+// A conflict means another writer already updated the task and a missing task was removed in the
+// meantime (a one-off task is deleted when its run completes); neither is an error for an
+// idempotent "make sure this exists" call. The caller's next interaction with the task (for example
+// `runSoon`) surfaces a removed task as not found. Not used for a key replacement, see
+// `assertApiKeyReplaced`.
+const throwUnlessConflictOrMissing = (result: BulkUpdateTaskResult, action: string): void => {
+  const [firstError] = result.errors;
+  if (
+    firstError &&
+    firstError.error.statusCode !== VERSION_CONFLICT_STATUS &&
+    firstError.error.statusCode !== NOT_FOUND_STATUS
+  ) {
+    throw new Error(`Tried to ${action} but failed with error: ${firstError.error.message}`);
+  }
+};
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
@@ -176,9 +198,10 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
+    const { runAs, ...taskInstanceWithoutRunAs } = taskInstance;
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...omit(options, 'apiKey', 'request'),
-      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
+      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstanceWithoutRunAs, this.logger),
     });
 
     const traceparent =
@@ -188,7 +211,8 @@ export class TaskScheduling {
 
     return await this.store.schedule(
       {
-        ...modifiedTask,
+        ...omit(modifiedTask, 'runAs'),
+        ...(runAs ? { runAs } : {}),
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
@@ -211,11 +235,12 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
     const modifiedTasks = await Promise.all(
-      taskInstances.map(async (taskInstance, i, arr) => {
-        const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+      taskInstances.map(async ({ runAs, ...taskInstance }, i, arr) => {
+        const { taskInstance: middlewareTask } = await this.middleware.beforeSave({
           ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
+        const modifiedTask = { ...omit(middlewareTask, 'runAs'), ...(runAs ? { runAs } : {}) };
         const enabled = modifiedTask.enabled ?? true;
         let scheduling: Partial<{ runAt: Date; scheduledAt: Date }> = {};
         if (enabled) {
@@ -451,6 +476,13 @@ export class TaskScheduling {
   /**
    * Schedules a task with an Id
    *
+   * When the task already exists its credential is left as stored, unless `options.regenerateApiKey`
+   * is true: then the key of an idle task is replaced with one granted (or cloned) from
+   * `options.request`, so the next claim runs as the current caller. Schedule and `runAt` are not
+   * changed by that replacement. A claimed task keeps its key; call again once it is idle. Rejects
+   * with a conflict error when the key of an idle task could not be replaced because of concurrent
+   * updates, so the caller can retry.
+   *
    * @param task - The task being scheduled.
    * @returns {Promise<TaskInstanceWithId>}
    */
@@ -482,26 +514,104 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithId,
     options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
+    await this.ensureExistingCredentialMatchesRunAs(taskInstance);
+
+    // Without a request (or with security disabled) no key could be granted, so there is nothing to
+    // replace; the store would otherwise reject the update of a task that carries a key.
+    const regenerateApiKey =
+      options?.regenerateApiKey === true && this.store.willGrantApiKeys(options);
+
     // check if task specifies a schedule interval
     // if so,try to update the just the schedule
     // only works for interval schedule
     if (taskInstance.schedule && taskInstance.schedule.interval) {
+      // Also regenerates the API key of an idle task when `options.regenerateApiKey` is set.
       const result = await this.bulkUpdateSchedules(
         [taskInstance.id],
         taskInstance.schedule,
         options
       );
-      if (
-        result.errors.length &&
-        result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
-        result.errors[0].error.statusCode !== NOT_FOUND_STATUS
-      ) {
-        throw new Error(
-          `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
+      if (regenerateApiKey) {
+        this.assertApiKeyReplaced(result, taskInstance.id);
+      } else {
+        throwUnlessConflictOrMissing(
+          result,
+          `update schedule for existing task "${taskInstance.id}"`
         );
       }
+    } else if (regenerateApiKey) {
+      const result = await this.regenerateApiKeyOfExistingTask(taskInstance.id, options);
+      this.assertApiKeyReplaced(result, taskInstance.id);
     }
     return taskInstance;
+  }
+
+  /**
+   * A version conflict on every attempt is tolerable for a plain schedule update, but a key
+   * replacement that never landed would leave the previous caller's key on the task while this call
+   * reports success, so the conflict is surfaced for the caller to retry. A removed task is not an
+   * error: a one-off task is deleted when its run completes.
+   */
+  private assertApiKeyReplaced(result: BulkUpdateTaskResult, taskId: string): void {
+    const [firstError] = result.errors;
+    if (!firstError || firstError.error.statusCode === NOT_FOUND_STATUS) {
+      return;
+    }
+    if (firstError.error.statusCode === VERSION_CONFLICT_STATUS) {
+      throw SavedObjectsErrorHelpers.decorateConflictError(
+        new Error(
+          `The API key of task "${taskId}" could not be regenerated because the task was updated concurrently; retry`
+        )
+      );
+    }
+    throw new Error(
+      `Tried to regenerate API key of existing task "${taskId}" but failed with error: ${firstError.error.message}`
+    );
+  }
+
+  /**
+   * Replaces the stored API key of an idle one-off task, leaving every other attribute as stored.
+   * The store queues the previous key for invalidation. A claimed task is skipped: a one-off task
+   * is deleted once its run completes, so a new key would be thrown away with it. Version conflicts
+   * are retried by `retryableBulkUpdate`.
+   */
+  private async regenerateApiKeyOfExistingTask(
+    taskId: string,
+    options?: ScheduleOptions
+  ): Promise<BulkUpdateTaskResult> {
+    return retryableBulkUpdate({
+      taskIds: [taskId],
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: (task) => task.status === TaskStatus.Idle,
+      map: (task) => task,
+      validate: false,
+      options: scheduleOptionsToStoreApiKeyOptions(options),
+    });
+  }
+
+  // A task's identity is only set when it is created, so a different `runAs` can't be applied to an
+  // existing task, and keeping the old identity would run it as an account the caller didn't ask for.
+  // The schedule update reads the task again, so a task removed and scheduled again with another
+  // `runAs` in between gets this schedule. That's accepted: the update keeps the task's credential.
+  private async ensureExistingCredentialMatchesRunAs({ id, runAs }: TaskInstanceWithId) {
+    let credential: TaskCredential | undefined;
+    try {
+      credential = await this.store.getCredential(id);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return;
+      }
+      throw e;
+    }
+
+    if (!credentialMatchesRunAs(credential, runAs)) {
+      const error = SavedObjectsErrorHelpers.decorateConflictError(
+        new Error(`Task "${id}" exists with a different runAs. Remove it and schedule it again.`)
+      );
+      // `bulkSchedule`'s conflict only has a top-level `statusCode`, so set it here too.
+      throw Object.assign(error, { statusCode: VERSION_CONFLICT_STATUS });
+    }
   }
 }
 

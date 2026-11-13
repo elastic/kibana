@@ -9,15 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import { within, isESQLNamedParamLiteral } from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
-import { TIME_SYSTEM_PARAMS } from '../../commands';
+import { GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS, TIME_SYSTEM_PARAMS } from '../../commands';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';
 
 const TIME_SYSTEM_DESCRIPTIONS = {
-  '?_tstart': i18n.translate('kbn-esql-language.esql.autocomplete.timeSystemParamStart', {
+  '?_tstart': i18n.translate('esqlLanguage.esql.autocomplete.timeSystemParamStart', {
     defaultMessage: 'The start time from the date picker',
   }),
-  '?_tend': i18n.translate('kbn-esql-language.esql.autocomplete.timeSystemParamEnd', {
+  '?_tend': i18n.translate('esqlLanguage.esql.autocomplete.timeSystemParamEnd', {
     defaultMessage: 'The end time from the date picker',
   }),
 };
@@ -61,6 +61,12 @@ export async function getFunctionArgumentHover(
   }
 
   const contents: { value: string }[] = [];
+  if (isESQLNamedParamLiteral(argumentAtOffset)) {
+    const geoPrecisionDescription = GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS[argumentAtOffset.text];
+    if (geoPrecisionDescription) {
+      contents.push({ value: `**${argumentAtOffset.text}**: ${geoPrecisionDescription}` });
+    }
+  }
   if (argumentAtOffset && isESQLNamedParamLiteral(argumentAtOffset)) {
     const bestMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(argumentAtOffset.text));
     // We only know if it's start or end after first 3 characters (?t_s or ?t_e)

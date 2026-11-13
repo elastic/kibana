@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ACTION_HANDOFF_TO_FORENSICS_YAML from './action_handoff_to_forensics.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
@@ -24,10 +24,12 @@ export const ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID =
  * run time.
  */
 export const ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yaml: ACTION_HANDOFF_TO_FORENSICS_YAML,
+  version: 2,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'action_handoff_to_forensics.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

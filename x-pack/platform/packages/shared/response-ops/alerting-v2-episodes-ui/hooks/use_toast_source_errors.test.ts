@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook } from '@testing-library/react';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import type { EpisodeFetchErrorSurface } from '../types/episode_data_source';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import { useToastSourceErrors } from './use_toast_source_errors';
 
 const httpError = (status: number, message: string) =>
@@ -21,7 +24,7 @@ describe('useToastSourceErrors', () => {
 
     expect(addError).toHaveBeenCalledTimes(1);
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alerts for v2 alerts',
+      title: 'Failed to fetch alerts for Universal Alerting',
     });
   });
 
@@ -32,7 +35,7 @@ describe('useToastSourceErrors', () => {
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'list'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alerts for v1 alerts',
+      title: 'Failed to fetch alerts for Classic Alerting',
     });
   });
 
@@ -54,10 +57,10 @@ describe('useToastSourceErrors', () => {
 
     expect(addError).toHaveBeenCalledTimes(2);
     expect(addError).toHaveBeenNthCalledWith(1, classicError, {
-      title: 'Failed to fetch KPIs for v1 alerts',
+      title: 'Failed to fetch KPIs for Classic Alerting',
     });
     expect(addError).toHaveBeenNthCalledWith(2, v2Error, {
-      title: 'Failed to fetch KPIs for v2 alerts',
+      title: 'Failed to fetch KPIs for Universal Alerting',
     });
   });
 
@@ -68,14 +71,29 @@ describe('useToastSourceErrors', () => {
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'histogram'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch histogram data for v1 alerts',
+      title: 'Failed to fetch histogram data for Classic Alerting',
+    });
+  });
+
+  it('names a source by the label it registered in context', () => {
+    const addError = jest.fn();
+    const error = new Error('slo failed');
+    const dataSource = createTestEpisodeSource({ id: 'slo', label: 'SLO burn rate' });
+
+    renderHook(() => useToastSourceErrors([{ sourceId: 'slo', error }], { addError }, 'list'), {
+      wrapper: ({ children }) =>
+        React.createElement(EpisodeDataSourceProvider, { dataSource }, children),
+    });
+
+    expect(addError).toHaveBeenCalledWith(error, {
+      title: 'Failed to fetch alerts for SLO burn rate',
     });
   });
 
   it.each<[EpisodeFetchErrorSurface, string]>([
-    ['list', 'Failed to fetch alerts for custom alerts'],
-    ['kpis', 'Failed to fetch KPIs for custom alerts'],
-    ['histogram', 'Failed to fetch histogram data for custom alerts'],
+    ['list', 'Failed to fetch alerts for custom'],
+    ['kpis', 'Failed to fetch KPIs for custom'],
+    ['histogram', 'Failed to fetch histogram data for custom'],
   ])('names a custom source on the %s surface', (surface, expectedTitle) => {
     const addError = jest.fn();
     const error = new Error(`custom ${surface} failed`);

@@ -16,6 +16,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type { AgenticInvestigationsPluginSetup, AgenticInvestigationsPluginStart } from './types';
 export type { SubjectsClient } from './subjects/services/subjects_client';
+export type { FindingsWriter } from './findings/findings_writer';
 export type { DeleteInvestigationDataAcrossSpacesResult } from './investigations/services/delete_investigation_data_across_spaces';
 export type {
   DeleteInvestigationDataResult,
@@ -25,3 +26,13 @@ export type {
   ClaimSubjectsParams,
   ClaimSubjectsResult,
 } from './subjects/services/subject_claims_service';
+
+export { defineInvestigationAttachment } from './investigation_attachments/define_investigation_attachment';
+export type {
+  InvestigationAttachmentDocService,
+  InvestigationAttachmentStorage,
+} from './investigation_attachments/attachment_doc_service';
+export type {
+  StoredInvestigationAttachment,
+  InvestigationAttachmentDocument,
+} from '../common/investigation_attachments';

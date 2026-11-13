@@ -23,6 +23,7 @@ import type {
   ChatCompletionChunkEvent,
   ChatCompletionEvent,
   ChatCompletionTokenCount,
+  FeatureChatCompleteAPI,
   InferenceConnector,
 } from '@kbn/inference-common';
 import {
@@ -108,7 +109,7 @@ const metadata = {
 };
 
 describe('InferenceChatModel', () => {
-  let chatComplete: ChatCompleteAPI & jest.MockedFn<ChatCompleteAPI>;
+  let chatComplete: ChatCompleteAPI & FeatureChatCompleteAPI & jest.MockedFn<ChatCompleteAPI>;
   let connector: InferenceConnector;
 
   beforeEach(() => {
@@ -594,6 +595,278 @@ describe('InferenceChatModel', () => {
         })
       );
     });
+
+    it('calls chatComplete with connectorId when no featureId is set', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: connector.connectorId })
+      );
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('featureId');
+    });
+
+    it('calls chatComplete with featureId and without connectorId when built from a feature', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        telemetryMetadata,
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(chatComplete).toHaveBeenCalledWith({
+        featureId: 'my-feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        stream: false,
+        metadata,
+      });
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('connectorId');
+    });
+
+    it('forwards the connector-path options on the feature path', async () => {
+      const abortCtrl = new AbortController();
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        model: 'super-duper-model',
+        functionCallingMode: 'simulated',
+        signal: abortCtrl.signal,
+        timeout: 60000,
+        maxContentLength: 1000,
+        maxRetries: 2,
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: 'constructor-session',
+        telemetryMetadata,
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith({
+        featureId: 'my-feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        functionCalling: 'simulated',
+        modelName: 'super-duper-model',
+        abortSignal: abortCtrl.signal,
+        timeout: 60000,
+        maxContentLength: 1000,
+        maxRetries: 2,
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: 'constructor-session',
+        stream: false,
+        metadata,
+      });
+    });
+
+    it('forwards tools and toolChoice on the feature path', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        telemetryMetadata,
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        tool_choice: 'test_tool',
+        tools: [
+          {
+            name: 'test_tool',
+            description: 'Just some test tool',
+            schema: z.object({
+              city: z.string().describe('The city to get the weather for'),
+              zipCode: z.number().optional().describe('The zipCode to get the weather for'),
+            }),
+          },
+        ],
+      });
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(chatComplete).toHaveBeenCalledWith({
+        featureId: 'my-feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        toolChoice: { function: 'test_tool' },
+        tools: {
+          test_tool: {
+            description: 'Just some test tool',
+            schema: {
+              properties: {
+                city: {
+                  description: 'The city to get the weather for',
+                  type: 'string',
+                },
+                zipCode: {
+                  description: 'The zipCode to get the weather for',
+                  type: 'number',
+                },
+              },
+              required: ['city'],
+              type: 'object',
+            },
+          },
+        },
+        stream: false,
+        metadata,
+      });
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('connectorId');
+    });
+
+    it('forwards bound tools on the feature path', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        telemetryMetadata,
+      }).bindTools([
+        {
+          name: 'test_tool',
+          description: 'Just some test tool',
+          schema: z.object({
+            city: z.string().describe('The city to get the weather for'),
+          }),
+        },
+      ]);
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith({
+        featureId: 'my-feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        toolChoice: 'auto',
+        tools: {
+          test_tool: {
+            description: 'Just some test tool',
+            schema: {
+              properties: {
+                city: {
+                  description: 'The city to get the weather for',
+                  type: 'string',
+                },
+              },
+              required: ['city'],
+              type: 'object',
+            },
+          },
+        },
+        stream: false,
+        metadata,
+      });
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('connectorId');
+    });
+
+    it('forwards temperature on the feature path', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        temperature: 0.7,
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+      await chatModel.invoke('question', { temperature: 0.2 });
+
+      expect(chatComplete).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ featureId: 'my-feature', temperature: 0.7 })
+      );
+      expect(chatComplete).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ featureId: 'my-feature', temperature: 0.2 })
+      );
+    });
+
+    it('does not forward constructor reasoning on the feature path', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        reasoning: { effort: 'medium' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'my-feature' })
+      );
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('reasoning');
+    });
+
+    it('does not forward per-call reasoning on the feature path', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', { reasoning: { effort: 'high' } });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'my-feature' })
+      );
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('reasoning');
+    });
+
+    it('does not forward reasoning set via withConfig on the feature path', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+      }).withConfig({ reasoning: { effort: 'none' } });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('reasoning');
+    });
+
+    it('calls chatComplete with featureId when streaming', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+      });
+      chatComplete.mockReturnValue(createStreamResponse(['hello']));
+
+      const output = await chatModel.stream('question');
+      for await (const chunk of output) {
+        expect(chunk).toBeDefined();
+      }
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'my-feature', stream: true })
+      );
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('connectorId');
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('reasoning');
+    });
+  });
+
+  describe('#getConnector', () => {
+    it('returns the connector passed to the constructor', () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+
+      expect(chatModel.getConnector()).toBe(connector);
+    });
+
+    it('returns the connector snapshot on the feature path', () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+      });
+
+      expect(chatModel.getConnector()).toBe(connector);
+    });
   });
 
   describe('Response handling', () => {
@@ -722,6 +995,44 @@ describe('InferenceChatModel', () => {
         input_tokens: 5,
         output_tokens: 10,
         total_tokens: 15,
+      });
+    });
+
+    it('includes thinking tokens in output_tokens and output_token_details', async () => {
+      let rawOutput: Record<string, any>;
+
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        maxRetries: 0,
+        callbacks: [
+          {
+            handleLLMEnd(_output) {
+              rawOutput = _output;
+            },
+          },
+        ],
+      });
+      chatComplete.mockResolvedValue(
+        createResponse({
+          content: 'response',
+          tokens: { prompt: 5, completion: 10, thinking: 30, total: 45 },
+        })
+      );
+
+      const output: AIMessage = await chatModel.invoke('Some question');
+
+      expect(output.usage_metadata).toEqual({
+        input_tokens: 5,
+        output_tokens: 40,
+        total_tokens: 45,
+        output_token_details: { reasoning: 30 },
+      });
+
+      expect(rawOutput!.llmOutput.tokenUsage).toEqual({
+        promptTokens: 5,
+        completionTokens: 40,
+        totalTokens: 45,
       });
     });
 
@@ -914,6 +1225,98 @@ describe('InferenceChatModel', () => {
       });
     });
 
+    it('includes thinking tokens in the token count chunk usage_metadata', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector, maxRetries: 0 });
+      chatComplete.mockReturnValue(
+        createStreamResponse(['hi'], { prompt: 5, completion: 20, thinking: 15, total: 40 })
+      );
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      expect(allChunks[allChunks.length - 1].usage_metadata).toEqual({
+        input_tokens: 5,
+        output_tokens: 35,
+        total_tokens: 40,
+        output_token_details: { reasoning: 15 },
+      });
+
+      const concatChunk = allChunks.reduce((concat, current) => concat.concat(current));
+      expect(concatChunk.usage_metadata).toEqual({
+        input_tokens: 5,
+        input_token_details: {},
+        output_tokens: 35,
+        output_token_details: { reasoning: 15 },
+        total_tokens: 40,
+      });
+    });
+
+    it('exposes reasoning chunks as additional_kwargs.reasoning_content', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockReturnValue(
+        createStreamResponse([
+          { reasoning: 'Let me ' },
+          { reasoning: 'think.' },
+          { content: 'The answer', reasoning: '' },
+          ' is 42.',
+        ])
+      );
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      expect(allChunks.map((chunk) => chunk.content)).toEqual(['', '', 'The answer', ' is 42.']);
+      expect(allChunks.map((chunk) => chunk.additional_kwargs.reasoning_content)).toEqual([
+        'Let me ',
+        'think.',
+        undefined,
+        undefined,
+      ]);
+
+      const concatChunk = allChunks.reduce((concat, current) => concat.concat(current));
+      expect(concatChunk.content).toEqual('The answer is 42.');
+      expect(concatChunk.additional_kwargs.reasoning_content).toEqual('Let me think.');
+    });
+
+    it('keeps refusal alongside reasoning in additional_kwargs', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockReturnValue(
+        createStreamResponse([{ reasoning: 'Checking policy.', refusal: 'I cannot help.' }])
+      );
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      expect(allChunks[0].additional_kwargs).toEqual({
+        reasoning_content: 'Checking policy.',
+        refusal: 'I cannot help.',
+      });
+    });
+
+    it('omits reasoning_content when chunks carry no reasoning', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockReturnValue(createStreamResponse(['hello ', 'there']));
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      allChunks.forEach((chunk) => {
+        expect(chunk.additional_kwargs).not.toHaveProperty('reasoning_content');
+      });
+    });
+
     it('throws when the underlying call throws', async () => {
       const chatModel = new InferenceChatModel({
         chatComplete,
@@ -1035,6 +1438,26 @@ describe('InferenceChatModel', () => {
         model_name: 'my-super-model',
         metadata,
       });
+    });
+
+    it('returns featureId instead of connectorId on the feature path', () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        model: 'my-super-model',
+        telemetryMetadata,
+      });
+
+      const identifyingParams = chatModel.identifyingParams();
+
+      expect(identifyingParams).toEqual({
+        featureId: 'my-feature',
+        modelName: 'my-super-model',
+        model_name: 'my-super-model',
+        metadata,
+      });
+      expect(identifyingParams).not.toHaveProperty('connectorId');
     });
   });
 

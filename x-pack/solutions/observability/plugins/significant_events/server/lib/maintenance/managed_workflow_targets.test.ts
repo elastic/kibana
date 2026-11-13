@@ -7,14 +7,13 @@
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
   buildDisableTargets,
-  DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS,
   GLOBAL_CORE_WORKFLOW_IDS,
   GLOBAL_MAINTENANCE_WORKFLOW_IDS,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
@@ -24,7 +23,6 @@ describe('managed_workflow_targets registry', () => {
   it('includes every installable workflow id in the maintenance sweep lists', () => {
     const maintenanceIds = new Set<string>([
       ...GLOBAL_MAINTENANCE_WORKFLOW_IDS,
-      ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS,
       ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
     ]);
 
@@ -34,15 +32,15 @@ describe('managed_workflow_targets registry', () => {
   });
 
   it('keeps Significant Events core and lifecycle workflows in the global maintenance set', () => {
-    expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([
-      ...GLOBAL_CORE_WORKFLOW_IDS,
-      SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-    ]);
+    expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([...GLOBAL_CORE_WORKFLOW_IDS]);
   });
 
-  it('keeps continuous onboarding in the default-space set', () => {
-    expect(DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS).toEqual(
-      expect.arrayContaining([SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID])
+  it('tracks continuous onboarding and sync as per-space scheduled workflows', () => {
+    expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toEqual(
+      expect.arrayContaining([
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      ])
     );
   });
 

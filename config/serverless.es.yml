@@ -5,6 +5,7 @@ plugins.allowlistPluginGroups: ['platform', 'search']
 
 xpack.search.enabled: false
 xpack.osquery.enabled: false
+xpack.alerting_v2.enabled: false
 
 # Enable fleet on search projects for agentless features
 xpack.fleet.enabled: true
@@ -71,6 +72,9 @@ xpack.cloud.serverless.project_type: search
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
 
+## Enable the shared Elasticsearch home page
+xpack.elasticsearchHome.enabled: true
+
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
 
@@ -94,9 +98,6 @@ data_visualizer.resultLinks.fileBeat.enabled: false
 
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
-
-# Search Homepage
-xpack.searchHomepage.enabled: true
 
 # AI Assistant config
 xpack.observabilityAIAssistant.enabled: true

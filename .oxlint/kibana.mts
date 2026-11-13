@@ -9,6 +9,7 @@
 
 import type { DummyRuleMap, OxlintOverride } from 'oxlint';
 
+import { featureFlagSnapshotAllowlist } from './feature_flag_snapshot_allowlist.mts';
 import { moduleMigrationRule } from './module_migration.mts';
 
 const HOOK_FORM_LIB_DEPRECATION =
@@ -16,6 +17,8 @@ const HOOK_FORM_LIB_DEPRECATION =
 
 export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_async_promise_body': 'error',
+  '@kbn/eslint/no_abort_signal_timeout': 'error',
+  '@kbn/eslint/no_uncleared_race_timeout': 'error',
   '@kbn/eslint/no_async_foreach': 'error',
   '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
   '@kbn/eslint/no_trailing_import_slash': 'error',
@@ -27,6 +30,13 @@ export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
   '@kbn/eslint/no_wrapped_error_in_logger': 'error',
   '@kbn/eslint/no_npx_playwright': 'error',
+  '@kbn/eslint/no_redundant_link_navigation': 'warn',
+  '@kbn/eslint/no_feature_flag_snapshot': [
+    'error',
+    {
+      allow: featureFlagSnapshotAllowlist,
+    },
+  ],
   '@kbn/eslint/module_migration': moduleMigrationRule,
   '@kbn/disable/no_protected_eslint_disable': 'error',
   '@kbn/disable/no_naked_eslint_disable': 'error',
@@ -36,7 +46,8 @@ export const kibanaOverrides: OxlintOverride[] = [
   {
     files: ['**/*.{js,mjs,ts,tsx}'],
     rules: {
-      'no-restricted-imports': [
+      // A separate rule, so these stay warnings next to the error-level `no-restricted-imports`.
+      '@kbn/eslint/no_deprecated_imports': [
         'warn',
         {
           paths: [
@@ -130,6 +141,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-lens-common/**/*',
       'src/platform/packages/shared/kbn-lens-common-2/**/*',
       'src/platform/packages/shared/kbn-coloring/**/*',
+      'src/platform/packages/shared/kbn-coloring-components/**/*',
       'src/platform/packages/shared/kbn-chart-icons/**/*',
       'src/platform/packages/shared/kbn-event-annotation-common/**/*',
       'src/platform/packages/shared/kbn-event-annotation-components/**/*',
@@ -152,6 +164,29 @@ export const kibanaOverrides: OxlintOverride[] = [
     },
   },
   {
+    files: ['**/*.{ts,tsx}'],
+    excludeFiles: [
+      '**/*.test.{ts,tsx}',
+      '**/*.mock.{ts,tsx}',
+      '**/*.stories.{ts,tsx}',
+      '**/__tests__/**',
+      '**/__mocks__/**',
+      '**/__fixtures__/**',
+      '**/__snapshots__/**',
+      '**/test/**',
+      '**/tests/**',
+      '**/scripts/**',
+      '**/cypress/**',
+      '**/e2e/**',
+      '**/ftr_e2e/**',
+      '**/.storybook/**',
+      'src/platform/packages/shared/kbn-zod/**',
+    ],
+    rules: {
+      '@kbn/eslint/require_lazy_zod_schema': 'error',
+    },
+  },
+  {
     // Plugin and core index files must list the APIs they expose instead of using `export *`.
     files: [
       'src/core/{server,public,common}/index.ts',
@@ -161,6 +196,71 @@ export const kibanaOverrides: OxlintOverride[] = [
     ],
     rules: {
       '@kbn/eslint/no_export_all': 'error',
+    },
+  },
+  {
+    // Browser-only UI libraries must not load in the Kibana server process: a
+    // single value import of the @elastic/eui barrel pulls 1,100+ modules of
+    // React components into Node.js. Type-only imports are allowed (erased at
+    // runtime); pure color/token values are available from
+    // @elastic/eui-theme-common and @elastic/eui-theme-borealis.
+    files: [
+      'src/**/server/**/*.{ts,tsx}',
+      'x-pack/**/server/**/*.{ts,tsx}',
+      'packages/**/server/**/*.{ts,tsx}',
+      'examples/**/server/**/*.{ts,tsx}',
+    ],
+    excludeFiles: [
+      '**/*.{test,spec,stories}.{ts,tsx}',
+      '**/test/**',
+      '**/tests/**',
+      '**/integration_tests/**',
+      '**/__tests__/**',
+      '**/__mocks__/**',
+      '**/__fixtures__/**',
+      '**/mocks/**',
+      '**/test_helpers/**',
+      '**/scripts/**',
+    ],
+    rules: {
+      '@kbn/eslint/no_browser_imports_in_server': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@elastic/eui',
+                '@elastic/eui/**',
+                'react',
+                'react-dom',
+                'react-dom/**',
+                'react-intl',
+                'react-use',
+                'react-use/**',
+                'react-redux',
+                'redux',
+                '@reduxjs/toolkit',
+                '@reduxjs/toolkit/**',
+                '@emotion/react',
+                '@emotion/css',
+                '@emotion/styled',
+                'refractor',
+                'refractor/**',
+                'prismjs',
+                'prismjs/**',
+                '@elastic/apm-rum',
+                '@elastic/apm-rum-core',
+                '@kbn/i18n-react',
+              ],
+              allowTypeImports: true,
+              message:
+                'Browser-only UI libraries must not load in the Kibana server process. ' +
+                'Use type-only imports, pure modules (e.g. @elastic/eui-theme-common for color palettes), ' +
+                'or move the UI code to public/.',
+            },
+          ],
+        },
+      ],
     },
   },
 ];

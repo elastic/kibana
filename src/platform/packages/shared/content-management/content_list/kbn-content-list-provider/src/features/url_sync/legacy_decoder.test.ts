@@ -8,7 +8,8 @@
  */
 
 import { decodeLegacyParams } from './legacy_decoder';
-import type { SortDirectionsByField } from './url_codec';
+import type { SortDirectionsByField } from '../sorting';
+import { NO_CREATOR_USER_FILTER } from '../../item';
 
 describe('legacy_decoder', () => {
   const bothDirections = new Set<'asc' | 'desc'>(['asc', 'desc']);
@@ -71,6 +72,14 @@ describe('legacy_decoder', () => {
       decodeLegacyParams({ created_by: ['jane@example.com', 'Jane Doe'] }, validSortFields)?.state
         .queryText
     ).toBe('createdBy:"jane@example.com" createdBy:"Jane Doe"');
+  });
+
+  it('maps the legacy no-creator sentinel so old bookmarks keep matching', () => {
+    const queryText = decodeLegacyParams({ created_by: 'no-user' }, validSortFields)?.state
+      .queryText;
+
+    expect(queryText).toContain(NO_CREATOR_USER_FILTER);
+    expect(queryText).not.toContain('no-user');
   });
 
   it('decodes favorites=true as is:starred', () => {

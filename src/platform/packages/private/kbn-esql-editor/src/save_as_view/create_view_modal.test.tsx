@@ -17,6 +17,7 @@ import {
   EsqlViewsClientError,
 } from '@kbn/esql-utils';
 import { CreateViewModal } from './create_view_modal';
+import { ViewCreatedSource } from '../telemetry/telemetry_service';
 
 jest.mock('@kbn/esql-utils', () => {
   const actual = jest.requireActual('@kbn/esql-utils');
@@ -29,11 +30,15 @@ jest.mock('@kbn/esql-utils', () => {
 const createView = jest.fn();
 const query = 'FROM logs-* | LIMIT 10';
 
-const renderModal = (onClose = jest.fn(), onSaved = jest.fn()) => {
+const renderModal = (
+  onClose = jest.fn(),
+  onSaved = jest.fn(),
+  source = ViewCreatedSource.EDITOR_MENU
+) => {
   const core = coreMock.createStart();
   render(
     <KibanaContextProvider services={{ core }}>
-      <CreateViewModal query={query} onClose={onClose} onSaved={onSaved} />
+      <CreateViewModal query={query} onClose={onClose} onSaved={onSaved} source={source} />
     </KibanaContextProvider>
   );
   return { core, onClose, onSaved };
@@ -94,6 +99,7 @@ describe('CreateViewModal', () => {
         name: 'sales',
         query,
         description: undefined,
+        validate: true,
       })
     );
   });
@@ -108,6 +114,7 @@ describe('CreateViewModal', () => {
         name: 'sales',
         query,
         description: 'Daily sales',
+        validate: true,
       })
     );
   });
@@ -171,6 +178,82 @@ describe('CreateViewModal', () => {
       });
       expect(onSaved).toHaveBeenCalledWith('sales');
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('shows validation warnings in the modal after the view is saved', async () => {
+    const warning = 'view [sales] query is not valid: Unknown index [missing]';
+    createView.mockResolvedValue({ acknowledged: true, warnings: [warning] });
+    const { core, onClose, onSaved } = renderModal();
+
+    submitView('sales');
+
+    expect(await screen.findByTestId('saveAsViewValidationWarning')).toHaveTextContent(
+      'View "sales" was created, but its query has validation warnings.'
+    );
+    expect(screen.getByTestId('saveAsViewValidationWarning')).toHaveTextContent(warning);
+    expect(screen.getByTestId('saveAsViewCloseButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('saveAsViewSubmitButton')).not.toBeInTheDocument();
+    expect(onSaved).toHaveBeenCalledWith('sales');
+    expect(onClose).not.toHaveBeenCalled();
+    expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('saveAsViewCloseButton'));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  describe('telemetry', () => {
+    it('reports a created view without the query or description text', async () => {
+      const { core } = renderModal();
+
+      submitView('my_view', 'A description');
+
+      await waitFor(() => expect(createView).toHaveBeenCalled());
+      expect(core.analytics.reportEvent).toHaveBeenCalledWith('esql.view_created', {
+        source: 'editor_menu',
+        has_description: true,
+        query_length: query.length,
+      });
+    });
+
+    it('reports a whitespace-only description as no description', async () => {
+      const { core } = renderModal();
+
+      submitView('my_view', '   ');
+
+      await waitFor(() => expect(createView).toHaveBeenCalled());
+      expect(core.analytics.reportEvent).toHaveBeenCalledWith(
+        'esql.view_created',
+        expect.objectContaining({ has_description: false })
+      );
+    });
+
+    it('reports the control it was created from', async () => {
+      const { core } = renderModal(jest.fn(), jest.fn(), ViewCreatedSource.QUERY_HISTORY);
+
+      submitView('my_view');
+
+      await waitFor(() => expect(createView).toHaveBeenCalled());
+      expect(core.analytics.reportEvent).toHaveBeenCalledWith(
+        'esql.view_created',
+        expect.objectContaining({ source: 'query_history' })
+      );
+    });
+
+    it('does not report a creation that failed', async () => {
+      createView.mockRejectedValue(
+        new EsqlViewsClientError('Forbidden', 403, undefined, 'security_exception')
+      );
+      const { core } = renderModal();
+
+      submitView('my_view');
+
+      await waitFor(() => expect(createView).toHaveBeenCalled());
+      expect(core.analytics.reportEvent).not.toHaveBeenCalledWith(
+        'esql.view_created',
+        expect.anything()
+      );
     });
   });
 });

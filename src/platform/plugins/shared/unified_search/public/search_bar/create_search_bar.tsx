@@ -315,6 +315,8 @@ export function createSearchBar({
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
+            visorInitialState={props.visorInitialState}
+            onVisorInitialStateChange={props.onVisorInitialStateChange}
             hasDirtyState={props.hasDirtyState}
             esqlVariablesConfig={props.esqlVariablesConfig}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
@@ -323,6 +325,8 @@ export function createSearchBar({
             enableResourceBrowser={props.enableResourceBrowser}
             enableCreateView={props.enableCreateView}
             enableDateRangePicker={props.enableDateRangePicker}
+            legacyDatePickerProps={props.legacyDatePickerProps}
+            showTimeWindowButtons={props.showTimeWindowButtons}
             esqlApproximation={props.esqlApproximation}
           />
         </core.i18n.Context>

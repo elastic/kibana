@@ -32,7 +32,25 @@ describe('VectorDB navigation tree', () => {
     );
   });
 
-  it('includes the Monitor performance and Configure Search Power Cloud links in Admin and Settings > Organization', () => {
+  it('includes Search boost with a New badge next to Index Management', () => {
+    const { body } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const dataManagement = body.find((item) => item.title === 'Data management');
+    const indicesSection = dataManagement?.children?.find(
+      (item) => item.title === 'Indices and data streams'
+    );
+
+    expect(indicesSection?.children?.[0]).toEqual(
+      expect.objectContaining({ link: 'management:index_management' })
+    );
+    expect(indicesSection?.children?.[1]).toEqual(
+      expect.objectContaining({ link: 'management:search_boost', badgeType: 'new' })
+    );
+  });
+
+  it('includes only organization-level Cloud links in Admin and Settings > Organization', () => {
     const { footer } = createNavigationTree({
       ...core.application,
       core,
@@ -44,9 +62,24 @@ describe('VectorDB navigation tree', () => {
 
     expect(organizationSection?.children).toEqual([
       expect.objectContaining({ cloudLink: 'billingAndSub' }),
+      expect.objectContaining({ cloudLink: 'userAndRoles' }),
+    ]);
+  });
+
+  it('includes the Monitor performance and Configure Search Power Cloud links in Admin and Settings > Project performance', () => {
+    const { footer } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const adminAndSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+    const projectPerformanceSection = adminAndSettingsNode?.children?.find(
+      (item) => item.id === 'settings_project_performance'
+    );
+
+    expect(projectPerformanceSection?.children).toEqual([
       expect.objectContaining({ cloudLink: 'deployment', title: 'Monitor performance' }),
       expect.objectContaining({ cloudLink: 'searchPower' }),
-      expect.objectContaining({ cloudLink: 'userAndRoles' }),
+      expect.objectContaining({ link: 'management:queryActivity' }),
     ]);
   });
 

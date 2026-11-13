@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { HttpStart } from '@kbn/core-http-browser';
+import { buildPath, type HttpStart } from '@kbn/core-http-browser';
 import type {
   ContentInsightsStats,
   ContentInsightsStatsResponse,
@@ -38,7 +38,13 @@ export class ContentInsightsClient implements ContentInsightsClientPublic {
 
   track(id: string, eventType: ContentInsightsEventTypes) {
     this.deps.http
-      .post(`/internal/content_management/insights/${this.config.domainId}/${id}/${eventType}`)
+      .post(
+        buildPath('/internal/content_management/insights/{domainId}/{id}/{eventType}', {
+          domainId: this.config.domainId,
+          id,
+          eventType,
+        })
+      )
       .catch((e) => {
         this.logger.warn(`Could not track ${eventType} event for ${id}. Error: ${e?.message}`, {
           error: e,
@@ -49,7 +55,11 @@ export class ContentInsightsClient implements ContentInsightsClientPublic {
   async getStats(id: string, eventType: ContentInsightsEventTypes) {
     return this.deps.http
       .get<ContentInsightsStatsResponse>(
-        `/internal/content_management/insights/${this.config.domainId}/${id}/${eventType}/stats`
+        buildPath('/internal/content_management/insights/{domainId}/{id}/{eventType}/stats', {
+          domainId: this.config.domainId,
+          id,
+          eventType,
+        })
       )
       .then((response) => response.result);
   }

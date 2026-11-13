@@ -41,6 +41,7 @@ import {
 import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
+  AddOtherFilterHandler,
 } from '../../types';
 import { canProvideStatsForEsqlField } from '../../utils/can_provide_stats';
 
@@ -289,6 +290,10 @@ export interface UnifiedFieldListItemProps {
    */
   onAddFilter?: AddFieldFilterHandler;
   /**
+   * Callback to add a filter for the "Other" top values bucket to filter bar
+   */
+  onAddOtherFilter?: AddOtherFilterHandler;
+  /**
    * Determines whether the field is empty
    */
   isEmpty: boolean;
@@ -362,6 +367,7 @@ function UnifiedFieldListItemComponent({
   onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
   onAddFilter,
+  onAddOtherFilter,
   isEmpty,
   isSelected,
   trackUiMetric,
@@ -390,6 +396,17 @@ function UnifiedFieldListItemComponent({
           }
         : undefined,
     [setOpen, onAddFilter]
+  );
+
+  const addOtherFilterAndClosePopover: typeof onAddOtherFilter | undefined = useMemo(
+    () =>
+      onAddOtherFilter
+        ? (...params) => {
+            setOpen(false);
+            onAddOtherFilter?.(...params);
+          }
+        : undefined,
+    [setOpen, onAddOtherFilter]
   );
 
   const togglePopover = useCallback(() => {
@@ -443,6 +460,7 @@ function UnifiedFieldListItemComponent({
           multiFields={multiFields}
           dataView={dataView}
           onAddFilter={addFilterAndClosePopover}
+          onAddOtherFilter={addOtherFilterAndClosePopover}
           additionalFilters={additionalFilters}
         />
 

@@ -14,12 +14,17 @@ import {
   type CaseAttachmentData,
   type CasesAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
+import {
+  CASES_UPDATED_UI_EVENT,
+  type CasesUpdatedUiEventData,
+} from '../../../common/types/agent_builder/ui_events';
 
 /**
  * Only an Agent Builder conversation persists emitted attachments and can resolve
  * `<render_attachment id="..." />` tags. MCP clients, the public `tools/_execute`
  * API and the CLI would receive attachment IDs they cannot use, so tools skip
- * emission for them and return the case data alone.
+ * emission for them and return the case data alone. The `cases:updated` UI event
+ * is skipped with it, as those callers have no conversation event stream to carry it.
  */
 export const canRenderAttachments = (callContext: ToolHandlerContext['callContext']): boolean =>
   callContext.callSource === 'agent';
@@ -114,16 +119,29 @@ export const emitCasesAttachment = async (
  * tools (manage, attachments, observables) surface the affected case(s) to
  * the user as structured attachments rather than relying on text output.
  *
+ * Also sends a `cases:updated` UI event so an open case view can refresh.
+ *
  * Returns the IDs of the emitted attachment(s). The caller should surface
  * these to the LLM via the tool result so the agent can render them inline
  * with `<render_attachment id="..." />`.
  */
 export const emitFromStepResult = async (
-  attachments: ToolHandlerContext['attachments'],
+  { attachments, events }: Pick<ToolHandlerContext, 'attachments' | 'events'>,
   toolResult: { results: Array<{ data?: unknown }> }
 ): Promise<string[]> => {
   const data = toolResult.results?.[0]?.data as { case?: Case; cases?: Case[] } | undefined;
   if (!data) return [];
+  const caseIds = data.case
+    ? [data.case.id]
+    : Array.isArray(data.cases)
+    ? data.cases.map(({ id }) => id)
+    : [];
+  if (caseIds.length > 0) {
+    events.sendUiEvent<typeof CASES_UPDATED_UI_EVENT, CasesUpdatedUiEventData>(
+      CASES_UPDATED_UI_EVENT,
+      { caseIds }
+    );
+  }
   if (data.case) {
     const id = await emitCaseAttachment(attachments, toCaseAttachmentData(data.case));
     return [id];

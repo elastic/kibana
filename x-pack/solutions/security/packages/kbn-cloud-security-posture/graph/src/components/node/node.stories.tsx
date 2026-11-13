@@ -11,7 +11,7 @@ import { ReactFlow, Controls, Background } from '@xyflow/react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import type { NodeViewModel } from '../types';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode } from '.';
+import { EntityCardNode } from '.';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from '../graph/styles';
@@ -32,12 +32,12 @@ const meta: Meta<NodeViewModel> = {
       options: ['primary', 'danger', 'warning'],
       control: { type: 'radio' },
     },
-    shape: {
-      options: ['ellipse', 'hexagon', 'pentagon', 'rectangle', 'diamond'],
-      control: { type: 'radio' },
-    },
     expandButtonClick: { action: 'expandButtonClick' },
     toolbarItemsFn: { control: false },
+    isOrigin: {
+      control: { type: 'boolean' },
+      description: 'Origin entity — draws the starting point highlight ring',
+    },
   },
   args: {
     id: 'siem-windows',
@@ -54,10 +54,11 @@ const meta: Meta<NodeViewModel> = {
     countryCodes: ['us', 'ru', 'es', 'us', 'us'],
     count: 5,
     color: 'primary',
-    shape: 'hexagon',
+    kind: 'entity',
     icon: 'aws',
     interactive: true,
     toolbarItemsFn: storybookToolbarItems,
+    isOrigin: false,
   },
   decorators: [GlobalStylesStorybookDecorator],
 };
@@ -65,11 +66,7 @@ const meta: Meta<NodeViewModel> = {
 export default meta;
 
 const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
+  entity: EntityCardNode,
 };
 
 const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
@@ -81,7 +78,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
       nodes={[
         {
           id: args.id,
-          type: args.shape,
+          type: args.kind,
           data: pick(args, [
             'id',
             'tag',
@@ -95,6 +92,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
             'interactive',
             'expandButtonClick',
             'toolbarItemsFn',
+            'isOrigin',
           ]),
           position: { x: 0, y: 0 },
         },
@@ -111,6 +109,15 @@ export const Node: StoryObj<NodeViewModel> = {
   render: Template,
 };
 
+/** Origin entity with the starting point highlight ring. */
+export const OriginHighlight: StoryObj<NodeViewModel> = {
+  render: Template,
+  args: {
+    isOrigin: true,
+    count: 1,
+  },
+};
+
 export const Colors: StoryObj = {
   parameters: {
     controls: { disable: true },
@@ -118,7 +125,7 @@ export const Colors: StoryObj = {
   render: () => {
     const colorNodes = (['primary', 'danger', 'warning'] as const).map((color, index) => ({
       id: `color-${color}`,
-      type: 'hexagon',
+      type: 'entity',
       data: {
         id: `color-${color}`,
         label: `${color} Node`,
@@ -126,7 +133,7 @@ export const Colors: StoryObj = {
         color,
         icon: 'storage',
         interactive: true,
-        shape: 'hexagon',
+        kind: 'entity',
       },
       position: { x: index * 200, y: 0 },
     }));
@@ -134,39 +141,6 @@ export const Colors: StoryObj = {
     return (
       <>
         <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={colorNodes}>
-          <Controls />
-          <Background />
-        </ReactFlow>
-        <GlobalGraphStyles />
-      </>
-    );
-  },
-};
-
-export const Shapes: StoryObj = {
-  parameters: {
-    controls: { disable: true },
-  },
-  render: () => {
-    const shapes = (['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const).map(
-      (shape, index) => ({
-        id: `entity-${shape}`,
-        type: shape,
-        data: {
-          id: `entity-${shape}`,
-          label: `${shape} node`,
-          color: 'primary',
-          icon: 'okta',
-          interactive: true,
-          shape,
-        },
-        position: { x: index * 200, y: 0 },
-      })
-    );
-
-    return (
-      <>
-        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={shapes}>
           <Controls />
           <Background />
         </ReactFlow>
@@ -197,10 +171,10 @@ export const Details: StoryObj = {
   render: () => {
     const nodes = Object.entries(detailsUseCases).map(([useCaseName, props], index) => ({
       id: useCaseName,
-      type: 'hexagon',
+      type: 'entity',
       data: {
         id: useCaseName,
-        shape: 'hexagon',
+        kind: 'entity',
         color: 'primary',
         icon: 'storage',
         interactive: true,
@@ -229,7 +203,7 @@ export const Interactivity: StoryObj = {
     const interactivityNodes = [
       {
         id: 'interactive-node',
-        type: 'hexagon',
+        type: 'entity',
         data: {
           id: 'interactive-node',
           label: 'Interactive Node',
@@ -237,14 +211,14 @@ export const Interactivity: StoryObj = {
           color: 'primary',
           icon: 'gear',
           interactive: true,
-          shape: 'hexagon',
+          kind: 'entity',
           toolbarItemsFn: storybookToolbarItems,
         },
         position: { x: 0, y: 0 },
       },
       {
         id: 'non-interactive-node',
-        type: 'hexagon',
+        type: 'entity',
         data: {
           id: 'non-interactive-node',
           label: 'Non-Interactive Node',
@@ -252,7 +226,7 @@ export const Interactivity: StoryObj = {
           color: 'primary',
           icon: 'gear',
           interactive: false,
-          shape: 'hexagon',
+          kind: 'entity',
         },
         position: { x: 200, y: 0 },
       },

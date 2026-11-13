@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyGrouping, AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type {
@@ -39,6 +39,7 @@ export interface Alert {
   alert_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: AlertData;
+  alert_url: string;
 }
 
 /** Suppression fact read from `.alert-actions`; a null `alert_id` means series-scoped. */
@@ -50,7 +51,7 @@ export interface SuppressionRow {
   alert_id: string | null;
   should_suppress: boolean;
   last_ack_action?: string | null;
-  last_deactivate_action?: string | null;
+  last_lifecycle_action?: string | null;
   last_snooze_action?: string | null;
 }
 
@@ -62,7 +63,7 @@ export type AlertSuppressionRow = Omit<SuppressionRow, 'alert_id' | 'last_snooze
 /** Row of the series suppressions query: snooze state of a series, so it carries no `alert_id`. */
 export type SeriesSuppressionRow = Omit<
   SuppressionRow,
-  'alert_id' | 'last_ack_action' | 'last_deactivate_action'
+  'alert_id' | 'last_ack_action' | 'last_lifecycle_action'
 >;
 
 export interface DispatcherExecutionParams {
@@ -97,6 +98,7 @@ export interface Rule {
   spaceId: string;
   name: string;
   routingTags: string[];
+  groupingFields: string[];
 }
 
 export interface PolicyMatcherAttributes {
@@ -112,10 +114,11 @@ export interface ActionPolicy {
   /** Structured matcher evaluated against the alert context.
    *  Null or absent means catch-all (matches every alert). */
   matcher?: PolicyMatcherAttributes | null;
-  /** data.* fields used to group alerts into a single action group */
-  groupBy: string[];
-  /** How alerts are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
-  groupingMode: 'per_alert' | 'all' | 'per_field';
+  /**
+   * How alerts are batched into action group payloads. The mode decides whether `data.*` fields
+   * come with it. Defaulted at hydration (DEFAULT_GROUPING).
+   */
+  grouping: ActionPolicyGrouping;
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
@@ -143,7 +146,9 @@ export interface ActionGroup {
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
-export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
+export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'> & {
+  grouping_fields: Rule['groupingFields'];
+};
 
 export type ActionPolicyWorkflowPayloadAlert = Alert;
 
@@ -161,6 +166,12 @@ export interface LastNotifiedRecord {
   alert_status?: string;
 }
 
+export interface AlreadyNotifiedRecord {
+  action_group_id: ActionGroupId;
+  alert_id: string;
+  notified_through: string;
+}
+
 export interface LastNotifiedInfo {
   lastNotified: Date;
   alertStatus?: string;
@@ -168,7 +179,7 @@ export interface LastNotifiedInfo {
 
 /**
  * A single failed attempt to dispatch one action group to one workflow
- * destination. Carries everything the execution-history step needs to emit a
+ * destination. Carries everything `DispatchStep` needs to emit a
  * `dispatch_failed` event: the parent policy, the failing group + workflow, the
  * affected alerts, and a machine-readable + human-readable cause.
  */
@@ -197,8 +208,6 @@ export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
   /** Result of the windowed candidate scan (alerts + truncation flag). */
   readonly scan?: AlertScan;
-  /** Count of alerts that received an `.alert-actions` record this tick. */
-  readonly recordedAlerts?: number;
   /** Suppression facts from `.alert-actions`, indexed for per-alert lookup. */
   readonly suppressions?: SuppressionIndex;
   /** Dispatchable vs suppressed verdict on the scanned alerts. */
@@ -207,6 +216,8 @@ export interface DispatcherPipelineState {
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
+  /** Alerts of each group an earlier tick already handled (scheduled, or failed to); recorded as `fire`, never dispatched again. */
+  readonly alreadyNotified?: ActionGroup[];
   /** Delivery decision: groups eligible to dispatch now vs groups held back. */
   readonly plan?: DispatchPlan;
   /** Dispatch results: workflow executions per group and failed attempts. */
@@ -217,7 +228,8 @@ export type DispatcherHaltReason =
   | 'no_alerts'
   | 'no_actions'
   | 'aborted'
-  | 'inline_stats_too_large';
+  | 'inline_stats_too_large'
+  | 'commit_failed';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -59,18 +59,16 @@ describe('NotificationControlsSection', () => {
     expect(mockUseFetchRuleEventFields).toHaveBeenCalledWith('alert_status: "active"');
   });
 
-  it('populates the group-by combo-box with fields returned by useFetchRuleEventFields', async () => {
+  it('populates the group-by combo-box with fields returned by useFetchRuleEventFields', () => {
     mockUseFetchRuleEventFields.mockReturnValue({
       data: ['data.host', 'data.service'],
       isLoading: false,
     });
-    const user = userEvent.setup();
     renderSection({ ...DEFAULT_FORM_STATE, groupingMode: 'per_field' });
 
-    const groupByInput = screen.getByTestId(TEST_SUBJ.groupByInput);
-    await user.click(groupByInput.querySelector('input')!);
+    fireEvent.click(within(screen.getByTestId(TEST_SUBJ.groupByInput)).getByRole('combobox'));
 
-    expect(await screen.findByTitle('data.host')).toBeInTheDocument();
+    expect(screen.getByTitle('data.host')).toBeInTheDocument();
     expect(screen.getByTitle('data.service')).toBeInTheDocument();
   });
 

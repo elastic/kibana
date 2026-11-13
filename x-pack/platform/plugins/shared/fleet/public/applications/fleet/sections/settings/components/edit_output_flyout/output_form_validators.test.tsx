@@ -14,8 +14,25 @@ import {
   validateCATrustedFingerPrint,
   validateKafkaHeaders,
   validateKafkaHosts,
+  validateKafkaOAuth2Claims,
+  validateKafkaOAuth2ClientCertificateKeySecret,
+  validateKafkaOAuth2ClientId,
+  validateKafkaOAuth2ClientSecretSecret,
+  validateKafkaKerberosConfigPath,
+  validateKafkaKerberosKeytab,
+  validateKafkaKerberosPassword,
+  validateKafkaKerberosRealm,
+  validateKafkaKerberosUsername,
+  validateKafkaOAuth2EndpointParams,
+  validateKafkaOAuth2Seconds,
+  validateKafkaOAuth2TokenUrl,
   validateKibanaURL,
   validateKibanaAPIKey,
+  validateOtlpByteSize,
+  validateOtlpDuration,
+  validateOtlpEndpoint,
+  validateOtlpHeaders,
+  validateOtlpShortString,
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
@@ -472,6 +489,232 @@ describe('Output form validation', () => {
       const res = validateDynamicKafkaTopics([{ label: 'field', value: '%{[field]}]}' }]);
       expect(res).toEqual([
         'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+  });
+
+  describe('Kafka OAuth2 validators', () => {
+    describe('validateKafkaOAuth2ClientId', () => {
+      it('should require a client id', () => {
+        expect(validateKafkaOAuth2ClientId('')).toEqual(['Client ID is required']);
+        expect(validateKafkaOAuth2ClientId('   ')).toEqual(['Client ID is required']);
+      });
+
+      it('should accept a client id', () => {
+        expect(validateKafkaOAuth2ClientId('my-client')).toBeUndefined();
+      });
+    });
+
+    describe('validateKafkaOAuth2ClientSecretSecret', () => {
+      it('should require a client secret', () => {
+        expect(validateKafkaOAuth2ClientSecretSecret('')).toEqual(['Client secret is required']);
+        expect(validateKafkaOAuth2ClientSecretSecret(undefined)).toEqual([
+          'Client secret is required',
+        ]);
+      });
+
+      it('should accept a new client secret and a saved one', () => {
+        expect(validateKafkaOAuth2ClientSecretSecret('my-secret')).toBeUndefined();
+        expect(validateKafkaOAuth2ClientSecretSecret({ id: 'secret-id' })).toBeUndefined();
+      });
+    });
+
+    describe('validateKafkaOAuth2ClientCertificateKeySecret', () => {
+      it('should require a private key', () => {
+        expect(validateKafkaOAuth2ClientCertificateKeySecret('')).toEqual([
+          'Private key is required',
+        ]);
+        expect(validateKafkaOAuth2ClientCertificateKeySecret(undefined)).toEqual([
+          'Private key is required',
+        ]);
+      });
+
+      it('should accept a new private key and a saved one', () => {
+        expect(validateKafkaOAuth2ClientCertificateKeySecret('-----BEGIN-----')).toBeUndefined();
+        expect(validateKafkaOAuth2ClientCertificateKeySecret({ id: 'key-id' })).toBeUndefined();
+      });
+    });
+
+    describe('validateKafkaOAuth2Claims', () => {
+      it('should accept no claims or a JSON object', () => {
+        expect(validateKafkaOAuth2Claims('')).toBeUndefined();
+        expect(validateKafkaOAuth2Claims('  ')).toBeUndefined();
+        expect(validateKafkaOAuth2Claims('{"sub": "my-client", "n": {"a": 1}}')).toBeUndefined();
+        expect(validateKafkaOAuth2Claims('{}')).toBeUndefined();
+      });
+
+      it.each(['not json', '["a"]', '"text"', '42', 'null'])(
+        'should reject %s, it is not a JSON object',
+        (value) => {
+          expect(validateKafkaOAuth2Claims(value)).toEqual([
+            'The claims must be a JSON object, for example {"sub": "my-client"}',
+          ]);
+        }
+      );
+    });
+
+    describe('validateKafkaOAuth2Seconds', () => {
+      it('should accept no value or a number of seconds, decimals included', () => {
+        expect(validateKafkaOAuth2Seconds('')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('  ')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('0')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('30')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('1.5')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('86400')).toBeUndefined();
+      });
+
+      it.each(['-1', '86401', 'abc', '10s', 'Infinity'])('should reject %s', (value) => {
+        expect(validateKafkaOAuth2Seconds(value)).toEqual([
+          'Specify a number of seconds between 0 and 86400',
+        ]);
+      });
+    });
+
+    describe('validateKafkaOAuth2TokenUrl', () => {
+      it('should require a token url', () => {
+        expect(validateKafkaOAuth2TokenUrl('')).toEqual(['Token URL is required']);
+      });
+
+      it('should accept an http or https url', () => {
+        expect(validateKafkaOAuth2TokenUrl('https://idp.example.com/oauth2/token')).toBeUndefined();
+        expect(validateKafkaOAuth2TokenUrl('http://localhost:8080/token')).toBeUndefined();
+      });
+
+      it('should reject another protocol', () => {
+        expect(validateKafkaOAuth2TokenUrl('ftp://idp.example.com')).toEqual([
+          'Token URL must start with http:// or https://',
+        ]);
+      });
+
+      it('should reject something that is not a url', () => {
+        expect(validateKafkaOAuth2TokenUrl('idp.example.com/token')).toEqual(['Invalid URL']);
+        expect(validateKafkaOAuth2TokenUrl('not a url')).toEqual(['Invalid URL']);
+      });
+    });
+
+    describe('Kerberos validators', () => {
+      it.each([
+        [validateKafkaKerberosConfigPath, 'Kerberos configuration file is required'],
+        [validateKafkaKerberosRealm, 'Realm is required'],
+        [validateKafkaKerberosKeytab, 'Keytab file is required'],
+        [validateKafkaKerberosUsername, 'Username is required'],
+        [validateKafkaKerberosPassword, 'Password is required'],
+      ])('should require a value', (validate, message) => {
+        expect(validate('')).toEqual([message]);
+        expect(validate('value')).toBeUndefined();
+      });
+
+      it('should not accept a value that is only white space, except for the password', () => {
+        expect(validateKafkaKerberosRealm('  ')).toHaveLength(1);
+        expect(validateKafkaKerberosPassword('  ')).toBeUndefined();
+      });
+    });
+
+    describe('validateKafkaOAuth2EndpointParams', () => {
+      it('should accept complete parameters and the empty row', () => {
+        expect(
+          validateKafkaOAuth2EndpointParams([
+            { key: 'audience', value: 'kafka' },
+            { key: '', value: '' },
+          ])
+        ).toBeUndefined();
+      });
+
+      it('should flag a parameter without value or without name', () => {
+        expect(
+          validateKafkaOAuth2EndpointParams([
+            { key: 'audience', value: '' },
+            { key: '', value: 'kafka' },
+          ])
+        ).toEqual([
+          expect.objectContaining({ index: 0, hasKeyError: false, hasValueError: true }),
+          expect.objectContaining({ index: 1, hasKeyError: true, hasValueError: false }),
+        ]);
+      });
+
+      it('should flag the reserved name __proto__', () => {
+        expect(validateKafkaOAuth2EndpointParams([{ key: '__proto__', value: 'kafka' }])).toEqual([
+          {
+            message: '"__proto__" is a reserved name and cannot be used',
+            index: 0,
+            hasKeyError: true,
+            hasValueError: false,
+          },
+        ]);
+      });
+    });
+  });
+});
+
+describe('OTLP validators', () => {
+  describe('validateOtlpEndpoint', () => {
+    it('should require an endpoint', () => {
+      expect(validateOtlpEndpoint('')).toEqual(['Endpoint is required']);
+      expect(validateOtlpEndpoint('  ')).toEqual(['Endpoint is required']);
+    });
+
+    it('should accept host:port and URLs', () => {
+      expect(validateOtlpEndpoint('collector.example.com:4317')).toBeUndefined();
+      expect(validateOtlpEndpoint('https://collector.example.com:4317')).toBeUndefined();
+    });
+
+    it('should reject spaces and long endpoints', () => {
+      expect(validateOtlpEndpoint('collector example:4317')).toEqual([
+        'Endpoint must not contain spaces',
+      ]);
+      expect(validateOtlpEndpoint('a'.repeat(2049))).toEqual([
+        'Endpoint must be at most 2048 characters',
+      ]);
+    });
+  });
+
+  describe('validateOtlpDuration', () => {
+    it.each(['', '0', '5s', '500ms', '1m30s', '1.5h', '10us', '2µs'])(
+      'should accept %p',
+      (value) => {
+        expect(validateOtlpDuration(value)).toBeUndefined();
+      }
+    );
+
+    it.each(['5', 'five seconds', '-5s', '5 s', 's'])('should reject %p', (value) => {
+      expect(validateOtlpDuration(value)).toEqual(['Specify a duration such as 500ms, 5s, 1m30s']);
+    });
+  });
+
+  describe('validateOtlpByteSize', () => {
+    it.each(['', '0', '524288'])('should accept %p', (value) => {
+      expect(validateOtlpByteSize(value)).toBeUndefined();
+    });
+
+    it.each(['-1', '1.5', 'abc', '99999999999999999999'])('should reject %p', (value) => {
+      expect(validateOtlpByteSize(value)).toEqual(['Specify a whole number of bytes, 0 or more']);
+    });
+  });
+
+  describe('validateOtlpShortString', () => {
+    it('should accept up to 256 characters', () => {
+      expect(validateOtlpShortString('')).toBeUndefined();
+      expect(validateOtlpShortString('a'.repeat(256))).toBeUndefined();
+      expect(validateOtlpShortString('a'.repeat(257))).toEqual(['Must be at most 256 characters']);
+    });
+  });
+
+  describe('validateOtlpHeaders', () => {
+    it('should accept an empty row and complete pairs', () => {
+      expect(validateOtlpHeaders([{ key: '', value: '' }])).toBeUndefined();
+      expect(validateOtlpHeaders([{ key: 'x-tenant', value: 'acme' }])).toBeUndefined();
+    });
+
+    it('should reject incomplete pairs, duplicates and long values', () => {
+      expect(validateOtlpHeaders([{ key: 'a', value: '' }])).toHaveLength(1);
+      expect(
+        validateOtlpHeaders([
+          { key: 'a', value: '1' },
+          { key: 'a', value: '2' },
+        ])
+      ).toHaveLength(1);
+      expect(validateOtlpHeaders([{ key: 'a', value: 'v'.repeat(1001) }])).toEqual([
+        expect.objectContaining({ index: 0, hasKeyError: false, hasValueError: true }),
       ]);
     });
   });

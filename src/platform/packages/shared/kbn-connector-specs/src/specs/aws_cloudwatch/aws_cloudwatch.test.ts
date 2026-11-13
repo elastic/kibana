@@ -368,6 +368,37 @@ describe('AWS CloudWatch connector', () => {
       });
     });
 
+    it('decodes the base64 MetricWidgetImage of a JSON response', async () => {
+      const pngBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+      mockPost.mockResolvedValue({
+        data: Buffer.from(JSON.stringify({ MetricWidgetImage: pngBytes.toString('base64') })),
+      });
+
+      const result = await AwsCloudwatch.actions.getMetricWidgetImage.handler(mockContext, {
+        metricWidget: '{"metrics":[["AWS/EC2","CPUUtilization"]]}',
+      });
+
+      expect(result).toEqual({
+        contentType: 'image/png',
+        encoding: 'base64',
+        content: pngBytes.toString('base64'),
+      });
+    });
+
+    it.each([
+      ['has no MetricWidgetImage', '{"foo":"bar"}'],
+      ['has a non-string MetricWidgetImage', '{"MetricWidgetImage":123}'],
+      ['is malformed', '{"MetricWidgetImage":"AA'],
+    ])('throws a readable error when a JSON response %s', async (_description, responseBody) => {
+      mockPost.mockResolvedValue({ data: Buffer.from(responseBody) });
+
+      await expect(
+        AwsCloudwatch.actions.getMetricWidgetImage.handler(mockContext, {
+          metricWidget: '{"metrics":[["AWS/EC2","CPUUtilization"]]}',
+        })
+      ).rejects.toThrow('AWS CloudWatch returned a response with no MetricWidgetImage');
+    });
+
     it('throws a readable error when CloudWatch returns an empty image body', async () => {
       mockPost.mockResolvedValue({ data: new ArrayBuffer(0) });
 
@@ -605,6 +636,55 @@ describe('AWS CloudWatch connector', () => {
       await expect(AwsCloudwatch.test.handler(mockContext)).rejects.toThrow(
         'AWS CloudWatch error (UnknownOperationException)'
       );
+    });
+  });
+
+  describe('input bounds', () => {
+    const { getMetricData, setAlarmState } = AwsCloudwatch.actions;
+
+    it.each([
+      [500, true],
+      [501, false],
+    ])('getMetricData accepts up to 500 queries: %d valid=%s', (count, expected) => {
+      const metricDataQueries = Array.from({ length: count }, (_, i) => ({
+        id: `m${i}`,
+        expression: 'SELECT 1',
+      }));
+      expect(
+        getMetricData.input.safeParse({
+          metricDataQueries,
+          startTime: '2024-01-15T00:00:00Z',
+          endTime: '2024-01-15T01:00:00Z',
+        }).success
+      ).toBe(expected);
+    });
+
+    describe('setAlarmState stateReasonData', () => {
+      const isValid = (stateReasonData: Record<string, unknown>) =>
+        setAlarmState.input.safeParse({
+          alarmName: 'high-cpu',
+          stateValue: 'OK',
+          stateReason: 'test',
+          stateReasonData,
+        }).success;
+      // `{"k":"<value>"}` adds 8 characters around the value.
+      const overhead = JSON.stringify({ k: '' }).length;
+
+      it('is bounded at 4000 characters of serialized JSON', () => {
+        expect(isValid({ k: 'x'.repeat(4000 - overhead) })).toBe(true);
+        expect(isValid({ k: 'x'.repeat(4001 - overhead) })).toBe(false);
+      });
+
+      it('counts escaped characters as serialized', () => {
+        expect(isValid({ k: '"'.repeat((4000 - overhead) / 2) })).toBe(true);
+        expect(isValid({ k: '"'.repeat((4000 - overhead) / 2 + 1) })).toBe(false);
+      });
+
+      it('accepts more than 50 entries when the serialized size fits', () => {
+        expect(
+          isValid(Object.fromEntries(Array.from({ length: 100 }, (_, i) => [`k${i}`, i])))
+        ).toBe(true);
+      });
     });
   });
 });

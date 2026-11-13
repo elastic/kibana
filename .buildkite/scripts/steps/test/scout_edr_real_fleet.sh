@@ -29,8 +29,8 @@ source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
 # UI project drives the browser. API project enrolls a host and talks to Kibana over HTTP.
 # Each config boots its own stack and VM. Keep both out of default Scout (excluded_configs).
 CONFIGS=(
-  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts"
-  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts"
+  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts"
+  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/playwright.config.ts"
 )
 
 upload_events_if_available() {
@@ -72,7 +72,7 @@ for CONFIG_PATH in "${CONFIGS[@]}"; do
   start=$(date +%s)
 
   set +e
-  node scripts/scout run-tests --location local --arch "$ARCH" --domain "$DOMAIN" --serverConfigSet edr_real_fleet --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+  node scripts/scout run-tests --location local --arch "$ARCH" --domain "$DOMAIN" --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
   EXIT_CODE=$?
   set -e
 

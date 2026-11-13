@@ -20,6 +20,7 @@ import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   concatJsonObjectPropertyEsqlExprSafe,
   JSON_OBJECT_START,
@@ -234,7 +235,7 @@ const buildV2ActorResolution = (): string => {
 
   // Combine field evaluations (entity.namespace) and user EUID into a single EVAL
   // to prevent the ES|QL optimizer from pruning the intermediate entity.namespace column.
-  const userFieldEvaluationsEsql = getFieldEvaluationsEsql('user');
+  const userFieldEvaluationsEsql = getFieldEvaluationsEsql(getBuiltInEntityDefinition('user'));
 
   // Compute EUIDs for typed entity types (excludes generic — falls back to entity.id)
   const typedEntityTypes = ALL_ENTITY_TYPES.filter((t) => t !== 'generic');
@@ -244,7 +245,7 @@ const buildV2ActorResolution = (): string => {
     evalParts.push(userFieldEvaluationsEsql);
   }
   typedEntityTypes.forEach((type) => {
-    evalParts.push(getEuidEsqlEvaluation(type, `_actor_${type}_euid`));
+    evalParts.push(getEuidEsqlEvaluation(getBuiltInEntityDefinition(type), `_actor_${type}_euid`));
   });
 
   // Use raw entity.id directly (not saved variable) since buildSaveSourceFieldsEsql
@@ -405,10 +406,14 @@ const buildEsqlQuery = ({
   integrationRuntimeEvalsEnabled,
   showUnknownTarget,
 }: BuildEsqlQueryParams): string => {
-  // TODO: switch back to LOAD once ES|QL supports accessing subfields of flattened-type
-  // parents under unmapped_fields="LOAD" (currently throws verification_exception for fields
-  // like m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
-  // greenhouse.audit.event.meta.name, cisco_meraki.*.vap).
+  // NULLIFY is used because LOAD rejects dotted references to subfields of flattened fields on ES
+  // versions that cannot read them. The few integration fields that live in flattened objects
+  // (m365_defender.event.additional_fields, snyk.audit_logs.content, greenhouse.audit.event.meta,
+  // cisco_meraki.*.vap) are read with COALESCE(<root>.<key>, FIELD_EXTRACT(<root>, "<key>")): the
+  // dotted path covers indices that map the key as a regular field, FIELD_EXTRACT covers flattened
+  // mappings on ES versions where the dotted path resolves to null. ES|QL reads keys of flattened
+  // fields by dotted path from https://github.com/elastic/elasticsearch/pull/164665 (behind the
+  // esql_flattened_subfields feature flag, on in snapshot builds only).
   // When LOAD is restored, keep the global user.id cast below and add similar casts for any
   // other field known to be mapped with the wrong type in some integration index.
   // See NULLIFY_WORKAROUNDS.md for the full revert checklist and the user.id audit results.
@@ -460,7 +465,7 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // Per-target → source-document mapping ("<targetEntityId>\\n<_id>"), collected via VALUES so
 // that after STATS drops targetEntityId from the group key we can still attribute each target
 // to the document(s) that referenced it. regroupEvents uses this to compute each target-type
-// group's own docIds, which keeps label nodes split by document exactly as they would be if the
+// group's own docIds, which keeps event nodes split by document exactly as they would be if the
 // query still grouped by targetEntityId.
 | EVAL targetDocMap = CONCAT(COALESCE(targetEntityId, ""), "\\n", _id)
 // Map host and source values to enriched contextual data

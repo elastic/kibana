@@ -42,8 +42,25 @@ export const IOCS_TITLE = i18n.translate(
   { defaultMessage: 'IOCs' }
 );
 
+export const ALERTS_FALLBACK_TITLE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.groupedAttachments.alertsFallbackTitle',
+  { defaultMessage: 'Alerts' }
+);
+
 export const alertsTitle = (count: number) =>
   i18n.translate('xpack.securitySolution.agentBuilder.groupedAttachments.alertsTitle', {
     defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+    values: { count },
+  });
+
+export const rulesTitle = (count: number) =>
+  i18n.translate('xpack.securitySolution.agentBuilder.groupedAttachments.rulesTitle', {
+    defaultMessage: '{count} {count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
+
+export const attacksTitle = (count: number) =>
+  i18n.translate('xpack.securitySolution.agentBuilder.groupedAttachments.attacksTitle', {
+    defaultMessage: '{count} {count, plural, one {attack} other {attacks}}',
     values: { count },
   });

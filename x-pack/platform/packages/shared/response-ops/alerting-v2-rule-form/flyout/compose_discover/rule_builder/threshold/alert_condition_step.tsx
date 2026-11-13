@@ -96,6 +96,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     http: services.http,
     application: services.application,
     getDatasets: () => getDatasets(services.http),
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
@@ -109,6 +110,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     http: services.http,
     dataViews: services.dataViews,
     search: services.data.search.search,
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const numericFields = useMemo(
@@ -134,7 +136,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   const handleTimeFieldChange = useCallback(
     (field: string) => {
-      onThresholdValuesChange({ ...thresholdValuesRef.current, timeField: field });
+      // Auto-resolution after mount is not a user edit. Marking it dirty makes Back
+      // and X confirm on a form the user has not touched.
+      onThresholdValuesChange(
+        { ...thresholdValuesRef.current, timeField: field },
+        { origin: 'init' }
+      );
     },
     [onThresholdValuesChange]
   );
@@ -150,6 +157,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     http: services.http,
     dataViews: services.dataViews,
     search: services.data.search.search,
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);

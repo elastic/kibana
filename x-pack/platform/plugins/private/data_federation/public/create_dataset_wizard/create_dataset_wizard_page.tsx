@@ -25,6 +25,8 @@ import type { DataSetWithName, DataSource } from '../../common';
 import { DATASETS_PATH } from '../app_paths';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
+import type { DatasetFormat } from '../../common/dataset_types';
+import { getDatasetCreateEvents, UI_COUNTER_EVENTS } from '../ui_counters';
 import { buildDatasetPayload } from './build_dataset_payload';
 import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from './constants';
 import { type CreateDatasetFormValues } from './create_dataset_form_state';
@@ -77,10 +79,9 @@ export function CreateDatasetWizardPage({
 }) {
   const history = useHistory();
   const {
-    services: { datasetsClient, toasts },
+    services: { datasetsClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const isEditMode = initialDataSet !== undefined;
-  const datasetNameToEdit = initialDataSet?.name;
   const [saveError, setSaveError] = useState<SaveError | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const formDefaultValues = useMemo(
@@ -151,8 +152,8 @@ export function CreateDatasetWizardPage({
     }
 
     setIsSaving(true);
-    const previousName = initialDataSet?.name.trim();
     let savedName: string;
+    const savedFormat = values.settings?.format as DatasetFormat | undefined;
     try {
       const payload = buildDatasetPayload(values);
       await datasetsClient.add(payload);
@@ -163,22 +164,9 @@ export function CreateDatasetWizardPage({
       return;
     }
 
-    if (previousName && previousName !== savedName) {
-      try {
-        await datasetsClient.delete(previousName);
-      } catch (error) {
-        setSaveError({
-          title: createDatasetWizardStrings.deletePreviousErrorTitle,
-          text: createDatasetWizardStrings.deletePreviousErrorText(
-            savedName,
-            previousName,
-            getFlyoutSaveErrorMessage(error)
-          ),
-        });
-        setIsSaving(false);
-        return;
-      }
-    }
+    reportUiCounter?.(
+      isEditMode ? UI_COUNTER_EVENTS.datasetUpdate : getDatasetCreateEvents(savedFormat)
+    );
 
     try {
       await loadDataSets();
@@ -191,7 +179,7 @@ export function CreateDatasetWizardPage({
       setIsSaving(false);
       goToDatasets();
     }
-  }, [datasetsClient, goToDatasets, initialDataSet, loadDataSets, methods, toasts]);
+  }, [datasetsClient, goToDatasets, isEditMode, loadDataSets, methods, reportUiCounter, toasts]);
 
   const activeStepId = STEPS[activeStepIndex].id;
   const isLastStep = activeStepIndex === LAST_STEP_INDEX;
@@ -275,7 +263,6 @@ export function CreateDatasetWizardPage({
                       existingDataSetNames={existingDataSetNames}
                       loadDataSources={loadDataSources}
                       isEditMode={isEditMode}
-                      datasetNameToEdit={datasetNameToEdit}
                     />
                   )}
                   {activeStepId === 'settings' && <StepAdditional />}
@@ -292,6 +279,7 @@ export function CreateDatasetWizardPage({
                       iconType="chevronSingleLeft"
                       onClick={() => goToStep(activeStepIndex - 1)}
                       data-test-subj="backButton"
+                      data-telemetry-id={`dataFederation-datasetWizard-${activeStepId}-backButton`}
                     >
                       {createDatasetWizardStrings.backButton}
                     </EuiButtonEmpty>
@@ -306,6 +294,11 @@ export function CreateDatasetWizardPage({
                     disabled={stepContent.isValid === false}
                     isLoading={isSaving}
                     data-test-subj="nextButton"
+                    data-telemetry-id={
+                      isLastStep
+                        ? 'dataFederation-datasetWizard-saveButton'
+                        : `dataFederation-datasetWizard-${activeStepId}-nextButton`
+                    }
                   >
                     {isLastStep
                       ? isSaving

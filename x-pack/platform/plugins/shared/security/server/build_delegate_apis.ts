@@ -124,12 +124,16 @@ export const buildSecurityApi = ({
       // `async` so that a disabled feature surfaces as a rejected promise rather than a
       // synchronous throw, which callers of a promise-returning API would not expect.
       create: async (request, params) => requireServiceAccounts().backend.create(request, params),
+      delete: async (request, id, params) =>
+        requireServiceAccounts().management.delete(request, id, params),
       bindWorkload: async (pluginId, request, params) =>
         requireServiceAccounts().workloads.bindWorkload(pluginId, request, params),
       unbindWorkload: async (pluginId, request, params) =>
         requireServiceAccounts().workloads.unbindWorkload(pluginId, request, params),
       getWorkloadBinding: async (pluginId, params) =>
         requireServiceAccounts().workloads.getBinding(pluginId, params),
+      getWorkloadServiceAccountSummary: async (pluginId, params) =>
+        requireServiceAccounts().workloads.getServiceAccountSummary(pluginId, params),
       withScopedRequestForWorkload: async (pluginId, params, fn) =>
         requireServiceAccounts().workloads.withScopedRequest(pluginId, params, fn),
     },

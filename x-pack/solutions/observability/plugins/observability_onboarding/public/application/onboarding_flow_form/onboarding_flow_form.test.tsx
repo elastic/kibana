@@ -19,7 +19,7 @@ import type { ObservabilityOnboardingAppServices } from '../..';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../quickstart_flows/shared/use_pricing_feature');
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
   }),

@@ -17,43 +17,61 @@ import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 const MAX_SUPPORTED_TERMS_BUCKETS = 2;
 
 export interface TermsConversionContext {
-  hasDateHistogram: boolean;
+  /**
+   * The layer nests Top values and a date histogram in a way the generator cannot express:
+   * a Top values dimension between a date histogram and another Top values dimension, or
+   * nested Top values followed by a date histogram. See `generateEsqlQuery` for the shapes
+   * that are supported.
+   */
+  hasUnsupportedDateHistogramNesting: boolean;
   /** Number of terms buckets on the layer, including this column. */
   termsBucketCount: number;
+  /**
+   * When true, `otherBucket` on this column can be expressed: the only Top values dimension,
+   * aggregated first (alone or above a date histogram).
+   */
+  supportsOtherBucket?: boolean;
 }
 
 /**
  * Returns the highest-priority conversion failure reason for a terms dimension,
  * or `undefined` when the column is eligible. Check order:
- * 1. Other bucket (default-on; also covers missing values — the UI only enables
- *    "Include documents without the selected field" when Other is on, and
- *    toEsAggsFn forces missingBucket = otherBucket && missingBucket)
- * 2. Date histogram / time series
+ * 1. Unsupported nesting of Top values and a date histogram — shown before Other
+ *    so charts that cannot convert even with Other off get the structural reason
+ * 2. Other bucket when this column is not eligible for Other, or when it also
+ *    includes documents without the field (missingBucket; the UI only enables it
+ *    when Other is on, and toEsAggsFn forces missingBucket = otherBucket &&
+ *    missingBucket)
  * 3. More than two Top values dimensions
  * 4. Multiple fields on one Top values dimension
  * 5. Include / exclude filters
  * 6. Accuracy mode
  * 7. Unsupported ranking (custom, then rarity / significance)
  *
- * Callers may combine eligible terms with other convertible categorical
- * buckets via `LIMIT n BY` (non-time-series). Date histogram remains unsupported.
+ * Callers may combine eligible terms with other convertible buckets, including a
+ * date histogram, via `WHERE … IN (subquery)` and `LIMIT n BY`.
  *
  * All blockers are evaluated so the priority list stays authoritative; only the
  * highest-priority reason is returned.
  */
 export const getTermsConversionFailure = (
   { params }: TermsIndexPatternColumn,
-  { hasDateHistogram, termsBucketCount }: TermsConversionContext
+  {
+    hasUnsupportedDateHistogramNesting,
+    termsBucketCount,
+    supportsOtherBucket = false,
+  }: TermsConversionContext
 ): EsqlConversionFailureReason | undefined => {
   const reasons: EsqlConversionFailureReason[] = [];
 
-  // unset/false = Other off (UI / toEsAggsFn Boolean).
-  if (params.otherBucket === true) {
-    reasons.push('terms_other_bucket_not_supported');
+  if (hasUnsupportedDateHistogramNesting) {
+    reasons.push('terms_date_histogram_not_supported');
   }
 
-  if (hasDateHistogram) {
-    reasons.push('terms_date_histogram_not_supported');
+  // unset/false = Other off (UI / toEsAggsFn Boolean). With missingBucket, DSL shows missing
+  // documents as their own bucket, while the ES|QL remap would count them in Other.
+  if (params.otherBucket === true && (!supportsOtherBucket || params.missingBucket === true)) {
+    reasons.push('terms_other_bucket_not_supported');
   }
 
   if (termsBucketCount > MAX_SUPPORTED_TERMS_BUCKETS) {

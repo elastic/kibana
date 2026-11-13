@@ -964,8 +964,18 @@ describe('GcpIam', () => {
       const base = { resourceType: 'projects', resourceId: 'my-project-123' };
       expect(schema?.safeParse({ ...base, permissions: [] }).success).toBe(false);
       expect(
-        schema?.safeParse({ ...base, permissions: new Array(101).fill('iam.roles.get') }).success
+        schema?.safeParse({ ...base, permissions: new Array(20_000).fill('iam.roles.get') }).success
+      ).toBe(true);
+      expect(
+        schema?.safeParse({ ...base, permissions: new Array(20_001).fill('iam.roles.get') }).success
       ).toBe(false);
+    });
+
+    it('accepts queryGrantableRoles page sizes up to the API maximum of 2000', () => {
+      const schema = getAction('queryGrantableRoles').input;
+      const base = { resourceType: 'projects', resourceId: 'my-project-123' };
+      expect(schema?.safeParse({ ...base, pageSize: 2000 }).success).toBe(true);
+      expect(schema?.safeParse({ ...base, pageSize: 2001 }).success).toBe(false);
     });
 
     it('requires an etag on setIamPolicy', () => {

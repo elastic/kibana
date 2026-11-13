@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/chart-expressions-common'
   - '@kbn/react-kibana-context-render'
   - '@kbn/visualizations-common'
+  - '@kbn/visualizations-components'
 tags:
   - plugin
   - prod
@@ -44,6 +45,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

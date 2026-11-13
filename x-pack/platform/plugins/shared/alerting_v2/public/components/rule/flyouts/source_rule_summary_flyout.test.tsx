@@ -18,13 +18,6 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => `CoreStart(${key})`,
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_row', () => ({
-  getTagsOverflowLimits: () => ({ overflowSize: 3, maxVisible: 2 }),
-  TagsOverflowBadgeRow: ({ tags }: { tags: string[] }) => (
-    <span data-test-subj="mockTagsOverflow">{tags.join(', ')}</span>
-  ),
-}));
-
 jest.mock('../rule_details_table', () => ({
   RuleDetailsTable: ({
     items,
@@ -80,6 +73,12 @@ describe('SourceRuleSummaryFlyout', () => {
     expect(screen.getByTestId('sourceRuleName')).toHaveTextContent('My classic rule');
   });
 
+  it('renders the Classic badge', () => {
+    renderFlyout();
+
+    expect(screen.getByTestId('classicRulesBadge')).toHaveTextContent('Classic');
+  });
+
   it('renders the enabled badge', () => {
     renderFlyout();
 
@@ -92,10 +91,11 @@ describe('SourceRuleSummaryFlyout', () => {
     expect(screen.getByTestId('sourceRuleDisabledBadge')).toHaveTextContent('Disabled');
   });
 
-  it('renders tags via TagsOverflowBadgeRow', () => {
+  it('renders the tags as header badges', () => {
     renderFlyout();
 
-    expect(screen.getByTestId('mockTagsOverflow')).toHaveTextContent('tag-a, tag-b');
+    expect(screen.getByText('tag-a')).toBeInTheDocument();
+    expect(screen.getByText('tag-b')).toBeInTheDocument();
   });
 
   it('renders rule condition fields', () => {
@@ -145,7 +145,7 @@ describe('SourceRuleSummaryFlyout', () => {
     const onClose = jest.fn();
     renderFlyout({ onClose });
 
-    fireEvent.click(screen.getByTestId('sourceRuleSummaryFlyoutCloseButton'));
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -157,6 +157,63 @@ describe('SourceRuleSummaryFlyout', () => {
     fireEvent.click(screen.getByTestId('sourceRuleSummaryFlyoutFooterCloseButton'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the template flyout without a backdrop', () => {
+    renderFlyout();
+
+    expect(screen.getByTestId('sourceRuleSummaryFlyout')).toBeInTheDocument();
+    expect(document.querySelector('.euiOverlayMask')).not.toBeInTheDocument();
+  });
+
+  describe('when the rule is loading', () => {
+    it('keeps the flyout open with a loading header and body', () => {
+      renderFlyout({ rule: undefined, isLoading: true });
+
+      expect(screen.getByTestId('sourceRuleSummaryFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutHeaderTitleLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('classicRulesBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('sourceRuleSummaryFlyoutTakeActionButton')).toBeDisabled();
+    });
+
+    it('does not render the Take action button when the source has no details link', () => {
+      renderFlyout({ rule: undefined, isLoading: true, ruleDetailsHref: null });
+
+      expect(
+        screen.queryByTestId('sourceRuleSummaryFlyoutTakeActionButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('calls onClose from the footer close button', () => {
+      const onClose = jest.fn();
+      renderFlyout({ rule: undefined, isLoading: true, onClose });
+
+      fireEvent.click(screen.getByTestId('sourceRuleSummaryFlyoutFooterCloseButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when the rule is not found', () => {
+    it('renders the not found prompt', () => {
+      renderFlyout({ rule: undefined });
+
+      expect(screen.getByTestId('sourceRuleSummaryFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutNotFound')).toHaveTextContent('Rule not found');
+      expect(screen.queryByTestId('ruleSummaryFlyoutLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('classicRulesBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('sourceRuleSummaryFlyoutTakeActionButton')).toBeDisabled();
+    });
+
+    it('calls onClose from the footer close button', () => {
+      const onClose = jest.fn();
+      renderFlyout({ rule: undefined, onClose });
+
+      fireEvent.click(screen.getByTestId('sourceRuleSummaryFlyoutFooterCloseButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('falls back to rule id when name is not available', () => {

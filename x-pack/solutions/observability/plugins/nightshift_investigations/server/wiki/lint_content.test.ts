@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { lintWikiContent } from './lint_content';
+
+const rulesOf = (text: string) => lintWikiContent(text).map(({ rule }) => rule);
+
+describe('lintWikiContent', () => {
+  it.each([
+    ['an ISO date', 'Started on 2026-08-18 for the project.', 'iso_timestamp'],
+    ['an ISO timestamp', 'Seen at 2026-08-18T07:20:32Z in the logs.', 'iso_timestamp'],
+    ['a clock time with a zone', 'The gap ran until 07:34 UTC.', 'clock_time'],
+    ['a UUID', 'Trace 3f90992e-1b81-4f58-9a2c-0d5e6f7a8b9c failed.', 'uuid'],
+    ['a long hex id', 'Run 45440287bd44aa9addfa424be71a4f0f was slow.', 'long_hex_id'],
+    ['a relative time', 'The service is currently unavailable.', 'relative_time'],
+    ['a count of events seen', 'It logged 5,944 errors on one node.', 'counted_quantity'],
+  ])('flags %s', (_name, text, rule) => {
+    expect(rulesOf(text)).toContain(rule);
+  });
+
+  it('accepts durable structure and configured limits', () => {
+    const clean = [
+      '## Dependencies',
+      'Project creation depends on the DNS publisher (`external-dns`) to publish records.',
+      '## Observability',
+      'Group by `container.image.name` and `agent.version` before and during the onset.',
+      'Queries over a wide window can exceed the 120s curl limit; narrow the window and retry.',
+      'The memory limit is 128 MB; compare restarts with logged exit lines.',
+    ].join('\n');
+
+    expect(lintWikiContent(clean)).toEqual([]);
+  });
+
+  it.each(['403 errors on registration', 'a burst of 503 errors', 'returns 429 error responses'])(
+    'does not read an HTTP status code as a count of errors: %s',
+    (text) => {
+      expect(lintWikiContent(text)).toEqual([]);
+    }
+  );
+
+  it.each(['5,944 errors', '1,403 errors', '250 errors', '23 restarts', '12 retries'])(
+    'still flags a count of events that merely contains digits like a status: %s',
+    (text) => {
+      expect(rulesOf(text)).toEqual(['counted_quantity']);
+    }
+  );
+
+  it.each(['32 pods', 'about 9 pods', '3 nodes', '6 replicas', '2 instances'])(
+    'reports how many instances run without blocking: %s',
+    (text) => {
+      expect(lintWikiContent(text)).toEqual([
+        expect.objectContaining({ rule: 'replica_count', blocking: false }),
+      ]);
+    }
+  );
+
+  it.each([
+    'It logged 5,944 errors on one node.',
+    'The client gives up after 3 retries.',
+    'Bulk requests carry 1000 documents per batch.',
+    'The API says "The requested resource is currently unavailable".',
+    'Check the logs from the last hour before onset.',
+  ])('reports a count or a relative time without blocking: %s', (text) => {
+    const violations = lintWikiContent(text);
+
+    expect(violations.length).toBeGreaterThan(0);
+    expect(violations.every(({ blocking }) => !blocking)).toBe(true);
+  });
+
+  it('blocks only what names a date, a time or an id', () => {
+    const violations = lintWikiContent(
+      'On 2026-08-18 at 07:20 UTC, run 45440287bd44aa9addfa424be71a4f0f, trace 3f90992e-1b81-4f58-9a2c-0d5e6f7a8b9c.'
+    );
+
+    expect(violations.map(({ rule }) => rule)).toEqual([
+      'iso_timestamp',
+      'clock_time',
+      'uuid',
+      'long_hex_id',
+    ]);
+    expect(violations.every(({ blocking }) => blocking)).toBe(true);
+  });
+
+  it('does not treat a short word of hex letters as an id', () => {
+    expect(lintWikiContent('Use the deadbeef marker only in tests.')).toEqual([]);
+  });
+
+  it('reads the text around a shared link, not the link itself', () => {
+    const savedSearch =
+      'https://kibana.example.com/app/r/s/Ab3dE?_g=(time:(from:%272026-08-18T07:20:00Z%27))';
+    const dashboard =
+      "https://kibana.example.com/app/dashboards#/view/overview?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2015-09-19T06:31:44.000Z',to:'2015-09-23T18:31:44.000Z'))";
+    const issue = 'https://github.com/acme/widgets/issues/4821';
+
+    expect(lintWikiContent(`Saved search: ${savedSearch}, issue ${issue}.`)).toEqual([]);
+    expect(lintWikiContent(`Dashboard (see ${dashboard}) shows the failing exports.`)).toEqual([]);
+    expect(rulesOf(`Saved search (${savedSearch}) failed on 2026-08-18.`)).toEqual([
+      'iso_timestamp',
+    ]);
+    expect(rulesOf(`Dashboard (see ${dashboard}) failed on 2026-08-18.`)).toEqual([
+      'iso_timestamp',
+    ]);
+  });
+
+  it('reports each occurrence with its text', () => {
+    const violations = lintWikiContent('On 2026-08-18 and 2026-08-19 it failed.');
+
+    expect(violations.map(({ match }) => match)).toEqual(['2026-08-18', '2026-08-19']);
+  });
+});

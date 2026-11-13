@@ -13,10 +13,12 @@ import {
   EuiIcon,
   EuiPageHeader,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AlertZeroIcon } from '@kbn/security-solution-navigation';
 import { useKibanaTimeZone } from '../../hooks/use_kibana_time_zone';
 
 /**
@@ -112,6 +114,8 @@ export interface AlertZeroPageHeaderProps {
   greeting?: string;
   /** Replaces the title derived from the queue state. */
   title?: string;
+  /** Supporting line under the heading. */
+  subtitle?: string;
 }
 /**
  * Page header for AlertZero routes.
@@ -128,6 +132,7 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
   eventCount = 0,
   greeting,
   title: titleOverride,
+  subtitle,
 }) => {
   const { euiTheme } = useEuiTheme();
   const timeZone = useKibanaTimeZone();
@@ -175,7 +180,7 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
                   border-color ${euiTheme.animation.slow} ease;
               `}
             >
-              <EuiIcon type="sun" size="m" aria-hidden={true} />
+              <EuiIcon type={AlertZeroIcon} size="m" aria-hidden={true} />
               <span
                 style={{
                   display: 'inline-block',
@@ -201,6 +206,11 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
                 <span>{title}</span>
               </h1>
             </EuiTitle>
+            {subtitle && (
+              <EuiText size="s" color="subdued" data-test-subj="alertZeroPageHeaderSubtitle">
+                {subtitle}
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>

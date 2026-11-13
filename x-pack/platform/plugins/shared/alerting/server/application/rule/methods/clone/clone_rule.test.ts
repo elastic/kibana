@@ -67,6 +67,7 @@ describe('clone', () => {
           apiKeyOwner: 'user-a',
           apiKeyCreatedByUser: false,
           uiamApiKey: sourceUiamApiKey,
+          uiamApiKeyExternal: true,
         },
         references: [],
       };
@@ -84,6 +85,7 @@ describe('clone', () => {
       expect(createdAttributes.apiKeyOwner).toBeNull();
       expect(createdAttributes.apiKeyCreatedByUser).toBeNull();
       expect(createdAttributes.uiamApiKey).not.toBe(sourceUiamApiKey);
+      expect(createdAttributes).not.toHaveProperty('uiamApiKeyExternal');
     });
 
     it('stamps createdByProfileUid and updatedByProfileUid from the current user', async () => {

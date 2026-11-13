@@ -25,12 +25,13 @@ export const setCommand = {
   methods: setCommandMethods,
   metadata: {
     type: 'header' as const,
-    description: i18n.translate('kbn-esql-language.esql.definitions.setDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.setDoc', {
       defaultMessage: 'Sets a query setting',
     }),
     declaration: `SET <setting> = <value>`,
     examples: ['SET project_routing = "_alias:_origin";', 'SET project_routing = "_alias:*";'],
     hidden: isHidden,
+    hiddenAfterCommands: ['let'],
     name: 'set',
   },
 };

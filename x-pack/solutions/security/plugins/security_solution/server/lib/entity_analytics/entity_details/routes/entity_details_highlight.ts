@@ -57,13 +57,16 @@ export const entityDetailsHighlightsRoute = ({
         ): Promise<IKibanaResponse<EntityDetailsHighlightsResponse>> => {
           const siemResponse = buildSiemResponse(response);
           try {
-            const entityType = request.body.entityType;
-            const entityIdentifier = request.body.entityIdentifier;
-            const anonymizationFields = request.body.anonymizationFields;
-            const connectorId = request.body.connectorId;
+            const {
+              entityType,
+              entityIdentifier,
+              anonymizationFields,
+              connectorId,
+              from: fromDate,
+              to: toDate,
+              mode,
+            } = request.body;
             const entityField = EntityTypeToIdentifierField[entityType];
-            const fromDate = request.body.from;
-            const toDate = request.body.to;
 
             const [coreStart, { entityStore, inference }] = await getStartServices();
             const securitySolution = await context.securitySolution;
@@ -72,7 +75,6 @@ export const entityDetailsHighlightsRoute = ({
 
             const coreContext = await context.core;
             const soClient = coreContext.savedObjects.client;
-            const riskEngineClient = securitySolution.getRiskEngineDataClient();
             const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
             const entityStoreClient = entityStore.createCRUDClient(esClient, spaceId);
 
@@ -86,7 +88,6 @@ export const entityDetailsHighlightsRoute = ({
 
             const { getV1Data, getV2Data, getLocalReplacements } =
               entityDetailsHighlightsServiceFactory({
-                riskEngineClient,
                 entityStoreClient,
                 experimentalFeatures: config.experimentalFeatures,
                 mitreDataClient,
@@ -106,6 +107,7 @@ export const entityDetailsHighlightsRoute = ({
               entityIdentifier,
               anomalyFromDate: fromDate,
               anomalyToDate: toDate,
+              mode,
             };
 
             const entitySummary = config.experimentalFeatures.entityAnalyticsEntityStoreV2

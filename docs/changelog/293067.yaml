@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293067
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-areas:
-- AI and machine Learning
-title: 'Reduce the number of times the data recognizer calls the `recognize` API on page load'

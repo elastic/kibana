@@ -10,8 +10,12 @@ import { createMockEndpointAppContext } from '../../../endpoint/mocks';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import {
   createEndpointResponseActionsSkill,
+  ISOLATE_TOOL_ID,
+  UNISOLATE_TOOL_ID,
   GET_ENDPOINT_STATUS_TOOL_ID,
   LIST_ENDPOINTS_TOOL_ID,
+  RUNNING_PROCESSES_TOOL_ID,
+  SCAN_TOOL_ID,
   GET_RESPONSE_ACTION_STATUS_TOOL_ID,
 } from '.';
 
@@ -23,8 +27,22 @@ describe('createEndpointResponseActionsSkill', () => {
   });
 
   describe('skill definition', () => {
+    it.each([[true, 'security-elastic-defend-configuration-troubleshooting']] as const)(
+      'routes diagnosis with universal flag %s',
+      (enabled, name) => {
+        const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+          automaticTroubleshootingUniversalSkill: enabled,
+        });
+        expect(skill.description).toContain(`use ${name}.`);
+        expect(skill.content).toContain(`routes to the ${name}\nskill.`);
+        expect(skill.content).toContain(`load ${name} and follow it.`);
+      }
+    );
+
     it('returns a valid skill definition', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
 
       expect(skill).toBeDefined();
       expect(skill.id).toBe('endpoint-response-actions');
@@ -39,7 +57,9 @@ describe('createEndpointResponseActionsSkill', () => {
     });
 
     it('leads the description with the capability, not excluded intents', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
       const [firstSentence] = skill.description.split(/(?<=\.)\s/);
       expect(firstSentence).toMatch(/status|List/);
       expect(firstSentence).not.toMatch(/\bwhy\b|offline|missing|unhealthy/i);
@@ -48,7 +68,9 @@ describe('createEndpointResponseActionsSkill', () => {
     });
 
     it('stops diagnosis before routing to any response actions tool', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
       const process = skill.content.slice(skill.content.indexOf('## Process'));
       expect(process).toMatch(/0\. .*WHY.*unhealthy.*offline.*missing/);
       expect(process).toContain('WHY a response action');
@@ -57,8 +79,43 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(process.indexOf('0.')).toBeLessThan(process.indexOf('1.'));
     });
 
+    it('does not claim to be read-only and documents the shipped write-tool contract', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
+      const reference =
+        skill.referencedContent?.find((entry) => entry.name === 'reference')?.content ?? '';
+
+      for (const text of [skill.description, skill.content, reference]) {
+        expect(text).not.toMatch(/read-only/i);
+        expect(text).not.toMatch(/only reads state/i);
+        expect(text).not.toMatch(/cannot isolate, release, scan/i);
+      }
+      expect(skill.description).toMatch(/isolate or release/);
+      expect(skill.description).toMatch(/malware scan/);
+      expect(skill.description.length).toBeLessThanOrEqual(1024);
+
+      // the unshipped actions stay refused
+      expect(skill.content).toMatch(/execute, kill-process.*not available/s);
+      expect(skill.content).toContain('Response Actions UI');
+
+      // one contract: write tools are called directly, ambiguity handled by the tool
+      expect(skill.content).toContain('call directly');
+      expect(skill.content).toContain('ambiguous_hostname');
+      expect(skill.content).toMatch(/no\s+\\?`?get_endpoint_status\\?`? pre-check/);
+      expect(reference).not.toMatch(/Before isolate or release, call/);
+      expect(reference).toMatch(/isolate_host.*directly/);
+      // running processes enqueues a real action, so it is platform-confirmed too
+      expect(skill.content).toContain(
+        'running processes → `get_running_processes` (write, platform-confirmed)'
+      );
+      expect(skill.content).toMatch(/all four pause for\s+the analyst's confirmation/);
+    });
+
     it('includes system instructions in content', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
 
       expect(skill.content).toContain('Endpoint Response Actions Skill');
       expect(skill.content).toContain('When to Use This Skill');
@@ -74,7 +131,9 @@ describe('createEndpointResponseActionsSkill', () => {
     });
 
     it('exposes detailed reference material via referencedContent', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
 
       const reference =
         skill.referencedContent?.find((entry) => entry.name === 'reference')?.content ?? '';
@@ -83,86 +142,62 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(reference).not.toContain('for endpoint or response action state');
       expect(reference).toContain('get_endpoint_status');
     });
-
-    it('declares itself read-only and names the write actions it cannot perform', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-
-      // This slice ships read-only tools. The instructions must say so
-      // explicitly, otherwise the agent is free to claim it isolated a host
-      // it never touched, or to improvise a write via another skill's tools.
-      expect(skill.content).toContain('read-only');
-      expect(skill.description).toContain('Read-only');
-      for (const writeAction of ['isolate', 'release', 'scan']) {
-        expect(skill.content).toContain(writeAction);
-      }
-    });
-
-    it('distinguishes not-found reasons from error codes in the reference doc', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-
-      // A missing host or action comes back as `found: false` + `reason`, not
-      // as an `error`. Naming a reason an error is what makes the model treat
-      // a normal not-found as an unexpected result instead of asking the
-      // analyst to verify the id. The exact contract lives in the reference
-      // doc the skill points the model to for error-code handling.
-      const reference = skill.referencedContent?.find((c) => c.name === 'reference')?.content;
-      expect(reference).toContain('reason: endpoint_not_found');
-      expect(reference).toContain('reason: action_not_found');
-      expect(reference).toContain('error: insufficient_privileges');
-      expect(reference).toContain('error: unknown_error');
-    });
   });
 
   describe('getInlineTools', () => {
-    it('returns exactly the 3 read-only inline tools (list_endpoints, get_endpoint_status, get_response_action_status)', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+    it('returns exactly 7 inline tools (list_endpoints, isolate_host, unisolate_host, get_endpoint_status, running_processes, scan, get_response_action_status)', async () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
       const inlineTools = await skill.getInlineTools?.();
-      expect(inlineTools).toHaveLength(3);
+      expect(inlineTools).toHaveLength(7);
       const toolIds = (inlineTools ?? []).map((t) => t.id);
-      expect(toolIds).toEqual(
-        expect.arrayContaining([
-          LIST_ENDPOINTS_TOOL_ID,
-          GET_ENDPOINT_STATUS_TOOL_ID,
-          GET_RESPONSE_ACTION_STATUS_TOOL_ID,
-        ])
-      );
-    });
-
-    it('exposes no write/state-changing tools in this slice', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const toolIds = (inlineTools ?? []).map((t) => t.id);
-
-      // Guards the slice boundary: a write tool re-added to `getInlineTools`
-      // without its confirmation/authz review must fail here rather than ship
-      // silently under a skill the analyst was told is read-only.
-      for (const writeToolId of [
-        'endpoint-response-actions.isolate_host',
-        'endpoint-response-actions.unisolate_host',
-        'endpoint-response-actions.scan',
-        'endpoint-response-actions.running_processes',
-      ]) {
-        expect(toolIds).not.toContain(writeToolId);
-      }
+      expect(toolIds).toContain(LIST_ENDPOINTS_TOOL_ID);
+      expect(toolIds).toContain(ISOLATE_TOOL_ID);
+      expect(toolIds).toContain(UNISOLATE_TOOL_ID);
+      expect(toolIds).toContain(GET_ENDPOINT_STATUS_TOOL_ID);
+      expect(toolIds).toContain(RUNNING_PROCESSES_TOOL_ID);
+      expect(toolIds).toContain(SCAN_TOOL_ID);
+      expect(toolIds).toContain(GET_RESPONSE_ACTION_STATUS_TOOL_ID);
     });
 
     it('satisfies the 7-tool hard cap enforced by validateSkillDefinition', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
       await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
     });
 
-    it('includes list_endpoints tool', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+    it('includes isolate_host tool', async () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
 
       const inlineTools = await skill.getInlineTools?.();
 
-      const listTool = inlineTools?.find((tool) => tool.id === LIST_ENDPOINTS_TOOL_ID);
+      const isolateTool = inlineTools?.find((tool) => tool.id === ISOLATE_TOOL_ID);
 
-      expect(listTool).toBeDefined();
+      expect(isolateTool).toBeDefined();
+      expect(isolateTool?.description).toContain('Isolates a host');
+    });
+
+    it('includes unisolate_host tool', async () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
+
+      const inlineTools = await skill.getInlineTools?.();
+
+      const unisolateTool = inlineTools?.find((tool) => tool.id === UNISOLATE_TOOL_ID);
+
+      expect(unisolateTool).toBeDefined();
+      expect(unisolateTool?.description).toContain('Un-isolates a host');
     });
 
     it('includes get_endpoint_status tool', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
 
       const inlineTools = await skill.getInlineTools?.();
 
@@ -173,7 +208,9 @@ describe('createEndpointResponseActionsSkill', () => {
     });
 
     it('includes get_response_action_status tool', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
 
       const inlineTools = await skill.getInlineTools?.();
 

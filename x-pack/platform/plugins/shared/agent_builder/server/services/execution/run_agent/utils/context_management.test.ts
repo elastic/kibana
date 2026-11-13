@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import { createToolResultStoreMock } from '../../../../test_utils/runner';
+import { createToolManagerMock, createToolResultStoreMock } from '../../../../test_utils/runner';
 import { timelineFromRounds } from '../../../../test_utils/timeline';
 import type { StateType, StateUpdate } from '../state';
 import { applyStepUpdates, type RunStepUpdate } from '../step_state';
@@ -368,6 +368,44 @@ describe('compactContext node', () => {
     });
   });
 
+  it('reports the compaction analytics event with correct fields', async () => {
+    compactContextMock.mockResolvedValue(compactionResult());
+    const analyticsService = {
+      reportSkillInvoked: jest.fn(),
+      reportCompactionTriggered: jest.fn(),
+    };
+    const { compactContext: node } = createContextManagementNodes(
+      deps({ analyticsService, agentId: 'my-agent', executionId: 'exec-1' })
+    );
+
+    await node(
+      baseState({ currentCycle: 3, compactionRequest: request({ trigger: 'round_start' }) })
+    );
+
+    expect(analyticsService.reportCompactionTriggered).toHaveBeenCalledWith({
+      agentId: 'my-agent',
+      executionId: 'exec-1',
+      trigger: 'round_start',
+      tokenCountBefore: 90_000,
+      tokenCountAfter: 30_000,
+      summarizedCycleCount: 4,
+      modelId: 'c',
+    });
+  });
+
+  it('does not report analytics when compaction is skipped', async () => {
+    compactContextMock.mockResolvedValue(undefined);
+    const analyticsService = {
+      reportSkillInvoked: jest.fn(),
+      reportCompactionTriggered: jest.fn(),
+    };
+    const { compactContext: node } = createContextManagementNodes(deps({ analyticsService }));
+
+    await node(baseState({ compactionRequest: request() }));
+
+    expect(analyticsService.reportCompactionTriggered).not.toHaveBeenCalled();
+  });
+
   it('allows the summarizer fallback for forced compactions only', async () => {
     compactContextMock.mockResolvedValue(compactionResult());
     const { compactContext: node } = createContextManagementNodes(deps());
@@ -424,5 +462,18 @@ describe('compactContext node', () => {
     await expect(node(baseState())).rejects.toMatchObject({
       meta: { errCode: AgentExecutionErrorCode.invalidState },
     });
+  });
+
+  it('passes the tool manager to the compactor for the dynamic tools snapshot', async () => {
+    compactContextMock.mockResolvedValue(compactionResult());
+    const toolManager = createToolManagerMock();
+    const { compactContext: node } = createContextManagementNodes(deps({ toolManager }));
+
+    await node(baseState({ compactionRequest: request() }));
+
+    expect(compactContextMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ toolManager })
+    );
   });
 });

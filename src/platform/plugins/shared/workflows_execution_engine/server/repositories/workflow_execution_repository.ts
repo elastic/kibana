@@ -16,6 +16,13 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowExecutionsDataClient } from './data_access_layer';
 import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk/bulk_updater_write_result';
+import {
+  getResumeContextRevert,
+  getResumeInputTake,
+  type ResumeResponseRef,
+  type RevertResumeContextParams,
+  type RevertResumeContextResult,
+} from './resume_context_revert';
 
 /**
  * An execution document is written by several independent writers while the run is in flight:
@@ -27,6 +34,9 @@ import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk/bulk_upd
  * cover 409, so the retry has to happen server-side.
  */
 const UPDATE_RETRY_ON_CONFLICT = 3;
+
+const isCreateConflict = (error: { type?: string } | undefined): boolean =>
+  error?.type === 'version_conflict_engine_exception';
 
 export class WorkflowExecutionRepository {
   constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
@@ -55,6 +65,25 @@ export class WorkflowExecutionRepository {
     }
 
     return doc;
+  }
+
+  /**
+   * Reads only the cancellation fields of a workflow execution (real-time GET with a source filter).
+   * Returns null when the document is missing or belongs to another space.
+   */
+  public async getWorkflowExecutionCancelState(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<Pick<EsWorkflowExecution, 'cancelRequested' | 'cancelledAt' | 'cancelledBy'> | null> {
+    const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId], {
+      sourceIncludes: ['spaceId', 'cancelRequested', 'cancelledAt', 'cancelledBy'],
+    });
+    const doc = items[0]?.document;
+    if (!doc || doc.spaceId !== spaceId) {
+      return null;
+    }
+    const { cancelRequested, cancelledAt, cancelledBy } = doc;
+    return { cancelRequested, cancelledAt, cancelledBy };
   }
 
   public async getWorkflowExecutionWithVersion(
@@ -127,12 +156,57 @@ export class WorkflowExecutionRepository {
     // For a single-document create, any error must propagate so callers don't
     // silently proceed after a failed write (e.g. version conflict on duplicate ID).
     const itemError = response.items[0]?.error;
-    if (itemError) {
-      throw new Error(
-        `Failed to create workflow execution ${workflowExecution.id}: ${
-          itemError.reason ?? JSON.stringify(itemError)
-        }`
-      );
+    if (!itemError) {
+      return;
+    }
+    if (isCreateConflict(itemError)) {
+      const persistedIds = await this.getAlreadyPersistedIds([workflowExecution]);
+      if (persistedIds.has(workflowExecution.id)) {
+        await this.refreshAfterRecoveredCreate(options.refresh);
+        return;
+      }
+    }
+    throw new Error(
+      `Failed to create workflow execution ${workflowExecution.id}: ${
+        itemError.reason ?? JSON.stringify(itemError)
+      }`
+    );
+  }
+
+  /**
+   * A transient error (e.g. a client timeout) can hide a create that Elasticsearch already
+   * persisted, so the retried `create` fails with a version conflict. Execution IDs are freshly
+   * generated UUIDs, so a stored document with the same ID, space and workflow is that earlier
+   * attempt of the same create.
+   */
+  private async getAlreadyPersistedIds(
+    executions: Array<Partial<EsWorkflowExecution>>
+  ): Promise<Set<string>> {
+    const ids = executions.flatMap(({ id }) => (id ? [id] : []));
+    const { items } = await this.workflowExecutionsDataClient.getByIds(ids, {
+      sourceIncludes: ['spaceId', 'workflowId'],
+    });
+    const storedById = new Map(items.map(({ document }) => [document.id, document]));
+    return new Set(
+      executions.flatMap(({ id, spaceId, workflowId }) => {
+        const stored = id ? storedById.get(id) : undefined;
+        return stored && stored.spaceId === spaceId && stored.workflowId === workflowId
+          ? [stored.id]
+          : [];
+      })
+    );
+  }
+
+  /**
+   * A conflicted create item made no write in this request, so the request's `refresh` option
+   * does not cover the document persisted by the earlier attempt; refresh explicitly when the
+   * caller asked for it.
+   */
+  private async refreshAfterRecoveredCreate(
+    refresh: boolean | 'wait_for' | undefined
+  ): Promise<void> {
+    if (refresh === true || refresh === 'wait_for') {
+      await this.workflowExecutionsDataClient.refresh();
     }
   }
 
@@ -178,9 +252,18 @@ export class WorkflowExecutionRepository {
       refresh: options.refresh,
     });
 
+    const conflicting = executions.filter((_, idx) =>
+      isCreateConflict(bulkResponse.items[idx]?.error)
+    );
+    const persistedIds =
+      conflicting.length > 0 ? await this.getAlreadyPersistedIds(conflicting) : new Set<string>();
+    if (persistedIds.size > 0) {
+      await this.refreshAfterRecoveredCreate(options.refresh);
+    }
+
     return bulkResponse.items.map((item, idx: number) => {
       const id = executions[idx].id as string;
-      if (item.error) {
+      if (item.error && !persistedIds.has(id)) {
         return { id, error: item.error.reason ?? JSON.stringify(item.error) };
       }
       return { id };
@@ -536,6 +619,77 @@ export class WorkflowExecutionRepository {
       );
     }
     return writeResult === 'updated';
+  }
+
+  /**
+   * CAS: takes back the resume response a request wrote into the context, restoring the values it
+   * replaced, but only while the response is still there and no runner has picked it up.
+   */
+  public async tryRevertResumeContext(
+    params: RevertResumeContextParams
+  ): Promise<RevertResumeContextResult> {
+    // Set by the updater, which re-runs after a version conflict; the last run decides. An object,
+    // because TypeScript would narrow a `let` assigned in a callback to its initial value.
+    const outcome: { skip?: RevertResumeContextResult } = {};
+    const { items } = await this.workflowExecutionsDataClient.bulk({
+      refresh: false,
+      items: [
+        {
+          operation: 'update',
+          documentId: params.workflowExecutionId,
+          sourceFields: ['spaceId', 'status', 'context'] as const,
+          retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+          updater: (current) => {
+            const revert = getResumeContextRevert(current, params);
+            if ('skip' in revert) {
+              outcome.skip = revert.skip;
+              return 'noop';
+            }
+            outcome.skip = undefined;
+            return { context: revert.context };
+          },
+        },
+      ],
+    });
+
+    const writeResult = getBulkUpdaterWriteResult(items[0]);
+    if (writeResult === 'updated') return 'reverted';
+    if (writeResult === 'noop') return outcome.skip ?? 'not_pending';
+    return writeResult;
+  }
+
+  /**
+   * CAS: marks a stored resume response as taken by the runner about to apply it. Returns false when
+   * the response is no longer stored (taken back or replaced), in which case it must not be applied.
+   */
+  public async tryTakeResumeInput(ref: ResumeResponseRef): Promise<boolean> {
+    // Set by the updater, which re-runs after a version conflict; the last run decides.
+    const outcome: { taken?: boolean } = {};
+    const { items } = await this.workflowExecutionsDataClient.bulk({
+      refresh: false,
+      items: [
+        {
+          operation: 'update',
+          documentId: ref.workflowExecutionId,
+          sourceFields: ['spaceId', 'context'] as const,
+          retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+          updater: (current) => {
+            const take = getResumeInputTake(current, ref);
+            outcome.taken = take.outcome === 'taken';
+            return take.context ? { context: take.context } : 'noop';
+          },
+        },
+      ],
+    });
+
+    const writeResult = getBulkUpdaterWriteResult(items[0]);
+    if (writeResult === 'conflict') {
+      // Unknown whether the mark landed; failing lets the task retry with a fresh read.
+      throw new Error(
+        `Version conflict taking the resume input of workflow execution ${ref.workflowExecutionId}`
+      );
+    }
+    return writeResult === 'updated' || (writeResult === 'noop' && outcome.taken === true);
   }
 
   /**

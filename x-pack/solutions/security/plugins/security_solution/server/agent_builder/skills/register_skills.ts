@@ -36,7 +36,7 @@ import {
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
 import { createDetectionCoverageSkill } from './detection_coverage';
-import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
+import { createEndpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
@@ -44,7 +44,6 @@ interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
   experimentalFeatures: ExperimentalFeatures;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
-  kibanaVersion: string;
   logger: Logger;
   ml: EntityAnalyticsRoutesDeps['ml'];
   options: {
@@ -59,21 +58,21 @@ export const registerSkills = async ({
   agentBuilder,
   experimentalFeatures,
   getStartServices,
-  kibanaVersion,
   logger,
   ml,
   options,
 }: RegisterSkillsOpts): Promise<void> => {
-  if (experimentalFeatures.automaticTroubleshootingSkill) {
+  if (
+    experimentalFeatures.automaticTroubleshootingSkill &&
+    !experimentalFeatures.automaticTroubleshootingUniversalSkill
+  ) {
     agentBuilder.skills.register(
-      createAutomaticTroubleshootingSkill(options.endpointAppContextService)
+      createAutomaticTroubleshootingSkill(options.endpointAppContextService, experimentalFeatures)
     );
   }
 
   const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
-  await agentBuilder.skills.register(
-    getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
-  );
+  await agentBuilder.skills.register(getEntityAnalyticsSkill());
 
   if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
     agentBuilder.skills.register(manageWatchlistsSkill);
@@ -134,25 +133,24 @@ export const registerSkills = async ({
   }
 
   if (experimentalFeatures.endpointForensicAnalysisSkill) {
-    await agentBuilder.skills.register(endpointForensicAnalysisSkill);
+    await agentBuilder.skills.register(createEndpointForensicAnalysisSkill(experimentalFeatures));
   }
 
   if (experimentalFeatures.elasticDefendPolicyManagementSkill) {
     await agentBuilder.skills.register(
       createElasticDefendPolicyManagementSkill({
         endpointAppContextService: options.endpointAppContextService,
-        getStartServices,
       })
     );
   }
 
   if (experimentalFeatures.endpointResponseActionsSkill) {
     await agentBuilder.skills.register(
-      createEndpointResponseActionsSkill(options.endpointAppContextService)
+      createEndpointResponseActionsSkill(options.endpointAppContextService, experimentalFeatures)
     );
   }
 
   if (experimentalFeatures.investigateRuleSkill) {
-    await agentBuilder.skills.register(createInvestigateRuleSkill());
+    await agentBuilder.skills.register(createInvestigateRuleSkill({ getStartServices }));
   }
 };

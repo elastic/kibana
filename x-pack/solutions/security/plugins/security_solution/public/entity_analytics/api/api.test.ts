@@ -8,6 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 
+import { API_VERSIONS } from '../../../common/constants';
 import { useEntityAnalyticsRoutes } from './api';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -48,10 +49,9 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on v2 branch
     );
   });
 
-  it('threads context into the classic status request when fetchRiskEngineStatus is called with v2 disabled', async () => {
-    // With v2 disabled, the wrapper falls through to a single http.fetch on RISK_ENGINE_STATUS_URL.
+  it('uses the maintainer status request when the entity store v2 flag is disabled', async () => {
     useExperimentalMock.mockReturnValue(false);
-    mockFetch.mockResolvedValue({ risk_engine_status: 'NOT_INSTALLED' });
+    mockFetch.mockResolvedValue({ maintainers: [] });
 
     const { result } = renderHook(() => useEntityAnalyticsRoutes());
 
@@ -59,7 +59,7 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on v2 branch
     await result.current.fetchRiskEngineStatus({ context });
 
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.any(String),
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
       expect.objectContaining({ context })
     );
   });
@@ -144,6 +144,50 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on entity de
         query: { entityId: 'alice', entityType: 'user' },
         signal,
         context,
+      })
+    );
+  });
+
+  it('passes mode as a query param in fetchPersistedAiSummary when provided', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+
+    await result.current.fetchPersistedAiSummary({
+      params: { entityType: 'user', entityIdentifier: 'alice', mode: 'resolved' },
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: 'GET',
+        query: { entityId: 'alice', entityType: 'user', mode: 'resolved' },
+      })
+    );
+  });
+});
+
+describe('useEntityAnalyticsRoutes — watchlist entity sources', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useKibanaMock.mockReturnValue({ services: { http: { fetch: mockFetch } } });
+    mockFetch.mockResolvedValue({});
+  });
+
+  it('sends a versioned PUT to the entity source URL in updateWatchlistEntitySource', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+
+    await result.current.updateWatchlistEntitySource({
+      watchlistId: 'watchlist-1',
+      entitySourceId: 'source-1',
+      body: { type: 'index' },
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/entity_analytics/watchlists/watchlist-1/entity_source/source-1',
+      expect.objectContaining({
+        method: 'PUT',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({ type: 'index' }),
       })
     );
   });

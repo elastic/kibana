@@ -13,6 +13,7 @@ import type {
   TaskPriority,
   TaskCost,
   TaskTypeGroup,
+  TaskRunAsDefinition,
 } from './task';
 import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
@@ -62,6 +63,9 @@ export const REMOVED_TYPES: string[] = [
 
   // Legacy streams description generation task replaced by the synchronous suggestion API
   'streams_description_generation',
+
+  // Legacy risk engine task removed in https://github.com/elastic/kibana/pull/303438
+  'risk_engine:risk_scoring',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [
@@ -136,6 +140,12 @@ export interface TaskRegisterDefinition {
 
   paramsSchema?: ObjectType;
   taskTypeGroup?: TaskTypeGroup;
+
+  /**
+   * Present when tasks of this type may run as the plugin's bound service accounts. The workload
+   * type `task_identity` is reserved for Task Manager.
+   */
+  runAs?: TaskRunAsDefinition;
 }
 
 /**

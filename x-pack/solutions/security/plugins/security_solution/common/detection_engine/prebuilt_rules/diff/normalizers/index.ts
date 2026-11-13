@@ -9,3 +9,5 @@ export * from './normalize_filter_array';
 export * from './normalize_query_field';
 export * from './normalize_rule_threshold';
 export * from './normalize_threat_array';
+export * from './normalize_required_fields';
+export * from './normalize_tags';

@@ -12,12 +12,12 @@ import {
   encodeUrlState,
   getInitialQueryText,
   getSortingConfigKey,
-  getSortingUrlConfigFromKey,
+  getSortDirectionsByFieldFromKey,
   mergeAndStringify,
   queryTextCodec,
   sortCodec,
 } from './url_codec';
-import type { SortDirectionsByField } from './url_codec';
+import type { SortDirectionsByField } from '../sorting';
 
 const initialSort = { field: 'title', direction: 'asc' as const };
 const directions = (...values: Array<'asc' | 'desc'>) => new Set(values);
@@ -185,13 +185,12 @@ describe('url_codec', () => {
       const key = getSortingConfigKey(sorting);
 
       expect(getSortingConfigKey({ ...sorting, fields: [...sorting.fields].reverse() })).toBe(key);
-      expect(getSortingUrlConfigFromKey(key)).toEqual({
-        initialSort: { field: 'updatedAt', direction: 'desc' },
-        sortDirectionsByField: new Map([
+      expect(getSortDirectionsByFieldFromKey(key)).toEqual(
+        new Map([
           ['title', directions('asc', 'desc')],
           ['updatedAt', directions('asc', 'desc')],
-        ]),
-      });
+        ])
+      );
     });
 
     it('returns a primitive initial query text', () => {
@@ -200,11 +199,11 @@ describe('url_codec', () => {
     });
 
     describe('offered sort options', () => {
-      const getUrlConfig = (sorting: Parameters<typeof getSortingConfigKey>[0]) =>
-        getSortingUrlConfigFromKey(getSortingConfigKey(sorting));
+      const getOffered = (sorting: Parameters<typeof getSortingConfigKey>[0]) =>
+        getSortDirectionsByFieldFromKey(getSortingConfigKey(sorting));
 
       it('offers only the allowed directions of a field', () => {
-        const { sortDirectionsByField: offered } = getUrlConfig({
+        const offered = getOffered({
           fields: [
             { field: 'title', name: 'Name' },
             { field: 'accessedAt', name: 'Recently viewed', allowedDirections: ['desc'] },
@@ -220,7 +219,7 @@ describe('url_codec', () => {
       });
 
       it('derives the offered options from `options` when `fields` is not set', () => {
-        const { sortDirectionsByField: offered } = getUrlConfig({
+        const offered = getOffered({
           options: [
             { label: 'Name A-Z', field: 'title', direction: 'asc' },
             { label: 'Newest', field: 'updatedAt', direction: 'desc' },
@@ -233,6 +232,15 @@ describe('url_codec', () => {
             ['updatedAt', directions('desc')],
           ])
         );
+      });
+
+      it.each([
+        ['an empty key', ''],
+        ['an entry without a direction', 'title'],
+        ['an unknown direction', 'title:sideways'],
+        ['a field containing a colon', 'a:b:asc'],
+      ])('ignores %s', (_, key) => {
+        expect(getSortDirectionsByFieldFromKey(key)).toEqual(new Map());
       });
     });
   });

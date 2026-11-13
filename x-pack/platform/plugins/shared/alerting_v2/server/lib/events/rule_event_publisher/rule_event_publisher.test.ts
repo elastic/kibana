@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createRuleResponse } from '../../test_utils';
 import type { EventBus } from '../event_bus';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createRuleEventPublisher } from './rule_event_publisher.mock';
@@ -26,7 +27,10 @@ describe('RuleEventPublisher', () => {
 
   beforeEach(() => {
     ({ publisher, eventBus } = createRuleEventPublisher());
-    context = { request: httpServerMock.createKibanaRequest(), origin: 'internal' };
+    context = {
+      request: httpServerMock.createKibanaRequest(),
+      origin: { actor: 'internal', channel: 'api' },
+    };
   });
 
   const cases = [
@@ -127,5 +131,18 @@ describe('RuleEventPublisher', () => {
 
       expect(eventBus.publish).not.toHaveBeenCalled();
     });
+  });
+
+  it('copies prevRule onto a rule.updated payload and omits it when absent', () => {
+    const prevRule = createRuleResponse({ id: 'rule-1' });
+    publisher.emitRuleUpdated(context, [
+      { ruleId: 'rule-1', spaceId: 'space-1', prevRule },
+      { ruleId: 'rule-2', spaceId: 'space-1' },
+    ]);
+
+    const [firstEvent] = eventBus.publish.mock.calls[0];
+    const [secondEvent] = eventBus.publish.mock.calls[1];
+    expect((firstEvent.payload as RuleEventPayload).prevRule).toEqual(prevRule);
+    expect(secondEvent.payload as RuleEventPayload).not.toHaveProperty('prevRule');
   });
 });

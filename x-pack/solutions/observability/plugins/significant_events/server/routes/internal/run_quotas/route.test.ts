@@ -7,7 +7,9 @@
 
 import {
   DEFAULT_RUN_QUOTA_SETTINGS,
+  RUN_QUOTA_GROUPS,
   type RunQuotaConsumeRequest,
+  type RunQuotaGroup,
 } from '../../../../common/run_quotas';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
@@ -51,10 +53,11 @@ const consumeRoute =
 
 const repository = {} as RunQuotaSavedObjectsRepository;
 const server = {} as SignificantEventsServer;
-const request = {};
+const request = { spaceId: 'default' };
 
 const defaultSettings: RunQuotaSettingsAttributes = {
   enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
+  investigationLimitsEnabled: DEFAULT_RUN_QUOTA_SETTINGS.investigationLimitsEnabled,
   limits: { ...DEFAULT_RUN_QUOTA_SETTINGS.limits },
 };
 
@@ -64,15 +67,11 @@ const handlerParams = {
   getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
 };
 
-const mockLedgerCounts = (counts: {
-  detection: number;
-  investigation: number;
-  ki_extraction: number;
-}) => {
+const mockLedgerCounts = (counts: Partial<Record<RunQuotaGroup, number>>) => {
   jest.mocked(readRunQuotaLedger).mockImplementation(async (_repository, date, group) => ({
     date,
     group,
-    count: counts[group],
+    count: counts[group] ?? 0,
   }));
 };
 
@@ -81,7 +80,7 @@ describe('Significant Events run quota routes', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-09-03T08:30:00.000Z'));
     jest.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
     jest.mocked(canManageRunQuotas).mockReset().mockResolvedValue(false);
-    jest.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true });
+    jest.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true, limit: 15 });
     jest
       .mocked(createRunQuotaInternalRepository)
       .mockReset()
@@ -89,7 +88,7 @@ describe('Significant Events run quota routes', () => {
     jest.mocked(patchRunQuotaSettings).mockReset();
     jest.mocked(readRunQuotaSettings).mockReset().mockResolvedValue(defaultSettings);
     jest.mocked(readRunQuotaLedger).mockReset();
-    mockLedgerCounts({ detection: 0, investigation: 0, ki_extraction: 0 });
+    mockLedgerCounts({});
     handlerParams.getScopedClients.mockClear();
   });
 
@@ -119,6 +118,12 @@ describe('Significant Events run quota routes', () => {
   it('accepts only non-empty bounded settings updates', () => {
     expect(putRoute.params.safeParse({ body: { enabled: true } }).success).toBe(true);
     expect(putRoute.params.safeParse({ body: { limits: { detection: 0 } } }).success).toBe(true);
+    expect(putRoute.params.safeParse({ body: { limits: { investigation: null } } }).success).toBe(
+      true
+    );
+    expect(putRoute.params.safeParse({ body: { activateLimits: { detection: 15 } } }).success).toBe(
+      true
+    );
     expect(
       putRoute.params.safeParse({
         body: {
@@ -134,7 +139,15 @@ describe('Significant Events run quota routes', () => {
       { limits: { detection: -1 } },
       { limits: { detection: 10_001 } },
       { limits: { detection: 1.5 } },
+      { limits: { investigation: 0 } },
+      { limits: { manual_investigation: 0 } },
+      { limits: { total_investigation: 10_001 } },
       { limits: { memory: 1 } },
+      { activateLimits: {} },
+      { activateLimits: { detection: 0 } },
+      { activateLimits: { memory: 1 } },
+      { enabled: true, activateLimits: { detection: 15 } },
+      { activateLimits: { detection: 15 }, limits: { detection: 5 } },
     ]) {
       expect(putRoute.params.safeParse({ body }).success).toBe(false);
     }
@@ -164,15 +177,24 @@ describe('Significant Events run quota routes', () => {
   it('returns configured limits and current-day counts while enforcement is disabled', async () => {
     const settings: RunQuotaSettingsAttributes = {
       enabled: false,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 0,
         investigation: 30,
+        manual_investigation: 6,
+        total_investigation: 12,
         ki_extraction: 0,
       },
     };
     jest.mocked(readRunQuotaSettings).mockResolvedValue(settings);
     jest.mocked(canManageRunQuotas).mockResolvedValue(false);
-    mockLedgerCounts({ detection: 17, investigation: 8, ki_extraction: 4 });
+    mockLedgerCounts({
+      detection: 17,
+      investigation: 8,
+      manual_investigation: 2,
+      total_investigation: 10,
+      ki_extraction: 4,
+    });
 
     const response = await getRoute.handler({
       ...handlerParams,
@@ -181,10 +203,13 @@ describe('Significant Events run quota routes', () => {
 
     expect(response).toEqual({
       enabled: false,
+      investigationLimitsEnabled: true,
       limits: settings.limits,
       counts: {
         detection: 17,
         investigation: 8,
+        manual_investigation: 2,
+        total_investigation: 10,
         ki_extraction: 4,
       },
       window: {
@@ -194,18 +219,20 @@ describe('Significant Events run quota routes', () => {
       },
       canManage: false,
     });
-    expect(readRunQuotaLedger).toHaveBeenCalledTimes(3);
-    expect(readRunQuotaLedger).toHaveBeenCalledWith(repository, '2026-09-03', 'detection');
-    expect(readRunQuotaLedger).toHaveBeenCalledWith(repository, '2026-09-03', 'investigation');
-    expect(readRunQuotaLedger).toHaveBeenCalledWith(repository, '2026-09-03', 'ki_extraction');
+    expect(jest.mocked(readRunQuotaLedger).mock.calls.map(([, , group]) => group)).toEqual(
+      RUN_QUOTA_GROUPS
+    );
   });
 
   it('applies an actual partial update and returns the common snapshot', async () => {
     const updated: RunQuotaSettingsAttributes = {
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 0,
         investigation: 30,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 20,
       },
     };
@@ -229,10 +256,13 @@ describe('Significant Events run quota routes', () => {
     });
     expect(response).toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: updated.limits,
       counts: {
         detection: 2,
         investigation: 3,
+        manual_investigation: 0,
+        total_investigation: 0,
         ki_extraction: 4,
       },
       window: {
@@ -241,6 +271,39 @@ describe('Significant Events run quota routes', () => {
         timezone: 'UTC',
       },
       canManage: true,
+    });
+  });
+
+  it('stores unlimited investigation limits as zero and leaves omitted ones untouched', async () => {
+    jest.mocked(patchRunQuotaSettings).mockResolvedValue(defaultSettings);
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: {
+        body: {
+          limits: { investigation: null, manual_investigation: null, total_investigation: 7 },
+        },
+      },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      limits: { investigation: 0, manual_investigation: 0, total_investigation: 7 },
+    });
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: { body: { limits: { detection: 5 } } },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      limits: { detection: 5 },
+    });
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: { body: { activateLimits: { detection: 5 }, limits: { investigation: null } } },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      activateLimits: { detection: 5 },
+      limits: { investigation: 0 },
     });
   });
 
@@ -254,7 +317,7 @@ describe('Significant Events run quota routes', () => {
         ...handlerParams,
         params: { body },
       } as never)
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 15 });
 
     expect(consumeRunQuota).toHaveBeenCalledWith({
       internalRepository: repository,

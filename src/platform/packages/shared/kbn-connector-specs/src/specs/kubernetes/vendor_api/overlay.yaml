@@ -1,0 +1,17 @@
+overlay: 1.0.0
+info:
+  title: Kubernetes API corrections
+  version: 1.0.0
+actions:
+  - target: $.components.securitySchemes
+    description: >-
+      The kubernetes_gke auth type exchanges the service account key for a Google access token
+      at https://oauth2.googleapis.com/token and sends it as the bearer token. The Kubernetes
+      spec doesn't describe that exchange, so this declares the token URL the mock answers.
+    update:
+      GoogleServiceAccountToken:
+        type: oauth2
+        flows:
+          clientCredentials:
+            tokenUrl: https://oauth2.googleapis.com/token
+            scopes: {}

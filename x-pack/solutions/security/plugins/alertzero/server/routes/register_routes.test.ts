@@ -19,13 +19,20 @@ const setup = () => {
     router,
     logger: loggerMock.create(),
     getSpaceId: service,
+    getClusterClient: service,
+    isCpsEnabled: () => false,
     getWatchesService: service,
     getWorkersService: service,
     getConversationProposalsService: service,
     getActionsService: service,
     getAgentBuilderConversations: service,
+    getAgentBuilderAttachments: service,
     getHuntServices: service,
     getScanFailuresService: service,
+    getThreatIntelSupplyService: service,
+    isServerless: false,
+    getWorkflowsManagement: service,
+    reportTelemetryEvent: service,
   });
   const routes = (['get', 'post', 'put', 'patch', 'delete'] as const).flatMap((method) =>
     router.versioned[method].mock.calls.map(([{ path }]) => router.versioned.getRoute(method, path))

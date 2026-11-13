@@ -51,7 +51,20 @@ apiTest.describe('GET /api/data_views/v2/{id} - as code', { tag: tags.deployment
     // Validate the meta
     expect(getResponse.body.meta.managed).toBe(false);
     expect(getResponse.body.meta.version).toBeDefined();
-    expect(getResponse.body.meta.namespaces).toBeDefined();
+    expect(getResponse.body.meta.spaces).toBeDefined();
+  });
+
+  apiTest('does not return scripted_fields when the data view has none', async ({ apiClient }) => {
+    const response = await apiClient.get(`${BASE_PATH}/${MOCK_DATA_VIEW.id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.data.scripted_fields).toBeUndefined();
   });
 
   apiTest('returns 404 for a non-existing data view', async ({ apiClient }) => {

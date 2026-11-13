@@ -23,11 +23,8 @@ describe('aiIndexSourcesSkill', () => {
     expect(isAllowedBuiltinSkill(aiIndexSourcesSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(aiIndexSourcesSkill.experimental).toBe(true);
-  });
-
   it('is hidden in spaces where the Context Engine is off, like the other setup skills', () => {
+    expect(aiIndexSourcesSkill.experimental).toBeFalsy();
     expect(aiIndexSourcesSkill.availability).toBe(contextEngineSkillAvailability);
   });
 

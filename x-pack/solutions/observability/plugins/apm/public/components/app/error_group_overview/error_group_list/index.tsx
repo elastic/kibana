@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { Timestamp } from '@kbn/apm-ui-shared';
 import { truncate } from '@kbn/apm-common';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   deriveQueryType,
+  findNonColumnFullTextArguments,
   findOverBroadMatchPredicates,
+  renderNonColumnFullTextArgumentError,
   renderOverBroadMatchError,
-  type Streams,
 } from '@kbn/streams-schema';
 import { type StreamQuery } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
@@ -17,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import {
   EsqlQueryValidationError,
-  validateEsqlQueryForStreamOrThrow,
+  validateEsqlQueryForSourceOrThrow,
 } from '../../../lib/significant_events/validate_esql_query';
 
 export interface QueryInput {
@@ -32,23 +34,29 @@ export interface QueryInput {
 
 export async function createQueryKnowledgeIndicatorToolHandler({
   kiClient,
-  definition,
+  source,
   queryInput,
   logger,
 }: {
   kiClient: KnowledgeIndicatorClient;
-  definition: Streams.all.Definition;
+  source: NightshiftSource;
   queryInput: QueryInput;
   logger: Logger;
 }): Promise<{ id: string }> {
   logger.debug(
-    `ki_query_create: creating query KI for stream "${definition.name}" with title "${queryInput.title}"`
+    `ki_query_create: creating query KI for source "${source.slug}" with title "${queryInput.title}"`
   );
 
-  validateEsqlQueryForStreamOrThrow({
+  validateEsqlQueryForSourceOrThrow({
     esqlQuery: queryInput.esql.query,
-    stream: definition,
+    viewName: source.view_name,
   });
+
+  // Before the over-broad check: its MATCH_PHRASE advice is moot while the field is a cast.
+  const nonColumnArguments = findNonColumnFullTextArguments(queryInput.esql.query);
+  if (nonColumnArguments.length > 0) {
+    throw new EsqlQueryValidationError(renderNonColumnFullTextArgumentError(nonColumnArguments));
+  }
 
   const overBroad = findOverBroadMatchPredicates(queryInput.esql.query);
   if (overBroad.length > 0) {
@@ -66,10 +74,10 @@ export async function createQueryKnowledgeIndicatorToolHandler({
     expires_at: queryInput.expires_at,
   };
 
-  await kiClient.upsertQuery(definition, query);
+  await kiClient.upsertQuery(source.id, query);
 
   logger.debug(
-    `ki_query_create: created query KI for stream "${definition.name}" with id "${query.id}"`
+    `ki_query_create: created query KI for source "${source.slug}" with id "${query.id}"`
   );
 
   return {

@@ -12,6 +12,7 @@ import { manageCasesTool } from './manage_cases';
 import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 import { invokeStepHandler } from '../utils/invoke_step';
+import { CASES_UPDATED_UI_EVENT } from '../../../common/types/agent_builder/ui_events';
 
 jest.mock('../utils/invoke_step', () => ({ invokeStepHandler: jest.fn() }));
 const invokeStepHandlerMock = invokeStepHandler as jest.MockedFunction<typeof invokeStepHandler>;
@@ -36,6 +37,7 @@ const buildToolContext = (
     logger: loggingSystemMock.createLogger(),
     attachments,
     callContext: { toolId: 'platform.core.cases.manage', toolCallId: 'call-1', callSource },
+    events: { sendUiEvent: jest.fn() },
   } as unknown as ToolHandlerContext);
 
 describe('manageCasesTool handler — attachment emission by caller', () => {
@@ -52,13 +54,17 @@ describe('manageCasesTool handler — attachment emission by caller', () => {
 
   it('emits a case attachment for an Agent Builder conversation call', async () => {
     const attachments = buildMockAttachments();
+    const toolContext = buildToolContext(attachments, 'agent');
     const tool = manageCasesTool(jest.fn(), false);
     const result = await tool.handler(
       { mode: 'update', case_id: 'case-1', title: 'New title' } as never,
-      buildToolContext(attachments, 'agent')
+      toolContext
     );
 
     expect(attachments.add).toHaveBeenCalledTimes(1);
+    expect(toolContext.events.sendUiEvent).toHaveBeenCalledWith(CASES_UPDATED_UI_EVENT, {
+      caseIds: ['case-1'],
+    });
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.attachment_ids).toEqual(['att-1']);
   });
@@ -67,14 +73,16 @@ describe('manageCasesTool handler — attachment emission by caller', () => {
     'returns the case without emitting an attachment for %s callers',
     async (callSource) => {
       const attachments = buildMockAttachments();
+      const toolContext = buildToolContext(attachments, callSource);
       const tool = manageCasesTool(jest.fn(), false);
       const result = await tool.handler(
         { mode: 'update', case_id: 'case-1', title: 'New title' } as never,
-        buildToolContext(attachments, callSource)
+        toolContext
       );
 
       expect(invokeStepHandlerMock).toHaveBeenCalledTimes(1);
       expect(attachments.add).not.toHaveBeenCalled();
+      expect(toolContext.events.sendUiEvent).not.toHaveBeenCalled();
       const { results } = result as unknown as {
         results: Array<{ data: Record<string, unknown> }>;
       };

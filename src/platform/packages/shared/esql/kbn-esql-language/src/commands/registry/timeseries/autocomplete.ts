@@ -46,7 +46,7 @@ export async function autocomplete(
     suggestions.push(...definitions);
   };
 
-  const metadataSuggestions = getMetadataSuggestions(command, innerText);
+  const metadataSuggestions = getMetadataSuggestions(command, innerText, callbacks?.isServerless);
   if (metadataSuggestions) {
     return metadataSuggestions;
   }

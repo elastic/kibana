@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { AlertSeverity } from '@kbn/rule-data-utils';
+import type { PresetSchedule } from '../../../common/automation_schedule';
+import type { AlertSourceMode } from '../../../common/automation_limits';
+
 export type AutomationType = 'custom' | 'managed';
 
-export type AlertStatus = 'active' | 'inactive' | 'any';
 export type RuleNameMatchMode = 'substring' | 'regex';
 export type SlackTriggerEvent = 'message';
-export type SchedulePreset = 'hourly' | 'daily' | 'weekly' | 'custom';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';
 export type CompletionAction = 'create_investigation' | 'post_to_slack' | 'silent';
@@ -20,22 +22,20 @@ export type NightshiftTriggerRow =
   | {
       kind: 'alert';
       ruleNamePattern?: string;
+      ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
-      alertStatus?: AlertStatus;
       tags?: string[];
+      severities?: AlertSeverity[];
+      alertSources?: string[];
+      alertSourceMode?: AlertSourceMode;
     }
-  | {
-      kind: 'schedule';
-      schedulePreset?: SchedulePreset;
-      cronExpression?: string;
-      timezone?: string;
-      scopeQuery?: string;
-    }
+  | (PresetSchedule & { kind: 'schedule'; scopeQuery?: string })
   | {
       kind: 'slack';
       event: SlackTriggerEvent;
       channels?: string[];
       users?: string[];
+      bots?: string[];
       messageFilter?: string;
     };
 
@@ -53,7 +53,10 @@ export interface NightshiftAutomationExecution {
 export interface NightshiftAutomationCompletion {
   action?: CompletionAction;
   targetMode?: CompletionTargetMode;
+  /** Slack channel id or `#name` for `channel` mode. */
   destination?: string;
+  /** Slack connector to post through; defaults to the Elastic Slack app connector. */
+  connectorId?: string;
 }
 
 export interface NightshiftAutomationRuntime {
@@ -73,7 +76,7 @@ export interface NightshiftAutomationAttributes {
   workflowId?: string;
   trigger: NightshiftAutomationTrigger;
   execution: NightshiftAutomationExecution;
-  completion: NightshiftAutomationCompletion;
+  completions: NightshiftAutomationCompletion[];
   runtime: NightshiftAutomationRuntime;
   createdAt: string;
   updatedAt: string;

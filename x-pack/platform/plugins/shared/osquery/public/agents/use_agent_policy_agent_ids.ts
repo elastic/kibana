@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
-import { AGENTS_PREFIX } from '@kbn/fleet-plugin/common';
+import { AGENTS_PREFIX, buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
@@ -32,7 +32,12 @@ export const useAgentPolicyAgentIds = ({
   return useQuery<{ agents: Agent[] }, unknown, string[]>(
     ['agentPolicyAgentIds', agentPolicyId],
     () => {
-      const kuery = `${AGENTS_PREFIX}.policy_id:${agentPolicyId}`;
+      // the agents of the policy, also the ones on a version specific or the sentinel policy
+      const kuery = buildPolicyBaseIdWithFallbackKuery(
+        agentPolicyId ?? '',
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      );
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {
         version: API_VERSIONS.internal.v1,

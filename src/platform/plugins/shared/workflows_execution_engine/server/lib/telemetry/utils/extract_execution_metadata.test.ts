@@ -17,6 +17,7 @@ import {
   extractEventChainVisitedWorkflowIdsFromExecution,
   extractExecutionMetadata,
   extractQueueDelayMs,
+  extractRunAs,
   extractTimeToFirstStep,
   mergeEmitterWorkflowIntoEventChainVisited,
 } from './extract_execution_metadata';
@@ -426,6 +427,79 @@ describe('extractQueueDelayMs', () => {
   });
 });
 
+describe('extractRunAs', () => {
+  const definitionWithRunAs = (runAs?: string): WorkflowYaml =>
+    ({
+      steps: [],
+      ...(runAs && { settings: { run_as: runAs } }),
+    } as Partial<WorkflowYaml> as WorkflowYaml);
+
+  it('reports user for an execution with no service account', () => {
+    expect(extractRunAs(createMockWorkflowExecution())).toEqual({ runAs: 'user' });
+  });
+
+  it("reports a service account set by the workflow's own settings.run_as", () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs('sa-1'),
+          effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: false });
+  });
+
+  it('reports a service account inherited from the parent workflow', () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs(),
+          effectiveIdentity: {
+            type: 'service_account',
+            id: 'sa-parent',
+            inheritedFrom: { workloadId: 'parent-wf' },
+          },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: true });
+  });
+
+  it("reports an inherited service account that overrides the child's own settings.run_as", () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs('sa-child'),
+          effectiveIdentity: {
+            type: 'service_account',
+            id: 'sa-parent',
+            inheritedFrom: { workloadId: 'parent-wf' },
+          },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: true });
+  });
+
+  it('reports user when a non-inherited identity has no settings.run_as, as the runner does', () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs(),
+          effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+        })
+      )
+    ).toEqual({ runAs: 'user' });
+  });
+
+  it('is included in the execution metadata', () => {
+    expect(
+      extractExecutionMetadata(
+        createMockWorkflowExecution({ workflowDefinition: definitionWithRunAs('sa-1') }),
+        []
+      )
+    ).toMatchObject({ runAs: 'service_account', runAsInherited: false });
+  });
+});
+
 describe('extractCompositionContext', () => {
   it('returns empty object when not triggered by workflow-step', () => {
     expect(extractCompositionContext(compositionFixture('manual', {}))).toEqual({});
@@ -489,6 +563,96 @@ describe('extractCompositionContext', () => {
         })
       )
     ).toEqual({ compositionDepth: 1 });
+  });
+
+  it('returns empty object for a top-level execution even when the context carries lineage keys', () => {
+    expect(
+      extractCompositionContext(
+        compositionFixture('manual', {
+          executionChain: [
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
+          parentWorkflowExecutionId: 'parent-exec-id',
+          parentWorkflowId: 'parent-wf-id',
+        })
+      )
+    ).toEqual({});
+  });
+
+  describe('executionChain', () => {
+    const ROOT_HOP = { executionId: 'root-exec-id', invocation: 'sync', workflowId: 'root-wf-id' };
+    const PARENT_HOP = {
+      executionId: 'parent-exec-id',
+      invocation: 'async',
+      workflowId: 'parent-wf-id',
+    };
+    const grandchildContext = {
+      executionChain: [ROOT_HOP, PARENT_HOP],
+      parentDepth: 1,
+      parentWorkflowExecutionId: 'parent-exec-id',
+      parentWorkflowId: 'parent-wf-id',
+      parentWorkflowInvocation: 'async',
+    };
+
+    it('returns the stored chain, root first and direct parent last, next to the composition fields', () => {
+      expect(
+        extractCompositionContext(compositionFixture('workflow-step', grandchildContext))
+      ).toEqual({
+        compositionDepth: 2,
+        executionChain: [ROOT_HOP, PARENT_HOP],
+        parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'async',
+      });
+    });
+
+    it('ends with the stored parent keys as its last hop, and its length is the depth', () => {
+      const { compositionDepth, executionChain = [] } = extractCompositionContext(
+        compositionFixture('workflow-step', grandchildContext)
+      );
+      const { parentWorkflowExecutionId, parentWorkflowId, parentWorkflowInvocation } =
+        grandchildContext;
+
+      expect({
+        depth: executionChain.length,
+        last: executionChain[executionChain.length - 1],
+      }).toEqual({
+        depth: compositionDepth,
+        last: {
+          executionId: parentWorkflowExecutionId,
+          invocation: parentWorkflowInvocation,
+          workflowId: parentWorkflowId,
+        },
+      });
+    });
+
+    it("copies only each hop's own fields", () => {
+      expect(
+        extractCompositionContext(
+          compositionFixture('workflow-step', {
+            ...grandchildContext,
+            executionChain: [{ ...ROOT_HOP, extra: 'not reported' }, PARENT_HOP],
+          })
+        ).executionChain
+      ).toEqual([ROOT_HOP, PARENT_HOP]);
+    });
+
+    it.each([
+      ['no chain (a pre-upgrade chain)', undefined],
+      ['an empty chain', []],
+      ['a malformed hop', [ROOT_HOP, { executionId: 'parent-exec-id' }]],
+    ])('omits executionChain for a child with %s', (_label, executionChain) => {
+      expect(
+        extractCompositionContext(
+          compositionFixture('workflow-step', { ...grandchildContext, executionChain })
+        )
+      ).not.toHaveProperty('executionChain');
+    });
+
+    it('never returns a chain for a top-level execution, even when its context carries one', () => {
+      expect(extractCompositionContext(compositionFixture('manual', grandchildContext))).toEqual(
+        {}
+      );
+    });
   });
 });
 

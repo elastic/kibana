@@ -6,5 +6,11 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/std", "@kbn/zod"]
+  "kbn_references": [
+    "@kbn/std",
+    "@kbn/zod",
+    "@kbn/streamlang",
+    "@kbn/utility-types",
+    "@kbn/core-spaces-common",
+  ]
 }

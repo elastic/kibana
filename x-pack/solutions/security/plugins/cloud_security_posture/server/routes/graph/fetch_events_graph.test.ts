@@ -142,6 +142,28 @@ describe('fetchEvents', () => {
     expect(args.query).not.toContain('EVAL user.id = TO_STRING(user.id)');
   });
 
+  it('expands and casts user.entity.id and user.target.entity.id for EUID resolution', async () => {
+    await fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: true,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    expect(args.query).toContain('| MV_EXPAND `user.entity.id`');
+    expect(args.query).toContain('| MV_EXPAND `user.target.entity.id`');
+    expect(args.query).toContain('| EVAL `user.entity.id` = TO_STRING(`user.entity.id`)');
+    expect(args.query).toContain(
+      '| EVAL `user.target.entity.id` = TO_STRING(`user.target.entity.id`)'
+    );
+  });
+
   it('should include origin event parameters when originEventIds are provided', async () => {
     const originEventIds: OriginEventId[] = [
       { id: '1', isAlert: true },
@@ -464,10 +486,10 @@ describe('regroupEvents', () => {
     expect(result[0].targetIdsCount).toBe(2);
   });
 
-  it('enriched and unenriched targets from the same row share one label node', () => {
+  it('enriched and unenriched targets from the same row share one event node', () => {
     // One ES|QL row with an enriched target (type Host) and an unenriched target (null)
     // that share the same single document. They form two type groups, but because the label
-    // node is keyed on documents only, both groups share the same labelNodeId — the label node
+    // node is keyed on documents only, both groups share the same eventNodeId — the event node
     // then fans out to both targets via separate edges (see parse_records dedup).
     const record = buildEventEsqlRow({
       actorEntityId: 'user:actor',
@@ -487,13 +509,13 @@ describe('regroupEvents', () => {
     const result = regroupEvents([record], enrichmentMap);
 
     expect(result).toHaveLength(2);
-    const labelIds = result.map((g) => g.labelNodeId);
+    const labelIds = result.map((g) => g.eventNodeId);
     expect(labelIds[0]).toBe(labelIds[1]);
-    // Single document → labelNodeId is the raw document _id.
+    // Single document → eventNodeId is the raw document _id.
     expect(labelIds[0]).toBe('doc-shared');
   });
 
-  it('labelNodeId is SHA-256 of sorted document _ids across merged rows', () => {
+  it('eventNodeId is SHA-256 of sorted document _ids across merged rows', () => {
     const record1 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       docIds: ['doc-a'],
@@ -510,10 +532,10 @@ describe('regroupEvents', () => {
     const [group] = regroupEvents([record1, record2], new Map());
 
     // Multiple documents → hashIds sorts inputs before hashing.
-    const expectedLabelNodeId = createHash('sha256')
+    const expectedEventNodeId = createHash('sha256')
       .update(['doc-a', 'doc-b'].join(','))
       .digest('hex');
-    expect(group.labelNodeId).toBe(expectedLabelNodeId);
+    expect(group.eventNodeId).toBe(expectedEventNodeId);
   });
 
   it('does not double-count uniqueEventsCount when the same doc appears in multiple rows', () => {

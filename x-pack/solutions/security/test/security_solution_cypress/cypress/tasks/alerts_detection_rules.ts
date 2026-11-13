@@ -22,7 +22,6 @@ import {
   DELETE_RULE_ACTION_BTN,
   DISABLED_RULES_BTN,
   DUPLICATE_RULE_ACTION_BTN,
-  DUPLICATE_RULE_MENU_PANEL_BTN,
   EDIT_RULE_ACTION_BTN,
   ELASTIC_RULES_BTN,
   ENABLED_RULES_BTN,
@@ -73,7 +72,6 @@ import {
   RULE_NAME_HEADER,
 } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
-import { LOADING_INDICATOR } from '../screens/security_header';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 import { goToRuleEditSettings } from './rule_details';
@@ -115,33 +113,6 @@ export const manuallyRunFirstRule = () => {
   cy.get(MANUAL_RULE_RUN_ACTION_BTN).should('be.visible');
   cy.get(MANUAL_RULE_RUN_ACTION_BTN).click();
   cy.get(MODAL_CONFIRMATION_BTN).click();
-};
-
-/**
- * Duplicates the rule from the menu and does additional
- * pipes and checking that the elements are present on the
- * page as well as removed when doing the clicks to help reduce
- * flake.
- */
-export const duplicateRuleFromMenu = () => {
-  cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
-
-  // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).click({ force: true });
-  cy.get(CONFIRM_DUPLICATE_RULE).click();
-};
-
-/**
- * Check that the duplicated rule is on the table
- * and it is disabled (default)
- */
-export const checkDuplicatedRule = (ruleName: string): void => {
-  cy.contains(RULE_NAME, ruleName)
-    .parents(RULES_ROW)
-    .find(RULE_SWITCH)
-    .should('have.attr', 'aria-checked', 'false');
 };
 
 export const deleteFirstRule = () => {

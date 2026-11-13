@@ -10,14 +10,16 @@
 import { EuiDelayRender, EuiEmptyPrompt, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ChangePointExperienceGridContent } from './change_point_experience_grid_content';
 import type { UnifiedChangePointGridProps } from './types';
 import { useChangePointCards } from './hooks/use_change_point_cards';
 
 export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = (props) => {
   const {
+    actions,
     renderToggleActions,
     chartToolbarCss,
     isChartLoading,
@@ -48,6 +50,51 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
 
   const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
 
+  const onAddPageToDashboard = useCallback(() => {
+    if (!actions?.addPageToDashboard || !seriesColumns || !cards?.length) {
+      return;
+    }
+
+    if (!isOfAggregateQueryType(fetchParams.query)) {
+      return;
+    }
+
+    actions.addPageToDashboard({ esql: fetchParams.query.esql });
+  }, [actions, cards, fetchParams.query, seriesColumns]);
+
+  const addToDashboardAction = useMemo(() => {
+    if (
+      !actions?.addPageToDashboard ||
+      isChartLoading ||
+      showNoData ||
+      showNoSeries ||
+      !seriesColumns ||
+      !cards?.length
+    ) {
+      return;
+    }
+
+    return {
+      label: i18n.translate('changePointChartViewer.actions.addToDashboard', {
+        defaultMessage: 'Add to dashboard',
+      }),
+      toolTipContent: i18n.translate('changePointChartViewer.actions.addToDashboardTooltip', {
+        defaultMessage: 'Add a change point panel to a dashboard',
+      }),
+      iconType: 'addToDashboard',
+      onClick: onAddPageToDashboard,
+      'data-test-subj': 'changePointAddPageToDashboard',
+    };
+  }, [
+    actions?.addPageToDashboard,
+    cards?.length,
+    isChartLoading,
+    onAddPageToDashboard,
+    seriesColumns,
+    showNoData,
+    showNoSeries,
+  ]);
+
   return (
     <div
       css={css`
@@ -61,6 +108,7 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
         toolbarCss={chartToolbarCss}
         toolbar={{
           toggleActions: toolbarToggleActions,
+          rightSide: addToDashboardAction ? [addToDashboardAction] : undefined,
         }}
       >
         {showLoading ? (

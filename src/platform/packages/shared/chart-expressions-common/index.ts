@@ -29,11 +29,11 @@ export {
   LegendLayout,
   LegendSizeToPixels,
   DEFAULT_LEGEND_SIZE,
+  LENS_DEFAULT_LEGEND_SIZE,
   getLegendLayout,
 } from './legend';
 
 export { isFilterableColumnSet, getFilterDrilldownWarningMessage } from './computed_column_warning';
-export { ChartTooltipFooterMessage } from './components/chart_tooltip_footer_message';
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';
 export type { ExpressionValueVisDimension } from './expression_value_dimension';

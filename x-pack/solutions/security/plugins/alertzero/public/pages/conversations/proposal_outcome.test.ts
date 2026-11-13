@@ -40,6 +40,23 @@ describe('proposalOutcome', () => {
     ).toBe('Approved by Maya Chen');
   });
 
+  it('reports a failed action as Failed, not as an approval', () => {
+    expect(
+      proposalOutcome({
+        ...baseProposal,
+        decision: 'approved',
+        status: 'failed',
+        decidedBy: analyst,
+      })
+    ).toBe('Failed');
+  });
+
+  it('reports a failed action as Failed when the approver is unattributed', () => {
+    expect(proposalOutcome({ ...baseProposal, decision: 'approved', status: 'failed' })).toBe(
+      'Failed'
+    );
+  });
+
   it('names whoever declined it', () => {
     expect(
       proposalOutcome({

@@ -9,7 +9,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { UpdateSourceEditor } from './update_source_editor';
-import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
+import { LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('12345'),

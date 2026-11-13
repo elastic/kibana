@@ -195,7 +195,7 @@ export const manageCasesTool = (
 
       const result = await runStep();
       if (mode !== 'delete' && canRenderAttachments(toolContext.callContext)) {
-        const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+        const attachmentIds = await emitFromStepResult(toolContext, result);
         return injectAttachmentIds(result, attachmentIds);
       }
       return result;

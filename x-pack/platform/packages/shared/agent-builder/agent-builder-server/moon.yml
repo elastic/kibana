@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core-ui-settings-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/connector-specs'
+  - '@kbn/isomer-components'
 tags:
   - shared-common
   - package
@@ -39,6 +40,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

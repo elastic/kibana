@@ -1,17 +1,6 @@
 #!/bin/bash
 
-# TODO: rewrite after https://github.com/elastic/kibana-operations/issues/15 is done
 export LEGACY_VAULT_ADDR="https://secrets.elastic.co:8200"
-if [[ "${VAULT_ADDR:-}" == "$LEGACY_VAULT_ADDR" ]]; then
-  VAULT_PATH_PREFIX="secret/kibana-issues/dev"
-  VAULT_KV_PREFIX="secret/kibana-issues/dev"
-  IS_LEGACY_VAULT_ADDR=true
-else
-  VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
-  VAULT_KV_PREFIX="kv/ci-shared/kibana-deployments"
-  IS_LEGACY_VAULT_ADDR=false
-fi
-export IS_LEGACY_VAULT_ADDR
 
 retry() {
   local retries=$1; shift
@@ -38,7 +27,7 @@ vault_get() {
   key_path=${1:-}
   field=${2:-}
 
-  fullPath="$VAULT_PATH_PREFIX/$key_path"
+  fullPath="secret/ci/elastic-kibana/$key_path"
 
   if [[ -z "$field" || "$field" =~ ^-.* ]]; then
     retry 5 5 vault read "$fullPath" "${@:2}"
@@ -53,29 +42,33 @@ vault_set() {
   fields=("$@")
 
 
-  fullPath="$VAULT_PATH_PREFIX/$key_path"
+  fullPath="secret/ci/elastic-kibana/$key_path"
 
   # shellcheck disable=SC2068
   retry 5 5 vault write "$fullPath" ${fields[@]}
 }
 
-vault_kv_get() {
-  local kv_path=${1:-}
-  local field=${2:-}
+# Readable only by the Buildkite pipelines granted on kv/ci-shared/kibana/pr-deploy/* in elastic/terrazzo
+PR_DEPLOY_VAULT_PATH="kv/ci-shared/kibana/pr-deploy"
 
-  if [[ -z "$field" || "$field" =~ ^-.* ]]; then
-    retry 5 5 vault read "$kv_path" "${@:2}"
-  else
-    retry 5 5 vault read -field="$field" "$kv_path" "${@:3}"
-  fi
+load_cloud_deploy_credentials() {
+  EC_API_KEY="$(retry 5 5 vault kv get -field=api_key "$PR_DEPLOY_VAULT_PATH/cloud-deploy")"
+  export EC_API_KEY
 }
 
-vault_kv_set() {
-  kv_path=$1
-  shift
-  fields=("$@")
+load_project_deploy_credentials() {
+  PROJECT_API_KEY="$(retry 5 5 vault kv get -field=api_key "$PR_DEPLOY_VAULT_PATH/project-deploy")"
+  export PROJECT_API_KEY
+  PROJECT_API_DOMAIN="$(retry 5 5 vault kv get -field=domain "$PR_DEPLOY_VAULT_PATH/project-deploy")"
+  export PROJECT_API_DOMAIN
+}
 
-  vault kv put "$VAULT_KV_PREFIX/$kv_path" "${fields[@]}"
+# Prints a legacy Vault token; must run while VAULT_TOKEN is still the ci-prod token
+legacy_vault_token() {
+  local role_id secret_id
+  role_id="$(retry 5 5 vault kv get -field=role_id "$PR_DEPLOY_VAULT_PATH/legacy-vault-approle")" || return 1
+  secret_id="$(retry 5 5 vault kv get -field=secret_id "$PR_DEPLOY_VAULT_PATH/legacy-vault-approle")" || return 1
+  VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$role_id" secret_id="$secret_id"
 }
 
 function set_in_legacy_vault() {
@@ -87,7 +80,7 @@ function set_in_legacy_vault() {
 
   # Make sure to either keep this variable name `VAULT_TOKEN` or unset `VAULT_TOKEN`,
   # otherwise the VM's default token will be used, that's connected to the ci-prod vault instance
-  VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+  VAULT_TOKEN=$(legacy_vault_token)
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
 
   set +e
@@ -108,7 +101,7 @@ function unset_in_legacy_vault() {
 
   # Make sure to either keep this variable name `VAULT_TOKEN` or unset `VAULT_TOKEN`,
   # otherwise the VM's default token will be used, that's connected to the ci-prod vault instance
-  VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+  VAULT_TOKEN=$(legacy_vault_token)
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
 
   set +e

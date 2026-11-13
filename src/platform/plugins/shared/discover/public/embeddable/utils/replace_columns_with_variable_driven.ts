@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 
 /**
@@ -16,18 +16,18 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
  */
 export const replaceColumnsWithVariableDriven = (
   savedSearchColumns: string[] | undefined,
-  columnsMeta: Record<string, DatatableColumnMeta> | undefined,
+  resultDataSource: EsqlSource | undefined,
   esqlVariables: ESQLControlVariable[] | undefined,
   isEsql: boolean
 ): string[] => {
-  if (!isEsql || !columnsMeta) {
+  if (!isEsql || !resultDataSource) {
     return savedSearchColumns ?? [];
   }
 
-  const columnsFromRequest = Object.keys(columnsMeta);
-  const columnDrivenByVariable = Object.entries(columnsMeta).find(([id, meta]) => {
+  const columnsFromRequest = resultDataSource.getColumns().map(({ name }) => name);
+  const columnDrivenByVariable = columnsFromRequest.find((name) => {
     // check if the id exists in the esqlVariables value property
-    return esqlVariables?.some((esqlVar) => esqlVar.value === id);
+    return esqlVariables?.some((esqlVar) => esqlVar.value === name);
   });
 
   if (!columnDrivenByVariable) {
@@ -35,7 +35,7 @@ export const replaceColumnsWithVariableDriven = (
   }
 
   // find the savedSearch.columns which doesn't exist in columnsFromRequest and replace it with the columnDrivenByVariable
-  const variableDrivenColumnName = columnDrivenByVariable[0];
+  const variableDrivenColumnName = columnDrivenByVariable;
   const updatedColumns = (savedSearchColumns ?? []).map((columnName) => {
     // If this column from savedSearch doesn't exist in the current request columns,
     // replace it with the variable-driven column

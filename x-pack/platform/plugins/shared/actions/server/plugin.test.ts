@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
+import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -31,6 +32,7 @@ import type {
 } from './plugin';
 import { ActionsPlugin } from './plugin';
 import {
+  ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
   AlertHistoryEsIndexConnectorId,
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -84,6 +86,7 @@ function getConfig(overrides = {}) {
       maxEmitted: 25,
       ...defaultInboundEventsLimitConfigs,
     },
+    connectorSigningKeys: { enabled: false },
     ...overrides,
   };
 }
@@ -148,6 +151,7 @@ describe('Actions Plugin', () => {
           maxEmitted: 25,
           ...defaultInboundEventsLimitConfigs,
         },
+        connectorSigningKeys: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -594,6 +598,7 @@ describe('Actions Plugin', () => {
           maxEmitted: 25,
           ...defaultInboundEventsLimitConfigs,
         },
+        connectorSigningKeys: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -637,6 +642,30 @@ describe('Actions Plugin', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
       );
+    });
+
+    describe('connector catalog feature flag', () => {
+      it('subscribes to the connector catalog feature flag with a false fallback', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+
+        expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+          ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+          false
+        );
+      });
+
+      it('unsubscribes from the connector catalog feature flag on stop', async () => {
+        const connectorCatalogEnabled$ = new BehaviorSubject(false);
+        coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
+
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+        expect(connectorCatalogEnabled$.observed).toBe(true);
+
+        plugin.stop();
+        expect(connectorCatalogEnabled$.observed).toBe(false);
+      });
     });
 
     describe('getActionsClientWithRequest()', () => {
@@ -977,6 +1006,7 @@ describe('Actions Plugin', () => {
                 maxEmitted: 25,
                 ...defaultInboundEventsLimitConfigs,
               },
+              connectorSigningKeys: { enabled: false },
             })
           );
           const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);

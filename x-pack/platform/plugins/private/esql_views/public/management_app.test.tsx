@@ -23,6 +23,7 @@ import {
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { getQueryPreview } from './esql_views_table';
 import { ManagementApp } from './management_app';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import type { DiscoverEsqlLocatorParams } from './types';
 import type {
   EsqlViewPreviewDependencies,
@@ -33,8 +34,7 @@ import type {
 type EsqlEditorProps = Omit<ESQLEditorProps, 'ref'>;
 
 const mockRunPreview = jest.fn().mockResolvedValue(undefined);
-const mockResetPreview = jest.fn();
-const mockResetPreviewIfQueryChanged = jest.fn();
+const mockClearPreviewErrorIfQueryChanged = jest.fn();
 const mockUseEsqlViewPreview = jest.fn<UseEsqlViewPreviewResult, [EsqlViewPreviewDependencies]>();
 const mockEsqlDataGrid = jest.fn();
 
@@ -84,6 +84,13 @@ const createClient = (): jest.Mocked<EsqlViewsClient> => ({
 
 const createDiscoverLocator = () => sharePluginMock.createLocator<DiscoverEsqlLocatorParams>();
 
+const createTelemetryClient = (): jest.Mocked<EsqlViewsTelemetryClient> => ({
+  trackViewsPageVisited: jest.fn(),
+  trackViewCreated: jest.fn(),
+  trackViewEdited: jest.fn(),
+  trackViewDeleted: jest.fn(),
+});
+
 const renderApp = (
   client: EsqlViewsClient,
   {
@@ -93,6 +100,7 @@ const renderApp = (
     EsqlEditor = MockEsqlEditor,
     isDiscoverAvailable = true,
     discoverLocator,
+    telemetryClient = createTelemetryClient(),
     toasts = notificationServiceMock.createStartContract().toasts,
   }: {
     canCreate?: boolean;
@@ -101,10 +109,11 @@ const renderApp = (
     EsqlEditor?: ComponentType<EsqlEditorProps>;
     isDiscoverAvailable?: boolean;
     discoverLocator?: ReturnType<typeof createDiscoverLocator>;
+    telemetryClient?: jest.Mocked<EsqlViewsTelemetryClient>;
     toasts?: ReturnType<typeof notificationServiceMock.createStartContract>['toasts'];
   } = {}
-) =>
-  render(
+) => ({
+  ...render(
     <EuiProvider>
       <MockAppHeaderProvider>
         <ManagementApp
@@ -117,11 +126,14 @@ const renderApp = (
           documentationUrl={documentationUrl}
           EsqlEditor={EsqlEditor}
           previewDependencies={previewDependencies as never}
+          telemetryClient={telemetryClient}
           toasts={toasts}
         />
       </MockAppHeaderProvider>
     </EuiProvider>
-  );
+  ),
+  telemetryClient,
+});
 
 const twoViews: EsqlViewsResult = {
   views: [
@@ -149,8 +161,7 @@ describe('ManagementApp', () => {
     jest.clearAllMocks();
     mockRunPreview.mockResolvedValue(undefined);
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: undefined,
       hasRun: false,
       isLoading: false,
@@ -264,6 +275,62 @@ describe('ManagementApp', () => {
     expect(screen.getByTestId('esqlViewsDeleteButton')).toBeInTheDocument();
   });
 
+  it('identifies reserved views and disables their management controls', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({
+      views: [
+        { name: 'user-view', query: 'FROM logs-*' },
+        { name: 'reserved-view', query: 'FROM metrics-*', reserved: true },
+      ],
+    });
+
+    renderApp(client, { discoverLocator: createDiscoverLocator() });
+
+    await screen.findByText('reserved-view');
+    const reservedRow = getRow('reserved-view');
+    expect(within(reservedRow).getByTestId('esqlViewsReservedBadge')).toHaveTextContent('Reserved');
+    expect(within(reservedRow).getByRole('checkbox')).toBeDisabled();
+    const reservedActionsButton = within(reservedRow).getByTestId('esqlViewsActionsButton');
+    expect(reservedActionsButton).toHaveAttribute('aria-disabled', 'true');
+    expect(reservedActionsButton).toHaveAccessibleName(
+      'Reserved views cannot be edited or deleted.'
+    );
+    fireEvent.click(reservedActionsButton);
+    expect(screen.queryByTestId('esqlViewsEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsDeleteButton')).not.toBeInTheDocument();
+    expect(within(reservedRow).getByTestId('esqlViewsOpenInDiscoverAction')).not.toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+
+    const userRow = getRow('user-view');
+    expect(within(userRow).getByRole('checkbox')).toBeEnabled();
+    expect(within(userRow).getByTestId('esqlViewsActionsButton')).toBeEnabled();
+  });
+
+  it('shows reserved views by default and allows hiding them', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({
+      views: [
+        { name: 'user-view', query: 'FROM logs-*' },
+        { name: 'reserved-view', query: 'FROM metrics-*', reserved: true },
+      ],
+    });
+
+    renderApp(client);
+
+    await screen.findByText('reserved-view');
+    expect(screen.getByText('user-view')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('esqlViewsReservedFilter'));
+
+    await waitFor(() => expect(screen.queryByText('reserved-view')).not.toBeInTheDocument());
+    expect(screen.getByText('user-view')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('esqlViewsReservedFilter'));
+    expect(await screen.findByText('reserved-view')).toBeInTheDocument();
+  });
+
   it('renders the form fields while the ES|QL editor loads', async () => {
     const client = createClient();
     let resolveEditor: ((module: { default: ComponentType<EsqlEditorProps> }) => void) | undefined;
@@ -351,7 +418,7 @@ describe('ManagementApp', () => {
 
     fireEvent.click(screen.getByTestId('mockSelectHistoryQuery'));
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(historyQuery);
-    expect(mockResetPreviewIfQueryChanged).toHaveBeenCalledWith(historyQuery);
+    expect(mockClearPreviewErrorIfQueryChanged).toHaveBeenCalledWith(historyQuery);
     expect(mockRunPreview).toHaveBeenLastCalledWith(
       { esql: historyQuery },
       expect.any(AbortController)
@@ -408,7 +475,7 @@ describe('ManagementApp', () => {
     expect(mockRunPreview).not.toHaveBeenCalled();
   });
 
-  it('matches the prototype preview accordion and configures the shared result grid', async () => {
+  it('keeps existing results visible while loading and configures the shared result grid', async () => {
     const client = createClient();
     const editorProps = jest.fn();
     const Editor = (props: EsqlEditorProps) => {
@@ -428,11 +495,10 @@ describe('ManagementApp', () => {
       rows: [['first'], ['second']],
     };
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: undefined,
       hasRun: true,
-      isLoading: false,
+      isLoading: true,
       result: previewResult,
       runPreview: mockRunPreview,
     });
@@ -443,11 +509,12 @@ describe('ManagementApp', () => {
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
 
-    expect(screen.getByText('ES|QL Query Results')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL query results')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('ES|QL Query Results'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
 
     expect(await screen.findByTestId('mockEsqlDataGrid')).toHaveTextContent('2 preview rows');
+    expect(screen.queryByTestId('esqlViewPreviewLoading')).not.toBeInTheDocument();
     expect(mockEsqlDataGrid).toHaveBeenCalledWith(
       expect.objectContaining({
         columns: previewResult.columns,
@@ -473,12 +540,41 @@ describe('ManagementApp', () => {
 
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
-    fireEvent.click(screen.getByText('ES|QL Query Results'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
 
     expect(screen.getByText('No results yet')).toBeInTheDocument();
     expect(
       screen.getByText('Run the query above to preview its results here.')
     ).toBeInTheDocument();
+  });
+
+  it('surfaces preview errors only through the ES|QL editor', async () => {
+    const client = createClient();
+    const editorProps = jest.fn();
+    const previewError = new Error('Preview request failed');
+    const Editor = (props: EsqlEditorProps) => {
+      editorProps(props);
+      return <MockEsqlEditor {...props} />;
+    };
+    client.getViews.mockResolvedValue({ views: [] });
+    mockUseEsqlViewPreview.mockReturnValue({
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
+      error: previewError,
+      hasRun: true,
+      isLoading: false,
+      result: undefined,
+      runPreview: mockRunPreview,
+    });
+
+    renderApp(client, { EsqlEditor: Editor });
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
+
+    expect(editorProps.mock.lastCall?.[0].errors).toEqual([previewError]);
+    expect(screen.getByText(previewError.message)).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewPreviewError')).not.toBeInTheDocument();
   });
 
   it('validates fields while creating a view and refetches after saving', async () => {
@@ -504,8 +600,8 @@ describe('ManagementApp', () => {
         'Changes affect every dashboard, alert, and other saved object that uses this view.'
       )
     ).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'ES|QL view details' })).toBeInTheDocument();
-    expect(screen.getByText('Name and describe the view.')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'ES|QL view details' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Name and describe the view.')).not.toBeInTheDocument();
     expect(screen.getByPlaceholderText('e.g. my-view')).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -519,7 +615,7 @@ describe('ManagementApp', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ES|QL query' })).toBeInTheDocument();
     expect(
-      screen.getByText('Write a new query, or select a recently or starred query.')
+      screen.getByText('Write a new query, or select a recent or starred query.')
     ).toBeInTheDocument();
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(
       'FROM kibana_sample_data_ecommerce | WHERE KQL("term")'
@@ -578,6 +674,11 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
 
     expect(await screen.findByTestId('esqlViewNameInput')).toHaveAttribute('readonly');
+    expect(
+      screen.queryByText(
+        'Must not match an existing index, data stream, alias, external dataset, or view.'
+      )
+    ).not.toBeInTheDocument();
     fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
       target: { value: 'Production logs' },
     });
@@ -731,8 +832,7 @@ describe('ManagementApp', () => {
     });
     client.createView.mockResolvedValue({ acknowledged: true });
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: new Error('Preview request failed'),
       hasRun: true,
       isLoading: false,
@@ -1017,7 +1117,7 @@ describe('ManagementApp', () => {
       });
     });
 
-    it('disables the action when the user cannot access Discover', async () => {
+    it('hides the action when the user cannot access Discover', async () => {
       const client = createClient();
       client.getViews.mockResolvedValue(twoViews);
       const discoverLocator = createDiscoverLocator();
@@ -1025,22 +1125,17 @@ describe('ManagementApp', () => {
       renderApp(client, { discoverLocator, isDiscoverAvailable: false });
       await screen.findByText('logs-view');
 
-      const action = within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction');
-      expect(action).toHaveAttribute('aria-disabled', 'true');
-      fireEvent.click(action);
-      expect(discoverLocator.navigateSync).not.toHaveBeenCalled();
+      expect(within(getRow('logs-view')).queryByTestId('esqlViewsOpenInDiscoverAction')).toBeNull();
     });
 
-    it('disables the action when the Discover locator is unavailable', async () => {
+    it('hides the action when the Discover locator is unavailable', async () => {
       const client = createClient();
       client.getViews.mockResolvedValue(twoViews);
 
       renderApp(client);
       await screen.findByText('logs-view');
 
-      expect(
-        within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction')
-      ).toHaveAttribute('aria-disabled', 'true');
+      expect(within(getRow('logs-view')).queryByTestId('esqlViewsOpenInDiscoverAction')).toBeNull();
     });
   });
 
@@ -1128,12 +1223,17 @@ describe('ManagementApp', () => {
 
       fireEvent.click(within(getRow('logs-view')).getByRole('checkbox'));
 
+      const actionsButton = within(otherRow).getByTestId('esqlViewsActionsButton');
       await waitFor(() => {
-        expect(within(otherRow).getByTestId('esqlViewsActionsButton')).toHaveAttribute(
-          'aria-disabled',
-          'true'
-        );
+        expect(actionsButton).toHaveAttribute('aria-disabled', 'true');
       });
+      expect(actionsButton).toHaveAccessibleName(
+        'Individual item actions are disabled when rows are being selected.'
+      );
+      fireEvent.mouseOver(actionsButton.parentElement as HTMLElement);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Individual item actions are disabled when rows are being selected.'
+      );
       expect(within(otherRow).getByTestId('esqlViewsOpenInDiscoverAction')).toHaveAttribute(
         'aria-disabled',
         'true'
@@ -1240,6 +1340,203 @@ describe('ManagementApp', () => {
       expect(client.getViews).toHaveBeenCalledTimes(2);
       expect(screen.getByTestId('esqlViewsTable')).toBeInTheDocument();
       expect(screen.getByText('logs-view')).toBeInTheDocument();
+    });
+  });
+
+  describe('telemetry', () => {
+    const createView = async (
+      client: jest.Mocked<EsqlViewsClient>,
+      { description }: { description?: string } = {}
+    ) => {
+      fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+      fireEvent.change(await screen.findByTestId('esqlViewNameInput'), {
+        target: { value: 'sales.view' },
+      });
+      if (description !== undefined) {
+        fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
+          target: { value: description },
+        });
+      }
+      fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
+        target: { value: 'FROM transactions-*' },
+      });
+      fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+      await waitFor(() => expect(client.createView).toHaveBeenCalled());
+    };
+
+    it('reports a single page visit per mount', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      expect(telemetryClient.trackViewsPageVisited).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a created view with its query length and whether it has a description', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [] });
+      client.createView.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('No ES|QL views found');
+
+      await createView(client, { description: 'Sales transactions' });
+
+      expect(telemetryClient.trackViewCreated).toHaveBeenCalledTimes(1);
+      expect(telemetryClient.trackViewCreated).toHaveBeenCalledWith({
+        hasDescription: true,
+        queryLength: 'FROM transactions-*'.length,
+      });
+      expect(telemetryClient.trackViewEdited).not.toHaveBeenCalled();
+    });
+
+    it('reports a created view without a description', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [] });
+      client.createView.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('No ES|QL views found');
+
+      await createView(client);
+
+      expect(telemetryClient.trackViewCreated).toHaveBeenCalledWith({
+        hasDescription: false,
+        queryLength: 'FROM transactions-*'.length,
+      });
+    });
+
+    it('reports a whitespace-only description as no description', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [] });
+      client.createView.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('No ES|QL views found');
+
+      await createView(client, { description: '   ' });
+
+      expect(telemetryClient.trackViewCreated).toHaveBeenCalledWith({
+        hasDescription: false,
+        queryLength: 'FROM transactions-*'.length,
+      });
+    });
+
+    it('does not report a creation that failed', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [] });
+      client.createView.mockRejectedValue(createClientError('Forbidden', 403));
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('No ES|QL views found');
+
+      await createView(client);
+
+      await screen.findByTestId('esqlViewSaveError');
+      expect(telemetryClient.trackViewCreated).not.toHaveBeenCalled();
+    });
+
+    it('reports an edited view', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+      client.updateView.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Actions for logs-view' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+      fireEvent.change(await screen.findByTestId('esqlViewDescriptionInput'), {
+        target: { value: 'Updated logs' },
+      });
+      fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+      await waitFor(() => expect(telemetryClient.trackViewEdited).toHaveBeenCalledTimes(1));
+      expect(telemetryClient.trackViewCreated).not.toHaveBeenCalled();
+    });
+
+    it('does not report an edit that failed', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+      client.updateView.mockRejectedValue(createClientError('Forbidden', 403));
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Actions for logs-view' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+      fireEvent.change(await screen.findByTestId('esqlViewDescriptionInput'), {
+        target: { value: 'Updated logs' },
+      });
+      fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+      await screen.findByTestId('esqlViewSaveError');
+      expect(telemetryClient.trackViewEdited).not.toHaveBeenCalled();
+    });
+
+    it('reports one deletion event per bulk delete operation, counting the submitted views', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValueOnce(twoViews).mockResolvedValueOnce({ views: [] });
+      client.deleteViews.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      fireEvent.click(within(getRow('logs-view')).getByRole('checkbox'));
+      fireEvent.click(within(getRow('orders-view')).getByRole('checkbox'));
+      fireEvent.click(await screen.findByTestId('esqlViewsBulkDeleteButton'));
+      fireEvent.click(
+        within(await screen.findByTestId('esqlViewsDeleteConfirmModal')).getByRole('button', {
+          name: 'Delete',
+        })
+      );
+
+      await waitFor(() => expect(telemetryClient.trackViewDeleted).toHaveBeenCalledTimes(1));
+      expect(telemetryClient.trackViewDeleted).toHaveBeenCalledWith({ count: 2 });
+    });
+
+    it('reports a single-view deletion', async () => {
+      const client = createClient();
+      client.getViews
+        .mockResolvedValueOnce(twoViews)
+        .mockResolvedValueOnce({ views: [twoViews.views[1]] });
+      client.deleteViews.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      await openDeleteAction('logs-view');
+      fireEvent.click(
+        within(await screen.findByTestId('esqlViewsDeleteConfirmModal')).getByRole('button', {
+          name: 'Delete',
+        })
+      );
+
+      await waitFor(() => expect(telemetryClient.trackViewDeleted).toHaveBeenCalledTimes(1));
+      expect(telemetryClient.trackViewDeleted).toHaveBeenCalledWith({ count: 1 });
+    });
+
+    it('does not report a deletion that failed', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+      client.deleteViews.mockRejectedValue(createClientError('Forbidden', 403));
+      const { toasts } = notificationServiceMock.createStartContract();
+
+      const { telemetryClient } = renderApp(client, { toasts });
+      await screen.findByText('logs-view');
+
+      await openDeleteAction('logs-view');
+      fireEvent.click(
+        within(await screen.findByTestId('esqlViewsDeleteConfirmModal')).getByRole('button', {
+          name: 'Delete',
+        })
+      );
+
+      await waitFor(() => expect(toasts.addDanger).toHaveBeenCalled());
+      expect(telemetryClient.trackViewDeleted).not.toHaveBeenCalled();
     });
   });
 });

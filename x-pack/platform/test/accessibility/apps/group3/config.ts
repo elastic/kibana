@@ -23,6 +23,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--data.search.sessions.enabled=true',
         '--xpack.upgrade_assistant.ui.enabled=true',
+        // Keeps the classic Rules and Logs heading tabs, which hide when Alerting V2 is on.
+        '--uiSettings.globalOverrides.alerting:v2:enabled=false',
       ],
     },
 

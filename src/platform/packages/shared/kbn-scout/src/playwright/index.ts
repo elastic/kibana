@@ -24,6 +24,7 @@ export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
 // Fixtures and Page Objects (can be extended with solution-specific logic)
 export type {
   BrowserAuthFixture,
+  GotoAppOptions,
   ScoutPage,
   PageObjects, // can be extended with solution specific Page Objects
 } from './fixtures/scope/test';
@@ -49,6 +50,10 @@ export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 
 // Raw HTTP client fixture, for UI suites that need to call Kibana routes directly
 export { apiClientFixture } from './fixtures/scope/worker';
+
+// API key auth, for UI suites that need to call Kibana routes as a given role
+export { defaultRolesFixture, requestAuthFixture } from './fixtures/scope/worker';
+export type { DefaultRolesFixture } from './fixtures/scope/worker';
 
 // Other worker types
 export type {

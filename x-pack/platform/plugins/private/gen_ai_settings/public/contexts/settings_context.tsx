@@ -7,20 +7,12 @@
 
 import React from 'react';
 import { createContext, useContext } from 'react';
-import type {
-  FieldDefinition,
-  OnFieldChangeFn,
-  UiSettingMetadata,
-  UnsavedFieldChange,
-} from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
-import type { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
-import { normalizeSettings } from '@kbn/management-settings-utilities';
-import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useEditableSettings } from '@kbn/management-settings-hooks';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
@@ -59,6 +51,7 @@ const SETTING_KEYS = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
@@ -77,164 +70,50 @@ export const SettingsContextProvider = ({ children }: { children: React.ReactNod
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
-function combineErrors(errors: Error[]): Error {
-  const message = errors.map((err) => err.message || String(err)).join('; ');
-  return new Error(message);
-}
-
-function getSettingsFields({
-  settingsKeys,
-  uiSettings,
-}: {
-  settingsKeys: string[];
-  uiSettings?: IUiSettingsClient;
-}) {
-  if (!uiSettings) {
-    return {};
-  }
-
-  const uiSettingsDefinition = uiSettings.getAll();
-  const normalizedSettings = normalizeSettings(uiSettingsDefinition);
-
-  return settingsKeys.reduce<Record<string, FieldDefinition>>((acc, key) => {
-    const setting: UiSettingMetadata = normalizedSettings[key];
-    if (setting) {
-      const field = getFieldDefinition({
-        id: key,
-        setting,
-        params: { isCustom: uiSettings.isCustom(key), isOverridden: uiSettings.isOverridden(key) },
-      });
-      acc[key] = field;
-    }
-    return acc;
-  }, {});
-}
-
 const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
   const {
     services: { settings, notifications },
   } = useKibana();
 
-  const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
-    {}
-  );
+  const {
+    fields,
+    unsavedChanges,
+    handleFieldChange,
+    cleanUnsavedChanges,
+    saveAll: saveAllSettings,
+    isSaving,
+  } = useEditableSettings({ settingsKeys, settingsClient: settings.client });
 
   // Custom validation errors from external validators
   const [customValidationErrors, setCustomValidationErrors] = React.useState<ValidationError[]>([]);
 
-  const queryClient = useQueryClient();
-
-  const fieldsQuery = useQuery({
-    queryKey: ['settingsFields', settingsKeys],
-    queryFn: async () => {
-      return getSettingsFields({ settingsKeys, uiSettings: settings?.client });
-    },
-    refetchOnWindowFocus: true,
-  });
-
-  // Subscribe to UI settings changes to update in real-time when values change
-  React.useEffect(() => {
-    if (!settings?.client) {
-      return;
-    }
-
-    const subscription = settings.client.getUpdate$().subscribe(({ key }) => {
-      // If the changed setting is one we're tracking, invalidate the query to refetch
-      if (settingsKeys.includes(key)) {
-        queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
+  const saveAll = async (): Promise<boolean> => {
+    try {
+      if (!isEmpty(unsavedChanges) && customValidationErrors.length > 0) {
+        throw new Error(customValidationErrors.map((error) => error.message).join('\n'));
       }
-    });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [settings?.client, settingsKeys, queryClient]);
-
-  const saveSingleSettingMutation = useMutation({
-    mutationFn: async ({
-      id,
-      change,
-    }: {
-      id: string;
-      change: UnsavedFieldChange<UiSettingsType>['unsavedValue'];
-    }) => {
-      await settings.client.set(id, change);
-      queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
-    },
-  });
-
-  const saveAllMutation = useMutation({
-    mutationFn: async () => {
-      if (settings && !isEmpty(unsavedChanges)) {
-        // Validate fields before saving
-        if (customValidationErrors.length > 0) {
-          // Throw error to prevent save
-          throw new Error(customValidationErrors.map((error) => error.message).join('\n'));
-        }
-
-        const updateErrors: Error[] = [];
-        const subscription = settings.client.getUpdateErrors$().subscribe((error) => {
-          updateErrors.push(error);
-        });
-        try {
-          const fieldsMap = fieldsQuery.data ?? {};
-          const requiresReload = Object.keys(unsavedChanges).some(
-            (key) => fieldsMap[key]?.requiresPageReload === true
-          );
-          await Promise.all(
-            Object.entries(unsavedChanges).map(([key, value]) => {
-              return settings.client.set(key, value.unsavedValue);
-            })
-          );
-          queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
-          cleanUnsavedChanges();
-          if (updateErrors.length > 0) {
-            throw combineErrors(updateErrors);
-          }
-          return requiresReload;
-        } finally {
-          if (subscription) {
-            subscription.unsubscribe();
-          }
-        }
-      }
-      return false;
-    },
-    onSuccess() {
+      const { requiresReload } = await saveAllSettings();
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.gen_ai_settings.save.success', {
+        title: i18n.translate('xpack.genAiSettings.save.success', {
           defaultMessage: 'Settings saved',
         }),
       });
-    },
-    onError(error: Error) {
+      return requiresReload;
+    } catch (error) {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.gen_ai_settings.save.error', {
+        title: i18n.translate('xpack.genAiSettings.save.error', {
           defaultMessage: 'Failed to save settings',
         }),
         text:
           error.message ??
-          i18n.translate('xpack.gen_ai_settings.save.error.text', {
+          i18n.translate('xpack.genAiSettings.save.error.text', {
             defaultMessage: 'Unknown error',
           }),
       });
-    },
-  });
-
-  const handleFieldChange: OnFieldChangeFn = (id, change) => {
-    if (!change) {
-      setUnsavedChanges((changes) => {
-        const { [id]: unsavedChange, ...rest } = changes;
-        return rest;
-      });
-      return;
+      throw error;
     }
-    setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
   };
-
-  function cleanUnsavedChanges() {
-    setUnsavedChanges({});
-  }
 
   const setValidationErrors = React.useCallback(
     (errors: ValidationError[] | ((current: ValidationError[]) => ValidationError[])) => {
@@ -248,13 +127,12 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
   );
 
   return {
-    fields: fieldsQuery.data ?? {},
+    fields,
     unsavedChanges,
     handleFieldChange,
-    saveAll: saveAllMutation.mutateAsync,
-    isSaving: saveAllMutation.isLoading || saveSingleSettingMutation.isLoading,
+    saveAll,
+    isSaving,
     cleanUnsavedChanges,
-    saveSingleSetting: saveSingleSettingMutation.mutateAsync,
     setValidationErrors,
   };
 };

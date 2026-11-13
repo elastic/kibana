@@ -20,6 +20,7 @@ export type {
   DataErrorsControl,
   QuickSearchVisorProps,
   RestorableStateProviderApi,
+  VisorNlResultHandler,
 } from '@kbn/esql-editor';
 export type { EsqlPluginSetup, EsqlPluginStart };
 

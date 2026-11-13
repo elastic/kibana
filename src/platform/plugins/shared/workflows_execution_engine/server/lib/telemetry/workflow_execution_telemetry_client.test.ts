@@ -81,6 +81,16 @@ describe('WorkflowExecutionTelemetryClient', () => {
     };
   };
 
+  /** Every composition and lineage field; a top-level execution reports none of them. */
+  const ALL_LINEAGE_FIELDS = [
+    'compositionDepth',
+    'executionChain',
+    'parentWorkflowId',
+    'parentWorkflowInvocation',
+  ];
+  const reportedFieldsAmong = (eventData: object, fields: readonly string[]): string[] =>
+    Object.keys(eventData).filter((key) => fields.includes(key));
+
   describe('reportWorkflowExecutionCompleted', () => {
     it('should report workflow execution completed event with all metadata', () => {
       const workflowExecution = createMockWorkflowExecution({
@@ -385,6 +395,68 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
     });
 
+    it('should report no lineage fields for top-level executions', () => {
+      const workflowExecution = createMockWorkflowExecution({ triggeredBy: 'manual' });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(reportedFieldsAmong(eventData, ALL_LINEAGE_FIELDS)).toEqual([]);
+    });
+
+    it('should include executionChain, and no flat lineage ids, for sub-workflow executions', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'workflow-step',
+        context: {
+          executionChain: [
+            { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
+          parentDepth: 1,
+          parentWorkflowExecutionId: 'parent-exec-id',
+          parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'sync',
+        },
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        executionChain: [
+          { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
+          { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+        ],
+        parentWorkflowId: 'parent-wf-id',
+      });
+    });
+
+    it('should omit executionChain for a sub-workflow execution without a stored chain', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'workflow-step',
+        context: {
+          parentDepth: 1,
+          parentWorkflowExecutionId: 'parent-exec-id',
+          parentWorkflowId: 'parent-wf-id',
+        },
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({ compositionDepth: 2, parentWorkflowId: 'parent-wf-id' });
+      expect(eventData).not.toHaveProperty('executionChain');
+    });
+
     it('should normalize event-driven trigger id to triggerType event and eventTriggerId', () => {
       const workflowExecution = createMockWorkflowExecution({
         triggeredBy: 'cases.caseCreated',
@@ -596,6 +668,59 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
     });
 
+    it('should report no lineage fields for failed top-level executions', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        status: ExecutionStatus.FAILED,
+        triggeredBy: 'scheduled',
+        error: {
+          message: 'Workflow failed',
+          type: 'ExecutionError',
+        },
+      });
+
+      client.reportWorkflowExecutionFailed({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(reportedFieldsAmong(eventData, ALL_LINEAGE_FIELDS)).toEqual([]);
+    });
+
+    it('should include executionChain, and no flat lineage ids, for failed sub-workflow executions', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        status: ExecutionStatus.FAILED,
+        triggeredBy: 'workflow-step',
+        context: {
+          executionChain: [
+            { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
+          parentDepth: 1,
+          parentWorkflowExecutionId: 'parent-exec-id',
+          parentWorkflowId: 'parent-wf-id',
+        },
+        error: {
+          message: 'Child failed',
+          type: 'ExecutionError',
+        },
+      });
+
+      client.reportWorkflowExecutionFailed({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        executionChain: [
+          { executionId: 'root-exec-id', invocation: 'async', workflowId: 'root-wf-id' },
+          { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+        ],
+        parentWorkflowId: 'parent-wf-id',
+      });
+    });
+
     it('should include token usage totals when failed execution usage is present', () => {
       const workflowExecution = createMockWorkflowExecution({
         status: ExecutionStatus.FAILED,
@@ -678,6 +803,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         eventChainDepth: 2,
         isTestRun: false,
         isManaged: false,
+        runAs: 'user',
         logTriggerEventsEnabled: true,
       });
     });
@@ -703,6 +829,28 @@ describe('WorkflowExecutionTelemetryClient', () => {
       expect(eventData).not.toHaveProperty('compositionDepth');
       expect(eventData).not.toHaveProperty('parentWorkflowId');
       expect(eventData).not.toHaveProperty('parentWorkflowInvocation');
+    });
+
+    it('should omit executionChain and the flat lineage ids from event-driven suppression telemetry', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'cases.updated',
+        status: ExecutionStatus.SKIPPED,
+        context: {
+          event: { timestamp: '2025-01-01T00:00:00.000Z', spaceId: 'default' },
+          executionChain: [
+            { executionId: 'root-exec-id', invocation: 'sync', workflowId: 'root-wf-id' },
+          ],
+          parentWorkflowExecutionId: 'parent-exec-id',
+        },
+      });
+
+      client.reportEventDrivenExecutionSuppressed({
+        workflowExecution,
+        logTriggerEventsEnabled: false,
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).not.toHaveProperty('executionChain');
     });
 
     it('should include managed workflow execution fields when present', () => {
@@ -802,6 +950,54 @@ describe('WorkflowExecutionTelemetryClient', () => {
         cancellationReason: 'Parent cancelled',
       });
     });
+
+    it('should report no lineage fields for cancelled top-level executions', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        status: ExecutionStatus.CANCELLED,
+        triggeredBy: 'manual',
+        cancellationReason: 'User cancelled',
+        cancelledAt: '2024-01-01T00:00:30.000Z',
+      });
+
+      client.reportWorkflowExecutionCancelled({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(reportedFieldsAmong(eventData, ALL_LINEAGE_FIELDS)).toEqual([]);
+    });
+
+    it('should include executionChain, and no flat lineage ids, for cancelled sub-workflow executions', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        status: ExecutionStatus.CANCELLED,
+        triggeredBy: 'workflow-step',
+        context: {
+          executionChain: [
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
+          parentDepth: 0,
+          parentWorkflowExecutionId: 'parent-exec-id',
+          parentWorkflowId: 'parent-wf-id',
+        },
+        cancellationReason: 'Parent cancelled',
+        cancelledAt: '2024-01-01T00:00:30.000Z',
+      });
+
+      client.reportWorkflowExecutionCancelled({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        executionChain: [
+          { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+        ],
+        compositionDepth: 1,
+        parentWorkflowId: 'parent-wf-id',
+      });
+    });
   });
 
   describe('execution metadata extraction', () => {
@@ -852,6 +1048,34 @@ describe('WorkflowExecutionTelemetryClient', () => {
         hasRetries: true, // Same step ID executed twice
         uniqueStepIdsExecuted: 1,
       });
+    });
+
+    it('should report runAs user without runAsInherited for an execution with no service account', () => {
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution: createMockWorkflowExecution(),
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({ runAs: 'user' });
+      expect(eventData).not.toHaveProperty('runAsInherited');
+    });
+
+    it("should report runAs service_account for an execution bound by the workflow's own settings.run_as", () => {
+      client.reportWorkflowExecutionFailed({
+        workflowExecution: createMockWorkflowExecution({
+          status: ExecutionStatus.FAILED,
+          workflowDefinition: {
+            steps: [],
+            settings: { run_as: 'sa-1' },
+          } as Partial<WorkflowYaml> as WorkflowYaml,
+          effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+        }),
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({ runAs: 'service_account', runAsInherited: false });
     });
   });
 

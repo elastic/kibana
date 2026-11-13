@@ -23,6 +23,10 @@ interface EntityAnalyticsReadPrivilegesCalloutProps {
   entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
   leadGenerationPrivileges?: EntityAnalyticsPrivileges;
   anomalyPrivileges?: EntityAnalyticsPrivileges;
+  /** The alerts index privileges, for surfaces that read alerts. */
+  alertsIndexPrivileges?: IndexPrivileges;
+  /** The Security > Alerts Kibana feature privilege is missing, for surfaces that read alerts. */
+  alertsFeatureMissing?: boolean;
   /**
    * Identifies the surface rendering the callout. Used as the dismissal storage
    * namespace and as the message id prefix, so ids stay unique and dismissals
@@ -51,6 +55,8 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
     entityEnginePrivileges,
     leadGenerationPrivileges,
     anomalyPrivileges,
+    alertsIndexPrivileges,
+    alertsFeatureMissing = false,
     id,
     dismissible = true,
   }: EntityAnalyticsReadPrivilegesCalloutProps) => {
@@ -60,10 +66,12 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
         ...getAnyMissingReadPrivileges(entityEnginePrivileges),
         ...getAnyMissingReadPrivileges(leadGenerationPrivileges),
         ...getAnyMissingReadPrivileges(anomalyPrivileges),
+        ...getIndexMissingReadPrivileges(alertsIndexPrivileges),
       ];
 
       const featurePrivileges: MissingFeaturePrivileges[] = [
         ...getAnomalyMissingKibanaPrivileges(anomalyPrivileges),
+        ...(alertsFeatureMissing ? ALERTS_MISSING_KIBANA_PRIVILEGES : []),
       ];
 
       if (indexPrivileges.length === 0 && featurePrivileges.length === 0) return null;
@@ -86,6 +94,8 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
       entityEnginePrivileges,
       leadGenerationPrivileges,
       anomalyPrivileges,
+      alertsIndexPrivileges,
+      alertsFeatureMissing,
     ]);
 
     if (!message) return null;
@@ -101,12 +111,12 @@ EntityAnalyticsReadPrivilegesCallout.displayName = 'EntityAnalyticsPrivilegesCal
 
 const READ_RELEVANT_PRIVILEGES = new Set(['read', 'view_index_metadata']);
 
-const getAnyMissingReadPrivileges = (
-  privileges: EntityAnalyticsPrivileges | undefined
-): MissingIndexPrivileges[] => {
-  if (!privileges) return [];
+type IndexPrivileges = Readonly<Record<string, Readonly<Record<string, boolean>>>>;
 
-  return Object.entries(privileges.privileges.elasticsearch.index ?? {})
+const getIndexMissingReadPrivileges = (
+  index: IndexPrivileges | undefined
+): MissingIndexPrivileges[] =>
+  Object.entries(index ?? {})
     .map(
       ([indexName, privs]): MissingIndexPrivileges => [
         indexName,
@@ -116,9 +126,16 @@ const getAnyMissingReadPrivileges = (
       ]
     )
     .filter(([, missingPrivs]) => missingPrivs.length > 0);
-};
+
+const getAnyMissingReadPrivileges = (
+  privileges: EntityAnalyticsPrivileges | undefined
+): MissingIndexPrivileges[] =>
+  getIndexMissingReadPrivileges(privileges?.privileges.elasticsearch.index);
 
 const ML_KIBANA_READ_ACTION = 'ui:ml/canGetJobs';
+
+/** The role editor lists the alerts privileges under the "Alerts" feature. */
+const ALERTS_MISSING_KIBANA_PRIVILEGES: MissingFeaturePrivileges[] = [['Alerts', ['read']]];
 
 const getAnomalyMissingKibanaPrivileges = (
   privileges: EntityAnalyticsPrivileges | undefined

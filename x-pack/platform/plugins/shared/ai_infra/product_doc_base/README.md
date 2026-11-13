@@ -118,6 +118,20 @@ Both product documentation and Security Labs artifacts are hosted on the same CD
 xpack.productDocBase.artifactRepositoryUrl: 'https://kibana-knowledge-base-artifacts.elastic.co'
 ```
 
+### Serverless: bundled artifacts
+
+Serverless distributions ship the `latest` product documentation artifacts for every product (plus the newest Security Labs artifact), for both inference IDs serverless resolves the default to (`.jina-embeddings-v5-text-small` and EIS ELSER, i.e. the unsuffixed artifacts), inside the image, under `target/bundled_artifacts` in this plugin, together with an `index.xml` in the same `ListBucketResult` format as the remote repository. The build task `BundleProductDocArtifacts` (`src/dev/build/tasks/product_docs`) downloads them from the storage bucket for serverless platforms only; stateful distributions are unaffected.
+
+On serverless the plugin uses that directory as a `file://` artifact repository and never contacts the remote repository; documentation is refreshed when a new image is rolled out. The repository in use is logged at startup. Without a bundle (local serverless development) the plugin falls back to the remote repository. A non-default `xpack.productDocBase.artifactRepositoryUrl` always takes precedence over the bundle; to force the default remote repository instead of the bundle, set:
+
+```yaml
+xpack.productDocBase.useBundledArtifacts: false
+```
+A `file://` URL pointing at a directory with a bucket `index.xml` and the zips is also accepted. Scout and FTR test
+servers default to the tiny stub repository shipped in `@kbn/test-kibana-server` (`PRODUCT_DOC_STUB_REPOSITORY_URL`)
+so that CI never downloads the real artifacts; a suite that needs the real documentation must set the CDN URL in its
+own config.
+
 Artifact naming conventions:
 
 - Product docs: `kb-product-doc-{product}-{version}.zip`
@@ -125,14 +139,44 @@ Artifact naming conventions:
 
 ## Run tests
 
-Set up test server
+### Unit tests
+
+Unit tests cover the artifact-builder processing pipeline (`processDocuments`) — no running
+Kibana or Elasticsearch required.
+
+```
+node scripts/jest x-pack/packages/ai-infra/product-doc-artifact-builder/src/tasks/process_documents.test.ts
+```
+
+### Functional tests
+
+Functional tests live in the `functional_gen_ai` inference suite. There are two suites:
+
+| Suite | `--grep` pattern | What it tests |
+|---|---|---|
+| Installation lifecycle | `product docs base` | install / update / uninstall flows for ELSER and Jina |
+| Search quality | `product docs search quality` | document counts + query relevance after install |
+
+The installation suite tests both ELSER (always available) and Jina via EIS (requires Cloud
+Connected Mode). The Jina tests read `KIBANA_EIS_CCM_API_KEY` from the environment — set by CI
+from Vault, or locally from your team's secret store. Without it, only the ELSER tests pass; the
+`Jina (via EIS)` describe block fails immediately.
+
+**Step 1 — start the test server** (terminal 1):
 
 ```
 node scripts/functional_tests_server.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts
 ```
 
-Run tests on different terminal
+**Step 2 — run a suite** (terminal 2):
 
 ```
-node scripts/functional_tests_server.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs base'
+# Installation lifecycle only
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs base'
+
+# Search quality only
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs search quality'
+
+# Both suites
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs'
 ```

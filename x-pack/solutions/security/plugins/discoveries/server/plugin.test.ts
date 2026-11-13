@@ -72,7 +72,7 @@ const createMockRuleRegistry = () => ({
   ruleDataService: {
     initializeIndex: jest.fn().mockReturnValue({
       getReader: jest.fn(),
-      getWriter: jest.fn(),
+      getWriter: jest.fn().mockResolvedValue({}),
     }),
   },
 });
@@ -437,6 +437,45 @@ describe('DiscoveriesPlugin', () => {
       });
     });
 
+    describe('ad-hoc Attack Discovery index', () => {
+      it('installs the index for the default space during setup', () => {
+        const ruleRegistry = createMockRuleRegistry();
+        const plugin = new DiscoveriesPlugin(createPluginInitializerContext());
+
+        plugin.setup(
+          coreMock.createSetup(),
+          createPluginSetupDeps({
+            ruleRegistry: ruleRegistry as unknown as DiscoveriesPluginSetupDeps['ruleRegistry'],
+          })
+        );
+
+        const dataClient = ruleRegistry.ruleDataService.initializeIndex();
+        expect(dataClient.getWriter).toHaveBeenCalledWith({ namespace: 'default' });
+      });
+
+      it('logs and continues when the default space index cannot be installed', async () => {
+        const ruleRegistry = createMockRuleRegistry();
+        const dataClient = ruleRegistry.ruleDataService.initializeIndex();
+        dataClient.getWriter.mockRejectedValue(new Error('writes disabled'));
+        const context = createPluginInitializerContext();
+        const logger = context.logger.get();
+        const plugin = new DiscoveriesPlugin(context);
+
+        plugin.setup(
+          coreMock.createSetup(),
+          createPluginSetupDeps({
+            ruleRegistry: ruleRegistry as unknown as DiscoveriesPluginSetupDeps['ruleRegistry'],
+          })
+        );
+
+        await flushPromises();
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Unable to pre-create ad-hoc Attack Discovery index for the default space: writes disabled'
+        );
+      });
+    });
+
     describe('agent builder registration', () => {
       let mockAgentBuilder: ReturnType<typeof createMockAgentBuilder>;
 
@@ -527,6 +566,7 @@ describe('DiscoveriesPlugin', () => {
         expect(installStatic).toHaveBeenCalledTimes(1);
         expect(installStatic).toHaveBeenCalledWith({
           enabled: true,
+          logger: expect.anything(),
           workflowsExtensions: mockWorkflowsExtensionsStart,
         });
       });

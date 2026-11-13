@@ -11,8 +11,27 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
 
 import { CpsPlugin } from './plugin';
+import { CPSManager } from './services/cps_manager';
+
+jest.mock('./services/cps_manager');
+
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('CpsPlugin (public)', () => {
+  const mockLinkedProjects = (hasLinkedProjects: boolean) => {
+    jest.mocked(CPSManager).mockImplementation(
+      () =>
+        ({
+          whenReady: () => Promise.resolve(),
+          hasLinkedProjects: () => hasLinkedProjects,
+        } as unknown as CPSManager)
+    );
+  };
+
+  beforeEach(() => {
+    mockLinkedProjects(false);
+  });
+
   const buildPlugin = (cpsEnabled: boolean) => {
     const initContext = coreMock.createPluginInitializerContext({ cpsEnabled });
     return new CpsPlugin(initContext);
@@ -57,6 +76,29 @@ describe('CpsPlugin (public)', () => {
 
       expect(start.cpsManager).toBeUndefined();
       expect(start.isTierEligible).toBe(true);
+    });
+
+    it('registers the project picker when there are linked projects', async () => {
+      mockLinkedProjects(true);
+      const plugin = buildPlugin(true);
+      plugin.setup(coreMock.createSetup());
+      const coreStart = coreMock.createStart();
+
+      plugin.start(coreStart, {});
+      await flushPromises();
+
+      expect(coreStart.chrome.controls.projectPicker.set).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not register the project picker without linked projects', async () => {
+      const plugin = buildPlugin(true);
+      plugin.setup(coreMock.createSetup());
+      const coreStart = coreMock.createStart();
+
+      plugin.start(coreStart, {});
+      await flushPromises();
+
+      expect(coreStart.chrome.controls.projectPicker.set).not.toHaveBeenCalled();
     });
   });
 });

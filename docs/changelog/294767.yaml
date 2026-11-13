@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/294767
-issues:
-- https://github.com/elastic/security-team/issues/18063
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: Show a YAML or graph preview in the `workflow.yaml` attachment canvas

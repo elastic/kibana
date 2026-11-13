@@ -9,8 +9,13 @@
 
 import { Query } from '@elastic/eui';
 import type { ParsedQuery, UrlStateSlices } from './types';
-import type { SortState, SortDirectionsByField } from './url_codec';
-
+import {
+  isAllowedSort,
+  isSortDirection,
+  type SortDirection,
+  type SortDirectionsByField,
+} from '../sorting';
+import { NO_CREATOR_USER_FILTER } from '../../item';
 const LEGACY_KEYS = ['s', 'title', 'filter', 'sort', 'sortdir', 'created_by', 'favorites'] as const;
 
 export interface LegacyDecodeResult {
@@ -51,6 +56,16 @@ const resolveLegacySortField = (
   return undefined;
 };
 
+/**
+ * Legacy tables persisted the no-creator selection as `no-user`, while the provider keys
+ * creator-less items with {@link NO_CREATOR_USER_FILTER}. Without translating it, an old
+ * bookmarked URL filters on a creator that matches nothing.
+ */
+const LEGACY_NO_CREATOR_FILTER = 'no-user';
+
+const toCreatorKey = (user: string): string =>
+  user === LEGACY_NO_CREATOR_FILTER ? NO_CREATOR_USER_FILTER : user;
+
 const buildQueryText = ({
   freeText,
   createdBy,
@@ -63,7 +78,7 @@ const buildQueryText = ({
   let query = Query.parse('');
 
   for (const user of createdBy) {
-    query = query.addSimpleFieldValue('createdBy', user);
+    query = query.addSimpleFieldValue('createdBy', toCreatorKey(user));
   }
 
   if (favorites) {
@@ -115,9 +130,10 @@ export const decodeLegacyParams = (
     const field = resolveLegacySortField(legacySort, sortDirectionsByField);
     const directionParam = firstString(params.sortdir);
     const defaultDirection = legacySort === 'title' ? 'asc' : 'desc';
-    const direction: SortState['direction'] =
-      directionParam === 'asc' || directionParam === 'desc' ? directionParam : defaultDirection;
-    if (field && sortDirectionsByField.get(field)?.has(direction)) {
+    const direction: SortDirection = isSortDirection(directionParam)
+      ? directionParam
+      : defaultDirection;
+    if (field && isAllowedSort(sortDirectionsByField, { field, direction })) {
       state.sort = { field, direction };
     } else {
       onUnknownValue?.('sort', legacySort);

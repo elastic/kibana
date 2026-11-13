@@ -11,9 +11,14 @@ import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import { getSkillsInstructions, getRelevantSkillsPointerInstructions } from './utils/skills';
 import { renderVisibleContext } from '../utils/visible_context';
-import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
+import {
+  attachmentToolsInstructions,
+  attachmentToolsUnavailableNotice,
+  renderAttachmentPrompt,
+} from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { getFileSystemInstructions } from './utils/filestore';
+import { getDynamicToolsInstructions } from './utils/dynamic_tools';
 import { getAiIndicesInstructions } from './utils/ai_indices';
 import { getDeploymentInstructions } from './utils/deployment';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
@@ -95,8 +100,26 @@ ${fieldLines}
 `;
 };
 
+/**
+ * The `## CUSTOM RENDERING` section, written only when something remains under it. Inline
+ * attachment rendering is taught only to agents that have the attachment tools.
+ */
+const getCustomRenderingSection = (attachmentTools: boolean, renderersPrompt: string): string => {
+  if (attachmentTools) {
+    return `## CUSTOM RENDERING\n\n${renderAttachmentPrompt()}\n\n${renderersPrompt}`;
+  }
+  if (!renderersPrompt) {
+    return '';
+  }
+  return `## CUSTOM RENDERING\n\n${renderersPrompt}`;
+};
+
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions, aiIndexCatalog },
+  configuration: {
+    instructions: customInstructions,
+    aiIndexCatalog,
+    capabilities: { attachmentTools },
+  },
   outputSchema,
   skills,
   spaceId,
@@ -118,6 +141,11 @@ const getAgentSystemMessage = async ({
     conversationMetadata,
     conversationTemplates,
     conversationMetadataWritable
+  );
+
+  const customRenderingSection = getCustomRenderingSection(
+    attachmentTools,
+    renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })
   );
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
@@ -172,10 +200,13 @@ Assume users can't see most tool calls or thinking - only your text output.
 
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.
-- Use custom rendering when appropriate.
-- Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
+${
+  customRenderingSection ? '- Use custom rendering when appropriate.\n' : ''
+}- Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
 
 ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
+
+${experimentalFeatures.dynamicTools ? getDynamicToolsInstructions() : ''}
 
 ${
   experimentalFeatures.skills
@@ -199,16 +230,19 @@ ${customInstructions}
 
 ${structuredOutputDescription(outputSchema)}
 
-${attachmentToolsInstructions()}
+${attachmentTools ? attachmentToolsInstructions() : attachmentToolsUnavailableNotice()}
 
-## SML @ REFERENCES
-When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
-- For each distinct entry id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
-- Skip \`sml_attach\` for an entry id only if a **previous** turn already ran \`sml_attach\` successfully for that entry id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML entry ids.
-- You may pass multiple entry ids in one \`sml_attach\` call when the user referenced several assets.
+## SML '#' REFERENCES
+When the user picks from the # menu, the message includes markdown links: \`[#label](sml://ENTRY_ID)\`. The items they point to are attached to the conversation automatically, and the description of each attachment is the link label without the \`#\`.
+- Use those attachments directly, matching them to the links by description, and do not look the items up again.
+${
+  experimentalFeatures.sml
+    ? `- Only if a linked item is not among the conversation attachments, call \`sml_attach\` with its entry id: the URL-decoded substring after \`sml://\`, the same as \`entry_id\` from \`sml_search\`.
 
 ## CONNECTOR DISCOVERY
-This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.
+This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.`
+    : ''
+}
 
 ## CONNECTOR ACTION HINTS
 
@@ -218,11 +252,7 @@ Sub-actions listed in a connector attachment may carry a bracketed scope tag:
 - **[DESTROY]** — the action overwrites, updates, or deletes existing external data. Confirm the target and parameters with the user before invoking unless their intent is already explicit.
 - No tag — the action is read-only and has no external side effects.
 
-## CUSTOM RENDERING
-
-${renderAttachmentPrompt()}
-
-${renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })}
+${customRenderingSection}
 
 ${getDeploymentInstructions(deployment)}`);
 };

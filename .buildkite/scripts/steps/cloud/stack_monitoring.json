@@ -1,16 +1,15 @@
 {
-  "prune_orphans": false,
   "settings": {
     "observability": {
       "metrics": {
         "destination": {
-          "deployment_id": null,
+          "deployment_id": "self",
           "ref_id": "main-elasticsearch"
         }
       },
       "logging": {
         "destination": {
-          "deployment_id": null,
+          "deployment_id": "self",
           "ref_id": "main-elasticsearch"
         }
       }

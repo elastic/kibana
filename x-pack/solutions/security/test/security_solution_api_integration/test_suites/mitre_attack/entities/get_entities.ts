@@ -16,8 +16,12 @@ import {
   createMitreTactic,
   createMitreTechnique,
   createMitreSubtechnique,
+  createAtlasMitreTactic,
+  createAtlasMitreTechnique,
+  createAtlasMitreSubtechnique,
   DEFAULT_MOCK_FRAMEWORK_VERSION,
   OLDER_MOCK_FRAMEWORK_VERSION,
+  ATLAS_MOCK_FRAMEWORK_VERSION,
 } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -63,24 +67,95 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.subtechniques.length).to.eql(1);
       });
 
-      it('defaults to the enterprise framework', async () => {
+      it('defaults to the enterprise framework and returns only enterprise entities', async () => {
         const mockTactic = createMitreTactic();
-        await seedMitreEntities(es, [mockTactic]);
+        const atlasTactic = createAtlasMitreTactic();
+        await seedMitreEntities(es, [mockTactic, atlasTactic]);
 
         const { body, status } = await mitreAttackApi.getEntities();
 
         expect(status).to.eql(200);
         expect(body.framework).to.eql('enterprise');
+        expect(body.framework_version).to.eql(mockTactic.framework_version);
+        expect(body.tactics.map((t: { id: string }) => t.id)).to.eql([mockTactic.id]);
+        for (const entity of [...body.tactics, ...body.techniques, ...body.subtechniques]) {
+          expect(entity.framework).to.eql('enterprise');
+        }
       });
 
-      it('defaults to framework_version matching the latest seeded version', async () => {
-        const mockTactic = createMitreTactic({ framework_version: '30.0' });
-        await seedMitreEntities(es, [mockTactic]);
+      it('defaults to framework_version matching the latest seeded version of the requested framework', async () => {
+        // Enterprise is seeded at 99.0 and 98.0, atlas at 97.0: the resolved
+        // version must be the highest one PER framework, not across the index.
+        const newerTactic = createMitreTactic({
+          framework_version: DEFAULT_MOCK_FRAMEWORK_VERSION,
+        });
+        const olderTactic = createMitreTactic({ framework_version: OLDER_MOCK_FRAMEWORK_VERSION });
+        const atlasTactic = createAtlasMitreTactic();
+        await seedMitreEntities(es, [newerTactic, olderTactic, atlasTactic]);
 
-        const { body, status } = await mitreAttackApi.getEntities();
+        const [enterpriseResp, atlasResp] = await Promise.all([
+          mitreAttackApi.getEntities(),
+          mitreAttackApi.getEntities({ framework: 'atlas' }),
+        ]);
+
+        expect(enterpriseResp.status).to.eql(200);
+        expect(enterpriseResp.body.framework).to.eql('enterprise');
+        expect(enterpriseResp.body.framework_version).to.eql(DEFAULT_MOCK_FRAMEWORK_VERSION);
+
+        expect(atlasResp.status).to.eql(200);
+        expect(atlasResp.body.framework).to.eql('atlas');
+        expect(atlasResp.body.framework_version).to.eql(ATLAS_MOCK_FRAMEWORK_VERSION);
+      });
+    });
+
+    describe('framework filtering', () => {
+      it('returns only atlas entities when framework=atlas is requested alongside seeded enterprise entities', async () => {
+        const enterpriseTactic = createMitreTactic();
+        const enterpriseTechnique = createMitreTechnique({ tactic_ids: [enterpriseTactic.id] });
+        const enterpriseSubtechnique = createMitreSubtechnique({
+          technique_id: enterpriseTechnique.id,
+          tactic_ids: [enterpriseTactic.id],
+        });
+        const atlasTactic = createAtlasMitreTactic();
+        const atlasTechnique = createAtlasMitreTechnique({ tactic_ids: [atlasTactic.id] });
+        const atlasSubtechnique = createAtlasMitreSubtechnique({
+          technique_id: atlasTechnique.id,
+          tactic_ids: [atlasTactic.id],
+        });
+        await seedMitreEntities(es, [
+          enterpriseTactic,
+          enterpriseTechnique,
+          enterpriseSubtechnique,
+          atlasTactic,
+          atlasTechnique,
+          atlasSubtechnique,
+        ]);
+
+        const { body, status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
 
         expect(status).to.eql(200);
-        expect(body.framework_version).to.eql(mockTactic.framework_version);
+        expect(body.framework).to.eql('atlas');
+        expect(body.framework_version).to.eql(ATLAS_MOCK_FRAMEWORK_VERSION);
+        expect(body.tactics.map((t: { id: string }) => t.id)).to.eql([atlasTactic.id]);
+        expect(body.techniques.map((t: { id: string }) => t.id)).to.eql([atlasTechnique.id]);
+        expect(body.subtechniques.map((t: { id: string }) => t.id)).to.eql([atlasSubtechnique.id]);
+        for (const entity of [...body.tactics, ...body.techniques, ...body.subtechniques]) {
+          expect(entity.framework).to.eql('atlas');
+          expect(entity.framework_version).to.eql(ATLAS_MOCK_FRAMEWORK_VERSION);
+          expect(entity.reference.startsWith('https://atlas.mitre.org/')).to.eql(true);
+        }
+      });
+
+      it('returns 200 with empty buckets for framework=atlas when only enterprise entities exist', async () => {
+        await seedMitreEntities(es, [createMitreTactic()]);
+
+        const { body, status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
+
+        expect(status).to.eql(200);
+        expect(body.framework).to.eql('atlas');
+        expect(body.tactics).to.eql([]);
+        expect(body.techniques).to.eql([]);
+        expect(body.subtechniques).to.eql([]);
       });
     });
 
@@ -427,6 +502,43 @@ export default ({ getService }: FtrProviderContext) => {
         }
       });
 
+      it('resolves the latest version independently per framework', async () => {
+        // Enterprise 99.0 + 98.0 and atlas 97.0 coexist in the index. The
+        // enterprise call must resolve 99.0 and the atlas call 97.0 — the
+        // higher enterprise version must not leak into the atlas resolution.
+        const newerEnterpriseTactic = createMitreTactic({
+          framework_version: DEFAULT_MOCK_FRAMEWORK_VERSION,
+        });
+        const olderEnterpriseTactic = createMitreTactic({
+          framework_version: OLDER_MOCK_FRAMEWORK_VERSION,
+        });
+        const atlasTactic = createAtlasMitreTactic();
+        await seedMitreEntities(es, [newerEnterpriseTactic, olderEnterpriseTactic, atlasTactic]);
+
+        const [enterpriseResp, atlasResp] = await Promise.all([
+          mitreAttackApi.getEntities({ framework: 'enterprise' }),
+          mitreAttackApi.getEntities({ framework: 'atlas' }),
+        ]);
+
+        expect(enterpriseResp.status).to.eql(200);
+        expect(enterpriseResp.body.framework).to.eql('enterprise');
+        expect(enterpriseResp.body.framework_version).to.eql(DEFAULT_MOCK_FRAMEWORK_VERSION);
+        expect(enterpriseResp.body.tactics.map((t: { id: string }) => t.id)).to.eql([
+          newerEnterpriseTactic.id,
+        ]);
+        for (const entity of enterpriseResp.body.tactics) {
+          expect(entity.framework_version).to.eql(DEFAULT_MOCK_FRAMEWORK_VERSION);
+        }
+
+        expect(atlasResp.status).to.eql(200);
+        expect(atlasResp.body.framework).to.eql('atlas');
+        expect(atlasResp.body.framework_version).to.eql(ATLAS_MOCK_FRAMEWORK_VERSION);
+        expect(atlasResp.body.tactics.map((t: { id: string }) => t.id)).to.eql([atlasTactic.id]);
+        for (const entity of atlasResp.body.tactics) {
+          expect(entity.framework_version).to.eql(ATLAS_MOCK_FRAMEWORK_VERSION);
+        }
+      });
+
       it('returns the explicit version data when framework_version is specified', async () => {
         const mockTactic = createMitreTactic({ framework_version: OLDER_MOCK_FRAMEWORK_VERSION });
         const secondTactic = createMitreTactic({
@@ -525,7 +637,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('request validation', () => {
       it('rejects an unsupported framework value with 400', async () => {
-        const { status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
+        const { status } = await mitreAttackApi.getEntities({ framework: 'mobile' });
         expect(status).to.eql(400);
       });
 

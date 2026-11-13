@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import CONTINUOUS_ONBOARDING_YAML from './continuous_onboarding.yaml';
-import FEATURES_IDENTIFICATION_YAML from './features_identification.yaml';
-import ONBOARDING_YAML from './onboarding.yaml';
-import QUERIES_GENERATION_YAML from './queries_generation.yaml';
-import SYNC_YAML from './sync.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
   'system-streams-ki-features-identification';
@@ -32,12 +28,14 @@ const SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT = {
   enablement: 'enforced',
 } as const;
 
-// The continuous onboarding workflow is installed disabled and toggled on/off
-// by the user via the continuous KI extraction setting.
-// enablement: 'restorable' — the user's enabled/disabled choice is preserved
-// across upgrades instead of being reset from the YAML.
-const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT = {
-  lifecycle: 'static',
+// The continuous onboarding and sync workflows are installed per space on
+// demand, with the space id as the workflow id suffix.
+// lifecycle: 'dynamic' — instances are created and removed at runtime, so
+// startup never treats them as orphans.
+// enablement: 'restorable' — the enabled/disabled choice is preserved across
+// upgrades instead of being reset from the YAML.
+const SIGNIFICANT_EVENTS_KI_PER_SPACE_WORKFLOW_MANAGEMENT = {
+  lifecycle: 'dynamic',
   versionStrategy: 'auto',
   enablement: 'restorable',
 } as const;
@@ -45,47 +43,72 @@ const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT = {
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 4,
+  version: 6,
   billable: false,
-  yaml: FEATURES_IDENTIFICATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'features_identification.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 2,
+  version: 4,
   billable: false,
-  yaml: QUERIES_GENERATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'queries_generation.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 7,
+  version: 9,
   billable: false,
-  yaml: ONBOARDING_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'onboarding.yaml');
+  },
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 3,
+  version: 4,
   billable: false,
-  yaml: CONTINUOUS_ONBOARDING_YAML,
-  management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'continuous_onboarding.yaml');
+  },
+  management: SIGNIFICANT_EVENTS_KI_PER_SPACE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
-// The sync (groundedness) sweep workflow is installed disabled and enabled on
-// demand by SyncWorkflowService, so it uses the same restorable management as
-// continuous onboarding to preserve the enabled/disabled choice across upgrades.
+// The sync (groundedness) sweep workflow is installed per space and enabled on
+// demand by SyncWorkflowService, so it shares the continuous onboarding management.
 export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   pluginId: 'significantEvents',
+  version: 2,
+  billable: false,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'sync.yaml');
+  },
+  management: SIGNIFICANT_EVENTS_KI_PER_SPACE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition;
+
+/** Durable cleanup and onboarding scheduling after source catalog changes. */
+export const SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID =
+  'system-nightshift-source-reconciliation';
+
+/** Queues source changes so a later edit cannot be dropped behind a running cleanup. */
+export const SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
+  pluginId: 'significantEvents',
   version: 1,
   billable: false,
-  yaml: SYNC_YAML,
-  management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'source_reconciliation.yaml');
+  },
+  management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

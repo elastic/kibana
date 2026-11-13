@@ -37,6 +37,7 @@ const buildToolContext = (
       toolCallId: 'call-1',
       callSource,
     },
+    events: { sendUiEvent: jest.fn() },
   } as unknown as ToolHandlerContext);
 
 const buildRegistry = (
@@ -66,12 +67,12 @@ describe('manageAttachmentsTool', () => {
     expect(tool.id).toBe('platform.core.cases.manage_attachments');
   });
 
-  it('has write (non-destructive) annotations', () => {
+  it('has destructive write annotations', () => {
     const tool = buildTool(buildRegistry([]), true);
     expect(tool.annotations).toEqual({
       title: 'Manage Case Attachments',
       readOnlyHint: false,
-      destructiveHint: false,
+      destructiveHint: true,
       idempotentHint: false,
       openWorldHint: false,
     });
@@ -122,6 +123,66 @@ describe('manageAttachmentsTool', () => {
     ).rejects.toThrow(/no authorable attachment types/i);
   });
 
+  it('deletes attachments through the cases client without emitting a case', async () => {
+    const attachments = buildMockAttachments();
+    const tool = buildTool(buildRegistry([]), true);
+
+    const result = await tool.handler(
+      { mode: 'delete_attachments', case_id: 'case-1', ids: ['a-1', 'a-2'] } as never,
+      buildToolContext(attachments)
+    );
+
+    expect(casesClient.attachments.bulkDelete).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      savedObjectIds: ['a-1', 'a-2'],
+    });
+    expect(attachments.add).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [{ type: 'other', data: { case_id: 'case-1', ids: ['a-1', 'a-2'] } }],
+    });
+  });
+
+  it('passes include_related to the cases client', async () => {
+    const tool = buildTool(buildRegistry([]), true);
+
+    await tool.handler(
+      {
+        mode: 'delete_attachments',
+        case_id: 'case-1',
+        ids: ['a-1'],
+        include_related: false,
+      } as never,
+      buildToolContext()
+    );
+
+    expect(casesClient.attachments.bulkDelete).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      savedObjectIds: ['a-1'],
+      includeRelated: false,
+    });
+  });
+
+  it('throws when a deletion fails', async () => {
+    casesClient.attachments.bulkDelete.mockRejectedValue(new Error('Forbidden'));
+    const tool = buildTool(buildRegistry([]), true);
+
+    await expect(
+      tool.handler(
+        { mode: 'delete_attachments', case_id: 'case-1', ids: ['a-1'] } as never,
+        buildToolContext()
+      )
+    ).rejects.toThrow('Attachments could not be deleted on case "case-1": a-1. Reason: Forbidden');
+  });
+
+  it('rejects delete_attachments without ids before calling the cases client', async () => {
+    const tool = buildTool(buildRegistry([]), true);
+
+    await expect(
+      tool.handler({ mode: 'delete_attachments', case_id: 'case-1' } as never, buildToolContext())
+    ).rejects.toThrow(/ids/);
+    expect(casesClient.attachments.bulkDelete).not.toHaveBeenCalled();
+  });
+
   it('bulk-creates attachments and emits a case attachment when enabled', async () => {
     const theCase = {
       id: 'case-1',
@@ -139,7 +200,7 @@ describe('manageAttachmentsTool', () => {
       updated_at: null,
     };
     casesClient.cases.get.mockResolvedValue(theCase as never);
-    casesClient.attachments.bulkCreate.mockResolvedValue(theCase as never);
+    casesClient.attachments.bulkCreateAndGetCase.mockResolvedValue(theCase as never);
 
     const attachments = buildMockAttachments();
     const tool = buildTool(buildRegistry([{ id: 'comment', schema: commentSchema }]), true);
@@ -152,7 +213,7 @@ describe('manageAttachmentsTool', () => {
       buildToolContext(attachments)
     );
 
-    expect(casesClient.attachments.bulkCreate).toHaveBeenCalledWith({
+    expect(casesClient.attachments.bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [{ type: 'comment', data: { content: 'hi' }, owner: 'securitySolution' }],
     });
@@ -166,9 +227,10 @@ describe('manageAttachmentsTool', () => {
     async (callSource) => {
       const theCase = { id: 'case-1', title: 'Test Case', owner: 'securitySolution' };
       casesClient.cases.get.mockResolvedValue(theCase as never);
-      casesClient.attachments.bulkCreate.mockResolvedValue(theCase as never);
+      casesClient.attachments.bulkCreateAndGetCase.mockResolvedValue(theCase as never);
 
       const attachments = buildMockAttachments();
+      const toolContext = buildToolContext(attachments, callSource);
       const tool = buildTool(buildRegistry([{ id: 'comment', schema: commentSchema }]), true);
       const result = await tool.handler(
         {
@@ -176,11 +238,12 @@ describe('manageAttachmentsTool', () => {
           case_id: 'case-1',
           attachments: [{ type: 'comment', data: { content: 'hi' } }],
         } as never,
-        buildToolContext(attachments, callSource)
+        toolContext
       );
 
-      expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(casesClient.attachments.bulkCreateAndGetCase).toHaveBeenCalledTimes(1);
       expect(attachments.add).not.toHaveBeenCalled();
+      expect(toolContext.events.sendUiEvent).not.toHaveBeenCalled();
       const { results } = result as unknown as {
         results: Array<{ data: Record<string, unknown> }>;
       };

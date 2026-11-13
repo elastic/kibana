@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
+  ChatTriggerMode,
   Conversation,
   ConversationRound,
   ConversationRoundAuthor,
@@ -17,6 +18,7 @@ import type {
   AgentExecutionMode,
   AutoApprovedApi,
   ChatEvent,
+  EventActor,
   ConversationWriteSource,
   ExecutionStatus,
   InteractivityConfig,
@@ -28,6 +30,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
+  ModelSource,
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
@@ -40,7 +43,6 @@ import type {
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
-  TodoStateManager,
   IFilesystemService,
   IBashService,
   ConversationTemplatesService,
@@ -59,11 +61,17 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
-  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  /**
+   * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a
+   * `metadata_updated` activity event attributed via `options.activity` (default: current user).
+   */
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: { source: ConversationWriteSource }
+    options: {
+      source: ConversationWriteSource;
+      activity?: { actor?: EventActor; execution_id?: string };
+    }
   ): Promise<{ changedFields: string[] }>;
 }
 
@@ -94,12 +102,21 @@ export interface SubAgentExecutionResult {
   events$: Observable<ChatEvent>;
 }
 
+/** Options of a sub-agent run as its own task, outliving the run that spawned it. */
+export interface SubAgentBackgroundOptions {
+  /** How the parent gets the result; unset, the result waits for the parent's next run. */
+  parentTriggerMode?: ChatTriggerMode;
+}
+
 /** Parameters for a one-shot standalone sub-agent execution. */
 export interface ExecuteSubAgentParams {
   agentId: string;
   parentExecutionId: string;
   prompt: string;
-  connectorId?: string;
+  /** Set to run the sub-agent in the background. */
+  background?: SubAgentBackgroundOptions;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -109,12 +126,15 @@ export interface CreateSubAgentParams {
   agentId: string;
   parentConversationId: string;
   parentExecutionId: string;
+  /** Set to run the sub-agent in the background. */
+  background?: SubAgentBackgroundOptions;
   subagentName: string;
   subagentPurpose?: string;
   /** Pre-allocated id for the child conversation (assigned by the caller). */
   conversationId: string;
   prompt: string;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -126,7 +146,9 @@ export interface SendToSubAgentParams {
   /** Existing child conversation id */
   conversationId: string;
   prompt: string;
-  connectorId?: string;
+  background?: SubAgentBackgroundOptions;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   abortSignal?: AbortSignal;
 }
 
@@ -160,16 +182,23 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
-  /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
+  /** Whether AI index instructions are enabled by the Context Engine setting */
   aiIndices: boolean;
+  /** Whether SML is available, which follows the Agent Builder experimental setting */
+  sml: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the todo list tool and task-management prompt are enabled */
-  todos: boolean;
+  /** Whether a finished background sub-agent wakes its parent; follows the Agent Builder experimental setting */
+  backgroundWake: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */
   apiDiscovery: boolean;
+  /**
+   * Whether dynamically loaded tools (skill and attachment-bound tools) are exposed through the
+   * `execute_dynamic_tool` meta-tool instead of being added to the native tool list.
+   */
+  dynamicTools: boolean;
 }
 
 /**
@@ -230,13 +259,18 @@ export interface AgentHandlerContext {
    */
   spaceId: string;
   /**
+   * Service account the execution runs as; see `GetAgentOptions.runAs`.
+   */
+  runAs?: string;
+  /**
    * Information about the deployment (environment, version, license...) the agent runs in.
    */
   deployment: DeploymentContext;
   /**
-   * The resolved connector ID for this execution, if any.
+   * The model source this execution runs on: an explicit connector or an inference feature.
+   * Undefined when the model comes from the Agent Builder default.
    */
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
@@ -315,10 +349,6 @@ export interface AgentHandlerContext {
    * Attachment state manager to manage conversation attachments during execution.
    */
   attachmentStateManager: AttachmentStateManager;
-  /**
-   * Manages the active todo list for this conversation execution.
-   */
-  todoStateManager: TodoStateManager;
   /**
    * Used to manage interruptions.
    */
@@ -445,6 +475,8 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
+  /** The actor that posted the input, when it is an agent (a sub-agent's report) rather than the requesting user. */
+  actor?: EventActor;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.

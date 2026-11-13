@@ -12,7 +12,7 @@ describe('PolicyCatalog', () => {
   const catalog = PolicyCatalog.of(
     new Map([
       ['p1', createActionPolicy({ id: 'p1', spaceId: 'space-a', apiKey: 'key-1' })],
-      ['p2', createActionPolicy({ id: 'p2', spaceId: 'space-b', groupingMode: 'all' })],
+      ['p2', createActionPolicy({ id: 'p2', spaceId: 'space-b', grouping: { mode: 'all' } })],
     ])
   );
 
@@ -36,5 +36,28 @@ describe('PolicyCatalog', () => {
   it('resolves the dispatch api key', () => {
     expect(catalog.apiKeyOf('p1')).toBe('key-1');
     expect(catalog.apiKeyOf('p2')).toBeUndefined();
+  });
+
+  it('resolves the effective throttle strategy, defaulting by grouping mode', () => {
+    // No throttle configured: per_alert notifies on status change, other modes once per interval.
+    expect(catalog.throttleStrategyOf('p1')).toBe('on_status_change');
+    expect(catalog.throttleStrategyOf('p2')).toBe('time_interval');
+    expect(catalog.throttleStrategyOf('missing')).toBeUndefined();
+  });
+
+  it('returns the configured throttle strategy when the policy has one', () => {
+    const withThrottle = PolicyCatalog.of(
+      new Map([
+        [
+          'p3',
+          createActionPolicy({
+            id: 'p3',
+            throttle: { strategy: 'every_time' },
+          }),
+        ],
+      ])
+    );
+
+    expect(withThrottle.throttleStrategyOf('p3')).toBe('every_time');
   });
 });

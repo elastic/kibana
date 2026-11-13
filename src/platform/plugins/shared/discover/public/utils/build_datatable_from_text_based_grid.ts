@@ -10,28 +10,19 @@
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { EsqlSource } from '@kbn/data-source';
 
 /**
- * Rebuilds an ES|QL Datatable from grid rows and `getTextBasedColumnsMeta` output.
- * Column ids are the ES|QL column names (id === name for text-based results).
+ * Rebuilds an ES|QL Datatable from grid rows and the result columns of their source.
  */
 export const buildDatatableFromTextBasedGrid = ({
   rows,
-  columnsMeta,
+  resultDataSource,
 }: {
   rows: DataTableRecord[];
-  columnsMeta: DataTableColumnsMeta | undefined;
+  resultDataSource: EsqlSource | undefined;
 }): Datatable | undefined => {
-  if (!columnsMeta) {
-    return undefined;
-  }
-
-  const columns = Object.entries(columnsMeta).map(([name, meta]) => ({
-    id: name,
-    name,
-    meta,
-  }));
+  const columns = [...(resultDataSource?.resultColumns ?? [])];
 
   if (!columns.length) {
     return undefined;

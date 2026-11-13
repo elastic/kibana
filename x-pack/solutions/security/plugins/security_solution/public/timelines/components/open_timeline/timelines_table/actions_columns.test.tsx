@@ -262,4 +262,36 @@ describe('#getActionsColumns', () => {
 
     expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toEqual(false);
   });
+
+  test('it removes the timeline from the case when "remove from case" is clicked', () => {
+    const onRemoveFromCase = jest.fn();
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(mockResults),
+      actionTimelineToShow: ['removeFromCase'],
+      onRemoveFromCase,
+    };
+    const wrapper = mountWithIntl(
+      <TestProvidersComponent>
+        <TimelinesTable {...testProps} />
+      </TestProvidersComponent>
+    );
+
+    wrapper.find('[data-test-subj="remove-timeline-from-case"]').first().simulate('click');
+
+    expect(onRemoveFromCase).toHaveBeenCalledWith(mockResults[0].savedObjectId);
+  });
+
+  test('it should not render "remove from case" without onRemoveFromCase', () => {
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(mockResults),
+      actionTimelineToShow: ['removeFromCase'],
+    };
+    const wrapper = mountWithIntl(
+      <TestProvidersComponent>
+        <TimelinesTable {...testProps} />
+      </TestProvidersComponent>
+    );
+
+    expect(wrapper.find('[data-test-subj="remove-timeline-from-case"]').exists()).toEqual(false);
+  });
 });
