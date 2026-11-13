@@ -71,6 +71,17 @@ describe('buildTemplateValues', () => {
   it('rejects a skill id that cannot be rendered safely', () => {
     expect(() => buildTemplateValues({ skillId: `x' OR "1"` })).toThrow(/Invalid skill id/);
   });
+
+  it.each(['Find-Security-Rules', 'foo.bar', '-triage', 'a'.repeat(65)])(
+    'rejects %j, which Agent Builder would not accept as a skill id',
+    (skillId) => {
+      expect(() => buildTemplateValues({ skillId })).toThrow(/Invalid skill id/);
+    }
+  );
+
+  it('accepts an id at the Agent Builder length limit', () => {
+    expect(buildTemplateValues({ skillId: 'a'.repeat(64) }).skillId).toBe('a'.repeat(64));
+  });
 });
 
 describe('getAesopDriftMonitorTracingWarnings', () => {

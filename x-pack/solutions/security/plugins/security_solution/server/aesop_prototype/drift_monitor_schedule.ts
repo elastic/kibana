@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { skillIdMaxLength, skillIdRegexp } from '@kbn/agent-builder-common';
 import { createHash } from 'crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
@@ -78,8 +79,8 @@ interface AesopDriftMonitorEnableParams {
   lookbackMinutes?: number;
 }
 
-// Both values are rendered raw into a single-quoted YAML const and ES|QL string literals.
-const SAFE_SKILL_ID = /^[A-Za-z0-9._-]+$/;
+// Both values are rendered raw into a single-quoted YAML const and ES|QL string
+// literals. Agent Builder's own id grammar keeps the id safe to render.
 const SAFE_SKILL_NAME = /^[A-Za-z0-9 ._-]+$/;
 
 export const buildTemplateValues = ({
@@ -88,7 +89,7 @@ export const buildTemplateValues = ({
   intervalMinutes,
   lookbackMinutes,
 }: AesopDriftMonitorEnableParams): AesopDriftMonitorWorkflowTemplateValues => {
-  if (!SAFE_SKILL_ID.test(skillId)) {
+  if (skillId.length > skillIdMaxLength || !skillIdRegexp.test(skillId)) {
     throw new Error(`Invalid skill id for the AESOP drift monitor: '${skillId}'`);
   }
   return {

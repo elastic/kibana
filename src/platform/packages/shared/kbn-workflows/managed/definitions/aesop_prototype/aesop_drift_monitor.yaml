@@ -36,9 +36,13 @@ triggers:
 steps:
   # Traces that invoked the skill in the lookback window. Spans carry no
   # skill attribute, so the join is the load_skill tool call: a trace
-  # belongs to the skill when a load_skill span's `skill` argument names it.
-  # The model passes the skill's display name, its id, or a SKILL.md path
-  # under either, so the GROK'd reference matches any of them. Tool-call arguments
+  # belongs to the skill when a load_skill span resolved it. load_skill
+  # resolves its `skill` argument by name or by a `<basePath>/<name>` (or
+  # SKILL.md) path, never by id, so the argument filter matches the name.
+  # The result carries the resolved `skill.id`, which drops errored calls and
+  # same-named skills under another base path. The result is a keyword with
+  # ignore_above 1024, so a long skill's result reads back null; those spans
+  # fall back to the argument match alone. Tool-call arguments and results
   # are only on spans when `agentBuilder:tracing:includeToolDetails` is on;
   # with it off this finds nothing (the enable route warns about that).
   # The operation/tool filter runs inside KQL(), not raw column refs:
@@ -64,8 +68,10 @@ steps:
         FROM traces-agent_builder.otel-*
         | WHERE KQL("attributes.gen_ai.operation.name:execute_tool AND attributes.gen_ai.tool.name:load_skill")
         | GROK attributes.gen_ai.tool.call.arguments "\"skill\"\\s*:\\s*\"%{DATA:skill_ref}\""
-        | EVAL skill_ref = REPLACE(skill_ref, "/SKILL\\.md$", "")
-        | WHERE skill_ref IN ("{{ consts.SKILL_ID }}", "{{ consts.SKILL_NAME }}") OR ENDS_WITH(skill_ref, "/{{ consts.SKILL_ID }}") OR ENDS_WITH(skill_ref, "/{{ consts.SKILL_NAME }}")
+        | EVAL skill_ref = REPLACE(TRIM(skill_ref), "/SKILL\\.md$", "")
+        | WHERE skill_ref == "{{ consts.SKILL_NAME }}" OR ENDS_WITH(skill_ref, "/{{ consts.SKILL_NAME }}")
+        | GROK attributes.gen_ai.tool.call.result "\"skill\":\\{\"id\":\"%{DATA:resolved_id}\""
+        | WHERE attributes.gen_ai.tool.call.result IS NULL OR resolved_id == "{{ consts.SKILL_ID }}"
         | STATS last_seen = MAX(@timestamp) BY trace_id
         | SORT last_seen DESC
         | LIMIT 25

@@ -52,7 +52,7 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   pluginId: 'securitySolution',
   // Bump on every YAML edit: yamlTemplate hashing does not see the imported
   // YAML, so installed instances only re-render on a version bump.
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: ({ skillId, skillName, intervalMinutes, lookbackMinutes }) =>
     renderTemplate(AESOP_DRIFT_MONITOR_YAML, {

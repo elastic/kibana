@@ -113,4 +113,21 @@ describe('skill-pii', () => {
     });
     expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
   });
+
+  it('still exempts a template token at the edge of the bounded context', async () => {
+    const result = await skillPiiEvaluator.evaluate({
+      trace,
+      round: round(`${'x'.repeat(5000)}jane.{id}.doe@corp.com`),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('scans a long whitespace-free run of matches in bounded time', async () => {
+    const content = Array.from({ length: 5000 }, (_, i) => `u${i}@corp.com`).join(',');
+    const started = Date.now();
+    const result = await skillPiiEvaluator.evaluate({ trace, round: round(content), log });
+    expect(Date.now() - started).toBeLessThan(2000);
+    expect(result.scores[0].label).toBe('fail');
+  });
 });

@@ -15,6 +15,31 @@ interface InjectionPattern {
   reason: string;
 }
 
+// A letter or mark of a script that uses ZWNJ/ZWJ in ordinary text (Persian,
+// Indic, …): anything but Latin, Common or Inherited.
+const JOINING_SCRIPT_CHAR = String.raw`(?![\p{sc=Latin}\p{sc=Common}\p{sc=Inherited}])[\p{L}\p{M}]`;
+const EMOJI_CHAR = String.raw`[\p{Extended_Pictographic}\uFE0F\u{1F3FB}-\u{1F3FF}]`;
+// Lookbehind that exempts a joiner sitting after a joining-script character
+// and not before a Latin one.
+const joiningScriptExempt = (joiner: string): string =>
+  String.raw`(?<!${JOINING_SCRIPT_CHAR}${joiner}(?!\p{sc=Latin}))`;
+const ZERO_WIDTH_PATTERN = new RegExp(
+  [
+    String.raw`[\u200B\u2060\uFEFF\u202A-\u202E\u2066-\u2069]`,
+    String.raw`\u200C${joiningScriptExempt(String.raw`\u200C`)}`,
+    String.raw`\u200D(?<!${EMOJI_CHAR}\u200D(?=\p{Extended_Pictographic}))${joiningScriptExempt(
+      String.raw`\u200D`
+    )}`,
+  ].join('|'),
+  'gu'
+);
+
+// Hosts the agent may legitimately send data to, subdomains included. Each
+// suffix is anchored by the boundary below, so `elastic.co.evil.com` and
+// `github.com.attacker.net` still match.
+const ALLOWED_HOSTS = String.raw`localhost|127\.0\.0\.1|(?:[\w-]+\.)*(?:elastic\.co|elastic-cloud\.com|github\.com)`;
+const HOST_END = String.raw`(?:[/:?#\s,;)'"\]>]|\.(?![\w-])|$)`;
+
 // Agent-authored output can be fed into downstream agent contexts, so
 // anything that overrides role, hides instructions, or redirects the agent
 // off-platform is an injection vector — not just "bad style".
@@ -48,17 +73,18 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
   },
   {
     name: 'zero-width-chars',
-    // ZWJ is only a signal outside emoji sequences, and a BOM only when not
-    // leading the text.
-    pattern:
-      /[\u200B\u200C\u2060\u202A-\u202E]|(?<!^)\uFEFF|(?<![\p{Extended_Pictographic}\uFE0F\u{1F3FB}-\u{1F3FF}])\u200D|\u200D(?!\p{Extended_Pictographic})/gu,
+    // ZWNJ/ZWJ are only a signal outside emoji sequences and joining scripts.
+    // A leading BOM is already stripped from each part by collectRoundText.
+    pattern: ZERO_WIDTH_PATTERN,
     severity: 'high',
     reason: 'Contains zero-width or bidi control characters (prompt-smuggling vector)',
   },
   {
     name: 'tool-exfiltration',
-    pattern:
-      /\b(?:send|post|curl|fetch|upload|transmit|exfiltrate)\s+[^.\n]{0,80}?\b(?:to|at|via)\s+https?:\/\/(?!(?:localhost|127\.0\.0\.1|elastic\.co|elastic-cloud\.com|github\.com|github-enterprise[\w-]*(?:\.[\w-]+)*)(?:[/:?#\s,;)'"\]>]|\.(?![\w-])|$))/gi,
+    pattern: new RegExp(
+      String.raw`\b(?:send|post|curl|fetch|upload|transmit|exfiltrate)\s+[^.\n]{0,80}?\b(?:to|at|via)\s+https?:\/\/(?!(?:${ALLOWED_HOSTS})${HOST_END})`,
+      'gi'
+    ),
     severity: 'high',
     reason: 'References sending data to an external URL',
   },

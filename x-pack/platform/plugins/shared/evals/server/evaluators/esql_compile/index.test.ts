@@ -57,7 +57,7 @@ describe('esql-compile', () => {
     });
   });
 
-  it('compiles fenced ES|QL blocks and leaves an existing LIMIT untouched', async () => {
+  it('appends LIMIT 0 even after an existing LIMIT', async () => {
     const { esClient, requestMock } = createEsClient();
     await esqlCompileEvaluator.evaluate({
       trace: { traceId, esClient },
@@ -68,7 +68,7 @@ describe('esql-compile', () => {
       expect.objectContaining({
         method: 'POST',
         path: '/_query',
-        body: { query: 'FROM logs-*\n| LIMIT 10' },
+        body: { query: 'FROM logs-*\n| LIMIT 10 | LIMIT 0' },
       })
     );
   });
@@ -114,5 +114,20 @@ describe('esql-compile', () => {
     });
     expect(result.scores[0].score).toBe(0.5);
     expect(result.scores[0].label).toBe('fail');
+  });
+
+  it('ignores ES|QL that appears only in a tool result', async () => {
+    const { esClient, requestMock } = createEsClient();
+    const result = await esqlCompileEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: {
+        input: { message: 'query' },
+        steps: [{ tool_id: 'x', arguments: {}, result: '```esql\nFROM logs-*\n| LIMIT 1\n```' }],
+        response: { message: 'done' },
+      },
+      log,
+    });
+    expect(requestMock).not.toHaveBeenCalled();
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
   });
 });

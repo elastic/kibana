@@ -137,9 +137,9 @@ describe('skill-index-resolves', () => {
     expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: expected }));
   });
 
-  it('still resolves patterns found only in tool results', async () => {
+  it('ignores patterns found only in tool results', async () => {
     const { esClient, resolveIndexMock } = createEsClient();
-    await indexResolvesEvaluator.evaluate({
+    const result = await indexResolvesEvaluator.evaluate({
       trace: { traceId, esClient },
       round: {
         input: { message: 'query' },
@@ -148,6 +148,46 @@ describe('skill-index-resolves', () => {
       },
       log,
     });
+    expect(resolveIndexMock).not.toHaveBeenCalled();
+    expect(result.scores[0]).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('resolves patterns in tool-call arguments', async () => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: {
+        input: { message: 'query' },
+        steps: [{ tool_id: 'x', arguments: { query: 'FROM logs-foo-* | LIMIT 1' } }],
+        response: { message: 'done' },
+      },
+      log,
+    });
     expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs-foo-*' }));
+  });
+
+  it.each(['`host.name`', '`process.entity_id`', '`@timestamp`', '`event.category`'])(
+    'does not treat the backticked field path %s as an index',
+    async (field) => {
+      const { esClient, resolveIndexMock } = createEsClient();
+      await indexResolvesEvaluator.evaluate({
+        trace: { traceId, esClient },
+        round: round(`Group by ${field} to count`),
+        log,
+      });
+      expect(resolveIndexMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it('still resolves a backticked index with a known shape', async () => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('Search `.alerts-security.alerts-default` for it'),
+      log,
+    });
+    expect(resolveIndexMock).toHaveBeenCalledWith(
+      expect.objectContaining({ name: '.alerts-security.alerts-default' })
+    );
   });
 });

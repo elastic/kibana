@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluatorDefinition } from '../types';
-import { collectRoundTextWithToolResults } from '../round_text';
+import { collectRoundText } from '../round_text';
 
 const ESQL_BLOCK_PATTERN = /```(?:esql|ES\|QL|esql-query)\s*\n([\s\S]*?)```/gi;
 // Inline ES|QL: starts with FROM, ends at blank line or end of input.
@@ -42,15 +42,15 @@ interface QueryCheckResult {
 }
 
 /**
- * Verifies an ES|QL query parses by asking ES to execute it with a trivially
- * bounded result (LIMIT 0 appended). Returns fast and does not transfer rows.
- * If the query already has a LIMIT, we leave it alone.
+ * Verifies an ES|QL query parses by asking ES to execute it with LIMIT 0
+ * appended. A trailing LIMIT 0 is valid after any earlier LIMIT, so it is
+ * always appended and no rows are transferred.
  */
 const verifyQuery = async (
   esClient: ElasticsearchClient,
   rawQuery: string
 ): Promise<QueryCheckResult> => {
-  const query = /\bLIMIT\s+\d+/i.test(rawQuery) ? rawQuery : `${rawQuery} | LIMIT 0`;
+  const query = `${rawQuery} | LIMIT 0`;
 
   try {
     await (
@@ -88,7 +88,7 @@ export const esqlCompileEvaluator: EvaluatorDefinition = {
   description:
     'Executes each ES|QL query in the round output with LIMIT 0 to verify it parses and the referenced indices/columns exist.',
   async evaluate({ round, trace }) {
-    const content = collectRoundTextWithToolResults(round);
+    const content = collectRoundText(round);
     const queries = extractEsqlQueries(content);
 
     if (queries.length === 0) {

@@ -64,11 +64,17 @@ const TEMPLATE_PATTERNS = [
   /<%.*%>/, // template tags
 ];
 
+// Bounds the walk so a long whitespace-free run (minified JSON, base64) does not
+// make every match scan the whole run.
+const TOKEN_CONTEXT_MAX = 256;
+
 const tokenAround = (content: string, start: number, end: number): string => {
   let from = start;
-  while (from > 0 && !/\s/.test(content[from - 1])) from--;
+  const minFrom = Math.max(0, start - TOKEN_CONTEXT_MAX);
+  while (from > minFrom && !/\s/.test(content[from - 1])) from--;
   let to = end;
-  while (to < content.length && !/\s/.test(content[to])) to++;
+  const maxTo = Math.min(content.length, end + TOKEN_CONTEXT_MAX);
+  while (to < maxTo && !/\s/.test(content[to])) to++;
   return content.slice(from, to);
 };
 

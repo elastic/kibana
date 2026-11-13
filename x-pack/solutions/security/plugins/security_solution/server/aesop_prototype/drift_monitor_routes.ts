@@ -9,9 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { skillIdMaxLength, skillIdRegexp } from '@kbn/agent-builder-common';
 import type { KibanaRequest, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { StartPlugins } from '../plugin';
-import type { SecuritySolutionPluginRouter } from '../types';
+import type { SecuritySolutionPluginRouter, SecuritySolutionRequestHandlerContext } from '../types';
 import {
   AESOP_DRIFT_MONITOR_ROUTE_PATH,
   AESOP_DRIFT_MONITOR_ROUTES_API_VERSION,
@@ -41,15 +42,17 @@ const LICENSE_ERROR_MESSAGE = i18n.translate(
   { defaultMessage: 'Your license does not support this feature.' }
 );
 
+const skillIdSchema = schema.string({
+  minLength: 1,
+  maxLength: skillIdMaxLength,
+  validate: (value) =>
+    skillIdRegexp.test(value)
+      ? undefined
+      : 'skill_id must be lowercase letters, digits, hyphens or underscores, starting and ending with a letter or digit',
+});
+
 const bodySchema = schema.object({
-  skill_id: schema.string({
-    minLength: 1,
-    maxLength: 128,
-    validate: (value) =>
-      /^[A-Za-z0-9._-]+$/.test(value)
-        ? undefined
-        : 'skill_id may only contain letters, digits, dots, hyphens and underscores',
-  }),
+  skill_id: skillIdSchema,
   interval_minutes: schema.number({ min: 5, max: 1440, defaultValue: 60 }),
   lookback_minutes: schema.number({ min: 5, max: 10080, defaultValue: 120 }),
 });
@@ -99,6 +102,21 @@ export const registerAesopDriftMonitorRoutes = ({
     }
   };
 
+  // Advisory only: a settings read failure must not fail an enable that already succeeded.
+  const readTracingWarnings = async (
+    context: SecuritySolutionRequestHandlerContext
+  ): Promise<string[]> => {
+    try {
+      const { uiSettings } = await context.core;
+      return await getAesopDriftMonitorTracingWarnings((settingId) =>
+        uiSettings.client.get<boolean>(settingId)
+      );
+    } catch (error) {
+      logger.debug(() => `AESOP drift monitor: could not read tracing settings: ${error}`);
+      return [];
+    }
+  };
+
   router.versioned
     .post({
       path: AESOP_DRIFT_MONITOR_ROUTE_PATH,
@@ -123,16 +141,13 @@ export const registerAesopDriftMonitorRoutes = ({
         }
         try {
           const { skill_id: skillId } = request.body;
+          const warnings = await readTracingWarnings(context);
           const { documentId } = await enableAesopDriftMonitor(await resolveDeps(request), {
             skillId,
             skillName: await resolveSkillName(request, skillId),
             intervalMinutes: request.body.interval_minutes,
             lookbackMinutes: request.body.lookback_minutes,
           });
-          const { uiSettings } = await context.core;
-          const warnings = await getAesopDriftMonitorTracingWarnings((settingId) =>
-            uiSettings.client.get<boolean>(settingId)
-          );
           return response.ok({ body: { document_id: documentId, warnings } });
         } catch (error) {
           logger.warn('Failed to enable the AESOP drift monitor', { error });
@@ -159,9 +174,7 @@ export const registerAesopDriftMonitorRoutes = ({
         version: AESOP_DRIFT_MONITOR_ROUTES_API_VERSION,
         validate: {
           request: {
-            params: schema.object({
-              skill_id: schema.string({ minLength: 1, maxLength: 128 }),
-            }),
+            params: schema.object({ skill_id: skillIdSchema }),
           },
         },
       },

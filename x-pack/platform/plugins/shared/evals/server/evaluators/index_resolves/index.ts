@@ -7,12 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluatorDefinition } from '../types';
-import { collectRoundTextWithToolResults } from '../round_text';
+import { collectRoundText } from '../round_text';
 
 // Index patterns are only extracted where the text signals an index context:
 //   - ES|QL `FROM <pattern>, <pattern>` clauses
 //   - `index:` / `index pattern <x>` mentions
-//   - backticked tokens
+//   - backticked tokens that are not field paths
 //   - bare tokens that match a recognisable index shape (`logs-*`, `.alerts-*`)
 const FROM_CLAUSE_PATTERN =
   /\bFROM\s+([\w.*-]+(?:\s*,\s*[\w.*-]+)*)(?=\s*(?:\||\r?\n|$)|\s+METADATA\b)/gi;
@@ -24,6 +24,9 @@ const WILDCARD_SUFFIX_SHAPE = /^\.?[a-z0-9][\w.-]*-\*$/;
 const KIBANA_HIDDEN_PREFIX_SHAPE =
   /^\.(?:alerts|internal|ds|kibana|fleet|items|lists|siem)[\w.*-]*$/;
 const DATA_STREAM_SHAPE = /^(?:logs|metrics|traces|synthetics)-(?=[\w.-]*[.*])[\w.*-]+$/;
+// ECS-style field paths (`host.name`, `process.entity_id`, `@timestamp`) are
+// backticked in ES|QL as often as index names are.
+const FIELD_PATH_SHAPE = /^@?[a-z_][a-z0-9_]*(?:\.@?[a-z0-9_]+)*$/i;
 
 const FILE_EXTENSION =
   /\.(?:txt|json|ya?ml|md|jsx?|tsx?|py|log|csv|xml|html?|png|jpe?g|conf|cfg|ini|sh|exe|dll|pdf|zip|gz)$/i;
@@ -92,7 +95,10 @@ const extractIndexPatterns = (content: string): string[] => {
 
   for (const m of content.matchAll(FROM_CLAUSE_PATTERN)) addContextual(m[1]);
   for (const m of content.matchAll(INDEX_CONTEXT_PATTERN)) addContextual(m[1] ?? m[2]);
-  for (const m of content.matchAll(BACKTICKED_PATTERN)) addContextual(m[1]);
+  for (const m of content.matchAll(BACKTICKED_PATTERN)) {
+    const candidate = stripPunctuation(m[1]);
+    if (hasKnownIndexShape(candidate) || !FIELD_PATH_SHAPE.test(candidate)) addContextual(m[1]);
+  }
 
   for (const token of content.split(/[\s,;]+/)) {
     const candidate = stripPunctuation(token);
@@ -161,7 +167,7 @@ export const indexResolvesEvaluator: EvaluatorDefinition = {
   description:
     'Verifies every index/data-stream pattern referenced in the round output resolves on the active cluster.',
   async evaluate({ round, trace }) {
-    const content = collectRoundTextWithToolResults(round);
+    const content = collectRoundText(round);
     const patterns = extractIndexPatterns(content);
 
     if (patterns.length === 0) {

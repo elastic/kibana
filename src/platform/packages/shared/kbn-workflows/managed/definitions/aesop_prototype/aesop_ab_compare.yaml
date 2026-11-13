@@ -142,7 +142,7 @@ steps:
 
   - name: baseline_run
     type: ai.evals.evaluateDataset
-    if: '${{ steps.resolve_variant.output.ok == true }}'
+    if: '${{ steps.resolve_variant.output.ok == true and steps.baseline_start.error == null }}'
     with:
       connector_id: '{{ inputs.connector_id }}'
       agent_id: '{{ inputs.agent_id }}'
@@ -182,7 +182,7 @@ steps:
 
   - name: variant_run
     type: ai.evals.evaluateDataset
-    if: '${{ steps.resolve_variant.output.ok == true }}'
+    if: '${{ steps.resolve_variant.output.ok == true and steps.variant_start.error == null }}'
     with:
       connector_id: '{{ inputs.connector_id }}'
       agent_id: '{{ inputs.agent_id }}'
@@ -235,6 +235,8 @@ steps:
     if: '${{ steps.resolve_arms.output.scored == true and steps.compare.error == null }}'
     with:
       comparison_json: '${{ steps.compare.output.comparison | json }}'
+    on-failure:
+      continue: true
 
   # ----------------------------------------------------------------------
   # Approval gate. Propose deploying the variant; on approval PUT the new
@@ -242,7 +244,7 @@ steps:
   # ----------------------------------------------------------------------
   - name: propose_deploy
     type: workflow.execute
-    if: '${{ steps.resolve_arms.output.scored == true and steps.compare.error == null }}'
+    if: '${{ steps.resolve_arms.output.scored == true and steps.compare.error == null and steps.resolve_comparison.error == null }}'
     # Straight to the proposals gate in default run-as mode, not through the
     # AlertZero bridge: the bridge delegates with `run-as-mode: inherit`, which
     # needs a parent running as a bound service account, and this run executes
@@ -324,6 +326,8 @@ steps:
   # is active. Runs whenever the variant was created: every step between
   # create_variant and here continues on failure, so an arm, compare or
   # proposal error still reaches this step instead of leaking the variant.
+  # A run that times out or is cancelled never gets here; the variant then
+  # outlives the run until it is deleted by hand (no sweeper in the prototype).
   # ----------------------------------------------------------------------
   - name: cleanup_variant
     type: kibana.request
@@ -347,4 +351,4 @@ steps:
       decision: '${{ steps.propose_deploy.output.decision }}'
       deployed: '${{ steps.deploy_variant.error == null and steps.propose_deploy.output.decision == "approved" }}'
       skip_reason: >-
-        {% if steps.resolve_variant.output.ok != true %}The variant skill could not be created: {{ steps.create_variant.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif steps.variant_run.error != null %}The variant arm failed: {{ steps.variant_run.error.message }}{% elsif steps.resolve_arms.output.scored != true %}An A/B arm produced no scores (baseline: {{ steps.baseline_run.output.scores_ingested | default: 0 }}, variant: {{ steps.variant_run.output.scores_ingested | default: 0 }}); nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.propose_deploy.error != null %}The deploy proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.deploy_variant.error != null %}Deploy failed after approval: {{ steps.deploy_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.cleanup_variant.error != null %}Deployed, but the scratch variant skill was not deleted: {{ steps.cleanup_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.resolve_variant.output.ok != true %}The variant skill could not be created: {{ steps.create_variant.error.message }}{% elsif steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.variant_start.error != null %}The variant experiment could not be started: {{ steps.variant_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif steps.variant_run.error != null %}The variant arm failed: {{ steps.variant_run.error.message }}{% elsif steps.resolve_arms.output.scored != true %}An A/B arm produced no scores (baseline: {{ steps.baseline_run.output.scores_ingested | default: 0 }}, variant: {{ steps.variant_run.output.scores_ingested | default: 0 }}); nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.resolve_comparison.error != null %}The A/B comparison could not be rendered: {{ steps.resolve_comparison.error.message }}{% elsif steps.propose_deploy.error != null %}The deploy proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.deploy_variant.error != null %}Deploy failed after approval: {{ steps.deploy_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.cleanup_variant.error != null %}Deployed, but the scratch variant skill was not deleted: {{ steps.cleanup_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
