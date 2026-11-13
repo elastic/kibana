@@ -6,9 +6,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 import { createEntitySourcesService } from '../entity_sources/entity_sources_service';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
@@ -32,7 +32,7 @@ export const createWatchlistMaintainer = ({
     logger.info(`Watchlist maintainer setup completed for namespace "${namespace}"`);
     return status.state;
   },
-  run: async ({ status, esClient, fakeRequest, signal }) => {
+  run: async ({ status, esClient, signal }) => {
     const namespace = status.metadata.namespace;
 
     const [coreStart, pluginsStart] = await getStartServices();
@@ -45,11 +45,9 @@ export const createWatchlistMaintainer = ({
 
     logger.debug(`Watchlist maintainer run for namespace "${namespace}"`);
 
-    // Use the authenticated fakeRequest from the task manager (created with the
-    // credentials of the user who installed the Entity Store) rather than
-    // buildNamespacedInternalSavedObjectsClientUnsafe, which has no auth credentials.
-    const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
+    const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({
+      coreStart,
+      namespace,
       includedHiddenTypes: [watchlistEntitySourceTypeName],
     });
 

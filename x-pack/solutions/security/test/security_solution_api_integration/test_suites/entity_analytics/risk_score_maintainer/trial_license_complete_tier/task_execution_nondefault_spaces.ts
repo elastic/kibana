@@ -22,6 +22,7 @@ import {
   setupMaintainerLogsDataStream,
   cleanupMaintainerLogsDataStream,
   waitForEntityStoreDoc,
+  watchlistRouteHelpersFactory,
 } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -156,6 +157,68 @@ export default ({ getService }: FtrProviderContext): void => {
           new Set(normalized.map(({ id_value: idValue }) => idValue).filter(Boolean))
         ).sort();
         expect(idValues).to.eql(expectedEuids);
+      });
+
+      it('applies the watchlist modifier of the space the maintainer runs in', async () => {
+        const watchlistRoutes = watchlistRouteHelpersFactory(supertest, namespace);
+        const watchlistName = `space-watchlist-${uuidv4().slice(0, 8)}`;
+        const { documentIds, testEntities } = await maintainerScenario.seedEntities([
+          riskScoreMaintainerEntityBuilders.host({ hostName: `host-wl-${uuidv4().slice(0, 8)}` }),
+        ]);
+        const [host] = testEntities;
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds,
+          alerts: 1,
+          riskScore: 30,
+        });
+
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+          waitForEntities: false,
+        });
+        await waitForEntityStoreDoc({ es, retry, entityId: host.expectedEuid, namespace });
+
+        const watchlistResponse = await watchlistRoutes.create({
+          name: watchlistName,
+          riskModifier: 1.5,
+        });
+        const watchlistId = watchlistResponse.body.id!;
+        await maintainerScenario.setEntityWatchlists({
+          testEntity: host,
+          watchlistIds: [watchlistId],
+        });
+        await waitForEntityStoreDoc({
+          es,
+          retry,
+          entityId: host.expectedEuid,
+          requiredWatchlistId: watchlistId,
+          namespace,
+        });
+        await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, namespace) });
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        const index = `risk-score.risk-score-${namespace}`;
+        let modifiers: Array<Record<string, unknown>> = [];
+        await retry.waitForWithTimeout(
+          `risk score with the watchlist modifier for ${host.expectedEuid} in ${namespace}`,
+          60_000,
+          async () => {
+            const rawScores = await readRiskScores(es, [index]);
+            const doc = rawScores.find((score) => score.host?.risk?.id_value === host.expectedEuid);
+            const docModifiers = (doc?.host?.risk?.modifiers ?? []) as Array<
+              Record<string, unknown>
+            >;
+            if (!docModifiers.some(({ type }) => type === 'watchlist')) {
+              return false;
+            }
+            modifiers = docModifiers;
+            return true;
+          }
+        );
+
+        const watchlistModifier = modifiers.find(({ type }) => type === 'watchlist');
+        expect(watchlistModifier?.subtype).to.eql(watchlistName);
       });
     });
   });
