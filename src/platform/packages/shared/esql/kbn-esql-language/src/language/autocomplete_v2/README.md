@@ -22,3 +22,5 @@ What is here so far:
   the list of commands Kibana has not registered. A grammar upgrade shows up as a change here.
 - `locate_examples.test.ts`: runs `locate` at every token boundary of the registered command
   examples.
+- `signature_coverage.test.ts`: the gate for a new command. A command Kibana registers must
+  be described, and every position it has must get its role from a signature.
