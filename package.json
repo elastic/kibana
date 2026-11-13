@@ -126,7 +126,7 @@
     "globby/fast-glob": "3.3.2"
   },
   "dependencies": {
-    "@ai-sdk/langchain": "1.0.190",
+    "@ai-sdk/langchain": "1.0.207",
     "@appland/sql-parser": "1.5.1",
     "@arizeai/openinference-semantic-conventions": "1.1.0",
     "@aws-sdk/client-bedrock-runtime": "3.1089.0",
@@ -1154,7 +1154,7 @@
     "@xterm/xterm": "6.0.0",
     "@xyflow/react": "12.4.2",
     "adm-zip": "0.6.1",
-    "ai": "5.0.190",
+    "ai": "5.0.207",
     "ajv": "8.20.0",
     "antlr4": "4.13.1-patch-1",
     "archiver": "7.0.1",
