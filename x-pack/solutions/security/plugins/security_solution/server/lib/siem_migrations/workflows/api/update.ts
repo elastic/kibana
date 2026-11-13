@@ -13,6 +13,7 @@ import {
   UpdateWorkflowMigrationRequestParams,
 } from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { withLicense } from '../../common/api/util/with_license';
 import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 import { authz } from './util/authz';
@@ -38,9 +39,25 @@ export const registerSiemWorkflowMigrationsUpdateRoute = (
         },
       },
       withLicense(
-        withExistingMigration(async (_context, req, res): Promise<IKibanaResponse> => {
-          logger.debug(`Workflow migration update is not implemented (${req.params.migration_id})`);
-          return res.ok();
+        withExistingMigration(async (context, req, res): Promise<IKibanaResponse> => {
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'workflows'
+          );
+          const { migration_id: migrationId } = req.params;
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const workflowsMigrationsClient =
+              ctx.securitySolution.siemMigrations.getWorkflowsClient();
+            await siemMigrationAuditLogger.logUpdateMigration({ migrationId });
+            await workflowsMigrationsClient.data.migrations.update(migrationId, req.body);
+
+            return res.ok();
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logUpdateMigration({ migrationId, error });
+            return res.customError({ statusCode: 500, body: (error as Error).message });
+          }
         })
       )
     );

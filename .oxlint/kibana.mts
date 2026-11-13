@@ -141,6 +141,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-lens-common/**/*',
       'src/platform/packages/shared/kbn-lens-common-2/**/*',
       'src/platform/packages/shared/kbn-coloring/**/*',
+      'src/platform/packages/shared/kbn-coloring-components/**/*',
       'src/platform/packages/shared/kbn-chart-icons/**/*',
       'src/platform/packages/shared/kbn-event-annotation-common/**/*',
       'src/platform/packages/shared/kbn-event-annotation-components/**/*',
