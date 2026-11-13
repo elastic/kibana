@@ -259,10 +259,14 @@ describe('ProcessTreeNode component', () => {
         renderResult = mockedContext.render(
           <ProcessTreeNode {...props} process={sessionViewAlertProcessMock} />
         );
-        await user.click(renderResult.getByTestId('processTreeNodeAlertButton'));
+        const button = renderResult.getByTestId('processTreeNodeAlertButton');
+        expect(button).toHaveAttribute('aria-expanded', 'false');
+        await user.click(button);
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
-        await user.click(renderResult.getByTestId('processTreeNodeAlertButton'));
+        expect(button).toHaveAttribute('aria-expanded', 'true');
+        await user.click(button);
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeFalsy();
+        expect(button).toHaveAttribute('aria-expanded', 'false');
       });
     });
 
@@ -309,17 +313,17 @@ describe('ProcessTreeNode component', () => {
           <ProcessTreeNode {...props} process={processMockWithChildren} />
         );
 
+        const button = renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton');
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);
+        expect(button).toHaveAttribute('aria-expanded', 'false');
 
-        await user.click(
-          renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton')
-        );
+        await user.click(button);
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(2);
+        expect(button).toHaveAttribute('aria-expanded', 'true');
 
-        await user.click(
-          renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton')
-        );
+        await user.click(button);
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);
+        expect(button).toHaveAttribute('aria-expanded', 'false');
       });
     });
     describe('Search', () => {
