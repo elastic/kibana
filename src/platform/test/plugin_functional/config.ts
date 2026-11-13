@@ -70,6 +70,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           __dirname,
           '../../test_plugins/kbn_tp_custom_visualizations'
         )}`,
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../test_plugins/plugin_functional/plugins')
+        ),
       ],
     },
   };
