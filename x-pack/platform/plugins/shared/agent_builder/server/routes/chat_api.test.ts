@@ -477,7 +477,7 @@ describe('POST /api/chat/message', () => {
     return { executeAgent, response, result };
   };
 
-  it('registers the route as public + experimental with request and response validation', () => {
+  it('registers the route as public + tech preview with request and response validation', () => {
     const registrations: Array<{ config: any; version: any }> = [];
     const router = {
       versioned: {
@@ -506,11 +506,11 @@ describe('POST /api/chat/message', () => {
         access: 'public',
         options: expect.objectContaining({
           tags: ['oas-tag:agent builder'],
-          availability: { stability: 'experimental', since: '9.6.0' },
+          availability: { stability: 'tech_preview', since: '9.6.0' },
         }),
       })
     );
-    expect(registration.config.description).toContain('agentBuilder:experimentalFeatures');
+    expect(registration.config.description).not.toContain('agentBuilder:experimentalFeatures');
     expect(registration.version.options.oasOperationObject()).toMatch(/chat_message\.yaml$/);
     expect(registration.version).toEqual(
       expect.objectContaining({
@@ -570,15 +570,18 @@ describe('POST /api/chat/message', () => {
     });
   });
 
-  it('answers 404 and never runs the agent when the experimental feature flag is disabled', async () => {
+  it('serves the route when the experimental feature flag is disabled', async () => {
     const { executeAgent, response, result } = await sendMessage({
       body: { message: 'Hello' },
       flagEnabled: false,
     });
 
-    expect(response.notFound).toHaveBeenCalledTimes(1);
-    expect(executeAgent).not.toHaveBeenCalled();
-    expect(result).toEqual({ status: 404 });
+    expect(response.notFound).not.toHaveBeenCalled();
+    expect(executeAgent).toHaveBeenCalledTimes(1);
+    expect(result).toStrictEqual({
+      status: 200,
+      payload: { conversation_id: 'conv-1', answer: 'Hi!' },
+    });
   });
 
   it('maps an agent-not-found execution error to a 404 through the handler wrapper', async () => {

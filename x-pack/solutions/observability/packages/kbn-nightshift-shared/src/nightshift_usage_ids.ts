@@ -22,3 +22,5 @@ export const NIGHTSHIFT_DISCOVERY_USAGE_ID = 'nightshift_discovery' as const;
 export const NIGHTSHIFT_INVESTIGATION_USAGE_ID = 'nightshift_investigation' as const;
 
 export const NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID = 'nightshift_investigation_memory' as const;
+
+export const NIGHTSHIFT_ONLINE_EVALS_USAGE_ID = 'nightshift_online_evals' as const;

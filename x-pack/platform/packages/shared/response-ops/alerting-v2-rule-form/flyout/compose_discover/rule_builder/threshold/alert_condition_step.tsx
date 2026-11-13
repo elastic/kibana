@@ -96,6 +96,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     http: services.http,
     application: services.application,
     getDatasets: () => getDatasets(services.http),
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
@@ -109,6 +110,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     http: services.http,
     dataViews: services.dataViews,
     search: services.data.search.search,
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const numericFields = useMemo(
@@ -155,6 +157,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     http: services.http,
     dataViews: services.dataViews,
     search: services.data.search.search,
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { userStorageServiceMock } from '@kbn/core-user-storage-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import {
   registerNotificationUserStorage,
   readAllBeforeSchema,
@@ -17,7 +17,7 @@ import {
 } from './user_storage';
 
 const collectRegistrations = () => {
-  const userStorage = userStorageServiceMock.createSetupContract();
+  const { userStorage } = coreMock.createSetup();
   registerNotificationUserStorage(userStorage);
   expect(userStorage.register).toHaveBeenCalledTimes(1);
   return userStorage.register.mock.calls[0][0];

@@ -11,9 +11,12 @@ import { ACTION_POLICY_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { expect } from '@kbn/scout/ui';
 import {
   agentChatTest as test,
+  buildCreateActionPolicyData,
+  mockAttachActionPolicy,
   mockFinalAnswerRenderingActionPolicyAttachment,
   mockLoadSkill,
   mockManageActionPolicy,
+  mockManageAttachedActionPolicy,
   mockTitleGeneration,
   type AlertingPageObjects,
 } from '../fixtures';
@@ -25,6 +28,7 @@ import {
  * error boundary.
  */
 const POLICY_DESCRIPTION = 'Created from the canvas spec';
+const EDITED_POLICY_DESCRIPTION = 'Edited by the agent in the canvas spec';
 const ROUTING_TAG = 'scout-canvas-routing';
 const AGENT_BUILDER_PUBLIC_API_HEADERS = {
   'Content-Type': 'application/json',
@@ -90,15 +94,24 @@ test.describe(
 
     const expectCanvasContent = async (pageObjects: AlertingPageObjects, policyName: string) => {
       const { canvas, renderErrorCallout } = pageObjects.agentChat;
-      await expect(canvas.getByRole('heading', { name: policyName, level: 2 })).toBeVisible();
-      for (const term of ['Description', 'Matcher', 'Dispatch per', 'Frequency', 'Destinations']) {
-        await expect(canvas.getByText(term, { exact: true })).toBeVisible();
-      }
-      await expect(canvas.getByText(POLICY_DESCRIPTION)).toBeVisible();
-      await expect(canvas.getByText('Rule routing tags include')).toBeVisible();
-      await expect(canvas.getByText(ROUTING_TAG, { exact: true })).toBeVisible();
-      await expect(canvas.getByText('On status change', { exact: true })).toBeVisible();
-      await expect(canvas.getByText(workflowName)).toBeVisible();
+      // The policy name is the title of the Agent Builder canvas header, not part of the canvas body.
+      await expect(canvas.getByText(policyName, { exact: true })).toBeVisible();
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutDefinition')).toBeVisible();
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutNotification')).toBeVisible();
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutDestinations')).toBeVisible();
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutDescriptionBlock')).toContainText(
+        POLICY_DESCRIPTION
+      );
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutPolicyScopeBlock')).toContainText(
+        ROUTING_TAG
+      );
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutDispatchModeBlock')).toContainText(
+        'Alert'
+      );
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutFrequencyBlock')).toContainText(
+        'On status change'
+      );
+      await expect(canvas.getByTestId('actionPolicyDestinationCard')).toContainText(workflowName);
       await expect(renderErrorCallout).toHaveCount(0);
     };
 
@@ -265,6 +278,72 @@ test.describe(
       await pageObjects.agentChat.openAttachmentCanvas();
 
       await expectCanvasContent(pageObjects, policyName);
+    });
+
+    test('flags an agent edit to a saved policy until Update Policy saves it', async ({
+      page,
+      pageObjects,
+      llmProxy,
+      apiServices,
+    }) => {
+      const policyName = uniquePolicyName('Canvas edited policy');
+      policyNames.push(policyName);
+      const { id: policyId } = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: policyName,
+          description: POLICY_DESCRIPTION,
+          destinations: [{ type: 'workflow', id: workflowId }],
+          matcher: { tags: [ROUTING_TAG] },
+        })
+      );
+
+      await test.step('the agent attaches the saved policy and edits it', async () => {
+        // Each interceptor expires 30s after it is registered, so register after the app loads.
+        await pageObjects.agentChat.goto();
+        mockTitleGeneration(llmProxy, policyName);
+        mockLoadSkill(llmProxy, ACTION_POLICY_AUTHORING_SKILL_ID);
+        mockAttachActionPolicy(llmProxy, policyId);
+        mockManageAttachedActionPolicy(llmProxy, [
+          { operation: 'set_metadata', name: policyName, description: EDITED_POLICY_DESCRIPTION },
+        ]);
+        // attach_action_policy creates version 1 from the saved policy; the edit creates version 2.
+        mockFinalAnswerRenderingActionPolicyAttachment(
+          llmProxy,
+          'I updated the policy description.',
+          2
+        );
+
+        await pageObjects.agentChat.sendMessage(`Update the description of ${policyName}`);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        await page.waitForURL(PERSISTED_CONVERSATION_URL);
+        trackConversation(page);
+        await expect(pageObjects.agentChat.previewButton).toBeVisible({ timeout: 60_000 });
+      });
+
+      await test.step('both headers show unsaved changes', async () => {
+        await expect(pageObjects.agentChat.inlineUnsavedChangesBadge).toBeVisible();
+        await pageObjects.agentChat.openAttachmentCanvas();
+        await expect(pageObjects.agentChat.canvasUnsavedChangesBadge).toBeVisible();
+        await expect(
+          pageObjects.agentChat.canvas.getByText(EDITED_POLICY_DESCRIPTION)
+        ).toBeVisible();
+      });
+
+      await test.step('Update Policy saves the edit and clears the canvas badge', async () => {
+        await pageObjects.agentChat.canvasAction('Update Policy').click();
+
+        await expect(
+          page.getByText(`Policy "${policyName}" updated`, { exact: true })
+        ).toBeVisible();
+        await expect(pageObjects.agentChat.canvasUnsavedChangesBadge).toHaveCount(0);
+        const { description } = await apiServices.alertingV2.actionPolicies.get(policyId);
+        expect(description).toBe(EDITED_POLICY_DESCRIPTION);
+      });
+
+      await test.step('the inline badge clears once the canvas closes', async () => {
+        await pageObjects.agentChat.closeAttachmentCanvas();
+        await expect(pageObjects.agentChat.inlineUnsavedChangesBadge).toHaveCount(0);
+      });
     });
   }
 );

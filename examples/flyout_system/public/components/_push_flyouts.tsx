@@ -149,6 +149,7 @@ const SystemFlyout: React.FC<SystemFlyoutProps> = ({
         id: `pushFlyout-${slug(label)}`,
         'data-test-subj': `pushFlyout-${slug(label)}`,
         session: 'start',
+        flyoutMenuProps: { title: label },
         type,
         size: storedWidth ?? 's',
         resizable: true,

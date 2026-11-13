@@ -14,17 +14,9 @@ import {
   useSvgAiGradient,
 } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
-import type { InvestigationStatus } from '@kbn/investigation-output';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
-import {
-  getInvestigationWorkflowStatusLabel,
-  isInvestigationInvestigated,
-  isInvestigationTerminalFailure,
-} from '../../../common/investigation_progress_status';
-import {
-  getInvestigationStatusLabel,
-  isEventInvestigated,
-} from '../significant_event/significant_event_status';
+import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { getInvestigationProgressStatusLabel } from '../../../common/investigation_progress_status';
+import { getInvestigationState } from '../../../data/significant_events/investigation_state';
 import { nightshiftReducedMotionStyles } from '../../../common/transition';
 
 // Staggered offsets so the dots pulse in sequence (typing-indicator effect).
@@ -355,66 +347,23 @@ function InvestigatedStatus({ label }: { label: string }) {
   return <GradientOutlinedStatusBadge label={label} testSubj="nightshiftInvestigatedStatus" />;
 }
 
-function InvestigationTerminalFailureStatus({ label }: { label: string }) {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <EuiBadge
-      color="hollow"
-      iconType="cross"
-      iconSide="left"
-      data-test-subj="nightshiftInvestigationFailedStatus"
-      css={css`
-        color: ${euiTheme.colors.textDanger};
-      `}
-    >
-      {label}
-    </EuiBadge>
-  );
-}
-
 /**
- * Animated "Investigating" badge while the latest investigation is in progress,
- * AI-gradient "Investigated" badge once it has completed. Shared between the
- * event list items and the flyout header. Returns null when the event has no
- * investigations so unresolved/resolved events without runs stay unlabeled.
+ * Animated "Investigating" badge while the event's investigation is in progress, AI-gradient
+ * "Investigated" badge once it has completed, and nothing otherwise.
  */
 export function InvestigationStatusBadge({
   event,
-  investigationStatus,
 }: {
-  event: Pick<SignificantEvent, 'investigations'>;
-  investigationStatus?: InvestigationStatus | null;
+  event: Pick<SignificantEventResponse, 'investigation_state'>;
 }): React.ReactElement | null {
-  if (investigationStatus === null) {
-    return null;
+  const state = getInvestigationState(event);
+  if (state === 'in_progress') {
+    return <InvestigatingStatus label={getInvestigationProgressStatusLabel(false)} />;
   }
-
-  const hasInvestigation = investigationStatus != null || (event.investigations?.length ?? 0) > 0;
-  if (!hasInvestigation) {
-    return null;
+  if (state === 'completed') {
+    return <InvestigatedStatus label={getInvestigationProgressStatusLabel(true)} />;
   }
-
-  const isInvestigated =
-    investigationStatus != null
-      ? isInvestigationInvestigated(investigationStatus)
-      : isEventInvestigated(event);
-  const label =
-    investigationStatus != null
-      ? getInvestigationWorkflowStatusLabel(investigationStatus)
-      : getInvestigationStatusLabel(event);
-  const isTerminalFailure =
-    investigationStatus != null && isInvestigationTerminalFailure(investigationStatus);
-
-  if (isInvestigated) {
-    return <InvestigatedStatus label={label} />;
-  }
-
-  if (isTerminalFailure) {
-    return <InvestigationTerminalFailureStatus label={label} />;
-  }
-
-  return <InvestigatingStatus label={label} />;
+  return null;
 }
 
 export {

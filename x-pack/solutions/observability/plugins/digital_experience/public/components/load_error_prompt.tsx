@@ -10,6 +10,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../ebt_constants';
+import { httpErrorMessage } from '../utils/http_error_message';
 
 const RETRY_LABEL = i18n.translate('xpack.digitalExperience.loadError.retryButtonLabel', {
   defaultMessage: 'Try again',
@@ -37,7 +38,7 @@ export function LoadErrorPrompt({
       iconType="warning"
       color="danger"
       title={<h2>{title}</h2>}
-      body={<p>{error.message}</p>}
+      body={<p>{httpErrorMessage(error)}</p>}
       actions={
         <EuiButton
           data-test-subj={retryDataTestSubj}

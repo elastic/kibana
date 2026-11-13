@@ -12,3 +12,9 @@ export const ellipsisCss = css`
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
+
+/** EUI's cell content box is a flex row, so the cell must fill it for `text-align` to have room to move. */
+export const alignEndCss = css`
+  inline-size: 100%;
+  text-align: end;
+`;

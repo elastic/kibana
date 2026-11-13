@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/serverless'
   - '@kbn/react-kibana-context-theme'
+  - '@kbn/react-query'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/shared-ux-utility'
   - '@kbn/core-lifecycle-browser'
@@ -42,6 +43,7 @@ tags:
   - prod
   - group-search
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts

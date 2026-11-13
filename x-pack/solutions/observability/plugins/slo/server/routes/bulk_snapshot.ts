@@ -7,7 +7,7 @@
 
 import path from 'path';
 import { badRequest } from '@hapi/boom';
-import { bulkSnapshotParamsSchema } from '@kbn/slo-schema';
+import { bulkSnapshotParamsSchema, snapshotResponseSchema } from '@kbn/slo-schema';
 import { SnapshotService } from '../services/snapshot_service';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -29,6 +29,9 @@ export const bulkSnapshotRoute = createSloServerRoute({
     },
   },
   params: bulkSnapshotParamsSchema,
+  responses: {
+    200: { description: 'Successful response', body: () => snapshotResponseSchema },
+  },
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     const { at, requests } = params.body;
 

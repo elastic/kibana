@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Parser, Walker, isStringLiteral } from '@elastic/esql';
 import { getESQLQuery, getESQLQueryFromIndexPattern, getApmIndexPattern } from './get_esql_query';
 import {
   EXCEPTION_MESSAGE,
@@ -343,6 +344,104 @@ describe('getESQLQuery', () => {
       });
 
       expect(result).toContain('WHERE KQL("user.id: \\"123\\"")');
+    });
+
+    // Inline on purpose: `getKqlSearchQueries` in @kbn/esql-utils does the same, but it trims the
+    // values (which would hide whitespace changes), drops parse errors, and would add a package
+    // dependency to the APM plugin just for this test.
+    const getKqlLiterals = (query: string) => {
+      const { root, errors } = Parser.parse(query);
+      const literals: string[] = [];
+      Walker.walk(root, {
+        visitFunction: (fn) => {
+          const [arg] = fn.args;
+          if (fn.name.toLowerCase() === 'kql' && isStringLiteral(arg)) {
+            literals.push(arg.valueUnquoted);
+          }
+        },
+      });
+      return { errors, literals };
+    };
+
+    /**
+     * The kuery comes from the user's query bar and is embedded in an ES|QL string literal.
+     * The printed query must parse cleanly AND the literal must decode back to exactly the
+     * kuery the user typed, so no character is lost or reinterpreted along the way.
+     */
+    it.each([
+      [
+        'nested/unbalanced double quotes',
+        'url.query: "filter=+type:"INDIVIDUAL"+AND+NOT+status:"NNA""',
+      ],
+      ['wildcard inside a quoted phrase', 'status.message : "Last loaded AES TIK for*"'],
+      ['plain quoted value', 'error.exception.type:"AppExceptionsServiceException"'],
+      ['escaped colon', 'labels.in\\:correlationid :"abc"'],
+      ['wildcards and escaped colons', '* \\:* \\:"* "'],
+      ['escaped quote inside a phrase', 'message: "say \\"hi\\""'],
+      ['trailing backslash', 'path: C\\\\'],
+      ['lone double quote', '"'],
+      ['lone backslash', '\\'],
+      ['ES|QL placeholder characters', 'a: ?param and b: ??ident'],
+      ['backticks and dollar signs', 'a: `b` and c: $d'],
+      ['comment markers inside a phrase', 'a: "/* x */" or b: "// y"'],
+      ['a pipe followed by another command', 'a: 1 | LIMIT 1'],
+      ['tab and newline', 'a: x\tand\nb: y'],
+      ['leading and trailing whitespace', '  a: 1  '],
+      ['non-ASCII characters', 'name: "żółć ü é 日本"'],
+      ['KQL ranges and boolean operators', 'a > 5 and not (b < 3 or c: *)'],
+    ])('keeps a kuery with %s intact as a single KQL string literal', (_, kuery) => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { kuery },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).not.toBeNull();
+      const { errors, literals } = getKqlLiterals(result!);
+      expect(errors).toHaveLength(0);
+      expect(literals).toEqual([kuery]);
+    });
+
+    it('emits one KQL command per kuery source, in order, each parseable', () => {
+      const result = getESQLQueryFromIndexPattern({
+        indexPattern: 'logs-*',
+        params: {
+          environment: ENVIRONMENT_NOT_DEFINED_VALUE,
+          exceptionsOnly: true,
+          kuery: 'url.query: "a"b""',
+        },
+      });
+
+      const { errors, literals } = getKqlLiterals(result);
+      expect(errors).toHaveLength(0);
+      expect(literals).toHaveLength(3);
+      expect(literals[0]).toContain(SERVICE_ENVIRONMENT);
+      expect(literals[1]).toContain(OTEL_EVENT_NAME);
+      expect(literals[2]).toBe('url.query: "a"b""');
+    });
+
+    it('does not add a KQL command for an empty kuery', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { kuery: '' },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).not.toContain('KQL(');
+    });
+
+    it('does not let a kuery break out of the string literal to inject another command', () => {
+      const kuery = '") | DROP service.name | WHERE KQL("';
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { kuery },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      // The payload must stay inside the escaped literal: one FROM and one WHERE, nothing else.
+      const { root } = Parser.parse(result!);
+      expect(root.commands.map((command) => command.name)).toEqual(['from', 'where']);
+      expect(getKqlLiterals(result!).literals).toEqual([kuery]);
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { JsonValue } from '@kbn/utility-types';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
@@ -26,7 +26,7 @@ export const MAX_ALERTS_PER_INVESTIGATION = 20;
 // A rule type writes one evaluation entry per metric or criterion, so this bounds a hostile
 // array rather than a realistic rule.
 const MAX_EVALUATION_ENTRIES = 20;
-const MAX_V2_ALERT_DATA_LENGTH = 32_000;
+export const MAX_V2_ALERT_DATA_LENGTH = 32_000;
 
 export const investigationSubjectTypeSchema = z.enum(INVESTIGATION_SUBJECT_TYPES);
 
@@ -175,26 +175,28 @@ export const alertSnapshotSchema = z.object({
  * classic alert it has no rule type, category or reason, and the alert's own fields live in
  * `data`.
  */
-export const v2AlertSnapshotSchema = z.object({
-  alert_version: z.literal('v2'),
-  /** `episode.id` */
-  id: z.string().min(1).max(500),
-  rule_id: z.string().min(1).max(500),
-  rule_name: z.string().min(1).max(500).optional(),
-  group_hash: z.string().min(1).max(500),
-  /** `episode.status` */
-  status: z.string().min(1).max(100),
-  /** Timestamp of the episode's first event. */
-  start: isoDateTime({ offset: true }).max(100),
-  last_event_timestamp: isoDateTime({ offset: true }).max(100).optional(),
-  severity: z.string().min(1).max(100).optional(),
-  source: z.string().min(1).max(500).optional(),
-  /** The `data` of the latest event that carried any. */
-  data: z
-    .record(z.string().max(128), z.unknown())
-    .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
-    .optional(),
-});
+export const v2AlertSnapshotSchema = lazySchema(() =>
+  z.object({
+    alert_version: z.literal('v2'),
+    /** `episode.id` */
+    id: z.string().min(1).max(500),
+    rule_id: z.string().min(1).max(500).optional(),
+    rule_name: z.string().min(1).max(500).optional(),
+    group_hash: z.string().min(1).max(500),
+    /** `episode.status` */
+    status: z.string().min(1).max(100),
+    /** Timestamp of the episode's first event. */
+    start: isoDateTime({ offset: true }).max(100),
+    last_event_timestamp: isoDateTime({ offset: true }).max(100).optional(),
+    severity: z.string().min(1).max(100).optional(),
+    source: z.string().min(1).max(500).optional(),
+    /** The `data` of the latest event that carried any. */
+    data: z
+      .record(z.string().max(128), z.unknown())
+      .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
+      .optional(),
+  })
+);
 
 export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_version', [
   alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
@@ -209,11 +211,14 @@ export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_vers
  * believing the attach happened. If a single investigation ever needs several triggers, that is a
  * deliberate change to the subject shape, not an extra key smuggled through the context.
  */
-export const alertInvestigationContextSchema = z
-  .object({
-    alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
-  })
-  .strict();
+export const alertInvestigationContextSchema = lazySchema(() =>
+  z
+    .object({
+      alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
+      source_workflow_execution_id: z.string().trim().min(1).max(500).optional(),
+    })
+    .strict()
+);
 
 /**
  * Legacy `event_uuid` key, kept optional and id-shaped. The workflow no longer interpolates it
@@ -233,12 +238,14 @@ const significantEventUuidSchema = z
  * add a field. Only the key with a hazard attached is constrained; the bounds on key count and key
  * length stay, so an open context is still not an unbounded one.
  */
-export const freeFormContextSchema = z
-  .looseObject({ event_uuid: significantEventUuidSchema.optional() })
-  .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
-  .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
-    message: 'context has a key longer than 128 characters',
-  });
+export const freeFormContextSchema = lazySchema(() =>
+  z
+    .looseObject({ event_uuid: significantEventUuidSchema.optional() })
+    .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
+    .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
+      message: 'context has a key longer than 128 characters',
+    })
+);
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
 export type InvestigationNotificationDestination = z.infer<

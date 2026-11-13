@@ -10,11 +10,12 @@ import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiButtonEmpty,
+  EuiDelayRender,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSkeletonText,
   EuiTitle,
@@ -31,12 +32,15 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common
 import { RETRY_BUTTON_LABEL } from '../../../common/messages';
 import type { SeverityDotColor } from '../../../common/severity';
 import { SEVERITY_DOT_COLOR } from '../../../common/severity';
+import { ShowMoreButton } from '../../ui/show_more_button';
+import { INVESTIGATIONS_PAGE_SIZE } from '../../../data/investigations/use_fetch_investigations';
 import type {
   InvestigationSectionId,
   InvestigationSectionState,
 } from '../../../data/investigations/use_investigation_sections';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationCardActions } from './investigation_card_actions';
+import { useInvestigationAssignees } from './use_investigation_assignees';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
@@ -55,6 +59,8 @@ export interface InvestigationSectionProps {
   onToggle?: (isOpen: boolean) => void;
   /** Briefly draws the section's border in its severity colour, after a jump lands on it. */
   isHighlighted?: boolean;
+  /** A new search, filter or time range is loading while the previous rows are still shown. */
+  isLoadingNewFilters?: boolean;
 }
 
 /** Set on a section by the list, to the height of the sticky page header that would cover it. */
@@ -143,10 +149,15 @@ export const isInvestigationSectionVisible = (section: InvestigationSectionState
 const SectionCard = ({
   children,
   highlightColor,
+  isLoading = false,
+  loadingTestSubj,
 }: {
   children: React.ReactNode;
   /** Set while the card is highlighted. */
   highlightColor?: SeverityDotColor;
+  /** Draws the blue loading line tables show, once loading has taken a moment. */
+  isLoading?: boolean;
+  loadingTestSubj?: string;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const strongBorderColors: Record<SeverityDotColor, string> = {
@@ -174,6 +185,17 @@ const SectionCard = ({
         }
       `}
     >
+      {isLoading && (
+        // The delay keeps a fast load from flashing the line.
+        <EuiDelayRender delay={300}>
+          <EuiProgress
+            data-test-subj={loadingTestSubj}
+            size="xs"
+            color="primary"
+            position="absolute"
+          />
+        </EuiDelayRender>
+      )}
       {children}
     </EuiPanel>
   );
@@ -294,14 +316,28 @@ const RetryCallout = ({
 
 const SectionRows = ({
   investigations,
+  remaining,
+  hasMore,
+  isLoadingMore,
+  presentation,
+  onShowMore,
   selectedInvestigationId,
   onInvestigationClick,
 }: Pick<
   InvestigationSectionProps,
-  'investigations' | 'selectedInvestigationId' | 'onInvestigationClick'
->): React.ReactElement => {
+  | 'investigations'
+  | 'hasMore'
+  | 'isLoadingMore'
+  | 'onShowMore'
+  | 'selectedInvestigationId'
+  | 'onInvestigationClick'
+> & {
+  remaining: number;
+  presentation: SectionPresentation;
+}): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
+  const renderAssignees = useInvestigationAssignees(investigations);
 
   return (
     <SectionBlock paddingSize="none">
@@ -334,51 +370,45 @@ const SectionRows = ({
             {InvestigationCard && (
               <InvestigationCard
                 investigation={investigation}
+                // Newest activity first, so the age shown is when it last changed.
+                timestamp="updated"
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
-                actions={<InvestigationCardActions investigation={investigation} />}
+                actions={
+                  <InvestigationCardActions
+                    investigation={investigation}
+                    assignees={renderAssignees(investigation)}
+                  />
+                }
               />
             )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+      {hasMore && remaining > 0 && (
+        <ShowMoreButton
+          count={INVESTIGATIONS_PAGE_SIZE}
+          remaining={remaining}
+          isLoading={isLoadingMore}
+          onClick={onShowMore}
+          data-test-subj={`nightshiftInvestigationSectionShowMore-${presentation.id}`}
+          // Six sections each render a "Show more", so the accessible name has to say which one.
+          aria-label={i18n.translate('xpack.nightshift.investigations.sectionShowMoreAriaLabel', {
+            defaultMessage: 'Show {count} more {sectionTitle} investigations',
+            values: {
+              count: Math.min(INVESTIGATIONS_PAGE_SIZE, remaining),
+              sectionTitle: presentation.title,
+            },
+          })}
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.SHOW_MORE_INVESTIGATIONS,
+            element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+          })}
+        />
+      )}
     </SectionBlock>
   );
 };
-
-const ShowMoreButton = ({
-  presentation: { id, title },
-  isLoadingMore,
-  onShowMore,
-}: {
-  presentation: SectionPresentation;
-  isLoadingMore: boolean;
-  onShowMore: () => void;
-}): React.ReactElement => (
-  <EuiFlexGroup justifyContent="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        data-test-subj={`nightshiftInvestigationSectionShowMore-${id}`}
-        // Six sections each render a "Show more", so the accessible name has to say which one.
-        aria-label={i18n.translate('xpack.nightshift.investigations.sectionShowMoreAriaLabel', {
-          defaultMessage: 'Show more {sectionTitle} investigations',
-          values: { sectionTitle: title },
-        })}
-        isLoading={isLoadingMore}
-        size="s"
-        onClick={onShowMore}
-        {...getEbtProps({
-          action: NIGHTSHIFT_EBT_ACTIONS.SHOW_MORE_INVESTIGATIONS,
-          element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
-        })}
-      >
-        {i18n.translate('xpack.nightshift.investigations.showMoreButtonLabel', {
-          defaultMessage: 'Show more',
-        })}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 export const InvestigationSection = ({
   id,
@@ -395,6 +425,7 @@ export const InvestigationSection = ({
   isOpen = true,
   onToggle,
   isHighlighted = false,
+  isLoadingNewFilters = false,
 }: InvestigationSectionProps): React.ReactElement | null => {
   const { euiTheme } = useEuiTheme();
   const presentation = getSectionPresentation(id);
@@ -428,18 +459,14 @@ export const InvestigationSection = ({
             )}
             <SectionRows
               investigations={investigations}
+              remaining={Math.max(0, total - investigations.length)}
+              hasMore={hasMore}
+              isLoadingMore={isLoadingMore}
+              presentation={presentation}
+              onShowMore={onShowMore}
               selectedInvestigationId={selectedInvestigationId}
               onInvestigationClick={onInvestigationClick}
             />
-            {hasMore && (
-              <SectionBlock>
-                <ShowMoreButton
-                  presentation={presentation}
-                  isLoadingMore={isLoadingMore}
-                  onShowMore={onShowMore}
-                />
-              </SectionBlock>
-            )}
           </>
         );
       default: {
@@ -485,6 +512,8 @@ export const InvestigationSection = ({
         <h2 id={presentation.headingId}>{presentation.title}</h2>
       </EuiScreenReaderOnly>
       <SectionCard
+        isLoading={isLoadingNewFilters}
+        loadingTestSubj={`nightshiftInvestigationSectionLoading-${id}`}
         highlightColor={
           isHighlighted && presentation.severity != null
             ? SEVERITY_DOT_COLOR[presentation.severity]
