@@ -38,6 +38,8 @@ export interface SearchParams {
   end: number;
   /** Only this environment's data when set. */
   environment?: string;
+  /** IANA time zone the histogram buckets line up with. */
+  timeZone: string;
 }
 
 export interface SpansSearchParams extends SearchParams {
@@ -46,7 +48,12 @@ export interface SpansSearchParams extends SearchParams {
 }
 
 /** Page loads, JS errors and web vitals per application, from the logs. */
-export const logsSearch = ({ start, end, environment }: SearchParams): estypes.SearchRequest => ({
+export const logsSearch = ({
+  start,
+  end,
+  environment,
+  timeZone,
+}: SearchParams): estypes.SearchRequest => ({
   ...otelSearchDefaults(OTEL_LOGS_INDEX),
   query: {
     bool: {
@@ -81,7 +88,7 @@ export const logsSearch = ({ start, end, environment }: SearchParams): estypes.S
     },
     pageLoadsOverTime: {
       ...eventCount(EVENT_NAVIGATION_TIMING),
-      aggs: { histogram: dateHistogram(start, end) },
+      aggs: { histogram: dateHistogram(start, end, timeZone) },
     },
   }),
 });

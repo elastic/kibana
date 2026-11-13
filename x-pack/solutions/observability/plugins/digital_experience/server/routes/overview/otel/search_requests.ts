@@ -52,6 +52,8 @@ export interface OverviewSearchParams {
   percentile?: OverviewPercentile;
   /** Only the documents this query (the Overview's KQL, as a query) matches. */
   kuery?: estypes.QueryDslQueryContainer;
+  /** IANA time zone the trend buckets line up with. */
+  timeZone: string;
 }
 
 /**
@@ -72,6 +74,7 @@ export const logsSearch = ({
   filters = {},
   percentile = DEFAULT_OVERVIEW_PERCENTILE,
   kuery,
+  timeZone,
 }: OverviewSearchParams): estypes.SearchRequest => ({
   ...otelSearchDefaults(OTEL_LOGS_INDEX),
   runtime_mappings: filterRuntimeMappings(),
@@ -106,7 +109,7 @@ export const logsSearch = ({
             loadTimeSamples: countOf(NAVIGATION_TIMING_LOAD_EVENT_END),
             // The counts of the trend sum to the page loads, and both charts share its buckets.
             trend: {
-              ...dateHistogram(start, end),
+              ...dateHistogram(start, end, timeZone),
               aggs: { loadTime: percentileOf(NAVIGATION_TIMING_LOAD_EVENT_END, percentile) },
             },
           },

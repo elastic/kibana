@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { DEFAULT_OVERVIEW_PERCENTILE } from '../../../../common/overview_filters';
 import type { ApplicationOverviewResponse } from '../../../../common/types/overview';
 import { sortEnvironments } from '../../../lib/helpers/environment';
+import { getHistogramInterval } from '../../../lib/helpers/time_series';
 import { pickerEnvironments } from '../../../lib/otel/environments';
 import { toFilterOptions } from '../../../lib/otel/overview_filters';
 import { OVERVIEW_SEARCH_SPAN_NAME } from '../constants';
@@ -43,6 +44,7 @@ const searchOtelOverview = async ({
     overview: toOverview(
       searchParams.serviceName,
       searchParams.percentile ?? DEFAULT_OVERVIEW_PERCENTILE,
+      getHistogramInterval(searchParams.start, searchParams.end),
       logs,
       spans
     ),

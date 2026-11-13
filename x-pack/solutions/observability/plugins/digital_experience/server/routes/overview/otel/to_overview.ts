@@ -6,6 +6,7 @@
  */
 
 import type { OverviewPercentile } from '../../../../common/overview_filters';
+import type { HistogramInterval } from '../../../../common/types/applications';
 import type { ApplicationOverview, OverviewTrendPoint } from '../../../../common/types/overview';
 import { getPercentile } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
@@ -30,6 +31,7 @@ const toTrend = (logs?: OverviewLogsAggregations): OverviewTrendPoint[] =>
 export const toOverview = (
   serviceName: string,
   percentile: OverviewPercentile,
+  trendInterval: HistogramInterval,
   logs?: OverviewLogsAggregations,
   spans?: OverviewSpansAggregations
 ): ApplicationOverview => {
@@ -49,5 +51,6 @@ export const toOverview = (
     ),
     webVitals: metrics ? toWebVitals(metrics) : NO_WEB_VITALS,
     trend: toTrend(logs),
+    trendInterval,
   };
 };

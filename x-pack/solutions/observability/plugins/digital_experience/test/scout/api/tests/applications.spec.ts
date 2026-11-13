@@ -5,14 +5,26 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
+import type { ApplicationOverviewResponse } from '../../../../common/types/overview';
 import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
+const localTime = (timestamp: number) => moment.tz(timestamp, testData.NEW_YORK_TIME_ZONE);
+const isLocalMidnight = (timestamp: number) => localTime(timestamp).format('HH:mm') === '00:00';
+const isLocalMidnightOrNoon = (timestamp: number) =>
+  ['00:00', '12:00'].includes(localTime(timestamp).format('HH:mm'));
+
 const {
+  ACROSS_DAYLIGHT_SAVING,
+  NEW_YORK_TIME_ZONE,
+  OVERVIEW_PATH,
+  THIRTY_DAYS,
+  withQuery,
   APM_ONLY_ROLE,
   APPLICATIONS_IN_TIME_RANGE_PATH,
   APPLICATIONS_PATH,
@@ -184,5 +196,99 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
         expect(response).toHaveStatusCode(200);
       });
     }
+  });
+
+  apiTest(
+    'buckets the page loads over time by 12 hours in the time zone',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(
+        withQuery(APPLICATIONS_PATH, { ...THIRTY_DAYS, timeZone: NEW_YORK_TIME_ZONE }),
+        { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      const { applications, pageLoadsOverTime } = response.body as ApplicationsResponse;
+      expect(pageLoadsOverTime.interval).toStrictEqual({ value: 43200, unit: 's' });
+      expect(pageLoadsOverTime.otel.length).toBeGreaterThan(0);
+      expect(
+        pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnightOrNoon(timestamp))
+      ).toBe(true);
+
+      const bucketed = pageLoadsOverTime.otel.reduce((sum, { count }) => sum + count, 0);
+      const total = applications
+        .filter(({ source }) => source === 'otel')
+        .reduce((sum, { pageLoads }) => sum + pageLoads.count, 0);
+      expect(bucketed).toBe(total);
+    }
+  );
+
+  apiTest(
+    'buckets the page loads over time by local days across a daylight saving change',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(
+        withQuery(APPLICATIONS_PATH, { ...ACROSS_DAYLIGHT_SAVING, timeZone: NEW_YORK_TIME_ZONE }),
+        { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      const { pageLoadsOverTime } = response.body as ApplicationsResponse;
+      expect(pageLoadsOverTime.interval).toStrictEqual({ value: 1, unit: 'd' });
+      expect(pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnight(timestamp))).toBe(
+        true
+      );
+      // 2021-03-14 has 23 hours in New York.
+      const hours = pageLoadsOverTime.otel
+        .slice(1)
+        .map(
+          ({ timestamp }, index) => (timestamp - pageLoadsOverTime.otel[index].timestamp) / 36e5
+        );
+      expect(hours).toContain(23);
+    }
+  );
+
+  apiTest('buckets the Overview trend in the time zone', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+    const response = await apiClient.get(
+      withQuery(OVERVIEW_PATH, { ...THIRTY_DAYS, timeZone: NEW_YORK_TIME_ZONE }),
+      { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+    );
+
+    expect(response).toHaveStatusCode(200);
+    const { trend, trendInterval } = (response.body as ApplicationOverviewResponse).overview;
+    expect(trendInterval).toStrictEqual({ value: 43200, unit: 's' });
+    expect(trend.length).toBeGreaterThan(0);
+    expect(trend.every(({ timestamp }) => isLocalMidnightOrNoon(timestamp))).toBe(true);
+  });
+
+  apiTest('returns 400 for an unknown time zone', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+    const headers = { ...COMMON_HEADERS, ...cookieHeader };
+
+    const response = await apiClient.get(`${APPLICATIONS_IN_TIME_RANGE_PATH}&timeZone=Not/AZone`, {
+      headers,
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('buckets in UTC without a time zone', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+    const response = await apiClient.get(withQuery(APPLICATIONS_PATH, THIRTY_DAYS), {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    const { pageLoadsOverTime } = response.body as ApplicationsResponse;
+    expect(pageLoadsOverTime.otel.length).toBeGreaterThan(0);
+    expect(
+      pageLoadsOverTime.otel.every(({ timestamp }) => timestamp % (12 * 60 * 60 * 1000) === 0)
+    ).toBe(true);
   });
 });

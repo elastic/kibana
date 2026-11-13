@@ -16,7 +16,7 @@ const applicationsOf = (request: ReturnType<typeof logsSearch>) =>
   (request.aggs?.inEnvironment as { aggs: { applications: ApplicationsAggregation } }).aggs
     .applications;
 
-const PARAMS = { start: 10, end: 20 };
+const PARAMS = { start: 10, end: 20, timeZone: 'UTC' };
 
 const SPANS_PARAMS = { ...PARAMS, serviceNames: ['web', 'shop'] };
 
@@ -66,7 +66,11 @@ describe('logsSearch', () => {
   });
 
   it('counts the page loads over time in the selected environment', () => {
-    const { aggs } = logsSearch({ start: 0, end: 60 * 60 * 1000 }).aggs?.inEnvironment as {
+    const { aggs } = logsSearch({
+      start: 0,
+      end: 60 * 60 * 1000,
+      timeZone: 'America/New_York',
+    }).aggs?.inEnvironment as {
       aggs: Record<string, unknown>;
     };
 
@@ -77,6 +81,7 @@ describe('logsSearch', () => {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: '60s',
+            time_zone: 'America/New_York',
             min_doc_count: 0,
             extended_bounds: { min: 0, max: 60 * 60 * 1000 },
           },

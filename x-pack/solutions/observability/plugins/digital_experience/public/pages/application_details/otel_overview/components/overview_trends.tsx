@@ -39,8 +39,11 @@ import {
   OVERVIEW_PERCENTILES,
 } from '../../../../../common/overview_filters';
 import type { OverviewPercentile } from '../../../../../common/overview_filters';
+import type { HistogramInterval } from '../../../../../common/types/applications';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
+import type { QueriedRange } from '../../../../utils/time_range_query';
+import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
 import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
@@ -135,9 +138,13 @@ function TrendChart({
   formatValue,
   chartType,
   xDomain,
+  interval,
+  range,
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
+  interval: HistogramInterval;
+  range: QueriedRange | undefined;
   metric: 'pageLoads' | 'loadTimePercentileMs';
   name: string;
   color: string;
@@ -171,6 +178,12 @@ function TrendChart({
         xDomain={xDomain}
       />
       <Tooltip headerFormatter={({ value }) => formatDate(value)} />
+      <PartialBucketsEndzones
+        points={points}
+        interval={interval}
+        range={range}
+        timeZone={timeZone}
+      />
       <Axis id="time" position={Position.Bottom} style={HIDDEN_AXIS_LINES} />
       <Axis
         id={`${metric}Axis`}
@@ -252,6 +265,8 @@ function TrendRow({
  */
 export function OverviewTrends({
   points,
+  interval,
+  range,
   pageLoads,
   loadTimePercentileMs,
   percentile,
@@ -260,6 +275,10 @@ export function OverviewTrends({
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
+  /** The width of every bucket. */
+  interval: HistogramInterval;
+  /** The queried time range; the edge buckets are shaded where they cover only part of it. */
+  range: QueriedRange | undefined;
   /** The page loads of the whole range, the sum of the points. */
   pageLoads: number;
   /** The load time of the whole range, which the points' percentiles do not add up to. */
@@ -288,7 +307,7 @@ export function OverviewTrends({
       ? { min: points[0].timestamp, max: points[points.length - 1].timestamp }
       : undefined;
 
-  const chartProps = { points, chartType, xDomain, onTimeRangeSelect };
+  const chartProps = { points, interval, range, chartType, xDomain, onTimeRangeSelect };
 
   return (
     <EuiPanel

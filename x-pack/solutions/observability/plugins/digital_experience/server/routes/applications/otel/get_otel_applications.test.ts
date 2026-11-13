@@ -109,7 +109,9 @@ describe('getOtelApplications', () => {
       spanEnvironments: envs(['canary']),
     });
 
-    await expect(getOtelApplications({ esClient, start: 1, end: 2 })).resolves.toEqual({
+    await expect(
+      getOtelApplications({ esClient, start: 1, end: 2, timeZone: 'UTC' })
+    ).resolves.toEqual({
       applications: [
         {
           serviceName: 'web',
@@ -161,7 +163,7 @@ describe('getOtelApplications', () => {
   it('matches web vital names in any case and orders the applications by page loads', async () => {
     const esClient = setup({ logs: [], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20 });
+    await getOtelApplications({ esClient, start: 10, end: 20, timeZone: 'UTC' });
 
     const [[logsRequest]] = esClient.search.mock.calls;
     const { applications } = (
@@ -183,7 +185,7 @@ describe('getOtelApplications', () => {
   it('queries the OTel logs and traces for browser SDKs only', async () => {
     const esClient = setup({ logs: [pageLoadsOnly('web')], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20 });
+    await getOtelApplications({ esClient, start: 10, end: 20, timeZone: 'UTC' });
 
     const indices = esClient.search.mock.calls.map(([request]) => request?.index);
     expect(indices).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
@@ -201,7 +203,12 @@ describe('getOtelApplications', () => {
       logEnvironments: envs(['production'], [], 2),
     });
 
-    const { environments } = await getOtelApplications({ esClient, start: 1, end: 2 });
+    const { environments } = await getOtelApplications({
+      esClient,
+      start: 1,
+      end: 2,
+      timeZone: 'UTC',
+    });
 
     expect(environments).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
   });
@@ -214,7 +221,12 @@ describe('getOtelApplications', () => {
       spanEnvironments: envs(['traces-only'], [], 2),
     });
 
-    const { environments } = await getOtelApplications({ esClient, start: 1, end: 2 });
+    const { environments } = await getOtelApplications({
+      esClient,
+      start: 1,
+      end: 2,
+      timeZone: 'UTC',
+    });
 
     expect(environments).toEqual(['production']);
   });
@@ -222,7 +234,7 @@ describe('getOtelApplications', () => {
   it('searches the HTTP requests of the applications found in the logs only', async () => {
     const esClient = setup({ logs: [pageLoadsOnly('web'), pageLoadsOnly('shop')], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20 });
+    await getOtelApplications({ esClient, start: 10, end: 20, timeZone: 'UTC' });
 
     const [, [spansRequest]] = esClient.search.mock.calls;
     const { applications } = (
@@ -238,7 +250,7 @@ describe('getOtelApplications', () => {
   it('skips the spans search without applications in the logs', async () => {
     const esClient = setup({ logs: [], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20 });
+    await getOtelApplications({ esClient, start: 10, end: 20, timeZone: 'UTC' });
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
   });
@@ -251,6 +263,7 @@ describe('getOtelApplications', () => {
       start: 10,
       end: 20,
       environment: 'ENVIRONMENT_NOT_DEFINED',
+      timeZone: 'UTC',
     });
 
     esClient.search.mock.calls.forEach(([request]) => {
@@ -276,7 +289,13 @@ describe('getOtelApplications', () => {
   it('filters by environment on both environment fields', async () => {
     const esClient = setup({ logs: [pageLoadsOnly('web')], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20, environment: 'production' });
+    await getOtelApplications({
+      esClient,
+      start: 10,
+      end: 20,
+      environment: 'production',
+      timeZone: 'UTC',
+    });
 
     esClient.search.mock.calls.forEach(([request]) => {
       expect((request?.aggs?.inEnvironment as { filter: unknown } | undefined)?.filter).toEqual({
