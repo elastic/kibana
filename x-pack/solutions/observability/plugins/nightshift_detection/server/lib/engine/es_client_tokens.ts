@@ -14,7 +14,7 @@ import { createToken } from '@kbn/core-di';
  * without giving the detection service account any privilege on them.
  *
  * No service takes a client from `core` directly; it asks for this token or for
- * {@link EngineDataClient}.
+ * {@link DetectionEngineDataClient}.
  */
 export const DetectionEngineSystemClient = createToken<ElasticsearchClient>(
   'nightshiftDetection.EngineSystemClient'
@@ -26,6 +26,6 @@ export const DetectionEngineSystemClient = createToken<ElasticsearchClient>(
  *
  * Bound per tick, when the tick route builds the request scope; it is unbound until then.
  */
-export const EngineDataClient = createToken<ElasticsearchClient>(
+export const DetectionEngineDataClient = createToken<ElasticsearchClient>(
   'nightshiftDetection.EngineDataClient'
 );

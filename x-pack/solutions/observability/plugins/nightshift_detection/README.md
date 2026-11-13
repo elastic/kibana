@@ -15,7 +15,7 @@ Enterprise license.
 
 Two clients, two identities:
 
-- `EngineDataClient`: the space's detection service account, request-scoped. Generators read
+- `DetectionEngineDataClient`: the space's detection service account, request-scoped. Generators read
   customer data with it.
 - `DetectionEngineSystemClient`: `asInternalUser` (kibana_system). Every read and write on
   `.nightshift-detection_engine-*` goes through it.
