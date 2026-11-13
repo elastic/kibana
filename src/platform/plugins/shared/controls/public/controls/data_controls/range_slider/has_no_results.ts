@@ -88,15 +88,7 @@ export function hasNoResults$({
   };
 }
 
-export async function hasNoResults({
-  abortSignal,
-  dataSource,
-  filters,
-  query,
-  rangeFilter,
-  timeRange,
-  projectRouting,
-}: {
+interface HasNoResultsParams {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
   filters?: Filter[];
@@ -104,7 +96,11 @@ export async function hasNoResults({
   rangeFilter: Filter;
   timeRange?: TimeRange;
   projectRouting?: ProjectRouting;
-}): Promise<boolean> {
+}
+
+export async function hasNoResults(params: HasNoResultsParams): Promise<boolean> {
+  const { abortSignal, dataSource, filters, query, rangeFilter, timeRange, projectRouting } =
+    params;
   if (isEsqlFilterableSource(dataSource)) {
     return fetchEsqlSourceHasNoResults({
       abortSignal,
@@ -115,10 +111,18 @@ export async function hasNoResults({
     });
   }
 
-  if (!dataSource.id) {
-    return false;
-  }
-  const dataView = await dataViewsService.get(dataSource.id);
+  return dataViewHasNoResults(params);
+}
+
+async function dataViewHasNoResults({
+  abortSignal,
+  dataSource,
+  filters,
+  query,
+  rangeFilter,
+  timeRange,
+}: HasNoResultsParams): Promise<boolean> {
+  const dataView = await dataViewsService.get(dataSource.id ?? '');
 
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);

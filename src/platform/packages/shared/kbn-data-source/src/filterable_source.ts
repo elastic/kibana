@@ -40,6 +40,8 @@ export interface FilterableSource extends DataViewBase {
   readonly fields: FilterableField[];
   readonly name?: string;
   readonly timeFieldName?: string;
+  /** For an ES|QL source: its source command alone (`FROM x`), which a query on its FROM target starts with. */
+  readonly sourceQuery?: string;
   getName?(): string;
   isTimeBased(): boolean;
   getFieldByName(name: string): FilterableField | undefined;

@@ -10,6 +10,11 @@
 import { setStubKibanaServices } from '../../../services/mocks';
 import { coreServices } from '../../../services/kibana_services';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
+import { fetchEsqlSourceOptions } from './fetch_esql_source_options';
+
+jest.mock('./fetch_esql_source_options', () => ({
+  fetchEsqlSourceOptions: jest.fn(),
+}));
 
 describe('OptionsListFetchCache', () => {
   let fetchSpy: jest.SpyInstance;
@@ -123,6 +128,64 @@ describe('OptionsListFetchCache', () => {
     );
 
     expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  describe('request of a field of an ES|QL source', () => {
+    const baseSourceRequest = (overrides: Record<string, unknown> = {}) => ({
+      kind: 'esql-source' as const,
+      fieldName: 'host',
+      esql: 'FROM logs-* | STATS BY host',
+      selectedOptions: [],
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      (fetchEsqlSourceOptions as jest.Mock).mockReset();
+      (fetchEsqlSourceOptions as jest.Mock).mockResolvedValue(okSuggestionsResponse);
+    });
+
+    it('runs from the browser with the abort signal, and does not call the server route', async () => {
+      const cache = new OptionsListFetchCache();
+      const { signal } = new AbortController();
+
+      await cache.runFetchRequest(baseSourceRequest(), signal);
+
+      expect(fetchEsqlSourceOptions).toHaveBeenCalledWith(baseSourceRequest(), signal);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('serves the cached response for the same request and refetches when the filter changes', async () => {
+      const cache = new OptionsListFetchCache();
+      const prefix = (value: string) => ({ prefix: { host: { value } } });
+
+      await cache.runFetchRequest(
+        baseSourceRequest({ filter: prefix('ma') }),
+        new AbortController().signal
+      );
+      await cache.runFetchRequest(
+        baseSourceRequest({ filter: prefix('ma') }),
+        new AbortController().signal
+      );
+      expect(fetchEsqlSourceOptions).toHaveBeenCalledTimes(1);
+
+      await cache.runFetchRequest(
+        baseSourceRequest({ filter: prefix('mac') }),
+        new AbortController().signal
+      );
+      expect(fetchEsqlSourceOptions).toHaveBeenCalledTimes(2);
+    });
+
+    it('refetches when the field changes, for the same query', async () => {
+      const cache = new OptionsListFetchCache();
+
+      await cache.runFetchRequest(baseSourceRequest(), new AbortController().signal);
+      await cache.runFetchRequest(
+        baseSourceRequest({ fieldName: 'other' }),
+        new AbortController().signal
+      );
+
+      expect(fetchEsqlSourceOptions).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('CPS project routing', () => {

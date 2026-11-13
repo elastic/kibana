@@ -34,8 +34,9 @@ describe('hasNoResults', () => {
   it('is false when the FROM target of an ES|QL source has a document in the range', async () => {
     (dataService.search.esql as jest.Mock).mockResolvedValue({ rawResponse: { values: [['a']] } });
 
+    const abortSignal = new AbortController().signal;
     const result = await hasNoResults({
-      abortSignal: new AbortController().signal,
+      abortSignal,
       dataSource: esqlSource,
       rangeFilter,
     });
@@ -46,7 +47,7 @@ describe('hasNoResults', () => {
         query: 'FROM logs-* | LIMIT 1',
         kibanaQueryContext: expect.objectContaining({ kibanaFilters: [rangeFilter] }),
       }),
-      expect.anything()
+      { abortSignal }
     );
     expect(dataViewsService.get).not.toHaveBeenCalled();
   });

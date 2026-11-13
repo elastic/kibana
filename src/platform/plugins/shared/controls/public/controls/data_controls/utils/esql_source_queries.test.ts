@@ -9,22 +9,32 @@
 
 import type { FilterableSource } from '@kbn/data-source';
 import {
-  getAnyDocumentQuery,
   getFieldMinMaxQuery,
   getFieldValuesQuery,
+  getHasDocumentsQuery,
 } from './esql_source_queries';
 
 describe('queries on the FROM target of an ES|QL source', () => {
-  const source = (title: string): FilterableSource => ({
+  const source = (title: string, sourceQuery?: string): FilterableSource => ({
     kind: 'esql',
     id: 'dataset-id',
     title,
+    sourceQuery,
     fields: [],
     getFieldByName: () => undefined,
     isTimeBased: () => false,
   });
 
-  it('reads the values of a field from the target, which can be a list of targets', () => {
+  it('starts from the source command of the source, as it was written', () => {
+    const withMetadata = source('logs-*', 'FROM logs-* METADATA _index');
+
+    expect(getFieldValuesQuery(withMetadata, 'host')).toBe(
+      'FROM logs-* METADATA _index | STATS BY host'
+    );
+    expect(getHasDocumentsQuery(withMetadata)).toBe('FROM logs-* METADATA _index | LIMIT 1');
+  });
+
+  it('starts from the title when the source has no source command', () => {
     expect(getFieldValuesQuery(source('logs-*,metrics-*'), 'host')).toBe(
       'FROM logs-*,metrics-* | STATS BY host'
     );
@@ -37,9 +47,5 @@ describe('queries on the FROM target of an ES|QL source', () => {
     expect(getFieldMinMaxQuery(source('logs-*'), 'bytes-in')).toBe(
       'FROM logs-* | STATS min = MIN(`bytes-in`), max = MAX(`bytes-in`)'
     );
-  });
-
-  it('reads one document of the target', () => {
-    expect(getAnyDocumentQuery(source('my-view'))).toBe('FROM my-view | LIMIT 1');
   });
 });

@@ -19,6 +19,7 @@ import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
 import { SELECTIONS_MAX } from '@kbn/controls-constants';
 import type { StartDeps } from '../plugin';
 
+import { esqlColumnValuesToOptionsListResponse } from '../../common/options_list/esql_response';
 import { getESQLSingleColumnValues } from '../../common/options_list/get_esql_single_column_values';
 import type {
   OptionsListDSLFetchBody,
@@ -26,7 +27,6 @@ import type {
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../common/options_list/types';
-import { esqlColumnValuesToOptionsListResponse } from './options_list_esql_response';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 import { getSuggestionAggregationBuilder } from './suggestion_queries';
 

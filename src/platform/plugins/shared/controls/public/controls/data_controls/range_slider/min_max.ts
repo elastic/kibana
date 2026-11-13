@@ -139,17 +139,7 @@ export function minMax$({
   };
 }
 
-export async function getMinMax({
-  abortSignal,
-  dataSource,
-  field,
-  filters,
-  query,
-  timeRange,
-  esqlVariables,
-  esqlPreFilter,
-  projectRouting,
-}: {
+interface GetMinMaxParams {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
   field: FilterableField;
@@ -159,25 +149,17 @@ export async function getMinMax({
   esqlVariables?: ESQLControlVariable[];
   esqlPreFilter?: { bool: BoolQuery };
   projectRouting?: ProjectRouting;
-}): Promise<{ min: number | undefined; max: number | undefined }> {
+}
+
+interface MinMax {
+  min: number | undefined;
+  max: number | undefined;
+}
+
+export async function getMinMax(params: GetMinMaxParams): Promise<MinMax> {
+  const { abortSignal, dataSource, field, filters, query, timeRange, projectRouting } = params;
   if (query && 'esql' in query) {
-    const result = await getESQLSingleColumnValues({
-      query: query.esql,
-      timeRange,
-      filter: esqlPreFilter,
-      signal: abortSignal,
-      search: dataService.search.search,
-      esqlVariables: esqlVariables ?? [],
-      timezone: getControlsTimezone(),
-    });
-    if (getESQLSingleColumnValues.isNumericResult(result)) {
-      return { min: min(result.values), max: max(result.values) };
-    } else {
-      const error = getESQLSingleColumnValues.isSuccess(result)
-        ? new Error('Range slider values query returned a non-numeric field')
-        : result.errors[0];
-      throw error;
-    }
+    return getMinMaxOfEsqlQuery(query.esql, params);
   }
 
   if (isEsqlFilterableSource(dataSource)) {
@@ -190,10 +172,39 @@ export async function getMinMax({
     });
   }
 
-  if (!dataSource.id) {
-    return { min: undefined, max: undefined };
+  return getMinMaxOfDataView(params);
+}
+
+async function getMinMaxOfEsqlQuery(
+  esqlQuery: string,
+  { abortSignal, timeRange, esqlVariables, esqlPreFilter }: GetMinMaxParams
+): Promise<MinMax> {
+  const result = await getESQLSingleColumnValues({
+    query: esqlQuery,
+    timeRange,
+    filter: esqlPreFilter,
+    signal: abortSignal,
+    search: dataService.search.search,
+    esqlVariables: esqlVariables ?? [],
+    timezone: getControlsTimezone(),
+  });
+  if (getESQLSingleColumnValues.isNumericResult(result)) {
+    return { min: min(result.values), max: max(result.values) };
   }
-  const dataView = await dataViewsService.get(dataSource.id);
+  throw getESQLSingleColumnValues.isSuccess(result)
+    ? new Error('Range slider values query returned a non-numeric field')
+    : result.errors[0];
+}
+
+async function getMinMaxOfDataView({
+  abortSignal,
+  dataSource,
+  field,
+  filters,
+  query,
+  timeRange,
+}: GetMinMaxParams): Promise<MinMax> {
+  const dataView = await dataViewsService.get(dataSource.id ?? '');
 
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);

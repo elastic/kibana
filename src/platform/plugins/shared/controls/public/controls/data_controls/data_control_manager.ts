@@ -119,9 +119,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
 
   const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
   const field$ = new BehaviorSubject<FilterableField | undefined>(undefined);
-  const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
-    String(toFormat)
-  );
+  const defaultFieldFormatter = (toFormat: any) => String(toFormat);
+  const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>(defaultFieldFormatter);
   const dataViewIdSubscription = combineLatest([
     dataControlStateManager.api.dataViewId$,
     dataControlStateManager.api.valuesSource$,
@@ -151,10 +150,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
         if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(error);
         return;
       }
-      if (dataSource) {
-        resolveInitialDataSourceReady(dataSource);
-      }
-      dataSources$.next(dataSource ? [dataSource] : undefined);
+      resolveInitialDataSourceReady(dataSource);
+      dataSources$.next([dataSource]);
     });
 
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
@@ -199,7 +196,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
       if (field) {
         defaultFieldLabel$.next(field.displayName ?? field.name);
         const formatter = dataSource.getFormatterForField?.(field);
-        if (formatter) fieldFormatter.next((value: unknown) => formatter.convertToText(value));
+        fieldFormatter.next(
+          formatter ? (value: unknown) => formatter.convertToText(value) : defaultFieldFormatter
+        );
       }
     });
 

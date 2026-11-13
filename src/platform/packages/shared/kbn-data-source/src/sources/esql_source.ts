@@ -405,6 +405,7 @@ export class EsqlSource implements DataSourceBase {
         title: dataset.title,
         name: dataset.name,
         timeFieldName: dataset.timeFieldName,
+        sourceQuery: dataset.query,
         fields,
         getFieldByName: (name) => fieldsByName.get(name),
         isTimeBased: () => dataset.isTimeBased(),

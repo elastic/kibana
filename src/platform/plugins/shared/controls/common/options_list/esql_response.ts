@@ -10,8 +10,8 @@
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListDSLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 
-import type { GetESQLSingleColumnValuesSuccess } from '../../common/options_list/get_esql_single_column_values';
-import type { OptionsListSuccessResponse } from '../../common/options_list/types';
+import type { GetESQLSingleColumnValuesSuccess } from './get_esql_single_column_values';
+import type { OptionsListSuccessResponse } from './types';
 
 export const clientSideSearch = (
   value: string | number,

@@ -21,6 +21,8 @@ import type {
   OptionsListUnifiedFetchBody,
 } from '../../../../common/options_list/types';
 import { coreServices } from '../../../services/kibana_services';
+import type { OptionsListEsqlSourceFetchBody } from './fetch_esql_source_options';
+import { fetchEsqlSourceOptions } from './fetch_esql_source_options';
 
 const REQUEST_CACHE_SIZE = 50; // only store a max of 50 responses
 const REQUEST_CACHE_TTL = 1000 * 60; // time to live = 1 minute
@@ -41,7 +43,9 @@ export class OptionsListFetchCache {
     });
   }
 
-  private getRequestHash = (request: OptionsListUnifiedFetchBody) => {
+  private getRequestHash = (
+    request: OptionsListUnifiedFetchBody | OptionsListEsqlSourceFetchBody
+  ) => {
     // round timeRange to the minute to avoid cache misses
     const roundedTimeRange = (timeRange?: TimeRange) =>
       timeRange
@@ -82,6 +86,22 @@ export class OptionsListFetchCache {
       });
     }
 
+    if (request.kind === 'esql-source') {
+      const { esql, fieldName, filter, sort, ignoreValidations, selectedOptions, projectRouting } =
+        request;
+
+      return hash({
+        kind: request.kind,
+        esql,
+        fieldName,
+        filter,
+        sort,
+        ignoreValidations,
+        selectedOptions: ignoreValidations ? undefined : selectedOptions,
+        projectRouting,
+      });
+    }
+
     const {
       esql,
       timeRange,
@@ -111,7 +131,7 @@ export class OptionsListFetchCache {
   };
 
   public async runFetchRequest(
-    request: OptionsListUnifiedFetchBody,
+    request: OptionsListUnifiedFetchBody | OptionsListEsqlSourceFetchBody,
     abortSignal: AbortSignal
   ): Promise<OptionsListResponse> {
     const requestHash = this.getRequestHash(request);
@@ -119,15 +139,18 @@ export class OptionsListFetchCache {
       return Promise.resolve(this.cache.get(requestHash)!);
     }
 
-    const result = await coreServices.http.fetch<OptionsListResponse>(
-      `/internal/controls/optionsList/fetch`,
-      {
-        version: '1',
-        body: JSON.stringify(request),
-        signal: abortSignal,
-        method: 'POST',
-      }
-    );
+    const result =
+      request.kind === 'esql-source'
+        ? await fetchEsqlSourceOptions(request, abortSignal)
+        : await coreServices.http.fetch<OptionsListResponse>(
+            `/internal/controls/optionsList/fetch`,
+            {
+              version: '1',
+              body: JSON.stringify(request),
+              signal: abortSignal,
+              method: 'POST',
+            }
+          );
 
     if (!optionsListResponseWasFailure(result)) {
       this.cache.set(requestHash, result);

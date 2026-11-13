@@ -52,7 +52,7 @@ describe('getMinMax', () => {
           timeField: '@timestamp',
         }),
       }),
-      expect.anything()
+      { abortSignal }
     );
     expect(dataViewsService.get).not.toHaveBeenCalled();
   });

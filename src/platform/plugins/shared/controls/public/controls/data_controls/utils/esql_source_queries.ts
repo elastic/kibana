@@ -10,14 +10,17 @@
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import type { FilterableSource } from '@kbn/data-source';
 
-/** The queries that controls run on the FROM target of an ES|QL source, which can be a view. */
-export const getFieldValuesQuery = ({ title }: FilterableSource, fieldName: string): string =>
-  `FROM ${title} | STATS BY ${formatEsqlIdentifier(fieldName)}`;
+const getSourceQuery = ({ sourceQuery, title }: FilterableSource): string =>
+  sourceQuery ?? `FROM ${title}`;
 
-export const getFieldMinMaxQuery = ({ title }: FilterableSource, fieldName: string): string => {
+/** The queries that controls run on the FROM target of an ES|QL source, which can be a view. */
+export const getFieldValuesQuery = (source: FilterableSource, fieldName: string): string =>
+  `${getSourceQuery(source)} | STATS BY ${formatEsqlIdentifier(fieldName)}`;
+
+export const getFieldMinMaxQuery = (source: FilterableSource, fieldName: string): string => {
   const field = formatEsqlIdentifier(fieldName);
-  return `FROM ${title} | STATS min = MIN(${field}), max = MAX(${field})`;
+  return `${getSourceQuery(source)} | STATS min = MIN(${field}), max = MAX(${field})`;
 };
 
-export const getAnyDocumentQuery = ({ title }: FilterableSource): string =>
-  `FROM ${title} | LIMIT 1`;
+export const getHasDocumentsQuery = (source: FilterableSource): string =>
+  `${getSourceQuery(source)} | LIMIT 1`;

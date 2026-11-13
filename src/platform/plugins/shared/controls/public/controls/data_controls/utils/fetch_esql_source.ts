@@ -15,7 +15,7 @@ import type {
   IEsqlSearchParams,
 } from '@kbn/search-types';
 import { dataService } from '../../../services/kibana_services';
-import { getAnyDocumentQuery, getFieldMinMaxQuery } from './esql_source_queries';
+import { getHasDocumentsQuery, getFieldMinMaxQuery } from './esql_source_queries';
 
 type EsqlSourceFetchParams = Pick<IEsqlSearchParams, 'projectRouting'> &
   Pick<IEsqlSearchOptions, 'abortSignal'> & {
@@ -54,7 +54,7 @@ export const fetchEsqlSourceMinMax = async (
 export const fetchEsqlSourceHasNoResults = async (
   params: EsqlSourceFetchParams & { rangeFilter: Filter }
 ): Promise<boolean> => {
-  const rows = await runEsqlSourceQuery(getAnyDocumentQuery(params.dataSource), {
+  const rows = await runEsqlSourceQuery(getHasDocumentsQuery(params.dataSource), {
     ...params,
     kibanaQueryContext: {
       ...params.kibanaQueryContext,

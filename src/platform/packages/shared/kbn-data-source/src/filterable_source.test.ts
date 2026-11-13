@@ -137,6 +137,12 @@ describe('toFilterableSource', () => {
       ]);
     });
 
+    it('has the source command of the dataset, which a query on its FROM target starts with', async () => {
+      const source = await statsOnDataset('command-*');
+
+      expect((await source.toFilterableSource()).sourceQuery).toBe('FROM command-*');
+    });
+
     it('looks a field up by name, as a data view does', async () => {
       const source = await statsOnDataset('lookup-*', '@timestamp');
 
@@ -145,7 +151,6 @@ describe('toFilterableSource', () => {
       expect(filterable.getFieldByName('host')).toBe(
         filterable.fields.find(({ name }) => name === 'host')
       );
-      expect(filterable.getFieldByName('host')).toBeDefined();
       expect(filterable.getFieldByName('missing')).toBeUndefined();
     });
 

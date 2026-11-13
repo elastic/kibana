@@ -15,6 +15,12 @@ import { coreServices } from '../../../services/kibana_services';
 import { setStubKibanaServices } from '../../../services/mocks';
 import { fetchAndValidate$ } from './fetch_and_validate';
 
+const mockGetESQLResults = jest.fn();
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
+}));
+
 const phraseFilter = (field: string, value: string) =>
   ({
     meta: { type: 'phrase', key: field, params: { query: value } },
@@ -103,6 +109,55 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     expect(secondBody.filter).toBeDefined();
     expect(JSON.stringify(secondBody.filter)).toContain('mainframe');
 
+    subscription.unsubscribe();
+  }, 10000);
+
+  it('runs an ES|QL query from the browser for a field of an ES|QL source', async () => {
+    const api = buildApi({
+      filters$: new BehaviorSubject<unknown>([]),
+      parentQuery$: new BehaviorSubject<unknown>(undefined),
+    });
+    const field = { name: 'host', type: 'string', aggregatable: true };
+    api.valuesSource$.next(ControlValuesSource.FIELD);
+    api.dataSources$.next([
+      {
+        kind: 'esql',
+        id: 'dataset-id',
+        title: 'logs-*',
+        sourceQuery: 'FROM logs-*',
+        fields: [field],
+        getFieldByName: () => field,
+        isTimeBased: () => false,
+      },
+    ]);
+    api.field$.next(field);
+    mockGetESQLResults.mockResolvedValue({
+      response: { columns: [{ name: 'host', type: 'keyword' }], values: [['mainframe']] },
+    });
+    const emitted: unknown[] = [];
+
+    const { suggestions$ } = fetchAndValidate$({
+      api,
+      requestSize$: new BehaviorSubject<number>(10) as any,
+      runPastTimeout$: new BehaviorSubject<boolean>(false) as any,
+      selectedOptions$: new BehaviorSubject<unknown[]>([]) as any,
+      searchTechnique$: new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard') as any,
+      sort$: new BehaviorSubject<unknown>({ by: '_key', direction: 'asc' }) as any,
+    });
+    const subscription = suggestions$.subscribe((result) => emitted.push(result));
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlQuery: 'FROM logs-* | STATS BY host',
+        signal: expect.any(AbortSignal),
+      })
+    );
+    expect(emitted).toContainEqual(
+      expect.objectContaining({ suggestions: [{ value: 'mainframe' }] })
+    );
     subscription.unsubscribe();
   }, 10000);
 
