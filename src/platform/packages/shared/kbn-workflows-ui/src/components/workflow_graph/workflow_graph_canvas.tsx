@@ -215,7 +215,9 @@ const getHomeFrameBounds = (
   // Frame the leading rank: settings (when present) + triggers so the home
   // view keeps both rows in view under TOP_PADDING.
   // Prefer the settings group (absolute) over child cards (parent-relative).
-  const leading = nodes.filter((n) => n.type === 'trigger' || n.type === 'settingsGroup');
+  const leading = nodes.filter(
+    (n) => n.type === 'trigger' || n.type === 'settingsGroup' || (n.type === 'settings' && !n.parentId)
+  );
   return boundsFromNodes(leading.length > 0 ? leading : nodes) ?? fallback;
 };
 

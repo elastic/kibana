@@ -136,4 +136,36 @@ describe('buildWorkflowSettingsNodes', () => {
       })
     ).toEqual([]);
   });
+
+  it('places a single Workflow settings card above triggers when cardLayout is single', () => {
+    const nodes = buildWorkflowSettingsNodes([triggerAt(0, 200)], 'TB', {
+      workflowName: 'Demo',
+      constantsCount: 2,
+      outputsCount: 1,
+      selectedKind: 'info',
+      cardLayout: 'single',
+    });
+
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0].parentId).toBeUndefined();
+    expect(nodes.some((n) => n.type === 'settingsGroup')).toBe(false);
+    expect(nodes[0]).toMatchObject({
+      id: 'settings:info',
+      type: 'settings',
+      width: PENDING_NODE_WIDTH,
+      height: PENDING_NODE_HEIGHT,
+      selected: true,
+      position: {
+        x: 0,
+        y: 200 - SETTINGS_TO_FLOW_GAP - PENDING_NODE_HEIGHT,
+      },
+      data: {
+        kind: 'info',
+        label: 'Workflow settings',
+        subtitle: 'General, constants, and outputs',
+        iconType: 'gear',
+        compact: false,
+      },
+    });
+  });
 });

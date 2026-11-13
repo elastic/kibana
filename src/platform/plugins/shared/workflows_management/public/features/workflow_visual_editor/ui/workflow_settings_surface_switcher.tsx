@@ -78,6 +78,7 @@ const SettingsSurfacePrototypeNavControl = () => {
   const radioAId = useGeneratedHtmlId({ prefix: 'settingsSurfaceA' });
   const radioBId = useGeneratedHtmlId({ prefix: 'settingsSurfaceB' });
   const radioCId = useGeneratedHtmlId({ prefix: 'settingsSurfaceC' });
+  const radioDId = useGeneratedHtmlId({ prefix: 'settingsSurfaceD' });
   const emptyStateCheckboxId = useGeneratedHtmlId({ prefix: 'creationEmptyState' });
 
   useEffect(
@@ -136,7 +137,7 @@ const SettingsSurfacePrototypeNavControl = () => {
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="workflows.settingsSurface.switcher.flyoutDescription"
-                defaultMessage="Preview the three workflow-settings chrome patterns: A side panel, B canvas info nodes, or C collapsible launcher."
+                defaultMessage="Preview the workflow-settings chrome patterns: A side panel, B canvas info nodes, C collapsible launcher, or D a canvas node that opens General, Constants, and Outputs."
               />
             </EuiText>
             <EuiSpacer size="m" />
@@ -206,6 +207,14 @@ const SettingsSurfacePrototypeNavControl = () => {
                 onChange={() => setWorkflowSettingsSurfaceVariant('c')}
                 label={i18n.translate('workflows.settingsSurface.switcher.c', {
                   defaultMessage: 'C · Collapsible',
+                })}
+              />
+              <EuiRadio
+                id={radioDId}
+                checked={value === 'd'}
+                onChange={() => setWorkflowSettingsSurfaceVariant('d')}
+                label={i18n.translate('workflows.settingsSurface.switcher.d', {
+                  defaultMessage: 'D · Workflow settings',
                 })}
               />
             </div>

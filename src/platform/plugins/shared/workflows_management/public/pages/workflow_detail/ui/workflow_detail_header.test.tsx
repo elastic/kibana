@@ -244,6 +244,7 @@ describe('WorkflowDetailHeader', () => {
   });
 
   it('opens the workflow settings flyout from the header gear', () => {
+    setWorkflowSettingsSurfaceVariant('a');
     const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
 
     expect(screen.queryByTestId('workflowSettingsFlyout')).not.toBeInTheDocument();

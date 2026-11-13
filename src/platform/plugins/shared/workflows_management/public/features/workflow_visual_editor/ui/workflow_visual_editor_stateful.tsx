@@ -61,8 +61,8 @@ import {
   WorkflowSettingsBPanel,
   type WorkflowSettingsBPanelKind,
 } from './workflow_settings_b_panel';
+import { WorkflowSettingsDPanel } from './workflow_settings_d_panel';
 import { WorkflowSettingsCSurface } from './workflow_settings_c_surface';
-import { WorkflowSettingsSurfaceSwitcher } from './workflow_settings_surface_switcher';
 import {
   getWorkflowSettingsBNodeLayout,
   getWorkflowSettingsSurfaceVariant,
@@ -335,10 +335,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     []
   );
 
-  const handleSettingsSurfaceVariantChange = useCallback((next: WorkflowSettingsSurfaceVariant) => {
-    setWorkflowSettingsSurfaceVariant(next);
-    setSettingsSurfaceVariantState(next);
-    setSettingsBKind(null);
+  useEffect(() => {
+    setWorkflowSettingsSurfaceVariant('b');
   }, []);
 
   const openSettingsBPanel = useCallback(
@@ -431,13 +429,14 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const settingsNodesProp = useMemo(
     () =>
-      canEdit && settingsSurfaceVariant === 'b'
+      canEdit && (settingsSurfaceVariant === 'b' || settingsSurfaceVariant === 'd')
         ? {
             workflowName: workflowName ?? workflow?.name ?? '',
             constantsCount: settingsCounts.constants,
             outputsCount: settingsCounts.outputs,
             selectedKind: settingsBKind ?? undefined,
-            cardLayout: settingsBNodeLayout,
+            cardLayout:
+              settingsSurfaceVariant === 'd' ? ('single' as const) : settingsBNodeLayout,
           }
         : undefined,
     [
@@ -1069,15 +1068,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         suppressInsertionControls={floatingPanelOpen}
         settingsNodes={settingsNodesProp}
         onSettingsNodeSelect={
-          canEdit && settingsSurfaceVariant === 'b' ? handleSettingsNodeSelect : undefined
+          canEdit && (settingsSurfaceVariant === 'b' || settingsSurfaceVariant === 'd')
+            ? handleSettingsNodeSelect
+            : undefined
         }
       />
-      {canEdit ? (
-        <WorkflowSettingsSurfaceSwitcher
-          value={settingsSurfaceVariant}
-          onChange={handleSettingsSurfaceVariantChange}
-        />
-      ) : null}
       {canEdit && settingsSurfaceVariant === 'c' ? (
         <WorkflowSettingsCSurface
           workflowId={workflowId}
@@ -1184,6 +1179,16 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             readOnly={!canEdit}
             onClose={closeSettingsBPanel}
           />
+        </CanvasConfigPanelShell>
+      )}
+      {settingsBKind && settingsSurfaceVariant === 'd' && (
+        <CanvasConfigPanelShell
+          width={panelWidth}
+          onWidthChange={setStoredPanelWidth}
+          canvasWidth={canvasWidth}
+          data-test-subj="workflowSettingsDPanelContainer"
+        >
+          <WorkflowSettingsDPanel readOnly={!canEdit} onClose={closeSettingsBPanel} />
         </CanvasConfigPanelShell>
       )}
       {flyoutTarget && !panel && !settingsBKind && (

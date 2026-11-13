@@ -28,8 +28,8 @@ export const SETTINGS_TO_FLOW_GAP = 100;
 export const SETTINGS_COMPACT_WIDTH = 168;
 export const SETTINGS_COMPACT_HEIGHT = 40;
 
-/** How Option B settings cards are arranged. */
-export type SettingsNodesCardLayout = 'row' | 'vertical' | 'compact';
+/** How Option B settings cards are arranged. `single` is Option D: one card, no group. */
+export type SettingsNodesCardLayout = 'row' | 'vertical' | 'compact' | 'single';
 
 export interface WorkflowSettingsNodesInput {
   readonly workflowName: string;
@@ -48,6 +48,21 @@ interface SettingsNodeSpec {
 }
 
 function settingsNodeSpecs(input: WorkflowSettingsNodesInput): SettingsNodeSpec[] {
+  if (input.cardLayout === 'single') {
+    return [
+      {
+        kind: 'info',
+        label: i18n.translate('workflowsUi.graph.settings.singleLabel', {
+          defaultMessage: 'Workflow settings',
+        }),
+        subtitle: i18n.translate('workflowsUi.graph.settings.singleSubtitle', {
+          defaultMessage: 'General, constants, and outputs',
+        }),
+        iconType: 'gear',
+      },
+    ];
+  }
+
   return [
     {
       kind: 'info',
@@ -133,6 +148,42 @@ export function buildWorkflowSettingsNodes(
   const arrangeInRow = cardLayout !== 'vertical';
   const width = isCompact ? SETTINGS_COMPACT_WIDTH : PENDING_NODE_WIDTH;
   const height = isCompact ? SETTINGS_COMPACT_HEIGHT : PENDING_NODE_HEIGHT;
+
+  if (cardLayout === 'single') {
+    const spec = specs[0];
+    let x: number;
+    let y: number;
+    if (direction === 'LR') {
+      const bandMidY = (extent.minY + extent.maxY) / 2;
+      x = extent.minX - SETTINGS_TO_FLOW_GAP - width;
+      y = bandMidY - height / 2;
+    } else {
+      const bandMidX = (extent.minX + extent.maxX) / 2;
+      y = extent.minY - SETTINGS_TO_FLOW_GAP - height;
+      x = bandMidX - width / 2;
+    }
+    return [
+      {
+        id: `settings:${spec.kind}`,
+        type: 'settings',
+        position: { x, y },
+        width,
+        height,
+        draggable: false,
+        connectable: false,
+        className: 'nopan',
+        selected: input.selectedKind === spec.kind,
+        data: {
+          kind: spec.kind,
+          label: spec.label,
+          subtitle: spec.subtitle,
+          iconType: spec.iconType,
+          compact: false,
+        },
+      },
+    ];
+  }
+
   const gap = SETTINGS_GROUP_PAD;
   const pad = SETTINGS_GROUP_PAD;
   const span =

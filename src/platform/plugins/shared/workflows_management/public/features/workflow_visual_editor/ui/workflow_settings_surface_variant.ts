@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Prototype settings-surface variants. A is the frozen header flyout. */
-export type WorkflowSettingsSurfaceVariant = 'a' | 'b' | 'c';
+/** Settings-surface variants. B (canvas info nodes) is the default. */
+export type WorkflowSettingsSurfaceVariant = 'a' | 'b' | 'c' | 'd';
 
 /** Option B canvas card arrangements. */
 export type WorkflowSettingsBNodeLayout = 'row' | 'vertical' | 'compact';
@@ -26,17 +26,14 @@ const notify = (): void => {
 
 export const getWorkflowSettingsSurfaceVariant = (): WorkflowSettingsSurfaceVariant => {
   if (sessionVariant) return sessionVariant;
+  // Option B is the settings surface. Ignore a leftover prototype choice.
+  sessionVariant = 'b';
   try {
-    const stored = sessionStorage.getItem(VARIANT_STORAGE_KEY);
-    if (stored === 'a' || stored === 'b' || stored === 'c') {
-      sessionVariant = stored;
-      return stored;
-    }
+    sessionStorage.setItem(VARIANT_STORAGE_KEY, 'b');
   } catch {
     // sessionStorage unavailable
   }
-  sessionVariant = 'a';
-  return 'a';
+  return 'b';
 };
 
 export const setWorkflowSettingsSurfaceVariant = (next: WorkflowSettingsSurfaceVariant): void => {
