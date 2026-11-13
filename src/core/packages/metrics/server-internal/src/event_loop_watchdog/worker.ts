@@ -60,8 +60,6 @@ interface Capture {
   activeFrom: number;
   /** Set when the stop is requested. */
   stopReason?: CaptureStopReason;
-  /** When `Profiler.stop` was sent (milliseconds). */
-  stopRequestedAt?: number;
   /** When the block ended (milliseconds); only set for `block_ended`. */
   blockEndedAt?: number;
   /** Largest heartbeat gap seen since a `block_ended` stop was requested. */
@@ -227,9 +225,8 @@ export const runWatchdogWorker = (
     current.blockEndedAt = blockEndedAt;
     current.started
       .then(
-        () => {
-          current.stopRequestedAt = toMs(nowUs());
-          return current.profiler.stop().then(
+        () =>
+          current.profiler.stop().then(
             (profile) => onProfile(current, profile, stopReason, blockedMs),
             (error) => {
               if (stopped) {
@@ -241,8 +238,7 @@ export const runWatchdogWorker = (
                 { tags: ['event-loop-watchdog'] }
               );
             }
-          );
-        },
+          ),
         // A capture that failed to start was counted and ended by the start handler.
         () => undefined
       )
@@ -256,19 +252,15 @@ export const runWatchdogWorker = (
     blockedMs: number
   ) => {
     const nowMs = toMs(nowUs());
-    const {
-      phase,
-      blockStartedAt,
-      requestedAt,
-      profilerStartMs = 0,
-      stopRequestedAt = requestedAt,
-      blockEndedAt,
-    } = current;
-    // The profile's clock can be offset from the heartbeat clock, so anchor the block's end to
-    // `endTime` and the stop request. For `max_duration`, the block is still going at the stop.
+    const { phase, blockStartedAt, requestedAt, profilerStartMs = 0, blockEndedAt } = current;
+    // The profile's clock can be offset from the heartbeat clock, so anchor the block's end to the
+    // first sample, taken once the start resolved. Not to `endTime`: native work right after the
+    // block delays `Profiler.stop`. For `max_duration`, the block is still going at the stop.
     const inBlockUntilUs =
       stopReason === 'block_ended' && blockEndedAt !== undefined
-        ? profile.endTime - (stopRequestedAt - blockEndedAt) * 1000
+        ? profile.startTime +
+          (profile.timeDeltas?.[0] ?? 0) +
+          (blockEndedAt - (requestedAt + profilerStartMs)) * 1000
         : undefined;
     let summary;
     try {

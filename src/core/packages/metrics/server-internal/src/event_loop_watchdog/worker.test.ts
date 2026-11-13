@@ -216,6 +216,15 @@ describe('runWatchdogWorker', () => {
     start({ profiling: profilingData });
     setSlot(Slot.profiling, 1);
   };
+  /** A block whose capture is requested `startsAfterMs` in, with `Profiler.start` resolving then. */
+  const profiledBlock = async (ms: number, startsAfterMs = profilingData.startAfterMs.starting) => {
+    beat();
+    stall(startsAfterMs);
+    await settle();
+    stall(ms - startsAfterMs);
+    resume();
+    await settle();
+  };
   const statsMeta = (call = 0) =>
     (logger.info.mock.calls[call][1] as StatsLogMeta).kibana.event_loop_watchdog.stats;
 
@@ -486,8 +495,7 @@ describe('runWatchdogWorker', () => {
       await settle();
       expect(sessions).toHaveLength(0);
 
-      block(4_000);
-      await settle();
+      await profiledBlock(4_000, 3_000);
       expect(profileMeta()).toMatchObject({ profiledAfterMs: 3_000 });
       idle(STATS_INTERVAL_MS);
       expect(lastStats().profiling).toMatchObject({ pastStartAfter: 1, profiled: 1 });
@@ -501,8 +509,7 @@ describe('runWatchdogWorker', () => {
       expect(sessions).toHaveLength(0);
 
       setSlot(Slot.runningSince, nowUs);
-      block(1_500);
-      await settle();
+      await profiledBlock(1_500);
       expect(sessions).toHaveLength(1);
       expect(profileMeta()).toMatchObject({ phase: 'running' });
       idle(STATS_INTERVAL_MS);
@@ -546,8 +553,8 @@ describe('runWatchdogWorker', () => {
         blockedMs: 2_000,
         profiledAfterMs: 1_000,
         profilerStartMs: expect.any(Number),
-        sampledMs: 1_975,
-        coverage: 0.99,
+        sampledMs: 1_000,
+        coverage: 0.5,
         captureDurationMs: 1_025,
         samples: 2,
         frames: [{ name: 'spin', location: 'src/core/server/spin.ts:10', percent: 100 }],
@@ -586,8 +593,7 @@ describe('runWatchdogWorker', () => {
         timeDeltas: [500_000],
       };
       startProfiling();
-      block(1_500);
-      await settle();
+      await profiledBlock(1_500);
       expect(profileLines()[0][0]).toMatch(
         /^Event loop block profiled: block ~1500ms \(profiled after ~1000ms, profiler start took ~\d+ms\), 1 samples; stopped: block_ended$/
       );
@@ -619,8 +625,8 @@ describe('runWatchdogWorker', () => {
     });
 
     it('measures sampledMs for block_ended to the block end on the profile clock, not the stop, and caps coverage at 1', async () => {
-      // First sample at 500ms, block ends 25ms before stop (endTime = 1_525_000 µs -> inBlockUntilUs = 1_500_000 µs),
-      // so sampledMs to block end is 1_000ms (not 1_025ms to endTime).
+      // The first sample (500_000 µs) is the start resolving 500ms into the block, so the block
+      // ends at 1_500_000 µs and sampledMs is 1_000ms, not 1_025ms to the stop (endTime).
       profile = {
         nodes: [node(1, '(root)', { children: [2] }), node(2, 'spin')],
         startTime: 0,
@@ -628,9 +634,9 @@ describe('runWatchdogWorker', () => {
         samples: [2, 2],
         timeDeltas: [500_000, 1_025_000],
       };
-      startProfiling();
-      block(1_500);
-      await settle();
+      start({ profiling: { ...profilingData, startAfterMs: { starting: 500, running: 500 } } });
+      setSlot(Slot.profiling, 1);
+      await profiledBlock(1_500, 500);
       expect(profileMeta()).toMatchObject({
         blockedMs: 1_500,
         sampledMs: 1_000,
@@ -638,12 +644,20 @@ describe('runWatchdogWorker', () => {
         samples: 1,
       });
 
-      // When sampledMs to the block end still exceeds blockedMs, coverage is capped at 1.
-      profile = sampledProfile;
+      // A max_duration capture measures to endTime; when that exceeds blockedMs, coverage is capped at 1.
+      profile = { ...sampledProfile, endTime: 7_000_000 };
       idle(profilingData.cooldownMs.starting);
-      block(1_500);
+      beat();
+      stall(500);
       await settle();
-      expect(profileMeta(1)).toMatchObject({ blockedMs: 1_500, sampledMs: 1_975, coverage: 1 });
+      stall(profilingData.maxDurationMs.starting);
+      await settle();
+      expect(profileMeta(1)).toMatchObject({
+        stopReason: 'max_duration',
+        blockedMs: 5_500,
+        sampledMs: 6_000,
+        coverage: 1,
+      });
     });
 
     it('profiles a block once, however long it lasts', async () => {
@@ -667,8 +681,7 @@ describe('runWatchdogWorker', () => {
 
     it('waits out the cooldown, counting the blocks it skips once each', async () => {
       startProfiling();
-      block(1_500);
-      await settle();
+      await profiledBlock(1_500);
       block(1_500);
       block(1_500);
       await settle();
@@ -707,12 +720,11 @@ describe('runWatchdogWorker', () => {
 
     it('counts a block that outlasts the cooldown as profiled, not as skipped', async () => {
       startProfiling();
-      block(1_500);
-      await settle();
-      beat();
-      stall(profilingData.cooldownMs.running + 2_000);
-      resume();
-      await settle();
+      await profiledBlock(1_500);
+      await profiledBlock(
+        profilingData.cooldownMs.running + 2_000,
+        profilingData.cooldownMs.running
+      );
       expect(sessions).toHaveLength(2);
       idle(STATS_INTERVAL_MS);
       expect(totalProfilingStats()).toMatchObject({
@@ -850,39 +862,36 @@ describe('runWatchdogWorker', () => {
       [
         'whose busy samples all land after the block ended',
         {
-          // resume() stamps the heartbeat, then stalls 25ms before the poll requests the stop,
-          // so inBlockUntilUs is endTime - 25_000 = 25_000 µs. Sample 1 at 10_000 µs is idle;
-          // sample 2 at 30_000 µs is busy, after the block ended.
+          // The first sample (10_000 µs, idle) is the start resolving 1_000ms into the block, so
+          // the block ends at 510_000 µs; the busy sample at 530_000 µs is after it.
           nodes: [node(1, '(root)', { children: [2, 3] }), node(2, '(idle)'), node(3, 'lateWork')],
           startTime: 0,
-          endTime: 50_000,
+          endTime: 550_000,
           samples: [2, 3],
-          timeDeltas: [10_000, 20_000],
+          timeDeltas: [10_000, 520_000],
         },
       ],
     ])('counts a capture %s as empty, not profiled', async (_, emptyProfile) => {
       profile = emptyProfile;
       startProfiling();
-      block(1_500);
-      await settle();
+      await profiledBlock(1_500);
       expect(profileMeta()).toMatchObject({ samples: 0, frames: [], kibanaFrames: [] });
       idle(STATS_INTERVAL_MS);
       expect(lastStats().profiling).toMatchObject({ profiled: 0, emptyTooLate: 1 });
     });
 
     it('counts a block_ended capture with a busy sample at the block end as profiled', async () => {
-      // inBlockUntilUs is 50_000 - 25_000 = 25_000 µs; the first sample lands at 25_000 µs, the
-      // second at 40_000 µs (after the block end).
+      // The first sample (10_000 µs, idle) is the start resolving 1_000ms into the block, so the
+      // block ends at 510_000 µs: the busy sample there counts, the one at 525_000 µs doesn't.
       profile = {
-        nodes: [node(1, '(root)', { children: [2] }), node(2, 'inBlockWork')],
+        nodes: [node(1, '(root)', { children: [2, 3] }), node(2, '(idle)'), node(3, 'inBlockWork')],
         startTime: 0,
-        endTime: 50_000,
-        samples: [2, 2],
-        timeDeltas: [25_000, 15_000],
+        endTime: 525_000,
+        samples: [2, 3, 3],
+        timeDeltas: [10_000, 500_000, 15_000],
       };
       startProfiling();
-      block(1_500);
-      await settle();
+      await profiledBlock(1_500);
       expect(profileMeta()).toMatchObject({
         samples: 1,
         frames: [{ name: 'inBlockWork', percent: 100 }],
@@ -891,15 +900,68 @@ describe('runWatchdogWorker', () => {
       expect(lastStats().profiling).toMatchObject({ profiled: 1, emptyTooLate: 0 });
     });
 
+    it('leaves out the samples after the block when Profiler.stop resolves late, so a capture with only those is empty', async () => {
+      const profiledBlockWithLateStop = async () => {
+        let reply = () => {};
+        stopReply = new Promise((resolve) => {
+          reply = resolve;
+        });
+        beat();
+        stall(1_000);
+        await settle();
+        stall(500);
+        resume();
+        // Native work after the block delays the stop by 300ms.
+        stall(300);
+        reply();
+        await settle();
+      };
+      // The first sample (10_000 µs) is the start resolving 1_000ms into the block, so the block
+      // ends at 510_000 µs. The stop is requested at 535_000 µs and resolves at endTime.
+      const nodes = [
+        node(1, '(root)', { children: [2, 3, 4] }),
+        node(2, '(idle)'),
+        node(3, 'inBlockWork'),
+        node(4, 'postBlockWork'),
+      ];
+      profile = {
+        nodes,
+        startTime: 0,
+        endTime: 835_000,
+        samples: [3, 3, 4, 4],
+        timeDeltas: [10_000, 500_000, 100_000, 200_000],
+      };
+      startProfiling();
+      await profiledBlockWithLateStop();
+      expect(profileMeta()).toMatchObject({
+        stopReason: 'block_ended',
+        sampledMs: 500,
+        samples: 2,
+        frames: [{ name: 'inBlockWork', percent: 100 }],
+      });
+
+      profile = {
+        nodes,
+        startTime: 0,
+        endTime: 835_000,
+        samples: [2, 4, 4],
+        timeDeltas: [10_000, 600_000, 200_000],
+      };
+      idle(profilingData.cooldownMs.starting);
+      await profiledBlockWithLateStop();
+      expect(profileMeta(1)).toMatchObject({ samples: 0, frames: [], kibanaFrames: [] });
+      idle(STATS_INTERVAL_MS);
+      expect(totalProfilingStats()).toMatchObject({ profiled: 1, emptyTooLate: 1 });
+    });
+
     it('counts a capture as emptyTooLate with sampledMs: 0 when the block ends while the profiler is still starting', async () => {
       let releaseStart = () => {};
       startReply = new Promise((resolve) => {
         releaseStart = resolve;
       });
-      // Once Profiler.start resolves (after the block ended), the profiler takes one busy sample
-      // after the block and stops at endTime = 300_000 µs. Since stopRequestedAt is 325ms after
-      // blockEndedAt, inBlockUntilUs is 300_000 - 325_000 = -25_000 µs, before the first sample at
-      // 10_000 µs (reaching the sampledMs clamp at 0).
+      // Profiler.start resolves 325ms after the block ended, and its first sample (10_000 µs) is
+      // busy, after the block. inBlockUntilUs is 10_000 - 325_000 = -315_000 µs, before that
+      // sample (reaching the sampledMs clamp at 0).
       profile = {
         nodes: [node(1, '(root)', { children: [2] }), node(2, 'lateWork')],
         startTime: 0,
@@ -956,8 +1018,7 @@ describe('runWatchdogWorker', () => {
         },
       });
       setSlot(Slot.profiling, 1);
-      block(1_500);
-      await settle();
+      await profiledBlock(1_500);
       expect(heapReadAfterNodes).toBe(true);
       expect(profileMeta().heapUsed).toBe(4321);
       // 1_500ms block - 1_000ms startAfter + 25ms resume poll = 525ms (without the 500ms added inside summarizeProfile).
