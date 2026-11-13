@@ -48,6 +48,10 @@ export function esqlColumnValuesToOptionsListResponse(
   }
 ): OptionsListSuccessResponse {
   const uniqueValues = Array.from(new Set(result.values as ReadonlyArray<string | number>));
+  // A date is a timestamp in the options list, as the aggregations return it and as a selection stores it
+  const isDateColumn = result.column.type === 'date' || result.column.type === 'date_nanos';
+  const toSuggestionValue = (value: string | number) =>
+    isDateColumn ? Date.parse(String(value)) : String(value);
   // TODO Remove when we're able to get accurate document counts for ES|QL-source controls
   const sortConfig =
     sort?.by === '_count'
@@ -62,13 +66,15 @@ export function esqlColumnValuesToOptionsListResponse(
   const suggestions = uniqueValues
     .filter((value) => clientSideSearch(value, searchString, searchTechnique))
     .sort((valueA, valueB) => directionMultiplier * String(valueA).localeCompare(String(valueB)))
-    .map((value) => ({ value: String(value) }));
+    .map((value) => ({ value: toSuggestionValue(value) }));
 
   const invalidSelections = ignoreValidations
     ? []
     : selectedOptions?.filter(
         (selection: OptionsListSelection) =>
-          !uniqueValues.some((value) => value === selection || String(value) === String(selection))
+          !uniqueValues.some(
+            (value) => value === selection || String(toSuggestionValue(value)) === String(selection)
+          )
       );
   return {
     suggestions,

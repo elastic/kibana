@@ -8,14 +8,20 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableSource } from '@kbn/data-source';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
-import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import { getESQLSingleColumnValues } from '../../../../common/options_list';
+import { getControlsTimezone } from '../../utils';
+import {
+  buildESQLPreFilter,
+  getEsqlSourceFieldQuery,
+  getFetchContextFilters,
+  getFetchContextTimeRange,
+} from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function hasNoResults$({
@@ -47,10 +53,11 @@ export function hasNoResults$({
     switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
       const dataSource = api.dataSources$?.value?.[0];
       const rangeFilter = rangeFilters?.[0];
-      // an ES|QL source has no data view to search
-      if (!dataSource || isEsqlFilterableSource(dataSource) || !rangeFilter || ignoreValidations) {
+      if (!dataSource || !rangeFilter || ignoreValidations) {
         return false;
       }
+      const fieldName = api.fieldName$.value;
+      const field = fieldName ? dataSource.getFieldByName(fieldName) : undefined;
 
       try {
         setIsLoading(true);
@@ -59,6 +66,7 @@ export function hasNoResults$({
         return await hasNoResults({
           abortSignal: abortController.signal,
           dataSource,
+          esql: getEsqlSourceFieldQuery(dataSource, field),
           rangeFilter,
           ...controlFetchContext,
           timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
@@ -85,9 +93,10 @@ export function hasNoResults$({
   };
 }
 
-async function hasNoResults({
+export async function hasNoResults({
   abortSignal,
   dataSource,
+  esql,
   filters,
   query,
   rangeFilter,
@@ -95,11 +104,35 @@ async function hasNoResults({
 }: {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
+  /** The query that populates the control, for an ES|QL source */
+  esql?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
 }): Promise<boolean> {
+  if (esql) {
+    // The values of the query that are in the range: there are none when the range has no results
+    const result = await getESQLSingleColumnValues({
+      query: `${esql}\n| LIMIT 1`,
+      filter: buildESQLPreFilter({
+        fetchContext: { query, filters: [...(filters ?? []), rangeFilter] },
+        useGlobalFilters: true,
+        dataSource,
+        timeRange,
+        esqlQuery: esql,
+      }),
+      signal: abortSignal,
+      search: dataService.search.search,
+      esqlVariables: [],
+      timezone: getControlsTimezone(),
+    });
+    if (!getESQLSingleColumnValues.isSuccess(result)) {
+      throw result.errors[0];
+    }
+    return getESQLSingleColumnValues.hasNoResults(result);
+  }
+
   const dataView = await dataViewsService.get(dataSource.id ?? '');
 
   const searchSource = await dataService.search.searchSource.create();
