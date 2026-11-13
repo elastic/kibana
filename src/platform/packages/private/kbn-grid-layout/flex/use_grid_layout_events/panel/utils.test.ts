@@ -9,7 +9,7 @@
 
 import { KeyboardCode } from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
 import type { FlexLayoutStateManager } from '../../types';
-import type { ActivePanelEvent } from '../../grid_panel/types';
+import type { ActivePanelEvent } from '../../panel/types';
 import { getKeyboardDragPosition, getNextKeyboardResizePosition } from './utils';
 
 // a: [0-200] b: [250-450] c: [500-700]   (row 0)

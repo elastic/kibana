@@ -13,7 +13,7 @@ import { filter, map, pairwise, skip, startWith } from 'rxjs';
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridPanelDragPreview = React.memo(() => {
+export const PanelDragPreview = React.memo(() => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -64,4 +64,4 @@ const styles = css({
   height: 'calc(var(--kbnFlexRowHeight) * 1px)',
 });
 
-GridPanelDragPreview.displayName = 'kbnFlexLayoutPanelDragPreview';
+PanelDragPreview.displayName = 'kbnFlexLayoutPanelDragPreview';

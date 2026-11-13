@@ -10,14 +10,14 @@
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { combineLatest, skip } from 'rxjs';
-import { useGridPanelState } from './use_panel_grid_data';
+import { usePanelState } from './use_panel_state';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   const [width, setWidth] = useState(0);
   const [isResizing, setIsResizing] = useState(false);
 
-  const panel$ = useGridPanelState({ panelId });
+  const panel$ = usePanelState({ panelId });
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   useEffect(() => {

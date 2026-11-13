@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { GridPanel } from './grid_panel';
-export { GridPanelDragPreview } from './grid_panel_drag_preview';
+export { Panel } from './panel';
+export { PanelDragPreview } from './panel_drag_preview';
 export type { FlexPanelData, ActivePanelEvent } from './types';

@@ -16,21 +16,21 @@ import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from '../../common/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
-import { ResizeHandle } from './grid_panel_resize_handle';
-import { useGridPanelState } from './use_panel_grid_data';
-import { ResizeGauge } from './grid_panel_resize_gauge';
+import { ResizeHandle } from './panel_resize_handle';
+import { usePanelState } from './use_panel_state';
+import { ResizeGauge } from './panel_resize_gauge';
 import { applyActivePanelStyles, clearActivePanelStyles, pinPanelWidth } from './panel_styles';
 
-export interface GridPanelProps {
+export interface PanelProps {
   panelId: string;
 }
 
-export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
+export const Panel = React.memo(({ panelId }: PanelProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
     useGridLayoutContext();
-  const panel$ = useGridPanelState({ panelId });
+  const panel$ = usePanelState({ panelId });
   const dragHandleApi = useDragHandleApi({ panelId });
 
   const initialStyles = useMemo(() => {
@@ -123,7 +123,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   );
 });
 
-GridPanel.displayName = 'kbnFlexLayoutPanel';
+Panel.displayName = 'kbnFlexLayoutPanel';
 
 const styles = {
   panel: css({

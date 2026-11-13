@@ -10,7 +10,7 @@
 import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
-import type { ActivePanelEvent, FlexPanelData } from './grid_panel';
+import type { ActivePanelEvent, FlexPanelData } from './panel';
 
 /**
  * The settings for how the grid should be rendered

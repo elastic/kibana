@@ -10,7 +10,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
 
-import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
+import type { ActivePanelEvent, FlexPanelData } from '../../panel';
 import type { FlexLayoutData, FlexLayoutStateManager } from '../../types';
 import type { GridLayoutContextType } from '../../use_grid_layout_context';
 import { getSensorType } from '../../../grid/use_grid_layout_events/sensors';
@@ -87,7 +87,7 @@ export const moveKeyboardDragAction = (
     nextLayout[id] = { ...layout[id], order };
   });
   gridLayout$.next(nextLayout);
-  // the first move is what makes the panel visibly active (see `grid_panel.tsx`)
+  // the first move is what makes the panel visibly active (see `panel.tsx`)
   activePanelEvent$.next({ ...activePanel });
 
   panelRefs.current[activePanel.id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

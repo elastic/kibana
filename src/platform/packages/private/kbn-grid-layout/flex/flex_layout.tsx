@@ -13,7 +13,7 @@ import { cloneDeep, isEqual } from 'lodash';
 
 import { css } from '@emotion/react';
 
-import { GridPanel, GridPanelDragPreview } from './grid_panel';
+import { Panel, PanelDragPreview } from './panel';
 import type {
   GridAccessMode,
   FlexLayoutData,
@@ -115,9 +115,9 @@ export const FlexLayout = ({
         css={[styles.layout, styles.hasActivePanel]}
       >
         {panelIds.map((id) => (
-          <GridPanel key={id} panelId={id} />
+          <Panel key={id} panelId={id} />
         ))}
-        <GridPanelDragPreview />
+        <PanelDragPreview />
       </div>
     </GridLayoutContext.Provider>
   );

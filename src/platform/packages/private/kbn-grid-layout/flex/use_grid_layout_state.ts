@@ -16,7 +16,7 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 
 import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
-import type { ActivePanelEvent } from './grid_panel';
+import type { ActivePanelEvent } from './panel';
 import type {
   FlexLayoutData,
   FlexLayoutStateManager,

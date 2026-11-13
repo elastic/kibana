@@ -15,7 +15,7 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import type { FlexPanelData } from './types';
 import type { FlexLayoutData } from '../types';
 
-export const useGridPanelState = ({
+export const usePanelState = ({
   panelId,
 }: {
   panelId: string;

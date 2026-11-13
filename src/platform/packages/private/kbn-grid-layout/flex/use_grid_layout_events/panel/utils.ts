@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
+import type { ActivePanelEvent, FlexPanelData } from '../../panel';
 import type { FlexLayoutStateManager } from '../../types';
 import {
   getSensorPosition,

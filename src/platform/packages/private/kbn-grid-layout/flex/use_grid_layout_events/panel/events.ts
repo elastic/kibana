@@ -9,7 +9,7 @@
 
 import { useCallback, useRef } from 'react';
 
-import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
+import type { ActivePanelEvent, FlexPanelData } from '../../panel';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 import {
   getSensorPosition,

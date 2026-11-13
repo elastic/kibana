@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FlexPanelData } from '../grid_panel';
+import type { FlexPanelData } from '../panel';
 import type { FlexLayoutData } from '../types';
 
 const comparePanels = (panelA: FlexPanelData, panelB: FlexPanelData) => panelA.order - panelB.order;
