@@ -64,7 +64,7 @@ const listHandlerParams = ({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated, countFacets }),
       }),
-      server: server as object,
+      server,
       logger,
     } as never,
   };
