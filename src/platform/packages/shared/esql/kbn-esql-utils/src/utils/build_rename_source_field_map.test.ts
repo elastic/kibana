@@ -165,6 +165,18 @@ describe('buildRenameSourceFieldMap', () => {
     });
   });
 
+  describe('LET bindings', () => {
+    it('resolves a RENAME inside a referenced binding to the source field', () => {
+      const query = 'LET a = (FROM logs | RENAME bytes AS size); FROM a';
+      expect(resolve('size', query)).toBe('bytes');
+    });
+
+    it('does not resolve a binding RENAME that the binding later shadows', () => {
+      const query = 'LET a = (FROM logs | RENAME bytes AS size | EVAL size = size * 2); FROM a';
+      expect(resolve('size', query)).toBe('size');
+    });
+  });
+
   describe('ENRICH WITH aliases', () => {
     it('resolves ENRICH ... WITH new_name = enrich_field as a rename', () => {
       const query = 'FROM logs | ENRICH servers ON host WITH server_name = host_name';

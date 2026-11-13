@@ -9,8 +9,16 @@
 
 import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
-import type { ESQLCommandSummary } from '@kbn/esql-language/src/commands/registry/types';
-import { getSummaryPerCommand } from './get_query_summary';
+import {
+  getNamedSubqueries,
+  type ESQLCommandSummary,
+  type ESQLCommandSummaryContext,
+} from '@kbn/esql-language';
+import {
+  createNamedSubquerySummaryContext,
+  getQuerySummaryFromCommands,
+  getSummaryPerCommand,
+} from './get_query_summary';
 import { parseEsqlCached } from './parse_esql_cached';
 
 interface CommandWithSummary {
@@ -107,10 +115,14 @@ function resolveOneField(
   return current;
 }
 
-function buildContext(commands: readonly ESQLAstCommand[], query: string): RenameResolutionContext {
+function buildContext(
+  commands: readonly ESQLAstCommand[],
+  query: string,
+  summaryContext: ESQLCommandSummaryContext
+): RenameResolutionContext {
   const commandSummaries: CommandWithSummary[] = commands.map((cmd) => ({
     cmd,
-    summary: getSummaryPerCommand(query, cmd),
+    summary: getSummaryPerCommand(query, cmd, summaryContext),
   }));
 
   const renameOutputNames = new Set<string>();
@@ -168,9 +180,10 @@ function renameMapFromContext(context: RenameResolutionContext): Map<string, str
 /** Builds the rename map from commands that have already been parsed. */
 export function buildRenameSourceFieldMapFromCommands(
   commands: readonly ESQLAstCommand[],
-  query: string
+  query: string,
+  summaryContext: ESQLCommandSummaryContext
 ): Map<string, string> {
-  return renameMapFromContext(buildContext(commands, query));
+  return renameMapFromContext(buildContext(commands, query, summaryContext));
 }
 
 /**
@@ -181,5 +194,15 @@ export function buildRenameSourceFieldMapFromCommands(
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
   const { root } = parseEsqlCached(query);
-  return buildRenameSourceFieldMapFromCommands(root.commands, query);
+  // Each LET builds its own rename map, so FROM gets its columns already mapped to source fields.
+  const summaryContext = createNamedSubquerySummaryContext(
+    getNamedSubqueries(root.header),
+    (commands, bindingContext) => ({
+      ...getQuerySummaryFromCommands(commands, query, bindingContext),
+      renamedColumnsPairs: new Set(
+        buildRenameSourceFieldMapFromCommands(commands, query, bindingContext)
+      ),
+    })
+  );
+  return buildRenameSourceFieldMapFromCommands(root.commands, query, summaryContext);
 }

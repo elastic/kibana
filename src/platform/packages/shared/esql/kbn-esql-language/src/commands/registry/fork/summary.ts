@@ -9,9 +9,13 @@
 
 import type { ESQLCommand, ESQLAstForkCommand } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../../..';
-import type { ESQLCommandSummary, FieldSummary } from '../types';
+import type { ESQLCommandSummary, ESQLCommandSummaryContext, FieldSummary } from '../types';
 
-export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
+export const summary = (
+  command: ESQLCommand,
+  query: string,
+  context: ESQLCommandSummaryContext
+): ESQLCommandSummary => {
   const forkCommand = command as ESQLAstForkCommand;
   const branches = forkCommand.args.map((parens) => parens.child);
 
@@ -26,7 +30,7 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
       const commandDef = esqlCommandRegistry.getCommandByName(branchCommand.name);
 
       if (commandDef?.methods.summary) {
-        const branchSummary = commandDef.methods.summary(branchCommand, query);
+        const branchSummary = commandDef.methods.summary(branchCommand, query, context);
 
         if (branchSummary.newColumns) {
           branchSummary.newColumns.forEach((col) => allNewColumns.add(col));

@@ -180,6 +180,14 @@ export interface ESQLCommandSummary {
   aggregates?: Set<FieldSummary>;
 }
 
+/** What source commands need to pull the LETs they use into their summary. */
+export interface ESQLCommandSummaryContext {
+  /** The LETs that the sources of this pipeline can point to. */
+  namedSubqueries: readonly NamedSubquery[];
+  /** Gives back the summary of a LET, which only sees the LETs declared before it. */
+  getNamedSubquerySummary: (namedSubquery: NamedSubquery) => ESQLCommandSummary;
+}
+
 export interface FieldSummary {
   /**
    * The field name, correctly formatted, extracted from the AST.
