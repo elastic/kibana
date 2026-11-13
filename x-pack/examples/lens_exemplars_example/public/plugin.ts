@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { Plugin, CoreSetup } from '@kbn/core/public';
+import { BehaviorSubject, type Subscription } from 'rxjs';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { createExemplarsExtension, EXEMPLARS_APP_ID, type Exemplar } from './exemplars_extension';
+import {
+  createExemplarsExtension,
+  EXEMPLARS_APP_ID,
+  EXEMPLARS_FEATURE_FLAG,
+  type Exemplar,
+} from './exemplars_extension';
 import { mount } from './mount';
 
 export interface SetupDependencies {
@@ -27,11 +32,14 @@ export class LensExemplarsExamplePlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   private readonly selectedExemplar$ = new BehaviorSubject<Exemplar | undefined>(undefined);
+  private isExemplarsEnabled = false;
+  private featureFlagSubscription?: Subscription;
 
   public setup(core: CoreSetup<StartDependencies>, { developerExamples, lens }: SetupDependencies) {
     lens.registerExtension(
       createExemplarsExtension({
         onExemplarClick: (exemplar) => this.selectedExemplar$.next(exemplar),
+        isEnabled: () => this.isExemplarsEnabled,
       })
     );
 
@@ -58,7 +66,15 @@ export class LensExemplarsExamplePlugin
     });
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    this.featureFlagSubscription = core.featureFlags
+      .getBooleanValue$(EXEMPLARS_FEATURE_FLAG, false)
+      .subscribe((enabled) => {
+        this.isExemplarsEnabled = enabled;
+      });
+  }
 
-  public stop() {}
+  public stop() {
+    this.featureFlagSubscription?.unsubscribe();
+  }
 }

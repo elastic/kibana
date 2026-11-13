@@ -61,7 +61,10 @@ describe('exemplars extension', () => {
   });
 
   describe('rules', () => {
-    const extension = createExemplarsExtension({ onExemplarClick: jest.fn() });
+    const extension = createExemplarsExtension({
+      onExemplarClick: jest.fn(),
+      isEnabled: () => true,
+    });
 
     it('applies to STATS layers rendered by the example app', () => {
       const context = getContext(EXEMPLARS_APP_ID, LOGS_QUERY);
@@ -72,11 +75,25 @@ describe('exemplars extension', () => {
       const context = getContext('dashboards', LOGS_QUERY);
       expect(extension.isApplicable(context, context.layers[0])).toBe(false);
     });
+
+    it('follows the latest feature flag value on each evaluation', () => {
+      let isEnabled = false;
+      const flaggedExtension = createExemplarsExtension({
+        onExemplarClick: jest.fn(),
+        isEnabled: () => isEnabled,
+      });
+      const context = getContext(EXEMPLARS_APP_ID, LOGS_QUERY);
+
+      expect(flaggedExtension.isApplicable(context, context.layers[0])).toBe(false);
+
+      isEnabled = true;
+      expect(flaggedExtension.isApplicable(context, context.layers[0])).toBe(true);
+    });
   });
 
   it('draws valid rows and opens the clicked exemplar', async () => {
     const onExemplarClick = jest.fn();
-    const extension = createExemplarsExtension({ onExemplarClick });
+    const extension = createExemplarsExtension({ onExemplarClick, isEnabled: () => true });
 
     const overlay = await extension.fetchOverlay({
       layer: { layerId: 'layer1', esql: LOGS_QUERY },

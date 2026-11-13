@@ -15,6 +15,7 @@ import {
 
 export const EXEMPLARS_APP_ID = 'lens_exemplars_example';
 export const EXEMPLARS_EXTENSION_ID = 'lensExemplarsExample.exemplars';
+export const EXEMPLARS_FEATURE_FLAG = 'lensExemplarsExample.enabled';
 
 const EXEMPLARS_LIMIT = 200;
 const SIMULATED_EXEMPLARS_LIMIT = 30;
@@ -62,11 +63,14 @@ export const getExemplarsQuery = (esql: string): ExemplarsQuery | undefined => {
 
 interface CreateExemplarsExtensionParams {
   readonly onExemplarClick: (exemplar: Exemplar) => void;
+  /** Latest value of the feature flag; read on every chart load, so a change applies on the next reload. */
+  readonly isEnabled: () => boolean;
 }
 
 /** Lens extension drawing clickable exemplars over the XY charts of this example app. */
 export const createExemplarsExtension = ({
   onExemplarClick,
+  isEnabled,
 }: CreateExemplarsExtensionParams): LensExtension => {
   const exemplarsById = new Map<string, Exemplar>();
   let nextId = 0;
@@ -74,11 +78,16 @@ export const createExemplarsExtension = ({
   return {
     id: EXEMPLARS_EXTENSION_ID,
     visualizationTypes: ['lnsXY'],
-    isApplicable: ({ executionContext }, { esql }) =>
-      executionContext?.name === EXEMPLARS_APP_ID &&
-      esql !== undefined &&
-      queryHasStatsCommand(esql) &&
-      getExemplarsQuery(esql) !== undefined,
+    isApplicable: ({ executionContext }, { esql }) => {
+      return (
+        isEnabled() &&
+        executionContext?.name === EXEMPLARS_APP_ID &&
+        esql !== undefined &&
+        queryHasStatsCommand(esql) &&
+        getExemplarsQuery(esql) !== undefined
+      );
+    },
+
     fetchOverlay: async ({ layer, executeEsql }) => {
       const query = layer.esql ? getExemplarsQuery(layer.esql) : undefined;
       if (!query) {

@@ -14,3 +14,12 @@ The extension applies to ES|QL layers with a `STATS` command rendered by this ap
 - On any other query it simulates exemplars with the largest raw samples of the aggregated field.
 
 The "Show exemplars" switch uses the runtime-only `extensions` prop of the Lens component.
+
+The extension is behind the `lensExemplarsExample.enabled` feature flag. It defaults to `false`,
+so the extension is off wherever the flag isn't served. Lens checks the flag each time a chart
+loads, so a change applies on the next chart refresh. Enable it locally with:
+
+```yaml
+feature_flags.overrides:
+  lensExemplarsExample.enabled: true
+```
