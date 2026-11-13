@@ -78,10 +78,7 @@ Row virtualization is enabled by default. Its estimated height and overscan can 
 Each column must provide a `getTextValue` callback. It returns the canonical plain-text cell value
 used as the default accessible name and focused-cell clipboard value. It should match the visible
 data semantically and is deliberately separate from `renderCell`, so visual React content never has
-to be inspected or converted back into text. Phase 1 `renderCell` output is read-only visual content
-and must not include tabbable descendants such as links, buttons, or inputs. Interactive controls
-and complex cell content will be introduced through public capabilities that preserve the grid's
-composite tab stop without inspecting or rewriting consumer DOM.
+to be inspected or converted back into text.
 
 ## Keyboard and focus behavior
 
