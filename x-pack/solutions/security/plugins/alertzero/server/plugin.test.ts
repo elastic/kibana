@@ -267,7 +267,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(contextEngine.registerAiIndex).toHaveBeenCalledWith(
         'security-triage-decisions',
         expect.objectContaining({
-          dest: { type: 'index', value: 'ai-index-idx-security-triage-decisions' },
+          dest: { type: 'index', value: '.ai-index-idx-security-triage-decisions' },
         })
       );
     });

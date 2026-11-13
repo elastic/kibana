@@ -31,8 +31,6 @@ import {
 
 export interface StoreFpDecisionsStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
-  /** False until the decisions index template is installed, and after its install fails. */
-  areDecisionWritesAllowed: () => boolean;
 }
 
 const NOTHING = {
@@ -53,12 +51,11 @@ const NOTHING = {
  *
  * The write goes straight to the backing index: the Context Engine's own `createKi` step cannot
  * apply the consistency rule, and the worker's role has `index` on this index. It checks the
- * `contextEngine:enabled` setting first, and refuses to write until the index template that maps
- * the space privilege is installed, because a write would auto-create the index without it.
+ * `contextEngine:enabled` setting first. The index is a dot-prefixed AI index, so Elasticsearch's
+ * managed template maps the space privilege as `nested` when the first write creates it.
  */
 export const getTriageStoreFpDecisionsStepDefinition = ({
   isContextEngineEnabled,
-  areDecisionWritesAllowed,
 }: StoreFpDecisionsStepDependencies) =>
   createServerStepDefinition({
     ...triageStoreFpDecisionsStepCommonDefinition,
@@ -78,12 +75,6 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
       try {
         if (!(await isContextEngineEnabled(contextManager.getFakeRequest()))) {
           return result('disabled');
-        }
-        if (!areDecisionWritesAllowed()) {
-          logger.warn(
-            'Triage decisions were not stored: the decisions index template is not installed'
-          );
-          return result('storage_failure');
         }
 
         const kind: FpDecisionKind =

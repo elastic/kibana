@@ -56,11 +56,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import {
-  ensureFingerprintIndexMapping,
-  ensureTriageDecisionsIndexMapping,
-} from './context_engine/ensure_fingerprint_index';
-import { startWriteGate, type WriteGate } from './context_engine/write_gate';
+import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
 import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
@@ -164,20 +160,17 @@ export class AlertZeroPlugin
   };
 
   /**
-   * Closed while the fingerprint template install is in flight, and until it succeeds. Open when
-   * the plugin never started the install, as with the config kill switch off.
+   * False while the fingerprint template install is in flight, and after it fails.
+   * `start` cannot return a promise, so the matcher reads this as it changes.
    */
-  private fingerprintGate?: WriteGate;
-
-  /** Same gate for the triage decisions index. Closed until its template install succeeds. */
-  private decisionGate?: WriteGate;
+  private fingerprintWritesAllowed = true;
 
   private readonly alertZeroStartContract = (): AlertZeroPluginStart => {
     const plugin = this;
     return {
       registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
       get attackFingerprintWritesAllowed() {
-        return plugin.fingerprintGate?.isOpen() ?? true;
+        return plugin.fingerprintWritesAllowed;
       },
     };
   };
@@ -280,7 +273,6 @@ export class AlertZeroPlugin
         stepsLogger
       ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
-      areDecisionWritesAllowed: () => this.decisionGate?.isOpen() ?? false,
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
       getWorkflowsManagement: () =>
@@ -395,19 +387,17 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
 
-    // Writes stay refused until the template is installed, so a worker that runs in that gap
-    // reviews every attack and does not auto-create the index. A failed install is retried.
-    const internalEsClient = core.elasticsearch.client.asInternalUser;
-    this.fingerprintGate = startWriteGate({
-      ensure: () => ensureFingerprintIndexMapping(internalEsClient, this.logger),
-      logger: this.logger,
-      label: 'Attack fingerprint',
-    });
-    this.decisionGate = startWriteGate({
-      ensure: () => ensureTriageDecisionsIndexMapping(internalEsClient, this.logger),
-      logger: this.logger,
-      label: 'Triage decisions',
-    });
+    // Plugin start cannot return a promise. Writes stay refused until this settles, so a
+    // worker that runs in that gap reviews every attack and does not auto-create the index.
+    this.fingerprintWritesAllowed = false;
+    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger).then(
+      (allowed) => {
+        this.fingerprintWritesAllowed = allowed;
+      },
+      () => {
+        this.fingerprintWritesAllowed = false;
+      }
+    );
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
@@ -617,7 +607,5 @@ export class AlertZeroPlugin
   stop() {
     this.triageGroupingFlagSubscription?.unsubscribe();
     this.decisionAutoCloseFlagSubscription?.unsubscribe();
-    this.fingerprintGate?.stop();
-    this.decisionGate?.stop();
   }
 }

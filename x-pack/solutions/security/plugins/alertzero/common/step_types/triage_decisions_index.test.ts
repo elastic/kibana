@@ -12,7 +12,7 @@ describe('TRIAGE_DECISIONS_AI_INDEX_DEST', () => {
   it('is its own index, so Hunt readers never see decisions and the space mapping is ours', () => {
     expect(TRIAGE_DECISIONS_AI_INDEX_DEST).toEqual({
       type: 'index',
-      value: 'ai-index-idx-security-triage-decisions',
+      value: '.ai-index-idx-security-triage-decisions',
     });
     expect(TRIAGE_DECISIONS_AI_INDEX_DEST.value).not.toBe(HUNT_COVERAGE_AI_INDEX_DEST.value);
   });

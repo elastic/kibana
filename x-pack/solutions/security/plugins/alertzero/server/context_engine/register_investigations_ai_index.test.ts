@@ -31,7 +31,7 @@ describe('registerInvestigationsAiIndex', () => {
     expect(registerAiIndex).toHaveBeenCalledWith(
       'security-triage-decisions',
       expect.objectContaining({
-        dest: { type: 'index', value: 'ai-index-idx-security-triage-decisions' },
+        dest: { type: 'index', value: '.ai-index-idx-security-triage-decisions' },
         memory_enabled: false,
       })
     );

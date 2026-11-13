@@ -12,7 +12,6 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../common/step_types/triage_decisions_index';
 import { ATTACK_FINGERPRINT_AI_INDEX_ID } from './register_investigations_ai_index';
 
 const FINGERPRINT_INDEX = getAiIndexDest('index', ATTACK_FINGERPRINT_AI_INDEX_ID).value;
@@ -24,7 +23,6 @@ const FINGERPRINT_INDEX = getAiIndexDest('index', ATTACK_FINGERPRINT_AI_INDEX_ID
  */
 const BASE_INDEX_TEMPLATE = 'ai-index-idx';
 const FINGERPRINT_INDEX_TEMPLATE = 'security-attack-fingerprint';
-const TRIAGE_DECISIONS_INDEX_TEMPLATE = 'security-triage-decisions';
 const FALLBACK_TEMPLATE_PRIORITY = 501;
 const FALLBACK_COMPOSED_OF = ['ai-index@mappings'] as const;
 
@@ -111,37 +109,28 @@ const readBaseTemplate = async (esClient: ElasticsearchClient): Promise<BaseTemp
   }
 };
 
-const spaceScopedMappings = (baseProperties: MappingTypeMapping['properties']) => ({
+const fingerprintMappings = (baseProperties: MappingTypeMapping['properties']) => ({
   properties: {
     ...baseProperties,
     ...FINGERPRINT_INDEX_MAPPINGS.properties,
   },
 });
 
-interface SpaceScopedIndex {
-  index: string;
-  template: string;
-  /** Names the index in log messages. */
-  label: string;
-}
-
 /**
- * Installs the index template that maps the space privilege as `nested`. `kibana_system` can
- * manage index templates and cannot create the index or change its mapping, so an existing
- * index with the wrong mapping has to be recreated. The worker's first write then auto-creates
- * it from this template. A false result means the template is not installed, and the caller
- * must not let anything auto-create the index.
+ * Installs the fingerprint index template. `kibana_system` can manage index templates and
+ * cannot create this index or change its mapping, so an existing index with the wrong
+ * mapping has to be recreated. The worker's first write then auto-creates it from this template.
  */
-const ensureSpaceScopedIndexMapping = async (
+/** True when the fingerprint template is installed. A false result must not auto-create the index. */
+export const ensureFingerprintIndexMapping = async (
   esClient: ElasticsearchClient,
-  logger: Logger,
-  { index, template, label }: SpaceScopedIndex
+  logger: Logger
 ): Promise<boolean> => {
   const base = await readBaseTemplate(esClient);
   try {
     await esClient.indices.putIndexTemplate({
-      name: template,
-      index_patterns: [index],
+      name: FINGERPRINT_INDEX_TEMPLATE,
+      index_patterns: [FINGERPRINT_INDEX],
       priority: base.priority,
       composed_of: base.composedOf,
       // `ai-index@custom` is optional. Without the base template's ignore list,
@@ -151,21 +140,21 @@ const ensureSpaceScopedIndexMapping = async (
         : { ignore_missing_component_templates: base.ignoreMissingComponentTemplates }),
       template: {
         ...(base.settings === undefined ? {} : { settings: base.settings }),
-        mappings: spaceScopedMappings(base.properties),
+        mappings: fingerprintMappings(base.properties),
       },
     });
   } catch (error) {
-    logger.warn(`${label} index template was not installed: ${errorText(error)}`);
+    logger.warn(`Attack fingerprint index template was not installed: ${errorText(error)}`);
     return false;
   }
 
   try {
-    const exists = await esClient.indices.exists({ index });
+    const exists = await esClient.indices.exists({ index: FINGERPRINT_INDEX });
     if (exists !== true) {
       return true;
     }
 
-    const response = await esClient.indices.getMapping({ index });
+    const response = await esClient.indices.getMapping({ index: FINGERPRINT_INDEX });
     const current = Object.values(response)[0]?.mappings as Record<string, unknown> | undefined;
     const type = privilegesType(current);
     if (type === 'nested') {
@@ -177,33 +166,11 @@ const ensureSpaceScopedIndexMapping = async (
         ? 'has no nested permissions.kibana.privileges mapping'
         : `maps permissions.kibana.privileges as ${type}`;
     logger.warn(
-      `${label} index ${index} ${detail}. ` +
+      `Attack fingerprint index ${FINGERPRINT_INDEX} ${detail}. ` +
         'Context Engine cannot space-scope that field until the index is recreated.'
     );
   } catch (error) {
-    logger.warn(`${label} index mapping was not read: ${errorText(error)}`);
+    logger.warn(`Attack fingerprint index mapping was not read: ${errorText(error)}`);
   }
   return true;
 };
-
-/** True when the fingerprint template is installed. A false result must not auto-create the index. */
-export const ensureFingerprintIndexMapping = (
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<boolean> =>
-  ensureSpaceScopedIndexMapping(esClient, logger, {
-    index: FINGERPRINT_INDEX,
-    template: FINGERPRINT_INDEX_TEMPLATE,
-    label: 'Attack fingerprint',
-  });
-
-/** True when the triage decisions template is installed. A false result must not auto-create the index. */
-export const ensureTriageDecisionsIndexMapping = (
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<boolean> =>
-  ensureSpaceScopedIndexMapping(esClient, logger, {
-    index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
-    template: TRIAGE_DECISIONS_INDEX_TEMPLATE,
-    label: 'Triage decisions',
-  });
