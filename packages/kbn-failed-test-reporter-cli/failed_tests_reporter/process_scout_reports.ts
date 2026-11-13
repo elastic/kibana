@@ -170,7 +170,7 @@ export async function processScoutReports(
         continue;
       }
 
-      // its per-test issue, if any, is left to be handed over to the suite issue it gets
+      // its per-test issue, if any, is left for the suite issue it gets to replace
       if (!perTestIssues) {
         log.info(`No suite issue tracks this test yet: ${failure.classname} - ${failure.name}`);
         failure.failureCount = 0;

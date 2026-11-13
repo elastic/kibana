@@ -55,8 +55,8 @@ export interface FlakySuiteIssueContext {
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
   /**
-   * Issues about the suite's tests that this issue takes over from: closed before their test failed
-   * again, or open per-test issues closed as its duplicates once filed.
+   * Issues about the suite's tests that this issue replaces: closed before their test failed again,
+   * or open per-test issues closed as its duplicates once filed.
    */
   previousIssues?: PreviousIssues;
 }
@@ -119,9 +119,9 @@ export interface FlakySuiteIssueMetadata {
    */
   'report.shownTestIds'?: string[];
   /**
-   * Issues the suite issue took over from that its tests table doesn't name: those handed over
-   * after it was filed, and those of tests beyond the table's rows. The body's "Previously tracked
-   * in" line lists them.
+   * Issues the suite issue replaces that its tests table doesn't name: those it replaced after it
+   * was filed, and those of tests beyond the table's rows. The body's "Previously tracked in" line
+   * lists them.
    */
   'suite.previousIssues'?: number[];
   /** Those of `suite.previousIssues` no comment has named yet; the next comment names them. */
@@ -826,8 +826,8 @@ export const SKIP_TIP =
   'to `/skip` it, or skip the test case manually.';
 
 /**
- * Full issue body for a new suite issue, including the hidden metadata. The issues it takes over
- * from are named next to their test in the tests table.
+ * Full issue body for a new suite issue, including the hidden metadata. The issues it replaces are
+ * named next to their test in the tests table.
  */
 export const renderFlakySuiteIssueBody = (
   suite: FlakySuite,

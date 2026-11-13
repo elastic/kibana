@@ -66,11 +66,11 @@ export const plural = (count: number, singular: string, pluralForm = `${singular
 export const issueList = (numbers: readonly number[]): string =>
   numbers.map((number) => `#${number}`).join(', ');
 
-/** `Previously tracked in #1, #2.`: the issues a suite issue took over from. */
+/** `Previously tracked in #1, #2.`: the issues a suite issue replaces. */
 export const previouslyTrackedIn = (numbers: readonly number[]): string =>
   `Previously tracked in ${issueList(numbers)}.`;
 
-/** Issues a suite issue took over from, by the id of the test they were about. */
+/** Issues a suite issue replaces, by the id of the test they were about. */
 export type PreviousIssues = ReadonlyMap<string, readonly number[]>;
 
 /** `19%`, or `<1%` for a rate that is positive but rounds down to nothing. */

@@ -9,7 +9,7 @@
 
 import { computeTestID } from '@kbn/scout-reporting';
 import { ToolingLog } from '@kbn/tooling-log';
-import { handOverComment } from '../flaky_test_issues/hand_over';
+import { replacedIssueComment } from '../flaky_test_issues/replace_per_test_issues';
 import { FLAKY_TEST_SUITE_METADATA_PREFIX } from '../flaky_test_issues/issue_body';
 import {
   MAX_NEW_ISSUES_PER_JOB,
@@ -225,7 +225,7 @@ const report = (
     github: mockGithub().github,
     repo: 'elastic/appex-qa-ai',
     build,
-    handOverPerTestIssues: false,
+    replacePerTestIssues: false,
     dryRun: false,
     ...overrides,
   });
@@ -305,7 +305,7 @@ describe('reportConsistentFailureIssues', () => {
       commented: [],
       tracked: [],
       skipped: [],
-      handedOver: [],
+      replaced: [],
     });
   });
 
@@ -336,7 +336,7 @@ describe('reportConsistentFailureIssues', () => {
       commented: [],
       tracked: [],
       skipped: [],
-      handedOver: [],
+      replaced: [],
     });
   });
 
@@ -485,11 +485,11 @@ describe('reportConsistentFailureIssues', () => {
     expect(closedPerTest.created).toHaveLength(1);
   });
 
-  describe('handing over per-test issues', () => {
+  describe('replacing per-test issues', () => {
     const brokenTests = () => ({
       es: mockEs([...brokenSince('test-1', 101, 102), ...brokenSince('test-2', 101, 102)]).es,
       failures: [scoutFailure('test-1', 'a'), scoutFailure('test-2', 'b')],
-      handOverPerTestIssues: true,
+      replacePerTestIssues: true,
     });
 
     it('files the suite issue even when every broken test has a per-test issue, and closes them as its duplicates', async () => {
@@ -513,17 +513,17 @@ describe('reportConsistentFailureIssues', () => {
         [2, 1500],
       ]);
       expect(addIssueComment.mock.calls).toEqual([
-        [1, handOverComment(500)],
-        [2, handOverComment(500)],
+        [1, replacedIssueComment(500)],
+        [2, replacedIssueComment(500)],
       ]);
       expect(summary.tracked).toEqual([]);
-      expect(summary.handedOver).toEqual([
+      expect(summary.replaced).toEqual([
         'https://github.com/elastic/appex-qa-ai/issues/1',
         'https://github.com/elastic/appex-qa-ai/issues/2',
       ]);
     });
 
-    it('hands them over to the suite issue the break is posted on, even within the day', async () => {
+    it('replaces them with the suite issue the break is posted on, even within the day', async () => {
       const existing = failingSuiteIssue(new Date(NOW.getTime() - 2 * HOUR_MS));
       const { github, createIssue, addIssueComment, closeAsDuplicate, editIssue } = mockGithub([
         existing,
@@ -534,16 +534,16 @@ describe('reportConsistentFailureIssues', () => {
         es: mockEs(brokenSince('test-1', 101, 102)).es,
         github,
         failures: [scoutFailure('test-1', 'shows results')],
-        handOverPerTestIssues: true,
+        replacePerTestIssues: true,
         now: NOW,
       });
 
       expect(createIssue).not.toHaveBeenCalled();
       // the break was posted 2 hours ago: the only comment is the one closing the per-test issue
-      expect(addIssueComment.mock.calls).toEqual([[3, handOverComment(42)]]);
+      expect(addIssueComment.mock.calls).toEqual([[3, replacedIssueComment(42)]]);
       expect(closeAsDuplicate).toHaveBeenCalledWith(3, 1042);
       expect(summary.tracked).toEqual([{ filePath: SPEC, url: existing.html_url }]);
-      expect(summary.handedOver).toEqual(['https://github.com/elastic/appex-qa-ai/issues/3']);
+      expect(summary.replaced).toEqual(['https://github.com/elastic/appex-qa-ai/issues/3']);
       // the body lists it, and the next post names it
       const [[, { body }]] = editIssue.mock.calls;
       expect(body).toContain('\n\nPreviously tracked in #3.\n\n<!-- kibanaCiData');
@@ -554,7 +554,7 @@ describe('reportConsistentFailureIssues', () => {
         es: mockEs(brokenSince('test-1', 101, 102)).es,
         github: nextDay.github,
         failures: [scoutFailure('test-1', 'shows results')],
-        handOverPerTestIssues: true,
+        replacePerTestIssues: true,
         now: new Date(NOW.getTime() + 25 * HOUR_MS),
       });
       const [[number, comment]] = nextDay.addIssueComment.mock.calls;
@@ -564,7 +564,7 @@ describe('reportConsistentFailureIssues', () => {
       expect(previousIssuesOf(posted)).toEqual({ listed: [3] });
     });
 
-    it('names the per-test issues it hands over in the break it posts', async () => {
+    it('names the per-test issues it replaces in the break it posts', async () => {
       const existing = failingSuiteIssue(new Date(NOW.getTime() - 25 * HOUR_MS));
       const { github, addIssueComment, editIssue } = mockGithub([
         existing,
@@ -575,13 +575,13 @@ describe('reportConsistentFailureIssues', () => {
         es: mockEs(brokenSince('test-1', 101, 102)).es,
         github,
         failures: [scoutFailure('test-1', 'shows results')],
-        handOverPerTestIssues: true,
+        replacePerTestIssues: true,
         now: NOW,
       });
 
       expect(addIssueComment.mock.calls).toEqual([
         [42, expect.stringMatching(/^🔴 .*\n\nPreviously tracked in #3\.$/s)],
-        [3, handOverComment(42)],
+        [3, replacedIssueComment(42)],
       ]);
       const [[, { body }]] = editIssue.mock.calls;
       expect(body).toContain('Previously tracked in #3.');
@@ -597,7 +597,7 @@ describe('reportConsistentFailureIssues', () => {
         es: mockEs(brokenSince('test-1', 101, 102)).es,
         github,
         failures: [scoutFailure('test-1', 'a')],
-        handOverPerTestIssues: true,
+        replacePerTestIssues: true,
       });
 
       expect(createIssue).toHaveBeenCalledTimes(1);
@@ -645,7 +645,7 @@ describe('reportConsistentFailureIssues', () => {
       commented: [],
       tracked: [],
       skipped: [],
-      handedOver: [],
+      replaced: [],
     });
   });
 });

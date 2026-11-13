@@ -206,7 +206,7 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
 });
 
 describe('processJUnitReports with per-test issues off', () => {
-  it('neither updates per-test issues, left to be handed over to suite issues, nor opens new ones', async () => {
+  it('neither updates per-test issues, left for suite issues to replace, nor opens new ones', async () => {
     const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams([createExistingIssue(failures[0])]);

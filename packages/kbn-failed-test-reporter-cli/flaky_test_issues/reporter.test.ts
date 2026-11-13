@@ -14,7 +14,7 @@ import type {
   ListIssuesOptions,
 } from '../failed_tests_reporter/github_api';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import { handOverComment } from './hand_over';
+import { replacedIssueComment } from './replace_per_test_issues';
 import {
   FLAKY_TEST_SUITE_METADATA_PREFIX,
   readFlakySuiteIssueMetadata,
@@ -84,7 +84,7 @@ const run = (
     omitSkippedTests: true,
     updateIssues: true,
     commentCooldownDays: 3,
-    handOverPerTestIssues: false,
+    replacePerTestIssues: false,
     dryRun: false,
     ...overrides,
   });
@@ -531,14 +531,14 @@ describe('reportFlakySuiteIssues', () => {
     });
   });
 
-  describe('handing over per-test issues', () => {
-    const handingOver = { handOverPerTestIssues: true };
+  describe('replacing per-test issues', () => {
+    const replacing = { replacePerTestIssues: true };
 
     it('files the suite issue over open per-test issues, and closes them as its duplicates', async () => {
       const perTest = scoutTestIssue(43, 'pw-1');
       const github = createGithubApi([perTest, fileMention(7)]);
 
-      const summary = await run(github, { report: flakyReport([trackedTest()]), ...handingOver });
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
 
       const [, body] = github.createIssue.mock.calls[0];
       expect(body).toContain('| #43 |');
@@ -560,9 +560,7 @@ describe('reportFlakySuiteIssues', () => {
           filePath: SUITE_PATH,
           suiteTitle: 'Default status alert',
           issue: expect.objectContaining({ number: 900 }),
-          handedOver: [
-            { number: 43, url: perTest.html_url, title: perTest.title, state: 'closed' },
-          ],
+          replaced: [{ number: 43, url: perTest.html_url, title: perTest.title, state: 'closed' }],
         },
       ]);
     });
@@ -570,7 +568,7 @@ describe('reportFlakySuiteIssues', () => {
     it('hands the per-test issues of its tests over to the suite issue it refreshes', async () => {
       const github = createGithubApi([suiteIssue(42), scoutTestIssue(43, 'pw-1')]);
 
-      const summary = await run(github, { report: flakyReport([trackedTest()]), ...handingOver });
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
 
       expect(github.createIssue).not.toHaveBeenCalled();
       expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
@@ -580,16 +578,16 @@ describe('reportFlakySuiteIssues', () => {
       expect(previousIssuesOf(body)).toEqual({ listed: [43] });
       expect(github.addIssueComment.mock.calls).toEqual([
         [42, expect.stringMatching(/\n\nPreviously tracked in #43\.$/)],
-        [43, handOverComment(42)],
+        [43, replacedIssueComment(42)],
       ]);
       expect(summary.actions[0]).toMatchObject({
         action: 'updated',
         issue: { number: 42 },
-        handedOver: [{ number: 43, state: 'closed' }],
+        replaced: [{ number: 43, state: 'closed' }],
       });
     });
 
-    it('names a per-test issue it hands over between comments in the next comment', async () => {
+    it('names a per-test issue it replaces between comments in the next comment', async () => {
       // filed the day before: no comment is due yet
       const github = createGithubApi([
         suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z')),
@@ -597,18 +595,18 @@ describe('reportFlakySuiteIssues', () => {
       ]);
       const report = flakyReport([trackedTest()]);
 
-      await run(github, { report, ...handingOver });
+      await run(github, { report, ...replacing });
 
       const [[, { body }]] = github.editIssue.mock.calls;
       expect(body).toContain('Previously tracked in #43.');
       expect(previousIssuesOf(body)).toEqual({ listed: [43], unannounced: [43] });
-      expect(github.addIssueComment.mock.calls).toEqual([[43, handOverComment(42)]]);
+      expect(github.addIssueComment.mock.calls).toEqual([[43, replacedIssueComment(42)]]);
 
       // three days later the comment is due, and names it
       const later = createGithubApi([suiteIssue(42, { body })]);
       await run(later, {
         report: { ...report, generatedAt: new Date('2026-09-12T09:04:41.000Z') },
-        ...handingOver,
+        ...replacing,
       });
 
       const [[number, comment]] = later.addIssueComment.mock.calls;
@@ -632,7 +630,7 @@ describe('reportFlakySuiteIssues', () => {
         scoutTestIssue(43, 'pw-1', { labels: [{ name: 'skipped-test' }] }),
       ]);
 
-      const summary = await run(github, { report: flakyReport([trackedTest()]), ...handingOver });
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
 
       expect(summary.actions[0]).toMatchObject({ action: 'created' });
       expect(github.createIssue.mock.calls[0][1]).toContain('Possibly related: #43.');
@@ -644,7 +642,7 @@ describe('reportFlakySuiteIssues', () => {
         scoutTestIssue(43, 'pw-1', { state: 'closed', closed_at: '2026-09-09T08:00:00Z' }),
       ]);
 
-      const summary = await run(github, { report: flakyReport([trackedTest()]), ...handingOver });
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
 
       expectNoWrites(github);
       expect(summary.actions[0]).toMatchObject({ action: 'skipped', reason: 'tracked' });
@@ -657,7 +655,7 @@ describe('reportFlakySuiteIssues', () => {
       const summary = await run(github, {
         report: flakyReport([trackedTest()]),
         tracking,
-        ...handingOver,
+        ...replacing,
       });
 
       expectNoWrites(github);
@@ -669,10 +667,10 @@ describe('reportFlakySuiteIssues', () => {
       const github = createGithubApi([scoutTestIssue(43, 'pw-1')]);
       github.closeAsDuplicate.mockRejectedValueOnce(new Error('422 Validation Failed'));
 
-      const summary = await run(github, { report: flakyReport([trackedTest()]), ...handingOver });
+      const summary = await run(github, { report: flakyReport([trackedTest()]), ...replacing });
 
       expect(summary.counts).toMatchObject({ created: 1, failed: 0 });
-      expect(summary.actions[0]).not.toHaveProperty('handedOver');
+      expect(summary.actions[0]).not.toHaveProperty('replaced');
       expect(github.addIssueComment).not.toHaveBeenCalled();
     });
   });

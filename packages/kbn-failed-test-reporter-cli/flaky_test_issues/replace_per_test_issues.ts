@@ -34,17 +34,17 @@ const labelName = (label: unknown): string | undefined => {
   return typeof name === 'string' ? name : undefined;
 };
 
-/** An open per-test issue about one of a suite's tests, which no longer tracks it once handed over. */
+/** An open per-test issue about one of a suite's tests, which no longer tracks it once replaced. */
 export const isOpenPerTestIssue = ({ issue, match }: MatchedIssue): boolean =>
   (match === 'test' || match === 'moved') && issue.state === 'open';
 
-/** One the suite's issue takes over; the issue of a skipped test is left open, as it tracks the skip. */
-export const isHandedOver = (matched: MatchedIssue): boolean =>
+/** One the suite's issue replaces; the issue of a skipped test is left open, as it tracks the skip. */
+export const isReplaced = (matched: MatchedIssue): boolean =>
   isOpenPerTestIssue(matched) &&
   !matched.issue.labels.some((label) => labelName(label) === SKIPPED_TEST_LABEL);
 
-/** The per-test issues the suite's issue takes over (`isHandedOver`), by the id of their test. */
-export const perTestIssuesByTest = (
+/** The per-test issues the suite's issue replaces (`isReplaced`), by the id of their test. */
+export const replacedIssuesByTest = (
   suite: MatchableSuite,
   index: IssueIndex
 ): Map<string, GithubIssue[]> => {
@@ -52,7 +52,7 @@ export const perTestIssuesByTest = (
   for (const test of suite.tests) {
     const single = { ...suite, tests: [test] };
     const issues = findMatchingIssues(single, candidateIssues(single, index))
-      .filter(isHandedOver)
+      .filter(isReplaced)
       .map(({ issue }) => issue);
     if (issues.length > 0) {
       byTest.set(test.testId, issues);
@@ -96,23 +96,23 @@ const withPreviouslyTrackedLine = (body: string, numbers: readonly number[]): st
   )}${metadata}`;
 };
 
-export interface TakenOver {
+export interface ListedReplacedIssues {
   body: string;
   /** The issues the comment posted with this body names as previously tracking the suite. */
   announced: number[];
 }
 
 /**
- * The body of a suite issue that takes over `numbers` after it was filed: those it doesn't list yet
+ * The body of a suite issue that replaces `numbers` after it was filed: those it doesn't list yet
  * join its "Previously tracked in" line, and the issues the next comment names. With `commenting`,
- * the comment posted along with the body names them, and those taken over since the last comment.
+ * the comment posted along with the body names them, and those replaced since the last comment.
  * The tests table stays as filed.
  */
-export const takeOver = (
+export const listReplacedIssues = (
   body: string,
   numbers: readonly number[],
   commenting: boolean
-): TakenOver => {
+): ListedReplacedIssues => {
   const listed = [...new Set([...recordedNumbers(body, PREVIOUS_ISSUES), ...numbersInLine(body)])];
   const added = numbers.filter((number) => !listed.includes(number));
   const unannounced = [...recordedNumbers(body, NEW_PREVIOUS_ISSUES), ...added];
@@ -139,11 +139,11 @@ export const withPreviouslyTracked = (comment: string, numbers: readonly number[
   numbers.length > 0 ? `${comment}\n\n${previouslyTrackedIn(numbers)}` : comment;
 
 /** The comment on a per-test issue closed as a duplicate of its suite's issue. */
-export const handOverComment = (suiteIssueNumber: number): string =>
+export const replacedIssueComment = (suiteIssueNumber: number): string =>
   `Now tracked in #${suiteIssueNumber}, together with the other tests of its suite. New ` +
   'failures will be reported there, so this issue is closed as a duplicate.';
 
-export interface HandOverOptions {
+export interface CloseReplacedIssuesOptions {
   github: GithubApi;
   log: ToolingLog;
   dryRun: boolean;
@@ -159,13 +159,13 @@ export interface HandOverOptions {
  * logged and the issue left open for the next run; a failed comment is only logged. Returns the
  * issues closed.
  */
-export const handOver = async ({
+export const closeReplacedIssues = async ({
   github,
   log,
   dryRun,
   issues,
   suiteIssue,
-}: HandOverOptions): Promise<GithubIssue[]> => {
+}: CloseReplacedIssuesOptions): Promise<GithubIssue[]> => {
   const closed: GithubIssue[] = [];
   for (const issue of issues) {
     try {
@@ -186,7 +186,7 @@ export const handOver = async ({
     );
     closed.push(issue);
     try {
-      await github.addIssueComment(issue.number, handOverComment(suiteIssue.number));
+      await github.addIssueComment(issue.number, replacedIssueComment(suiteIssue.number));
     } catch (error) {
       log.warning(`failed to comment on #${issue.number}: ${errorMessage(error)}`);
     }

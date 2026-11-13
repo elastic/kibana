@@ -19,11 +19,11 @@ import {
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   distinctIssues,
-  handOver,
-  perTestIssuesByTest,
-  takeOver,
+  closeReplacedIssues,
+  replacedIssuesByTest,
+  listReplacedIssues,
   withPreviouslyTracked,
-} from '../flaky_test_issues/hand_over';
+} from '../flaky_test_issues/replace_per_test_issues';
 import { FLAKY_TEST_SUITE_METADATA_PREFIX } from '../flaky_test_issues/issue_body';
 import { plural } from '../flaky_test_issues/markdown';
 import {
@@ -89,7 +89,7 @@ export interface ConsistentFailureIssuesOptions {
    * that no longer opens or updates them: they don't keep the suite from getting an issue, and are
    * closed as its duplicates. Issues labelled `skipped-test` are left open.
    */
-  handOverPerTestIssues: boolean;
+  replacePerTestIssues: boolean;
   dryRun: boolean;
   now?: Date;
 }
@@ -106,14 +106,14 @@ export interface ConsistentFailureIssuesSummary {
   commented: Array<SuiteIssueRef & { reopened: boolean }>;
   /**
    * Suites an issue is already about without a comment: per-test issues, which get their own
-   * failure comments unless handed over, or a suite issue the break was posted on less than a day
+   * failure comments unless replaced, or a suite issue the break was posted on less than a day
    * ago.
    */
   tracked: SuiteIssueRef[];
   /** Files of the suites over the cap. */
   skipped: string[];
-  /** Per-test issues closed as duplicates of the suite's issue (`handOverPerTestIssues`). */
-  handedOver: string[];
+  /** Per-test issues closed as duplicates of the suite's issue (`replacePerTestIssues`). */
+  replaced: string[];
 }
 
 interface Candidate {
@@ -221,18 +221,18 @@ const isOpen = ({ issue }: MatchedIssue): boolean => issue.state === 'open';
 
 /**
  * The issue already tracking the suite: one about the suite or its whole file, an open one before
- * a recently closed one, or, failing that and unless they are handed over, the open per-test issue
+ * a recently closed one, or, failing that and unless they are replaced, the open per-test issue
  * of one of its tests when every test has one. A single test without an issue gets the suite its
  * issue.
  */
 const trackingIssue = (
   suite: FailingSuite,
   index: IssueIndex,
-  handingOver: boolean
+  replacing: boolean
 ): MatchedIssue | undefined => {
   const matches = findMatchingIssues(suite, candidateIssues(suite, index));
   const aboutSuite = matches.find(({ match }) => match === 'suite');
-  if (aboutSuite || handingOver) {
+  if (aboutSuite || replacing) {
     return aboutSuite;
   }
   const perTest = suite.tests.map((test) => {
@@ -268,7 +268,7 @@ const describeSuite = ({ filePath, framework }: FailingSuite): string =>
  * the latest builds of the pipeline and branch after passing before, by the test events of those
  * builds. A file an issue is already about gets none: a suite issue, open or recently closed,
  * gets a comment instead, at most once a day per pipeline and branch, and is reopened; per-test
- * issues get their own failure comments, unless `handOverPerTestIssues` closes them as duplicates
+ * issues get their own failure comments, unless `replacePerTestIssues` closes them as duplicates
  * of the suite's issue, filed regardless. Nor do files beyond `MAX_NEW_ISSUES_PER_JOB` get one, so
  * a job that breaks everything files a few issues, not dozens. The same break is found again by
  * the next builds while it lasts, so a check that could not run does not lose it, and the issue
@@ -284,7 +284,7 @@ export const reportConsistentFailureIssues = async (
     github,
     repo,
     build,
-    handOverPerTestIssues,
+    replacePerTestIssues,
     dryRun,
     now = new Date(),
   } = options;
@@ -293,7 +293,7 @@ export const reportConsistentFailureIssues = async (
     commented: [],
     tracked: [],
     skipped: [],
-    handedOver: [],
+    replaced: [],
   };
 
   const candidates = candidatesOf(failures);
@@ -346,13 +346,13 @@ export const reportConsistentFailureIssues = async (
    * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
    * of the last post is read from GitHub as it is now, as other jobs of the build find the same
    * break, and recorded once the comment is posted: a comment that failed isn't taken as posted,
-   * and the next build posts it. The per-test issues `takingOver` join the body's "Previously
+   * and the next build posts it. The per-test issues `replacing` join the body's "Previously
    * tracked in" line, and the comment names them, or the next one does.
    */
   const postBreak = async (
     suite: FailingSuite,
     issue: GithubIssue,
-    takingOver: readonly number[]
+    replacing: readonly number[]
   ) => {
     const ref = { filePath: suite.filePath, url: issue.html_url };
     const body = (await github.getIssue(issue.number))?.body ?? issue.body;
@@ -365,14 +365,14 @@ export const reportConsistentFailureIssues = async (
           suite
         )}`
       );
-      const taken = takeOver(body, takingOver, false);
+      const taken = listReplacedIssues(body, replacing, false);
       if (taken.body !== body) {
         await github.editIssue(issue.number, { body: taken.body });
       }
       summary.tracked.push(ref);
       return;
     }
-    const { body: taken, announced } = takeOver(body, takingOver, true);
+    const { body: taken, announced } = listReplacedIssues(body, replacing, true);
     const newBody = updateIssueMetadata(
       taken,
       { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
@@ -390,29 +390,35 @@ export const reportConsistentFailureIssues = async (
     summary.commented.push({ ...ref, reopened: reopen });
   };
 
-  /** The open per-test issues of the broken tests by test, when handing them over. */
+  /** The open per-test issues of the broken tests, by test, when replacing them. */
   const perTestIssuesOf = (suite: FailingSuite): Map<string, GithubIssue[]> =>
-    handOverPerTestIssues ? perTestIssuesByTest(suite, index) : new Map();
+    replacePerTestIssues ? replacedIssuesByTest(suite, index) : new Map();
 
-  const handOverTo = async (
+  const closeReplaced = async (
     suiteIssue: { number: number; id: number },
     perTestIssues: readonly GithubIssue[]
   ) => {
-    const handedOver = await handOver({ github, log, dryRun, issues: perTestIssues, suiteIssue });
-    summary.handedOver.push(...handedOver.map(({ html_url: url }) => url));
+    const replaced = await closeReplacedIssues({
+      github,
+      log,
+      dryRun,
+      issues: perTestIssues,
+      suiteIssue,
+    });
+    summary.replaced.push(...replaced.map(({ html_url: url }) => url));
   };
 
   for (const suite of groupIntoSuites(breaks)) {
     const perTest = perTestIssuesOf(suite);
-    const handingOver = distinctIssues([...perTest.values()].flat());
-    const tracked = trackingIssue(suite, index, handOverPerTestIssues);
+    const replacing = distinctIssues([...perTest.values()].flat());
+    const tracked = trackingIssue(suite, index, replacePerTestIssues);
     if (tracked?.match === 'suite') {
       await postBreak(
         suite,
         tracked.issue,
-        handingOver.map(({ number }) => number)
+        replacing.map(({ number }) => number)
       );
-      await handOverTo(tracked.issue, handingOver);
+      await closeReplaced(tracked.issue, replacing);
       continue;
     }
     if (tracked) {
@@ -429,7 +435,7 @@ export const reportConsistentFailureIssues = async (
       summary.skipped.push(suite.filePath);
       continue;
     }
-    const superseded = handingOver.map(({ number }) => number);
+    const superseded = replacing.map(({ number }) => number);
     const related = findMatchingIssues(suite, candidateIssues(suite, index))
       .filter(isOpen)
       .map(({ issue }) => issue.number)
@@ -449,7 +455,7 @@ export const reportConsistentFailureIssues = async (
         `${plural(suite.tests.length, 'test')} in ${describeSuite(suite)}`
     );
     summary.created.push({ filePath: suite.filePath, url: created.html_url });
-    await handOverTo(created, handingOver);
+    await closeReplaced(created, replacing);
   }
   return summary;
 };

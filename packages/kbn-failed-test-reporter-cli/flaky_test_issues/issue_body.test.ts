@@ -543,7 +543,7 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(renderFlakySuiteIssueBody(suite, { report, relatedIssues: [7, 8] })).toMatchSnapshot();
   });
 
-  it('names the issues it takes over from next to their test in the tests table', () => {
+  it('names the issues it replaces next to their test in the tests table', () => {
     const { suite, report } = singleTestReport();
     const { testId } = suite.tests[0];
     const body = renderFlakySuiteIssueBody(suite, {

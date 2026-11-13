@@ -47,13 +47,13 @@ async function checkConsistentFailures({
   log,
   failures,
   repo,
-  handOverPerTestIssues,
+  replacePerTestIssues,
   dryRun,
 }: {
   log: ToolingLog;
   failures: TestFailure[];
   repo: string;
-  handOverPerTestIssues: boolean;
+  replacePerTestIssues: boolean;
   dryRun: boolean;
 }) {
   const { BUILDKITE_PIPELINE_SLUG: pipeline, BUILDKITE_BRANCH: branch } = process.env;
@@ -81,7 +81,7 @@ async function checkConsistentFailures({
       github: new GithubApi({ log, token: process.env.GITHUB_TOKEN, dryRun, repo }),
       repo,
       build: { pipeline, branch },
-      handOverPerTestIssues,
+      replacePerTestIssues,
       dryRun,
     });
   } finally {
@@ -91,7 +91,7 @@ async function checkConsistentFailures({
 
 // Whether failures get per-test issues (the legacy behaviour, default): a new one for a test no
 // issue tracks yet, a comment on an existing one. 'false' leaves issues to the daily flaky suite
-// reporter and `--report-failing-suites`, which hands the per-test issues over to suite issues;
+// reporter and `--report-failing-suites`, which replace the per-test issues with suite issues;
 // suite issues are updated either way. Set in the pipeline env, flip back to fall back.
 const PER_TEST_ISSUES = process.env.REPORT_FAILED_TESTS_PER_TEST_ISSUES !== 'false';
 
@@ -218,7 +218,7 @@ export function runFailedTestsReporterCli() {
                 log,
                 failures: [...junitFailures, ...scoutFailures],
                 repo: failingSuitesRepo,
-                handOverPerTestIssues: !PER_TEST_ISSUES,
+                replacePerTestIssues: !PER_TEST_ISSUES,
                 dryRun: !updateGithub,
               });
             } catch (error) {
