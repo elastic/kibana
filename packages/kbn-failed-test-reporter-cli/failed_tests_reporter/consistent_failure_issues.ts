@@ -114,12 +114,8 @@ interface Break extends ConsistentFailure {
   suiteTitle?: string;
 }
 
-const frameworkOf = (failure: TestFailure): TestFramework | undefined => {
-  if (isScoutFailure(failure)) {
-    return 'playwright';
-  }
-  return failure.testType === 'ftr' || failure.testType === 'jest' ? failure.testType : undefined;
-};
+const frameworkOf = (failure: TestFailure): TestFramework | undefined =>
+  isScoutFailure(failure) ? 'playwright' : failure.testType;
 
 /** The failures the test events can tell the history of: one per test id, with a file. */
 const candidatesOf = (failures: readonly TestFailure[]): Candidate[] => {

@@ -13,11 +13,11 @@ import type {
   entityNodeDataSchema,
   graphRequestSchema,
   graphResponseSchema,
-  groupNodeDataSchema,
-  labelNodeDataSchema,
+  connectorGroupNodeDataSchema,
+  eventNodeDataSchema,
   relationshipNodeDataSchema,
   nodeColorSchema,
-  nodeShapeSchema,
+  nodeKindSchema,
   nodeDocumentDataSchema,
   entitySchema,
 } from '../../schema/graph/v1';
@@ -39,7 +39,7 @@ export type GraphResponse = Omit<TypeOf<typeof graphResponseSchema>, 'messages'>
 export type EdgeColor = typeof edgeColorSchema.type;
 export type NodeColor = typeof nodeColorSchema.type;
 
-export type NodeShape = TypeOf<typeof nodeShapeSchema>;
+export type NodeKind = TypeOf<typeof nodeKindSchema>;
 
 export enum ApiMessageCode {
   // @ts-expect-error upgrade typescript v5.9.3
@@ -50,20 +50,20 @@ export type EntityNodeDataModel = TypeOf<typeof entityNodeDataSchema>;
 
 export type EntityDetailsModel = TypeOf<typeof entitySchema>;
 
-export type GroupNodeDataModel = TypeOf<typeof groupNodeDataSchema>;
+export type ConnectorGroupNodeDataModel = TypeOf<typeof connectorGroupNodeDataSchema>;
 
-export type LabelNodeDataModel = TypeOf<typeof labelNodeDataSchema>;
+export type EventNodeDataModel = TypeOf<typeof eventNodeDataSchema>;
 
 export type RelationshipNodeDataModel = TypeOf<typeof relationshipNodeDataSchema>;
 
 export type EdgeDataModel = TypeOf<typeof edgeDataSchema>;
 
-export type ConnectorNodeType = 'label' | 'relationship';
+export type ConnectorNodeType = 'event' | 'relationship';
 
 export type NodeDataModel =
   | EntityNodeDataModel
-  | GroupNodeDataModel
-  | LabelNodeDataModel
+  | ConnectorGroupNodeDataModel
+  | EventNodeDataModel
   | RelationshipNodeDataModel;
 
 export type NodeDocumentDataModel = TypeOf<typeof nodeDocumentDataSchema>;

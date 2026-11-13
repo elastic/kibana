@@ -90,6 +90,7 @@ describe('useFlyoutApi', () => {
       scopeId: '',
       entityName: 'host-1',
       onShowEntity: jest.fn(),
+      entryPoint: 'entity_flyout',
     });
     result.current.openIocFlyout(iocParams);
     result.current.openIocFlyoutAsChild(iocParams);
