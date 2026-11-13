@@ -16,10 +16,26 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { RouteBreadcrumbsContextProvider } from '../breadcrumbs/route_breadcrumbs_context';
 import { digitalExperienceRouter } from '../routes';
 import type { DigitalExperienceStartDeps } from '../types';
+import { SideNavProvider, useIsSideNavHidden } from './side_nav_context';
 
 const router = digitalExperienceRouter as unknown as ComponentProps<
   typeof RouterProvider
 >['router'];
+
+/** The Observability page template, without its navigation when a page asks for the width. */
+function AppPageTemplate({
+  PageTemplate,
+}: {
+  PageTemplate: DigitalExperienceStartDeps['observabilityShared']['navigation']['PageTemplate'];
+}) {
+  const isSideNavHidden = useIsSideNavHidden();
+  return (
+    // Unpadded, so each page's AppHeader spans the page; pages pad their own content.
+    <PageTemplate pageSectionProps={{ paddingSize: 'none' }} showSolutionNav={!isSideNavHidden}>
+      <RouteRenderer />
+    </PageTemplate>
+  );
+}
 
 export const renderApp = ({
   core,
@@ -44,10 +60,9 @@ export const renderApp = ({
               {/* Outside the template's error boundary, so an invalid URL param reaches the
               router's boundary, which removes it from the URL. */}
               <RouteBreadcrumbsContextProvider>
-                {/* Unpadded, so each page's AppHeader spans the page; pages pad their own content. */}
-                <PageTemplate pageSectionProps={{ paddingSize: 'none' }}>
-                  <RouteRenderer />
-                </PageTemplate>
+                <SideNavProvider>
+                  <AppPageTemplate PageTemplate={PageTemplate} />
+                </SideNavProvider>
               </RouteBreadcrumbsContextProvider>
             </RedirectAppLinks>
           </div>

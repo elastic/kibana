@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { omitBy, isUndefined } from 'lodash';
 import {
   EuiButton,
   EuiCode,
@@ -53,9 +52,10 @@ import {
   SESSIONS_OPTIONAL_COLUMN_IDS,
   SessionsTable,
 } from './components/sessions_table';
+import { sessionsListRequestQuery } from './hooks/sessions_list_request';
 import { useSessionsListQuery } from './hooks/use_sessions_list_query';
 import { useSessionsStatus } from './hooks/use_sessions_status';
-import { DURATION_BUCKETS, pickSessionsListQuery } from '../../utils/sessions_list_query';
+import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 
 /** The attribute EDOT Browser stamps on every span and log of a session. */
 const SESSION_ID_FIELD = 'session.id';
@@ -222,43 +222,14 @@ function SessionsList({
     error,
     refresh,
   } = useAbortableAsync(
-    async ({ signal }) => {
-      const { startDate, endDate } = getDateISORange({
-        from: timeRange.rangeFrom,
-        to: timeRange.rangeTo,
-      });
-      const duration = DURATION_BUCKETS.find(({ id }) => id === state.duration);
-      return apiClient.fetch(
-        'GET /internal/digital_experience/applications/{serviceName}/sessions',
-        {
-          signal,
-          params: {
-            path: { serviceName },
-            query: omitBy(
-              {
-                start: startDate,
-                end: endDate,
-                query: state.search,
-                browser: state.browser,
-                os: state.os,
-                country: state.country,
-                entryPage: state.entryPage,
-                environment,
-                withJsErrors: state.withJsErrors ? 'true' : undefined,
-                withFailedRequests: state.withFailedRequests ? 'true' : undefined,
-                minDurationMs: duration?.minDurationMs,
-                maxDurationMs: duration?.maxDurationMs,
-                sortField: state.sortField,
-                sortDirection: state.sortDirection,
-                page: state.page,
-                perPage: state.perPage,
-              },
-              isUndefined
-            ) as { start: string; end: string },
-          },
-        }
-      );
-    },
+    ({ signal }) =>
+      apiClient.fetch('GET /internal/digital_experience/applications/{serviceName}/sessions', {
+        signal,
+        params: {
+          path: { serviceName },
+          query: sessionsListRequestQuery({ timeRange, environment, state }),
+        },
+      }),
     [apiClient, serviceName, timeRange, environment, state],
     { unsetValueOnError: true }
   );

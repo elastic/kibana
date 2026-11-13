@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiPageSection,
   EuiPanel,
+  EuiProgress,
+  useResizeObserver,
   EuiSpacer,
   EuiTitle,
   copyToClipboard,
@@ -28,24 +30,26 @@ import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../ebt_constants';
 import { useApiClient } from '../../hooks/use_api_client';
+import { useHideSideNav } from '../../application/side_nav_context';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useDiscoverHref } from '../../hooks/use_discover_href';
+import { usePersistedChoice } from '../../hooks/use_persisted_choice';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { ANONYMOUS_USER, SESSIONS_LABEL } from '../../labels';
+import { shortSessionId } from '../../utils/describe_session';
 import { formatSessionDuration } from '../../utils/format_session_duration';
 import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 import { JourneyFilters } from './components/journey_filters';
+import { SessionSplitView } from './components/session_split_view';
+import { SessionsRail } from './components/sessions_rail';
 import { PageJourney } from './components/page_journey';
 import { SessionSummary } from './components/session_summary';
 import { SessionWaterfall, pageColors } from './components/session_waterfall';
 import { sessionEsqlQuery, sessionTimeRange } from './utils/session_discover';
 import { groupEventsByVisit, layoutWaterfall } from './utils/session_timeline';
 import { ACTIVITY_KINDS, type ActivityFilters, type ActivityKind } from './utils/visit_activity';
-
-/** Characters of the session ID shown in the breadcrumb; the header has it in full. */
-const SHORT_ID_LENGTH = 8;
 
 const BACK_TO_SESSIONS = i18n.translate(
   'xpack.digitalExperience.sessionDetail.backToSessionsButtonLabel',
@@ -67,6 +71,47 @@ const USER_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.userLab
 const STARTED_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.startedLabel', {
   defaultMessage: 'Started',
 });
+
+const SESSIONS_LIST_LABEL = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.sessionsListLabel',
+  { defaultMessage: 'Sessions list' }
+);
+
+/**
+ * Where the sessions list shows beside a session, kept across visits. A value stored before the
+ * list could move, `open`, falls back to the left, where it was.
+ */
+const RAIL_STORAGE_KEY = 'digitalExperience.sessionDetail.rail';
+const RAIL_PLACEMENTS = ['left', 'right', 'hidden'] as const;
+type RailPlacement = (typeof RAIL_PLACEMENTS)[number];
+
+const RAIL_PLACEMENT_OPTIONS: ReadonlyArray<{
+  placement: RailPlacement;
+  label: string;
+  iconType: string;
+}> = [
+  {
+    placement: 'left',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showLeft', {
+      defaultMessage: 'Show on the left',
+    }),
+    iconType: 'transitionLeftIn',
+  },
+  {
+    placement: 'right',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showRight', {
+      defaultMessage: 'Show on the right',
+    }),
+    iconType: 'transitionRightIn',
+  },
+  {
+    placement: 'hidden',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.hide', {
+      defaultMessage: 'Hide',
+    }),
+    iconType: 'eyeSlash',
+  },
+];
 
 const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   'xpack.digitalExperience.sessionDetail.openInDiscoverLabel',
@@ -305,11 +350,33 @@ export function SessionDetailPage({
   const { query } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
   const { overviewHref, sessionsHref } = useApplicationLinks(serviceName, query.source);
   const backHref = sessionsHref(pickSessionsListQuery(query));
+  const [railPlacement, setRailPlacement] = usePersistedChoice(
+    RAIL_STORAGE_KEY,
+    RAIL_PLACEMENTS,
+    'left'
+  );
+  const railOpen = railPlacement !== 'hidden';
+  const railSide = railPlacement === 'right' ? 'right' : 'left';
+  // The list takes the width of the side navigation while it shows.
+  useHideSideNav(railOpen);
+
+  // Another session opens at its top, whether the page or the panel beside the list scrolls.
+  const pageRef = useRef<HTMLDivElement>(null);
+  // Measured, so that the sessions list's header can line up with it.
+  const [headerElement, setHeaderElement] = useState<HTMLDivElement | null>(null);
+  const { height: headerHeight } = useResizeObserver(headerElement, 'height');
+  const shownSessionId = useRef(sessionId);
+  useEffect(() => {
+    if (shownSessionId.current !== sessionId) {
+      shownSessionId.current = sessionId;
+      pageRef.current?.scrollIntoView?.({ block: 'start' });
+    }
+  }, [sessionId]);
 
   useRouteBreadcrumb([
     { text: serviceName, href: overviewHref },
     { text: SESSIONS_LABEL, href: backHref },
-    { text: sessionId.slice(0, SHORT_ID_LENGTH) },
+    { text: shortSessionId(sessionId) },
   ]);
 
   const {
@@ -378,10 +445,12 @@ export function SessionDetailPage({
         />
       );
     }
-    if (loading || !detail) {
+    // While the next session loads, the previous one stays, under a progress bar.
+    if (!detail) {
       return loadingPrompt;
     }
-    return <SessionDetail detail={detail} formatters={formatters} />;
+    // Keyed, so that what the user expanded or filtered on one session doesn't carry to the next.
+    return <SessionDetail key={detail.session.sessionId} detail={detail} formatters={formatters} />;
   };
 
   const copySessionId = () => {
@@ -435,38 +504,88 @@ export function SessionDetailPage({
       ];
 
   return (
-    <div data-test-subj="digitalExperienceSessionPage">
-      {/* The header's back is the way to the list, so there is no in-page back button, and Chrome
-    Next shows a single back control. */}
-      <AppHeader
-        title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
-          defaultMessage: 'Session',
-        })}
-        back={{ href: backHref, label: SESSIONS_LABEL }}
-        badges={session ? sessionBadges(session) : undefined}
-        metadata={metadata}
-        menu={
-          discoverHref
-            ? {
-                items: [
-                  {
-                    id: 'openInDiscover',
-                    order: 1,
-                    label: OPEN_IN_DISCOVER_LABEL,
-                    iconType: 'discoverApp',
-                    href: discoverHref,
-                    testId: 'digitalExperienceSessionOpenInDiscover',
-                    ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER },
-                  },
-                ],
-              }
-            : undefined
-        }
-      />
-      {/* The app shell is unpadded, so the header spans the page; the content pads itself. */}
-      <EuiPageSection paddingSize="m" restrictWidth={false}>
-        {renderContent()}
-      </EuiPageSection>
-    </div>
+    <SessionSplitView
+      railOpen={railOpen}
+      railSide={railSide}
+      rail={
+        <SessionsRail
+          serviceName={serviceName}
+          sessionId={sessionId}
+          source={query.source}
+          side={railSide}
+          onHide={() => setRailPlacement('hidden')}
+          headerHeight={headerHeight || undefined}
+        />
+      }
+    >
+      <div data-test-subj="digitalExperienceSessionPage" ref={pageRef}>
+        {/* The header's back is the way to the list, so there is no in-page back button, and Chrome
+      Next shows a single back control. */}
+        <div ref={setHeaderElement}>
+          <AppHeader
+            title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
+              defaultMessage: 'Session',
+            })}
+            back={{ href: backHref, label: SESSIONS_LABEL }}
+            badges={session ? sessionBadges(session) : undefined}
+            metadata={metadata}
+            menu={{
+              items: [
+                {
+                  id: 'sessionsList',
+                  order: 1,
+                  label: SESSIONS_LIST_LABEL,
+                  iconType: railSide === 'right' ? 'transitionRightIn' : 'transitionLeftIn',
+                  isSelected: railOpen,
+                  testId: 'digitalExperienceSessionsListToggle',
+                  popoverTestId: 'digitalExperienceSessionsListPlacement',
+                  // Where the list shows, or that it doesn't.
+                  items: RAIL_PLACEMENT_OPTIONS.map(({ placement, label, iconType }, index) => ({
+                    id: `sessionsList-${placement}`,
+                    order: index + 1,
+                    label,
+                    iconType,
+                    isSelected: railPlacement === placement,
+                    run: () => setRailPlacement(placement),
+                    testId: `digitalExperienceSessionsListPlacement-${placement}`,
+                    ebt: {
+                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST,
+                      detail: placement,
+                    },
+                  })),
+                },
+                ...(discoverHref
+                  ? [
+                      {
+                        id: 'openInDiscover',
+                        order: 2,
+                        label: OPEN_IN_DISCOVER_LABEL,
+                        iconType: 'discoverApp',
+                        href: discoverHref,
+                        testId: 'digitalExperienceSessionOpenInDiscover',
+                        ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER },
+                      },
+                    ]
+                  : []),
+              ],
+            }}
+          />
+        </div>
+        {/* The app shell is unpadded, so the header spans the page; the content pads itself. */}
+        <div css={{ position: 'relative' }}>
+          {loading && detail && (
+            <EuiProgress
+              size="xs"
+              color="accent"
+              position="absolute"
+              data-test-subj="digitalExperienceSessionLoadingNext"
+            />
+          )}
+        </div>
+        <EuiPageSection paddingSize="m" restrictWidth={false}>
+          {renderContent()}
+        </EuiPageSection>
+      </div>
+    </SessionSplitView>
   );
 }
