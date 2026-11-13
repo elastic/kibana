@@ -34,8 +34,13 @@ import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { Hypothesis } from '@kbn/agentic-investigations-plugin/common';
 import { isTransientReadError, runInvestigation } from '../investigation/task';
 import type { InvestigationExample } from '../investigation/types';
-import { parseSubmissions, treeIdsInSubmission } from './arguments';
-import type { ReinforcementExample, ReinforcementTaskOutput, SubmitArguments } from './types';
+import { confirmsCause, parseSubmissions, treeIdsInSubmission } from './arguments';
+import type {
+  AppliedWrite,
+  ReinforcementExample,
+  ReinforcementTaskOutput,
+  SubmitArguments,
+} from './types';
 
 const API_VERSION = '2023-10-31';
 const SPACE_ID = 'default';
@@ -70,6 +75,7 @@ interface IndexedTreeDoc {
 
 const VERSION_PAGE_SIZE = 100;
 const TREE_ID_PAGE_SIZE = 500;
+const LEARNING_PAGE_SIZE = 500;
 
 const errorType = (error: unknown): string | undefined => {
   const candidate = (error ?? {}) as {
@@ -347,11 +353,97 @@ export const restoreDecisionTrees = async (
   if (firstError !== undefined) throw firstError;
 };
 
-/** Writes the prior tree as the space's head so hydrate and prepare can see it. */
+/**
+ * Learning documents in the space, by id. `filter` narrows them, for example to one writer. Throws on
+ * a full page, since a partial list would leave learnings out.
+ */
+const searchLearnings = async (
+  esClient: Client,
+  filter: estypes.QueryDslQueryContainer[],
+  fullPageMessage: string
+): Promise<Map<string, Record<string, unknown>>> => {
+  let response;
+  try {
+    response = await esClient.search<Record<string, unknown>>({
+      index: DECISION_TREE_AI_INDEX_DEST,
+      size: LEARNING_PAGE_SIZE,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            { term: { type: 'decision_tree_learning' } },
+            { term: { 'attributes.space_id': SPACE_ID } },
+            ...filter,
+          ],
+        },
+      },
+    });
+  } catch (error) {
+    if (isIndexNotFound(error)) return new Map();
+    throw error;
+  }
+
+  const hits = response.hits.hits;
+  if (hits.length >= LEARNING_PAGE_SIZE) throw new Error(fullPageMessage);
+  const learnings = new Map<string, Record<string, unknown>>();
+  for (const hit of hits) {
+    if (hit._id && hit._source) learnings.set(hit._id, hit._source);
+  }
+  return learnings;
+};
+
+/** Every learning document in the space, so a follow-up replay's learning writes can be undone. */
+export const snapshotLearnings = (
+  esClient: Client
+): Promise<Map<string, Record<string, unknown>>> =>
+  searchLearnings(
+    esClient,
+    [],
+    `The ${SPACE_ID} space has ${LEARNING_PAGE_SIZE} or more decision tree learnings, so the replay cannot snapshot all of them`
+  );
+
+/**
+ * Puts back every learning slot `conversationId` wrote: the snapshot's document when the slot
+ * existed before, otherwise nothing. A slot another investigation wrote since is left alone. Keeps
+ * going past a failed write and throws the first error at the end.
+ */
+export const restoreLearnings = async (
+  esClient: Client,
+  snapshot: ReadonlyMap<string, Record<string, unknown>>,
+  conversationId: string
+): Promise<void> => {
+  const written = await searchLearnings(
+    esClient,
+    [{ term: { 'attributes.conversation_id': conversationId } }],
+    `Conversation ${conversationId} wrote ${LEARNING_PAGE_SIZE} or more learnings, so the replay cannot list them`
+  );
+  let firstError: unknown;
+  for (const id of written.keys()) {
+    const previous = snapshot.get(id);
+    try {
+      if (previous) {
+        await esClient.index({
+          index: DECISION_TREE_AI_INDEX_DEST,
+          id,
+          document: previous,
+          refresh: 'wait_for',
+        });
+      } else {
+        await esClient.delete({ index: DECISION_TREE_AI_INDEX_DEST, id, refresh: 'wait_for' });
+      }
+    } catch (error) {
+      if (previous || !isMissingDocument(error)) firstError ??= error;
+    }
+  }
+  if (firstError !== undefined) throw firstError;
+};
+
+/** Writes the prior tree, when the round has one, as the space's head so hydrate and prepare see it. */
 export const seedPriorTree = async (
   esClient: Client,
   example: ReinforcementExample
 ): Promise<void> => {
+  if (!example.input.prior_tree) return;
   const { tree_id: treeId, version, markdown } = example.input.prior_tree;
   const mermaid = extractMermaid(markdown);
   const tree = parseMermaidDecisionTree(mermaid, treeId);
@@ -389,7 +481,10 @@ const readSubmittedMarkdown = async (
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
-/** A unique conversation id per replay, so `prepare_turn` runs it as a first round. */
+/**
+ * A unique conversation id per replay, so `prepare_turn` finds no earlier rounds. A follow-up replay
+ * gets its turn kind from `replay_causal_confirmed` instead.
+ */
 const replayConversationId = (caseId: string): string => {
   const suffix = `-${randomUUID()}`;
   const room = MAX_CONVERSATION_ID_LENGTH - REPLAY_CONVERSATION_ID_PREFIX.length - suffix.length;
@@ -425,12 +520,55 @@ const cancelExecution = async (
   }
 };
 
+/** What the reinforce step reports. */
+interface ReinforceOutput {
+  submissions_json?: string;
+  skipped?: boolean;
+  trace_id?: string;
+  submit_rejected?: boolean;
+  applied_writes?: unknown;
+}
+
 /** The same step id is recorded twice; only the later one carries the agent output. */
 const reinforceStep = (execution: WorkflowExecutionDto) =>
   [...(execution.stepExecutions ?? [])].reverse().find((step) => {
     if (step.stepId !== 'reinforce_decision_trees' || step.output == null) return false;
     return typeof step.output === 'object';
   });
+
+/** The later record of a step that carries an object output; a step id can be recorded twice. */
+const stepOutput = (
+  execution: WorkflowExecutionDto,
+  stepId: string
+): Record<string, unknown> | undefined => {
+  const step = [...(execution.stepExecutions ?? [])]
+    .reverse()
+    .find(
+      ({ stepId: id, output }) => id === stepId && output != null && typeof output === 'object'
+    );
+  return step?.output as Record<string, unknown> | undefined;
+};
+
+/** Turn kind `prepare_turn` ran, or undefined when it did not report one. */
+const preparedTurnKind = (
+  execution: WorkflowExecutionDto
+): ReinforcementTaskOutput['turn_kind'] => {
+  const turnKind = stepOutput(execution, 'prepare_turn')?.turn_kind;
+  return turnKind === 'initial_investigation' || turnKind === 'feedback_reinforcement'
+    ? turnKind
+    : undefined;
+};
+
+/** The reinforce step's `applied_writes`, reduced to what the graders read. */
+const appliedWrites = (output: { applied_writes?: unknown } | undefined): AppliedWrite[] =>
+  (Array.isArray(output?.applied_writes) ? output.applied_writes : []).flatMap(
+    (write: { store?: unknown; item_id?: unknown; action?: unknown } | null) =>
+      typeof write?.store === 'string' &&
+      typeof write.item_id === 'string' &&
+      typeof write.action === 'string'
+        ? [{ store: write.store, item_id: write.item_id, action: write.action }]
+        : []
+  );
 
 /** Tree ids the submissions name, in the `symptom:<slug>` form the plugin stores trees under. */
 const submittedTreeIds = (submissions: readonly SubmitArguments[]): string[] => [
@@ -449,9 +587,38 @@ const headContent = (treeId: string, docs: readonly IndexedTreeDoc[] | undefined
 };
 
 /**
+ * Without a seeded tree: every tree a submit named that the last submit names or the run wrote, then
+ * every other tree the run wrote, each with its head before the replay and after it. Must run before
+ * rollback.
+ */
+const unseededTreesAfterRun = async (
+  esClient: Client,
+  submissions: readonly SubmitArguments[],
+  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>,
+  conversationId: string
+): Promise<NonNullable<ReinforcementTaskOutput['trees']>> => {
+  const written = await listDecisionTreeIdsForConversation(esClient, conversationId);
+  const lastSubmitted = new Set(submittedTreeIds(submissions.slice(-1)));
+  const ids = new Set([
+    ...submittedTreeIds(submissions).filter((id) => lastSubmitted.has(id) || written.includes(id)),
+    ...written,
+  ]);
+  const trees: NonNullable<ReinforcementTaskOutput['trees']> = [];
+  for (const treeId of ids) {
+    trees.push({
+      tree_id: treeId,
+      prior_mermaid: headContent(treeId, snapshots.get(treeId)),
+      submitted_mermaid: await readSubmittedMarkdown(esClient, treeId),
+    });
+  }
+  return trees;
+};
+
+/**
  * The seeded tree and every other tree the run saved or its last submit named, each with its head
  * before the replay and after it, so the grader checks every tree the replay touched. A tree named
- * only by an earlier, rejected submit is left out. Must run before rollback.
+ * only by an earlier, rejected submit is left out. Without a seeded tree, grades the trees the run
+ * wrote instead. Must run before rollback.
  */
 const replayTreesAfterRun = async (
   esClient: Client,
@@ -460,6 +627,9 @@ const replayTreesAfterRun = async (
   snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>,
   conversationId: string
 ): Promise<NonNullable<ReinforcementTaskOutput['trees']>> => {
+  if (!example.input.prior_tree) {
+    return unseededTreesAfterRun(esClient, submissions, snapshots, conversationId);
+  }
   const { tree_id: seededId, markdown: seededMarkdown } = example.input.prior_tree;
   const trees: NonNullable<ReinforcementTaskOutput['trees']> = [
     {
@@ -492,9 +662,10 @@ const replayTreesAfterRun = async (
 /**
  * Replays one investigation round through the agent-optimize workflow as a `replay` run, so the
  * reinforcement agent builds the round from the supplied tool calls instead of reading a
- * conversation. Returns the submit arguments plus the trees it graded as the replay left them, then
- * rolls back only the trees the replay owns: the seeded tree and every tree whose commit or counts
- * carry its conversation id.
+ * conversation. A `follow_up` round runs as a follow-up with the given causal verdict. Returns the
+ * submit arguments plus the trees it graded as the replay left them, then rolls back only what the
+ * replay owns: the seeded tree, every tree whose commit or counts carry its conversation id, and
+ * every learning stamped with it.
  */
 export const runReinforcementExample = async ({
   esClient,
@@ -509,16 +680,18 @@ export const runReinforcementExample = async ({
   example: ReinforcementExample;
   log?: Pick<ToolingLog, 'warning'>;
 }): Promise<ReinforcementTaskOutput> => {
-  const { tree_id: treeId, markdown: priorMarkdown } = example.input.prior_tree;
+  const { prior_tree: priorTree, follow_up: followUp } = example.input;
+  const seededIds = priorTree ? [priorTree.tree_id] : [];
   const base: ReinforcementTaskOutput = {
     case_id: example.metadata.case_id,
-    prior_mermaid: priorMarkdown,
-    tree_id: treeId,
+    causal_confirmed: followUp?.causal_confirmed ?? confirmsCause(example.input.response),
+    ...(priorTree ? { prior_mermaid: priorTree.markdown, tree_id: priorTree.tree_id } : {}),
     submissions: [],
   };
 
   const conversationId = replayConversationId(example.metadata.case_id);
   let snapshots: Map<string, IndexedTreeDoc[]> | undefined;
+  let learnings: Map<string, Record<string, unknown>> | undefined;
   let submissions: SubmitArguments[] = [];
   let executionId: string | undefined;
   let sawTerminal = false;
@@ -526,7 +699,8 @@ export const runReinforcementExample = async ({
   // A failure becomes this run's execution_error, so it counts against the spec's pass rate instead
   // of rejecting the whole experiment.
   try {
-    snapshots = await snapshotDecisionTrees(esClient, [treeId]);
+    snapshots = await snapshotDecisionTrees(esClient, seededIds);
+    learnings = await snapshotLearnings(esClient);
     await seedPriorTree(esClient, example);
     const started = (await fetch(
       `/api/workflows/workflow/${encodeURIComponent(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID)}/run`,
@@ -545,6 +719,7 @@ export const runReinforcementExample = async ({
             connector_id: connectorId,
             tool_calls: example.input.tool_calls,
             tool_results: example.input.tool_results,
+            ...(followUp ? { replay_causal_confirmed: followUp.causal_confirmed } : {}),
           },
         }),
       }
@@ -566,15 +741,9 @@ export const runReinforcementExample = async ({
     }
 
     const reinforce = reinforceStep(execution);
-    const output = reinforce?.output as
-      | {
-          submissions_json?: string;
-          skipped?: boolean;
-          trace_id?: string;
-          submit_rejected?: boolean;
-        }
-      | undefined;
+    const output = reinforce?.output as ReinforceOutput | undefined;
     submissions = parseSubmissions(output?.submissions_json);
+    const turnKind = preparedTurnKind(execution);
     const trees = await replayTreesAfterRun(
       esClient,
       example,
@@ -587,9 +756,14 @@ export const runReinforcementExample = async ({
     const submitRejected = output?.submit_rejected === true;
     const failed =
       !finished || execution.status !== ExecutionStatus.COMPLETED || !reinforced || submitRejected;
+    // The server ignores `replay_causal_confirmed` outside a gated replay, so the round would not
+    // test the follow-up script it claims to.
+    const notFollowUp = followUp !== undefined && turnKind !== 'feedback_reinforcement';
 
     result = {
       ...base,
+      ...(turnKind ? { turn_kind: turnKind } : {}),
+      applied_writes: appliedWrites(output),
       execution_id: executionId,
       ...(output?.trace_id ? { traceId: output.trace_id } : {}),
       workflow_status: execution.status,
@@ -600,9 +774,14 @@ export const runReinforcementExample = async ({
             (output?.skipped || reinforce?.status === ExecutionStatus.SKIPPED
               ? 'Decision-tree reinforcement was skipped. Select NIGHTSHIFT_DATASETS=reinforcement so decision trees and the sandbox are enabled.'
               : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
+        : notFollowUp
+        ? `The round replays a follow-up, but prepare_turn ran it as ${
+            turnKind ?? 'an unknown turn'
+          }, so replay_causal_confirmed was ignored.`
         : undefined,
       submissions,
-      submitted_mermaid: trees[0].submitted_mermaid,
+      ...(priorTree ? {} : { tree_id: trees[0]?.tree_id }),
+      submitted_mermaid: trees[0]?.submitted_mermaid,
       trees,
     };
   } catch (error) {
@@ -614,21 +793,30 @@ export const runReinforcementExample = async ({
     };
   }
 
+  if (executionId && !sawTerminal) {
+    await cancelExecution(fetch, executionId, log);
+  }
+  const rollbackErrors: string[] = [];
   try {
-    if (executionId && !sawTerminal) {
-      await cancelExecution(fetch, executionId, log);
-    }
     // A submit names trees it may never have written, so only the seeded tree and the trees the
     // replay's writes are stamped with count as its own. Nothing was seeded without a snapshot.
     if (snapshots) {
       await restoreDecisionTrees(esClient, snapshots, {
-        treeIds: [treeId],
+        treeIds: seededIds,
         candidateIds: submittedTreeIds(submissions),
         conversationId,
       });
     }
   } catch (error) {
-    const rollback = `Rolling back the replay's decision trees failed: ${errorMessage(error)}`;
+    rollbackErrors.push(`Rolling back the replay's decision trees failed: ${errorMessage(error)}`);
+  }
+  try {
+    if (learnings) await restoreLearnings(esClient, learnings, conversationId);
+  } catch (error) {
+    rollbackErrors.push(`Rolling back the replay's learnings failed: ${errorMessage(error)}`);
+  }
+  if (rollbackErrors.length > 0) {
+    const rollback = rollbackErrors.join('\n');
     log?.warning(rollback);
     result = {
       ...result,
@@ -911,15 +1099,9 @@ export const runCustomer0Reinforcement = async ({
   }
 
   const reinforce = reinforceStep(execution);
-  const output = reinforce?.output as
-    | {
-        submissions_json?: string;
-        skipped?: boolean;
-        trace_id?: string;
-        submit_rejected?: boolean;
-      }
-    | undefined;
+  const output = reinforce?.output as ReinforceOutput | undefined;
   const submissions = parseSubmissions(output?.submissions_json);
+  const turnKind = preparedTurnKind(execution);
   const trees = await treesAfterRun(esClient, submissions, conversationId);
   const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
   const submitRejected = output?.submit_rejected === true;
@@ -928,6 +1110,9 @@ export const runCustomer0Reinforcement = async ({
   return {
     ...base,
     response,
+    ...(turnKind ? { turn_kind: turnKind } : {}),
+    causal_confirmed: confirmsCause(response),
+    applied_writes: appliedWrites(output),
     execution_id: execution.id,
     ...(output?.trace_id ? { traceId: output.trace_id } : {}),
     workflow_status: execution.status,

@@ -17,14 +17,26 @@ import {
 import { reinforcementExamples } from './traces';
 import type { ReinforcementExample, SubmitArguments } from './types';
 
-const NEGATIVE_CASE_IDS = ['customer0-es-proxy-unconfirmed-2026-09-14'];
+const NEGATIVE_CASE_IDS = [
+  'customer0-es-proxy-unconfirmed-2026-09-14',
+  'customer0-es-proxy-followup-unconfirmed-2026-09-14',
+  'customer0-uiam-pod-loss-initial-2026-09-14',
+];
 
 const negativeRounds = reinforcementExamples.filter(
   (example) => !confirmsCause(example.input.response)
 );
 
+type PriorTree = NonNullable<ReinforcementExample['input']['prior_tree']>;
+
+const priorTreeOf = (example: ReinforcementExample): PriorTree => {
+  const { prior_tree: priorTree } = example.input;
+  if (!priorTree) throw new Error(`${example.metadata.case_id} seeds no prior tree`);
+  return priorTree;
+};
+
 const gradeOnPriorTree = (example: ReinforcementExample, submission: SubmitArguments) => {
-  const { tree_id: treeId, markdown } = example.input.prior_tree;
+  const { tree_id: treeId, markdown } = priorTreeOf(example);
   const tree = parseTreeMarkdown(markdown, treeId);
   return gradeSubmissions({
     submissions: [submission],
@@ -79,12 +91,11 @@ describe('loadReinforcementExamples', () => {
     );
   });
 
-  it('rejects a round without the prior tree the replay seeds', () => {
+  it('rejects a follow-up round without its causal verdict', () => {
     const [{ input, metadata }] = reinforcementExamples;
-    const { prior_tree: _priorTree, ...withoutPriorTree } = input;
     expect(() =>
-      loadReinforcementExamples(writeExamples([{ input: withoutPriorTree, metadata }]))
-    ).toThrow('prior_tree');
+      loadReinforcementExamples(writeExamples([{ input: { ...input, follow_up: {} }, metadata }]))
+    ).toThrow('causal_confirmed');
   });
 });
 
@@ -94,9 +105,7 @@ describe('reinforcementExamples', () => {
       (example) => example.metadata.case_id === 'customer0-eql-slo-burn-rate-2026-09-14'
     );
     expect(mergeRound).toHaveLength(1);
-    // The prompt doesn't ask for merges yet, so no committed round makes an empty merge score 0.
-    expect(reinforcementExamples.some((example) => example.metadata.require_merge)).toBe(false);
-    const markdown = mergeRound[0].input.prior_tree.markdown;
+    const { markdown } = priorTreeOf(mergeRound[0]);
     expect(markdown).toContain('E2[Pod restarted]');
     expect(markdown).toContain('E3[Pod deleted]');
     expect(mergeRound[0].input.response).toContain('uiam-58fb87db87-26cfj');
@@ -111,19 +120,47 @@ describe('reinforcementExamples', () => {
 });
 
 describe('bundled ES|QL queries', () => {
-  it.each(reinforcementExamples.map((example) => [example.metadata.case_id, example] as const))(
-    '%s sorts by a column its STATS produces and its output header names those columns',
-    (_, example) => {
-      const command = String(example.input.tool_calls[1].params.command);
+  const statsQueries = reinforcementExamples.flatMap((example) =>
+    example.input.tool_calls.flatMap((call, index) => {
+      const command = String(call.params.command ?? '');
       const columns = statsColumns(command);
-      if (!columns) return;
+      const result = example.input.tool_results[index].results[0] as { data: { stdout: string } };
+      return columns
+        ? [[call.tool_call_id, { command, columns, stdout: result.data.stdout }] as const]
+        : [];
+    })
+  );
+
+  it.each(statsQueries)(
+    '%s sorts by a column its STATS produces and its output header names those columns',
+    (_, { command, columns, stdout }) => {
       const [, sortColumn] = command.match(/\| SORT ([\w.@]+)/) ?? [];
       expect(columns).toContain(sortColumn);
-      const bash = example.input.tool_results[1].results[0] as { data: { stdout: string } };
-      const [header = ''] = bash.data.stdout.split('\n');
+      const [header = ''] = stdout.split('\n');
       expect(new Set(header.trim().split(/\s+/))).toEqual(columns);
     }
   );
+});
+
+describe('follow-up and new-tree rounds', () => {
+  it('gives each follow-up the verdict its response states', () => {
+    const followUps = reinforcementExamples.filter((example) => example.input.follow_up);
+    expect(followUps.length).toBeGreaterThan(0);
+    for (const example of followUps) {
+      expect(example.input.follow_up?.causal_confirmed).toBe(confirmsCause(example.input.response));
+    }
+  });
+
+  it('opens no tree and replays a first round when there is no prior tree', () => {
+    const newTreeRounds = reinforcementExamples.filter((example) => !example.input.prior_tree);
+    expect(newTreeRounds.length).toBeGreaterThan(0);
+    for (const example of newTreeRounds) {
+      expect(example.input.follow_up).toBeUndefined();
+      expect(example.input.tool_calls.map((call) => call.tool_id)).not.toContain(
+        'nightshift_sandbox_view_file'
+      );
+    }
+  });
 });
 
 describe('negative reinforcement round', () => {
@@ -136,22 +173,23 @@ describe('negative reinforcement round', () => {
     }
   });
 
-  it.each(negativeRounds.map((example) => [example.metadata.case_id, example] as const))(
-    '%s scores 0 when the submit sets a causal path and 1 when it does not',
-    (_, example) => {
-      const treeId = example.input.prior_tree.tree_id;
-      const visitedPath = ['S1', 'E1', 'D1'];
+  it.each(
+    negativeRounds
+      .filter((example) => example.input.prior_tree)
+      .map((example) => [example.metadata.case_id, example] as const)
+  )('%s scores 0 when the submit sets a causal path and 1 when it does not', (_, example) => {
+    const treeId = priorTreeOf(example).tree_id;
+    const visitedPath = ['S1', 'E1', 'D1'];
 
-      const withCausalPath = gradeOnPriorTree(example, {
-        traversals: [{ tree_id: treeId, visited_path: visitedPath, causal_path: ['S1', 'E1'] }],
-      });
-      expect(withCausalPath.score).toBeLessThan(1);
-      expect(withCausalPath.explanation).toContain('does not confirm a cause');
+    const withCausalPath = gradeOnPriorTree(example, {
+      traversals: [{ tree_id: treeId, visited_path: visitedPath, causal_path: ['S1', 'E1'] }],
+    });
+    expect(withCausalPath.score).toBeLessThan(1);
+    expect(withCausalPath.explanation).toContain('does not confirm a cause');
 
-      const withoutCausalPath = gradeOnPriorTree(example, {
-        traversals: [{ tree_id: treeId, visited_path: visitedPath }],
-      });
-      expect(withoutCausalPath.score).toBe(1);
-    }
-  );
+    const withoutCausalPath = gradeOnPriorTree(example, {
+      traversals: [{ tree_id: treeId, visited_path: visitedPath }],
+    });
+    expect(withoutCausalPath.score).toBe(1);
+  });
 });

@@ -40,7 +40,7 @@ The decision trace MUST follow this exact format for parsing:
    - End nodes (`((...))`) are terminal — they have no outgoing edges
    - Keep labels concise (2-6 words); exact reusable query entities belong in `evidence_gatherer_metadata`
    - Avoid special characters in labels that conflict with Mermaid syntax. In particular, do not use parentheses `()` inside labels — rephrase instead (e.g. "Which apps drove load increase" not "Which application(s) drove the load increase").
-   - Mark edges on the path actually taken during the investigation by prefixing the edge label with `✅` (e.g. `-->|✅ error_code starts with DB|`). Edges NOT taken should have no prefix. For simple edges (no condition label) on the taken path, add `-->|✅|`.
+   - Do NOT mark the edges an investigation visited; visits are counted outside the file. A `✅` at the start of an edge label marks a confirmed causal path and nothing else. Add it only to the edges your task tells you to mark as causal (e.g. `-->|✅ error_code starts with DB|`, or `-->|✅|` for an edge with no condition label), and leave any `✅` already on other edges as it is.
    - Do NOT use `linkStyle`, `style`, `classDef`, subgraphs, or any other Mermaid styling/directives. Only `flowchart TD`, nodes, and edges.
    - The trace should reflect the actual conversation flow: Symptoms/Questions lead to Evidence Gathering, which feeds into Decisions, which may lead to further Evidence Gathering or terminate at an End node.
 
@@ -49,22 +49,22 @@ The decision trace MUST follow this exact format for parsing:
 The diagram must start directly with `flowchart TD` — no code fences, no triple backticks:
 
 flowchart TD
-    S1([High error rate on API]) -->|✅| E1[Query error logs]
+    S1([High error rate on API]) --> E1[Query error logs]
     S2([Increased P99 latency]) --> E2[Query latency metrics]
-    E1 -->|✅| D1{{Database-related errors?}}
+    E1 --> D1{{Database-related errors?}}
     E2 --> D1
-    D1 -->|✅ yes| E3[Query DB pool metrics]
+    D1 -->|yes| E3[Query DB pool metrics]
     D1 -->|no| E4[Search traces for failures]
-    E3 -->|✅| D2{{Connection pool exhausted?}}
-    D2 -->|✅ yes| E5[Check recent deploys]
+    E3 --> D2{{Connection pool exhausted?}}
+    D2 -->|yes| E5[Check recent deploys]
     D2 -->|no| E5
     E4 --> D3{{Memory issue?}}
     D3 -->|high memory usage| E7[Check memory allocation trends]
     D3 -->|memory normal| E8[Query upstream dependencies]
-    E5 -->|✅| D4{{Leak found in recent deploy?}}
-    D4 -->|✅ Yes| E9[Identify leaking code path]
+    E5 --> D4{{Leak found in recent deploy?}}
+    D4 -->|Yes| E9[Identify leaking code path]
     D4 -->|No| E6[Profile slow queries]
-    E9 -->|✅| X1((Connection leak in deploy))
+    E9 --> X1((Connection leak in deploy))
     E6 --> X2((Slow query performance))
     E7 --> X3((Memory pressure from allocation growth))
     E8 --> D5{{Is upstream degraded?}}

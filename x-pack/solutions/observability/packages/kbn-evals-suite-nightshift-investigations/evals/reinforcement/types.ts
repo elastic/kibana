@@ -51,18 +51,21 @@ export interface ReplayToolResult {
 
 /**
  * One Customer-0 investigation round replayed through the reinforcement agent.
- * `prior_tree` is the tree already stored when the round starts.
+ * `prior_tree` is the tree already stored when the round starts. Without one, the round opens no
+ * tree, so the agent creates a new one.
  */
 export interface ReinforcementExample {
   input: {
     question: string;
     response: string;
-    prior_tree: {
+    /**
+     * Replays the round as a follow-up whose causal check returned this verdict, so the agent gets
+     * the reinforce script (`true`) or the extend script (`false`). Unset replays a first round.
+     */
+    follow_up?: { causal_confirmed: boolean };
+    prior_tree?: {
       tree_id: string;
-      /**
-       * Head version of the seeded tree. It does not pick the reinforcement script: the turn kind
-       * comes from the conversation's earlier rounds, and a replay always runs as a first round.
-       */
+      /** Head version of the seeded tree. It does not pick the turn script; `follow_up` does. */
       version: number;
       markdown: string;
     };
@@ -78,9 +81,23 @@ export interface ReinforcementExample {
   };
 }
 
+/** One write the reinforce step applied, from its `applied_writes` output. */
+export interface AppliedWrite {
+  store: string;
+  item_id: string;
+  /** `create`, `update`, `reinforce` (the submit tool detected a causal reinforcement), ... */
+  action: string;
+}
+
 /** What the task records for the graders. */
 export interface ReinforcementTaskOutput {
   case_id: string;
+  /** Turn kind `prepare_turn` ran, which picks the script family the agent got. */
+  turn_kind?: 'initial_investigation' | 'feedback_reinforcement';
+  /** Whether the round confirmed a root cause: the follow-up verdict, else the response. */
+  causal_confirmed?: boolean;
+  /** Writes the reinforce step applied, in order, across every submit attempt. */
+  applied_writes?: AppliedWrite[];
   execution_id?: string;
   /** Agent Builder trace of the reinforcement run. The eval UI opens this, not the task span. */
   traceId?: string;
@@ -92,8 +109,10 @@ export interface ReinforcementTaskOutput {
   submissions: SubmitArguments[];
   /** Mermaid of the tree after the run, or the prior tree when the run did not replace it. */
   submitted_mermaid?: string;
-  prior_mermaid: string;
-  tree_id: string;
+  /** The seeded tree, or undefined when the round seeded none. */
+  prior_mermaid?: string;
+  /** The seeded tree's id, or the first tree the run wrote when it seeded none. */
+  tree_id?: string;
   /** Investigator response the causal-path check reads. Falls back to the example input. */
   response?: string;
   /**

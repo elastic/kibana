@@ -1,3 +1,4 @@
 Task: create a new decision tree for this initial investigation.
 No decision-tree file was accessed. Pick a stable kebab-case symptom slug (2-5 words; letters, digits, and hyphens only; no environment, region, team, or timestamp; suffix -alert for structured alert messages).
-Create {{decision_tree_directory}}/decision_tree_<symptom>.md with {{write_file_tool}}, then call {{submit_tool}} with tree_id symptom:<symptom> and that file path.
+A root cause is confirmed only when the investigation's answer confirms it. Then mark its causal path with ✅; otherwise add no ✅.
+Create {{decision_tree_directory}}/decision_tree_<symptom>.md with {{write_file_tool}}, then call {{submit_tool}} with tree_id symptom:<symptom>, that file path, and the traversal.

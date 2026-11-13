@@ -48,6 +48,7 @@ describe('nightshift agent optimize workflow', () => {
         'conversation_id',
         'prompt',
         'replay',
+        'replay_causal_confirmed',
         'response',
         'round_connector_id',
         'round_id',
@@ -243,6 +244,19 @@ describe('nightshift agent optimize workflow', () => {
     expect(
       workflow.steps.find((step) => step.name === 'reinforce_decision_trees')?.with?.replay
     ).toBe('${{ inputs.replay }}');
+  });
+
+  // A replay can only reach the follow-up prompt through the prepare step, which picks the turn
+  // kind and the causal verdict. ${{ }} keeps both flags booleans for the step's schema.
+  it('declares the replayed causal verdict and forwards both replay flags to the prepare step', () => {
+    const { properties } = workflow.triggers[0].inputs;
+    expect(properties.replay_causal_confirmed).toEqual(
+      expect.objectContaining({ type: 'boolean' })
+    );
+    expect(workflow.steps.find((step) => step.name === 'prepare_turn')?.with).toMatchObject({
+      replay: '${{ inputs.replay }}',
+      replay_causal_confirmed: '${{ inputs.replay_causal_confirmed }}',
+    });
   });
 
   // Proves the sequential phase really compiles: the reinforcement steps become graph nodes

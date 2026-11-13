@@ -13,7 +13,13 @@ Constraints:
 
 Here the base tree is the existing decision tree on disk and the inputs to merge are this turn's investigation.
 {{merge_discipline}}
-- If every step of this investigation already matches an existing node, the tree is already complete: make no structural edits and call {{submit_tool}} with an empty symptom_trees list.
+- If every step of this investigation already matches an existing node, the tree is already complete: make no structural edits. Call {{submit_tool}} with an empty symptom_trees list, unless you marked a confirmed causal path with ✅; then submit that file.
+
+When you call {{submit_tool}}:
+- symptom_trees: every decision-tree file you edited or created. If this investigation shows that existing nodes are the same step or event, fold them into one node and list each fold in merged_nodes: from is the ids you removed, into is the id that absorbed them. Leave merged_nodes empty when you folded nothing.
+- traversals: one entry for each decision tree this investigation followed, whether or not you edited it.
+  - visited_path: the node ids this investigation followed on the tree as you submit it, in order, starting at the symptom node.
+  - causal_path: only when your task says a root cause is confirmed: the walk from the symptom node to the end node of that cause. It starts at the same symptom node as visited_path, e.g. ["S1","E1","D1","X1"]. Every edge on it, and no other edge you add, carries ✅. Otherwise leave it empty.
 
 When you create or edit a decision tree, it MUST follow this format (the node shape encodes the node type):
 

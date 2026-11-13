@@ -102,11 +102,8 @@ const stepId = (step: PathStep): string | undefined => {
   return undefined;
 };
 
-/**
- * A path is node ids in order. Consecutive ids are one edge. A step with no id, or a single id,
- * does not name an edge.
- */
-const walkEdges = (
+/** Splits a path into edge refs: consecutive node ids are one edge; a missing id is a problem. */
+export const walkEdges = (
   steps: PathStep[] | undefined,
   label: string,
   treeId: string
@@ -168,6 +165,7 @@ export const gradeSubmissions = ({
   response,
   requireMerge = false,
   requireCausalPath = true,
+  causalConfirmed,
 }: {
   submissions: SubmitArguments[];
   prior: DecisionTreeView | undefined;
@@ -175,6 +173,8 @@ export const gradeSubmissions = ({
   response: string;
   requireMerge?: boolean;
   requireCausalPath?: boolean;
+  /** The round's causal verdict. Falls back to whether `response` confirms a cause. */
+  causalConfirmed?: boolean;
 }): { score: 0 | 1; explanation: string } => {
   if (submissions.length === 0) {
     return {
@@ -189,7 +189,8 @@ export const gradeSubmissions = ({
   if (!submitted || !treeId) {
     problems.push('The submitted tree could not be parsed.');
   } else {
-    problems.push(...traversalProblems(last, treeId, response, requireCausalPath));
+    const confirmed = causalConfirmed ?? confirmsCause(response);
+    problems.push(...traversalProblems(last, treeId, confirmed, requireCausalPath));
     problems.push(...mergeProblems(last, prior, submitted));
     problems.push(...pathProblems(last, submitted));
     if (requireMerge && !declaresMerge(last, treeId)) {
@@ -207,7 +208,8 @@ export const gradeSubmissions = ({
   };
 };
 
-const declaresMerge = (submission: SubmitArguments, treeId: string): boolean =>
+/** True when the submit folds at least one node of `treeId` into another. */
+export const declaresMerge = (submission: SubmitArguments, treeId: string): boolean =>
   (submission.symptom_trees ?? []).some((tree) => {
     if (!namesTree(tree.tree_id, treeId)) return false;
     return (tree.merged_nodes ?? []).some(
@@ -225,14 +227,13 @@ const traversalsForTree = (submission: SubmitArguments, treeId: string): Travers
 const traversalProblems = (
   submission: SubmitArguments,
   treeId: string,
-  response: string,
+  confirmed: boolean,
   requireCausalPath: boolean
 ): string[] => {
   const traversals = traversalsForTree(submission, treeId);
   if (traversals.length === 0) {
     return [`The submit has no traversal for ${treeId}.`];
   }
-  const confirmed = confirmsCause(response);
   const problems: string[] = [];
   for (const traversal of traversals) {
     if ((traversal.visited_path ?? []).length === 0) {
@@ -244,10 +245,10 @@ const traversalProblems = (
     );
     const causal = traversal.causal_path ?? [];
     if (requireCausalPath && confirmed && causal.length === 0) {
-      problems.push(`The response confirms a cause, but causal_path for ${treeId} is empty.`);
+      problems.push(`The round confirms a cause, but causal_path for ${treeId} is empty.`);
     }
     if (!confirmed && causal.length > 0) {
-      problems.push(`The response does not confirm a cause, but causal_path for ${treeId} is set.`);
+      problems.push(`The round does not confirm a cause, but causal_path for ${treeId} is set.`);
     }
   }
   return problems;

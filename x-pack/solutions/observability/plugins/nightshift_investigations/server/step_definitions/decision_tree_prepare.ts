@@ -12,6 +12,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { REPLAY_CONVERSATION_ID_PREFIX } from '@kbn/nightshift-decision-trees';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import {
@@ -98,6 +99,16 @@ export const decisionTreePrepareStepDefinition = ({
         .max(128)
         .optional()
         .describe('Deterministic T_background trace id from materialize.'),
+      replay: z
+        .boolean()
+        .optional()
+        .describe('True when the round is a recorded transcript an evaluation replays.'),
+      replay_causal_confirmed: z
+        .boolean()
+        .optional()
+        .describe(
+          'Replays only: run the round as a follow-up whose causal check returned this verdict.'
+        ),
     }),
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
@@ -133,6 +144,8 @@ export const decisionTreePrepareStepDefinition = ({
         response,
         connector_id: requestedConnectorId,
         round_connector_id: roundConnectorId,
+        replay,
+        replay_causal_confirmed: replayCausalConfirmed,
       } = context.input;
       const skippedOutput = {
         output: {
@@ -163,6 +176,25 @@ export const decisionTreePrepareStepDefinition = ({
           'Skipped decision tree reinforcement: without the conversation and round ids there is no telling a first round from a follow-up'
         );
         return skippedOutput;
+      }
+
+      // A replay has no conversation to tell a follow-up by, so it may name the turn and its
+      // verdict. Only an eval replay id qualifies, so a real investigation never skips its check.
+      const replayVerdict: CausalCheckResult | undefined =
+        replay === true &&
+        conversationId.startsWith(REPLAY_CONVERSATION_ID_PREFIX) &&
+        typeof replayCausalConfirmed === 'boolean'
+          ? {
+              isFeedback: true,
+              causalConfirmed: replayCausalConfirmed,
+              causalSummary: 'Supplied by the replay.',
+              learning: '',
+            }
+          : undefined;
+      if (typeof replayCausalConfirmed === 'boolean' && !replayVerdict) {
+        context.logger.warn(
+          `Ignored replay_causal_confirmed for "${conversationId}": it needs replay: true and a conversation_id starting with ${REPLAY_CONVERSATION_ID_PREFIX}`
+        );
       }
 
       const agentBuilder = getAgentBuilder();
@@ -254,7 +286,9 @@ export const decisionTreePrepareStepDefinition = ({
         async (span) => {
           const res = await prepareReinforcementTurn({
             turnKind:
-              earlierRounds.length === 0 ? 'initial_investigation' : 'feedback_reinforcement',
+              replayVerdict || earlierRounds.length > 0
+                ? 'feedback_reinforcement'
+                : 'initial_investigation',
             investigationId: conversationId,
             roundId,
             earlierAccessedTreeIds: extractAccessedTreeIdsFromRounds(earlierRounds),
@@ -263,7 +297,7 @@ export const decisionTreePrepareStepDefinition = ({
             logger,
             spaceId,
             toolCalls: roundToolCalls,
-            checkCausal,
+            checkCausal: replayVerdict ? async () => replayVerdict : checkCausal,
           });
           if (res.skipped) {
             span?.setAttribute('nightshift.skipped', true);

@@ -15,8 +15,10 @@ import type { ReinforcementExample } from './types';
  * symptoms the label names. Each view_file result is the prior tree, and each sandbox
  * command is an ES|QL query whose rows restate the label. They are not a captured
  * cluster transcript. The first prior tree has two nodes for one pod-loss event, so
- * the reinforcement agent has a real merge to declare. The last round is a reduced negative
- * round, not the published label: it confirms no cause, so a causal path on it scores 0.
+ * the reinforcement agent must declare that merge. The rounds after the published label are
+ * reduced rounds: a first round that confirms no cause, a follow-up whose causal check confirms
+ * the human's cause, a follow-up whose check does not, and a first round that opens no tree and
+ * confirms no cause, so the agent creates a tree without a causal path.
  * Set `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` to replay an export instead.
  */
 const VIEW_FILE = 'nightshift_sandbox_view_file';
@@ -39,16 +41,25 @@ const round = (
     };
   }
 ): ReinforcementExample => {
-  const { tree_id: treeId, markdown: treeMarkdown } = example.input.prior_tree;
   const viewId = `${example.metadata.case_id}-view`;
   const bashId = (index: number): string => `${example.metadata.case_id}-bash-${index}`;
   const { queries, ...input } = example.input;
+  // A round without a prior tree opens none, so the agent creates one.
+  const prior = input.prior_tree;
   return {
     metadata: example.metadata,
     input: {
       ...input,
       tool_calls: [
-        { tool_id: VIEW_FILE, tool_call_id: viewId, params: { file_path: treePath(treeId) } },
+        ...(prior
+          ? [
+              {
+                tool_id: VIEW_FILE,
+                tool_call_id: viewId,
+                params: { file_path: treePath(prior.tree_id) },
+              },
+            ]
+          : []),
         ...queries.map(({ query }, index) => ({
           tool_id: BASH,
           tool_call_id: bashId(index),
@@ -56,11 +67,17 @@ const round = (
         })),
       ],
       tool_results: [
-        {
-          tool_id: VIEW_FILE,
-          tool_call_id: viewId,
-          results: [{ tool_result_id: `${viewId}-r`, type: 'other', data: { text: treeMarkdown } }],
-        },
+        ...(prior
+          ? [
+              {
+                tool_id: VIEW_FILE,
+                tool_call_id: viewId,
+                results: [
+                  { tool_result_id: `${viewId}-r`, type: 'other', data: { text: prior.markdown } },
+                ],
+              },
+            ]
+          : []),
         ...queries.map(({ stdout }, index) => ({
           tool_id: BASH,
           tool_call_id: bashId(index),
@@ -90,8 +107,8 @@ const confirmed = (candidate: string): string =>
 const unconfirmed = (rejected: string, inconclusive: string): string =>
   `{"hypotheses":[{"candidate":"${rejected}","status":"rejected"},{"candidate":"${inconclusive}","status":"inconclusive"}]}`;
 
-const esqlQuery = (body: string): string =>
-  `esql "FROM logs-* | WHERE @timestamp >= \\"2026-09-14T17:50:00.000Z\\" AND @timestamp < \\"2026-09-14T18:20:00.000Z\\" AND ${body} | LIMIT 20"`;
+const esqlQuery = (body: string, index = 'logs-*'): string =>
+  `esql "FROM ${index} | WHERE @timestamp >= \\"2026-09-14T17:50:00.000Z\\" AND @timestamp < \\"2026-09-14T18:20:00.000Z\\" AND ${body} | LIMIT 20"`;
 
 /** The uiam pod's lifecycle around the incident: the restart and the deletion are one event. */
 const UIAM_POD_LIFECYCLE: ReplayedQuery = {
@@ -121,6 +138,17 @@ const GATEWAY_TREE = `flowchart TD
     D1 -->|yes| X1((Upstream pod loss))
     D1 -->|no| X2((Gateway fault))`;
 
+/** A later gateway tree with branches the follow-up round does not walk. */
+const GATEWAY_FOLLOWUP_TREE = `flowchart TD
+    S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]
+    E1 --> D1{{Errors point at one upstream?}}
+    D1 -->|yes| E2[Correlate with the upstream pod]
+    D1 -->|no| E3[Check gateway resource usage]
+    E2 --> D2{{Errors stop after the pod is replaced?}}
+    D2 -->|yes| X1((Upstream pod loss))
+    D2 -->|no| X2((Upstream fault persists))
+    E3 --> X3((Gateway resource exhaustion))`;
+
 const PROXY_TREE = `flowchart TD
     S1([Elasticsearch proxy errors]) --> E1[Check proxy logs around the alert]
     E1 --> D1{{Errors limited to one pod?}}
@@ -132,8 +160,9 @@ export const reinforcementExamples: ReinforcementExample[] = [
     metadata: {
       case_id: 'customer0-eql-slo-burn-rate-2026-09-14',
       source: 'customer0-smoke',
-      // Not `require_merge` yet: the prompt doesn't ask for merges, so the round would miss every
-      // time. The judge still scores whether the agent folds the duplicate pod-loss nodes.
+      // The prompt asks the agent to fold duplicate nodes the investigation shows are one event, so
+      // an empty `merged_nodes` for the restarted and deleted pod nodes scores 0.
+      require_merge: true,
     },
     input: {
       question: [
@@ -254,6 +283,147 @@ export const reinforcementExamples: ReinforcementExample[] = [
             'elasticsearch-proxy-7d9c5b6f4-q4wjn  11',
           ].join('\n'),
         },
+      ],
+    },
+  }),
+  round({
+    metadata: {
+      case_id: 'customer0-otel-gateway-followup-confirmed-2026-09-14',
+      source: 'customer0-smoke',
+    },
+    input: {
+      question:
+        'Thanks. For the record, we deleted uiam-58fb87db87-26cfj at 18:00 and the otel-delivery-gateway ' +
+        'errors stopped as soon as the replacement pod came up. Can you confirm that pod was the cause?',
+      response: [
+        'Confirmed: losing uiam-58fb87db87-26cfj caused the otel-delivery-gateway errors.',
+        'Gateway resource exhaustion is ruled out: no otel-delivery-gateway pod went above 34% of its',
+        'CPU limit or 52% of its memory limit.',
+        'Every gateway error in the window targeted that pod, climbing to 78 a minute by 17:59.',
+        'The last 41 landed in the 18:00 minute, and none were logged after the replacement',
+        'uiam-58fb87db87-vd5fc started serving at 18:01.',
+        confirmed('upstream uiam pod loss'),
+      ].join('\n'),
+      follow_up: { causal_confirmed: true },
+      prior_tree: {
+        tree_id: 'symptom:otel-gateway-errors',
+        version: 3,
+        markdown: markdown('Otel delivery gateway errors', GATEWAY_FOLLOWUP_TREE),
+      },
+      queries: [
+        // The D1 -->|no| E3 branch: the gateway's own resource usage, which was normal.
+        {
+          query: esqlQuery(
+            'k8s.deployment.name == \\"otel-delivery-gateway\\" | STATS max_cpu_utilization = MAX(k8s.pod.cpu_limit_utilization), max_memory_utilization = MAX(k8s.pod.memory_limit_utilization) BY k8s.pod.name | SORT max_cpu_utilization DESC',
+            'metrics-*'
+          ),
+          stdout: [
+            'k8s.pod.name                           max_cpu_utilization  max_memory_utilization',
+            'otel-delivery-gateway-6c8f9d7b5-h2kdx  0.34                 0.52',
+            'otel-delivery-gateway-6c8f9d7b5-t7mzq  0.31                 0.49',
+            'otel-delivery-gateway-6c8f9d7b5-x9vbn  0.29                 0.47',
+          ].join('\n'),
+        },
+        {
+          query: esqlQuery(
+            'service.name == \\"otel-delivery-gateway\\" AND log.level == \\"error\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute), destination.address | SORT bucket'
+          ),
+          stdout: [
+            'bucket                     destination.address    errors',
+            '2026-09-14T17:50:00.000Z   uiam-58fb87db87-26cfj  38',
+            '2026-09-14T17:51:00.000Z   uiam-58fb87db87-26cfj  40',
+            '2026-09-14T17:52:00.000Z   uiam-58fb87db87-26cfj  43',
+            '2026-09-14T17:53:00.000Z   uiam-58fb87db87-26cfj  44',
+            '2026-09-14T17:54:00.000Z   uiam-58fb87db87-26cfj  47',
+            '2026-09-14T17:55:00.000Z   uiam-58fb87db87-26cfj  61',
+            '2026-09-14T17:56:00.000Z   uiam-58fb87db87-26cfj  66',
+            '2026-09-14T17:57:00.000Z   uiam-58fb87db87-26cfj  70',
+            '2026-09-14T17:58:00.000Z   uiam-58fb87db87-26cfj  73',
+            '2026-09-14T17:59:00.000Z   uiam-58fb87db87-26cfj  78',
+            '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  41',
+          ].join('\n'),
+        },
+        UIAM_POD_LIFECYCLE,
+      ],
+    },
+  }),
+  round({
+    metadata: {
+      case_id: 'customer0-es-proxy-followup-unconfirmed-2026-09-14',
+      source: 'customer0-smoke',
+    },
+    input: {
+      question:
+        'We also rolled out a new elasticsearch-proxy config around then. ' +
+        'Could that rollout be what caused the proxy errors?',
+      response: [
+        'Conclusion: The config rollout did not cause the proxy errors, and no cause was confirmed in this round.',
+        'The proxy pods loaded config generation 418 from 18:12, after the errors had already ended in the',
+        '18:00 bucket. They ended when the uiam pod was replaced, but the proxy logs in this window do not',
+        'record which upstream each request failed on, so that link is not shown either.',
+        unconfirmed('proxy config rollout', 'uiam pod loss behind the proxy errors'),
+      ].join('\n'),
+      follow_up: { causal_confirmed: false },
+      prior_tree: {
+        tree_id: 'symptom:es-proxy-errors',
+        version: 2,
+        markdown: markdown('Elasticsearch proxy errors', PROXY_TREE),
+      },
+      queries: [
+        {
+          query: esqlQuery(
+            'service.name == \\"elasticsearch-proxy\\" AND log.level == \\"error\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | SORT bucket'
+          ),
+          stdout: [
+            'bucket                     errors',
+            '2026-09-14T17:50:00.000Z   87',
+            '2026-09-14T17:55:00.000Z   131',
+            '2026-09-14T18:00:00.000Z   19',
+          ].join('\n'),
+        },
+        {
+          query: esqlQuery(
+            'service.name == \\"elasticsearch-proxy\\" AND event.action == \\"config_reloaded\\" | KEEP @timestamp, k8s.pod.name, event.action, message | SORT @timestamp'
+          ),
+          stdout: [
+            '@timestamp                 k8s.pod.name                         event.action     message',
+            '2026-09-14T18:12:04.000Z   elasticsearch-proxy-7d9c5b6f4-2xkqp  config_reloaded  Loaded proxy config generation 418',
+            '2026-09-14T18:12:05.000Z   elasticsearch-proxy-7d9c5b6f4-8mzvt  config_reloaded  Loaded proxy config generation 418',
+            '2026-09-14T18:12:07.000Z   elasticsearch-proxy-7d9c5b6f4-q4wjn  config_reloaded  Loaded proxy config generation 418',
+          ].join('\n'),
+        },
+      ],
+    },
+  }),
+  round({
+    metadata: {
+      case_id: 'customer0-uiam-pod-loss-initial-2026-09-14',
+      source: 'customer0-smoke',
+    },
+    input: {
+      question:
+        'uiam returned 503s to authentication requests during the 2026-09-14 18:00 UTC Azure eastus2 incident. ' +
+        'Find out why.',
+      response: [
+        'Conclusion: No cause was confirmed in this round.',
+        'Every 503 came from uiam-58fb87db87-26cfj, and they stopped once the pod was deleted at 18:00',
+        'and uiam-58fb87db87-vd5fc took over at 18:01. The replacement runs the same ReplicaSet, so a',
+        'rollout is ruled out, but the logs in this window do not show why that pod started failing.',
+        unconfirmed('uiam deployment rollout', 'fault inside pod uiam-58fb87db87-26cfj'),
+      ].join('\n'),
+      queries: [
+        {
+          query: esqlQuery(
+            'service.name == \\"uiam\\" AND http.response.status_code == 503 | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes), k8s.pod.name | SORT bucket'
+          ),
+          stdout: [
+            'bucket                     k8s.pod.name           errors',
+            '2026-09-14T17:50:00.000Z   uiam-58fb87db87-26cfj  299',
+            '2026-09-14T17:55:00.000Z   uiam-58fb87db87-26cfj  479',
+            '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  60',
+          ].join('\n'),
+        },
+        UIAM_POD_LIFECYCLE,
       ],
     },
   }),

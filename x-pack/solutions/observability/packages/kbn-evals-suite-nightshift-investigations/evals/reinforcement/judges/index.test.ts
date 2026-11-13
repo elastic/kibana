@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { submitArgumentsEvaluator } from '.';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { EvalConnector } from '@kbn/evals';
+import {
+  MERGES_DECLARED_EVALUATOR,
+  createMergedNodesEvaluator,
+  promptCheckEvaluators,
+  submitArgumentsEvaluator,
+} from '.';
 import type { ReinforcementTaskOutput, SubmitArguments } from '../types';
 
 const SEEDED_ID = 'symptom:eql-slo-burn-rate';
@@ -129,5 +137,96 @@ describe('submitArgumentsEvaluator', () => {
 
     expect(graded.explanation).toContain('no tree has a causal_path');
     expect(graded.score).toBe(0);
+  });
+});
+
+describe('prompt check evaluators', () => {
+  it('leave an unfinished run unscored', async () => {
+    const results = await Promise.all(
+      promptCheckEvaluators.map((evaluator) =>
+        evaluator.evaluate({
+          input: { question: 'Why?', prior_tree: { tree_id: SEEDED_ID } },
+          output: { case_id: 'case-1', submissions: [], execution_error: 'Workflow timed out' },
+          expected: undefined,
+          metadata: { case_id: 'case-1' },
+        })
+      )
+    );
+
+    expect(results.map(({ score, label }) => ({ score, label }))).toEqual(
+      promptCheckEvaluators.map(() => ({ score: null, label: 'not_run' }))
+    );
+  });
+
+  const merge = [{ from: ['E3'], into: 'E2' }];
+
+  it.each([
+    [
+      'a round without require_merge',
+      false,
+      [submission(merge)],
+      { score: null, label: 'not_run' },
+    ],
+    [
+      'an empty merge on a require_merge round',
+      true,
+      [submission([])],
+      { score: 0, label: 'fail' },
+    ],
+    [
+      'a merge only on an earlier submit',
+      true,
+      [submission(merge), submission([])],
+      { score: 0, label: 'fail' },
+    ],
+    ['a declared merge', true, [submission(merge)], { score: 1, label: 'pass' }],
+  ])('merges_declared grades %s', async (_, requireMerge, submissions, expected) => {
+    const [mergesDeclared] = promptCheckEvaluators.filter(
+      ({ name }) => name === MERGES_DECLARED_EVALUATOR
+    );
+
+    const graded = await mergesDeclared.evaluate({
+      input: { question: 'Why?', response: CONFIRMED, prior_tree: { tree_id: SEEDED_ID } },
+      output: { case_id: 'case-1', submissions },
+      expected: undefined,
+      metadata: { case_id: 'case-1', require_merge: requireMerge },
+    });
+
+    expect(graded).toMatchObject(expected);
+  });
+});
+
+describe('createMergedNodesEvaluator', () => {
+  it('scores the share of passed criteria, not the number the model returns', async () => {
+    const prompt = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              score: 1,
+              arguments_ok: true,
+              merges_ok: true,
+              marks_ok: false,
+              reasoning: 'D1 -->|no| X2 gained a ✅ off the causal path.',
+            },
+          },
+        },
+      ],
+    });
+    const evaluator = createMergedNodesEvaluator({
+      inferenceClient: { prompt } as unknown as BoundInferenceClient,
+      evaluationConnector: {} as EvalConnector,
+      log: new ToolingLog(),
+    });
+
+    const graded = await evaluator.evaluate({
+      input: { question: 'Why is the EQL SLO burning?', response: CONFIRMED },
+      output: { case_id: 'case-1', submissions: [submission([])] },
+      expected: undefined,
+      metadata: { case_id: 'case-1' },
+    });
+
+    expect(graded).toMatchObject({ score: 2 / 3, label: 'fail' });
+    expect(prompt.mock.calls[0][0].input.prior_tree).toContain('created a new tree');
   });
 });

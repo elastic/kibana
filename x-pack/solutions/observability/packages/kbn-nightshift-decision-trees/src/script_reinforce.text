@@ -1,4 +1,5 @@
 Task: reinforce the decision tree now that the root cause is verified.
-Add nodes for any verified evidence or investigation steps that were previously unexplored.
-Mark the causal-path edges with ✅ and keep unrelated branches unchanged.
-When done, call {{submit_tool}} with the edited decision-tree files.
+Add nodes for any verified evidence or investigation steps that were previously unexplored, so the tree reaches the verified cause.
+Mark the causal path: prefix with ✅ the edges from the symptom node to the end node of the verified cause, and no other edge this investigation visited. Pass that walk as causal_path.
+Keep unrelated branches and their node IDs unchanged.
+When done, call {{submit_tool}} with the edited decision-tree files and the traversals.

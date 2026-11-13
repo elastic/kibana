@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
+import { REPLAY_CONVERSATION_ID_PREFIX } from '@kbn/nightshift-decision-trees';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { NO_CAUSAL_VERDICT } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
@@ -311,6 +312,46 @@ describe('decisionTreePrepareStepDefinition', () => {
           },
         },
       });
+    });
+  });
+
+  // An eval replay has no saved rounds, so without this it could never exercise the follow-up
+  // prompt. The verdict is the replay's own; no model is asked.
+  describe('a replayed follow-up', () => {
+    const replayRound = {
+      ...investigatorRound,
+      conversation_id: `${REPLAY_CONVERSATION_ID_PREFIX}case-1`,
+      replay: true,
+      replay_causal_confirmed: true,
+    };
+
+    it('runs as a follow-up with the supplied verdict and no causal check', async () => {
+      await run(replayRound);
+
+      expect(preparedWith()).toMatchObject({ turnKind: 'feedback_reinforcement' });
+      await expect(preparedWith().checkCausal!()).resolves.toEqual({
+        isFeedback: true,
+        causalConfirmed: true,
+        causalSummary: 'Supplied by the replay.',
+        learning: '',
+      });
+      expect(createOptimizeModel).not.toHaveBeenCalled();
+    });
+
+    // A real investigation must never skip its causal check on a caller's say-so.
+    it.each([
+      ['without replay: true', { ...replayRound, replay: undefined }],
+      [
+        'for a conversation id that is not a replay id',
+        { ...replayRound, conversation_id: 'inv-1' },
+      ],
+    ])('is ignored %s', async (_case, input) => {
+      await run(input);
+
+      expect(preparedWith()).toMatchObject({ turnKind: 'initial_investigation' });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Ignored replay_causal_confirmed')
+      );
     });
   });
 
