@@ -110,8 +110,12 @@ version:
 | Key mapped as a regular field (data indexed without the package, dynamic mapping) | the value | null |
 | Not mapped at all | null | null |
 
-Neither read errors in any of these cases, including when one query covers indices with different
-mappings, so a wrong choice silently drops the actor or target. ES reads keys of flattened fields
+Neither read errors on an index with one of these mappings, so a wrong choice silently drops the
+actor or target. When one query covers an index where the root is `flattened` and another where the
+key is mapped as a regular field (so the root is an object), ES 9.6 rejects `FIELD_EXTRACT` on that
+root with `Cannot use field [<root>] due to ambiguities`, and the graph request fails with a 400.
+[elastic/elasticsearch#164438](https://github.com/elastic/elasticsearch/pull/164438) resolves this
+in ES 9.7. ES reads keys of flattened fields
 as columns from [elastic/elasticsearch#164665](https://github.com/elastic/elasticsearch/pull/164665),
 which is behind the `esql_flattened_subfields` feature flag (on in snapshot builds, off in
 releases), so dev stacks on a recent snapshot read the dotted path even on flattened mappings.

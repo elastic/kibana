@@ -4189,12 +4189,11 @@ export default function (providerContext: FtrProviderContext) {
         expect(sourceFields['user.id']).to.equal('S-1-5-21-flattened');
       });
 
-      it('reads user.id from a key mapped as a regular field next to a flattened mapping', async () => {
+      it('reads user.id from a key mapped as a regular field', async () => {
         const response = await postGraph(supertest, {
           query: {
             originEventIds: [],
-            // testIndex maps the root as flattened, keyAsFieldIndex maps the key as keyword.
-            indexPatterns: [testIndex, keyAsFieldIndex],
+            indexPatterns: [keyAsFieldIndex],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
@@ -4214,6 +4213,30 @@ export default function (providerContext: FtrProviderContext) {
         const sourceFields = userNode.documentsData.find((d: any) => d.type === 'entity').entity
           .sourceFields;
         expect(sourceFields['user.id']).to.equal('S-1-5-21-key-as-field');
+      });
+
+      it('returns 400 when one index maps a flattened root as flattened and another as an object', async () => {
+        // ES 9.6 rejects FIELD_EXTRACT on a root mapped as flattened in one index and as an object
+        // in another. elastic/elasticsearch#164438 resolves this in ES 9.7; if it reaches 9.6,
+        // this query returns 200 and this test should assert the user.id from keyAsFieldIndex.
+        const response = await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            // testIndex maps the root as flattened, keyAsFieldIndex maps the key as keyword.
+            indexPatterns: [testIndex, keyAsFieldIndex],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [{ match_phrase: { 'event.id': 'key-as-field-evt-1' } }],
+              },
+            },
+          },
+        }).expect(result(400, logger));
+
+        expect(response.body.message).to.contain(
+          'Cannot use field [m365_defender.event.additional_fields] due to ambiguities'
+        );
       });
     });
   });
