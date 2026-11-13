@@ -102,7 +102,7 @@ export const registerAesopDriftMonitorRoutes = ({
     }
   };
 
-  // Advisory only: a settings read failure must not fail an enable that already succeeded.
+  // Advisory only: a settings read failure must not fail the enable.
   const readTracingWarnings = async (
     context: SecuritySolutionRequestHandlerContext
   ): Promise<string[]> => {

@@ -130,4 +130,29 @@ describe('skill-pii', () => {
     expect(Date.now() - started).toBeLessThan(2000);
     expect(result.scores[0].label).toBe('fail');
   });
+
+  it.each([
+    ['separate argument values', { to: 'admin@contoso.com', body: '{name}' }],
+    ['a JSON-string argument', '{"to":"admin@contoso.com","body":"{name}"}'],
+  ])('does not let a placeholder in %s exempt a real address', async (_label, args) => {
+    const result = await skillPiiEvaluator.evaluate({
+      trace,
+      round: {
+        input: { message: 'query' },
+        steps: [{ tool_id: 'send', arguments: args }],
+        response: { message: 'done' },
+      },
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 0, label: 'fail' });
+  });
+
+  it('does not let a comma-separated placeholder exempt a real address', async () => {
+    const result = await skillPiiEvaluator.evaluate({
+      trace,
+      round: round('admin@contoso.com,{name}'),
+      log,
+    });
+    expect(result.scores[0]).toMatchObject({ score: 0, label: 'fail' });
+  });
 });

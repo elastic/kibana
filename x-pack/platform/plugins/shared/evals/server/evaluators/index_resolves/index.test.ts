@@ -166,6 +166,20 @@ describe('skill-index-resolves', () => {
     expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs-foo-*' }));
   });
 
+  it('resolves a non-wildcard index in a multi-line tool-call query', async () => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: {
+        input: { message: 'query' },
+        steps: [{ tool_id: 'x', arguments: '{"query":"FROM my-index\\n| LIMIT 1"}' }],
+        response: { message: 'done' },
+      },
+      log,
+    });
+    expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: 'my-index' }));
+  });
+
   it.each(['`host.name`', '`process.entity_id`', '`@timestamp`', '`event.category`'])(
     'does not treat the backticked field path %s as an index',
     async (field) => {

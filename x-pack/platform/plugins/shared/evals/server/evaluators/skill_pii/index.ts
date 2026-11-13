@@ -56,8 +56,10 @@ const SAFE_MATCH_PATTERNS = [
   /placeholder/i,
 ];
 
-// Template syntax is tested against the whitespace-delimited token around the
-// match, because the PII regexes themselves never capture braces or tags.
+// Template syntax is tested against the token around the match, because the PII
+// regexes themselves never capture braces or tags. The token stops at
+// whitespace, quotes and list separators, so a placeholder in a neighbouring
+// value does not exempt a real address.
 const TEMPLATE_PATTERNS = [
   /\{[\w.]+}/, // template variables like {user.email}
   /\$\{[\w.]+}/, // template literals like ${email}
@@ -68,13 +70,15 @@ const TEMPLATE_PATTERNS = [
 // make every match scan the whole run.
 const TOKEN_CONTEXT_MAX = 256;
 
+const TOKEN_BOUNDARY = /[\s"',;]/;
+
 const tokenAround = (content: string, start: number, end: number): string => {
   let from = start;
   const minFrom = Math.max(0, start - TOKEN_CONTEXT_MAX);
-  while (from > minFrom && !/\s/.test(content[from - 1])) from--;
+  while (from > minFrom && !TOKEN_BOUNDARY.test(content[from - 1])) from--;
   let to = end;
   const maxTo = Math.min(content.length, end + TOKEN_CONTEXT_MAX);
-  while (to < maxTo && !/\s/.test(content[to])) to++;
+  while (to < maxTo && !TOKEN_BOUNDARY.test(content[to])) to++;
   return content.slice(from, to);
 };
 
