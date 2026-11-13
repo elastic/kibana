@@ -37,7 +37,6 @@ const setup = ({
   alerts,
   keysWithVerdicts = [],
   enabled = true,
-  writesAllowed = true,
   bulkResponse = { errors: false, items: [] as unknown[] },
   searchFails = false,
   closedAsOther = [],
@@ -45,7 +44,6 @@ const setup = ({
   alerts: Array<{ _id: string; _source: Record<string, unknown> }>;
   keysWithVerdicts?: string[];
   enabled?: boolean;
-  writesAllowed?: boolean;
   bulkResponse?: { errors: boolean; items: unknown[] };
   searchFails?: boolean;
   /** Ids of alerts an analyst closed with a reason other than false positive. */
@@ -72,7 +70,6 @@ const setup = ({
   const run = (input: Record<string, unknown>) =>
     getTriageStoreFpDecisionsStepDefinition({
       isContextEngineEnabled,
-      areDecisionWritesAllowed: () => writesAllowed,
     }).handler({
       input: {
         outcome: 'approved',
@@ -167,16 +164,6 @@ describe('triage store decisions step', () => {
         permissions: { kibana: { privileges: [{ space: 'default' }] } },
       })
     );
-  });
-
-  it('refuses to write until the decisions index template is installed', async () => {
-    const { run, bulk } = setup({ alerts: alertsOf([['a.exe', 3]]), writesAllowed: false });
-
-    const { output } = await run({});
-
-    // A write now would auto-create the index with a mapping that cannot scope by space.
-    expect(output).toEqual(expect.objectContaining({ skip_reason: 'storage_failure', written: 0 }));
-    expect(bulk).not.toHaveBeenCalled();
   });
 
   it('stores nothing for a key that has an earlier true positive or inconclusive alert', async () => {

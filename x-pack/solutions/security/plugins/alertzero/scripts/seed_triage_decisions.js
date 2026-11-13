@@ -14,11 +14,13 @@
  *       A  acme-update.exe   5 low + 1 high alerts   an approved decision      -> would_close (low), kept with a human (high)
  *       B  scan.exe          3 medium alerts         a dismissed decision       -> would_skip
  *       C  unknown.exe       2 low alerts            no decision                -> never matched
- *   - the two decisions (`fp-decision-<hash>`, `fp-dismissal-<hash>`) in the `security-triage-decisions`
- *     Knowledge Item index, built with the same code the store step uses.
+ *   - the two decisions (`fp-decision-<hash>`, `fp-dismissal-<hash>`) in the
+ *     `.ai-index-idx-security-triage-decisions` Knowledge Item index, built with the same code the
+ *     store step uses.
  *
- * Start Kibana once first: it installs the index template that maps the space privilege. An index
- * that exists without it cannot space-scope the decisions until it is deleted.
+ * The first write creates that index from Elasticsearch's managed AI index template, which maps
+ * the space privilege. The template has a semantic field, so Elasticsearch needs machine learning
+ * on, for its default `.elser-2-elasticsearch` endpoint.
  *
  * The keys come from the real key code, so a change to the key rules changes the seed with it.
  *

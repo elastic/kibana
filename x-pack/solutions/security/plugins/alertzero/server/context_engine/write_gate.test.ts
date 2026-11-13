@@ -33,17 +33,11 @@ describe('installSpaceScopedIndexTemplates', () => {
     });
     await flushPromises();
 
-    expect(putIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'security-attack-fingerprint',
         index_patterns: ['ai-index-idx-security-attack-fingerprints'],
-      })
-    );
-    expect(putIndexTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'security-triage-decisions',
-        index_patterns: ['ai-index-idx-security-triage-decisions'],
       })
     );
   });

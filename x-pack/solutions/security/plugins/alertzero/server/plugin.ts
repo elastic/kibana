@@ -58,7 +58,6 @@ import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { ALERTZERO_AI_INDICES, type AlertZeroAiIndexId } from './context_engine/ai_index_registry';
 import { registerAiIndices } from './context_engine/register_ai_indices';
-import { TRIAGE_DECISIONS_AI_INDEX_ID } from '../common/step_types/triage_decisions_index';
 import {
   installSpaceScopedIndexTemplates,
   type AiIndexWriteGates,
@@ -273,7 +272,6 @@ export class AlertZeroPlugin
         stepsLogger
       ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
-      areDecisionWritesAllowed: () => this.isAiIndexWritable(TRIAGE_DECISIONS_AI_INDEX_ID),
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
       getWorkflowsManagement: () =>

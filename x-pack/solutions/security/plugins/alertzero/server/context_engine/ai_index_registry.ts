@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import type { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import {
   ATTACK_FINGERPRINT_AI_INDEX_ID,
   KNOWLEDGE_INDICATOR_AI_INDEX_ID,
 } from '../../common/ai_indices';
-import { TRIAGE_DECISIONS_AI_INDEX_ID } from '../../common/step_types/triage_decisions_index';
+import {
+  TRIAGE_DECISIONS_AI_INDEX_DEST,
+  TRIAGE_DECISIONS_AI_INDEX_ID,
+} from '../../common/step_types/triage_decisions_index';
 
 /** An AI index AlertZero registers with Context Engine. */
 export interface AlertZeroAiIndex<TId extends string = string> {
   id: TId;
   description: string;
+  /** Set when the backing index is not the default for the id, such as a dot-prefixed one. */
+  dest?: ReturnType<typeof getAiIndexDest>;
   /**
    * Set when Context Engine has to scope the index's documents by space. AlertZero then installs
    * an index template that maps `permissions.kibana.privileges` as `nested`, and records a write
@@ -56,16 +62,16 @@ export const ATTACK_FINGERPRINT_AI_INDEX = {
   },
 } as const satisfies AlertZeroAiIndex;
 
-/** Alert triage decisions. The store step writes the backing index once the template is installed. */
+/**
+ * Alert triage decisions. The backing index is dot-prefixed, so Elasticsearch's own template maps
+ * the space privilege as `nested` and AlertZero installs no template for it.
+ */
 export const TRIAGE_DECISIONS_AI_INDEX = {
   id: TRIAGE_DECISIONS_AI_INDEX_ID,
   description:
     'Internal alert triage decisions: false-positive patterns that triage workers match ' +
     'against later alerts. Not for analysts to query.',
-  spaceScopedTemplate: {
-    templateName: 'security-triage-decisions',
-    logLabel: 'Triage decisions',
-  },
+  dest: TRIAGE_DECISIONS_AI_INDEX_DEST,
 } as const satisfies AlertZeroAiIndex;
 
 /** One entry per index. */
