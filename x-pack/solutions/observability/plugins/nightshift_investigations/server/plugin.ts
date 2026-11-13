@@ -88,7 +88,11 @@ import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
-import { setupNightshiftTelemetry, type NightshiftTelemetryClient } from './telemetry';
+import {
+  reportAlertsEnteredPipeline,
+  setupNightshiftTelemetry,
+  type NightshiftTelemetryClient,
+} from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
@@ -121,6 +125,8 @@ import {
   nightshiftSandboxAllowlistSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
+  nightshiftInvestigationQuotaLedgerSavedObjectType,
+  nightshiftInvestigationQuotaSettingsSavedObjectType,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
@@ -132,6 +138,7 @@ import {
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import { createSandboxAllowlistClient } from './sandbox_allowlist';
+import { createInvestigationQuotaClient } from './lib/investigation_quotas';
 import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
 import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
@@ -219,11 +226,17 @@ export class NightshiftInvestigationsPlugin
       })
     );
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
+    const telemetry = setupNightshiftTelemetry({
+      analytics: core.analytics,
+      logger: this.logger.get('telemetry'),
+    });
+    this.telemetry = telemetry;
     plugins.alerting?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
     });
     plugins.alertingVTwo?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
+      onStatusChanges: async (payloads) => reportAlertsEnteredPipeline(payloads, telemetry),
     });
     // Single choke point for sandbox access: tools and workflow steps resolve the sandbox through
     // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
@@ -233,11 +246,6 @@ export class NightshiftInvestigationsPlugin
       isNightshiftEnabled: isNightshiftEnabledSync,
       logger: this.logger.get('sandbox'),
     });
-    const telemetry = setupNightshiftTelemetry({
-      analytics: core.analytics,
-      logger: this.logger.get('telemetry'),
-    });
-    this.telemetry = telemetry;
     for (const judge of [
       ...referenceFreeJudges,
       ...alertOutcomeJudges,
@@ -268,9 +276,16 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
     core.savedObjects.registerType(nightshiftSandboxAllowlistSavedObjectType);
+    core.savedObjects.registerType(nightshiftInvestigationQuotaSettingsSavedObjectType);
+    core.savedObjects.registerType(nightshiftInvestigationQuotaLedgerSavedObjectType);
 
     const sandboxAllowlistClient = createSandboxAllowlistClient({
       getDeps: () => ({ savedObjects: this.savedObjects, spaces: this.spaces }),
+    });
+
+    const investigationQuotaClient = createInvestigationQuotaClient({
+      getDeps: () => ({ savedObjects: this.savedObjects, security: this.securityStart }),
+      logger: this.logger.get('investigation_quotas'),
     });
 
     const customContextClient = createCustomContextClient({
@@ -749,6 +764,7 @@ export class NightshiftInvestigationsPlugin
           listSandboxConnectorTypes,
           sandboxAllowlistClient,
           customContextClient,
+          investigationQuotaClient,
           onboardingClient,
           getWikiPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {

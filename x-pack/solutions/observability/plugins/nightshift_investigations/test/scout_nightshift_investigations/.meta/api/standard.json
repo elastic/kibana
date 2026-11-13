@@ -1,5 +1,5 @@
 {
-  "sha1": "a396b0dcc2866026ca962a2a4d1eac31842d33a8",
+  "sha1": "9408d68beaefa4cff82564a6ebe1f9dd7accb03a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -224,6 +224,118 @@
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
         "line": 54,
         "column": 7
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-e002dcb23e36457",
+      "title": "/internal/nightshift/investigation_quotas returns the limits, today’s counts and the window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 58,
+        "column": 63
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-b069ccefc795059",
+      "title": "/internal/nightshift/investigation_quotas changes limits, removes one with null and keeps them while enforcement is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-60cc47e0814c8e3",
+      "title": "/internal/nightshift/investigation_quotas rejects invalid updates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 103,
+        "column": 16
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-55a8c91c5e944d7",
+      "title": "/internal/nightshift/investigation_quotas lets read-only users see the limits but not change them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 126,
+        "column": 19
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-5b1161e9d2c2903",
+      "title": "/internal/nightshift/investigation_quotas requires the configure privilege as well as manage to change the limits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 131,
+        "column": 26
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-e6bb5996ae26539",
+      "title": "/internal/nightshift/investigation_quotas rejects users without any Nightshift privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 138,
+        "column": 42
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-160c0ee36012d76",
+      "title": "/internal/nightshift/investigation_quotas returns 404 while Nightshift is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 145,
+        "column": 30
       }
     },
     {

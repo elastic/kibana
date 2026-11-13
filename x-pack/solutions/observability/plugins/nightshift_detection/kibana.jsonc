@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/nightshift-detection-plugin",
+  "owner": "@elastic/nightshift",
+  "group": "observability",
+  "visibility": "private",
+  "description": "Nightshift detection engine: runs detection strategies per space and stores detection signals",
+  "plugin": {
+    "id": "nightshiftDetection",
+    "browser": false,
+    "server": true,
+    "configPath": ["xpack", "nightshiftDetection"],
+    "requiredPlugins": ["significantEvents", "nightshiftSources", "licensing"],
+    "optionalPlugins": ["cloud"],
+    "requiredBundles": []
+  }
+}
