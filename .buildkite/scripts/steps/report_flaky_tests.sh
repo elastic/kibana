@@ -23,6 +23,7 @@ FLAKY_TESTS_FRAMEWORKS="${FLAKY_TESTS_FRAMEWORKS:-}"
 # Optional; pipelines of FLAKY_TESTS_PIPELINES whose builds are counted together per branch, as
 # they run the same tests in the same environment. Set, every other pipeline is judged per branch
 # on its own, e.g. one running the tests in another environment; empty, all are judged together.
+# Pipelines not in FLAKY_TESTS_PIPELINES are ignored, so a schedule may override that one alone.
 FLAKY_TESTS_JUDGED_TOGETHER="${FLAKY_TESTS_JUDGED_TOGETHER:-}"
 # The agent PTY is 160 columns wide, but the build page log pane fits fewer once line numbers and
 # timestamps are shown (about 130 on a laptop), so size the summary table explicitly.

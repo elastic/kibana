@@ -67,8 +67,10 @@ the window. Thresholds are checked per branch, so a clean branch cannot hide a f
 branch a test qualified on is recorded as `flakiestBranch`. Tests that never passed in the window
 are consistently failing, not flaky, and are not reported.
 
-With `--judgedTogether` (`FLAKY_TESTS_JUDGED_TOGETHER` in the pipeline: `kibana-on-merge` and
-`kibana-security-solution-on-merge`), only those pipelines' builds are counted together. Every
+With `--judgedTogether` (`FLAKY_TESTS_JUDGED_TOGETHER` in the pipeline: `kibana-on-merge`,
+`kibana-security-solution-on-merge` and `kibana-batch-testing`, which run the same tests in the
+same local environment), only those pipelines' builds are counted together, those the report
+doesn't read ignored. Every
 other pipeline is judged per branch on its own: those running the tests in another environment,
 FIPS mode (`kibana-fips`) and Elastic Cloud (ECH and MKI), with far fewer builds. A test failing 4
 of the 14 FIPS builds on `main` is flaky there, even with 500 clean on-merge builds of `main`.
