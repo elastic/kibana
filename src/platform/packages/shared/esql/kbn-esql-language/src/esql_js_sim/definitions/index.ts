@@ -13,9 +13,12 @@ export {
   DEFAULT_EXPRESSION_ROLE,
   DEFAULT_ROLES,
 } from './signatures/argument_roles';
+export { ENTITY_FACTS, ENTITY_TYPES } from './entities/entity_facts';
+export type { EntityFacts, EntityItem, EntityOrigin, EntityScope } from './entities/types';
 export { COMMAND_FACTS, UNDESCRIBED_COMMANDS } from './signatures/command_facts';
 export { EXPRESSION_PARTS } from './signatures/expression_parts';
 export { INHERITED_FIELDS, resolveRole } from './signatures/resolve_role';
+export { ROLE_KINDS, validateArgumentRoles } from './signatures/validate_roles';
 export type {
   ArgumentRole,
   ColumnRole,

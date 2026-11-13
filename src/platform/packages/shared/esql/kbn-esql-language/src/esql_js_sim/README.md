@@ -119,6 +119,25 @@ call site, in a closed schema (`signatures/types.ts`).
   these before anyone describes it. `UNDESCRIBED_COMMANDS` lists the commands that still rely
   on them.
 
+- `validateArgumentRoles(data)`: checks a table of roles that arrives as data, as JSON from
+  another package would. Every field a role may have is listed, so an unknown field, kind or
+  entity is reported with where it is.
+
+## Entities (`definitions/entities`)
+
+An entity is a named thing an argument can refer to. `ENTITY_FACTS` lists every kind with
+where its values come from: the language (metadata fields, settings), the cluster (sources,
+lookup indices, enrich policies, inference endpoints) or a parent entity (the fields of an
+enrich policy). Two closed shapes describe the exchange with whoever lists entities:
+
+- `EntityScope`: what narrows the entities at a place (index mode, inside a subquery, the
+  parent's name, the task of an inference endpoint, serverless). A lister gets a scope and
+  nothing else: no command and no query text.
+- `EntityItem`: an entity as data (name, category, aliases, hidden, has children, type).
+
+`entity_facts.test.ts` fails for a kind of entity no argument names, and for an argument that
+names a child entity without depending on an argument that names its parent.
+
 A role says only what validation could check. How an editor presents it stays in Kibana.
 
 `signatures.test.ts` fails when a role points at a call site the grammar does not have, when a
