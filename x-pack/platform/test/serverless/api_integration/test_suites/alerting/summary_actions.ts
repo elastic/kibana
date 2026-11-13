@@ -22,6 +22,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_UUID,
   ALERT_STATUS,
+  ALERT_TRACKED,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   TAGS,
@@ -153,7 +154,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
         ruleId,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -166,7 +166,6 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -198,6 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_SNOOZED]: false,
         [ALERT_STATUS]: 'active',
+        [ALERT_TRACKED]: true,
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
         [ALERT_RULE_CONSUMER]: 'alerts',
@@ -290,7 +290,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
         ruleId,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -303,7 +302,6 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -335,6 +333,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_SNOOZED]: false,
         [ALERT_STATUS]: 'active',
+        [ALERT_TRACKED]: true,
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
         [ALERT_RULE_CONSUMER]: 'alerts',
@@ -517,7 +516,6 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -561,6 +559,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_SNOOZED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',
+        [ALERT_TRACKED]: true,
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
         [ALERT_RULE_CONSUMER]: 'alerts',

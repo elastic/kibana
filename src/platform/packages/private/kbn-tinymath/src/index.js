@@ -12,17 +12,21 @@ import memoizeOne from 'memoize-one';
 import { functions as includedFunctions } from './functions';
 import { parse as parseFn } from './grammar.peggy';
 
-const MAX_EXPRESSION_LENGTH = 1000;
+const MAX_EXPRESSION_LENGTH = 8 * 1024;
 const MAX_NESTING_DEPTH = 20;
 
 // Matches single- and double-quoted strings, including escaped quotes (\' and \").
-// Used to strip quoted spans before counting parenthesis nesting depth, so that
-// parentheses inside KQL/Lucene filter strings (e.g. count(kql='(a or b)')) are
-// not mistakenly counted as structural nesting.
+// Used to strip quoted spans (KQL/Lucene filters, quoted field names) before
+// applying structural limits, so that parentheses and characters inside
+// count(kql='(a or b)') are not counted as math nesting or expression length.
 const QUOTED_STRINGS_RE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g;
 
-function checkNestingDepth(input) {
-  const unquoted = input.replace(QUOTED_STRINGS_RE, '');
+/** Returns the expression with quoted spans removed, used for structural length and nesting checks. */
+function getUnquoted(input) {
+  return input.replace(QUOTED_STRINGS_RE, '');
+}
+
+function checkNestingDepth(unquoted) {
   let depth = 0;
   for (let i = 0; i < unquoted.length; i++) {
     if (unquoted[i] === '(') {
@@ -44,11 +48,13 @@ function parse(input, options) {
     throw new Error('Expression must be a string');
   }
 
-  if (input.length > MAX_EXPRESSION_LENGTH) {
+  const unquoted = getUnquoted(input);
+
+  if (unquoted.length > MAX_EXPRESSION_LENGTH) {
     throw new Error(`Expression exceeds maximum length of ${MAX_EXPRESSION_LENGTH} characters`);
   }
 
-  checkNestingDepth(input);
+  checkNestingDepth(unquoted);
 
   try {
     return parseFn(input, options);
@@ -110,4 +116,4 @@ function isOperable(args) {
   });
 }
 
-export { memoizedParse as parse, evaluate, interpret };
+export { memoizedParse as parse, evaluate, interpret, MAX_EXPRESSION_LENGTH, getUnquoted };

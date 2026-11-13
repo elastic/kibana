@@ -10,6 +10,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import {
   StreamableHTTPClientTransport,
   StreamableHTTPError,
+  type StreamableHTTPClientTransportOptions,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
 import type { Logger } from '@kbn/core/server';
@@ -47,7 +48,9 @@ function formatConnectionErrorMessage(error: unknown): string {
  */
 export class McpClient {
   private readonly client: Client;
-  private readonly transport: StreamableHTTPClientTransport;
+  private readonly transportUrl: URL;
+  private readonly transportOptions: StreamableHTTPClientTransportOptions;
+  private transport?: StreamableHTTPClientTransport;
 
   private connected: boolean = false;
 
@@ -66,7 +69,8 @@ export class McpClient {
       maxReconnectionDelay = 10000,
     }: McpClientOptions = {}
   ) {
-    this.transport = new StreamableHTTPClientTransport(new URL(clientDetails.url), {
+    this.transportUrl = new URL(clientDetails.url);
+    this.transportOptions = {
       requestInit: {
         headers,
       },
@@ -77,7 +81,7 @@ export class McpClient {
         initialReconnectionDelay,
         maxReconnectionDelay,
       },
-    });
+    };
 
     this.name = clientDetails.name;
     this.version = clientDetails.version;
@@ -86,6 +90,13 @@ export class McpClient {
       name: clientDetails.name,
       version: clientDetails.version,
     });
+  }
+
+  /**
+   * A transport can be started only once, so every connect attempt gets a new one.
+   */
+  private createTransport(): StreamableHTTPClientTransport {
+    return new StreamableHTTPClientTransport(this.transportUrl, this.transportOptions);
   }
 
   /**
@@ -103,6 +114,7 @@ export class McpClient {
       this.logger.debug(`Attempting to connect to MCP server ${this.name}, ${this.version}`);
       try {
         // connect() performs the initialization handshake with the MCP server as per MCP protocol
+        this.transport = this.createTransport();
         await this.client.connect(this.transport);
         this.connected = true;
         this.logger.debug(`Connected to MCP server ${this.name}, ${this.version}`);
@@ -111,12 +123,14 @@ export class McpClient {
         this.logger.error(
           `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
+        // Closing aborts any pending request, even when the transport failed to start
+        await this.closeAfterFailedConnect();
         if (error instanceof StreamableHTTPError) {
-          throw new Error(errorMessage);
+          throw new Error(errorMessage, { cause: error });
         } else if (error instanceof UnauthorizedError) {
-          throw new Error(`Unauthorized error: ${errorMessage}`);
+          throw new Error(`Unauthorized error: ${errorMessage}`, { cause: error });
         } else {
-          throw new Error(`Error connecting to MCP server: ${errorMessage}`);
+          throw new Error(`Error connecting to MCP server: ${errorMessage}`, { cause: error });
         }
       }
     }
@@ -129,6 +143,19 @@ export class McpClient {
     };
   }
 
+  private async closeAfterFailedConnect(): Promise<void> {
+    this.transport = undefined;
+    try {
+      await this.client.close();
+    } catch (closeError) {
+      this.logger.debug(
+        `Error closing MCP client after failed connect to ${this.name}, ${this.version}: ${
+          closeError instanceof Error ? closeError.message : String(closeError)
+        }`
+      );
+    }
+  }
+
   /**
    * Disconnect from the MCP client and return the disconnected status.
    */
@@ -136,6 +163,7 @@ export class McpClient {
     if (this.connected) {
       this.logger.debug(`Attempting to disconnect from MCP server ${this.name}, ${this.version}`);
       await this.client.close();
+      this.transport = undefined;
       this.connected = false;
       this.logger.debug(`Disconnected from MCP client ${this.name}, ${this.version}`);
     }

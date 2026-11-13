@@ -100,6 +100,7 @@ const createMockInitializerContext = (): PluginInitializerContext<ConfigSchema> 
         error: jest.fn(),
       })),
     },
+    env: { packageInfo: { buildFlavor: 'traditional' } },
   } as unknown as PluginInitializerContext<ConfigSchema>);
 
 const createMockSidebarApp = () => ({ open: jest.fn(), close: jest.fn() });

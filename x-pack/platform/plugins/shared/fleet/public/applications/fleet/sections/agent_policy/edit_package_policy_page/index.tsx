@@ -60,6 +60,7 @@ import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../ser
 import {
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
+  inferVarGroupSelections,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
 import { useMultipleAgentPolicies } from '../../../hooks';
@@ -184,8 +185,13 @@ export const EditPackagePolicyForm = memo<{
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
+    // The policy predates the package's var_groups: prefer inferring the selection
+    // from its populated vars over the first-visible-option default, so an existing
+    // configuration (e.g. direct access keys) is not presented as a different one
+    const defaults = computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+    const inferred = inferVarGroupSelections(varGroups, packagePolicy.vars);
+    return inferred ? { ...defaults, ...inferred } : defaults;
+  }, [packagePolicy.var_group_selections, packagePolicy.vars, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -313,7 +319,7 @@ export const EditPackagePolicyForm = memo<{
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
   //  if `from === 'installed-integrations'` then it links back to the Installed Integrations tab
   const cancelUrl = useMemo((): string => {
-    if (from === 'installed-integrations') {
+    if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
       return getHref('integrations_installed', {});
     }
     return from === 'package-edit' && packageInfo
@@ -325,7 +331,7 @@ export const EditPackagePolicyForm = memo<{
       : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
-    if (from === 'installed-integrations') {
+    if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
       return getHref('integrations_installed', {});
     }
     return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
@@ -401,7 +407,8 @@ export const EditPackagePolicyForm = memo<{
           ilmPolicyRef.current,
           packageInfo,
           notifications,
-          packageInfo.title ?? packageInfo.name
+          packageInfo.title ?? packageInfo.name,
+          namespaceCustomizationEnabledRef.current
         );
       }
       setIsEdited(false);
@@ -474,7 +481,12 @@ export const EditPackagePolicyForm = memo<{
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
-    from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
+    from:
+      from === 'installed-integrations' && isUpgrade
+        ? 'upgrade-from-installed-integrations'
+        : extensionView?.useLatestPackageVersion && isUpgrade
+        ? 'upgrade-from-extension'
+        : from,
     cancelUrl,
     agentPolicies,
     packageInfo,
@@ -630,7 +642,11 @@ export const EditPackagePolicyForm = memo<{
   });
 
   return (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="editPackagePolicy"
+    >
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
@@ -814,7 +830,7 @@ const Breadcrumb = memo<{
     );
   } else if (from === 'upgrade-from-fleet-policy-list') {
     breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
-  } else if (from === 'installed-integrations') {
+  } else if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
     breadcrumb = <InstalledIntegrationsBreadcrumb policyName={packagePolicyName} />;
   }
 

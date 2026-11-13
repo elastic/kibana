@@ -199,7 +199,9 @@ describe('Discover state', () => {
         })
       );
       await new Promise(process.nextTick);
-      expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
+      expect(getCurrentUrl()).toBe(
+        '/#?_g=(refreshInterval:(pause:!t,value:5000),time:(from:now-15m,to:now))'
+      );
     });
   });
 

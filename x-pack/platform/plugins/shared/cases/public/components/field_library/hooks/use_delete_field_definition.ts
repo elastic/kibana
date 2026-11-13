@@ -11,6 +11,7 @@ import { casesQueriesKeys, casesMutationsKeys } from '../../../containers/consta
 import * as i18n from '../translations';
 import type { ServerError } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
+import { useFieldDefinitionDeletedEBT } from '../../../analytics/field_library';
 
 interface MutationArgs {
   id: string;
@@ -23,6 +24,7 @@ interface UseDeleteFieldDefinitionProps {
 export const useDeleteFieldDefinition = ({ onSuccess }: UseDeleteFieldDefinitionProps = {}) => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
+  const reportFieldDefinitionDeleted = useFieldDefinitionDeletedEBT();
 
   return useMutation<void, ServerError, MutationArgs>(({ id }) => deleteFieldDefinition({ id }), {
     mutationKey: casesMutationsKeys.deleteFieldDefinition,
@@ -30,6 +32,7 @@ export const useDeleteFieldDefinition = ({ onSuccess }: UseDeleteFieldDefinition
       queryClient.invalidateQueries(casesQueriesKeys.fieldDefinitions);
       showSuccessToast(i18n.SUCCESS_DELETING_FIELD_DEFINITION);
       onSuccess?.();
+      reportFieldDefinitionDeleted();
     },
     onError: (error: ServerError) => {
       showErrorToast(error, { title: i18n.ERROR_DELETING_FIELD_DEFINITION });

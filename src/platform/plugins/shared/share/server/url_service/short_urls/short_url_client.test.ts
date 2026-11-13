@@ -97,6 +97,23 @@ describe('ServerShortUrlClient', () => {
       expect(data.accessDate).toBeGreaterThan(Date.now() - 1000000);
       expect(data.accessCount).toBe(0);
     });
+
+    test('rejects a custom slug with invalid characters', async () => {
+      const { client, locator } = setup();
+
+      await expect(
+        client.create({
+          locator,
+          slug: 'pipe|is-not-allowed',
+          params: {
+            url: '/foo/bar',
+          },
+        })
+      ).rejects.toMatchObject({
+        code: 'INVALID_SLUG',
+        message: 'Invalid [slug = pipe|is-not-allowed].',
+      });
+    });
   });
 
   describe('.resolve()', () => {

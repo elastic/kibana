@@ -15,6 +15,7 @@ import {
   ENTITY_TYPE_TEST_ID,
 } from '../../../../../common/cases/attachments/entity/test_ids';
 import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 
 type Props = UnifiedReferenceAttachmentViewProps<
   EntityAttachmentPayload['metadata'],
@@ -29,6 +30,7 @@ const baseProps: Props = {
   },
   caseData: { id: 'case-1', title: 'Case 1' },
   savedObjectId: 'saved-object-id-1',
+  permissions: allCasesPermissions(),
   createdBy: { username: 'elastic', fullName: null, email: null, profileUid: undefined },
   version: '1',
   rowContext: {

@@ -57,7 +57,7 @@ The indices are named \`.cases\` / \`.cases-activity\` / \`.cases-attachments\` 
 
 | Index | Grain | Key fields |
 |-------|-------|-----------|
-| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.assignees.username\`, \`case.assignees.full_name\`, \`case.assignees.email\`, \`case.observables.observable-type-<x>\`, \`case.extended_fields\` |
+| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.assignees.username\`, \`case.assignees.full_name\`, \`case.assignees.email\`, \`case.observables.observable-type-<x>\`, \`case.extended_fields\`, \`case.template.id\`, \`case.template.version\` |
 | \`.cases-activity\` | one doc per user action | \`case.id\`, \`action.type\`, \`action.verb\`, \`action.status_new\`, \`action.severity_new\`, \`action.assignees_changed\`, \`action.tags_changed\`, \`action.connector_id_new\`, \`action.attachment_reference_id\`, \`actor.*\`, \`@timestamp\` |
 | \`.cases-attachments\` | one doc per comment/attachment | \`case.id\`, \`attachment.type\`, \`attachment.comment\`, \`attachment.alert.rule.id\`, \`attachment.alert.rule.name\`, \`attachment.alert.indices\`, \`attachment.event.indices\`, \`attachment.attachment_id\`, \`created_at\` |
 
@@ -86,6 +86,33 @@ These indices are **re-indexed from the case saved objects** by real-time hooks 
 - the question is freshness-sensitive (very recent cases or edits),
 
 cross-check against the source of truth with \`${platformCoreTools.cases}\` (get / bulk_get / search) and reconcile. Prefer the saved-object value when they disagree, and tell the user there may be indexing lag. Never present a suspicious analytics number as fact without this check.
+
+## Template analytics
+
+When the Cases templates feature is enabled, each case carries \`case.template.id\` (the saved-object ID of the template it was created from) and \`case.template.version\` (an integer recording which revision of the template was in effect at creation time). Both are \`keyword\` / \`integer\` fields — directly queryable in ES|QL without helpers.
+
+Cases created without a template have \`case.template.id\` absent — filter with \`IS NOT NULL\` / \`IS NULL\` to separate templated from ad-hoc cases.
+
+**Template name lookup.** The \`.cases\` index stores only the template ID, not its name. To label results by name, retrieve the matching templates via the \`${platformCoreTools.cases}\` tool or the public template API, then annotate the ES|QL results server-side — you cannot join to a templates index in ES|QL.
+
+Example — count open cases per template:
+\`\`\`esql
+FROM .cases
+| WHERE case.status != "closed" AND case.template.id IS NOT NULL
+| STATS open_cases = COUNT(*) BY case.template.id
+| SORT open_cases DESC
+\`\`\`
+
+Example — compare closure rate between templated and ad-hoc cases:
+\`\`\`esql
+FROM .cases
+| EVAL is_templated = CASE(case.template.id IS NOT NULL, "templated", "ad-hoc")
+| EVAL is_closed = CASE(case.status == "closed", 1, 0)
+| STATS total = COUNT(*), closed = SUM(is_closed) BY is_templated
+| EVAL closure_rate = ROUND(closed::double / total, 3)
+\`\`\`
+
+See the referenced "template-analytics" patterns for ready-made recipes.
 
 ## KQL / the Case Analytics data view (self-service + fallback)
 
@@ -287,6 +314,54 @@ Swap \`observable-type-ipv4\` for the type of interest. The set is open (custom 
 
 ## MTTD note
 The alert's original detection time is not stored on the attachment (only rule id/name and source indices). To compute MTTD, join out to the alerts indices in \`attachment.alert.indices\` using the alert ids in \`attachment.attachment_id\`, then compare the alert's original time to \`case.created_at\`.`,
+    },
+    {
+      relativePath: './analytics',
+      name: 'template-analytics',
+      content: `# Template analytics queries
+
+Template fields on \`.cases\`: \`case.template.id\` (keyword — the template SO id) and \`case.template.version\` (integer). Cases created without a template have these fields absent.
+
+## Open cases per template (top 10)
+\`\`\`esql
+FROM .cases
+| WHERE case.status != "closed" AND case.template.id IS NOT NULL
+| STATS open_cases = COUNT(*) BY case.template.id
+| SORT open_cases DESC
+| LIMIT 10
+\`\`\`
+Follow up with the public template API (or the \`${platformCoreTools.cases}\` tool) to resolve IDs to names.
+
+## Templated vs ad-hoc closure rate
+\`\`\`esql
+FROM .cases
+| EVAL is_templated = CASE(case.template.id IS NOT NULL, "templated", "ad-hoc")
+| EVAL is_closed = CASE(case.status == "closed", 1, 0)
+| STATS total = COUNT(*), closed = SUM(is_closed) BY is_templated
+| EVAL closure_rate = ROUND(closed::double / total, 3)
+| SORT total DESC
+\`\`\`
+
+## MTTR by template (last 90 days)
+\`\`\`esql
+FROM .cases
+| WHERE case.status == "closed"
+  AND case.time_to_resolve IS NOT NULL
+  AND case.template.id IS NOT NULL
+  AND case.created_at >= NOW() - 90 days
+| STATS mttr_seconds = AVG(case.time_to_resolve), case_count = COUNT(*) BY case.template.id
+| EVAL mttr_hours = ROUND(mttr_seconds / 3600, 1)
+| SORT mttr_seconds DESC
+\`\`\`
+
+## Extended-field breakdown filtered to one template
+\`\`\`esql
+FROM .cases
+| WHERE case.template.id == "<TEMPLATE_ID>"
+| EVAL effort = FIELD_EXTRACT(case.extended_fields, "effort_as_integer")
+| STATS avg_effort = AVG(effort::double), with_value = COUNT(effort), total = COUNT(*)
+\`\`\`
+Always surface the populated-vs-total counts — blank extended fields are common.`,
     },
     {
       relativePath: './analytics',

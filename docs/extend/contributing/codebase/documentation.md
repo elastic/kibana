@@ -173,7 +173,7 @@ The code sandbox approach can be a lot faster to iterate compared to running it 
 
 ## Example plugins
 
-Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or [building block](../../key-concepts/ui/building-blocks.md) to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
+Running Kibana with `pnpm start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or [building block](../../key-concepts/ui/building-blocks.md) to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
 
 You can also visit these [examples plugins hosted online](https://demo.kibana.dev/8.2/app/home). Note that because anonymous access is enabled, some
 of the demos are currently not working.

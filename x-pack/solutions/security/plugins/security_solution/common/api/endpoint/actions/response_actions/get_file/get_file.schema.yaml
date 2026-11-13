@@ -76,3 +76,7 @@ components:
                 path:
                   type: string
                   description: The full file path to retrieve from the endpoint.
+                force:
+                  type: boolean
+                  description: "Read a file locked by the OS from a volume snapshot. Endpoint on Windows only."
+                  example: true

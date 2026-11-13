@@ -45,6 +45,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6, backported to 9.5.x
+   */
+  responseActionsEndpointMemoryDumpRaw: true,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
@@ -275,12 +281,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables entity ML anomaly details API
    */
   entityAnalyticsAnomalyDetails: true,
-
-  /**
-   * Enables the deprecated prebuilt rules UI
-   * Release: 9.4
-   */
-  prebuiltRulesDeprecationUIEnabled: true,
 
   /**
    * Enables the Detection Rule Changes History API endpoint

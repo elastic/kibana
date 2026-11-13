@@ -33,7 +33,7 @@ export const FieldPreview = () => {
 
   const {
     params: {
-      value: { name, script, format },
+      value: { name, customLabel, script, format, type, parentName },
     },
     controller,
   } = useFieldPreviewContext();
@@ -61,6 +61,11 @@ export const FieldPreview = () => {
     setFieldListHeight(height);
   }, []);
 
+  // The custom label applies to the field as a whole, so it does not replace the
+  // "<parent>.<subfield>" keys of composite subfield rows
+  const previewRowLabel =
+    type !== 'composite' && !parentName ? customLabel ?? undefined : undefined;
+
   const renderFieldsToPreview = () => {
     if (fields.length === 0) {
       return null;
@@ -70,7 +75,12 @@ export const FieldPreview = () => {
       <ul>
         {fields.map((field, i) => (
           <li key={i} data-test-subj="fieldPreviewItem">
-            <PreviewListItem field={field} isFromScript hasScriptError={Boolean(error)} />
+            <PreviewListItem
+              field={field}
+              label={previewRowLabel}
+              isFromScript
+              hasScriptError={Boolean(error)}
+            />
           </li>
         ))}
       </ul>

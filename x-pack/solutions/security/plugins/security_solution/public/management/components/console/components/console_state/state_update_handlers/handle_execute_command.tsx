@@ -167,6 +167,22 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     argState: enteredCommand?.argState,
     commandDefinition,
   };
+
+  // No support currently for positional parameters
+  if (parsedInput.params.length > 0) {
+    return updateStateWithNewCommandHistoryItem(
+      state,
+      createCommandHistoryEntry(
+        cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        createCommandExecutionState({
+          errorMessage: executionTranslations.unsupportedPositionalArguments(
+            parsedInput.params.join(', ')
+          ),
+        }),
+        false
+      )
+    );
+  }
   const requiredArgs = getRequiredArguments(commandDefinition.args);
   const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
 
@@ -396,10 +412,29 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             )
           );
         }
+      } else if (
+        argDefinition.mustHaveValue === false &&
+        argInput.some((value) => value !== true)
+      ) {
+        // Args defined as `mustHaveValue: false` do not support providing argument value
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            createCommandExecutionState({
+              errorMessage: (
+                <ConsoleCodeBlock>
+                  {executionTranslations.argDoesNotAcceptAnyValue(argName)}
+                </ConsoleCodeBlock>
+              ),
+            }),
+            false
+          )
+        );
       }
 
-      // Call validation callback if one was defined for the argument
       if (argDefinition.validate) {
+        // Call validation callback if one was defined for the argument
         const validationResult = argDefinition.validate(argInput);
 
         if (validationResult !== true) {

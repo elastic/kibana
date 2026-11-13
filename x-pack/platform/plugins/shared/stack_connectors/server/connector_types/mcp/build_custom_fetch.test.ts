@@ -30,9 +30,81 @@ describe('buildCustomFetch', () => {
     configurationUtilities = actionsConfigMock.create();
   });
 
-  it('returns a function', () => {
+  it('returns a fetch function and a close function', () => {
     const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
-    expect(typeof customFetch).toBe('function');
+    expect(typeof customFetch.fetch).toBe('function');
+    expect(typeof customFetch.close).toBe('function');
+  });
+
+  describe('close', () => {
+    it('closes the undici Agent', async () => {
+      const agentClose = jest.fn().mockResolvedValue(undefined);
+      (Agent as unknown as jest.Mock).mockImplementationOnce(() => ({ close: agentClose }));
+      configurationUtilities.getSSLSettings.mockReturnValue({});
+      configurationUtilities.getProxySettings.mockReturnValue(undefined);
+      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+
+      const { close } = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      expect(agentClose).not.toHaveBeenCalled();
+
+      await close();
+
+      expect(agentClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the undici ProxyAgent when a proxy is configured', async () => {
+      const proxyAgentClose = jest.fn().mockResolvedValue(undefined);
+      (ProxyAgent as unknown as jest.Mock).mockImplementationOnce(() => ({
+        close: proxyAgentClose,
+      }));
+      configurationUtilities.getSSLSettings.mockReturnValue({});
+      configurationUtilities.getProxySettings.mockReturnValue({
+        proxyUrl: 'https://proxy.example.com:8080',
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+        proxyHeaders: {},
+        proxySSLSettings: { verificationMode: 'full' as const },
+      });
+      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+
+      const { close } = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      await close();
+
+      expect(proxyAgentClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fallback Agent when the proxy URL is invalid', async () => {
+      const agentClose = jest.fn().mockResolvedValue(undefined);
+      (Agent as unknown as jest.Mock).mockImplementationOnce(() => ({ close: agentClose }));
+      configurationUtilities.getSSLSettings.mockReturnValue({});
+      configurationUtilities.getProxySettings.mockReturnValue({
+        proxyUrl: 'not-a-url',
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+        proxyHeaders: {},
+        proxySSLSettings: { verificationMode: 'full' as const },
+      });
+      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+
+      const { close } = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      await close();
+
+      expect(agentClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('is a no-op on the second call', async () => {
+      const agentClose = jest.fn().mockResolvedValue(undefined);
+      (Agent as unknown as jest.Mock).mockImplementationOnce(() => ({ close: agentClose }));
+      configurationUtilities.getSSLSettings.mockReturnValue({});
+      configurationUtilities.getProxySettings.mockReturnValue(undefined);
+      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+
+      const { close } = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      await close();
+      await close();
+
+      expect(agentClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('without proxy', () => {
@@ -273,7 +345,7 @@ describe('buildCustomFetch', () => {
       configurationUtilities.getProxySettings.mockReturnValue(undefined);
       configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
 
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       const mockResponse = new Response('ok');
       const globalFetchSpy = jest.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse);
@@ -333,7 +405,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('follows a redirect to an allowlisted host', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       const redirectUrl = 'https://allowed.example.com/v1/mcp';
       const finalResponse = new Response('final', { status: 200 });
@@ -347,7 +419,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('blocks a redirect to a disallowed host', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       const redirectUrl = 'https://evil.internal.example.com/steal';
       globalFetchSpy.mockResolvedValueOnce(mockRedirectResponse(302, redirectUrl));
@@ -360,7 +432,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('throws when max redirects is exceeded', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy.mockResolvedValue(
         mockRedirectResponse(302, 'https://allowed.example.com/loop')
@@ -372,7 +444,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('throws when a redirect response is missing the Location header', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy.mockResolvedValueOnce(mockRedirectResponse(302, null));
 
@@ -382,7 +454,7 @@ describe('buildCustomFetch', () => {
     });
 
     it.each([307, 308])('preserves method and body for %i redirects', async (status) => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(status, 'https://allowed.example.com/v1/mcp'))
@@ -398,7 +470,7 @@ describe('buildCustomFetch', () => {
     it.each([301, 302, 303])(
       'downgrades method to GET and drops body for %i redirects',
       async (status) => {
-        const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+        const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
         globalFetchSpy
           .mockResolvedValueOnce(mockRedirectResponse(status, 'https://allowed.example.com/v1/mcp'))
@@ -413,7 +485,7 @@ describe('buildCustomFetch', () => {
     );
 
     it.each([301, 302, 303])('strips request-body-headers on %i method change', async (status) => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(
@@ -446,7 +518,7 @@ describe('buildCustomFetch', () => {
     });
 
     it.each([307, 308])('preserves request-body-headers on %i redirects', async (status) => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(
@@ -468,7 +540,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('resolves relative Location URLs against the request URL', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(302, '/v2/mcp'))
@@ -484,7 +556,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('follows multiple redirects through allowed hosts', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/step1'))
@@ -503,7 +575,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('blocks a multi-hop redirect when an intermediate hop is disallowed', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/step1'))
@@ -519,7 +591,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('strips authorization header on cross-origin redirects', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1/mcp'))
@@ -541,7 +613,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('preserves authorization header on same-origin redirects', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(307, 'https://mcp-server.example.com/v2/mcp'))
@@ -558,7 +630,7 @@ describe('buildCustomFetch', () => {
     });
 
     it('strips both authorization and request-body-headers on cross-origin method change', async () => {
-      const customFetch = buildCustomFetch(configurationUtilities, logger, targetUrl);
+      const { fetch: customFetch } = buildCustomFetch(configurationUtilities, logger, targetUrl);
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/v1/mcp'))

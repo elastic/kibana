@@ -3337,7 +3337,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -3352,7 +3352,10 @@ paths:
       operationId: ImportRules
       parameters:
         - description: Determines whether existing rules with the same `rule_id` are
-            overwritten.
+            overwritten. If an imported rule matches the existing rule's
+            settings, including whether it's enabled, the existing rule isn't
+            updated. It keeps its `revision`, `updated_at` timestamp, and API
+            key, and is counted in `rules_summary.skipped`.
           in: query
           name: overwrite
           required: false
@@ -3412,6 +3415,11 @@ paths:
                     exceptions_success: true
                     exceptions_success_count: 0
                     rules_count: 1
+                    rules_summary:
+                      created: 1
+                      failed: 0
+                      skipped: 0
+                      updated: 0
                     success: true
                     success_count: 1
               schema:
@@ -3447,6 +3455,35 @@ paths:
                   rules_count:
                     minimum: 0
                     type: integer
+                  rules_summary:
+                    additionalProperties: false
+                    description: Counts of imported rules by outcome. `created`, `updated`, and
+                      `skipped` are included in `success_count`. `failed` did
+                      not import successfully.
+                    type: object
+                    properties:
+                      created:
+                        description: Rules created by this import.
+                        minimum: 0
+                        type: integer
+                      failed:
+                        description: Rules that did not import successfully.
+                        minimum: 0
+                        type: integer
+                      skipped:
+                        description: Existing rules skipped because nothing changed. Included in
+                          `success_count`.
+                        minimum: 0
+                        type: integer
+                      updated:
+                        description: Existing rules overwritten because the payload changed.
+                        minimum: 0
+                        type: integer
+                    required:
+                      - created
+                      - updated
+                      - skipped
+                      - failed
                   success:
                     type: boolean
                   success_count:
@@ -3459,6 +3496,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - rules_summary
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings
@@ -4539,6 +4577,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/BulkEditSkipReason'
             - $ref: '#/components/schemas/BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/BulkDeleteSkipReason'
       required:
         - id
         - skip_reason
@@ -4580,6 +4619,10 @@ components:
           type: string
       required:
         - action
+    BulkDeleteSkipReason:
+      enum:
+        - RULE_NOT_FOUND
+      type: string
     BulkDisableRules:
       type: object
       properties:
@@ -5025,6 +5068,27 @@ components:
             the alerts index mapping — for example, runtime fields the rule's
             source index defined at the time the alerts were created. Limited to
             100 entries per request; larger maps are rejected.
+          maxProperties: 100
+          type: object
+        runtime_mappings:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldMapping'
+          description: >-
+            Use this when the query references fields that are not in the alerts
+            index mapping, for example data view runtime fields with a Painless
+            script.
+
+            Kibana sends `type`, `script.source`, and `format` to Elasticsearch
+            as `runtime_mappings` on the status-update query. Unlike
+            `runtime_fields`, Kibana keeps your script and runs it at query
+            time. It does not replace the script with a `_source` reader.
+
+            When a script is present, Kibana sets `on_script_error` to
+            `continue`. If the script fails on one alert, that field has no
+            value for the alert and the update continues.
+
+            Unique field names across `runtime_fields` and `runtime_mappings`
+            combined cannot exceed 100. Larger maps are rejected.
           maxProperties: 100
           type: object
         status:
@@ -6807,9 +6871,8 @@ components:
             - severity
         - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
     MaxSignals:
-      default: 100
       description: |
-        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value). Defaults to `100`.
         > info
         > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
@@ -8871,6 +8934,37 @@ components:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
       required:
         - command
+    RuntimeFieldMapping:
+      description: A runtime field included in the status-update query so the query
+        can match fields that are not in the alerts index mapping, for example
+        scripted fields on a data view. Elasticsearch evaluates the field at
+        query time.
+      type: object
+      properties:
+        format:
+          description: Format string for date runtime fields, for example
+            `strict_date_optional_time`.
+          maxLength: 100
+          type: string
+        script:
+          additionalProperties: false
+          description: Inline Painless script that Elasticsearch evaluates for each alert.
+            Only `source` is accepted. Stored scripts, parameterized scripts
+            (`params`), and non-default `lang` values are not supported. Extra
+            properties are rejected with a 400 so the script is not run with
+            different semantics.
+          type: object
+          properties:
+            source:
+              description: Painless script source to execute.
+              maxLength: 10000
+              type: string
+          required:
+            - source
+        type:
+          $ref: '#/components/schemas/RuntimeFieldType'
+      required:
+        - type
     RuntimeFieldType:
       description: The data type for the runtime field type. Determines how the field
         value is indexed and queried.
@@ -9487,6 +9581,27 @@ components:
             `_source` that are not part of the Elastic Common Schema (ECS) of
             the alerts index mapping, for example, custom fields that the rule's
             source index defined when the alerts were created.
+          maxProperties: 100
+          type: object
+        runtime_mappings:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldMapping'
+          description: >-
+            Use this when the query references fields that are not in the alerts
+            index mapping, for example data view runtime fields with a Painless
+            script.
+
+            Kibana sends `type`, `script.source`, and `format` to Elasticsearch
+            as `runtime_mappings` on the status-update query. Unlike
+            `runtime_fields`, Kibana keeps your script and runs it at query
+            time. It does not replace the script with a `_source` reader.
+
+            When a script is present, Kibana sets `on_script_error` to
+            `continue`. If the script fails on one alert, that field has no
+            value for the alert and the update continues.
+
+            Unique field names across `runtime_fields` and `runtime_mappings`
+            combined cannot exceed 100. Larger maps are rejected.
           maxProperties: 100
           type: object
         status:

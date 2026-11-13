@@ -9,11 +9,11 @@ import type { HttpSetup } from '@kbn/core/public';
 import { fetchTakenPackageNames } from './package_names';
 
 const mockGetInstalledPackages = jest.fn();
-const mockGetAllIntegrations = jest.fn();
+const mockGetAllIntegrationNames = jest.fn();
 
 jest.mock('./api', () => ({
   getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
-  getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...args),
+  getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrationNames(...args),
 }));
 
 const mockHttp = {} as HttpSetup;
@@ -23,7 +23,7 @@ describe('fetchTakenPackageNames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetInstalledPackages.mockResolvedValue({ items: [] });
-    mockGetAllIntegrations.mockResolvedValue([]);
+    mockGetAllIntegrationNames.mockResolvedValue([]);
   });
 
   it('includes installed Fleet package IDs', async () => {
@@ -39,7 +39,7 @@ describe('fetchTakenPackageNames', () => {
   });
 
   it('includes AIV2 integration IDs', async () => {
-    mockGetAllIntegrations.mockResolvedValue([
+    mockGetAllIntegrationNames.mockResolvedValue([
       { integrationId: 'my_custom_integration', title: 'My Custom Integration' },
     ]);
 
@@ -49,7 +49,9 @@ describe('fetchTakenPackageNames', () => {
   });
 
   it('includes normalized AIV2 integration titles', async () => {
-    mockGetAllIntegrations.mockResolvedValue([{ integrationId: 'some_id', title: 'Nginx Logs' }]);
+    mockGetAllIntegrationNames.mockResolvedValue([
+      { integrationId: 'some_id', title: 'Nginx Logs' },
+    ]);
 
     const result = await fetchTakenPackageNames(deps);
 
@@ -58,7 +60,7 @@ describe('fetchTakenPackageNames', () => {
 
   it('handles empty responses without throwing', async () => {
     mockGetInstalledPackages.mockResolvedValue({ items: [] });
-    mockGetAllIntegrations.mockResolvedValue([]);
+    mockGetAllIntegrationNames.mockResolvedValue([]);
 
     const result = await fetchTakenPackageNames(deps);
 
@@ -67,7 +69,7 @@ describe('fetchTakenPackageNames', () => {
 
   it('handles null/undefined responses without throwing', async () => {
     mockGetInstalledPackages.mockResolvedValue(null);
-    mockGetAllIntegrations.mockResolvedValue(null);
+    mockGetAllIntegrationNames.mockResolvedValue(null);
 
     const result = await fetchTakenPackageNames(deps);
 
@@ -78,7 +80,7 @@ describe('fetchTakenPackageNames', () => {
     mockGetInstalledPackages.mockResolvedValue({
       items: [{ id: 'nginx' }],
     });
-    mockGetAllIntegrations.mockResolvedValue([{ integrationId: 'my_logs', title: 'My Logs' }]);
+    mockGetAllIntegrationNames.mockResolvedValue([{ integrationId: 'my_logs', title: 'My Logs' }]);
 
     const result = await fetchTakenPackageNames(deps);
 
@@ -92,6 +94,6 @@ describe('fetchTakenPackageNames', () => {
     await fetchTakenPackageNames({ http: mockHttp, abortSignal });
 
     expect(mockGetInstalledPackages).toHaveBeenCalledWith({ http: mockHttp, abortSignal });
-    expect(mockGetAllIntegrations).toHaveBeenCalledWith({ http: mockHttp, abortSignal });
+    expect(mockGetAllIntegrationNames).toHaveBeenCalledWith({ http: mockHttp, abortSignal });
   });
 });

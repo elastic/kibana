@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
@@ -126,39 +127,56 @@ apiTest.describe(
       });
       packagePolicyId = packagePolicyRes.body?.item?.id ?? '';
 
+      // The pad-ml module registers asynchronously after the PAD integration install, so retry
+      // until it is recognized instead of firing a setup that fails silently before it exists.
+      const setupMlModuleWithRetry = async (
+        module: string,
+        body: Record<string, unknown>
+      ): Promise<void> => {
+        const maxAttempts = 10;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
+            headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+            responseType: 'json',
+            body,
+          });
+          const jobs: Array<{ success?: boolean; error?: { status?: number } }> =
+            response.body?.jobs ?? [];
+          const succeeded =
+            response.statusCode === 200 &&
+            jobs.length > 0 &&
+            jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
+          if (succeeded) {
+            return;
+          }
+          if (attempt < maxAttempts) {
+            await setTimeoutAsync(3000);
+          }
+        }
+        throw new Error(`Failed to set up ML module "${module}" after ${maxAttempts} attempts`);
+      };
+
       // Create PAD ML jobs
       log.debug(`Setting up PAD ML jobs...`);
-      await apiClient
-        .post('/internal/ml/modules/setup/pad-ml', {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
-          responseType: 'json',
-          body: {
-            prefix: '',
-            groups: ['security', 'ftr'],
-            indexPatternName: 'logs-*',
-            useDedicatedIndex: false,
-            startDatafeed: true,
-            start: startMs,
-          },
-        })
-        .catch(() => {});
+      await setupMlModuleWithRetry('pad-ml', {
+        prefix: '',
+        groups: ['security', 'ftr'],
+        indexPatternName: 'logs-*',
+        useDedicatedIndex: false,
+        startDatafeed: true,
+        start: startMs,
+      });
 
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
-      await apiClient
-        .post('/internal/ml/modules/setup/security_auth', {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
-          responseType: 'json',
-          body: {
-            prefix: '',
-            groups: ['security', 'authentication', 'ftr'],
-            indexPatternName: 'logs-*',
-            useDedicatedIndex: false,
-            startDatafeed: true,
-            start: startMs,
-          },
-        })
-        .catch(() => {});
+      await setupMlModuleWithRetry('security_auth', {
+        prefix: '',
+        groups: ['security', 'authentication', 'ftr'],
+        indexPatternName: 'logs-*',
+        useDedicatedIndex: false,
+        startDatafeed: true,
+        start: startMs,
+      });
 
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);

@@ -765,7 +765,13 @@ describe('RuleTypeRunner', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `rule execution generated greater than 100 alerts: test:1: 'rule-name'`
+        `rule execution generated greater than 100 alerts: test:1: 'rule-name'`,
+        {
+          labels: {
+            ruleId: '1',
+            ruleType: 'test',
+          },
+        }
       );
       expect(ruleRunMetricsStore.setHasReachedAlertLimit).toHaveBeenCalledWith(true);
       expect(state).toEqual({ foo: 'bar' });
@@ -888,7 +894,13 @@ describe('RuleTypeRunner', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `rule execution generated greater than 100 alerts: test:1: 'rule-name'`
+        `rule execution generated greater than 100 alerts: test:1: 'rule-name'`,
+        {
+          labels: {
+            ruleId: '1',
+            ruleType: 'test',
+          },
+        }
       );
       expect(ruleRunMetricsStore.setHasReachedAlertLimit).toHaveBeenCalledWith(true);
       expect(state).toBeUndefined();

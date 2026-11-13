@@ -447,6 +447,73 @@ describe('SamlSessionManager', () => {
       );
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
     });
+
+    describe('with custom SAML realm', () => {
+      const customRole = 'custom_role_worker_1';
+      const customRealmCookieInstance = Cookie.parse(
+        'sid=custom_realm_cookie_value; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT'
+      )!;
+      const samlSMOptionsWithCustomRealm = {
+        ...samlSMOptionsWithCloudHostName,
+        customSamlRealm: { providerName: 'qaf', roles: [customRole] },
+      };
+      let createCustomRealmSAMLSessionMock: jest.SpyInstance;
+
+      beforeEach(() => {
+        createCustomRealmSAMLSessionMock = jest
+          .spyOn(samlAuth, 'createCustomRealmSAMLSession')
+          .mockResolvedValue(
+            new Session(customRealmCookieInstance, `elastic_${customRole}@elastic.co`)
+          );
+      });
+
+      test(`uses the custom SAML provider for listed roles without reading cloud users`, async () => {
+        const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
+        const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+          customRole
+        );
+
+        expect(cookie).toBe(customRealmCookieInstance.value);
+        expect(createCustomRealmSAMLSessionMock).toHaveBeenCalledWith({
+          providerName: 'qaf',
+          username: `elastic_${customRole}`,
+          email: `elastic_${customRole}@elastic.co`,
+          fullname: `test ${customRole}`,
+          role: customRole,
+          kbnHost: 'https://my-test-deployment.test.elastic.cloud',
+          kbnVersion: '8.12.0',
+          log: expect.any(ToolingLog),
+        });
+        expect(createCloudSAMLSessionMock).not.toHaveBeenCalled();
+        expect(readCloudUsersFromFileMock).not.toHaveBeenCalled();
+      });
+
+      test(`uses cloud users for roles that aren't listed`, async () => {
+        const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
+        const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+          roleViewer
+        );
+
+        expect(cookie).toBe(cloudCookieInstance.value);
+        expect(createCloudSAMLSessionMock).toHaveBeenCalledTimes(1);
+        expect(createCustomRealmSAMLSessionMock).not.toHaveBeenCalled();
+      });
+
+      test(`still throws for unlisted roles without cloud users`, async () => {
+        const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
+        await expect(
+          samlSessionManager.getInteractiveUserSessionCookieWithRoleScope('admin')
+        ).rejects.toThrow(`User with 'admin' role is not defined`);
+        expect(createCustomRealmSAMLSessionMock).not.toHaveBeenCalled();
+      });
+
+      test(`caches the custom realm session for the same role`, async () => {
+        const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
+        await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(customRole);
+        await samlSessionManager.getApiCredentialsForRole(customRole);
+        expect(createCustomRealmSAMLSessionMock).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe(`for cloud session with 'isCloud' set to false`, () => {

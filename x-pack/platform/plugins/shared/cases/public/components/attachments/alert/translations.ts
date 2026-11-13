@@ -11,11 +11,6 @@ export const ALERT_DISPLAY_NAME = i18n.translate('xpack.cases.attachments.stackA
   defaultMessage: 'Alerts',
 });
 
-export const ALERT_AVATAR_ARIA_LABEL = i18n.translate(
-  'xpack.cases.attachments.stackAlert.avatarAriaLabel',
-  { defaultMessage: 'alert' }
-);
-
 export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   'xpack.cases.attachments.stackAlert.alertCommentLabelTitle',
   {
@@ -45,7 +40,7 @@ export const REMOVED_ALERTS_LABEL_TITLE = (totalAlerts: number) =>
     values: { totalAlerts },
   });
 
-export const DELETE_ALERTS_SUCCESS_TITLE = (totalAlerts: number) =>
+export const DELETE_ALERTS_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.cases.attachments.stackAlert.deleteAlertsSuccessTitle', {
     defaultMessage:
       'Deleted {totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {alerts}}',

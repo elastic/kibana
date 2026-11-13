@@ -3808,6 +3808,308 @@ describe('TaskManagerRunner', () => {
       });
     });
 
+    test('updates saved object with a later runAt if rrule task expires and the gap between occurrences is greater than timeout', async () => {
+      const id = _.random(1, 20).toString();
+      const runAt = moment().subtract(1, 'h').startOf('hour').toDate();
+      const {
+        instance: taskInstance,
+        runner,
+        store,
+      } = await readyToRunStageSetup({
+        instance: {
+          id,
+          runAt,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { rrule: { freq: 4, interval: 1, tzid: 'UTC', byminute: [0] } },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        {
+          id: expect.any(String),
+          ownerId: null,
+          retryAt: null,
+          runAt: expect.any(Date),
+          startedAt: null,
+          status: 'idle',
+          version: undefined,
+        },
+        {
+          validate: true,
+          doc: taskInstance,
+        }
+      );
+      const [{ runAt: updatedRunAt }] = store.partialUpdate.mock.calls[0];
+      expect(updatedRunAt!.getTime()).toBeGreaterThan(runAt.getTime());
+    });
+
+    test('updates saved object if a nonuniform rrule task expires and the gap after its runAt is greater than timeout', async () => {
+      const id = _.random(1, 20).toString();
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          id,
+          runAt: moment().subtract(1, 'h').startOf('hour').add(5, 'm').toDate(),
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { rrule: { freq: 4, interval: 1, tzid: 'UTC', byminute: [0, 5] } },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15m',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20 * 60 * 1000));
+                jest.advanceTimersByTime(20 * 60 * 1000);
+                await promise;
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'idle', runAt: expect.any(Date) }),
+        expect.anything()
+      );
+    });
+
+    test('does not update saved object if rrule task expires and timeout is greater than the gap between occurrences', async () => {
+      const id = _.random(1, 20).toString();
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          id,
+          runAt: moment().subtract(1, 'h').startOf('hour').toDate(),
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { rrule: { freq: 4, interval: 1, tzid: 'UTC', byminute: [0] } },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '2h',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 3 * 60 * 60 * 1000));
+                jest.advanceTimersByTime(3 * 60 * 60 * 1000);
+                await promise;
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      // the long running task retryAt updates are expected, the expired task update is not
+      expect(store.partialUpdate).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'idle' }),
+        expect.anything()
+      );
+    });
+
+    test('handles a version conflict gracefully when an expired recurring task is reclaimed while running and schedule is greater than timeout', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const { runner, store, logger } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '30s' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+              },
+            }),
+          },
+        },
+      });
+
+      // another Kibana reclaimed and updated the task
+      store.partialUpdate.mockRejectedValueOnce({
+        type: 'task',
+        id,
+        status: 409,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: `[task:${id}]: version conflict, required seqNo [1], primary term [1]. current document has seqNo [64000] and primary term [1]`,
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+
+      const frameworkErrorLogs = logger.error.mock.calls.filter(([, meta]) =>
+        ((meta as { tags?: string[] })?.tags ?? []).includes('task-run-failed')
+      );
+      expect(frameworkErrorLogs).toEqual([]);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Skipping the update of expired/cancelled task bar:${id} because it was reclaimed by another Kibana while running.`,
+        { tags: [id, 'bar'] }
+      );
+    });
+
+    test('resolves a version conflict when updating a recurring task after a successful run', async () => {
+      const id = 'conflict-success';
+      const startedAt = new Date();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          schedule: { interval: '1m' },
+          startedAt,
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: { foo: 'bar' } };
+              },
+            }),
+          },
+        },
+      });
+
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '5m' },
+        runAt: minutesFromNow(5),
+      };
+
+      store.partialUpdate
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object conflict'))
+        )
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolving task document version conflict after task run for task "bar:${id}"`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolved task document version conflict after task run for task "bar:${id}"`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(store.get).toHaveBeenCalledWith(id);
+      expect(store.partialUpdate).toHaveBeenCalledTimes(2);
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          version: 'WzIsMV0=',
+          schedule: { interval: '5m' },
+          runAt: currentTask.runAt,
+          state: { foo: 'bar' },
+        }),
+        { validate: false, doc: currentTask }
+      );
+    });
+
+    test('resolves a version_conflict_engine_exception when updating a recurring task', async () => {
+      const id = 'conflict-engine';
+      const startedAt = new Date();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          schedule: { interval: '1m' },
+          startedAt,
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      const currentTask = {
+        ...instance,
+        version: 'WzMsMV0=',
+      };
+
+      store.partialUpdate
+        .mockRejectedValueOnce({
+          type: 'task',
+          id,
+          status: 409,
+          error: {
+            type: 'version_conflict_engine_exception',
+            reason: `[task:${id}]: version conflict`,
+          },
+        })
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolving task document version conflict after task run for task "bar:${id}"`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolved task document version conflict after task run for task "bar:${id}"`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(store.get).toHaveBeenCalledWith(id);
+      expect(store.partialUpdate).toHaveBeenCalledTimes(2);
+    });
+
     test('Prints debug logs on task start/end', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {

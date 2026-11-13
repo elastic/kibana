@@ -71,7 +71,6 @@ describe('CaseSettingsPopover', () => {
     renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />, {
       wrapperProps: {
         license: platinumLicense,
-        features: { observables: { enabled: true, autoExtract: true } },
       },
     });
 
@@ -81,9 +80,7 @@ describe('CaseSettingsPopover', () => {
   });
 
   it('does not render extract observables switch without platinum+ license', async () => {
-    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />, {
-      wrapperProps: { features: { observables: { enabled: true, autoExtract: true } } },
-    });
+    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
 
     await screen.findByTestId('case-settings-popover');
     expect(
@@ -95,7 +92,7 @@ describe('CaseSettingsPopover', () => {
     renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />, {
       wrapperProps: {
         license: platinumLicense,
-        features: { observables: { enabled: true, autoExtract: false } },
+        owner: ['cases'],
       },
     });
 
@@ -111,7 +108,6 @@ describe('CaseSettingsPopover', () => {
       {
         wrapperProps: {
           license: platinumLicense,
-          features: { observables: { enabled: true, autoExtract: true } },
         },
       }
     );
@@ -153,7 +149,7 @@ describe('CaseSettingsPopover', () => {
 
   it('does not render sync alerts switch when alerts sync is disabled', async () => {
     renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />, {
-      wrapperProps: { features: { alerts: { sync: false } } },
+      wrapperProps: { owner: ['observability'] },
     });
 
     await screen.findByTestId('case-settings-popover');

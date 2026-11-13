@@ -10,7 +10,7 @@ import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { RoundCompleteEventData } from '@kbn/agent-builder-common/chat/events';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import React, { useCallback, useMemo, useRef } from 'react';
 
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -27,9 +27,11 @@ export interface EditWithAiProps {
 
 const UPDATE_ESQL_QUERY_TOOL_ID = 'update_esql_query';
 
-const updateEsqlQuerySchema = z.object({
-  query: z.string().describe('The new ES|QL query to use for alert retrieval'),
-});
+const updateEsqlQuerySchema = lazySchema(() =>
+  z.object({
+    query: z.string().describe('The new ES|QL query to use for alert retrieval'),
+  })
+);
 
 const EditWithAiComponent: React.FC<EditWithAiProps> = ({ esqlQuery, onEsqlQueryChange }) => {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();

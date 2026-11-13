@@ -192,6 +192,8 @@ export async function createOrUpdatePreconfiguredOutputs(
         await outputService.update(soClient, esClient, id, data, {
           fromPreconfiguration: true,
           secretHashes,
+          // the Kibana config file declares the whole output: a secret it no longer names is removed
+          declaresAllSecrets: true,
         });
         // Bump revision of all policies using that output
         await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id, {
@@ -268,14 +270,11 @@ export async function cleanPreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingOutputs = await outputService.list();
-  const existingPreconfiguredOutput = existingOutputs.items.filter(
-    (o) => o.is_preconfigured === true
-  );
+  const existingPreconfiguredOutputs = await outputService.listPreconfigured();
 
   const logger = appContextService.getLogger();
 
-  for (const output of existingPreconfiguredOutput) {
+  for (const output of existingPreconfiguredOutputs.items) {
     const hasBeenDelete = !outputs.find(({ id }) => output.id === id);
     if (!hasBeenDelete) {
       continue;

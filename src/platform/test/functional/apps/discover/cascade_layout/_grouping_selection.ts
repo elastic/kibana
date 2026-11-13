@@ -181,9 +181,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('dscCascadeRowContextActionOpenInNewTab');
 
           expect(await unifiedTabs.getNumberOfTabs()).to.be(tabCount + 1);
+          const newTabQuery = await esql.getEsqlEditorQuery();
           expect(await discover.isShowingCascadeLayout()).to.be(false);
-
-          const newTabQuery = await monacoEditor.getCodeEditorValue();
           expect(newTabQuery).not.to.be(statsQuery);
 
           // assert new tab query contains the correct match query for the categorize function in the new tab
@@ -239,9 +238,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('dscCascadeRowContextActionOpenInNewTab');
 
           expect(await unifiedTabs.getNumberOfTabs()).to.be(tabCount + 1);
+          const newTabQuery = await esql.getEsqlEditorQuery();
           expect(await discover.isShowingCascadeLayout()).to.be(false);
-
-          const newTabQuery = await monacoEditor.getCodeEditorValue();
           expect(newTabQuery).not.to.be(statsQueryWithCategorize);
 
           // assert new tab query contains the correct match query for the categorize function in the new tab

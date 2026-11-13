@@ -32,12 +32,13 @@ import {
   sendGetAgents,
 } from '../../../hooks';
 
-import type { AgentPolicy, PackagePolicy } from '../../../types';
+import type { AgentPolicy, AgentPolicyPackagePoliciesSummary, PackagePolicy } from '../../../types';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
   hasFleetServer: boolean;
   packagePolicies?: PackagePolicy[];
+  packagePoliciesSummary?: AgentPolicyPackagePoliciesSummary;
   agentPolicy: AgentPolicy;
 }
 
@@ -49,6 +50,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   children,
   hasFleetServer,
   packagePolicies,
+  packagePoliciesSummary,
   agentPolicy,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
@@ -148,17 +150,20 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
   const packagePoliciesWithMultiplePolicies = useMemo(() => {
     // Find if there are package policies that have multiple agent policies
-    if (packagePolicies && canUseMultipleAgentPolicies) {
+    if (!canUseMultipleAgentPolicies) {
+      return false;
+    }
+    if (packagePolicies) {
       return packagePolicies.some((policy) => policy?.policy_ids.length > 1);
     }
-    return false;
-  }, [canUseMultipleAgentPolicies, packagePolicies]);
+    return packagePoliciesSummary?.has_shared ?? false;
+  }, [canUseMultipleAgentPolicies, packagePolicies, packagePoliciesSummary]);
 
   // Deleting a non-agentless policy that still has active agents assigned is blocked
   // (matching the server-side guard); the user must unassign those agents first.
   const isDeleteBlockedByAgents = !agentPolicy?.supports_agentless && !!agentsCount;
 
-  const hasPackagePolicies = (packagePolicies?.length ?? 0) > 0;
+  const hasPackagePolicies = (packagePolicies?.length ?? packagePoliciesSummary?.count ?? 0) > 0;
 
   // Require typing the policy name to confirm for non-trivial policies (those with
   // integration policies and/or assigned agents). Trivial, empty policies can be

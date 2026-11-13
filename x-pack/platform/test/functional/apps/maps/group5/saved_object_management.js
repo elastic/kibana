@@ -134,8 +134,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should update filter bar with filters stored with map', async () => {
-          const hasSourceFilter = await filterBar.hasFilter('machine.os.raw', 'ios');
-          expect(hasSourceFilter).to.be(true);
+          await filterBar.expectFilter('machine.os.raw', 'ios');
         });
 
         it('should update app state with query stored with map', async () => {

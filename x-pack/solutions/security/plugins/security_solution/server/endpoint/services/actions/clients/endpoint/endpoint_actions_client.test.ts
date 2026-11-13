@@ -638,6 +638,158 @@ describe('EndpointActionsClient', () => {
     });
   });
 
+  describe('#getFile()', () => {
+    describe('when `force` parameter is set to `true`', () => {
+      it('should throw error when endpoint does not support `get_file_force` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: 'C:\\locked.dat', force: true },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: expect.stringContaining(
+            'The following agent IDs do not support the get-file `force` parameter'
+          ),
+          statusCode: 400,
+        });
+      });
+
+      it('should succeed when endpoint supports the `get_file_force` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+            ),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: 'C:\\locked.dat', force: true },
+            })
+          )
+        ).resolves.toBeDefined();
+      });
+    });
+
+    it('should succeed without checking capability when `force` is not set', async () => {
+      await expect(
+        endpointActionsClient.getFile(
+          responseActionsClientMock.createGetFileOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { path: 'C:\\file.txt' },
+          })
+        )
+      ).resolves.toBeDefined();
+    });
+
+    it('should succeed without checking capability when `force` is false', async () => {
+      await expect(
+        endpointActionsClient.getFile(
+          responseActionsClientMock.createGetFileOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { path: 'C:\\file.txt', force: false },
+          })
+        )
+      ).resolves.toBeDefined();
+    });
+
+    it('should omit `force` from the Fleet action parameters when it is `false`', async () => {
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: false },
+        })
+      );
+
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ parameters: { path: 'C:\\file.txt' } }),
+        })
+      );
+    });
+
+    it('should only look up the host metadata once when `force` is `true`', async () => {
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+          ),
+        ]),
+      });
+
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: true },
+        })
+      );
+
+      // The capability check must not re-query the metadata, since a later (post-dispatch) validation
+      // that disagrees with the first would leave a dispatched action without a request document.
+      expect(
+        (classConstructorOptions.esClient.search as jest.Mock).mock.calls.filter(
+          ([request]) => request?.index === metadataCurrentIndexPattern
+        )
+      ).toHaveLength(1);
+    });
+
+    it('should send `force` in the Fleet action parameters when it is `true`', async () => {
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+          ),
+        ]),
+      });
+
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: true },
+        })
+      );
+
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            parameters: { path: 'C:\\file.txt', force: true },
+          }),
+        })
+      );
+    });
+  });
+
   describe('#memoryDump()', () => {
     it('should error when feature flag is false', async () => {
       // @ts-expect-error mocking this for testing purposes
@@ -654,10 +806,11 @@ describe('EndpointActionsClient', () => {
     it.each`
       title        | params
       ${'kernel'}  | ${{ type: 'kernel' }}
+      ${'raw'}     | ${{ type: 'raw' }}
       ${'process'} | ${{ type: 'process', pid: '123' }}
     `(
       'should validate that agent supports memory dump of $title',
-      async ({ params: ResponseActionMemoryDumpParameters }) => {
+      async ({ params: memoryDumpParameters }) => {
         const generator = new EndpointMetadataGenerator('seed');
 
         applyEsClientSearchMock({
@@ -668,15 +821,105 @@ describe('EndpointActionsClient', () => {
           ]),
         });
 
+        if (memoryDumpParameters.type === 'raw') {
+          // @ts-expect-error update of readonly property is ok here
+          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
+            true;
+        }
+
         await expect(
           endpointActionsClient.memoryDump(
-            responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+            responseActionsClientMock.createMemoryDumpActionOption({
+              ...getCommonResponseActionOptions(),
+              parameters: memoryDumpParameters,
+            })
           )
         ).rejects.toThrow(
           'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
         );
       }
     );
+
+    it('should validate that agent supports memory dump of raw', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
+        true;
+
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+        ]),
+      });
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'raw' },
+          })
+        )
+      ).rejects.toThrow(
+        'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
+      );
+    });
+
+    it('should error when `raw` type is used but the feature flag is disabled', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
+        false;
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'raw' },
+          })
+        )
+      ).rejects.toThrow('memory-dump `raw` type is not enabled');
+    });
+
+    it('should process `raw` memory dump when the agent supports it', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
+        true;
+
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['memdump_raw'] } })
+          ),
+        ]),
+      });
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'raw' },
+          })
+        )
+      ).resolves.toBeDefined();
+
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            command: 'memory-dump',
+            comment: expect.anything(),
+            parameters: { type: 'raw' },
+          },
+        })
+      );
+    });
   });
 
   describe('#cancel()', () => {

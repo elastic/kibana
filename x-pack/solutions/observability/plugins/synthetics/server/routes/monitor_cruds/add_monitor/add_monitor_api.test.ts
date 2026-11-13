@@ -272,6 +272,77 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
   });
 
+  describe('normalizeMonitor - maintenance windows', () => {
+    const buildApi = (maintenanceWindows: Array<{ id: string; title: string }>) => {
+      const syntheticsService = new SyntheticsService({ config: {} } as any);
+      syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+      return {
+        api: new AddEditMonitorAPI({
+          spaceId: 'default',
+          syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+          request: { body: {} },
+        } as any),
+        maintenanceWindows,
+        getMaintenanceWindows: syntheticsService.getMaintenanceWindows,
+      };
+    };
+
+    it('resolves maintenance window names to ids', async () => {
+      const { api, maintenanceWindows, getMaintenanceWindows } = buildApi([
+        { id: 'mw-1', title: 'Weekend window' },
+      ]);
+      const result = await api.normalizeMonitor(
+        { type: 'http', maintenance_windows: ['Weekend window'] } as any,
+        {} as any,
+        undefined,
+        maintenanceWindows as any
+      );
+      expect(result.maintenance_windows).toEqual(['mw-1']);
+      expect(getMaintenanceWindows).not.toHaveBeenCalled();
+    });
+
+    it('keeps valid maintenance window ids', async () => {
+      const { api, maintenanceWindows } = buildApi([{ id: 'mw-1', title: 'Weekend window' }]);
+      const result = await api.normalizeMonitor(
+        { type: 'http', maintenance_windows: ['mw-1'] } as any,
+        {} as any,
+        undefined,
+        maintenanceWindows as any
+      );
+      expect(result.maintenance_windows).toEqual(['mw-1']);
+    });
+
+    it('throws for an unresolved reference', async () => {
+      const { api, maintenanceWindows } = buildApi([{ id: 'mw-1', title: 'Weekend window' }]);
+      await expect(
+        api.normalizeMonitor(
+          { type: 'http', maintenance_windows: ['nope'] } as any,
+          {} as any,
+          undefined,
+          maintenanceWindows as any
+        )
+      ).rejects.toThrow(/nope/);
+    });
+
+    it('throws when maintenance windows are unavailable', async () => {
+      const { api, maintenanceWindows } = buildApi([]);
+      await expect(
+        api.normalizeMonitor(
+          { type: 'http', maintenance_windows: ['mw-1'] } as any,
+          {} as any,
+          undefined,
+          maintenanceWindows as any
+        )
+      ).rejects.toThrow(/mw-1/);
+    });
+
+    it('does not fetch maintenance windows when none are referenced', async () => {
+      const { api, getMaintenanceWindows } = buildApi([]);
+      await api.normalizeMonitor({ type: 'http' } as any, {} as any);
+      expect(getMaintenanceWindows).not.toHaveBeenCalled();
+    });
+  });
+
   describe('validateUniqueMonitorName', () => {
     it('should return an error message if the monitor name already exists', async () => {
       const api = new AddEditMonitorAPI({

@@ -44,12 +44,16 @@ export default function ({ getService }: FtrProviderContext) {
   const scheduleId = `scheduled-results-it-${Date.now()}`;
   const executionCount = 11;
 
-  // 2 successful responses + 1 errored response; none carry a `space_id`.
-  const successfulResponses = 2;
-  const erroredResponses = 1;
+  // 3 agents, 4 docs; none carry a `space_id`. Agent `a` responds TWICE — with
+  // one doc per agent `doc_count === cardinality` and these assertions cannot
+  // tell an agent count from a document count.
+  const successfulAgents = 2; // agents a, b
+  const erroredAgents = 1; // agent c
+  const expectedAgents = successfulAgents + erroredAgents; // 3 distinct agents
+  const successDocs = 3; // agent a responds twice
+  const expectedTotalDocs = successDocs + erroredAgents; // 4 docs — grid pagination counts these
   const rowsPerSuccess = 111;
-  const expectedTotalRows = rowsPerSuccess * successfulResponses; // errored response reports 0 rows
-  const expectedAgents = successfulResponses + erroredResponses;
+  const expectedTotalRows = rowsPerSuccess * successDocs; // errored response reports 0 rows
 
   // This index is owned by the stack's generic `logs-*-*` data stream template,
   // whose ECS dynamic mappings type strings as `keyword` and disable date
@@ -116,6 +120,14 @@ export default function ({ getService }: FtrProviderContext) {
         action_response: { osquery: { count: rowsPerSuccess } },
         count: rowsPerSuccess,
       },
+      // Agent `a`'s second response — the doc that separates agents from docs.
+      {
+        ...base,
+        response_id: `${scheduleId}-a2`,
+        agent_id: 'scheduled-results-it-agent-a',
+        action_response: { osquery: { count: rowsPerSuccess } },
+        count: rowsPerSuccess,
+      },
       {
         ...base,
         response_id: `${scheduleId}-b`,
@@ -173,9 +185,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(row).to.be.ok();
       expect(row?.sourceType).to.be('scheduled');
       expect(row?.totalRows).to.be(expectedTotalRows);
-      expect(row?.agentCount).to.be(expectedAgents);
-      expect(row?.successCount).to.be(successfulResponses);
-      expect(row?.errorCount).to.be(erroredResponses);
+      expect(row?.agentCount).to.be(expectedAgents); // 3, not 4
+      expect(row?.successCount).to.be(successfulAgents); // 2, not 3
+      expect(row?.errorCount).to.be(erroredAgents);
     });
 
     it('detail endpoint agrees with the history row for responses with no space_id', async () => {
@@ -189,9 +201,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Pre-fix every one of these was 0 because of the strict space_id filter.
       expect(aggregations.totalRowCount).to.be(expectedTotalRows);
-      expect(total).to.be(expectedAgents);
-      expect(aggregations.successful).to.be(successfulResponses);
-      expect(aggregations.failed).to.be(erroredResponses);
+      expect(aggregations.totalResponded).to.be(expectedAgents); // 3, not 4
+      expect(aggregations.successful).to.be(successfulAgents); // 2, not 3
+      expect(aggregations.failed).to.be(erroredAgents);
+      // `total` stays document-based: the grid renders one row per doc.
+      expect(total).to.be(expectedTotalDocs); // 4 docs from 3 agents
     });
   });
 }

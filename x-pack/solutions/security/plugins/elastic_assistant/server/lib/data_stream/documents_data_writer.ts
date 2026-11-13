@@ -13,6 +13,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { UUID } from '@kbn/elastic-assistant-common';
+import { getConversationOwnerFilter } from './get_conversation_owner_filter';
 
 export interface BulkOperationError {
   message: string;
@@ -136,84 +137,27 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           },
-          {
-            nested: {
-              path: 'users',
-              query: {
-                bool: {
-                  should: [
-                    // Match on users.id if profile_uid exists
-                    ...(authenticatedUser.profile_uid
-                      ? [{ term: { 'users.id': authenticatedUser.profile_uid } }]
-                      : []),
-                    // Always try to match on users.name
-                    { term: { 'users.name': authenticatedUser.username } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            },
-          },
-        ],
-      },
-    },
-  });
-  getFilterByConversationUser = (authenticatedUser: AuthenticatedUser) => ({
-    filter: {
-      bool: {
-        should: [
-          {
-            bool: {
-              must: [
-                {
-                  exists: { field: 'created_by' },
-                },
-                {
-                  bool: {
-                    should: [
-                      // Match on users.id if profile_uid exists
-                      ...(authenticatedUser.profile_uid
-                        ? [{ term: { 'created_by.id': authenticatedUser.profile_uid } }]
-                        : []),
-                      // Always try to match on users.name
-                      { term: { 'created_by.name': authenticatedUser.username } },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-          {
-            bool: {
-              must: [
-                // legacy conversation without created_by field have users array we can match against
-                { bool: { must_not: [{ exists: { field: 'created_by' } }] } },
+          ...(authenticatedUser.profile_uid
+            ? [
                 {
                   nested: {
                     path: 'users',
                     query: {
                       bool: {
-                        should: [
-                          // Match on users.id if profile_uid exists
-                          ...(authenticatedUser.profile_uid
-                            ? [{ term: { 'users.id': authenticatedUser.profile_uid } }]
-                            : []),
-                          // Always try to match on users.name
-                          { term: { 'users.name': authenticatedUser.username } },
-                        ],
+                        should: [{ term: { 'users.id': authenticatedUser.profile_uid } }],
                         minimum_should_match: 1,
                       },
                     },
                   },
                 },
-              ],
-            },
-          },
+              ]
+            : []),
         ],
-        minimum_should_match: 1,
       },
     },
+  });
+  getFilterByConversationUser = (authenticatedUser: AuthenticatedUser) => ({
+    filter: getConversationOwnerFilter(authenticatedUser),
   });
 
   private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(

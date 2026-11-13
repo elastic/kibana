@@ -280,12 +280,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           password: 'changeme',
         });
 
-        await browser.refresh();
-
         log.debug('API key created, moving on to view');
 
         // Set testUsers roles to have the `read_security` cluster privilege
         await security.testUser.setRoles(['read_security_role']);
+        await browser.refresh();
 
         // View newly created API Key
         await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);

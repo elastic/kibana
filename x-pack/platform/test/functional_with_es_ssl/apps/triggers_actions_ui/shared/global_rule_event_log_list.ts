@@ -95,8 +95,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should load from the shareable lazy loader', async () => {
       await PageObjects.common.navigateToApp('triggersActionsUiExample/global_rule_event_log_list');
-      const exists = await testSubjects.exists('ruleEventLogListTable');
-      const spacesSwitchExists = await testSubjects.exists('showAllSpacesSwitch');
+      const exists = await testSubjects.waitForExists('ruleEventLogListTable');
+      const spacesSwitchExists = await testSubjects.waitForExists('showAllSpacesSwitch');
 
       expect(exists).to.be(true);
       expect(spacesSwitchExists).to.be(true);
@@ -198,22 +198,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      ruleNameCells = await find.allByCssSelector(
-        '[data-gridcell-column-id="rule_name"][data-test-subj="dataGridRowCell"]'
-      );
-
       // Should not see the 'test-rule' since that is filtered out by filteredRuleTypes
       // Should see both space rules: Error count threshold + Failed transaction
-      textCellsMap = {};
+      await retry.tryForTime(10000, async () => {
+        ruleNameCells = await find.allByCssSelector(
+          '[data-gridcell-column-id="rule_name"][data-test-subj="dataGridRowCell"]'
+        );
+        textCellsMap = {};
+        await asyncForEach(ruleNameCells, async (cell) => {
+          const text = await cell.getVisibleText();
+          textCellsMap[text] = true;
+        });
 
-      await asyncForEach(ruleNameCells, async (cell) => {
-        const text = await cell.getVisibleText();
-        textCellsMap[text] = true;
+        expect(textCellsMap['Error count threshold']).eql(true);
+        expect(textCellsMap['Failed transaction']).eql(true);
+        expect(textCellsMap['test-rule']).eql(undefined);
       });
-
-      expect(textCellsMap['Error count threshold']).eql(true);
-      expect(textCellsMap['Failed transaction']).eql(true);
-      expect(textCellsMap['test-rule']).eql(undefined);
     });
   });
 };

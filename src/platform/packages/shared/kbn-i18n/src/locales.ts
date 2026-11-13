@@ -91,35 +91,3 @@ export const setAvailableLocales = (locales: ReadonlyArray<AvailableLocale>): vo
  * been called or if the deployment has disabled the picker.
  */
 export const getAvailableLocales = (): ReadonlyArray<AvailableLocale> => _availableLocales;
-
-/**
- * Resolves the browser's most-preferred language to a locale id this Kibana
- * instance can serve. For each entry in `navigator.languages` (highest priority
- * first) we try a case-insensitive exact match against the available locales,
- * then fall back to the primary language subtag — so `en-US` resolves to `en`
- * when the browser does not also list a bare `en`. Returns `undefined` when no
- * browser preference can be served, or when called outside a browser (e.g. on
- * the server).
- */
-export const getBrowserPreferredLocale = (
-  availableLocales: ReadonlyArray<{ id: string }> = getAvailableLocales()
-): SupportedLocaleId | undefined => {
-  if (typeof navigator === 'undefined') return undefined;
-
-  const preferences = navigator.languages?.length
-    ? navigator.languages
-    : [navigator.language].filter(Boolean);
-
-  const primarySubtag = (tag: string) => tag.split('-')[0].toLowerCase();
-
-  for (const preference of preferences) {
-    const lower = preference.toLowerCase();
-    const exact = availableLocales.find(({ id }) => id.toLowerCase() === lower);
-    if (exact) return exact.id;
-
-    const primary = primarySubtag(preference);
-    const byPrimary = availableLocales.find(({ id }) => primarySubtag(id) === primary);
-    if (byPrimary) return byPrimary.id;
-  }
-  return undefined;
-};

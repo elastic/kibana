@@ -15,6 +15,8 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { McpClient } from '@kbn/mcp-client';
 import type { CallToolResponse, ListToolsResponse } from '@kbn/mcp-client';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
+import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
+import { mcpCircuitBreaker, BREAKER_INITIAL_COOLING_MS } from './circuit_breaker';
 
 // Type for accessing private methods in tests
 // Using a type that makes private methods accessible for testing
@@ -64,7 +66,7 @@ jest.mock('./auth_helpers', () => ({
 
 // Mock the build_custom_fetch module
 jest.mock('./build_custom_fetch', () => ({
-  buildCustomFetch: jest.fn().mockReturnValue(jest.fn()),
+  buildCustomFetch: jest.fn(),
 }));
 
 import { buildCustomFetch } from './build_custom_fetch';
@@ -82,6 +84,8 @@ describe('McpConnector', () => {
   let mockMcpClient: jest.Mocked<McpClient>;
   let services: ReturnType<typeof actionsMock.createServices>;
   let connectorUsageCollector: ConnectorUsageCollector;
+  let mockFetch: jest.Mock;
+  let mockCloseFetch: jest.Mock;
 
   const defaultConfig = {
     serverUrl: 'https://example.com/mcp',
@@ -93,14 +97,19 @@ describe('McpConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Clear the listTools cache before each test
+    // Clear the listTools cache and the circuit breaker state before each test
     listToolsCache.clear();
+    mcpCircuitBreaker.clear();
 
     services = actionsMock.createServices();
     connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
+
+    mockFetch = jest.fn();
+    mockCloseFetch = jest.fn().mockResolvedValue(undefined);
+    (buildCustomFetch as jest.Mock).mockReturnValue({ fetch: mockFetch, close: mockCloseFetch });
 
     // Create a mock McpClient instance
     mockMcpClient = {
@@ -146,8 +155,6 @@ describe('McpConnector', () => {
         defaultConfig.serverUrl
       );
 
-      const returnedFetch = mockBuildCustomFetch.mock.results[0].value;
-
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { McpClient } = require('@kbn/mcp-client');
       expect(McpClient).toHaveBeenCalledWith(
@@ -156,7 +163,7 @@ describe('McpConnector', () => {
           url: defaultConfig.serverUrl,
         }),
         expect.objectContaining({
-          fetch: returnedFetch,
+          fetch: mockFetch,
         })
       );
     });
@@ -537,6 +544,307 @@ describe('McpConnector', () => {
         await retryCall[1].onRetry();
         expect(mockMcpClient.disconnect).toHaveBeenCalled();
       }
+    });
+  });
+
+  describe('circuit breaker', () => {
+    let now: number;
+    let dateSpy: jest.SpyInstance;
+    const callParams = { name: 'tool1', arguments: {} };
+    const connectFailure = () => new Error('Error connecting to MCP server: fetch failed');
+
+    const createConnector = (
+      id = 'test-connector-1',
+      config: { serverUrl: string; hasAuth: boolean } = defaultConfig
+    ) =>
+      new McpConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id, type: CONNECTOR_ID },
+        config,
+        secrets: defaultSecrets,
+        logger,
+        services,
+      });
+
+    const failListTools = (target: McpConnector = connector) =>
+      target.listTools({}, connectorUsageCollector).then(
+        () => {
+          throw new Error('expected listTools to reject');
+        },
+        (error: Error) => error
+      );
+
+    const openBreaker = async (target: McpConnector = connector) => {
+      for (let i = 0; i < 3; i++) {
+        await failListTools(target);
+      }
+    };
+
+    beforeEach(() => {
+      now = 1_000_000;
+      dateSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockImplementation(() => Promise.reject(connectFailure()));
+    });
+
+    afterEach(() => {
+      dateSpy.mockRestore();
+    });
+
+    it('keeps retries on for the first 2 failures and turns them off for the 3rd', async () => {
+      const first = await failListTools();
+      const second = await failListTools();
+      const third = await failListTools();
+
+      expect(isRetryableError(first)).toBeNull();
+      expect(isRetryableError(second)).toBeNull();
+      expect(isRetryableError(third)).toBe(false);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('is unavailable after 3 connection failures')
+      );
+    });
+
+    it('fails fast without connecting once the breaker is open', async () => {
+      await openBreaker();
+      expect(mockMcpClient.connect).toHaveBeenCalledTimes(3);
+
+      const error = await failListTools();
+
+      expect(error.message).toContain('is unavailable, next attempt in 60s');
+      expect(isRetryableError(error)).toBe(false);
+      expect(mockMcpClient.connect).toHaveBeenCalledTimes(3);
+      expect(mockMcpClient.listTools).not.toHaveBeenCalled();
+    });
+
+    it('still closes the fetch dispatcher when the call fails fast', async () => {
+      await openBreaker();
+      mockCloseFetch.mockClear();
+
+      await failListTools();
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('serves a cached listTools result while the breaker is open', async () => {
+      await openBreaker();
+      listToolsCache.set(
+        (connector as unknown as { getListToolsCacheKey: () => string }).getListToolsCacheKey(),
+        { tools: [{ name: 'cached', inputSchema: {} }] }
+      );
+
+      await expect(connector.listTools({}, connectorUsageCollector)).resolves.toEqual({
+        tools: [{ name: 'cached', inputSchema: {} }],
+      });
+    });
+
+    it('connects again after the cooling window and closes the breaker on success', async () => {
+      await openBreaker();
+
+      now += BREAKER_INITIAL_COOLING_MS;
+      mockMcpClient.connect.mockResolvedValue({ connected: true });
+      mockMcpClient.isConnected.mockReturnValueOnce(false).mockReturnValue(true);
+      mockMcpClient.listTools.mockResolvedValue({ tools: [] });
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      await expect(connector.listTools({}, connectorUsageCollector)).resolves.toEqual({
+        tools: [],
+      });
+      expect(mockMcpClient.connect).toHaveBeenCalledTimes(4);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('is available again'));
+
+      // closed: it takes 3 new failures to open again
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockImplementation(() => Promise.reject(connectFailure()));
+      listToolsCache.clear();
+      const error = await failListTools();
+      expect(isRetryableError(error)).toBeNull();
+    });
+
+    it('re-opens with a doubled window after a failure once the cooling window ended', async () => {
+      await openBreaker();
+
+      now += BREAKER_INITIAL_COOLING_MS;
+      const reopened = await failListTools();
+      expect(isRetryableError(reopened)).toBe(false);
+
+      const error = await failListTools();
+      expect(error.message).toContain('next attempt in 120s');
+    });
+
+    it('does not count user errors', async () => {
+      mockMcpClient.connect.mockRejectedValue(
+        new Error('Unauthorized error: nope', { cause: new UnauthorizedError('nope') })
+      );
+
+      for (let i = 0; i < 5; i++) {
+        const error = await failListTools();
+        expect(error.message).toContain('Unauthorized error');
+        expect(isRetryableError(error)).toBeNull();
+      }
+
+      expect(mockMcpClient.connect).toHaveBeenCalledTimes(5);
+    });
+
+    it('does not count errors from a connected client', async () => {
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.listTools.mockRejectedValue(new Error('MCP error -32001: Request timed out'));
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      for (let i = 0; i < 5; i++) {
+        await failListTools();
+      }
+
+      expect(mockMcpClient.listTools).toHaveBeenCalledTimes(5);
+    });
+
+    it('does not count tool errors from callTool', async () => {
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.callTool.mockRejectedValue(new Error("Error calling tool 'tool1'"));
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      for (let i = 0; i < 5; i++) {
+        await expect(connector.callTool(callParams, connectorUsageCollector)).rejects.toThrow(
+          'Error calling tool'
+        );
+      }
+
+      expect(mockMcpClient.callTool).toHaveBeenCalledTimes(5);
+    });
+
+    it('shares the breaker between listTools, callTool and testConnector', async () => {
+      await openBreaker();
+
+      const callToolError = await connector.callTool(callParams, connectorUsageCollector).then(
+        () => undefined,
+        (error: Error) => error
+      );
+      const testError = await connector.testConnector({}, connectorUsageCollector).then(
+        () => undefined,
+        (error: Error) => error
+      );
+
+      expect(callToolError?.message).toContain('is unavailable');
+      expect(isRetryableError(callToolError as Error)).toBe(false);
+      expect(testError?.message).toContain('is unavailable');
+      expect(mockMcpClient.connect).toHaveBeenCalledTimes(3);
+    });
+
+    it('opens the breaker from testConnector connect failures', async () => {
+      for (let i = 0; i < 3; i++) {
+        await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow(
+          'fetch failed'
+        );
+      }
+
+      const error = await failListTools();
+
+      expect(error.message).toContain('is unavailable');
+      expect(mockMcpClient.connect).toHaveBeenCalledTimes(3);
+    });
+
+    it('uses a separate breaker per connector id', async () => {
+      await openBreaker();
+      const other = createConnector('other-connector');
+
+      const error = await failListTools(other);
+
+      expect(error.message).toContain('fetch failed');
+      expect(isRetryableError(error)).toBeNull();
+    });
+
+    it('uses a separate breaker when the connector configuration changes', async () => {
+      await openBreaker();
+      const edited = createConnector('test-connector-1', {
+        serverUrl: 'https://example.com/other-mcp',
+        hasAuth: false,
+      });
+
+      const error = await failListTools(edited);
+
+      expect(error.message).toContain('fetch failed');
+    });
+  });
+
+  describe('dispatcher release', () => {
+    const callParams = { name: 'tool1', arguments: {} };
+
+    it('closes the fetch dispatcher after a successful listTools', async () => {
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.listTools.mockResolvedValue({ tools: [] });
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      await connector.listTools({}, connectorUsageCollector);
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher after a successful callTool', async () => {
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.callTool.mockResolvedValue({ content: [] });
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      await connector.callTool(callParams, connectorUsageCollector);
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher after a successful testConnector', async () => {
+      mockMcpClient.connect.mockResolvedValue({ connected: true });
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      await connector.testConnector({}, connectorUsageCollector);
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher when listTools fails to connect', async () => {
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockRejectedValue(new Error('Error connecting to MCP server: boom'));
+
+      await expect(connector.listTools({}, connectorUsageCollector)).rejects.toThrow('boom');
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher when callTool fails to connect', async () => {
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockRejectedValue(new Error('Error connecting to MCP server: boom'));
+
+      await expect(connector.callTool(callParams, connectorUsageCollector)).rejects.toThrow('boom');
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher when testConnector fails to connect', async () => {
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockRejectedValue(new Error('Error connecting to MCP server: boom'));
+
+      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow('boom');
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs a close failure at debug level and keeps the original error', async () => {
+      mockCloseFetch.mockRejectedValue(new Error('close failed'));
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockRejectedValue(new Error('Error connecting to MCP server: boom'));
+
+      await expect(connector.listTools({}, connectorUsageCollector)).rejects.toThrow('boom');
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Error closing fetch dispatcher after listTools: close failed')
+      );
+    });
+
+    it('still closes the fetch dispatcher when disconnect throws', async () => {
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.listTools.mockResolvedValue({ tools: [] });
+      mockMcpClient.disconnect.mockRejectedValue(new Error('disconnect failed'));
+
+      await connector.listTools({}, connectorUsageCollector);
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
     });
   });
 

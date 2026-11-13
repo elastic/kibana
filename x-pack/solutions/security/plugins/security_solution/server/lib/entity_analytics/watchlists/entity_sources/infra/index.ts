@@ -25,4 +25,5 @@ export {
   getStreamPatternFor,
   integrationsSourceIndex,
   oktaLastFullSyncMarkersIndex,
+  getLastFullSyncMarkersIndex,
 } from './constants';

@@ -19,6 +19,7 @@ import {
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
+  validateDynamicKafkaTopics,
 } from './output_form_validators';
 
 const validateYamlConfig = createValidateYamlConfig(parse);
@@ -409,6 +410,69 @@ describe('Output form validation', () => {
       it('should return an error for a path containing whitespace', () => {
         expect(validateSslPathInput('/path/with spaces/cert.pem')).toBeDefined();
       });
+    });
+  });
+
+  describe('validateDynamicKafkaTopics', () => {
+    const validTopics = [
+      { label: 'field1', value: '%{[field]}' },
+      { label: 'field2', value: 'field2' },
+      { label: 'field3', value: '%{[field2]}-%{[field3]}' },
+      { label: 'field4', value: '%{[data_stream.type]}-%{[service.common_name]:agent-monitoring}' },
+    ];
+    const invalidBracketTopic = [{ label: '%{[field}', value: '%{[field}' }];
+    const invalidPercentTopic = [{ label: '{[field]}', value: '{[field]}' }];
+    it('should work with valid topics', () => {
+      const res = validateDynamicKafkaTopics(validTopics);
+      expect(res).toBeUndefined();
+    });
+    it("should return error with missing brackets in topic's name", () => {
+      const res = validateDynamicKafkaTopics(invalidBracketTopic);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it("should return error with missing percent sign before opening brackets in topic's name", () => {
+      const res = validateDynamicKafkaTopics(invalidPercentTopic);
+      expect(res).toEqual(['Opening brackets should be preceded by a percent sign']);
+    });
+    it('should return error when fallback terminator is missing', () => {
+      const res = validateDynamicKafkaTopics([
+        { label: 'field', value: '%{[service.common_name]:agent-monitoring' },
+      ]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when closing bracket appears before opening bracket', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: ']}%{[field' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when opening square bracket is missing from token', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: '%{field]}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when square brackets are omitted entirely', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: '%{field}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when orphan closing delimiter precedes a valid token', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: ']}%{[field]}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when orphan closing delimiter follows a valid token', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: '%{[field]}]}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
     });
   });
 });

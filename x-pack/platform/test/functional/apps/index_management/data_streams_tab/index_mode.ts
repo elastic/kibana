@@ -94,7 +94,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Open details flyout of existing data stream - it has standard index mode
         await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
         // Check that index mode detail exists and its label is "Standard"
-        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+        expect(await testSubjects.waitForExists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be('Standard');
         // Close flyout
         await testSubjects.click('closeDetailsButton');
@@ -118,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Open details flyout of data stream
         await pageObjects.indexManagement.clickDataStreamNameLink('test-logsdb');
         // Check that index mode detail exists and its label is "LogsDB"
-        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+        expect(await testSubjects.waitForExists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be('LogsDB');
         // Close flyout
         await testSubjects.click('closeDetailsButton');
@@ -155,7 +155,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Open details flyout of data stream
         await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
         // Check that index mode detail exists and its label is origin
-        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+        expect(await testSubjects.waitForExists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
         // Close flyout
         await testSubjects.click('closeDetailsButton');
@@ -202,7 +202,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Open data stream
         await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
         // Check that index mode detail exists and its label is destination index mode
-        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+        expect(await testSubjects.waitForExists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
         // Close flyout
         await testSubjects.click('closeDetailsButton');

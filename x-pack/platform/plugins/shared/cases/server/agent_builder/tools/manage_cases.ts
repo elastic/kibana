@@ -17,6 +17,7 @@ import { createCaseFromTemplateStepCommonDefinition } from '../../../common/work
 import { assignCaseStepCommonDefinition } from '../../../common/workflows/steps/assign_case';
 import { addTagsStepCommonDefinition } from '../../../common/workflows/steps/add_tags';
 import { setCustomFieldStepCommonDefinition } from '../../../common/workflows/steps/set_custom_field';
+import { setExtendedFieldsStepCommonDefinition } from '../../../common/workflows/steps/set_extended_fields';
 import { createCaseStepDefinition } from '../../workflows/steps/create_case';
 import { updateCaseStepDefinition } from '../../workflows/steps/update_case';
 import { updateCasesStepDefinition } from '../../workflows/steps/update_cases';
@@ -26,6 +27,7 @@ import { assignCaseStepDefinition } from '../../workflows/steps/simple_steps';
 import { unassignCaseStepDefinition } from '../../workflows/steps/unassign_case';
 import { addTagsStepDefinition } from '../../workflows/steps/add_tags';
 import { setCustomFieldStepDefinition } from '../../workflows/steps/set_custom_field';
+import { setExtendedFieldsStepDefinition } from '../../workflows/steps/set_extended_fields';
 import type { CasesClient } from '../../client';
 import { invokeStepHandler } from '../utils/invoke_step';
 import {
@@ -36,70 +38,103 @@ import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_att
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
-const manageCasesSchema = z.object({
-  mode: z
-    .enum([
-      'create',
-      'create_from_template',
-      'update',
-      'update_bulk',
-      'delete',
-      'assign',
-      'unassign',
-      'add_tags',
-      'set_custom_field',
-    ])
-    .describe(
-      'Required fields per mode:\n' +
-        '- create: title, owner (+ optional connector_id)\n' +
-        '- create_from_template: owner, case_template_id\n' +
-        '- update: case_id, updates (version auto-resolved)\n' +
-        '- update_bulk: cases (array of {case_id, updates, version?}) — use for ≥2 cases\n' +
-        '- delete: case_ids\n' +
-        '- assign: case_id, assignees (ADDS users)\n' +
-        '- unassign: case_id, assignees (REMOVES users; null/[] removes all)\n' +
-        '- add_tags: case_id, tags_to_add (APPENDS to existing tags)\n' +
-        '- set_custom_field: case_id, owner, field_name, value'
+const BASE_MODES = [
+  'create',
+  'create_from_template',
+  'update',
+  'update_bulk',
+  'delete',
+  'assign',
+  'unassign',
+  'add_tags',
+  'set_custom_field',
+] as const;
+
+const EXTENDED_FIELDS_MODE = 'set_extended_fields' as const;
+
+const BASE_MODE_DESCRIPTION =
+  'Required fields per mode:\n' +
+  '- create: title, owner (+ optional connector_id)\n' +
+  '- create_from_template: owner, case_template_id\n' +
+  '- update: case_id, updates (version auto-resolved)\n' +
+  '- update_bulk: cases (array of {case_id, updates, version?}) — use for ≥2 cases\n' +
+  '- delete: case_ids\n' +
+  '- assign: case_id, assignees (ADDS users)\n' +
+  '- unassign: case_id, assignees (REMOVES users; null/[] removes all)\n' +
+  '- add_tags: case_id, tags_to_add (APPENDS to existing tags)\n' +
+  '- set_custom_field: case_id, owner, field_name, value';
+
+const EXTENDED_FIELDS_MODE_DESCRIPTION =
+  '- set_extended_fields: case_id, fields (map of `<name>_as_<type>` → value)';
+
+const buildManageCasesSchema = (isTemplatesEnabled: boolean) => {
+  const modes = isTemplatesEnabled ? ([...BASE_MODES, EXTENDED_FIELDS_MODE] as const) : BASE_MODES;
+
+  const modeDescription = isTemplatesEnabled
+    ? `${BASE_MODE_DESCRIPTION}\n${EXTENDED_FIELDS_MODE_DESCRIPTION}`
+    : BASE_MODE_DESCRIPTION;
+
+  return z.object({
+    mode: z.enum(modes).describe(modeDescription),
+    ...createCaseStepCommonDefinition.inputSchema.partial().shape,
+    ...updateCaseStepCommonDefinition.inputSchema.partial().shape,
+    ...updateCasesStepCommonDefinition.inputSchema.partial().shape,
+    ...deleteCasesStepCommonDefinition.inputSchema.partial().shape,
+    ...createCaseFromTemplateStepCommonDefinition.inputSchema.partial().shape,
+    ...assignCaseStepCommonDefinition.inputSchema.partial().shape,
+    ...setCustomFieldStepCommonDefinition.inputSchema.partial().shape,
+    ...(isTemplatesEnabled
+      ? setExtendedFieldsStepCommonDefinition.inputSchema.partial().shape
+      : {}),
+    // add_tags: only adds tags + case_id — both already covered; provide alias to avoid conflict with create's tags:
+    tags_to_add: addTagsStepCommonDefinition.inputSchema.shape.tags
+      .optional()
+      .describe('Tags to ADD to the existing tag list. Required for add_tags mode.'),
+    // Custom field not in any step schema:
+    connector_id: z
+      .string()
+      .optional()
+      .describe('External connector ID for the case. Optional for create mode.'),
+    // Override tags to clarify it replaces the full tag list (vs tags_to_add which appends):
+    tags: createCaseStepCommonDefinition.inputSchema.shape.tags.describe(
+      'Tags to set on the case. Used in create mode (replaces entire tag list).'
     ),
-  ...createCaseStepCommonDefinition.inputSchema.partial().shape,
-  ...updateCaseStepCommonDefinition.inputSchema.partial().shape,
-  ...updateCasesStepCommonDefinition.inputSchema.partial().shape,
-  ...deleteCasesStepCommonDefinition.inputSchema.partial().shape,
-  ...createCaseFromTemplateStepCommonDefinition.inputSchema.partial().shape,
-  ...assignCaseStepCommonDefinition.inputSchema.partial().shape,
-  ...setCustomFieldStepCommonDefinition.inputSchema.partial().shape,
-  // add_tags: only adds tags + case_id — both already covered; provide alias to avoid conflict with create's tags:
-  tags_to_add: addTagsStepCommonDefinition.inputSchema.shape.tags
-    .optional()
-    .describe('Tags to ADD to the existing tag list. Required for add_tags mode.'),
-  // Custom field not in any step schema:
-  connector_id: z
-    .string()
-    .optional()
-    .describe('External connector ID for the case. Optional for create mode.'),
-  // Override tags to clarify it replaces the full tag list (vs tags_to_add which appends):
-  tags: createCaseStepCommonDefinition.inputSchema.shape.tags.describe(
-    'Tags to set on the case. Used in create mode (replaces entire tag list).'
-  ),
-});
+  });
+};
+
+type ManageCasesSchema = ReturnType<typeof buildManageCasesSchema>;
 
 export const manageCasesTool = (
-  getCasesClientFn: GetCasesClientFn
-): BuiltinToolDefinition<typeof manageCasesSchema> => {
+  getCasesClientFn: GetCasesClientFn,
+  isTemplatesEnabled: boolean
+): BuiltinToolDefinition<ManageCasesSchema> => {
+  const manageCasesSchema = buildManageCasesSchema(isTemplatesEnabled);
   const createStepDef = createCaseStepDefinition(getCasesClientFn);
   const updateCaseStepDef = updateCaseStepDefinition(getCasesClientFn);
   const updateCasesStepDef = updateCasesStepDefinition(getCasesClientFn);
   const deleteCasesStepDef = deleteCasesStepDefinition(getCasesClientFn);
-  const createFromTemplateStepDef = createCaseFromTemplateStepDefinition(getCasesClientFn);
+  const createFromTemplateStepDef = createCaseFromTemplateStepDefinition(
+    getCasesClientFn,
+    isTemplatesEnabled
+  );
   const assignStepDef = assignCaseStepDefinition(getCasesClientFn);
   const unassignStepDef = unassignCaseStepDefinition(getCasesClientFn);
   const addTagsStepDef = addTagsStepDefinition(getCasesClientFn);
   const setCustomFieldStepDef = setCustomFieldStepDefinition(getCasesClientFn);
+  // Always constructed (cheap, no side effects): whether `set_extended_fields` is actually
+  // reachable is gated by `isTemplatesEnabled` in the schema (`buildManageCasesSchema`), not here.
+  const setExtendedFieldsStepDef = setExtendedFieldsStepDefinition(getCasesClientFn);
+
+  const modesDescription = isTemplatesEnabled
+    ? '`create`, `create_from_template`, `update`, `update_bulk` (≥2 cases), `delete`, `assign`, `unassign`, `add_tags`, `set_custom_field`, `set_extended_fields`'
+    : '`create`, `create_from_template`, `update`, `update_bulk` (≥2 cases), `delete`, `assign`, `unassign`, `add_tags`, `set_custom_field`';
 
   return {
     id: platformCoreCasesTools.manage,
     type: ToolType.builtin,
-    description: `Cases CRUD + assign/tags/custom fields. Modes: \`create\`, \`create_from_template\`, \`update\`, \`update_bulk\` (≥2 cases), \`delete\`, \`assign\`, \`unassign\`, \`add_tags\`, \`set_custom_field\`. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    description: `Cases CRUD + assign/tags/custom fields${
+      isTemplatesEnabled ? '/extended fields' : ''
+    }. Modes: ${modesDescription}. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
     schema: manageCasesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {
@@ -135,6 +170,11 @@ export const manageCasesTool = (
             );
           case 'set_custom_field':
             return invokeStepHandler(setCustomFieldStepDef, { case_id, ...rest }, toolContext);
+          case EXTENDED_FIELDS_MODE:
+            // Reaching this case requires the `manageCasesSchema` to have accepted `mode:
+            // 'set_extended_fields'`, which only happens when `isTemplatesEnabled` is true (see
+            // `buildManageCasesSchema`) — so `setExtendedFieldsStepDef` is always usable here.
+            return invokeStepHandler(setExtendedFieldsStepDef, { case_id, ...rest }, toolContext);
           default: {
             const _exhaustive: never = mode;
             throw new Error(`Unknown manage_cases mode: ${_exhaustive}`);

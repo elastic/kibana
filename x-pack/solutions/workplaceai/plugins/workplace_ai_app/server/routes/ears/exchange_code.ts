@@ -49,8 +49,10 @@ export function registerExchangeCodeRoute({
           ]),
         }),
         body: schema.object({
-          code: schema.string(),
-          pkce_verifier: schema.string(),
+          // Authorization codes are provider-defined; Microsoft's are the longest (~1.5k chars).
+          code: schema.string({ maxLength: 4096 }),
+          // RFC 7636 §4.1: code_verifier is 43-128 characters.
+          pkce_verifier: schema.string({ minLength: 43, maxLength: 128 }),
         }),
       },
     },

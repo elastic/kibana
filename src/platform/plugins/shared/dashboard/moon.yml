@@ -135,6 +135,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'
@@ -146,6 +148,4 @@ fileGroups:
     - test/scout_oas_schema/**/*.json
     - test/scout_anonymous_authc/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

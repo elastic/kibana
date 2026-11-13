@@ -28,6 +28,9 @@ describe('Presentation panel', () => {
       <div data-test-subj="testPresentationPanelInternalComponent">This is a test component</div>
     ),
     componentApi: { uuid: 'test' },
+    componentInternalApi: {
+      setVisibility: () => {},
+    },
   };
 
   const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');

@@ -16,7 +16,7 @@ import { EuiText, EuiThemeProvider } from '@elastic/eui';
 import { ExistenceFetchStatus } from '../../types';
 import { FieldListFilters } from '../field_list_filters';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
 import FieldListGrouped, { type FieldListGroupedProps } from './field_list_grouped';
 import userEvent from '@testing-library/user-event';
@@ -296,6 +296,68 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     expect(within(availableFields).getAllByTestId('testFieldItem')).toHaveLength(25);
     expect(within(unmappedFields).getAllByTestId('testFieldItem')).toHaveLength(88);
     expect(within(metaFields).queryAllByTestId('testFieldItem')).toHaveLength(0);
+  });
+
+  it('keeps a group which was just opened rendered when a throttled scroll event arrives', () => {
+    const buildFields = (prefix: string, count: number) =>
+      [...new Array(count)].map(
+        (_, index) => new DataViewField({ ...allFields[0].toSpec(), name: `${prefix}${index}` })
+      );
+    // 53 available fields leave the initial page size of 50 exhausted, so the 3 meta
+    // fields only render thanks to the budget which opening their group reserves
+    const fieldGroups: FieldListGroupedProps<DataViewField>['fieldGroups'] = {
+      AvailableFields: {
+        fields: buildFields('available', 53),
+        fieldCount: 53,
+        title: 'Available fields',
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        isAffectedByGlobalFilter: false,
+        isAffectedByTimeFilter: false,
+      },
+      MetaFields: {
+        fields: buildFields('meta', 3),
+        fieldCount: 3,
+        title: 'Meta fields',
+        isInitiallyOpen: false,
+        showInAccordion: true,
+        isAffectedByGlobalFilter: false,
+        isAffectedByTimeFilter: false,
+      },
+    };
+
+    jest.useFakeTimers();
+
+    try {
+      render(<FieldListGrouped {...defaultProps} fieldGroups={fieldGroups} />);
+
+      const scrollContainer = screen.getByTestId('fieldListGroupedFieldGroups');
+      const scrollTo = (scrollTop: number) => {
+        Object.defineProperties(scrollContainer, {
+          scrollTop: { value: scrollTop, configurable: true },
+          clientHeight: { value: 500, configurable: true },
+          scrollHeight: { value: 1000, configurable: true },
+        });
+        fireEvent.scroll(scrollContainer);
+      };
+
+      const metaFields = screen.getByTestId('fieldListGroupedMetaFields');
+      expect(within(metaFields).queryAllByTestId('testFieldItem')).toHaveLength(0);
+
+      // Exhaust the page size, so further scrolls stop re-rendering and the last one
+      // stays throttled until after the group has been opened
+      scrollTo(600);
+      scrollTo(700);
+      scrollTo(800);
+
+      fireEvent.click(screen.getByRole('button', { name: /meta fields/i }));
+      expect(within(metaFields).getAllByTestId('testFieldItem')).toHaveLength(3);
+
+      act(() => jest.advanceTimersByTime(100));
+      expect(within(metaFields).getAllByTestId('testFieldItem')).toHaveLength(3);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('renders correctly when fields are searched and filtered', async () => {

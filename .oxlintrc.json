@@ -15,7 +15,8 @@
     "**/ftr_e2e/**",
     "**/e2e/**",
     "**/integration_tests/**",
-    "**/json_schemas/**"
+    "**/json_schemas/**",
+    "src/platform/packages/shared/kbn-flot-charts/lib/**"
   ],
 
   "rules": {
@@ -175,8 +176,8 @@
     "constructor-super": "error",
     "dot-notation": ["error", { "allowKeywords": true }],
     // "eqeqeq": ["error", "always", { "null": "ignore" }],
-    // "eslint-comments/no-unused-disable": "error",
-    // "eslint-comments/no-unused-enable": "error",
+    // "@eslint-community/eslint-comments/no-unused-disable": "error",
+    // "@eslint-community/eslint-comments/no-unused-enable": "error",
     "guard-for-in": "error",
     // "import/default": "error",
     // "import/export": "error",

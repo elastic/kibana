@@ -42,6 +42,23 @@ const durationFormatSuffixSchema = schema.maybe(
     },
   })
 );
+const durationFormatDecimalsSchema = schema.maybe(
+  schema.number({
+    meta: {
+      description:
+        'Number of decimal places to display. Defaults to `0`. Ignored for `auto-approximate`.',
+    },
+  })
+);
+
+const durationFormatCompactSchema = schema.maybe(
+  schema.boolean({
+    meta: {
+      description:
+        'When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.',
+    },
+  })
+);
 
 export const durationFormatSchema = schema.object(
   {
@@ -58,6 +75,8 @@ export const durationFormatSchema = schema.object(
           'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
       },
     }),
+    decimals: durationFormatDecimalsSchema,
+    compact: durationFormatCompactSchema,
     suffix: durationFormatSuffixSchema,
   },
   {

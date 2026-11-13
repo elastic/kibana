@@ -170,6 +170,21 @@ export const getSearchableContent = (attributes: UserActionTransformedAttributes
   return extractor ? extractor(payload) : [];
 };
 
+const authorMatchesSearch = (
+  attributes: UserActionTransformedAttributes,
+  term: string
+): boolean => {
+  const createdBy = attributes.created_by;
+  if (!createdBy) {
+    return false;
+  }
+
+  const username = createdBy.username?.toLowerCase() ?? '';
+  const fullName = createdBy.full_name?.toLowerCase() ?? '';
+
+  return username.includes(term) || fullName.includes(term);
+};
+
 export const matchesSearch = (
   attributes: UserActionTransformedAttributes,
   search: string
@@ -185,15 +200,53 @@ export const matchesSearch = (
     return true;
   }
 
-  const createdBy = attributes.created_by;
-  if (createdBy) {
-    const username = createdBy.username?.toLowerCase() ?? '';
-    const fullName = createdBy.full_name?.toLowerCase() ?? '';
+  return authorMatchesSearch(attributes, term);
+};
 
-    if (username.includes(term) || fullName.includes(term)) {
-      return true;
+/**
+ * After a document has matched search, project `extended_fields` payloads so the
+ * Activity UI only draws fields that explain the hit. Author hits keep the full
+ * map. Returns `null` when a value projection leaves no fields (caller must omit
+ * the document so the empty-map expander fallback never appears). Non-field-update
+ * actions and empty search are returned unchanged. This is a read-time projection
+ * on the find-with-search path only — stored user actions are never rewritten.
+ */
+export const projectUserActionForSearch = (
+  attributes: UserActionTransformedAttributes,
+  search: string
+): UserActionTransformedAttributes | null => {
+  if (!search || attributes.type !== UserActionTypes.extended_fields) {
+    return attributes;
+  }
+
+  const term = search.toLowerCase();
+
+  if (authorMatchesSearch(attributes, term)) {
+    return attributes;
+  }
+
+  const payload = attributes.payload as { extended_fields?: Record<string, unknown> };
+  const extendedFields = payload.extended_fields;
+  if (extendedFields == null || typeof extendedFields !== 'object') {
+    return attributes;
+  }
+
+  const matchingFields: Record<string, string> = {};
+  for (const [key, value] of Object.entries(extendedFields)) {
+    if (typeof value === 'string' && value.toLowerCase().includes(term)) {
+      matchingFields[key] = value;
     }
   }
 
-  return false;
+  if (Object.keys(matchingFields).length === 0) {
+    return null;
+  }
+
+  return {
+    ...attributes,
+    payload: {
+      ...attributes.payload,
+      extended_fields: matchingFields,
+    },
+  };
 };

@@ -97,7 +97,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
     data-test-subj="table-topCountriesSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -131,6 +131,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                         id="generated-id_euiToolTipAnchor"
                       >
                         <button
+                          aria-expanded="true"
                           aria-label="Open"
                           class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
                           data-test-subj="query-toggle-header"
@@ -391,7 +392,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <span
-                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    class="css-purdnl-FlagWrapper e1nywon80"
                     data-test-subj="country-flag"
                   >
                     🇩🇪
@@ -447,7 +448,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <span
-                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    class="css-purdnl-FlagWrapper e1nywon80"
                     data-test-subj="country-flag"
                   >
                     🇺🇸
@@ -785,7 +786,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
     data-test-subj="table-topCountriesSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -819,6 +820,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                         id="generated-id_euiToolTipAnchor"
                       >
                         <button
+                          aria-expanded="true"
                           aria-label="Open"
                           class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
                           data-test-subj="query-toggle-header"
@@ -1113,7 +1115,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <span
-                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    class="css-purdnl-FlagWrapper e1nywon80"
                     data-test-subj="country-flag"
                   >
                     🇩🇪
@@ -1178,7 +1180,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <span
-                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    class="css-purdnl-FlagWrapper e1nywon80"
                     data-test-subj="country-flag"
                   >
                     🇺🇸

@@ -552,6 +552,153 @@ describe('WatchlistEntitySourceClient', () => {
     });
   });
 
+  describe('rotateApiKey', () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    const mockSourcesById = (sources: Record<string, Record<string, unknown>>) => {
+      soClient.get.mockImplementation(async (_type: string, id: string) => {
+        const attributes = sources[id];
+        if (!attributes) throw new Error(`Saved object [${id}] not found`);
+        return { id, type: watchlistEntitySourceTypeName, references: [], attributes } as never;
+      });
+      soClient.update.mockImplementation(
+        async (_type: string, id: string, attrs: Record<string, unknown>) =>
+          ({ id, attributes: { ...sources[id], ...attrs } } as never)
+      );
+    };
+
+    const indexSource = (overrides: Record<string, unknown> = {}) => ({
+      type: 'index',
+      name: 'My Source',
+      indexPattern: 'logs-*',
+      apiKeyId: 'old-kid',
+      ...overrides,
+    });
+
+    it('replaces an existing key: persists the new key, then invalidates the old one', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+
+      const result = await client.rotateApiKey('source-1', request);
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        watchlistEntitySourceTypeName,
+        'source-1',
+        mockedApiKey,
+        expect.anything()
+      );
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+        mockSecurity,
+        'old-kid',
+        logger
+      );
+      // grant-first: the old key is only invalidated once the new one is saved
+      expect(soClient.update.mock.invocationCallOrder[0]).toBeLessThan(
+        mockInvalidateEntitySourceApiKey.mock.invocationCallOrder[0]
+      );
+      expect(result.apiKeyId).toBe(mockedApiKey.apiKeyId);
+    });
+
+    it('also grants a key to a source that has none', async () => {
+      mockSourcesById({ 'source-1': indexSource({ apiKeyId: undefined }) });
+
+      await client.rotateApiKey('source-1', request);
+
+      expect(soClient.update).toHaveBeenCalled();
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('keeps the old key untouched when the grant fails', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      mockGrantEntitySourceApiKey.mockRejectedValue(new Error('grant failed'));
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow('grant failed');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('discards the new key and keeps the old one when saving the source fails', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      soClient.update.mockRejectedValue(new Error('conflict'));
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow('conflict');
+
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledTimes(1);
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+        mockSecurity,
+        mockedApiKey.apiKeyId,
+        logger
+      );
+    });
+
+    it('keeps the new key when the save fails after the write was applied', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      soClient.update.mockImplementation(async () => {
+        // the write is committed but the response never arrives
+        soClient.get.mockResolvedValue({
+          id: 'source-1',
+          type: watchlistEntitySourceTypeName,
+          references: [],
+          attributes: indexSource({ apiKeyId: mockedApiKey.apiKeyId }),
+        } as never);
+        throw new Error('connection lost');
+      });
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow('connection lost');
+
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('does not invalidate the new key when it cannot confirm what was saved', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      soClient.update.mockImplementation(async () => {
+        soClient.get.mockRejectedValue(new Error('unavailable'));
+        throw new Error('connection lost');
+      });
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow('connection lost');
+
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('rejects a caller who cannot read the index, without granting anything', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      mockValidateIndexPermissions.mockRejectedValue(new Error('Insufficient privileges'));
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow(
+        'Insufficient privileges'
+      );
+
+      expect(mockValidateIndexPermissions).toHaveBeenCalledWith(esClient, 'logs-*');
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects sources that are not index-type', async () => {
+      mockSourcesById({ 'source-1': { type: 'store', name: 'Store' } });
+
+      await expect(client.rotateApiKey('source-1', request)).rejects.toThrow(/index-type/);
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws when encrypted saved objects are not available', async () => {
+      mockSourcesById({ 'source-1': indexSource() });
+      const noEncryptionClient = new WatchlistEntitySourceClient({
+        soClient,
+        namespace: 'default',
+        esClient,
+        getStartServices: mockGetStartServices as never,
+        logger,
+        hasEncryptionKey: false,
+      });
+
+      await expect(noEncryptionClient.rotateApiKey('source-1', request)).rejects.toThrow(
+        /encrypted saved objects/
+      );
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+  });
+
   describe('get', () => {
     it('delegates to soClient.get and returns the source with id', async () => {
       soClient.get.mockResolvedValue({

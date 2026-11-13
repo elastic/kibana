@@ -25,6 +25,9 @@ import {
   getCase,
 } from '../../../../common/lib/api';
 
+const EVENTS_INDEX = 'test-events-index';
+const LEGACY_EVENTS_INDEX = 'legacy-events-index';
+
 /**
  * Legacy v1 `event` payload. With the flag ON the owner prefix resolves it to a
  * unified `security.event`, but it is written through the legacy path so it lands
@@ -34,7 +37,7 @@ const legacyEventPayload = (overrides: Record<string, unknown> = {}): Attachment
   ({
     type: AttachmentType.event,
     eventId: 'legacy-event-1',
-    index: 'legacy-events-index',
+    index: LEGACY_EVENTS_INDEX,
     owner: 'securitySolutionFixture',
     ...overrides,
   } as AttachmentRequest);
@@ -43,13 +46,27 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  // Attaching an event requires the referenced document to actually exist (mget-backed
+  // existence check), so tests must seed it first.
+  const seedEvents = (ids: string[], index = EVENTS_INDEX) =>
+    Promise.all(
+      ids.map((id) =>
+        es.index({ index, id, document: { '@timestamp': new Date().toISOString() }, refresh: true })
+      )
+    );
+
   describe('Unified Events — CRUD, aggregation, stats', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
+      await es.indices.delete({
+        index: [EVENTS_INDEX, LEGACY_EVENTS_INDEX],
+        ignore_unavailable: true,
+      });
     });
 
     describe('create', () => {
       it('creates a unified event attachment via v2 payload', async () => {
+        await seedEvents(['event-doc-1']);
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
@@ -71,6 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('writes event to cases-attachments SO when flag is ON', async () => {
+        await seedEvents(['event-so-check']);
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
@@ -117,6 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('creates event with array attachmentId', async () => {
+        await seedEvents(['event-1', 'event-2', 'event-3']);
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
@@ -138,6 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('read', () => {
       it('retrieves a unified event by id', async () => {
+        await seedEvents(['event-read-1']);
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
@@ -164,6 +184,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('reflects unified events in case totalEvents count', async () => {
+        await seedEvents(['event-find-1', 'event-find-2']);
         const postedCase = await createCase(supertest, postCaseReq);
         await bulkCreateAttachments({
           supertest,
@@ -195,6 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('stats and aggregation', () => {
       it('totalEvents reflects unified event count on the case', async () => {
+        await seedEvents(['stats-event-1', 'stats-event-2']);
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
@@ -226,6 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('counts comments and events in case totals', async () => {
+        await seedEvents(['mixed-event-1']);
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
@@ -253,6 +276,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('mixed legacy + unified events on the same case', () => {
       it('reads a legacy `event` through the v2 read path (legacy type preserved in legacy mode)', async () => {
+        await seedEvents(['legacy-event-1'], LEGACY_EVENTS_INDEX);
         const postedCase = await createCase(supertest, postCaseReq);
         const legacyCase = await createComment({
           supertest,
@@ -273,6 +297,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('lifts a legacy `event` onto cases-attachments alongside a unified event', async () => {
+        await seedEvents(['legacy-event-1'], LEGACY_EVENTS_INDEX);
+        await seedEvents(['unified-event-mix']);
         const postedCase = await createCase(supertest, postCaseReq);
 
         const legacyCase = await createComment({
@@ -339,6 +365,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('totalEvents equals the union of legacy and unified events', async () => {
+        await seedEvents(['legacy-event-1'], LEGACY_EVENTS_INDEX);
+        await seedEvents(['union-event-1', 'union-event-2', 'union-event-3']);
         const postedCase = await createCase(supertest, postCaseReq);
 
         // One legacy event (lifted onto cases-attachments when the flag is ON).
@@ -376,6 +404,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('delete', () => {
       it('deletes a unified event', async () => {
+        await seedEvents(['event-delete-1']);
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,

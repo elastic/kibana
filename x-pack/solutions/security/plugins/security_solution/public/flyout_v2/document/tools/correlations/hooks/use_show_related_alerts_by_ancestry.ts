@@ -10,16 +10,13 @@ import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { ALERT_ANCESTORS_ID } from '../../../../../../common/field_maps/field_names';
 import { useIsAnalyzerEnabled } from '../../../../../detections/hooks/use_is_analyzer_enabled';
 import { useLicense } from '../../../../../common/hooks/use_license';
+import { isRulePreviewDocument } from '../../../../shared/utils/is_rule_preview_document';
 
 export interface UseShowRelatedAlertsByAncestryParams {
   /**
    * The alert or event document
    */
   hit: DataTableRecord;
-  /**
-   * Boolean indicating if the flyout is open in preview
-   */
-  isRulePreview: boolean;
 }
 
 export interface UseShowRelatedAlertsByAncestryResult {
@@ -34,13 +31,14 @@ export interface UseShowRelatedAlertsByAncestryResult {
 }
 
 /**
- * Returns true if the user has at least platinum privilege, and if the document has ancestry data
+ * Returns true if the user has at least platinum privilege, and if the document has ancestry data.
+ * For rule preview documents the ancestry document id is the ancestor's id rather than the hit id.
  */
 export const useShowRelatedAlertsByAncestry = ({
   hit,
-  isRulePreview,
 }: UseShowRelatedAlertsByAncestryParams): UseShowRelatedAlertsByAncestryResult => {
   const hasProcessEntityInfo = useIsAnalyzerEnabled(hit);
+  const isRulePreview = isRulePreviewDocument(hit);
 
   const ancestorId = (getFieldValue(hit, ALERT_ANCESTORS_ID) as string) ?? '';
   const ancestryDocumentId = isRulePreview ? ancestorId : hit.raw._id ?? '';

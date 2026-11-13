@@ -27,8 +27,6 @@ import type {
   TemplatesService,
   FieldDefinitionsService,
 } from '../services';
-import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
@@ -60,8 +58,6 @@ export interface CasesClientArgs {
   readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
-  readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   readonly unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   readonly securityStartPlugin: SecurityPluginStart;
   readonly spaceId: string;
@@ -73,6 +69,7 @@ export interface CasesClientArgs {
   readonly casesEventBus?: CasesEventBus;
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
+  readonly clientSource: CasesClientSource;
 }
 
 export type CasesSearchParams = Partial<
@@ -91,3 +88,14 @@ export type CasesSearchParams = Partial<
     | 'customFields'
   > & { authorizationFilter?: KueryNode }
 >;
+
+/**
+ * The source that created a cases client.
+ * - `plugin_contract`: called via another plugin's contract (e.g. Security Solution, Fleet).
+ */
+export type CasesClientSource =
+  | 'rest_api'
+  | 'connector'
+  | 'workflow'
+  | 'agent_builder'
+  | 'plugin_contract';

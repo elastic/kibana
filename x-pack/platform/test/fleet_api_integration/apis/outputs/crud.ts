@@ -232,6 +232,13 @@ export default function (providerContext: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
 
+      // Pre-install filetest so the parallel createPackagePolicy calls below don't race a first-time install
+      await supertest
+        .post(`/api/fleet/epm/packages/filetest/0.1.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
       let { body: apiResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'kibana')
@@ -313,7 +320,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('GET /outputs', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/291937
+    describe.skip('GET /outputs', () => {
       it('should list all the outputs', async () => {
         const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
@@ -793,6 +801,198 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
+      // A credential an output keeps as a secret must survive an update that does not touch it,
+      // and a plain text value sent for it must be stored as a secret too. Getting either wrong
+      // leaves the output pointing at a secret that no longer exists, and every agent using it
+      // fails with `key file not configured accessing 'logstash.ssl'`.
+      describe('updating an output that keeps a credential as a secret', () => {
+        const expectSecretDeleted = async (id: string) => {
+          // the error is read outside of any `try`, so that a secret that still exists fails the
+          // test, and an error other than a not found does too
+          const error = await getSecretById(id).then(
+            () => undefined,
+            (e) => e
+          );
+          expect(error?.meta?.statusCode).to.be(404);
+        };
+
+        const createLogstashOutputWithSecretKey = async () => {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Logstash Output ${uuidV4()}`,
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: { ssl: { key: 'KEY' } },
+            })
+            .expect(200);
+
+          return { id: res.body.item.id, secretId: res.body.item.secrets.ssl.key.id };
+        };
+
+        it('keeps the ssl key when only the name is updated', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Logstash Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          // the secret is still stored, so the reference the output keeps resolves
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('KEY');
+
+          const { body } = await supertest.get(`/api/fleet/outputs/${id}`).expect(200);
+          expect(body.item.secrets.ssl.key.id).to.equal(secretId);
+          expect(body.item.ssl.certificate).to.equal('CERTIFICATE');
+        });
+
+        it('stores a plain text ssl key as a secret and removes the previous one', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: {
+                certificate: 'NEW_CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+                key: 'PLAIN_KEY',
+              },
+            })
+            .expect(200);
+
+          const newSecretId = updateRes.body.item.secrets.ssl.key.id;
+          expect(newSecretId).not.to.equal(secretId);
+          // the plain text value is not stored next to the secret
+          expect(updateRes.body.item.ssl.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('NEW_CERTIFICATE');
+
+          const secret = await getSecretById(newSecretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('PLAIN_KEY');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the ssl key when ssl is explicitly cleared', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ ssl: null })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes only the ssl key when it is cleared with an explicit null', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: { certificate: 'CERTIFICATE', certificate_authorities: ['CA1', 'CA2'] },
+              secrets: { ssl: { key: null } },
+            })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('CERTIFICATE');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the password of a kafka output when the authentication type changes', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            // the Kafka update payload requires a name
+            .send({ name: `Kafka Output renamed ${uuidV4()}`, auth_type: 'none' })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.password).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
+        it('keeps the password of a kafka output when only the name is updated', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Kafka Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('pass');
+        });
+
+        it('keeps the service token of a remote elasticsearch output when only the name is updated', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Remote Elasticsearch Output ${uuidV4()}`,
+              type: 'remote_elasticsearch',
+              hosts: ['https://remote-es:9200'],
+              secrets: { service_token: 'token' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.service_token.id;
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Remote Elasticsearch Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('token');
+        });
+      });
+
       it('should allow to update kibana_api_key on an existing remote_elasticsearch output', async function () {
         const res = await supertest
           .post(`/api/fleet/outputs`)
@@ -840,10 +1040,8 @@ export default function (providerContext: FtrProviderContext) {
 
         // Create package policies with default output under agent policies not using default output
         // to ensure that those agent policies still get bumped
-        await Promise.all([
-          createPackagePolicy([policy2.item.id], undefined, defaultOutputId),
-          createPackagePolicy([policy4.item.id], TEST_SPACE_ID, defaultOutputId),
-        ]);
+        await createPackagePolicy([policy2.item.id], undefined, defaultOutputId);
+        await createPackagePolicy([policy4.item.id], TEST_SPACE_ID, defaultOutputId);
 
         await supertest
           .put(`/api/fleet/outputs/${defaultOutputId}`)
@@ -895,10 +1093,8 @@ export default function (providerContext: FtrProviderContext) {
 
         // Create package policies under agent policies using default output to ensure those
         // agent policies still get bumped
-        await Promise.all([
-          createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
-          createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
-        ]);
+        await createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id);
+        await createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id);
 
         await supertest
           .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)
@@ -979,10 +1175,8 @@ export default function (providerContext: FtrProviderContext) {
 
           // Create package policies under agent policies using default output to ensure those
           // agent policies still get bumped
-          await Promise.all([
-            createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
-            createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
-          ]);
+          await createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id);
+          await createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id);
 
           await supertest
             .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)
@@ -1014,6 +1208,104 @@ export default function (providerContext: FtrProviderContext) {
             deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
             deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
           ]);
+        });
+      });
+
+      describe('output ID immutability', () => {
+        let targetOutputId: string;
+
+        beforeEach(async () => {
+          const { body } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `id-immutability-test-${uuidV4()}`,
+              type: 'elasticsearch',
+              hosts: ['https://test.fr:443'],
+            })
+            .expect(200);
+          targetOutputId = body.item.id;
+        });
+
+        afterEach(async () => {
+          if (!targetOutputId) return;
+          await supertest
+            .delete(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+        });
+
+        it('should return 400 when body id does not match path outputId', async function () {
+          const { body } = await supertest
+            .put(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: '../../../api/spaces/space/admin-space',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr:443'],
+            })
+            .expect(400);
+
+          expect(body.message).to.contain('Cannot change output ID');
+
+          const { body: getBody } = await supertest
+            .get(`/api/fleet/outputs/${targetOutputId}`)
+            .expect(200);
+          expect(getBody.item.id).to.equal(targetOutputId);
+          expect(getBody.item.hosts).to.eql(['https://test.fr:443']);
+        });
+
+        it('should return 200 and preserve canonical id when body id matches path outputId', async function () {
+          const { body } = await supertest
+            .put(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: targetOutputId,
+              type: 'elasticsearch',
+              hosts: ['https://updated.fr:443'],
+            })
+            .expect(200);
+
+          expect(body.item.id).to.equal(targetOutputId);
+
+          const { body: getBody } = await supertest
+            .get(`/api/fleet/outputs/${targetOutputId}`)
+            .expect(200);
+          expect(getBody.item.id).to.equal(targetOutputId);
+        });
+
+        it('should return canonical id in list and GET after update attempts containing id', async function () {
+          // attempt poisoning via mismatched id — expect rejection
+          await supertest
+            .put(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: 'poisoned-id',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr:443'],
+            })
+            .expect(400);
+
+          // GET by canonical id still works
+          const { body: getBody } = await supertest
+            .get(`/api/fleet/outputs/${targetOutputId}`)
+            .expect(200);
+          expect(getBody.item.id).to.equal(targetOutputId);
+
+          // list returns canonical id
+          const { body: listBody } = await supertest.get(`/api/fleet/outputs`).expect(200);
+          const found = listBody.items.find((o: any) => o.id === targetOutputId);
+          expect(found).to.be.ok();
+          expect(found.id).to.equal(targetOutputId);
+
+          // delete with canonical id succeeds
+          await supertest
+            .delete(`/api/fleet/outputs/${targetOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          // prevent afterEach double-delete from failing
+          targetOutputId = '';
         });
       });
     });

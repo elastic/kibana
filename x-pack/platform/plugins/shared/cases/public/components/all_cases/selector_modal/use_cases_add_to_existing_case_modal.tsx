@@ -78,17 +78,22 @@ export const useCasesAddToExistingCaseModal = ({
   const handleOnRowClick = useCallback(
     async (
       theCase: CaseUI | undefined,
-      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
+      getAttachments: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
     ) => {
-      const attachments = getAttachments?.({ theCase }) ?? [];
-
       // when the case is undefined in the modal
-      // the user clicked "create new case"
+      // the user clicked "create new case". The case (and its owner) doesn't exist yet,
+      // so resolve owner-dependent attachments lazily once the flyout creates it instead
+      // of eagerly resolving here, which would lock in an empty array for callers whose
+      // getAttachments depends on theCase.owner.
       if (theCase === undefined) {
         closeModal();
-        openCreateNewCaseFlyout({ attachments });
+        openCreateNewCaseFlyout({
+          getAttachments: (owner: string) => getAttachments({ theCase: { owner } as CaseUI }) ?? [],
+        });
         return;
       }
+
+      const attachments = getAttachments?.({ theCase }) ?? [];
 
       try {
         // add attachments to the case
@@ -140,11 +145,7 @@ export const useCasesAddToExistingCaseModal = ({
   );
 
   const openModal = useCallback(
-    ({
-      getAttachments,
-    }: {
-      getAttachments?: GetAttachments;
-    } = {}) => {
+    ({ getAttachments }: { getAttachments: GetAttachments }) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {

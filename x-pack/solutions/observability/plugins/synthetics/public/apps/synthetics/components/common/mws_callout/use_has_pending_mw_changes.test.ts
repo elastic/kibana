@@ -6,59 +6,56 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import * as redux from 'react-redux';
-import * as alertsShared from '@kbn/alerts-ui-shared';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
-import { selectMaintenanceWindowsState } from '../../../state/maintenance_windows';
-import { selectDynamicSettings } from '../../../state/settings/selectors';
+import { useFetchMaintenanceWindows } from '../../../hooks';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useDispatch: jest.fn(),
-  useSelector: jest.fn(),
+jest.mock('../../../hooks', () => ({
+  ...jest.requireActual('../../../hooks'),
+  useFetchMaintenanceWindows: jest.fn().mockReturnValue({ data: undefined }),
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockReturnValue({ services: {} }),
-}));
+const mockUseFetchMWs = useFetchMaintenanceWindows as unknown as jest.MockedFunction<
+  () => {
+    data?: {
+      maintenanceWindows: Array<{
+        id: string;
+        title: string;
+        status: MaintenanceWindowStatus;
+        updatedAt: string;
+      }>;
+      lastSuccessfulSyncAt?: string;
+      autoSyncDisabled?: boolean;
+    };
+  }
+>;
 
-jest.mock('@kbn/alerts-ui-shared', () => ({
-  useFetchActiveMaintenanceWindows: jest.fn().mockReturnValue({ data: [] }),
-}));
-
-jest.mock('../../../contexts', () => ({
-  useSyntheticsRefreshContext: jest.fn().mockReturnValue({ lastRefresh: 0 }),
-}));
-
-const mockUseSelector = redux.useSelector as jest.MockedFunction<typeof redux.useSelector>;
-const mockDispatch = jest.fn();
-const mockUseFetchActiveMWs =
-  alertsShared.useFetchActiveMaintenanceWindows as unknown as jest.MockedFunction<
-    () => { data: Array<{ id: string; title: string }> }
-  >;
-
-const mockMW = (id: string, updatedAt: string) => ({
+const mockMW = (
+  id: string,
+  updatedAt: string,
+  status: MaintenanceWindowStatus = MaintenanceWindowStatus.Upcoming
+) => ({
   id,
   title: `MW ${id}`,
-  updated_at: updatedAt,
+  status,
+  updatedAt,
 });
+
+const setMWs = (
+  mws: Array<ReturnType<typeof mockMW>>,
+  syncStatus: { lastSuccessfulSyncAt?: string; autoSyncDisabled?: boolean } = {}
+) => {
+  mockUseFetchMWs.mockReturnValue({
+    data: { maintenanceWindows: mws, ...syncStatus },
+  });
+};
+
+const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60 * 1000).toISOString();
 
 describe('useHasPendingMwChanges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (redux.useDispatch as jest.Mock).mockReturnValue(mockDispatch);
-
-    mockUseFetchActiveMWs.mockReturnValue({ data: [] });
-
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === selectMaintenanceWindowsState) {
-        return { data: null };
-      }
-      if (selector === selectDynamicSettings) {
-        return { settings: { privateLocationsSyncInterval: 5 } };
-      }
-      return undefined;
-    });
+    mockUseFetchMWs.mockReturnValue({ data: undefined });
   });
 
   it('returns no pending changes when monitor has no MWs', () => {
@@ -68,58 +65,22 @@ describe('useHasPendingMwChanges', () => {
     expect(result.current.activeMWs).toEqual([]);
   });
 
-  it('returns no pending changes when allMWsData is not yet loaded', () => {
+  it('returns no pending changes when maintenance windows are not yet loaded', () => {
     const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
 
     expect(result.current.hasPendingChanges).toBe(false);
   });
 
   it('detects deleted MW as pending change', () => {
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === selectMaintenanceWindowsState) {
-        return { data: { data: [] } };
-      }
-      if (selector === selectDynamicSettings) {
-        return { settings: { privateLocationsSyncInterval: 5 } };
-      }
-      return undefined;
-    });
+    setMWs([]);
 
     const { result } = renderHook(() => useHasPendingMwChanges(['mw-deleted']));
 
     expect(result.current.hasPendingChanges).toBe(true);
   });
 
-  it('detects recently modified inactive MW as pending change', () => {
-    const recentlyUpdated = new Date(Date.now() - 60 * 1000).toISOString(); // 1 min ago
-
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === selectMaintenanceWindowsState) {
-        return { data: { data: [mockMW('mw-1', recentlyUpdated)] } };
-      }
-      if (selector === selectDynamicSettings) {
-        return { settings: { privateLocationsSyncInterval: 5 } };
-      }
-      return undefined;
-    });
-
-    const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
-
-    expect(result.current.hasPendingChanges).toBe(true);
-  });
-
-  it('returns no pending changes for MW updated longer ago than sync interval', () => {
-    const oldUpdate = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 min ago
-
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === selectMaintenanceWindowsState) {
-        return { data: { data: [mockMW('mw-1', oldUpdate)] } };
-      }
-      if (selector === selectDynamicSettings) {
-        return { settings: { privateLocationsSyncInterval: 5 } };
-      }
-      return undefined;
-    });
+  it('does not treat an existing inactive MW as pending after an edit', () => {
+    setMWs([mockMW('mw-1', new Date().toISOString())]);
 
     const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
 
@@ -128,20 +89,7 @@ describe('useHasPendingMwChanges', () => {
 
   it('returns no pending changes when MW is currently active', () => {
     const recentlyUpdated = new Date(Date.now() - 60 * 1000).toISOString();
-
-    mockUseFetchActiveMWs.mockReturnValue({
-      data: [{ id: 'mw-1', title: 'MW 1' }],
-    });
-
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === selectMaintenanceWindowsState) {
-        return { data: { data: [mockMW('mw-1', recentlyUpdated)] } };
-      }
-      if (selector === selectDynamicSettings) {
-        return { settings: { privateLocationsSyncInterval: 5 } };
-      }
-      return undefined;
-    });
+    setMWs([mockMW('mw-1', recentlyUpdated, MaintenanceWindowStatus.Running)]);
 
     const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
 
@@ -150,43 +98,90 @@ describe('useHasPendingMwChanges', () => {
   });
 
   it('filters activeMWs to only those referenced by the monitor', () => {
-    mockUseFetchActiveMWs.mockReturnValue({
-      data: [
-        { id: 'mw-1', title: 'MW 1' },
-        { id: 'mw-other', title: 'MW Other' },
-      ],
-    });
-
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === selectMaintenanceWindowsState) {
-        return { data: { data: [mockMW('mw-1', new Date().toISOString())] } };
-      }
-      if (selector === selectDynamicSettings) {
-        return { settings: { privateLocationsSyncInterval: 5 } };
-      }
-      return undefined;
-    });
+    setMWs([
+      mockMW('mw-1', new Date().toISOString(), MaintenanceWindowStatus.Running),
+      mockMW('mw-other', new Date().toISOString(), MaintenanceWindowStatus.Running),
+    ]);
 
     const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
 
-    expect(result.current.activeMWs).toEqual([{ id: 'mw-1', title: 'MW 1' }]);
+    expect(result.current.activeMWs.map((mw) => mw.id)).toEqual(['mw-1']);
   });
 
   it('detects pending changes when one of multiple MWs is deleted', () => {
     const recentlyUpdated = new Date(Date.now() - 60 * 1000).toISOString();
-
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === selectMaintenanceWindowsState) {
-        return { data: { data: [mockMW('mw-1', recentlyUpdated)] } };
-      }
-      if (selector === selectDynamicSettings) {
-        return { settings: { privateLocationsSyncInterval: 5 } };
-      }
-      return undefined;
-    });
+    setMWs([mockMW('mw-1', recentlyUpdated)]);
 
     const { result } = renderHook(() => useHasPendingMwChanges(['mw-1', 'mw-deleted']));
 
     expect(result.current.hasPendingChanges).toBe(true);
+  });
+
+  describe('overdue sync', () => {
+    it('flags a change made after the last successful sync once the grace period passed', () => {
+      setMWs([mockMW('mw-1', minutesAgo(10))], { lastSuccessfulSyncAt: minutesAgo(60) });
+
+      const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
+
+      expect(result.current.isSyncOverdue).toBe(true);
+      expect(result.current.hasPendingChanges).toBe(true);
+    });
+
+    it('flags it while the MW is active too', () => {
+      setMWs([mockMW('mw-1', minutesAgo(10), MaintenanceWindowStatus.Running)], {
+        lastSuccessfulSyncAt: minutesAgo(60),
+      });
+
+      const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
+
+      expect(result.current.isSyncOverdue).toBe(true);
+      expect(result.current.activeMWs).toHaveLength(1);
+    });
+
+    it('waits out the grace period for a fresh change', () => {
+      setMWs([mockMW('mw-1', minutesAgo(1))], { lastSuccessfulSyncAt: minutesAgo(60) });
+
+      const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
+
+      expect(result.current.isSyncOverdue).toBe(false);
+      expect(result.current.hasPendingChanges).toBe(false);
+    });
+
+    it('is not overdue once a sync completed after the change', () => {
+      setMWs([mockMW('mw-1', minutesAgo(30))], { lastSuccessfulSyncAt: minutesAgo(10) });
+
+      const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
+
+      expect(result.current.isSyncOverdue).toBe(false);
+    });
+
+    it('is not overdue while auto sync is disabled', () => {
+      setMWs([mockMW('mw-1', minutesAgo(30))], {
+        lastSuccessfulSyncAt: minutesAgo(60),
+        autoSyncDisabled: true,
+      });
+
+      const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
+
+      expect(result.current.isSyncOverdue).toBe(false);
+    });
+
+    it('is not overdue when the sync status is unknown', () => {
+      setMWs([mockMW('mw-1', minutesAgo(30))]);
+
+      const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
+
+      expect(result.current.isSyncOverdue).toBe(false);
+    });
+
+    it('ignores MWs the monitor does not reference', () => {
+      setMWs([mockMW('mw-1', minutesAgo(90)), mockMW('mw-other', minutesAgo(10))], {
+        lastSuccessfulSyncAt: minutesAgo(60),
+      });
+
+      const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
+
+      expect(result.current.isSyncOverdue).toBe(false);
+    });
   });
 });

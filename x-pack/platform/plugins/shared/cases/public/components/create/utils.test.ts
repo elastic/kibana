@@ -36,8 +36,8 @@ describe('utils', () => {
         customFields: [],
         description: '',
         settings: {
-          syncAlerts: true,
-          extractObservables: true,
+          syncAlerts: false,
+          extractObservables: false,
         },
         severity: 'low',
         tags: [],
@@ -60,13 +60,21 @@ describe('utils', () => {
         description: '',
         owner: 'foobar',
         settings: {
-          syncAlerts: true,
-          extractObservables: true,
+          syncAlerts: false,
+          extractObservables: false,
         },
         severity: 'low',
         tags: [],
         title: '',
       });
+    });
+
+    it('defaults sync alerts/extract observables on for the security solution owner', () => {
+      expect(getInitialCaseValue({ owner: 'securitySolution' })).toEqual(
+        expect.objectContaining({
+          settings: { syncAlerts: true, extractObservables: true },
+        })
+      );
     });
 
     it('returns extra fields', () => {

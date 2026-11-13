@@ -11,7 +11,12 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiSkeletonText } from '@elastic/eui';
 
 import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
-import { IntegrationsStateContextProvider, useBreadcrumbs, useStartServices } from '../../hooks';
+import {
+  IntegrationsStateContextProvider,
+  useAutomaticImportAuthz,
+  useBreadcrumbs,
+  useStartServices,
+} from '../../hooks';
 
 import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy_package_policy_page';
 import { CreatePackagePolicyPage } from '../../../fleet/sections/agent_policy/create_package_policy_page';
@@ -24,9 +29,10 @@ import { CustomLanguagesOverview } from './screens/detail/custom_languages_overv
 
 export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
+  const { canCreate } = useAutomaticImportAuthz();
   useBreadcrumbs('integrations');
 
-  const hasCreateIntegration = Boolean(automaticImport);
+  const hasCreateIntegration = Boolean(automaticImport) && canCreate;
 
   return (
     <Routes>

@@ -34,9 +34,13 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
     const { ids: idsToDelete } = request.body || {};
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 
-    const { errors, result } = await deleteMonitorAPI.execute({
+    const { errors, result, res } = await deleteMonitorAPI.execute({
       monitorIds: idsToDelete,
     });
+
+    if (res) {
+      return res;
+    }
 
     return { result, errors };
   },

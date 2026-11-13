@@ -10,7 +10,7 @@
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   buildTrendlineQueryWithMetricFieldMap,
-  buildTrendlineBucketExpression,
+  queryHasTsSourceCommand,
   LENS_METRIC_DEFAULT_COLOR_STEPS,
   type FormBasedPersistedState,
   type MetricVisualizationState,
@@ -36,6 +36,7 @@ import {
   DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from './metric/defaults';
 import { DEFAULT_LAYER_ID } from '../../constants';
+import { LENS_DEFAULT_TIME_FIELD } from '../constants';
 import {
   addLayerColumn,
   buildDataSourceState,
@@ -605,6 +606,12 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
   const defaultLayer = layers[DEFAULT_LAYER_ID];
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
 
+  // Column ids of the metric columns as they live inside the trendline layer. They differ from the
+  // main layer ids, so any reference into the trendline layer (e.g. a terms breakdown `orderBy`)
+  // must use these to resolve to a column that actually exists in that layer.
+  const trendlineMetricColumnId = `${ACCESSOR}_trendline`;
+  const trendlineSecondaryColumnId = `${getAccessorName('secondary')}_trendlineX0`;
+
   if (trendLineLayer) {
     trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
   }
@@ -624,25 +631,36 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
         drop_partial_intervals: false,
       })
     );
-    addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
+    addLayerColumn(trendLineLayer, trendlineMetricColumnId, newPrimaryColumns);
   }
 
   if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
-    const breakdownColumn = fromBucketLensApiToLensState(
-      layer.breakdown_by as LensApiBucketOperations,
-      [
-        ...newPrimaryColumns.map((col) => ({ column: col, id: getAccessorName('metric') })),
-        ...(newSecondaryColumns ?? []).map((col) => ({
-          column: col,
-          id: getAccessorName('secondary'),
-        })),
-      ]
+    const breakdownApiColumn = layer.breakdown_by as LensApiBucketOperations;
+
+    // A metric `rank_by.metric_index` resolves against this list, so the metric ids must match the
+    // ids of the metric columns in the layer the breakdown belongs to (main vs. trendline). Each
+    // call returns a fresh column so the two layers never share one mutable object.
+    const buildBreakdownColumn = (metricId: string, secondaryId: string) =>
+      fromBucketLensApiToLensState(breakdownApiColumn, [
+        ...newPrimaryColumns.map((column) => ({ column, id: metricId })),
+        ...(newSecondaryColumns ?? []).map((column) => ({ column, id: secondaryId })),
+      ]);
+
+    addLayerColumn(
+      defaultLayer,
+      columnName,
+      buildBreakdownColumn(getAccessorName('metric'), getAccessorName('secondary')),
+      true
     );
-    addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
 
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, breakdownColumn, true);
+      addLayerColumn(
+        trendLineLayer,
+        `${columnName}_trendline`,
+        buildBreakdownColumn(trendlineMetricColumnId, trendlineSecondaryColumnId),
+        true
+      );
     }
   }
 
@@ -650,7 +668,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
     const columnName = getAccessorName('secondary');
     addLayerColumn(defaultLayer, columnName, newSecondaryColumns);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newSecondaryColumns, false, 'X0');
+      addLayerColumn(trendLineLayer, trendlineSecondaryColumnId, newSecondaryColumns);
     }
   }
 
@@ -660,7 +678,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newColumn, false, 'X0');
+      addLayerColumn(trendLineLayer, `${columnName}_trendlineX0`, newColumn, false);
     }
   }
 
@@ -734,7 +752,9 @@ function buildEsqlTrendlineLayer(
   const dataSource = 'data_source' in config ? config.data_source : undefined;
   if (!dataSource || dataSource.type !== 'esql') return undefined;
 
-  const timeField = mainLayer.timeField;
+  const timeField =
+    mainLayer.timeField ??
+    (queryHasTsSourceCommand(dataSource.query) ? LENS_DEFAULT_TIME_FIELD : undefined);
   if (!timeField) return undefined;
 
   const metricColumn = mainLayer.columns.find((c) => c.columnId === getAccessorName('metric'));
@@ -766,13 +786,12 @@ function buildEsqlTrendlineLayer(
     );
   }
 
-  // Build trendline columns: time bucket + copies of metric columns from main layer
-  // The fieldName must match the ES|QL result column name, which is the full
-  // BUCKET expression (e.g. "BUCKET(timestamp, 75, ?_tstart, ?_tend)"),
-  // not the raw field name.
+  // Build trendline columns: time bucket + copies of metric columns from main layer.
+  // Use the query helper's resolved result column so aliased TBUCKET expressions
+  // map to their actual ES|QL result field.
   const timeColumn: TextBasedLayerColumn = {
     columnId: HISTOGRAM_COLUMN_NAME,
-    fieldName: buildTrendlineBucketExpression(timeField),
+    fieldName: trendlineQueryResult.timeField,
     meta: { type: 'date' },
   };
 

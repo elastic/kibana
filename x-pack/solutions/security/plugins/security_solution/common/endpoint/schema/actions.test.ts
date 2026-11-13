@@ -24,6 +24,7 @@ import {
   NoParametersRequestSchema,
   RunScriptActionRequestSchema,
   CancelActionRequestSchema,
+  EndpointActionGetFileSchema,
 } from '../../api/endpoint';
 import type { MemoryDumpActionRequestBody } from '../../api/endpoint/actions/response_actions/memory_dump';
 import { MemoryDumpActionRequestSchema } from '../../api/endpoint/actions/response_actions/memory_dump';
@@ -1369,10 +1370,14 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should only accept process or kernel as value for type', () => {
+    it('should only accept process, kernel or raw as value for type', () => {
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
       Object.assign(memDumpBody.parameters, { type: 'process', pid: 1 });
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
+
+      memDumpBody.parameters = { type: 'raw' };
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
@@ -1387,6 +1392,20 @@ describe('actions schemas', () => {
 
       delete memDumpBody.parameters.pid;
       memDumpBody.parameters.entity_id = 'some-value';
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+    });
+
+    it('should accept type of raw without pid or entity id', () => {
+      memDumpBody.parameters = { type: 'raw' };
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
+    });
+
+    it('should throw if pid or entity id is used with type = raw', () => {
+      memDumpBody.parameters = { type: 'raw', pid: 1 };
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+
+      memDumpBody.parameters = { type: 'raw', entity_id: 'some-value' };
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 
@@ -1438,6 +1457,53 @@ describe('actions schemas', () => {
       memDumpBody.parameters.entity_id = 'some-value';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+    });
+  });
+
+  describe('EndpointActionGetFileSchema', () => {
+    describe('and `force` parameter', () => {
+      it.each([true, false])('should accept `force` set to `%s`', (force) => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: 'C:\\locked.dat', force },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept `force` with agent type `endpoint`', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            agent_type: 'endpoint',
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: 'C:\\locked.dat', force: true },
+          });
+        }).not.toThrow();
+      });
+
+      it('should reject a `force` that is not a boolean', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: 'C:\\locked.dat', force: 'yes' },
+          });
+        }).toThrow();
+      });
+
+      describe.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+        'with agent type `%s`',
+        (agentType) => {
+          it.each([true, false])('should reject `force` set to `%s`', (force) => {
+            expect(() => {
+              EndpointActionGetFileSchema.body.validate({
+                agent_type: agentType,
+                endpoint_ids: ['endpoint_id'],
+                parameters: { path: 'C:\\locked.dat', force },
+              });
+            }).toThrow(`[parameters.force]: is not valid with agent type of ${agentType}`);
+          });
+        }
+      );
     });
   });
 });

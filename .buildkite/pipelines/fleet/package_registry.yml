@@ -23,6 +23,7 @@ steps:
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -69,8 +70,6 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -89,8 +88,6 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -116,6 +113,8 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     depends_on: build
@@ -133,6 +132,8 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     depends_on: build

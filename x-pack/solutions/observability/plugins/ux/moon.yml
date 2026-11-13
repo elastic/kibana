@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ux-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/actionable-obs-team'
+  defaultOwner: '@elastic/obs-signals-logs-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/ux-plugin'
   description: Moon project for @kbn/ux-plugin
   channel: ''
-  owner: '@elastic/actionable-obs-team'
+  owner: '@elastic/obs-signals-logs-team'
   sourceRoot: x-pack/solutions/observability/plugins/ux
 dependsOn:
   - '@kbn/core'
@@ -64,6 +64,7 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -72,6 +73,4 @@ fileGroups:
     - public/**/*.json
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

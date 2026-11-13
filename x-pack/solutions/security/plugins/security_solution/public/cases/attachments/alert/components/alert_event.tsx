@@ -11,6 +11,8 @@ import { UserActionTitle } from '@kbn/cases-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
+import { useAlertDataLoading } from './use_alert_data_loading';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
@@ -39,6 +41,8 @@ export interface AlertEventProps {
   rule: AlertAttachmentMetadata['rule'];
   savedObjectId: string;
   totalAlerts: number;
+  /** When true the rule name is shown as plain text with no clickable link (CPS / remote alerts). */
+  isRemoteAlert?: boolean;
 }
 
 export const AlertEvent: React.FC<AlertEventProps> = ({
@@ -46,6 +50,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   totalAlerts,
   savedObjectId,
   rule,
+  isRemoteAlert = false,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const enableNewFlyout = useIsNewFlyoutEnabled();
@@ -55,17 +60,27 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
       rules: { read: canReadRules },
     },
   } = useUserPrivileges();
+  const { loading: loadingPrivileges, hasAlertsRead } = useAlertsPrivileges();
 
   const ruleId = rule?.id ?? null;
   const ruleName = rule?.name ?? null;
 
-  // Only fetch live alert data when the attachment does not already carry rule info.
   const hasRuleIdFromMetadata = !isEmpty(ruleId);
   const idsToFetch = useMemo(
     () => (hasRuleIdFromMetadata ? [] : [alertId]),
     [hasRuleIdFromMetadata, alertId]
   );
-  const [loadingAlertData, alertsData] = useFetchAlertData(idsToFetch);
+  const [loadingAlertData, alertsData, refetchAlertData] = useFetchAlertData(idsToFetch);
+
+  const isLoadingAlertData = useAlertDataLoading({
+    hasRuleIdFromMetadata,
+    loadingAlertData,
+    loadingPrivileges,
+    hasAlertsRead,
+    alertsData,
+    alertId,
+    refetchAlertData,
+  });
 
   const { ruleId: resolvedRuleId, ruleName: resolvedRuleName } = useMemo(
     () =>
@@ -94,7 +109,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     }
   }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
-  if (loadingAlertData) {
+  if (isLoadingAlertData) {
     return <EuiLoadingSpinner size="m" />;
   }
 
@@ -111,7 +126,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
         label: resolvedRuleName,
         fallbackLabel: i18n.UNKNOWN_RULE,
         dataTestSubj: `alert-rule-link-${savedObjectId}`,
-        onClick: onRuleClick,
+        onClick: isRemoteAlert ? undefined : onRuleClick,
       }}
       dataTestSubj={`alerts-user-action-${savedObjectId}`}
     />

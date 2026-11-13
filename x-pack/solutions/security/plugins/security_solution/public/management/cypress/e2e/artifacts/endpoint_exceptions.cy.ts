@@ -102,7 +102,6 @@ describe(
 
           cy.visit(APP_PATH);
 
-          serverlessSecurityHeaders.showMoreItems();
           serverlessSecurityHeaders.openNavigationPanelFor(serverlessSecurityHeaders.ARTIFACTS);
           cy.get(serverlessSecurityHeaders.ARTIFACTS).should('exist');
         });

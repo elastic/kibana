@@ -679,6 +679,120 @@ describe('useTemplateFormSync', () => {
         [CASE_EXTENDED_FIELDS]: { overridden_name_as_keyword: 'lib_default' },
       });
     });
+
+    describe('legacy-visible linked definition exclusion', () => {
+      const linkedLibraryField = {
+        name: 'my_field',
+        owner: 'securitySolution',
+        fieldDefinitionId: 'fd-1',
+        legacyKey: 'cf_my_field',
+        definition:
+          'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nmetadata:\n  default: lib_default\n',
+      };
+      const templateWithRefAndInline = {
+        templateId: 'template-ref',
+        templateVersion: 1,
+        owner: 'securitySolution',
+        definition: {
+          name: 'Migrated Template',
+          fields: [
+            { $ref: 'my_field', name: undefined },
+            {
+              name: 'summary',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              metadata: { default: 'Default summary' },
+            },
+          ],
+        },
+      };
+
+      it('does not write defaults for a $ref to an excluded (legacy-visible) definition', () => {
+        // REGRESSION (the bug this guards): the migrated template's $ref default was written into
+        // the inner extended_fields form even when the legacy custom-field input for the same
+        // linked field was visible — submitting two values for one logical field, which the
+        // server rejects as a dual-input conflict.
+        mockUseFormData.mockReturnValue([{ templateId: 'template-ref' }]);
+        mockUseGetTemplate.mockReturnValue({ data: templateWithRefAndInline, isLoading: false });
+        mockUseGetFieldDefinitions.mockReturnValue({
+          data: { fieldDefinitions: [linkedLibraryField] },
+          isLoading: false,
+        });
+
+        renderHook(() => useTemplateFormSync(innerForm, new Set(), new Set(['my_field'])));
+
+        expect(innerForm.reset).toHaveBeenCalledWith({
+          [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Default summary' },
+        });
+      });
+
+      it('keeps an inline template field whose name matches an excluded definition', () => {
+        // Exclusion is by definition identity ($ref target), not by name coincidence: an inline
+        // template-local field is not the linked library field and must keep working.
+        const templateWithInlineNameCollision = {
+          templateId: 'template-inline',
+          templateVersion: 1,
+          owner: 'securitySolution',
+          definition: {
+            name: 'Inline Collision Template',
+            fields: [
+              {
+                name: 'my_field',
+                type: 'keyword',
+                control: 'INPUT_TEXT',
+                metadata: { default: 'inline_default' },
+              },
+            ],
+          },
+        };
+        mockUseFormData.mockReturnValue([{ templateId: 'template-inline' }]);
+        mockUseGetTemplate.mockReturnValue({
+          data: templateWithInlineNameCollision,
+          isLoading: false,
+        });
+        mockUseGetFieldDefinitions.mockReturnValue({
+          data: { fieldDefinitions: [linkedLibraryField] },
+          isLoading: false,
+        });
+
+        renderHook(() => useTemplateFormSync(innerForm, new Set(), new Set(['my_field'])));
+
+        expect(innerForm.reset).toHaveBeenCalledWith({
+          [CASE_EXTENDED_FIELDS]: { my_field_as_keyword: 'inline_default' },
+        });
+      });
+
+      it('re-syncs the same template when the exclusion set changes (legacy visibility flip)', () => {
+        // The forced-on legacy switch can resolve after the template was applied (configuration
+        // loads asynchronously). The exclusion set is part of the applied-template identity, so
+        // the flip must re-run the sync and drop the now-excluded default from the form.
+        mockUseFormData.mockReturnValue([{ templateId: 'template-ref' }]);
+        mockUseGetTemplate.mockReturnValue({ data: templateWithRefAndInline, isLoading: false });
+        mockUseGetFieldDefinitions.mockReturnValue({
+          data: { fieldDefinitions: [linkedLibraryField] },
+          isLoading: false,
+        });
+
+        const { rerender } = renderHook(
+          ({ excluded }: { excluded: ReadonlySet<string> }) =>
+            useTemplateFormSync(innerForm, new Set(), excluded),
+          { initialProps: { excluded: new Set<string>() as ReadonlySet<string> } }
+        );
+
+        expect(innerForm.reset).toHaveBeenLastCalledWith({
+          [CASE_EXTENDED_FIELDS]: {
+            my_field_as_keyword: 'lib_default',
+            summary_as_keyword: 'Default summary',
+          },
+        });
+
+        rerender({ excluded: new Set(['my_field']) });
+
+        expect(innerForm.reset).toHaveBeenLastCalledWith({
+          [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Default summary' },
+        });
+      });
+    });
   });
 
   describe('connector', () => {

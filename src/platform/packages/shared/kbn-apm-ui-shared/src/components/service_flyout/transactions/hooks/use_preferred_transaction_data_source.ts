@@ -30,8 +30,8 @@ export interface PreferredTransactionDataSource {
 }
 
 const FALLBACK: PreferredTransactionDataSource = {
-  documentType: 'transactionMetric',
-  rollupInterval: '1m',
+  documentType: 'transactionEvent',
+  rollupInterval: 'none',
 };
 
 // The main_statistics endpoint uses transactionDataSourceRt which only accepts

@@ -13,7 +13,7 @@ node scripts/jest --config x-pack/platform/packages/shared/kbn-event-stacktrace/
 
 ### Start
 ```
-yarn storybook event_stacktrace
+pnpm storybook event_stacktrace
 ```
 
 All files with a .stories.tsx extension will be loaded. You can access the development environment at http://localhost:9001.

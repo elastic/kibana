@@ -392,6 +392,56 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
   );
 
   apiTest(
+    'Cascade merge — golden entity with existing aliases is retargeted to the new target',
+    async ({ apiClient, esClient }) => {
+      const email = 'test10-cascade@co.com';
+      const adEntity = 'test10-ad-user';
+      const oktaGolden = 'test10-okta-golden';
+      const oktaAlias = 'test10-okta-alias';
+
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email,
+      });
+      await seedUserEntity(esClient, { entityId: oktaGolden, namespace: 'okta', email });
+      // The alias has a different email so it is not part of the email bucket
+      await seedUserEntity(esClient, {
+        entityId: oktaAlias,
+        namespace: 'entra_id',
+        email: 'test10-other@co.com',
+      });
+
+      // Manually link alias → okta golden, so the okta golden already has an alias
+      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { target_id: oktaGolden, entity_ids: [oktaAlias] },
+      });
+      expect(linkResponse.statusCode).toBe(200);
+
+      // Both goldens are unresolved and share an email; AD wins on namespace priority
+      await triggerMaintainerRun(apiClient, internalHeaders);
+
+      await waitForResolution(esClient, oktaGolden, adEntity);
+      // Cascade: the old golden's alias is retargeted to the new target (no alias-of-alias)
+      await waitForResolution(esClient, oktaAlias, adEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(3);
+      expect(groupResponse.body.target.entity.id).toBe(adEntity);
+
+      const aliasIds = groupResponse.body.aliases.map((a: any) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([oktaGolden, oktaAlias]));
+    }
+  );
+
+  apiTest(
     'Manually unlinked entity not re-resolved after new activity updates timestamp',
     async ({ apiClient, esClient }) => {
       const email = 'test9-unlink@co.com';

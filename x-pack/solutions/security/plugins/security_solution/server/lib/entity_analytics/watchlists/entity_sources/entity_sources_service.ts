@@ -28,6 +28,8 @@ import type { IdentityProvider, WatchlistsByEuid } from '../entities/service';
 import { createWatchlistEntitiesService } from '../entities/service';
 import { getIndexForWatchlist } from '../entities/utils';
 import { createIndexSyncService } from './sync/index_sync';
+import type { FullSyncState } from './sync/update_detection/update_detection';
+import type { SyncResult } from './sync/sources_sync';
 import { applyBulkRemoveSource } from './bulk/soft_delete';
 import type { StaleEntity } from './bulk/soft_delete';
 import { MANUAL_SOURCE_ID } from './manual/constants';
@@ -332,16 +334,40 @@ export const createEntitySourcesService = ({
           let prevMaxEntityId: string | undefined;
           let lastWatchlistsByEuid: WatchlistsByEuid = new Map();
 
+          // Resolved once per source, before paging, and reused for every page below plus the tail pass
+          let fullSyncState: FullSyncState & { completedAt?: string } = { hasNewFullSync: false };
+          try {
+            fullSyncState = await indexSyncService.resolveFullSyncState(source);
+          } catch (error) {
+            logger.warn(
+              `[WatchlistSync] Failed to resolve full-sync state for source ${source.id}: ${String(
+                error
+              )}`
+            );
+          }
+
+          let anySourceCallFailed = false;
+          const trackResult = ([result]: SyncResult[]) => {
+            if (!result || result.failed) {
+              anySourceCallFailed = true;
+            }
+          };
+
           for await (const page of watchlistEntitiesService.listEntityStoreEntities(identity)) {
-            await indexSyncService.plainIndexSync([
-              {
-                source,
-                entityStoreEntityIdsByType: page.entityIdsByType,
-                correlationMap: page.correlationMap,
-                watchlistsByEuid: page.watchlistsByEuid,
-                pageRange: { gt: prevMaxEntityId, lte: page.maxEntityId },
-              },
-            ]);
+            trackResult(
+              await indexSyncService.plainIndexSync(
+                [
+                  {
+                    source,
+                    entityStoreEntityIdsByType: page.entityIdsByType,
+                    correlationMap: page.correlationMap,
+                    watchlistsByEuid: page.watchlistsByEuid,
+                    pageRange: { gt: prevMaxEntityId, lte: page.maxEntityId },
+                  },
+                ],
+                fullSyncState
+              )
+            );
             prevMaxEntityId = page.maxEntityId;
             lastWatchlistsByEuid = page.watchlistsByEuid;
             if (abortSignal?.aborted) return;
@@ -351,15 +377,32 @@ export const createEntitySourcesService = ({
 
           // Tail pass: catch watchlist entries with entity.id beyond the last store page.
           // Empty correlationMap causes detectForIndexSource to no-op (no correlation values to query).
-          await indexSyncService.plainIndexSync([
-            {
-              source,
-              entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
-              correlationMap: new Map(),
-              watchlistsByEuid: lastWatchlistsByEuid,
-              pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
-            },
-          ]);
+          trackResult(
+            await indexSyncService.plainIndexSync(
+              [
+                {
+                  source,
+                  entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+                  correlationMap: new Map(),
+                  watchlistsByEuid: lastWatchlistsByEuid,
+                  pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
+                },
+              ],
+              fullSyncState
+            )
+          );
+
+          if (fullSyncState.hasNewFullSync && fullSyncState.completedAt && !anySourceCallFailed) {
+            try {
+              await indexSyncService.markFullSyncProcessed(source, fullSyncState.completedAt);
+            } catch (error) {
+              logger.warn(
+                `[WatchlistSync] Failed to persist full-sync marker for source ${
+                  source.id
+                }: ${String(error)}`
+              );
+            }
+          }
         })
     );
 

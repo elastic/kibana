@@ -305,7 +305,6 @@ export function MachineLearningNavigationProvider({
 
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('mlSuppliedConfigurationsButton');
-
         await testSubjects.click('mlSuppliedConfigurationsButton');
         await testSubjects.existOrFail('mlPageSuppliedConfigurations');
       });

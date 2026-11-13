@@ -162,6 +162,11 @@ export class CaseConfigureService {
           {
             references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
             refresh,
+            // OCC: the caller already re-checked `originalConfiguration.version` against the
+            // request right before this write (see configure/client.ts), but that check and this
+            // write are not atomic — passing the version here closes the race window between
+            // them instead of relying solely on last-write-wins.
+            version: originalConfiguration.version,
           }
         );
 

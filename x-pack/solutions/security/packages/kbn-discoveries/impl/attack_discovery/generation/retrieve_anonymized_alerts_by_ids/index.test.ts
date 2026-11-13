@@ -6,9 +6,12 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { ExecutionStatus, type WorkflowDetailDto, type WorkflowExecutionDto } from '@kbn/workflows';
 
 import { AttackDiscoveryError } from '../../../lib/errors/attack_discovery_error';
+import { getAnonymizedAlerts } from '../../graphs/default_attack_discovery_graph/nodes/retriever/helpers/get_anonymized_alerts';
+import { mockOpenAndAcknowledgedAlertsQueryResults } from '../../graphs/default_attack_discovery_graph/mock/mock_open_and_acknowledged_alerts_query_results';
 import type { WorkflowsManagementApi } from '../invoke_alert_retrieval_workflow';
 import { retrieveAnonymizedAlertsByIds } from '.';
 
@@ -155,6 +158,34 @@ describe('retrieveAnonymizedAlertsByIds', () => {
     >;
 
     expect(inputs.size).toBe(2);
+  });
+
+  it('builds inputs that the default retrieval step resolves when fewer than 10 ids are curated', async () => {
+    // At runtime the workflow engine hands these inputs to the default retrieval
+    // step, which calls `getAnonymizedAlerts`. Feed them to the real function so
+    // the contract between the two sides is tested, not mocked.
+    const workflowsManagementApi = buildApi();
+
+    await retrieveAnonymizedAlertsByIds({ ...baseParams, workflowsManagementApi });
+
+    const inputs = (workflowsManagementApi.runWorkflow as jest.Mock).mock.calls[0][2] as {
+      alerts_index_pattern: string;
+      filter: Record<string, unknown>;
+      size: number;
+    };
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    (esClient.search as unknown as jest.Mock).mockResolvedValue(
+      mockOpenAndAcknowledgedAlertsQueryResults
+    );
+
+    const alerts = await getAnonymizedAlerts({
+      alertsIndexPattern: inputs.alerts_index_pattern,
+      esClient,
+      filter: inputs.filter,
+      size: inputs.size,
+    });
+
+    expect(alerts).toHaveLength(mockOpenAndAcknowledgedAlertsQueryResults.hits.hits.length);
   });
 
   it('does not constrain the retrieval by a time window (start/end omitted)', async () => {

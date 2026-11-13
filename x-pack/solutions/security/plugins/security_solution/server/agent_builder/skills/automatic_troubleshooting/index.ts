@@ -194,6 +194,9 @@ Use exact terms from the user's request and queried endpoint evidence when calli
 - Only query indices listed in './available_indices'
 - Always include document \`_id\` and \`_index\` fields in search queries
 - Keep query result sets small enough to fit within context limits
+- Prefer recent data when querying any index: request the newest matching documents and order results by \`@timestamp DESC\` whenever you apply a result limit
+- When deliberately investigating a specific past event or historical time range, scope the query to that period explicitly instead of relying on recency
+- Include recency in the natural-language query you pass to the search tool — ask for "recent" or "newest" matching documents, not an unqualified request — so the generated query sorts by timestamp rather than returning an arbitrary subset under a limit
 - Base all conclusions on actual queried data, not assumptions`;
 
   return defineSkillType({

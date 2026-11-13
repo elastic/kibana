@@ -9,7 +9,7 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const GET_WORKFLOW_HEALTH_CHECK_TOOL_ID =
   'security.attack-discovery.get_workflow_health_check';
@@ -53,9 +53,11 @@ const toWorkflowHealth = (id: string, workflow: WorkflowDetailDto | null): Workf
   };
 };
 
-const inputSchema = z.object({
-  workflow_ids: z.array(z.string()),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    workflow_ids: z.array(z.string()),
+  })
+);
 
 export const getWorkflowHealthCheckTool = (
   fetcher: WorkflowFetcher

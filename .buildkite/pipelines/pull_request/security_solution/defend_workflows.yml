@@ -2,14 +2,13 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     key: defend-workflows
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -25,14 +24,13 @@ steps:
     label: 'Defend Workflows Cypress Tests on Serverless'
     key: defend-workflows-serverless
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60

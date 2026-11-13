@@ -25,6 +25,8 @@ import type {
   NewOutput,
   NewRemoteElasticsearchOutput,
   OtelExporterOutput,
+  SOSecret,
+  SOSecretOrNull,
 } from '../../../../../../../common/types/models';
 
 import {
@@ -155,25 +157,56 @@ export interface OutputFormInputsType {
   otelDisableBeatsauthInput: ReturnType<typeof useSwitchInput>;
 }
 
-function extractKafkaOutputSecrets(
+/**
+ * The secret to send for a credential, or `undefined` to send none. An update that leaves out a
+ * stored secret keeps it, so a stored secret the user cleared, or replaced with a plain text value,
+ * is removed with an explicit `null`.
+ */
+export const getSecretToSend = (
+  plainValue: string | undefined,
+  secretValue: SOSecret | undefined,
+  storedSecret: SOSecret | undefined
+): SOSecretOrNull | undefined => {
+  if (!plainValue && secretValue) {
+    return secretValue;
+  }
+  return storedSecret ? null : undefined;
+};
+
+/** The secrets of a Kafka output payload, where `null` removes a stored secret. */
+interface KafkaOutputSecretsPayload {
+  ssl?: { key: SOSecretOrNull };
+  password?: SOSecretOrNull;
+}
+
+export function extractKafkaOutputSecrets(
   inputs: Pick<
     OutputFormInputsType,
     | 'kafkaSslKeyInput'
     | 'kafkaSslKeySecretInput'
     | 'kafkaAuthPasswordInput'
     | 'kafkaAuthPasswordSecretInput'
-  >
-): KafkaOutput['secrets'] | null {
-  const secrets: KafkaOutput['secrets'] = {};
+  >,
+  storedSecrets?: KafkaOutput['secrets']
+): KafkaOutputSecretsPayload | null {
+  const secrets: KafkaOutputSecretsPayload = {};
 
-  if (!inputs.kafkaSslKeyInput.value && inputs.kafkaSslKeySecretInput.value) {
-    secrets.ssl = {
-      key: inputs.kafkaSslKeySecretInput.value,
-    };
+  const sslKey = getSecretToSend(
+    inputs.kafkaSslKeyInput.value,
+    inputs.kafkaSslKeySecretInput.value,
+    storedSecrets?.ssl?.key
+  );
+  if (sslKey !== undefined) {
+    secrets.ssl = { key: sslKey };
   }
 
-  if (!inputs.kafkaAuthPasswordInput.value && inputs.kafkaAuthPasswordSecretInput.value) {
-    secrets.password = inputs.kafkaAuthPasswordSecretInput.value;
+  const password = getSecretToSend(
+    inputs.kafkaAuthPasswordInput.value,
+    inputs.kafkaAuthPasswordSecretInput.value,
+    storedSecrets?.password
+  );
+  if (password !== undefined) {
+    secrets.password = password;
   }
 
   return Object.keys(secrets).length ? secrets : null;
@@ -193,13 +226,12 @@ export function extractDefaultDynamicKafkaTopics(
   if (!o?.topic || (o?.topic && !o.topic?.includes('%{['))) {
     return [];
   }
-  const matched = o.topic.match(/(%\{\[)(\S*)(\]\})/);
-  const parsed = matched?.length ? matched[2] : '';
-
+  const topic = o.topic;
+  const simpleToken = topic.match(/^%\{\[([^\]]+)\]\}$/);
   return [
     {
-      label: parsed,
-      value: parsed,
+      label: simpleToken ? simpleToken[1] : topic,
+      value: topic,
     },
   ];
 }
@@ -929,6 +961,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
       };
 
+      // the client SSL key of the Elasticsearch, remote Elasticsearch and Logstash outputs
+      const sslKeySecret = getSecretToSend(
+        sslKeyInput.value,
+        sslKeySecretInput.value,
+        (output as NewElasticsearchOutput | undefined)?.secrets?.ssl?.key
+      );
+
       const payload: NewOutput = (() => {
         const parseIntegerIfStringDefined = (value: string | undefined): number | undefined => {
           if (value !== undefined) {
@@ -946,12 +985,15 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               (val) => val !== ''
             ).length;
 
-            const maybeSecrets = extractKafkaOutputSecrets({
-              kafkaSslKeyInput,
-              kafkaSslKeySecretInput,
-              kafkaAuthPasswordInput,
-              kafkaAuthPasswordSecretInput,
-            });
+            const maybeSecrets = extractKafkaOutputSecrets(
+              {
+                kafkaSslKeyInput,
+                kafkaSslKeySecretInput,
+                kafkaAuthPasswordInput,
+                kafkaAuthPasswordSecretInput,
+              },
+              kafkaOutput?.secrets
+            );
 
             return {
               name: nameInput.value,
@@ -1047,7 +1089,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                   }
                 : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
                 ? {
-                    topic: `%{[${kafkaDynamicTopicInput.value}]}`,
+                    topic: kafkaDynamicTopicInput.value,
                   }
                 : {}),
               headers: kafkaHeadersInput.value,
@@ -1076,35 +1118,24 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                     ),
                   }
                 : null,
-              ...(!sslKeyInput.value &&
-                sslKeySecretInput.value && {
-                  secrets: {
-                    ssl: logstashEnableSSLInput.value
-                      ? {
-                          key: sslKeySecretInput.value,
-                        }
-                      : undefined,
-                  },
+              // with SSL disabled, `ssl: null` removes the stored key along with the SSL settings
+              ...(logstashEnableSSLInput.value &&
+                sslKeySecret !== undefined && {
+                  secrets: { ssl: { key: sslKeySecret } },
                 }),
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewLogstashOutput;
           case outputType.RemoteElasticsearch:
-            let secrets;
-            if (!serviceTokenInput.value && serviceTokenSecretInput.value) {
-              secrets = {
-                service_token: serviceTokenSecretInput.value,
-              };
-            }
-
-            if (!sslKeyInput.value && sslKeySecretInput.value) {
-              secrets = {
-                ...(secrets ?? {}),
-                ssl: {
-                  key: sslKeySecretInput.value,
-                },
-              };
-            }
+            const serviceTokenSecret = getSecretToSend(
+              serviceTokenInput.value,
+              serviceTokenSecretInput.value,
+              (output as NewRemoteElasticsearchOutput | undefined)?.secrets?.service_token
+            );
+            const secrets = {
+              ...(serviceTokenSecret !== undefined && { service_token: serviceTokenSecret }),
+              ...(sslKeySecret !== undefined && { ssl: { key: sslKeySecret } }),
+            };
             return {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
@@ -1116,7 +1147,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               ...otelExporterParams,
               service_token: serviceTokenInput.value || undefined,
               kibana_api_key: kibanaAPIKeyInput.value || undefined,
-              ...(secrets ? { secrets } : {}),
+              ...(Object.keys(secrets).length ? { secrets } : {}),
               sync_integrations: syncIntegrationsInput.value,
               kibana_url: kibanaURLInput.value || null,
               sync_uninstalled_integrations: syncUninstalledIntegrationsInput.value,
@@ -1153,14 +1184,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                   (val) => val !== ''
                 ),
               },
-              ...(!sslKeyInput.value &&
-                sslKeySecretInput.value && {
-                  secrets: {
-                    ssl: {
-                      key: sslKeySecretInput.value,
-                    },
-                  },
-                }),
+              ...(sslKeySecret !== undefined && {
+                secrets: { ssl: { key: sslKeySecret } },
+              }),
             } as NewElasticsearchOutput;
         }
       })();
@@ -1216,6 +1242,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaSslKeySecretInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
+    kafkaOutput,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,

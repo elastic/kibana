@@ -13,6 +13,7 @@ import type {
   ResolvedFieldLabelFilter,
 } from './extended_field_search_utils';
 import {
+  buildAllExtendedFieldValuesSearchClause,
   buildExtendedFieldFilterClauses,
   buildFieldLabelExistsClauses,
   EF_ALL_VALUES_FIELD,
@@ -35,7 +36,12 @@ export const DEFAULT_ATTACHMENT_SEARCH_FIELDS = [
   `${CASE_COMMENT_SAVED_OBJECT}.alertId`,
   `${CASE_COMMENT_SAVED_OBJECT}.eventId`,
   `${CASE_COMMENT_SAVED_OBJECT}.comment`,
-];
+] as const;
+
+export type AttachmentSearchField = (typeof DEFAULT_ATTACHMENT_SEARCH_FIELDS)[number];
+
+export const isAttachmentSearchField = (field: string): field is AttachmentSearchField =>
+  (DEFAULT_ATTACHMENT_SEARCH_FIELDS as readonly string[]).includes(field);
 
 export const mergeSearchQuery = (
   searchQuery?: estypes.QueryDslQueryContainer,
@@ -151,13 +157,10 @@ export const constructSearchQuery = ({
 
     if (runtimeFields?.length) {
       runtimeFields.forEach((field) => {
-        shouldClauses.push({
-          simple_query_string: {
-            query: search.toLowerCase(),
-            fields: [field],
-            default_operator: 'AND',
-          },
-        });
+        const runtimeClause = buildAllExtendedFieldValuesSearchClause(search, field);
+        if (runtimeClause != null) {
+          shouldClauses.push(runtimeClause);
+        }
       });
     }
   }

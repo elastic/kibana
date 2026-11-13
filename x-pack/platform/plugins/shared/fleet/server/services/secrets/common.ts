@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { get, keyBy } from 'lodash';
+import { cloneDeep, get, keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import type {
@@ -232,6 +232,35 @@ export function toCompiledSecretRef(id: string) {
 }
 
 /**
+ * Inverse of {@link toCompiledSecretRef}: scans an already-compiled policy fragment for inline
+ * `$co.elastic.secret{<id>}` placeholders and returns the set of ids found.
+ *
+ * Pass the compiled `inputs` and `otelcolConfig` — "appears in the JSON" is exactly the criterion
+ * Fleet Server uses when performing placeholder substitution. Never pass an object that carries
+ * `secret_references` itself, or every id will trivially match.
+ *
+ * Returns `undefined` if the fragment cannot be serialized so callers can fail open (keep the
+ * unpruned array) rather than silently dropping valid references.
+ */
+export function collectCompiledSecretRefIds(compiled: unknown): Set<string> | undefined {
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(compiled ?? null);
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .warn(`Unable to scan compiled policy fragment for secret references: ${err}`);
+    return undefined;
+  }
+  const ids = new Set<string>();
+  // Regex is constructed per call: a shared /g regex carries lastIndex state across calls.
+  for (const [, id] of serialized.matchAll(/\$co\.elastic\.secret\{([^}]+)\}/g)) {
+    ids.add(id);
+  }
+  return ids;
+}
+
+/**
  * Given an array of secret paths, deletes the corresponding secrets
  */
 export async function deleteSOSecrets(
@@ -296,6 +325,32 @@ export async function extractAndWriteSOSecrets<T>(opts: {
   };
 }
 
+/** A secret an update removes, with the path of the reference to it in the object. */
+export interface DeletedSOSecret extends SecretReference {
+  path: string;
+}
+
+/**
+ * The saved object update merges objects: deleting a secret leaves the object pointing at a secret
+ * that no longer exists, unless the reference is explicitly set to `null`. Returns the object with
+ * a `null` at the path of every deleted secret, but those the update replaces with a new one.
+ */
+export function withClearedSecretReferences<T>(
+  soObject: Partial<T>,
+  secretsToDelete: DeletedSOSecret[]
+): Partial<T> {
+  const removed = secretsToDelete.filter(({ path }) => get(soObject, path) === undefined);
+
+  if (!removed.length) {
+    return soObject;
+  }
+
+  const result = cloneDeep(soObject);
+  removed.forEach(({ path }) => set(result, path, null));
+
+  return result;
+}
+
 /**
  * Takes a generic object T to update and its old and new secret paths
  * Updates secrets and returns the references
@@ -309,7 +364,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
 }): Promise<{
   updatedSoObject: Partial<T>;
   secretReferences: SecretReference[];
-  secretsToDelete: SecretReference[];
+  secretsToDelete: DeletedSOSecret[];
 }> {
   const { updatedSoObject, oldSecretPaths, updatedSecretPaths, esClient, secretHashes } = opts;
 
@@ -360,6 +415,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
     secretReferences,
     secretsToDelete: toDelete.map((secretPath) => ({
       id: (secretPath.value as { id: string }).id,
+      path: secretPath.path,
     })),
   };
 }

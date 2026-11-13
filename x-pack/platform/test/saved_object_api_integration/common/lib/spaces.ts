@@ -17,4 +17,4 @@ export const SPACES = {
   },
 };
 
-export const ALL_SPACES_ID = '*';
+export { ALL_SPACES_ID } from '@kbn/core-spaces-common';

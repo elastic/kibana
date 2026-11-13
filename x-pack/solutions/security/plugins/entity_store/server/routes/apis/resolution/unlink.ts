@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -18,13 +18,17 @@ import { EntitiesNotFoundError, MixedEntityTypesError } from '../../../domain/er
 import { ENTITY_STORE_RESOLUTION_UNLINK_EVENT } from '../../../telemetry/events';
 import { reportResolutionError } from './utils/resolution_telemetry';
 
-const bodySchema = z.object({
-  entity_ids: z
-    .array(z.string())
-    .min(1)
-    .max(1000)
-    .describe('Entity identifiers to unlink from their resolution group. Minimum 1, maximum 1000.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entity_ids: z
+      .array(z.string())
+      .min(1)
+      .max(1000)
+      .describe(
+        'Entity identifiers to unlink from their resolution group. Minimum 1, maximum 1000.'
+      ),
+  })
+);
 
 type UnlinkRequestBody = z.infer<typeof bodySchema>;
 

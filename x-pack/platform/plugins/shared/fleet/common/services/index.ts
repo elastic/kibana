@@ -6,7 +6,12 @@
  */
 
 export * from './routes';
-export { validateFleetSavedObjectId } from './validate_fleet_id';
+export {
+  validateFleetSavedObjectId,
+  isPathTraversalId,
+  validateNoPathTraversalId,
+  validateNoPathTraversalIdSchema,
+} from './validate_fleet_id';
 export { isValidDuration, isValidEnrollmentKeyExpiration } from './validate_duration';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
@@ -145,6 +150,7 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  inferVarGroupSelections,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module
@@ -173,3 +179,15 @@ export {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
+
+export {
+  parseYamlChangelog,
+  formatChangelog,
+  getBreakingChanges,
+  getBreakingChangesInRange,
+  ChangeType,
+  type Changelog,
+  type ChangelogEntry,
+  type BreakingChangesLog,
+  type YamlParseFn,
+} from './changelog_utils';

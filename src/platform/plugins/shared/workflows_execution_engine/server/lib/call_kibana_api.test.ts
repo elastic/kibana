@@ -268,6 +268,25 @@ describe('callKibanaApi', () => {
     expect(headers['x-custom-trace-id']).toBe('trace-1');
   });
 
+  it('always sends x-kbn-alerting-clone-api-key: true, even if the step tries to set it', async () => {
+    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/detection_engine/rules/_bulk_action',
+        body: { action: 'enable', ids: ['r1'] },
+        headers: { 'X-Kbn-Alerting-Clone-Api-Key': 'false' },
+      }
+    );
+
+    const [, init] = mockedFetch.mock.calls[0];
+    const headers = (init as RequestInit).headers as Record<string, string>;
+    expect(headers['x-kbn-alerting-clone-api-key']).toBe('true');
+    expect(headers['X-Kbn-Alerting-Clone-Api-Key']).toBeUndefined();
+  });
+
   it('throws a KibanaApiCallError with the unchanged HTTP <status>: <body> message on non-2xx', async () => {
     mockedFetch.mockResolvedValue(
       createMockResponse({ body: { message: 'forbidden' }, status: 403 })

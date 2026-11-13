@@ -300,16 +300,6 @@ function convertReferenceLinesDecorationsToAPIFormat(
   });
 }
 
-function getLabelFromLayer(
-  forAccessor: string,
-  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): string | undefined {
-  if (isFormBasedLayer(layer)) {
-    return layer.columns[forAccessor]?.label;
-  }
-  return layer.columns.find((col) => col.columnId === forAccessor)?.label;
-}
-
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'>,
@@ -328,7 +318,6 @@ function convertReferenceLineLayerToAPI(
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const thresholds = (visualization.accessors
     ?.map((accessor): ReferenceLineDef | undefined => {
-      const label = getLabelFromLayer(accessor, layer);
       const { forAccessor, ...yConfigRest } = yConfigMap.get(accessor) || {};
       const decorationConfig = convertReferenceLinesDecorationsToAPIFormat(
         yConfigRest,
@@ -344,7 +333,6 @@ function convertReferenceLineLayerToAPI(
         }
         return {
           ...op,
-          ...(label != null ? { label } : {}),
           ...decorationConfig,
         };
       }
@@ -354,7 +342,6 @@ function convertReferenceLineLayerToAPI(
       }
       return {
         ...op,
-        ...(label != null ? { label } : {}),
         ...decorationConfig,
       };
     })

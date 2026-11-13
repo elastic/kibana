@@ -75,8 +75,11 @@ export interface DateRangePickerProps {
   defaultValue?: string;
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
-  /** Additional format string for parsing absolute dates (does not affect display). */
-  dateFormat?: string;
+  /**
+   * Additional moment format strings accepted when parsing absolute dates the
+   * user types, e.g. the Kibana `dateFormat` setting. Does not affect display.
+   */
+  inputDateFormats?: string[];
   /**
    * Locale used to recognise and generate named ranges, natural-language
    * durations/instants, and delimiters. English is always recognised
@@ -155,8 +158,14 @@ export interface DateRangePickerProps {
   /** Called when the user changes a setting in the settings panel. */
   onSettingsChange: (settings: DateRangePickerSettings) => void;
   /**
-   * A valid time zone name, from the IANA database, e.g. "America/Los_Angeles".
-   * This is only informational, it won't affect how dates are handled.
+   * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
+   * Calendar selections use this time zone to determine day boundaries.
+   * Use `Browser` or omit the prop to use the browser's time zone.
+   *
+   * Range text is formatted separately using Moment's global default time zone.
+   * Consumers must configure Moment and this prop with the same time zone. Kibana
+   * keeps them synchronized using the `dateFormat:tz` advanced setting.
+   *
    * @link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
    */
   timeZone?: string;

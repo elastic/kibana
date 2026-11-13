@@ -21,8 +21,6 @@ jest.mock('../../../cases_context/use_cases_context');
 
 const useCasesContextMock = useCasesContext as jest.Mock;
 
-const mockExternalRefRegistry = { list: jest.fn() };
-const mockPersistableRegistry = { list: jest.fn() };
 const mockUnifiedRegistry = { list: jest.fn() };
 
 const defaultArgs = {
@@ -43,8 +41,6 @@ describe('useBuilderContext', () => {
     jest.clearAllMocks();
     useCasesContextMock.mockReturnValue({
       owner: ['securitySolution'],
-      externalReferenceAttachmentTypeRegistry: mockExternalRefRegistry,
-      persistableStateAttachmentTypeRegistry: mockPersistableRegistry,
       unifiedAttachmentTypeRegistry: mockUnifiedRegistry,
     });
   });
@@ -58,8 +54,6 @@ describe('useBuilderContext', () => {
   it('includes registries from cases context', () => {
     const { result } = renderHook(() => useBuilderContext(defaultArgs));
 
-    expect(result.current.externalReferenceAttachmentTypeRegistry).toBe(mockExternalRefRegistry);
-    expect(result.current.persistableStateAttachmentTypeRegistry).toBe(mockPersistableRegistry);
     expect(result.current.unifiedAttachmentTypeRegistry).toBe(mockUnifiedRegistry);
   });
 

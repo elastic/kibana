@@ -94,6 +94,19 @@ function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T)
   return rest as unknown as T;
 }
 
+/** Applies fixSchemaArrayProperties to each entry of a $defs/definitions block. */
+function mapDefs(
+  defs: Record<string, ToolSchemaType> | undefined
+): Record<string, ToolSchemaType> | undefined {
+  return defs
+    ? Object.fromEntries(
+        Object.entries(defs as Record<string, ToolSchemaType>).map(([key, def]) => {
+          return [key, fixSchemaArrayProperties(def)];
+        })
+      )
+    : undefined;
+}
+
 /**
  * Claude is prone to ignoring the "array" part of an array type,
  * so this function patches it to add a message on each
@@ -114,6 +127,10 @@ export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T
           return [key, fixSchemaArrayProperties(childSchemaPart)];
         })
       ),
+      ...('$defs' in cleaned && cleaned.$defs ? { $defs: mapDefs(cleaned.$defs) } : {}),
+      ...('definitions' in cleaned && cleaned.definitions
+        ? { definitions: mapDefs(cleaned.definitions) }
+        : {}),
     };
   }
 

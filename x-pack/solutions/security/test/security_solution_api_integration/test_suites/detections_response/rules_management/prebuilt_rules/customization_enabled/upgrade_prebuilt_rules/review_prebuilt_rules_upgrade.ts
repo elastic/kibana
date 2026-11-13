@@ -291,6 +291,72 @@ export default ({ getService }: FtrProviderContext): void => {
               });
             });
           });
+
+          describe('rule type change conflicts', () => {
+            it('reports a SOLVABLE conflict on `type` for a non-customized type-changed rule', async () => {
+              await setUpRuleUpgrade({
+                assets: [
+                  {
+                    installed: {
+                      rule_id: 'query-rule',
+                      type: 'query',
+                      version: 1,
+                    },
+                    patch: {},
+                    upgrade: {
+                      rule_id: 'query-rule',
+                      type: 'saved_query',
+                      version: 2,
+                    },
+                  },
+                ],
+                removeInstalledAssets: !withHistoricalVersions,
+                deps,
+              });
+
+              const fieldsDiff = await fetchFirstPrebuiltRuleUpgradeReviewDiff(supertest);
+
+              expect(fieldsDiff.fields.type).toMatchObject({
+                conflict: 'SOLVABLE',
+                has_update: true,
+              });
+              expect(fieldsDiff).toMatchObject({
+                num_fields_with_non_solvable_conflicts: 0,
+              });
+            });
+
+            it('reports a NON_SOLVABLE conflict on `type` for a customized type-changed rule', async () => {
+              await setUpRuleUpgrade({
+                assets: [
+                  {
+                    installed: {
+                      rule_id: 'query-rule',
+                      type: 'query',
+                      version: 1,
+                    },
+                    patch: {
+                      rule_id: 'query-rule',
+                      name: 'Customized name',
+                    },
+                    upgrade: {
+                      rule_id: 'query-rule',
+                      type: 'saved_query',
+                      version: 2,
+                    },
+                  },
+                ],
+                removeInstalledAssets: !withHistoricalVersions,
+                deps,
+              });
+
+              const fieldsDiff = await fetchFirstPrebuiltRuleUpgradeReviewDiff(supertest);
+
+              expect(fieldsDiff.fields.type).toMatchObject({
+                conflict: 'NON_SOLVABLE',
+              });
+              expect(fieldsDiff.num_fields_with_non_solvable_conflicts).toBeGreaterThanOrEqual(1);
+            });
+          });
         }
       );
     }
@@ -495,6 +561,36 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(tagsCounts?.['tag-a']).toBe(2);
         expect(tagsCounts?.['tag-b']).toBe(1);
         expect(tagsCounts?.['tag-c']).toBe(1);
+      });
+
+      it('returns isCustomized facet counts keyed by "true" / "false"', async () => {
+        await setUpRuleUpgrade({
+          assets: [
+            {
+              installed: { rule_id: 'rule-a', type: 'query', name: 'Rule A', version: 1 },
+              patch: { rule_id: 'rule-a', name: 'Rule A customized' },
+              upgrade: { rule_id: 'rule-a', type: 'query', name: 'Rule A v2', version: 2 },
+            },
+            {
+              installed: { rule_id: 'rule-b', type: 'query', name: 'Rule B', version: 1 },
+              patch: {},
+              upgrade: { rule_id: 'rule-b', type: 'query', name: 'Rule B v2', version: 2 },
+            },
+            {
+              installed: { rule_id: 'rule-c', type: 'query', name: 'Rule C', version: 1 },
+              patch: {},
+              upgrade: { rule_id: 'rule-c', type: 'query', name: 'Rule C v2', version: 2 },
+            },
+          ],
+          deps,
+        });
+
+        const response = await reviewPrebuiltRulesToUpgrade(supertest, {
+          aggregations: { counts: ['isCustomized'] },
+        });
+
+        expect(response.total).toBe(3);
+        expect(response.counts?.isCustomized).toEqual({ true: 1, false: 2 });
       });
 
       it('fields narrows current_rule / target_rule while preserving baseline identity and the diff', async () => {

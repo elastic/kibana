@@ -183,7 +183,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     watch,
     trigger,
     setValue,
-    formState: { isSubmitting, isDirty },
+    formState: { isSubmitting, isDirty, dirtyFields },
   } = hooksForm;
   const { policy_ids: policyIds, shards, pack_type: packType, schedule, queries } = watch();
 
@@ -239,8 +239,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     );
   }, [packType, shards]);
 
+  // RHF clears dirtyFields.schedule when the value equals the synthesized default
+  // (e.g. a legacy pack whose default interval is 3600s), so value-equality alone
+  // would drop a deliberate "set it to 3600" choice. Track raw interaction instead.
+  const scheduleInteractedRef = useRef(false);
   const handleScheduleChange = useCallback(
     (next: ScheduleFormData) => {
+      scheduleInteractedRef.current = true;
       setValue('schedule', next, { shouldDirty: true });
     },
     [setValue]
@@ -295,8 +300,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           : [];
         const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
+        // Emit schedule fields only when the user touched the schedule or the pack
+        // already has one — otherwise an untouched legacy pack triggers a spurious
+        // legacy→interval transition that strips every bare per-query interval.
+        const scheduleIsDirtyOrExplicit =
+          Boolean(dirtyFields.schedule) || scheduleInteractedRef.current || packHasExplicitSchedule;
         const scheduleFields =
-          isRruleSchedulingEnabled && scheduleFormState ? serializeSchedule(scheduleFormState) : {};
+          isRruleSchedulingEnabled && scheduleFormState && scheduleIsDirtyOrExplicit
+            ? serializeSchedule(scheduleFormState)
+            : {};
 
         return {
           ...restPayload,
@@ -320,10 +332,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [
       createAsync,
       defaultValue?.saved_object_id,
+      dirtyFields.schedule,
       editMode,
       getShards,
       isRruleSchedulingEnabled,
       originalStartDate,
+      packHasExplicitSchedule,
       shards,
       showScheduleErrorsToast,
       updateAsync,

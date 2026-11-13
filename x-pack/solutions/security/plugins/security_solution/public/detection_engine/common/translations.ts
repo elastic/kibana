@@ -1208,6 +1208,34 @@ export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const AUTO_REFRESH_BUTTON_ON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_ON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOnAriaLabel',
+  {
+    defaultMessage: 'Auto refresh: On',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_OFF_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOffAriaLabel',
+  {
+    defaultMessage: 'Auto refresh: Off',
+  }
+);
+
 export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
   {
@@ -1548,8 +1576,7 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (
 export const RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
   {
-    defaultMessage:
-      'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.',
+    defaultMessage: 'Check the bulk update dialog for changes on rules containing data views.',
   }
 );
 

@@ -198,4 +198,83 @@ describe('ThreatEuiFlexGroup', () => {
     await waitFor(() => expect(screen.getByText('Defense Evasion (TA0005)')).toBeInTheDocument());
     expect(screen.queryByTestId('threatUnsupportedMitreIdWarning-TA0005')).not.toBeInTheDocument();
   });
+
+  it('does not throw when technique contains a null hole and still renders valid siblings', async () => {
+    const threat = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: {
+          id: 'TA0005',
+          name: 'Defense Evasion',
+          reference: 'https://attack.mitre.org/tactics/TA0005/',
+        },
+        technique: [
+          null,
+          {
+            id: 'T1548',
+            name: 'Abuse Elevation Control Mechanism',
+            reference: 'https://attack.mitre.org/techniques/T1548/',
+          },
+        ],
+      },
+    ] as Threats;
+
+    renderThreat(threat);
+
+    expect(await screen.findByText('Defense Evasion (TA0005)')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Abuse Elevation Control Mechanism (T1548)')
+    ).toBeInTheDocument();
+  });
+
+  it('does not throw when a threat entry is missing tactic', async () => {
+    const threat = [
+      {
+        framework: MITRE_FRAMEWORK,
+        technique: [
+          {
+            id: 'T1548',
+            name: 'Abuse Elevation Control Mechanism',
+            reference: 'https://attack.mitre.org/techniques/T1548/',
+          },
+        ],
+      },
+    ] as Threats;
+
+    const { container } = renderThreat(threat);
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-test-subj="threatTechniqueLink"]')).not.toBeNull();
+    });
+    expect(container.querySelector('[data-test-subj="threatTacticLink"]')).toBeNull();
+    expect(container.textContent).toContain('Abuse Elevation Control Mechanism');
+  });
+
+  it('does not throw when the threat array contains a null hole and still renders valid siblings', async () => {
+    const threat = [
+      null,
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: {
+          id: 'TA0005',
+          name: 'Defense Evasion',
+          reference: 'https://attack.mitre.org/tactics/TA0005/',
+        },
+        technique: [
+          {
+            id: 'T1548',
+            name: 'Abuse Elevation Control Mechanism',
+            reference: 'https://attack.mitre.org/techniques/T1548/',
+          },
+        ],
+      },
+    ] as Threats;
+
+    renderThreat(threat);
+
+    expect(await screen.findByText('Defense Evasion (TA0005)')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Abuse Elevation Control Mechanism (T1548)')
+    ).toBeInTheDocument();
+  });
 });

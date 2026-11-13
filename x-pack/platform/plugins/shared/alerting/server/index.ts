@@ -48,6 +48,8 @@ export type {
   RuleQueryInspectorTimeRange,
 } from './rule_query_inspector/types';
 export type { RulesClientCreateOptions } from './rules_client_factory';
+export { RulesNotFoundError } from './rules_client/lib/rules_not_found_error';
+export { RulesNotVisibleError } from './rules_client/lib/rules_not_visible_error';
 export type {
   FindResult,
   BulkEditOperation,
@@ -62,6 +64,11 @@ export type {
   BulkCreateRulesParams,
   BulkCreateRulesResult,
 } from './application/rule/methods/bulk_create';
+export type {
+  BulkUpdateRulesItem,
+  BulkUpdateRulesParams,
+  BulkUpdateRulesResult,
+} from './application/rule/methods/bulk_update';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';

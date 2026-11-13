@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
 import {
@@ -1117,7 +1116,7 @@ function buildParallelBranchBody(
       `Parallel step "${stepId}" has a branch body containing unsupported flow-control ` +
         `("${flowControlNode.type}"). A parallel branch body must be a straight-line sequence of ` +
         `atomic steps with no nested flow-control (if/switch/foreach/while), no step-level ` +
-        `"on-failure" handler, and no step-level "timeout".`,
+        `"if", no step-level "on-failure" handler, and no step-level "timeout".`,
       stepId
     );
   }
@@ -1347,9 +1346,4 @@ function resolveWorklfowSettings(
     'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
     timezone: workflowSettings.timezone ?? defaultSettings.timezone,
   };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function convertToSerializableGraph(graph: graphlib.Graph): any {
-  return graphlib.json.write(graph); // GraphLib does not provide type information, so we use `any`
 }

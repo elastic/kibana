@@ -100,6 +100,12 @@ function shouldUseProxy(logger: Logger, proxySettings: ProxySettings, targetUrl:
   return true;
 }
 
+export interface CustomFetch {
+  fetch: FetchLike;
+  /** Closes the undici dispatcher behind `fetch`; safe to call more than once. */
+  close: () => Promise<void>;
+}
+
 /**
  * Builds a custom `fetch` implementation that applies the SSL/TLS
  * and proxy settings from the actions plugin configuration.
@@ -108,12 +114,16 @@ function shouldUseProxy(logger: Logger, proxySettings: ProxySettings, targetUrl:
  * `xpack.actions.customHostSettings`, and `xpack.actions.proxyUrl` settings
  * as all other stack connectors. Redirect responses are followed manually
  * so that each hop is validated against `xpack.actions.allowedHosts`.
+ *
+ * Each call creates a new undici dispatcher that keeps sockets open after a request.
+ * The caller must call `close` when done, otherwise the sockets stay open until the
+ * server's keep-alive timeout expires.
  */
 export function buildCustomFetch(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
   targetUrl: string
-): FetchLike {
+): CustomFetch {
   const sslSettings = configurationUtilities.getSSLSettings();
   const proxySettings = configurationUtilities.getProxySettings();
   const customHostSettings = configurationUtilities.getCustomHostSettings(targetUrl);
@@ -130,7 +140,7 @@ export function buildCustomFetch(
       logger.warn(`invalid proxy URL "${proxySettings.proxyUrl}" ignored, using direct connection`);
       dispatcher = new Agent({ connect: tlsOptions });
 
-      return createFetchWithDispatcher(dispatcher, configurationUtilities, logger);
+      return createCustomFetch(dispatcher, configurationUtilities, logger);
     }
 
     logger.debug(`MCP connector: using proxy ${proxySettings.proxyUrl} for ${targetUrl}`);
@@ -150,8 +160,24 @@ export function buildCustomFetch(
     dispatcher = new Agent({ connect: tlsOptions });
   }
 
-  return createFetchWithDispatcher(dispatcher, configurationUtilities, logger);
+  return createCustomFetch(dispatcher, configurationUtilities, logger);
 }
+
+const createCustomFetch = (
+  dispatcher: Dispatcher,
+  configurationUtilities: ActionsConfigurationUtilities,
+  logger: Logger
+): CustomFetch => {
+  let closePromise: Promise<void> | undefined;
+
+  return {
+    fetch: createFetchWithDispatcher(dispatcher, configurationUtilities, logger),
+    close: () => {
+      closePromise = closePromise ?? dispatcher.close();
+      return closePromise;
+    },
+  };
+};
 
 const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
 

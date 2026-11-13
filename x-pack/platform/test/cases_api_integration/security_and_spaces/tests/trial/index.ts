@@ -27,6 +27,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // Trial
     loadTestFile(require.resolve('./cases/import_export_templates'));
+    loadTestFile(require.resolve('./cases/public_template_crud'));
     loadTestFile(require.resolve('./cases/user_actions/find_user_actions'));
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
@@ -56,6 +57,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
     loadTestFile(require.resolve('./internal/field_definitions'));
     loadTestFile(require.resolve('./internal/extended_fields_global'));
+    loadTestFile(require.resolve('./internal/field_pairing_errors'));
+    loadTestFile(require.resolve('./internal/find_user_actions_extended_fields'));
     loadTestFile(require.resolve('./internal/required_on_close'));
     loadTestFile(require.resolve('./internal/search_cases_extended_fields'));
 

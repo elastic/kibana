@@ -51,6 +51,8 @@
     "@kbn/esql-types",
     "@kbn/core-application-common",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server"
   ],
   "exclude": [
     "target/**/*",

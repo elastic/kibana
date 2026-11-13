@@ -65,6 +65,8 @@ tags:
   - prod
   - group-security
   - private
+  - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts

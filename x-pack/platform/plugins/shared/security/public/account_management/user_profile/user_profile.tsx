@@ -36,12 +36,7 @@ import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
-import {
-  getAvailableLocales,
-  getBrowserPreferredLocale,
-  i18n,
-  toCanonicalLocaleId,
-} from '@kbn/i18n';
+import { getAvailableLocales, i18n, toCanonicalLocaleId } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -999,11 +994,19 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       // Update profile only if it's available for the current user.
       if (values.data) {
+        // The route can reject a stored locale, or the form's fallback for a profile without one,
+        // when the deployment does not allow switching to it. Send the locale only when changed.
+        const { locale, ...userSettingsWithoutLocale } = values.data.userSettings;
+        let userSettings: Partial<typeof values.data.userSettings> = values.data.userSettings;
+        if (locale === initialValues.data?.userSettings.locale) {
+          userSettings = userSettingsWithoutLocale;
+        }
+        const profileData = { ...values.data, userSettings };
         submitActions.push(
           update(
             values.avatarType === 'image'
-              ? values.data
-              : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
+              ? profileData
+              : { ...profileData, avatar: { ...profileData.avatar, imageUrl: null } }
           )
         );
       }
@@ -1038,11 +1041,9 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         values.data &&
         initialValues.data?.userSettings.locale !== values.data.userSettings.locale
       ) {
-        const preferredLocale = getBrowserPreferredLocale();
         services.analytics.reportEvent('display_language_changed', {
           from: initialValues.data?.userSettings.locale ?? '',
           to: values.data.userSettings.locale,
-          ...(preferredLocale ? { preferred_language_kibana_locale: preferredLocale } : {}),
         });
       }
 

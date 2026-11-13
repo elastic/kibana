@@ -18,7 +18,6 @@ import {
 
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
-import { AttachmentType } from '../../../common/types/domain';
 import { createAttachments } from '../../containers/api';
 import type { AddCommentProps, AddCommentRefObject } from '.';
 import { AddComment } from '.';
@@ -141,8 +140,8 @@ describe('AddComment ', () => {
           caseId: addCommentProps.caseId,
           attachments: [
             {
-              comment: sampleData.comment,
-              type: AttachmentType.user,
+              type: COMMENT_ATTACHMENT_TYPE,
+              data: { content: sampleData.comment },
             },
           ],
           caseOwner: SECURITY_SOLUTION_OWNER,
@@ -319,8 +318,8 @@ describe('draft comment ', () => {
         caseId: addCommentProps.caseId,
         attachments: [
           {
-            comment: sampleData.comment,
-            type: AttachmentType.user,
+            type: COMMENT_ATTACHMENT_TYPE,
+            data: { content: sampleData.comment },
           },
         ],
         caseOwner: SECURITY_SOLUTION_OWNER,
@@ -401,8 +400,8 @@ describe('submit comment by key press', () => {
           caseId: addCommentProps.caseId,
           attachments: [
             {
-              comment: sampleData.comment,
-              type: AttachmentType.user,
+              type: COMMENT_ATTACHMENT_TYPE,
+              data: { content: sampleData.comment },
             },
           ],
           caseOwner: SECURITY_SOLUTION_OWNER,

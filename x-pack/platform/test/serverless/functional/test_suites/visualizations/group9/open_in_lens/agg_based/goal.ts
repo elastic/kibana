@@ -40,9 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      expect(await panelActions.canConvertToLensByTitle('Goal - Basic', { timeout: 5000 })).to.eql(
-        true
-      );
+      expect(await panelActions.canConvertToLensByTitle('Goal - Basic')).to.eql(true);
     });
 
     it('should convert to Lens', async () => {

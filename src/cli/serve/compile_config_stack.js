@@ -13,6 +13,7 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { getConfigFromFiles } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const isNotEmpty = _.negate(_.isEmpty);
 const isNotNull = _.negate(_.isNull);
@@ -48,10 +49,20 @@ export function compileConfigStack({
   // Filter out all config paths that didn't exist
   configs = configs.filter(isNotNull);
 
+  const distributionDefaults = resolve(REPO_ROOT, 'config_defaults/kibana.yml');
+  const hasDistributionDefaults = fileExists(distributionDefaults);
+  if (hasDistributionDefaults) {
+    configs.unshift(distributionDefaults);
+  }
+
   const serverlessMode = validateServerlessMode(serverless) || getServerlessModeFromCfg(configs);
   if (serverlessMode) {
-    configs.unshift(resolveConfig(`serverless.${serverlessMode}.yml`));
-    configs.unshift(resolveConfig('serverless.yml'));
+    configs.splice(
+      hasDistributionDefaults ? 1 : 0,
+      0,
+      resolveConfig('serverless.yml'),
+      resolveConfig(`serverless.${serverlessMode}.yml`)
+    );
 
     if (dev && devConfig !== false) {
       configs.push(resolveConfig('serverless.dev.yml'));

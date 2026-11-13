@@ -279,6 +279,24 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.no_data_strategy).toBeNull();
   });
 
+  it('nullifies tags when empty (clear all tags on a partial update)', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, tags: [] },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.metadata?.tags).toBeNull();
+  });
+
+  it('preserves tags when present', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, tags: ['prod', 'infra'] },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.metadata?.tags).toEqual(['prod', 'infra']);
+  });
+
   it('preserves grouping when present', () => {
     const values: FormValues = {
       ...baseFormValues,

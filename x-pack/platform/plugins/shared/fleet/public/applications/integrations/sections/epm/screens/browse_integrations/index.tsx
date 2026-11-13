@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import { useAutomaticImportAuthz, useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -35,16 +35,13 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImport, application, cloud } = useStartServices();
+  const { automaticImport, cloud } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
 
-  const automaticImportCapabilities = (
-    application.capabilities as Record<string, { view?: boolean } | undefined>
-  ).automatic_import;
-  const canReadAutomaticImportIntegrations =
-    automaticImportCapabilities?.view ?? Boolean(automaticImport);
+  const { canView: canReadAutomaticImportIntegrations, canCreate: canCreateAutomaticImport } =
+    useAutomaticImportAuthz();
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
     ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
@@ -158,8 +155,9 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         categories={mainCategories}
         selectedCategories={selectedCategories}
         onCategoryChange={onCategoryChange}
+        showCreatedIntegrations={canReadAutomaticImportIntegrations}
         CreateIntegrationCardButton={
-          canReadAutomaticImportIntegrations
+          canCreateAutomaticImport
             ? automaticImport?.components.CreateIntegrationSideCardButton
             : undefined
         }

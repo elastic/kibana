@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { CodeEditor } from '@kbn/code-editor';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import type { DataStreamResponse } from '../../../../../common';
 import type { GetDataStreamResultsResponse } from '../../../../common/lib/api';
@@ -63,6 +64,11 @@ jest.mock('../../../../common', () => ({
       isLoading: false,
     },
   }),
+}));
+
+const mockUseAuthorization = jest.fn();
+jest.mock('../../../../common/hooks/use_authorization', () => ({
+  useAuthorization: () => mockUseAuthorization(),
 }));
 
 const mockSelectPipelineTab = jest.fn();
@@ -142,6 +148,7 @@ describe('EditPipelineFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAuthorization.mockReturnValue({ canEditIntegration: true });
     mockMutateAsync.mockResolvedValue(createMockResults());
     mockReportCodeEditorCopyClicked.mockClear();
     mockUIState.selectedPipelineTab = 'table';
@@ -291,6 +298,37 @@ describe('EditPipelineFlyout', () => {
       await userEvent.click(tableTab);
 
       expect(mockSelectPipelineTab).toHaveBeenCalledWith('table');
+    });
+  });
+
+  describe('without the edit privilege', () => {
+    beforeEach(() => {
+      mockUseAuthorization.mockReturnValue({ canEditIntegration: false });
+    });
+
+    it('hides the Save button', () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.queryByTestId('editPipelineFlyoutSaveButton')).not.toBeInTheDocument();
+    });
+
+    it('renders the pipeline editor as read-only', () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(CodeEditor).toHaveBeenCalledWith(
+        expect.objectContaining({ options: expect.objectContaining({ readOnly: true }) }),
+        expect.anything()
+      );
+    });
+
+    it('still shows the results table', () => {
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.getByText('Test Data Stream')).toBeInTheDocument();
     });
   });
 

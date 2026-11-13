@@ -1092,7 +1092,7 @@ A runnable **simulated async report** step ships in the example plugin:
 | Poll-only public | `examples/workflows_extensions_example/public/step_types/poll_only_job_step.ts` |
 | Poll-only step type id | `example.pollOnlyJobDemo` |
 
-Run Kibana with `yarn start --run-examples`, open **Developer examples** → **Workflows Extensions Example**, and use the **Async report (start + poll demo)** or **Wait for async job (poll-only demo)** step in the editor.
+Run Kibana with `pnpm start --run-examples`, open **Developer examples** → **Workflows Extensions Example**, and use the **Async report (start + poll demo)** or **Wait for async job (poll-only demo)** step in the editor.
 
 **Demo vs production**
 

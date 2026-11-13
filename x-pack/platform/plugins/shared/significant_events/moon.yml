@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/significant-events-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-sig-events-team'
+  defaultOwner: '@elastic/nightshift-sre-agent-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/significant-events-plugin'
   description: Moon project for @kbn/significant-events-plugin
   channel: ''
-  owner: '@elastic/obs-sig-events-team'
+  owner: '@elastic/nightshift-sre-agent-team'
   sourceRoot: x-pack/platform/plugins/shared/significant_events
 dependsOn:
   - '@kbn/streams-plugin'
@@ -88,6 +88,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -98,6 +99,4 @@ fileGroups:
     - types/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -7,7 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createDashboard, testData } from '../fixtures';
+import { createDashboard, getMetricTrendline, testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric trendline on dashboard (DSL)',
@@ -78,7 +78,7 @@ spaceTest.describe(
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
         await expect(page.getByTestId('mtrVis')).toBeVisible();
-        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        await expect(getMetricTrendline(page)).toBeVisible();
       }
     );
 
@@ -119,7 +119,7 @@ spaceTest.describe(
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
         await expect(page.getByTestId('mtrVis')).toBeVisible();
-        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        await expect(getMetricTrendline(page)).toBeVisible();
       }
     );
   }

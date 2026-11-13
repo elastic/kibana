@@ -38,7 +38,9 @@ export type CreateToolPayload = Omit<
 > &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
-export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
+export type UpdateToolPayload = Partial<
+  Pick<ToolDefinition, 'description' | 'tags' | 'confirmation'>
+> & {
   configuration?: Partial<ToolDefinition['configuration']>;
 };
 
@@ -87,6 +89,7 @@ export interface WorkflowItem {
   id: string;
   name: string;
   description: string;
+  enabled: boolean;
 }
 
 export interface GetWorkflowResponse {

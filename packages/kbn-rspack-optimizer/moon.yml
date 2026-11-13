@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/transpiler-config'
   - '@kbn/core-ui-settings-common'
   - '@kbn/repo-packages'
+  - '@kbn/projects-solutions-groups'
   - '@kbn/ci-stats-reporter'
 tags:
   - shared-server
@@ -34,10 +35,9 @@ tags:
   - dev
   - group-undefined
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - src/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

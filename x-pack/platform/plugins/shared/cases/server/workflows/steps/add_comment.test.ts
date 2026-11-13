@@ -43,8 +43,8 @@ describe('addCommentStepDefinition', () => {
     expect(add).toHaveBeenCalledWith({
       caseId: 'case-1',
       comment: {
-        type: 'user',
-        comment: 'Investigating now',
+        type: 'comment',
+        data: { content: 'Investigating now' },
         owner: createCaseResponseFixture.owner,
       },
     });

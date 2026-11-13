@@ -43,7 +43,7 @@ export const ApiEndpoints = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-  const { endpoints, isLoading, isError } = useApiEndpoints();
+  const { endpoints, isLoading, isError, isForbidden } = useApiEndpoints();
   const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
@@ -144,7 +144,7 @@ export const ApiEndpoints = () => {
               </EuiLink>
             )}
           </EuiFlexGroup>
-          {isError && (
+          {(isError || isForbidden) && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
@@ -152,14 +152,28 @@ export const ApiEndpoints = () => {
                 color="warning"
                 iconType="warning"
                 size="s"
-                title={i18n.translate(
-                  'xpack.observability_onboarding.apiEndpoints.fetchErrorTitle',
-                  {
-                    defaultMessage:
-                      'Could not load endpoint details. Refresh the page to try again.',
-                  }
-                )}
-                data-test-subj="observabilityOnboardingApiEndpointsFetchError"
+                title={
+                  isForbidden
+                    ? i18n.translate(
+                        'xpack.observability_onboarding.apiEndpoints.noViewPermissionTitle',
+                        {
+                          defaultMessage:
+                            "You don't have permission to view endpoint details. Contact your administrator.",
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.observability_onboarding.apiEndpoints.fetchErrorTitle',
+                        {
+                          defaultMessage:
+                            'Could not load endpoint details. Refresh the page to try again.',
+                        }
+                      )
+                }
+                data-test-subj={
+                  isForbidden
+                    ? 'observabilityOnboardingApiEndpointsNoViewPermission'
+                    : 'observabilityOnboardingApiEndpointsFetchError'
+                }
               />
             </>
           )}

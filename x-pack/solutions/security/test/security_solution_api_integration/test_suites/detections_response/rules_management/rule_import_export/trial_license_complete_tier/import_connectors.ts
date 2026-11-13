@@ -8,12 +8,13 @@
 import expect from 'expect';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { combineToNdJson, getCustomQueryRuleParams } from '../../../utils';
+import { combineToNdJson, fetchRule, getCustomQueryRuleParams } from '../../../utils';
 import { createConnector, deleteConnector, getConnector } from '../../../utils/connectors';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @skipInServerlessMKI import action connectors', () => {
@@ -141,6 +142,10 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        const imported = await fetchRule(supertest, { ruleId: 'rule-1' });
+        expect(imported.name).toBe('Rule 1');
+        expect(imported.actions[0].id).toBe('my-test-email');
       });
 
       /**
@@ -265,6 +270,8 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        await detectionsApi.readRule({ query: { rule_id: 'rule-1' } }).expect(404);
       });
     });
 
@@ -382,6 +389,8 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        await detectionsApi.readRule({ query: { rule_id: 'rule-1' } }).expect(404);
       });
 
       it('DOES NOT return an error when rule actions reference a preconfigured connector', async () => {
@@ -423,6 +432,10 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        const imported = await fetchRule(supertest, { ruleId: 'rule-1' });
+        expect(imported.name).toBe('Rule 1');
+        expect(imported.actions[0].id).toBe('my-test-email');
       });
     });
   });

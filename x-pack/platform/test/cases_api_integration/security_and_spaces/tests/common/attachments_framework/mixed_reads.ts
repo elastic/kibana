@@ -32,13 +32,30 @@ import {
   getCase,
 } from '../../../../common/lib/api';
 
+const EVENTS_INDEX = 'test-events-index';
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  // Attaching an event requires the referenced document to actually exist (mget-backed
+  // existence check), so tests must seed it first.
+  const seedEvents = (ids: string[]) =>
+    Promise.all(
+      ids.map((id) =>
+        es.index({
+          index: EVENTS_INDEX,
+          id,
+          document: { '@timestamp': new Date().toISOString() },
+          refresh: true,
+        })
+      )
+    );
+
   describe('Mixed Legacy + Unified Reads', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
+      await es.indices.delete({ index: EVENTS_INDEX, ignore_unavailable: true });
     });
 
     describe('coexistence of legacy and unified attachments', () => {
@@ -80,6 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('counts events and comments in case totals', async () => {
+        await seedEvents(['mixed-event-1']);
         const postedCase = await createCase(supertest, postCaseReq);
 
         // Create unified comment
@@ -289,6 +307,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('cross-type stats and documents over a mixed case', () => {
       it('reports correct totals and retrieves every attachment across both SOs', async () => {
+        await seedEvents(['stats-event-1']);
         const postedCase = await createCase(supertest, postCaseReq);
 
         // Track ids as they appear — each response returns the full comment list.

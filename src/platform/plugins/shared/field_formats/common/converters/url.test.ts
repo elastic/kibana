@@ -490,6 +490,41 @@ describe('UrlFormat', () => {
       `);
     });
 
+    test('resolves leading-slash relative urls against the base path, including the space prefix', () => {
+      const convert = (basePath: string) =>
+        new UrlFormat({ parsedUrl: { origin: 'http://kibana.host.com', basePath } }).convertToReact(
+          '/test/hello'
+        );
+
+      expect(convert('')).toMatchInlineSnapshot(`
+        <a
+          href="http://kibana.host.com/test/hello"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          /test/hello
+        </a>
+      `);
+      expect(convert('/xyz')).toMatchInlineSnapshot(`
+        <a
+          href="http://kibana.host.com/xyz/test/hello"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          /test/hello
+        </a>
+      `);
+      expect(convert('/xyz/s/custom')).toMatchInlineSnapshot(`
+        <a
+          href="http://kibana.host.com/xyz/s/custom/test/hello"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          /test/hello
+        </a>
+      `);
+    });
+
     test('should fail gracefully if there are no parsedUrl provided', () => {
       const url = new UrlFormat({});
 

@@ -10,8 +10,7 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { rspack } from '@rspack/core';
-import { createExternalPluginConfig } from '@kbn/rspack-optimizer';
+import { rspack, createExternalPluginConfig } from '@kbn/rspack-optimizer';
 
 import type { TaskContext } from '../task_context';
 

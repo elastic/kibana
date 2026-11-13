@@ -1,3 +1,7 @@
+cbor2
+@launchdarkly/js-client-sdk
+@eslint-community/eslint-plugin-eslint-comments
+@xterm/xterm
 knip
 safe-stable-stringify
 ajv-draft-04
@@ -38,7 +42,6 @@ oxlint
 react-element-to-jsx-string
 @swc/core
 lightningcss
-tar-fs
 browserslist
 react-day-picker
 jszip
@@ -50,8 +53,6 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
-<<<<<<< HEAD
-=======
 typescript-7
 immer-v9
 react-redux-v7
@@ -59,5 +60,9 @@ redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+@swc/jest
+@swc/plugin-emotion
+@ampproject/remapping
+magic-string
 graphql
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
+bump-cli

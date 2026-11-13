@@ -13,6 +13,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   AGENTS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  FLEET_SYNTHETICS_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
@@ -88,6 +89,20 @@ export async function updateAgentPolicySpaces({
   const spacesToRemove =
     // @ts-expect-error upgrade typescript v5.9.3
     existingPolicy?.space_ids?.filter((spaceId) => !newSpaceIds.includes(spaceId) ?? true) ?? [];
+
+  // Synthetics resolves monitor package policies in the private location's space,
+  // so removing that space from the agent policy orphans them.
+  if (
+    spacesToRemove.length > 0 &&
+    !options?.force &&
+    existingPackagePolicies.some(
+      (packagePolicy) => packagePolicy.package?.name === FLEET_SYNTHETICS_PACKAGE
+    )
+  ) {
+    throw new FleetError(
+      'Agent policies used by Synthetics private locations cannot be moved to a different space.'
+    );
+  }
 
   // Privileges check
   for (const spaceId of spacesToAdd) {

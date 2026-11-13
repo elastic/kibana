@@ -569,6 +569,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:includeFrozenByDefault': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether built-in Agent Builder tools include frozen tier data by default.',
+    },
+  },
   'contextEngine:enabled': {
     type: 'boolean',
     _meta: { description: 'Whether the Context Engine is enabled.' },

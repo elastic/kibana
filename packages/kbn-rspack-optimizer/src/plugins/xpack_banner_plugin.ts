@@ -8,15 +8,16 @@
  */
 
 import Path from 'path';
-import { rspack, type Compiler } from '@rspack/core';
+import type { Compiler } from '@rspack/core';
+import { rspack } from '../rspack_runtime';
 
 /**
  * Elastic License 2.0 banner for x-pack plugin bundles.
  *
  * This is the exact text the legacy webpack optimizer prepends to every output
  * chunk of x-pack plugin compilations via `webpack.BannerPlugin({ raw: true })`.
- * The `/*!` prefix ensures the comment survives minification (both SWC and
- * Terser preserve `/*!` comments by default).
+ * The `/*!` prefix marks it as a legal comment so it survives any future
+ * re-minification.
  *
  * This is intentionally NOT the same as the triple-license source file header
  * (`TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER` in `.eslintrc.js`) or the
@@ -64,7 +65,14 @@ export class XPackBannerPlugin {
       compilation.hooks.processAssets.tap(
         {
           name: 'XPackBannerPlugin',
-          stage: rspack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+          // Runs after minification (PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE = 400)
+          // because SWC minification strips legal comments with our minimizer
+          // options — in Rspack v1 and v2 alike — so a pre-minify banner never
+          // survived into dist bundles. Injecting post-minify makes the banner
+          // independent of minimizer comment settings. Still before
+          // BundleMetricsPlugin (PROCESS_ASSETS_STAGE_ANALYSE = 4000) so
+          // measured sizes include it.
+          stage: rspack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
         },
         () => {
           for (const chunk of compilation.chunks) {

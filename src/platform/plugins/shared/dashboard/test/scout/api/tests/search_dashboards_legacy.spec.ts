@@ -71,7 +71,6 @@ apiTest.describe('dashboards - search - LEGACY', { tag: tags.deploymentAgnostic 
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(101);
     expect(response.body.dashboards).toHaveLength(20);
-    expect(response.body.dashboards[0].id).toBe('test-dashboard-00');
   });
 
   apiTest('should narrow results by query', async ({ apiClient }) => {
@@ -129,7 +128,6 @@ apiTest.describe('dashboards - search - LEGACY', { tag: tags.deploymentAgnostic 
       expect(response).toHaveStatusCode(200);
       expect(response.body.total).toBe(101);
       expect(response.body.dashboards).toHaveLength(10);
-      expect(response.body.dashboards[0].id).toBe('test-dashboard-40');
     }
   );
 

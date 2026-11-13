@@ -327,7 +327,8 @@ export const UserPanel = memo(function UserPanel({
             identityFields={documentEntityIdentifiers}
             entityRecord={observedUser.entityRecord ?? undefined}
             refetchEntityRecord={entityFromStoreResult.refetch}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
           />

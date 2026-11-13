@@ -9,25 +9,51 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { MwsCalloutContent } from './mws_callout_content';
 import { MwsPendingSyncCallout } from './mws_pending_sync_callout';
+import { MwsAgentVersionCallout } from './mws_agent_version_callout';
 import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
+import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 import { selectOverviewStatus } from '../../../state/overview_status';
 
 export const MonitorsMWsCallout = () => {
   const { allConfigs } = useSelector(selectOverviewStatus);
+  const { outdatedLocationIds } = useOutdatedMwAgentLocationIds();
 
   const monitorMWIds = useMemo(
     () => [...new Set(allConfigs?.flatMap((config) => config.maintenanceWindows ?? []))],
     [allConfigs]
   );
 
-  const { activeMWs, hasPendingChanges, syncInterval } = useHasPendingMwChanges(monitorMWIds);
+  const hasOutdatedAgent = useMemo(
+    () =>
+      outdatedLocationIds.size > 0 &&
+      (allConfigs ?? []).some(
+        (config) =>
+          (config.maintenanceWindows?.length ?? 0) > 0 &&
+          config.locations.some((location) => outdatedLocationIds.has(location.id))
+      ),
+    [allConfigs, outdatedLocationIds]
+  );
+
+  const { activeMWs, hasPendingChanges, isSyncOverdue } = useHasPendingMwChanges(monitorMWIds);
 
   if (activeMWs.length) {
-    return <MwsCalloutContent activeMWs={activeMWs} />;
+    return (
+      <MwsCalloutContent
+        activeMWs={activeMWs}
+        hasOutdatedAgent={hasOutdatedAgent}
+        isSyncOverdue={isSyncOverdue}
+      />
+    );
   }
 
   if (hasPendingChanges) {
-    return <MwsPendingSyncCallout syncInterval={syncInterval} />;
+    return (
+      <MwsPendingSyncCallout hasOutdatedAgent={hasOutdatedAgent} isSyncOverdue={isSyncOverdue} />
+    );
+  }
+
+  if (hasOutdatedAgent) {
+    return <MwsAgentVersionCallout />;
   }
 
   return null;

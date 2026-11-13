@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/dev-utils'
   - '@kbn/es'
   - '@kbn/rspack-optimizer'
+  - '@kbn/projects-solutions-groups'
 tags:
   - shared-server
   - package
@@ -41,10 +42,9 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

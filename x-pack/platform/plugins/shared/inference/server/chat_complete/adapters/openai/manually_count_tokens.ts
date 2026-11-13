@@ -18,7 +18,13 @@ function contentToString(
   if (!content) return '';
   if (typeof content === 'string') return content;
   return content
-    .map((part) => (part.type === 'text' ? part.text ?? '' : part.refusal ?? ''))
+    .map((part) => {
+      if (part.type === 'text') return part.text ?? '';
+      if (part.type === 'refusal') return part.refusal ?? '';
+      // Non-text parts (image_url, input_audio, etc.) can't be tokenized directly;
+      // use a placeholder so they contribute a rough token estimate rather than zero.
+      return `[${part.type}]`;
+    })
     .join('\n');
 }
 

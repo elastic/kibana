@@ -20,6 +20,7 @@ import {
   OTEL_COLLECTOR_INPUT_TYPE,
   OTEL_TEMPLATE_SUFFIX,
   UNIVERSAL_PROFILING_INDEX_PATTERNS,
+  UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
@@ -41,8 +42,11 @@ import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common
 
 import { extractSignalTypesFromPipelines } from './otel_collector';
 import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
+import { getRoleDescriptorNames } from './role_descriptor_name';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
+
+export const PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES = new Set(['monitor']);
 
 export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'auto_configure',
@@ -53,6 +57,8 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'index',
   'view_index_metadata',
 ];
+
+export const UNIVERSAL_PROFILING_QUEUE_PERMISSIONS = ['read', 'write', 'maintenance'];
 
 export const ELASTIC_CONNECTORS_INDEX_PERMISSIONS = [
   'read',
@@ -100,6 +106,8 @@ function applyOtelDatasetSuffixIfNeeded(
   return `${dataset}.${OTEL_TEMPLATE_SUFFIX}`;
 }
 
+type PermissionEntry = [packagePolicyId: string, descriptor: SecurityRoleDescriptor];
+
 export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyNamespace: string,
@@ -116,7 +124,7 @@ export function storedPackagePoliciesToAgentPermissions(
     return;
   }
 
-  const permissionEntries = packagePolicies.map((packagePolicy) => {
+  const permissionEntries = packagePolicies.map((packagePolicy): PermissionEntry => {
     if (!packagePolicy.package) {
       throw new PackagePolicyRequestError(
         `No package for package policy ${packagePolicy.name ?? packagePolicy.id}`
@@ -139,7 +147,10 @@ export function storedPackagePoliciesToAgentPermissions(
       pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||
       pkg.name === FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE
     ) {
-      return universalProfilingPermissions(packagePolicy.id);
+      return universalProfilingPermissions(
+        packagePolicy.id,
+        pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE
+      );
     }
 
     if (pkg.name === FLEET_APM_PACKAGE) {
@@ -161,7 +172,7 @@ export function storedPackagePoliciesToAgentPermissions(
     const dataStreams = getNormalizedDataStreams(pkg);
     if (!isDynamicInput && (!dataStreams || dataStreams.length === 0)) {
       // Return empty object (not undefined) if no additional permissions
-      return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy) ?? {}];
+      return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy)];
     }
 
     let dataStreamsForPermissions: DataStreamMeta[];
@@ -322,9 +333,18 @@ export function storedPackagePoliciesToAgentPermissions(
 
     let clusterRoleDescriptor = {};
     const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
-    if (cluster.length > 0) {
+    const validCluster = cluster.filter((p) => PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES.has(p));
+    const invalidCluster = cluster.filter((p) => !PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES.has(p));
+    if (invalidCluster.length) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Ignoring invalid or forbidden cluster privilege(s) in package policy "${packagePolicy.id}": ${invalidCluster}`
+        );
+    }
+    if (validCluster.length > 0) {
       clusterRoleDescriptor = {
-        cluster,
+        cluster: validCluster,
       };
     }
     // namespace is either the package policy's or the agent policy one
@@ -342,7 +362,15 @@ export function storedPackagePoliciesToAgentPermissions(
     ];
   });
 
-  return Object.fromEntries(permissionEntries);
+  // The package policy ID becomes the role descriptor name of the output API key. It can be set
+  // by API callers, so make sure one ID that ES rejects cannot block the whole agent policy.
+  const roleDescriptorNames = getRoleDescriptorNames(
+    permissionEntries.map(([packagePolicyId]) => packagePolicyId)
+  );
+
+  return Object.fromEntries(
+    permissionEntries.map(([, descriptor], index) => [roleDescriptorNames[index], descriptor])
+  );
 }
 
 export interface DataStreamMeta {
@@ -420,16 +448,27 @@ export function getDataStreamPrivileges(
   };
 }
 
-function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
+function universalProfilingPermissions(
+  packagePolicyId: string,
+  includeSymbolizationQueues: boolean
+): [string, SecurityRoleDescriptor] {
+  const indices: SecurityIndicesPrivileges[] = [
+    {
+      names: [...UNIVERSAL_PROFILING_INDEX_PATTERNS],
+      privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+    },
+  ];
+  if (includeSymbolizationQueues) {
+    indices.push({
+      names: [...UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS],
+      privileges: UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
+    });
+  }
+
   return [
     packagePolicyId,
     {
-      indices: [
-        {
-          names: [...UNIVERSAL_PROFILING_INDEX_PATTERNS],
-          privileges: UNIVERSAL_PROFILING_PERMISSIONS,
-        },
-      ],
+      indices,
     },
   ];
 }
@@ -450,17 +489,13 @@ function maybeAddAgentlessPermissions(
 
 function maybeAddAdditionalPackagePoliciesPermissions(
   packagePolicy: PackagePolicy,
-  existing?: SecurityRoleDescriptor
-): SecurityRoleDescriptor | undefined {
+  existing: SecurityRoleDescriptor = {}
+): SecurityRoleDescriptor {
   if (
     !packagePolicy.additional_datastreams_permissions ||
     !packagePolicy.additional_datastreams_permissions.length
   ) {
     return existing;
-  }
-
-  if (!existing) {
-    existing = {};
   }
 
   if (!existing.indices) {

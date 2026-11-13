@@ -53,11 +53,10 @@ import {
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CreateCaseFormFieldsProps } from './form_fields';
 import { CreateCaseFormFields } from './form_fields';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { renderWithTestingProviders } from '../../common/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { DEFAULT_FEATURES } from '../../../common/constants';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
 import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 import { useSubmitCase } from './use_submit_case';
@@ -440,12 +439,12 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false, extractObservables: false },
+          settings: { syncAlerts: false, extractObservables: true },
         },
       });
     });
 
-    it('should set sync alerts to false when the sync feature setting is false', async () => {
+    it('should set sync alerts to false for a non-Security owner', async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         data: connectorsMock,
@@ -453,7 +452,7 @@ describe('Create case', () => {
 
       renderWithTestingProviders(
         <TestComponent
-          selectedOwner={SECURITY_SOLUTION_OWNER}
+          selectedOwner={OBSERVABILITY_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -461,7 +460,7 @@ describe('Create case', () => {
         </TestComponent>,
         {
           wrapperProps: {
-            features: { alerts: { sync: false, enabled: true } },
+            owner: [OBSERVABILITY_OWNER],
           },
         }
       );
@@ -476,6 +475,7 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
+          owner: OBSERVABILITY_OWNER,
           settings: { syncAlerts: false, extractObservables: false },
         },
       });
@@ -1019,10 +1019,6 @@ describe('Create case', () => {
       {
         wrapperProps: {
           license,
-          features: {
-            ...DEFAULT_FEATURES,
-            observables: { enabled: true, autoExtract: true },
-          },
         },
       }
     );

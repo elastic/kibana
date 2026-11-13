@@ -499,7 +499,9 @@ export const entityDetailsHighlightsServiceFactory = ({
             vulnerabilitiesTotal: enrichedEntity.vulnerabilitiesTotal,
           }
         : {}),
-      anomalies: anomaliesAnonymized,
+      // Null when empty so the model gets an explicit "no ML anomalies" signal
+      // (clearer than [] or omitting the key).
+      anomalies: anomaliesAnonymized.length > 0 ? anomaliesAnonymized : null,
     };
   };
 
@@ -542,7 +544,9 @@ export const entityDetailsHighlightsServiceFactory = ({
             vulnerabilitiesTotal: vulnerabilityData.vulnerabilitiesTotal,
           }
         : {}),
-      anomalies: anomaliesAnonymized,
+      // Null when empty so the model gets an explicit "no ML anomalies" signal
+      // (clearer than [] or omitting the key).
+      anomalies: anomaliesAnonymized.length > 0 ? anomaliesAnonymized : null,
     };
   };
 
@@ -575,11 +579,11 @@ export const entityDetailsHighlightsServiceFactory = ({
     });
 
     if (!enrichedEntities || enrichedEntities.length === 0) {
-      // No entity → omit vulnerabilities entirely (nothing applicable to report)
+      // No entity → omit vulnerabilities; anomalies are explicitly null (no ML findings).
       return {
         riskScore: [],
         assetCriticality: [],
-        anomalies: [],
+        anomalies: null,
       };
     }
 

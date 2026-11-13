@@ -174,6 +174,21 @@ describe('getEuidFromObject', () => {
       ).toBe('user:alice@host-1@local');
     });
 
+    it('treats a multi-valued event.type as IdP when any value matches, regardless of order', () => {
+      const iamEvent = (type: string[]) => ({
+        user: { email: 'michael@example.com', name: 'michael@example.com' },
+        host: { name: 'LAPTOP-1' },
+        event: { kind: 'signal', module: 'zscaler_zpa', category: ['iam'], type },
+      });
+      expect(getEuidFromObject('user', iamEvent(['info', 'user']))).toBe(
+        'user:michael@example.com@zscaler_zpa'
+      );
+      expect(getEuidFromObject('user', iamEvent(['user', 'info']))).toBe(
+        'user:michael@example.com@zscaler_zpa'
+      );
+      expect(getEuidFromObject('user', iamEvent(['info']))).toBeUndefined();
+    });
+
     it('returns undefined when event.outcome is failure (documentsFilter)', () => {
       expect(
         getEuidFromObject('user', {

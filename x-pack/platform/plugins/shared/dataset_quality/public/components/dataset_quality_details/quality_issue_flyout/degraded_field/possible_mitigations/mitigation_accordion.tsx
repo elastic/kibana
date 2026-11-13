@@ -31,7 +31,7 @@ export function MitigationAccordion({
   initialIsOpen = false,
 }: MitigationAccordionProps) {
   const accordionId = useGeneratedHtmlId({
-    prefix: title,
+    prefix: dataTestSubjPrefix,
   });
 
   return (

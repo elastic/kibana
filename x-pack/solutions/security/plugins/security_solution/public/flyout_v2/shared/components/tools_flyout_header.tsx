@@ -11,7 +11,6 @@ import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { ToolsFlyoutTitle } from './tools_flyout_title';
 import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID } from './test_ids';
-import { useFlyoutHasBackButton } from '../hooks/use_flyout_has_back_button';
 
 export interface ToolsFlyoutHeaderProps {
   /**
@@ -49,11 +48,7 @@ export interface ToolsFlyoutHeaderProps {
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
   ({ title, onTitleClick, label, iconType, badge, timestamp }) => {
     const { euiTheme } = useEuiTheme();
-    const showSourceContext = !!onTitleClick && !!label && !!iconType;
-
-    // When the flyout menu renders a back button, the header is pushed onto its own row and no
-    // longer overlaps the close button, so we only reserve room for the close button otherwise.
-    const hasBackButton = useFlyoutHasBackButton();
+    const showSourceContext = !!label && !!iconType;
 
     return (
       <EuiFlexGroup
@@ -61,7 +56,7 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
         alignItems="center"
         gutterSize="m"
         responsive={false}
-        css={{ flexWrap: 'nowrap', paddingRight: hasBackButton ? 0 : euiTheme.size.l }}
+        css={{ flexWrap: 'nowrap', paddingRight: 0 }}
         data-test-subj={TOOLS_FLYOUT_HEADER_TEST_ID}
       >
         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>

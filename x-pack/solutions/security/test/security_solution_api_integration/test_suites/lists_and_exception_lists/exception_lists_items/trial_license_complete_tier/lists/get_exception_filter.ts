@@ -22,7 +22,7 @@ import {
 import { getCreateExceptionListItemMinimalSchemaMockWithoutId } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
-import { createListsIndex, deleteListsIndex } from '../../../utils';
+import { createListsIndex, deleteListsIndex, deleteAllExceptions } from '../../../utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
+        await deleteAllExceptions(supertest, log);
         await deleteListsIndex(supertest, log);
       });
 
@@ -100,6 +101,90 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           },
         });
+      });
+
+      it('should return 400 when exceptions exceeds 1000 items', async () => {
+        const oversizedExceptions = Array.from({ length: 1_001 }, () => ({
+          description: 'd',
+          entries: [
+            { field: 'a', operator: 'included' as const, type: 'match' as const, value: 'b' },
+          ],
+          list_id: 'l',
+          name: 'n',
+          type: 'simple' as const,
+        }));
+
+        const { body } = await supertest
+          .post(`${INTERNAL_EXCEPTION_FILTER}`)
+          .set('kbn-xsrf', 'true')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send({ exceptions: oversizedExceptions, type: 'exception_items' })
+          .expect(400);
+
+        expect(body.message).to.contain('exceptions cannot contain more than 1000 items');
+      });
+
+      it('should return 400 when exception_list_ids exceeds 10000 items', async () => {
+        const oversizedList = Array.from({ length: 10_001 }, (_, i) => ({
+          exception_list_id: `list-${i}`,
+          namespace_type: 'single' as const,
+        }));
+
+        const { body } = await supertest
+          .post(`${INTERNAL_EXCEPTION_FILTER}`)
+          .set('kbn-xsrf', 'true')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send({ exception_list_ids: oversizedList, type: 'exception_list_ids' })
+          .expect(400);
+
+        expect(body.message).to.contain('exception_list_ids cannot contain more than 10000 items');
+      });
+
+      it('should deduplicate exception_list_ids and return same filter as a single entry', async () => {
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListDetectionSchemaMock())
+          .expect(200);
+
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getCreateExceptionListItemMinimalSchemaMockWithoutId(),
+            list_id: getCreateExceptionListDetectionSchemaMock().list_id,
+            item_id: '1',
+            entries: [
+              { field: 'host.name', value: 'some host', operator: 'included', type: 'match' },
+            ],
+          })
+          .expect(200);
+
+        const listId = getCreateExceptionListDetectionSchemaMock().list_id;
+        const singleEntry = { exception_list_id: listId, namespace_type: 'single' as const };
+
+        const { body: singleBody } = await supertest
+          .post(`${INTERNAL_EXCEPTION_FILTER}`)
+          .set('kbn-xsrf', 'true')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send({ exception_list_ids: [singleEntry], type: 'exception_list_ids' })
+          .expect(200);
+
+        const { body: dupBody } = await supertest
+          .post(`${INTERNAL_EXCEPTION_FILTER}`)
+          .set('kbn-xsrf', 'true')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send({
+            exception_list_ids: [singleEntry, singleEntry, singleEntry],
+            type: 'exception_list_ids',
+          })
+          .expect(200);
+
+        expect(dupBody).to.eql(singleBody);
       });
 
       it('should return an exception filter if correctly passed exception ids', async () => {

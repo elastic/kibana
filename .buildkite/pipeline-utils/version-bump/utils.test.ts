@@ -8,7 +8,7 @@
  */
 
 import type { RestEndpointMethodTypes } from '@octokit/rest';
-import { isAutomatedVersionBumpPR } from './utils';
+import { isAutomatedVersionBumpPR } from './utils.ts';
 
 type PrChanges = RestEndpointMethodTypes['pulls']['listFiles']['response']['data'];
 

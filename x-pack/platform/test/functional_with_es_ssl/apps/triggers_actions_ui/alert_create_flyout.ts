@@ -81,10 +81,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .expect(204, '');
   }
 
+  async function setRuleName(ruleName: string) {
+    // React doesn't observe FTR's JS-based clearValue, so the pre-filled default name has to be cleared with real key events
+    await testSubjects.setValue('ruleDetailsNameInput', ruleName, { clearWithKeyboard: true });
+    expect(await testSubjects.getAttribute('ruleDetailsNameInput', 'value')).to.eql(ruleName);
+  }
+
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.click(`.es-query-SelectOption`);
-    await testSubjects.setValue('ruleDetailsNameInput', alertName);
+    await setRuleName(alertName);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     await comboBox.set('thresholdIndexesComboBox', 'k');
@@ -103,14 +109,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   async function defineAPMErrorCountRule(ruleName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.click(`apm.error_rate-SelectOption`);
-    await testSubjects.setValue('ruleDetailsNameInput', ruleName);
+    await setRuleName(ruleName);
   }
 
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.click('test.always-firing-SelectOption');
     await testSubjects.scrollIntoView('ruleDetailsNameInput');
-    await testSubjects.setValue('ruleDetailsNameInput', alertName);
+    await setRuleName(alertName);
   }
 
   async function discardNewRuleCreation() {
@@ -596,7 +602,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.click(`.es-query-SelectOption`);
-      await testSubjects.setValue('ruleDetailsNameInput', 'alertName');
+      await setRuleName('alertName');
       await testSubjects.click('rulePageFooterCancelButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
@@ -645,8 +651,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.waitForWithTimeout(
         'ES|QL KEEP warning footer button to appear',
         testSubjects.TRY_TIME,
-        async () =>
-          await testSubjects.exists('ESQLEditor-footerPopoverButton-warning', { timeout: 1000 })
+        async () => await testSubjects.exists('ESQLEditor-footerPopoverButton-warning')
       );
 
       await testSubjects.click('ESQLEditor-footerPopoverButton-warning');

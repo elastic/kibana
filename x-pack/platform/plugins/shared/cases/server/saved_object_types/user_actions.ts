@@ -8,7 +8,6 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
-import type { UserActionsMigrationsDeps } from './migrations/user_actions';
 import { createUserActionsMigrations } from './migrations/user_actions';
 
 /**
@@ -16,9 +15,7 @@ import { createUserActionsMigrations } from './migrations/user_actions';
  * Remove these comments when https://github.com/elastic/kibana/issues/152756 is resolved.
  */
 
-export const createCaseUserActionSavedObjectType = (
-  migrationDeps: UserActionsMigrationsDeps
-): SavedObjectsType => ({
+export const createCaseUserActionSavedObjectType = (): SavedObjectsType => ({
   name: CASE_USER_ACTION_SAVED_OBJECT,
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
@@ -87,7 +84,7 @@ export const createCaseUserActionSavedObjectType = (
       },
     },
   },
-  migrations: () => createUserActionsMigrations(migrationDeps),
+  migrations: () => createUserActionsMigrations(),
   management: {
     importableAndExportable: true,
     visibleInManagement: false,

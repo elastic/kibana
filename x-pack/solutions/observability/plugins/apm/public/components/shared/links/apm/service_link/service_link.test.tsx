@@ -5,37 +5,66 @@
  * 2.0.
  */
 
-import { composeStories } from '@storybook/react';
-import { render, screen } from '@testing-library/react';
 import React from 'react';
-import * as stories from './service_link.stories';
+import { render, screen } from '@testing-library/react';
+import { ServiceLink } from '.';
+import * as useApmRouterModule from '../../../../../hooks/use_apm_router';
 
-const { Example, AndroidAgent, IOSAgent } = composeStories(stories);
+const query = {
+  environment: 'ENVIRONMENT_ALL',
+  kuery: '',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  serviceGroup: '',
+  comparisonEnabled: false,
+} as any;
 
-const params =
-  'anomalyThreshold=major&comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup=';
 describe('ServiceLink', () => {
-  it('links to service details', async () => {
-    expect(() => render(<Example />)).not.toThrowError();
+  const mockLink = jest.fn();
 
-    expect(await screen.findByTestId('serviceLink_java')).toHaveAttribute(
-      'href',
-      `/basepath/app/apm/services/opbeans-java/overview?${params}`
-    );
+  beforeEach(() => {
+    mockLink.mockClear();
+    jest.spyOn(useApmRouterModule, 'useApmRouter').mockReturnValue({ link: mockLink } as any);
   });
 
-  it('links to mobile service details', async () => {
-    expect(() => render(<AndroidAgent />)).not.toThrowError();
-    expect(() => render(<IOSAgent />)).not.toThrowError();
+  it('links to service details', () => {
+    mockLink.mockReturnValue('/basepath/app/apm/services/opbeans-java/overview');
 
-    expect(await screen.findByTestId('serviceLink_android/java')).toHaveAttribute(
-      'href',
-      `/basepath/app/apm/mobile-services/opbeans-android/overview?${params}`
-    );
+    render(<ServiceLink agentName="java" serviceName="opbeans-java" query={query} />);
 
-    expect(await screen.findByTestId('serviceLink_iOS/swift')).toHaveAttribute(
+    expect(screen.getByTestId('serviceLink_java')).toHaveAttribute(
       'href',
-      `/basepath/app/apm/mobile-services/opbeans-swift/overview?${params}`
+      '/basepath/app/apm/services/opbeans-java/overview'
     );
+    expect(mockLink).toHaveBeenCalledWith('/services/{serviceName}/overview', {
+      path: { serviceName: 'opbeans-java' },
+      query,
+    });
+  });
+
+  it('links to mobile service details', () => {
+    mockLink
+      .mockReturnValueOnce('/basepath/app/apm/mobile-services/opbeans-android/overview')
+      .mockReturnValueOnce('/basepath/app/apm/mobile-services/opbeans-swift/overview');
+
+    render(<ServiceLink agentName="android/java" serviceName="opbeans-android" query={query} />);
+    render(<ServiceLink agentName="iOS/swift" serviceName="opbeans-swift" query={query} />);
+
+    expect(screen.getByTestId('serviceLink_android/java')).toHaveAttribute(
+      'href',
+      '/basepath/app/apm/mobile-services/opbeans-android/overview'
+    );
+    expect(screen.getByTestId('serviceLink_iOS/swift')).toHaveAttribute(
+      'href',
+      '/basepath/app/apm/mobile-services/opbeans-swift/overview'
+    );
+    expect(mockLink).toHaveBeenCalledWith('/mobile-services/{serviceName}/overview', {
+      path: { serviceName: 'opbeans-android' },
+      query,
+    });
+    expect(mockLink).toHaveBeenCalledWith('/mobile-services/{serviceName}/overview', {
+      path: { serviceName: 'opbeans-swift' },
+      query,
+    });
   });
 });

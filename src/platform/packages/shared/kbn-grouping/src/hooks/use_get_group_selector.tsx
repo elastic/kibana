@@ -20,6 +20,7 @@ import { validateEnforcedGroups, ensureEnforcedGroupsInFront } from '../helpers'
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface UseGetGroupSelectorArgs {
+  allowedFieldTypes?: string[];
   defaultGroupingOptions: GroupOption[];
   dispatch: React.Dispatch<Action>;
   fields: FieldSpec[];
@@ -49,7 +50,12 @@ export interface UseGetGroupSelectorArgs {
 interface UseGetGroupSelectorStateless
   extends Pick<
     UseGetGroupSelectorArgs,
-    'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels' | 'settings'
+    | 'allowedFieldTypes'
+    | 'defaultGroupingOptions'
+    | 'groupingId'
+    | 'fields'
+    | 'maxGroupingLevels'
+    | 'settings'
   > {
   onGroupChange: (selectedGroups: string[]) => void;
 }
@@ -60,6 +66,7 @@ interface UseGetGroupSelectorStateless
 // the grouping component will handle the group selector. When the group selector is set back to none,
 // the consumer can again use the groupSelectorStateless component to select a new group
 export const useGetGroupSelectorStateless = ({
+  allowedFieldTypes,
   defaultGroupingOptions,
   groupingId,
   fields,
@@ -78,6 +85,7 @@ export const useGetGroupSelectorStateless = ({
     return (
       <GroupSelector
         {...{
+          allowedFieldTypes,
           groupingId,
           groupsSelected: ['none'],
           'data-test-subj': 'alerts-table-group-selector',
@@ -89,10 +97,19 @@ export const useGetGroupSelectorStateless = ({
         }}
       />
     );
-  }, [groupingId, fields, maxGroupingLevels, defaultGroupingOptions, onChange, settings]);
+  }, [
+    allowedFieldTypes,
+    groupingId,
+    fields,
+    maxGroupingLevels,
+    defaultGroupingOptions,
+    onChange,
+    settings,
+  ]);
 };
 
 export const useGetGroupSelector = ({
+  allowedFieldTypes,
   defaultGroupingOptions,
   dispatch,
   fields,
@@ -255,6 +272,7 @@ export const useGetGroupSelector = ({
   return useMemo(
     () => (
       <GroupSelector
+        allowedFieldTypes={allowedFieldTypes}
         groupingId={groupingId}
         groupsSelected={selectedGroups}
         data-test-subj="alerts-table-group-selector"
@@ -268,6 +286,7 @@ export const useGetGroupSelector = ({
       />
     ),
     [
+      allowedFieldTypes,
       groupingId,
       selectedGroups,
       onChange,

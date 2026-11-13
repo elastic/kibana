@@ -6,7 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { AGENTS_INDEX } from '../../../common';
 import { buildPolicyBaseIdWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
@@ -16,10 +19,13 @@ import { buildPolicyBaseIdWithFallbackEsFilter } from '../../../common/services/
  * assigned to each policy or any of its version-specific policies (e.g. policy1 and policy1#9.3).
  * @param esClient
  * @param agentPolicyIds parent agent policy ids
+ * @param runtimeMappings when provided (from buildAgentStatusRuntimeField), also excludes
+ *   status:inactive and status:unenrolled agents via the runtime status field
  */
 export const getAgentCountForAgentPolicies = async (
   esClient: ElasticsearchClient,
-  agentPolicyIds: string[]
+  agentPolicyIds: string[],
+  { runtimeMappings }: { runtimeMappings?: MappingRuntimeFields } = {}
 ): Promise<Record<string, number>> => {
   if (agentPolicyIds.length === 0) {
     return {};
@@ -30,21 +36,27 @@ export const getAgentCountForAgentPolicies = async (
     filters[policyId] = buildPolicyBaseIdWithFallbackEsFilter(policyId);
   }
 
+  const baseFilter: QueryDslQueryContainer[] = runtimeMappings
+    ? [
+        { term: { active: 'true' } },
+        {
+          bool: {
+            must_not: [{ term: { status: 'inactive' } }, { term: { status: 'unenrolled' } }],
+          },
+        },
+      ]
+    : [{ term: { active: 'true' } }];
+
   const searchPromise = esClient.search<
     unknown,
     Record<'agent_counts', { buckets: Record<string, { doc_count: number }> }>
   >({
     index: AGENTS_INDEX,
     ignore_unavailable: true,
+    ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
     query: {
       bool: {
-        filter: [
-          {
-            term: {
-              active: 'true',
-            },
-          },
-        ],
+        filter: baseFilter,
       },
     },
     aggs: {

@@ -9,15 +9,15 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/270340
-apiTest.describe.skip('pingList query', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
 
   const from = '2019-01-28T17:40:08.078Z';
   const to = '2025-01-28T19:00:16.078Z';
 
-  apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
+  apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
+    await esClient.indices.delete({ index: 'heartbeat-8-full-test', ignore_unavailable: true });
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
