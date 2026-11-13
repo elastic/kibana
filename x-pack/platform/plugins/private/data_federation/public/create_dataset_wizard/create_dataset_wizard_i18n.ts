@@ -123,6 +123,36 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Request',
     }
   ),
+  reviewPreviewTabLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewPreviewTabLabel',
+    {
+      defaultMessage: 'Preview',
+    }
+  ),
+  reviewPreviewLoadingTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewPreviewLoadingTitle',
+    {
+      defaultMessage: 'Loading preview results',
+    }
+  ),
+  reviewPreviewErrorTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewPreviewErrorTitle',
+    {
+      defaultMessage: 'Unable to load preview',
+    }
+  ),
+  reviewPreviewNoResultsTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewPreviewNoResultsTitle',
+    {
+      defaultMessage: 'No results found',
+    }
+  ),
+  reviewPreviewNoResultsDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewPreviewNoResultsDescription',
+    {
+      defaultMessage: 'The query ran successfully but returned no results.',
+    }
+  ),
   reviewRequestDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.reviewRequestDescription',
     {

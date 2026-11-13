@@ -16,6 +16,10 @@ import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { emptyDatasetFormValues } from '../dataset_form_initial_values';
 import { StepReview } from './step_review';
 
+jest.mock('./dataset_preview', () => ({
+  DatasetPreview: () => <div data-test-subj="mockDatasetPreview" />,
+}));
+
 const dataSources: DataSource[] = [{ name: 'source-1', type: 's3', description: '', settings: {} }];
 
 const renderStepReview = (overrides: Partial<CreateDatasetFormValues> = {}) => {
@@ -319,5 +323,14 @@ describe('StepReview', () => {
     expect(request).toHaveTextContent('"dynamic": "false"');
     // The name travels as the path id, not in the body.
     expect(request).not.toHaveTextContent('"name"');
+  });
+
+  it('only renders the preview once its tab is selected', () => {
+    const { getByTestId, queryByTestId } = renderStepReview();
+
+    expect(queryByTestId('mockDatasetPreview')).toBeNull();
+
+    fireEvent.click(getByTestId('createDatasetWizardReviewPreviewTabButton'));
+    expect(getByTestId('mockDatasetPreview')).toBeInTheDocument();
   });
 });
