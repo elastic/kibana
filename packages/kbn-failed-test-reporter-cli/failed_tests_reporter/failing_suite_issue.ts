@@ -21,11 +21,13 @@ import {
   formatFullFailureMessage,
   FRAMEWORK_LABELS,
   inlineCode,
+  issueList,
   KIBANA_BLOB_URL,
   plural,
   table,
   targetEnvironment,
   testDashboardUrl,
+  type PreviousIssues,
 } from '../flaky_test_issues/markdown';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
@@ -75,8 +77,8 @@ export interface FailingSuiteIssueContext {
   branch: string;
   /** Numbers of issues that mention the suite's file or are about some of its tests. */
   relatedIssues?: number[];
-  /** Numbers of the per-test issues of its tests closed as its duplicates once it is filed. */
-  supersededIssues?: number[];
+  /** The per-test issues of its tests closed as its duplicates once it is filed. */
+  previousIssues?: PreviousIssues;
   /** When the issue is filed, recorded as the break's first post on its pipeline and branch. */
   postedAt?: Date;
 }
@@ -207,12 +209,17 @@ const opening = (suite: FailingSuite, ctx: FailingSuiteIssueContext): string => 
   );
 };
 
-const testsList = (suite: FailingSuite): string =>
+/** One line per test, with the issues it was tracked in before, if any. */
+const testsList = (suite: FailingSuite, { previousIssues }: FailingSuiteIssueContext): string =>
   [
     'Consistently failing tests:',
-    ...suite.tests.map(
-      (test) => `- ${inlineCode(test.title)} · [history](${testDashboardUrl(test.testId)})`
-    ),
+    ...suite.tests.map((test) => {
+      const previous = previousIssues?.get(test.testId) ?? [];
+      return (
+        `- ${inlineCode(test.title)} · [history](${testDashboardUrl(test.testId)})` +
+        (previous.length > 0 ? ` · previously tracked in ${issueList(previous)}` : '')
+      );
+    }),
   ].join('\n');
 
 const suiteDetails = (suite: FailingSuite): string => {
@@ -243,14 +250,6 @@ const lastFailure = (suite: FailingSuite): string | undefined => {
     suite.tests.length > 1 ? `Last failure of ${inlineCode(test.title)}:` : 'Last failure:';
   return `${lead}\n\n${codeBlock(formatFullFailureMessage(test.errorMessage))}`;
 };
-
-const issueList = (numbers: readonly number[]): string =>
-  numbers.map((number) => `#${number}`).join(', ');
-
-const supersededIssues = ({
-  supersededIssues: numbers,
-}: FailingSuiteIssueContext): string | undefined =>
-  numbers && numbers.length > 0 ? `Previously tracked in ${issueList(numbers)}.` : undefined;
 
 const relatedIssues = ({ relatedIssues: numbers }: FailingSuiteIssueContext): string | undefined =>
   numbers && numbers.length > 0 ? `Possibly related: ${issueList(numbers)}.` : undefined;
@@ -288,10 +287,9 @@ export const renderFailingSuiteIssueBody = (
   updateIssueMetadata(
     [
       opening(suite, ctx),
-      testsList(suite),
+      testsList(suite, ctx),
       suiteDetails(suite),
       lastFailure(suite),
-      supersededIssues(ctx),
       relatedIssues(ctx),
       SKIP_TIP,
     ]

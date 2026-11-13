@@ -8,7 +8,7 @@
  */
 
 import type { FlakyTestBranchStats } from '@kbn/scout-reporting';
-import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
+import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   FLAKY_TEST_SUITE_METADATA_PREFIX,
   flakySuiteIssueTitle,
@@ -543,20 +543,48 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(renderFlakySuiteIssueBody(suite, { report, relatedIssues: [7, 8] })).toMatchSnapshot();
   });
 
-  it('names the issues it takes over from before the possibly related ones', () => {
+  it('names the issues it takes over from next to their test in the tests table', () => {
     const { suite, report } = singleTestReport();
+    const { testId } = suite.tests[0];
     const body = renderFlakySuiteIssueBody(suite, {
       report,
-      relatedIssues: [9],
-      supersededIssues: [7, 8],
+      previousIssues: new Map([[testId, [7, 8]]]),
     });
 
-    const superseded = body.indexOf('Previously tracked in #7, #8.');
-    expect(superseded).toBeGreaterThan(-1);
-    expect(body.indexOf('Possibly related: #9.')).toBeGreaterThan(superseded);
-    expect(renderFlakySuiteIssueBody(suite, { report, supersededIssues: [] })).not.toContain(
+    expect(body).toContain('| Test | Flaky branches | Dashboard | Previously tracked in |');
+    expect(body).toMatch(/^\| creates default alert.* \| \[dashboard\]\(.*\) \| #7, #8 \|$/m);
+    expect(body).not.toContain('Previously tracked in #');
+    expect(
+      getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX)
+    ).toBeUndefined();
+    // no column when no test was tracked before
+    expect(renderFlakySuiteIssueBody(suite, { report, previousIssues: new Map() })).not.toContain(
       'Previously tracked'
     );
+  });
+
+  it('lists the issues of the tests the table has no room for in a line, before the possibly related ones', () => {
+    const tests = Array.from({ length: 16 }, (_, position) =>
+      flakyTest({ testId: `t${position}`, title: `test ${position}`, failedBuilds: 40 - position })
+    );
+    const report = flakyReport(tests);
+    const [suite] = groupIntoSuites(report.flaky);
+    const body = renderFlakySuiteIssueBody(suite, {
+      report,
+      relatedIssues: [10],
+      previousIssues: new Map([
+        ['t0', [7]],
+        ['t15', [9]],
+      ]),
+    });
+
+    expect(body).toContain('| #7 |');
+    const line = body.indexOf('Previously tracked in #9.');
+    expect(line).toBeGreaterThan(-1);
+    expect(body.indexOf('Possibly related: #10.')).toBeGreaterThan(line);
+    expect(
+      getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX)
+    ).toEqual([9]);
   });
 
   it('records the suite and the first report snapshot in the metadata', () => {

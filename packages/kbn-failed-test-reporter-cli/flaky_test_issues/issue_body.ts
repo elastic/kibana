@@ -27,12 +27,15 @@ import {
   inlineCode,
   isFlakyBranch,
   isPullRequestRef,
+  issueList,
   KIBANA_BLOB_URL,
   plural,
+  previouslyTrackedIn,
   table,
   targetEnvironment,
   testsTable,
   type BranchThresholds,
+  type PreviousIssues,
 } from './markdown';
 import type { FlakySuite } from './suites';
 
@@ -52,10 +55,10 @@ export interface FlakySuiteIssueContext {
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
   /**
-   * Numbers of issues about one of the suite's tests that this issue takes over from: closed
-   * before their test failed again, or open per-test issues closed as its duplicates once filed.
+   * Issues about the suite's tests that this issue takes over from: closed before their test failed
+   * again, or open per-test issues closed as its duplicates once filed.
    */
-  supersededIssues?: number[];
+  previousIssues?: PreviousIssues;
 }
 
 export interface FlakySuiteIssueRefreshContext {
@@ -115,6 +118,14 @@ export interface FlakySuiteIssueMetadata {
    * it was recorded, until their next comment.
    */
   'report.shownTestIds'?: string[];
+  /**
+   * Issues the suite issue took over from that its tests table doesn't name: those handed over
+   * after it was filed, and those of tests beyond the table's rows. The body's "Previously tracked
+   * in" line lists them.
+   */
+  'suite.previousIssues'?: number[];
+  /** Those of `suite.previousIssues` no comment has named yet; the next comment names them. */
+  'report.newPreviousIssues'?: number[];
 }
 
 /** What an issue body records; older issues lack some of it. */
@@ -761,13 +772,24 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
   ].join('\n');
 };
 
-const issueList = (numbers: readonly number[]): string =>
-  numbers.map((number) => `#${number}`).join(', ');
-
-const supersededIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
-  ctx.supersededIssues && ctx.supersededIssues.length > 0
-    ? `Previously tracked in ${issueList(ctx.supersededIssues)}.`
-    : undefined;
+/**
+ * The issues the tests table has no room for: those of tests beyond its rows, which the
+ * "Previously tracked in" line lists instead.
+ */
+const unlistedPreviousIssues = (
+  suite: FlakySuite,
+  { previousIssues }: FlakySuiteIssueContext
+): number[] => {
+  if (!previousIssues) {
+    return [];
+  }
+  const numbersOf = (tests: FlakySuite['tests']) =>
+    tests.flatMap(({ testId }) => previousIssues.get(testId) ?? []);
+  const listed = new Set(numbersOf(suite.tests.slice(0, MAX_TEST_ROWS)));
+  return [...new Set(numbersOf(suite.tests.slice(MAX_TEST_ROWS)))].filter(
+    (number) => !listed.has(number)
+  );
+};
 
 const relatedIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
   ctx.relatedIssues && ctx.relatedIssues.length > 0
@@ -775,11 +797,15 @@ const relatedIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
     : undefined;
 
 /** What a report found about the suite: its flaky tests, then the failures from every angle. */
-const reportSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
+const reportSections = (
+  suite: FlakySuite,
+  { report, previousIssues }: FlakySuiteIssueContext
+): Array<string | undefined> => [
   testsTable(suite.tests, {
     withDashboardLinks: true,
     maxRows: MAX_TEST_ROWS,
     thresholds: report.thresholds,
+    previousIssues,
   }),
   skippedNote(suite),
 ];
@@ -799,23 +825,34 @@ export const SKIP_TIP =
   "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
   'to `/skip` it, or skip the test case manually.';
 
-/** Full issue body for a new suite issue, including the hidden metadata. */
-export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string =>
-  updateIssueMetadata(
+/**
+ * Full issue body for a new suite issue, including the hidden metadata. The issues it takes over
+ * from are named next to their test in the tests table.
+ */
+export const renderFlakySuiteIssueBody = (
+  suite: FlakySuite,
+  ctx: FlakySuiteIssueContext
+): string => {
+  const unlisted = unlistedPreviousIssues(suite, ctx);
+  return updateIssueMetadata(
     joinSections([
       opening(suite),
-      ...reportSections(suite, ctx.report),
+      ...reportSections(suite, ctx),
       '### Suite',
       suiteDetails(suite),
       '### Failures',
       ...failureSections(suite, ctx.report),
       SKIP_TIP,
-      supersededIssues(ctx),
+      unlisted.length > 0 ? previouslyTrackedIn(unlisted) : undefined,
       relatedIssues(ctx),
     ]),
-    flakySuiteIssueMetadata(suite, ctx.report),
+    {
+      ...flakySuiteIssueMetadata(suite, ctx.report),
+      ...(unlisted.length > 0 ? { 'suite.previousIssues': unlisted } : {}),
+    },
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
+};
 
 /**
  * The body of a refreshed issue: the text stays as filed, a record of what the suite did then,

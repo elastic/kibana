@@ -62,6 +62,17 @@ export const table = (header: string[], rows: string[][]): string =>
 export const plural = (count: number, singular: string, pluralForm = `${singular}s`): string =>
   `${count} ${count === 1 ? singular : pluralForm}`;
 
+/** `#1, #2` */
+export const issueList = (numbers: readonly number[]): string =>
+  numbers.map((number) => `#${number}`).join(', ');
+
+/** `Previously tracked in #1, #2.`: the issues a suite issue took over from. */
+export const previouslyTrackedIn = (numbers: readonly number[]): string =>
+  `Previously tracked in ${issueList(numbers)}.`;
+
+/** Issues a suite issue took over from, by the id of the test they were about. */
+export type PreviousIssues = ReadonlyMap<string, readonly number[]>;
+
 /** `19%`, or `<1%` for a rate that is positive but rounds down to nothing. */
 export const formatPercent = (rate: number): string => {
   const percent = Math.round(rate * 100);
@@ -190,8 +201,8 @@ export const formatBranchRates = (
 };
 
 /**
- * Rows of the per-test table, with a link to each test's dashboard unless told otherwise; the
- * suite's tests come ranked.
+ * Rows of the per-test table, with a link to each test's dashboard unless told otherwise, and the
+ * issues each test was tracked in before when any has some; the suite's tests come ranked.
  */
 export const testsTable = (
   tests: readonly FlakyTestEntry[],
@@ -199,19 +210,32 @@ export const testsTable = (
     withDashboardLinks,
     maxRows,
     thresholds,
-  }: { withDashboardLinks: boolean; maxRows: number; thresholds: BranchThresholds }
+    previousIssues,
+  }: {
+    withDashboardLinks: boolean;
+    maxRows: number;
+    thresholds: BranchThresholds;
+    previousIssues?: PreviousIssues;
+  }
 ): string => {
-  const header = ['Test', 'Flaky branches'];
-  const rows = tests
-    .slice(0, maxRows)
-    .map((test) => [
-      test.title,
-      formatBranchRates(test, thresholds),
-      ...(withDashboardLinks ? [`[dashboard](${testDashboardUrl(test.testId)})`] : []),
-    ]);
+  const shown = tests.slice(0, maxRows);
+  const previousOf = (test: FlakyTestEntry) => previousIssues?.get(test.testId) ?? [];
+  const withPrevious = shown.some((test) => previousOf(test).length > 0);
+  const header = [
+    'Test',
+    'Flaky branches',
+    ...(withDashboardLinks ? ['Dashboard'] : []),
+    ...(withPrevious ? ['Previously tracked in'] : []),
+  ];
+  const rows = shown.map((test) => [
+    test.title,
+    formatBranchRates(test, thresholds),
+    ...(withDashboardLinks ? [`[dashboard](${testDashboardUrl(test.testId)})`] : []),
+    ...(withPrevious ? [issueList(previousOf(test))] : []),
+  ]);
   const rest = tests.length - maxRows;
   return [
-    table(withDashboardLinks ? [...header, 'Dashboard'] : header, rows),
+    table(header, rows),
     ...(rest > 0 ? [`and ${plural(rest, 'more flaky test')} in this file.`] : []),
   ].join('\n\n');
 };

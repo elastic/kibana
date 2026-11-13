@@ -9,6 +9,9 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { GithubApi, GithubIssue } from '../failed_tests_reporter/github_api';
+import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
+import { FLAKY_TEST_SUITE_METADATA_PREFIX, type FlakySuiteIssueMetadata } from './issue_body';
+import { previouslyTrackedIn } from './markdown';
 import {
   candidateIssues,
   findMatchingIssues,
@@ -40,22 +43,100 @@ export const isHandedOver = (matched: MatchedIssue): boolean =>
   isOpenPerTestIssue(matched) &&
   !matched.issue.labels.some((label) => labelName(label) === SKIPPED_TEST_LABEL);
 
-/** The per-test issues the suite's issue takes over (`isHandedOver`), each once. */
-export const perTestIssuesToHandOver = (
+/** The per-test issues the suite's issue takes over (`isHandedOver`), by the id of their test. */
+export const perTestIssuesByTest = (
   suite: MatchableSuite,
   index: IssueIndex
-): GithubIssue[] => {
-  const byNumber = new Map<number, GithubIssue>();
+): Map<string, GithubIssue[]> => {
+  const byTest = new Map<string, GithubIssue[]>();
   for (const test of suite.tests) {
     const single = { ...suite, tests: [test] };
-    for (const matched of findMatchingIssues(single, candidateIssues(single, index))) {
-      if (isHandedOver(matched)) {
-        byNumber.set(matched.issue.number, matched.issue);
-      }
+    const issues = findMatchingIssues(single, candidateIssues(single, index))
+      .filter(isHandedOver)
+      .map(({ issue }) => issue);
+    if (issues.length > 0) {
+      byTest.set(test.testId, issues);
     }
   }
-  return [...byNumber.values()];
+  return byTest;
 };
+
+/** Each of the issues once, in the order first seen. */
+export const distinctIssues = (issues: readonly GithubIssue[]): GithubIssue[] => [
+  ...new Map(issues.map((issue) => [issue.number, issue])).values(),
+];
+
+const PREVIOUS_ISSUES: keyof FlakySuiteIssueMetadata = 'suite.previousIssues';
+const NEW_PREVIOUS_ISSUES: keyof FlakySuiteIssueMetadata = 'report.newPreviousIssues';
+const PREVIOUSLY_TRACKED_LINE = /\n\nPreviously tracked in #[^\n]*/g;
+const METADATA_START = '\n\n<!-- kibanaCiData = ';
+
+const recordedNumbers = (body: string, key: keyof FlakySuiteIssueMetadata): number[] => {
+  const value: unknown = getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
+  return Array.isArray(value) ? value.filter((item): item is number => Number.isInteger(item)) : [];
+};
+
+/** The body's text and hidden metadata, which stays last. */
+const splitBody = (body: string): [text: string, metadata: string] => {
+  const start = body.indexOf(METADATA_START);
+  return start === -1 ? [body, ''] : [body.slice(0, start), body.slice(start)];
+};
+
+/** The numbers its "Previously tracked in" line lists, for a body that recorded none. */
+const numbersInLine = (body: string): number[] =>
+  (splitBody(body)[0].match(PREVIOUSLY_TRACKED_LINE) ?? []).flatMap((line) =>
+    [...line.matchAll(/#(\d+)/g)].map(([, number]) => Number(number))
+  );
+
+/** The body with its "Previously tracked in" line, at the end of its text, listing `numbers`. */
+const withPreviouslyTrackedLine = (body: string, numbers: readonly number[]): string => {
+  const [text, metadata] = splitBody(body);
+  return `${text.replace(PREVIOUSLY_TRACKED_LINE, '')}\n\n${previouslyTrackedIn(
+    numbers
+  )}${metadata}`;
+};
+
+export interface TakenOver {
+  body: string;
+  /** The issues the comment posted with this body names as previously tracking the suite. */
+  announced: number[];
+}
+
+/**
+ * The body of a suite issue that takes over `numbers` after it was filed: those it doesn't list yet
+ * join its "Previously tracked in" line, and the issues the next comment names. With `commenting`,
+ * the comment posted along with the body names them, and those taken over since the last comment.
+ * The tests table stays as filed.
+ */
+export const takeOver = (
+  body: string,
+  numbers: readonly number[],
+  commenting: boolean
+): TakenOver => {
+  const listed = [...new Set([...recordedNumbers(body, PREVIOUS_ISSUES), ...numbersInLine(body)])];
+  const added = numbers.filter((number) => !listed.includes(number));
+  const unannounced = [...recordedNumbers(body, NEW_PREVIOUS_ISSUES), ...added];
+  if (added.length === 0 && (!commenting || unannounced.length === 0)) {
+    return { body, announced: [] };
+  }
+  const previous = [...listed, ...added];
+  return {
+    body: updateIssueMetadata(
+      added.length > 0 ? withPreviouslyTrackedLine(body, previous) : body,
+      {
+        [PREVIOUS_ISSUES]: previous,
+        // undefined drops the key from the JSON once a comment names them
+        [NEW_PREVIOUS_ISSUES]: commenting ? undefined : unannounced,
+      },
+      FLAKY_TEST_SUITE_METADATA_PREFIX
+    ),
+    announced: commenting ? unannounced : [],
+  };
+};
+
+/** The comment, followed by the issues it names as previously tracking the suite. */
+export const withPreviouslyTracked = (comment: string, numbers: readonly number[]): string =>
+  numbers.length > 0 ? `${comment}\n\n${previouslyTrackedIn(numbers)}` : comment;
 
 /** The comment on a per-test issue closed as a duplicate of its suite's issue. */
 export const handOverComment = (suiteIssueNumber: number): string =>

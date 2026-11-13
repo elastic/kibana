@@ -10,6 +10,7 @@
 import { computeTestID } from '@kbn/scout-reporting';
 import { ToolingLog } from '@kbn/tooling-log';
 import { handOverComment } from '../flaky_test_issues/hand_over';
+import { FLAKY_TEST_SUITE_METADATA_PREFIX } from '../flaky_test_issues/issue_body';
 import {
   MAX_NEW_ISSUES_PER_JOB,
   reportConsistentFailureIssues,
@@ -19,6 +20,7 @@ import { failingPostedAt, renderFailingSuiteIssueBody } from './failing_suite_is
 import type { TestFailure } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssue } from './github_api';
+import { getIssueMetadata } from './issue_metadata';
 
 const log = new ToolingLog();
 const build = { pipeline: 'kibana-on-merge', branch: 'main' };
@@ -201,6 +203,14 @@ const failingSuiteIssue = (postedAt: Date, overrides: Partial<GithubIssue> = {})
     ),
     overrides
   );
+};
+
+/** The issues a suite issue's body lists as previously tracking it, and those no comment named. */
+const previousIssuesOf = (body: string) => {
+  const read = (key: string): number[] | undefined =>
+    getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
+  const unannounced = read('report.newPreviousIssues');
+  return { listed: read('suite.previousIssues'), ...(unannounced ? { unannounced } : {}) };
 };
 
 const NOW = new Date('2026-10-16T10:00:00.000Z');
@@ -493,7 +503,10 @@ describe('reportConsistentFailureIssues', () => {
 
       expect(createIssue).toHaveBeenCalledTimes(1);
       const [, body] = createIssue.mock.calls[0];
-      expect(body).toContain('Previously tracked in #1, #2.');
+      // next to their test, rather than in a line of their own
+      expect(body).toMatch(/^- `.* a` · \[history\]\(.*\) · previously tracked in #1$/m);
+      expect(body).toMatch(/^- `.* b` · \[history\]\(.*\) · previously tracked in #2$/m);
+      expect(body).not.toContain('Previously tracked in #');
       expect(body).toContain('Possibly related: #3.');
       expect(closeAsDuplicate.mock.calls).toEqual([
         [1, 1500],
@@ -512,7 +525,7 @@ describe('reportConsistentFailureIssues', () => {
 
     it('hands them over to the suite issue the break is posted on, even within the day', async () => {
       const existing = failingSuiteIssue(new Date(NOW.getTime() - 2 * HOUR_MS));
-      const { github, createIssue, addIssueComment, closeAsDuplicate } = mockGithub([
+      const { github, createIssue, addIssueComment, closeAsDuplicate, editIssue } = mockGithub([
         existing,
         perTestIssue(3, 'test-1'),
       ]);
@@ -531,6 +544,48 @@ describe('reportConsistentFailureIssues', () => {
       expect(closeAsDuplicate).toHaveBeenCalledWith(3, 1042);
       expect(summary.tracked).toEqual([{ filePath: SPEC, url: existing.html_url }]);
       expect(summary.handedOver).toEqual(['https://github.com/elastic/appex-qa-ai/issues/3']);
+      // the body lists it, and the next post names it
+      const [[, { body }]] = editIssue.mock.calls;
+      expect(body).toContain('\n\nPreviously tracked in #3.\n\n<!-- kibanaCiData');
+      expect(previousIssuesOf(body)).toEqual({ listed: [3], unannounced: [3] });
+
+      const nextDay = mockGithub([{ ...existing, body }]);
+      await report({
+        es: mockEs(brokenSince('test-1', 101, 102)).es,
+        github: nextDay.github,
+        failures: [scoutFailure('test-1', 'shows results')],
+        handOverPerTestIssues: true,
+        now: new Date(NOW.getTime() + 25 * HOUR_MS),
+      });
+      const [[number, comment]] = nextDay.addIssueComment.mock.calls;
+      expect(number).toBe(42);
+      expect(comment).toMatch(/^🔴 .*\n\nPreviously tracked in #3\.$/s);
+      const [[, { body: posted }]] = nextDay.editIssue.mock.calls;
+      expect(previousIssuesOf(posted)).toEqual({ listed: [3] });
+    });
+
+    it('names the per-test issues it hands over in the break it posts', async () => {
+      const existing = failingSuiteIssue(new Date(NOW.getTime() - 25 * HOUR_MS));
+      const { github, addIssueComment, editIssue } = mockGithub([
+        existing,
+        perTestIssue(3, 'test-1'),
+      ]);
+
+      await report({
+        es: mockEs(brokenSince('test-1', 101, 102)).es,
+        github,
+        failures: [scoutFailure('test-1', 'shows results')],
+        handOverPerTestIssues: true,
+        now: NOW,
+      });
+
+      expect(addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/^🔴 .*\n\nPreviously tracked in #3\.$/s)],
+        [3, handOverComment(42)],
+      ]);
+      const [[, { body }]] = editIssue.mock.calls;
+      expect(body).toContain('Previously tracked in #3.');
+      expect(previousIssuesOf(body)).toEqual({ listed: [3] });
     });
 
     it('leaves the per-test issue of a skipped test open and out of the count', async () => {

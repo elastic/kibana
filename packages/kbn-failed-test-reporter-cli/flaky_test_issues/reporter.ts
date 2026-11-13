@@ -36,7 +36,14 @@ import {
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
-import { handOver, isOpenPerTestIssue, perTestIssuesToHandOver } from './hand_over';
+import {
+  distinctIssues,
+  handOver,
+  isOpenPerTestIssue,
+  perTestIssuesByTest,
+  takeOver,
+  withPreviouslyTracked,
+} from './hand_over';
 import { isPullRequestRef } from './markdown';
 import { isSkippedTest, skippedBranches } from './skipped';
 import { groupIntoSuites, type FlakySuite } from './suites';
@@ -262,11 +269,14 @@ interface Coverage {
   tracked?: MatchedIssue;
   /** Issues about one of the tests that no longer count (`isSuperseded`), strongest first. */
   superseded: MatchedIssue[];
+  /** The numbers of `superseded`, by the id of the test each is about. */
+  supersededByTest: Map<string, number[]>;
 }
 
 const coverage = (suite: FlakySuite, index: IssueIndex, handingOver: boolean): Coverage => {
   const covering: MatchedIssue[] = [];
   const superseded = new Map<number, MatchedIssue>();
+  const supersededByTest = new Map<string, number[]>();
   let uncovered = false;
   for (const test of suite.tests) {
     const single = { ...suite, tests: [test] };
@@ -279,6 +289,10 @@ const coverage = (suite: FlakySuite, index: IssueIndex, handingOver: boolean): C
           return true;
         }
         superseded.set(matched.issue.number, matched);
+        supersededByTest.set(test.testId, [
+          ...(supersededByTest.get(test.testId) ?? []),
+          matched.issue.number,
+        ]);
         return false;
       }
     );
@@ -293,6 +307,7 @@ const coverage = (suite: FlakySuite, index: IssueIndex, handingOver: boolean): C
   return {
     ...(uncovered ? {} : { tracked: strongestTracking(distinct.sort(compareMatches)) }),
     superseded: [...superseded.values()].sort(compareMatches),
+    supersededByTest,
   };
 };
 
@@ -493,9 +508,12 @@ export const reportFlakySuiteIssues = async (
     record({ action: 'skipped', ...suiteRef(suite), reason: 'all-tests-skipped' });
   }
 
-  /** The open per-test issues the suite's issue takes over, when handing them over. */
-  const perTestIssuesOf = (suite: FlakySuite): GithubIssue[] =>
-    handOverPerTestIssues ? perTestIssuesToHandOver(suite, index) : [];
+  /** The open per-test issues the suite's issue takes over by test, when handing them over. */
+  const perTestIssuesOf = (suite: FlakySuite): Map<string, GithubIssue[]> =>
+    handOverPerTestIssues ? perTestIssuesByTest(suite, index) : new Map();
+
+  const issuesOf = (byTest: Map<string, GithubIssue[]>): GithubIssue[] =>
+    distinctIssues([...byTest.values()].flat());
 
   /** Closes the issues as duplicates of the suite's issue; those closed, for its action. */
   const handOverTo = async (
@@ -507,10 +525,14 @@ export const reportFlakySuiteIssues = async (
   };
 
   /**
-   * The superseded and handed over issues are linked as previously tracking the suite, the other
-   * matches as possibly related.
+   * The superseded and handed over issues are named next to their test as previously tracking the
+   * suite, the other matches linked as possibly related.
    */
-  const create = async (suite: FlakySuite, related: MatchedIssue[], superseded: MatchedIssue[]) => {
+  const create = async (
+    suite: FlakySuite,
+    related: MatchedIssue[],
+    { superseded, supersededByTest }: Pick<Coverage, 'superseded' | 'supersededByTest'>
+  ) => {
     const ref = suiteRef(suite);
     if (counts.created >= maxNewIssues) {
       log.info(`skip, ${maxNewIssues} issues already created this run: ${describeSuite(suite)}`);
@@ -518,24 +540,32 @@ export const reportFlakySuiteIssues = async (
       return;
     }
     const title = flakySuiteIssueTitle(suite);
-    const handingOver = perTestIssuesOf(suite);
-    const supersededNumbers = [
-      ...superseded.map(({ issue }) => issue.number),
-      ...handingOver.map(({ number }) => number),
-    ];
+    const perTest = perTestIssuesOf(suite);
+    const handingOver = issuesOf(perTest);
+    const previousIssues = new Map<string, number[]>();
+    for (const { testId } of suite.tests) {
+      const numbers = new Set([
+        ...(supersededByTest.get(testId) ?? []),
+        ...(perTest.get(testId) ?? []).map(({ number }) => number),
+      ]);
+      if (numbers.size > 0) {
+        previousIssues.set(testId, [...numbers]);
+      }
+    }
+    const previousNumbers = [...new Set([...previousIssues.values()].flat())];
     const body = renderFlakySuiteIssueBody(suite, {
       report,
       relatedIssues: related
         .map(({ issue }) => issue.number)
-        .filter((number) => !supersededNumbers.includes(number)),
-      supersededIssues: supersededNumbers,
+        .filter((number) => !previousNumbers.includes(number)),
+      previousIssues,
     });
     try {
       const created = await github.createIssue(title, body, issueLabels(suite, githubRepo));
       log.info(
         `created #${created.number} ${created.html_url}: ${describeSuite(suite)}` +
-          (supersededNumbers.length > 0
-            ? ` (previously tracked in ${supersededNumbers.map((n) => `#${n}`).join(', ')})`
+          (previousNumbers.length > 0
+            ? ` (previously tracked in ${previousNumbers.map((n) => `#${n}`).join(', ')})`
             : '')
       );
       // Later suites of this run match against it too, an untitled suite's issue covers its file
@@ -560,7 +590,9 @@ export const reportFlakySuiteIssues = async (
    * comment. A comment that then fails is not retried: the metadata already records it, so the
    * next qualifying report comments instead. Recording it after the comment would take another
    * edit, and a failure there would mean a duplicate comment rather than a missed one. The
-   * per-test issues of the suites refreshed are handed over last, to the issue as now open.
+   * per-test issues of the suites refreshed join the body's "Previously tracked in" line, the
+   * comment names them, or the next one does, and they are handed over last, to the issue as now
+   * open.
    */
   const update = async (
     suite: FlakySuite,
@@ -570,27 +602,35 @@ export const reportFlakySuiteIssues = async (
   ) => {
     const recordEach = (action: (ref: SuiteRef) => FlakySuiteAction) =>
       members.forEach((member) => record(action(suiteRef(member))));
-    const body = refreshFlakySuiteIssueMetadata(issue.body, suite, { report, previous, comment });
+    const handingOver = members.map((member) => issuesOf(perTestIssuesOf(member)));
+    const { body, announced } = takeOver(
+      refreshFlakySuiteIssueMetadata(issue.body, suite, { report, previous, comment }),
+      distinctIssues(handingOver.flat()).map(({ number }) => number),
+      comment
+    );
     try {
       await github.editIssue(issue.number, { body, ...(reopen ? { state: 'open' } : {}) });
       if (comment) {
         await github.addIssueComment(
           issue.number,
-          renderFlakySuiteIssueComment(suite, { report, reopened: reopen, previous })
+          withPreviouslyTracked(
+            renderFlakySuiteIssueComment(suite, { report, reopened: reopen, previous }),
+            announced
+          )
         );
       }
       log.info(
         `${reopen ? 'reopened' : 'updated'} #${issue.number}${comment ? ' with a comment' : ''}: ` +
           describeSuite(suite)
       );
-      for (const member of members) {
+      for (const [position, member] of members.entries()) {
         record({
           action: 'updated',
           ...suiteRef(member),
           issue: { ...issueRef(issue), state: 'open' },
           commented: comment,
           reopened: reopen,
-          ...(await handOverTo(issue, perTestIssuesOf(member))),
+          ...(await handOverTo(issue, handingOver[position])),
         });
       }
     } catch (error) {
@@ -626,7 +666,7 @@ export const reportFlakySuiteIssues = async (
     }
     const ref = suiteRef(suite);
     const matches = findMatchingIssues(suite, candidateIssues(suite, index));
-    const { tracked, superseded } = coverage(suite, index, handOverPerTestIssues);
+    const { tracked, ...supersededIssues } = coverage(suite, index, handOverPerTestIssues);
     const own = updateIssues ? refreshedIssue(suite, matches) : undefined;
     if (own) {
       const members = isWholeFileIssue(own.issue) ? suitesSharing(suite, own.issue) : [suite];
@@ -663,7 +703,7 @@ export const reportFlakySuiteIssues = async (
       continue;
     }
     // Issues that merely mention the file are not about the suite; they are linked, not updated
-    await create(suite, matches, superseded);
+    await create(suite, matches, supersededIssues);
   }
 
   return {

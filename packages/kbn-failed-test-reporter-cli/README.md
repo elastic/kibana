@@ -109,8 +109,8 @@ target and by pipeline, and links issues that mention the same file as possibly 
 - An open `failed-test` issue about the test (the per-test issues `report_failed_tests` files),
   about the suite, or about the whole file.
 - A closed one, as long as the test has not failed since it was closed. Once it fails again the
-  closed issue stops counting, and the new suite issue links it as "Previously tracked in #N"
-  (`supersedes` in the summary). Without this, a closed issue would keep the suite silent for up
+  closed issue stops counting, and the new suite issue names it next to its test, in the tests
+  table's "Previously tracked in" column (`supersedes` in the summary). Without this, a closed issue would keep the suite silent for up
   to `--closed-since-days`: once `report_failed_tests` stops writing, its per-test issues get no
   new comments and the stale sweep closes them. The suite's own issue is the exception: it is
   reopened instead (below).
@@ -119,15 +119,20 @@ target and by pipeline, and links issues that mention the same file as possibly 
 With `--hand-over-per-test-issues` (`FLAKY_TESTS_HAND_OVER_PER_TEST_ISSUES=true` in the pipeline),
 for when CI no longer updates per-test issues, an open per-test issue doesn't count: the suite gets
 its issue anyway. Once that issue is filed or refreshed, the open per-test issues of its flaky
-tests are closed as its duplicates (`handedOver` in the summary), and a new issue lists them as
-"Previously tracked in #N". Each gets a comment: "Now tracked in #M, together with the other tests
-of its suite. New failures will be reported there, so this issue is closed as a duplicate." It is
+tests are closed as its duplicates (`handedOver` in the summary). A new issue names each next to
+its test, in the tests table's "Previously tracked in" column, or in a "Previously tracked in #N"
+line for the tests the table has no room for. An existing issue lists them in that line, at the
+end of its text, and the comment of the refresh names them, or the next comment does
+(`suite.previousIssues` and `report.newPreviousIssues` in its hidden data). Each per-test issue
+gets a comment: "Now tracked in #M, together with the other tests of its suite. New failures will
+be reported there, so this issue is closed as a duplicate." It is
 closed before the comment is posted, as the failed-test Slack alert and investigator skip
 comments on closed issues; on an open per-test issue they would take the comment for a new
 failure. An issue labelled `skipped-test` is left open and linked as possibly related, as it
 tracks a skip. The consistent failure check of `report_failed_tests` hands over the per-test
 issues of the tests it finds broken the same way, on a job with
-`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false`.
+`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false`: a new issue names them next to each test of its list,
+and an existing issue lists them in its line, named by the 🔴 comment, or the next one.
 
 While issues are filed in a sandbox, the issues of `elastic/kibana` count too (`--tracking-repo`,
 default `elastic/kibana`; empty disables it, and it is skipped when it names `--github-repo`

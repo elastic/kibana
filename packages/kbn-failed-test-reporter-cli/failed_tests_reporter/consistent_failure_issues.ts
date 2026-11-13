@@ -17,7 +17,13 @@ import {
   type TestSetup,
 } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { handOver, perTestIssuesToHandOver } from '../flaky_test_issues/hand_over';
+import {
+  distinctIssues,
+  handOver,
+  perTestIssuesByTest,
+  takeOver,
+  withPreviouslyTracked,
+} from '../flaky_test_issues/hand_over';
 import { FLAKY_TEST_SUITE_METADATA_PREFIX } from '../flaky_test_issues/issue_body';
 import { plural } from '../flaky_test_issues/markdown';
 import {
@@ -340,9 +346,14 @@ export const reportConsistentFailureIssues = async (
    * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
    * of the last post is read from GitHub as it is now, as other jobs of the build find the same
    * break, and recorded once the comment is posted: a comment that failed isn't taken as posted,
-   * and the next build posts it.
+   * and the next build posts it. The per-test issues `takingOver` join the body's "Previously
+   * tracked in" line, and the comment names them, or the next one does.
    */
-  const postBreak = async (suite: FailingSuite, issue: GithubIssue) => {
+  const postBreak = async (
+    suite: FailingSuite,
+    issue: GithubIssue,
+    takingOver: readonly number[]
+  ) => {
     const ref = { filePath: suite.filePath, url: issue.html_url };
     const body = (await github.getIssue(issue.number))?.body ?? issue.body;
     const postedAt = failingPostedAt(body);
@@ -354,15 +365,23 @@ export const reportConsistentFailureIssues = async (
           suite
         )}`
       );
+      const taken = takeOver(body, takingOver, false);
+      if (taken.body !== body) {
+        await github.editIssue(issue.number, { body: taken.body });
+      }
       summary.tracked.push(ref);
       return;
     }
+    const { body: taken, announced } = takeOver(body, takingOver, true);
     const newBody = updateIssueMetadata(
-      body,
+      taken,
       { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
       FLAKY_TEST_SUITE_METADATA_PREFIX
     );
-    await github.addIssueComment(issue.number, renderFailingSuiteComment(suite, build));
+    await github.addIssueComment(
+      issue.number,
+      withPreviouslyTracked(renderFailingSuiteComment(suite, build), announced)
+    );
     await github.editIssue(issue.number, { body: newBody, ...(reopen ? { state: 'open' } : {}) });
     log.info(
       `${dryRun ? 'Would post' : 'Posted'} the break on #${issue.number}` +
@@ -371,9 +390,9 @@ export const reportConsistentFailureIssues = async (
     summary.commented.push({ ...ref, reopened: reopen });
   };
 
-  /** The open per-test issues of the broken tests, when handing them over. */
-  const perTestIssuesOf = (suite: FailingSuite): GithubIssue[] =>
-    handOverPerTestIssues ? perTestIssuesToHandOver(suite, index) : [];
+  /** The open per-test issues of the broken tests by test, when handing them over. */
+  const perTestIssuesOf = (suite: FailingSuite): Map<string, GithubIssue[]> =>
+    handOverPerTestIssues ? perTestIssuesByTest(suite, index) : new Map();
 
   const handOverTo = async (
     suiteIssue: { number: number; id: number },
@@ -384,10 +403,16 @@ export const reportConsistentFailureIssues = async (
   };
 
   for (const suite of groupIntoSuites(breaks)) {
+    const perTest = perTestIssuesOf(suite);
+    const handingOver = distinctIssues([...perTest.values()].flat());
     const tracked = trackingIssue(suite, index, handOverPerTestIssues);
     if (tracked?.match === 'suite') {
-      await postBreak(suite, tracked.issue);
-      await handOverTo(tracked.issue, perTestIssuesOf(suite));
+      await postBreak(
+        suite,
+        tracked.issue,
+        handingOver.map(({ number }) => number)
+      );
+      await handOverTo(tracked.issue, handingOver);
       continue;
     }
     if (tracked) {
@@ -404,7 +429,6 @@ export const reportConsistentFailureIssues = async (
       summary.skipped.push(suite.filePath);
       continue;
     }
-    const handingOver = perTestIssuesOf(suite);
     const superseded = handingOver.map(({ number }) => number);
     const related = findMatchingIssues(suite, candidateIssues(suite, index))
       .filter(isOpen)
@@ -414,7 +438,9 @@ export const reportConsistentFailureIssues = async (
     const body = renderFailingSuiteIssueBody(suite, {
       ...build,
       relatedIssues: related,
-      supersededIssues: superseded,
+      previousIssues: new Map(
+        [...perTest].map(([testId, testIssues]) => [testId, testIssues.map(({ number }) => number)])
+      ),
       postedAt: now,
     });
     const created = await github.createIssue(title, body, issueLabels(suite, repo));

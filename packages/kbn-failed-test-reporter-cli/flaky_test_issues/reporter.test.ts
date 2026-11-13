@@ -13,9 +13,13 @@ import type {
   GithubIssue,
   ListIssuesOptions,
 } from '../failed_tests_reporter/github_api';
-import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
+import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import { handOverComment } from './hand_over';
-import { readFlakySuiteIssueMetadata, renderFlakySuiteIssueBody } from './issue_body';
+import {
+  FLAKY_TEST_SUITE_METADATA_PREFIX,
+  readFlakySuiteIssueMetadata,
+  renderFlakySuiteIssueBody,
+} from './issue_body';
 import {
   issueLabels,
   reportFlakySuiteIssues,
@@ -125,6 +129,14 @@ const fileMention = (number: number) =>
 /** The report entry the per-test issues are about. */
 const trackedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
   flakyTest({ testId: 'pw-1', ...overrides });
+
+/** The issues a suite issue's body lists as previously tracking it, and those no comment named. */
+const previousIssuesOf = (body: string) => {
+  const read = (key: string): number[] | undefined =>
+    getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
+  const unannounced = read('report.newPreviousIssues');
+  return { listed: read('suite.previousIssues'), ...(unannounced ? { unannounced } : {}) };
+};
 
 const expectNoWrites = (github: ReturnType<typeof createGithubApi>) => {
   expect(github.createIssue).not.toHaveBeenCalled();
@@ -398,7 +410,8 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(github.createIssue).toHaveBeenCalledTimes(1);
       const [, body] = github.createIssue.mock.calls[0];
-      expect(body).toContain('Previously tracked in #43.');
+      expect(body).toContain('| Previously tracked in |');
+      expect(body).toContain('| #43 |');
       expect(body).not.toContain('Possibly related');
       expect(summary.actions).toEqual([
         {
@@ -456,7 +469,7 @@ describe('reportFlakySuiteIssues', () => {
         supersedes: [expect.objectContaining({ number: 44 })],
       });
       const [, body] = github.createIssue.mock.calls[0];
-      expect(body).toContain('Previously tracked in #44.');
+      expect(body).toMatch(/\| another test \|.*\| #44 \|\n/);
       expect(body).toContain('Possibly related: #43.');
     });
 
@@ -528,7 +541,7 @@ describe('reportFlakySuiteIssues', () => {
       const summary = await run(github, { report: flakyReport([trackedTest()]), ...handingOver });
 
       const [, body] = github.createIssue.mock.calls[0];
-      expect(body).toContain('Previously tracked in #43.');
+      expect(body).toContain('| #43 |');
       expect(body).toContain('Possibly related: #7.');
       expect(github.closeAsDuplicate).toHaveBeenCalledTimes(1);
       expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1900);
@@ -560,14 +573,49 @@ describe('reportFlakySuiteIssues', () => {
       const summary = await run(github, { report: flakyReport([trackedTest()]), ...handingOver });
 
       expect(github.createIssue).not.toHaveBeenCalled();
-      expect(github.editIssue).toHaveBeenCalledWith(42, expect.anything());
       expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
-      expect(github.addIssueComment).toHaveBeenCalledWith(43, handOverComment(42));
+      // the body lists it below its text, the comment of this refresh names it
+      const [[, { body }]] = github.editIssue.mock.calls;
+      expect(body).toContain('\n\nPreviously tracked in #43.\n\n<!-- kibanaCiData');
+      expect(previousIssuesOf(body)).toEqual({ listed: [43] });
+      expect(github.addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/\n\nPreviously tracked in #43\.$/)],
+        [43, handOverComment(42)],
+      ]);
       expect(summary.actions[0]).toMatchObject({
         action: 'updated',
         issue: { number: 42 },
         handedOver: [{ number: 43, state: 'closed' }],
       });
+    });
+
+    it('names a per-test issue it hands over between comments in the next comment', async () => {
+      // filed the day before: no comment is due yet
+      const github = createGithubApi([
+        suiteIssue(42, {}, new Date('2026-09-08T09:00:00.000Z')),
+        scoutTestIssue(43, 'pw-1'),
+      ]);
+      const report = flakyReport([trackedTest()]);
+
+      await run(github, { report, ...handingOver });
+
+      const [[, { body }]] = github.editIssue.mock.calls;
+      expect(body).toContain('Previously tracked in #43.');
+      expect(previousIssuesOf(body)).toEqual({ listed: [43], unannounced: [43] });
+      expect(github.addIssueComment.mock.calls).toEqual([[43, handOverComment(42)]]);
+
+      // three days later the comment is due, and names it
+      const later = createGithubApi([suiteIssue(42, { body })]);
+      await run(later, {
+        report: { ...report, generatedAt: new Date('2026-09-12T09:04:41.000Z') },
+        ...handingOver,
+      });
+
+      const [[number, comment]] = later.addIssueComment.mock.calls;
+      expect(number).toBe(42);
+      expect(comment).toMatch(/\n\nPreviously tracked in #43\.$/);
+      const [[, { body: commented }]] = later.editIssue.mock.calls;
+      expect(previousIssuesOf(commented)).toEqual({ listed: [43] });
     });
 
     it('leaves per-test issues alone without the option', async () => {
