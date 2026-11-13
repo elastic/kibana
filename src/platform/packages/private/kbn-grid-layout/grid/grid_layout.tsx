@@ -66,6 +66,9 @@ export const GridLayout = ({
     accessMode,
   });
   const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
+  const [isMobileView, setIsMobileView] = useState<boolean>(
+    gridLayoutStateManager.isMobileView$.getValue()
+  );
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -159,12 +162,8 @@ export const GridLayout = ({
      * mobile view
      */
     const gridLayoutClassSubscription = gridLayoutStateManager.isMobileView$.subscribe(
-      (isMobileView) => {
-        if (isMobileView) {
-          layoutRef.current?.classList.add('kbnGrid--mobileView');
-        } else {
-          layoutRef.current?.classList.remove('kbnGrid--mobileView');
-        }
+      (newIsMobileView) => {
+        setIsMobileView(newIsMobileView);
       }
     );
 
@@ -194,7 +193,11 @@ export const GridLayout = ({
             layoutRef.current = divElement;
             setDimensionsRef(divElement);
           }}
-          className={classNames('kbnGrid', { 'kbnGrid--static': accessMode === 'VIEW' }, className)}
+          className={classNames(
+            'kbnGrid',
+            { 'kbnGrid--static': accessMode === 'VIEW', 'kbnGrid--mobileView': isMobileView },
+            className
+          )}
           css={[styles.layout, styles.hasActivePanel, styles.singleColumn, styles.hasExpandedPanel]}
         >
           {elementsInOrder.map((element) => {
