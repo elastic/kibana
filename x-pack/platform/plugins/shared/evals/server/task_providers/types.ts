@@ -35,6 +35,8 @@ export type EvalsCallKibanaApi = <T = unknown>(params: {
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined>;
   headers?: Record<string, string>;
+  /** Overrides the self-client's default request timeout, in milliseconds. */
+  timeout?: number;
 }) => Promise<{ status: number; headers: Record<string, string>; body: T }>;
 
 /**

@@ -7,6 +7,7 @@
 
 import {
   API_VERSIONS,
+  EVALS_EVALUATE_TIMEOUT_MS,
   EVALS_EVALUATE_URL,
   EvaluateRequestBody,
   INTERNAL_API_ACCESS,
@@ -40,6 +41,7 @@ export const registerEvaluateRoute = ({
         authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Evaluate trace with one or more evaluators',
+      options: { timeout: { idleSocket: EVALS_EVALUATE_TIMEOUT_MS } },
     })
     .addVersion(
       {

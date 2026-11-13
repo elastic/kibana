@@ -43,6 +43,8 @@ export const EVALS_EVALUATOR_URL = `${EVALS_EVALUATORS_URL}/{name}` as const;
 export const EVALS_VALIDATE_URL = `${EVALS_INTERNAL_URL}/evaluators/_validate` as const;
 export const EVALS_TEST_EVALUATOR_URL = `${EVALS_INTERNAL_URL}/evaluators/_test` as const;
 export const EVALS_EVALUATE_URL = `${EVALS_INTERNAL_URL}/_evaluate` as const;
+/** LLM judges retry slow, invalid tool calls; one `/_evaluate` can exceed the 60s self-client default. */
+export const EVALS_EVALUATE_TIMEOUT_MS = 10 * 60 * 1000;
 export const EVALS_TRACING_PROJECTS_URL = `${EVALS_INTERNAL_URL}/tracing/projects` as const;
 export const EVALS_TRACING_PROJECT_TRACES_URL =
   `${EVALS_INTERNAL_URL}/tracing/projects/{projectName}/traces` as const;

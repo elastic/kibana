@@ -8,7 +8,7 @@
 // Intentionally copied from @kbn/evals — pending future extraction to @kbn/evals-common.
 
 export interface CorrectnessAnalysis {
-  summary: {
+  summary?: {
     factual_accuracy_summary: string;
     relevance_summary: string;
     sequence_accuracy_summary: string;

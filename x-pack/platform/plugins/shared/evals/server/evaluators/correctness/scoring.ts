@@ -95,3 +95,39 @@ export function calculateProceduralFidelityScore(
 
   return matchedCentralClaims / centralClaims.length;
 }
+
+/** Derives the categorical summary from the claim list when the judge omits it. */
+export function deriveCorrectnessSummary(
+  analysis: CorrectnessAnalysis['analysis']
+): NonNullable<CorrectnessAnalysis['summary']> {
+  const claims = Array.isArray(analysis) ? analysis : [];
+  const central = claims.filter((claim) => claim.centrality === 'central');
+
+  const hasCentralContradiction = central.some((claim) => claim.verdict === 'CONTRADICTED');
+  const hasMinorIssue = claims.some(
+    (claim) => claim.verdict === 'CONTRADICTED' || claim.verdict === 'PARTIALLY_SUPPORTED'
+  );
+  const factualAccuracy = hasCentralContradiction
+    ? 'MAJOR_INACCURACIES'
+    : hasMinorIssue
+    ? 'MINOR_INACCURACIES'
+    : 'ACCURATE';
+
+  const centralShare = claims.length ? central.length / claims.length : 0;
+  const relevance =
+    centralShare >= 0.5 ? 'RELEVANT' : centralShare > 0 ? 'PARTIALLY_RELEVANT' : 'IRRELEVANT';
+
+  const sequenced = central.filter((claim) => claim.sequence_match !== 'NOT_APPLICABLE');
+  const sequenceAccuracy =
+    sequenced.length === 0
+      ? 'NOT_APPLICABLE'
+      : sequenced.some((claim) => claim.sequence_match === 'MISMATCH')
+      ? 'MISMATCH'
+      : 'MATCH';
+
+  return {
+    factual_accuracy_summary: factualAccuracy,
+    relevance_summary: relevance,
+    sequence_accuracy_summary: sequenceAccuracy,
+  };
+}
