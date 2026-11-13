@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EvalsTaskContext } from '@kbn/evals-plugin/server/task_providers';
+import { createAesopVariantTaskProvider } from './aesop_variant_task_provider';
+
+const createContext = (overrides: Partial<EvalsTaskContext> = {}) => {
+  const callKibanaApi = jest.fn().mockResolvedValue({
+    status: 200,
+    headers: {},
+    body: { conversation_id: 'conv-1', trace_id: ['abc123'], response: { message: 'done' } },
+  });
+  const context = {
+    input: { question: 'Triage alert 42' },
+    connectorId: 'connector-1',
+    agentId: 'agent-1',
+    logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    abortSignal: new AbortController().signal,
+    getInferenceClient: jest.fn(),
+    callKibanaApi,
+    ...overrides,
+  } as unknown as EvalsTaskContext;
+  return { context, callKibanaApi: (overrides.callKibanaApi ?? callKibanaApi) as jest.Mock };
+};
+
+const sentOverrides = (callKibanaApi: jest.Mock) =>
+  callKibanaApi.mock.calls[0][0].body.configuration_overrides;
+
+describe('createAesopVariantTaskProvider', () => {
+  const provider = createAesopVariantTaskProvider();
+
+  it('pins the converse call to the given skill', async () => {
+    const { context, callKibanaApi } = createContext({ params: { skill_id: 'triage-v2' } });
+
+    const result = await provider.run(context);
+
+    expect(sentOverrides(callKibanaApi)).toEqual({ skill_ids: ['triage-v2'] });
+    expect(callKibanaApi.mock.calls[0][0].body.input).toBe('Triage alert 42');
+    expect(result.traceId).toBe('abc123');
+    expect(result.output).toEqual({ message: 'done', conversation_id: 'conv-1' });
+  });
+
+  it.each([true, 'true'])('runs the no-skill baseline for no_skill=%p', async (noSkill) => {
+    const { context, callKibanaApi } = createContext({ params: { no_skill: noSkill } });
+
+    await provider.run(context);
+
+    expect(sentOverrides(callKibanaApi)).toEqual({
+      skill_ids: [],
+      enable_elastic_capabilities: false,
+    });
+  });
+
+  it('prefers the no-skill baseline when a skill id is also given', async () => {
+    const { context, callKibanaApi } = createContext({
+      params: { no_skill: true, skill_id: 'triage-v2' },
+    });
+
+    await provider.run(context);
+
+    expect(sentOverrides(callKibanaApi).skill_ids).toEqual([]);
+  });
+
+  it.each([undefined, {}, { skill_id: '' }, { no_skill: 'false' }, { skill_id: 7 }])(
+    'rejects params %p without a skill id or no_skill',
+    async (params) => {
+      const { context, callKibanaApi } = createContext({ params });
+
+      await expect(provider.run(context)).rejects.toThrow(/params.skill_id or params.no_skill/);
+      expect(callKibanaApi).not.toHaveBeenCalled();
+    }
+  );
+
+  it('requires an agent id', async () => {
+    const { context } = createContext({ agentId: undefined, params: { no_skill: true } });
+
+    await expect(provider.run(context)).rejects.toThrow(/requires an agent_id/);
+  });
+});

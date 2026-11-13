@@ -13,7 +13,9 @@ import {
 
 /**
  * AESOP prototype: converse with `configuration_overrides.skill_ids` pinned to
- * the step's `params.skill_id`, so both A/B arms differ only in the loaded skill.
+ * the step's `params.skill_id`, so A/B arms differ only in the loaded skill.
+ * `params.no_skill: true` runs the no-skill baseline arm instead: an empty
+ * explicit skill set with Elastic capabilities off resolves to zero skills.
  */
 
 const CONVERSE_PATH = '/api/agent_builder/converse';
@@ -47,10 +49,16 @@ export const createAesopVariantTaskProvider = (): EvalsTaskProvider => ({
     if (!agentId) {
       throw new Error('The "security.aesopVariant" task provider requires an agent_id');
     }
-    const skillId = params?.skill_id;
-    if (typeof skillId !== 'string' || skillId.length === 0) {
-      throw new Error('The "security.aesopVariant" task provider requires params.skill_id');
+    // Workflow templating renders `{{ }}` values as strings, so accept 'true' too.
+    const noSkill = params?.no_skill === true || params?.no_skill === 'true';
+    const skillId = typeof params?.skill_id === 'string' ? params.skill_id : '';
+    if (!noSkill && skillId.length === 0) {
+      throw new Error(
+        'The "security.aesopVariant" task provider requires params.skill_id or params.no_skill'
+      );
     }
+    const configurationOverrides: { skill_ids: string[]; enable_elastic_capabilities?: boolean } =
+      noSkill ? { skill_ids: [], enable_elastic_capabilities: false } : { skill_ids: [skillId] };
 
     // Fresh per-example root span, same as the built-in converse provider: without it
     // every example folds into one trace and trace-based metrics mis-score.
@@ -63,9 +71,7 @@ export const createAesopVariantTaskProvider = (): EvalsTaskProvider => ({
           agent_id: agentId,
           connector_id: connectorId,
           input: extractInput(input),
-          configuration_overrides: {
-            skill_ids: [skillId],
-          },
+          configuration_overrides: configurationOverrides,
           _execution_mode: 'local',
         },
       });
