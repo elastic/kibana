@@ -544,7 +544,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer: buildWriter(),
-        idBasedRiskScoringEnabled: false,
         createMissingEntities: false,
         ...baseParams,
       });
@@ -564,7 +563,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer: buildWriter(),
-        idBasedRiskScoringEnabled: true,
         createMissingEntities: false,
         ...baseParams,
       });
