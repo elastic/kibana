@@ -123,6 +123,7 @@ export const useDataGridFocus = ({
 
   // Remembers an active cell whose focused DOM element was removed by virtualization.
   const lostOwnedFocusRef = useRef<DataGridCellAddress | null>(null);
+  const lostOwnedFocusModelRef = useRef(currentModel);
 
   // Keeps stable callbacks connected to the latest virtualizer and announcement handlers.
   const scrollToRowRef = useRef(scrollToRow);
@@ -249,6 +250,7 @@ export const useDataGridFocus = ({
       if (!element) {
         if (elementOwnsFocus(previousElement)) {
           lostOwnedFocusRef.current = address;
+          lostOwnedFocusModelRef.current = modelRef.current;
         }
         return;
       }
@@ -326,6 +328,10 @@ export const useDataGridFocus = ({
       } else if (rowOrderChanged && !scrollToRowRef.current(resolution.rowIndex)) {
         failPendingFocus('scroll_failed');
       }
+    }
+
+    if (lostOwnedFocusModelRef.current !== currentModel) {
+      lostOwnedFocusRef.current = null;
     }
 
     if (areDataGridCellAddressesEqual(previousActiveCell, reconciledActiveCell)) {

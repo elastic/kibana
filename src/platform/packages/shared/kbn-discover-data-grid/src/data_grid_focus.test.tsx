@@ -333,6 +333,29 @@ describe('DataGrid keyboard and logical focus', () => {
     await expectFocus('Name 1');
   });
 
+  it('does not restore stale focus lost to virtual scrolling after a model change', async () => {
+    const apiRef = createRef<DataGridApi>();
+    const { rerender } = renderGrid({ apiRef });
+    focusElement(screen.getByRole('gridcell', { name: 'Name 1' }));
+    if (!apiRef.current) {
+      throw new Error('Expected a data grid API.');
+    }
+
+    await act(async () => {
+      await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
+    });
+    expect(document.activeElement).toBe(document.body);
+    expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <TestDataGrid gridRows={[rows[2], rows[1], rows[0], ...rows.slice(3)]} apiRef={apiRef} />
+    );
+
+    expect(document.activeElement).toBe(document.body);
+    expect(screen.queryByRole('gridcell', { name: 'Name 1' })).toBeNull();
+    expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenCalledTimes(1);
+  });
+
   it('restores an off-screen active cell only when the grid receives keyboard focus', async () => {
     const apiRef = createRef<DataGridApi>();
     renderGrid({ apiRef });
