@@ -54,7 +54,7 @@ export function fetchAndValidate$({
   let abortController: AbortController | undefined;
 
   const suggestions$ = combineLatest({
-    dataViews: api.dataSources$,
+    dataSources: api.dataSources$,
     field: api.field$,
     esqlQuery: api.esqlQuery$,
     valuesSource: api.valuesSource$,
@@ -81,7 +81,7 @@ export function fetchAndValidate$({
     switchMap(
       async ([
         {
-          dataViews,
+          dataSources,
           field,
           fetchContext,
           useGlobalFilters,
@@ -101,7 +101,7 @@ export function fetchAndValidate$({
           built = buildOptionsListFetchBody({
             valuesSource: valuesSource ?? ControlValuesSource.FIELD,
             esqlQuery,
-            dataViews,
+            dataSources,
             field,
             fetchContext,
             useGlobalFilters,

@@ -43,7 +43,7 @@ export type BuildOptionsListFetchBodyResult =
 export function buildOptionsListFetchBody({
   valuesSource,
   esqlQuery,
-  dataViews,
+  dataSources,
   field,
   fetchContext,
   useGlobalFilters,
@@ -57,7 +57,7 @@ export function buildOptionsListFetchBody({
 }: {
   valuesSource: ControlValuesSource;
   esqlQuery?: string;
-  dataViews?: FilterableSource[];
+  dataSources?: FilterableSource[];
   field?: FilterableField;
   fetchContext: FetchContext;
   useGlobalFilters: boolean | undefined;
@@ -75,7 +75,7 @@ export function buildOptionsListFetchBody({
     }
 
     const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
-    const dataView = dataViews?.[0];
+    const dataSource = dataSources?.[0];
 
     const body: OptionsListESQLFetchBody = {
       kind: 'esql',
@@ -84,7 +84,7 @@ export function buildOptionsListFetchBody({
       filter: buildESQLPreFilter({
         fetchContext,
         useGlobalFilters,
-        dataView,
+        dataSource,
         timeRange,
         esqlQuery,
       }),
@@ -101,23 +101,23 @@ export function buildOptionsListFetchBody({
     return { outcome: 'fetch', body, showLoadingSuggestions: false };
   }
 
-  const dataView = dataViews?.[0];
+  const dataSource = dataSources?.[0];
   if (
-    !dataView ||
+    !dataSource ||
     !field ||
     !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
   ) {
     return { outcome: 'empty', response: { suggestions: [], totalCardinality: 0 } };
   }
 
-  const filters = buildOptionsListDashboardFilters(dataView, fetchContext, useGlobalFilters);
+  const filters = buildOptionsListDashboardFilters(dataSource, fetchContext, useGlobalFilters);
 
   return {
     outcome: 'fetch',
     showLoadingSuggestions: true,
     body: {
       kind: 'dsl',
-      index: dataView.title,
+      index: dataSource.title,
       sort,
       searchString,
       runPastTimeout,
@@ -128,7 +128,7 @@ export function buildOptionsListFetchBody({
       size: requestSize,
       ignoreValidations,
       filters,
-      runtimeFieldMap: getRuntimeFieldMap(dataView),
+      runtimeFieldMap: getRuntimeFieldMap(dataSource),
       isReload: fetchContext.isReload,
       projectRouting: fetchContext.projectRouting,
     },

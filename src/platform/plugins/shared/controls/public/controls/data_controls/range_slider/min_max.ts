@@ -105,7 +105,7 @@ export function minMax$({
                 ? buildESQLPreFilter({
                     fetchContext: controlFetchContext,
                     useGlobalFilters,
-                    dataView,
+                    dataSource: dataView,
                     timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
                     esqlQuery,
                   })

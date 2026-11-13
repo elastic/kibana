@@ -26,7 +26,7 @@ describe('buildOptionsListFetchBody', () => {
   it('requests the options of a field of an ES|QL source from its title', () => {
     const result = buildOptionsListFetchBody({
       valuesSource: ControlValuesSource.FIELD,
-      dataViews: [esqlSource],
+      dataSources: [esqlSource],
       field,
       fetchContext: { isReload: false, projectRouting: '_alias:*' } as FetchContext,
       useGlobalFilters: true,
