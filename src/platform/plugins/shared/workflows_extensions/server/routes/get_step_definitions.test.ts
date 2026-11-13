@@ -116,13 +116,43 @@ describe('registerGetStepDefinitionsRoute', () => {
     expect(steps[0].definitionHash).not.toBe(steps[1].definitionHash);
   });
 
-  it('logs an error and returns a fallback hash when hashing fails', async () => {
+  it('computes a real hash for schemas with parts JSON Schema cannot represent', async () => {
     const stepRegistry = new ServerStepRegistry(logger);
-    // z.date() is unrepresentable in JSON Schema and makes z.toJSONSchema throw.
+    // Transforms and z.date() are unrepresentable in JSON Schema; they must not break hashing.
     stepRegistry.register({
       id: 'a.step',
       handler: async () => ({ output: 'a' }),
+      inputSchema: z.object({ name: z.string().transform((value) => value.trim()) }),
+    } as any);
+    stepRegistry.register({
+      id: 'b.step',
+      handler: async () => ({ output: 'b' }),
       inputSchema: z.date(),
+    } as any);
+
+    const testRouter = httpServiceMock.createRouter();
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
+
+    const [, handler] = testRouter.get.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    await handler({} as any, httpServerMock.createKibanaRequest(), response);
+
+    const { body } = response.ok.mock.calls[0][0]!;
+    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
+    expect(steps.map(({ definitionHash }) => definitionHash)).toEqual([
+      expect.stringMatching(/^[a-f0-9]{64}$/),
+      expect.stringMatching(/^[a-f0-9]{64}$/),
+    ]);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs an error and returns a fallback hash when hashing fails', async () => {
+    const stepRegistry = new ServerStepRegistry(logger);
+    // A value that is not a zod schema makes z.toJSONSchema throw even when unrepresentable types are allowed.
+    stepRegistry.register({
+      id: 'a.step',
+      handler: async () => ({ output: 'a' }),
+      inputSchema: {},
     } as any);
 
     const testRouter = httpServiceMock.createRouter();
