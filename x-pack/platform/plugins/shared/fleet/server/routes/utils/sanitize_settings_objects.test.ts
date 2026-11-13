@@ -59,7 +59,7 @@ describe('sanitize settings objects', () => {
       });
     });
 
-    it('removes the password from a kafka output', () => {
+    it('removes the password and headers from a kafka output', () => {
       const output = {
         id: 'kafka',
         name: 'Kafka',
@@ -70,6 +70,7 @@ describe('sanitize settings objects', () => {
         auth_type: 'user_pass',
         username: 'user',
         password: 'kafka-password',
+        headers: [{ key: 'Authorization', value: 'Bearer kafka-token' }],
         secrets: { password: { id: 'secret-id' } },
       } as Output;
 
@@ -82,6 +83,36 @@ describe('sanitize settings objects', () => {
         hosts: ['kafka:9092'],
         auth_type: 'user_pass',
         username: 'user',
+      });
+    });
+
+    it('removes headers and secrets from an otlp output', () => {
+      const output = {
+        id: 'otlp',
+        name: 'OTLP',
+        type: 'otlp',
+        is_default: false,
+        is_default_monitoring: false,
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'https://otlp:4317',
+          headers: { Authorization: 'Bearer otlp-token' },
+          tls: { cert_pem: 'cert' },
+        },
+        secrets: { otlp_exporter: { tls: { key_pem: { id: 'secret-id' } } } },
+      } as Output;
+
+      expect(sanitizeOutput(output)).toEqual({
+        id: 'otlp',
+        name: 'OTLP',
+        type: 'otlp',
+        is_default: false,
+        is_default_monitoring: false,
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'https://otlp:4317',
+          tls: { cert_pem: 'cert' },
+        },
       });
     });
 

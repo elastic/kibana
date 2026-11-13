@@ -10,8 +10,8 @@ import { omit } from 'lodash';
 import type { DownloadSource, FleetServerHost, Output } from '../../../common/types';
 
 /**
- * Returns an output without its sensitive fields (keys, passwords, tokens, secret references),
- * for API responses to users who cannot read Fleet settings.
+ * Returns an output without its sensitive fields (keys, passwords, tokens, headers, secret
+ * references), for API responses to users who cannot read Fleet settings.
  *
  * Keep in sync with OUTPUT_ENCRYPTED_FIELDS.
  */
@@ -21,10 +21,16 @@ export function sanitizeOutput<T extends Output = Output>(output: T): T {
     'password',
     'service_token',
     'kibana_api_key',
+    // Kafka headers can carry credentials
+    'headers',
   ]) as Record<string, unknown>;
 
   if ('ssl' in output && output.ssl) {
     sanitized.ssl = omit(output.ssl, ['key']);
+  }
+  // OTLP exporter headers can carry credentials
+  if ('otlp_exporter' in output && output.otlp_exporter) {
+    sanitized.otlp_exporter = omit(output.otlp_exporter, ['headers']);
   }
 
   return sanitized as T;
