@@ -150,7 +150,7 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
     (privilege) => request.authzResult?.[privilege] === true
   );
 
-const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
+const DREAMING_DISABLED_MESSAGE = 'Context Engine dreaming is turned off.';
 
 /** What the public API returns for an AI index: no dreaming config, no deprecated `memory_enabled`. */
 const toPublicAiIndex = ({
@@ -231,7 +231,6 @@ export const registerAiIndexRoutes = ({
   getAiIndexDataReadService,
   getImprovementsService,
   aiIndexChanges,
-  isMemoryEnabled,
   isDreamingEnabled,
   getActions,
   getAgentBuilder,
@@ -248,7 +247,6 @@ export const registerAiIndexRoutes = ({
     spaceId: string
   ) => ImprovementsServiceApi;
   aiIndexChanges: Pick<AiIndexChangeNotifier, 'notify'>;
-  isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** Whether the global memory and dreaming settings are both on. */
   isDreamingEnabled: (request: KibanaRequest) => Promise<boolean>;
   getActions: () => Promise<ActionsPluginStart>;
@@ -1094,7 +1092,7 @@ export const registerAiIndexRoutes = ({
       access: 'internal',
       summary: 'Get the dreaming configuration of an AI Index',
       description:
-        'Returns what the AI Index learns from its memories. An AI Index that never configured dreaming returns `{ "enabled": false }`. Returns a 404 response while the global memory setting is off.',
+        'Returns what the AI Index learns from its memories. An AI Index that never configured dreaming returns `{ "enabled": false }`. Returns a 404 response while the global memory or dreaming setting is off.',
     })
     .addVersion(
       {
@@ -1108,8 +1106,8 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        if (!(await isMemoryEnabled(request))) {
-          return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
+        if (!(await isDreamingEnabled(request))) {
+          return response.notFound({ body: { message: DREAMING_DISABLED_MESSAGE } });
         }
         const { aiIndexId } = request.params;
         const spaceId = resolveSpaceId(await getSpaces(), request);
@@ -1131,7 +1129,7 @@ export const registerAiIndexRoutes = ({
       access: 'internal',
       summary: 'Configure dreaming for an AI Index',
       description:
-        'Replaces the dreaming configuration of an AI Index without touching the rest of the entry. Permitted on managed AI Indices, whose definition is otherwise immutable. Returns a 404 response while the global memory setting is off.',
+        'Replaces the dreaming configuration of an AI Index without touching the rest of the entry. Permitted on managed AI Indices, whose definition is otherwise immutable. Returns a 404 response while the global memory or dreaming setting is off.',
     })
     .addVersion(
       {
@@ -1147,8 +1145,8 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        if (!(await isMemoryEnabled(request))) {
-          return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
+        if (!(await isDreamingEnabled(request))) {
+          return response.notFound({ body: { message: DREAMING_DISABLED_MESSAGE } });
         }
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;

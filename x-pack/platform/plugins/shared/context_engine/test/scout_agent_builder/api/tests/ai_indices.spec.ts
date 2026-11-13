@@ -123,7 +123,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
   });
 
   apiTest(
-    'keeps the dreaming config behind the internal route while the global memory setting is on',
+    'keeps the dreaming config behind the internal route while the global memory and dreaming settings are on',
     async ({ apiClient, esClient, kbnClient, requestAuth }) => {
       const id = 'scout_memory_toggle_ai_index';
       const path = aiIndexPath(id);
@@ -165,7 +165,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
           expect(createResponse).toHaveStatusCode(201);
         });
 
-        await apiTest.step('hides the dreaming route while memory is off', async () => {
+        const expectDreamingRouteHidden = async () => {
           const getResponse = await apiClient.get(dreamingPath, {
             headers: internalHeaders,
             responseType: 'json',
@@ -178,7 +178,12 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
             body: dreaming,
           });
           expect(putResponse).toHaveStatusCode(404);
-        });
+        };
+
+        await apiTest.step(
+          'hides the dreaming route while memory is off',
+          expectDreamingRouteHidden
+        );
 
         await kbnClient.uiSettings.updateGlobal({
           [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
@@ -186,17 +191,24 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
         await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
         await apiTest.step(
-          'stores the config while memory is on, even with dreaming off',
-          async () => {
-            const putResponse = await apiClient.put(dreamingPath, {
-              headers: internalHeaders,
-              responseType: 'json',
-              body: dreaming,
-            });
-            expect(putResponse).toHaveStatusCode(200);
-            expect(putResponse.body).toStrictEqual({ dreaming });
-          }
+          'hides the dreaming route while dreaming is off',
+          expectDreamingRouteHidden
         );
+
+        await kbnClient.uiSettings.updateGlobal({
+          [CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID]: true,
+        });
+        await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
+        await apiTest.step('stores the config while memory and dreaming are on', async () => {
+          const putResponse = await apiClient.put(dreamingPath, {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: dreaming,
+          });
+          expect(putResponse).toHaveStatusCode(200);
+          expect(putResponse.body).toStrictEqual({ dreaming });
+        });
 
         await apiTest.step(
           'keeps the config out of the public AI index and through a public replace',
@@ -226,6 +238,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
         await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
         await kbnClient.uiSettings.updateGlobal({
           [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+          [CONTEXT_ENGINE_DREAMING_ENABLED_SETTING_ID]: false,
         });
         await kbnClient.uiSettings.waitForEventualCacheRefresh();
       }

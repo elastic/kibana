@@ -316,7 +316,6 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       aiIndexChanges: createAiIndexChanges(),
-      isMemoryEnabled: async () => memoryFlagEnabled,
       isDreamingEnabled: async () => memoryFlagEnabled && dreamingFlagEnabled,
       getActions: async () => actions,
       getAgentBuilder,
@@ -2114,7 +2113,6 @@ describe('ai indices routes', () => {
           getAiIndexDataReadService: () => readService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           aiIndexChanges: createAiIndexChanges(),
-          isMemoryEnabled: async () => memoryFlagEnabled,
           isDreamingEnabled: async () => memoryFlagEnabled && dreamingFlagEnabled,
           getActions: async () => actions,
           getAgentBuilder,
@@ -2602,8 +2600,11 @@ describe('ai indices routes', () => {
       expect(getRoute('PUT', AI_INDEX_DREAMING_PATH).config.access).toBe('internal');
     });
 
-    it('returns 404 while the global memory setting is off', async () => {
-      memoryFlagEnabled = false;
+    it.each([
+      ['memory', () => (memoryFlagEnabled = false)],
+      ['dreaming', () => (dreamingFlagEnabled = false)],
+    ])('returns 404 while the global %s setting is off', async (_setting, turnOff) => {
+      turnOff();
 
       await callRoute('GET', AI_INDEX_DREAMING_PATH, {
         params: { aiIndexId: 'customer_support' },
@@ -2614,22 +2615,10 @@ describe('ai indices routes', () => {
       });
 
       expect(response.notFound.mock.calls).toEqual(
-        Array(2).fill([{ body: { message: 'Context Engine memory is turned off.' } }])
+        Array(2).fill([{ body: { message: 'Context Engine dreaming is turned off.' } }])
       );
       expect(aiIndexService.get).not.toHaveBeenCalled();
       expect(aiIndexService.setDreaming).not.toHaveBeenCalled();
-    });
-
-    it('stores the config while the global dreaming setting is off', async () => {
-      dreamingFlagEnabled = false;
-      aiIndexService.setDreaming.mockResolvedValue(dreaming);
-
-      await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
-        params: { aiIndexId: 'customer_support' },
-        body: dreaming,
-      });
-
-      expect(response.ok).toHaveBeenCalledWith({ body: { dreaming } });
     });
 
     it('leaves the config and memory_enabled out of the public AI index', async () => {

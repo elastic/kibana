@@ -290,7 +290,6 @@ export class ContextEnginePlugin
       getAiIndexService,
       getImprovementsService,
       aiIndexChanges: this.aiIndexChanges,
-      isMemoryEnabled,
       isDreamingEnabled,
       getAiIndexDataReadService: (params) => {
         if (!this.createAiIndexDataReadService) {

@@ -165,6 +165,21 @@ export const takesMemories = (
   dreamingEnabled: boolean
 ): boolean => (dreamingEnabled ? isDreamingConfigured(dreaming) : memoryEnabled ?? !managed);
 
+/**
+ * Ids of the dreaming workflows attached to an AI index as automations start with these. They copy
+ * the ids in `@kbn/workflows/managed`, which the browser can't import without the workflow YAML.
+ */
+const DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES: readonly string[] = [
+  'system-context-engine-dreaming-',
+  'system-context-engine-trace-dreaming-',
+  'system-context-engine-relationships-',
+];
+
+/** Whether an automation is one of the workflows dreaming attaches to an AI index. */
+export const isDreamingAutomation = ({ type, value }: { type: string; value: string }): boolean =>
+  type === 'workflow' &&
+  DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES.some((prefix) => value.startsWith(prefix));
+
 /** Whether a config builds anything at all: at least one fact or entity type. */
 export const dreamingBuildsAnything = (config: DreamingTypesConfig): boolean => {
   const { facts, entities } = dreamingTypesOf(config);
