@@ -783,6 +783,17 @@ export class Authenticator {
       if (sessionUpdateResult) {
         return enrichWithUserProfileId(authenticationResult, sessionUpdateResult.value);
       }
+
+      // On minimal-authentication routes, updateSessionValue() leaves the session unchanged when
+      // the provider has no new state, for example after another call refreshed the token. The
+      // provider has just validated that session, so its profile ID applies to the same user.
+      const shouldReuseSessionProfile =
+        isMinimalAuthenticationRequest(request) &&
+        authenticationResult.succeeded() &&
+        authenticationResult.user?.username === existingSessionValue.username;
+      if (shouldReuseSessionProfile) {
+        return enrichWithUserProfileId(authenticationResult, existingSessionValue);
+      }
     }
 
     return authenticationResult;
@@ -1004,7 +1015,7 @@ export class Authenticator {
     const ownsSession =
       existingSessionValue?.provider.name === provider.name &&
       existingSessionValue?.provider.type === provider.type;
-    const isMinimalAuthentication = request.route.options.security?.authc?.enabled === 'minimal';
+    const isMinimalAuthentication = isMinimalAuthenticationRequest(request);
 
     // Minimal authentication can persist provider state only for a session that provider already owns.
     // A different username from the same provider still triggers normal session replacement below.
@@ -1406,6 +1417,11 @@ export class Authenticator {
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }
+}
+
+/** Checks whether the route requests minimal authentication. */
+function isMinimalAuthenticationRequest(request: KibanaRequest) {
+  return request.route.options.security?.authc?.enabled === 'minimal';
 }
 
 export function enrichWithUserProfileId(
