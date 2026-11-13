@@ -7,3 +7,4 @@
 
 export { registerFindingsRecorder } from './register_findings_recorder';
 export type { FindingsPassDeps } from './run_pass';
+export { FindingsCoordinator } from './coordinator';

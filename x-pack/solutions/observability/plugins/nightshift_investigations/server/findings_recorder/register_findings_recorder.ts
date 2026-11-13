@@ -24,17 +24,15 @@ import {
 import { extractAnswer } from './messages';
 import { runFindingsPass, type FindingsPassDeps } from './run_pass';
 
-/** Slack above the pass's own abort, so the pass ends first and the hook never times out. */
-const AFTER_EXECUTION_HOOK_TIMEOUT_MS = FINDINGS_RECORDER_FINAL_TIMEOUT_MS + 15_000;
-
 /**
  * Records the investigation's findings from outside the agent, so the agent needs no recording
  * tools and carries none of that prompt:
  *
  * - a cycle hook starts a non-blocking pass every few cycles, so findings appear while the
  *   investigation runs. It never waits and never adds anything to the agent's context;
- * - a blocking after-execution hook runs the final pass from the agent's answer, so the verdict
- *   exists before the investigation reports completed and notifications go out.
+ * - a non-blocking after-execution hook runs the final pass from the agent's answer, so the
+ *   execution returns and the user can continue while it runs. A reader that needs the verdict,
+ *   such as a notification, waits for it through `coordinator.waitForFinal`.
  */
 export const registerFindingsRecorder = ({
   agentBuilder,
@@ -87,8 +85,7 @@ export const registerFindingsRecorder = ({
     id: FINDINGS_RECORDER_AFTER_EXECUTION_HOOK_ID,
     hooks: {
       [HookLifecycle.afterExecution]: {
-        mode: HookExecutionMode.blocking,
-        timeout: AFTER_EXECUTION_HOOK_TIMEOUT_MS,
+        mode: HookExecutionMode.nonBlocking,
         handler: async (context) => {
           const {
             agentId,

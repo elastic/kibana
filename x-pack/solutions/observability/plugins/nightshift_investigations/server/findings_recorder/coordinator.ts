@@ -193,6 +193,47 @@ export class FindingsCoordinator {
     }
   }
 
+  /**
+   * Resolves once no final pass is in flight or waiting for the investigation, or after `timeoutMs`
+   * or when `signal` aborts, whichever comes first. A reader that needs the recorded findings, such
+   * as a notification, waits here. It never rejects and never waits on a pass that was not started.
+   */
+  async waitForFinal({
+    conversationId,
+    timeoutMs,
+    signal,
+  }: {
+    conversationId: string;
+    timeoutMs: number;
+    signal?: AbortSignal;
+  }): Promise<void> {
+    if (!this.states.get(conversationId)?.final) return;
+    let timer: NodeJS.Timeout | undefined;
+    let onAbort: (() => void) | undefined;
+    const cutoff = new Promise<void>((resolve) => {
+      timer = setTimeout(resolve, timeoutMs);
+      timer.unref?.();
+      onAbort = () => resolve();
+      signal?.addEventListener('abort', onAbort, { once: true });
+    });
+    try {
+      await Promise.race([
+        cutoff,
+        (async () => {
+          // A later round's final pass replaces the one in flight, so wait for the last.
+          for (let pending = this.states.get(conversationId)?.final; pending; ) {
+            await pending.done;
+            const next = this.states.get(conversationId)?.final;
+            pending = next === pending ? undefined : next;
+          }
+        })(),
+      ]);
+    } finally {
+      clearTimeout(timer);
+      if (onAbort) signal?.removeEventListener('abort', onAbort);
+    }
+  }
+
   /** Drops what is tracked for an investigation whose execution ended without a final pass. */
   release(conversationId: string): void {
     const state = this.states.get(conversationId);

@@ -146,12 +146,12 @@ describe('registerFindingsRecorder', () => {
     ).resolves.toBeUndefined();
   });
 
-  it('registers a blocking after-execution hook', () => {
+  it('registers a non-blocking after-execution hook so the execution returns without waiting', () => {
     const { register } = setup();
 
     const [bundle] = register.mock.calls[0];
     expect(bundle.hooks[HookLifecycle.afterExecution]).toMatchObject({
-      mode: HookExecutionMode.blocking,
+      mode: HookExecutionMode.nonBlocking,
     });
   });
 
