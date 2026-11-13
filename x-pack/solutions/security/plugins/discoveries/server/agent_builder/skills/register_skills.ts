@@ -9,7 +9,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 
 import type { DiscoveriesPluginStartDeps } from '../../types';
-import { alertRetrievalBuilderSkill } from './alert_retrieval_builder';
+import { createAlertRetrievalBuilderSkill } from './alert_retrieval_builder';
 import { createAttackDiscoveryGeneratorSkill } from './attack_discovery_generator';
 import type { WorkflowExecutionLookup } from './tools/get_attack_discovery_status_tool';
 import type { WorkflowFetcher } from './tools/get_workflow_health_check_tool';
@@ -38,7 +38,9 @@ export const registerSkills = async (
   logger: Logger,
   options?: RegisterSkillsOptions
 ): Promise<void> => {
-  await agentBuilder.skills.register(alertRetrievalBuilderSkill);
+  await agentBuilder.skills.register(
+    createAlertRetrievalBuilderSkill({ getStartServices: options?.getStartServices })
+  );
 
   if (options?.getEventLogIndex != null && options.workflowExecutionLookup != null) {
     await agentBuilder.skills.register(

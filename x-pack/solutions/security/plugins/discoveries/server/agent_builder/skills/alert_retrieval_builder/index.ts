@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { alertRetrievalBuilderSkill } from './alert_retrieval_builder_skill';
+export { createAlertRetrievalBuilderSkill } from './alert_retrieval_builder_skill';
