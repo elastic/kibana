@@ -197,4 +197,9 @@ export interface CursorIR {
    * argument the cursor is in, if it has text before the cursor, comes last and is `open`.
    */
   written: WrittenArgument[];
+  /**
+   * Every command written before the cursor, in the order written, with what is written in
+   * each. The innermost command around the cursor is the one whose arguments `written` holds.
+   */
+  commands: WrittenCommand[];
 }

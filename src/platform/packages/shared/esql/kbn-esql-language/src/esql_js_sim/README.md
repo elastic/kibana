@@ -55,6 +55,7 @@ What `grammar/` holds so far:
   it continues (`a.b` for the word `b`).
 - `onlyFollower`: the token that must come next, when nothing else can.
 - `written`: what is already written in the command, as described below.
+- `commands`: every command written before the cursor, with what is written in each.
 
 ## Written arguments
 
