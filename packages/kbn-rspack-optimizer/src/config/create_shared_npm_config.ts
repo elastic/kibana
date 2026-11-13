@@ -74,6 +74,7 @@ export function createSharedNpmConfig({
         '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json',
         '@elastic/eui-theme-borealis/lib/eui_theme_borealis_dark.json',
         '@elastic/eui-theme-borealis',
+        '@elastic/eui-theme-common',
         '@elastic/numeral',
         '@emotion/cache',
         '@emotion/react',

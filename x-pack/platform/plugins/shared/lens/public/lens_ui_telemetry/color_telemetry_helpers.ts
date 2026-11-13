@@ -8,7 +8,7 @@
 import type { ColorMapping } from '@kbn/coloring';
 import { isEqual } from 'lodash';
 import { KbnPalette } from '@kbn/palettes';
-import { getOtherAssignmentColor } from '@kbn/coloring/src/shared_components/color_mapping/config/utils';
+import { getOtherAssignmentColor } from '@kbn/coloring';
 import { nonNullable } from '../utils';
 
 const COLOR_MAPPING_PREFIX = 'color_mapping_';
