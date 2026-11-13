@@ -9,6 +9,7 @@
 
 import { Parser } from '@elastic/esql';
 import { Token } from 'antlr4';
+import { guardModePops } from '../cursor_location/guard_mode_pops';
 import type { TokenClass } from './types';
 
 interface Vocabulary {
@@ -54,9 +55,15 @@ const getVocabulary = (): Vocabulary => {
     probe.removeErrorListeners();
     // Pushed on the default mode, so a mode that pops itself has a mode to return to.
     probe.pushMode(mode);
-    const { type, start, stop } = probe.nextToken();
 
-    return type !== Token.EOF && start === 0 && stop === text.length - 1 ? type : undefined;
+    try {
+      const { type, start, stop } = guardModePops(probe).nextToken();
+
+      return type !== Token.EOF && start === 0 && stop === text.length - 1 ? type : undefined;
+    } catch (error) {
+      // A mode the lexer cannot run from here gives no text for the token.
+      return undefined;
+    }
   };
 
   const modes = Array.from({ length: modeCount }, (_, mode) => mode);

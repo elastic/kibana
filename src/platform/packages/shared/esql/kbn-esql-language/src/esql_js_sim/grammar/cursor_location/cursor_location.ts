@@ -15,6 +15,7 @@ import {
   type RuleWithStartToken,
 } from '../code_completion/code_completion_core';
 import { getCalledRules } from '../grammar_labels/call_sites';
+import { guardModePops } from './guard_mode_pops';
 import {
   COMMAND_DISPATCH_RULES,
   COMMAND_RULES,
@@ -134,7 +135,12 @@ const isLexable = (type: number, { mode, stack }: LexerModes, grammar: GrammarIn
     const [bottom = mode, ...above] = [...stack, mode];
     lexer.setMode(bottom);
     above.forEach((next) => lexer.pushMode(next));
-    lexable = lexer.nextToken().type === type;
+    try {
+      lexable = guardModePops(lexer).nextToken().type === type;
+    } catch (error) {
+      // The lexer cannot run in these modes, so it cannot produce the token there either.
+      lexable = false;
+    }
     lexableCache.set(key, lexable);
   }
   return lexable;
