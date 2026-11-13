@@ -9,7 +9,13 @@ import { SERVERLESS_DEFAULT_OUTPUT_ID } from '../../constants';
 import { agentPolicyService, appContextService, outputService } from '../../services';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
-import { postOutputHandler, putOutputHandler, getOutputAgentPolicyCountHandler } from './handler';
+import {
+  getOneOuputHandler,
+  getOutputsHandler,
+  postOutputHandler,
+  putOutputHandler,
+  getOutputAgentPolicyCountHandler,
+} from './handler';
 
 const putOutputHandlerWithErrorHandler = withDefaultErrorHandler(putOutputHandler);
 const postOutputHandlerWithErrorHandler = withDefaultErrorHandler(postOutputHandler);
@@ -428,6 +434,72 @@ describe('output handler', () => {
       );
 
       expect((res as any).statusCode).toBe(500);
+    });
+  });
+
+  describe('get output handlers', () => {
+    const remoteOutput = {
+      id: 'remote',
+      name: 'Remote',
+      type: 'remote_elasticsearch',
+      hosts: ['https://remote:9200'],
+      service_token: 'service-token',
+      ssl: { certificate: 'cert', key: 'ssl-key' },
+    };
+    const sanitizedRemoteOutput = {
+      id: 'remote',
+      name: 'Remote',
+      type: 'remote_elasticsearch',
+      hosts: ['https://remote:9200'],
+      ssl: { certificate: 'cert' },
+    };
+
+    const contextWithAuthz = (readSettings: boolean) =>
+      ({
+        ...mockContext,
+        fleet: Promise.resolve({ authz: { fleet: { readSettings } } }),
+      } as any);
+
+    beforeEach(() => {
+      jest.spyOn(outputService, 'list').mockResolvedValue({
+        items: [remoteOutput],
+        page: 1,
+        perPage: 1,
+        total: 1,
+      } as any);
+      jest.spyOn(outputService, 'get').mockResolvedValue(remoteOutput as any);
+    });
+
+    it('returns full outputs to users who can read settings', async () => {
+      const listRes = await getOutputsHandler(
+        contextWithAuthz(true),
+        {} as any,
+        mockResponse as any
+      );
+      const getRes = await getOneOuputHandler(
+        contextWithAuthz(true),
+        { params: { outputId: 'remote' } } as any,
+        mockResponse as any
+      );
+
+      expect((listRes as any).body.items).toEqual([remoteOutput]);
+      expect((getRes as any).body.item).toEqual(remoteOutput);
+    });
+
+    it('returns sanitized outputs to users who cannot read settings', async () => {
+      const listRes = await getOutputsHandler(
+        contextWithAuthz(false),
+        {} as any,
+        mockResponse as any
+      );
+      const getRes = await getOneOuputHandler(
+        contextWithAuthz(false),
+        { params: { outputId: 'remote' } } as any,
+        mockResponse as any
+      );
+
+      expect((listRes as any).body.items).toEqual([sanitizedRemoteOutput]);
+      expect((getRes as any).body.item).toEqual(sanitizedRemoteOutput);
     });
   });
 });
