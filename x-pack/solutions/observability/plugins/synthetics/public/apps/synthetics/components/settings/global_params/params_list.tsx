@@ -274,6 +274,8 @@ export const ParamsList = () => {
           toolsLeft: renderToolsLeft(),
           box: {
             incremental: true,
+            placeholder: SEARCH_PARAMS_PLACEHOLDER,
+            'aria-label': SEARCH_PARAMS_ARIA_LABEL,
             'data-test-subj': 'syntheticsParamsSearchInput',
           },
           filters: [
@@ -307,6 +309,21 @@ export const ParamsList = () => {
 const PARAMS_TABLE = i18n.translate('xpack.synthetics.settingsRoute.params.tableCaption', {
   defaultMessage: 'Synthetics Global Parameters',
 });
+
+const SEARCH_PARAMS_PLACEHOLDER = i18n.translate(
+  'xpack.synthetics.settingsRoute.params.searchPlaceholder',
+  {
+    defaultMessage: 'Search parameters by key, description, or tag',
+  }
+);
+
+const SEARCH_PARAMS_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.settingsRoute.params.searchAriaLabel',
+  {
+    defaultMessage:
+      'Search global parameters by key, description, or tag. Results filter as you type.',
+  }
+);
 
 const PARAMS_LABEL = i18n.translate('xpack.synthetics.settingsRoute.params.label', {
   defaultMessage: 'Parameters',
