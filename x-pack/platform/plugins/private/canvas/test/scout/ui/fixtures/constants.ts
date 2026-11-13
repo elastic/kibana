@@ -16,6 +16,8 @@ export const KBN_ARCHIVES = {
   // `canvas_lens` index (see ES_ARCHIVES.CANVAS_LENS).
   LENS: `${SCOUT_FIXTURES}/kbn_archives/canvas_lens`,
   REPORTS: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/reports',
+  // A Vega library item with inline data, so it renders without index privileges.
+  VEGA: `${SCOUT_FIXTURES}/kbn_archives/canvas_vega`,
   SAVED_OBJECT_RESOLVE:
     'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/saved_object_resolve',
   DASHBOARD: 'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana',
@@ -63,23 +65,6 @@ export const EMBEDDABLES = {
   VEGA: {
     libraryName: 'CanvasVegaLibraryItem',
     headingId: 'CanvasVegaLibraryItem',
-  },
-} as const;
-
-/** A Vega library item with inline data, so it renders without index privileges. */
-export const VEGA_LIBRARY_ITEM = {
-  title: EMBEDDABLES.VEGA.libraryName,
-  spec: {
-    format: 'json',
-    value: {
-      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-      data: { values: [{ category: 'A', count: 1 }] },
-      mark: 'bar',
-      encoding: {
-        x: { field: 'category', type: 'nominal' },
-        y: { field: 'count', type: 'quantitative' },
-      },
-    },
   },
 } as const;
 

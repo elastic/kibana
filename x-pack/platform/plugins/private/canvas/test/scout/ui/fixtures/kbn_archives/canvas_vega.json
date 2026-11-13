@@ -1,0 +1,36 @@
+{
+  "attributes": {
+    "spec": {
+      "format": "json",
+      "value": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "data": {
+          "values": [
+            {
+              "category": "A",
+              "count": 1
+            }
+          ]
+        },
+        "encoding": {
+          "x": {
+            "field": "category",
+            "type": "nominal"
+          },
+          "y": {
+            "field": "count",
+            "type": "quantitative"
+          }
+        },
+        "mark": "bar"
+      }
+    },
+    "title": "CanvasVegaLibraryItem"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "canvas-vega-library-item",
+  "managed": false,
+  "references": [],
+  "type": "vega",
+  "typeMigrationVersion": "10.1.0"
+}

@@ -24,22 +24,13 @@ import { test, testData } from '../../fixtures';
 
 const { VISUALIZATION, VEGA } = testData.EMBEDDABLES;
 const EXTENDED_TIMEOUT = 20_000;
-const VEGA_API_VERSION = '2023-10-31';
 
 test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classic'] }, () => {
-  let vegaItemId: string;
-
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     // Canvas is only accessible when at least one workpad exists.
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);
-    const { data } = await kbnClient.request<{ id: string }>({
-      method: 'POST',
-      path: '/api/vega',
-      headers: { 'elastic-api-version': VEGA_API_VERSION },
-      body: testData.VEGA_LIBRARY_ITEM,
-    });
-    vegaItemId = data.id;
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.VEGA);
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects: { canvas } }) => {
@@ -50,11 +41,8 @@ test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classi
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `/api/vega/${vegaItemId}`,
-      headers: { 'elastic-api-version': VEGA_API_VERSION },
-    });
+    // `vega` isn't in the standard list of cleaned types, so unload its archive explicitly.
+    await kbnClient.importExport.unload(testData.KBN_ARCHIVES.VEGA);
     await kbnClient.savedObjects.cleanStandardList();
   });
 
