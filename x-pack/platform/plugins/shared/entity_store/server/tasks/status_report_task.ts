@@ -463,11 +463,39 @@ async function runTask({
     logger.warn(`Failed to report resolution rules state: ${getErrorMessage(e)}`);
   }
 
-  // Report entity metadata. Expensive parts run on their own, so a timeout only drops that part.
+  // Report metadata datastream doc count (only present when entity store v2 is enabled)
+  try {
+    const { count: docCount } = await esClient.count(
+      { index: await resolveMetadataDataStreamName(esClient, namespace) },
+      { signal }
+    );
+    telemetryReporter.reportEvent(ENTITY_STORE_METADATA_USAGE_EVENT, { namespace, docCount });
+  } catch (e) {
+    // Datastream doesn't exist when v2 FF is off — not an error worth surfacing.
+    logger.debug(
+      `Metadata datastream not present, skipping metadata usage report: ${getErrorMessage(e)}`
+    );
+  }
+
+  // Report status
+  try {
+    const statusResult = await assetManagerClient.getStatus(true);
+    telemetryReporter.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT, {
+      namespace,
+      ...toHealthReportPayload(statusResult),
+    });
+  } catch (e) {
+    logger.error(`Error reporting entity store health: ${getErrorMessage(e)}`);
+    errors.push(getErrorMessage(e));
+  }
+
+  // Report entity metadata last: it is the slowest report, and a timeout must not lose the ones
+  // above. Expensive parts run on their own, so a timeout only drops that part.
   try {
     const fleetPackages = await getFleetPackageNames(
       coreStart.elasticsearch.client.asInternalUser,
-      logger
+      logger,
+      signal
     );
     for (const entityType of ALL_ENTITY_TYPES) {
       const state = typeState.get(entityType);
@@ -494,32 +522,6 @@ async function runTask({
     }
   } catch (e) {
     logger.warn(`Failed to report entity metadata: ${getErrorMessage(e)}`);
-  }
-
-  // Report metadata datastream doc count (only present when entity store v2 is enabled)
-  try {
-    const { count: docCount } = await esClient.count(
-      { index: await resolveMetadataDataStreamName(esClient, namespace) },
-      { signal }
-    );
-    telemetryReporter.reportEvent(ENTITY_STORE_METADATA_USAGE_EVENT, { namespace, docCount });
-  } catch (e) {
-    // Datastream doesn't exist when v2 FF is off — not an error worth surfacing.
-    logger.debug(
-      `Metadata datastream not present, skipping metadata usage report: ${getErrorMessage(e)}`
-    );
-  }
-
-  // Report status
-  try {
-    const statusResult = await assetManagerClient.getStatus(true);
-    telemetryReporter.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT, {
-      namespace,
-      ...toHealthReportPayload(statusResult),
-    });
-  } catch (e) {
-    logger.error(`Error reporting entity store health: ${getErrorMessage(e)}`);
-    errors.push(getErrorMessage(e));
   }
 
   if (errors.length > 0) {

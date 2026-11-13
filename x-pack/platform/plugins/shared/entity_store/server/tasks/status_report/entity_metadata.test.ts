@@ -12,6 +12,9 @@ import { collectEntityMetadata, getFleetPackageNames, toSourceKind } from './ent
 
 const columnsOf = (names: string[]) => names.map((name) => ({ name, type: 'long' }));
 
+// A source and the group of its entity, as the query's TOP lists them: `<source length>:<source><group>`.
+const tupleOf = (source: string, group: string) => `${Array.from(source).length}:${source}${group}`;
+
 describe('toSourceKind', () => {
   const packages = new Set(['okta', 'system']);
 
@@ -33,9 +36,12 @@ describe('getFleetPackageNames', () => {
       ],
     } as never);
 
-    await expect(getFleetPackageNames(esClient, loggerMock.create())).resolves.toEqual(
+    const signal = new AbortController().signal;
+
+    await expect(getFleetPackageNames(esClient, loggerMock.create(), signal)).resolves.toEqual(
       new Set(['okta'])
     );
+    expect(esClient.indices.getIndexTemplate).toHaveBeenCalledWith(expect.anything(), { signal });
   });
 
   it('returns an empty set and warns when the lookup fails', async () => {
@@ -43,7 +49,9 @@ describe('getFleetPackageNames', () => {
     esClient.indices.getIndexTemplate.mockRejectedValue(new Error('forbidden'));
     const logger = loggerMock.create();
 
-    await expect(getFleetPackageNames(esClient, logger)).resolves.toEqual(new Set());
+    await expect(
+      getFleetPackageNames(esClient, logger, new AbortController().signal)
+    ).resolves.toEqual(new Set());
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('forbidden'));
   });
 });
@@ -71,6 +79,7 @@ describe('collectEntityMetadata', () => {
     esql: (query: string) => {
       columns: Array<{ name: string; type: string }>;
       values: unknown[][];
+      is_partial?: boolean;
     },
     search: (params: Record<string, unknown>) => unknown = () => ({ aggregations: {} })
   ) => {
@@ -83,18 +92,16 @@ describe('collectEntityMetadata', () => {
   };
 
   it('pairs sources that share a value and counts the values already linked', async () => {
-    // A source and the group of its entity, as the query's TOP lists them.
-    const sep = '\u241f';
     const esClient = clientWith((query) => {
       if (query.includes('TOP(')) {
         return {
           columns: columnsOf(['v', 'srcs', 'sourceGroups']),
           values: [
-            ['a@x.io', 2, [`okta${sep}g1`, `azure${sep}g1`]],
-            ['b@x.io', 2, [`azure${sep}g1`, `okta${sep}g2`]],
-            ['c@x.io', 3, [`azure${sep}g3`, `okta${sep}g3`, `aws${sep}g3`]],
+            ['a@x.io', 2, [tupleOf('okta', 'g1'), tupleOf('azure', 'g1')]],
+            ['b@x.io', 2, [tupleOf('azure', 'g1'), tupleOf('okta', 'g2')]],
+            ['c@x.io', 3, [tupleOf('azure', 'g3'), tupleOf('okta', 'g3'), tupleOf('aws', 'g3')]],
             // azure and okta resolved together, aws still apart
-            ['d@x.io', 3, [`azure${sep}g4`, `okta${sep}g4`, `aws${sep}g5`]],
+            ['d@x.io', 3, [tupleOf('azure', 'g4'), tupleOf('okta', 'g4'), tupleOf('aws', 'g5')]],
           ],
         };
       }
@@ -123,6 +130,48 @@ describe('collectEntityMetadata', () => {
     expect(esClient.esql.query.mock.calls.every(([params]) => !/VALUES\(/.test(params.query))).toBe(
       true
     );
+  });
+
+  it('keeps a source that contains the separator, a colon or a multi-byte character', async () => {
+    const esClient = clientWith((query) =>
+      query.includes('TOP(')
+        ? {
+            columns: columnsOf(['v', 'srcs', 'sourceGroups']),
+            values: [
+              [
+                'a@x.io',
+                3,
+                [tupleOf('team\u241fokta', 'g1'), tupleOf('a:b', 'g1'), tupleOf('é😀', 'g2')],
+              ],
+            ],
+          }
+        : { columns: [], values: [] }
+    );
+
+    const { metadata } = await run(esClient, 'user');
+
+    const pairs = metadata.unlinkedDuplicates.sameValueAcrossSources!;
+    expect(pairs).toContainEqual(
+      expect.objectContaining({ sourceA: 'a:b', sourceB: 'team\u241fokta', alreadyLinked: 1 })
+    );
+    expect(pairs).toContainEqual(
+      expect.objectContaining({ sourceA: 'a:b', sourceB: 'é😀', alreadyLinked: 0 })
+    );
+    expect(pairs.some((pair) => pair.sourceA === 'team' || pair.sourceB === 'team')).toBe(false);
+  });
+
+  it('leaves a part out when ES|QL returns partial results', async () => {
+    const esClient = clientWith(
+      () => ({ columns: columnsOf(['entities']), values: [[1]], is_partial: true }),
+      () => ({ aggregations: { sources: { buckets: [{ key: 'okta', doc_count: 9 }] } } })
+    );
+
+    const { sourceStates, metadata } = await run(esClient, 'service');
+
+    expect(sourceStates[0]).not.toHaveProperty('targets');
+    expect(metadata.collection).toEqual([
+      expect.objectContaining({ part: 'sourceResolution', outcome: 'failed' }),
+    ]);
   });
 
   it('runs the duplicate and identifier parts only for the types they apply to', async () => {
@@ -174,6 +223,28 @@ describe('collectEntityMetadata', () => {
     expect(sourceStates[0].byPrimaryIdentifier).toEqual([{ identifier: 'host.id', entities: 8 }]);
   });
 
+  it('names the fields a local user id is built from', async () => {
+    const scripts: string[] = [];
+    const esClient = clientWith(
+      () => ({ columns: [], values: [] }),
+      (params) => {
+        const mappings = params.runtime_mappings as
+          | { primary_identifier: { script: { source: string } } }
+          | undefined;
+        if (mappings) {
+          scripts.push(mappings.primary_identifier.script.source);
+        }
+        return { aggregations: {} };
+      }
+    );
+
+    await run(esClient, 'user');
+
+    expect(scripts[0]).not.toContain("emit('local')");
+    expect(scripts[0]).toContain("name + '@' + h + '@local'");
+    expect(scripts[0]).toContain("emit('user.name@host.id')");
+  });
+
   it('adds targets and standalone to each source when the resolution part completes', async () => {
     const esClient = clientWith(
       (query) =>
@@ -192,6 +263,48 @@ describe('collectEntityMetadata', () => {
     const { sourceStates } = await run(esClient, 'service');
 
     expect(sourceStates[0]).toMatchObject({ source: 'okta', targets: 3, standalone: 4 });
+  });
+
+  it('asks only for the reported sources and reports zero for one with no resolution rows', async () => {
+    const queries: string[] = [];
+    const esClient = clientWith(
+      (query) => {
+        queries.push(query);
+        return {
+          columns: columnsOf(['entities', 'entity.source', 'role']),
+          values: [[3, 'okta', 'target']],
+        };
+      },
+      () => ({
+        aggregations: {
+          sources: {
+            buckets: [
+              { key: 'okta', doc_count: 3 },
+              { key: 'say "hi"', doc_count: 1 },
+            ],
+          },
+        },
+      })
+    );
+
+    const { sourceStates } = await run(esClient, 'service');
+
+    expect(queries[0]).toContain('entity.source IN ("okta", "say \\"hi\\"")');
+    expect(sourceStates.find((state) => state.source === 'say "hi"')).toMatchObject({
+      targets: 0,
+      standalone: 0,
+    });
+  });
+
+  it('does not query resolution when there are no sources', async () => {
+    const esClient = clientWith(() => ({ columns: [], values: [] }));
+
+    const { metadata } = await run(esClient, 'service');
+
+    expect(esClient.esql.query).not.toHaveBeenCalled();
+    expect(metadata.collection).toEqual([
+      expect.objectContaining({ part: 'sourceResolution', outcome: 'complete' }),
+    ]);
   });
 
   it('leaves targets and standalone out when the resolution part fails', async () => {

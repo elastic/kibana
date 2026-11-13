@@ -22,6 +22,7 @@ import { createAssetManagerClient } from './factories';
 import {
   ENTITY_STORE_METADATA_USAGE_EVENT,
   ENTITY_STORE_ENTITY_METADATA_EVENT,
+  ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_STORE_SOURCE_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
@@ -1085,6 +1086,26 @@ describe('status report task — usage, resolution state & metadata telemetry', 
           setFalse: 1,
         });
         expect(event.enrichment.relationships).toContainEqual({ type: 'owns', entities: 2 });
+      });
+    });
+
+    it('reports the health event before any entity metadata, so a slow collection cannot drop it', async () => {
+      await runStatusReportTask();
+
+      const eventTypes = reportEvent.mock.calls.map(([eventType]) => eventType);
+      const healthAt = eventTypes.indexOf(ENTITY_STORE_HEALTH_REPORT_EVENT.eventType);
+      expect(healthAt).toBeGreaterThanOrEqual(0);
+      expect(healthAt).toBeLessThan(
+        eventTypes.indexOf(ENTITY_STORE_ENTITY_METADATA_EVENT.eventType)
+      );
+      expect(healthAt).toBeLessThan(eventTypes.indexOf(ENTITY_STORE_SOURCE_STATE_EVENT.eventType));
+    });
+
+    it('passes the task signal to the Fleet template lookup', async () => {
+      await runStatusReportTask();
+
+      expect(getIndexTemplate).toHaveBeenCalledWith(expect.anything(), {
+        signal: expect.any(AbortSignal),
       });
     });
 
