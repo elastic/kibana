@@ -115,6 +115,7 @@ describe('findings writer', () => {
     expect(await write(0, [finding('CVE-2026-1'), finding('CVE-2026-2')])).toEqual({
       written: 2,
       fixed: 0,
+      fixSkipped: 0,
       failures: {},
     });
     let docs = await byCve(FINDINGS_INDEX);

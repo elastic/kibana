@@ -17,6 +17,9 @@ export const isAlpha = (c: string | undefined): boolean =>
 
 export const sign = (n: number): Ordering => (n < 0 ? -1 : n > 0 ? 1 : 0);
 
+/** Largest epoch the keys encode; larger ones lose precision in JS and overflow in painless. */
+export const MAX_EPOCH = 999_999_999;
+
 // Leading zeros are stripped, then one length char (0x30 + digit count) precedes the digits, so
 // longer numbers sort higher and equal-length numbers sort by their digits.
 const MAX_DIGITS = 0x7e - 0x30;

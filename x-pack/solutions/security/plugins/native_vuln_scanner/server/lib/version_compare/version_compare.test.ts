@@ -85,6 +85,8 @@ describe('dpkg', () => {
   it('rejects characters the key cannot represent', () => {
     expect(() => dpkgKey('1.0_beta')).toThrow(UnencodableVersionError);
     expect(() => dpkgKey('-1:1.0')).toThrow(UnencodableVersionError);
+    expect(dpkgKey('999999999:1.0')).toBeTruthy();
+    expect(() => dpkgKey('1000000000:1.0')).toThrow(UnencodableVersionError);
   });
 });
 
@@ -125,5 +127,6 @@ describe('rpm', () => {
   it('rejects numbers longer than the key length char can encode', () => {
     expect(() => rpmKey(`1.${'9'.repeat(79)}-1`)).toThrow(UnencodableVersionError);
     expect(() => rpmKey('-1:1.0-1')).toThrow(UnencodableVersionError);
+    expect(() => rpmKey(`${'9'.repeat(19)}:1.0-1`)).toThrow(UnencodableVersionError);
   });
 });

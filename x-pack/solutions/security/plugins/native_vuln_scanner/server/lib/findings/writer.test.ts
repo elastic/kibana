@@ -49,7 +49,7 @@ describe('writeFindings', () => {
       findings: [finding('h1', 'CVE-1'), finding('h1', 'CVE-1'), finding('h1', 'CVE-2')],
     });
 
-    expect(result).toEqual({ written: 2, fixed: 2, failures: {} });
+    expect(result).toEqual({ written: 2, fixed: 2, fixSkipped: 0, failures: {} });
     const operations = es.bulk.mock.calls[0][0].operations ?? [];
     expect(operations).toHaveLength(4);
     expect(operations[0]).toMatchObject({ update: { _index: FINDINGS_INDEX } });
@@ -74,6 +74,16 @@ describe('writeFindings', () => {
     const result = await writeFindings(es, { ...PARAMS, hosts: [host('h1')], findings: [] });
     expect(es.bulk).not.toHaveBeenCalled();
     expect(result.fixed).toBe(2);
+  });
+
+  it('reports open findings the fix pass skipped on conflicts or failures', async () => {
+    es.updateByQuery.mockResolvedValue({
+      updated: 1,
+      version_conflicts: 2,
+      failures: [{ id: 'x', index: FINDINGS_INDEX, status: 500, cause: { type: 'boom' } }],
+    });
+    const result = await writeFindings(es, { ...PARAMS, hosts: [host('h1')], findings: [] });
+    expect(result).toMatchObject({ fixed: 1, fixSkipped: 3 });
   });
 
   it('never runs the fix pass when an upsert failed', async () => {

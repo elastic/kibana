@@ -30,6 +30,7 @@ export class NativeVulnScannerPlugin
 
   public start(core: CoreStart): NativeVulnScannerServerStart {
     if (this.config.enabled) {
+      // Origin-only under CPS: the findings index is plugin-owned and lives in this project.
       ensureFindingsIndex(core.elasticsearch.client.asInternalUser).catch((error: Error) => {
         this.logger.error(`Failed to set up the vulnerability findings index: ${error.message}`);
       });

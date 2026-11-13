@@ -35,7 +35,11 @@ long parseEpoch(String s) {
     i++;
   }
   long v = 0;
-  while (i < s.length() && isDigit(s.charAt(i))) { v = v * 10 + (s.charAt(i) - 48); i++; }
+  // Stops accumulating past the cap so long cannot overflow; callers reject anything above it.
+  while (i < s.length() && isDigit(s.charAt(i))) {
+    if (v <= 999999999L) { v = v * 10 + (s.charAt(i) - 48); }
+    i++;
+  }
   return neg ? -v : v;
 }
 
@@ -106,7 +110,7 @@ int dash = rest.lastIndexOf('-');
 String a = dash >= 0 ? rest.substring(0, dash) : rest;
 String b = dash >= 0 ? rest.substring(dash + 1) : '';
 
-String ep = epoch < 0 ? null : encNum(String.valueOf(epoch));
+String ep = epoch < 0 || epoch > 999999999L ? null : encNum(String.valueOf(epoch));
 String ka = scheme == 'dpkg' ? dpkgRuns(a) : rpmVer(a);
 String kb = scheme == 'dpkg' ? dpkgRuns(b) : rpmVer(b);
 if (ep == null || ka == null || kb == null) {

@@ -332,6 +332,31 @@ describe('matchHost: RHEL', () => {
       expect(stats).toEqual({});
     });
 
+    it('ignores an unknown fact of an alternative that fails on another condition', () => {
+      const failing = {
+        ...nodejs,
+        conditions: [
+          [
+            { type: 'module_enabled' as const, module: 'nodejs:18' },
+            {
+              type: 'running_kernel' as const,
+              package: 'kernel',
+              operation: 'less than' as const,
+              evr: '0:5.14.0-427.22.1.el9_4',
+            },
+          ],
+        ],
+      };
+      const stats: MatchStats = {};
+      const findings = run(
+        host({ os: RHEL9, kernelRelease: '5.14.0-503.11.1.el9_5.x86_64', packages: nodePkg }),
+        [failing],
+        stats
+      );
+      expect(findings).toEqual([]);
+      expect(stats).toEqual({});
+    });
+
     it('evaluates running-kernel less-than and equals against uname -r', () => {
       const kernelCore = (operation: 'less than' | 'equals', evr: string) =>
         rhsa({

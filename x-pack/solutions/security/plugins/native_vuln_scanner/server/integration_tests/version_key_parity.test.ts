@@ -19,11 +19,15 @@ const FIXTURES = join(__dirname, '..', 'lib', 'version_compare', '__fixtures__')
 const SIMULATE_BATCH = 1000;
 
 // Inputs the labelled corpus does not reach: empty parts, separators at the edges, the longest
-// encodable number and one digit past it, and characters the dpkg key rejects.
+// encodable number and one digit past it, epochs at and past the cap (including ones that
+// overflow a long), and characters the dpkg key rejects.
+const EPOCH_EDGES = ['999999999', '0000000001', '1000000000', '9'.repeat(19), '9'.repeat(25)];
+
 const EDGE_CASES: Readonly<Record<Scheme, readonly string[]>> = {
   dpkg: [
     ...['', '0', '1:', ':1', '-1', '1-', 'a-b-c', '1.0~~', '01:1.0', ' 1.0 ', '-1:1.0'],
     ...[`1.${'9'.repeat(78)}`, `1.${'9'.repeat(79)}`, '1.0_bad', '1.0@x', 'ü1.0'],
+    ...EPOCH_EDGES.map((epoch) => `${epoch}:1.0-1`),
   ],
   rpm: [
     ...[
@@ -40,6 +44,7 @@ const EDGE_CASES: Readonly<Record<Scheme, readonly string[]>> = {
       '-1:1.0-1',
     ],
     ...[`1.${'9'.repeat(79)}`, 'ü1.0'],
+    ...EPOCH_EDGES.map((epoch) => `${epoch}:1.0-1.el9`),
   ],
 };
 

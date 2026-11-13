@@ -164,6 +164,7 @@ describe('toFindingDoc', () => {
         hostId: 'h2',
         scheme: 'dpkg',
         package: { name: 'openssl', version: '3.0.13-0ubuntu3' },
+        fixedVersion: '3.0.13-0ubuntu3.4',
       }),
       { id: 'h2', os: { family: 'ubuntu', version: 'noble' } },
       CTX
@@ -171,7 +172,7 @@ describe('toFindingDoc', () => {
     expect(doc.package).toEqual({
       name: 'openssl',
       version: '3.0.13-0ubuntu3',
-      fixed_version: '0:2.34-83.el9_3.7',
+      fixed_version: '3.0.13-0ubuntu3.4',
       type: 'deb',
     });
     expect(doc.resource).toEqual({ id: 'h2', name: 'h2' });

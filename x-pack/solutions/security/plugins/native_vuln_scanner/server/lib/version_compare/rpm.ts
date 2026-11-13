@@ -11,7 +11,7 @@
  * by a painless script; both must stay byte-identical.
  */
 
-import { encodeNumber, isAlpha, isDigit, sign, UnencodableVersionError } from './common';
+import { encodeNumber, isAlpha, isDigit, MAX_EPOCH, sign, UnencodableVersionError } from './common';
 import type { Ordering } from './common';
 
 export interface Evr {
@@ -127,6 +127,8 @@ const encodeVersion = (value: string): string => {
 /** Builds a keyword whose byte order equals rpm order; throws UnencodableVersionError. */
 export const rpmKey = (raw: string): string => {
   const { epoch, version, release } = parseEvr(raw);
-  if (epoch < 0) throw new UnencodableVersionError(`negative epoch: ${raw}`);
+  if (epoch < 0 || epoch > MAX_EPOCH) {
+    throw new UnencodableVersionError(`epoch out of range: ${raw}`);
+  }
   return encodeNumber(String(epoch)) + encodeVersion(version) + encodeVersion(release);
 };

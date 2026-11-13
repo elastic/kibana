@@ -147,7 +147,7 @@ const satisfiedAlternative = (
   if (record.conditions.length === 0) return [];
   let unknown: AdvisoryCondition | undefined;
   for (const alternative of record.conditions) {
-    let allTrue = true;
+    let alternativeUnknown: AdvisoryCondition | undefined;
     let failed = false;
     for (const condition of alternative) {
       const verdict = evaluateCondition(condition, host, stats);
@@ -155,12 +155,11 @@ const satisfiedAlternative = (
         failed = true;
         break;
       }
-      if (verdict === 'unknown') {
-        allTrue = false;
-        unknown ??= condition;
-      }
+      if (verdict === 'unknown') alternativeUnknown ??= condition;
     }
-    if (allTrue && !failed) return alternative;
+    if (failed) continue;
+    if (!alternativeUnknown) return alternative;
+    unknown ??= alternativeUnknown;
   }
   if (unknown) {
     countInto(stats, `unknown_${unknown.type}`);

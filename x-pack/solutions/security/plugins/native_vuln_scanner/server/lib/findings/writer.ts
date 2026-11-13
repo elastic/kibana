@@ -48,6 +48,11 @@ export interface WriteFindingsParams {
 export interface WriteFindingsResult {
   written: number;
   fixed: number;
+  /**
+   * Open findings the fix pass could not update (version conflicts with a concurrent write, or
+   * per-document failures). They stay open and the next run reconciles them.
+   */
+  fixSkipped: number;
   /** Bulk item failures as `<status>:<error type>` -> count. */
   failures: Record<string, number>;
 }
@@ -105,13 +110,18 @@ export const writeFindings = async (
     written += batch.length - countFailures(response, failures);
   }
   if (Object.keys(failures).length > 0) throw new FindingsWriteError(failures);
-  if (hosts.length === 0) return { written, fixed: 0, failures };
+  if (hosts.length === 0) return { written, fixed: 0, fixSkipped: 0, failures };
 
   await es.indices.refresh({ index: FINDINGS_INDEX });
   const hostIds = [...metaById.keys()];
   let fixed = 0;
+  let fixSkipped = 0;
   for (let i = 0; i < hostIds.length; i += HOST_BATCH) {
-    const { updated = 0 } = await es.updateByQuery({
+    const {
+      updated = 0,
+      version_conflicts: conflicts = 0,
+      failures: fixFailures = [],
+    } = await es.updateByQuery({
       index: FINDINGS_INDEX,
       conflicts: 'proceed',
       refresh: true,
@@ -127,6 +137,7 @@ export const writeFindings = async (
       script: { source: FIX_SCRIPT, lang: 'painless', params: { now } },
     });
     fixed += updated;
+    fixSkipped += conflicts + fixFailures.length;
   }
-  return { written, fixed, failures };
+  return { written, fixed, fixSkipped, failures };
 };
