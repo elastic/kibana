@@ -112,6 +112,28 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.content).toMatch(/all four pause for\s+the analyst's confirmation/);
     });
 
+    it('requires one confirmation per host by issuing write calls one at a time', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
+      const process = skill.content.slice(
+        skill.content.indexOf('## Process'),
+        skill.content.indexOf('## Guardrails')
+      );
+      const reference =
+        skill.referencedContent?.find((entry) => entry.name === 'reference')?.content ?? '';
+
+      expect(process).toContain('**Multiple hosts or actions**');
+      expect(process).toMatch(/one write tool call per host per action, one\s+at a time/);
+      expect(process).toMatch(/Never batch write calls in a single turn/);
+      expect(process).toMatch(/deferred, not\s+declined/);
+      expect(process.indexOf('**Multiple hosts or actions**')).toBeLessThan(
+        process.indexOf('**Report**')
+      );
+      expect(reference).toContain('Write call deferred');
+      expect(reference).toMatch(/several hosts.*one at a time.*never batch/s);
+    });
+
     it('includes system instructions in content', () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
         automaticTroubleshootingUniversalSkill: false,

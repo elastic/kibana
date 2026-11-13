@@ -75,7 +75,13 @@ from chat: say so and point the analyst to the Response Actions UI.
 2. **Write tools** — call directly; Agent Builder shows the confirmation card.
    Do not ask for chat confirmation first. If declined, report cancelled.
 
-3. **Report** — always include action ID, status, and output. For pending actions,
+3. **Multiple hosts or actions** — one write tool call per host per action, one
+   at a time. Never batch write calls in a single turn: issue the next call only
+   after the current one has returned, so the analyst confirms each host
+   separately. A write call returned as "Not executed" was deferred, not
+   declined: re-issue it once the pending one has returned.
+
+4. **Report** — always include action ID, status, and output. For pending actions,
    offer \`get_response_action_status\` follow-up. See \`./reference\` for error
    codes and best practices.
 
