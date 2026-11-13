@@ -71,11 +71,17 @@ const scorePrimary = (arm: Arm, index: number, evaluator: string): PrimaryScore 
   };
 };
 
-const noWinner = (rejected: Output['rejected'], reasons: string[], tie = false): Output => ({
+const noWinner = (
+  rejected: Output['rejected'],
+  reasons: string[],
+  tied: PrimaryScore[] = []
+): Output => ({
   winner_index: -1,
   winner_target_id: null,
   beats_baseline: false,
-  tie,
+  tie: tied.length > 0,
+  tied_indexes: tied.map(({ index }) => index),
+  tied_target_ids: tied.map(({ target_id: id }) => id),
   rejected,
   reasons,
 });
@@ -108,8 +114,18 @@ export const selectWinner = (input: Input): Output => {
     ]);
   }
 
-  const best = scored.reduce((top, row) => (row.improvement > top.improvement ? row : top));
-  const tied = scored.filter(
+  const qualifying = scored.filter(({ improvement }) => improvement > 0);
+  if (qualifying.length === 0) {
+    const closest = scored.reduce((top, row) => (row.improvement > top.improvement ? row : top));
+    return noWinner(rejected, [
+      `no arm beats the baseline on ${primary}; best was ${closest.target_id} at ${format(
+        closest.meanTarget
+      )} against ${format(closest.meanBaseline)}`,
+    ]);
+  }
+
+  const best = qualifying.reduce((top, row) => (row.improvement > top.improvement ? row : top));
+  const tied = qualifying.filter(
     ({ improvement }) => best.improvement - improvement <= input.min_delta
   );
   if (tied.length > 1) {
@@ -120,16 +136,8 @@ export const selectWinner = (input: Input): Output => {
           .map(({ target_id: id }) => id)
           .join(', ')})`,
       ],
-      true
+      tied
     );
-  }
-
-  if (best.improvement <= 0) {
-    return noWinner(rejected, [
-      `no arm beats the baseline on ${primary}; best was ${best.target_id} at ${format(
-        best.meanTarget
-      )} against ${format(best.meanBaseline)}`,
-    ]);
   }
 
   const summary = `${best.target_id} scored ${format(
@@ -154,6 +162,8 @@ export const selectWinner = (input: Input): Output => {
     winner_target_id: best.target_id,
     beats_baseline: best.pValue === null || significant,
     tie: false,
+    tied_indexes: [],
+    tied_target_ids: [],
     rejected,
     reasons,
   };

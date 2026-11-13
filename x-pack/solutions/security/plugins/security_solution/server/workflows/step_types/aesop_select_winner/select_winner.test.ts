@@ -58,6 +58,7 @@ describe('selectWinner', () => {
       winner_target_id: 'b',
       beats_baseline: true,
       tie: false,
+      tied_indexes: [],
       rejected: [],
     });
     expect(result.reasons.join(' ')).toContain('p=0.01');
@@ -125,9 +126,56 @@ describe('selectWinner', () => {
       )
     );
 
-    expect(result).toMatchObject({ winner_index: -1, tie: true, beats_baseline: false });
+    expect(result).toMatchObject({
+      winner_index: -1,
+      tie: true,
+      beats_baseline: false,
+      tied_indexes: [0, 1],
+      tied_target_ids: ['a', 'b'],
+    });
     expect(result.reasons[0]).toContain('a, b');
     expect(result.reasons[0]).not.toContain('c)');
+  });
+
+  it('does not report a tie between arms that both fall below the baseline', () => {
+    const result = selectWinner(
+      build(
+        [
+          arm('a', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.4, pValue: 0.01 }),
+            ...codePass,
+          ]),
+          arm('b', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.4, pValue: 0.01 }),
+            ...codePass,
+          ]),
+        ],
+        { min_delta: 0.05 }
+      )
+    );
+
+    expect(result).toMatchObject({ winner_index: -1, tie: false, tied_indexes: [] });
+    expect(result.reasons[0]).toContain('no arm beats the baseline');
+  });
+
+  it('excludes a below-baseline arm from a tie even when it is within min_delta', () => {
+    const result = selectWinner(
+      build(
+        [
+          arm('above', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.52, pValue: 0.01 }),
+            ...codePass,
+          ]),
+          arm('below', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.49, pValue: 0.01 }),
+            ...codePass,
+          ]),
+        ],
+        { min_delta: 0.05 }
+      )
+    );
+
+    expect(result).toMatchObject({ winner_index: 0, winner_target_id: 'above', tie: false });
   });
 
   it('returns no winner when nothing beats the baseline', () => {

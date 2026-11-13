@@ -359,6 +359,7 @@ steps:
     with:
       comparison_json: '${{ steps.compare.output.comparison | json }}'
       has_winner: '${{ steps.winner.output.winner_index >= 0 }}'
+      is_tie: '${{ steps.winner.output.tie == true }}'
       compared: true
 
   # The marker at the winner's position says which arm it was: `live` or the
@@ -395,7 +396,7 @@ steps:
   # ----------------------------------------------------------------------
   - name: write_rejection_ki
     type: context-engine.createKi
-    if: '${{ steps.resolve_comparison.output.compared == true and variables.deploy_candidate != true }}'
+    if: '${{ steps.resolve_comparison.output.compared == true and variables.deploy_candidate != true and steps.resolve_comparison.output.is_tie != true }}'
     with:
       ai_index_id: '{{ consts.AI_INDEX_ID }}'
       ki_id: 'rejection-{{ execution.id }}'
@@ -414,6 +415,52 @@ steps:
           rejected: '{{ steps.winner.output.rejected | json | truncate: 8000 }}'
           dataset_id: '{{ inputs.dataset_id }}'
           workflow_execution_id: '{{ execution.id }}'
+    on-failure:
+      continue: true
+
+  # ----------------------------------------------------------------------
+  # Tie: two or more arms beat the baseline and sit within min_delta of each
+  # other, so the evidence cannot pick one. Hand the choice to the analyst. This
+  # path deploys nothing and records no rejection, because no arm lost.
+  # ----------------------------------------------------------------------
+  - name: propose_tie_pick
+    type: workflow.execute
+    if: '${{ steps.resolve_comparison.output.is_tie == true }}'
+    with:
+      workflow-id: system-create-proposal
+      inputs:
+        origin: alertzero
+        conversationId: '{{ inputs.investigation_id }}'
+        title: "AESOP: pick between tied variants for {% if variables.has_live_skill == true %}{{ variables.target_skill_id }}{% else %}the skill {{ variables.target_skill_name }}{% endif %}"
+        comment: |-
+          **AESOP: {{ steps.winner.output.tied_indexes.size }} arms tie, so no winner was chosen.**
+
+          {{ steps.winner.output.reasons | join: ' ' }}
+
+          Nothing has been deployed. To choose one, revise this proposal with the arm you want deployed; if none is acceptable, dismiss it.
+
+          **Tied arms**
+          {% for tied_index in steps.winner.output.tied_indexes %}{% assign tied_marker = variables.arm_variant_indexes[tied_index] %}
+          - Experiment `{{ steps.winner.output.tied_target_ids[forloop.index0] }}`: {% if tied_marker == 'live' %}the live skill, as deployed today{% else %}variant {{ tied_marker }} of {{ inputs.variants.size }}{% endif %}
+          {% endfor %}
+
+          **Tied variant content**
+          {% for tied_index in steps.winner.output.tied_indexes %}{% assign tied_marker = variables.arm_variant_indexes[tied_index] %}{% if tied_marker != 'live' %}
+          Variant {{ tied_marker }}:
+          ```markdown
+          {{ inputs.variants[tied_marker] }}
+          ```
+          {% endif %}{% endfor %}
+
+          **A/B matrix** (baseline, {% if variables.has_live_skill == true %}live skill, {% endif %}every variant that scored):
+
+          ```json
+          ${{ steps.resolve_comparison.output.comparison_json }}
+          ```
+        impact: medium
+        confidence: low
+        autoApprove: false
+        expiresIn: '72h'
     on-failure:
       continue: true
 
@@ -663,4 +710,4 @@ steps:
       deployed: '${{ variables.deployed }}'
       skill_id: '{{ variables.target_skill_id }}'
       skip_reason: >-
-        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.deploy_candidate != true %}Rejected: {{ variables.reject_reason }}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif steps.resolve_comparison.output.is_tie == true %}{% if steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% else %}Tied arms, nothing deployed; the analyst was asked to pick one.{% endif %}{% elsif variables.deploy_candidate != true %}Rejected: {{ variables.reject_reason }}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

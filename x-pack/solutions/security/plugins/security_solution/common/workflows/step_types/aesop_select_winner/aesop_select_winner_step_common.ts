@@ -32,7 +32,6 @@ export const aesopSelectWinnerInputSchema = lazySchema(() =>
             z.object({
               target_id: z.string().max(512),
               results: z.array(comparisonResultSchema()).max(500),
-              pairing: z.unknown().optional(),
             })
           )
           .max(20),
@@ -67,7 +66,13 @@ export const aesopSelectWinnerOutputSchema = lazySchema(() =>
     beats_baseline: z
       .boolean()
       .describe('True when the winner improves on the baseline significantly, or n is too small'),
-    tie: z.boolean(),
+    tie: z
+      .boolean()
+      .describe('True when two or more arms that beat the baseline are within min_delta of the best'),
+    tied_indexes: z
+      .array(z.number().int())
+      .describe('Indexes into comparison.comparisons of the tied arms, empty when there is no tie'),
+    tied_target_ids: z.array(z.string()).describe('Target ids of the tied arms'),
     rejected: z.array(
       z.object({
         target_id: z.string(),
@@ -102,7 +107,7 @@ export const aesopSelectWinnerStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.aesopSelectWinner.documentation.details',
       {
         defaultMessage:
-          'Rejects every arm below 1 on a code evaluator, then ranks the rest by the primary evaluator. The best arm wins when its mean beats the baseline and the p-value is at or below alpha. When no p-value is available the best mean above the baseline is accepted and the reasons say so. Arms within min_delta of the best are a tie and produce no winner.',
+          'Rejects every arm below 1 on a code evaluator, then ranks the rest by the primary evaluator. The best arm wins when its mean beats the baseline and the p-value is at or below alpha. When no p-value is available the best mean above the baseline is accepted and the reasons say so. Only arms that beat the baseline can win or tie. Arms within min_delta of the best are a tie: no winner is chosen and the tied arms are listed in tied_indexes and tied_target_ids so an analyst can pick one.',
       }
     ),
     examples: [
