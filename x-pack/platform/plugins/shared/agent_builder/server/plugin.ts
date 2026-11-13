@@ -50,8 +50,8 @@ import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tool
 import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
 import {
-  connectorModelSource,
   createModelProviderFactory,
+  createRuntimeModelProviderFactory,
 } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
@@ -495,9 +495,7 @@ export class AgentBuilderPlugin
         findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
-        // The public contract stays connector-only; a feature-sourced default is an execution concern.
-        createModelProvider: ({ request, defaultConnectorId }) =>
-          modelProviderFactory({ request, defaultModel: connectorModelSource(defaultConnectorId) }),
+        createModelProvider: createRuntimeModelProviderFactory(modelProviderFactory),
       },
       conversations: {
         getScopedClient: async ({ request }) => {

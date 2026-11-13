@@ -20,7 +20,11 @@ import {
 import type { ModelSource } from '@kbn/agent-builder-server/runner';
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
-import { createModelProvider, createModelProviderFactory } from './model_provider';
+import {
+  createModelProvider,
+  createModelProviderFactory,
+  createRuntimeModelProviderFactory,
+} from './model_provider';
 
 interface EndpointMock {
   connectorId: string;
@@ -901,6 +905,67 @@ describe('createModelProviderFactory', () => {
       expect.objectContaining({
         request: deps.request,
         connectorId: 'override-connector',
+      })
+    );
+  });
+});
+
+describe('createRuntimeModelProviderFactory', () => {
+  const setupRuntimeFactory = () => {
+    const deps = setupDeps();
+    setupChatAndClient(deps.inference);
+    const createRuntimeModelProvider = createRuntimeModelProviderFactory(
+      createModelProviderFactory({
+        inference: deps.inference,
+        trackingService: deps.trackingService,
+        logger: deps.logger,
+        searchInferenceEndpoints: deps.searchInferenceEndpoints,
+      })
+    );
+    return { deps, createRuntimeModelProvider };
+  };
+
+  it('runs on the given connector and bills the calls to the given telemetryMetadata', async () => {
+    const telemetryMetadata = {
+      pluginId: 'nightshift_investigation_memory',
+      aggregateBy: 'interaction-1',
+    };
+    const { deps, createRuntimeModelProvider } = setupRuntimeFactory();
+
+    const provider = createRuntimeModelProvider({
+      request: deps.request,
+      defaultConnectorId: 'override-connector',
+      telemetryMetadata,
+    });
+    await provider.getDefaultModel();
+
+    expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        request: deps.request,
+        connectorId: 'override-connector',
+        chatModelOptions: { telemetryMetadata },
+      })
+    );
+    expect(deps.inference.getClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bindTo: {
+          connectorId: 'override-connector',
+          metadata: { connectorTelemetry: telemetryMetadata },
+        },
+      })
+    );
+  });
+
+  it('keeps the Agent Builder default model and telemetry when the caller gives neither', async () => {
+    const { deps, createRuntimeModelProvider } = setupRuntimeFactory();
+
+    const provider = createRuntimeModelProvider({ request: deps.request });
+    await provider.getDefaultModel();
+
+    expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'default-connector',
+        chatModelOptions: { telemetryMetadata: MODEL_TELEMETRY_METADATA },
       })
     );
   });

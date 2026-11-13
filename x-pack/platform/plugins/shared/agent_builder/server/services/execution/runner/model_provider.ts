@@ -11,6 +11,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
+import type { RuntimeStart } from '@kbn/agent-builder-server';
 import type {
   ModelProvider,
   ModelSource,
@@ -120,6 +121,19 @@ export const createModelProviderFactory: CreateModelProviderFactoryFn = (factory
     ...opts,
   });
 };
+
+/**
+ * Adapts a {@link ModelProviderFactoryFn} to the plugin's public `runtime.createModelProvider`
+ * contract, which stays connector-only: a feature-sourced default is an execution concern.
+ */
+export const createRuntimeModelProviderFactory =
+  (modelProviderFactory: ModelProviderFactoryFn): RuntimeStart['createModelProvider'] =>
+  ({ request, defaultConnectorId, telemetryMetadata }) =>
+    modelProviderFactory({
+      request,
+      defaultModel: connectorModelSource(defaultConnectorId),
+      ...(telemetryMetadata ? { telemetryMetadata } : {}),
+    });
 
 /**
  * Utility function to create a {@link ModelProvider}
