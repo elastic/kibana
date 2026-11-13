@@ -184312,10 +184312,26 @@ components:
                   example: true
                   type: boolean
                 path:
+<<<<<<< HEAD
                   description: The full file path to retrieve from the endpoint.
+=======
+                  description: The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
+                  maxLength: 4096
+                  minLength: 1
+>>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
                   type: string
-              required:
-                - path
+                paths:
+                  description: The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+                  example:
+                    - /var/log/syslog
+                    - /var/log/auth.log
+                  items:
+                    maxLength: 4096
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
           required:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:

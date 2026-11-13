@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../common/base';
+import { GET_FILE_MAX_PATHS } from '../../../../../endpoint/service/response_actions/constants';
 
 export const EndpointActionGetFileSchema = {
   body: schema.object(
@@ -15,13 +16,43 @@ export const EndpointActionGetFileSchema = {
       ...BaseActionRequestSchema,
 
       parameters: schema.object({
+<<<<<<< HEAD
         path: schema.string({ minLength: 1 }),
+=======
+        // Exactly one of `path` or `paths` must be defined (validated below)
+        path: schema.maybe(schema.string({ minLength: 1, maxLength: 4096 })),
+        // `paths` applies only to the Elastic Defend Endpoint (validated below)
+        paths: schema.maybe(
+          schema.arrayOf(schema.string({ minLength: 1, maxLength: 4096 }), {
+            minSize: 1,
+            maxSize: GET_FILE_MAX_PATHS,
+          })
+        ),
+>>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
         // `force` applies only to the Elastic Defend Endpoint on Windows (validated below)
         force: schema.maybe(schema.boolean()),
       }),
     },
     {
       validate(bodyContent) {
+        const { path, paths } = bodyContent.parameters;
+
+        if (path === undefined && paths === undefined) {
+          return '[parameters]: one of [path] or [paths] must be defined';
+        }
+
+        if (path !== undefined && paths !== undefined) {
+          return '[parameters]: [path] and [paths] cannot be used together';
+        }
+
+        if (
+          paths !== undefined &&
+          bodyContent.agent_type &&
+          bodyContent.agent_type !== 'endpoint'
+        ) {
+          return `[parameters.paths]: is not valid with agent type of ${bodyContent.agent_type}`;
+        }
+
         if (
           'force' in bodyContent.parameters &&
           bodyContent.agent_type &&

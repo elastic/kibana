@@ -66,10 +66,21 @@ export const ENDPOINT_CAPABILITIES = [
   'memdump_process',
   'memdump_kernel',
   'memdump_raw',
+<<<<<<< HEAD
+=======
+  'kill_process_descendants',
+  'get_file_multi_path',
+>>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
   'get_file_force',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
+
+/**
+ * The maximum number of paths that can be requested by a single `get-file` response action
+ * (`parameters.paths` in the API, repeated `--path` argument in the response console)
+ */
+export const GET_FILE_MAX_PATHS = 100;
 
 /**
  * The list of possible console command names that generate a Response Action to be dispatched

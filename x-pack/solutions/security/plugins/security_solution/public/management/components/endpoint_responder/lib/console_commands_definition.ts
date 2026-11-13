@@ -39,6 +39,7 @@ import type {
   ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
+  GET_FILE_MAX_PATHS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
 } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -236,6 +237,50 @@ export const getEndpointConsoleCommands = ({
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
 
+<<<<<<< HEAD
+=======
+  // `kill-process --kill-descendants` applies only to the Elastic Defend Endpoint, is gated behind
+  // a feature flag and requires that the host's Endpoint version supports it (reported via the
+  // `kill_process_descendants` capability).
+  const isKillDescendantsSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('kill_process_descendants');
+  const killDescendantsArg: Record<string, CommandArgDefinition> =
+    agentType === 'endpoint' && responseActionsEndpointKillProcessDescendants
+      ? {
+          'kill-descendants': {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: false,
+            about:
+              CONSOLE_COMMANDS.killProcess.args.killDescendants.about +
+              (isKillDescendantsSupportedByEndpoint
+                ? ''
+                : ` (${CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported})`),
+            validate: () => {
+              if (!isKillDescendantsSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported;
+              }
+
+              return true;
+            },
+          },
+        }
+      : {};
+
+  // `get-file` with multiple `--path` arguments applies only to the Elastic Defend Endpoint and
+  // requires that the host's Endpoint supports it (via the `get_file_multi_path` capability).
+  const getFileAllowsMultiplePaths = agentType === 'endpoint';
+  const isGetFileMultiPathSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('get_file_multi_path');
+  // The "can be used multiple times" help text is only shown when the Endpoint reports support for it
+  const getFilePathAbout =
+    getFileAllowsMultiplePaths && isGetFileMultiPathSupportedByEndpoint
+      ? CONSOLE_COMMANDS.getFile.args.path.aboutMultiple
+      : CONSOLE_COMMANDS.getFile.args.path.about;
+
+>>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
   // `get-file --force` applies only to the Elastic Defend Endpoint and is only offered when the
   // host's Endpoint supports it (reported via the `get_file_force` capability, Windows only).
   const isGetFileForceSupportedByEndpoint = (
@@ -412,10 +457,21 @@ export const getEndpointConsoleCommands = ({
       args: {
         path: {
           required: true,
-          allowMultiples: false,
-          about: CONSOLE_COMMANDS.getFile.args.path.about,
+          allowMultiples: getFileAllowsMultiplePaths,
+          mustHaveValue: 'non-empty-string',
+          about: getFilePathAbout,
           validate: (argData) => {
-            return emptyArgumentValidator(argData);
+            if (argData.length > 1) {
+              if (!isGetFileMultiPathSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.getFile.args.path.multipleNotSupported;
+              }
+
+              if (argData.length > GET_FILE_MAX_PATHS) {
+                return CONSOLE_COMMANDS.getFile.args.path.tooManyPaths(GET_FILE_MAX_PATHS);
+              }
+            }
+
+            return true;
           },
         },
         ...getFileForceArg,

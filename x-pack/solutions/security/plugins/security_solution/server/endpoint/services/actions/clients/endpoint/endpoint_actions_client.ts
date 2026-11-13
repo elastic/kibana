@@ -279,33 +279,57 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): ResponseActionsClientError | undefined {
     // `parameters` is a union of every command's parameters
     const parameters = (actionReq.parameters ?? {}) as Record<string, unknown>;
-    let capability: EndpointCapabilities | undefined;
-    let unsupportedMessage = '';
+    const requirements: Array<{ capability: EndpointCapabilities; unsupportedMessage: string }> =
+      [];
 
+<<<<<<< HEAD
     if (command === 'get-file' && parameters.force === true) {
       // `force` (read a locked file from a volume snapshot) is supported on Windows only
       capability = 'get_file_force';
       unsupportedMessage = 'the get-file `force` parameter (Windows only)';
+=======
+    if (command === 'kill-process' && parameters.kill_descendants === true) {
+      requirements.push({
+        capability: 'kill_process_descendants',
+        unsupportedMessage: 'killing process descendents',
+      });
+>>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
     }
 
-    if (!capability) {
-      return;
+    if (command === 'get-file') {
+      if (parameters.force === true) {
+        // `force` (read a locked file from a volume snapshot) is supported on Windows only
+        requirements.push({
+          capability: 'get_file_force',
+          unsupportedMessage: 'the get-file `force` parameter (Windows only)',
+        });
+      }
+
+      // `paths` (retrieve multiple files in one action)
+      if (parameters.paths !== undefined) {
+        requirements.push({
+          capability: 'get_file_multi_path',
+          unsupportedMessage: 'the get-file `paths` parameter',
+        });
+      }
     }
 
-    const unsupportedAgents = hosts
-      .filter((endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes(capability))
-      .map(
-        (endpointMeta) =>
-          `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
-      );
+    for (const { capability, unsupportedMessage } of requirements) {
+      const unsupportedAgents = hosts
+        .filter((endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes(capability))
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
 
-    if (unsupportedAgents.length > 0) {
-      return new ResponseActionsClientError(
-        `The following agent IDs do not support ${unsupportedMessage}: ${unsupportedAgents.join(
-          ', '
-        )}`,
-        400
-      );
+      if (unsupportedAgents.length > 0) {
+        return new ResponseActionsClientError(
+          `The following agent IDs do not support ${unsupportedMessage}: ${unsupportedAgents.join(
+            ', '
+          )}`,
+          400
+        );
+      }
     }
   }
 
