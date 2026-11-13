@@ -12,9 +12,14 @@ import type {
   CompactionSummary,
   CompactionStructuredData,
   CompactionToolCallSummary,
+  DynamicToolDefinition,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
-import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import {
+  createUserMessage,
+  renderDynamicToolDefinition,
+} from '@kbn/agent-builder-genai-utils/langchain';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { COMPACTION_TAIL_FLOOR_TOKENS } from '../constants';
 import type { CurrentRun } from '../transient_state';
@@ -61,6 +66,7 @@ export interface CompactContextDeps extends VisibleContextDeps {
   chatModel: InferenceChatModel;
   budget: ContextBudget;
   abortSignal?: AbortSignal;
+  toolManager?: ToolManager;
 }
 
 export interface CompactContextResult {
@@ -266,6 +272,7 @@ export const compactContext = async (
       cursor,
     })
   );
+  const dynamicTools = await snapshotDynamicTools(deps.toolManager);
   const summary: CompactionSummary = {
     summarized_up_to: cursor,
     summarized_round_count: coveredRoundIds.length,
@@ -273,6 +280,7 @@ export const compactContext = async (
     created_at: new Date().toISOString(),
     token_count: estimateTokens(serializeCompactionSummary(structuredData)),
     structured_data: structuredData,
+    ...(dynamicTools.length > 0 ? { dynamic_tools: dynamicTools } : {}),
   };
 
   return {
@@ -282,6 +290,14 @@ export const compactContext = async (
     summarizedCycleCount: covered.length,
   };
 };
+
+/**
+ * The definitions of the dynamic tools registered when the summary is generated. Taken once per
+ * compaction so the notice rendered after the summary stays identical until the next one; a tool
+ * loaded later is seen through its own tool result.
+ */
+const snapshotDynamicTools = (toolManager?: ToolManager): Promise<DynamicToolDefinition[]> =>
+  Promise.all((toolManager?.listDynamicTools() ?? []).map(renderDynamicToolDefinition));
 
 /** The LLM half of the summary when the summarizer failed: the existing one, else placeholders. */
 const fallbackLlmOutput = ({
