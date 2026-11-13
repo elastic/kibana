@@ -27,7 +27,7 @@ import { reportConsistentFailureIssues } from './consistent_failure_issues';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
 import type { TestFailure } from './get_failures';
-import { GithubApi } from './github_api';
+import { DEFAULT_GITHUB_REPO, GithubApi } from './github_api';
 import { processJUnitReports } from './process_junit_reports';
 import type { ProcessReportsParams } from './process_reports_types';
 import { processScoutReports } from './process_scout_reports';
@@ -188,6 +188,8 @@ export function runFailedTestsReporterCli() {
             prependTitle,
             updateGithub,
             perTestIssues: PER_TEST_ISSUES,
+            // the suite issues come from the repository the per-test issues are in
+            suiteIssueComments: !(reportFailingSuites && failingSuitesRepo === DEFAULT_GITHUB_REPO),
             indexInEs,
             reportUpdate,
             bkMeta,

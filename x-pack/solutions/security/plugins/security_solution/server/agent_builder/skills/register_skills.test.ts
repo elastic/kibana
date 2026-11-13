@@ -50,7 +50,6 @@ describe('registerSkills - endpoint response actions', () => {
       endpointResponseActionsSkill: true,
     },
     getStartServices: coreMock.createSetup().getStartServices,
-    kibanaVersion: '9.0.0',
     logger: loggerMock.create(),
     ml: undefined,
     options: { endpointAppContextService: createMockEndpointAppContext().service },

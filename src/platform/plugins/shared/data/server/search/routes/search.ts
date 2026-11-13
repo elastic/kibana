@@ -61,7 +61,12 @@ export function registerSearchRoute(
                 requestHash: schema.maybe(schema.string()),
                 projectRouting: schema.maybe(schema.string()),
                 approximation: schema.maybe(schema.boolean()),
-                pollLength: schema.maybe(schema.duration()),
+                pollLength: schema.maybe(
+                  schema.duration({
+                    // real values are a generally a few characters (e.g. `30s`); the max length is an arbitrary cap on the input size
+                    maxLength: 30,
+                  })
+                ),
               },
               { unknowns: 'allow' }
             ),
