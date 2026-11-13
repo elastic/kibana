@@ -62,10 +62,23 @@ describe('createSecurityRuleParamsAuthorizer', () => {
   });
 
   describe('response actions', () => {
-    it('resolves when neither new nor previous params have response actions', async () => {
+    it('skips getEndpointAuthz when creating with no response actions', async () => {
       await expect(
         buildAuthorizer().authorize(paramsWithResponseActions(), { request })
       ).resolves.toBeUndefined();
+
+      expect(endpointAppContextService.getEndpointAuthz).not.toHaveBeenCalled();
+    });
+
+    it('skips getEndpointAuthz when updating with empty response actions on both sides', async () => {
+      await expect(
+        buildAuthorizer().authorize(paramsWithResponseActions([]), {
+          request,
+          previousParams: paramsWithResponseActions([]),
+        })
+      ).resolves.toBeUndefined();
+
+      expect(endpointAppContextService.getEndpointAuthz).not.toHaveBeenCalled();
     });
 
     it('resolves when the user is authorized for the added response action', async () => {
@@ -78,6 +91,8 @@ describe('createSecurityRuleParamsAuthorizer', () => {
           request,
         })
       ).resolves.toBeUndefined();
+
+      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request);
     });
 
     it('throws a 403 Boom error when the user lacks privileges for the added response action', async () => {
@@ -91,6 +106,21 @@ describe('createSecurityRuleParamsAuthorizer', () => {
 
       expect(Boom.isBoom(error)).toBe(true);
       expect(error.output.statusCode).toBe(403);
+    });
+
+    it('calls getEndpointAuthz when removing response actions from a previous rule', async () => {
+      endpointAppContextService.getEndpointAuthz.mockResolvedValue(
+        getEndpointAuthzInitialStateMock({ canIsolateHost: true })
+      );
+
+      await expect(
+        buildAuthorizer().authorize(paramsWithResponseActions([]), {
+          request,
+          previousParams: paramsWithResponseActions([isolateResponseAction()]),
+        })
+      ).resolves.toBeUndefined();
+
+      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request);
     });
 
     it('does not re-authorize a response action that is unchanged from the previous params', async () => {
@@ -109,6 +139,8 @@ describe('createSecurityRuleParamsAuthorizer', () => {
           previousParams: paramsWithResponseActions(responseActions),
         })
       ).resolves.toBeUndefined();
+
+      expect(endpointAppContextService.getEndpointAuthz).toHaveBeenCalledWith(request);
     });
 
     it('uses the request-scoped osquery authz checker for osquery response actions', async () => {
