@@ -49,7 +49,6 @@ export interface IdentifyMetricsEntitiesResult {
   droppedIncompleteRowsCount: number;
   droppedOverflowRowsCount: number;
   droppedRows: DroppedMetricsEntityRows;
-  unknownClusterRows: number;
   excludedSkippedCount: number;
   timings: {
     catalogueMs: number;
@@ -138,7 +137,7 @@ const entityPriority = (feature: FeatureUpsert): number => {
     case 'k8s.cronjob':
       return 3;
     default:
-      return 3;
+      return 4;
   }
 };
 
@@ -170,7 +169,6 @@ export const identifyMetricsEntities = async ({
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
       droppedRows: createDroppedRows(),
-      unknownClusterRows: 0,
       excludedSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
     };
@@ -209,7 +207,6 @@ export const identifyMetricsEntities = async ({
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
       droppedRows: createDroppedRows(),
-      unknownClusterRows: 0,
       excludedSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
     };
@@ -226,7 +223,6 @@ export const identifyMetricsEntities = async ({
   let metricsEntityRowsCount = 0;
   let droppedIncompleteRowsCount = 0;
   const droppedRows = createDroppedRows();
-  let unknownClusterRows = 0;
 
   for (const keyRow of matchedKeyRows) {
     const response = (await esClient.esql.query(
@@ -246,7 +242,6 @@ export const identifyMetricsEntities = async ({
     droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
     droppedRows.nullCluster += folded.droppedRows.nullCluster;
     droppedRows.idTooLong += folded.droppedRows.idTooLong;
-    unknownClusterRows += folded.unknownClusterRows;
   }
 
   const [{ hits: excludedFeatures }, { hits: priorFeatures }] = await Promise.all([
@@ -305,7 +300,6 @@ export const identifyMetricsEntities = async ({
     droppedIncompleteRowsCount,
     droppedOverflowRowsCount,
     droppedRows,
-    unknownClusterRows,
     excludedSkippedCount,
     timings: { catalogueMs, inventoryMs, totalMs: Date.now() - startedAt },
   };

@@ -25,7 +25,6 @@ export interface EntityFoldResult {
   features: FeatureUpsert[];
   droppedIncompleteRowsCount: number;
   droppedRows: DroppedMetricsEntityRows;
-  unknownClusterRows: number;
 }
 
 export interface EntityFoldContext {

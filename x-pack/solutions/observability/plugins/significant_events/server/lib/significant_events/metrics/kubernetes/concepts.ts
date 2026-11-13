@@ -77,7 +77,7 @@ export const buildConceptListQuery = ({
   sourceQuery,
   cluster,
   datasetCondition,
-  additionalPipeline = '',
+  additionalPipeline,
   breakdownFields,
 }: {
   sourceQuery: string;
@@ -85,11 +85,13 @@ export const buildConceptListQuery = ({
   datasetCondition: string;
   additionalPipeline?: string;
   breakdownFields: readonly string[];
-}): string => `${sourceQuery}
+}): string => {
+  const extraPipeline = additionalPipeline ? `\n${additionalPipeline}` : '';
+  return `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     ${
       cluster ? `AND orchestrator.cluster.name == ${quoteEsqlString(cluster)}\n    ` : ''
-    }AND ${datasetCondition}
-${additionalPipeline}
+    }AND ${datasetCondition}${extraPipeline}
 | STATS last_seen = MAX(@timestamp) BY ${breakdownFields.join(', ')}
 | SORT ${breakdownFields.join(', ')}`;
+};

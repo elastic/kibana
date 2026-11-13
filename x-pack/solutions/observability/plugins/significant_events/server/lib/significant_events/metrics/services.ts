@@ -55,19 +55,17 @@ export const foldServiceRows = (
       features: [],
       droppedIncompleteRowsCount: 0,
       droppedRows,
-      unknownClusterRows: 0,
     };
   }
 
   const id = `services:${sourceId}`;
-  const title = `Services of ${sourceId}`;
+  const title = 'Services';
   if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
     droppedRows.idTooLong += 1;
     return {
       features: [],
       droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
       droppedRows,
-      unknownClusterRows: 0,
     };
   }
 
@@ -109,6 +107,5 @@ export const foldServiceRows = (
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
-    unknownClusterRows: 0,
   };
 };

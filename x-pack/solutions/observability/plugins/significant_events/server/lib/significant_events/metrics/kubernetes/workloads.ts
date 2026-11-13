@@ -60,7 +60,7 @@ const isWorkloadKind = (value: EsqlCell): value is WorkloadKind =>
   typeof value === 'string' && value in WORKLOAD_TYPES;
 
 // ReplicaSet hashes and Job timestamp suffixes are removed to recover long-lived owners.
-export const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-hash\`,
+const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-hash\`,
        rs = kubernetes.replicaset.name,
        derived_deployment = CASE(
          kubernetes.deployment.name IS NULL AND h IS NOT NULL AND rs IS NOT NULL
@@ -115,8 +115,8 @@ const buildWorkloadListQuery = ({
     )}) AND kubernetes.pod.uid IS NOT NULL`,
     additionalPipeline: `${WORKLOAD_OWNER_DERIVATION}
 | WHERE kind == "${kind}" AND workload IS NOT NULL AND kubernetes.namespace IS NOT NULL
-| EVAL member = CONCAT(kubernetes.namespace, "/", workload)`,
-    breakdownFields: ['member'],
+| EVAL \`${WORKLOAD_TYPES[kind].ownerField}\` = workload`,
+    breakdownFields: ['kubernetes.namespace', WORKLOAD_TYPES[kind].ownerField],
   });
 
 export const foldWorkloadRows = (
@@ -176,6 +176,5 @@ export const foldWorkloadRows = (
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
-    unknownClusterRows: 0,
   };
 };

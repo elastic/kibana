@@ -124,6 +124,5 @@ export const foldNodeRows = (
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
-    unknownClusterRows: 0,
   };
 };

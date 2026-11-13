@@ -227,8 +227,19 @@ describe('Kubernetes type KIs', () => {
     expect(deployments?.properties.list_query).toEqual(
       expect.stringContaining('| WHERE kind == "deployment"')
     );
+    expect(deployments?.properties.list_query).toEqual(
+      expect.stringContaining('| EVAL `kubernetes.deployment.name` = workload')
+    );
+    expect(deployments?.properties.list_query).toEqual(
+      expect.stringContaining(
+        '| STATS last_seen = MAX(@timestamp) BY kubernetes.namespace, kubernetes.deployment.name'
+      )
+    );
     expect(byId.get('k8s.cronjobs:cluster-a')?.properties.list_query).toEqual(
       expect.stringContaining('kubernetes.job.name RLIKE')
+    );
+    expect(byId.get('k8s.cronjobs:cluster-a')?.properties.list_query).toEqual(
+      expect.stringContaining('| EVAL `kubernetes.cronjob.name` = workload')
     );
     expect(byId.get('k8s.statefulsets:cluster-a')?.subtype).toBe('k8s.statefulset');
     expect(byId.get('k8s.daemonsets:cluster-a')?.subtype).toBe('k8s.daemonset');
@@ -364,12 +375,14 @@ describe('host type KIs', () => {
     const byId = new Map(
       mergeHostFeatures([...nodeFeatures, ...hostFeatures]).map((feature) => [feature.id, feature])
     );
+    const hostNodeFeature = hostFeatures.find(({ id }) => id === 'k8s.nodes:cluster-a');
 
     expect([...byId.keys()]).toEqual(['k8s.nodes:cluster-a', 'hosts:source-id']);
     expect(byId.get('hosts:source-id')).toEqual(
       expect.objectContaining({
         type: 'infrastructure',
         subtype: 'host',
+        title: 'Hosts',
         properties: expect.objectContaining({
           breakdown: ['host.name'],
           entity_store_type: 'host',
@@ -383,7 +396,12 @@ describe('host type KIs', () => {
       })
     );
     expect(byId.get('hosts:source-id')?.description).toContain('and 2 more');
+    expect(hostNodeFeature?.properties.breakdown).toEqual(['kubernetes.node.name']);
+    expect(hostNodeFeature?.properties.list_query).toEqual(
+      expect.stringContaining('| STATS last_seen = MAX(@timestamp) BY kubernetes.node.name')
+    );
     expect(byId.get('k8s.nodes:cluster-a')?.properties).toMatchObject({
+      breakdown: ['kubernetes.node.name'],
       members: ['node-x'],
       host_summary: { os: ['Wolfi'], cloud_provider: ['gcp'] },
     });
@@ -415,6 +433,7 @@ describe('service type KIs', () => {
         type: 'entity',
         subtype: 'service',
         id: 'services:source-id',
+        title: 'Services',
         properties: expect.objectContaining({
           breakdown: ['service.name'],
           entity_store_type: 'service',
@@ -424,6 +443,7 @@ describe('service type KIs', () => {
         }),
       })
     );
+    expect(feature?.properties.list_query).not.toContain('\n\n');
   });
 });
 

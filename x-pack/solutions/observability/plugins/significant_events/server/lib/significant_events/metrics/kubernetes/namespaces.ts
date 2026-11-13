@@ -106,6 +106,5 @@ export const foldNamespaceRows = (
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
-    unknownClusterRows: 0,
   };
 };

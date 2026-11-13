@@ -60,7 +60,7 @@ export const foldHostRows = (
     const scale = typeof row.scale === 'number' ? row.scale : 0;
     if (entityType === 'host') {
       const id = `hosts:${sourceId}`;
-      const title = `Hosts of ${sourceId}`;
+      const title = 'Hosts';
       if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
         droppedRows.idTooLong += 1;
         continue;
@@ -138,8 +138,9 @@ export const foldHostRows = (
           cluster,
           datasetCondition: HOST_DATASET_CONDITION,
           additionalPipeline: `${HOST_NODE_NAME_EVAL}
-| WHERE node_name IS NOT NULL`,
-          breakdownFields: ['host.name'],
+| WHERE node_name IS NOT NULL
+| EVAL \`kubernetes.node.name\` = node_name`,
+          breakdownFields: ['kubernetes.node.name'],
         }),
         host_summary: {
           os: stringsOf(row.os),
@@ -156,7 +157,6 @@ export const foldHostRows = (
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
-    unknownClusterRows: 0,
   };
 };
 
