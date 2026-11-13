@@ -8,8 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
@@ -46,13 +44,6 @@ export const AppMenuComponent = ({
   staticItems,
 }: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-  const { euiTheme } = useEuiTheme();
-
-  const secondaryActionsCss = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.xs};
-  `;
 
   /**
    * Global static items are registered once, usually before
@@ -118,26 +109,20 @@ export const AppMenuComponent = ({
     const inlineItems = displayedItems.slice(0, inlineItemLimit);
     const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
     const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
-    const hasSecondaryActions =
-      Boolean(historyConfig) || Boolean(switchConfig) || inlineItems.length > 0;
 
     return (
       <>
-        {hasSecondaryActions && (
-          <div css={secondaryActionsCss}>
-            {historyConfig && <AppMenuHistoryComponent historyConfig={historyConfig} />}
-            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-            {inlineItems.map((menuItem) => (
-              <AppMenuItem
-                key={menuItem.id}
-                {...menuItem}
-                isPopoverOpen={openPopoverId === menuItem.id}
-                onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
-                onPopoverClose={handleOnPopoverClose}
-              />
-            ))}
-          </div>
-        )}
+        {historyConfig && <AppMenuHistoryComponent historyConfig={historyConfig} />}
+        {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+        {inlineItems.map((menuItem) => (
+          <AppMenuItem
+            key={menuItem.id}
+            {...menuItem}
+            isPopoverOpen={openPopoverId === menuItem.id}
+            onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
+            onPopoverClose={handleOnPopoverClose}
+          />
+        ))}
         {primaryActionComponent}
         {shouldShowOverflow && (
           <AppMenuOverflowButton
