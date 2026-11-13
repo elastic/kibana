@@ -21,7 +21,7 @@ export const RULE_MIGRATION_SKILLS = {
     id: 'automatic-migration-rules-summarize',
     description: `Summarize Automatic Rule Migration progress: list every rule migration with its status and rule counts, or drill into one migration's task progress, translation stats, and missing resources.
 
-Use when the user asks "how are my rule migrations doing", wants an overview, asks about a specific rule migration by name, or asks which resources (macros, lookups, reference sets, watchlists) a migration is missing.
+Use when the user asks "how are my rule migrations doing", wants an overview, asks about a specific rule migration by name (including its timings or duration, such as a QRadar migration), or asks which resources (macros, lookups, reference sets, watchlists) a migration is missing.
 
 Read-only. Automatic Migration also covers dashboards — this skill handles rule migrations only.`,
   },
