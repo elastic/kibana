@@ -7,8 +7,9 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createConnectorCatalogStorage } from './connector_catalog_storage';
-import { CONNECTOR_CATALOG_INDEX } from './constants';
+import { CONNECTOR_TYPE_CATALOG_INDEX } from './constants';
 import type { StoredCatalogDefinition } from './types';
 
 const createResponseError = (statusCode: number, type: string): errors.ResponseError =>
@@ -30,65 +31,68 @@ const definition: StoredCatalogDefinition = {
 
 describe('createConnectorCatalogStorage', () => {
   const esClient = elasticsearchClientMock.createElasticsearchClient();
-  const storage = createConnectorCatalogStorage({ esClient });
+  const storage = createConnectorCatalogStorage({
+    esClient,
+    logger: loggingSystemMock.createLogger(),
+  });
 
   beforeEach(() => {
     jest.resetAllMocks();
+    // Lets the adapter bootstrap run on writes: no template, no index yet.
+    esClient.info.mockResolvedValue({ version: { build_flavor: 'default' } } as never);
+    esClient.indices.putIndexTemplate.mockResolvedValue({ acknowledged: true });
+    esClient.indices.get.mockResolvedValue({});
+    esClient.indices.create.mockResolvedValue({
+      acknowledged: true,
+      shards_acknowledged: true,
+      index: `${CONNECTOR_TYPE_CATALOG_INDEX}-000001`,
+    });
   });
 
-  describe('ensureIndex', () => {
-    it('creates the index with mappings only and dynamic false', async () => {
-      esClient.indices.create.mockResolvedValue({
-        acknowledged: true,
-        shards_acknowledged: true,
-        index: CONNECTOR_CATALOG_INDEX,
-      });
+  describe('lazy index setup', () => {
+    it('does not touch Elasticsearch when created', () => {
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(esClient.indices.create).not.toHaveBeenCalled();
+    });
 
-      await storage.ensureIndex();
+    it('installs the template with the write alias, mappings before the first write', async () => {
+      esClient.index.mockResolvedValue({} as never);
 
-      expect(esClient.indices.create).toHaveBeenCalledTimes(1);
-      const [request] = esClient.indices.create.mock.calls[0];
-      expect(request).toEqual(
+      await storage.replaceManifest({ raw: '{}' });
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+      const [template] = esClient.indices.putIndexTemplate.mock.calls[0];
+      expect(template).toEqual(
         expect.objectContaining({
-          index: CONNECTOR_CATALOG_INDEX,
-          mappings: expect.objectContaining({ dynamic: false }),
+          name: CONNECTOR_TYPE_CATALOG_INDEX,
+          template: expect.objectContaining({
+            aliases: { [CONNECTOR_TYPE_CATALOG_INDEX]: { is_write_index: true } },
+            mappings: expect.objectContaining({
+              properties: expect.objectContaining({
+                connectorId: expect.objectContaining({ type: 'keyword' }),
+                yaml: expect.objectContaining({ type: 'text', index: false }),
+              }),
+            }),
+          }),
         })
       );
-      expect(request).not.toHaveProperty('settings');
+      expect(esClient.indices.create).toHaveBeenCalledTimes(1);
     });
 
-    it('ignores resource_already_exists_exception', async () => {
-      esClient.indices.create.mockRejectedValue(
-        createResponseError(400, 'resource_already_exists_exception')
-      );
+    it('does not create anything on reads', async () => {
+      esClient.get.mockRejectedValue(createResponseError(404, 'index_not_found_exception'));
 
-      await expect(storage.ensureIndex()).resolves.toBeUndefined();
-    });
+      await storage.getManifest();
 
-    it('rethrows other errors', async () => {
-      esClient.indices.create.mockRejectedValue(createResponseError(500, 'boom'));
-
-      await expect(storage.ensureIndex()).rejects.toThrow();
-    });
-
-    it('passes the abort signal to the client', async () => {
-      esClient.indices.create.mockResolvedValue({
-        acknowledged: true,
-        shards_acknowledged: true,
-        index: CONNECTOR_CATALOG_INDEX,
-      });
-      const { signal } = new AbortController();
-
-      await storage.ensureIndex({ signal });
-
-      expect(esClient.indices.create).toHaveBeenCalledWith(expect.anything(), { signal });
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(esClient.indices.create).not.toHaveBeenCalled();
     });
   });
 
   describe('getManifest', () => {
     it('reads the manifest document by its fixed id', async () => {
       esClient.get.mockResolvedValue({
-        _index: CONNECTOR_CATALOG_INDEX,
+        _index: CONNECTOR_TYPE_CATALOG_INDEX,
         _id: 'manifest',
         found: true,
         _source: { type: 'manifest', raw: '{"connectors":[]}' },
@@ -96,7 +100,7 @@ describe('createConnectorCatalogStorage', () => {
 
       await expect(storage.getManifest()).resolves.toEqual({ raw: '{"connectors":[]}' });
       expect(esClient.get).toHaveBeenCalledWith(
-        { index: CONNECTOR_CATALOG_INDEX, id: 'manifest' },
+        { index: CONNECTOR_TYPE_CATALOG_INDEX, id: 'manifest' },
         { signal: undefined }
       );
     });
@@ -130,12 +134,12 @@ describe('createConnectorCatalogStorage', () => {
       esClient.mget.mockResolvedValue({
         docs: [
           {
-            _index: CONNECTOR_CATALOG_INDEX,
+            _index: CONNECTOR_TYPE_CATALOG_INDEX,
             _id: 'definition:.catalog-test@1.0.0',
             found: true,
             _source: { type: 'definition', ...definition },
           },
-          { _index: CONNECTOR_CATALOG_INDEX, _id: 'definition:.other@1.0.0', found: false },
+          { _index: CONNECTOR_TYPE_CATALOG_INDEX, _id: 'definition:.other@1.0.0', found: false },
         ],
       });
 
@@ -148,7 +152,7 @@ describe('createConnectorCatalogStorage', () => {
       expect(esClient.mget).toHaveBeenCalledTimes(1);
       expect(esClient.mget).toHaveBeenCalledWith(
         {
-          index: CONNECTOR_CATALOG_INDEX,
+          index: CONNECTOR_TYPE_CATALOG_INDEX,
           ids: ['definition:.catalog-test@1.0.0', 'definition:.other@1.0.0'],
         },
         { signal: undefined }
@@ -166,7 +170,7 @@ describe('createConnectorCatalogStorage', () => {
   describe('create-only writes', () => {
     it('createDefinition uses op_type create', async () => {
       esClient.index.mockResolvedValue({
-        _index: CONNECTOR_CATALOG_INDEX,
+        _index: CONNECTOR_TYPE_CATALOG_INDEX,
         _id: 'definition:.catalog-test@1.0.0',
         _version: 1,
         result: 'created',
@@ -178,9 +182,10 @@ describe('createConnectorCatalogStorage', () => {
       await expect(storage.createDefinition(definition)).resolves.toEqual({ created: true });
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: CONNECTOR_CATALOG_INDEX,
+          index: CONNECTOR_TYPE_CATALOG_INDEX,
           id: 'definition:.catalog-test@1.0.0',
           op_type: 'create',
+          require_alias: true,
         })
       );
     });
@@ -216,7 +221,7 @@ describe('createConnectorCatalogStorage', () => {
   describe('replaceManifest', () => {
     it('overwrites the document with the fixed id', async () => {
       esClient.index.mockResolvedValue({
-        _index: CONNECTOR_CATALOG_INDEX,
+        _index: CONNECTOR_TYPE_CATALOG_INDEX,
         _id: 'manifest',
         _version: 2,
         result: 'updated',
@@ -229,7 +234,7 @@ describe('createConnectorCatalogStorage', () => {
 
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: CONNECTOR_CATALOG_INDEX,
+          index: CONNECTOR_TYPE_CATALOG_INDEX,
           id: 'manifest',
           document: { type: 'manifest', raw: '{"connectors":[]}' },
         })

@@ -11,7 +11,7 @@ export { buildTypeFromStoredSpec } from './build_type_from_stored_spec';
 export type { BuildTypeFromStoredSpec } from './build_type_from_stored_spec';
 export {
   CATALOG_MANIFEST_DOC_ID,
-  CONNECTOR_CATALOG_INDEX,
+  CONNECTOR_TYPE_CATALOG_INDEX,
   getCatalogAssetDocId,
   getCatalogDefinitionDocId,
 } from './constants';

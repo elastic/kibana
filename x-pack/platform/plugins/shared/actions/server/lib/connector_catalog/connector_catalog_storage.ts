@@ -6,10 +6,12 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { IndexStorageSettings, StorageDocumentOf } from '@kbn/storage-adapter';
+import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import {
   CATALOG_MANIFEST_DOC_ID,
-  CONNECTOR_CATALOG_INDEX,
+  CONNECTOR_TYPE_CATALOG_INDEX,
   getCatalogAssetDocId,
   getCatalogDefinitionDocId,
 } from './constants';
@@ -32,31 +34,43 @@ interface DefinitionSource extends StoredCatalogDefinition {
 const isResponseErrorWithStatus = (error: unknown, statusCode: number): boolean =>
   error instanceof errors.ResponseError && error.statusCode === statusCode;
 
-const isIndexAlreadyExists = (error: unknown): boolean =>
-  error instanceof errors.ResponseError &&
-  error.body?.error?.type === 'resource_already_exists_exception';
-
-// `yaml`, `raw` and `content` stay in `_source` only. `dynamic: false` keeps them unindexed.
-const CATALOG_MAPPINGS = {
-  dynamic: false,
-  properties: {
-    type: { type: 'keyword' },
-    connectorId: { type: 'keyword' },
-    version: { type: 'keyword' },
-    contentHash: { type: 'keyword' },
-    catalogVersion: { type: 'keyword' },
-    sha256: { type: 'keyword' },
+// `yaml`, `raw` and `content` are stored but not indexed, so they only live in `_source`.
+const catalogStorageSettings = {
+  name: CONNECTOR_TYPE_CATALOG_INDEX,
+  schema: {
+    properties: {
+      type: types.keyword({}),
+      connectorId: types.keyword({}),
+      version: types.keyword({}),
+      contentHash: types.keyword({}),
+      catalogVersion: types.keyword({}),
+      sha256: types.keyword({}),
+      yaml: types.text({ index: false }),
+      raw: types.text({ index: false }),
+      content: types.text({ index: false }),
+    },
   },
-} as const;
+} satisfies IndexStorageSettings;
 
 export const createConnectorCatalogStorage = ({
   esClient,
+  logger,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
 }): ConnectorCatalogStorage => {
-  const createOnly = async (id: string, document: object): Promise<{ created: boolean }> => {
+  const adapter = new StorageIndexAdapter<
+    typeof catalogStorageSettings,
+    StorageDocumentOf<typeof catalogStorageSettings>
+  >(esClient, logger, catalogStorageSettings);
+  const client = adapter.getClient();
+
+  const createOnly = async (
+    id: string,
+    document: StorageDocumentOf<typeof catalogStorageSettings>
+  ): Promise<{ created: boolean }> => {
     try {
-      await esClient.index({ index: CONNECTOR_CATALOG_INDEX, id, document, op_type: 'create' });
+      await client.index({ id, document, op_type: 'create', refresh: false });
       return { created: true };
     } catch (error) {
       if (isResponseErrorWithStatus(error, 409)) {
@@ -67,24 +81,11 @@ export const createConnectorCatalogStorage = ({
   };
 
   return {
-    ensureIndex: async ({ signal }: CatalogRequestOptions = {}) => {
-      try {
-        await esClient.indices.create(
-          { index: CONNECTOR_CATALOG_INDEX, mappings: CATALOG_MAPPINGS },
-          { signal }
-        );
-      } catch (error) {
-        // Another Kibana node may have created the index first.
-        if (!isIndexAlreadyExists(error)) {
-          throw error;
-        }
-      }
-    },
-
+    // Reads use realtime get/mget on the alias, not the adapter `get` (a search).
     getManifest: async ({ signal }: CatalogRequestOptions = {}) => {
       try {
         const response = await esClient.get<ManifestSource>(
-          { index: CONNECTOR_CATALOG_INDEX, id: CATALOG_MANIFEST_DOC_ID },
+          { index: CONNECTOR_TYPE_CATALOG_INDEX, id: CATALOG_MANIFEST_DOC_ID },
           { signal }
         );
         const raw = response._source?.raw;
@@ -103,7 +104,7 @@ export const createConnectorCatalogStorage = ({
       }
       try {
         const response = await esClient.mget<DefinitionSource>(
-          { index: CONNECTOR_CATALOG_INDEX, ids: refs.map(getCatalogDefinitionDocId) },
+          { index: CONNECTOR_TYPE_CATALOG_INDEX, ids: refs.map(getCatalogDefinitionDocId) },
           { signal }
         );
         return response.docs.flatMap((doc) => {
@@ -131,10 +132,10 @@ export const createConnectorCatalogStorage = ({
       createOnly(getCatalogAssetDocId(sha256), { type: 'asset', sha256, content }),
 
     replaceManifest: async ({ raw }: StoredCatalogManifest) => {
-      await esClient.index({
-        index: CONNECTOR_CATALOG_INDEX,
+      await client.index({
         id: CATALOG_MANIFEST_DOC_ID,
         document: { type: 'manifest', raw },
+        refresh: false,
       });
     },
   };
