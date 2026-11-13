@@ -289,6 +289,12 @@ export interface EvaluationSpecificWorkerFixtures {
   repetitions: number;
   /** Examples each experiment runs at once unless the spec passes its own `concurrency`. */
   concurrency: number;
+  /**
+   * Suite opt-in set per-project by `createPlaywrightEvalsConfig`: this suite's
+   * generation path cannot export traces to the queried trace store. Not readable
+   * from the environment — a stray env value must not turn the opt-in on.
+   */
+  tracesUnavailableForSuiteMode: boolean;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
