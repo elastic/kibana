@@ -242,6 +242,62 @@ apiTest.describe(
     });
 
     apiTest(
+      'retries round_complete after the Retry-After delay when the receiver answers 429',
+      async ({ apiClient }) => {
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Retry-After Conversation Title',
+          response: 'Retry-After LLM response',
+        });
+
+        callbackServer.respondOnceWith(
+          ({ url, body }) =>
+            url === '/callback?token=retry-after' &&
+            isRoundCompleteEventPayload(body as ChatCallbackResponse),
+          { status: 429, headers: { 'Retry-After': '1' } }
+        );
+
+        const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+          headers: internalHeaders(),
+          body: {
+            input: 'Hello Retry-After',
+            connector_id: connectorId,
+            execution_idempotency_key: `Ev-callback-retry-after-${testRunId}`,
+            origin: {
+              type: ConversationOriginType.Slack,
+              external_conversation_id: 'team:T123/channel:C123/thread:callback-retry-after',
+            },
+            callback: {
+              url: `${callbackServerUrl}/callback?token=retry-after`,
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(202);
+
+        const accepted = response.body as ChatCallbackAcceptedResponse;
+        conversationIds.add(accepted.conversation_id);
+
+        const throttledRequests = await collectCompletedRoundRequests();
+        const retriedRequests = await collectCompletedRoundRequests();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        // The retried round_complete is the only request after the throttled one.
+        expect(retriedRequests).toHaveLength(1);
+
+        const throttled = throttledRequests[throttledRequests.length - 1];
+        const [retried] = retriedRequests;
+        const throttledPayload = throttled.body as ChatCallbackEventResponse;
+        const retriedPayload = retried.body as ChatCallbackEventResponse;
+
+        expect(retriedPayload.idempotency_key).toBe(accepted.execution_id);
+        expect(throttledPayload.idempotency_key).toBe(accepted.execution_id);
+        expect(retried.receivedAtMs - throttled.receivedAtMs).toBeGreaterThanOrEqual(1000);
+      }
+    );
+
+    apiTest(
       'renders the Slack surface payload with attachments in place',
       async ({ apiClient }) => {
         const attachmentContent = 'Attached callback note';

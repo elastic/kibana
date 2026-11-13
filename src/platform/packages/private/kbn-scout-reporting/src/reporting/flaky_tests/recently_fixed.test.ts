@@ -58,6 +58,26 @@ describe('lastFailures', () => {
     );
   });
 
+  it('finds the last failure of a pipeline judged on its own apart from the same branch', () => {
+    const setups = [
+      setupBuilds('x.......'),
+      { ...setupBuilds('.....x..', { setup: 'kibana-fips a.config.ts' }), pipeline: 'kibana-fips' },
+    ];
+
+    expect(lastFailures(setups)).toEqual([
+      { branch: 'main', at: new Date(FIRST_BUILD_AT + 1 * HOUR_MS), cleanBuilds: 7 },
+      {
+        branch: 'main',
+        pipeline: 'kibana-fips',
+        at: new Date(FIRST_BUILD_AT + 6 * HOUR_MS),
+        cleanBuilds: 2,
+      },
+    ]);
+    expect(describeFix(lastFailures(setups)[1])).toBe(
+      'no failures in the 2 builds on main in kibana-fips since 2026-10-01'
+    );
+  });
+
   it('leaves out branches without a failure', () => {
     const setups = [setupBuilds('.x..xxx..'), setupBuilds('...', { first: 100, branch: '9.6' })];
 

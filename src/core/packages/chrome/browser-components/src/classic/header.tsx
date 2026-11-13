@@ -77,35 +77,32 @@ export const ClassicHeader = React.memo(() => {
     <>
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
-          <EuiHeader
-            theme="dark"
-            position={'static'}
-            className="header__firstBar"
-            sections={[
-              {
-                items: [
-                  <>
-                    <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
-                    <HeaderLogo />
-                  </>,
-                ],
-              },
-              ...(!isSmall ? [{ items: [search] }] : []),
-              {
-                items: subscriptionBadge
-                  ? [
-                      <div
-                        css={{ marginInlineEnd: euiTheme.size.s }}
-                        data-test-subj={CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge}
-                      >
-                        {subscriptionBadge}
-                      </div>,
-                      rightGroup,
-                    ]
-                  : [rightGroup],
-              },
-            ]}
-          />
+          <EuiHeader theme="dark" position={'static'} className="header__firstBar">
+            <EuiHeaderSection>
+              <EuiHeaderSectionItem>
+                <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
+                <HeaderLogo />
+              </EuiHeaderSectionItem>
+            </EuiHeaderSection>
+            {!isSmall && (
+              <EuiHeaderSection>
+                <EuiHeaderSectionItem>{search}</EuiHeaderSectionItem>
+              </EuiHeaderSection>
+            )}
+            <EuiHeaderSection>
+              {subscriptionBadge && (
+                <EuiHeaderSectionItem>
+                  <div
+                    css={{ marginInlineEnd: euiTheme.size.s }}
+                    data-test-subj={CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge}
+                  >
+                    {subscriptionBadge}
+                  </div>
+                </EuiHeaderSectionItem>
+              )}
+              <EuiHeaderSectionItem>{rightGroup}</EuiHeaderSectionItem>
+            </EuiHeaderSection>
+          </EuiHeader>
 
           <EuiHeader position={'static'} className="header__secondBar">
             <EuiHeaderSection grow={false}>

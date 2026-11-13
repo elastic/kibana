@@ -67,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         doc: {
           policy_id: 'policy-inactivity-timeout',
+          policy_base_id: 'policy-inactivity-timeout',
           policy_revision_idx: 1,
           last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
         },

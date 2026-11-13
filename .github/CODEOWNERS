@@ -573,6 +573,7 @@ src/platform/packages/shared/kbn-chart-icons @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-charts-theme @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
 src/platform/packages/shared/kbn-coloring @elastic/kibana-dashboards
+src/platform/packages/shared/kbn-coloring-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
 src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
@@ -692,6 +693,7 @@ src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-wo
 src/platform/packages/shared/kbn-otel-demo @elastic/streams-ui
 src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/streams-ui
 src/platform/packages/shared/kbn-palettes @elastic/kibana-dashboards
+src/platform/packages/shared/kbn-palettes-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-signals-logs-team
 src/platform/packages/shared/kbn-react-fiber @elastic/appex-sharedux
@@ -779,6 +781,7 @@ src/platform/packages/shared/kbn-visualization-listing-components @elastic/kiban
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-dashboards
+src/platform/packages/shared/kbn-visualizations-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-library @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
@@ -960,46 +963,46 @@ src/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
 src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 src/platform/plugins/shared/workflows_management @elastic/workflows-eng
 src/platform/test
+src/platform/test_plugins/analytics/analytics_ftr_helpers @elastic/kibana-core
+src/platform/test_plugins/analytics/analytics_plugin_a @elastic/kibana-core
+src/platform/test_plugins/common/newsfeed @elastic/kibana-core
 src/platform/test_plugins/data_search @elastic/kibana-discover
+src/platform/test_plugins/health_gateway/status @elastic/kibana-core
+src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline @elastic/kibana-core
 src/platform/test_plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
+src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context @elastic/kibana-core
 src/platform/test_plugins/otel_metrics @elastic/obs-signals-metrics-team
-src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
-src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
-src/platform/test/common/plugins/newsfeed @elastic/kibana-core
-src/platform/test/health_gateway/plugins/status @elastic/kibana-core
-src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
-src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_app_status @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_history_block @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_http @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_a @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_appleave @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_b @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_chromeless @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_deep_links @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_deprecations @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_execution_context @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/app_link_test @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_app_status @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_history_block @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_http @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_a @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_appleave @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_b @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_chromeless @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_deep_links @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_deprecations @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_execution_context @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_helpmenu @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/core_provider_plugin @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/kbn_top_nav @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/rendering_plugin @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/saved_object_export_transforms @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/saved_object_import_warnings @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/saved_objects_hidden_type @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/session_notifications @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/telemetry @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/ui_settings_plugin @elastic/kibana-core
+src/platform/test_plugins/plugin_functional/usage_collection @elastic/kibana-core
+src/platform/test_plugins/server_integration/status_plugin_a @elastic/kibana-core
+src/platform/test_plugins/server_integration/status_plugin_b @elastic/kibana-core
+src/platform/test_plugins/user_storage @elastic/appex-sharedux
 src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
-src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/saved_objects_hidden_type @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/session_notifications @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/telemetry @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/usage_collection @elastic/kibana-core
-src/platform/test/server_integration/plugins/status_plugin_a @elastic/kibana-core
-src/platform/test/server_integration/plugins/status_plugin_b @elastic/kibana-core
-src/platform/test/user_storage/plugins/user_storage_test @elastic/appex-sharedux
 src/setup_node_env @elastic/kibana-operations
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/examples/embedded_lens_example @elastic/kibana-dashboards
@@ -1101,6 +1104,7 @@ x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux
 x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/alertzero-common-layer @elastic/nightshift
+x-pack/platform/packages/shared/kbn-agentic-investigations-impact @elastic/alertzero-common-layer @elastic/nightshift
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
@@ -1342,6 +1346,10 @@ x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
 x-pack/platform/test
 x-pack/platform/test_plugins/agent_builder_sml_test_types @elastic/workchat-eng
+x-pack/platform/test_plugins/cloud_integration/saml_provider @elastic/kibana-core
+x-pack/platform/test_plugins/functional_embedded/iframe_embedded @elastic/kibana-core
+x-pack/platform/test_plugins/functional_execution_context/alerts @elastic/kibana-core
+x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad @elastic/response-ops
 x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators @elastic/response-ops
 x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts @elastic/response-ops
@@ -1359,13 +1367,11 @@ x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases
 x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability @elastic/security-investigations
 x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution @elastic/security-investigations
 x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases @elastic/security-investigations
-x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
+x-pack/platform/test_plugins/usage_collection/application_usage_test @elastic/kibana-core
+x-pack/platform/test_plugins/usage_collection/stack_management_usage_test @elastic/kibana-core
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
-x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
-x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
-x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
 x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
@@ -1379,8 +1385,6 @@ x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-
 x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
-x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
-x-pack/platform/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-core
 x-pack/solutions/observability/packages/alert-details @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/nightshift-sre-agent-team
@@ -2358,7 +2362,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/api_integration/apis/general/*.js @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/199795/files/894a8ede3f9d0398c5af56bf5a82654a9bc0610b#r1846691639
 x-pack/platform/test/plugin_api_integration/*.ts @elastic/kibana-core @elastic/response-ops # Shared files across test suites owned by Core and Response Ops
 /x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
-x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
+x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/licensed_feature_usage @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kibana-core
 /x-pack/platform/test/stack_functional_integration/apps/savedobjects_upgrade_testing @elastic/kibana-core
@@ -2380,22 +2384,22 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/platform/test/functional/services/apps_menu.ts @elastic/kibana-core
 /x-pack/platform/test/functional/apps/status_page @elastic/kibana-core
 /x-pack/platform/test/cloud_integration @elastic/kibana-core
-/x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
+/x-pack/platform/test_plugins/cloud_integration/saml_provider @elastic/kibana-core
 /src/platform/test/server_integration @elastic/kibana-core
 /x-pack/platform/test/functional_cors @elastic/kibana-core
 /x-pack/platform/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
 /src/platform/test/plugin_functional/plugins/core* @elastic/kibana-core
-/src/platform/test/plugin_functional/plugins/session_notifications @elastic/kibana-core
-/src/platform/test/plugin_functional/plugins/kbn_top_nav/ @elastic/kibana-core
-/src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
+/src/platform/test_plugins/plugin_functional/session_notifications @elastic/kibana-core
+/src/platform/test_plugins/plugin_functional/kbn_top_nav/ @elastic/kibana-core
+/src/platform/test_plugins/plugin_functional/app_link_test @elastic/kibana-core
 /src/platform/test/plugin_functional/plugins/saved_object* @elastic/kibana-core
-/src/platform/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
+/src/platform/test_plugins/plugin_functional/rendering_plugin @elastic/kibana-core
 /src/platform/test/plugin_functional/test_suites/application_links @elastic/kibana-core
 /src/platform/test/plugin_functional/test_suites/telemetry @elastic/kibana-core
 /src/platform/test/plugin_functional/test_suites/usage_collection @elastic/kibana-core
 /src/platform/test/plugin_functional/test_suites/saved_objects* @elastic/kibana-core
 /src/platform/test/plugin_functional/test_suites/core* @elastic/kibana-core
-/src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
+/src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline @elastic/kibana-core
 /x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management @elastic/kibana-core
 /x-pack/platform/test/functional_embedded @elastic/kibana-core
 /src/platform/test/node_roles_functional @elastic/kibana-core
@@ -3241,6 +3245,11 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_invest
 # AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/alertzero-common-layer
 # Per-watch definitions without an override below fall back to @elastic/alertzero-common-layer.
+
+# Proposals managed workflows (proposal gate and resolution), and the action workflow contract the gate relies on
+src/platform/packages/shared/kbn-workflows/managed/definitions/proposals @elastic/alertzero-common-layer
+src/platform/packages/shared/kbn-workflows/managed/action_workflow.ts @elastic/alertzero-common-layer
+src/platform/packages/shared/kbn-workflows/managed/definitions/action_workflows.test.ts @elastic/alertzero-common-layer
 
 # Actions directories
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/actions/defend @elastic/security-defend-workflows
