@@ -1,0 +1,71 @@
+{
+  "id": "lens-metric-orders-trendline",
+  "type": "lens",
+  "attributes": {
+    "title": "Orders (24h)",
+    "visualizationType": "lnsMetric",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer-primary": {
+              "indexPatternId": "orders-*",
+              "columns": {
+                "col-count": {
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "label": "Order count",
+                  "customLabel": true
+                }
+              },
+              "columnOrder": ["col-count"]
+            },
+            "layer-trend": {
+              "indexPatternId": "orders-*",
+              "columns": {
+                "col-trend-time": {
+                  "operationType": "date_histogram",
+                  "sourceField": "@timestamp",
+                  "isBucketed": true,
+                  "dataType": "date",
+                  "label": "@timestamp",
+                  "params": { "interval": "1h" }
+                },
+                "col-trend-count": {
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "label": "Hourly orders",
+                  "customLabel": true
+                }
+              },
+              "columnOrder": ["col-trend-time", "col-trend-count"]
+            }
+          }
+        }
+      },
+      "visualization": {
+        "layerId": "layer-primary",
+        "layerType": "data",
+        "metricAccessor": "col-count",
+        "trendlineLayerId": "layer-trend",
+        "subtitle": "Past 24 hours"
+      },
+      "filters": [],
+      "query": { "query": "", "language": "kuery" }
+    }
+  },
+  "references": [
+    {
+      "id": "orders-data-view",
+      "name": "indexpattern-datasource-layer-layer-primary",
+      "type": "index-pattern"
+    },
+    {
+      "id": "orders-data-view",
+      "name": "indexpattern-datasource-layer-layer-trend",
+      "type": "index-pattern"
+    }
+  ]
+}

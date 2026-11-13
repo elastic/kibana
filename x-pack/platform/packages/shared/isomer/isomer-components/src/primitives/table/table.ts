@@ -12,10 +12,11 @@ import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { componentIcon, definePrimitive, plainText, snapshotMetrics } from '../../lib';
 import { tableReactRenderer } from './table_react';
 import { tableSlackRenderer } from './table_slack';
 import { noRowsNote, tableView, textTable } from './table_model';
+import { tableSnapshotHeight } from './table_snapshot_height';
 
 const MAX_ROWS = 1000;
 
@@ -44,6 +45,26 @@ const columnSchema = z
       .enum(['left', 'center', 'right'])
       .optional()
       .describe('Defaults to right for numbers, left otherwise.'),
+    width: z
+      .number()
+      .int()
+      .min(16)
+      .max(4096)
+      .optional()
+      .describe('The column’s width in pixels. Columns past the table’s width are cut off.'),
+    color: z
+      .object({
+        mode: z
+          .enum(['cell', 'text'])
+          .describe('`cell` fills the cell, with text that contrasts; `text` colors the text.'),
+        values: z
+          .array(z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/), z.null()]))
+          .max(MAX_ROWS)
+          .describe('One `#rrggbb` color or null per row, in `rows` order.'),
+      })
+      .strict()
+      .optional()
+      .describe('Each cell’s color, as a dashboard table colors a column by value.'),
   })
   .strict();
 
@@ -124,6 +145,15 @@ const tableSchema = z
       });
       return;
     }
+    columns.forEach(({ color }, index) => {
+      if (color && color.values.length !== rows.length) {
+        context.addIssue({
+          code: 'custom',
+          message: `needs one color per row (${rows.length})`,
+          path: ['columns', index, 'color', 'values'],
+        });
+      }
+    });
     rows.forEach((row, index) => {
       if (row.length !== columns.length) {
         context.addIssue({
@@ -182,6 +212,7 @@ export const table = definePrimitive<TableNode, typeof tableSchema>({
     example,
   },
   icon,
+  metrics: snapshotMetrics<TableNode>('table', (node) => tableSnapshotHeight(tableView(node))),
   examples: [
     example,
     {

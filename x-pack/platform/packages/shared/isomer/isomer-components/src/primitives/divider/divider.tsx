@@ -10,7 +10,7 @@ import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { nodeAnchor, z } from '@elastic/isomer-sdk';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import { componentIcon, definePrimitive } from '../../lib';
+import { componentIcon, definePrimitive, BORDER, SIZE, snapshotMetrics } from '../../lib';
 
 const dividerSchema = z.object({
   type: z.literal('divider'),
@@ -53,6 +53,7 @@ export const divider = definePrimitive<DividerNode, typeof dividerSchema>({
   },
   icon,
   examples: [example],
+  metrics: snapshotMetrics<DividerNode>('divider', () => BORDER.thin + SIZE.l),
   renderers: {
     react: (node, { context }) => (
       <hr {...nodeAnchor(context, node)} className={classNames(context, handles.root)} />

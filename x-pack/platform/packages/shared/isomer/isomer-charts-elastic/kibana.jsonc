@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/isomer-charts-elastic",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared"
+}

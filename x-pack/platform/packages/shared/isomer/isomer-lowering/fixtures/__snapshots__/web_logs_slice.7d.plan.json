@@ -1,0 +1,443 @@
+{
+  "diagnostics": [
+    {
+      "code": "lens.formBased.lowered-to-esql",
+      "level": "info",
+      "message": "Lens panel uses the form-based datasource; converter synthesized an ES|QL query",
+      "panelId": "alembic-requests-by-extension",
+    },
+    {
+      "code": "lens.formBased.lowered-to-esql",
+      "level": "info",
+      "message": "Lens panel uses the form-based datasource; converter synthesized an ES|QL query",
+      "panelId": "alembic-total-requests",
+    },
+    {
+      "code": "lens.formBased.lowered-to-esql",
+      "level": "info",
+      "message": "Lens panel uses the form-based datasource; converter synthesized an ES|QL query",
+      "panelId": "alembic-top-hosts",
+    },
+    {
+      "code": "lens.formBased.lowered-to-esql",
+      "level": "info",
+      "message": "Lens panel uses the form-based datasource; converter synthesized an ES|QL query",
+      "panelId": "alembic-requests-by-os",
+    },
+    {
+      "code": "lens.formBased.lowered-to-esql",
+      "level": "info",
+      "message": "Lens panel uses the form-based datasource; converter synthesized an ES|QL query",
+      "panelId": "alembic-os-by-hour",
+    },
+    {
+      "code": "lens.heatmap.lowered-to-adaptive-heatmap",
+      "level": "info",
+      "message": "Lens heatmap lowered to Adaptive UI heatmap; bind step may fall back to heatmapStrip only when the y-axis is absent or collapses to one bucket",
+      "panelId": "alembic-os-by-hour",
+    },
+  ],
+  "panels": [
+    {
+      "binding": {
+        "chart": {
+          "kind": "xy",
+          "mode": "bar",
+          "series": [
+            {
+              "id": "col-count",
+              "label": "Count of records",
+              "splitOnField": "col-extension",
+            },
+          ],
+          "stack": "stacked",
+          "stacked": true,
+          "xAxis": {
+            "id": "col-time",
+            "label": "@timestamp",
+          },
+          "yAxis": {
+            "id": "col-count",
+            "label": "Count of records",
+          },
+        },
+        "queryId": "alembic-requests-by-extension",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          0,
+          "node",
+        ],
+      },
+      "dimensions": {
+        "col-extension": {
+          "field": "extension.keyword",
+          "kind": "terms",
+        },
+        "col-time": {
+          "field": "@timestamp",
+          "intervalMs": 3600000,
+          "kind": "date_histogram",
+        },
+      },
+      "panelId": "requests",
+      "query": {
+        "chart": {
+          "kind": "xy",
+          "mode": "bar",
+          "series": [
+            {
+              "id": "col-count",
+              "label": "Count of records",
+              "splitOnField": "col-extension",
+            },
+          ],
+          "stack": "stacked",
+          "stacked": true,
+          "xAxis": {
+            "id": "col-time",
+            "label": "@timestamp",
+          },
+          "yAxis": {
+            "id": "col-count",
+            "label": "Count of records",
+          },
+        },
+        "id": "alembic-requests-by-extension",
+        "label": "Requests over time by extension",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` < NOW() | EVAL `col-extension` = `extension.keyword` | STATS `col-count` = COUNT(*) BY `col-time` = BUCKET(`@timestamp`, 1h), `col-extension` | SORT `col-time`",
+          "indexPattern": "kibana_sample_data_logs",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "alembic-requests-by-extension",
+    },
+    {
+      "binding": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "col-count",
+            "label": "Count of records",
+          },
+        },
+        "queryId": "alembic-total-requests",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          1,
+          "node",
+        ],
+      },
+      "dimensions": {},
+      "panelId": "total",
+      "query": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "col-count",
+            "label": "Count of records",
+          },
+        },
+        "id": "alembic-total-requests",
+        "label": "Total requests",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` < NOW() | STATS `col-count` = COUNT(*)",
+          "indexPattern": "kibana_sample_data_logs",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "alembic-total-requests",
+    },
+    {
+      "binding": {
+        "chart": {
+          "columns": [
+            {
+              "align": "left",
+              "id": "col-host",
+              "label": "Top 5 values of host.keyword",
+            },
+            {
+              "align": "right",
+              "font": "monospace",
+              "id": "col-count",
+              "label": "Count of records",
+            },
+            {
+              "align": "right",
+              "font": "monospace",
+              "id": "col-bytes",
+              "label": "Average of bytes",
+            },
+          ],
+          "kind": "datatable",
+          "sort": {
+            "column": "col-count",
+            "direction": "desc",
+          },
+        },
+        "queryId": "alembic-top-hosts",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          2,
+          "node",
+        ],
+      },
+      "dimensions": {
+        "col-host": {
+          "field": "host.keyword",
+          "kind": "terms",
+        },
+      },
+      "panelId": "hosts",
+      "query": {
+        "chart": {
+          "columns": [
+            {
+              "align": "left",
+              "id": "col-host",
+              "label": "Top 5 values of host.keyword",
+            },
+            {
+              "align": "right",
+              "font": "monospace",
+              "id": "col-count",
+              "label": "Count of records",
+            },
+            {
+              "align": "right",
+              "font": "monospace",
+              "id": "col-bytes",
+              "label": "Average of bytes",
+            },
+          ],
+          "kind": "datatable",
+          "sort": {
+            "column": "col-count",
+            "direction": "desc",
+          },
+        },
+        "id": "alembic-top-hosts",
+        "label": "Top hosts",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` < NOW() | EVAL `col-host` = `host.keyword` | STATS `col-count` = COUNT(*), `col-bytes` = AVG(bytes) BY `col-host` | SORT `col-count` DESC | LIMIT 5",
+          "indexPattern": "kibana_sample_data_logs",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "alembic-top-hosts",
+    },
+    {
+      "binding": {
+        "chart": {
+          "kind": "partition",
+          "layout": "donut",
+          "slices": {
+            "id": "col-os",
+            "label": "Count of records",
+            "valueField": "col-count",
+          },
+        },
+        "queryId": "alembic-requests-by-os",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          3,
+          "node",
+        ],
+      },
+      "dimensions": {
+        "col-os": {
+          "field": "machine.os.keyword",
+          "kind": "terms",
+        },
+      },
+      "panelId": "os",
+      "query": {
+        "chart": {
+          "kind": "partition",
+          "layout": "donut",
+          "slices": {
+            "id": "col-os",
+            "label": "Count of records",
+            "valueField": "col-count",
+          },
+        },
+        "id": "alembic-requests-by-os",
+        "label": "Requests by OS",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` < NOW() | EVAL `col-os` = `machine.os.keyword` | STATS `col-count` = COUNT(*) BY `col-os` | SORT `col-count` DESC | LIMIT 5",
+          "indexPattern": "kibana_sample_data_logs",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "alembic-requests-by-os",
+    },
+    {
+      "binding": {
+        "chart": {
+          "kind": "heatmap",
+          "value": {
+            "id": "col-count",
+            "label": "Count of records",
+          },
+          "xBucket": {
+            "id": "col-hour",
+            "label": "@timestamp",
+          },
+          "yBucket": {
+            "id": "col-os",
+            "label": "Top 5 values of machine.os.keyword",
+          },
+        },
+        "queryId": "alembic-os-by-hour",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          4,
+          "node",
+        ],
+      },
+      "dimensions": {
+        "col-hour": {
+          "field": "@timestamp",
+          "intervalMs": 10800000,
+          "kind": "date_histogram",
+        },
+        "col-os": {
+          "field": "machine.os.keyword",
+          "kind": "terms",
+        },
+      },
+      "panelId": "heat",
+      "query": {
+        "chart": {
+          "kind": "heatmap",
+          "value": {
+            "id": "col-count",
+            "label": "Count of records",
+          },
+          "xBucket": {
+            "id": "col-hour",
+            "label": "@timestamp",
+          },
+          "yBucket": {
+            "id": "col-os",
+            "label": "Top 5 values of machine.os.keyword",
+          },
+        },
+        "id": "alembic-os-by-hour",
+        "label": "Requests by OS and hour",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` < NOW() | EVAL `col-os` = `machine.os.keyword` | STATS `col-count` = COUNT(*) BY `col-hour` = BUCKET(`@timestamp`, 3h), `col-os` | SORT `col-hour`",
+          "indexPattern": "kibana_sample_data_logs",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "alembic-os-by-hour",
+    },
+  ],
+  "spec": {
+    "body": [
+      {
+        "columns": 48,
+        "items": [
+          {
+            "h": 15,
+            "node": {
+              "body": "Loading time series chart...",
+              "title": "Requests over time by extension",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 48,
+            "x": 0,
+            "y": 0,
+          },
+          {
+            "h": 8,
+            "node": {
+              "body": "Loading metric...",
+              "title": "Total requests",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 24,
+            "x": 0,
+            "y": 15,
+          },
+          {
+            "h": 8,
+            "node": {
+              "body": "Loading table...",
+              "title": "Top hosts",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 24,
+            "x": 24,
+            "y": 15,
+          },
+          {
+            "h": 12,
+            "node": {
+              "body": "Loading category breakdown...",
+              "title": "Requests by OS",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 24,
+            "x": 0,
+            "y": 23,
+          },
+          {
+            "h": 12,
+            "node": {
+              "body": "Loading heatmap...",
+              "title": "Requests by OS and hour",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 24,
+            "x": 24,
+            "y": 23,
+          },
+        ],
+        "mode": "grid",
+        "rowHeight": 20,
+        "type": "dashboardGrid",
+      },
+    ],
+    "meta": {
+      "source": "Kibana saved object dashboard/alembic-web-logs-slice",
+    },
+    "subtitle": "Phase 1 vertical slice over the sample web logs.",
+    "title": "[Logs] Requests (slice)",
+    "type": "view",
+  },
+  "title": "[Logs] Requests (slice)",
+  "vegaPanels": [],
+}

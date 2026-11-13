@@ -12,5 +12,9 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new IsomerPlugin(initializerContext);
 };
 
+// The demo's server drawing is configured (`xpack.isomer.charts.serverDraw`); the PR lane dropped the empty config.
+export { config } from './config';
 export type { IsomerPluginSetup, IsomerPluginStart } from './plugin';
+export type { DrawOptions, IsomerDrawing } from './charts_drawing';
+export type { IsomerEms, MapBasemap, MapView } from './ems';
 export type { KibanaIsomerRuntime } from '@kbn/isomer';

@@ -29,6 +29,7 @@ export const borealisLight: BorealisTokenValues = {
     background: {
       plain: '#FFFFFF',
       subdued: '#F6F9FC',
+      recessed: '#F6F9FC',
       base: {
         primary: '#F1F6FF',
         accent: '#FFF0F8',
@@ -204,6 +205,7 @@ export const borealisDark: BorealisTokenValues = {
     background: {
       plain: '#111C2C',
       subdued: '#0B1628',
+      recessed: '#07101F',
       base: {
         primary: '#0A2342',
         accent: '#351725',

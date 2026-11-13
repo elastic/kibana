@@ -146,3 +146,21 @@ describe('markdown', () => {
     );
   });
 });
+
+describe('markdown appearance', () => {
+  it('draws as the legacy Markdown visualization at its font size, light headings and underlined links', () => {
+    const legacyNode = {
+      type: 'markdown' as const,
+      text: '## Sample\nSee [docs](https://www.elastic.co).',
+      appearance: 'kibanaLegacy' as const,
+      fontSize: 13.33,
+    };
+    expect(validate({ type: 'view', body: [legacyNode] }).errors).toEqual([]);
+    const out = surfaces.html.render({ type: 'view', body: [legacyNode] }).html;
+    expect(out).toContain('font-size:13.33px');
+    expect(out).toMatch(
+      /componentsMarkdownLegacy[^{]*h2\s*\{[^}]*font-size:\s*2em;[^}]*font-weight:\s*300/
+    );
+    expect(out).toMatch(/componentsMarkdownLegacy[^{]*a[^{]*\{[^}]*text-decoration:\s*underline/);
+  });
+});

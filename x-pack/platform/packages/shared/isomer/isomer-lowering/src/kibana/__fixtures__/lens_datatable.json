@@ -1,0 +1,81 @@
+{
+  "id": "lens-datatable-top-paths",
+  "type": "lens",
+  "attributes": {
+    "title": "Top request paths (24h)",
+    "visualizationType": "lnsDatatable",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer-1": {
+              "indexPatternId": "web-*",
+              "columns": {
+                "col-path": {
+                  "operationType": "terms",
+                  "sourceField": "url.path",
+                  "isBucketed": true,
+                  "dataType": "string",
+                  "params": {
+                    "size": 20
+                  },
+                  "label": "Top path"
+                },
+                "col-count": {
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "label": "Requests"
+                },
+                "col-p95": {
+                  "operationType": "percentile",
+                  "sourceField": "transaction.duration.us",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "params": {
+                    "percentile": 95
+                  },
+                  "label": "p95 latency (µs)"
+                }
+              },
+              "columnOrder": ["col-path", "col-count", "col-p95"]
+            }
+          }
+        }
+      },
+      "visualization": {
+        "layerId": "layer-1",
+        "columns": [
+          {
+            "columnId": "col-path",
+            "alignment": "left"
+          },
+          {
+            "columnId": "col-count",
+            "alignment": "right"
+          },
+          {
+            "columnId": "col-p95",
+            "alignment": "right"
+          }
+        ],
+        "sorting": {
+          "columnId": "col-count",
+          "direction": "desc"
+        }
+      },
+      "filters": [],
+      "query": {
+        "query": "",
+        "language": "kuery"
+      }
+    }
+  },
+  "references": [
+    {
+      "id": "web-data-view",
+      "name": "indexpattern-datasource-layer-layer-1",
+      "type": "index-pattern"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "lens-metric-total-orders",
+  "type": "lens",
+  "attributes": {
+    "title": "Orders (24h)",
+    "visualizationType": "lnsMetric",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer-1": {
+              "indexPatternId": "orders-*",
+              "columns": {
+                "col-count": {
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "label": "Order count",
+                  "customLabel": true
+                }
+              },
+              "columnOrder": ["col-count"]
+            }
+          }
+        }
+      },
+      "visualization": {
+        "layerId": "layer-1",
+        "layerType": "data",
+        "metricAccessor": "col-count",
+        "subtitle": "Past 24 hours"
+      },
+      "filters": [],
+      "query": { "query": "", "language": "kuery" }
+    }
+  },
+  "references": [
+    {
+      "id": "orders-data-view",
+      "name": "indexpattern-datasource-layer-layer-1",
+      "type": "index-pattern"
+    }
+  ]
+}
