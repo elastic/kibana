@@ -163,7 +163,7 @@ describe('reconcileSourceCatalog', () => {
     const sources = ['a', 'b', 'c'].map((id) => makeSource({ id }));
     const states = new Map<
       string,
-      { revision?: string; onboardingScheduled: boolean; onboardingReservedAt?: number }
+      { revision?: string; onboardingScheduled: boolean; onboardingReservedAt?: number | null }
     >();
     const sourceKnowledgeState: SourceKnowledgeStateClient = {
       runExclusive: jest.fn(async ({ sourceId, run }) => {
@@ -760,7 +760,7 @@ describe('durable source revision reconciliation', () => {
     const onboardingClient = {
       cancelBySource: jest.fn(async () => null),
       getNonTerminalExecutions: jest.fn().mockResolvedValue([]),
-      getRecentExecutions: jest.fn().mockResolvedValue([]),
+      getLatestExecution: jest.fn().mockResolvedValue(undefined),
     };
     const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
     const reconcile = async () => {
@@ -787,13 +787,30 @@ describe('durable source revision reconciliation', () => {
   };
 
   it('starts onboarding for a new source without deleting knowledge', async () => {
-    const { reconcile, state, scheduleSourceOnboarding, kiClient, source } = setup();
+    const { reconcile, state, scheduleSourceOnboarding, kiClient, source, onboardingClient } =
+      setup();
     state.revision = undefined;
     state.onboardingScheduled = false;
     await reconcile();
     expect(scheduleSourceOnboarding).toHaveBeenCalledWith(source);
     expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
     expect(state.revision).toBe('revision-2');
+    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
+  });
+
+  it('clears an old reservation when the revision changes and schedules the new revision', async () => {
+    const { reconcile, state, checkpoint, scheduleSourceOnboarding, onboardingClient } = setup();
+    state.onboardingReservedAt = Date.now();
+
+    await reconcile();
+
+    expect(checkpoint).toHaveBeenCalledWith({
+      revision: 'revision-2',
+      onboardingScheduled: false,
+      onboardingReservedAt: null,
+    });
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
   });
 
   it('retries failed cleanup before scheduling the replacement exactly once', async () => {
@@ -838,10 +855,12 @@ describe('durable source revision reconciliation', () => {
   });
 
   it('leaves onboarding pending when continuous onboarding is off', async () => {
-    const { reconcile, state, scheduleSourceOnboarding } = setup();
+    const { reconcile, state, checkpoint, scheduleSourceOnboarding } = setup();
     scheduleSourceOnboarding.mockResolvedValue(false);
     await reconcile();
     expect(state.onboardingScheduled).toBe(false);
+    expect(state.onboardingReservedAt).toBeNull();
+    expect(checkpoint).toHaveBeenCalledWith({ onboardingReservedAt: null });
   });
 
   it('starts no run for a source created disabled, and exactly one when it is first enabled', async () => {
@@ -864,7 +883,7 @@ describe('durable source revision reconciliation', () => {
   });
 
   it('does not schedule a fresh reservation', async () => {
-    const { reconcile, state, scheduleSourceOnboarding } = setup();
+    const { reconcile, state, scheduleSourceOnboarding, onboardingClient } = setup();
     state.revision = 'revision-2';
     state.onboardingScheduled = false;
     state.onboardingReservedAt = Date.now();
@@ -872,6 +891,7 @@ describe('durable source revision reconciliation', () => {
     await reconcile();
 
     expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
   });
 
   it('does not schedule a stale reservation with a later execution', async () => {
@@ -879,20 +899,24 @@ describe('durable source revision reconciliation', () => {
     state.revision = 'revision-2';
     state.onboardingScheduled = false;
     state.onboardingReservedAt = Date.now() - 6 * 60_000;
-    onboardingClient.getRecentExecutions.mockResolvedValue([
-      {
-        ...runningExecution('source-slug'),
-        startedAt: new Date().toISOString(),
-      },
-    ]);
+    onboardingClient.getLatestExecution.mockResolvedValue({
+      ...runningExecution('source-slug'),
+      startedAt: new Date().toISOString(),
+    });
 
     await reconcile();
 
     expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(onboardingClient.getLatestExecution).toHaveBeenCalledTimes(1);
+    expect(onboardingClient.getLatestExecution).toHaveBeenCalledWith({
+      sourceId: 'source',
+      sourceSlug: 'source-slug',
+      request,
+    });
   });
 
   it('reschedules a stale reservation without a later execution', async () => {
-    const { reconcile, state, scheduleSourceOnboarding } = setup();
+    const { reconcile, state, scheduleSourceOnboarding, onboardingClient } = setup();
     const staleReservation = Date.now() - 6 * 60_000;
     state.revision = 'revision-2';
     state.onboardingScheduled = false;
@@ -902,5 +926,6 @@ describe('durable source revision reconciliation', () => {
 
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
     expect(state.onboardingReservedAt).toBeGreaterThan(staleReservation);
+    expect(onboardingClient.getLatestExecution).toHaveBeenCalledTimes(1);
   });
 });

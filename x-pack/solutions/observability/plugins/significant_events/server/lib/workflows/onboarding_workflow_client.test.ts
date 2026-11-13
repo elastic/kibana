@@ -874,4 +874,30 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('getLatestExecution', () => {
+    it('loads only the newest execution for the source concurrency key', async () => {
+      const execution = { id: 'exec-1', status: ExecutionStatus.COMPLETED };
+      const { client, managementApi } = createClient({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [execution] }),
+      });
+
+      const result = await client.getLatestExecution({
+        sourceId: 'logs.nginx',
+        sourceSlug: slugOf('logs.nginx'),
+        request: statusRequest,
+      });
+
+      expect(result).toEqual(execution);
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
+          sortField: 'createdAt',
+          sortOrder: 'desc',
+          size: 1,
+        }),
+        'default'
+      );
+    });
+  });
 });

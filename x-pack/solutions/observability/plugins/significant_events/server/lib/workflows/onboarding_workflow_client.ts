@@ -629,6 +629,27 @@ export class SignificantEventsKIsOnboardingClient {
     return results;
   }
 
+  /** Returns the newest onboarding execution for one source. */
+  async getLatestExecution({
+    sourceId,
+    sourceSlug,
+    request,
+  }: ISourceRunIdentity & { request: KibanaRequest }): Promise<
+    WorkflowExecutionListItemDto | undefined
+  > {
+    const { results } = await this.workflowExecutionService.getExecutions(
+      {
+        concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug }),
+        size: 1,
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+      },
+      request.spaceId,
+      request
+    );
+    return results[0];
+  }
+
   private async resolveSourceSlug({
     sourceId,
     sourceSlug,

@@ -110,7 +110,7 @@ export const classifySources = ({
  * Executions arrive newest-first. The first row whose concurrency key carries
  * the id of a known source is that source's latest run.
  */
-export const latestExecutionBySource = <TSource extends { id: string }>(
+const latestExecutionBySource = <TSource extends { id: string }>(
   sources: readonly TSource[],
   executions: WorkflowExecutionListItemDto[]
 ): Map<TSource, WorkflowExecutionListItemDto> => {
