@@ -19,15 +19,40 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [notion-connector-configuration]
 
-Notion connectors support **Bearer Token** (a static API token from an internal integration) or **OAuth 2.0 authorization code** (Notion signs the user in through {{kib}} and {{kib}} stores refreshable tokens). Select the authentication type when you create or edit the connector.
+::::{applies-switch}
+:::{applies-item} stack: preview =9.3
 
-Bearer Token
-:   A Notion internal integration token. See **Get API credentials**.
+Notion connectors support **Bearer token**, a static API token from an internal integration. See [Internal integration (Bearer token)](#notion-internal-integration).
 
-OAuth 2.0 authorization code
+:::
+:::{applies-item} stack: preview =9.4
+
+Notion connectors support **Bearer token** or **OAuth 2.0 Authorization Code**. Select the authentication type when you create or edit the connector.
+
+Bearer token
+:   A Notion internal integration token. See [Internal integration (Bearer token)](#notion-internal-integration).
+
+:::
+:::{applies-item} stack: preview 9.5
+
+Notion connectors offer **OAuth 2.0 Authorization Code** when you create a connector. Notion signs the user in through {{kib}}, and {{kib}} stores refreshable tokens.
+
+**Bearer token** is not offered for a new connector. A connector that already uses a bearer token keeps working. See [Internal integration (Bearer token)](#notion-internal-integration).
+
+:::
+:::{applies-item} serverless: preview
+
+Notion connectors offer **OAuth 2.0 Authorization Code** when you create a connector. Notion signs the user in through {{kib}}, and {{kib}} stores refreshable tokens.
+
+**Bearer token** is not offered for a new connector. A connector that already uses a bearer token keeps working. See [Internal integration (Bearer token)](#notion-internal-integration).
+
+:::
+::::
+
+OAuth 2.0 Authorization Code {applies_to}`serverless: preview` {applies_to}`stack: preview 9.4`
 :   Uses a **public integration** in Notion. In {{kib}} you provide:
 
-    - **Client ID** and **Client Secret**: from your Notion public integration
+    - **Client ID** and **Client secret**: from your Notion public integration
     - **Redirect URI**: register {{kib}}'s OAuth callback in your Notion integration settings (see **Get API credentials**)
 
     The connector automatically uses the correct Notion OAuth endpoints and scopes.
@@ -66,9 +91,14 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [notion-api-credentials]
 
-### OAuth Authorization Code (recommended)
+### OAuth 2.0 Authorization Code
 
-This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}. You need to create a **public integration** in Notion.
+```{applies_to}
+stack: preview 9.4
+serverless: preview
+```
+
+This matches the **OAuth 2.0 Authorization Code** authentication type in {{kib}}. You need to create a **public integration** in Notion.
 
 1. Go to [My integrations](https://www.notion.so/my-integrations).
 2. Select **+ New integration**.
@@ -83,15 +113,20 @@ This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}
      ```
 4. Select **Submit** to create the integration.
 5. In the integration settings, open the **Configuration** tab. Copy the **Client ID** and **Client Secret**.
-6. In {{kib}}, create a Notion connector and select **OAuth 2.0 authorization code** as the authentication method. Enter the **Client ID** and **Client Secret**, then select **Authorize** to sign in with your Notion account.
+6. In {{kib}}, create a Notion connector and select **OAuth 2.0 Authorization Code** as the authentication method. Enter the **Client ID** and **Client secret**, then select **Authorize** to sign in with your Notion account.
 
 ::::{note}
 When a user authorizes the connector, Notion prompts them to select which pages and databases to share. Only the selected content is accessible to the connector.
 ::::
 
-### Internal integration (Bearer Token)
+### Internal integration (Bearer token) [notion-internal-integration]
 
-Use this method if you prefer a static API token. Tokens do not expire but only grant access to content explicitly shared with the integration.
+:::{note}
+:applies_to: {"stack": "preview 9.5", "serverless": "preview"}
+**Bearer token** is not offered when you create a new Notion connector. Use this method only for a connector that already authenticates with an internal integration token. That connector keeps working.
+:::
+
+Use this method for a static API token. Tokens do not expire, and they grant access only to content shared with the integration.
 
 1. Go to [My integrations](https://www.notion.so/my-integrations).
 2. Select **+ New integration**.

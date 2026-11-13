@@ -15,13 +15,36 @@ You can use this connector in **Agent Builder** and **Workflows**.
 
 Some capabilities of this connector are only available from a certain version:
 
-- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Quick Connect OAuth 2.0.
+- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Quick Connect OAuth 2.0. The picker lists it first and shows a **Recommended** badge. On self-managed {{kib}}, it requires `xpack.actions.auth.ears.enabled` (default `true`) and `xpack.actions.auth.ears.url`.
+- {applies_to}`stack: preview =9.5` **Quick Connect OAuth 2.0** is included only when `xpack.actions.auth.ears.enabled` is `true` and `xpack.actions.auth.ears.url` is set. `xpack.actions.auth.ears.enabled` defaults to `false`.
+- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.5` **OAuth Client Credentials (Private Key JWT)** is available. **Bearer token** is not offered for a new connector.
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Send, update, and create actions to post channel and chat messages, edit a message, look up a user, and create a chat.
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Workflow events from Microsoft Graph change notifications.
 
 ## Prerequisites [microsoft-teams-prerequisites]
 
-In Microsoft Entra ID, you need an app registration for bearer token, OAuth authorization code, or OAuth client credentials. Quick Connect does not need an app registration.
+::::{applies-switch}
+:::{applies-item} stack: preview =9.4
+
+In Microsoft Entra ID, you need an app registration for **Bearer token**, **OAuth 2.0 Authorization Code**, or **OAuth Client Credentials**.
+
+:::
+:::{applies-item} stack: preview =9.5
+
+In Microsoft Entra ID, you need an app registration for **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, or **OAuth Client Credentials (Private Key JWT)**. **Bearer token** is not offered for a new connector. A connector that already uses a bearer token keeps working. With `xpack.actions.auth.ears.enabled` set to `true`, **Quick Connect OAuth 2.0** is also offered and does not need an app registration.
+
+:::
+:::{applies-item} stack: preview 9.6
+
+In Microsoft Entra ID, you need an app registration for **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, or **OAuth Client Credentials (Private Key JWT)**. **Quick Connect OAuth 2.0** does not need an app registration. **Bearer token** is not offered for a new connector. A connector that already uses a bearer token keeps working.
+
+:::
+:::{applies-item} serverless: preview
+
+In Microsoft Entra ID, you need an app registration for **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, or **OAuth Client Credentials (Private Key JWT)**. **Quick Connect OAuth 2.0** does not need an app registration. **Bearer token** is not offered for a new connector. A connector that already uses a bearer token keeps working.
+
+:::
+::::
 
 Registering the app and granting admin consent requires a role that can do both, such as Cloud Application Administrator. Application Developer can register the app and cannot grant admin consent. Teams Administrator cannot register an app.
 
@@ -38,9 +61,35 @@ To use the connector, set up credentials in Microsoft Entra ID (or use Quick Con
 
 #### Quick Connect OAuth 2.0
 
+```{applies_to}
+stack: preview 9.5
+serverless: preview
+```
+
+::::{applies-switch}
+:::{applies-item} stack: preview =9.5
+
+Included only when `xpack.actions.auth.ears.enabled` is `true` and `xpack.actions.auth.ears.url` is set. `xpack.actions.auth.ears.enabled` defaults to `false`. When Quick Connect is available, select **Quick Connect OAuth 2.0** and follow the authorization prompt. No app registration is required.
+
+:::
+:::{applies-item} stack: preview 9.6
+
 No setup required. Select **Quick Connect OAuth 2.0** when creating the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Microsoft Teams workspace.
 
+:::
+:::{applies-item} serverless: preview
+
+No setup required. Select **Quick Connect OAuth 2.0** when creating the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Microsoft Teams workspace.
+
+:::
+::::
+
 #### Bearer token (delegated auth)
+
+:::{note}
+:applies_to: {"stack": "preview 9.5", "serverless": "preview"}
+**Bearer token** is not offered when you create a new Microsoft Teams connector. Use these steps only for a connector that already uses a bearer token. That connector keeps working.
+:::
 
 1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
 2. Create a new application registration.
@@ -52,9 +101,9 @@ No setup required. Select **Quick Connect OAuth 2.0** when creating the connecto
    - `ChannelMessage.Send` — Send channel messages (required for `sendChannelMessage`)
    - `Chat.ReadWrite` — Send and create chats (required for `sendChatMessage` and `createChat`)
 4. Obtain a user access token through the OAuth delegated flow (for example, Authorization Code flow).
-5. In the **Microsoft API token** field, enter your user access token.
+5. Enter the user access token in the token field. On 9.4 the field is **Microsoft API token**. From 9.5, and on Serverless, edit a connector that already uses **Bearer token** and enter the token in **Token**.
 
-#### OAuth authorization code (delegated auth)
+#### OAuth 2.0 Authorization Code (delegated auth)
 
 1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
 2. Create a new application registration.
@@ -78,7 +127,7 @@ No setup required. Select **Quick Connect OAuth 2.0** when creating the connecto
    - **Authorization URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/authorize`
    - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
    - **Client ID**: your Application (client) ID
-   - **Client Secret**: the secret value from step 6
+   - **Client secret**: the secret value from step 6
 
 After you add a permission, sign in to the connector again so the stored token includes it. On edit, {{kib}} asks you to re-enter encrypted fields such as the client secret.
 
@@ -95,11 +144,16 @@ After you add a permission, sign in to the connector again so the stored token i
    - `Chat.ReadWrite.All` — Send, create, and update chats (required for `sendChatMessage` and `createChat`)
 4. Select **Grant admin consent**. The permission row must say **Granted**. A permission that was only added is not in the token.
 5. Under **Certificates & secrets**, create a new client secret.
-6. Copy the **Application (client) ID**, **client secret value**, and **tenant ID**. In the connector configuration, enter these values.
+6. Copy the **Application (client) ID** and the client secret value. In the connector configuration, enter **Token URL** (`https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`), **Client ID**, and **Client secret**. Replace `{your-tenant-id}` with your tenant ID.
 
-#### OAuth client credentials with certificate (app-only auth using private key JWT)
+#### OAuth client credentials with certificate (app-only auth using private key JWT) [microsoft-teams-private-key-jwt]
 
-Use this method when you want to authenticate without a client secret, using a certificate registered with your Azure AD app. This corresponds to the `oauth_client_credentials_private_key_jwt` auth type in the connector.
+```{applies_to}
+stack: preview 9.5
+serverless: preview
+```
+
+Use this method when you want to authenticate without a client secret, using a certificate registered with your Entra app.
 
 1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
 2. Create a new application registration (or reuse an existing one).
@@ -113,14 +167,37 @@ Use this method when you want to authenticate without a client secret, using a c
 7. In the connector configuration, enter:
    - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
    - **Client ID**: your Application (client) ID
-   - **Private Key**: the contents of `private_key.pem`
-   - **Certificate**: the contents of `certificate.pem` (used to compute the `x5t#S256` thumbprint sent in the JWT assertion)
+   - **Private key (PEM)**: upload `private_key.pem`
+   - **Certificate (PEM)**: upload `certificate.pem` (used to compute the `x5t#S256` thumbprint sent in the JWT assertion)
+
+   **Signing algorithm** defaults to `PS256`. **Certificate binding header** defaults to `x5t#S256`. Set **Key ID** only when the binding uses a key ID. Set **Private key passphrase** only when the private key is encrypted.
 
 ### Connector configuration [microsoft-teams-connector-configuration]
 
 You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 
-Microsoft Teams connectors support Quick Connect OAuth 2.0, a bearer token, OAuth authorization code, and OAuth client credentials. Select the authentication type when you create or edit the connector.
+::::{applies-switch}
+:::{applies-item} stack: preview =9.4
+
+Microsoft Teams connectors support **Bearer token**, **OAuth 2.0 Authorization Code**, and **OAuth Client Credentials**. Select the authentication type when you create or edit the connector.
+
+:::
+:::{applies-item} stack: preview =9.5
+
+On a default installation the picker offers **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, and **OAuth Client Credentials (Private Key JWT)**. **Bearer token** is not offered. A connector that already uses a bearer token keeps working and shows **Token**. **Quick Connect OAuth 2.0** is listed first, with a **Recommended** badge, only when `xpack.actions.auth.ears.enabled` is `true` and `xpack.actions.auth.ears.url` is set.
+
+:::
+:::{applies-item} stack: preview 9.6
+
+When you create a connector, the picker lists **Quick Connect OAuth 2.0** first and marks it with a **Recommended** badge when `xpack.actions.auth.ears.enabled` is `true` (the default) and `xpack.actions.auth.ears.url` is set. It also offers **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, and **OAuth Client Credentials (Private Key JWT)**. **Bearer token** is not offered. A connector that already uses a bearer token keeps working.
+
+:::
+:::{applies-item} serverless: preview
+
+When you create a connector, the picker lists **Quick Connect OAuth 2.0** first and marks it with a **Recommended** badge. It also offers **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, and **OAuth Client Credentials (Private Key JWT)**. **Bearer token** is not offered. A connector that already uses a bearer token keeps working.
+
+:::
+::::
 
 #### Quick Connect OAuth 2.0 (recommended)
 ```{applies_to}
@@ -128,14 +205,37 @@ serverless: preview
 stack: preview 9.6
 ```
 
-Elastic's managed OAuth flow for Microsoft Teams. No app setup is required. Select this option and authorize access to your Microsoft Teams workspace through Elastic. Provides delegated access (the connector acts as the authenticated user) with the same permissions as the OAuth authorization code method. Your Microsoft 365 administrator might need to grant consent for the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+Elastic's managed OAuth flow for Microsoft Teams. No app setup is required. Select this option and authorize access to your Microsoft Teams workspace through Elastic. Provides delegated access (the connector acts as the authenticated user) with the same permissions as the OAuth 2.0 Authorization Code method. Your Microsoft 365 administrator might need to grant consent for the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 #### Bearer token (delegated auth)
 
-Microsoft API token
-:   A Microsoft bearer token obtained through the delegated OAuth flow (for example, a user access token). Provides access to the authenticated user's teams, channels, chats, and messages.
+:::{note}
+:applies_to: {"stack": "preview 9.5", "serverless": "preview"}
+Shown only when you edit a connector that already uses **Bearer token**.
+:::
 
-#### OAuth authorization code (delegated auth)
+::::{applies-switch}
+:::{applies-item} stack: preview =9.4
+
+Microsoft API token
+:   A Microsoft bearer token obtained through the delegated OAuth flow. In the **Microsoft API token** field, enter the user access token.
+
+:::
+:::{applies-item} stack: preview 9.5
+
+Token
+:   Shown only when you edit a connector that already uses **Bearer token**. Enter the user access token in **Token**.
+
+:::
+:::{applies-item} serverless: preview
+
+Token
+:   Shown only when you edit a connector that already uses **Bearer token**. Enter the user access token in **Token**.
+
+:::
+::::
+
+#### OAuth 2.0 Authorization Code (delegated auth)
 
 Authorization URL
 :   The Microsoft Entra ID authorization endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`. Replace `{tenant-id}` with your Azure AD tenant ID.
@@ -145,14 +245,47 @@ Token URL
 
 #### OAuth client credentials (app-only auth)
 
+Token URL
+:   The Microsoft Entra ID token endpoint. Use `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`. Replace `{tenant-id}` with your tenant ID.
+
 Client ID
 :   The Application (client) ID of your Azure Active Directory (Azure AD) application registration.
 
 Client secret
 :   The client secret generated for your Azure AD application.
 
-Tenant ID
-:   Your Azure AD tenant ID. Used to construct the token endpoint: `https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token`.
+#### OAuth Client Credentials (Private Key JWT)
+
+```{applies_to}
+stack: preview 9.5
+serverless: preview
+```
+
+Use a certificate instead of a client secret. The picker label is **OAuth Client Credentials (Private Key JWT)**. Defaults are PS256 for **Signing algorithm** and `x5t#S256` for **Certificate binding header**. Refer to [OAuth client credentials with certificate](#microsoft-teams-private-key-jwt).
+
+Token URL
+:   The Microsoft Entra ID token endpoint. Use `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`.
+
+Client ID
+:   The Application (client) ID of your Entra app registration.
+
+Private key (PEM)
+:   The PEM-encoded private key that matches the certificate uploaded to the app registration.
+
+Certificate (PEM)
+:   The PEM-encoded public certificate. {{kib}} uses it to compute the `x5t#S256` thumbprint.
+
+Signing algorithm
+:   Defaults to `PS256`.
+
+Certificate binding header
+:   Defaults to `x5t#S256`.
+
+Key ID
+:   Optional. Set this when the binding uses a key ID.
+
+Private key passphrase
+:   Optional. Required only when the private key is encrypted.
 
 ### Connector networking configuration [microsoft-teams-connector-networking-configuration]
 
@@ -168,7 +301,7 @@ The Microsoft Teams connector has the following actions.
 
 **List joined teams**
 :   Returns the authenticated user's joined teams when using delegated auth, or the specified user's joined teams when `userId` is provided for app-only auth.
-    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code).
+    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth 2.0 Authorization Code).
 
 **List channels**
 :   Returns channels for the specified team.
@@ -182,7 +315,7 @@ The Microsoft Teams connector has the following actions.
 
 **List chats**
 :   Returns chats for the authenticated user.
-    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code).
+    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth 2.0 Authorization Code).
     - `top` (optional): Number of chats to return, up to 50.
 
 **List chat messages**
@@ -191,7 +324,7 @@ The Microsoft Teams connector has the following actions.
     - `top` (optional): Number of messages to return, up to 50.
 
 **Search messages**
-:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports Keyword Query Language (KQL) syntax. Requires delegated authentication (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code). Not supported with app-only (client credentials) auth.
+:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports Keyword Query Language (KQL) syntax. Requires delegated authentication (Quick Connect OAuth 2.0, bearer token, or OAuth 2.0 Authorization Code). Not supported with app-only (client credentials) auth.
     - `query` (required): Search query string (for example, `from:alice sent>2024-01-01`).
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return, up to 25.

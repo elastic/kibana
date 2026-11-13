@@ -13,6 +13,10 @@ Quick Connect OAuth 2.0 is an authentication option for {{kib}} connectors that 
 
 With other OAuth-based authentication types, you register an app with the service provider, configure scopes and redirect URIs, and copy a client ID and client secret into {{kib}}. Quick Connect OAuth 2.0 skips those steps.
 
+## Requirements on self-managed {{kib}} [quick-connect-oauth-requirements]
+
+Quick Connect OAuth 2.0 appears in the picker only when `xpack.actions.auth.ears.enabled` is `true` and `xpack.actions.auth.ears.url` is set. `xpack.actions.auth.ears.enabled` defaults to `false` in 9.5 and to `true` in 9.6. Without the URL, Quick Connect is not offered.
+
 ## Supported connectors [quick-connect-oauth-supported-connectors]
 
 The following connectors support Quick Connect OAuth 2.0:

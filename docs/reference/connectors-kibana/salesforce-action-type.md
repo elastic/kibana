@@ -19,8 +19,13 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [salesforce-connector-configuration]
 
-The Salesforce connector supports **OAuth 2.0 Client Credentials** and **OAuth 2.0 authorization code** authentication in
-{{kib}}. The fields you fill in depend on which auth type you select.
+The Salesforce connector supports **OAuth Client Credentials** and **OAuth 2.0 Authorization Code** authentication in
+{{kib}}. The fields you fill in depend on which authentication type you select.
+
+:::{note}
+:applies_to: {"stack": "preview 9.5", "serverless": "preview"}
+The picker lists **OAuth 2.0 Authorization Code** first and marks it with a **Recommended** badge.
+:::
 
 Token URL
 :   The OAuth 2.0 token endpoint for your Salesforce instance. Use your **domain** plus `/services/oauth2/token`.
@@ -29,7 +34,7 @@ Token URL
     `https://yourcompany.my.salesforce.com/services/oauth2/token` (My Domain).
 
 Authorization URL
-:   Required when you use **OAuth 2.0 authorization code** authentication. Use the same **domain** as for Token URL, with
+:   Required when you use **OAuth 2.0 Authorization Code** authentication. Use the same **domain** as for Token URL, with
     `/services/oauth2/authorize`. Examples: `https://login.salesforce.com/services/oauth2/authorize` (production),
     `https://test.salesforce.com/services/oauth2/authorize` (sandbox), or
     `https://yourcompany.my.salesforce.com/services/oauth2/authorize` (My Domain). Omit this when you use client
@@ -38,7 +43,7 @@ Authorization URL
 Client ID
 :   The **Consumer Key** from your Salesforce External Client App OAuth settings (see **Get API credentials**).
 
-Client Secret
+Client secret
 :   The **Consumer Secret** from your Salesforce External Client App OAuth settings.
 
 The connector uses the token URL to obtain access tokens and to derive the instance base URL for API calls. The
@@ -88,7 +93,7 @@ such as proxies, certificates, or TLS settings. You can set configurations that 
 
 ## Get API credentials [salesforce-api-credentials]
 
-Use the following steps to obtain credentials for the connector’s OAuth 2.0 Client Credentials authentication. The
+Use the following steps to obtain credentials for the connector’s OAuth Client Credentials authentication. The
 steps below are subject to change as the Salesforce UI updates.
 
 ### OAuth callback URL
@@ -107,18 +112,17 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
 4. On the form, set an **External Client App Name** (the label in the list; for example, `Elastic`) and an **API Name**
    (for example, `Elastic`). Complete any other required fields.
 5. Under **OAuth Settings**, set **Callback URL** to the value from **OAuth callback URL**. Salesforce typically requires
-   a callback URL when OAuth is enabled on the app. The connector’s **OAuth 2.0 Client Credentials** auth type uses the
-   token endpoint only and does not redirect the browser to this URL; if you use the connector’s **OAuth 2.0
-   authorization code** auth type instead, this URL must match what {{kib}} uses for the OAuth redirect.
+   a callback URL when OAuth is enabled on the app. The connector’s **OAuth Client Credentials** auth type uses the
+   token endpoint only and does not redirect the browser to this URL. If you use the connector’s **OAuth 2.0 Authorization Code** auth type instead, this URL must match what {{kib}} uses for the OAuth redirect.
 6. Under **Available Scopes**, select at least:
    - **Manage user data via APIs (api)**
    - **Perform requests at any time (refresh_token, offline_access)**
 7. Under **Flow Enablement**, enable the Salesforce option that matches the **authentication type** you choose when you
    create or edit this Salesforce connector in {{kib}}:
-   - **OAuth 2.0 Client Credentials** — turn on **Enable Client Credentials Flow**. {{kib}} uses the OAuth 2.0 client
+   - **OAuth Client Credentials** — turn on **Enable Client Credentials Flow**. {{kib}} uses the OAuth 2.0 client
      credentials grant (`grant_type=client_credentials`) against your Token URL; no browser visit to the Authorization
      URL is required for this mode.
-   - **OAuth 2.0 authorization code** — turn on **Enable Authorization Code and Credentials Flow** (or the equivalent
+   - **OAuth 2.0 Authorization Code**. Turn on **Enable Authorization Code and Credentials Flow** (or the equivalent
      label your Salesforce release uses for the authorization-code flow that uses `/services/oauth2/authorize` and your
      callback URL). {{kib}} drives the browser authorization step and exchanges the code at the Token URL.
    - To use **both** auth types with the **same** External Client App over time, enable **both** of the above options in
@@ -134,17 +138,17 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
     with least-privilege permission sets). Use Salesforce Help for current policy and **Run As** requirements for the
     client credentials flow in your org.
 11. Open the app again, scroll to **OAuth Settings**, and select **Consumer Key and Secret**. Use **Consumer Key** as
-    **Client ID** and **Consumer Secret** as **Client Secret** in the connector configuration in {{kib}}.
+    **Client ID** and **Consumer Secret** as **Client secret** in the connector configuration in {{kib}}.
 12. For **Token URL**, paste your org’s OAuth token endpoint (**domain** + `/services/oauth2/token`) into the connector
     in {{kib}}:
     - Production: `https://login.salesforce.com/services/oauth2/token`
     - Sandbox: `https://test.salesforce.com/services/oauth2/token`
     - My Domain: `https://yourcompany.my.salesforce.com/services/oauth2/token`
-13. When you use **OAuth 2.0 authorization code** authentication in {{kib}}, also paste **Authorization URL** using the
+13. When you use **OAuth 2.0 Authorization Code** authentication in {{kib}}, also paste **Authorization URL** using the
     same **domain** as Token URL with `/services/oauth2/authorize`:
     - Production: `https://login.salesforce.com/services/oauth2/authorize`
     - Sandbox: `https://test.salesforce.com/services/oauth2/authorize`
     - My Domain: `https://yourcompany.my.salesforce.com/services/oauth2/authorize`
-    Skip this when you use **OAuth 2.0 Client Credentials** only.
+    Skip this when you use **OAuth Client Credentials** only.
 
 For more background, search Salesforce Help for **External Client Apps** and the **OAuth 2.0 client credentials flow**.

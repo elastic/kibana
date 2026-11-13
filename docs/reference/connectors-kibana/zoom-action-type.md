@@ -21,8 +21,24 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 Zoom connectors have the following configuration properties:
 
+::::{applies-switch}
+:::{applies-item} stack: preview =9.4
+
 Zoom access token
-:   A Zoom Server-to-Server OAuth access token. Generate one through the Zoom Marketplace or API (refer to [Get API credentials](#zoom-api-credentials)). Tokens expire after 1 hour.
+:   A Zoom Server-to-Server OAuth access token. Generate one through the Zoom Marketplace or API (refer to [Get API credentials](#zoom-api-credentials)). Tokens expire after 1 hour. Select **Bearer token** when you create the connector.
+
+:::
+:::{applies-item} stack: preview 9.5
+
+The picker offers **OAuth 2.0 Authorization Code** for a new connector. **Bearer token** is not offered. A connector that already uses a bearer token keeps working. Its token field is **Token**. Tokens expire after 1 hour. Refer to [Server-to-Server OAuth](#zoom-server-to-server).
+
+:::
+:::{applies-item} serverless: preview
+
+The picker offers **OAuth 2.0 Authorization Code** for a new connector. **Bearer token** is not offered. A connector that already uses a bearer token keeps working. Its token field is **Token**. Tokens expire after 1 hour. Refer to [Server-to-Server OAuth](#zoom-server-to-server).
+
+:::
+::::
 
 ## Test connectors [zoom-action-configuration]
 
@@ -88,9 +104,25 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [zoom-api-credentials]
 
-The Zoom connector supports two authentication methods: **OAuth Authorization Code** (recommended) and **Server-to-Server OAuth** (via Bearer token).
+::::{applies-switch}
+:::{applies-item} stack: preview =9.4
 
-### OAuth Authorization Code (recommended)
+The Zoom connector supports two authentication methods: **OAuth 2.0 Authorization Code** and **Bearer token** (a Server-to-Server OAuth access token).
+
+:::
+:::{applies-item} stack: preview 9.5
+
+For a new connector, use **OAuth 2.0 Authorization Code**. **Bearer token** is not offered. A connector that already uses a Server-to-Server OAuth access token keeps working.
+
+:::
+:::{applies-item} serverless: preview
+
+For a new connector, use **OAuth 2.0 Authorization Code**. **Bearer token** is not offered. A connector that already uses a Server-to-Server OAuth access token keeps working.
+
+:::
+::::
+
+### OAuth 2.0 Authorization Code
 
 Use this method to let users authorize the connector with their own Zoom account. The connector handles token exchange and refresh automatically.
 
@@ -114,13 +146,18 @@ You must create a **General** app in the Zoom Marketplace (not a User-managed ap
    - `cloud_recording:read:list_recording_files` — get meeting recordings
    - `cloud_recording:read:list_user_recordings` — list user recordings
 8. On the **Activation** tab, select **Activate your app**.
-9. In {{kib}}, create a Zoom connector and select **OAuth Authorization Code** as the authentication method. Enter the **Client ID** and **Client Secret**, then authorize with your Zoom account.
+9. In {{kib}}, create a Zoom connector and select **OAuth 2.0 Authorization Code** as the authentication method. Enter the **Client ID** and **Client secret**, then authorize with your Zoom account.
 
 ::::{note}
 Cloud recordings (including transcripts and chat logs) require a Zoom Pro plan or higher.
 ::::
 
-### Server-to-Server OAuth
+### Server-to-Server OAuth [zoom-server-to-server]
+
+:::{note}
+:applies_to: {"stack": "preview 9.5", "serverless": "preview"}
+**Bearer token** is not offered when you create a new Zoom connector. Use this method only for a connector that already stores a Server-to-Server OAuth access token. That connector keeps working. Tokens expire after 1 hour.
+:::
 
 Use this method for automated or backend access without user interaction. Tokens are generated manually and expire after 1 hour.
 
@@ -149,7 +186,7 @@ Use this method for automated or backend access without user interaction. Tokens
      -u "YOUR_CLIENT_ID:YOUR_CLIENT_SECRET"
    ```
 
-9. Copy the `access_token` from the JSON response and enter it in the **Zoom access token** field when configuring the connector in {{kib}}.
+9. Copy the `access_token` from the JSON response. On 9.4, enter it in **Zoom access token**. From 9.5, and on Serverless, enter it in **Token** on a connector that already uses **Bearer token**.
 
 ::::{note}
 Zoom Server-to-Server OAuth tokens expire after 1 hour. You need to regenerate the token when it expires. Cloud recordings (including transcripts and chat logs) require a Zoom Pro plan or higher.
