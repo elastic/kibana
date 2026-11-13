@@ -226,6 +226,7 @@ describe.each(CASES)(
       );
       const ambiguous = first[0].data as Record<string, unknown>;
       expect(ambiguous.reason).toBe('ambiguous_hostname');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(client[clientMethod]).not.toHaveBeenCalled();
       expect(ambiguous.message).toContain('agentId');
       const candidateIds = (ambiguous.candidates as Array<{ agentId: string }>).map(
