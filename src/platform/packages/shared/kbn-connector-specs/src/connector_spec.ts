@@ -274,6 +274,14 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   scope: ActionScope;
 }
 
+/**
+ * Subset of the actions usage collector that spec handlers may call.
+ * Kept structural so this package does not import the actions plugin.
+ */
+export interface ConnectorUsageCollectorLike {
+  addRequestBodyBytes(result?: unknown, body?: string | object): void;
+}
+
 export interface ActionContext {
   client: AxiosInstance;
   /**
@@ -288,7 +296,10 @@ export interface ActionContext {
    */
   getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
-  connectorUsageCollector?: unknown;
+  /** Saved-object id of the connector being executed. */
+  connectorId?: string;
+  /** Subset of the actions usage collector that spec handlers may call. */
+  connectorUsageCollector?: ConnectorUsageCollectorLike;
   log: Logger;
   secrets?: Record<string, unknown>;
   /**
@@ -390,6 +401,23 @@ export interface ConnectorSandbox {
   hostsFromConfig?: readonly string[];
 }
 
+/** Legacy sub-action registration contract for a spec served by the spec executor. */
+export interface ConnectorSpecStackCompat {
+  /** Legacy config schema, used as-is. Not extended with authType or selectedActions. */
+  configSchema: z.ZodObject;
+  /** Legacy secrets schema, used as-is. Not wrapped in an auth-type union. */
+  secretsSchema: z.ZodObject;
+  /** Config fields checked with the legacy URL allow-list validator. */
+  allowedHostsKeys?: readonly string[];
+  /** Auth headers for native clients, built from legacy config and secrets. */
+  getAuthHeaders?(
+    config: Record<string, unknown>,
+    secrets: Record<string, unknown>
+  ): Promise<Record<string, string>>;
+  /** When this returns true, the executor rethrows the handler error as a user task-run error. */
+  isUserError?(err: unknown): boolean;
+}
+
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
@@ -433,6 +461,9 @@ export interface ConnectorSpec {
   // included in the connector's agent attachment representation so the LLM
   // has richer context about how to use the connector's sub-actions.
   skill?: string;
+
+  /** When set, the connector is registered as a stack type with legacy validators. */
+  stackCompat?: ConnectorSpecStackCompat;
 }
 
 // ============================================================================

@@ -9,7 +9,23 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 
 import type { ActionTypeConfig, ValidatorType } from '../../types';
+import { urlAllowListValidator } from '../../sub_action_framework/helpers';
 import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';
+
+/** Config validator for stack-compat specs. Uses the legacy schema and URL allow-list text. */
+export const generateCompatConfigSchema = (
+  schema: z.ZodObject,
+  allowedHostsKeys: readonly string[] = []
+): ValidatorType<ActionTypeConfig> => {
+  return {
+    schema,
+    customValidator: (config, validatorServices) => {
+      for (const key of allowedHostsKeys) {
+        urlAllowListValidator(key)(config, validatorServices);
+      }
+    },
+  };
+};
 
 export const generateConfigSchema = (
   schema: ConnectorSpec['schema'],

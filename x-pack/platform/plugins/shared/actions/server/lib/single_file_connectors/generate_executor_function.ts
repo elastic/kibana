@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpec, ConnectorSpecStackCompat } from '@kbn/connector-specs';
 import {
   authTypeUsesRelay,
   getAuthModeForAuthTypeId,
@@ -173,6 +173,8 @@ export const generateExecutorFunction = ({
   networkSettings: ConnectorNetworkSettings;
   platform: PlatformServices;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
+  stackCompat?: Pick<ConnectorSpecStackCompat, 'getAuthHeaders' | 'isUserError'>;
+  connectorName?: string;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
