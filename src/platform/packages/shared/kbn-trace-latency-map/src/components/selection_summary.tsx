@@ -63,6 +63,19 @@ export function SelectionSummary({
       data-test-subj="traceLatencyMapSelectionBar"
     >
       <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="xs"
+          iconType="cross"
+          onClick={onClear}
+          aria-label={i18n.translate('traceLatencyMap.selection.clearAriaLabel', {
+            defaultMessage: 'Clear selection',
+          })}
+          data-test-subj="traceLatencyMapClearSelection"
+        >
+          {i18n.translate('traceLatencyMap.selection.clear', { defaultMessage: 'Clear' })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiToolTip content={detail}>
           <EuiBadge
             color="hollow"
@@ -87,19 +100,6 @@ export function SelectionSummary({
         </EuiFlexItem>
       )}
       {actions && <EuiFlexItem grow={false}>{actions}</EuiFlexItem>}
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          onClick={onClear}
-          aria-label={i18n.translate('traceLatencyMap.selection.clearAriaLabel', {
-            defaultMessage: 'Clear selection',
-          })}
-          data-test-subj="traceLatencyMapClearSelection"
-        >
-          {i18n.translate('traceLatencyMap.selection.clear', { defaultMessage: 'Clear' })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

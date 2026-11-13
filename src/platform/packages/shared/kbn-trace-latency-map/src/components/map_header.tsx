@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiText,
+  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -85,18 +86,21 @@ export function MapHeader({
     >
       <EuiFlexItem grow>
         {stats && (
-          <EuiText size="xs" color="subdued" data-test-subj="traceLatencyMapStats">
+          // The p99 is the figure to read at a glance: full colour and bold, a size up.
+          <EuiText size="s" color="subdued" data-test-subj="traceLatencyMapStats">
             {i18n.translate('traceLatencyMap.header.maxStat', {
               defaultMessage: '{max} max',
               values: { max: formatDuration(stats.max) },
             })}
             {' · '}
-            <strong>
-              {i18n.translate('traceLatencyMap.header.p99Stat', {
-                defaultMessage: '{p99} p99',
-                values: { p99: formatDuration(stats.p99) },
-              })}
-            </strong>
+            <EuiTextColor color="default">
+              <strong>
+                {i18n.translate('traceLatencyMap.header.p99Stat', {
+                  defaultMessage: '{p99} p99',
+                  values: { p99: formatDuration(stats.p99) },
+                })}
+              </strong>
+            </EuiTextColor>
           </EuiText>
         )}
       </EuiFlexItem>
