@@ -315,9 +315,9 @@ export function DiscoverLayout() {
 
   const esqlModeErrors = useMemo(() => {
     if (isEsqlMode) {
-      return dataState.error;
+      return dataState.error ?? documentState.error;
     }
-  }, [dataState.error, isEsqlMode]);
+  }, [dataState.error, documentState.error, isEsqlMode]);
 
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;

@@ -17,6 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { ApproximationBadge } from '@kbn/esql-browser';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -46,6 +47,7 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import { ErrorCallout } from '@kbn/discover-utils/components';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useLatest from 'react-use/lib/useLatest';
@@ -590,6 +592,23 @@ function DiscoverDocumentsComponent({
     setSelectedCascadeGroups,
     renderViewModeToggle,
   ]);
+
+  if (documentState.fetchStatus === FetchStatus.ERROR && documentState.error) {
+    // displayed in place of the documents if they failed to load while the chart is already displayed
+    return (
+      <ErrorCallout
+        title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+          defaultMessage: 'Unable to retrieve search results',
+        })}
+        error={documentState.error}
+        isEsqlMode={isEsqlMode}
+        showErrorDialog={({ title, error }) =>
+          services.core.notifications.showErrorDialog({ title, error })
+        }
+        esqlReferenceHref={services.docLinks.links.query.queryESQL}
+      />
+    );
+  }
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (

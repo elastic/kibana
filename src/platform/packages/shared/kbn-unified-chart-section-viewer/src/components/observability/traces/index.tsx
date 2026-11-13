@@ -20,6 +20,7 @@ import { ThroughputChart } from './throughput';
 import { ChartsGrid } from '../../charts_grid';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractUsedMetadataFields } from '../../../utils';
+import { ChartLoadedContext } from '../../../context/chart_loaded_context';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -36,6 +37,7 @@ function TraceMetricsGrid({
   isComponentVisible,
   breakdownField,
   onBreakdownFieldChange,
+  onChartLoaded,
 }: UnifiedMetricsGridProps) {
   const { query, dataSource, columns } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
@@ -107,49 +109,51 @@ function TraceMetricsGrid({
   }
 
   return (
-    <ChartsGrid
-      id="tracesGrid"
-      toolbarCss={chartToolbarCss}
-      toolbar={toolbar}
-      isComponentVisible={isComponentVisible}
-    >
-      <TraceMetricsProvider
-        value={{
-          indexes: indexPattern,
-          filters,
-          metadataFields: usedMetadataFields,
-          services,
-          onBrushEnd,
-          onFilter,
-          fetchParams,
-          discoverFetch$,
-          actions,
-          profileId,
-          breakdownField: breakdownDataViewField?.name,
-        }}
+    <ChartLoadedContext.Provider value={onChartLoaded}>
+      <ChartsGrid
+        id="tracesGrid"
+        toolbarCss={chartToolbarCss}
+        toolbar={toolbar}
+        isComponentVisible={isComponentVisible}
       >
-        <EuiPanel
-          hasBorder={false}
-          hasShadow={false}
-          css={css`
-            height: 100%;
-            align-content: center;
-          `}
+        <TraceMetricsProvider
+          value={{
+            indexes: indexPattern,
+            filters,
+            metadataFields: usedMetadataFields,
+            services,
+            onBrushEnd,
+            onFilter,
+            fetchParams,
+            discoverFetch$,
+            actions,
+            profileId,
+            breakdownField: breakdownDataViewField?.name,
+          }}
         >
-          <EuiFlexGrid columns={3} gutterSize="s">
-            <EuiFlexItem>
-              <LatencyChart />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ErrorRateChart />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ThroughputChart />
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        </EuiPanel>
-      </TraceMetricsProvider>
-    </ChartsGrid>
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            css={css`
+              height: 100%;
+              align-content: center;
+            `}
+          >
+            <EuiFlexGrid columns={3} gutterSize="s">
+              <EuiFlexItem>
+                <LatencyChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ErrorRateChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ThroughputChart />
+              </EuiFlexItem>
+            </EuiFlexGrid>
+          </EuiPanel>
+        </TraceMetricsProvider>
+      </ChartsGrid>
+    </ChartLoadedContext.Provider>
   );
 }
 

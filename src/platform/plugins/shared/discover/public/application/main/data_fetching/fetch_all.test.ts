@@ -287,6 +287,48 @@ describe('test fetchAll', () => {
     ]);
   });
 
+  describe('ES|QL documents error', () => {
+    const error = new Error('This query failed');
+
+    const fetchAllEsql = () => {
+      deps.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: deps.getCurrentTab().id,
+          appState: { query: { esql: 'from foo' } },
+        })
+      );
+      mockfetchEsql.mockRejectedValue(error);
+      return fetchAll({ ...deps, esqlSource: createMockEsqlSource([], [], '@timestamp') });
+    };
+
+    test('should set main$ and totalHits$ to ERROR and resolve', async () => {
+      await fetchAllEsql();
+
+      expect(subjects.documents$.getValue()).toEqual(
+        expect.objectContaining({ fetchStatus: FetchStatus.ERROR, error })
+      );
+      expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+    });
+
+    test('should not set main$ to ERROR if a chart is already displayed', async () => {
+      const fetchPromise = fetchAllEsql();
+      // the chart finished loading before the documents request failed
+      subjects.main$.next({ fetchStatus: FetchStatus.PARTIAL });
+      await fetchPromise;
+
+      expect(subjects.documents$.getValue()).toEqual(
+        expect.objectContaining({ fetchStatus: FetchStatus.ERROR, error })
+      );
+      expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+      expect(subjects.main$.getValue()).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        foundDocuments: true,
+        error: undefined,
+      });
+    });
+  });
+
   describe('fetchMoreDocuments', () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];

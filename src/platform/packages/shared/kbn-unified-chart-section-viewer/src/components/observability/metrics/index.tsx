@@ -16,6 +16,7 @@ import { ExemplarsAvailabilityProvider } from './context/exemplars_availability_
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 import { ChartSectionInspectorProvider } from '../../../context/chart_section_inspector';
 import { ExternalServicesProvider } from '../../../context/external_services';
+import { ChartLoadedContext } from '../../../context/chart_loaded_context';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
@@ -24,7 +25,9 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
       <EventBasedTelemetryProvider analytics={props.services.analytics}>
         <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
           <ExemplarsAvailabilityProvider>
-            <MetricsExperienceGrid {...props} />
+            <ChartLoadedContext.Provider value={props.onChartLoaded}>
+              <MetricsExperienceGrid {...props} />
+            </ChartLoadedContext.Provider>
           </ExemplarsAvailabilityProvider>
         </ChartSectionInspectorProvider>
       </EventBasedTelemetryProvider>
