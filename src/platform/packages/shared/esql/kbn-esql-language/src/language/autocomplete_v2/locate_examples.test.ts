@@ -17,12 +17,6 @@ const examples = esqlCommandRegistry
   .flatMap(({ metadata }) => metadata.examples)
   .map((example) => example.replace(/^…/, 'FROM a '));
 
-// Examples the grammar rejects. The list may only shrink: an entry goes when its example is fixed.
-const INVALID_EXAMPLES = [
-  // SAMPLE takes one probability; the trailing comma is not part of the command.
-  'FROM employees\n| KEEP emp_no\n| SAMPLE 0.05,',
-];
-
 /** The start and the end of every token of a query. */
 const tokenBoundaries = (query: string): number[] => {
   const { tokens } = Parser.create(query);
@@ -50,11 +44,11 @@ describe('locate on the command examples', () => {
     }
   });
 
-  it('finds every example valid at its end, apart from the known ones', () => {
+  it('finds every example valid at its end', () => {
     const invalid = examples.filter(
       (example) => locate(example, example.length).position === 'invalid'
     );
 
-    expect(invalid).toEqual(INVALID_EXAMPLES);
+    expect(invalid).toEqual([]);
   });
 });
